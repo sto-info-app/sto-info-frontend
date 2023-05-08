@@ -6,6 +6,7 @@ export const environment = {
   production: false,
   env_name: 'local',
   env_label: 'Local Development',
+  apiUrl: 'http://localhost:3000',
 };
 
 /*
