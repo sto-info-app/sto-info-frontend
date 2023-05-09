@@ -13,12 +13,12 @@
       <div class="left-frame-top">
         <div class="panel panel-1">
           <a
-            *ngIf="isLoggedIn"
+            *ngIf="!isLoggedIn"
             routerLink="/login"
             >Login</a
           >
           <a
-            *ngIf="!isLoggedIn"
+            *ngIf="isLoggedIn"
             (click)="logout()"
             >Logout</a
           >
