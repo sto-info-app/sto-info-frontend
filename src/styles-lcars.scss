@@ -2230,3 +2230,37 @@ footer::after {
     width: 80px;
   }
 }
+
+/* Moving Bars! */
+.bar-panel {
+  display: flex;
+  width: 100%;
+}
+
+.bar-2,
+.bar-7 {
+  animation: resizeGroup1 60s linear infinite alternate;
+}
+
+.bar-4,
+.bar-9 {
+  animation: resizeGroup2 60s linear infinite alternate;
+}
+
+@keyframes resizeGroup1 {
+  0% {
+    flex: 1;
+  }
+  100% {
+    flex: 3;
+  }
+}
+
+@keyframes resizeGroup2 {
+  0% {
+    flex: 3;
+  }
+  100% {
+    flex: 1;
+  }
+}
