@@ -11,7 +11,7 @@
         >
       </div>
       <div class="left-frame-top">
-        <div class="panel panel-1"><a href="">Login</a></div>
+        <div class="panel panel-1"><a href="/login">Login</a></div>
         <div
           class="panel panel-2"
           [innerHTML]="sideColumnRandomTextItems[0]"></div>
@@ -28,22 +28,22 @@
           </div>
           <nav id="nav-standard">
             <a
-              href=""
+              href="/"
               id="b-one"
               >Home</a
             >
             <a
-              href=""
+              href="/about"
               id="b-two"
               >About</a
             >
             <a
-              href=""
+              href="/info"
               id="b-three"
               >Your STO Info</a
             >
             <a
-              href=""
+              href="/contact"
               id="b-four"
               >Contact</a
             >
@@ -88,8 +88,8 @@
           <div class="bar-10"></div>
         </div>
         <main>
-          <h1>Welcome to the {{ appTitle }}!</h1>
-          <p>Backend response: {{ backendResponse }}</p>
+          <router-outlet></router-outlet>
+          <!-- <p>Backend response: {{ backendResponse }}</p> -->
         </main>
 
         <footer>

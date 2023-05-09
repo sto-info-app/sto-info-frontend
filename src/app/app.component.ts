@@ -19,7 +19,7 @@ export class AppComponent implements AfterViewInit {
   @ViewChild('scrollTopButton')
   scrollTopButton!: ElementRef;
 
-  appTitle = 'Star Trek Online Info App';
+  appTitle = environment.appTitle;
   backendResponse = '';
   currentYear: number;
   dataCascade: string;
@@ -40,14 +40,15 @@ export class AppComponent implements AfterViewInit {
   }
 
   ngOnInit() {
-    this.http.get(`${this.apiUrl}`, { responseType: 'text' }).subscribe({
-      next: data => {
-        this.backendResponse = data;
-      },
-      error: error => {
-        this.backendResponse = 'Error fetching data from backend';
-      },
-    });
+    //TODO: Delete the test API call
+    // this.http.get(`${this.apiUrl}`, { responseType: 'text' }).subscribe({
+    //   next: data => {
+    //     this.backendResponse = data;
+    //   },
+    //   error: error => {
+    //     this.backendResponse = 'Error fetching data from backend';
+    //   },
+    // });
 
     this.populateSideColumnRandomTextItems();
   }

@@ -10,13 +10,6 @@
   font-size: 1.35rem;
 }
 
-html,
-body {
-  margin: 0;
-  height: 100%;
-  min-height: 100%;
-}
-
 .scroll-top {
   display: none;
   z-index: 1000;
@@ -764,7 +757,7 @@ h3 {
 }
 
 h1 {
-  font-size: clamp(1.6rem, 1.6rem + 2.7vw, 3.34rem);
+  font-size: clamp(1.6rem, 1.6rem + 2.7vw, 2.8rem);
 }
 
 h2 {
