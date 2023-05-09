@@ -11,11 +11,11 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   register(user: any) {
-    return this.http.post(`${this.apiUrl}/register`, user);
+    return this.http.post(`${this.apiUrl}/auth/register`, user);
   }
 
   login(credentials: any) {
-    return this.http.post(`${this.apiUrl}/login`, credentials);
+    return this.http.post(`${this.apiUrl}/auth/login`, credentials);
   }
 
   saveToken(token: string) {
