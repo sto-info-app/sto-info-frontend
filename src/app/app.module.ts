@@ -14,6 +14,7 @@ import { RegisterComponent } from './register/register.component';
 import { ContactComponent } from './contact/contact.component';
 import { AboutComponent } from './about/about.component';
 import { InfoComponent } from './info/info.component';
+import { LcarsErrorMessageComponent } from './lcars-error-message/lcars-error-message.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -29,6 +30,7 @@ export function tokenGetter() {
     ContactComponent,
     AboutComponent,
     InfoComponent,
+    LcarsErrorMessageComponent,
   ],
   imports: [
     BrowserModule,

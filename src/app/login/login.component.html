@@ -1,48 +1,65 @@
-<div class="flexbox">
-  <div class="col">
-    <div class="form-container">
-      <h1>Login</h1>
-      <form
-        (ngSubmit)="onLogin()"
-        class="form">
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            [(ngModel)]="email"
-            required />
-        </div>
-        <div class="form-group">
-          <label for="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            [(ngModel)]="password"
-            required />
-        </div>
-        <button
-          type="submit"
-          class="submit-button">
-          Login
-        </button>
-      </form>
+<div class="login-container">
+  <div class="flexbox">
+    <div class="col">
+      <div class="form-container">
+        <h1>Login</h1>
+        <form
+          (ngSubmit)="onLogin()"
+          class="form">
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              [(ngModel)]="email"
+              required
+              pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+              [class.errored]="errorMessage ? true : false"
+              (input)="validateInputs()" />
+            <div
+              *ngIf="email.trim() !== '' && !validateEmail(email)"
+              class="error">
+              Invalid email format
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              [(ngModel)]="password"
+              required
+              [class.errored]="errorMessage ? true : false"
+              (input)="validateInputs()" />
+          </div>
+          <button
+            type="submit"
+            class="submit-button"
+            [disabled]="!inputsValid">
+            Login
+          </button>
+        </form>
+      </div>
     </div>
-  </div>
-  <div class="col">
-    <div class="register-now-container">
-      <div class="lcars-text-bar">
-        <span>Not registered?</span>
+    <div class="col">
+      <div class="register-now-container">
+        <div class="lcars-text-bar">
+          <span>Not registered?</span>
+        </div>
+        <div class="buttons">
+          <a
+            href="/register"
+            class="full-width-btn-link sunflower"
+            >Register</a
+          >
+        </div>
       </div>
-      <div class="buttons">
-        <a
-          href="/register"
-          class="full-width-btn-link sunflower"
-          >Register</a
-        >
-      </div>
+      <app-lcars-error-message
+        *ngIf="errorMessage"
+        title="Access Denied"
+        [message]="errorMessage"></app-lcars-error-message>
     </div>
   </div>
 </div>
