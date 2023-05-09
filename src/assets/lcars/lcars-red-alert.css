@@ -1,0 +1,333 @@
+@charset "utf-8";
+/*
+	CSS Document 
+	Modified 2022 Feb 25
+	LCARS Red Alert Theme
+	By Jim Robertus www.thelcars.com
+
+    Amended 2023 May 09
+    By Steve Roberts
+*/
+
+@keyframes colorchange {
+  0% {
+    color: #f00;
+  }
+  25% {
+    color: #f00;
+  }
+  50% {
+    color: #f00;
+  }
+  75% {
+    color: #f00;
+  }
+  80% {
+    color: #000;
+  }
+  90% {
+    color: #000;
+  }
+  100% {
+    color: #f7f7f7;
+  }
+}
+
+@keyframes redalert {
+  0% {
+    background-color: #f7f7f7;
+  }
+  25% {
+    background-color: #f7f7f7;
+  }
+  50% {
+    background-color: #c00;
+  }
+  75% {
+    background-color: #c00;
+  }
+  80% {
+    background-color: #c00;
+  }
+  90% {
+    background-color: #f7f7f7;
+  }
+  100% {
+    background-color: #f7f7f7;
+  }
+}
+
+.panel-1 a {
+  animation: redalert 1s infinite;
+}
+
+.panel-4 {
+  animation: redalert 1s infinite;
+  animation-delay: 0.1s;
+}
+
+.submit-button {
+  background-color: #c00;
+}
+
+.left-frame-top,
+.left-frame,
+.panel-3,
+.top-corner-bg,
+.corner-bg,
+.bar-1,
+.bar-6 {
+  animation: redalert 1s infinite;
+  animation-delay: 0.3s;
+}
+
+.bar-2,
+.bar-7 {
+  animation: redalert 1s infinite;
+  animation-delay: 0.3s;
+}
+
+.bar-3,
+.bar-8 {
+  animation: redalert 1s infinite;
+  animation-delay: 0.4s;
+}
+
+.bar-4,
+.bar-9 {
+  animation: redalert 1s infinite;
+  animation-delay: 0.5s;
+}
+
+.button#top-left a {
+  animation: redalert 1s infinite;
+  animation-delay: 0.6s;
+}
+
+.bar-5,
+.bar-10 {
+  animation: redalert 1s infinite;
+  animation-delay: 0.7s;
+}
+
+.panel-5 {
+  animation: redalert 1s infinite;
+}
+
+.panel-6 {
+  animation: redalert 1s infinite;
+  animation-delay: 0.8s;
+}
+
+.left-frame-top {
+  background-color: #c00;
+}
+
+.left-frame {
+  background-color: #c00;
+}
+
+.panel-1 a {
+  background-color: #c00;
+}
+
+.data-cascade .row-1,
+.data-cascade .row-3,
+.data-cascade .row-4,
+.data-cascade .row-6,
+.data-cascade#niagara .row-1,
+.data-cascade#niagara .row-2,
+.data-cascade#niagara .row-3,
+.data-cascade#niagara .row-4,
+.data-cascade#niagara .row-5,
+.data-cascade#niagara .row-6,
+.data-cascade#orinoco .row-1,
+.data-cascade#orinoco .row-2,
+.data-cascade#orinoco .row-5,
+.data-cascade#orinoco .row-6 {
+  animation: colorchange 2s infinite;
+}
+
+.data-cascade .row-2,
+.data-cascade .row-5,
+.data-cascade#orinoco .row-3,
+.data-cascade#orinoco .row-4 {
+  animation: colorchange 3s infinite;
+}
+
+.data-cascade#frozen .row-1,
+.data-cascade#frozen .row-2,
+.data-cascade#frozen .row-3,
+.data-cascade#frozen .row-6 {
+  color: #f00;
+}
+
+.data-cascade#frozen .row-4 {
+  color: #f44;
+}
+
+.data-cascade#frozen .row-5 {
+  color: #f7f7f7;
+}
+
+.button#top-left a {
+  background-color: #c00;
+}
+
+.button#bottom-left a {
+  background-color: #c00;
+}
+
+.button#top-right a {
+  background-color: #e00;
+}
+
+.button#bottom-right a {
+  background-color: #dfdfdf;
+}
+
+.top-corner-bg {
+  background-color: #c00;
+}
+
+.bar-1,
+.bar-2,
+.bar-3,
+.bar-4,
+.bar-5,
+.bar-6,
+.bar-7,
+.bar-8,
+.bar-9,
+.bar-10 {
+  background-color: #c00;
+}
+
+#gap {
+  margin-top: 10px;
+}
+
+/* .panel-1, */
+/* .panel-2, */
+.panel-3,
+.panel-4,
+.panel-5,
+.panel-6,
+.panel-7,
+.panel-8,
+.panel-9,
+.panel-10 {
+  background-color: #c00;
+}
+
+.corner-bg {
+  background-color: #c00;
+}
+
+code {
+  color: #f00;
+}
+
+hr {
+  background-color: #c00;
+}
+
+.border {
+  border: 2px solid #c00;
+}
+
+.buttons a {
+  background-color: #e00;
+  color: #000;
+}
+
+.buttons a:nth-child(odd) {
+  background-color: #e00;
+}
+
+.buttons a:nth-child(even) {
+  background-color: #dfdfdf;
+}
+
+.silver {
+  background-color: #dfdfdf !important;
+}
+
+.alert-red {
+  background-color: #e00 !important;
+}
+
+.sidebar-buttons a {
+  background-color: #c00;
+}
+
+.lcars-bar {
+  background-color: #000;
+  border-right: 18px solid #e00;
+  border-left: 18px solid #e00;
+}
+
+.lcars-bar-inner {
+  background-color: #c00;
+}
+
+.lcars-bar-slice-bottom {
+  background-color: #c00;
+}
+
+.lcars-text-bar {
+  background-color: #c00;
+  border-right: 28px solid #e00;
+  border-left: 28px solid #e00;
+}
+
+footer {
+  background: linear-gradient(#ff8866 50%, #dd4444 50%);
+}
+
+.footer-panel {
+  background-color: #ff5555;
+}
+
+.footer-inside::before {
+  background-color: #ff8866;
+}
+
+.footer-inside::after {
+  background-color: #dd4444;
+}
+
+.footer-text a {
+  color: #e00;
+}
+
+/* Animate Red Alert & Moving Bars */
+.bar-2,
+.bar-7 {
+  animation: redalert 1s infinite 0.3s,
+    resizeGroup1 60s linear infinite alternate;
+}
+
+.bar-4,
+.bar-9 {
+  animation: redalert 1s infinite 0.5s,
+    resizeGroup2 60s linear infinite alternate;
+}
+
+@keyframes resizeGroup1 {
+  0% {
+    flex: 1;
+  }
+  100% {
+    flex: 3;
+  }
+}
+
+@keyframes resizeGroup2 {
+  0% {
+    flex: 3;
+  }
+  100% {
+    flex: 1;
+  }
+}

@@ -571,10 +571,18 @@ a {
 .bar-5,
 .bar-6,
 .bar-7,
-.bar-8,
 .bar-9,
 .bar-10 {
   height: 22px;
+}
+
+.bar-3,
+.bar-8 {
+  height: 11px;
+}
+
+.bar-3 {
+  margin-top: 11px;
 }
 
 .bar-1,
@@ -2228,5 +2236,39 @@ footer::after {
   }
   .lcars-bar-slice-bottom {
     width: 80px;
+  }
+}
+
+/* Moving Bars! */
+.bar-panel {
+  display: flex;
+  width: 100%;
+}
+
+.bar-2,
+.bar-7 {
+  animation: resizeGroup1 60s linear infinite alternate;
+}
+
+.bar-4,
+.bar-9 {
+  animation: resizeGroup2 60s linear infinite alternate;
+}
+
+@keyframes resizeGroup1 {
+  0% {
+    flex: 1;
+  }
+  100% {
+    flex: 3;
+  }
+}
+
+@keyframes resizeGroup2 {
+  0% {
+    flex: 3;
+  }
+  100% {
+    flex: 1;
   }
 }
