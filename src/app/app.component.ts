@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { environment } from '../environments/environment';
+import { AuthService } from './auth.service';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +21,7 @@ export class AppComponent implements AfterViewInit {
   scrollTopButton!: ElementRef;
 
   appTitle = environment.appTitle;
+  isLoggedIn: boolean = false;
   backendResponse = '';
   currentYear: number;
   dataCascade: string;
@@ -33,6 +35,7 @@ export class AppComponent implements AfterViewInit {
     private titleService: Title,
     private renderer: Renderer2,
     private el: ElementRef,
+    private authService: AuthService,
   ) {
     this.titleService.setTitle(environment.appTitle);
     this.currentYear = new Date().getFullYear();
@@ -40,15 +43,9 @@ export class AppComponent implements AfterViewInit {
   }
 
   ngOnInit() {
-    //TODO: Delete the test API call
-    // this.http.get(`${this.apiUrl}`, { responseType: 'text' }).subscribe({
-    //   next: data => {
-    //     this.backendResponse = data;
-    //   },
-    //   error: error => {
-    //     this.backendResponse = 'Error fetching data from backend';
-    //   },
-    // });
+    this.authService.isAuthenticated$.subscribe(loggedIn => {
+      this.isLoggedIn = loggedIn;
+    });
 
     this.populateSideColumnRandomTextItems();
   }
@@ -144,5 +141,9 @@ export class AppComponent implements AfterViewInit {
     let value2 = this.generateRandomValue(6, 6);
     let html = `<span class="random-lcars-ref">${value1}<span class="hop">-${value2}</span></span>`;
     return html;
+  }
+
+  logout(): void {
+    this.authService.performLogout();
   }
 }

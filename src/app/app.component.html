@@ -11,7 +11,18 @@
         >
       </div>
       <div class="left-frame-top">
-        <div class="panel panel-1"><a href="/login">Login</a></div>
+        <div class="panel panel-1">
+          <a
+            *ngIf="isLoggedIn"
+            routerLink="/login"
+            >Login</a
+          >
+          <a
+            *ngIf="!isLoggedIn"
+            (click)="logout()"
+            >Logout</a
+          >
+        </div>
         <div
           class="panel panel-2"
           [innerHTML]="sideColumnRandomTextItems[0]"></div>
