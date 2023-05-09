@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, ElementRef, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 
@@ -12,9 +12,16 @@ export class LoginComponent {
   email = '';
   password = '';
   errorMessage = '';
+  showErrorMilliseconds = 10000;
+  showRedAlertMilliseconds = 7000;
   inputsValid: boolean = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private renderer: Renderer2,
+    private el: ElementRef,
+  ) {}
 
   onLogin() {
     const credentials = {
@@ -45,11 +52,12 @@ export class LoginComponent {
   }
 
   displayErrorMessage(message: string) {
+    this.applyErrorStylesheet();
     this.errorMessage = message;
 
     setTimeout(() => {
       this.errorMessage = ''; // Reset error message
-    }, 5000); // 5000 milliseconds = 5 seconds
+    }, this.showErrorMilliseconds);
   }
 
   validateInputs() {
@@ -63,5 +71,33 @@ export class LoginComponent {
   validateEmail(email: string): boolean {
     const regex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
     return regex.test(email);
+  }
+
+  private applyErrorStylesheet() {
+    // Create a link element for the red alert stylesheet
+    const errorStyleLink = this.renderer.createElement('link');
+
+    // Set the link element attributes
+    this.renderer.setAttribute(errorStyleLink, 'rel', 'stylesheet');
+    this.renderer.setAttribute(
+      errorStyleLink,
+      'href',
+      'assets/lcars/lcars-red-alert.css',
+    );
+    this.renderer.setAttribute(errorStyleLink, 'id', 'red-alert-style-link');
+
+    // Add the red alert stylesheet to the head of the document
+    this.renderer.appendChild(
+      this.el.nativeElement.ownerDocument.head,
+      errorStyleLink,
+    );
+
+    // Remove the red alert stylesheet after 30 seconds
+    setTimeout(() => {
+      this.renderer.removeChild(
+        this.el.nativeElement.ownerDocument.head,
+        errorStyleLink,
+      );
+    }, this.showRedAlertMilliseconds);
   }
 }
