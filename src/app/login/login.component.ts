@@ -22,7 +22,7 @@ export class LoginComponent {
     this.authService.login(credentials).subscribe({
       next: (response: any) => {
         this.authService.saveToken(response.token);
-        this.router.navigate(['/protected']);
+        this.router.navigate(['/info']);
       },
       error: error => {
         console.error('Login error:', error);
