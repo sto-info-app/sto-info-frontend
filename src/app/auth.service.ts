@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -28,7 +28,21 @@ export class AuthService {
   }
 
   logout() {
-    return this.http.post(`${this.apiUrl}/auth/logout`, {});
+    const httpOptions = this.getHttpOptionsWithToken();
+    if (!httpOptions) {
+      // Handle the case when there is no token (e.g., user is not logged in)
+      return;
+    }
+    return this.http.post(`${this.apiUrl}/auth/logout`, {}, httpOptions);
+  }
+
+  private getHttpOptionsWithToken(): { headers: HttpHeaders } | null {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return { headers };
   }
 
   saveToken(token: string) {
@@ -46,7 +60,15 @@ export class AuthService {
   }
 
   performLogout() {
-    return this.logout().subscribe(() => {
+    const logout$ = this.logout();
+    if (!logout$) {
+      // If logout() returns undefined, just remove the token and navigate to the home page
+      this.removeToken();
+      this.router.navigate(['/']);
+      return;
+    }
+
+    logout$.subscribe(() => {
       this.removeToken();
       this.router.navigate(['/']);
     });
@@ -56,6 +78,4 @@ export class AuthService {
     //NOTE: Only use when a not wanting automatic updates though using a subscription
     return this.isAuthenticatedSubject.value;
   }
-
-  //TODO:Add more methods as needed for user authentication and handling
 }
