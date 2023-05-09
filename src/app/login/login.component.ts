@@ -12,8 +12,8 @@ export class LoginComponent {
   email = '';
   password = '';
   errorMessage = '';
-  showErrorMilliseconds = 10000;
-  showRedAlertMilliseconds = 7000;
+  showErrorMilliseconds = 15000;
+  showRedAlertMilliseconds = 8000;
   inputsValid: boolean = false;
 
   constructor(
