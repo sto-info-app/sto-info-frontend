@@ -69,7 +69,7 @@ select {
 body {
   display: flex;
   padding-block: 5px;
-  background-color: #000;
+  background-color: #0d0d0d;
   font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   font-weight: 400;
   line-height: 1.5;
@@ -117,10 +117,10 @@ a:active {
     color: #f70;
   }
   80% {
-    color: #000;
+    color: #0d0d0d;
   }
   90% {
-    color: #000;
+    color: #0d0d0d;
   }
   100% {
     color: #f5f6fa;
@@ -148,13 +148,13 @@ a:active {
   text-align: right;
   font-size: var(--sub-fonts);
   font-weight: bold;
-  color: #000;
+  color: #0d0d0d;
   transition: 800ms;
   z-index: 2;
 }
 
 #column-2 a {
-  color: #000;
+  color: #0d0d0d;
   text-decoration: none;
 }
 
@@ -215,8 +215,8 @@ a:active {
   display: block;
   width: 20px;
   height: 200px;
-  border-top: 5px solid #000;
-  border-bottom: 5px solid #000;
+  border-top: 5px solid #0d0d0d;
+  border-bottom: 5px solid #0d0d0d;
   background-color: var(--frame-color);
   position: absolute;
   top: 40px;
@@ -227,8 +227,8 @@ a:active {
   width: 14px;
   height: 65px;
   background-color: #d44;
-  border-left: 4px solid #000;
-  border-bottom: 4px solid #000;
+  border-left: 4px solid #0d0d0d;
+  border-bottom: 4px solid #0d0d0d;
   position: absolute;
   top: 45px;
   right: 0;
@@ -239,7 +239,7 @@ a:active {
   width: 14px;
   height: 70px;
   background-color: #78f;
-  border-left: 4px solid #000;
+  border-left: 4px solid #0d0d0d;
   position: absolute;
   top: 110px;
   right: 0;
@@ -250,8 +250,8 @@ a:active {
   width: 14px;
   height: 65px;
   background-color: #f70;
-  border-top: 4px solid #000;
-  border-left: 4px solid #000;
+  border-top: 4px solid #0d0d0d;
+  border-left: 4px solid #0d0d0d;
   position: absolute;
   bottom: 45px;
   right: 0;
@@ -263,7 +263,7 @@ a:active {
   display: block;
   width: 10px;
   height: 3px;
-  background-color: #000;
+  background-color: #0d0d0d;
   position: absolute;
   top: 54px;
   left: 0;
@@ -281,7 +281,7 @@ a:active {
   display: block;
   width: 20px;
   height: 240px;
-  background-color: #000;
+  background-color: #0d0d0d;
   border-radius: 10px 0 0 10px;
   position: absolute;
   top: 20px;
@@ -308,7 +308,7 @@ a:active {
   display: block;
   width: 20px;
   height: 240px;
-  background-color: #000;
+  background-color: #0d0d0d;
   border-radius: 0 10px 10px 0;
   position: absolute;
   top: 20px;
@@ -333,8 +333,8 @@ a:active {
   display: block;
   width: 20px;
   height: 200px;
-  border-top: 5px solid #000;
-  border-bottom: 5px solid #000;
+  border-top: 5px solid #0d0d0d;
+  border-bottom: 5px solid #0d0d0d;
   background-color: var(--frame-color);
 }
 
@@ -342,8 +342,8 @@ a:active {
   width: 14px;
   height: 65px;
   background-color: #f96;
-  border-bottom: 4px solid #000;
-  border-right: 4px solid #000;
+  border-bottom: 4px solid #0d0d0d;
+  border-right: 4px solid #0d0d0d;
   position: absolute;
   top: 45px;
   left: 0;
@@ -354,7 +354,7 @@ a:active {
   width: 14px;
   height: 70px;
   background-color: #fba;
-  border-right: 4px solid #000;
+  border-right: 4px solid #0d0d0d;
   position: absolute;
   top: 110px;
   left: 0;
@@ -365,8 +365,8 @@ a:active {
   width: 14px;
   height: 65px;
   background-color: #94f;
-  border-top: 4px solid #000;
-  border-right: 4px solid #000;
+  border-top: 4px solid #0d0d0d;
+  border-right: 4px solid #0d0d0d;
   position: absolute;
   bottom: 45px;
   left: 0;
@@ -518,7 +518,7 @@ a:active {
   display: inline-block;
   width: 100%;
   text-decoration: none;
-  color: #000;
+  color: #0d0d0d;
   font-weight: bold;
   padding: 18px 15px 8px 4px;
 }
@@ -527,7 +527,7 @@ a:active {
   display: inline-block;
   width: 100%;
   text-decoration: none;
-  color: #000;
+  color: #0d0d0d;
   font-weight: bold;
   padding: 18px 15px 8px 4px;
 }
@@ -587,7 +587,7 @@ a:active {
 }
 
 .pill-2:nth-child(3) {
-  background-color: #000;
+  background-color: #0d0d0d;
 }
 
 .pill-2:nth-child(4) {
@@ -639,41 +639,41 @@ a:active {
 .section-2-panel-a {
   padding: 205px 10px 15px 0;
   background-color: #d44;
-  border-bottom: 5px solid #000;
+  border-bottom: 5px solid #0d0d0d;
 }
 
 .section-2-panel-b {
   padding: 300px 10px 15px 0;
   background-color: #78f;
-  border-bottom: 5px solid #000;
+  border-bottom: 5px solid #0d0d0d;
 }
 
 .section-2-panel-c {
   padding: 15px 10px 125px 0;
 
-  border-bottom: 5px solid #000;
+  border-bottom: 5px solid #0d0d0d;
 }
 
 .section-2-panel-d {
   padding: 125px 10px 15px 0;
   background-color: #f96;
-  border-bottom: 5px solid #000;
+  border-bottom: 5px solid #0d0d0d;
 }
 
 .section-2-panel-e {
   padding: 425px 10px 15px 0;
-  border-bottom: 5px solid #000;
+  border-bottom: 5px solid #0d0d0d;
 }
 
 .section-2-buttons a {
   display: block;
   text-decoration: none;
   text-align: right;
-  border-bottom: 5px solid #000;
+  border-bottom: 5px solid #0d0d0d;
   padding: 30px 10px 15px 2px;
   background-color: var(--section-2-color);
   text-transform: uppercase;
-  color: #000;
+  color: #0d0d0d;
 }
 
 .section-2-buttons a:nth-child(2) {
@@ -699,13 +699,13 @@ a:active {
   text-decoration: none;
   text-transform: uppercase;
   text-align: right;
-  border-top: 5px solid #000;
-  border-bottom: 5px solid #000;
+  border-top: 5px solid #0d0d0d;
+  border-bottom: 5px solid #0d0d0d;
   padding: 20px 10px 0 2px;
   background-color: #c8f;
   font-size: 0.9rem;
   font-weight: bold;
-  color: #000;
+  color: #0d0d0d;
 }
 
 .left-frame-top,
@@ -714,7 +714,7 @@ a:active {
   text-align: right;
   font-size: var(--sub-fonts);
   font-weight: bold;
-  color: #000;
+  color: #0d0d0d;
 }
 
 .left-frame-top {
@@ -725,7 +725,7 @@ a:active {
 .left-frame-top a,
 .left-frame a {
   text-decoration: none;
-  color: #000;
+  color: #0d0d0d;
 }
 
 .left-frame {
@@ -747,7 +747,7 @@ a:active {
   display: block;
   width: 60px;
   height: 60px;
-  background: linear-gradient(to top right, #78f 50%, #000 50%);
+  background: linear-gradient(to top right, #78f 50%, #0d0d0d 50%);
   position: absolute;
   left: 0;
   bottom: 22px;
@@ -759,7 +759,7 @@ a:active {
   display: block;
   width: 60px;
   height: 60px;
-  background-color: #000;
+  background-color: #0d0d0d;
   border-radius: 0 0 0 56px;
   position: absolute;
   left: 0;
@@ -852,7 +852,7 @@ a:active {
   justify-content: space-between;
   overflow: hidden;
   height: 21px;
-  color: #000;
+  color: #0d0d0d;
 }
 
 /* Data Cascade default pattern */
@@ -1042,7 +1042,7 @@ nav a,
   text-transform: uppercase;
   font-size: 0.9rem;
   font-weight: bold;
-  color: #000;
+  color: #0d0d0d;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -1070,7 +1070,7 @@ nav a,
 }
 
 #blank {
-  background-color: #000;
+  background-color: #0d0d0d;
 }
 
 nav a:hover {
@@ -1138,7 +1138,7 @@ nav a:hover {
 .bar-7,
 .bar-8,
 .bar-9 {
-  border-right: 5px solid #000;
+  border-right: 5px solid #0d0d0d;
 }
 
 .bar-1,
@@ -1213,7 +1213,7 @@ nav a:hover {
   display: block;
   width: 60px;
   height: 60px;
-  background: linear-gradient(to bottom right, #d44 50%, #000 50%);
+  background: linear-gradient(to bottom right, #d44 50%, #0d0d0d 50%);
   position: absolute;
   left: 0;
   top: 22px;
@@ -1225,7 +1225,7 @@ nav a:hover {
   display: block;
   width: 60px;
   height: 60px;
-  background-color: #000;
+  background-color: #0d0d0d;
   border-radius: 56px 0 0 0;
   position: absolute;
   left: 0;
@@ -1494,7 +1494,7 @@ blockquote {
   font-size: var(--sub-fonts);
   font-weight: bold;
   text-transform: uppercase;
-  color: #000;
+  color: #0d0d0d;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -1509,11 +1509,11 @@ blockquote {
   display: block;
   text-decoration: none;
   text-align: right;
-  border-bottom: 5px solid #000;
+  border-bottom: 5px solid #0d0d0d;
   padding: 20px 10px 20px 2px;
   background-color: #d44;
   text-transform: uppercase;
-  color: #000;
+  color: #0d0d0d;
 }
 
 @media (max-width: 600px) {
@@ -1530,7 +1530,7 @@ blockquote {
 .lcars-bar {
   margin: 40px auto;
   height: 20px;
-  background-color: #000;
+  background-color: #0d0d0d;
   border-right: 18px solid #94f;
   border-left: 18px solid #94f;
   border-radius: 9px;
@@ -1561,7 +1561,7 @@ blockquote {
 .lcars-text-bar span {
   position: absolute;
   top: -4px;
-  background-color: #000;
+  background-color: #0d0d0d;
   height: 40px;
   overflow: visible;
   padding-inline: 10px;
@@ -1573,7 +1573,7 @@ blockquote {
 
 .lcars-text-bar::before {
   content: '';
-  background-color: #000;
+  background-color: #0d0d0d;
   display: block;
   width: 10px;
   height: 32px;
@@ -1585,7 +1585,7 @@ blockquote {
 
 .lcars-text-bar::after {
   content: '';
-  background-color: #000;
+  background-color: #0d0d0d;
   display: block;
   width: 10px;
   height: 32px;
@@ -1636,7 +1636,7 @@ footer {
 
 footer::before {
   content: '';
-  background-color: #000;
+  background-color: #0d0d0d;
   display: block;
   width: 5px;
   height: 100vh;
@@ -1648,7 +1648,7 @@ footer::before {
 
 footer::after {
   content: '';
-  background-color: #000;
+  background-color: #0d0d0d;
   display: block;
   width: 2px;
   height: 100vh;
@@ -1666,17 +1666,17 @@ footer::after {
   padding-top: 10px;
   padding-left: 0.4rem;
   background-color: #ffaa90;
-  border-top: 5px solid #000;
-  border-bottom: 5px solid #000;
+  border-top: 5px solid #0d0d0d;
+  border-bottom: 5px solid #0d0d0d;
   font-size: var(--sub-fonts);
   font-weight: bold;
-  color: #000;
+  color: #0d0d0d;
 }
 
 .footer-inside {
   flex: 1;
   min-height: 180px;
-  background-color: #000;
+  background-color: #0d0d0d;
   border-radius: 0 20px 20px 0;
   padding: 1.5rem 1rem;
   z-index: 2;
@@ -1913,7 +1913,7 @@ footer::after {
 
   .panel-2 {
     padding-bottom: 15px;
-    border-bottom: 5px solid #000;
+    border-bottom: 5px solid #0d0d0d;
     background-color: #78f;
   }
 
