@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-home',
@@ -8,8 +9,13 @@ import { environment } from 'src/environments/environment';
 })
 export class HomeComponent implements OnInit {
   appTitle = environment.appTitle;
+  isLoggedIn: boolean = false;
 
-  constructor() {}
+  constructor(private authService: AuthService) {
+    authService.isAuthenticated$.subscribe(loggedIn => {
+      this.isLoggedIn = loggedIn;
+    });
+  }
 
   ngOnInit(): void {}
 }
