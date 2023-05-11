@@ -1,7 +1,9 @@
 <div>
   <h1>Welcome to the {{ appTitle }}!</h1>
   <p>This is a work in progress!</p>
-  <div class="buttons">
+  <div
+    class="buttons"
+    *ngIf="!isLoggedIn">
     <a
       href="/login"
       class="bluey"
