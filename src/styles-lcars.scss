@@ -59,7 +59,7 @@ html {
 body {
   margin: 0;
   padding: 5px 0;
-  background-color: #000;
+  background-color: #0d0d0d;
   font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   line-height: 1.5;
   color: #79d;
@@ -98,10 +98,10 @@ a {
     color: #455580;
   }
   80% {
-    color: #000;
+    color: #0d0d0d;
   }
   90% {
-    color: #000;
+    color: #0d0d0d;
   }
   100% {
     color: #9cf;
@@ -130,13 +130,13 @@ a {
   text-decoration: none;
   text-transform: uppercase;
   text-align: right;
-  border-top: 8px solid #000;
-  border-bottom: 8px solid #000;
+  border-top: 8px solid #0d0d0d;
+  border-bottom: 8px solid #0d0d0d;
   padding: 20px 10px 20px 2px;
   background-color: #ffcc99;
   font-size: 0.96rem;
   font-weight: bold;
-  color: #000;
+  color: #0d0d0d;
 }
 
 .left-frame-top,
@@ -146,7 +146,7 @@ a {
   text-align: right;
   font-size: 0.88rem;
   font-weight: bold;
-  color: #000;
+  color: #0d0d0d;
 }
 
 .left-frame-top {
@@ -157,7 +157,7 @@ a {
 .left-frame-top a,
 .left-frame a {
   text-decoration: none;
-  color: #000;
+  color: #0d0d0d;
 }
 
 .left-frame {
@@ -170,7 +170,7 @@ a {
 }
 
 .panel {
-  border-bottom: 8px solid #000;
+  border-bottom: 8px solid #0d0d0d;
   text-transform: uppercase;
   position: relative;
   width: 100%;
@@ -197,7 +197,7 @@ a {
   background-color: #455580;
   padding: 82px 10px 15px 0;
   text-decoration: none;
-  color: #000;
+  color: #0d0d0d;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -218,7 +218,7 @@ a {
 
 .right-frame-top {
   flex: 1;
-  background-color: #000;
+  background-color: #0d0d0d;
 }
 
 .banner {
@@ -287,7 +287,7 @@ a {
   justify-content: space-between;
   overflow: hidden;
   height: 22px;
-  color: #000;
+  color: #0d0d0d;
 }
 
 .data-cascade .row-1 {
@@ -469,7 +469,7 @@ a {
   text-decoration: none;
   text-transform: uppercase;
   font-weight: bold;
-  color: #000;
+  color: #0d0d0d;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -525,13 +525,13 @@ a {
 .top-corner-bg {
   width: 160px;
   height: 50px;
-  background: linear-gradient(to top right, #58e 50%, #000 50%);
+  background: linear-gradient(to top right, #58e 50%, #0d0d0d 50%);
 }
 
 .top-corner {
   width: 160px;
   height: 50px;
-  background-color: #000;
+  background-color: #0d0d0d;
   border-radius: 0 0 0 30px;
 }
 
@@ -609,7 +609,7 @@ a {
 .bar-7,
 .bar-8,
 .bar-9 {
-  border-right: 8px solid #000;
+  border-right: 8px solid #0d0d0d;
 }
 
 .bar-1,
@@ -639,7 +639,7 @@ a {
 .bar-4-inside {
   width: 200px;
   height: 10px;
-  background-color: #000;
+  background-color: #0d0d0d;
   border-radius: 0 10px 0 0;
 }
 
@@ -657,7 +657,7 @@ a {
 .bar-9-inside {
   width: 200px;
   height: 10px;
-  background-color: #000;
+  background-color: #0d0d0d;
   border-radius: 0 0 10px 0;
 }
 
@@ -714,25 +714,25 @@ a {
 
 .right-frame {
   flex: 1;
-  background-color: #000;
+  background-color: #0d0d0d;
 }
 
 .corner-bg {
   width: 160px;
   height: 50px;
-  background: linear-gradient(to bottom right, #58e 50%, #000 50%);
+  background: linear-gradient(to bottom right, #58e 50%, #0d0d0d 50%);
 }
 
 .corner {
   width: 160px;
   height: 50px;
-  background-color: #000;
+  background-color: #0d0d0d;
   border-radius: 30px 0 0 0;
 }
 
 .content {
   padding: 0 0 25px 50px;
-  background-color: #000;
+  background-color: #0d0d0d;
 }
 
 .content > *:first-child {
@@ -971,7 +971,7 @@ a:hover {
   text-decoration: none;
   font-weight: bold;
   text-transform: uppercase;
-  color: #000;
+  color: #0d0d0d;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -993,11 +993,11 @@ a:hover {
   display: block;
   text-decoration: none;
   text-align: right;
-  border-bottom: 8px solid #000;
+  border-bottom: 8px solid #0d0d0d;
   padding: 20px 10px 20px 2px;
   background-color: #58e;
   text-transform: uppercase;
-  color: #000;
+  color: #0d0d0d;
 }
 
 .sidebar-buttons a:hover {
@@ -1021,7 +1021,7 @@ a:hover {
 .lcars-bar {
   margin: 40px auto;
   height: 20px;
-  background-color: #000;
+  background-color: #0d0d0d;
   border-right: 18px solid #79d;
   border-left: 18px solid #79d;
   border-radius: 9px;
@@ -1044,7 +1044,7 @@ a:hover {
   margin: 0 auto;
   width: 180px;
   height: 10px;
-  background-color: #000;
+  background-color: #0d0d0d;
 }
 
 .lcars-bar-slice-bottom {
@@ -1073,7 +1073,7 @@ a:hover {
 .lcars-text-bar span {
   position: absolute;
   top: -4px;
-  background-color: #000;
+  background-color: #0d0d0d;
   height: 40px;
   overflow: visible;
   padding: 0 10px;
@@ -1085,7 +1085,7 @@ a:hover {
 
 .lcars-text-bar::before {
   content: '';
-  background-color: #000;
+  background-color: #0d0d0d;
   display: block;
   width: 10px;
   height: 32px;
@@ -1097,7 +1097,7 @@ a:hover {
 
 .lcars-text-bar::after {
   content: '';
-  background-color: #000;
+  background-color: #0d0d0d;
   display: block;
   width: 10px;
   height: 32px;
@@ -1143,7 +1143,7 @@ footer {
 
 footer::before {
   content: '';
-  background-color: #000;
+  background-color: #0d0d0d;
   display: block;
   width: 5px;
   height: 100vh;
@@ -1155,7 +1155,7 @@ footer::before {
 
 footer::after {
   content: '';
-  background-color: #000;
+  background-color: #0d0d0d;
   display: block;
   width: 2px;
   height: 100vh;
@@ -1172,17 +1172,17 @@ footer::after {
   margin: auto;
   padding: 10px 0 0 1%;
   background-color: #6cf;
-  border-top: 5px solid #000;
-  border-bottom: 5px solid #000;
+  border-top: 5px solid #0d0d0d;
+  border-bottom: 5px solid #0d0d0d;
   font-size: 0.85rem;
   font-weight: bold;
-  color: #000;
+  color: #0d0d0d;
 }
 
 .footer-inside {
   flex: 1;
   min-height: 180px;
-  background-color: #000;
+  background-color: #0d0d0d;
   border-radius: 0 20px 20px 0;
   padding: 1.5rem 1rem;
   z-index: 2;
@@ -2109,14 +2109,14 @@ footer::after {
   }
   .scroll-top a {
     width: 60px;
-    border-top: 5px solid #000;
+    border-top: 5px solid #0d0d0d;
   }
   .panel-1 a {
     padding-top: 30px;
   }
   .panel-2 {
     padding-bottom: 15px;
-    border-bottom: 5px solid #000;
+    border-bottom: 5px solid #0d0d0d;
     background-color: #58e;
   }
   .hop {
@@ -2155,10 +2155,10 @@ footer::after {
   .bar-7,
   .bar-8,
   .bar-9 {
-    border-right: 5px solid #000;
+    border-right: 5px solid #0d0d0d;
   }
   .panel {
-    border-top: 5px solid #000;
+    border-top: 5px solid #0d0d0d;
   }
   .runner {
     height: 25px;
