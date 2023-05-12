@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MustMatch } from '../_helpers/must-match.validator';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -7,26 +9,78 @@ import { AuthService } from '../auth.service';
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
 })
-export class RegisterComponent {
-  email: string = '';
-  password: string = '';
+export class RegisterComponent implements OnInit {
+  registerForm!: FormGroup;
+  submitted = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private formBuilder: FormBuilder,
+    private router: Router,
+    private authService: AuthService,
+  ) {}
+
+  ngOnInit() {
+    this.registerForm = this.formBuilder.group(
+      {
+        firstName: ['', Validators.required],
+        lastName: ['', Validators.required],
+        username: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(5),
+            Validators.pattern('^[a-zA-Z0-9]*$'),
+          ],
+        ],
+        email: ['', [Validators.required, Validators.email]],
+        password: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(8),
+            Validators.pattern(
+              '^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9\n\r\t]).{8,}$',
+            ),
+          ],
+        ],
+        confirmPassword: ['', Validators.required],
+      },
+      { validator: MustMatch('password', 'confirmPassword') },
+    );
+  }
 
   onRegister() {
-    const credentials = {
-      email: this.email,
-      password: this.password,
-    };
+    this.submitted = true;
+
+    console.log('Register form values', this.registerForm.value);
+    console.log('Register form errors', this.registerForm.errors);
+
+    if (this.registerForm.invalid) {
+      return;
+    }
+
+    const credentials = this.registerForm.value;
 
     this.authService.register(credentials).subscribe({
       next: (response: any) => {
-        this.authService.saveToken(response.token);
-        this.router.navigate(['/protected']);
+        this.router.navigate(['/login']);
       },
       error: error => {
-        console.error('Registration error:', error);
-        // Handle login errors here (e.g., display an error message)
+        if (error.status === 409) {
+          console.error('Registration Conflict Exception error:', error);
+          if (error.error.message.includes('Email')) {
+            this.registerForm.controls['email'].setErrors({
+              uniqueEmail: true,
+            });
+          } else if (error.error.message.includes('Username')) {
+            this.registerForm.controls['username'].setErrors({
+              uniqueUsername: true,
+            });
+          }
+        } else {
+          console.error('Registration error:', error);
+          // Handle other types of errors
+        }
       },
       complete: () => {
         console.log('Registration complete');

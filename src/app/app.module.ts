@@ -1,20 +1,20 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { JwtModule } from '@auth0/angular-jwt';
 import { environment } from 'src/environments/environment';
+import { AboutComponent } from './about/about.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { ContactComponent } from './contact/contact.component';
 import { HomeComponent } from './home/home.component';
+import { InfoComponent } from './info/info.component';
+import { LcarsErrorMessageComponent } from './lcars-error-message/lcars-error-message.component';
 import { LoginComponent } from './login/login.component';
 import { ProtectedComponent } from './protected/protected.component';
 import { RegisterComponent } from './register/register.component';
-import { ContactComponent } from './contact/contact.component';
-import { AboutComponent } from './about/about.component';
-import { InfoComponent } from './info/info.component';
-import { LcarsErrorMessageComponent } from './lcars-error-message/lcars-error-message.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -45,6 +45,7 @@ export function tokenGetter() {
       },
     }),
     FormsModule,
+    ReactiveFormsModule,
   ],
   providers: [
     {
