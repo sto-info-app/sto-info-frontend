@@ -52,9 +52,6 @@ export class RegisterComponent implements OnInit {
   onRegister() {
     this.submitted = true;
 
-    console.log('Register form values', this.registerForm.value);
-    console.log('Register form errors', this.registerForm.errors);
-
     if (this.registerForm.invalid) {
       return;
     }
@@ -63,7 +60,7 @@ export class RegisterComponent implements OnInit {
 
     this.authService.register(credentials).subscribe({
       next: (response: any) => {
-        this.router.navigate(['/login']);
+        this.router.navigate(['/register/complete']);
       },
       error: error => {
         if (error.status === 409) {

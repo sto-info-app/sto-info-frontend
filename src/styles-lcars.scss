@@ -186,6 +186,7 @@ a {
 
 .panel a {
   padding: 15px 10px;
+  cursor: pointer;
 }
 
 .panel-1 {
@@ -754,6 +755,11 @@ a {
   flex: 1 1 300px;
 }
 
+.col.right {
+  text-align: right;
+  text-align: -webkit-right;
+}
+
 h1,
 h2,
 h3 {
@@ -875,6 +881,13 @@ blockquote {
   animation-delay: 1s;
 }
 
+.blink:hover,
+.blink-slower:hover,
+.blink-faster:hover {
+  animation: none;
+  opacity: 1;
+}
+
 a:hover {
   animation: none;
 }
@@ -957,6 +970,35 @@ a:hover {
   justify-content: space-evenly;
 }
 
+button {
+  display: block;
+  margin: 0 8px 16px 8px;
+  width: 200px;
+  height: 60px;
+  padding: 20px 25px 0 0;
+  background-color: #58e;
+  border-radius: 26px;
+  text-align: right;
+  font-size: 22px;
+  line-height: 1.2;
+  text-decoration: none;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #0d0d0d;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+button:active,
+button:focus,
+button:hover {
+  filter: brightness(70%);
+  outline: none;
+}
+
 .buttons a {
   display: block;
   margin: 0 8px 16px 8px;
@@ -976,6 +1018,7 @@ a:hover {
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  cursor: pointer;
 }
 
 .buttons a:active,
@@ -1869,6 +1912,12 @@ footer::after {
 
 .go-c72 {
   color: #f7f7f7 !important;
+}
+
+button.sunflower,
+button.bluey,
+button.gold {
+  color: #0d0d0d;
 }
 
 @media only screen and (max-width: 1240px) {

@@ -1,0 +1,11 @@
+.lcars-success-message-container {
+  // display: flex;
+  // flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+
+  .lcars-info-message {
+    padding: 0 40px;
+  }
+}
