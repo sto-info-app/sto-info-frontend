@@ -5,7 +5,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { JwtModule } from '@auth0/angular-jwt';
 import { environment } from 'src/environments/environment';
-import { AboutComponent } from './about/about.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ContactComponent } from './contact/contact.component';
@@ -17,6 +16,7 @@ import { LcarsSuccessMessageComponent } from './lcars-success-message/lcars-succ
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { RegistrationCompleteComponent } from './registration-complete/registration-complete.component';
+import { AboutComponent } from './static-pages/about/about.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
 
