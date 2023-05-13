@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from 'src/app/auth.service';
 import { MustMatch } from '../../_helpers/must-match.validator';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-register',

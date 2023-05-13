@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { environment } from '../environments/environment';
-import { AuthService } from './auth.service';
+import { AuthService } from './core/auth/auth.service';
 
 @Component({
   selector: 'app-root',
