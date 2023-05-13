@@ -5,21 +5,20 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { JwtModule } from '@auth0/angular-jwt';
 import { environment } from 'src/environments/environment';
-import { AboutComponent } from './about/about.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { ContactComponent } from './contact/contact.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 import { HomeComponent } from './home/home.component';
-import { InfoComponent } from './info/info.component';
-import { LcarsErrorMessageComponent } from './lcars-error-message/lcars-error-message.component';
 import { LoginComponent } from './login/login.component';
-import { ProtectedComponent } from './protected/protected.component';
 import { RegisterComponent } from './register/register.component';
-import { VerifyEmailComponent } from './verify-email/verify-email.component';
-import { LcarsSuccessMessageComponent } from './lcars-success-message/lcars-success-message.component';
 import { RegistrationCompleteComponent } from './registration-complete/registration-complete.component';
-import { LcarsInformationMessageComponent } from './lcars-information-message/lcars-information-message.component';
+import { LcarsErrorMessageComponent } from './shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsInformationMessageComponent } from './shared/components/lcars-information-message/lcars-information-message.component';
+import { LcarsSuccessMessageComponent } from './shared/components/lcars-success-message/lcars-success-message.component';
+import { AboutComponent } from './static-pages/about/about.component';
+import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
+import { VerifyEmailComponent } from './verify-email/verify-email.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -30,17 +29,16 @@ export function tokenGetter() {
     AppComponent,
     LoginComponent,
     RegisterComponent,
-    ProtectedComponent,
     HomeComponent,
     ContactComponent,
     AboutComponent,
-    InfoComponent,
     LcarsErrorMessageComponent,
     VerifyEmailComponent,
     LcarsSuccessMessageComponent,
     RegistrationCompleteComponent,
     LcarsInformationMessageComponent,
     TermsOfUseComponent,
+    DashboardComponent,
   ],
   imports: [
     BrowserModule,

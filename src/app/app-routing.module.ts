@@ -1,14 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AboutComponent } from './about/about.component';
 import { AuthGuard } from './auth.guard';
-import { ContactComponent } from './contact/contact.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 import { HomeComponent } from './home/home.component';
-import { InfoComponent } from './info/info.component';
 import { LoginComponent } from './login/login.component';
-import { ProtectedComponent } from './protected/protected.component';
 import { RegisterComponent } from './register/register.component';
 import { RegistrationCompleteComponent } from './registration-complete/registration-complete.component';
+import { AboutComponent } from './static-pages/about/about.component';
+import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
 
@@ -16,12 +15,6 @@ const routes: Routes = [
   {
     path: '',
     component: HomeComponent,
-  },
-  {
-    //TODO: Delete?
-    path: 'protected',
-    component: ProtectedComponent,
-    canActivate: [AuthGuard],
   },
 
   // User auth, registration and validation
@@ -58,8 +51,8 @@ const routes: Routes = [
 
   // STO App routes
   {
-    path: 'info',
-    component: InfoComponent,
+    path: 'dashboard',
+    component: DashboardComponent,
     canActivate: [AuthGuard],
   },
 ];

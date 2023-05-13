@@ -21,6 +21,8 @@ export class AppComponent implements AfterViewInit {
   scrollTopButton!: ElementRef;
 
   appTitle = environment.appTitle;
+  appLoggedInHome = environment.appLoggedInHome;
+
   isLoggedIn: boolean = false;
   backendResponse = '';
   currentYear: number;
@@ -30,12 +32,14 @@ export class AppComponent implements AfterViewInit {
   maxNumberOfSideColumnRandomTextItems: number = 5;
 
   constructor(
-    private http: HttpClient,
     @Inject('API_URL') private apiUrl: string,
+
+    private authService: AuthService,
     private titleService: Title,
+
+    private http: HttpClient,
     private renderer: Renderer2,
     private el: ElementRef,
-    private authService: AuthService,
   ) {
     this.titleService.setTitle(environment.appTitle);
     this.currentYear = new Date().getFullYear();

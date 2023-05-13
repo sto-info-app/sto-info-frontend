@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -9,6 +10,8 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
+  appLoggedInHome = environment.appLoggedInHome;
+
   EMAIL_PATTERN =
     "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$";
   email = '';
@@ -34,7 +37,7 @@ export class LoginComponent {
     this.authService.login(credentials).subscribe({
       next: (response: any) => {
         this.authService.saveToken(response.access_token);
-        this.router.navigate(['/info']);
+        this.router.navigate([this.appLoggedInHome]);
       },
       error: (error: HttpErrorResponse) => {
         if (error.status === 401) {

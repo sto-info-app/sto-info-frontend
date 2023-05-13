@@ -8,6 +8,7 @@ export const environment = {
   env_label: 'Local Development',
   apiUrl: 'http://localhost:3000',
   appTitle: 'Star Trek Online Info Portal',
+  appLoggedInHome: '/dashboard',
 };
 
 /*
