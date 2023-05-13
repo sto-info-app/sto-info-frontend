@@ -36,7 +36,11 @@ export class LoginComponent {
       },
       error: (error: HttpErrorResponse) => {
         if (error.status === 401) {
-          const errMessage = 'Unauthorised: Invalid email or password.';
+          let errMessage = 'Unauthorised: Invalid email or password.';
+          if (error.error.message === 'Email not verified') {
+            errMessage =
+              'Please verify your email before logging in. Check your inbox for the verification email.';
+          }
           console.error('Login error:', errMessage);
           this.displayErrorMessage(errMessage);
         } else {
