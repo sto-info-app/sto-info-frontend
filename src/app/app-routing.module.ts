@@ -6,7 +6,6 @@ import { ContactComponent } from './contact/contact.component';
 import { HomeComponent } from './home/home.component';
 import { InfoComponent } from './info/info.component';
 import { LoginComponent } from './login/login.component';
-import { ProtectedComponent } from './protected/protected.component';
 import { RegisterComponent } from './register/register.component';
 import { RegistrationCompleteComponent } from './registration-complete/registration-complete.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
@@ -16,12 +15,6 @@ const routes: Routes = [
   {
     path: '',
     component: HomeComponent,
-  },
-  {
-    //TODO: Delete?
-    path: 'protected',
-    component: ProtectedComponent,
-    canActivate: [AuthGuard],
   },
 
   // User auth, registration and validation

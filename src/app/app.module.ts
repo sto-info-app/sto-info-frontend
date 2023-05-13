@@ -12,14 +12,13 @@ import { ContactComponent } from './contact/contact.component';
 import { HomeComponent } from './home/home.component';
 import { InfoComponent } from './info/info.component';
 import { LcarsErrorMessageComponent } from './lcars-error-message/lcars-error-message.component';
-import { LoginComponent } from './login/login.component';
-import { ProtectedComponent } from './protected/protected.component';
-import { RegisterComponent } from './register/register.component';
-import { VerifyEmailComponent } from './verify-email/verify-email.component';
-import { LcarsSuccessMessageComponent } from './lcars-success-message/lcars-success-message.component';
-import { RegistrationCompleteComponent } from './registration-complete/registration-complete.component';
 import { LcarsInformationMessageComponent } from './lcars-information-message/lcars-information-message.component';
+import { LcarsSuccessMessageComponent } from './lcars-success-message/lcars-success-message.component';
+import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
+import { RegistrationCompleteComponent } from './registration-complete/registration-complete.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
+import { VerifyEmailComponent } from './verify-email/verify-email.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -30,7 +29,6 @@ export function tokenGetter() {
     AppComponent,
     LoginComponent,
     RegisterComponent,
-    ProtectedComponent,
     HomeComponent,
     ContactComponent,
     AboutComponent,
