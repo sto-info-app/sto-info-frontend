@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
-import { MessageType } from '../shared/models/lcars-message-type.enum';
+import { MessageType } from '../../shared/models/lcars-message-type.enum';
 
 @Component({
   selector: 'app-verify-email',
