@@ -9,6 +9,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './core/login/login.component';
 import { RegisterComponent } from './core/register/register.component';
+import { VerifyEmailComponent } from './core/verify-email/verify-email.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { HomeComponent } from './home/home.component';
 import { RegistrationCompleteComponent } from './registration-complete/registration-complete.component';
@@ -18,7 +19,6 @@ import { LcarsSuccessMessageComponent } from './shared/components/lcars-success-
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
-import { VerifyEmailComponent } from './verify-email/verify-email.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
