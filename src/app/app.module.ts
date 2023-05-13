@@ -19,6 +19,7 @@ import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -39,6 +40,7 @@ export function tokenGetter() {
     RegistrationCompleteComponent,
     LcarsInformationMessageComponent,
     TermsOfUseComponent,
+    DashboardComponent,
   ],
   imports: [
     BrowserModule,
