@@ -60,18 +60,8 @@ export class AuthService {
   }
 
   performLogout() {
-    const logout$ = this.logout();
-    if (!logout$) {
-      // If logout() returns undefined, just remove the token and navigate to the home page
-      this.removeToken();
-      this.router.navigate(['/']);
-      return;
-    }
-
-    logout$.subscribe(() => {
-      this.removeToken();
-      this.router.navigate(['/']);
-    });
+    this.removeToken();
+    this.router.navigate(['/login']);
   }
 
   isLoggedIn(): boolean {

@@ -1,31 +1,3 @@
-.login-container {
-  .register-now-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-
-    .lcars-text-bar {
-      width: 100%;
-      margin: 32px 0 0 0;
-    }
-
-    .buttons {
-      width: 100%;
-      margin-top: 5px;
-    }
-  }
-
-  input.errored {
-    border-color: #cc2233;
-  }
-
-  .submit-button:disabled {
-    background-color: #344470;
-  }
-  .submit-button:disabled:hover {
-    cursor: not-allowed;
-  }
+.login-side-col {
+  max-width: 400px;
 }

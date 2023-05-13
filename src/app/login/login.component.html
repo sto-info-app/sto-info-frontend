@@ -14,12 +14,12 @@
               name="email"
               [(ngModel)]="email"
               required
-              pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+              pattern="EMAIL_PATTERN"
               [class.errored]="errorMessage ? true : false"
               (input)="validateInputs()" />
             <div
               *ngIf="email.trim() !== '' && !validateEmail(email)"
-              class="error">
+              class="helper-error-text">
               Invalid email format
             </div>
           </div>
@@ -43,8 +43,8 @@
         </form>
       </div>
     </div>
-    <div class="col">
-      <div class="register-now-container">
+    <div class="col login-side-col">
+      <div class="column-container">
         <div class="lcars-text-bar">
           <span>Not registered?</span>
         </div>
