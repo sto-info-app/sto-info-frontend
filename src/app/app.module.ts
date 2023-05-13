@@ -7,8 +7,8 @@ import { JwtModule } from '@auth0/angular-jwt';
 import { environment } from 'src/environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 import { HomeComponent } from './home/home.component';
-import { InfoComponent } from './info/info.component';
 import { LcarsErrorMessageComponent } from './lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from './lcars-information-message/lcars-information-message.component';
 import { LcarsSuccessMessageComponent } from './lcars-success-message/lcars-success-message.component';
@@ -19,7 +19,6 @@ import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
-import { DashboardComponent } from './dashboard/dashboard.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -33,7 +32,6 @@ export function tokenGetter() {
     HomeComponent,
     ContactComponent,
     AboutComponent,
-    InfoComponent,
     LcarsErrorMessageComponent,
     VerifyEmailComponent,
     LcarsSuccessMessageComponent,
