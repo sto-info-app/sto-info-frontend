@@ -1,6 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import {
+  MIN_CHARS_PASSWORD,
+  MIN_CHARS_USERNAME,
+} from 'src/app/shared/constants/forms.constants';
+import {
+  PASSWORD_PATTERN,
+  USERNAME_PATTERN,
+} from 'src/app/shared/constants/regex-patterns.constants';
 import { MustMatch } from '../../shared/_helpers/must-match.validator';
 import { AuthService } from '../auth/auth.service';
 
@@ -12,6 +20,9 @@ import { AuthService } from '../auth/auth.service';
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   submitted = false;
+
+  minCharsInPassword: number = MIN_CHARS_PASSWORD;
+  minCharsInUsername: number = MIN_CHARS_USERNAME;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -28,8 +39,8 @@ export class RegisterComponent implements OnInit {
           '',
           [
             Validators.required,
-            Validators.minLength(5),
-            Validators.pattern('^[a-zA-Z0-9]*$'),
+            Validators.minLength(MIN_CHARS_USERNAME),
+            Validators.pattern(USERNAME_PATTERN),
           ],
         ],
         email: ['', [Validators.required, Validators.email]],
@@ -37,10 +48,8 @@ export class RegisterComponent implements OnInit {
           '',
           [
             Validators.required,
-            Validators.minLength(8),
-            Validators.pattern(
-              '^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9\n\r\t]).{8,}$',
-            ),
+            Validators.minLength(MIN_CHARS_PASSWORD),
+            Validators.pattern(PASSWORD_PATTERN),
           ],
         ],
         confirmPassword: ['', Validators.required],
