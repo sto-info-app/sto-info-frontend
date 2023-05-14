@@ -135,18 +135,20 @@
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['password'].errors?.['required']">
-                Password is required
+                Password is required.
               </div>
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['password'].errors?.['minlength']">
                 Password must be at least {{ minCharsInPassword }} characters
+                long.
               </div>
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['password'].errors?.['pattern']">
                 Password must contain at least one number, one uppercase and
-                lowercase letter, one special character and be at least 8
+                lowercase letter, one special character and be at least
+                {{ minCharsInPassword }}
                 characters long.
               </div>
             </div>
@@ -170,14 +172,14 @@
                 *ngIf="
                   registerForm.controls['confirmPassword'].errors?.['required']
                 ">
-                You must confirm your password
+                Confirmation password is required.
               </div>
               <div
                 class="helper-error-text"
                 *ngIf="
                   registerForm.controls['confirmPassword'].errors?.['mustMatch']
                 ">
-                Passwords must match
+                Passwords do not match.
               </div>
             </div>
           </div>
