@@ -65,7 +65,20 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    //NOTE: Only use when a not wanting automatic updates though using a subscription
-    return this.isAuthenticatedSubject.value;
+    return !!localStorage.getItem('access_token');
+  }
+
+  resetPassword(email: string): Observable<any> {
+    const url = `${environment.apiUrl}/auth/request-password-reset`;
+    return this.http.post(url, { email });
+  }
+
+  changePassword(token: string, password: string): Observable<any> {
+    const data = {
+      token: token,
+      password: password,
+    };
+
+    return this.http.post(`${environment.apiUrl}/auth/reset-password`, data);
   }
 }

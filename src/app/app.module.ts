@@ -7,6 +7,7 @@ import { JwtModule } from '@auth0/angular-jwt';
 import { environment } from 'src/environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { ResetPasswordRequestComponent } from './core/auth/reset-password-request/reset-password-request.component';
 import { LoginComponent } from './core/login/login.component';
 import { RegisterComponent } from './core/register/register.component';
 import { RegistrationCompleteComponent } from './core/registration-complete/registration-complete.component';
@@ -19,6 +20,7 @@ import { LcarsSuccessMessageComponent } from './shared/components/lcars-success-
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
+import { ChangePasswordComponent } from './core/auth/change-password/change-password.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -39,6 +41,8 @@ export function tokenGetter() {
     LcarsInformationMessageComponent,
     TermsOfUseComponent,
     DashboardComponent,
+    ResetPasswordRequestComponent,
+    ChangePasswordComponent,
   ],
   imports: [
     BrowserModule,

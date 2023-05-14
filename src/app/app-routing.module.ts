@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/auth/auth.guard';
+import { ChangePasswordComponent } from './core/auth/change-password/change-password.component';
+import { ResetPasswordRequestComponent } from './core/auth/reset-password-request/reset-password-request.component';
 import { LoginComponent } from './core/login/login.component';
 import { RegisterComponent } from './core/register/register.component';
 import { RegistrationCompleteComponent } from './core/registration-complete/registration-complete.component';
@@ -33,6 +35,14 @@ const routes: Routes = [
   {
     path: 'verify-email',
     component: VerifyEmailComponent,
+  },
+  {
+    path: 'reset-password',
+    component: ResetPasswordRequestComponent,
+  },
+  {
+    path: 'change-password',
+    component: ChangePasswordComponent,
   },
 
   // Static pages
