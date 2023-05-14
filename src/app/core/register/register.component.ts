@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import {
+  PASSWORD_PATTERN,
+  USERNAME_PATTERN,
+} from 'src/app/shared/constants/regex-patterns.constants';
 import { MustMatch } from '../../shared/_helpers/must-match.validator';
 import { AuthService } from '../auth/auth.service';
 
@@ -29,7 +33,7 @@ export class RegisterComponent implements OnInit {
           [
             Validators.required,
             Validators.minLength(5),
-            Validators.pattern('^[a-zA-Z0-9]*$'),
+            Validators.pattern(USERNAME_PATTERN),
           ],
         ],
         email: ['', [Validators.required, Validators.email]],
@@ -38,9 +42,7 @@ export class RegisterComponent implements OnInit {
           [
             Validators.required,
             Validators.minLength(8),
-            Validators.pattern(
-              '^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9\n\r\t]).{8,}$',
-            ),
+            Validators.pattern(PASSWORD_PATTERN),
           ],
         ],
         confirmPassword: ['', Validators.required],
