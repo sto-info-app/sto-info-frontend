@@ -21,6 +21,9 @@ export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   submitted = false;
 
+  minCharsInPassword: number = MIN_CHARS_PASSWORD;
+  minCharsInUsername: number = MIN_CHARS_USERNAME;
+
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,

@@ -71,7 +71,7 @@
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['username'].errors?.['minlength']">
-                Username must be at least 5 characters
+                Username must be at least {{ minCharsInUsername }} characters
               </div>
               <div
                 class="helper-error-text"
@@ -140,7 +140,7 @@
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['password'].errors?.['minlength']">
-                Password must be at least 8 characters
+                Password must be at least {{ minCharsInPassword }} characters
               </div>
               <div
                 class="helper-error-text"
