@@ -2,6 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
+  MIN_CHARS_PASSWORD,
+  MIN_CHARS_USERNAME,
+} from 'src/app/shared/constants/forms.constants';
+import {
   PASSWORD_PATTERN,
   USERNAME_PATTERN,
 } from 'src/app/shared/constants/regex-patterns.constants';
@@ -32,7 +36,7 @@ export class RegisterComponent implements OnInit {
           '',
           [
             Validators.required,
-            Validators.minLength(5),
+            Validators.minLength(MIN_CHARS_USERNAME),
             Validators.pattern(USERNAME_PATTERN),
           ],
         ],
@@ -41,7 +45,7 @@ export class RegisterComponent implements OnInit {
           '',
           [
             Validators.required,
-            Validators.minLength(8),
+            Validators.minLength(MIN_CHARS_PASSWORD),
             Validators.pattern(PASSWORD_PATTERN),
           ],
         ],
