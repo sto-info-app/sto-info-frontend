@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
+import { EMAIL_PATTERN } from 'src/app/shared/constants/emails.constants';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
 
@@ -12,8 +13,6 @@ import { AuthService } from '../auth/auth.service';
 export class LoginComponent {
   appLoggedInHome = environment.appLoggedInHome;
 
-  EMAIL_PATTERN =
-    "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$";
   email = '';
   password = '';
   errorMessage = '';
@@ -78,7 +77,7 @@ export class LoginComponent {
   }
 
   validateEmail(email: string): boolean {
-    const regex = new RegExp(this.EMAIL_PATTERN);
+    const regex = new RegExp(EMAIL_PATTERN);
     return regex.test(email);
   }
 
