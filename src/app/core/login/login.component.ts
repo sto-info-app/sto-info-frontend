@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
-import { EMAIL_PATTERN } from 'src/app/shared/constants/emails.constants';
+import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
 
