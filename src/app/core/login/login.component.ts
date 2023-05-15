@@ -1,6 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
+import {
+  MSG_ERROR_EMAIL_NOT_VERIFIED_DISPLAY_TEXT,
+  MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
+  MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
+  MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT,
+} from 'src/app/shared/constants/error-messages.constants';
 import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
@@ -39,11 +45,13 @@ export class LoginComponent {
         this.router.navigate([this.appLoggedInHome]);
       },
       error: (error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          let errMessage = 'Unauthorised: Invalid email or password.';
+        if (error.status === 0) {
+          console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
+          this.displayErrorMessage(MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT);
+        } else if (error.status === 401) {
+          let errMessage = MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT;
           if (error.error.message === 'Email not verified') {
-            errMessage =
-              'Please verify your email before logging in. Check your inbox for the verification email.';
+            errMessage = MSG_ERROR_EMAIL_NOT_VERIFIED_DISPLAY_TEXT;
           }
           console.error('Login error:', errMessage);
           this.displayErrorMessage(errMessage);
@@ -53,7 +61,7 @@ export class LoginComponent {
         }
       },
       complete: () => {
-        console.log('Login complete');
+        // console.log('Login complete');
       },
     });
     //TODO: Delete console logging!
