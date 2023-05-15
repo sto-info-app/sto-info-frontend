@@ -8,6 +8,10 @@ import {
   MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT,
 } from 'src/app/shared/constants/error-messages.constants';
 import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
+import {
+  MILLISECONDS_SHOW_ERROR_MSG,
+  MILLISECONDS_SHOW_RED_ALERT_THEME,
+} from 'src/app/shared/constants/timings.constants';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
 
@@ -22,8 +26,8 @@ export class LoginComponent {
   email = '';
   password = '';
   errorMessage = '';
-  showErrorMilliseconds = 15000;
-  showRedAlertMilliseconds = 8000;
+  showErrorMilliseconds = MILLISECONDS_SHOW_ERROR_MSG;
+  showRedAlertMilliseconds = MILLISECONDS_SHOW_RED_ALERT_THEME;
   inputsValid: boolean = false;
 
   constructor(

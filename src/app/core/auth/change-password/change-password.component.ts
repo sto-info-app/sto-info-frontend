@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MustMatch } from 'src/app/shared/_helpers/must-match.validator';
 import { MIN_CHARS_PASSWORD } from 'src/app/shared/constants/forms.constants';
 import { PASSWORD_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
+import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -96,6 +97,6 @@ export class ChangePasswordComponent implements OnInit {
   resetErrorMessage(): void {
     setTimeout(() => {
       this.errorMessage = ''; // Reset error message
-    }, 15000);
+    }, MILLISECONDS_SHOW_ERROR_MSG);
   }
 }

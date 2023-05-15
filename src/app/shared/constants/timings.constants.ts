@@ -1,0 +1,2 @@
+export const MILLISECONDS_SHOW_ERROR_MSG: number = 15000;
+export const MILLISECONDS_SHOW_RED_ALERT_THEME: number = 8000;
