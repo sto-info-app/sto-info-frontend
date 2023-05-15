@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
 import {
+  FORM_ERROR_INVALID_EMAIL_FORMAT,
   MSG_ERROR_EMAIL_NOT_VERIFIED_DISPLAY_TEXT,
   MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
   MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
@@ -21,13 +22,17 @@ import { AuthService } from '../auth/auth.service';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
-  appLoggedInHome = environment.appLoggedInHome;
+  // Allow environment contstants to be used in the HTML
+  appLoggedInHome: string = environment.appLoggedInHome;
+
+  // Allow contstants to be used in the HTML
+  showErrorMilliseconds: number = MILLISECONDS_SHOW_ERROR_MSG;
+  showRedAlertMilliseconds: number = MILLISECONDS_SHOW_RED_ALERT_THEME;
+  errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
 
   email = '';
   password = '';
   errorMessage = '';
-  showErrorMilliseconds = MILLISECONDS_SHOW_ERROR_MSG;
-  showRedAlertMilliseconds = MILLISECONDS_SHOW_RED_ALERT_THEME;
   inputsValid: boolean = false;
 
   constructor(

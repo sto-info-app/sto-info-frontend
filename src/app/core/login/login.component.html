@@ -20,7 +20,7 @@
             <div
               *ngIf="email.trim() !== '' && !validateEmail(email)"
               class="helper-error-text">
-              Invalid email format
+              {{ errorTextInvalidEmailFormat }}
             </div>
           </div>
           <div class="form-group">
