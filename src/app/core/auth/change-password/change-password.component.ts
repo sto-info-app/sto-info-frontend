@@ -2,6 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MustMatch } from 'src/app/shared/_helpers/must-match.validator';
+import {
+  FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED,
+  FORM_ERROR_PASSWORDS_DO_NOT_MATCH,
+  FORM_ERROR_PASSWORD_COMPLEXITY,
+  FORM_ERROR_PASSWORD_MIN_LENGTH,
+  FORM_ERROR_PASSWORD_REQUIRED,
+} from 'src/app/shared/constants/error-messages.constants';
 import { MIN_CHARS_PASSWORD } from 'src/app/shared/constants/forms.constants';
 import { PASSWORD_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
@@ -19,7 +26,13 @@ export class ChangePasswordComponent implements OnInit {
   errorMessage: string = '';
   successMessage: string = '';
 
-  minCharsInPassword: number = MIN_CHARS_PASSWORD;
+  // Allow contstants to be used in the HTML
+  errorTextPasswordRequired: string = FORM_ERROR_PASSWORD_REQUIRED;
+  errorTextPasswordMinLength: string = FORM_ERROR_PASSWORD_MIN_LENGTH;
+  errorTextPasswordComplexity: string = FORM_ERROR_PASSWORD_COMPLEXITY;
+  errorTextConfirmationPasswordRequired: string =
+    FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED;
+  errorTextPasswordsDoNotMatch: string = FORM_ERROR_PASSWORDS_DO_NOT_MATCH;
 
   constructor(
     private formBuilder: FormBuilder,
