@@ -24,7 +24,7 @@
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['firstName'].errors?.['required']">
-                First Name is required
+                {{ errorTextFirstNameRequired }}
               </div>
             </div>
           </div>
@@ -45,7 +45,7 @@
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['lastName'].errors?.['required']">
-                Last Name is required
+                {{ errorTextLastNameRequired }}
               </div>
             </div>
           </div>
@@ -66,22 +66,22 @@
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['username'].errors?.['required']">
-                Username is required
+                {{ errorTextUsernameRequired }}
               </div>
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['username'].errors?.['minlength']">
-                Username must be at least {{ minCharsInUsername }} characters
+                {{ errorTextUsernameMinLength }}
               </div>
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['username'].errors?.['uniqueUsername']">
-                Username is already taken
+                {{ errorTextUsernameTaken }}
               </div>
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['username'].errors?.['pattern']">
-                Username must contain only alphanumeric characters
+                {{ errorTextUsernamePattern }}
               </div>
             </div>
           </div>
@@ -102,17 +102,17 @@
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['email'].errors?.['required']">
-                Email is required
+                {{ errorTextEmailRequired }}
               </div>
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['email'].errors?.['email']">
-                Email is not valid
+                {{ errorTextEmailInvalidFormat }}
               </div>
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['email'].errors?.['uniqueEmail']">
-                Email is already taken
+                {{ errorTextEmailAlreadyRegistered }}
               </div>
             </div>
           </div>
@@ -135,21 +135,17 @@
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['password'].errors?.['required']">
-                Password is required.
+                {{ errorTextPasswordRequired }}
               </div>
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['password'].errors?.['minlength']">
-                Password must be at least {{ minCharsInPassword }} characters
-                long.
+                {{ errorTextPasswordMinLength }}
               </div>
               <div
                 class="helper-error-text"
                 *ngIf="registerForm.controls['password'].errors?.['pattern']">
-                Password must contain at least one number, one uppercase and
-                lowercase letter, one special character and be at least
-                {{ minCharsInPassword }}
-                characters long.
+                {{ errorTextPasswordComplexity }}
               </div>
             </div>
           </div>
@@ -172,14 +168,14 @@
                 *ngIf="
                   registerForm.controls['confirmPassword'].errors?.['required']
                 ">
-                Confirmation password is required.
+                {{ errorTextConfirmationPasswordRequired }}
               </div>
               <div
                 class="helper-error-text"
                 *ngIf="
                   registerForm.controls['confirmPassword'].errors?.['mustMatch']
                 ">
-                Passwords do not match.
+                {{ errorTextPasswordsDoNotMatch }}
               </div>
             </div>
           </div>

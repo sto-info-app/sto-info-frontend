@@ -2,10 +2,27 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
+  FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED,
+  FORM_ERROR_EMAIL_ALREADY_REGISTERED,
+  FORM_ERROR_EMAIL_REQUIRED,
+  FORM_ERROR_FIRSTNAME_REQUIRED,
+  FORM_ERROR_INVALID_EMAIL_FORMAT,
+  FORM_ERROR_LASTNAME_REQUIRED,
+  FORM_ERROR_PASSWORDS_DO_NOT_MATCH,
+  FORM_ERROR_PASSWORD_COMPLEXITY,
+  FORM_ERROR_PASSWORD_MIN_LENGTH,
+  FORM_ERROR_PASSWORD_REQUIRED,
+  FORM_ERROR_USERNAME_MIN_LENGTH,
+  FORM_ERROR_USERNAME_PATTERN,
+  FORM_ERROR_USERNAME_REQUIRED,
+  FORM_ERROR_USERNAME_TAKEN,
+} from 'src/app/shared/constants/error-messages.constants';
+import {
   MIN_CHARS_PASSWORD,
   MIN_CHARS_USERNAME,
 } from 'src/app/shared/constants/forms.constants';
 import {
+  EMAIL_PATTERN,
   PASSWORD_PATTERN,
   USERNAME_PATTERN,
 } from 'src/app/shared/constants/regex-patterns.constants';
@@ -21,8 +38,22 @@ export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   submitted = false;
 
-  minCharsInPassword: number = MIN_CHARS_PASSWORD;
-  minCharsInUsername: number = MIN_CHARS_USERNAME;
+  // Allow contstants to be used in the HTML
+  errorTextFirstNameRequired: string = FORM_ERROR_FIRSTNAME_REQUIRED;
+  errorTextLastNameRequired: string = FORM_ERROR_LASTNAME_REQUIRED;
+  errorTextUsernameRequired: string = FORM_ERROR_USERNAME_REQUIRED;
+  errorTextUsernameMinLength: string = FORM_ERROR_USERNAME_MIN_LENGTH;
+  errorTextUsernameTaken: string = FORM_ERROR_USERNAME_TAKEN;
+  errorTextUsernamePattern: string = FORM_ERROR_USERNAME_PATTERN;
+  errorTextEmailRequired: string = FORM_ERROR_EMAIL_REQUIRED;
+  errorTextEmailInvalidFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
+  errorTextEmailAlreadyRegistered: string = FORM_ERROR_EMAIL_ALREADY_REGISTERED;
+  errorTextPasswordsDoNotMatch: string = FORM_ERROR_PASSWORDS_DO_NOT_MATCH;
+  errorTextPasswordRequired: string = FORM_ERROR_PASSWORD_REQUIRED;
+  errorTextPasswordMinLength: string = FORM_ERROR_PASSWORD_MIN_LENGTH;
+  errorTextPasswordComplexity: string = FORM_ERROR_PASSWORD_COMPLEXITY;
+  errorTextConfirmationPasswordRequired: string =
+    FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -43,7 +74,7 @@ export class RegisterComponent implements OnInit {
             Validators.pattern(USERNAME_PATTERN),
           ],
         ],
-        email: ['', [Validators.required, Validators.email]],
+        email: ['', [Validators.required, Validators.pattern(EMAIL_PATTERN)]],
         password: [
           '',
           [
@@ -52,7 +83,12 @@ export class RegisterComponent implements OnInit {
             Validators.pattern(PASSWORD_PATTERN),
           ],
         ],
-        confirmPassword: ['', Validators.required],
+        confirmPassword: [
+          '',
+          Validators.required,
+          Validators.minLength(MIN_CHARS_PASSWORD),
+          Validators.pattern(PASSWORD_PATTERN),
+        ],
       },
       { validator: MustMatch('password', 'confirmPassword') },
     );
