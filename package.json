@@ -23,7 +23,7 @@
     "@auth0/angular-jwt": "^5.1.2",
     "moment": "^2.29.4",
     "ngx-pagination": "^6.0.3",
-    "ngx-toastr": "^14.3.0",
+    "ngx-toastr": "^17.0.1",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.13.0"
