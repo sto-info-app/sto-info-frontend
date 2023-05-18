@@ -1,16 +1,75 @@
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-
+import { RouterTestingModule } from '@angular/router/testing';
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
+  let httpMock: HttpTestingController;
+  let authService: AuthService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    localStorage.removeItem('access_token');
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule, RouterTestingModule],
+      providers: [AuthService],
+    });
     service = TestBed.inject(AuthService);
+    httpMock = TestBed.inject(HttpTestingController);
+    authService = TestBed.inject(AuthService);
+  });
+
+  afterEach(() => {
+    httpMock.verify(); // Verify that no unmatched requests are outstanding.
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  it('should return true from isAuthenticated$ when there is a token', () => {
+    authService.saveToken('valid-token');
+    authService.isAuthenticated$.subscribe(isAuthenticated => {
+      expect(isAuthenticated).toBe(true);
+    });
+  });
+
+  it('should return false from isAuthenticated$ when there is no token', () => {
+    authService.removeToken();
+    authService.isAuthenticated$.subscribe(isAuthenticated => {
+      expect(isAuthenticated).toBe(false);
+    });
+  });
+
+  it('should save token correctly', () => {
+    service.saveToken('test-token');
+    expect(localStorage.getItem('access_token')).toBe('test-token');
+    service.isAuthenticated$.subscribe(authenticated => {
+      expect(authenticated).toBeTruthy();
+    });
+  });
+
+  it('should remove token correctly', () => {
+    localStorage.setItem('access_token', 'test-token');
+    service.removeToken();
+    expect(localStorage.getItem('access_token')).toBeNull();
+    service.isAuthenticated$.subscribe(authenticated => {
+      expect(authenticated).toBeFalsy();
+    });
+  });
+
+  it('should return true from isLoggedIn when there is a token', () => {
+    localStorage.setItem('access_token', 'valid-token');
+    expect(authService.isLoggedIn()).toBe(true);
+  });
+
+  it('should return false from isLoggedIn when there is no token', () => {
+    localStorage.removeItem('access_token');
+    expect(authService.isLoggedIn()).toBe(false);
+  });
+
+  //TODO: Add more tests for other methods like login, register, logout, etc.
 });
