@@ -25,6 +25,7 @@
     "@fortawesome/fontawesome-pro": "^6.4.0",
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
+    "@fortawesome/pro-solid-svg-icons": "^6.4.0",
     "moment": "^2.29.4",
     "ngx-pagination": "^6.0.3",
     "ngx-toastr": "^17.0.1",
