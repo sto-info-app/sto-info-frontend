@@ -8,16 +8,23 @@ import {
   FORM_ERROR_FIRSTNAME_REQUIRED,
   FORM_ERROR_INVALID_EMAIL_FORMAT,
   FORM_ERROR_LASTNAME_REQUIRED,
+  FORM_ERROR_NAME_MAX_LENGTH,
   FORM_ERROR_PASSWORDS_DO_NOT_MATCH,
   FORM_ERROR_PASSWORD_COMPLEXITY,
+  FORM_ERROR_PASSWORD_MAX_LENGTH,
   FORM_ERROR_PASSWORD_MIN_LENGTH,
   FORM_ERROR_PASSWORD_REQUIRED,
+  FORM_ERROR_USERNAME_MAX_LENGTH,
   FORM_ERROR_USERNAME_MIN_LENGTH,
   FORM_ERROR_USERNAME_PATTERN,
   FORM_ERROR_USERNAME_REQUIRED,
   FORM_ERROR_USERNAME_TAKEN,
 } from 'src/app/shared/constants/error-messages.constants';
 import {
+  MAX_CHARS_GENERAL_STRING,
+  MAX_CHARS_NAMES,
+  MAX_CHARS_PASSWORD,
+  MAX_CHARS_USERNAME,
   MIN_CHARS_PASSWORD,
   MIN_CHARS_USERNAME,
 } from 'src/app/shared/constants/forms.constants';
@@ -41,8 +48,10 @@ export class RegisterComponent implements OnInit {
   // Allow contstants to be used in the HTML
   errorTextFirstNameRequired: string = FORM_ERROR_FIRSTNAME_REQUIRED;
   errorTextLastNameRequired: string = FORM_ERROR_LASTNAME_REQUIRED;
+  errorTextNamesMaxLength: string = FORM_ERROR_NAME_MAX_LENGTH;
   errorTextUsernameRequired: string = FORM_ERROR_USERNAME_REQUIRED;
   errorTextUsernameMinLength: string = FORM_ERROR_USERNAME_MIN_LENGTH;
+  errorTextUsernameMaxLength: string = FORM_ERROR_USERNAME_MAX_LENGTH;
   errorTextUsernameTaken: string = FORM_ERROR_USERNAME_TAKEN;
   errorTextUsernamePattern: string = FORM_ERROR_USERNAME_PATTERN;
   errorTextEmailRequired: string = FORM_ERROR_EMAIL_REQUIRED;
@@ -51,6 +60,7 @@ export class RegisterComponent implements OnInit {
   errorTextPasswordsDoNotMatch: string = FORM_ERROR_PASSWORDS_DO_NOT_MATCH;
   errorTextPasswordRequired: string = FORM_ERROR_PASSWORD_REQUIRED;
   errorTextPasswordMinLength: string = FORM_ERROR_PASSWORD_MIN_LENGTH;
+  errorTextPasswordMaxLength: string = FORM_ERROR_PASSWORD_MAX_LENGTH;
   errorTextPasswordComplexity: string = FORM_ERROR_PASSWORD_COMPLEXITY;
   errorTextConfirmationPasswordRequired: string =
     FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED;
@@ -64,30 +74,48 @@ export class RegisterComponent implements OnInit {
   ngOnInit() {
     this.registerForm = this.formBuilder.group(
       {
-        firstName: ['', Validators.required],
-        lastName: ['', Validators.required],
+        firstName: [
+          '',
+          [Validators.required, Validators.maxLength(MAX_CHARS_NAMES)],
+        ],
+        lastName: [
+          '',
+          [Validators.required, Validators.maxLength(MAX_CHARS_NAMES)],
+        ],
         username: [
           '',
           [
             Validators.required,
             Validators.minLength(MIN_CHARS_USERNAME),
+            Validators.maxLength(MAX_CHARS_USERNAME),
             Validators.pattern(USERNAME_PATTERN),
           ],
         ],
-        email: ['', [Validators.required, Validators.pattern(EMAIL_PATTERN)]],
+        email: [
+          '',
+          [
+            Validators.required,
+            Validators.pattern(EMAIL_PATTERN),
+            Validators.maxLength(MAX_CHARS_GENERAL_STRING),
+          ],
+        ],
         password: [
           '',
           [
             Validators.required,
             Validators.minLength(MIN_CHARS_PASSWORD),
+            Validators.maxLength(MAX_CHARS_PASSWORD),
             Validators.pattern(PASSWORD_PATTERN),
           ],
         ],
         confirmPassword: [
           '',
-          Validators.required,
-          Validators.minLength(MIN_CHARS_PASSWORD),
-          Validators.pattern(PASSWORD_PATTERN),
+          [
+            Validators.required,
+            Validators.minLength(MIN_CHARS_PASSWORD),
+            Validators.maxLength(MAX_CHARS_PASSWORD),
+            Validators.pattern(PASSWORD_PATTERN),
+          ],
         ],
       },
       { validator: MustMatch('password', 'confirmPassword') },
@@ -98,6 +126,12 @@ export class RegisterComponent implements OnInit {
     this.submitted = true;
 
     if (this.registerForm.invalid) {
+      // If there's a mustMatch error on the form group, set a separate error on the confirmPassword control
+      if (this.registerForm.errors?.['mustMatch']) {
+        this.registerForm.controls['confirmPassword'].setErrors({
+          mustMatch: true,
+        });
+      }
       return;
     }
 
@@ -125,7 +159,7 @@ export class RegisterComponent implements OnInit {
         }
       },
       complete: () => {
-        console.log('Registration complete');
+        // console.log('Registration complete');
       },
     });
   }
