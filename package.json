@@ -22,6 +22,7 @@
     "@angular/router": "^16.0.1",
     "@auth0/angular-jwt": "^5.1.2",
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
+    "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "moment": "^2.29.4",
     "ngx-pagination": "^6.0.3",
     "ngx-toastr": "^17.0.1",
