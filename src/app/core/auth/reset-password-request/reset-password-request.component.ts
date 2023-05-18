@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { FORM_ERROR_INVALID_EMAIL_FORMAT } from 'src/app/shared/constants/error-messages.constants';
 import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { AuthService } from '../auth.service';
 
@@ -13,6 +14,9 @@ export class ResetPasswordRequestComponent {
   errorMessage: string = '';
   successMessage: string = '';
   inputsValid: boolean = false;
+
+  // Allow contstants to be used in the HTML
+  errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
 
   constructor(private authService: AuthService, private router: Router) {}
 

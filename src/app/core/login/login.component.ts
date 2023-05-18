@@ -1,7 +1,18 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
+import {
+  FORM_ERROR_INVALID_EMAIL_FORMAT,
+  MSG_ERROR_EMAIL_NOT_VERIFIED_DISPLAY_TEXT,
+  MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
+  MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
+  MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT,
+} from 'src/app/shared/constants/error-messages.constants';
 import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
+import {
+  MILLISECONDS_SHOW_ERROR_MSG,
+  MILLISECONDS_SHOW_RED_ALERT_THEME,
+} from 'src/app/shared/constants/timings.constants';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
 
@@ -11,13 +22,17 @@ import { AuthService } from '../auth/auth.service';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
-  appLoggedInHome = environment.appLoggedInHome;
+  // Allow environment contstants to be used in the HTML
+  appLoggedInHome: string = environment.appLoggedInHome;
+
+  // Allow contstants to be used in the HTML
+  showErrorMilliseconds: number = MILLISECONDS_SHOW_ERROR_MSG;
+  showRedAlertMilliseconds: number = MILLISECONDS_SHOW_RED_ALERT_THEME;
+  errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
 
   email = '';
   password = '';
   errorMessage = '';
-  showErrorMilliseconds = 15000;
-  showRedAlertMilliseconds = 8000;
   inputsValid: boolean = false;
 
   constructor(
@@ -39,11 +54,13 @@ export class LoginComponent {
         this.router.navigate([this.appLoggedInHome]);
       },
       error: (error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          let errMessage = 'Unauthorised: Invalid email or password.';
+        if (error.status === 0) {
+          console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
+          this.displayErrorMessage(MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT);
+        } else if (error.status === 401) {
+          let errMessage = MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT;
           if (error.error.message === 'Email not verified') {
-            errMessage =
-              'Please verify your email before logging in. Check your inbox for the verification email.';
+            errMessage = MSG_ERROR_EMAIL_NOT_VERIFIED_DISPLAY_TEXT;
           }
           console.error('Login error:', errMessage);
           this.displayErrorMessage(errMessage);
@@ -53,7 +70,7 @@ export class LoginComponent {
         }
       },
       complete: () => {
-        console.log('Login complete');
+        // console.log('Login complete');
       },
     });
     //TODO: Delete console logging!
