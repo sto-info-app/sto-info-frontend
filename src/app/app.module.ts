@@ -4,9 +4,15 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { JwtModule } from '@auth0/angular-jwt';
+import {
+  FaIconLibrary,
+  FontAwesomeModule,
+} from '@fortawesome/angular-fontawesome';
+import { faHandSpock } from '@fortawesome/free-solid-svg-icons';
 import { environment } from 'src/environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { ChangePasswordComponent } from './core/auth/change-password/change-password.component';
 import { ResetPasswordRequestComponent } from './core/auth/reset-password-request/reset-password-request.component';
 import { LoginComponent } from './core/login/login.component';
 import { RegisterComponent } from './core/register/register.component';
@@ -20,7 +26,10 @@ import { LcarsSuccessMessageComponent } from './shared/components/lcars-success-
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
-import { ChangePasswordComponent } from './core/auth/change-password/change-password.component';
+
+// NOTE: This imports all icons into the bundle and increases app size!
+// import { fas } from '@fortawesome/pro-solid-svg-icons';
+// import { far } from '@fortawesome/pro-regular-svg-icons';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -58,6 +67,7 @@ export function tokenGetter() {
     }),
     FormsModule,
     ReactiveFormsModule,
+    FontAwesomeModule,
   ],
   providers: [
     {
@@ -67,4 +77,15 @@ export function tokenGetter() {
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(library: FaIconLibrary) {
+    // Add an individual FontAwesome icon to the library for convenient access in other components
+    // NOTE: Use `<fa-icon [icon]="['fas', 'hand-spock']"></fa-icon>` to use icon in the HTML
+    // NOTE: FontAwesome prefixes are: fas = solid, far = regular, fal = light, fat = thin, fad = duotone
+    library.addIcons(faHandSpock);
+
+    // Add entire icon packs
+    // NOTE: This imports all icons into the bundle and increases app size!
+    // library.addIconPacks(fas, far);
+  }
+}
