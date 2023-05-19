@@ -85,7 +85,7 @@ describe('ChangePasswordComponent', () => {
     );
     expect(component.changePasswordForm.valid).toBeTruthy();
 
-    authService.changePassword.and.returnValue(of({}));
+    authService.changePassword.and.returnValue(of(undefined));
 
     component.onSubmit();
 

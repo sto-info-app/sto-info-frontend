@@ -2,6 +2,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
 import {
+  LoginCredentials,
+  LoginResponse,
+} from 'src/app/models/user-auth.models';
+import {
   FORM_ERROR_INVALID_EMAIL_FORMAT,
   MSG_ERROR_EMAIL_NOT_VERIFIED_DISPLAY_TEXT,
   MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
@@ -43,13 +47,13 @@ export class LoginComponent {
   ) {}
 
   onLogin() {
-    const credentials = {
+    const credentials: LoginCredentials = {
       email: this.email,
       password: this.password,
     };
 
     this.authService.login(credentials).subscribe({
-      next: (response: any) => {
+      next: (response: LoginResponse) => {
         this.authService.saveToken(response.access_token);
         this.router.navigate([this.appLoggedInHome]);
       },

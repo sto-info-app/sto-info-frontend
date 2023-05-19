@@ -1,7 +1,13 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, map } from 'rxjs';
+import {
+  ChangePasswordValues,
+  LoginCredentials,
+  LoginResponse,
+  RegistrationFormValues,
+} from 'src/app/models/user-auth.models';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -19,12 +25,15 @@ export class AuthService {
     this.isAuthenticatedSubject.next(!!this.getToken());
   }
 
-  register(user: any) {
+  register(user: RegistrationFormValues) {
     return this.http.post(`${this.apiUrl}/auth/register`, user);
   }
 
-  login(credentials: any) {
-    return this.http.post(`${this.apiUrl}/auth/login`, credentials);
+  login(credentials: LoginCredentials): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(
+      `${this.apiUrl}/auth/login`,
+      credentials,
+    );
   }
 
   logout() {
@@ -68,17 +77,27 @@ export class AuthService {
     return !!localStorage.getItem('access_token');
   }
 
-  resetPassword(email: string): Observable<any> {
+  resetPassword(email: string): Observable<void> {
     const url = `${environment.apiUrl}/auth/request-password-reset`;
-    return this.http.post(url, { email });
+    return this.http.post(url, { email }).pipe(
+      map(() => {
+        return;
+      }),
+    );
   }
 
-  changePassword(token: string, password: string): Observable<any> {
-    const data = {
+  changePassword(token: string, password: string): Observable<void> {
+    const data: ChangePasswordValues = {
       token: token,
       password: password,
     };
 
-    return this.http.post(`${environment.apiUrl}/auth/reset-password`, data);
+    return this.http
+      .post(`${environment.apiUrl}/auth/reset-password`, data)
+      .pipe(
+        map(() => {
+          return;
+        }),
+      );
   }
 }

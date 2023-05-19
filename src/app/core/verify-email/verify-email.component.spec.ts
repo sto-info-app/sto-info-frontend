@@ -9,12 +9,15 @@ import { MessageType } from 'src/app/shared/models/lcars-message-type.enum';
 import { environment } from 'src/environments/environment';
 import { VerifyEmailComponent } from './verify-email.component';
 
+interface QueryParams {
+  token?: string;
+}
+
 describe('VerifyEmailComponent', () => {
   let component: VerifyEmailComponent;
   let fixture: ComponentFixture<VerifyEmailComponent>;
   let httpTestingController: HttpTestingController;
-  let route: ActivatedRoute;
-  let queryParamsSubject: Subject<any>;
+  let queryParamsSubject: Subject<QueryParams>;
 
   beforeEach(async () => {
     queryParamsSubject = new Subject();
@@ -33,7 +36,6 @@ describe('VerifyEmailComponent', () => {
     }).compileComponents();
 
     httpTestingController = TestBed.inject(HttpTestingController);
-    route = TestBed.inject(ActivatedRoute);
   });
 
   beforeEach(() => {

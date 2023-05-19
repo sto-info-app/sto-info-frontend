@@ -1,6 +1,5 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Title } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
@@ -10,7 +9,6 @@ describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
   let authService: AuthService;
-  let titleService: Title;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -18,7 +16,6 @@ describe('AppComponent', () => {
       imports: [HttpClientTestingModule],
       providers: [
         AuthService,
-        Title,
         { provide: 'API_URL', useValue: environment.apiUrl },
       ],
     }).compileComponents();
@@ -26,7 +23,6 @@ describe('AppComponent', () => {
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService);
-    titleService = TestBed.inject(Title);
   });
 
   it('should create the app', () => {

@@ -1,13 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../core/auth/auth.service';
 import { HomeComponent } from './home.component';
 
+interface MockAuthService {
+  isAuthenticated$: Observable<boolean>;
+}
+
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
-  let mockAuthService: any;
+  let mockAuthService: MockAuthService;
 
   beforeEach(async () => {
     mockAuthService = { isAuthenticated$: of(true) };
@@ -33,7 +37,7 @@ describe('HomeComponent', () => {
   });
 
   it('should subscribe to authentication state on creation', () => {
-    component = new HomeComponent(mockAuthService);
+    component = new HomeComponent(mockAuthService as unknown as AuthService);
     expect(component.isLoggedIn).toBeTrue();
   });
 });

@@ -1,6 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import {
+  MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
+  MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
+} from 'src/app/shared/constants/error-messages.constants';
 import { environment } from 'src/environments/environment';
 import { MessageType } from '../../shared/models/lcars-message-type.enum';
 
@@ -33,13 +37,19 @@ export class VerifyEmailComponent implements OnInit {
     this.http
       .post(`${environment.apiUrl}/auth/verify-email`, { token: this.token })
       .subscribe({
-        next: (response: any) => {
+        next: () => {
           this.message = 'Verification successful! You can now login.';
           this.messageType = MessageType.Success;
           this.showResendVerificationEmailButton = false;
         },
         error: error => {
-          if (error.status === 400 && error.error.message === 'Token expired') {
+          if (error.status === 0) {
+            console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
+            this.message = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;
+          } else if (
+            error.status === 400 &&
+            error.error.message === 'Token expired'
+          ) {
             this.message = 'Your verification link has expired';
           } else {
             this.message = 'Verification failed. Please try again.';
@@ -62,8 +72,13 @@ export class VerifyEmailComponent implements OnInit {
           this.showResendVerificationEmailButton = false;
         },
         error: error => {
-          this.message =
-            'Failed to resend verification email. Please try again.';
+          if (error.status === 0) {
+            console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
+            this.message = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;
+          } else {
+            this.message =
+              'Failed to resend verification email. Please try again.';
+          }
           this.messageType = MessageType.Error;
           this.showResendVerificationEmailButton = true;
         },
