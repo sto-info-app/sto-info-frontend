@@ -11,7 +11,8 @@ on:
         default: 'development'
 
 jobs:
-  build:
+  build_and_test:
+    name: Build and Test
     runs-on: ubuntu-latest
 
     strategy:
