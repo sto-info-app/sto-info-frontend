@@ -20,11 +20,11 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./change-password.component.scss'],
 })
 export class ChangePasswordComponent implements OnInit {
-  token: string = '';
+  token = '';
   changePasswordForm: FormGroup;
-  seriousErrorMessage: string = '';
-  errorMessage: string = '';
-  successMessage: string = '';
+  seriousErrorMessage = '';
+  errorMessage = '';
+  successMessage = '';
 
   // Allow contstants to be used in the HTML
   errorTextPasswordRequired: string = FORM_ERROR_PASSWORD_REQUIRED;

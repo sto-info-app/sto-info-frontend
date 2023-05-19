@@ -50,7 +50,7 @@ describe('ResetPasswordRequestComponent', () => {
   });
 
   it('should handle password reset correctly', () => {
-    spyOn(authService, 'resetPassword').and.returnValue(of({}));
+    spyOn(authService, 'resetPassword').and.returnValue(of(undefined));
     component.email = 'test@example.com';
     component.inputsValid = true;
     component.onPasswordReset();

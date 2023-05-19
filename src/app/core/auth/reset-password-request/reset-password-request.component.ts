@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { FORM_ERROR_INVALID_EMAIL_FORMAT } from 'src/app/shared/constants/error-messages.constants';
+import {
+  FORM_ERROR_INVALID_EMAIL_FORMAT,
+  MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
+  MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
+} from 'src/app/shared/constants/error-messages.constants';
 import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { AuthService } from '../auth.service';
 
@@ -10,10 +14,10 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./reset-password-request.component.scss'],
 })
 export class ResetPasswordRequestComponent {
-  email: string = '';
-  errorMessage: string = '';
-  successMessage: string = '';
-  inputsValid: boolean = false;
+  email = '';
+  errorMessage = '';
+  successMessage = '';
+  inputsValid = false;
 
   // Allow contstants to be used in the HTML
   errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
@@ -40,13 +44,22 @@ export class ResetPasswordRequestComponent {
     }
 
     this.authService.resetPassword(this.email).subscribe(
-      response => {
+      // Handle response
+      //response => {  //NOTE: Not using the response, but if need to, use this line, not the one below
+      () => {
         this.successMessage = `Check your email and follow the instructions to reset your password.`;
         this.errorMessage = '';
       },
       error => {
         // Handle error
-        this.errorMessage = 'An error occurred while resetting the password';
+        if (error.status === 0) {
+          console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
+          this.errorMessage = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;
+        } else {
+          console.error('Login error:', error);
+          this.errorMessage =
+            error.message || 'An error occurred while resetting the password';
+        }
       },
     );
   }
