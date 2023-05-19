@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -6,10 +6,6 @@ import { environment } from 'src/environments/environment';
   templateUrl: './terms-of-use.component.html',
   styleUrls: ['./terms-of-use.component.scss'],
 })
-export class TermsOfUseComponent implements OnInit {
+export class TermsOfUseComponent {
   appTitle = environment.appTitle;
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }
