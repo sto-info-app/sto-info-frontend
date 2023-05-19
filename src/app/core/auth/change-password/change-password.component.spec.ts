@@ -58,7 +58,7 @@ describe('ChangePasswordComponent', () => {
 
   it('password field validity', () => {
     let errors: ValidationErrors = {};
-    let password = component.changePasswordForm.controls['password'];
+    const password = component.changePasswordForm.controls['password'];
     errors = password.errors || {};
     expect(errors['required']).toBeTruthy();
 

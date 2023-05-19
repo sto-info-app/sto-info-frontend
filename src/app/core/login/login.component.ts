@@ -33,7 +33,7 @@ export class LoginComponent {
   email = '';
   password = '';
   errorMessage = '';
-  inputsValid: boolean = false;
+  inputsValid = false;
 
   constructor(
     private authService: AuthService,

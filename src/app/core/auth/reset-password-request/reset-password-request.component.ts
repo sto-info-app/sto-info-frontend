@@ -10,10 +10,10 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./reset-password-request.component.scss'],
 })
 export class ResetPasswordRequestComponent {
-  email: string = '';
-  errorMessage: string = '';
-  successMessage: string = '';
-  inputsValid: boolean = false;
+  email = '';
+  errorMessage = '';
+  successMessage = '';
+  inputsValid = false;
 
   // Allow contstants to be used in the HTML
   errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;

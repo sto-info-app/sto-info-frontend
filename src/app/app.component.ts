@@ -23,13 +23,13 @@ export class AppComponent implements AfterViewInit {
   appTitle = environment.appTitle;
   appLoggedInHome = environment.appLoggedInHome;
 
-  isLoggedIn: boolean = false;
+  isLoggedIn = false;
   backendResponse = '';
   currentYear: number;
   dataCascade: string;
   showScrollTop = false;
   sideColumnRandomTextItems: string[] = [];
-  maxNumberOfSideColumnRandomTextItems: number = 5;
+  maxNumberOfSideColumnRandomTextItems = 5;
 
   constructor(
     @Inject('API_URL') private apiUrl: string,
@@ -84,7 +84,6 @@ export class AppComponent implements AfterViewInit {
   }
 
   generateRandomValue(minChars: number, maxChars: number): string {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const numbers = '0123456789';
     const special = ' -';
     let value = '';
@@ -141,9 +140,9 @@ export class AppComponent implements AfterViewInit {
   }
 
   createDynamicSideColumnText(): string {
-    let value1 = this.generateRandomValue(2, 2);
-    let value2 = this.generateRandomValue(6, 6);
-    let html = `<span class="random-lcars-ref">${value1}<span class="hop">-${value2}</span></span>`;
+    const value1 = this.generateRandomValue(2, 2);
+    const value2 = this.generateRandomValue(6, 6);
+    const html = `<span class="random-lcars-ref">${value1}<span class="hop">-${value2}</span></span>`;
     return html;
   }
 

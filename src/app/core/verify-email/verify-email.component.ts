@@ -12,9 +12,9 @@ import { MessageType } from '../../shared/models/lcars-message-type.enum';
 export class VerifyEmailComponent implements OnInit {
   messageType: MessageType = MessageType.Info;
   MessageType = MessageType;
-  message: string = '';
-  token: string = '';
-  showResendVerificationEmailButton: boolean = false;
+  message = '';
+  token = '';
+  showResendVerificationEmailButton = false;
 
   constructor(private route: ActivatedRoute, private http: HttpClient) {}
 
