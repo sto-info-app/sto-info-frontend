@@ -11,49 +11,52 @@ on:
         default: 'development'
 
 jobs:
-  build_and_test:
-    name: Build and Test
+  lint:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18]
-
     steps:
-      - name: Checkout code
+      - name: Get code
         uses: actions/checkout@v3
+
+      - name: Load & cache dependencies
+        id: cache-dependencies
+        uses: ./.github/actions/cached-dependencies
         with:
-          ref: ${{ github.event.inputs.branch }}
+          caching: 'false'
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
+      - name: Output information
+        run: echo "Cache used? ${{ steps.cache-dependencies.outputs.used-cache }}"
 
-      - name: Setup .npmrc file to publish to npm
-        run: |
-          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}" > .npmrc
+      - name: Lint code
+        run: npm run lint
 
-      - name: Cache Node.js modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
 
-      - name: Build the app
+      - name: Test code
+        id: run-tests
+        run: npm run test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+
+      - name: Build website
         run: npm run build
 
-      - name: Setup Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-
-      - name: Run tests
-        run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-files
+          path: dist
