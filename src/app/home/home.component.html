@@ -1,6 +1,9 @@
 <div>
   <h1>Welcome to the {{ appTitle }}!</h1>
-  <p>This is a work in progress!</p>
+  <p>
+    This is a work in progress!
+    <fa-icon [icon]="['fas', 'hand-spock']"></fa-icon>
+  </p>
   <div
     class="buttons"
     *ngIf="!isLoggedIn">
