@@ -1,9 +1,14 @@
-# .github/workflows/ci.yml
 name: Angular CI
 
 on:
   push:
     branches: [development]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build and test'
+        required: true
+        default: 'development'
 
 jobs:
   build:
@@ -14,12 +19,19 @@ jobs:
         node-version: [18.x]
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Setup .npmrc file to publish to npm
+        run: |
+          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}" > .npmrc
 
       - name: Cache Node.js modules
         uses: actions/cache@v2
@@ -31,10 +43,16 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build the app
-        run: npm run build --if-present
+        run: npm run build
+
+      - name: Setup Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
       - name: Run tests
-        run: npm test
+        run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
