@@ -82,8 +82,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Bump version and push tag
+        if: github.ref == 'refs/heads/development'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          npm version patch
+          git push
+
+      - name: Tag version
+        if: github.ref == 'refs/heads/production'
         uses: anothrNick/github-tag-action@1.65.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BUMP: patch
+          DEFAULT_BUMP: none
+          WITH_V: true
