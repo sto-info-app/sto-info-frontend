@@ -1213,13 +1213,14 @@ footer::after {
   max-width: 130px;
   height: 100px;
   margin: auto;
-  padding: 10px 0 0 1%;
+  padding: 55px 15px 0 1%;
   background-color: #6cf;
   border-top: 5px solid #0d0d0d;
   border-bottom: 5px solid #0d0d0d;
-  font-size: 0.85rem;
+  font-size: 0.62rem;
   font-weight: bold;
   color: #0d0d0d;
+  text-align: right;
 }
 
 .footer-inside {
