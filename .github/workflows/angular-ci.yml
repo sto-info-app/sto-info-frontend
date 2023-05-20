@@ -101,7 +101,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: patch
           tag_prefix: v
-          dry_run: true # Prevents actual tagging. Remove this when you're sure the workflow is correct.
 
       - name: Print new version
         run: echo "New version is ${{ steps.tag_version.outputs.new_version }}"
