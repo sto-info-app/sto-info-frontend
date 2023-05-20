@@ -25,7 +25,6 @@ export class AppComponent implements AfterViewInit {
   appVersion = environment.version;
 
   isLoggedIn = false;
-  backendResponse = '';
   currentYear: number;
   dataCascade: string;
   showScrollTop = false;
