@@ -4,7 +4,9 @@ import {
 } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { Subject, of } from 'rxjs';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { MessageType } from 'src/app/shared/models/lcars-message-type.enum';
 import { environment } from 'src/environments/environment';
 import { VerifyEmailComponent } from './verify-email.component';
@@ -23,8 +25,8 @@ describe('VerifyEmailComponent', () => {
     queryParamsSubject = new Subject();
 
     await TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      declarations: [VerifyEmailComponent],
+      imports: [RouterTestingModule, HttpClientTestingModule],
+      declarations: [VerifyEmailComponent, LcarsErrorMessageComponent],
       providers: [
         {
           provide: ActivatedRoute,
@@ -42,6 +44,10 @@ describe('VerifyEmailComponent', () => {
     fixture = TestBed.createComponent(VerifyEmailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    httpTestingController.verify(); // Verifies that no requests are outstanding.
   });
 
   it('should create', () => {
@@ -62,7 +68,7 @@ describe('VerifyEmailComponent', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      declarations: [VerifyEmailComponent],
+      declarations: [VerifyEmailComponent, LcarsErrorMessageComponent],
       providers: [
         {
           provide: ActivatedRoute,

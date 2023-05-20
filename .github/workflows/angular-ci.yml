@@ -2,58 +2,88 @@ name: Angular CI
 
 on:
   push:
-    branches: [development]
+    branches:
+      - development
+      - production
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to build and test'
-        required: true
-        default: 'development'
+
+env:
+  NODE_VERSION: 18
 
 jobs:
-  build_and_test:
-    name: Build and Test
+  lint:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18]
-
+    timeout-minutes: 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
         with:
-          ref: ${{ github.event.inputs.branch }}
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+
+      - name: Lint code
+        run: npm run lint
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
-      - name: Setup .npmrc file to publish to npm
-        run: |
-          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}" > .npmrc
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
 
-      - name: Cache Node.js modules
-        uses: actions/cache@v3
+      - name: Test code
+        id: run-tests
+        run: npm run test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
 
-      - name: Build the app
+      - name: Build website
         run: npm run build
 
-      - name: Setup Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-files
+          path: dist
 
-      - name: Run tests
-        run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
+  version_and_tag:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.65.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch

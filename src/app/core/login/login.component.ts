@@ -58,23 +58,28 @@ export class LoginComponent {
         this.router.navigate([this.appLoggedInHome]);
       },
       error: (error: HttpErrorResponse) => {
-        if (error.status === 0) {
-          console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
-          this.displayErrorMessage(MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT);
-        } else if (error.status === 401) {
-          let errMessage = MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT;
-          if (error.error.message === 'Email not verified') {
-            errMessage = MSG_ERROR_EMAIL_NOT_VERIFIED_DISPLAY_TEXT;
-          }
-          console.error('Login error:', errMessage);
-          this.displayErrorMessage(errMessage);
-        } else {
-          console.error('Login error:', error);
-          this.displayErrorMessage(error.error.message);
+        let errMessage = '';
+        switch (error.status) {
+          case 0:
+            console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
+            errMessage = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;
+            break;
+          case 401:
+            errMessage =
+              error.error.message === 'Email not verified'
+                ? MSG_ERROR_EMAIL_NOT_VERIFIED_DISPLAY_TEXT
+                : MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT;
+            break;
+          default:
+            errMessage = error.error.message;
+            break;
         }
+        // console.error('Login error:', errMessage);
+        this.displayErrorMessage(errMessage);
       },
       complete: () => {
         // console.log('Login complete');
+        this.resetErrorMessage();
       },
     });
     //TODO: Delete console logging!
@@ -85,8 +90,12 @@ export class LoginComponent {
     this.errorMessage = message;
 
     setTimeout(() => {
-      this.errorMessage = ''; // Reset error message
+      this.resetErrorMessage();
     }, this.showErrorMilliseconds);
+  }
+
+  resetErrorMessage(): void {
+    this.errorMessage = ''; // Reset error message
   }
 
   validateInputs() {
