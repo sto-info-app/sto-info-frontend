@@ -46,6 +46,8 @@ describe('ChangePasswordComponent', () => {
     fixture = TestBed.createComponent(ChangePasswordComponent);
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+
+    spyOn(console, 'error');
   });
 
   it('should create', () => {
@@ -111,6 +113,10 @@ describe('ChangePasswordComponent', () => {
 
     component.onSubmit();
 
+    expect(console.error).toHaveBeenCalledWith({
+      status: 400,
+      error: { message: 'Token expired' },
+    }); // Add this line
     expect(component.seriousErrorMessage).toBe(
       'Your password reset link has expired. You need to request a new another reset email.',
     );
