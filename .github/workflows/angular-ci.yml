@@ -2,38 +2,39 @@ name: Angular CI
 
 on:
   push:
-    branches: [development]
+    branches:
+      - development
+      - production
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to build and test'
-        required: true
-        default: 'development'
+
+env:
+  NODE_VERSION: 18
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Get code
-        uses: actions/checkout@v3
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Load & cache dependencies
-        id: cache-dependencies
         uses: ./.github/actions/cached-dependencies
-        with:
-          caching: 'false'
-
-      - name: Output information
-        run: echo "Cache used? ${{ steps.cache-dependencies.outputs.used-cache }}"
 
       - name: Lint code
         run: npm run lint
 
   test:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
-      - name: Get code
-        uses: actions/checkout@v3
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Load & cache dependencies
         uses: ./.github/actions/cached-dependencies
@@ -46,8 +47,11 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Get code
-        uses: actions/checkout@v3
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Load & cache dependencies
         uses: ./.github/actions/cached-dependencies
@@ -60,3 +64,13 @@ jobs:
         with:
           name: dist-files
           path: dist
+
+  version_and_tag:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.34.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
