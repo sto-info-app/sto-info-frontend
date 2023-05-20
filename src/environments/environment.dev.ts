@@ -1,6 +1,8 @@
+import packageJson from '../../package.json';
+
 export const environment = {
   production: false,
-  version: require('../../package.json').version,
+  version: packageJson.version,
   env_name: 'dev',
   env_label: 'Development',
   apiUrl: 'http://localhost:3000',
