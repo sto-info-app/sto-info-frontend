@@ -35,7 +35,6 @@ jobs:
         run: npm run lint
 
   test:
-    needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -56,7 +55,6 @@ jobs:
         run: npm run test
 
   build:
-    needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -82,7 +80,7 @@ jobs:
           path: dist
 
   version_and_tag:
-    needs: build
+    needs: [lint, test, build]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
