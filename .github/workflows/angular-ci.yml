@@ -1,17 +1,21 @@
 name: Angular CI
 
 on:
-  push:
+  pull_request:
     branches:
       - development
-      - production
-  workflow_dispatch:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
 
 env:
   NODE_VERSION: 18
 
 jobs:
   lint:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -31,7 +35,7 @@ jobs:
         run: npm run lint
 
   test:
-    needs: lint
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -52,7 +56,7 @@ jobs:
         run: npm run test
 
   build:
-    needs: test
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -78,25 +82,38 @@ jobs:
           path: dist
 
   version_and_tag:
-    needs: build
+    if: github.actor != 'github-actions[bot]'
+    needs: [lint, test, build]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
-      - name: Bump version and push tag
-        if: github.ref == 'refs/heads/development'
+      - name: Bump version (patch) and create a tag
+        if: github.event.pull_request.state == 'open'
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v5.6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          tag_prefix: v
+          dry_run: true # Prevents actual tagging. Remove this when you're sure the workflow is correct.
+
+      - name: Print new version
+        run: echo "New version is ${{ steps.tag_version.outputs.new_version }}"
+
+      - name: Update version in package.json
+        run: npm version --no-git-tag-version ${{ steps.tag_version.outputs.new_version }}
+
+      - name: Commit and push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          npm version patch
-          git push
-
-      - name: Tag version
-        if: github.ref == 'refs/heads/production'
-        uses: anothrNick/github-tag-action@1.65.0
+          git commit -m "Bump version to ${{ steps.tag_version.outputs.new_version }} [skip ci]" -a
+          git push origin HEAD:${{ github.head_ref }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BUMP: none
-          WITH_V: true
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
