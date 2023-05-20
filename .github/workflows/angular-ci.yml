@@ -9,13 +9,15 @@ on:
       - synchronize
       - reopened
       - ready_for_review
-  # workflow_dispatch:
+    paths-ignore:
+      - '**[skip ci]**'
 
 env:
   NODE_VERSION: 18
 
 jobs:
   lint:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -35,6 +37,7 @@ jobs:
         run: npm run lint
 
   test:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -55,6 +58,7 @@ jobs:
         run: npm run test
 
   build:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -80,6 +84,7 @@ jobs:
           path: dist
 
   version_and_tag:
+    if: github.actor != 'github-actions[bot]'
     needs: [lint, test, build]
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -110,7 +115,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git commit -m "Bump version to ${{ steps.tag_version.outputs.new_version }}" -a
+          git commit -m "Bump version to ${{ steps.tag_version.outputs.new_version }} [skip ci]" -a
           git push origin HEAD:${{ github.head_ref }}
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
