@@ -96,7 +96,7 @@ jobs:
       - name: Bump version (patch) and create a tag
         if: github.event.pull_request.state == 'open'
         id: tag_version
-        uses: mathieudutour/github-tag-action@v5.6
+        uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: patch
