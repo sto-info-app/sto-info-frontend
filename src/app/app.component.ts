@@ -22,6 +22,7 @@ export class AppComponent implements AfterViewInit {
 
   appTitle = environment.appTitle;
   appLoggedInHome = environment.appLoggedInHome;
+  appVersion = environment.version;
 
   isLoggedIn = false;
   backendResponse = '';
