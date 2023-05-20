@@ -47,5 +47,6 @@ module.exports = function (config) {
     },
     singleRun: false,
     restartOnFileChange: true,
+    files: ['src/test-setup.ts'],
   });
 };

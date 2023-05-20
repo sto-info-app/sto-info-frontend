@@ -1,4 +1,5 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
@@ -22,10 +23,12 @@ describe('RegisterComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ReactiveFormsModule,
-        RouterTestingModule,
+        RouterTestingModule.withRoutes([
+          { path: 'register/complete', component: DummyComponent },
+        ]),
         HttpClientTestingModule,
       ],
-      declarations: [RegisterComponent],
+      declarations: [RegisterComponent, DummyComponent],
       providers: [
         {
           provide: AuthService,
@@ -194,9 +197,9 @@ describe('RegisterComponent', () => {
     expect(authService.register).toHaveBeenCalled();
   });
 
-  it('should navigate to /register/complete when the form is submitted successfully', () => {
+  it('should navigate to /register/complete when the form is submitted successfully', done => {
     spyOn(authService, 'register').and.returnValue(of({}));
-    spyOn(router, 'navigate');
+    spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
 
     // Fill in the form inputs
     component.registerForm.controls['firstName'].setValue('Test');
@@ -208,7 +211,13 @@ describe('RegisterComponent', () => {
 
     component.onRegister();
 
-    expect(authService.register).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/register/complete']);
+    fixture.whenStable().then(() => {
+      expect(authService.register).toHaveBeenCalled();
+      expect(router.navigate).toHaveBeenCalledWith(['/register/complete']);
+      done();
+    });
   });
 });
+
+@Component({ template: '' })
+class DummyComponent {}

@@ -1,4 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  FaIconComponent,
+  FontAwesomeModule,
+} from '@fortawesome/angular-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons';
+import { MockComponent } from 'ng-mocks';
 import { Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../core/auth/auth.service';
@@ -14,10 +21,14 @@ describe('HomeComponent', () => {
   let mockAuthService: MockAuthService;
 
   beforeEach(async () => {
+    library.add(fas); // Add FontAwesome icons to the library
     mockAuthService = { isAuthenticated$: of(true) };
+  });
 
+  beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [HomeComponent],
+      imports: [FontAwesomeModule],
+      declarations: [HomeComponent, MockComponent(FaIconComponent)],
       providers: [{ provide: AuthService, useValue: mockAuthService }],
     }).compileComponents();
   });

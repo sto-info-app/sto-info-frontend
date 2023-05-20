@@ -63,14 +63,22 @@ describe('ResetPasswordRequestComponent', () => {
   });
 
   it('should handle password reset error correctly', () => {
-    spyOn(authService, 'resetPassword').and.returnValue(throwError({}));
+    const errorObject = { message: 'Some error occurred' };
+    spyOn(authService, 'resetPassword').and.returnValue(
+      throwError(errorObject),
+    );
+
+    // Suppress console.error
+    spyOn(console, 'error');
+
     component.email = 'test@example.com';
     component.inputsValid = true;
     component.onPasswordReset();
 
     expect(authService.resetPassword).toHaveBeenCalledWith('test@example.com');
-    expect(component.errorMessage).toBe(
-      'An error occurred while resetting the password',
-    );
+    expect(component.errorMessage).toBe(errorObject.message);
+
+    // Expect console.error to have been called with the correct arguments
+    expect(console.error).toHaveBeenCalledWith('Login error:', errorObject);
   });
 });
