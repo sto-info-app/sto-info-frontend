@@ -149,6 +149,7 @@ jobs:
           AWS_S3_BUCKET: dev.startrekonline.info
           SOURCE_DIR: 'dist'
           ACL: 'public-read'
+          ARGS: '--delete'
 
   # angular_ci_is_done:
   #   needs: [angular_ci_deploy_to_dev]
