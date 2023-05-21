@@ -5,7 +5,7 @@ export const environment = {
   version: packageJson.version,
   env_name: 'dev',
   env_label: 'Development',
-  apiUrl: 'http://localhost:3000',
+  apiUrl: 'https://dev-api.startrekonline.info',
   appTitle: 'Star Trek Online Info Portal',
   appLoggedInHome: '/dashboard',
 };

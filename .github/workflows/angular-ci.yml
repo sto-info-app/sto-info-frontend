@@ -117,8 +117,35 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
+  angular_ci_deploy_to_dev:
+    needs: [angular_ci_build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-files
+          path: dist
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: Sync dist folder to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks --delete
+          bucket: dev.startrekonline.info
+          source_dir: dist
+
   angular_ci_is_done:
-    needs: [angular_ci_version_and_tag]
+    needs: [angular_ci_build]
     runs-on: ubuntu-latest
     timeout-minutes: 1
     steps:
