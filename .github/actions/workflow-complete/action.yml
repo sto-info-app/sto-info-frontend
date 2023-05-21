@@ -1,0 +1,10 @@
+name: 'Workflow Complete'
+description: 'Output that all jobs are complete!'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Completion Step
+      run: echo "All jobs completed successfully!"
+      shell: bash
