@@ -17,6 +17,7 @@ import {
   MILLISECONDS_SHOW_ERROR_MSG,
   MILLISECONDS_SHOW_RED_ALERT_THEME,
 } from 'src/app/shared/constants/timings.constants';
+import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
 
@@ -44,6 +45,7 @@ export class LoginComponent {
     private router: Router,
     private renderer: Renderer2,
     private el: ElementRef,
+    private redAlertThemeService: RedAlertThemeService,
   ) {}
 
   onLogin() {
@@ -112,30 +114,9 @@ export class LoginComponent {
   }
 
   private applyErrorStylesheet() {
-    // Create a link element for the red alert stylesheet
-    const errorStyleLink = this.renderer.createElement('link');
-
-    // Set the link element attributes
-    this.renderer.setAttribute(errorStyleLink, 'rel', 'stylesheet');
-    this.renderer.setAttribute(
-      errorStyleLink,
-      'href',
-      'assets/lcars/lcars-red-alert.css',
+    this.redAlertThemeService.applyRedAlertThemeThenClearAfterAShortTime(
+      this.renderer,
+      this.el.nativeElement,
     );
-    this.renderer.setAttribute(errorStyleLink, 'id', 'red-alert-style-link');
-
-    // Add the red alert stylesheet to the head of the document
-    this.renderer.appendChild(
-      this.el.nativeElement.ownerDocument.head,
-      errorStyleLink,
-    );
-
-    // Remove the red alert stylesheet after 30 seconds
-    setTimeout(() => {
-      this.renderer.removeChild(
-        this.el.nativeElement.ownerDocument.head,
-        errorStyleLink,
-      );
-    }, this.showRedAlertMilliseconds);
   }
 }
