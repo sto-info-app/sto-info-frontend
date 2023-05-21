@@ -145,10 +145,10 @@ jobs:
 
       - name: Sync dist folder to S3
         uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --acl public-read --follow-symlinks --delete
-          bucket: dev.startrekonline.info
-          source_dir: dist
+        env:
+          AWS_S3_BUCKET: dev.startrekonline.info
+          SOURCE_DIR: 'dist'
+          ACL: 'public-read'
 
   angular_ci_is_done:
     needs: [angular_ci_build]
