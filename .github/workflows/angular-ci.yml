@@ -147,7 +147,7 @@ jobs:
         uses: jakejarvis/s3-sync-action@master
         env:
           AWS_S3_BUCKET: dev.startrekonline.info
-          SOURCE_DIR: 'dist'
+          SOURCE_DIR: 'dist/sto-info-frontend'
           ACL: 'public-read'
           ARGS: '--delete'
 
