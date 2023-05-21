@@ -14,7 +14,7 @@ env:
   NODE_VERSION: 18
 
 jobs:
-  lint:
+  angular_ci_lint:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -34,7 +34,7 @@ jobs:
       - name: Lint code
         run: npm run lint
 
-  test:
+  angular_ci_test:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -55,7 +55,7 @@ jobs:
         id: run-tests
         run: npm run test
 
-  build:
+  angular_ci_build:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -81,9 +81,9 @@ jobs:
           name: dist-files
           path: dist
 
-  version_and_tag:
+  angular_ci_version_and_tag:
     if: github.actor != 'github-actions[bot]'
-    needs: [lint, test, build]
+    needs: [angular_ci_lint, angular_ci_test, angular_ci_build]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -118,9 +118,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
   angular_ci_is_done:
-    needs: [version_and_tag]
+    needs: [angular_ci_version_and_tag]
     runs-on: ubuntu-latest
     timeout-minutes: 1
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Completion Step
-        run: echo "All jobs completed successfully!"
+        uses: ./.github/actions/workflow-complete
