@@ -26,6 +26,7 @@ import { LcarsSuccessMessageComponent } from './shared/components/lcars-success-
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
+import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
 
 // NOTE: This imports all icons into the bundle and increases app size!
 // import { fas } from '@fortawesome/pro-solid-svg-icons';
@@ -52,6 +53,7 @@ export function tokenGetter() {
     DashboardComponent,
     ResetPasswordRequestComponent,
     ChangePasswordComponent,
+    PageNotFoundComponent,
   ],
   imports: [
     BrowserModule,

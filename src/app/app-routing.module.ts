@@ -8,18 +8,22 @@ import { RegisterComponent } from './core/register/register.component';
 import { RegistrationCompleteComponent } from './core/registration-complete/registration-complete.component';
 import { VerifyEmailComponent } from './core/verify-email/verify-email.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
 import { HomeComponent } from './home/home.component';
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 
 const routes: Routes = [
+  // *****************************************
+  // * Default route
   {
     path: '',
     component: HomeComponent,
   },
 
-  // User auth, registration and validation
+  // *****************************************
+  // * User auth, registration and validation
   {
     path: 'login',
     component: LoginComponent,
@@ -45,7 +49,8 @@ const routes: Routes = [
     component: ChangePasswordComponent,
   },
 
-  // Static pages
+  // *****************************************
+  // * Static pages
   {
     path: 'about',
     component: AboutComponent,
@@ -59,11 +64,19 @@ const routes: Routes = [
     component: TermsOfUseComponent,
   },
 
-  // STO App routes
+  // *****************************************
+  // * STO App routes
   {
     path: 'dashboard',
     component: DashboardComponent,
     canActivate: [AuthGuard],
+  },
+
+  // *****************************************
+  // * Errors
+  {
+    path: '**',
+    component: PageNotFoundComponent,
   },
 ];
 
