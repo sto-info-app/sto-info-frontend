@@ -118,8 +118,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
   angular_ci_is_done:
-    if: github.actor != 'github-actions[bot]'
-    needs: [lint, test, build, version_and_tag]
+    needs: [version_and_tag]
     runs-on: ubuntu-latest
     timeout-minutes: 1
     steps:
