@@ -118,7 +118,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
   angular_ci_deploy_to_dev:
-    needs: [angular_ci_build]
+    needs:
+      [
+        angular_ci_lint,
+        angular_ci_test,
+        angular_ci_build,
+        angular_ci_version_and_tag,
+      ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
