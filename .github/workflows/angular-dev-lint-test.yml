@@ -1,4 +1,4 @@
-name: Development Pull Request CI
+name: Development Pull Request CI - Lint and Test
 
 on:
   pull_request:
@@ -15,7 +15,6 @@ env:
 
 jobs:
   lint_and_test:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -46,21 +45,3 @@ jobs:
             echo "Lint or Test step failed."
             exit 1
           fi
-
-  version_bump:
-    if: github.actor != 'github-actions[bot]' && !endsWith(github.event.head_commit.message, '[no version bump]') && needs.lint_and_test.result == 'success'
-    needs: lint_and_test
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Bump version (patch)
-        uses: mathieudutour/github-tag-action@v6.1
-        with:
-          github_token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          default_bump: patch
-          tag_prefix: v
-          # create_annotated_tag: false # do not create a tag yet
