@@ -15,7 +15,7 @@ env:
 
 jobs:
   lint_and_test:
-    if: "!startsWith(github.event.commits[0].message, 'Bump version to')"
+    if: "!startsWith(github.event.pull_request.title, 'Bump version to')"
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -48,7 +48,7 @@ jobs:
           fi
 
   version_bump:
-    if: "!contains(github.event.commits[0].message, '[no version bump]') && needs.lint_and_test.result == 'success'"
+    if: "!contains(github.event.pull_request.title, '[no version bump]') && needs.lint_and_test.result == 'success'"
     needs: lint_and_test
     runs-on: ubuntu-latest
     timeout-minutes: 5
