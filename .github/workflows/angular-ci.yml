@@ -3,7 +3,8 @@ name: Angular CI
 on:
   pull_request:
     branches:
-      - development
+      # - development
+      - disable-this-workflow # Enable this line to not allow the workflow to run during testing!
     types:
       - opened
       - synchronize
