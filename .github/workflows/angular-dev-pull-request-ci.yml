@@ -69,6 +69,8 @@ jobs:
       - name: Bump version (patch) in package.json
         id: bump_version
         run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           npm version patch -m "Bump version to %s"
           echo "::set-output name=new_version::$(node -p "require('./package.json').version")"
 
