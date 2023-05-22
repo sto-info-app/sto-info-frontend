@@ -43,7 +43,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git push https://x-access-token:${{ secrets.GH_PAT_REPO_TOKEN }}@github.com/steverobertsuk/sto-info-frontend.git HEAD:${{ github.event.pull_request.head.ref }}
+          git push https://x-access-token:${{ secrets.GH_PAT_REPO_TOKEN }}@github.com/steverobertsuk/sto-info-frontend.git HEAD:${{ github.ref }}
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
