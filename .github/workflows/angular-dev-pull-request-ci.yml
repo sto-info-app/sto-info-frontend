@@ -14,8 +14,8 @@ env:
   NODE_VERSION: 18
 
 jobs:
-  if: !startsWith(github.event.head_commit.message, 'Bump version to')
   lint_and_test:
+    if: "!startsWith(github.event.commits[0].message, 'Bump version to')"
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -48,7 +48,7 @@ jobs:
           fi
 
   version_bump:
-    if: !endsWith(github.event.head_commit.message, '[no version bump]') && needs.lint_and_test.result == 'success'
+    if: "!contains(github.event.commits[0].message, '[no version bump]') && needs.lint_and_test.result == 'success'"
     needs: lint_and_test
     runs-on: ubuntu-latest
     timeout-minutes: 5
