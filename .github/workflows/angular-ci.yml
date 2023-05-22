@@ -70,10 +70,12 @@ jobs:
           github_token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           default_bump: patch
           tag_prefix: v
-          create_annotated_tag: false
+          create_annotated_tag: false # do not create a tag yet
 
       - name: Update version in package.json
-        run: npm version --no-git-tag-version ${{ steps.tag_version.outputs.new_version }}
+        run: |
+          npm version --no-git-tag-version ${{ steps.tag_version.outputs.new_version }}
+          cat package.json
 
   angular_ci_build:
     if: github.actor != 'github-actions[bot]'
@@ -171,3 +173,14 @@ jobs:
           SOURCE_DIR: 'dist/sto-info-frontend'
           ACL: 'public-read'
           ARGS: '--delete'
+
+  # angular_ci_is_done:
+  #   needs: [angular_ci_deploy_to_dev]
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 1
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+
+  #     - name: Completion Step
+  #       uses: ./.github/actions/workflow-complete
