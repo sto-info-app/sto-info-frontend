@@ -57,10 +57,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Bump version (patch)
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Get current version
+        id: current_version
+        run: echo "::set-output name=version::$(node -p "require('./package.json').version")"
+
+      - name: Bump version (patch) in package.json
+        id: bump_version
+        run: |
+          npm version patch -m "Bump version to %s"
+          echo "::set-output name=new_version::$(node -p "require('./package.json').version")"
+
+      - name: Push changes
+        run: git push
+
+      - name: Check version bump
+        run: |
+          if [[ "${{ steps.current_version.outputs.version }}" == "${{ steps.bump_version.outputs.new_version }}" ]]; then
+            echo "Version bump failed."
+            exit 1
+          fi
+
+      - name: Bump version (patch) in Git
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          default_bump: patch
+          default_bump: false
           tag_prefix: v
+          release_branches: development
           # create_annotated_tag: false # do not create a tag yet
