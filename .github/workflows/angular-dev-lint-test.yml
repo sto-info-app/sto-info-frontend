@@ -1,0 +1,47 @@
+name: Development Pull Request CI - Lint and Test
+
+on:
+  pull_request:
+    branches:
+      - development
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+env:
+  NODE_VERSION: 18
+
+jobs:
+  lint_and_test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+
+      - name: Lint code
+        id: lint_step
+        run: npm run lint || echo "::set-output name=status::failure"
+
+      - name: Test code
+        id: test_step
+        run: npm run test || echo "::set-output name=status::failure"
+
+      - name: Check results
+        run: |
+          if [[ "${{ steps.lint_step.outputs.status }}" == "failure" ]] || [[ "${{ steps.test_step.outputs.status }}" == "failure" ]]; then
+            echo "Lint or Test step failed."
+            exit 1
+          fi

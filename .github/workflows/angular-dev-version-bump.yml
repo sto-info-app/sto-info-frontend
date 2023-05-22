@@ -1,55 +1,17 @@
-name: Development Pull Request CI
+name: Development Pull Request CI - Version Bump
 
 on:
-  pull_request:
-    branches:
-      - development
+  workflow_run:
+    workflows: ['Development Pull Request CI - Lint and Test']
     types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
+      - completed
 
 env:
   NODE_VERSION: 18
 
 jobs:
-  lint_and_test:
-    if: "!startsWith(github.event.pull_request.title, 'Bump version to')"
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup project
-        uses: ./.github/actions/setup-project
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
-
-      - name: Load & cache dependencies
-        uses: ./.github/actions/cached-dependencies
-
-      - name: Lint code
-        id: lint_step
-        run: npm run lint || echo "::set-output name=status::failure"
-
-      - name: Test code
-        id: test_step
-        run: npm run test || echo "::set-output name=status::failure"
-
-      - name: Check results
-        run: |
-          if [[ "${{ steps.lint_step.outputs.status }}" == "failure" ]] || [[ "${{ steps.test_step.outputs.status }}" == "failure" ]]; then
-            echo "Lint or Test step failed."
-            exit 1
-          fi
-
   version_bump:
-    if: "!contains(github.event.pull_request.title, '[no version bump]') && needs.lint_and_test.result == 'success'"
-    needs: lint_and_test
+    if: "github.event.workflow_run.conclusion == 'success' && !startsWith(github.event.workflow_run.head_commit.message, 'Bump version to')"
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -57,7 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
       - name: Setup Node.js environment
@@ -81,7 +43,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git push https://x-access-token:${{ secrets.GH_PAT_REPO_TOKEN }}@github.com/steverobertsuk/sto-info-frontend.git HEAD:${{ github.head_ref }}
+          git push https://x-access-token:${{ secrets.GH_PAT_REPO_TOKEN }}@github.com/steverobertsuk/sto-info-frontend.git HEAD:${{ github.event.pull_request.head.ref }}
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
