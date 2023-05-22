@@ -81,6 +81,8 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git push
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
       - name: Check version bump
         run: |
