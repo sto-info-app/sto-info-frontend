@@ -75,10 +75,6 @@ jobs:
       - name: Update version in package.json
         run: npm version --no-git-tag-version ${{ steps.tag_version.outputs.new_version }}
 
-      - name: Get new version
-        id: get_version
-        run: echo "::set-output name=version::$(node -p "require('./package.json').version")"
-
   angular_ci_build:
     if: github.actor != 'github-actions[bot]'
     needs: [angular_ci_lint, angular_ci_test, angular_ci_version_bump]
@@ -128,8 +124,17 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git tag v${{ needs.angular_ci_version_bump.outputs.get_version.outputs.version }} # create the tag
-          git push origin v${{ needs.angular_ci_version_bump.outputs.get_version.outputs.version }} # push the tag
+          git tag v${{ needs.angular_ci_version_bump.outputs.new_version }}
+          git push origin v${{ needs.angular_ci_version_bump.outputs.new_version }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+
+      - name: Push version bump
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -am "bump version number"
+          git push
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
