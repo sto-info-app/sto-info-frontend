@@ -14,8 +14,8 @@ env:
   NODE_VERSION: 18
 
 jobs:
+  if: !startsWith(github.event.head_commit.message, 'Bump version to')
   lint_and_test:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -48,16 +48,12 @@ jobs:
           fi
 
   version_bump:
-    if: github.actor != 'github-actions[bot]' && !endsWith(github.event.head_commit.message, '[no version bump]') && needs.lint_and_test.result == 'success'
+    if: !endsWith(github.event.head_commit.message, '[no version bump]') && needs.lint_and_test.result == 'success'
     needs: lint_and_test
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
-      - name: Print Actor
-        id: actor
-        run: echo "Actor actor=${{ github.actor }}"
-
       - name: Checkout code
         uses: actions/checkout@v3
         with:
