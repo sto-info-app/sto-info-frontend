@@ -119,6 +119,14 @@
   animation-delay: 0.8s;
 }
 
+.panel-7,
+.panel-8,
+.panel-9,
+.panel-10 {
+  animation: redalert 1s infinite;
+  animation-delay: 0.9s;
+}
+
 .left-frame-top {
   background-color: #c00;
 }
