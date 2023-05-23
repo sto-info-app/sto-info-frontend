@@ -1,0 +1,88 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - 'development'
+
+env:
+  NODE_VERSION: 18
+  BUMP_VERSION_COMMIT_MSG: 'Bump version number'
+
+jobs:
+  prerequisite_check:
+    runs-on: ubuntu-latest
+
+    # Check commit message
+    outputs:
+      skip: ${{ steps.commit.outputs.skip }}
+    steps:
+      - id: commit
+        run: |
+          commit=$(git log --format=%B -n 1 ${{ github.event.after }})
+          echo "commit: $commit"
+          if [[ "$commit" == *"${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
+            echo "::set-output name=skip::true"
+          else
+            echo "::set-output name=skip::false"
+          fi
+
+  main:
+    needs: prerequisite_check
+    if: needs.prerequisite_check.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm run test
+
+      - name: Bump Version and Push Changes Back (Only for pull requests)
+        if: github.event_name == 'pull_request'
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }}"
+          git push
+
+      - name: Build Angular Project
+        run: npm run build -- --prod --output-path dist
+
+      - name: Deploy to S3 (Development)
+        if: github.ref == 'refs/heads/development'
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks --delete
+          path: dist/sto-info-frontend/
+          bucket: dev.startrekonline.info
+          region: eu-west-2
+          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Deploy to S3 (Production)
+        if: github.ref == 'refs/heads/master'
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks --delete
+          path: dist/sto-info-frontend/
+          bucket: startrekonline.info
+          region: eu-west-2
+          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
