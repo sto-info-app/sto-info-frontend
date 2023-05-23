@@ -86,7 +86,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
       - name: Build Angular Project
-        run: npm run build -- --prod --output-path dist
+        run: npm run build
 
       - name: Deploy to S3 (Development)
         if: github.ref == 'refs/heads/development'
