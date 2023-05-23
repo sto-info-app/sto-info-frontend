@@ -71,8 +71,8 @@ jobs:
       - name: Bump Version and Push Changes Back (Only for pull requests)
         if: github.event_name == 'pull_request'
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name 'Steve Roberts'
+          git config user.email steve@shadowcomputers.co.uk
           git checkout ${{ needs.prerequisite_check.outputs.branch }}
           npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }}"
           git push https://${{ secrets.GH_PAT_REPO_TOKEN }}@github.com/steverobertsuk/sto-info-frontend.git ${{ needs.prerequisite_check.outputs.branch }}
