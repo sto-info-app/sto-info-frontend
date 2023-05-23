@@ -72,7 +72,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           git config user.name 'Steve Roberts'
-          git config user.email steve@shadowcomputers.co.uk
+          git config user.email 'steverobertsuk@users.noreply.github.com'
           git checkout ${{ needs.prerequisite_check.outputs.branch }}
           npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }}"
           git push https://${{ secrets.GH_PAT_REPO_TOKEN }}@github.com/steverobertsuk/sto-info-frontend.git ${{ needs.prerequisite_check.outputs.branch }}
