@@ -19,7 +19,7 @@ jobs:
     # Check commit message
     outputs:
       skip: ${{ steps.commit.outputs.skip }}
-      branch: ${{ steps.branch.outputs.branch }}
+      branch: ${{ steps.get-branch-name.outputs.branch }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -36,9 +36,10 @@ jobs:
             echo "::set-output name=skip::false"
           fi
 
-      - id: branch
+      - id: get-branch-name
         run: |
-          echo "::set-output name=branch::${{ github.head_ref }}"
+          echo "::set-output name=branch::$(echo ${GITHUB_HEAD_REF})"
+        shell: bash
 
   main:
     needs: prerequisite_check
@@ -49,8 +50,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.prerequisite_check.outputs.branch }}
-          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
 
       - name: Setup project
         uses: ./.github/actions/setup-project
@@ -73,7 +73,7 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }}"
-          git push origin ${{ needs.prerequisite_check.outputs.branch }}
+          git push origin HEAD
 
       - name: Build Angular Project
         run: npm run build -- --prod --output-path dist
