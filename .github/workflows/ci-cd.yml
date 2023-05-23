@@ -27,7 +27,7 @@ jobs:
       - id: commit
         run: |
           echo "GET COMMIT MESSAGE"
-          COMMIT_MESSAGE=$(git log --no-merges -1 --format=%B)        
+          COMMIT_MESSAGE=$(git log --format=%B -1 HEAD^)     
           echo "Current commit message: $COMMIT_MESSAGE"
           if [[ "$COMMIT_MESSAGE" == *"${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
             echo "::set-output name=skip::true"
