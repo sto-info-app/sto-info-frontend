@@ -26,8 +26,8 @@ jobs:
 
       - id: commit
         run: |
-          COMMIT_HASH=$(git rev-parse HEAD)
-          COMMIT_MESSAGE=$(git log -1 --format=%B $COMMIT_HASH)        
+          echo "GET COMMIT MESSAGE"
+          COMMIT_MESSAGE=$(git log --no-merges -1 --format=%B)        
           echo "Current commit message: $COMMIT_MESSAGE"
           if [[ "$COMMIT_MESSAGE" == *"${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
             echo "::set-output name=skip::true"
@@ -37,6 +37,7 @@ jobs:
 
       - id: get-branch-name
         run: |
+          echo "GET BRANCH NAME"
           echo "::set-output name=branch::$(echo ${GITHUB_HEAD_REF})"
         shell: bash
 
