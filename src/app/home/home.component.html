@@ -8,12 +8,12 @@
     class="buttons"
     *ngIf="!isLoggedIn">
     <a
-      href="/login"
+      [routerLink]="getRouteLink(appRoutes.LOGIN)"
       class="bluey"
       >Login</a
     >
     <a
-      href="/register"
+      [routerLink]="getRouteLink(appRoutes.REGISTER)"
       class="sunflower"
       >Register</a
     >

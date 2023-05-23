@@ -10,6 +10,7 @@ import { VerifyEmailComponent } from './core/verify-email/verify-email.component
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
 import { HomeComponent } from './home/home.component';
+import { APP_ROUTES } from './shared/constants/app-routing.constants';
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
@@ -25,49 +26,49 @@ const routes: Routes = [
   // *****************************************
   // * User auth, registration and validation
   {
-    path: 'login',
+    path: APP_ROUTES.LOGIN,
     component: LoginComponent,
   },
   {
-    path: 'register',
+    path: APP_ROUTES.REGISTER,
     component: RegisterComponent,
   },
   {
-    path: 'register/complete',
+    path: APP_ROUTES.REGISTER_COMPLETE,
     component: RegistrationCompleteComponent,
   },
   {
-    path: 'verify-email',
+    path: APP_ROUTES.VERIFY_EMAIL,
     component: VerifyEmailComponent,
   },
   {
-    path: 'reset-password',
+    path: APP_ROUTES.RESET_PASSWORD,
     component: ResetPasswordRequestComponent,
   },
   {
-    path: 'change-password',
+    path: APP_ROUTES.CHANGE_PASSWORD,
     component: ChangePasswordComponent,
   },
 
   // *****************************************
   // * Static pages
   {
-    path: 'about',
+    path: APP_ROUTES.ABOUT,
     component: AboutComponent,
   },
   {
-    path: 'contact',
+    path: APP_ROUTES.CONTACT,
     component: ContactComponent,
   },
   {
-    path: 'terms-of-use',
+    path: APP_ROUTES.TERMS_OF_USE,
     component: TermsOfUseComponent,
   },
 
   // *****************************************
   // * STO App routes
   {
-    path: 'dashboard',
+    path: APP_ROUTES.STO_DASHBOARD,
     component: DashboardComponent,
     canActivate: [AuthGuard],
   },

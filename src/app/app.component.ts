@@ -10,6 +10,8 @@ import {
 import { Title } from '@angular/platform-browser';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
+import { APP_ROUTES } from './shared/constants/app-routing.constants';
+import { RoutingService } from './shared/services/routing.service';
 
 @Component({
   selector: 'app-root',
@@ -21,8 +23,8 @@ export class AppComponent implements AfterViewInit {
   scrollTopButton!: ElementRef;
 
   appTitle = environment.appTitle;
-  appLoggedInHome = environment.appLoggedInHome;
   appVersion = environment.version;
+  appRoutes = APP_ROUTES;
 
   isLoggedIn = false;
   currentYear: number;
@@ -33,6 +35,8 @@ export class AppComponent implements AfterViewInit {
 
   constructor(
     @Inject('API_URL') private apiUrl: string,
+
+    private routingService: RoutingService,
 
     private authService: AuthService,
     private titleService: Title,
@@ -148,5 +152,9 @@ export class AppComponent implements AfterViewInit {
 
   logout(): void {
     this.authService.performLogout();
+  }
+
+  getRouteLink(route: string): string {
+    return this.routingService.getLink(route);
   }
 }

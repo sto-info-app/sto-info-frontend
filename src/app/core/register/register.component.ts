@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RegistrationFormValues } from 'src/app/models/user-auth.models';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED,
   FORM_ERROR_EMAIL_ALREADY_REGISTERED,
@@ -35,6 +36,7 @@ import {
   PASSWORD_PATTERN,
   USERNAME_PATTERN,
 } from 'src/app/shared/constants/regex-patterns.constants';
+import { RoutingService } from 'src/app/shared/services/routing.service';
 import { MustMatch } from '../../shared/_helpers/must-match.validator';
 import { AuthService } from '../auth/auth.service';
 
@@ -46,6 +48,7 @@ import { AuthService } from '../auth/auth.service';
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   submitted = false;
+  appRoutes = APP_ROUTES;
 
   // Allow contstants to be used in the HTML
   errorTextFirstNameRequired: string = FORM_ERROR_FIRSTNAME_REQUIRED;
@@ -71,6 +74,7 @@ export class RegisterComponent implements OnInit {
     private formBuilder: FormBuilder,
     private router: Router,
     private authService: AuthService,
+    private routingService: RoutingService,
   ) {}
 
   ngOnInit() {
@@ -168,5 +172,9 @@ export class RegisterComponent implements OnInit {
         // console.log('Registration complete');
       },
     });
+  }
+
+  getRouteLink(route: string): string {
+    return this.routingService.getLink(route);
   }
 }

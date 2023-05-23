@@ -667,7 +667,7 @@ a {
 }
 
 .lcars-main-content-container {
-  min-height: 85%;
+  min-height: 100%;
 }
 
 .random-lcars-ref {
@@ -700,6 +700,7 @@ a {
 }
 
 .panel-8 {
+  flex: 2.7;
   background-color: #8ff;
 }
 

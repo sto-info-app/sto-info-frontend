@@ -14,7 +14,8 @@
         <div class="panel panel-1">
           <a
             *ngIf="!isLoggedIn"
-            routerLink="/login"
+            [routerLink]="getRouteLink(appRoutes.LOGIN)"
+            routerLinkActive="peach"
             >Login</a
           >
           <a
@@ -39,22 +40,27 @@
           </div>
           <nav id="nav-standard">
             <a
-              href="/"
+              [routerLink]="getRouteLink('HOME')"
+              [routerLinkActiveOptions]="{ exact: true }"
+              routerLinkActive="almond-creme"
               id="b-one"
               >Home</a
             >
             <a
-              href="/about"
+              [routerLink]="getRouteLink(appRoutes.ABOUT)"
+              routerLinkActive="almond-creme"
               id="b-two"
               >About</a
             >
             <a
-              href="{{ appLoggedInHome }}"
+              [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+              routerLinkActive="almond-creme"
               id="b-three"
               >Dashboard</a
             >
             <a
-              href="/contact"
+              [routerLink]="getRouteLink(appRoutes.CONTACT)"
+              routerLinkActive="almond-creme"
               id="b-four"
               >Contact</a
             >
@@ -76,18 +82,28 @@
         <div class="panel-grow-container">
           <div class="panel panel-3"></div>
           <div class="sidebar-buttons">
-            <a href="">button 01</a>
-            <a href="">button 02</a>
+            <a
+              *ngIf="!isLoggedIn"
+              [routerLink]="getRouteLink(appRoutes.REGISTER)"
+              routerLinkActive="peach"
+              >Register</a
+            >
+            <a
+              *ngIf="isLoggedIn"
+              [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+              routerLinkActive="peach"
+              >Dashboard</a
+            >
           </div>
           <div class="panel panel-4"></div>
           <div class="panel panel-5"></div>
           <div
             class="panel panel-6"
             [innerHTML]="sideColumnRandomTextItems[1]"></div>
-          <!-- <div class="panel panel-7"></div>
-          <div class="panel panel-8"></div>
+          <!-- <div class="panel panel-7"></div> -->
+          <!-- <div class="panel panel-8"></div> -->
           <div class="panel panel-9"></div>
-          <div class="panel panel-10"></div> -->
+          <!-- <div class="panel panel-10"></div> -->
         </div>
       </div>
       <div class="right-frame">

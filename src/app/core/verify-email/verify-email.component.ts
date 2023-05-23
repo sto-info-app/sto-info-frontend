@@ -1,10 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
   MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
 } from 'src/app/shared/constants/error-messages.constants';
+import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 import { MessageType } from '../../shared/models/lcars-message-type.enum';
 
@@ -19,8 +21,13 @@ export class VerifyEmailComponent implements OnInit {
   message = '';
   token = '';
   showResendVerificationEmailButton = false;
+  appRoutes = APP_ROUTES;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) {}
+  constructor(
+    private route: ActivatedRoute,
+    private http: HttpClient,
+    private routingService: RoutingService,
+  ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -83,5 +90,9 @@ export class VerifyEmailComponent implements OnInit {
           this.showResendVerificationEmailButton = true;
         },
       });
+  }
+
+  getRouteLink(route: string): string {
+    return this.routingService.getLink(route);
   }
 }
