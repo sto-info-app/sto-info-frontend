@@ -76,8 +76,9 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
+          git checkout "${{ needs.prerequisite_check.outputs.branch }}"
           npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }}"
-          git push
+          git push origin "${{ needs.prerequisite_check.outputs.branch }}"
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
