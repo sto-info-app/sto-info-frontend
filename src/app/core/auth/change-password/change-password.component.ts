@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MustMatch } from 'src/app/shared/_helpers/must-match.validator';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED,
   FORM_ERROR_PASSWORDS_DO_NOT_MATCH,
@@ -12,6 +13,7 @@ import {
 import { MIN_CHARS_PASSWORD } from 'src/app/shared/constants/forms.constants';
 import { PASSWORD_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
+import { RoutingService } from 'src/app/shared/services/routing.service';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -25,6 +27,7 @@ export class ChangePasswordComponent implements OnInit {
   seriousErrorMessage = '';
   errorMessage = '';
   successMessage = '';
+  appRoutes = APP_ROUTES;
 
   // Allow contstants to be used in the HTML
   errorTextPasswordRequired: string = FORM_ERROR_PASSWORD_REQUIRED;
@@ -39,6 +42,7 @@ export class ChangePasswordComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
+    private routingService: RoutingService,
   ) {
     this.changePasswordForm = this.formBuilder.group(
       {
@@ -111,5 +115,9 @@ export class ChangePasswordComponent implements OnInit {
     setTimeout(() => {
       this.errorMessage = ''; // Reset error message
     }, MILLISECONDS_SHOW_ERROR_MSG);
+  }
+
+  getRouteLink(route: string): string {
+    return this.routingService.getLink(route);
   }
 }

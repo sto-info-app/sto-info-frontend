@@ -9,6 +9,7 @@ import { MockComponent } from 'ng-mocks';
 import { Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../core/auth/auth.service';
+import { RoutingService } from '../shared/services/routing.service';
 import { HomeComponent } from './home.component';
 
 interface MockAuthService {
@@ -19,6 +20,7 @@ describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
   let mockAuthService: MockAuthService;
+  let routingService: RoutingService;
 
   beforeEach(async () => {
     library.add(fas); // Add FontAwesome icons to the library
@@ -29,7 +31,10 @@ describe('HomeComponent', () => {
     await TestBed.configureTestingModule({
       imports: [FontAwesomeModule],
       declarations: [HomeComponent, MockComponent(FaIconComponent)],
-      providers: [{ provide: AuthService, useValue: mockAuthService }],
+      providers: [
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: RoutingService },
+      ],
     }).compileComponents();
   });
 
@@ -48,7 +53,10 @@ describe('HomeComponent', () => {
   });
 
   it('should subscribe to authentication state on creation', () => {
-    component = new HomeComponent(mockAuthService as unknown as AuthService);
+    component = new HomeComponent(
+      mockAuthService as unknown as AuthService,
+      routingService as RoutingService,
+    );
     expect(component.isLoggedIn).toBeTrue();
   });
 });

@@ -5,6 +5,7 @@ import {
   LoginCredentials,
   LoginResponse,
 } from 'src/app/models/user-auth.models';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   FORM_ERROR_INVALID_EMAIL_FORMAT,
   MSG_ERROR_EMAIL_NOT_VERIFIED_DISPLAY_TEXT,
@@ -18,6 +19,7 @@ import {
   MILLISECONDS_SHOW_RED_ALERT_THEME,
 } from 'src/app/shared/constants/timings.constants';
 import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
+import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
 
@@ -46,7 +48,9 @@ export class LoginComponent {
     private renderer: Renderer2,
     private el: ElementRef,
     private redAlertThemeService: RedAlertThemeService,
+    private routingService: RoutingService,
   ) {}
+  appRoutes = APP_ROUTES;
 
   onLogin() {
     const credentials: LoginCredentials = {
@@ -118,5 +122,9 @@ export class LoginComponent {
       this.renderer,
       this.el.nativeElement,
     );
+  }
+
+  getRouteLink(route: string): string {
+    return this.routingService.getLink(route);
   }
 }

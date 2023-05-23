@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { FORM_ERROR_INVALID_EMAIL_FORMAT } from 'src/app/shared/constants/error-messages.constants';
 import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
+import { RoutingService } from 'src/app/shared/services/routing.service';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -14,11 +16,16 @@ export class ResetPasswordRequestComponent {
   errorMessage = '';
   successMessage = '';
   inputsValid = false;
+  appRoutes = APP_ROUTES;
 
   // Allow contstants to be used in the HTML
   errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private routingService: RoutingService,
+  ) {}
 
   validateEmail(email: string): boolean {
     return EMAIL_PATTERN.test(email);
@@ -57,5 +64,9 @@ export class ResetPasswordRequestComponent {
         }
       },
     );
+  }
+
+  getRouteLink(route: string): string {
+    return this.routingService.getLink(route);
   }
 }
