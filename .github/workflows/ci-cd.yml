@@ -22,10 +22,12 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - id: commit
         run: |
-          commit=$(git log --format=%B -n 1 ${{ github.event.after }})
+          commit=$(git log --format=%B -n 1)
           echo "commit: $commit"
           if [[ "$commit" == *"${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
             echo "::set-output name=skip::true"
