@@ -19,6 +19,7 @@ jobs:
     # Check commit message
     outputs:
       skip: ${{ steps.commit.outputs.skip }}
+      branch: ${{ steps.branch.outputs.branch }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -35,6 +36,10 @@ jobs:
             echo "::set-output name=skip::false"
           fi
 
+      - id: branch
+        run: |
+          echo "::set-output name=branch::${{ github.head_ref }}"
+
   main:
     needs: prerequisite_check
     if: needs.prerequisite_check.outputs.skip != 'true'
@@ -44,7 +49,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ needs.prerequisite_check.outputs.branch }}
 
       - name: Setup project
         uses: ./.github/actions/setup-project
