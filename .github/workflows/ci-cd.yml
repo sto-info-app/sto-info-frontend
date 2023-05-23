@@ -71,14 +71,20 @@ jobs:
       - name: Run Tests
         run: npm run test
 
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
+          fetch-depth: 0 # Fetch all history to enable proper commit and push
+
       - name: Bump Version and Push Changes Back (Only for pull requests)
         if: github.event_name == 'pull_request'
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
-          git checkout "${{ needs.prerequisite_check.outputs.branch }}"
           npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }}"
-          git push origin "${{ needs.prerequisite_check.outputs.branch }}"
+          git push
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
