@@ -43,7 +43,7 @@ jobs:
           echo "::set-output name=branch::$(echo ${GITHUB_HEAD_REF})"
         shell: bash
 
-  main:
+  test:
     needs: prerequisite_check
     if: needs.prerequisite_check.outputs.skip != 'true'
     runs-on: ubuntu-latest
@@ -71,12 +71,27 @@ jobs:
       - name: Run Tests
         run: npm run test
 
+  version_bump:
+    needs: [prerequisite_check, test]
+    if: needs.prerequisite_check.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
 
       - name: Bump Version and Push Changes Back (Only for pull requests)
         if: github.event_name == 'pull_request'
@@ -87,6 +102,28 @@ jobs:
           git push
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+
+  build_and_deploy:
+    needs: [prerequisite_check, version_bump]
+    if: needs.prerequisite_check.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
+          fetch-depth: 0 # Fetch all history to enable proper commit and push
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
 
       - name: Build Angular Project
         run: npm run build
