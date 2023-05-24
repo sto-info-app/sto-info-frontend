@@ -115,6 +115,9 @@ jobs:
       - name: Clear npm cache
         run: npm cache clean --force
 
+      - name: Remove node_modules
+        run: rm -rf node_modules
+
   build_and_deploy:
     needs: [prerequisite_check, version_bump]
     if: needs.prerequisite_check.outputs.skip != 'true'
@@ -152,12 +155,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
-      - name: Load & cache dependencies
-        uses: ./.github/actions/cached-dependencies
+      # - name: Load & cache dependencies
+      #   uses: ./.github/actions/cached-dependencies
       # - name: Reinstall dependencies
       #   run: |
       #     rm -rf node_modules
       #     npm install
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Build Angular Project
         run: npm run build
