@@ -21,21 +21,14 @@ jobs:
       skip: ${{ steps.commit.outputs.skip }}
       branch: ${{ steps.get-branch-name.outputs.branch }}
     steps:
-      - name: Output GitHub variables
-        run: |
-          echo "Repository: ${{ github.repository }}"
-          echo "Base Ref: ${{ github.event.pull_request.base.ref }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Ref Name: ${{ github.ref_name }}"
-
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - id: commit
+        name: Get commit message
         run: |
-          echo "GET COMMIT MESSAGE"
           COMMIT_MESSAGE=$(git log --no-merges -1 --format=%B)
           echo "Current commit message: $COMMIT_MESSAGE"
           if [[ "$COMMIT_MESSAGE" == *"${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
@@ -43,11 +36,18 @@ jobs:
           else
             echo "::set-output name=skip::false"
           fi
+        shell: bash
 
       - id: get-branch-name
+        name: Get branch name
         run: |
-          echo "GET BRANCH NAME"
-          echo "::set-output name=branch::$(echo ${GITHUB_HEAD_REF})"
+          branch_name=$(echo ${GITHUB_HEAD_REF})
+          if [ -z "$branch_name" ]
+          then
+            branch_name=$(echo "${{ github.head_ref }}")
+          fi
+          echo "Branch name is: $branch_name"
+          echo "::set-output name=branch::$branch_name"
         shell: bash
 
   test:
@@ -88,7 +88,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          # ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
 
       - name: Bump Version and Push Changes Back (Only for pull requests)
@@ -105,32 +104,51 @@ jobs:
     if: needs.prerequisite_check.outputs.skip != 'true'
     runs-on: ubuntu-latest
 
+    #NOTE: Do not use custom actions for project setup, cache and dependencies, as the new version number will not get used in the build process.
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
 
-      - name: Setup project
-        uses: ./.github/actions/setup-project
+      - name: Checkout branch
+        run: |
+          branch_name="${{ needs.prerequisite_check.outputs.branch }}"
+          if [ -n "$branch_name" ]
+          then
+            echo "Checking out branch $branch_name"
+            git checkout "$branch_name"
+          else
+            echo "Checking out default branch"
+            git checkout master
+          fi
+        shell: bash
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
-      - name: Load & cache dependencies
-        uses: ./.github/actions/cached-dependencies
+      - name: Setup .npmrc file to publish to npm
+        run: |
+          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}" > .npmrc
+        shell: bash
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build Angular Project
         run: npm run build
-
-      - name: Output GitHub variables
-        run: |
-          echo "Repository: ${{ github.repository }}"
-          echo "Base Ref: ${{ github.event.pull_request.base.ref }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Ref Name: ${{ github.ref_name }}"
 
       - name: Deploy to S3 (Development)
         if: github.event.pull_request.base.ref == 'development'
