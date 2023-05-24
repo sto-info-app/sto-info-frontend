@@ -118,6 +118,11 @@ jobs:
       - name: Build Angular Project
         run: npm run build
 
+      - name: Output GitHub variables
+        run: |
+          echo "Repository: ${{ env.GITHUB_REPOSITORY }}"
+          echo "Ref: ${{ env.GITHUB_REF }}"
+
       - name: Deploy to S3 (Development)
         if: github.ref == 'refs/heads/development'
         uses: jakejarvis/s3-sync-action@master
