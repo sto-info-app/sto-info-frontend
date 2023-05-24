@@ -109,8 +109,9 @@ jobs:
           git config --global user.email "github-actions@github.com"
           echo "Before version bump: $(git rev-parse HEAD)"
           npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }}"
-          echo "After version bump: $(git rev-parse HEAD)"
           git push origin HEAD:${{ needs.prerequisite_check.outputs.branch }}
+          npm install
+          echo "After version bump: $(git rev-parse HEAD)"
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
@@ -151,12 +152,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
-      # - name: Load & cache dependencies
-      #   uses: ./.github/actions/cached-dependencies
-      - name: Reinstall dependencies
-        run: |
-          rm -rf node_modules
-          npm install
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+      # - name: Reinstall dependencies
+      #   run: |
+      #     rm -rf node_modules
+      #     npm install
 
       - name: Build Angular Project
         run: npm run build
