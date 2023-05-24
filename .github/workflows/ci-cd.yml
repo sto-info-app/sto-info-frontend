@@ -24,6 +24,7 @@ jobs:
       - name: Output GitHub variables
         run: |
           echo "Repository: ${{ github.repository }}"
+          echo "Base Ref: ${{ github.event.pull_request.base.ref }}"
           echo "Ref: ${{ github.ref }}"
           echo "Ref Name: ${{ github.ref_name }}"
 
@@ -127,6 +128,7 @@ jobs:
       - name: Output GitHub variables
         run: |
           echo "Repository: ${{ github.repository }}"
+          echo "Base Ref: ${{ github.event.pull_request.base.ref }}"
           echo "Ref: ${{ github.ref }}"
           echo "Ref Name: ${{ github.ref_name }}"
 
