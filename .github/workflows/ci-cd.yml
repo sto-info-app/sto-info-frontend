@@ -146,8 +146,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
-      - name: Load & cache dependencies
-        uses: ./.github/actions/cached-dependencies
+      # - name: Load & cache dependencies
+      #   uses: ./.github/actions/cached-dependencies
+      - name: Reinstall Dependencies
+        run: |
+          npm ci
 
       - name: Build Angular Project
         run: npm run build
