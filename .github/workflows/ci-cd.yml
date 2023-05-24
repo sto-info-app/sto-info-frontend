@@ -136,7 +136,7 @@ jobs:
         if: github.event.pull_request.base.ref == 'development'
         uses: jakejarvis/s3-sync-action@master
         with:
-          args: --acl public-read --follow-symlinks --delete
+          args: --follow-symlinks --delete
         env:
           AWS_S3_BUCKET: dev.startrekonline.info
           AWS_REGION: eu-west-2
