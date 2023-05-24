@@ -31,7 +31,7 @@ jobs:
         run: |
           COMMIT_MESSAGE=$(git log --no-merges -1 --format=%B)
           echo "Current commit message: $COMMIT_MESSAGE"
-          if [[ "$COMMIT_MESSAGE" == *"${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
+          if [[ "$COMMIT_MESSAGE" == "${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
             echo "::set-output name=skip::true"
           else
             echo "::set-output name=skip::false"
@@ -90,11 +90,16 @@ jobs:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
 
+      - id: old-app-ver
+        name: Get Old App Version
+        run: echo "::set-output name=version::$(jq -r '.version' package.json)"
+        shell: bash
+
       - name: Bump Version and Push Changes Back (Only for pull requests)
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
-          npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }}"
+          npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }} from ${{ steps.old-app-ver.outputs.version }} to %s"
           git push origin HEAD:${{ needs.prerequisite_check.outputs.branch }}
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
