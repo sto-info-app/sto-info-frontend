@@ -107,13 +107,13 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
-          echo "Before version bump: $(git rev-parse HEAD)"
           npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }}"
           git push origin HEAD:${{ needs.prerequisite_check.outputs.branch }}
-          npm install
-          echo "After version bump: $(git rev-parse HEAD)"
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+
+      - name: Clear npm cache
+        run: npm cache clean --force
 
   build_and_deploy:
     needs: [prerequisite_check, version_bump]
