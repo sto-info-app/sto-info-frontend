@@ -85,15 +85,6 @@ jobs:
           # ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
 
-      # - name: Setup project
-      #   uses: ./.github/actions/setup-project
-      #   with:
-      #     node-version: ${{ env.NODE_VERSION }}
-      #     fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
-
-      # - name: Load & cache dependencies
-      #   uses: ./.github/actions/cached-dependencies
-
       - name: Bump Version and Push Changes Back (Only for pull requests)
         run: |
           git config --global user.name "GitHub Actions"
