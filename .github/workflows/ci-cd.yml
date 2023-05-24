@@ -93,7 +93,6 @@ jobs:
       - id: old-app-ver
         name: Get Old App Version
         run: echo "::set-output name=version::$(jq -r '.version' package.json)"
-        shell: bash
 
       - name: Bump Version and Push Changes Back (Only for pull requests)
         run: |
