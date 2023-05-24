@@ -35,8 +35,8 @@ jobs:
           fetch-depth: 0
 
       - id: commit
+        name: Get commit message
         run: |
-          echo "GET COMMIT MESSAGE"
           COMMIT_MESSAGE=$(git log --no-merges -1 --format=%B)
           echo "Current commit message: $COMMIT_MESSAGE"
           if [[ "$COMMIT_MESSAGE" == *"${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
@@ -44,17 +44,22 @@ jobs:
           else
             echo "::set-output name=skip::false"
           fi
+        shell: bash
 
       - id: get-angular-version
+        name: Get Angular version
         run: |
-          echo "GET ANGULAR VERSION"
-          echo "::set-output name=angular_version::$(node -p "require('./package.json').version")"
+          angular_version=$(node -p "require('./package.json').version")
+          echo "Angular version is: $angular_version"
+          echo "::set-output name=angular_version::$angular_version"
         shell: bash
 
       - id: get-branch-name
+        name: Get branch name
         run: |
-          echo "GET BRANCH NAME"
-          echo "::set-output name=branch::$(echo ${GITHUB_HEAD_REF})"
+          branch_name=$(echo ${GITHUB_HEAD_REF})
+          echo "Branch name is: $branch_name"
+          echo "::set-output name=branch::$branch_name"
         shell: bash
 
   test:
