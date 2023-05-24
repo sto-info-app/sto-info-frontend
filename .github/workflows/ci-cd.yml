@@ -135,8 +135,21 @@ jobs:
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          ref: ${{ needs.prerequisite_check.outputs.branch }}
+          # ref: ${{ needs.prerequisite_check.outputs.branch }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
+
+      - name: Checkout branch
+        run: |
+          branch_name="${{ needs.prerequisite_check.outputs.branch }}"
+          if [ -n "$branch_name" ]
+          then
+            echo "Checking out branch $branch_name"
+            git checkout "$branch_name"
+          else
+            echo "Checking out default branch"
+            git checkout master
+          fi
+        shell: bash
 
       - name: Print package.json
         run: cat package.json
