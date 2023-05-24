@@ -21,6 +21,12 @@ jobs:
       skip: ${{ steps.commit.outputs.skip }}
       branch: ${{ steps.get-branch-name.outputs.branch }}
     steps:
+      - name: Output GitHub variables
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Ref Name: ${{ github.ref_name }}"
+
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
@@ -120,8 +126,9 @@ jobs:
 
       - name: Output GitHub variables
         run: |
-          echo "Repository: ${{ env.GITHUB_REPOSITORY }}"
-          echo "Ref: ${{ env.GITHUB_REF }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Ref Name: ${{ github.ref_name }}"
 
       - name: Deploy to S3 (Development)
         if: github.ref == 'refs/heads/development'
