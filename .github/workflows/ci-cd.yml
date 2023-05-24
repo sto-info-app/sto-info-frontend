@@ -153,8 +153,10 @@ jobs:
 
       # - name: Load & cache dependencies
       #   uses: ./.github/actions/cached-dependencies
-      - name: Install Dependencies
-        run: npm install
+      - name: Reinstall dependencies
+        run: |
+          rm -rf node_modules
+          npm install
 
       - name: Build Angular Project
         run: npm run build
