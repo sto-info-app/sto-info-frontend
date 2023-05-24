@@ -112,12 +112,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
-      - name: Clear npm cache
-        run: npm cache clean --force
-
-      - name: Remove node_modules
-        run: rm -rf node_modules
-
   build_and_deploy:
     needs: [prerequisite_check, version_bump]
     if: needs.prerequisite_check.outputs.skip != 'true'
@@ -161,6 +155,12 @@ jobs:
       #   run: |
       #     rm -rf node_modules
       #     npm install
+
+      - name: Clear npm cache
+        run: npm cache clean --force
+
+      - name: Remove node_modules
+        run: rm -rf node_modules
 
       - name: Install dependencies
         run: npm install
