@@ -151,6 +151,27 @@ jobs:
           fi
         shell: bash
 
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup .npmrc file to publish to npm
+        run: |
+          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}" > .npmrc
+        shell: bash
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Print package.json
         run: cat package.json
 
@@ -160,11 +181,11 @@ jobs:
           echo "Angular version is: $angular_version"
         shell: bash
 
-      - name: Setup project
-        uses: ./.github/actions/setup-project
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+      # - name: Setup project
+      #   uses: ./.github/actions/setup-project
+      #   with:
+      #     node-version: ${{ env.NODE_VERSION }}
+      #     fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       # - name: Load & cache dependencies
       #   uses: ./.github/actions/cached-dependencies
@@ -173,14 +194,14 @@ jobs:
       #     rm -rf node_modules
       #     npm install
 
-      - name: Clear npm cache
-        run: npm cache clean --force
+      # - name: Clear npm cache
+      #   run: npm cache clean --force
 
-      - name: Remove node_modules
-        run: rm -rf node_modules
+      # - name: Remove node_modules
+      #   run: rm -rf node_modules
 
-      - name: Install dependencies
-        run: npm install
+      # - name: Install dependencies
+      #   run: npm install
 
       - name: Build Angular Project
         run: npm run build
