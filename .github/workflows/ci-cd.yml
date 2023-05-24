@@ -20,6 +20,7 @@ jobs:
     outputs:
       skip: ${{ steps.commit.outputs.skip }}
       branch: ${{ steps.get-branch-name.outputs.branch }}
+      angular_version: ${{ steps.get-angular-version.outputs.angular_version }}
     steps:
       - name: Output GitHub variables
         run: |
@@ -43,6 +44,10 @@ jobs:
           else
             echo "::set-output name=skip::false"
           fi
+
+      - id: get-angular-version
+        run: |
+          echo "::set-output name=angular_version::$(node -p "require('./package.json').version")"
 
       - id: get-branch-name
         run: |
