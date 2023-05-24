@@ -1,9 +1,5 @@
 name: CI/CD
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
-
 on:
   push:
     branches:
@@ -25,11 +21,6 @@ jobs:
       skip: ${{ steps.commit.outputs.skip }}
       branch: ${{ steps.get-branch-name.outputs.branch }}
     steps:
-      - name: Output GitHub variables
-        run: |
-          echo "Actor: ${{ github.actor }}"
-        shell: bash
-
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
@@ -96,17 +87,17 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GH_SC_PAT_REPO_TOKEN }}
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
 
       - name: Bump Version and Push Changes Back (Only for pull requests)
         run: |
-          git config --global user.name "Shadow Computers"
-          git config --global user.email "github@shadowcomputers.co.uk"
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
           npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }}"
           git push origin HEAD:${{ needs.prerequisite_check.outputs.branch }}
         env:
-          GH_TOKEN: ${{ secrets.GH_SC_PAT_REPO_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
   build_and_deploy:
     needs: [prerequisite_check, version_bump]
