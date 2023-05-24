@@ -155,7 +155,7 @@ jobs:
         run: npm run build
 
       - name: Deploy to S3 (Development)
-        if: github.event.pull_request.base.ref == 'development_disable'
+        if: github.event.pull_request.base.ref == 'development'
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --follow-symlinks --delete
