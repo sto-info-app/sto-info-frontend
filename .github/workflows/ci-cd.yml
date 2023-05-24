@@ -47,7 +47,9 @@ jobs:
 
       - id: get-angular-version
         run: |
+          echo "GET ANGULAR VERSION"
           echo "::set-output name=angular_version::$(node -p "require('./package.json').version")"
+        shell: bash
 
       - id: get-branch-name
         run: |
