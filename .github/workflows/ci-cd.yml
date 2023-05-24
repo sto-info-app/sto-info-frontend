@@ -20,6 +20,7 @@ jobs:
     outputs:
       skip: ${{ steps.commit.outputs.skip }}
       branch: ${{ steps.get-branch-name.outputs.branch }}
+      angular_version: ${{ steps.get-angular-version.outputs.angular_version }}
     steps:
       - name: Output GitHub variables
         run: |
@@ -43,6 +44,12 @@ jobs:
           else
             echo "::set-output name=skip::false"
           fi
+
+      - id: get-angular-version
+        run: |
+          echo "GET ANGULAR VERSION"
+          echo "::set-output name=angular_version::$(node -p "require('./package.json').version")"
+        shell: bash
 
       - id: get-branch-name
         run: |
@@ -106,11 +113,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Output GitHub variables
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Base Ref: ${{ github.event.pull_request.base.ref }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Ref Name: ${{ github.ref_name }}"
+          echo "Prerequisite Branch: ${{ needs.prerequisite_check.outputs.branch }}"
+          echo "Event Name: ${{ github.event_name }}"
+
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
+          ref: ${{ needs.prerequisite_check.outputs.branch }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
 
       - name: Setup project
@@ -124,13 +140,6 @@ jobs:
 
       - name: Build Angular Project
         run: npm run build
-
-      - name: Output GitHub variables
-        run: |
-          echo "Repository: ${{ github.repository }}"
-          echo "Base Ref: ${{ github.event.pull_request.base.ref }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Ref Name: ${{ github.ref_name }}"
 
       - name: Deploy to S3 (Development)
         if: github.event.pull_request.base.ref == 'development'
