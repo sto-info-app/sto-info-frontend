@@ -20,6 +20,7 @@ jobs:
     outputs:
       skip: ${{ steps.commit.outputs.skip }}
       branch: ${{ steps.get-branch-name.outputs.branch }}
+      angular_version: ${{ steps.get-angular-version.outputs.angular_version }}
     steps:
       - name: Output GitHub variables
         run: |
@@ -34,8 +35,8 @@ jobs:
           fetch-depth: 0
 
       - id: commit
+        name: Get commit message
         run: |
-          echo "GET COMMIT MESSAGE"
           COMMIT_MESSAGE=$(git log --no-merges -1 --format=%B)
           echo "Current commit message: $COMMIT_MESSAGE"
           if [[ "$COMMIT_MESSAGE" == *"${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
@@ -43,11 +44,26 @@ jobs:
           else
             echo "::set-output name=skip::false"
           fi
+        shell: bash
+
+      - id: get-angular-version
+        name: Get Angular version
+        run: |
+          angular_version=$(node -p "require('./package.json').version")
+          echo "Angular version is: $angular_version"
+          echo "::set-output name=angular_version::$angular_version"
+        shell: bash
 
       - id: get-branch-name
+        name: Get branch name
         run: |
-          echo "GET BRANCH NAME"
-          echo "::set-output name=branch::$(echo ${GITHUB_HEAD_REF})"
+          branch_name=$(echo ${GITHUB_HEAD_REF})
+          if [ -z "$branch_name" ]
+          then
+            branch_name=$(echo "${{ github.head_ref }}")
+          fi
+          echo "Branch name is: $branch_name"
+          echo "::set-output name=branch::$branch_name"
         shell: bash
 
   test:
@@ -106,31 +122,89 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
-          fetch-depth: 0 # Fetch all history to enable proper commit and push
-
-      - name: Setup project
-        uses: ./.github/actions/setup-project
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
-
-      - name: Load & cache dependencies
-        uses: ./.github/actions/cached-dependencies
-
-      - name: Build Angular Project
-        run: npm run build
-
       - name: Output GitHub variables
         run: |
           echo "Repository: ${{ github.repository }}"
           echo "Base Ref: ${{ github.event.pull_request.base.ref }}"
           echo "Ref: ${{ github.ref }}"
           echo "Ref Name: ${{ github.ref_name }}"
+          echo "Prerequisite Branch: ${{ needs.prerequisite_check.outputs.branch }}"
+          echo "Event Name: ${{ github.event_name }}"
+
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          # ref: ${{ needs.prerequisite_check.outputs.branch }}
+          fetch-depth: 0 # Fetch all history to enable proper commit and push
+
+      - name: Checkout branch
+        run: |
+          branch_name="${{ needs.prerequisite_check.outputs.branch }}"
+          if [ -n "$branch_name" ]
+          then
+            echo "Checking out branch $branch_name"
+            git checkout "$branch_name"
+          else
+            echo "Checking out default branch"
+            git checkout master
+          fi
+        shell: bash
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup .npmrc file to publish to npm
+        run: |
+          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}" > .npmrc
+        shell: bash
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Print package.json
+        run: cat package.json
+
+      - name: Get Angular version
+        run: |
+          angular_version=$(node -p "require('./package.json').version")
+          echo "Angular version is: $angular_version"
+        shell: bash
+
+      # - name: Setup project
+      #   uses: ./.github/actions/setup-project
+      #   with:
+      #     node-version: ${{ env.NODE_VERSION }}
+      #     fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      # - name: Load & cache dependencies
+      #   uses: ./.github/actions/cached-dependencies
+      # - name: Reinstall dependencies
+      #   run: |
+      #     rm -rf node_modules
+      #     npm install
+
+      # - name: Clear npm cache
+      #   run: npm cache clean --force
+
+      # - name: Remove node_modules
+      #   run: rm -rf node_modules
+
+      # - name: Install dependencies
+      #   run: npm install
+
+      - name: Build Angular Project
+        run: npm run build
 
       - name: Deploy to S3 (Development)
         if: github.event.pull_request.base.ref == 'development'
