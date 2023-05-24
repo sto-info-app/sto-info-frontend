@@ -14,8 +14,8 @@ runs:
     - name: Install dependencies
       run: |
         if [[ "${{ steps.cache.outputs.cache-hit }}" == "true" ]]; then
-          npm install
-        else
           npm ci
+        else
+          npm install
         fi
       shell: bash

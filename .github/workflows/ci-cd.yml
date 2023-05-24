@@ -1,0 +1,142 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - 'development'
+
+env:
+  NODE_VERSION: 18
+  BUMP_VERSION_COMMIT_MSG: 'Bump version number'
+
+jobs:
+  prerequisite_check:
+    runs-on: ubuntu-latest
+
+    # Check commit message
+    outputs:
+      skip: ${{ steps.commit.outputs.skip }}
+      branch: ${{ steps.get-branch-name.outputs.branch }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - id: commit
+        run: |
+          echo "GET COMMIT MESSAGE"
+          COMMIT_MESSAGE=$(git log --no-merges -1 --format=%B)
+          echo "Current commit message: $COMMIT_MESSAGE"
+          if [[ "$COMMIT_MESSAGE" == *"${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
+            echo "::set-output name=skip::true"
+          else
+            echo "::set-output name=skip::false"
+          fi
+
+      - id: get-branch-name
+        run: |
+          echo "GET BRANCH NAME"
+          echo "::set-output name=branch::$(echo ${GITHUB_HEAD_REF})"
+        shell: bash
+
+  test:
+    needs: prerequisite_check
+    if: needs.prerequisite_check.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
+          fetch-depth: 0 # Fetch all history to enable proper commit and push
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm run test
+
+  version_bump:
+    # needs: [prerequisite_check, test]
+    needs: [prerequisite_check]
+    if: needs.prerequisite_check.outputs.skip != 'true' && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          # ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
+          fetch-depth: 0 # Fetch all history to enable proper commit and push
+
+      - name: Bump Version and Push Changes Back (Only for pull requests)
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+          npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }}"
+          git push origin HEAD:${{ needs.prerequisite_check.outputs.branch }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+
+  build_and_deploy:
+    needs: [prerequisite_check, version_bump]
+    if: needs.prerequisite_check.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
+          fetch-depth: 0 # Fetch all history to enable proper commit and push
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+
+      - name: Build Angular Project
+        run: npm run build
+
+      - name: Deploy to S3 (Development)
+        if: github.ref == 'refs/heads/development'
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks --delete
+          path: dist/sto-info-frontend/
+          bucket: dev.startrekonline.info
+          region: eu-west-2
+          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Deploy to S3 (Production)
+        if: github.ref == 'refs/heads/master'
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks --delete
+          path: dist/sto-info-frontend/
+          bucket: startrekonline.info
+          region: eu-west-2
+          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
