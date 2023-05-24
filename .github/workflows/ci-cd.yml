@@ -58,6 +58,10 @@ jobs:
         name: Get branch name
         run: |
           branch_name=$(echo ${GITHUB_HEAD_REF})
+          if [ -z "$branch_name" ]
+          then
+            branch_name=$(echo "${{ github.head_ref }}")
+          fi
           echo "Branch name is: $branch_name"
           echo "::set-output name=branch::$branch_name"
         shell: bash
