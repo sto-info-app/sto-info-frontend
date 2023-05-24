@@ -97,7 +97,7 @@ jobs:
           npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }}"
           git push origin HEAD:${{ needs.prerequisite_check.outputs.branch }}
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build_and_deploy:
     needs: [prerequisite_check, version_bump]
