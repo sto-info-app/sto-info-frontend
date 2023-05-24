@@ -72,8 +72,7 @@ jobs:
         run: npm run test
 
   version_bump:
-    # needs: [prerequisite_check, test]
-    needs: [prerequisite_check]
+    needs: [prerequisite_check, test]
     if: needs.prerequisite_check.outputs.skip != 'true' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
