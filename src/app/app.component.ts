@@ -23,6 +23,7 @@ export class AppComponent implements AfterViewInit {
   scrollTopButton!: ElementRef;
 
   appTitle = environment.appTitle;
+  appTitleTestTag = '';
   appVersion = environment.version;
   appRoutes = APP_ROUTES;
 
@@ -45,7 +46,15 @@ export class AppComponent implements AfterViewInit {
     private renderer: Renderer2,
     private el: ElementRef,
   ) {
-    this.titleService.setTitle(environment.appTitle);
+    // Tags to add to titles to help identify the environment in use
+    if (environment.env_name === 'local') this.appTitleTestTag = ' [Local Dev]';
+    if (environment.env_name === 'dev') this.appTitleTestTag = ' [Dev]';
+
+    this.titleService.setTitle(
+      (environment.appTitle
+        ? environment.appTitle
+        : 'Star Trek Online Info Portal') + this.appTitleTestTag,
+    );
     this.currentYear = new Date().getFullYear();
     this.dataCascade = this.createDynamicDataCascade(8, 7, 3, 6);
   }
