@@ -666,10 +666,6 @@ a {
   margin-top: 10px;
 }
 
-.lcars-main-content-container {
-  min-height: 100%;
-}
-
 .random-lcars-ref {
   padding: 20px 10px 0 0;
   display: block;
@@ -715,8 +711,14 @@ a {
 }
 
 .right-frame {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   background-color: #0d0d0d;
+}
+
+main {
+  flex-grow: 1;
 }
 
 .corner-bg {
@@ -1175,14 +1177,14 @@ button:hover {
 
 footer {
   display: flex;
-  bottom: 0;
-  margin: 50px auto 0 15px;
+  margin: 50px auto 10px 15px;
   padding: 12px 0;
   background: linear-gradient(#58e 50%, #455580 50%);
   border-radius: 0 20px 20px 0;
   overflow: hidden;
-  position: relative;
+  position: sticky;
   z-index: 1;
+  width: 100%;
 }
 
 footer::before {
