@@ -22,7 +22,7 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {
     // Check if there's a login token and update the BehaviorSubject
-    this.isAuthenticatedSubject.next(!!this.getToken());
+    this.isAuthenticatedSubject.next(this.isTokenValid());
   }
 
   register(user: RegistrationFormValues) {
