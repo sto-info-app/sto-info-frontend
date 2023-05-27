@@ -62,6 +62,11 @@ export class AuthService {
     localStorage.setItem('access_token', token);
     localStorage.setItem('expires_at', expiresAt.toString());
     this.isAuthenticatedSubject.next(true);
+
+    // Start a timer to automatically remove the token when it expires
+    setTimeout(() => {
+      this.removeToken();
+    }, expiresIn * 1000);
   }
 
   getToken(): string | null {
