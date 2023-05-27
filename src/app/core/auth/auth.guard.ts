@@ -20,9 +20,9 @@ export class AuthGuard {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     state: RouterStateSnapshot,
   ): boolean | Observable<boolean> | Promise<boolean> {
-    const token = this.authService.getToken();
+    const tokenIsValid = this.authService.isTokenValid();
 
-    if (token) {
+    if (tokenIsValid) {
       // The user is authenticated, and canActivate returns true
       return true;
     } else {
