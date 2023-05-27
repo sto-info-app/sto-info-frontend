@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import { BehaviorSubject, Observable, map, tap } from 'rxjs';
 import {
   ChangePasswordValues,
   LoginCredentials,
@@ -30,10 +30,13 @@ export class AuthService {
   }
 
   login(credentials: LoginCredentials): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(
-      `${this.apiUrl}/auth/login`,
-      credentials,
-    );
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials)
+      .pipe(
+        tap(response => {
+          this.saveToken(response.access_token, response.expires_in);
+        }),
+      );
   }
 
   logout() {
@@ -54,18 +57,38 @@ export class AuthService {
     return { headers };
   }
 
-  saveToken(token: string) {
+  saveToken(token: string, expiresIn: number) {
+    const expiresAt = Date.now() + expiresIn * 1000;
     localStorage.setItem('access_token', token);
+    localStorage.setItem('expires_at', expiresAt.toString());
     this.isAuthenticatedSubject.next(true);
   }
 
   getToken(): string | null {
+    if (!this.isTokenValid()) {
+      // Token is expired or does not exist
+      this.removeToken();
+      return null;
+    }
+    // Token exists and is not expired
     return localStorage.getItem('access_token');
   }
 
   removeToken() {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('expires_at');
     this.isAuthenticatedSubject.next(false);
+  }
+
+  isTokenValid(): boolean {
+    const token = localStorage.getItem('access_token');
+    const expiresAt = localStorage.getItem('expires_at');
+
+    if (!token || !expiresAt) {
+      return false;
+    }
+
+    return Date.now() < Number(expiresAt);
   }
 
   performLogout() {
@@ -74,7 +97,7 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('access_token');
+    return this.isTokenValid();
   }
 
   resetPassword(email: string): Observable<void> {

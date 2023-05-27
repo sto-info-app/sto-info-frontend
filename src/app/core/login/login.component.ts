@@ -60,7 +60,7 @@ export class LoginComponent {
 
     this.authService.login(credentials).subscribe({
       next: (response: LoginResponse) => {
-        this.authService.saveToken(response.access_token);
+        this.authService.saveToken(response.access_token, response.expires_in);
         this.router.navigate([this.appLoggedInHome]);
       },
       error: (error: HttpErrorResponse) => {
@@ -80,15 +80,12 @@ export class LoginComponent {
             errMessage = error.error.message;
             break;
         }
-        // console.error('Login error:', errMessage);
         this.displayErrorMessage(errMessage);
       },
       complete: () => {
-        // console.log('Login complete');
         this.resetErrorMessage();
       },
     });
-    //TODO: Delete console logging!
   }
 
   displayErrorMessage(message: string) {
