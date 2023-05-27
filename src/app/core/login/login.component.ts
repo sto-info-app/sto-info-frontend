@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ElementRef, Renderer2 } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   LoginCredentials,
   LoginResponse,
@@ -44,6 +44,7 @@ export class LoginComponent {
 
   constructor(
     private authService: AuthService,
+    private route: ActivatedRoute,
     private router: Router,
     private renderer: Renderer2,
     private el: ElementRef,
@@ -61,7 +62,11 @@ export class LoginComponent {
     this.authService.login(credentials).subscribe({
       next: (response: LoginResponse) => {
         this.authService.saveToken(response.access_token, response.expires_in);
-        this.router.navigate([this.appLoggedInHome]);
+
+        // Get the URL the user was originally trying to access
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        // If there's a return URL, navigate to it. Otherwise, navigate to a default page.
+        this.router.navigate([returnUrl || this.appLoggedInHome]);
       },
       error: (error: HttpErrorResponse) => {
         let errMessage = '';

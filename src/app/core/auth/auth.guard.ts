@@ -27,7 +27,10 @@ export class AuthGuard {
       return true;
     } else {
       // The user is not authenticated, canActivate returns false and redirects to the login page
-      this.router.navigate(['/login']);
+      // Pass the URL they were trying to access as a query parameter
+      this.router.navigate(['/login'], {
+        queryParams: { returnUrl: state.url },
+      });
       return false;
     }
   }
