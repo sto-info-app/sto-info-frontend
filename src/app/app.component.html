@@ -23,7 +23,7 @@
             (click)="logout()"
             >Logout
             <span *ngIf="autoLogoutCountdown > 0">
-              in {{ autoLogoutCountdown * 1000 | date : 'mm:ss' }}</span
+              in {{ autoLogoutCountdown | timeFormat }}</span
             ></a
           >
         </div>

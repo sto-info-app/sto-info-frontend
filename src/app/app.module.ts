@@ -27,6 +27,7 @@ import { LcarsInformationMessageComponent } from './shared/components/lcars-info
 import { LcarsSuccessMessageComponent } from './shared/components/lcars-success-message/lcars-success-message.component';
 import { LcarsWarningMessageComponent } from './shared/components/lcars-warning-message/lcars-warning-message.component';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
+import { TimeFormatPipe } from './shared/pipes/time-format.pipe';
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
@@ -59,6 +60,7 @@ export function tokenGetter() {
     PageNotFoundComponent,
     LcarsWarningMessageComponent,
     RefreshSessionDialogComponent,
+    TimeFormatPipe,
   ],
   imports: [
     BrowserModule,
@@ -77,6 +79,7 @@ export function tokenGetter() {
     FontAwesomeModule,
     MatDialogModule,
   ],
+  exports: [TimeFormatPipe],
   providers: [
     {
       provide: 'API_URL',

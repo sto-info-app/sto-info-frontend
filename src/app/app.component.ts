@@ -224,6 +224,7 @@ export class AppComponent implements AfterViewInit {
     // Open a warning dialog
     this.dialogRef = this.dialog.open(RefreshSessionDialogComponent, {
       hasBackdrop: true,
+      data: { appComponent: this },
     });
 
     // Handle the result (if any action needed)

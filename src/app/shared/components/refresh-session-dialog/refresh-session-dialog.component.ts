@@ -1,5 +1,10 @@
-import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { Component, Inject, Optional } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { AppComponent } from 'src/app/app.component';
+
+export interface DialogData {
+  countdownSeconds: number;
+}
 
 @Component({
   selector: 'app-refresh-session-dialog',
@@ -7,7 +12,16 @@ import { MatDialogRef } from '@angular/material/dialog';
   styleUrls: ['./refresh-session-dialog.component.scss'],
 })
 export class RefreshSessionDialogComponent {
-  constructor(public dialogRef: MatDialogRef<RefreshSessionDialogComponent>) {}
+  appComponent: AppComponent;
+
+  constructor(
+    public dialogRef: MatDialogRef<RefreshSessionDialogComponent>,
+    @Optional()
+    @Inject(MAT_DIALOG_DATA)
+    public data: { appComponent: AppComponent },
+  ) {
+    this.appComponent = data.appComponent;
+  }
 
   onStayConnected(): void {
     this.dialogRef.close(true);

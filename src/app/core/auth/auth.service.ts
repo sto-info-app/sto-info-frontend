@@ -38,8 +38,7 @@ export class AuthService {
   public warningAnnounced$: Observable<number> =
     this.warningAnnouncedSubject.asObservable();
 
-  // public autoLogoutWarningMins = 5; // 5 minutes before expiration
-  public autoLogoutWarningMins = 1; // 5 minutes before expiration //TODO: remove me and enable line above after testing
+  public autoLogoutWarningMins = 5; // 5 minutes before expiration
   public autoLogoutWarningSecs = this.autoLogoutWarningMins * 60;
   public autoLogoutWarningMilliSecs = this.autoLogoutWarningSecs * 1000;
   private autoLogoutTimeout: NodeJS.Timeout | null = null;
