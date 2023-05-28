@@ -15,6 +15,7 @@ import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
 import { APP_ROUTES } from './shared/constants/app-routing.constants';
+import { DebuggingService } from './shared/services/debugging.service';
 import { RoutingService } from './shared/services/routing.service';
 
 @Component({
@@ -30,6 +31,7 @@ export class AppComponent implements AfterViewInit {
   appTitleTestTag = '';
   appVersion = environment.version;
   appRoutes = APP_ROUTES;
+  appDebugging = false;
 
   isLoggedIn = false;
   autoLogoutCountdown = 0;
@@ -49,7 +51,7 @@ export class AppComponent implements AfterViewInit {
     @Inject('API_URL') private apiUrl: string,
 
     private routingService: RoutingService,
-
+    private debuggingService: DebuggingService,
     private authService: AuthService,
     private titleService: Title,
 
@@ -63,6 +65,9 @@ export class AppComponent implements AfterViewInit {
     // Tags to add to titles to help identify the environment in use
     if (environment.env_name === 'local') this.appTitleTestTag = ' [Local Dev]';
     if (environment.env_name === 'dev') this.appTitleTestTag = ' [Dev]';
+
+    // Check debugging mode
+    this.appDebugging = this.debuggingService.allowDebugging();
 
     this.titleService.setTitle(
       (environment.appTitle
