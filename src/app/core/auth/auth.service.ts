@@ -256,4 +256,13 @@ export class AuthService {
       this.autoLogoutTimeout = null;
     }
   }
+
+  isTokenExpiringSoon(): boolean {
+    const thresholdMins = 15; // Minutes before login session expires
+    const thresholdSecs = thresholdMins * 60;
+
+    const secondsUntilExpiry = this.getSecondsUntilLoginSessionExpiry();
+
+    return secondsUntilExpiry < thresholdSecs;
+  }
 }

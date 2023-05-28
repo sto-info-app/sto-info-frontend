@@ -4,7 +4,8 @@ import {
   Router,
   RouterStateSnapshot,
 } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -20,14 +21,20 @@ export class AuthGuard {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     state: RouterStateSnapshot,
   ): boolean | Observable<boolean> | Promise<boolean> {
-    const tokenIsValid = this.authService.isTokenValid();
-
-    if (tokenIsValid) {
-      // The user is authenticated, and canActivate returns true
+    if (this.authService.isTokenValid()) {
+      if (this.authService.isTokenExpiringSoon()) {
+        return this.authService.refreshToken().pipe(
+          map(() => true),
+          catchError(() => {
+            this.router.navigate(['/login'], {
+              queryParams: { returnUrl: state.url },
+            });
+            return of(false);
+          }),
+        );
+      }
       return true;
     } else {
-      // The user is not authenticated, canActivate returns false and redirects to the login page
-      // Pass the URL they were trying to access as a query parameter
       this.router.navigate(['/login'], {
         queryParams: { returnUrl: state.url },
       });
