@@ -1,0 +1,22 @@
+<div mat-dialog-content>
+  <app-lcars-warning-message
+    message="Attention, your subspace channel will close in five minutes; please indicate if you want to stay connected."></app-lcars-warning-message>
+</div>
+<div
+  mat-dialog-actions
+  align="end">
+  <button
+    class="green"
+    mat-button
+    mat-dialog-close
+    (click)="onStayConnected()">
+    Stay connected
+  </button>
+  <button
+    class="red"
+    mat-button
+    mat-dialog-close
+    (click)="onDissmis()">
+    Dismiss
+  </button>
+</div>

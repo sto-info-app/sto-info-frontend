@@ -61,7 +61,11 @@ export class LoginComponent {
 
     this.authService.login(credentials).subscribe({
       next: (response: LoginResponse) => {
-        this.authService.saveToken(response.access_token, response.expires_in);
+        this.authService.saveToken(
+          response.access_token,
+          response.refresh_token,
+          response.expires_in,
+        );
 
         // Get the URL the user was originally trying to access
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');

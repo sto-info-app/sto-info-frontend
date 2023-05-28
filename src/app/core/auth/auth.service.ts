@@ -1,7 +1,14 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, map, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  ReplaySubject,
+  map,
+  tap,
+  throwError,
+} from 'rxjs';
 import {
   ChangePasswordValues,
   LoginCredentials,
@@ -15,14 +22,36 @@ import { environment } from 'src/environments/environment';
 })
 export class AuthService {
   private apiUrl = environment.apiUrl;
+
   private isAuthenticatedSubject: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
   public isAuthenticated$: Observable<boolean> =
     this.isAuthenticatedSubject.asObservable();
 
+  private expiryAnnouncedSubject: ReplaySubject<number> =
+    new ReplaySubject<number>(1); // Will replay the last 1 values to new subscribers
+  public expiryAnnounced$: Observable<number> =
+    this.expiryAnnouncedSubject.asObservable();
+
+  private warningAnnouncedSubject: ReplaySubject<number> =
+    new ReplaySubject<number>(1); // Will replay the last 1 values to new subscribers
+  public warningAnnounced$: Observable<number> =
+    this.warningAnnouncedSubject.asObservable();
+
+  // public autoLogoutWarningMins = 5; // 5 minutes before expiration
+  public autoLogoutWarningMins = 1; // 5 minutes before expiration //TODO: remove me and enable line above after testing
+  public autoLogoutWarningSecs = this.autoLogoutWarningMins * 60;
+  public autoLogoutWarningMilliSecs = this.autoLogoutWarningSecs * 1000;
+  private autoLogoutTimeout: NodeJS.Timeout | null = null;
+
+  private refreshTokenTimeout: NodeJS.Timeout | null = null;
+
   constructor(private http: HttpClient, private router: Router) {
     // Check if there's a login token and update the BehaviorSubject
     this.isAuthenticatedSubject.next(this.isTokenValid());
+
+    // Load any valid token expiry from localStorage and create a timer
+    this.createAutoLogoutTimer();
   }
 
   register(user: RegistrationFormValues) {
@@ -34,22 +63,27 @@ export class AuthService {
       .post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials)
       .pipe(
         tap(response => {
-          this.saveToken(response.access_token, response.expires_in);
+          this.saveToken(
+            response.access_token,
+            response.refresh_token,
+            response.expires_in,
+          );
+          // localStorage.setItem('refresh_token', response.refresh_token); //TODO delete me?
         }),
       );
   }
 
   logout() {
-    const httpOptions = this.getHttpOptionsWithToken();
+    const httpOptions = this.getHttpOptionsWithRefreshToken();
     if (!httpOptions) {
       // Handle the case when there is no token (e.g., user is not logged in)
-      return;
+      return throwError('No token found');
     }
     return this.http.post(`${this.apiUrl}/auth/logout`, {}, httpOptions);
   }
 
-  private getHttpOptionsWithToken(): { headers: HttpHeaders } | null {
-    const token = this.getToken();
+  private getHttpOptionsWithRefreshToken(): { headers: HttpHeaders } | null {
+    const token = localStorage.getItem('refresh_token');
     if (!token) {
       return null;
     }
@@ -57,16 +91,20 @@ export class AuthService {
     return { headers };
   }
 
-  saveToken(token: string, expiresIn: number) {
+  saveToken(accessToken: string, refreshToken: string, expiresIn: number) {
     const expiresAt = Date.now() + expiresIn * 1000;
-    localStorage.setItem('access_token', token);
-    localStorage.setItem('expires_at', expiresAt.toString());
-    this.isAuthenticatedSubject.next(true);
+    const warningAt = expiresAt - this.autoLogoutWarningMilliSecs; // The warning time
 
-    // Start a timer to automatically remove the token when it expires
-    setTimeout(() => {
-      this.removeToken();
-    }, expiresIn * 1000);
+    localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('refresh_token', refreshToken);
+    localStorage.setItem('expires_at', expiresAt.toString());
+    localStorage.setItem('warning_at', warningAt.toString());
+
+    this.isAuthenticatedSubject.next(true);
+    this.expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time //TODO: Delete?
+    this.warningAnnouncedSubject.next(warningAt); // Notify subscribers of the new warning time
+
+    this.createRefreshTokenTimer(expiresIn);
   }
 
   getToken(): string | null {
@@ -81,8 +119,35 @@ export class AuthService {
 
   removeToken() {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     localStorage.removeItem('expires_at');
+    localStorage.removeItem('warning_at');
     this.isAuthenticatedSubject.next(false);
+
+    // Notify subscribers that the token has expired
+    this.expiryAnnouncedSubject.next(0);
+  }
+
+  refreshToken(): Observable<LoginResponse> {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) {
+      // Handle the case when there is no token (e.g., user is not logged in)
+      return throwError('No token found');
+    }
+    const body = { refresh_token: refreshToken };
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/auth/refresh`, body)
+      .pipe(
+        tap(response => {
+          this.saveToken(
+            response.access_token,
+            response.refresh_token,
+            response.expires_in,
+          );
+          const expiresAt = Date.now() + response.expires_in * 1000;
+          this.expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time
+        }),
+      );
   }
 
   isTokenValid(): boolean {
@@ -97,7 +162,18 @@ export class AuthService {
   }
 
   performLogout() {
+    this.clearRefreshTokenTimer();
     this.removeToken();
+    // Send a request to the backend to revoke the refresh token
+    const token = this.getToken();
+    if (token) {
+      const httpOptions = this.getHttpOptionsWithRefreshToken();
+      if (httpOptions) {
+        this.http
+          .post(`${this.apiUrl}/auth/revoke`, {}, httpOptions)
+          .subscribe();
+      }
+    }
     this.router.navigate(['/login']);
   }
 
@@ -127,5 +203,59 @@ export class AuthService {
           return;
         }),
       );
+  }
+
+  getSecondsUntilLoginSessionExpiry(): number {
+    const expiresAt = Number(localStorage.getItem('expires_at'));
+    const now = new Date().getTime();
+    return Math.max(0, expiresAt - now) / 1000; // Convert to seconds
+  }
+
+  createRefreshTokenTimer(expiresIn: number): void {
+    this.clearRefreshTokenTimer();
+
+    // Start a new timer to automatically remove the token when it expires
+    this.refreshTokenTimeout = setTimeout(() => {
+      if (this.getSecondsUntilLoginSessionExpiry() > 5) {
+        this.refreshToken().subscribe();
+      }
+    }, expiresIn * 1000 - 5000); // Refresh the token 5 seconds before it expires
+  }
+
+  clearRefreshTokenTimer(): void {
+    // If there's an existing timer, clear it
+    if (this.refreshTokenTimeout && this.refreshTokenTimeout !== null) {
+      clearTimeout(this.refreshTokenTimeout);
+      this.refreshTokenTimeout = null;
+    }
+  }
+
+  createAutoLogoutTimer(): void {
+    this.clearAutoLogoutTimer();
+
+    const expiresAt = Number(localStorage.getItem('expires_at'));
+    const warningAt = Number(localStorage.getItem('warning_at'));
+
+    if (warningAt && Date.now() < warningAt) {
+      // If now is before the warning time, set a timer to trigger the warning
+      this.autoLogoutTimeout = setTimeout(() => {
+        this.warningAnnouncedSubject.next(Date.now()); // Trigger the warning
+      }, warningAt - Date.now());
+    }
+
+    if (expiresAt && Date.now() < expiresAt) {
+      // If now is before the expiration time, set a timer to perform the logout
+      this.refreshTokenTimeout = setTimeout(() => {
+        this.performLogout();
+      }, expiresAt - Date.now());
+    }
+  }
+
+  clearAutoLogoutTimer(): void {
+    // If there's an existing timer, clear it
+    if (this.autoLogoutTimeout && this.autoLogoutTimeout !== null) {
+      clearTimeout(this.autoLogoutTimeout);
+      this.autoLogoutTimeout = null;
+    }
   }
 }

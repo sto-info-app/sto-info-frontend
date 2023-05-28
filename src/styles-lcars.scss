@@ -10,6 +10,21 @@
   font-size: 1.35rem;
 }
 
+body,
+.mat-typography,
+.mat-button,
+.mat-card {
+  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif !important;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+.mat-mdc-dialog-container {
+  --mdc-dialog-subhead-font: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed',
+    sans-serif !important;
+  --mdc-dialog-supporting-text-font: 'Antonio', 'Arial Narrow',
+    'Avenir Next Condensed', sans-serif !important;
+}
+
 .scroll-top {
   display: none;
   z-index: 1000;
@@ -60,8 +75,6 @@ body {
   margin: 0;
   padding: 5px 0;
   background-color: #0d0d0d;
-  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
-  line-height: 1.5;
   color: #79d;
   // display: flex;
   display: block;
@@ -763,26 +776,101 @@ main {
   text-align: -webkit-right;
 }
 
-h1,
-h2,
-h3 {
+.mat-h1,
+.mat-headline-5,
+.mat-typography .mat-h1,
+.mat-typography .mat-headline-5,
+.mat-typography h1,
+h1 {
+  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   margin: 30px 0;
   font-weight: normal;
   text-transform: uppercase;
   line-height: 1.2;
   color: #6cf;
-}
-
-h1 {
   font-size: clamp(1.6rem, 1.6rem + 2.7vw, 2.8rem);
+  line-height: 1;
 }
 
+.mat-h2,
+.mat-headline-6,
+.mat-typography .mat-h2,
+.mat-typography .mat-headline-6,
+.mat-typography h2,
 h2 {
+  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  margin: 30px 0;
+  font-weight: normal;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: #6cf;
   font-size: clamp(1.2rem, 1.2rem + 2vw, 2rem);
 }
 
+.mat-h3,
+.mat-subtitle-1,
+.mat-typography .mat-h3,
+.mat-typography .mat-subtitle-1,
+.mat-typography h3,
 h3 {
+  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  margin: 30px 0;
+  font-weight: normal;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: #6cf;
   font-size: clamp(1.1rem, 1rem + 2vw, 1.8rem);
+}
+
+.mat-h4,
+.mat-body-1,
+.mat-typography .mat-h4,
+.mat-typography .mat-body-1,
+.mat-typography h4,
+h4 {
+  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  line-height: 1.2;
+  font-size: 1.1rem;
+}
+
+.mat-h5,
+.mat-typography .mat-h5,
+.mat-typography h5,
+h5 {
+  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-decoration: underline;
+  line-height: 1.2;
+  font-size: 1rem;
+}
+
+.mat-h6,
+.mat-typography .mat-h6,
+.mat-typography h6,
+h6 {
+  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-weight: normal;
+  text-transform: none;
+  text-decoration: underline;
+  line-height: 1.2;
+  font-size: 1rem;
+}
+
+.mat-body p,
+.mat-body-2 p,
+.mat-typography .mat-body p,
+.mat-typography .mat-body-2 p,
+.mat-typography p,
+p {
+  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  margin-block: 1rem;
+  margin: 0 0 15px;
+  line-height: 1.2;
+  font-size: 1rem;
 }
 
 p.caption {
@@ -1177,7 +1265,7 @@ button:hover {
 
 footer {
   display: flex;
-  margin: 50px auto 10px 15px;
+  margin: 50px auto 8px 15px;
   padding: 12px 0;
   background: linear-gradient(#58e 50%, #455580 50%);
   border-radius: 0 20px 20px 0;
@@ -1269,6 +1357,9 @@ footer::after {
   justify-content: center;
   gap: 20px;
   text-align: center;
+}
+
+.footer-text p {
   font-size: 0.7rem;
 }
 
@@ -2324,4 +2415,88 @@ button.gold {
   100% {
     flex: 1;
   }
+}
+
+// Angular Material overrides!
+.mat-mdc-card {
+  --mdc-elevated-card-container-color: #0d0d0d;
+  --mdc-outlined-card-container-color: #0d0d0d;
+}
+
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-color: #0d0d0d;
+  --mdc-dialog-subhead-color: rgba(255, 255, 255, 0.87);
+  --mdc-dialog-supporting-text-color: rgba(255, 255, 255, 0.6);
+}
+
+.mdc-menu-surface {
+  background-color: var(--mdc-theme-surface, #0d0d0d);
+  color: var(--mdc-theme-on-surface, #fff);
+}
+
+.mat-mdc-paginator {
+  background: #0d0d0d;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.mat-mdc-unelevated-button.mat-unthemed {
+  --mdc-filled-button-container-color: #0d0d0d;
+  --mdc-filled-button-label-text-color: #fff;
+}
+
+.mat-mdc-raised-button.mat-unthemed {
+  --mdc-protected-button-container-color: #0d0d0d;
+  --mdc-protected-button-label-text-color: #fff;
+}
+
+.mat-mdc-fab.mat-unthemed,
+.mat-mdc-mini-fab.mat-unthemed {
+  --mdc-fab-container-color: #0d0d0d;
+  --mdc-fab-icon-color: #fff;
+  --mat-mdc-fab-color: #fff;
+}
+
+.mdc-data-table {
+  background-color: var(--mdc-theme-surface, #0d0d0d);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.mdc-data-table__header-cell {
+  background-color: var(--mdc-theme-surface, #0d0d0d);
+}
+
+.mat-mdc-table,
+.mat-bottom-sheet-container,
+.mat-button-toggle-appearance-standard,
+.mat-button-toggle-disabled.mat-button-toggle-appearance-standard,
+.mat-button-toggle-disabled.mat-button-toggle-checked,
+.mat-datepicker-content,
+.mat-expansion-panel,
+.mat-drawer,
+.mat-drawer.mat-drawer-push,
+.mat-stepper-horizontal,
+.mat-stepper-vertical,
+.mat-tree {
+  background: #0d0d0d;
+  color: #79d;
+}
+
+@media (hover: none) {
+  .mat-expansion-panel:not(.mat-expanded):not([aria-disabled='true'])
+    .mat-expansion-panel-header:hover {
+    background: #0d0d0d;
+  }
+}
+.cdk-overlay-dark-backdrop {
+  background: rgba(0, 0, 0, 0.8);
+}
+.cdk-overlay-pane {
+  border: 10px solid #ccdeff;
+  min-width: 60%;
+  -moz-box-shadow: 2px 2px 3px #444a77;
+  -webkit-box-shadow: 2px 2px 3px #444a77;
+  box-shadow: 2px 2px 3px #444a77;
+  -moz-border-radius: 20px 20px 20px 20px;
+  -webkit-border-radius: 20px;
+  border-radius: 20px 20px 20px 20px;
 }
