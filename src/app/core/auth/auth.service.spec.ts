@@ -31,7 +31,11 @@ describe('AuthService', () => {
   });
 
   it('should return true from isAuthenticated$ when there is a token', () => {
-    authService.saveToken('valid-token', Date.now() + 3600);
+    authService.saveToken(
+      'valid-token',
+      'valid-refresh-token',
+      Date.now() + 3600,
+    );
     authService.isAuthenticated$.subscribe(isAuthenticated => {
       expect(isAuthenticated).toBe(true);
     });
@@ -44,9 +48,10 @@ describe('AuthService', () => {
     });
   });
 
-  it('should save token correctly', () => {
-    service.saveToken('test-token', Date.now() + 3600);
+  it('should save tokens correctly', () => {
+    service.saveToken('test-token', 'test-refresh-token', Date.now() + 3600);
     expect(localStorage.getItem('access_token')).toBe('test-token');
+    expect(localStorage.getItem('refresh_token')).toBe('test-refresh-token');
     service.isAuthenticated$.subscribe(authenticated => {
       expect(authenticated).toBeTruthy();
     });

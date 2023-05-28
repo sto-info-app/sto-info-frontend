@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
+import { LoginResponse } from 'src/app/models/user-auth.models';
 import { AuthService } from '../auth/auth.service';
 import { LoginComponent } from './login.component';
 
@@ -77,9 +78,12 @@ describe('LoginComponent', () => {
   });
 
   it('should handle login correctly', () => {
-    spyOn(authService, 'login').and.returnValue(
-      of({ access_token: 'test_token' }),
-    );
+    const mockLoginResponse: LoginResponse = {
+      access_token: 'test_token',
+      refresh_token: 'test_refresh_token',
+      expires_in: Date.now() + 3600,
+    };
+    spyOn(authService, 'login').and.returnValue(of(mockLoginResponse));
     spyOn(authService, 'saveToken');
     spyOn(router, 'navigate');
 
@@ -91,7 +95,11 @@ describe('LoginComponent', () => {
       email: 'test@example.com',
       password: 'testpassword',
     });
-    expect(authService.saveToken).toHaveBeenCalledWith('test_token');
-    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']); // update to the correct route
+    expect(authService.saveToken).toHaveBeenCalledWith(
+      'test_token',
+      'test_refresh_token',
+      Date.now() + 3600,
+    );
+    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']); //TODO: Update to the correct route from constants
   });
 });
