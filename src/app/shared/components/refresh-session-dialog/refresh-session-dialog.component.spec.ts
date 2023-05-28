@@ -8,7 +8,7 @@ describe('RefreshSessionDialogComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [RefreshSessionDialogComponent]
+      declarations: [RefreshSessionDialogComponent],
     });
     fixture = TestBed.createComponent(RefreshSessionDialogComponent);
     component = fixture.componentInstance;
