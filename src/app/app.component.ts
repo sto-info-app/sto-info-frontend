@@ -76,6 +76,7 @@ export class AppComponent implements AfterViewInit {
   ngOnInit() {
     this.authService.isAuthenticated$.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
+      this.startCountdown();
     });
 
     // Subscribe to the warningAnnounced$ Observable - display of auto logout warning message
