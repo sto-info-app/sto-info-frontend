@@ -68,7 +68,6 @@ export class AuthService {
             response.refresh_token,
             response.expires_in,
           );
-          // localStorage.setItem('refresh_token', response.refresh_token); //TODO delete me?
         }),
       );
   }
@@ -101,7 +100,7 @@ export class AuthService {
     localStorage.setItem('warning_at', warningAt.toString());
 
     this.isAuthenticatedSubject.next(true);
-    this.expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time //TODO: Delete?
+    this.expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time
     this.warningAnnouncedSubject.next(warningAt); // Notify subscribers of the new warning time
 
     this.createRefreshTokenTimer(expiresIn);
