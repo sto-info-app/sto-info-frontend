@@ -32,7 +32,7 @@ export class AppComponent implements AfterViewInit {
   appRoutes = APP_ROUTES;
 
   isLoggedIn = false;
-  autoLogoutCountdown = 0; //TODO: Delete??
+  autoLogoutCountdown = 0;
   currentYear: number;
   dataCascade: string;
   showScrollTop = false;
@@ -58,7 +58,6 @@ export class AppComponent implements AfterViewInit {
     private el: ElementRef,
 
     public dialog: MatDialog,
-
     private zone: NgZone,
   ) {
     // Tags to add to titles to help identify the environment in use
@@ -79,29 +78,7 @@ export class AppComponent implements AfterViewInit {
       this.isLoggedIn = loggedIn;
     });
 
-    // this.authService.expiryAnnounced$.subscribe(expiryTime => {
-    //   if (expiryTime === 0) {
-    //     // The token has expired
-    //     this.isLoggedIn = false;
-
-    //     // Reset countdown
-    //     this.autoLogoutCountdown = 0;
-    //     return;
-    //   }
-
-    //   const warningTime =
-    //     expiryTime - Date.now() - this.authService.autoLogoutWarningMilliSecs;
-    //   if (warningTime > 0) {
-    //     setTimeout(() => {
-    //       this.openRefreshSessionDialog();
-
-    //       // Start the countdown
-    //       // this.startAutoLogoutCountdown(this.authService.autoLogoutWarningSecs);
-    //     }, warningTime);
-    //   }
-    // }); // Listen to the expiry announced from AuthService
-
-    // Subscribe to the warningAnnounced$ Observable
+    // Subscribe to the warningAnnounced$ Observable - display of auto logout warning message
     this.warningSubscription = this.authService.warningAnnounced$.subscribe(
       (warningTime: number) => {
         const delay = warningTime - Date.now(); // calculate the delay in milliseconds
@@ -113,7 +90,7 @@ export class AppComponent implements AfterViewInit {
       },
     );
 
-    // Subscribe to the expiryAnnounced$ Observable
+    // Subscribe to the expiryAnnounced$ Observable - auto logout
     this.expirySubscription = this.authService.expiryAnnounced$.subscribe(
       expiryTime => {
         if (expiryTime !== 0 && Date.now() >= expiryTime) {
@@ -250,49 +227,14 @@ export class AppComponent implements AfterViewInit {
 
     // Handle the result (if any action needed)
     this.dialogRef.afterClosed().subscribe((stayLoggedIn = false) => {
-      console.log(`Stay connected? : ${stayLoggedIn}`);
-
       if (stayLoggedIn) {
-        this.authService.refreshToken().subscribe(
-          res => {
-            console.log('res', res); //TODO: delete me!
-
-            //TODO: Handle the response
-            //TODO:  - add refresh_token, access_token & expires at to local storage?
-            //TODO:    (or check it is done in this.authService.refreshToken())
-          },
-          err => {
-            // Handle any errors that occurred during the request.
-            console.error(err);
-          },
-        );
+        this.authService.refreshToken().subscribe();
       }
-      // this.startAutoLogoutCountdown(
-      //   this.authService.getSecondsUntilLoginSessionExpiry(),
-      // );
 
       // Allow opening the dialog box again
       this.dialogRef = null;
     });
   }
-
-  // startAutoLogoutCountdown(seconds: number) {
-  //   this.autoLogoutCountdown = seconds;
-  //   const countdownInterval = setInterval(() => {
-  //     this.autoLogoutCountdown--;
-  //     if (this.autoLogoutCountdown <= 0) {
-  //       clearInterval(countdownInterval);
-
-  //       // If the warning dialog is open
-  //       if (this.dialogRef) {
-  //         this.dialogRef.close(); // Close the dialog
-  //         this.dialogRef = null; // Allow opening the dialog box again
-  //       }
-
-  //       this.authService.performLogout();
-  //     }
-  //   }, 1000);
-  // }
 
   startCountdown(): void {
     this.zone.run(() => {
