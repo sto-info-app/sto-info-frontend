@@ -1,10 +1,5 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import {
-  ActivatedRouteSnapshot,
-  Router,
-  RouterStateSnapshot,
-} from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MockProvider } from 'ng-mocks';
 import { AuthGuard } from './auth.guard';
@@ -12,13 +7,15 @@ import { AuthService } from './auth.service';
 
 describe('AuthGuard', () => {
   let guard: AuthGuard;
-  let authService: AuthService;
-  let router: Router;
+  //TODO: Restore these variables - disabled as unused when tests below were disabled!
+  //NOTE: https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
+  // let authService: AuthService;
+  // let router: Router;
 
-  const routeMock: ActivatedRouteSnapshot = {} as ActivatedRouteSnapshot;
-  const routeStateMock: RouterStateSnapshot = {
-    url: '/cookies',
-  } as RouterStateSnapshot;
+  // const routeMock: ActivatedRouteSnapshot = {} as ActivatedRouteSnapshot;
+  // const routeStateMock: RouterStateSnapshot = {
+  //   url: '/cookies',
+  // } as RouterStateSnapshot;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -26,8 +23,10 @@ describe('AuthGuard', () => {
       providers: [AuthGuard, MockProvider(AuthService)],
     });
     guard = TestBed.inject(AuthGuard);
-    authService = TestBed.inject(AuthService);
-    router = TestBed.inject(Router);
+    //TODO: Restore these variables - disabled as unused when tests below were disabled!
+    //NOTE: https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
+    // authService = TestBed.inject(AuthService);
+    // router = TestBed.inject(Router);
   });
 
   it('should be created', () => {
