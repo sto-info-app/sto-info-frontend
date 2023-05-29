@@ -78,10 +78,11 @@ describe('LoginComponent', () => {
   });
 
   it('should handle login correctly', () => {
+    const expectedExpiration = 1687002446481507;
     const mockLoginResponse: LoginResponse = {
       access_token: 'test_token',
       refresh_token: 'test_refresh_token',
-      expires_in: Date.now() + 3600,
+      expires_in: expectedExpiration,
     };
     spyOn(authService, 'login').and.returnValue(of(mockLoginResponse));
     spyOn(authService, 'saveToken');
@@ -98,7 +99,7 @@ describe('LoginComponent', () => {
     expect(authService.saveToken).toHaveBeenCalledWith(
       'test_token',
       'test_refresh_token',
-      Date.now() + 3600,
+      expectedExpiration,
     );
     expect(router.navigate).toHaveBeenCalledWith(['/dashboard']); //TODO: Update to the correct route from constants
   });

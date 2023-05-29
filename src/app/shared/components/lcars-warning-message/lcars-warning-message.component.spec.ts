@@ -27,7 +27,9 @@ describe('LcarsWarningMessageComponent', () => {
     component.message = 'Test Message';
     fixture.detectChanges();
 
-    const titleElement = fixture.debugElement.query(By.css('.go-mars'));
+    const titleElement = fixture.debugElement.query(
+      By.css('.go-october-sunset'),
+    );
     expect(titleElement.nativeElement.textContent).toEqual('Test Title');
 
     const messageElement = fixture.debugElement.query(

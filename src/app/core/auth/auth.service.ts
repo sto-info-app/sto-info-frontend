@@ -5,6 +5,7 @@ import {
   BehaviorSubject,
   Observable,
   ReplaySubject,
+  catchError,
   map,
   tap,
   throwError,
@@ -106,13 +107,17 @@ export class AuthService {
   }
 
   getToken(): string | null {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      return null;
+    }
     if (!this.isTokenValid()) {
       // Token is expired or does not exist
       this.removeToken();
       return null;
     }
     // Token exists and is not expired
-    return localStorage.getItem('access_token');
+    return token;
   }
 
   removeToken() {
@@ -144,6 +149,10 @@ export class AuthService {
           );
           const expiresAt = Date.now() + response.expires_in * 1000;
           this.expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time
+        }),
+        catchError(error => {
+          this.router.navigate(['/login']);
+          return throwError(error);
         }),
       );
   }

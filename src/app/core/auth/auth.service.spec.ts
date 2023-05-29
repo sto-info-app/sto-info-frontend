@@ -68,11 +68,13 @@ describe('AuthService', () => {
 
   it('should return true from isLoggedIn when there is a token', () => {
     localStorage.setItem('access_token', 'valid-token');
+    localStorage.setItem('expires_at', '1687002446481507');
     expect(authService.isLoggedIn()).toBe(true);
   });
 
   it('should return false from isLoggedIn when there is no token', () => {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('expires_at');
     expect(authService.isLoggedIn()).toBe(false);
   });
 
