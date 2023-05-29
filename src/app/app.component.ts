@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
@@ -43,6 +43,14 @@ export class AppComponent implements AfterViewInit {
   themePanel2RandomText: string;
   themePanel6RandomText: string;
 
+  scrollCallbackFunction = (): void => {
+    this.zone.run(() => {
+      this.toggleScrollTopButton();
+    });
+  };
+  showScrollButton = false;
+
+  private destroy$ = new Subject<void>();
   private warningSubscription: Subscription | undefined;
   private expirySubscription: Subscription | undefined;
   private intervalId: number | null = null;
@@ -87,26 +95,29 @@ export class AppComponent implements AfterViewInit {
   }
 
   ngOnInit() {
-    this.authService.isAuthenticated$.subscribe(loggedIn => {
-      this.isLoggedIn = loggedIn;
-      this.startCountdown();
-    });
+    this.authService.isAuthenticated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(loggedIn => {
+        this.isLoggedIn = loggedIn;
+        this.startCountdown();
+      });
 
     // Subscribe to the warningAnnounced$ Observable - display of auto logout warning message
-    this.warningSubscription = this.authService.warningAnnounced$.subscribe(
-      (warningTime: number) => {
+    this.warningSubscription = this.authService.warningAnnounced$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((warningTime: number) => {
         const delay = warningTime - Date.now(); // calculate the delay in milliseconds
         if (delay > 0) {
           setTimeout(() => {
             this.openRefreshSessionDialog();
           }, delay);
         }
-      },
-    );
+      });
 
     // Subscribe to the expiryAnnounced$ Observable - auto logout
-    this.expirySubscription = this.authService.expiryAnnounced$.subscribe(
-      expiryTime => {
+    this.expirySubscription = this.authService.expiryAnnounced$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(expiryTime => {
         if (expiryTime !== 0 && Date.now() >= expiryTime) {
           this.authService.performLogout();
         } else if (
@@ -116,28 +127,22 @@ export class AppComponent implements AfterViewInit {
         ) {
           this.startCountdown();
         }
-      },
-    );
+      });
   }
 
   ngAfterViewInit() {
-    window.addEventListener('scroll', () => {
-      this.toggleScrollTopButton();
-    });
+    window.addEventListener('scroll', this.scrollCallbackFunction);
   }
 
   ngOnDestroy() {
     // Unsubscribe from the Observables when the component is destroyed
-    this.warningSubscription?.unsubscribe();
-    this.expirySubscription?.unsubscribe();
+    window.addEventListener('scroll', this.scrollCallbackFunction);
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   toggleScrollTopButton() {
-    if (window.pageYOffset > 100) {
-      this.scrollTopButton.nativeElement.style.display = 'block';
-    } else {
-      this.scrollTopButton.nativeElement.style.display = 'none';
-    }
+    this.showScrollButton = window.pageYOffset > 100;
   }
 
   scrollToTop() {

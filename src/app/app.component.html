@@ -3,7 +3,8 @@
     <div class="wrap">
       <div
         #scrollTopButton
-        class="scroll-top">
+        class="scroll-top"
+        [style.display]="showScrollButton ? 'block' : 'none'">
         <a
           (click)="scrollToTop()"
           id="scroll-top"
