@@ -8,4 +8,5 @@ export const environment = {
   apiUrl: 'https://dev-api.startrekonline.info',
   appTitle: 'Star Trek Online Info Portal',
   appLoggedInHome: '/dashboard',
+  allowDebugging: false,
 };

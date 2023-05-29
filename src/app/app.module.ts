@@ -1,6 +1,7 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogModule } from '@angular/material/dialog';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { JwtModule } from '@auth0/angular-jwt';
@@ -19,14 +20,17 @@ import { RegisterComponent } from './core/register/register.component';
 import { RegistrationCompleteComponent } from './core/registration-complete/registration-complete.component';
 import { VerifyEmailComponent } from './core/verify-email/verify-email.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
 import { HomeComponent } from './home/home.component';
 import { LcarsErrorMessageComponent } from './shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from './shared/components/lcars-information-message/lcars-information-message.component';
 import { LcarsSuccessMessageComponent } from './shared/components/lcars-success-message/lcars-success-message.component';
+import { LcarsWarningMessageComponent } from './shared/components/lcars-warning-message/lcars-warning-message.component';
+import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
+import { TimeFormatPipe } from './shared/pipes/time-format.pipe';
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
-import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
 
 // NOTE: This imports all icons into the bundle and increases app size!
 // import { fas } from '@fortawesome/pro-solid-svg-icons';
@@ -54,6 +58,9 @@ export function tokenGetter() {
     ResetPasswordRequestComponent,
     ChangePasswordComponent,
     PageNotFoundComponent,
+    LcarsWarningMessageComponent,
+    RefreshSessionDialogComponent,
+    TimeFormatPipe,
   ],
   imports: [
     BrowserModule,
@@ -70,7 +77,9 @@ export function tokenGetter() {
     FormsModule,
     ReactiveFormsModule,
     FontAwesomeModule,
+    MatDialogModule,
   ],
+  exports: [TimeFormatPipe],
   providers: [
     {
       provide: 'API_URL',
