@@ -35,6 +35,7 @@ describe('AuthGuard', () => {
   });
 
   //TODO: Restore this test!
+  //NOTE: https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
   // it('should allow navigation if user is authenticated', async () => {
   //   spyOn(authService, 'getToken').and.returnValue('test-token');
   //   const result = await guard.canActivate(routeMock, routeStateMock);
@@ -42,6 +43,7 @@ describe('AuthGuard', () => {
   // });
 
   //TODO: Restore this test!
+  //NOTE: https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
   // it('should not allow navigation if user is not authenticated', async () => {
   //   spyOn(authService, 'getToken').and.returnValue(null);
   //   const navigateSpy = spyOn(router, 'navigate');
