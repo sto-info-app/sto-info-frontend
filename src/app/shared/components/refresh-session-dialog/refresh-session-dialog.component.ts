@@ -27,7 +27,7 @@ export class RefreshSessionDialogComponent {
     this.dialogRef.close(true);
   }
 
-  onDissmis(): void {
-    this.dialogRef.close(false);
+  onLogout(): void {
+    this.appComponent.logout();
   }
 }
