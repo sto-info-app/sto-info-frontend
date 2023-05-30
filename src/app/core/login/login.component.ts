@@ -5,6 +5,7 @@ import {
   LoginCredentials,
   LoginResponse,
 } from 'src/app/models/user-auth.models';
+import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   FORM_ERROR_INVALID_EMAIL_FORMAT,
@@ -27,6 +28,7 @@ import { AuthService } from '../auth/auth.service';
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
+  animations: [progressBarAnimation],
 })
 export class LoginComponent {
   // Allow environment contstants to be used in the HTML
@@ -41,6 +43,7 @@ export class LoginComponent {
   password = '';
   errorMessage = '';
   inputsValid = false;
+  isSubmitting = false;
 
   constructor(
     private authService: AuthService,
@@ -54,6 +57,9 @@ export class LoginComponent {
   appRoutes = APP_ROUTES;
 
   onLogin() {
+    if (!this.inputsValid) return;
+    this.isSubmitting = true;
+
     const credentials: LoginCredentials = {
       email: this.email,
       password: this.password,
@@ -90,9 +96,11 @@ export class LoginComponent {
             break;
         }
         this.displayErrorMessage(errMessage);
+        this.isSubmitting = false;
       },
       complete: () => {
         this.resetErrorMessage();
+        this.isSubmitting = false;
       },
     });
   }
@@ -133,4 +141,6 @@ export class LoginComponent {
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
   }
+
+  applySubmitting(): void {}
 }
