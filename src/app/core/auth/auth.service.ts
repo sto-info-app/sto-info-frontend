@@ -169,6 +169,10 @@ export class AuthService {
   }
 
   performLogout() {
+    if (!this.isLoggedIn) {
+      return;
+    }
+
     this.clearRefreshTokenTimer();
     this.removeToken();
     // Send a request to the backend to revoke the refresh token
