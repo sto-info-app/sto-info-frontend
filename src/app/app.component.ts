@@ -150,6 +150,12 @@ export class AppComponent implements AfterViewInit {
   }
 
   logout(): void {
+    // Stop countdown
+    if (this.intervalId !== null) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+
     this.authService.performLogout();
   }
 
@@ -181,6 +187,10 @@ export class AppComponent implements AfterViewInit {
   }
 
   startCountdown(): void {
+    if (!this.isLoggedIn) {
+      return;
+    }
+
     this.zone.run(() => {
       this.intervalId = window.setInterval(() => {
         this.autoLogoutCountdown =
