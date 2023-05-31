@@ -5,6 +5,7 @@ import {
   LoginCredentials,
   LoginResponse,
 } from 'src/app/models/user-auth.models';
+import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   FORM_ERROR_INVALID_EMAIL_FORMAT,
@@ -14,10 +15,7 @@ import {
   MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT,
 } from 'src/app/shared/constants/error-messages.constants';
 import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
-import {
-  MILLISECONDS_SHOW_ERROR_MSG,
-  MILLISECONDS_SHOW_RED_ALERT_THEME,
-} from 'src/app/shared/constants/timings.constants';
+import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
 import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
@@ -27,6 +25,7 @@ import { AuthService } from '../auth/auth.service';
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
+  animations: [progressBarAnimation],
 })
 export class LoginComponent {
   // Allow environment contstants to be used in the HTML
@@ -34,13 +33,13 @@ export class LoginComponent {
 
   // Allow contstants to be used in the HTML
   showErrorMilliseconds: number = MILLISECONDS_SHOW_ERROR_MSG;
-  showRedAlertMilliseconds: number = MILLISECONDS_SHOW_RED_ALERT_THEME;
   errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
 
   email = '';
   password = '';
   errorMessage = '';
   inputsValid = false;
+  isSubmitting = false;
 
   constructor(
     private authService: AuthService,
@@ -54,6 +53,9 @@ export class LoginComponent {
   appRoutes = APP_ROUTES;
 
   onLogin() {
+    if (!this.inputsValid) return;
+    this.isSubmitting = true;
+
     const credentials: LoginCredentials = {
       email: this.email,
       password: this.password,
@@ -90,9 +92,11 @@ export class LoginComponent {
             break;
         }
         this.displayErrorMessage(errMessage);
+        this.isSubmitting = false;
       },
       complete: () => {
         this.resetErrorMessage();
+        this.isSubmitting = false;
       },
     });
   }

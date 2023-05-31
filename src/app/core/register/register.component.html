@@ -18,7 +18,7 @@
               *ngIf="
                 (registerForm.controls['firstName'].invalid &&
                   registerForm.controls['firstName'].touched) ||
-                (submitted && registerForm.controls['firstName'].errors)
+                (isSubmitting && registerForm.controls['firstName'].errors)
               "
               class="invalid-feedback"
               id="firstName-invalid-feedback">
@@ -45,7 +45,7 @@
               *ngIf="
                 (registerForm.controls['lastName'].invalid &&
                   registerForm.controls['lastName'].touched) ||
-                (submitted && registerForm.controls['lastName'].errors)
+                (isSubmitting && registerForm.controls['lastName'].errors)
               "
               class="invalid-feedback"
               id="lastName-invalid-feedback">
@@ -72,7 +72,7 @@
               *ngIf="
                 (registerForm.controls['username'].invalid &&
                   registerForm.controls['username'].touched) ||
-                (submitted && registerForm.controls['username'].errors)
+                (isSubmitting && registerForm.controls['username'].errors)
               "
               class="invalid-feedback"
               id="username-invalid-feedback">
@@ -114,7 +114,7 @@
               *ngIf="
                 (registerForm.controls['email'].invalid &&
                   registerForm.controls['email'].touched) ||
-                (submitted && registerForm.controls['email'].errors)
+                (isSubmitting && registerForm.controls['email'].errors)
               "
               class="invalid-feedback"
               id="email-invalid-feedback">
@@ -152,7 +152,7 @@
               *ngIf="
                 (registerForm.controls['password'].invalid &&
                   registerForm.controls['password'].touched) ||
-                (submitted && registerForm.controls['password'].errors)
+                (isSubmitting && registerForm.controls['password'].errors)
               "
               class="invalid-feedback"
               id="password-invalid-feedback">
@@ -189,7 +189,8 @@
               *ngIf="
                 (registerForm.controls['confirmPassword'].invalid &&
                   registerForm.controls['confirmPassword'].touched) ||
-                (submitted && registerForm.controls['confirmPassword'].errors)
+                (isSubmitting &&
+                  registerForm.controls['confirmPassword'].errors)
               "
               class="invalid-feedback"
               id="confirmPassword-invalid-feedback">
@@ -209,7 +210,9 @@
           </div>
 
           <button
-            [disabled]="!registerForm.valid"
+            [disabled]="!registerForm.valid || isSubmitting"
+            [ngClass]="{ submitting: isSubmitting }"
+            [@progressBarAnimation]="isSubmitting ? 'submitting' : 'idle'"
             type="submit"
             class="submit-button">
             Register
@@ -230,6 +233,10 @@
           >
         </div>
       </div>
+      <app-lcars-error-message
+        *ngIf="errorMessage"
+        title="Access Denied"
+        [message]="errorMessage"></app-lcars-error-message>
     </div>
   </div>
 </div>
