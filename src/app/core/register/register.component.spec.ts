@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
@@ -27,6 +28,7 @@ describe('RegisterComponent', () => {
           { path: 'register/complete', component: DummyComponent },
         ]),
         HttpClientTestingModule,
+        BrowserAnimationsModule,
       ],
       declarations: [RegisterComponent, DummyComponent],
       providers: [

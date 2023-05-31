@@ -1,7 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
@@ -17,7 +23,12 @@ describe('LoginComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, RouterTestingModule, FormsModule],
+      imports: [
+        HttpClientTestingModule,
+        RouterTestingModule,
+        FormsModule,
+        BrowserAnimationsModule,
+      ],
       declarations: [LoginComponent],
       providers: [AuthService],
     }).compileComponents();
@@ -54,30 +65,31 @@ describe('LoginComponent', () => {
     expect(component.inputsValid).toBeFalse();
   });
 
-  it('should handle login error correctly', () => {
-    spyOn(authService, 'login').and.returnValue(
-      throwError(
-        new HttpErrorResponse({
-          status: 401,
-          error: { message: 'Unauthorised: Invalid email or password.' },
-        }),
-      ),
-    );
+  it('should handle login error correctly', fakeAsync(() => {
+    const mockErrorResponse = new HttpErrorResponse({
+      error: { message: 'Unauthorised: Invalid email or password.' },
+      status: 401,
+    });
+    spyOn(authService, 'login').and.returnValue(throwError(mockErrorResponse));
+    spyOn(component, 'displayErrorMessage');
 
     component.email = 'test@example.com';
     component.password = 'testpassword';
+    component.inputsValid = true; // Set inputsValid to true
     component.onLogin();
+
+    tick();
 
     expect(authService.login).toHaveBeenCalledWith({
       email: 'test@example.com',
       password: 'testpassword',
     });
-    expect(component.errorMessage).toBe(
+    expect(component.displayErrorMessage).toHaveBeenCalledWith(
       'Unauthorised: Invalid email or password.',
     );
-  });
+  }));
 
-  it('should handle login correctly', () => {
+  it('should handle login correctly', fakeAsync(() => {
     const expectedExpiration = 1687002446481507;
     const mockLoginResponse: LoginResponse = {
       access_token: 'test_token',
@@ -90,7 +102,10 @@ describe('LoginComponent', () => {
 
     component.email = 'test@example.com';
     component.password = 'testpassword';
+    component.inputsValid = true; // Set inputsValid to true
     component.onLogin();
+
+    tick();
 
     expect(authService.login).toHaveBeenCalledWith({
       email: 'test@example.com',
@@ -101,6 +116,7 @@ describe('LoginComponent', () => {
       'test_refresh_token',
       expectedExpiration,
     );
-    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']); //TODO: Update to the correct route from constants
-  });
+    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+  }));
 });
+//TODO: Update to the correct route from constants
