@@ -31,6 +31,7 @@ import { TimeFormatPipe } from './shared/pipes/time-format.pipe';
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
+import { HeaderComponent } from './template/header/header.component';
 
 // NOTE: This imports all icons into the bundle and increases app size!
 // import { fas } from '@fortawesome/pro-solid-svg-icons';
@@ -61,6 +62,7 @@ export function tokenGetter() {
     LcarsWarningMessageComponent,
     RefreshSessionDialogComponent,
     TimeFormatPipe,
+    HeaderComponent,
   ],
   imports: [
     BrowserModule,

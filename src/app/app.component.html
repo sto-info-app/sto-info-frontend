@@ -1,87 +1,14 @@
 <div class="wrap-everything">
   <section id="column-3">
-    <div class="wrap">
-      <div
-        #scrollTopButton
-        class="scroll-top"
-        [style.display]="showScrollButton ? 'block' : 'none'">
-        <a
-          (click)="scrollToTop()"
-          id="scroll-top"
-          ><span class="hop">screen</span> top</a
-        >
-      </div>
-      <div class="left-frame-top">
-        <div class="panel panel-1">
-          <a
-            *ngIf="!isLoggedIn"
-            [routerLink]="getRouteLink(appRoutes.LOGIN)"
-            routerLinkActive="peach"
-            >Login</a
-          >
-          <a
-            *ngIf="isLoggedIn"
-            (click)="logout()"
-            >Logout
-            <span *ngIf="appDebugging && autoLogoutCountdown > 0">
-              in {{ autoLogoutCountdown | timeFormat }}</span
-            ></a
-          >
-        </div>
-        <div
-          class="panel panel-2"
-          [innerHTML]="themePanel2RandomText"></div>
-      </div>
-      <div class="right-frame-top">
-        <div class="banner">{{ appTitle }}</div>
-        <div class="data-cascade-button-group">
-          <div class="cascade-wrapper">
-            <div
-              class="data-cascade"
-              id="default">
-              <div [innerHTML]="dataCascade"></div>
-            </div>
-          </div>
-          <nav id="nav-standard">
-            <a
-              [routerLink]="getRouteLink('HOME')"
-              [routerLinkActiveOptions]="{ exact: true }"
-              routerLinkActive="almond-creme"
-              id="b-one"
-              >Home</a
-            >
-            <a
-              [routerLink]="getRouteLink(appRoutes.ABOUT)"
-              routerLinkActive="almond-creme"
-              id="b-two"
-              >About</a
-            >
-            <a
-              [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
-              routerLinkActive="almond-creme"
-              id="b-three"
-              >Dashboard</a
-            >
-            <a
-              [routerLink]="getRouteLink(appRoutes.CONTACT)"
-              routerLinkActive="almond-creme"
-              id="b-four"
-              >Contact</a
-            >
-          </nav>
-        </div>
-        <div class="bar-panel first-bar-panel">
-          <div class="bar-1"></div>
-          <div class="bar-2"></div>
-          <div class="bar-3"></div>
-          <div class="bar-4"></div>
-          <div class="bar-5"></div>
-        </div>
-      </div>
-    </div>
+    <app-header
+      [showScrollButton]="showScrollButton"
+      [isLoggedIn]="isLoggedIn"
+      [autoLogoutCountdown]="autoLogoutCountdown"
+      [logout]="logout">
+    </app-header>
     <div
-      class="wrap lcars-main-content-container"
-      id="gap">
+      class="wrap gap"
+      id="lcars-body-container">
       <div class="left-frame">
         <div class="panel-grow-container">
           <div class="panel panel-3"></div>
