@@ -32,20 +32,20 @@ export class GeneralThemeService {
       value += numbers.charAt(Math.floor(Math.random() * numbers.length));
     }
 
+    // Shuffle the characters in the value to mix letters and numbers
+    value = value
+      .split('')
+      .sort(() => 0.5 - Math.random())
+      .join('');
+
     // Add space or hyphen with a 1 in 20 chance, but not for the first or last character
-    if (length >= 3 && Math.random() < 1 / 20) {
+    if (length >= minChars + 1 && Math.random() < 1 / 20) {
       const specialIndex = Math.floor(Math.random() * (length - 3)) + 1;
       value =
         value.slice(0, specialIndex) +
         special.charAt(Math.floor(Math.random() * special.length)) +
         value.slice(specialIndex);
     }
-
-    // Shuffle the characters in the value to mix letters and numbers
-    value = value
-      .split('')
-      .sort(() => 0.5 - Math.random())
-      .join('');
 
     return value;
   }
