@@ -1,13 +1,4 @@
-import { HttpClient } from '@angular/common/http';
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  Inject,
-  NgZone,
-  Renderer2,
-  ViewChild,
-} from '@angular/core';
+import { Component, Inject, NgZone } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { Subject, Subscription, takeUntil } from 'rxjs';
@@ -15,7 +6,6 @@ import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
 import { APP_ROUTES } from './shared/constants/app-routing.constants';
-import { DebuggingService } from './shared/services/debugging.service';
 import { GeneralThemeService } from './shared/services/general-theme.service';
 import { RoutingService } from './shared/services/routing.service';
 
@@ -24,31 +14,19 @@ import { RoutingService } from './shared/services/routing.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements AfterViewInit {
-  @ViewChild('scrollTopButton')
-  scrollTopButton!: ElementRef;
-
+export class AppComponent {
   appTitle = environment.appTitle;
   appTitleTestTag = '';
   appVersion = environment.version;
   appRoutes = APP_ROUTES;
-  appDebugging = false;
 
   isLoggedIn = false;
   autoLogoutCountdown = 0;
   currentYear: number;
-  showScrollTop = false;
 
-  dataCascade: string;
-  themePanel2RandomText: string;
-  themePanel6RandomText: string;
-
-  scrollCallbackFunction = (): void => {
-    this.zone.run(() => {
-      this.toggleScrollTopButton();
-    });
-  };
   showScrollButton = false;
+
+  themePanel6RandomText: string;
 
   private destroy$ = new Subject<void>();
   private warningSubscription: Subscription | undefined;
@@ -61,15 +39,10 @@ export class AppComponent implements AfterViewInit {
     @Inject('API_URL') private apiUrl: string,
 
     private routingService: RoutingService,
-    private debuggingService: DebuggingService,
     private authService: AuthService,
     private generalThemeService: GeneralThemeService,
 
     private titleService: Title,
-
-    private http: HttpClient,
-    private renderer: Renderer2,
-    private el: ElementRef,
 
     public dialog: MatDialog,
     private zone: NgZone,
@@ -78,20 +51,16 @@ export class AppComponent implements AfterViewInit {
     if (environment.env_name === 'local') this.appTitleTestTag = ' [Local Dev]';
     if (environment.env_name === 'dev') this.appTitleTestTag = ' [Dev]';
 
-    // Check debugging mode
-    this.appDebugging = this.debuggingService.allowDebugging();
-
     this.titleService.setTitle(
       (environment.appTitle
         ? environment.appTitle
         : 'Star Trek Online Info Portal') + this.appTitleTestTag,
     );
     this.currentYear = new Date().getFullYear();
-    this.dataCascade = this.generalThemeService.createDynamicDataCascade();
-    this.themePanel2RandomText =
-      this.generalThemeService.createDynamicSideColumnText();
     this.themePanel6RandomText =
       this.generalThemeService.createDynamicSideColumnText();
+
+    this.logout = this.logout.bind(this);
   }
 
   ngOnInit() {
@@ -99,18 +68,20 @@ export class AppComponent implements AfterViewInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe(loggedIn => {
         this.isLoggedIn = loggedIn;
-        this.startCountdown();
+        if (this.isLoggedIn) this.startCountdown();
       });
 
     // Subscribe to the warningAnnounced$ Observable - display of auto logout warning message
     this.warningSubscription = this.authService.warningAnnounced$
       .pipe(takeUntil(this.destroy$))
       .subscribe((warningTime: number) => {
-        const delay = warningTime - Date.now(); // calculate the delay in milliseconds
-        if (delay > 0) {
-          setTimeout(() => {
-            this.openRefreshSessionDialog();
-          }, delay);
+        if (this.isLoggedIn) {
+          const delay = warningTime - Date.now(); // calculate the delay in milliseconds
+          if (delay > 0) {
+            setTimeout(() => {
+              this.openRefreshSessionDialog();
+            }, delay);
+          }
         }
       });
 
@@ -118,35 +89,24 @@ export class AppComponent implements AfterViewInit {
     this.expirySubscription = this.authService.expiryAnnounced$
       .pipe(takeUntil(this.destroy$))
       .subscribe(expiryTime => {
-        if (expiryTime !== 0 && Date.now() >= expiryTime) {
-          this.authService.performLogout();
-        } else if (
-          expiryTime !== 0 &&
-          Date.now() < expiryTime &&
-          !this.intervalId
-        ) {
-          this.startCountdown();
+        if (this.isLoggedIn) {
+          if (expiryTime !== 0 && Date.now() >= expiryTime) {
+            this.authService.performLogout();
+          } else if (
+            expiryTime !== 0 &&
+            Date.now() < expiryTime &&
+            !this.intervalId
+          ) {
+            this.startCountdown();
+          }
         }
       });
   }
 
-  ngAfterViewInit() {
-    window.addEventListener('scroll', this.scrollCallbackFunction);
-  }
-
   ngOnDestroy() {
     // Unsubscribe from the Observables when the component is destroyed
-    window.addEventListener('scroll', this.scrollCallbackFunction);
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  toggleScrollTopButton() {
-    this.showScrollButton = window.pageYOffset > 100;
-  }
-
-  scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   logout(): void {
