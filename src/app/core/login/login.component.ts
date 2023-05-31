@@ -137,6 +137,4 @@ export class LoginComponent {
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
   }
-
-  applySubmitting(): void {}
 }
