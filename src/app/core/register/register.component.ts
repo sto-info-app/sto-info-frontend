@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RegistrationFormValues } from 'src/app/models/user-auth.models';
+import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED,
@@ -22,6 +23,9 @@ import {
   FORM_ERROR_USERNAME_REQUIRED,
   FORM_ERROR_USERNAME_TAKEN,
   MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
+  MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
+  MSG_ERROR_HTTP_STATUS_400_CONSOLE_TEXT,
+  MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT,
 } from 'src/app/shared/constants/error-messages.constants';
 import {
   MAX_CHARS_GENERAL_STRING,
@@ -36,6 +40,8 @@ import {
   PASSWORD_PATTERN,
   USERNAME_PATTERN,
 } from 'src/app/shared/constants/regex-patterns.constants';
+import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
+import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { MustMatch } from '../../shared/_helpers/must-match.validator';
 import { AuthService } from '../auth/auth.service';
@@ -44,13 +50,16 @@ import { AuthService } from '../auth/auth.service';
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
+  animations: [progressBarAnimation],
 })
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
-  submitted = false;
+  errorMessage = '';
+  isSubmitting = false;
   appRoutes = APP_ROUTES;
 
   // Allow contstants to be used in the HTML
+  showErrorMilliseconds: number = MILLISECONDS_SHOW_ERROR_MSG;
   errorTextFirstNameRequired: string = FORM_ERROR_FIRSTNAME_REQUIRED;
   errorTextLastNameRequired: string = FORM_ERROR_LASTNAME_REQUIRED;
   errorTextNamesMaxLength: string = FORM_ERROR_NAME_MAX_LENGTH;
@@ -75,6 +84,9 @@ export class RegisterComponent implements OnInit {
     private router: Router,
     private authService: AuthService,
     private routingService: RoutingService,
+    private renderer: Renderer2,
+    private el: ElementRef,
+    private redAlertThemeService: RedAlertThemeService,
   ) {}
 
   ngOnInit() {
@@ -129,7 +141,7 @@ export class RegisterComponent implements OnInit {
   }
 
   onRegister() {
-    this.submitted = true;
+    this.isSubmitting = true;
 
     if (this.registerForm.invalid) {
       // If there's a mustMatch error on the form group, set a separate error on the confirmPassword control
@@ -138,6 +150,7 @@ export class RegisterComponent implements OnInit {
           mustMatch: true,
         });
       }
+      this.isSubmitting = false;
       return;
     }
 
@@ -148,10 +161,16 @@ export class RegisterComponent implements OnInit {
     this.authService.register(registrationFormValues).subscribe({
       next: () => {
         this.router.navigate(['/register/complete']);
+        this.isSubmitting = false;
       },
       error: error => {
+        let errMessage = '';
         if (error.status === 0) {
           console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
+          errMessage = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;
+        } else if (error.status === 400) {
+          console.error(MSG_ERROR_HTTP_STATUS_400_CONSOLE_TEXT);
+          errMessage = MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT;
         } else if (error.status === 409) {
           console.error('Registration Conflict Exception error:', error);
           if (error.error.message.includes('Email')) {
@@ -165,16 +184,35 @@ export class RegisterComponent implements OnInit {
           }
         } else {
           console.error('Registration error:', error);
-          // Handle other types of errors
+          //TODO: Handle other types of errors (or delete this comment!)
         }
+        this.displayErrorMessage(errMessage);
+        this.isSubmitting = false;
       },
       complete: () => {
         // console.log('Registration complete');
+        this.isSubmitting = false;
       },
     });
   }
 
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
+  }
+
+  displayErrorMessage(message: string) {
+    this.redAlertThemeService.applyRedAlertThemeThenClearAfterAShortTime(
+      this.renderer,
+      this.el.nativeElement,
+    );
+    this.errorMessage = message;
+
+    setTimeout(() => {
+      this.resetErrorMessage();
+    }, this.showErrorMilliseconds);
+  }
+
+  resetErrorMessage(): void {
+    this.errorMessage = ''; // Reset error message
   }
 }
