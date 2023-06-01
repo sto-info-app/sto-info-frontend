@@ -20,7 +20,7 @@ export class ResizeObserverDirective implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.observer = new ResizeObserver(entries => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         this.appResizeObserver.emit(entry.contentRect);
       }
     });

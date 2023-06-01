@@ -8,7 +8,7 @@ describe('MainContentBarPanelComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [MainContentBarPanelComponent]
+      declarations: [MainContentBarPanelComponent],
     });
     fixture = TestBed.createComponent(MainContentBarPanelComponent);
     component = fixture.componentInstance;
