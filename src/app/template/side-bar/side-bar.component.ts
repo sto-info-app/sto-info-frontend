@@ -14,6 +14,11 @@ export class SideBarComponent {
   appRoutes = APP_ROUTES;
   themePanel6RandomText: string;
 
+  isPenel5Hidden = false;
+  isPenel7Hidden = false;
+  isPenel8Hidden = false;
+  isPenel10Hidden = false;
+
   constructor(
     private routingService: RoutingService,
     private generalThemeService: GeneralThemeService,
@@ -24,5 +29,12 @@ export class SideBarComponent {
 
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
+  }
+
+  onResize(event: DOMRectReadOnly): void {
+    this.isPenel5Hidden = event.height >= 900;
+    this.isPenel7Hidden = event.height >= 1200;
+    this.isPenel10Hidden = event.height >= 1500;
+    this.isPenel8Hidden = event.height >= 1800;
   }
 }
