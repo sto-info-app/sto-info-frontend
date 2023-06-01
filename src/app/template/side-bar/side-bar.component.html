@@ -1,0 +1,30 @@
+<div
+  id="lcars-side-bar"
+  class="left-frame">
+  <div class="panel-grow-container">
+    <div class="panel panel-3"></div>
+    <div class="sidebar-buttons">
+      <a
+        *ngIf="!isLoggedIn"
+        [routerLink]="getRouteLink(appRoutes.REGISTER)"
+        routerLinkActive="peach"
+        >Register</a
+      >
+      <a
+        *ngIf="isLoggedIn"
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+        routerLinkActive="peach"
+        >Dashboard</a
+      >
+    </div>
+    <div class="panel panel-4"></div>
+    <div class="panel panel-5"></div>
+    <div
+      class="panel panel-6"
+      [innerHTML]="themePanel6RandomText"></div>
+    <!-- <div class="panel panel-7"></div> -->
+    <!-- <div class="panel panel-8"></div> -->
+    <div class="panel panel-9"></div>
+    <!-- <div class="panel panel-10"></div> -->
+  </div>
+</div>

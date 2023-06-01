@@ -32,6 +32,10 @@ import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 import { HeaderComponent } from './template/header/header.component';
+import { MainContentComponent } from './template/main-content/main-content.component';
+import { SideBarComponent } from './template/side-bar/side-bar.component';
+import { FooterComponent } from './template/footer/footer.component';
+import { MainContentBarPanelComponent } from './template/main-content-bar-panel/main-content-bar-panel.component';
 
 // NOTE: This imports all icons into the bundle and increases app size!
 // import { fas } from '@fortawesome/pro-solid-svg-icons';
@@ -63,6 +67,10 @@ export function tokenGetter() {
     RefreshSessionDialogComponent,
     TimeFormatPipe,
     HeaderComponent,
+    MainContentComponent,
+    SideBarComponent,
+    FooterComponent,
+    MainContentBarPanelComponent,
   ],
   imports: [
     BrowserModule,
