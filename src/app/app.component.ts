@@ -1,13 +1,10 @@
-import { Component, Inject, NgZone } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
-import { APP_ROUTES } from './shared/constants/app-routing.constants';
-import { GeneralThemeService } from './shared/services/general-theme.service';
-import { RoutingService } from './shared/services/routing.service';
 
 @Component({
   selector: 'app-root',
@@ -15,18 +12,10 @@ import { RoutingService } from './shared/services/routing.service';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  appTitle = environment.appTitle;
-  appTitleTestTag = '';
-  appVersion = environment.version;
-  appRoutes = APP_ROUTES;
-
   isLoggedIn = false;
   autoLogoutCountdown = 0;
-  currentYear: number;
 
   showScrollButton = false;
-
-  themePanel6RandomText: string;
 
   private destroy$ = new Subject<void>();
   private warningSubscription: Subscription | undefined;
@@ -36,29 +25,13 @@ export class AppComponent {
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
 
   constructor(
-    @Inject('API_URL') private apiUrl: string,
-
-    private routingService: RoutingService,
     private authService: AuthService,
-    private generalThemeService: GeneralThemeService,
-
     private titleService: Title,
 
     public dialog: MatDialog,
     private zone: NgZone,
   ) {
-    // Tags to add to titles to help identify the environment in use
-    if (environment.env_name === 'local') this.appTitleTestTag = ' [Local Dev]';
-    if (environment.env_name === 'dev') this.appTitleTestTag = ' [Dev]';
-
-    this.titleService.setTitle(
-      (environment.appTitle
-        ? environment.appTitle
-        : 'Star Trek Online Info Portal') + this.appTitleTestTag,
-    );
-    this.currentYear = new Date().getFullYear();
-    this.themePanel6RandomText =
-      this.generalThemeService.createDynamicSideColumnText();
+    this.setAppTitle();
 
     this.logout = this.logout.bind(this);
   }
@@ -119,10 +92,6 @@ export class AppComponent {
     this.authService.performLogout();
   }
 
-  getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
-  }
-
   openRefreshSessionDialog() {
     // If a dialog box is already open, do nothing
     if (this.dialogRef) {
@@ -171,5 +140,18 @@ export class AppComponent {
         }
       }, 1000);
     });
+  }
+
+  setAppTitle() {
+    // Tags to add to titles to help identify the environment in use
+    let appTitleTestTag = '';
+    if (environment.env_name === 'local') appTitleTestTag = ' [Local Dev]';
+    if (environment.env_name === 'dev') appTitleTestTag = ' [Dev]';
+
+    this.titleService.setTitle(
+      (environment.appTitle
+        ? environment.appTitle
+        : 'Star Trek Online Info Portal') + appTitleTestTag,
+    );
   }
 }

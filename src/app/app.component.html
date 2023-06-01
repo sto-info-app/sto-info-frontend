@@ -1,82 +1,11 @@
 <div class="wrap-everything">
-  <section id="column-3">
+  <section id="column-page-container">
     <app-header
       [showScrollButton]="showScrollButton"
       [isLoggedIn]="isLoggedIn"
       [autoLogoutCountdown]="autoLogoutCountdown"
       [logout]="logout">
     </app-header>
-    <div
-      class="wrap gap"
-      id="lcars-body-container">
-      <div class="left-frame">
-        <div class="panel-grow-container">
-          <div class="panel panel-3"></div>
-          <div class="sidebar-buttons">
-            <a
-              *ngIf="!isLoggedIn"
-              [routerLink]="getRouteLink(appRoutes.REGISTER)"
-              routerLinkActive="peach"
-              >Register</a
-            >
-            <a
-              *ngIf="isLoggedIn"
-              [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
-              routerLinkActive="peach"
-              >Dashboard</a
-            >
-          </div>
-          <div class="panel panel-4"></div>
-          <div class="panel panel-5"></div>
-          <div
-            class="panel panel-6"
-            [innerHTML]="themePanel6RandomText"></div>
-          <!-- <div class="panel panel-7"></div> -->
-          <!-- <div class="panel panel-8"></div> -->
-          <div class="panel panel-9"></div>
-          <!-- <div class="panel panel-10"></div> -->
-        </div>
-      </div>
-      <div class="right-frame">
-        <div class="bar-panel">
-          <div class="bar-6"></div>
-          <div class="bar-7"></div>
-          <div class="bar-8"></div>
-          <div class="bar-9"></div>
-          <div class="bar-10"></div>
-        </div>
-        <main>
-          <router-outlet></router-outlet>
-        </main>
-
-        <footer>
-          <div class="footer-inside">
-            <div class="footer-text">
-              <p>Copyright &#169; {{ currentYear }} {{ appTitle }}.</p>
-              <p>
-                LCARS Inspired Website Template by Jim Robertus
-                <a
-                  target="_blank"
-                  href="https://www.thelcars.com"
-                  >www.TheLCARS.com</a
-                >. Using
-                <a
-                  target="_blank"
-                  href="https://icons8.com/icons/set/star-trek"
-                  >Star Trek icons</a
-                >
-                provided by
-                <a
-                  target="_blank"
-                  href="https://icons8.com"
-                  >Icons8</a
-                >.
-              </p>
-            </div>
-          </div>
-          <div class="footer-panel">v{{ appVersion }}</div>
-        </footer>
-      </div>
-    </div>
+    <app-main-content [isLoggedIn]="isLoggedIn"> </app-main-content>
   </section>
 </div>
