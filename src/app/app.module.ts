@@ -27,11 +27,16 @@ import { LcarsInformationMessageComponent } from './shared/components/lcars-info
 import { LcarsSuccessMessageComponent } from './shared/components/lcars-success-message/lcars-success-message.component';
 import { LcarsWarningMessageComponent } from './shared/components/lcars-warning-message/lcars-warning-message.component';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
+import { ResizeObserverDirective } from './shared/directives/resize-observer.directive';
 import { TimeFormatPipe } from './shared/pipes/time-format.pipe';
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
+import { FooterComponent } from './template/footer/footer.component';
 import { HeaderComponent } from './template/header/header.component';
+import { MainContentBarPanelComponent } from './template/main-content-bar-panel/main-content-bar-panel.component';
+import { MainContentComponent } from './template/main-content/main-content.component';
+import { SideBarComponent } from './template/side-bar/side-bar.component';
 
 // NOTE: This imports all icons into the bundle and increases app size!
 // import { fas } from '@fortawesome/pro-solid-svg-icons';
@@ -63,6 +68,11 @@ export function tokenGetter() {
     RefreshSessionDialogComponent,
     TimeFormatPipe,
     HeaderComponent,
+    MainContentComponent,
+    SideBarComponent,
+    FooterComponent,
+    MainContentBarPanelComponent,
+    ResizeObserverDirective,
   ],
   imports: [
     BrowserModule,
@@ -81,7 +91,7 @@ export function tokenGetter() {
     FontAwesomeModule,
     MatDialogModule,
   ],
-  exports: [TimeFormatPipe],
+  exports: [TimeFormatPipe, ResizeObserverDirective],
   providers: [
     {
       provide: 'API_URL',
