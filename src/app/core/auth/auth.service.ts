@@ -177,8 +177,6 @@ export class AuthService {
       return;
     }
 
-    this.clearRefreshTokenTimer();
-    this.removeToken();
     // Send a request to the backend to revoke the refresh token
     const token = this.getToken();
     if (token) {
@@ -189,6 +187,10 @@ export class AuthService {
           .subscribe();
       }
     }
+
+    this.clearRefreshTokenTimer();
+    this.removeToken();
+
     this.router.navigate(['/login']);
   }
 
