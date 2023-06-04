@@ -41,14 +41,18 @@ export class AppComponent {
       .pipe(takeUntil(this.destroy$))
       .subscribe(loggedIn => {
         this.isLoggedIn = loggedIn;
-        if (this.isLoggedIn) this.startCountdown();
+        if (this.isLoggedIn && this.intervalId === null) {
+          this.startCountdown();
+        } else if (!this.isLoggedIn && this.intervalId !== null) {
+          this.stopCountdown();
+        }
       });
 
     // Subscribe to the warningAnnounced$ Observable - display of auto logout warning message
     this.warningSubscription = this.authService.warningAnnounced$
       .pipe(takeUntil(this.destroy$))
       .subscribe((warningTime: number) => {
-        if (this.isLoggedIn) {
+        if (this.isLoggedIn && this.intervalId !== null) {
           const delay = warningTime - Date.now(); // calculate the delay in milliseconds
           if (delay > 0) {
             setTimeout(() => {
@@ -83,18 +87,22 @@ export class AppComponent {
   }
 
   logout(): void {
-    // Stop countdown
-    if (this.intervalId !== null) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-    }
-
+    this.stopCountdown();
     this.authService.performLogout();
   }
 
   openRefreshSessionDialog() {
     // If a dialog box is already open, do nothing
     if (this.dialogRef) {
+      return;
+    }
+
+    // If the countdown has ended, do nothing
+    if (!this.autoLogoutCountdown || this.autoLogoutCountdown <= 0) {
+      return;
+    }
+
+    if (!this.isLoggedIn) {
       return;
     }
 
@@ -116,7 +124,7 @@ export class AppComponent {
   }
 
   startCountdown(): void {
-    if (!this.isLoggedIn) {
+    if (!this.isLoggedIn || this.intervalId !== null) {
       return;
     }
 
@@ -125,10 +133,7 @@ export class AppComponent {
         this.autoLogoutCountdown =
           this.authService.getSecondsUntilLoginSessionExpiry();
         if (this.autoLogoutCountdown <= 0) {
-          if (this.intervalId !== null) {
-            clearInterval(this.intervalId);
-            this.intervalId = null;
-          }
+          this.stopCountdown();
 
           // If the warning dialog is open
           if (this.dialogRef) {
@@ -140,6 +145,14 @@ export class AppComponent {
         }
       }, 1000);
     });
+  }
+
+  stopCountdown(): void {
+    if (this.intervalId !== null) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+      this.autoLogoutCountdown = 0;
+    }
   }
 
   setAppTitle() {

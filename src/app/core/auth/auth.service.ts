@@ -177,18 +177,17 @@ export class AuthService {
       return;
     }
 
+    // Send a request to the backend to revoke the refresh token
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (refreshToken) {
+      this.http
+        .post(`${this.apiUrl}/auth/logout`, { tokenId: refreshToken })
+        .subscribe();
+    }
+
     this.clearRefreshTokenTimer();
     this.removeToken();
-    // Send a request to the backend to revoke the refresh token
-    const token = this.getToken();
-    if (token) {
-      const httpOptions = this.getHttpOptionsWithRefreshToken();
-      if (httpOptions) {
-        this.http
-          .post(`${this.apiUrl}/auth/revoke`, {}, httpOptions)
-          .subscribe();
-      }
-    }
+
     this.router.navigate(['/login']);
   }
 
