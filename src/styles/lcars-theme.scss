@@ -260,7 +260,7 @@ h1 {
 .mat-typography h2,
 h2 {
   font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
-  margin: 30px 0;
+  margin: 30px 0 10px 0;
   font-weight: 400;
   text-transform: uppercase;
   line-height: 1.2;
@@ -275,7 +275,7 @@ h2 {
 .mat-typography h3,
 h3 {
   font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
-  margin: 30px 0;
+  margin: 30px 0 10px 0;
   font-weight: 400;
   text-transform: uppercase;
   line-height: 1.2;
@@ -374,19 +374,26 @@ body {
 }
 
 body {
-  display: flex;
+  display: block;
   padding-block: 5px;
+  padding: 5px 0;
   background-color: #0d0d0d;
   font-size: 100%;
   font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   font-weight: 400;
   line-height: 1.5;
-  color: #c7f;
+  color: #79d;
 }
 
 a {
-  color: #c3f;
+  color: #8ff;
   text-decoration: underline;
+
+  fa-icon.ext-link {
+    color: #fa4;
+    font-size: small;
+    vertical-align: top;
+  }
 }
 
 a:hover {
@@ -1445,19 +1452,6 @@ html {
   * {
     scrollbar-color: #2d2d2d #121212;
   }
-}
-
-body {
-  margin: 0;
-  padding: 5px 0;
-  background-color: #0d0d0d;
-  color: #79d;
-  display: block;
-}
-
-a {
-  text-decoration: underline;
-  color: #58e;
 }
 
 .wrap {
