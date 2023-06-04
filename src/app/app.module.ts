@@ -9,7 +9,7 @@ import {
   FaIconLibrary,
   FontAwesomeModule,
 } from '@fortawesome/angular-fontawesome';
-import { faHandSpock } from '@fortawesome/free-solid-svg-icons';
+import { faExternalLink, faHandSpock } from '@fortawesome/free-solid-svg-icons';
 import { environment } from 'src/environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -31,6 +31,7 @@ import { ResizeObserverDirective } from './shared/directives/resize-observer.dir
 import { TimeFormatPipe } from './shared/pipes/time-format.pipe';
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
+import { CreditsComponent } from './static-pages/credits/credits.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 import { FooterComponent } from './template/footer/footer.component';
 import { HeaderComponent } from './template/header/header.component';
@@ -73,6 +74,7 @@ export function tokenGetter() {
     FooterComponent,
     MainContentBarPanelComponent,
     ResizeObserverDirective,
+    CreditsComponent,
   ],
   imports: [
     BrowserModule,
@@ -105,7 +107,7 @@ export class AppModule {
     // Add an individual FontAwesome icon to the library for convenient access in other components
     // NOTE: Use `<fa-icon [icon]="['fas', 'hand-spock']"></fa-icon>` to use icon in the HTML
     // NOTE: FontAwesome prefixes are: fas = solid, far = regular, fal = light, fat = thin, fad = duotone
-    library.addIcons(faHandSpock);
+    library.addIcons(faHandSpock, faExternalLink);
 
     // Add entire icon packs
     // NOTE: This imports all icons into the bundle and increases app size!
