@@ -178,14 +178,11 @@ export class AuthService {
     }
 
     // Send a request to the backend to revoke the refresh token
-    const token = this.getToken();
-    if (token) {
-      const httpOptions = this.getHttpOptionsWithRefreshToken();
-      if (httpOptions) {
-        this.http
-          .post(`${this.apiUrl}/auth/revoke`, {}, httpOptions)
-          .subscribe();
-      }
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (refreshToken) {
+      this.http
+        .post(`${this.apiUrl}/auth/logout`, { tokenId: refreshToken })
+        .subscribe();
     }
 
     this.clearRefreshTokenTimer();
