@@ -1,25 +1,71 @@
-<div class="footer-inside">
-  <div class="footer-text">
-    <p>Copyright &#169; {{ currentYear }} {{ appTitle }}.</p>
-    <p>
-      LCARS Inspired Website Template by Jim Robertus
-      <a
-        target="_blank"
-        href="https://www.thelcars.com"
-        >www.TheLCARS.com</a
-      >. Using
-      <a
-        target="_blank"
-        href="https://icons8.com/icons/set/star-trek"
-        >Star Trek icons</a
-      >
-      provided by
-      <a
-        target="_blank"
-        href="https://icons8.com"
-        >Icons8</a
-      >.
-    </p>
+<div id="footer-inside">
+  <div id="footer-text">
+    <div id="footer-links-container">
+      <div
+        id="footer-list-container"
+        class="flexbox">
+        <div class="col footer-list-col">
+          <ul class="lcars-list">
+            <li>
+              <a
+                [routerLink]="getRouteLink('HOME')"
+                [routerLinkActiveOptions]="{ exact: true }"
+                routerLinkActive="active"
+                >Home</a
+              >
+            </li>
+            <li>
+              <a
+                [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+                routerLinkActive="active"
+                >Dashboard</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div class="col footer-list-col">
+          <ul class="lcars-list">
+            <li>
+              <a
+                [routerLink]="getRouteLink(appRoutes.ABOUT)"
+                routerLinkActive="active"
+                >About</a
+              >
+            </li>
+            <li>
+              <a
+                [routerLink]="getRouteLink(appRoutes.CONTACT)"
+                routerLinkActive="active"
+                >Contact</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div class="col footer-list-col">
+          <ul class="lcars-list">
+            <li>
+              <a
+                [routerLink]="getRouteLink(appRoutes.CREDITS)"
+                routerLinkActive="active"
+                >Credits</a
+              >
+            </li>
+            <li>
+              <a
+                [routerLink]="getRouteLink(appRoutes.TERMS_OF_USE)"
+                routerLinkActive="active"
+                >Terms of use</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div id="copyright-text">
+      <p>Copyright &#169; {{ currentYear }} {{ appTitle }}.</p>
+    </div>
   </div>
 </div>
-<div class="footer-panel">v{{ appVersion }}</div>
+<div id="footer-panel-container">
+  <div id="footer-panel">v{{ appVersion }}</div>
+</div>
