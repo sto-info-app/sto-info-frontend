@@ -22,13 +22,7 @@ import { VerifyEmailComponent } from './core/verify-email/verify-email.component
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
 import { HomeComponent } from './home/home.component';
-import { LcarsErrorMessageComponent } from './shared/components/lcars-error-message/lcars-error-message.component';
-import { LcarsInformationMessageComponent } from './shared/components/lcars-information-message/lcars-information-message.component';
-import { LcarsSuccessMessageComponent } from './shared/components/lcars-success-message/lcars-success-message.component';
-import { LcarsWarningMessageComponent } from './shared/components/lcars-warning-message/lcars-warning-message.component';
-import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
-import { ResizeObserverDirective } from './shared/directives/resize-observer.directive';
-import { TimeFormatPipe } from './shared/pipes/time-format.pipe';
+import { SharedModule } from './shared/shared.module';
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { CreditsComponent } from './static-pages/credits/credits.component';
@@ -55,25 +49,18 @@ export function tokenGetter() {
     HomeComponent,
     ContactComponent,
     AboutComponent,
-    LcarsErrorMessageComponent,
     VerifyEmailComponent,
-    LcarsSuccessMessageComponent,
-    RegistrationCompleteComponent,
-    LcarsInformationMessageComponent,
     TermsOfUseComponent,
     DashboardComponent,
     ResetPasswordRequestComponent,
+    RegistrationCompleteComponent,
     ChangePasswordComponent,
     PageNotFoundComponent,
-    LcarsWarningMessageComponent,
-    RefreshSessionDialogComponent,
-    TimeFormatPipe,
     HeaderComponent,
     MainContentComponent,
     SideBarComponent,
     FooterComponent,
     MainContentBarPanelComponent,
-    ResizeObserverDirective,
     CreditsComponent,
   ],
   imports: [
@@ -92,8 +79,8 @@ export function tokenGetter() {
     ReactiveFormsModule,
     FontAwesomeModule,
     MatDialogModule,
+    SharedModule,
   ],
-  exports: [TimeFormatPipe, ResizeObserverDirective],
   providers: [
     {
       provide: 'API_URL',
