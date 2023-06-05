@@ -1,0 +1,83 @@
+name: 'Bump Version'
+description: 'Increase the version number of the Angular project'
+
+on:
+  push:
+    branches:
+      - development
+      - production
+
+env:
+  BUMP_VERSION_COMMIT_MSG: 'Bump version number'
+
+jobs:
+  version_bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all branches and tags
+
+      - name: Get Current Protected Branch Name
+        id: branch_name
+        run: echo "::set-output name=branch::${GITHUB_REF#refs/heads/}"
+
+      - id: old-app-ver
+        name: Get Old App Version
+        run: echo "::set-output name=version::$(jq -r '.version' package.json)"
+
+      - name: Set Date and Time
+        id: set_datetime
+        run: echo "::set-output name=datetime::$(date +'%Y%m%d%H%M%S')"
+
+      - name: Create Temp Branch for Version Bump
+        id: create_branch
+        run: |
+          branch_name="version-bump/${{ steps.branch_name.outputs.branch }}-${{ steps.set_datetime.outputs.datetime }}"
+          git checkout -b $branch_name
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump Version
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+          npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }} from ${{ steps.old-app-ver.outputs.version }} to %s"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push back to Temp Branch
+        run: |
+          git push origin ${{ steps.create_branch.outputs.branch_name }}
+
+      - name: Create Pull Request from Temp Branch to Protected Branch
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'Chore: Version bump'
+          body: ${{ env.BUMP_VERSION_COMMIT_MSG }}
+          branch: ${{ steps.set_datetime.outputs.branch_name }}
+          base: ${{ steps.branch_name.outputs.branch }}
+
+      - name: Complete Pull Request
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              merge_method: 'squash'  # Choose merge method: 'merge', 'squash', or 'rebase'
+            })
+
+      - name: Delete Temp Branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const ref = `heads/${context.payload.pull_request.head.ref}`;
+            github.git.deleteRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: ref
+            })
