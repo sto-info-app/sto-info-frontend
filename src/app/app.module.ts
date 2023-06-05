@@ -13,10 +13,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { ErrorPagesModule } from './error-pages/error-pages.module';
 import { HomeModule } from './home/home.module';
 import { SharedModule } from './shared/shared.module';
-import { AboutComponent } from './static-pages/about/about.component';
-import { ContactComponent } from './static-pages/contact/contact.component';
-import { CreditsComponent } from './static-pages/credits/credits.component';
-import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
+import { StaticPagesModule } from './static-pages/static-pages.module';
 import { FooterComponent } from './template/footer/footer.component';
 import { HeaderComponent } from './template/header/header.component';
 import { MainContentBarPanelComponent } from './template/main-content-bar-panel/main-content-bar-panel.component';
@@ -30,15 +27,11 @@ export function tokenGetter() {
 @NgModule({
   declarations: [
     AppComponent,
-    ContactComponent,
-    AboutComponent,
-    TermsOfUseComponent,
     HeaderComponent,
     MainContentComponent,
     SideBarComponent,
     FooterComponent,
     MainContentBarPanelComponent,
-    CreditsComponent,
   ],
   imports: [
     BrowserModule,
@@ -60,6 +53,7 @@ export function tokenGetter() {
     DashboardModule,
     ErrorPagesModule,
     HomeModule,
+    StaticPagesModule,
   ],
   providers: [
     {
