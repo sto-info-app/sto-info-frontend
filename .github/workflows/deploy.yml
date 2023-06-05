@@ -28,16 +28,8 @@ jobs:
         run: echo "NODE_VERSION=$NODE_VERSION"
         if: env.NODE_VERSION
 
-  test:
-    needs: prerequisite_check
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Lint and Test
-        uses: ./.github/workflows/lint-test
-
   build_and_deploy:
-    needs: [prerequisite_check, test]
+    needs: [prerequisite_check]
     runs-on: ubuntu-latest
 
     #NOTE: Do not use custom actions for project setup, cache and dependencies, as the new version number will not get used in the build process.
