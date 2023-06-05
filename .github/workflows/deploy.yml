@@ -25,8 +25,16 @@ jobs:
         run: echo "NODE_VERSION=$NODE_VERSION"
         if: env.NODE_VERSION
 
-  build_and_deploy:
+  bump_version_number:
     needs: [prerequisite_check]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Bump Version
+        uses: ./.github/actions/version-bump
+
+  build_and_deploy:
+    needs: [bump_version_number]
     runs-on: ubuntu-latest
 
     steps:
