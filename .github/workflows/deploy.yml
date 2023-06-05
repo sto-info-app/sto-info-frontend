@@ -1,4 +1,4 @@
-name: CI/CD
+name: Deployment
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
     types:
       - closed
     branches:
-      - master
+      - production
       - development
 
   workflow_run:
@@ -15,9 +15,6 @@ on:
       - Pull Request Check
     types:
       - completed
-
-env:
-  BUMP_VERSION_COMMIT_MSG: 'Bump version number'
 
 jobs:
   prerequisite_check:
@@ -28,11 +25,17 @@ jobs:
         run: echo "NODE_VERSION=$NODE_VERSION"
         if: env.NODE_VERSION
 
-  build_and_deploy:
+  bump_version_number:
     needs: [prerequisite_check]
     runs-on: ubuntu-latest
 
-    #NOTE: Do not use custom actions for project setup, cache and dependencies, as the new version number will not get used in the build process.
+    steps:
+      - name: Bump Version
+        uses: ./.github/actions/version-bump
+
+  build_and_deploy:
+    needs: [bump_version_number]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repo

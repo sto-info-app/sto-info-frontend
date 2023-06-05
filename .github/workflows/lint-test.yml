@@ -10,10 +10,15 @@ on:
       - 'development'
       - 'epic/*'
 
-env:
-  NODE_VERSION: 18
-
 jobs:
+  prerequisite_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check if NODE_VERSION exists
+        run: echo "NODE_VERSION=$NODE_VERSION"
+        if: env.NODE_VERSION
+
   lint_and_test:
     runs-on: ubuntu-latest
 
