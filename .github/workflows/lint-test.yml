@@ -1,9 +1,11 @@
-name: Lint and Test Epics
+name: Lint and Test
 
 on:
   pull_request:
     types: [opened, edited, reopened]
     branches:
+      - 'master'
+      - 'development'
       - 'epic/*'
 
 env:

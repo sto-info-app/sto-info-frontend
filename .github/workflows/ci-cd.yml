@@ -1,12 +1,13 @@
 name: CI/CD
 
 on:
-  push:
-    branches:
-      - 'master'
-  pull_request:
-    branches:
-      - 'development'
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - 'master'
+  # pull_request:
+  #   branches:
+  #     - 'development'
 
 env:
   NODE_VERSION: 18
