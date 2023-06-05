@@ -14,7 +14,7 @@ import { environment } from 'src/environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
-import { DashboardComponent } from './dashboard/dashboard.component';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
 import { HomeComponent } from './home/home.component';
 import { SharedModule } from './shared/shared.module';
@@ -43,7 +43,6 @@ export function tokenGetter() {
     ContactComponent,
     AboutComponent,
     TermsOfUseComponent,
-    DashboardComponent,
     PageNotFoundComponent,
     HeaderComponent,
     MainContentComponent,
@@ -70,6 +69,7 @@ export function tokenGetter() {
     MatDialogModule,
     SharedModule,
     CoreModule,
+    DashboardModule,
   ],
   providers: [
     {
