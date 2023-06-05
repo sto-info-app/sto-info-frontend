@@ -14,7 +14,7 @@ env:
   NODE_VERSION: 18
 
 jobs:
-  lint_test_epic:
+  lint_and_test:
     runs-on: ubuntu-latest
 
     steps:
