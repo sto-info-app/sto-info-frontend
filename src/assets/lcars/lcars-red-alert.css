@@ -293,19 +293,19 @@ footer {
   background: linear-gradient(#ff8866 50%, #dd4444 50%);
 }
 
-.footer-panel {
+#footer-panel {
   background-color: #ff5555;
 }
 
-.footer-inside::before {
+#footer-inside::before {
   background-color: #ff8866;
 }
 
-.footer-inside::after {
+#footer-inside::after {
   background-color: #dd4444;
 }
 
-.footer-text a {
+#footer-text a {
   color: #e00;
 }
 

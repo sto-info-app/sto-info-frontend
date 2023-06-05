@@ -9,4 +9,6 @@ export const environment = {
   appTitle: 'Star Trek Online Info Portal',
   appLoggedInHome: '/dashboard',
   allowDebugging: false,
+  minsBeforeLogoutExpiryToShowWarning: 5,
+  minsBeforeLogoutExpiryToRefreshToken: 15,
 };
