@@ -1,4 +1,5 @@
 import { Injectable, Renderer2 } from '@angular/core';
+import { Subject, takeUntil, timer } from 'rxjs';
 import {
   MILLISECONDS_SHOW_RED_ALERT_THEME,
   MILLISECONDS_SWITCH_TO_RED_ALERT_STATIC_THEME,
@@ -8,6 +9,8 @@ import {
   providedIn: 'root',
 })
 export class RedAlertThemeService {
+  private stopTimers$ = new Subject<void>();
+
   applyRedAlertTheme(renderer: Renderer2, el: Element): void {
     this.applyRedAlertStylesheet(
       renderer,
@@ -42,6 +45,7 @@ export class RedAlertThemeService {
     this.applyRedAlertTheme(renderer, el);
 
     setTimeout(() => {
+      this.stopTimers$.next();
       this.clearRedAlertStylesheet(renderer, el);
     }, MILLISECONDS_SHOW_RED_ALERT_THEME);
   }
@@ -49,9 +53,15 @@ export class RedAlertThemeService {
   applyRedAlertThemeThenApplyStaticRedTheme(renderer: Renderer2, el: Element) {
     this.applyRedAlertTheme(renderer, el);
 
-    setTimeout(() => {
-      this.applyRedAlertStaticTheme(renderer, el);
-    }, MILLISECONDS_SWITCH_TO_RED_ALERT_STATIC_THEME);
+    timer(MILLISECONDS_SWITCH_TO_RED_ALERT_STATIC_THEME)
+      .pipe(takeUntil(this.stopTimers$))
+      .subscribe(() => {
+        this.applyRedAlertStaticTheme(renderer, el);
+      });
+  }
+
+  clearTimers(): void {
+    this.stopTimers$.next();
   }
 
   clearRedAlertStylesheet(renderer: Renderer2, el: Element): void {
