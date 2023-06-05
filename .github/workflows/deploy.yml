@@ -7,7 +7,7 @@ on:
     types:
       - closed
     branches:
-      - master
+      - production
       - development
 
   workflow_run:
