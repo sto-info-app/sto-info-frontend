@@ -13,12 +13,7 @@ import { faExternalLink, faHandSpock } from '@fortawesome/free-solid-svg-icons';
 import { environment } from 'src/environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { ChangePasswordComponent } from './core/auth/change-password/change-password.component';
-import { ResetPasswordRequestComponent } from './core/auth/reset-password-request/reset-password-request.component';
-import { LoginComponent } from './core/login/login.component';
-import { RegisterComponent } from './core/register/register.component';
-import { RegistrationCompleteComponent } from './core/registration-complete/registration-complete.component';
-import { VerifyEmailComponent } from './core/verify-email/verify-email.component';
+import { CoreModule } from './core/core.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
 import { HomeComponent } from './home/home.component';
@@ -44,17 +39,11 @@ export function tokenGetter() {
 @NgModule({
   declarations: [
     AppComponent,
-    LoginComponent,
-    RegisterComponent,
     HomeComponent,
     ContactComponent,
     AboutComponent,
-    VerifyEmailComponent,
     TermsOfUseComponent,
     DashboardComponent,
-    ResetPasswordRequestComponent,
-    RegistrationCompleteComponent,
-    ChangePasswordComponent,
     PageNotFoundComponent,
     HeaderComponent,
     MainContentComponent,
@@ -80,6 +69,7 @@ export function tokenGetter() {
     FontAwesomeModule,
     MatDialogModule,
     SharedModule,
+    CoreModule,
   ],
   providers: [
     {

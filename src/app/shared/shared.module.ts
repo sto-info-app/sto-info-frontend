@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { LcarsErrorMessageComponent } from './components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from './components/lcars-information-message/lcars-information-message.component';
 import { LcarsSuccessMessageComponent } from './components/lcars-success-message/lcars-success-message.component';
@@ -30,6 +31,7 @@ import { TimeFormatPipe } from './pipes/time-format.pipe';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    RouterModule,
 
     // Pipes
     TimeFormatPipe,
