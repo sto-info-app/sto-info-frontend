@@ -14,30 +14,19 @@ import { ErrorPagesModule } from './error-pages/error-pages.module';
 import { HomeModule } from './home/home.module';
 import { SharedModule } from './shared/shared.module';
 import { StaticPagesModule } from './static-pages/static-pages.module';
-import { FooterComponent } from './template/footer/footer.component';
-import { HeaderComponent } from './template/header/header.component';
-import { MainContentBarPanelComponent } from './template/main-content-bar-panel/main-content-bar-panel.component';
-import { MainContentComponent } from './template/main-content/main-content.component';
-import { SideBarComponent } from './template/side-bar/side-bar.component';
+import { TemplateModule } from './template/template.module';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
 }
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HeaderComponent,
-    MainContentComponent,
-    SideBarComponent,
-    FooterComponent,
-    MainContentBarPanelComponent,
-  ],
+  declarations: [AppComponent],
   imports: [
-    BrowserModule,
+    // Routing modules
     AppRoutingModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
+
+    // Auth modules
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,
@@ -45,15 +34,23 @@ export function tokenGetter() {
         disallowedRoutes: [],
       },
     }),
+
+    // Angular modules
+    BrowserModule,
+    BrowserAnimationsModule,
+    HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
     MatDialogModule,
+
+    // Project modules
     SharedModule,
     CoreModule,
     DashboardModule,
     ErrorPagesModule,
     HomeModule,
     StaticPagesModule,
+    TemplateModule,
   ],
   providers: [
     {
