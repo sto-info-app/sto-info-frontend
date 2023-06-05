@@ -6,7 +6,7 @@ env:
   BUMP_VERSION_COMMIT_MSG: 'Bump version number'
 
 runs:
-  using: 'composite'
+  using: 'shell'
 
   steps:
     - name: Set User for Git
