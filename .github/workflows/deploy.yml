@@ -29,8 +29,6 @@ jobs:
     needs: [prerequisite_check]
     runs-on: ubuntu-latest
 
-    #NOTE: Do not use custom actions for project setup, cache and dependencies, as the new version number will not get used in the build process.
-
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
