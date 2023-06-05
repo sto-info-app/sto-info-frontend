@@ -1,16 +1,20 @@
-name: Lint and Test Epics
+name: Lint and Test
 
 on:
+  workflow_dispatch:
+
   pull_request:
-    types: [opened, edited, reopened]
+    types: [opened, synchronize, edited, reopened]
     branches:
+      - 'master'
+      - 'development'
       - 'epic/*'
 
 env:
   NODE_VERSION: 18
 
 jobs:
-  lint_test_epic:
+  lint_and_test:
     runs-on: ubuntu-latest
 
     steps:

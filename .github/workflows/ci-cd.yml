@@ -1,12 +1,13 @@
 name: CI/CD
 
 on:
-  push:
-    branches:
-      - 'master'
-  pull_request:
-    branches:
-      - 'development'
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - 'master'
+  # pull_request:
+  #   branches:
+  #     - 'development'
 
 env:
   NODE_VERSION: 18
@@ -151,37 +152,37 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Angular Project (Development)
-        if: github.event.pull_request.base.ref == 'development'
-        run: npm run build -- --configuration=development
+      # - name: Build Angular Project (Development)
+      #   if: github.event.pull_request.base.ref == 'development'
+      #   run: npm run build -- --configuration=development
 
-      - name: Build Angular Project (Production)
-        if: github.event.pull_request.base.ref == 'master'
-        run: npm run build -- --configuration=production
+      # - name: Build Angular Project (Production)
+      #   if: github.event.pull_request.base.ref == 'master'
+      #   run: npm run build -- --configuration=production
 
-      - name: Build Angular Project
-        if: github.event.pull_request.base.ref != 'development' && github.event.pull_request.base.ref != 'master'
-        run: npm run build
+      # - name: Build Angular Project
+      #   if: github.event.pull_request.base.ref != 'development' && github.event.pull_request.base.ref != 'master'
+      #   run: npm run build
 
-      - name: Deploy to S3 (Development)
-        if: github.event.pull_request.base.ref == 'development'
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --follow-symlinks --delete
-        env:
-          AWS_S3_BUCKET: dev.startrekonline.info
-          AWS_REGION: eu-west-2
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: dist/sto-info-frontend/
+      # - name: Deploy to S3 (Development)
+      #   if: github.event.pull_request.base.ref == 'development'
+      #   uses: jakejarvis/s3-sync-action@master
+      #   with:
+      #     args: --follow-symlinks --delete
+      #   env:
+      #     AWS_S3_BUCKET: dev.startrekonline.info
+      #     AWS_REGION: eu-west-2
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     SOURCE_DIR: dist/sto-info-frontend/
 
-      - name: Deploy to S3 (Production)
-        if: github.event.pull_request.base.ref == 'master'
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --acl public-read --follow-symlinks --delete
-          path: dist/sto-info-frontend/
-          bucket: startrekonline.info
-          region: eu-west-2
-          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # - name: Deploy to S3 (Production)
+      #   if: github.event.pull_request.base.ref == 'master'
+      #   uses: jakejarvis/s3-sync-action@master
+      #   with:
+      #     args: --acl public-read --follow-symlinks --delete
+      #     path: dist/sto-info-frontend/
+      #     bucket: startrekonline.info
+      #     region: eu-west-2
+      #     access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
