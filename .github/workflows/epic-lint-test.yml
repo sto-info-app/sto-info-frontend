@@ -1,0 +1,33 @@
+name: Lint and Test Epics
+
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+    branches:
+      - 'epic/*'
+
+env:
+  NODE_VERSION: 18
+
+jobs:
+  lint_test_epic:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm run test
