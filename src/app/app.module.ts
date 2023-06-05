@@ -5,82 +5,28 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { JwtModule } from '@auth0/angular-jwt';
-import {
-  FaIconLibrary,
-  FontAwesomeModule,
-} from '@fortawesome/angular-fontawesome';
-import { faExternalLink, faHandSpock } from '@fortawesome/free-solid-svg-icons';
 import { environment } from 'src/environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { ChangePasswordComponent } from './core/auth/change-password/change-password.component';
-import { ResetPasswordRequestComponent } from './core/auth/reset-password-request/reset-password-request.component';
-import { LoginComponent } from './core/login/login.component';
-import { RegisterComponent } from './core/register/register.component';
-import { RegistrationCompleteComponent } from './core/registration-complete/registration-complete.component';
-import { VerifyEmailComponent } from './core/verify-email/verify-email.component';
-import { DashboardComponent } from './dashboard/dashboard.component';
-import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
-import { HomeComponent } from './home/home.component';
-import { LcarsErrorMessageComponent } from './shared/components/lcars-error-message/lcars-error-message.component';
-import { LcarsInformationMessageComponent } from './shared/components/lcars-information-message/lcars-information-message.component';
-import { LcarsSuccessMessageComponent } from './shared/components/lcars-success-message/lcars-success-message.component';
-import { LcarsWarningMessageComponent } from './shared/components/lcars-warning-message/lcars-warning-message.component';
-import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
-import { ResizeObserverDirective } from './shared/directives/resize-observer.directive';
-import { TimeFormatPipe } from './shared/pipes/time-format.pipe';
-import { AboutComponent } from './static-pages/about/about.component';
-import { ContactComponent } from './static-pages/contact/contact.component';
-import { CreditsComponent } from './static-pages/credits/credits.component';
-import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
-import { FooterComponent } from './template/footer/footer.component';
-import { HeaderComponent } from './template/header/header.component';
-import { MainContentBarPanelComponent } from './template/main-content-bar-panel/main-content-bar-panel.component';
-import { MainContentComponent } from './template/main-content/main-content.component';
-import { SideBarComponent } from './template/side-bar/side-bar.component';
-
-// NOTE: This imports all icons into the bundle and increases app size!
-// import { fas } from '@fortawesome/pro-solid-svg-icons';
-// import { far } from '@fortawesome/pro-regular-svg-icons';
+import { CoreModule } from './core/core.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { ErrorPagesModule } from './error-pages/error-pages.module';
+import { HomeModule } from './home/home.module';
+import { SharedModule } from './shared/shared.module';
+import { StaticPagesModule } from './static-pages/static-pages.module';
+import { TemplateModule } from './template/template.module';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
 }
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    LoginComponent,
-    RegisterComponent,
-    HomeComponent,
-    ContactComponent,
-    AboutComponent,
-    LcarsErrorMessageComponent,
-    VerifyEmailComponent,
-    LcarsSuccessMessageComponent,
-    RegistrationCompleteComponent,
-    LcarsInformationMessageComponent,
-    TermsOfUseComponent,
-    DashboardComponent,
-    ResetPasswordRequestComponent,
-    ChangePasswordComponent,
-    PageNotFoundComponent,
-    LcarsWarningMessageComponent,
-    RefreshSessionDialogComponent,
-    TimeFormatPipe,
-    HeaderComponent,
-    MainContentComponent,
-    SideBarComponent,
-    FooterComponent,
-    MainContentBarPanelComponent,
-    ResizeObserverDirective,
-    CreditsComponent,
-  ],
+  declarations: [AppComponent],
   imports: [
-    BrowserModule,
+    // Routing modules
     AppRoutingModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
+
+    // Auth modules
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,
@@ -88,12 +34,24 @@ export function tokenGetter() {
         disallowedRoutes: [],
       },
     }),
+
+    // Angular modules
+    BrowserModule,
+    BrowserAnimationsModule,
+    HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    FontAwesomeModule,
     MatDialogModule,
+
+    // Project modules
+    SharedModule,
+    CoreModule,
+    DashboardModule,
+    ErrorPagesModule,
+    HomeModule,
+    StaticPagesModule,
+    TemplateModule,
   ],
-  exports: [TimeFormatPipe, ResizeObserverDirective],
   providers: [
     {
       provide: 'API_URL',
@@ -102,15 +60,4 @@ export function tokenGetter() {
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {
-  constructor(library: FaIconLibrary) {
-    // Add an individual FontAwesome icon to the library for convenient access in other components
-    // NOTE: Use `<fa-icon [icon]="['fas', 'hand-spock']"></fa-icon>` to use icon in the HTML
-    // NOTE: FontAwesome prefixes are: fas = solid, far = regular, fal = light, fat = thin, fad = duotone
-    library.addIcons(faHandSpock, faExternalLink);
-
-    // Add entire icon packs
-    // NOTE: This imports all icons into the bundle and increases app size!
-    // library.addIconPacks(fas, far);
-  }
-}
+export class AppModule {}
