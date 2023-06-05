@@ -13,6 +13,7 @@ import { HomeComponent } from './home/home.component';
 import { APP_ROUTES } from './shared/constants/app-routing.constants';
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
+import { CreditsComponent } from './static-pages/credits/credits.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 
 const routes: Routes = [
@@ -63,6 +64,10 @@ const routes: Routes = [
   {
     path: APP_ROUTES.TERMS_OF_USE,
     component: TermsOfUseComponent,
+  },
+  {
+    path: APP_ROUTES.CREDITS,
+    component: CreditsComponent,
   },
 
   // *****************************************

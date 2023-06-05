@@ -39,7 +39,8 @@ export class AuthService {
   public warningAnnounced$: Observable<number> =
     this.warningAnnouncedSubject.asObservable();
 
-  public autoLogoutWarningMins = 5; // 5 minutes before expiration
+  public autoLogoutWarningMins =
+    environment.minsBeforeLogoutExpiryToShowWarning || 5; // 5 minutes before expiration if not set in environment settings
   public autoLogoutWarningSecs = this.autoLogoutWarningMins * 60;
   public autoLogoutWarningMilliSecs = this.autoLogoutWarningSecs * 1000;
   private autoLogoutTimeout: NodeJS.Timeout | null = null;
@@ -91,7 +92,7 @@ export class AuthService {
   }
 
   saveToken(accessToken: string, refreshToken: string, expiresIn: number) {
-    const expiresAt = Date.now() + expiresIn * 1000;
+    const expiresAt = this.getNewExpriresMilliseconds(expiresIn);
     const warningAt = expiresAt - this.autoLogoutWarningMilliSecs; // The warning time
 
     localStorage.setItem('access_token', accessToken);
@@ -147,7 +148,10 @@ export class AuthService {
             response.refresh_token,
             response.expires_in,
           );
-          const expiresAt = Date.now() + response.expires_in * 1000;
+
+          const expiresAt = this.getNewExpriresMilliseconds(
+            response.expires_in,
+          );
           this.expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time
         }),
         catchError(error => {
@@ -173,18 +177,17 @@ export class AuthService {
       return;
     }
 
+    // Send a request to the backend to revoke the refresh token
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (refreshToken) {
+      this.http
+        .post(`${this.apiUrl}/auth/logout`, { tokenId: refreshToken })
+        .subscribe();
+    }
+
     this.clearRefreshTokenTimer();
     this.removeToken();
-    // Send a request to the backend to revoke the refresh token
-    const token = this.getToken();
-    if (token) {
-      const httpOptions = this.getHttpOptionsWithRefreshToken();
-      if (httpOptions) {
-        this.http
-          .post(`${this.apiUrl}/auth/revoke`, {}, httpOptions)
-          .subscribe();
-      }
-    }
+
     this.router.navigate(['/login']);
   }
 
@@ -220,6 +223,10 @@ export class AuthService {
     const expiresAt = Number(localStorage.getItem('expires_at'));
     const now = new Date().getTime();
     return Math.max(0, expiresAt - now) / 1000; // Convert to seconds
+  }
+
+  getNewExpriresMilliseconds(seconds: number): number {
+    return Date.now() + seconds * 1000;
   }
 
   createRefreshTokenTimer(expiresIn: number): void {
@@ -271,7 +278,8 @@ export class AuthService {
   }
 
   isTokenExpiringSoon(): boolean {
-    const thresholdMins = 15; // Minutes before login session expires
+    const thresholdMins =
+      environment.minsBeforeLogoutExpiryToRefreshToken || 15; // Minutes before login session expires if not set in environment settings
     const thresholdSecs = thresholdMins * 60;
 
     const secondsUntilExpiry = this.getSecondsUntilLoginSessionExpiry();

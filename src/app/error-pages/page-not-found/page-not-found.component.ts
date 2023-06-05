@@ -28,5 +28,6 @@ export class PageNotFoundComponent {
       this.renderer,
       this.el.nativeElement,
     );
+    this.redAlertThemeService.clearTimers();
   }
 }
