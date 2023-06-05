@@ -16,9 +16,6 @@ on:
     types:
       - completed
 
-env:
-  BUMP_VERSION_COMMIT_MSG: 'Bump version number'
-
 jobs:
   prerequisite_check:
     runs-on: ubuntu-latest
