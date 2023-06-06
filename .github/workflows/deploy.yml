@@ -103,15 +103,9 @@ jobs:
           draft: false
 
       - name: Complete Pull Request
-        uses: actions/github-script@v6
+        uses: ./.github/actions/merge_pull_request
         with:
-          script: |
-            github.pulls.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-              merge_method: 'squash'  # Choose merge method: 'merge', 'squash', or 'rebase'
-            })
+          github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
       - name: Delete Temp Branch
         uses: actions/github-script@v6
