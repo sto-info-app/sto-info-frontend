@@ -92,8 +92,14 @@ jobs:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           title: 'Chore: Version bump'
           body: 'Bump version number'
-          branch: '${{ steps.create_temp_branch.outputs.branch_name }}'
-          base: '${{ steps.current_branch_name.outputs.branch }}'
+          branch: ${{ steps.create_temp_branch.outputs.branch_name }}
+          base: ${{ steps.current_branch_name.outputs.branch }}
+          commit-message: '[create-pull-request] automated change'
+          committer: 'GitHub <noreply@github.com>'
+          author: 'steverobertsuk <steverobertsuk@users.noreply.github.com>'
+          signoff: false
+          delete-branch: false
+          draft: false
 
       - name: Complete Pull Request
         uses: actions/github-script@v6
