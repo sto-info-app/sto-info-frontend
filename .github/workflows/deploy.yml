@@ -103,7 +103,7 @@ jobs:
           draft: false
 
       - name: Complete Pull Request
-        uses: actions/github-script@v6
+        uses: actions/github-script@v5.2.0
         with:
           script: |
             github.pulls.merge({
