@@ -92,7 +92,7 @@ jobs:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           title: 'Chore: Version bump'
           body: 'Bump version number'
-          branch: 'refs/heads/${{ steps.create_temp_branch.outputs.branch_name }}'
+          branch: ${{ steps.create_temp_branch.outputs.branch_name }}
           base: '${{ steps.current_branch_name.outputs.branch }}'
 
       - name: Complete Pull Request
