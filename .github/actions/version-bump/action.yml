@@ -53,12 +53,11 @@ runs:
     - name: Create Pull Request from Temp Branch to Protected Branch
       uses: peter-evans/create-pull-request@v5
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GH_PAT_REPO_TOKEN }}
         title: 'Chore: Version bump'
         body: 'Bump version number'
         branch: ${{ steps.create_temp_branch.outputs.branch_name }}
         base: ${{ steps.current_branch_name.outputs.branch }}
-      shell: bash
 
     - name: Complete Pull Request
       uses: actions/github-script@v6
@@ -70,7 +69,6 @@ runs:
             pull_number: context.payload.pull_request.number,
             merge_method: 'squash'  # Choose merge method: 'merge', 'squash', or 'rebase'
           })
-      shell: bash
 
     - name: Delete Temp Branch
       uses: actions/github-script@v6
@@ -82,4 +80,3 @@ runs:
             repo: context.repo.repo,
             ref: ref
           })
-      shell: bash
