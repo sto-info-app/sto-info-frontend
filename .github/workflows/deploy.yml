@@ -32,6 +32,9 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          fetch-depth: 0 # Fetch all history to enable proper commit and push
 
       # - name: Bump Version
       #   uses: ./.github/actions/version-bump
