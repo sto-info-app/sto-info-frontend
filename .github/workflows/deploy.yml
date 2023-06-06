@@ -71,15 +71,16 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
           npm version patch -m HEAD:"Bump version number from ${{ steps.old-app-ver.outputs.version }} to %s"
-          git push origin HEAD:${{ steps.create_temp_branch.outputs.branch_name }}
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
-      # - name: Push back to Temp Branch
-      #   run: |
-      #     git push origin HEAD:${{ steps.create_temp_branch.outputs.branch_name }}
-      #   shell: bash
+      - name: Push back to Temp Branch
+        run: |
+          git push --set-upstream origin ${{ steps.create_temp_branch.outputs.branch_name }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
       - name: Create Pull Request from Temp Branch to Protected Branch
         uses: peter-evans/create-pull-request@v5
