@@ -6,15 +6,17 @@ env:
   BUMP_VERSION_COMMIT_MSG: 'Bump version number'
 
 runs:
-  using: 'shell'
+  using: 'composite'
 
   steps:
     - name: Set User for Git
+      shell: bash
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "github-actions@github.com"
 
     - name: Get Current Protected Branch Name
+      shell: bash
       id: current_branch_name
       run: echo "::set-output name=branch::${{ github.ref }}"
 
@@ -64,6 +66,7 @@ runs:
           })
 
     - name: Delete Temp Branch
+      shell: bash
       uses: actions/github-script@v6
       with:
         script: |
