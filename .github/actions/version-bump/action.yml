@@ -1,32 +1,34 @@
 name: 'Bump Version'
 description: 'Increase the version number of the Angular project'
 
-env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  # BUMP_VERSION_COMMIT_MSG: 'Bump version number'
+# env:
+#   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+# BUMP_VERSION_COMMIT_MSG: 'Bump version number'
 
 runs:
   using: 'composite'
 
   steps:
     - name: Set User for Git
-      shell: bash
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "github-actions@github.com"
+      shell: bash
 
     - name: Get Current Protected Branch Name
-      shell: bash
       id: current_branch_name
       run: echo "::set-output name=branch::${{ github.ref }}"
+      shell: bash
 
     - id: old-app-ver
       name: Get Old App Version
       run: echo "::set-output name=version::$(jq -r '.version' package.json)"
+      shell: bash
 
     - name: Set Date and Time
       id: set_datetime
       run: echo "::set-output name=datetime::$(date +'%Y%m%d%H%M%S')"
+      shell: bash
 
     - name: Create Temp Branch for Version Bump
       id: create_temp_branch
@@ -34,16 +36,19 @@ runs:
         branch_name="version-bump/${{ steps.current_branch_name.outputs.branch }}-${{ steps.set_datetime.outputs.datetime }}"
         git checkout -b $branch_name
         git push origin $branch_name
+      shell: bash
 
     - name: Bump Version
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "github-actions@github.com"
         npm version patch -m "Bump version number from ${{ steps.old-app-ver.outputs.version }} to %s"
+      shell: bash
 
     - name: Push back to Temp Branch
       run: |
         git push origin ${{ steps.create_temp_branch.outputs.branch_name }}
+      shell: bash
 
     - name: Create Pull Request from Temp Branch to Protected Branch
       uses: peter-evans/create-pull-request@v5
@@ -53,6 +58,7 @@ runs:
         body: 'Bump version number'
         branch: ${{ steps.create_temp_branch.outputs.branch_name }}
         base: ${{ steps.current_branch_name.outputs.branch }}
+      shell: bash
 
     - name: Complete Pull Request
       uses: actions/github-script@v6
@@ -64,9 +70,9 @@ runs:
             pull_number: context.payload.pull_request.number,
             merge_method: 'squash'  # Choose merge method: 'merge', 'squash', or 'rebase'
           })
+      shell: bash
 
     - name: Delete Temp Branch
-      shell: bash
       uses: actions/github-script@v6
       with:
         script: |
@@ -76,3 +82,4 @@ runs:
             repo: context.repo.repo,
             ref: ref
           })
+      shell: bash
