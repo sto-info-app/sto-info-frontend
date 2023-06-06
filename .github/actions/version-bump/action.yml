@@ -43,7 +43,7 @@ runs:
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "github-actions@github.com"
-        npm version patch -m "Bump version number from ${{ steps.old-app-ver.outputs.version }} to %s"
+        npm version patch -m HEAD:"Bump version number from ${{ steps.old-app-ver.outputs.version }} to %s"
       shell: bash
 
     - name: Push back to Temp Branch
