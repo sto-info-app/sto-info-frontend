@@ -64,6 +64,7 @@ jobs:
           branch_name="version-bump/${{ steps.current_branch_name.outputs.branch }}-${{ steps.set_datetime.outputs.datetime }}"
           git checkout -b $branch_name
           git push origin $branch_name
+          echo "::set-output name=branch_name::$branch_name"
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
