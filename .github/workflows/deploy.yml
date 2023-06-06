@@ -59,6 +59,8 @@ jobs:
       - name: Create Temp Branch for Version Bump
         id: create_temp_branch
         run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
           branch_name="version-bump/${{ steps.current_branch_name.outputs.branch }}-${{ steps.set_datetime.outputs.datetime }}"
           git checkout -b $branch_name
           git push origin $branch_name
@@ -77,7 +79,9 @@ jobs:
 
       - name: Push back to Temp Branch
         run: |
-          git push --set-upstream origin ${{ steps.create_temp_branch.outputs.branch_name }}
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+          git push origin ${{ steps.create_temp_branch.outputs.branch_name }}
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
