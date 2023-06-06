@@ -30,8 +30,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # - name: Checkout Repo
-      #   uses: actions/checkout@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v3
 
       # - name: Bump Version
       #   uses: ./.github/actions/version-bump
