@@ -3,7 +3,7 @@ description: 'Increase the version number of the Angular project'
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  BUMP_VERSION_COMMIT_MSG: 'Bump version number'
+  # BUMP_VERSION_COMMIT_MSG: 'Bump version number'
 
 runs:
   using: 'composite'
@@ -39,7 +39,7 @@ runs:
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "github-actions@github.com"
-        npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }} from ${{ steps.old-app-ver.outputs.version }} to %s"
+        npm version patch -m "Bump version number from ${{ steps.old-app-ver.outputs.version }} to %s"
 
     - name: Push back to Temp Branch
       run: |
@@ -50,7 +50,7 @@ runs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         title: 'Chore: Version bump'
-        body: ${{ env.BUMP_VERSION_COMMIT_MSG }}
+        body: 'Bump version number'
         branch: ${{ steps.create_temp_branch.outputs.branch_name }}
         base: ${{ steps.current_branch_name.outputs.branch }}
 
