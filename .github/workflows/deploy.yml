@@ -35,6 +35,8 @@ jobs:
 
       - name: Bump Version
         uses: ./.github/actions/version-bump
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   build_and_deploy:
     needs: [bump_version_number]

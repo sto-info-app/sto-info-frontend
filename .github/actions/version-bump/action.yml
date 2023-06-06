@@ -1,9 +1,10 @@
 name: 'Bump Version'
 description: 'Increase the version number of the Angular project'
 
-# env:
-#   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-# BUMP_VERSION_COMMIT_MSG: 'Bump version number'
+inputs:
+  token:
+    description: 'GitHub token for accessing the repository'
+    required: true
 
 runs:
   using: 'composite'
@@ -53,7 +54,7 @@ runs:
     - name: Create Pull Request from Temp Branch to Protected Branch
       uses: peter-evans/create-pull-request@v5
       with:
-        token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+        token: ${{ inputs.token }}
         title: 'Chore: Version bump'
         body: 'Bump version number'
         branch: ${{ steps.create_temp_branch.outputs.branch_name }}
