@@ -60,6 +60,8 @@ jobs:
           git checkout -b $branch_name
           git push origin $branch_name
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
       - name: Bump Version
         run: |
@@ -67,6 +69,8 @@ jobs:
           git config --global user.email "github-actions@github.com"
           npm version patch -m HEAD:"Bump version number from ${{ steps.old-app-ver.outputs.version }} to %s"
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
       - name: Push back to Temp Branch
         run: |
