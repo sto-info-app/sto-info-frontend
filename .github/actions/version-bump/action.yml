@@ -35,6 +35,8 @@ runs:
 
     - name: Bump Version
       run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "github-actions@github.com"
         npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }} from ${{ steps.old-app-ver.outputs.version }} to %s"
 
     - name: Push back to Temp Branch
