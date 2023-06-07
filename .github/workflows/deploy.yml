@@ -110,7 +110,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
-              merge_method: 'merge' // Choose merge method: 'merge', 'squash', or 'rebase'
+              merge_method: 'squash' // Choose merge method: 'merge', 'squash', or 'rebase'
             });
             console.log(data);
           github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
