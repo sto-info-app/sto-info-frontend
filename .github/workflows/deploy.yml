@@ -106,14 +106,15 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { data } = await github.pulls.merge({
+            const octokit = github.getOctokit(context.token);
+            const { data } = await octokit.rest.pulls.merge({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
               merge_method: 'squash' // Choose merge method: 'merge', 'squash', or 'rebase'
             });
             console.log(data);
-          github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          # github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
       # - name: Complete Pull Request
       #   uses: ./.github/actions/merge_pull_request
