@@ -103,15 +103,16 @@ jobs:
           draft: false
 
       - name: Complete Pull Request
-        uses: actions/github-script@v5.2.0
+        uses: actions/github-script@v6
         with:
           script: |
-            github.pulls.merge({
+            const { data } = await github.pulls.merge({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
-              merge_method: 'merge'  # Choose merge method: 'merge', 'squash', or 'rebase'
-            })
+              merge_method: 'merge' // Choose merge method: 'merge', 'squash', or 'rebase'
+            });
+            console.log(data);
           github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
       # - name: Complete Pull Request
