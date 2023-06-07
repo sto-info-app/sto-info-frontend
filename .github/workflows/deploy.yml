@@ -106,8 +106,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const octokit = github.getOctokit(context.token);
-            const { data } = await octokit.rest.pulls.merge({
+            const { data } = await github.rest.pulls.merge({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
