@@ -91,7 +91,7 @@ export class AuthService {
     return { headers };
   }
 
-  private getHttpOptionsWithAccessToken(): { headers: HttpHeaders } | null {
+  getHttpOptionsWithAccessToken(): { headers: HttpHeaders } | null {
     const token = localStorage.getItem('access_token');
     if (!token) {
       return null;
