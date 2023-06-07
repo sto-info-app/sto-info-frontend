@@ -91,6 +91,15 @@ export class AuthService {
     return { headers };
   }
 
+  private getHttpOptionsWithAccessToken(): { headers: HttpHeaders } | null {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      return null;
+    }
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return { headers };
+  }
+
   saveToken(accessToken: string, refreshToken: string, expiresIn: number) {
     const expiresAt = this.getNewExpriresMilliseconds(expiresIn);
     const warningAt = expiresAt - this.autoLogoutWarningMilliSecs; // The warning time
