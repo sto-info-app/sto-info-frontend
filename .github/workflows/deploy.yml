@@ -106,7 +106,12 @@ jobs:
       - name: Extract Pull Request Number
         id: extract_pull_request_number
         run: |
-          echo "::set-output name=pull-request-number::${{ github.event.pull_request.number }}"
+          echo "::set-output name=pull-request-number::${{ steps.create_pull_request.outputs.pull-request-number }}"
+
+      - name: Get Pull Request Branch
+        id: get_pull_request_branch
+        run: |
+          echo "::set-output name=pull-request-branch::$(curl -s https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.create_pull_request.outputs.pull-request-number }} | jq -r '.head.ref')"
 
       - name: Approve Pull Request
         uses: juliangruber/approve-pull-request-action@v2.0.0
@@ -117,9 +122,11 @@ jobs:
       - name: Merge Pull Request
         uses: octokit/request-action@v2.x
         with:
-          route: PUT /repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/merge
+          route: PUT /repos/${{ github.repository }}/pulls/${{ steps.create_pull_request.outputs.pull-request-number }}/merge
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_REF: ${{ steps.get_pull_request_branch.outputs.pull-request-branch }}
+          BASE_REF: ${{ steps.create_temp_branch.outputs.branch_name }}
 
       # - name: Delete Temp Branch
       #   uses: actions/github-script@v6
