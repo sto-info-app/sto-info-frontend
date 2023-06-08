@@ -3,12 +3,12 @@ name: Lint and Test
 on:
   workflow_dispatch:
 
-  pull_request:
-    types: [opened, synchronize, edited, reopened]
-    branches:
-      - 'master'
-      - 'development'
-      - 'epic/*'
+  # pull_request:
+  #   types: [opened, synchronize, edited, reopened]
+  #   branches:
+  #     - 'master'
+  #     - 'development'
+  #     - 'epic/*'
 
 jobs:
   prerequisite_check:
