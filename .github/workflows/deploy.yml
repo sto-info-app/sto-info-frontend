@@ -106,7 +106,9 @@ jobs:
       - name: Get Pull Request Number
         id: get_pull_request_number
         run: |
-          echo "::set-output name=pull-request-number::$(curl -s "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ steps.create_pull_request.outputs.head }}&base=${{ steps.current_branch_name.outputs.branch }}" | jq -r '.[0].number')"
+          pull_request_url=$(curl -s "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ steps.create_pull_request.outputs.head }}&base=${{ steps.current_branch_name.outputs.branch }}" | jq -r '.[0].url')
+          pull_request_number=$(basename $pull_request_url)
+          echo "::set-output name=pull-request-number::$pull_request_number"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
