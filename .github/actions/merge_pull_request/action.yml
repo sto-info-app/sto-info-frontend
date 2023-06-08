@@ -1,0 +1,9 @@
+name: 'Merge Pull Request'
+description: 'Merges a pull request'
+inputs:
+  github-token:
+    description: 'GitHub token'
+    required: true
+runs:
+  using: 'node16'
+  main: 'index.js'

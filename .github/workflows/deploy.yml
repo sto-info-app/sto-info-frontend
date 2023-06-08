@@ -1,0 +1,245 @@
+name: Deployment
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    types:
+      - closed
+    branches:
+      - production
+      - development
+
+  workflow_run:
+    workflows:
+      - Pull Request Check
+    types:
+      - completed
+
+jobs:
+  prerequisite_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check if NODE_VERSION exists
+        run: echo "NODE_VERSION=$NODE_VERSION"
+        if: env.NODE_VERSION
+
+  bump_version_number:
+    needs: [prerequisite_check]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          fetch-depth: 0 # Fetch all history to enable proper commit and push
+
+      # - name: Bump Version
+      #   uses: ./.github/actions/version-bump
+      #   with:
+      #     token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+
+      - name: Get Current Protected Branch Name
+        id: current_branch_name
+        run: echo "::set-output name=branch::${{ github.ref }}"
+        shell: bash
+
+      - id: old-app-ver
+        name: Get Old App Version
+        run: echo "::set-output name=version::$(jq -r '.version' package.json)"
+        shell: bash
+
+      - name: Set Date and Time
+        id: set_datetime
+        run: echo "::set-output name=datetime::$(date +'%Y%m%d%H%M%S')"
+        shell: bash
+
+      - name: Create Temp Branch for Version Bump
+        id: create_temp_branch
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+          branch_name="version-bump/${{ steps.current_branch_name.outputs.branch }}-${{ steps.set_datetime.outputs.datetime }}"
+          git checkout -b $branch_name
+          git push origin $branch_name
+          echo "::set-output name=branch_name::$branch_name"
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+
+      - name: Bump Version
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+          npm version patch -m HEAD:"Bump version number from ${{ steps.old-app-ver.outputs.version }} to %s"
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+
+      - name: Push back to Temp Branch
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+          git push --set-upstream origin ${{ steps.create_temp_branch.outputs.branch_name }}:${{ steps.create_temp_branch.outputs.branch_name }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+
+      - name: Create Pull Request from Temp Branch to Protected Branch
+        id: create_pull_request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          title: 'Chore: Version bump'
+          body: 'Bump version number'
+          branch: ${{ steps.create_temp_branch.outputs.branch_name }}
+          base: ${{ steps.current_branch_name.outputs.branch }}
+          delete-branch: false
+
+      - name: Check outputs
+        if: ${{ steps.create_pull_request.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.create_pull_request.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.create_pull_request.outputs.pull-request-url }}"
+
+      - name: Verify Branch Names
+        run: |
+          git branch --list
+          git branch -r --list
+
+      - name: List Open Pull Requests
+        run: |
+          API_RESPONSE=$(curl -s -X GET -H "Authorization: Bearer ${{ secrets.GH_PAT_REPO_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls?state=open")
+          echo "API Response: $API_RESPONSE"
+
+      - name: Check outputs2
+        if: ${{ steps.create_pull_request.id }} != 'null'
+        run: |
+          HEAD_BRANCH="${{ steps.create_temp_branch.outputs.branch_name }}"
+          BASE_BRANCH="${{ steps.current_branch_name.outputs.branch }}"
+          echo "Head Branch: $HEAD_BRANCH"
+          echo "Base Branch: $BASE_BRANCH"
+          API_RESPONSE=$(curl -s -X GET -H "Authorization: Bearer ${{ secrets.GH_PAT_REPO_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls?head=$HEAD_BRANCH&base=$BASE_BRANCH")
+          echo "API Response: $API_RESPONSE"
+          PR_NUMBER=$(echo "$API_RESPONSE" | jq -r '.[0].number')
+          echo "Pull Request Number - $PR_NUMBER"
+
+      - name: Get Pull Request Number
+        run: |
+          API_RESPONSE=$(curl -s -X GET -H "Authorization: Bearer ${{ secrets.GH_PAT_REPO_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls?head=steverobertsuk:version-bump/development-20230608185705&base=steverobertsuk:development")
+          echo "API Response: $API_RESPONSE"
+          PR_NUMBER=$(echo "$API_RESPONSE" | jq -r '.[0].number')
+          echo "Pull Request Number - $PR_NUMBER"
+
+      # - name: Create Pull Request from Temp Branch to Protected Branch
+      #   id: create_pull_request
+      #   uses: peter-evans/create-pull-request@v5
+      #   with:
+      #     token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+      #     title: 'Chore: Version bump'
+      #     body: 'Bump version number'
+      #     branch: ${{ steps.create_temp_branch.outputs.branch_name }}
+      #     base: ${{ steps.current_branch_name.outputs.branch }}
+      #     commit-message: '[create-pull-request] automated change'
+      #     committer: 'GitHub <noreply@github.com>'
+      #     author: 'steverobertsuk <steverobertsuk@users.noreply.github.com>'
+      #     signoff: false
+      #     delete-branch: false
+      #     draft: false
+
+      # - name: Get Pull Request Number
+      #   id: get_pull_request_number
+      #   run: |
+      #     pull_request_url=$(curl -s "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ steps.create_pull_request.outputs.head }}&base=${{ steps.current_branch_name.outputs.branch }}" | jq -r '.[0].url')
+      #     pull_request_number=$(basename $pull_request_url)
+      #     echo "::set-output name=pull-request-number::$pull_request_number"
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Get Pull Request Branch
+      #   id: get_pull_request_branch
+      #   run: |
+      #     echo "::set-output name=pull-request-branch::$(curl -s https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.get_pull_request_number.outputs.pull-request-number }} | jq -r '.head.ref')"
+
+      # - name: Approve Pull Request
+      #   uses: juliangruber/approve-pull-request-action@v2.0.0
+      #   with:
+      #     github-token: ${{ secrets.GH_SC_PAT_REPO_TOKEN }}
+      #     number: ${{ steps.get_pull_request_number.outputs.pull-request-number }}
+
+      # - name: Merge Pull Request
+      #   uses: octokit/request-action@v2.x
+      #   with:
+      #     route: PUT /repos/${{ github.repository }}/pulls/${{ steps.get_pull_request_number.outputs.pull-request-number }}/merge
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     HEAD_REF: ${{ steps.get_pull_request_branch.outputs.pull-request-branch }}
+      #     BASE_REF: ${{ steps.create_temp_branch.outputs.branch_name }}
+
+      # - name: Delete Temp Branch
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       const ref = `heads/${context.payload.pull_request.head.ref}`;
+      #       github.git.deleteRef({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         ref: ref
+      #       })
+
+  #TODO: Re-enable this job!:
+  # build_and_deploy:
+  #   needs: [bump_version_number]
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout Repo
+  #       uses: actions/checkout@v3
+
+  #     - name: Setup project
+  #       uses: ./.github/actions/setup-project
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+  #     - name: Load & cache dependencies
+  #       uses: ./.github/actions/cached-dependencies
+
+  #     - name: Build Angular Project (Development)
+  #       if: github.event.pull_request.base.ref == 'development'
+  #       run: npm run build -- --configuration=development
+
+  #     - name: Build Angular Project (Production)
+  #       if: github.event.pull_request.base.ref == 'master'
+  #       run: npm run build -- --configuration=production
+
+  #     - name: Check branch
+  #       if: github.event.pull_request.base.ref != 'development' && github.event.pull_request.base.ref != 'master'
+  #       run: |
+  #         echo "Only the development or master branch get built for deployment - cancelling workflow"
+  #         exit 1
+
+  #     - name: Deploy to S3 (Development)
+  #       if: github.event.pull_request.base.ref == 'development'
+  #       uses: jakejarvis/s3-sync-action@master
+  #       with:
+  #         args: --follow-symlinks --delete
+  #       env:
+  #         AWS_S3_BUCKET: dev.startrekonline.info
+  #         AWS_REGION: eu-west-2
+  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         SOURCE_DIR: dist/sto-info-frontend/
+
+  #     - name: Deploy to S3 (Production)
+  #       if: github.event.pull_request.base.ref == 'master'
+  #       uses: jakejarvis/s3-sync-action@master
+  #       with:
+  #         args: --acl public-read --follow-symlinks --delete
+  #         path: dist/sto-info-frontend/
+  #         bucket: startrekonline.info
+  #         region: eu-west-2
+  #         access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
