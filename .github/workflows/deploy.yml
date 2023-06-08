@@ -114,6 +114,13 @@ jobs:
           github-token: ${{ secrets.GH_SC_PAT_REPO_TOKEN }}
           number: ${{ steps.extract_pull_request_number.outputs.pull-request-number }}
 
+      - name: Merge Pull Request
+        uses: octokit/request-action@v2.x
+        with:
+          route: PUT /repos/${{ github.repository }}/pulls/${{ steps.create_pull_request.outputs.pull-request-number }}/merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       # - name: Delete Temp Branch
       #   uses: actions/github-script@v6
       #   with:
