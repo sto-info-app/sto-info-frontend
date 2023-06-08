@@ -110,10 +110,13 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
-              merge_method: 'squash' // Choose merge method: 'merge', 'squash', or 'rebase'
+              merge_method: 'merge'
             });
             console.log(data);
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+        # Choose merge_method: 'merge', 'squash', or 'rebase'
 
       # - name: Complete Pull Request
       #   uses: ./.github/actions/merge_pull_request
