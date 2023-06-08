@@ -111,7 +111,7 @@ jobs:
       - name: Approve Pull Request
         uses: juliangruber/approve-pull-request-action@v2.0.0
         with:
-          github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          github-token: ${{ secrets.GH_SC_PAT_REPO_TOKEN }}
           number: ${{ steps.extract_pull_request_number.outputs.pull-request-number }}
           # repo: ${{ steps.create_temp_branch.outputs.branch_name }} # optional
 
