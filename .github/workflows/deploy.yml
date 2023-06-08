@@ -104,6 +104,16 @@ jobs:
           echo "Pull Request Number - ${{ steps.create_pull_request.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.create_pull_request.outputs.pull-request-url }}"
 
+      - name: Verify Branch Names
+        run: |
+          git branch --list
+          git branch -r --list
+
+      - name: List Open Pull Requests
+        run: |
+          API_RESPONSE=$(curl -s -X GET -H "Authorization: Bearer ${{ secrets.GH_PAT_REPO_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls?state=open")
+          echo "API Response: $API_RESPONSE"
+
       - name: Check outputs2
         if: ${{ steps.create_pull_request.id }} != 'null'
         run: |
