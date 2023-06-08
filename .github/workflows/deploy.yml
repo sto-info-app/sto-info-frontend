@@ -115,12 +115,12 @@ jobs:
           number: ${{ steps.extract_pull_request_number.outputs.pull-request-number }}
           # repo: ${{ steps.create_temp_branch.outputs.branch_name }} # optional
 
-      - name: Merge Pull Request
-        uses: juliangruber/merge-pull-request-action@v1
-        with:
-          github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          number: ${{ steps.extract_pull_request_number.outputs.pull-request-number }}
-          method: merge
+      # - name: Merge Pull Request
+      #   uses: juliangruber/merge-pull-request-action@v1
+      #   with:
+      #     github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+      #     number: ${{ steps.extract_pull_request_number.outputs.pull-request-number }}
+      #     method: merge
 
       # - name: Complete (Merge) Pull Request
       #   uses: peter-evans/github-pull-request-action@v4
