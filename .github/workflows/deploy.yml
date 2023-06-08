@@ -119,7 +119,7 @@ jobs:
         with:
           route: PUT /repos/${{ github.repository }}/pulls/${{ steps.create_pull_request.outputs.pull-request-number }}/merge
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: Delete Temp Branch
       #   uses: actions/github-script@v6
