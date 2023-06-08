@@ -126,6 +126,13 @@ jobs:
           PR_NUMBER=$(echo "$API_RESPONSE" | jq -r '.[0].number')
           echo "Pull Request Number - $PR_NUMBER"
 
+      - name: Get Pull Request Number
+        run: |
+          API_RESPONSE=$(curl -s -X GET -H "Authorization: Bearer ${{ secrets.GH_PAT_REPO_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls?head=steverobertsuk:version-bump/development-20230608185705&base=steverobertsuk:development")
+          echo "API Response: $API_RESPONSE"
+          PR_NUMBER=$(echo "$API_RESPONSE" | jq -r '.[0].number')
+          echo "Pull Request Number - $PR_NUMBER"
+
       # - name: Create Pull Request from Temp Branch to Protected Branch
       #   id: create_pull_request
       #   uses: peter-evans/create-pull-request@v5
