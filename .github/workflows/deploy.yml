@@ -103,20 +103,23 @@ jobs:
           delete-branch: false
           draft: false
 
+      - name: Extract Pull Request Number
+        id: extract_pull_request_number
+        run: echo "::set-output name=pull-request-number::$(echo ${{ steps.create_pull_request.outputs.pull-request }} | cut -d'/' -f1)"
+
       - name: Approve Pull Request
         uses: juliangruber/approve-pull-request-action@v2.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ steps.create_pull_request.outputs.pull-request-number }}
+          number: ${{ steps.extract_pull_request_number.outputs.pull-request-number }}
           # repo: ${{ steps.create_temp_branch.outputs.branch_name }} # optional
 
       - name: Merge Pull Request
         uses: juliangruber/merge-pull-request-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ steps.create_pull_request.outputs.pull-request-number }}
-          method: merge # squash rebase
-          repo: juliangruber/octokit-action
+          number: ${{ steps.extract_pull_request_number.outputs.pull-request-number }}
+          method: merge
 
       # - name: Complete (Merge) Pull Request
       #   uses: peter-evans/github-pull-request-action@v4
