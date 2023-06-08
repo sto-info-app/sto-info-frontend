@@ -106,7 +106,7 @@ jobs:
       - name: Extract Pull Request Number
         id: extract_pull_request_number
         run: |
-          echo "::set-output name=pull-request-number::$(echo '${{ steps.create_pull_request.outputs.pull-request-url }}' | awk -F/ '{print $NF}')"
+          echo "::set-output name=pull-request-number::${{ github.event.pull_request.number }}"
 
       - name: Approve Pull Request
         uses: juliangruber/approve-pull-request-action@v2.0.0
