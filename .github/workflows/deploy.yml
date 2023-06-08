@@ -113,42 +113,6 @@ jobs:
         with:
           github-token: ${{ secrets.GH_SC_PAT_REPO_TOKEN }}
           number: ${{ steps.extract_pull_request_number.outputs.pull-request-number }}
-          # repo: ${{ steps.create_temp_branch.outputs.branch_name }} # optional
-
-      # - name: Merge Pull Request
-      #   uses: juliangruber/merge-pull-request-action@v1
-      #   with:
-      #     github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-      #     number: ${{ steps.extract_pull_request_number.outputs.pull-request-number }}
-      #     method: merge
-
-      # - name: Complete (Merge) Pull Request
-      #   uses: peter-evans/github-pull-request-action@v4
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     merge-method: 'merge' # Choose merge method: 'merge', 'squash', or 'rebase'
-      #     pull-request-number: ${{ steps.create_pull_request.outputs.pull-request-number }}
-
-      # - name: Complete Pull Request
-      #   uses: actions/github-script@v6
-      #   with:
-      #     script: |
-      #       github.pulls.merge({
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         pull_number: context.payload.pull_request.number,
-      #         merge_method: 'squash'  # Choose merge method: 'merge', 'squash', or 'rebase'
-      #       })
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-      # Choose merge_method: 'merge', 'squash', or 'rebase'
-
-      # - name: Complete Pull Request
-      #   uses: ./.github/actions/merge_pull_request
-      #   with:
-      #     github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
       # - name: Delete Temp Branch
       #   uses: actions/github-script@v6
