@@ -104,6 +104,12 @@ jobs:
           echo "Pull Request Number - ${{ steps.create_pull_request.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.create_pull_request.outputs.pull-request-url }}"
 
+      - name: Check outputs2
+        if: ${{ steps.create_pull_request.id }} != 'null'
+        run: |
+          PR_NUMBER=$(curl -s -X GET -H "Authorization: Bearer ${{ secrets.GH_PAT_REPO_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ steps.create_temp_branch.outputs.branch_name }}&base=${{ steps.current_branch_name.outputs.branch }}" | jq -r '.[0].number')
+          echo "Pull Request Number - $PR_NUMBER"
+
       # - name: Create Pull Request from Temp Branch to Protected Branch
       #   id: create_pull_request
       #   uses: peter-evans/create-pull-request@v5
