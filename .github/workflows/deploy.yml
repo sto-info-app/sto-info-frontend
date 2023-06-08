@@ -96,7 +96,7 @@ jobs:
           body: 'Bump version number'
           branch: ${{ steps.create_temp_branch.outputs.branch_name }}
           base: ${{ steps.current_branch_name.outputs.branch }}
-          delete-branch: true
+          delete-branch: false
 
       - name: Check outputs
         if: ${{ steps.create_pull_request.outputs.pull-request-number }}
