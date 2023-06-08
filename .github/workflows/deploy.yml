@@ -106,15 +106,15 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { data } = await github.rest.pulls.merge({
+            github.pulls.merge({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
-              merge_method: 'merge'
-            });
-            console.log(data);
+              merge_method: 'squash'  # Choose merge method: 'merge', 'squash', or 'rebase'
+            })
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
           # github-token: ${{ secrets.GH_PAT_REPO_TOKEN }}
         # Choose merge_method: 'merge', 'squash', or 'rebase'
 
