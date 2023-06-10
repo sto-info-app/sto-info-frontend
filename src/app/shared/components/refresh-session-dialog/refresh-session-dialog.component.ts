@@ -2,10 +2,6 @@ import { Component, Inject, Optional } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppComponent } from 'src/app/app.component';
 
-export interface DialogData {
-  countdownSeconds: number;
-}
-
 @Component({
   selector: 'app-refresh-session-dialog',
   templateUrl: './refresh-session-dialog.component.html',
