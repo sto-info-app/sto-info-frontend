@@ -8,6 +8,7 @@ import { RegisterComponent } from './core/register/register.component';
 import { RegistrationCompleteComponent } from './core/registration-complete/registration-complete.component';
 import { VerifyEmailComponent } from './core/verify-email/verify-email.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { ProfileComponent } from './dashboard/profile/profile.component';
 import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
 import { HomeComponent } from './home/home.component';
 import { APP_ROUTES } from './shared/constants/app-routing.constants';
@@ -75,6 +76,11 @@ const routes: Routes = [
   {
     path: APP_ROUTES.STO_DASHBOARD,
     component: DashboardComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_PROFILE,
+    component: ProfileComponent,
     canActivate: [AuthGuard],
   },
 

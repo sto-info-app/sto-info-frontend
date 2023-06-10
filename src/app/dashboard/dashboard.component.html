@@ -1,4 +1,42 @@
-<div>
-  <h1>Dashboard</h1>
-  <p>This will be installed next Tuesday!</p>
+<app-loading-bar *ngIf="!user"></app-loading-bar>
+
+<div id="dashboard-container">
+  <div
+    id="dashboard-info-main-column"
+    class="col">
+    <h1>Dashboard</h1>
+    <div
+      *ngIf="user"
+      id="dashboard-info-main-content">
+      <p>{{ userGreeting }}</p>
+      <p>Summaries will installed on Tuesday!</p>
+    </div>
+  </div>
+  <div
+    *ngIf="user"
+    id="dashboard-info-side-column"
+    class="col">
+    <div class="lcars-text-bar">
+      <span>Personnel Record</span>
+    </div>
+    <div id="personnel-image">
+      <div class="pics-right">
+        <img
+          src="/assets/photo_unavailable.png"
+          alt="Photo unavilable"
+          class="border" />
+        <p class="caption">
+          Captain {{ user.lastName || 'Unknown' }},
+          {{ user.firstName || 'Unknown' }}
+        </p>
+      </div>
+    </div>
+    <div class="buttons personnel-buttons">
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_PROFILE)"
+        class="full-width-btn-link sunflower"
+        >View record</a
+      >
+    </div>
+  </div>
 </div>

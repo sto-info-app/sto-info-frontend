@@ -1,1 +1,64 @@
-<p>profile works!</p>
+<app-loading-bar *ngIf="!user"></app-loading-bar>
+
+<div id="personnel-record-container">
+  <div
+    id="personnel-record-main-column"
+    class="col">
+    <h1>Personnel Record</h1>
+    <div
+      *ngIf="user"
+      id="personnel-record-main-content">
+      <div class="lcars-text-bar personnel-lcars-text-bar">
+        <span>Personal Details</span>
+      </div>
+      <p>
+        <span class="record-title">Name:</span> {{ user.firstName }}
+        {{ user.lastName }}
+      </p>
+      <p><span class="record-title">Username:</span> {{ user.username }}</p>
+      <p><span class="record-title">Email:</span> {{ user.email }}</p>
+
+      <div class="lcars-text-bar personnel-lcars-text-bar">
+        <span>Activity</span>
+      </div>
+      <p>
+        <span class="record-title">Last logged in:</span>
+        {{ timeSinceLastLogin() }}
+      </p>
+      <p>
+        <span class="record-title">Password last reset:</span>
+        {{ timeSinceLastPasswordReset() }}
+      </p>
+      <p>
+        <span class="record-title">Record last updated:</span>
+        {{ timeSinceLastUpdated() }}
+      </p>
+    </div>
+  </div>
+  <div
+    *ngIf="user"
+    id="personnel-record-side-column"
+    class="col">
+    <div class="lcars-text-bar">
+      <span>Photo</span>
+    </div>
+    <div id="personnel-image">
+      <div class="pics-right">
+        <img
+          src="/assets/photo_unavailable.png"
+          alt="Photo unavilable"
+          class="border" />
+      </div>
+    </div>
+    <div class="lcars-text-bar">
+      <span>Auxiliary Controls</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+        class="full-width-btn-link sunflower"
+        >Dashboard</a
+      >
+    </div>
+  </div>
+</div>

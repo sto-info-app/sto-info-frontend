@@ -1,0 +1,40 @@
+#personnel-record-container {
+  display: flex;
+
+  #personnel-record-main-column {
+    flex: 2;
+    flex-basis: 69%;
+
+    .personnel-lcars-text-bar {
+      width: 75%;
+      margin-top: 60px;
+    }
+
+    p {
+      .record-title {
+        color: #6cf;
+        text-transform: uppercase;
+      }
+    }
+  }
+
+  #personnel-record-side-column {
+    flex: 1;
+    flex-basis: 30%;
+
+    #personnel-image {
+      display: flex;
+
+      .caption {
+        text-transform: uppercase;
+        line-height: 1.2;
+        font-size: 1.2rem;
+      }
+    }
+
+    .buttons {
+      margin-top: 0;
+      padding-top: 0;
+    }
+  }
+}
