@@ -11,6 +11,7 @@ import { LcarsErrorMessageComponent } from './components/lcars-error-message/lca
 import { LcarsInformationMessageComponent } from './components/lcars-information-message/lcars-information-message.component';
 import { LcarsSuccessMessageComponent } from './components/lcars-success-message/lcars-success-message.component';
 import { LcarsWarningMessageComponent } from './components/lcars-warning-message/lcars-warning-message.component';
+import { LoadingBarComponent } from './components/loading-bar/loading-bar.component';
 import { RefreshSessionDialogComponent } from './components/refresh-session-dialog/refresh-session-dialog.component';
 import { ResizeObserverDirective } from './directives/resize-observer.directive';
 import { TimeFormatPipe } from './pipes/time-format.pipe';
@@ -33,6 +34,7 @@ import { TimeFormatPipe } from './pipes/time-format.pipe';
     LcarsSuccessMessageComponent,
     LcarsWarningMessageComponent,
     RefreshSessionDialogComponent,
+    LoadingBarComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   exports: [
@@ -55,6 +57,7 @@ import { TimeFormatPipe } from './pipes/time-format.pipe';
     LcarsSuccessMessageComponent,
     LcarsWarningMessageComponent,
     RefreshSessionDialogComponent,
+    LoadingBarComponent,
   ],
 })
 export class SharedModule {

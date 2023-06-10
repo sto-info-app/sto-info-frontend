@@ -1,3 +1,5 @@
+const rootDashboard = 'dashboard';
+
 export const APP_ROUTES = {
   // Auth
   LOGIN: 'login',
@@ -14,5 +16,7 @@ export const APP_ROUTES = {
   CREDITS: 'credits',
 
   // STO App Routes
-  STO_DASHBOARD: 'dashboard',
+  STO_DASHBOARD: rootDashboard,
+  STO_DASHBOARD_PROFILE: rootDashboard + '/profile',
+  STO_DASHBOARD_ACCOUNTS: rootDashboard + '/accounts',
 };
