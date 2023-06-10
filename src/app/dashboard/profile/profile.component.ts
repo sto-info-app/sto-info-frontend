@@ -28,8 +28,6 @@ export class ProfileComponent {
       if (user.isAccountDisabled) this.authService.performLogout();
 
       this.user = user;
-
-      console.log('user', this.user); //TODO: Delete this - testing only!
     });
   }
 
