@@ -8,7 +8,7 @@ describe('LoadingBarComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [LoadingBarComponent]
+      declarations: [LoadingBarComponent],
     });
     fixture = TestBed.createComponent(LoadingBarComponent);
     component = fixture.componentInstance;
