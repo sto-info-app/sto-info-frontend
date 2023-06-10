@@ -9,17 +9,20 @@
       <a
         *ngIf="!isLoggedIn"
         [routerLink]="getRouteLink(appRoutes.REGISTER)"
+        [routerLinkActiveOptions]="{ exact: true }"
         routerLinkActive="peach"
         >Register</a
       >
       <a
         *ngIf="isLoggedIn"
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+        [routerLinkActiveOptions]="{ exact: true }"
         routerLinkActive="peach"
         >Dashboard</a
       >
       <a
         [routerLink]="getRouteLink('page-not-found')"
+        [routerLinkActiveOptions]="{ exact: true }"
         routerLinkActive="peach"
         >Error Page</a
       >

@@ -16,6 +16,7 @@
       <a
         *ngIf="!isLoggedIn"
         [routerLink]="getRouteLink(appRoutes.LOGIN)"
+        [routerLinkActiveOptions]="{ exact: true }"
         routerLinkActive="peach"
         >Login</a
       >
@@ -52,18 +53,21 @@
         >
         <a
           [routerLink]="getRouteLink(appRoutes.ABOUT)"
+          [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="almond-creme"
           id="b-two"
           >About</a
         >
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+          [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="almond-creme"
           id="b-three"
           >Dashboard</a
         >
         <a
           [routerLink]="getRouteLink(appRoutes.CONTACT)"
+          [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="almond-creme"
           id="b-four"
           >Contact</a
