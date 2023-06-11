@@ -157,11 +157,11 @@ jobs:
         run: npm run build -- --configuration=development
 
       - name: Build Angular Project (Production)
-        if: github.event.pull_request.base.ref == 'master'
+        if: github.event.pull_request.base.ref == 'production'
         run: npm run build -- --configuration=production
 
       - name: Build Angular Project
-        if: github.event.pull_request.base.ref != 'development' && github.event.pull_request.base.ref != 'master'
+        if: github.event.pull_request.base.ref != 'development' && github.event.pull_request.base.ref != 'production'
         run: npm run build
 
       - name: Deploy to S3 (Development)
@@ -177,7 +177,7 @@ jobs:
           SOURCE_DIR: dist/sto-info-frontend/
 
       - name: Deploy to S3 (Production)
-        if: github.event.pull_request.base.ref == 'master'
+        if: github.event.pull_request.base.ref == 'production'
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --acl public-read --follow-symlinks --delete
