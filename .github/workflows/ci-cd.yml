@@ -1,6 +1,7 @@
 name: CI/CD
 
 on:
+  workflow_dispatch:
   # push:
   #   branches:
   #     - 'production'
@@ -60,7 +61,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'master' }}
+          ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'production' }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
 
       - name: Setup project
@@ -126,7 +127,7 @@ jobs:
             git checkout "$branch_name"
           else
             echo "Checking out default branch"
-            git checkout master
+            git checkout production
           fi
         shell: bash
 

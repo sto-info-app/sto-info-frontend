@@ -1,0 +1,88 @@
+name: Deployment
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    types:
+      - closed
+    branches:
+      - production
+      - development
+
+  workflow_run:
+    workflows:
+      - Pull Request Check
+    types:
+      - completed
+
+jobs:
+  prerequisite_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check if NODE_VERSION exists
+        run: echo "NODE_VERSION=$NODE_VERSION"
+        if: env.NODE_VERSION
+
+  bump_version_number:
+    needs: [prerequisite_check]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Bump Version
+        uses: ./.github/actions/version-bump
+
+  build_and_deploy:
+    needs: [bump_version_number]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+
+      - name: Build Angular Project (Development)
+        if: github.event.pull_request.base.ref == 'development'
+        run: npm run build -- --configuration=development
+
+      - name: Build Angular Project (Production)
+        if: github.event.pull_request.base.ref == 'master'
+        run: npm run build -- --configuration=production
+
+      - name: Check branch
+        if: github.event.pull_request.base.ref != 'development' && github.event.pull_request.base.ref != 'master'
+        run: |
+          echo "Only the development or master branch get built for deployment - cancelling workflow"
+          exit 1
+
+      - name: Deploy to S3 (Development)
+        if: github.event.pull_request.base.ref == 'development'
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: dev.startrekonline.info
+          AWS_REGION: eu-west-2
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: dist/sto-info-frontend/
+
+      - name: Deploy to S3 (Production)
+        if: github.event.pull_request.base.ref == 'master'
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks --delete
+          path: dist/sto-info-frontend/
+          bucket: startrekonline.info
+          region: eu-west-2
+          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
