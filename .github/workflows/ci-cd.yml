@@ -1,9 +1,9 @@
 name: CI/CD
 
 on:
-  push:
-    branches:
-      - 'master'
+  # push:
+  #   branches:
+  #     - 'production'
   pull_request:
     branches:
       - 'development'
