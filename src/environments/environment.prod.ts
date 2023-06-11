@@ -1,6 +1,7 @@
 import packageJson from '../../package.json';
+import { Environment } from './models/environment.model';
 
-export const environment = {
+export const environment: Environment = {
   production: true,
   version: packageJson.version,
   env_name: 'prod',
