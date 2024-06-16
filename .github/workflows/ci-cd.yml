@@ -10,7 +10,7 @@ on:
       - 'development'
 
 env:
-  NODE_VERSION: 18
+  NODE_VERSION: 22
   BUMP_VERSION_COMMIT_MSG: 'Bump version number'
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
       branch: ${{ steps.get-branch-name.outputs.branch }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -58,7 +58,7 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'production' }}
@@ -86,7 +86,7 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
@@ -113,7 +113,7 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
@@ -132,7 +132,7 @@ jobs:
         shell: bash
 
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -142,7 +142,7 @@ jobs:
         shell: bash
 
       - name: Cache node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
