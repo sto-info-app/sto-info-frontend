@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -20,44 +20,36 @@ export function tokenGetter() {
   return localStorage.getItem('access_token');
 }
 
-@NgModule({
-  declarations: [AppComponent],
-  imports: [
-    // Routing modules
-    AppRoutingModule,
-
-    // Auth modules
-    JwtModule.forRoot({
-      config: {
-        tokenGetter: tokenGetter,
-        allowedDomains: [new URL(environment.apiUrl).host],
-        disallowedRoutes: [],
-      },
-    }),
-
-    // Angular modules
-    BrowserModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-
-    // Project modules
-    SharedModule,
-    CoreModule,
-    DashboardModule,
-    ErrorPagesModule,
-    HomeModule,
-    StaticPagesModule,
-    TemplateModule,
-  ],
-  providers: [
-    {
-      provide: 'API_URL',
-      useValue: environment.apiUrl,
-    },
-  ],
-  bootstrap: [AppComponent],
-})
+@NgModule({ declarations: [AppComponent],
+    bootstrap: [AppComponent], imports: [
+        // Routing modules
+        AppRoutingModule,
+        // Auth modules
+        JwtModule.forRoot({
+            config: {
+                tokenGetter: tokenGetter,
+                allowedDomains: [new URL(environment.apiUrl).host],
+                disallowedRoutes: [],
+            },
+        }),
+        // Angular modules
+        BrowserModule,
+        BrowserAnimationsModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatDialogModule,
+        // Project modules
+        SharedModule,
+        CoreModule,
+        DashboardModule,
+        ErrorPagesModule,
+        HomeModule,
+        StaticPagesModule,
+        TemplateModule], providers: [
+        {
+            provide: 'API_URL',
+            useValue: environment.apiUrl,
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+    ] })
 export class AppModule {}
