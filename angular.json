@@ -98,13 +98,13 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "local": {
-              "browserTarget": "sto-info-frontend:build:local"
+              "buildTarget": "sto-info-frontend:build:local"
             },
             "development": {
-              "browserTarget": "sto-info-frontend:build:development"
+              "buildTarget": "sto-info-frontend:build:development"
             },
             "production": {
-              "browserTarget": "sto-info-frontend:build:production"
+              "buildTarget": "sto-info-frontend:build:production"
             }
           },
           "defaultConfiguration": "local"
@@ -112,7 +112,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "sto-info-frontend:build"
+            "buildTarget": "sto-info-frontend:build"
           }
         },
         "test": {
