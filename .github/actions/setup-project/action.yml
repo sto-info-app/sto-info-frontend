@@ -5,7 +5,7 @@ inputs:
   node-version:
     description: 'Node.js version'
     required: true
-    default: 18
+    default: 22
 
   fontawesome-npm-auth-token:
     description: 'FontAwesome NPM Auth Token'

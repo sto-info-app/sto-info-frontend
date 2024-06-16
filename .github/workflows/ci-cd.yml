@@ -10,7 +10,7 @@ on:
       - 'development'
 
 env:
-  NODE_VERSION: 18
+  NODE_VERSION: 22
   BUMP_VERSION_COMMIT_MSG: 'Bump version number'
 
 jobs:
