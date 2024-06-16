@@ -33,7 +33,7 @@
     "@fortawesome/pro-thin-svg-icons": "^6.4.0",
     "moment": "^2.29.4",
     "ngx-pagination": "^6.0.3",
-    "ngx-toastr": "^17.0.1",
+    "ngx-toastr": "^18.0.0",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.7"
