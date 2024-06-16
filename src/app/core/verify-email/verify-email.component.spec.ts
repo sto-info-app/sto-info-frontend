@@ -1,4 +1,11 @@
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -7,7 +14,6 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { MessageType } from 'src/app/shared/models/lcars-message-type.enum';
 import { environment } from 'src/environments/environment';
 import { VerifyEmailComponent } from './verify-email.component';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 interface QueryParams {
   token?: string;
@@ -23,19 +29,19 @@ describe('VerifyEmailComponent', () => {
     queryParamsSubject = new Subject();
 
     await TestBed.configureTestingModule({
-    declarations: [VerifyEmailComponent, LcarsErrorMessageComponent],
-    imports: [RouterTestingModule],
-    providers: [
+      declarations: [VerifyEmailComponent, LcarsErrorMessageComponent],
+      imports: [RouterTestingModule],
+      providers: [
         {
-            provide: ActivatedRoute,
-            useValue: {
-                queryParams: queryParamsSubject.asObservable(),
-            },
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: queryParamsSubject.asObservable(),
+          },
         },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
-    ]
-}).compileComponents();
+      ],
+    }).compileComponents();
 
     httpTestingController = TestBed.inject(HttpTestingController);
   });
@@ -67,19 +73,19 @@ describe('VerifyEmailComponent', () => {
   it('should show error message if token is missing', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-    declarations: [VerifyEmailComponent, LcarsErrorMessageComponent],
-    imports: [],
-    providers: [
+      declarations: [VerifyEmailComponent, LcarsErrorMessageComponent],
+      imports: [],
+      providers: [
         {
-            provide: ActivatedRoute,
-            useValue: {
-                queryParams: of(convertToParamMap({})),
-            },
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: of(convertToParamMap({})),
+          },
         },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
-    ]
-});
+      ],
+    });
 
     fixture = TestBed.createComponent(VerifyEmailComponent);
     component = fixture.componentInstance;

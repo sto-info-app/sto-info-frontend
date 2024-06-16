@@ -1,10 +1,13 @@
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MockProvider } from 'ng-mocks';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AuthGuard', () => {
   let guard: AuthGuard;
@@ -20,9 +23,14 @@ describe('AuthGuard', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    imports: [RouterTestingModule],
-    providers: [AuthGuard, MockProvider(AuthService), provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+      imports: [RouterTestingModule],
+      providers: [
+        AuthGuard,
+        MockProvider(AuthService),
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+      ],
+    });
     guard = TestBed.inject(AuthGuard);
     //TODO: Restore these variables - disabled as unused when tests below were disabled!
     //NOTE: https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests

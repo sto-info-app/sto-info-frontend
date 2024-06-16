@@ -5,7 +5,7 @@ inputs:
   node-version:
     description: 'Node.js version'
     required: true
-    default: 18
+    default: 22
 
   fontawesome-npm-auth-token:
     description: 'FontAwesome NPM Auth Token'
@@ -16,10 +16,10 @@ runs:
 
   steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Use Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
 
