@@ -91,8 +91,8 @@ jobs:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
 
-      - id: old-app-ver
-        name: Get Old App Version
+      - name: Get Old App Version
+        id: old-app-ver
         run: echo "::set-output name=version::$(jq -r '.version' package.json)"
 
       - name: Bump Version and Push Changes Back (Only for pull requests)
