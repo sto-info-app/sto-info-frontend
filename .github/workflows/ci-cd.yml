@@ -174,14 +174,14 @@ jobs:
           AWS_REGION: eu-west-2
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: dist/sto-info-frontend/
+          SOURCE_DIR: dist/sto-info-frontend/browser/
 
       - name: Deploy to S3 (Production)
         if: github.event.pull_request.base.ref == 'production'
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --acl public-read --follow-symlinks --delete
-          path: dist/sto-info-frontend/
+          path: dist/sto-info-frontend/browser/
           bucket: startrekonline.info
           region: eu-west-2
           access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
