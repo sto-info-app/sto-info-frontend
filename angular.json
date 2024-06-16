@@ -18,12 +18,15 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/sto-info-frontend",
+            "outputPath": {
+              "base": "dist/sto-info-frontend"
+            },
             "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": [
+              "src/polyfills.ts"
+            ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": ["src/favicons/favicon.ico", "src/assets"],
@@ -33,7 +36,8 @@
               "src/styles/lcars-theme-colours.scss",
               "src/styles/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "browser": "src/main.ts"
           },
           "configurations": {
             "local": {
@@ -43,9 +47,7 @@
                   "with": "src/environments/environment.ts"
                 }
               ],
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
@@ -57,9 +59,7 @@
                   "with": "src/environments/environment.dev.ts"
                 }
               ],
-              "buildOptimizer": true,
               "optimization": true,
-              "vendorChunk": true,
               "extractLicenses": true,
               "sourceMap": false,
               "namedChunks": true
@@ -71,9 +71,7 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "buildOptimizer": true,
               "optimization": true,
-              "vendorChunk": true,
               "extractLicenses": true,
               "sourceMap": false,
               "namedChunks": false,
