@@ -1,10 +1,11 @@
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { AuthService } from '../auth.service';
 import { ResetPasswordRequestComponent } from './reset-password-request.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ResetPasswordRequestComponent', () => {
   let component: ResetPasswordRequestComponent;
@@ -13,10 +14,10 @@ describe('ResetPasswordRequestComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, RouterTestingModule, FormsModule],
-      declarations: [ResetPasswordRequestComponent],
-      providers: [AuthService],
-    }).compileComponents();
+    declarations: [ResetPasswordRequestComponent],
+    imports: [RouterTestingModule, FormsModule],
+    providers: [AuthService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+}).compileComponents();
   });
 
   beforeEach(() => {

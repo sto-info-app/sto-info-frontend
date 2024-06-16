@@ -1,5 +1,5 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpErrorResponse, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
   ComponentFixture,
   TestBed,
@@ -23,15 +23,12 @@ describe('LoginComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule,
-        RouterTestingModule,
+    declarations: [LoginComponent],
+    imports: [RouterTestingModule,
         FormsModule,
-        BrowserAnimationsModule,
-      ],
-      declarations: [LoginComponent],
-      providers: [AuthService],
-    }).compileComponents();
+        BrowserAnimationsModule],
+    providers: [AuthService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+}).compileComponents();
   });
 
   beforeEach(() => {

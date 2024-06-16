@@ -1,4 +1,4 @@
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -13,6 +13,7 @@ import {
 } from 'src/app/shared/constants/forms.constants';
 import { AuthService } from '../auth/auth.service';
 import { RegisterComponent } from './register.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
@@ -22,24 +23,23 @@ describe('RegisterComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        ReactiveFormsModule,
+    declarations: [RegisterComponent, DummyComponent],
+    imports: [ReactiveFormsModule,
         RouterTestingModule.withRoutes([
-          { path: 'register/complete', component: DummyComponent },
+            { path: 'register/complete', component: DummyComponent },
         ]),
-        HttpClientTestingModule,
-        BrowserAnimationsModule,
-      ],
-      declarations: [RegisterComponent, DummyComponent],
-      providers: [
+        BrowserAnimationsModule],
+    providers: [
         {
-          provide: AuthService,
-          useValue: {
-            register: () => of({}),
-          },
+            provide: AuthService,
+            useValue: {
+                register: () => of({}),
+            },
         },
-      ],
-    }).compileComponents();
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+}).compileComponents();
   }));
 
   beforeEach(() => {
