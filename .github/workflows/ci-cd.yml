@@ -29,6 +29,10 @@ jobs:
       skip: ${{ steps.commit.outputs.skip }}
       branch: ${{ steps.get-branch-name.outputs.branch }}
     steps:
+      - name: Check if NODE_VERSION exists
+        run: echo "NODE_VERSION=$NODE_VERSION"
+        if: ${{ env.NODE_VERSION }}
+
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
