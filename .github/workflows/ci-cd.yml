@@ -2,12 +2,19 @@ name: CI/CD
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - 'production'
+
   pull_request:
+    types:
+      - closed
     branches:
-      - 'development'
+      - production
+      - development
+
+  workflow_run:
+    workflows:
+      - Pull Request Check
+    types:
+      - completed
 
 env:
   NODE_VERSION: 22
@@ -22,6 +29,10 @@ jobs:
       skip: ${{ steps.commit.outputs.skip }}
       branch: ${{ steps.get-branch-name.outputs.branch }}
     steps:
+      - name: Check if NODE_VERSION exists
+        run: echo "NODE_VERSION=$NODE_VERSION"
+        if: ${{ env.NODE_VERSION }}
+
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
@@ -180,9 +191,10 @@ jobs:
         if: github.event.pull_request.base.ref == 'production'
         uses: jakejarvis/s3-sync-action@master
         with:
-          args: --acl public-read --follow-symlinks --delete
-          path: dist/sto-info-frontend/browser/
-          bucket: startrekonline.info
-          region: eu-west-2
-          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          args: --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: startrekonline.info
+          AWS_REGION: eu-west-2
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: dist/sto-info-frontend/browser/

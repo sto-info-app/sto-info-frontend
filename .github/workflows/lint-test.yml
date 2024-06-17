@@ -10,6 +10,9 @@ on:
       - 'development'
       - 'epic/*'
 
+env:
+  NODE_VERSION: 22
+
 jobs:
   prerequisite_check:
     runs-on: ubuntu-latest
