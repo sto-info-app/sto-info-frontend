@@ -28,6 +28,7 @@ jobs:
     outputs:
       skip: ${{ steps.commit.outputs.skip }}
       branch: ${{ steps.get-branch-name.outputs.branch }}
+
     steps:
       - name: Check if NODE_VERSION exists
         run: echo "NODE_VERSION=$NODE_VERSION"
@@ -62,8 +63,33 @@ jobs:
           echo "::set-output name=branch::$branch_name"
         shell: bash
 
-  test:
+  version_bump:
     needs: prerequisite_check
+    if: needs.prerequisite_check.outputs.skip != 'true' && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          fetch-depth: 0 # Fetch all history to enable proper commit and push
+
+      - name: Get Old App Version
+        id: old-app-ver
+        run: echo "::set-output name=version::$(jq -r '.version' package.json)"
+
+      - name: Bump Version and Push Changes Back (Only for pull requests)
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+          npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }} from ${{ steps.old-app-ver.outputs.version }} to %s"
+          git push origin HEAD:${{ needs.prerequisite_check.outputs.branch }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+
+  test:
+    needs: [prerequisite_check, version_bump]
     if: needs.prerequisite_check.outputs.skip != 'true'
     runs-on: ubuntu-latest
 
@@ -89,31 +115,6 @@ jobs:
 
       - name: Run Tests
         run: npm run test
-
-  version_bump:
-    needs: [prerequisite_check, test]
-    if: needs.prerequisite_check.outputs.skip != 'true' && github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          fetch-depth: 0 # Fetch all history to enable proper commit and push
-
-      - name: Get Old App Version
-        id: old-app-ver
-        run: echo "::set-output name=version::$(jq -r '.version' package.json)"
-
-      - name: Bump Version and Push Changes Back (Only for pull requests)
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "github-actions@github.com"
-          npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }} from ${{ steps.old-app-ver.outputs.version }} to %s"
-          git push origin HEAD:${{ needs.prerequisite_check.outputs.branch }}
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
 
   build_and_deploy:
     needs: [prerequisite_check, version_bump]
