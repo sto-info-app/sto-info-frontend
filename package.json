@@ -1,6 +1,6 @@
 {
   "name": "sto-info-frontend",
-  "version": "0.1.40",
+  "version": "0.1.43",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -60,6 +60,25 @@
     "ng-mocks": "^14.13.0",
     "prettier": "^2.8.8",
     "typescript": "~5.4.5"
+  },
+  "projects": {
+    "sto-info-frontend": {
+      "architect": {
+        "build": {
+          "options": {
+            "outputPath": "dist/sto-info-frontend"
+          },
+          "configurations": {
+            "production": {
+              "outputPath": "dist/sto-info-frontend"
+            },
+            "development": {
+              "outputPath": "dist/sto-info-frontend"
+            }
+          }
+        }
+      }
+    }
   },
   "lint-staged": {
     "*.{ts,js}": [
