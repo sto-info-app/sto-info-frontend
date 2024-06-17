@@ -2,12 +2,19 @@ name: CI/CD
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - 'production'
+
   pull_request:
+    types:
+      - closed
     branches:
-      - 'development'
+      - production
+      - development
+
+  workflow_run:
+    workflows:
+      - Pull Request Check
+    types:
+      - completed
 
 env:
   NODE_VERSION: 22
