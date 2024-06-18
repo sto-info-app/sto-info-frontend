@@ -3,7 +3,7 @@ name: CI/CD
 on:
   workflow_dispatch:
 
-  pull_request_target:
+  pull_request:
     types:
       - closed
     branches:
@@ -64,33 +64,8 @@ jobs:
           echo "::set-output name=branch::$branch_name"
         shell: bash
 
-  version_bump:
-    needs: prerequisite_check
-    if: needs.prerequisite_check.outputs.skip != 'true' && github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          fetch-depth: 0 # Fetch all history to enable proper commit and push
-
-      - name: Get Old App Version
-        id: old-app-ver
-        run: echo "::set-output name=version::$(jq -r '.version' package.json)"
-
-      - name: Bump Version and Push Changes Back
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "github-actions@github.com"
-          npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }} from ${{ steps.old-app-ver.outputs.version }} to %s"
-          git push origin HEAD:${{ needs.prerequisite_check.outputs.branch }}
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
-
   test:
-    needs: [prerequisite_check, version_bump]
+    needs: prerequisite_check
     if: needs.prerequisite_check.outputs.skip != 'true'
     runs-on: ubuntu-latest
 
@@ -99,7 +74,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          ref: ${{ github.event_name == 'pull_request_target' && needs.prerequisite_check.outputs.branch || 'production' }}
+          ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'production' }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
 
       - name: Setup project
@@ -118,7 +93,7 @@ jobs:
         run: npm run test
 
   build_and_deploy:
-    needs: [prerequisite_check, version_bump, test]
+    needs: [prerequisite_check, test]
     if: needs.prerequisite_check.outputs.skip != 'true'
     runs-on: ubuntu-latest
 
