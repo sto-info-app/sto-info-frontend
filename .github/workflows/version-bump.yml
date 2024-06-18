@@ -11,14 +11,27 @@ env:
 
 jobs:
   prerequisite_check:
+    if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
 
-    # Check commit message
     outputs:
       skip: ${{ steps.commit.outputs.skip }}
       branch: ${{ steps.get-branch-name.outputs.branch }}
+      do_bump_version: ${{ steps.check_comment.outputs.do_bump_version }}
 
     steps:
+      - id: check_comment
+        name: Check for /bump_version comment
+        if: ${{ github.event_name == 'issue_comment' }}
+        run: |
+          COMMENT_BODY="${{ github.event.comment.body }}"
+          if [[ "$COMMENT_BODY" == *"/bump_version"* ]]; then
+            echo "::set-output name=do_bump_version::true"
+          else
+            echo "::set-output name=do_bump_version::false"
+          fi
+        shell: bash
+
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
@@ -50,7 +63,7 @@ jobs:
 
   version_bump:
     needs: prerequisite_check
-    if: needs.prerequisite_check.outputs.skip != 'true'
+    if: needs.prerequisite_check.outputs.skip != 'true' && needs.prerequisite_check.outputs.do_bump_version == 'true'
     runs-on: ubuntu-latest
 
     steps:
