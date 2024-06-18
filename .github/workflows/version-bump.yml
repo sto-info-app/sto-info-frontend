@@ -1,0 +1,87 @@
+name: Version Bump
+
+on:
+  workflow_dispatch:
+
+  issue_comment:
+    types: [created]
+
+env:
+  BUMP_VERSION_COMMIT_MSG: 'Bump version number'
+
+jobs:
+  prerequisite_check:
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+
+    outputs:
+      skip: ${{ steps.commit.outputs.skip }}
+      branch: ${{ steps.get-branch-name.outputs.branch }}
+      do_bump_version: ${{ steps.check_comment.outputs.do_bump_version }}
+
+    steps:
+      - id: check_comment
+        name: Check for /bump_version comment
+        if: ${{ github.event_name == 'issue_comment' }}
+        run: |
+          COMMENT_BODY="${{ github.event.comment.body }}"
+          if [[ "$COMMENT_BODY" == *"/bump_version"* ]]; then
+            echo "::set-output name=do_bump_version::true"
+          else
+            echo "::set-output name=do_bump_version::false"
+          fi
+        shell: bash
+
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: commit
+        name: Get commit message
+        run: |
+          COMMIT_MESSAGE=$(git log --no-merges -1 --format=%B)
+          echo "Current commit message: $COMMIT_MESSAGE"
+          if [[ "$COMMIT_MESSAGE" == "${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
+            echo "::set-output name=skip::true"
+          else
+            echo "::set-output name=skip::false"
+          fi
+        shell: bash
+
+      - id: get-branch-name
+        name: Get branch name
+        run: |
+          branch_name=$(echo ${GITHUB_HEAD_REF})
+          if [ -z "$branch_name" ]
+          then
+            branch_name=$(echo "${{ github.head_ref }}")
+          fi
+          echo "Branch name is: $branch_name"
+          echo "::set-output name=branch::$branch_name"
+        shell: bash
+
+  version_bump:
+    needs: prerequisite_check
+    if: needs.prerequisite_check.outputs.skip != 'true' && needs.prerequisite_check.outputs.do_bump_version == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          fetch-depth: 0 # Fetch all history to enable proper commit and push
+
+      - name: Get Old App Version
+        id: old-app-ver
+        run: echo "::set-output name=version::$(jq -r '.version' package.json)"
+
+      - name: Bump Version and Push Changes Back
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+          npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }} from ${{ steps.old-app-ver.outputs.version }} to %s"
+          git push origin HEAD:${{ needs.prerequisite_check.outputs.branch }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
