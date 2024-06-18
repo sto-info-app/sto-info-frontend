@@ -3,14 +3,6 @@ name: CI/CD
 on:
   workflow_dispatch:
 
-  pull_request:
-    types:
-      - opened
-      - synchronize
-    branches:
-      - production
-      - development
-
   pull_request_target:
     types:
       - closed
@@ -30,6 +22,7 @@ env:
 
 jobs:
   prerequisite_check:
+    if: ${{ github.actor != 'github-actions[bot]' }}
     runs-on: ubuntu-latest
 
     # Check commit message
@@ -73,7 +66,7 @@ jobs:
 
   version_bump:
     needs: prerequisite_check
-    if: needs.prerequisite_check.outputs.skip != 'true'
+    if: needs.prerequisite_check.outputs.skip != 'true' && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     steps:
