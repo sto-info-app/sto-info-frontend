@@ -17,21 +17,9 @@ jobs:
     outputs:
       skip: ${{ steps.commit.outputs.skip }}
       branch: ${{ steps.get-branch-name.outputs.branch }}
-      do_bump_version: ${{ steps.check_comment.outputs.do_bump_version }}
+      do_version_bump: ${{ steps.check_comment.outputs.do_version_bump }}
 
     steps:
-      - id: check_comment
-        name: Check for /bump_version comment
-        if: ${{ github.event_name == 'issue_comment' }}
-        run: |
-          COMMENT_BODY="${{ github.event.comment.body }}"
-          if [[ "$COMMENT_BODY" == *"/bump_version"* ]]; then
-            echo "::set-output name=do_bump_version::true"
-          else
-            echo "::set-output name=do_bump_version::false"
-          fi
-        shell: bash
-
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
@@ -61,9 +49,21 @@ jobs:
           echo "::set-output name=branch::$branch_name"
         shell: bash
 
+      - id: check_comment
+        name: Check for /bump_version comment
+        if: ${{ github.event_name == 'issue_comment' }}
+        run: |
+          COMMENT_BODY="${{ github.event.comment.body }}"
+          if [[ "$COMMENT_BODY" == *"/bump_version"* ]]; then
+            echo "::set-output name=do_version_bump::true"
+          else
+            echo "::set-output name=do_version_bump::false"
+          fi
+        shell: bash
+
   version_bump:
     needs: prerequisite_check
-    if: needs.prerequisite_check.outputs.skip != 'true' && needs.prerequisite_check.outputs.do_bump_version == 'true'
+    if: needs.prerequisite_check.outputs.skip != 'true' && needs.prerequisite_check.outputs.do_version_bump == 'true'
     runs-on: ubuntu-latest
 
     steps:
