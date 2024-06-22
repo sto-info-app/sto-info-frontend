@@ -67,6 +67,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Print Environment Variables
+        run: printenv
+
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
@@ -89,7 +92,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
           npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }} from ${{ steps.old-app-ver.outputs.version }} to %s"
-          branch_name=${{ needs.prerequisite_check.outputs.branch }}
+          branch_name="${{ needs.prerequisite_check.outputs.branch }}"
           echo "Pushing to branch: $branch_name"
           git push origin HEAD:$branch_name
         env:
