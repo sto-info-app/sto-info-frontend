@@ -16,7 +16,7 @@ jobs:
 
     outputs:
       skip: ${{ steps.commit.outputs.skip }}
-      branch: ${{ steps.get-branch-name.outputs.branch }}
+      branch: ${{ steps.get_branch_name.outputs.branch }}
       do_version_bump: ${{ steps.check_comment.outputs.do_version_bump }}
 
     steps:
@@ -37,7 +37,7 @@ jobs:
           fi
         shell: bash
 
-      - id: get-branch-name
+      - id: get_branch_name
         name: Get branch name
         run: |
           if [ -n "${GITHUB_HEAD_REF}" ]; then
