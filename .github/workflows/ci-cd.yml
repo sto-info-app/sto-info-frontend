@@ -3,19 +3,18 @@ name: CI/CD
 on:
   workflow_dispatch:
 
-    #TODO: Enable after workflow testing is complete!
-  # pull_request:
-  #   types:
-  #     - closed
-  #   branches:
-  #     - production
-  #     - development
+  pull_request:
+    types:
+      - closed
+    branches:
+      - production
+      - development
 
-  # workflow_run:
-  #   workflows:
-  #     - Pull Request Check
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows:
+      - Pull Request Check
+    types:
+      - completed
 
 env:
   NODE_VERSION: 22
