@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Workflow Version
         run: |
-          echo "Workflow Version 1"
+          echo "Workflow Version 2"
 
   prerequisite_check:
     if: ${{ github.event.issue.pull_request }}
