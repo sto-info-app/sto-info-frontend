@@ -3,12 +3,13 @@ name: Lint and Test
 on:
   workflow_dispatch:
 
-  pull_request:
-    types: [opened, synchronize, edited, reopened]
-    branches:
-      - 'master'
-      - 'development'
-      - 'epic/*'
+    #TODO: Enable after workflow testing is complete!
+  # pull_request:
+  #   types: [opened, synchronize, edited, reopened]
+  #   branches:
+  #     - 'master'
+  #     - 'development'
+  #     - 'epic/*'
 
 env:
   NODE_VERSION: 22
