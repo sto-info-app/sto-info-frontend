@@ -63,7 +63,7 @@ jobs:
 
   version_bump:
     needs: prerequisite_check
-    if: needs.prerequisite_check.outputs.skip != 'true' && needs.prerequisite_check.outputs.do_version_bump == 'true'
+    if: needs.prerequisite_check.outputs.skip != 'true' && needs.prerequisite_check.outputs.branch != '' && needs.prerequisite_check.outputs.do_version_bump == 'true'
     runs-on: ubuntu-latest
 
     steps:
