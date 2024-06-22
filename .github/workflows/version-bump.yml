@@ -61,6 +61,9 @@ jobs:
           fi
         shell: bash
 
+      - name: Print Environment Variables
+        run: printenv
+
   version_bump:
     needs: prerequisite_check
     if: needs.prerequisite_check.outputs.skip != 'true' && needs.prerequisite_check.outputs.branch != '' && needs.prerequisite_check.outputs.do_version_bump == 'true'
