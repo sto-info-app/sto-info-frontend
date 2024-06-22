@@ -1,6 +1,6 @@
 {
   "name": "sto-info-frontend",
-  "version": "0.1.51",
+  "version": "0.1.52",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
