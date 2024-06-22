@@ -41,8 +41,7 @@ jobs:
         name: Get branch name
         run: |
           branch_name=$(echo ${GITHUB_HEAD_REF})
-          if [ -z "$branch_name" ]
-          then
+          if [ -z "$branch_name" ]; then
             branch_name=$(echo "${{ github.head_ref }}")
           fi
           echo "Branch name is: $branch_name"
@@ -73,6 +72,10 @@ jobs:
           token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           fetch-depth: 0 # Fetch all history to enable proper commit and push
 
+      - name: Debug Branch Name
+        run: |
+          echo "Branch to push to: ${{ needs.prerequisite_check.outputs.branch }}"
+
       - name: Get Old App Version
         id: old-app-ver
         run: echo "::set-output name=version::$(jq -r '.version' package.json)"
@@ -82,6 +85,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
           npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }} from ${{ steps.old-app-ver.outputs.version }} to %s"
+          echo "Pushing to branch: ${{ needs.prerequisite_check.outputs.branch }}"
           git push origin HEAD:${{ needs.prerequisite_check.outputs.branch }}
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
