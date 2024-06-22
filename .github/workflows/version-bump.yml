@@ -10,13 +10,6 @@ env:
   BUMP_VERSION_COMMIT_MSG: 'Bump version number'
 
 jobs:
-  workflow_version:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Workflow Version
-        run: |
-          echo "Workflow Version 4"
-
   prerequisite_check:
     if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
@@ -67,9 +60,6 @@ jobs:
             echo "::set-output name=do_version_bump::false"
           fi
         shell: bash
-
-      # - name: Print Environment Variables
-      #   run: printenv
 
       - name: Print Outputs
         run: |
