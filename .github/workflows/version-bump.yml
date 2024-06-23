@@ -3,6 +3,7 @@ name: Version Bump
 on:
   workflow_dispatch:
 
+  # Check comment when created
   issue_comment:
     types: [created]
 
