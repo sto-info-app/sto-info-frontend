@@ -37,6 +37,7 @@
     "moment": "^2.29.4",
     "ngx-pagination": "^6.0.3",
     "ngx-toastr": "^19.0.0",
+    "rimraf": "^6.0.1",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "undici": "^6.19.1",
