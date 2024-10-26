@@ -31,11 +31,13 @@
     "@fortawesome/pro-regular-svg-icons": "^6.4.0",
     "@fortawesome/pro-solid-svg-icons": "^6.4.0",
     "@fortawesome/pro-thin-svg-icons": "^6.4.0",
+    "http-proxy-middleware": "^3.0.2",
     "moment": "^2.29.4",
     "ngx-pagination": "^6.0.3",
     "ngx-toastr": "^19.0.0",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
+    "undici": "^6.19.1",
     "zone.js": "~0.14.7"
   },
   "devDependencies": {
