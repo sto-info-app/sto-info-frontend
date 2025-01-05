@@ -3,12 +3,12 @@ name: CI/CD
 on:
   workflow_dispatch:
 
-  pull_request:
-    types:
-      - closed
-    branches:
-      - production
-      - development
+  # pull_request:
+  #   types:
+  #     - closed
+  #   branches:
+  #     - production
+  #     - development
 
   workflow_run:
     workflows:
