@@ -3,8 +3,8 @@ name: Version Bump
 on:
   workflow_dispatch:
 
-  # Check comment when created
-  issue_comment:
+  # Check pull request comment when it is created
+  pull_request_review_comment:
     types: [created]
 
 env:
