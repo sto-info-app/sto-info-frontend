@@ -12,7 +12,7 @@ env:
 
 jobs:
   prerequisite_check:
-    if: ${{ github.event.issue.pull_request }}
+    if: ${{ github.event.issue.pull_request || github.event.pull_request }}
     runs-on: ubuntu-latest
 
     outputs:
