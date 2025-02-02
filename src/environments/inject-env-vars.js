@@ -1,6 +1,9 @@
 const fs = require('fs');
 
-const environmentTemplate = fs.readFileSync('environment.template.ts', 'utf8');
+const environmentTemplate = fs.readFileSync(
+  'src/environments/environment.template.ts',
+  'utf8',
+);
 
 // Pull from process.env (set in Render)
 const replacedContent = environmentTemplate
