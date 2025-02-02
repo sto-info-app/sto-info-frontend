@@ -22,19 +22,19 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = environment.apiUrl;
+  private readonly apiUrl = environment.apiUrl;
 
-  private isAuthenticatedSubject: BehaviorSubject<boolean> =
+  private readonly isAuthenticatedSubject: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
   public isAuthenticated$: Observable<boolean> =
     this.isAuthenticatedSubject.asObservable();
 
-  private expiryAnnouncedSubject: ReplaySubject<number> =
+  private readonly expiryAnnouncedSubject: ReplaySubject<number> =
     new ReplaySubject<number>(1); // Will replay the last 1 values to new subscribers
   public expiryAnnounced$: Observable<number> =
     this.expiryAnnouncedSubject.asObservable();
 
-  private warningAnnouncedSubject: ReplaySubject<number> =
+  private readonly warningAnnouncedSubject: ReplaySubject<number> =
     new ReplaySubject<number>(1); // Will replay the last 1 values to new subscribers
   public warningAnnounced$: Observable<number> =
     this.warningAnnouncedSubject.asObservable();
@@ -47,7 +47,10 @@ export class AuthService {
 
   private refreshTokenTimeout: NodeJS.Timeout | null = null;
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(
+    private readonly http: HttpClient,
+    private readonly router: Router,
+  ) {
     // Check if there's a login token and update the BehaviorSubject
     this.isAuthenticatedSubject.next(this.isTokenValid());
 
@@ -77,7 +80,7 @@ export class AuthService {
     const httpOptions = this.getHttpOptionsWithRefreshToken();
     if (!httpOptions) {
       // Handle the case when there is no token (e.g., user is not logged in)
-      return throwError('No token found');
+      return throwError(() => new Error('No token found'));
     }
     return this.http.post(`${this.apiUrl}/auth/logout`, {}, httpOptions);
   }
@@ -145,7 +148,7 @@ export class AuthService {
     const refreshToken = localStorage.getItem('refresh_token');
     if (!refreshToken) {
       // Handle the case when there is no token (e.g., user is not logged in)
-      return throwError('No token found');
+      return throwError(() => new Error('No token found'));
     }
     const body = { refresh_token: refreshToken };
     return this.http
@@ -165,7 +168,7 @@ export class AuthService {
         }),
         catchError(error => {
           this.router.navigate(['/login']);
-          return throwError(error);
+          return throwError(() => error);
         }),
       );
   }
