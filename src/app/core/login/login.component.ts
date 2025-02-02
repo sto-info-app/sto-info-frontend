@@ -22,11 +22,11 @@ import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
-    selector: 'app-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss'],
-    animations: [progressBarAnimation],
-    standalone: false
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
+  animations: [progressBarAnimation],
+  standalone: false,
 })
 export class LoginComponent {
   // Allow environment contstants to be used in the HTML
@@ -43,13 +43,13 @@ export class LoginComponent {
   isSubmitting = false;
 
   constructor(
-    private authService: AuthService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private renderer: Renderer2,
-    private el: ElementRef,
-    private redAlertThemeService: RedAlertThemeService,
-    private routingService: RoutingService,
+    private readonly authService: AuthService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly renderer: Renderer2,
+    private readonly el: ElementRef,
+    private readonly redAlertThemeService: RedAlertThemeService,
+    private readonly routingService: RoutingService,
   ) {}
   appRoutes = APP_ROUTES;
 
@@ -73,7 +73,7 @@ export class LoginComponent {
         // Get the URL the user was originally trying to access
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
         // If there's a return URL, navigate to it. Otherwise, navigate to a default page.
-        this.router.navigate([returnUrl || this.appLoggedInHome]);
+        this.router.navigate([returnUrl ?? this.appLoggedInHome]);
       },
       error: (error: HttpErrorResponse) => {
         let errMessage = '';
@@ -84,12 +84,16 @@ export class LoginComponent {
             break;
           case 401:
             errMessage =
-              error.error.message === 'Email not verified'
+              error.error?.message === 'Email not verified'
                 ? MSG_ERROR_EMAIL_NOT_VERIFIED_DISPLAY_TEXT
                 : MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT;
             break;
+          case 408:
+            console.error('Request timed out.');
+            errMessage = 'The request timed out. Please try again.';
+            break;
           default:
-            errMessage = error.error.message;
+            errMessage = error.error?.message || 'Unknown error!';
             break;
         }
         this.displayErrorMessage(errMessage);
