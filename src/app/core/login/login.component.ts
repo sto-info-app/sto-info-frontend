@@ -22,10 +22,10 @@ import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
-    selector: 'app-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss'],
-    animations: [progressBarAnimation],
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
+  animations: [progressBarAnimation],
   standalone: false,
 })
 export class LoginComponent {
@@ -73,7 +73,7 @@ export class LoginComponent {
         // Get the URL the user was originally trying to access
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
         // If there's a return URL, navigate to it. Otherwise, navigate to a default page.
-        this.router.navigate([returnUrl || this.appLoggedInHome]);
+        this.router.navigate([returnUrl ?? this.appLoggedInHome]);
       },
       error: (error: HttpErrorResponse) => {
         let errMessage = '';
