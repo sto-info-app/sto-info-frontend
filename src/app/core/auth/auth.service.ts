@@ -64,7 +64,9 @@ export class AuthService {
 
   login(credentials: LoginCredentials): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials)
+      .post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials, {
+        withCredentials: true,
+      })
       .pipe(
         tap(response => {
           this.saveToken(
