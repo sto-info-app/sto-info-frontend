@@ -8,7 +8,8 @@ import {
 } from '@angular/core';
 
 @Directive({
-  selector: '[appResizeObserver]',
+    selector: '[appResizeObserver]',
+    standalone: false
 })
 export class ResizeObserverDirective implements OnInit, OnDestroy {
   @Output()

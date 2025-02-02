@@ -7,9 +7,10 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { AuthService } from '../auth.service';
 
 @Component({
-  selector: 'app-reset-password-request',
-  templateUrl: './reset-password-request.component.html',
-  styleUrls: ['./reset-password-request.component.scss'],
+    selector: 'app-reset-password-request',
+    templateUrl: './reset-password-request.component.html',
+    styleUrls: ['./reset-password-request.component.scss'],
+    standalone: false
 })
 export class ResetPasswordRequestComponent {
   email = '';

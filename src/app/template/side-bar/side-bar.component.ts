@@ -4,9 +4,10 @@ import { GeneralThemeService } from 'src/app/shared/services/general-theme.servi
 import { RoutingService } from 'src/app/shared/services/routing.service';
 
 @Component({
-  selector: 'app-side-bar',
-  templateUrl: './side-bar.component.html',
-  styleUrls: ['./side-bar.component.scss'],
+    selector: 'app-side-bar',
+    templateUrl: './side-bar.component.html',
+    styleUrls: ['./side-bar.component.scss'],
+    standalone: false
 })
 export class SideBarComponent {
   @Input() isLoggedIn!: boolean;
