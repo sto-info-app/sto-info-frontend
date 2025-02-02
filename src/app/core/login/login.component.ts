@@ -26,7 +26,7 @@ import { AuthService } from '../auth/auth.service';
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.scss'],
     animations: [progressBarAnimation],
-    standalone: false
+  standalone: false,
 })
 export class LoginComponent {
   // Allow environment contstants to be used in the HTML
@@ -43,13 +43,13 @@ export class LoginComponent {
   isSubmitting = false;
 
   constructor(
-    private authService: AuthService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private renderer: Renderer2,
-    private el: ElementRef,
-    private redAlertThemeService: RedAlertThemeService,
-    private routingService: RoutingService,
+    private readonly authService: AuthService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly renderer: Renderer2,
+    private readonly el: ElementRef,
+    private readonly redAlertThemeService: RedAlertThemeService,
+    private readonly routingService: RoutingService,
   ) {}
   appRoutes = APP_ROUTES;
 
@@ -84,7 +84,7 @@ export class LoginComponent {
             break;
           case 401:
             errMessage =
-              error.error.message === 'Email not verified'
+              error.error?.message === 'Email not verified'
                 ? MSG_ERROR_EMAIL_NOT_VERIFIED_DISPLAY_TEXT
                 : MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT;
             break;
