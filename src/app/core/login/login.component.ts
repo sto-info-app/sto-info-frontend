@@ -88,6 +88,10 @@ export class LoginComponent {
                 ? MSG_ERROR_EMAIL_NOT_VERIFIED_DISPLAY_TEXT
                 : MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT;
             break;
+          case 408:
+            console.error('Request timed out.');
+            errMessage = 'The request timed out. Please try again.';
+            break;
           default:
             errMessage = error.error?.message || 'Unknown error!';
             break;
