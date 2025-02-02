@@ -89,7 +89,7 @@ export class LoginComponent {
                 : MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT;
             break;
           default:
-            errMessage = error.error.message;
+            errMessage = error.error?.message || 'Unknown error!';
             break;
         }
         this.displayErrorMessage(errMessage);
