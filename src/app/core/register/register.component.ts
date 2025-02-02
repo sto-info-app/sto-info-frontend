@@ -47,10 +47,11 @@ import { MustMatch } from '../../shared/_helpers/must-match.validator';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
-  selector: 'app-register',
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss'],
-  animations: [progressBarAnimation],
+    selector: 'app-register',
+    templateUrl: './register.component.html',
+    styleUrls: ['./register.component.scss'],
+    animations: [progressBarAnimation],
+    standalone: false
 })
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;

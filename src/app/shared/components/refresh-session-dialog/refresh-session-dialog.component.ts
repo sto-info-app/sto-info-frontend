@@ -3,9 +3,10 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppComponent } from 'src/app/app.component';
 
 @Component({
-  selector: 'app-refresh-session-dialog',
-  templateUrl: './refresh-session-dialog.component.html',
-  styleUrls: ['./refresh-session-dialog.component.scss'],
+    selector: 'app-refresh-session-dialog',
+    templateUrl: './refresh-session-dialog.component.html',
+    styleUrls: ['./refresh-session-dialog.component.scss'],
+    standalone: false
 })
 export class RefreshSessionDialogComponent {
   appComponent: AppComponent;

@@ -22,10 +22,11 @@ import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
-  animations: [progressBarAnimation],
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
+    animations: [progressBarAnimation],
+    standalone: false
 })
 export class LoginComponent {
   // Allow environment contstants to be used in the HTML

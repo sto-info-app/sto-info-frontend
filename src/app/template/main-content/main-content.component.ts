@@ -5,9 +5,10 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-main-content',
-  templateUrl: './main-content.component.html',
-  styleUrls: ['./main-content.component.scss'],
+    selector: 'app-main-content',
+    templateUrl: './main-content.component.html',
+    styleUrls: ['./main-content.component.scss'],
+    standalone: false
 })
 export class MainContentComponent {
   @Input() isLoggedIn!: boolean;

@@ -5,9 +5,10 @@ import { APP_ROUTES } from '../shared/constants/app-routing.constants';
 import { RoutingService } from '../shared/services/routing.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+    selector: 'app-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.scss'],
+    standalone: false
 })
 export class HomeComponent {
   appTitle: string = environment.appTitle;

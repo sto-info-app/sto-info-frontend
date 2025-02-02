@@ -7,9 +7,10 @@ import { User } from '../models/user.model';
 import { DashboardService } from '../services/dashboard.service';
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss'],
+    selector: 'app-profile',
+    templateUrl: './profile.component.html',
+    styleUrls: ['./profile.component.scss'],
+    standalone: false
 })
 export class ProfileComponent {
   appRoutes = APP_ROUTES;
