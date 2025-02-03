@@ -8,7 +8,8 @@
     "build:prod": "ng build --prod",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "eslint \"src/**/*.ts\""
+    "lint": "eslint \"src/**/*.ts\"",
+    "postbuild": "cp src/assets/_redirects dist/sto-info-frontend/_redirects"
   },
   "private": true,
   "dependencies": {
