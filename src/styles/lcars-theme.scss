@@ -215,8 +215,7 @@
 }
 
 @media (hover: none) {
-  .mat-expansion-panel:not(.mat-expanded):not([aria-disabled='true'])
-    .mat-expansion-panel-header:hover {
+  .mat-expansion-panel:not(.mat-expanded):not([aria-disabled='true']) .mat-expansion-panel-header:hover {
     background: #0d0d0d;
   }
 }
@@ -993,8 +992,8 @@ main {
   padding-left: clamp(20px, 3vw, 50px);
 }
 
-main > :first-child,
-article > :first-child {
+main> :first-child,
+article> :first-child {
   margin-top: 0;
 }
 
@@ -1008,7 +1007,7 @@ article > :first-child {
   flex: 1 1 300px;
 }
 
-.col > :first-child {
+.col> :first-child {
   margin-top: 0;
 }
 
@@ -1378,7 +1377,7 @@ footer::after {
   float: right;
 }
 
-#footer-text > * {
+#footer-text>* {
   margin: 0;
   justify-content: center;
 }
@@ -1419,6 +1418,7 @@ footer::after {
         color: #79d;
         text-decoration: none;
       }
+
       a.active {
         color: #fba;
       }
@@ -2081,7 +2081,7 @@ main {
   background-color: #0d0d0d;
 }
 
-.content > :first-child {
+.content> :first-child {
   margin-top: 0;
 }
 
@@ -3084,6 +3084,7 @@ button.gold {
 
 // Media Queries
 @media only screen and (max-width: 1240px) {
+
   .bar-1,
   .bar-6 {
     width: 320px;
@@ -3194,6 +3195,7 @@ button.gold {
 }
 
 @media only screen and (max-width: 1020px) {
+
   .dc6,
   .dc3,
   .dc12,
@@ -3211,6 +3213,7 @@ button.gold {
 }
 
 @media only screen and (max-width: 890px) {
+
   .left-frame-top,
   .left-frame {
     width: 130px;
@@ -3322,6 +3325,7 @@ button.gold {
 }
 
 @media only screen and (max-width: 790px) {
+
   .dc5,
   .dc6,
   .grid-4 {
@@ -3336,6 +3340,7 @@ button.gold {
 }
 
 @media only screen and (max-width: 700px) {
+
   .left-frame-top,
   .left-frame {
     width: 110px;
@@ -3710,6 +3715,7 @@ button.gold {
   .bar-8 {
     height: 5px;
   }
+
   .bar-1,
   .bar-6 {
     width: 40px;
@@ -3826,6 +3832,7 @@ button.gold {
 }
 
 @media only screen and (max-width: 388px) {
+
   .bar-1,
   .bar-6 {
     width: 90px;
