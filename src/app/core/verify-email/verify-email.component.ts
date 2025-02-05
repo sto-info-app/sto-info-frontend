@@ -14,7 +14,7 @@ import { MessageType } from '../../shared/models/lcars-message-type.enum';
     selector: 'app-verify-email',
     templateUrl: './verify-email.component.html',
     styleUrls: ['./verify-email.component.scss'],
-    standalone: false
+  standalone: false,
 })
 export class VerifyEmailComponent implements OnInit {
   messageType: MessageType = MessageType.Info;
