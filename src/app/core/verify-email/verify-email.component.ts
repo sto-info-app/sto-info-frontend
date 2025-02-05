@@ -41,7 +41,6 @@ export class VerifyEmailComponent implements OnInit {
   }
 
   verifyEmail() {
-    this.http;
     this.http
       .post(`${environment.apiUrl}/auth/verify-email`, { token: this.token })
       .subscribe({
