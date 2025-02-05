@@ -246,7 +246,6 @@ h1 {
   margin: 30px 0;
   font-weight: 400;
   text-transform: uppercase;
-  line-height: 1.2;
   color: #6cf;
   font-size: clamp(1.6rem, 1.6rem + 2.7vw, 2.8rem);
   line-height: 1;
@@ -311,7 +310,6 @@ h5 {
 .mat-typography .mat-h6,
 .mat-typography h6,
 h6 {
-  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   font-weight: 400;
   text-transform: none;
