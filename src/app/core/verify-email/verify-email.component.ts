@@ -11,9 +11,9 @@ import { environment } from 'src/environments/environment';
 import { MessageType } from '../../shared/models/lcars-message-type.enum';
 
 @Component({
-    selector: 'app-verify-email',
-    templateUrl: './verify-email.component.html',
-    styleUrls: ['./verify-email.component.scss'],
+  selector: 'app-verify-email',
+  templateUrl: './verify-email.component.html',
+  styleUrls: ['./verify-email.component.scss'],
   standalone: false,
 })
 export class VerifyEmailComponent implements OnInit {
@@ -25,9 +25,9 @@ export class VerifyEmailComponent implements OnInit {
   appRoutes = APP_ROUTES;
 
   constructor(
-    private route: ActivatedRoute,
-    private http: HttpClient,
-    private routingService: RoutingService,
+    private readonly route: ActivatedRoute,
+    private readonly http: HttpClient,
+    private readonly routingService: RoutingService,
   ) {}
 
   ngOnInit() {
