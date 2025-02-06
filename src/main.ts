@@ -9,7 +9,8 @@ if (environment.production) {
   enableProdMode();
 }
 
-new EnvCheckService();
+const envCheckService = new EnvCheckService();
+envCheckService.checkEnvVariables(); // Validate the environment variables
 
 platformBrowserDynamic()
   .bootstrapModule(AppModule)
