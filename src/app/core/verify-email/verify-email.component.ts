@@ -11,10 +11,10 @@ import { environment } from 'src/environments/environment';
 import { MessageType } from '../../shared/models/lcars-message-type.enum';
 
 @Component({
-    selector: 'app-verify-email',
-    templateUrl: './verify-email.component.html',
-    styleUrls: ['./verify-email.component.scss'],
-    standalone: false
+  selector: 'app-verify-email',
+  templateUrl: './verify-email.component.html',
+  styleUrls: ['./verify-email.component.scss'],
+  standalone: false,
 })
 export class VerifyEmailComponent implements OnInit {
   messageType: MessageType = MessageType.Info;
@@ -25,9 +25,9 @@ export class VerifyEmailComponent implements OnInit {
   appRoutes = APP_ROUTES;
 
   constructor(
-    private route: ActivatedRoute,
-    private http: HttpClient,
-    private routingService: RoutingService,
+    private readonly route: ActivatedRoute,
+    private readonly http: HttpClient,
+    private readonly routingService: RoutingService,
   ) {}
 
   ngOnInit() {
@@ -41,7 +41,6 @@ export class VerifyEmailComponent implements OnInit {
   }
 
   verifyEmail() {
-    this.http;
     this.http
       .post(`${environment.apiUrl}/auth/verify-email`, { token: this.token })
       .subscribe({
