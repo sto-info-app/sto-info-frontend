@@ -4,7 +4,7 @@
   <div
     #scrollTopButton
     class="scroll-top"
-    [style.display]="showScrollButton ? 'block' : 'none'">
+    [ngClass]="showScrollButton ? 'show-scroll-top' : 'hide-scroll-top'">
     <a
       (click)="scrollToTop()"
       id="scroll-top"
