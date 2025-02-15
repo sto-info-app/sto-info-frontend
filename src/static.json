@@ -1,0 +1,10 @@
+{
+  "headers": {
+    "/favicon.ico": {
+      "Cache-Control": "public, max-age=604800"
+    },
+    "/assets/favicons/*.png": {
+      "Cache-Control": "public, max-age=604800"
+    }
+  }
+}
