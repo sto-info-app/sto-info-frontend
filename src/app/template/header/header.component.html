@@ -18,11 +18,13 @@
         [routerLink]="getRouteLink(appRoutes.LOGIN)"
         [routerLinkActiveOptions]="{ exact: true }"
         routerLinkActive="peach"
+        id="header-login-link"
         >Login</a
       >
       <a
         *ngIf="isLoggedIn"
         (click)="logout()"
+        id="header-logout-link"
         >Logout
         <span *ngIf="appDebugging && autoLogoutCountdown > 0">
           in {{ autoLogoutCountdown | timeFormat }}</span
