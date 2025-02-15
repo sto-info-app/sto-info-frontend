@@ -4,6 +4,10 @@ import {
 } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  MAT_RIPPLE_GLOBAL_OPTIONS,
+  RippleGlobalOptions,
+} from '@angular/material/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -22,6 +26,10 @@ import { TemplateModule } from './template/template.module';
 export function tokenGetter() {
   return localStorage.getItem('access_token');
 }
+
+const globalRippleConfig: RippleGlobalOptions = {
+  disabled: true,
+};
 
 @NgModule({
   declarations: [AppComponent],
@@ -56,6 +64,7 @@ export function tokenGetter() {
     TemplateModule,
   ],
   providers: [
+    { provide: MAT_RIPPLE_GLOBAL_OPTIONS, useValue: globalRippleConfig },
     {
       provide: 'API_URL',
       useValue: environment.apiUrl,
