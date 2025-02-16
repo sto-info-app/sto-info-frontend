@@ -86,5 +86,5 @@ describe('AuthService', () => {
     expect(authService.isLoggedIn()).toBe(false);
   });
 
-  //TODO: Add more tests for other methods like login, register, logout, etc.
+  //NOTE: Add more tests for other methods like login, register, logout, etc. - https://app.shortcut.com/startrekonlineinfo/story/314/add-unit-tests-for-all-components
 });

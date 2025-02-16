@@ -122,4 +122,4 @@ describe('LoginComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
   }));
 });
-//TODO: Update to the correct route from constants
+//NOTE: Should update to the correct route from constants

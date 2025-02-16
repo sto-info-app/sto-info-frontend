@@ -11,8 +11,7 @@ import { AuthService } from './auth.service';
 
 describe('AuthGuard', () => {
   let guard: AuthGuard;
-  //TODO: Restore these variables - disabled as unused when tests below were disabled!
-  //NOTE: https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
+  //NOTE: Restore these variables - disabled as unused when tests below were disabled! - https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
   // let authService: AuthService;
   // let router: Router;
 
@@ -32,8 +31,7 @@ describe('AuthGuard', () => {
       ],
     });
     guard = TestBed.inject(AuthGuard);
-    //TODO: Restore these variables - disabled as unused when tests below were disabled!
-    //NOTE: https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
+    //NOTE: Restore these variables - disabled as unused when tests below were disabled! - https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
     // authService = TestBed.inject(AuthService);
     // router = TestBed.inject(Router);
   });
@@ -42,16 +40,14 @@ describe('AuthGuard', () => {
     expect(guard).toBeTruthy();
   });
 
-  //TODO: Restore this test!
-  //NOTE: https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
+  //NOTE: Restore this test! - https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
   // it('should allow navigation if user is authenticated', async () => {
   //   spyOn(authService, 'getToken').and.returnValue('test-token');
   //   const result = await guard.canActivate(routeMock, routeStateMock);
   //   expect(result).toBe(true);
   // });
 
-  //TODO: Restore this test!
-  //NOTE: https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
+  //NOTE: Restore this test! - https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
   // it('should not allow navigation if user is not authenticated', async () => {
   //   spyOn(authService, 'getToken').and.returnValue(null);
   //   const navigateSpy = spyOn(router, 'navigate');

@@ -112,5 +112,5 @@ describe('VerifyEmailComponent', () => {
     expect(component.showResendVerificationEmailButton).toBe(false);
   });
 
-  //TODO: Add more tests for error cases and resendVerificationEmail
+  //NOTE: Add more tests for error cases and resendVerificationEmail - https://app.shortcut.com/startrekonlineinfo/story/314/add-unit-tests-for-all-components
 });

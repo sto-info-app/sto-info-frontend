@@ -1,5 +1,5 @@
 describe('ProfileComponent', () => {
-  //TODO: Update & Restore tests!
+  //NOTE: Update & Restore tests! - https://app.shortcut.com/startrekonlineinfo/story/314/add-unit-tests-for-all-components
   /*
   let component: ProfileComponent;
   let fixture: ComponentFixture<ProfileComponent>;

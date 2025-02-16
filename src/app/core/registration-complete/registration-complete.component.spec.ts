@@ -49,7 +49,7 @@ describe('RegistrationCompleteComponent', () => {
     );
   });
 
-  //TODO: Reinstate and fix this test
+  //NOTE: Reinstate and fix this test - https://app.shortcut.com/startrekonlineinfo/story/314/add-unit-tests-for-all-components
   /*it('should display the correct link', () => {
     fixture.detectChanges();
 
