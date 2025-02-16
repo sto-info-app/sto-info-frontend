@@ -158,7 +158,6 @@ export class RegisterComponent implements OnInit {
     const registrationFormValues: RegistrationFormValues =
       this.registerForm.value;
 
-    //TODO: Display error messages?
     this.authService.register(registrationFormValues).subscribe({
       next: () => {
         this.router.navigate(['/register/complete']);
@@ -185,13 +184,11 @@ export class RegisterComponent implements OnInit {
           }
         } else {
           console.error('Registration error:', error);
-          //TODO: Handle other types of errors (or delete this comment!)
         }
         this.displayErrorMessage(errMessage);
         this.isSubmitting = false;
       },
       complete: () => {
-        // console.log('Registration complete');
         this.isSubmitting = false;
       },
     });
