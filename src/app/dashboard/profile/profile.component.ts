@@ -37,17 +37,17 @@ export class ProfileComponent {
   }
 
   timeSinceLastLogin(): string {
-    if (!this.user || !this.user.lastLogin) return 'Unknown';
+    if (!this.user?.lastLogin) return 'Unknown';
     return this.dateTimeHelper.timeSince(this.user.lastLogin);
   }
 
   timeSinceLastPasswordReset(): string {
-    if (!this.user || !this.user.lastPasswordReset) return 'Unknown';
+    if (!this.user?.lastPasswordReset) return 'Unknown';
     return this.dateTimeHelper.timeSince(this.user.lastPasswordReset);
   }
 
   timeSinceLastUpdated(): string {
-    if (!this.user || !this.user.updatedAt) return 'Unknown';
+    if (!this.user?.updatedAt) return 'Unknown';
     return this.dateTimeHelper.timeSince(this.user.updatedAt);
   }
 }
