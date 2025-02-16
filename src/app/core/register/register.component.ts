@@ -47,11 +47,11 @@ import { MustMatch } from '../../shared/_helpers/must-match.validator';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
-    selector: 'app-register',
-    templateUrl: './register.component.html',
-    styleUrls: ['./register.component.scss'],
-    animations: [progressBarAnimation],
-    standalone: false
+  selector: 'app-register',
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.scss'],
+  animations: [progressBarAnimation],
+  standalone: false,
 })
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
@@ -81,13 +81,13 @@ export class RegisterComponent implements OnInit {
     FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private router: Router,
-    private authService: AuthService,
-    private routingService: RoutingService,
-    private renderer: Renderer2,
-    private el: ElementRef,
-    private redAlertThemeService: RedAlertThemeService,
+    private readonly formBuilder: FormBuilder,
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly routingService: RoutingService,
+    private readonly renderer: Renderer2,
+    private readonly el: ElementRef,
+    private readonly redAlertThemeService: RedAlertThemeService,
   ) {}
 
   ngOnInit() {

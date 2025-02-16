@@ -15,8 +15,8 @@ export class HomeComponent {
   appRoutes = APP_ROUTES;
 
   constructor(
-    private authService: AuthService,
-    private routingService: RoutingService,
+    private readonly authService: AuthService,
+    private readonly routingService: RoutingService,
   ) {
     this.authService.isAuthenticated$.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { MustMatch } from 'src/app/shared/_helpers/must-match.validator';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
@@ -17,10 +17,10 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { AuthService } from '../auth.service';
 
 @Component({
-    selector: 'app-change-password',
-    templateUrl: './change-password.component.html',
-    styleUrls: ['./change-password.component.scss'],
-    standalone: false
+  selector: 'app-change-password',
+  templateUrl: './change-password.component.html',
+  styleUrls: ['./change-password.component.scss'],
+  standalone: false,
 })
 export class ChangePasswordComponent implements OnInit {
   token = '';
@@ -39,11 +39,10 @@ export class ChangePasswordComponent implements OnInit {
   errorTextPasswordsDoNotMatch: string = FORM_ERROR_PASSWORDS_DO_NOT_MATCH;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService,
-    private routingService: RoutingService,
+    private readonly formBuilder: FormBuilder,
+    private readonly route: ActivatedRoute,
+    private readonly authService: AuthService,
+    private readonly routingService: RoutingService,
   ) {
     this.changePasswordForm = this.formBuilder.group(
       {

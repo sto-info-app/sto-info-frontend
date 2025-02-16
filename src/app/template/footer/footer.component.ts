@@ -14,7 +14,7 @@ export class FooterComponent {
   currentYear: number;
   appRoutes = APP_ROUTES;
 
-  constructor(private routingService: RoutingService) {
+  constructor(private readonly routingService: RoutingService) {
     this.currentYear = new Date().getFullYear();
   }
 

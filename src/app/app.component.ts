@@ -17,19 +17,18 @@ export class AppComponent {
 
   showScrollButton = false;
 
-  private destroy$ = new Subject<void>();
-  private warningSubscription: Subscription | undefined;
-  private expirySubscription: Subscription | undefined;
+  destroy$ = new Subject<void>();
+  warningSubscription: Subscription | undefined;
+  expirySubscription: Subscription | undefined;
   private intervalId: number | null = null;
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
 
   constructor(
-    private authService: AuthService,
-    private titleService: Title,
-
-    public dialog: MatDialog,
-    private zone: NgZone,
+    private readonly authService: AuthService,
+    private readonly titleService: Title,
+    private readonly zone: NgZone,
+    public readonly dialog: MatDialog,
   ) {
     this.setAppTitle();
 

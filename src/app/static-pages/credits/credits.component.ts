@@ -12,7 +12,7 @@ export class CreditsComponent {
   appTitle = environment.appTitle;
   appRoutes = APP_ROUTES;
 
-  constructor(private routingService: RoutingService) {}
+  constructor(private readonly routingService: RoutingService) {}
 
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);

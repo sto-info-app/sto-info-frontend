@@ -20,8 +20,8 @@ export class SideBarComponent {
   isPenel10Hidden = false;
 
   constructor(
-    private routingService: RoutingService,
-    private generalThemeService: GeneralThemeService,
+    private readonly routingService: RoutingService,
+    private readonly generalThemeService: GeneralThemeService,
   ) {
     this.themePanel6RandomText =
       this.generalThemeService.createDynamicSideColumnText();

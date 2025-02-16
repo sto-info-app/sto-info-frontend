@@ -7,10 +7,10 @@ import { User } from '../models/user.model';
 import { DashboardService } from '../services/dashboard.service';
 
 @Component({
-    selector: 'app-profile',
-    templateUrl: './profile.component.html',
-    styleUrls: ['./profile.component.scss'],
-    standalone: false
+  selector: 'app-profile',
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.scss'],
+  standalone: false,
 })
 export class ProfileComponent {
   appRoutes = APP_ROUTES;
@@ -18,10 +18,10 @@ export class ProfileComponent {
   user: User | undefined;
 
   constructor(
-    private dashboardService: DashboardService,
-    private authService: AuthService,
-    private routingService: RoutingService,
-    private dateTimeHelper: DatesTimeHelperService,
+    private readonly dashboardService: DashboardService,
+    private readonly authService: AuthService,
+    private readonly routingService: RoutingService,
+    private readonly dateTimeHelper: DatesTimeHelperService,
   ) {}
 
   ngOnInit() {
