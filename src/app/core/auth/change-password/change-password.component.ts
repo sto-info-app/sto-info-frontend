@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MustMatch } from 'src/app/shared/_helpers/must-match.validator';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -44,7 +49,7 @@ export class ChangePasswordComponent implements OnInit {
     private readonly authService: AuthService,
     private readonly routingService: RoutingService,
   ) {
-    this.changePasswordForm = this.formBuilder.group(
+    this.changePasswordForm = this.formBuilder.nonNullable.group(
       {
         password: [
           '',
@@ -64,7 +69,7 @@ export class ChangePasswordComponent implements OnInit {
         ],
       },
       {
-        validator: MustMatch('password', 'confirmPassword'),
+        validators: MustMatch('password', 'confirmPassword') as ValidatorFn,
       },
     );
   }
@@ -82,8 +87,8 @@ export class ChangePasswordComponent implements OnInit {
     if (this.changePasswordForm.valid) {
       this.authService
         .changePassword(this.token, this.changePasswordForm.value.password)
-        .subscribe(
-          () => {
+        .subscribe({
+          next: _response => {
             this.successMessage = 'Your password has been changed.';
             if (this.authService.isLoggedIn()) {
               // Logout the user after successfully changing the password
@@ -91,7 +96,7 @@ export class ChangePasswordComponent implements OnInit {
               this.successMessage += ' You will need to login again.';
             }
           },
-          error => {
+          error: error => {
             console.error(error);
 
             if (
@@ -106,7 +111,7 @@ export class ChangePasswordComponent implements OnInit {
               this.resetErrorMessage();
             }
           },
-        );
+        });
     }
   }
 

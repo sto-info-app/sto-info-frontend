@@ -1,5 +1,10 @@
 import { Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { RegistrationFormValues } from 'src/app/models/user-auth.models';
 import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
@@ -91,7 +96,7 @@ export class RegisterComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.registerForm = this.formBuilder.group(
+    this.registerForm = this.formBuilder.nonNullable.group(
       {
         firstName: [
           '',
@@ -137,7 +142,7 @@ export class RegisterComponent implements OnInit {
           ],
         ],
       },
-      { validator: MustMatch('password', 'confirmPassword') },
+      { validators: MustMatch('password', 'confirmPassword') as ValidatorFn },
     );
   }
 
