@@ -64,7 +64,7 @@ export class HeaderComponent implements AfterViewInit {
   }
 
   toggleScrollTopButton() {
-    this.showScrollButton = window.pageYOffset > 100;
+    this.showScrollButton = window.scrollY > 100;
   }
 
   scrollToTop() {
