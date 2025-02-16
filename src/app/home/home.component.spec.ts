@@ -20,7 +20,7 @@ describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
   let mockAuthService: MockAuthService;
-  let routingService: RoutingService;
+  let routingService: RoutingService = new RoutingService();
 
   beforeEach(async () => {
     library.add(fas); // Add FontAwesome icons to the library
@@ -55,7 +55,7 @@ describe('HomeComponent', () => {
   it('should subscribe to authentication state on creation', () => {
     component = new HomeComponent(
       mockAuthService as unknown as AuthService,
-      routingService as RoutingService,
+      routingService,
     );
     expect(component.isLoggedIn).toBeTrue();
   });
