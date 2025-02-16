@@ -22,10 +22,15 @@ describe('LcarsWarningMessageComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should have correct title and message', () => {
-    component.title = 'Test Title';
-    component.message = 'Test Message';
+  const setComponentProperties = (
+    properties: Partial<LcarsWarningMessageComponent>,
+  ) => {
+    Object.assign(component, properties);
     fixture.detectChanges();
+  };
+
+  it('should have correct title and message', () => {
+    setComponentProperties({ title: 'Test Title', message: 'Test Message' });
 
     const titleElement = fixture.debugElement.query(
       By.css('.go-october-sunset'),
@@ -39,8 +44,7 @@ describe('LcarsWarningMessageComponent', () => {
   });
 
   it('should add blink class if blinkMessage is true', () => {
-    component.blinkMessage = true;
-    fixture.detectChanges();
+    setComponentProperties({ blinkMessage: true });
 
     const messageElement = fixture.debugElement.query(
       By.css('.lcars-warning-message'),
@@ -49,8 +53,7 @@ describe('LcarsWarningMessageComponent', () => {
   });
 
   it('should not add blink class if blinkMessage is false', () => {
-    component.blinkMessage = false;
-    fixture.detectChanges();
+    setComponentProperties({ blinkMessage: false });
 
     const messageElement = fixture.debugElement.query(
       By.css('.lcars-warning-message'),

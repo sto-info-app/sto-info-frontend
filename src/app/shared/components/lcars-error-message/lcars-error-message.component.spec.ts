@@ -18,27 +18,33 @@ describe('LcarsErrorMessageComponent', () => {
     fixture.detectChanges();
   });
 
+  function setComponentProperties(
+    properties: Partial<LcarsErrorMessageComponent>,
+  ) {
+    Object.assign(component, properties);
+    fixture.detectChanges();
+  }
+
+  function queryElement(selector: string) {
+    return fixture.debugElement.query(By.css(selector)).nativeElement;
+  }
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
   it('should have correct title and message', () => {
-    component.title = 'Test Title';
-    component.message = 'Test Message';
-    fixture.detectChanges();
+    setComponentProperties({ title: 'Test Title', message: 'Test Message' });
 
-    const titleElement = fixture.debugElement.query(By.css('.go-mars'));
-    expect(titleElement.nativeElement.textContent).toEqual('Test Title');
+    const titleElement = queryElement('.go-mars');
+    expect(titleElement.textContent).toEqual('Test Title');
 
-    const messageElement = fixture.debugElement.query(
-      By.css('.lcars-error-message p'),
-    );
-    expect(messageElement.nativeElement.textContent).toEqual('Test Message');
+    const messageElement = queryElement('.lcars-error-message p');
+    expect(messageElement.textContent).toEqual('Test Message');
   });
 
   it('should add blink class if blinkMessage is true', () => {
-    component.blinkMessage = true;
-    fixture.detectChanges();
+    setComponentProperties({ blinkMessage: true });
 
     const messageElement = fixture.debugElement.query(
       By.css('.lcars-error-message'),
@@ -47,8 +53,7 @@ describe('LcarsErrorMessageComponent', () => {
   });
 
   it('should not add blink class if blinkMessage is false', () => {
-    component.blinkMessage = false;
-    fixture.detectChanges();
+    setComponentProperties({ blinkMessage: false });
 
     const messageElement = fixture.debugElement.query(
       By.css('.lcars-error-message'),

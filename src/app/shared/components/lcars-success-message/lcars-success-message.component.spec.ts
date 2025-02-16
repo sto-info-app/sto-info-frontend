@@ -15,42 +15,46 @@ describe('LcarsSuccessMessageComponent', () => {
     component = fixture.componentInstance;
   });
 
+  const setComponentProperties = (
+    title: string,
+    message: string,
+    blinkMessage: boolean,
+  ) => {
+    component.title = title;
+    component.message = message;
+    component.blinkMessage = blinkMessage;
+    fixture.detectChanges();
+  };
+
+  const getMessageElement = () =>
+    fixture.debugElement.query(By.css('.lcars-success-message'));
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
   it('should display the title and message', () => {
-    component.title = 'Test Title';
-    component.message = 'Test Message';
-    fixture.detectChanges();
+    setComponentProperties('Test Title', 'Test Message', false);
 
     const titleElement = fixture.debugElement.query(
       By.css('.lcars-text-bar span'),
     );
-    const messageElement = fixture.debugElement.query(
-      By.css('.lcars-success-message p'),
-    );
+    const messageElement = getMessageElement().query(By.css('p'));
     expect(titleElement.nativeElement.textContent).toBe('Test Title');
     expect(messageElement.nativeElement.textContent).toBe('Test Message');
   });
 
   it('should add blink class if blinkMessage is true', () => {
-    component.blinkMessage = true;
-    fixture.detectChanges();
+    setComponentProperties('', '', true);
 
-    const messageElement = fixture.debugElement.query(
-      By.css('.lcars-success-message'),
-    );
+    const messageElement = getMessageElement();
     expect(messageElement.nativeElement.classList.contains('blink')).toBeTrue();
   });
 
   it('should not add blink class if blinkMessage is false', () => {
-    component.blinkMessage = false;
-    fixture.detectChanges();
+    setComponentProperties('', '', false);
 
-    const messageElement = fixture.debugElement.query(
-      By.css('.lcars-success-message'),
-    );
+    const messageElement = getMessageElement();
     expect(
       messageElement.nativeElement.classList.contains('blink'),
     ).toBeFalse();
