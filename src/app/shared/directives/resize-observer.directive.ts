@@ -8,8 +8,8 @@ import {
 } from '@angular/core';
 
 @Directive({
-    selector: '[appResizeObserver]',
-    standalone: false
+  selector: '[appResizeObserver]',
+  standalone: false,
 })
 export class ResizeObserverDirective implements OnInit, OnDestroy {
   @Output()
@@ -17,7 +17,7 @@ export class ResizeObserverDirective implements OnInit, OnDestroy {
 
   private observer!: ResizeObserver;
 
-  constructor(private elementRef: ElementRef) {}
+  constructor(private readonly elementRef: ElementRef) {}
 
   ngOnInit(): void {
     this.observer = new ResizeObserver(entries => {

@@ -8,8 +8,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
 import {
   MAX_CHARS_NAMES,
@@ -29,7 +28,7 @@ describe('RegisterComponent', () => {
       declarations: [RegisterComponent, DummyComponent],
       imports: [
         ReactiveFormsModule,
-        RouterTestingModule.withRoutes([
+        provideRouter([
           { path: 'register/complete', component: DummyComponent },
         ]),
         BrowserAnimationsModule,
@@ -98,12 +97,12 @@ describe('RegisterComponent', () => {
     const confirmPasswordControl =
       component.registerForm.controls['confirmPassword'];
 
-    await firstNameControl.setValue('a'.repeat(MAX_CHARS_NAMES + 1));
-    await lastNameControl.setValue('a'.repeat(MAX_CHARS_NAMES + 1));
-    await usernameControl.setValue('a'.repeat(MAX_CHARS_USERNAME + 1));
-    await emailControl.setValue('not an email');
-    await passwordControl.setValue('short');
-    await confirmPasswordControl.setValue('D1fferent!');
+    firstNameControl.setValue('a'.repeat(MAX_CHARS_NAMES + 1));
+    lastNameControl.setValue('a'.repeat(MAX_CHARS_NAMES + 1));
+    usernameControl.setValue('a'.repeat(MAX_CHARS_USERNAME + 1));
+    emailControl.setValue('not an email');
+    passwordControl.setValue('short');
+    confirmPasswordControl.setValue('D1fferent!');
 
     firstNameControl.updateValueAndValidity();
     lastNameControl.updateValueAndValidity();
@@ -126,7 +125,6 @@ describe('RegisterComponent', () => {
     passwordControl.markAsTouched();
     confirmPasswordControl.markAsTouched();
 
-    // await fixture.whenStable();
     await fixture.whenRenderingDone();
     fixture.detectChanges();
 
@@ -227,7 +225,7 @@ describe('RegisterComponent', () => {
 });
 
 @Component({
-    template: '',
-    standalone: false
+  template: '',
+  standalone: false,
 })
 class DummyComponent {}

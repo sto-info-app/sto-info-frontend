@@ -9,7 +9,7 @@ import {
   providedIn: 'root',
 })
 export class RedAlertThemeService {
-  private stopTimers$ = new Subject<void>();
+  stopTimers$ = new Subject<void>();
 
   applyRedAlertTheme(renderer: Renderer2, el: Element): void {
     this.applyRedAlertStylesheet(
