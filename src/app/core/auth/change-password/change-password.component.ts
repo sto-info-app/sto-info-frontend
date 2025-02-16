@@ -70,7 +70,7 @@ export class ChangePasswordComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.token = this.route.snapshot.queryParamMap.get('token') || '';
+    this.token = this.route.snapshot.queryParamMap.get('token') ?? '';
 
     if (!this.token) {
       this.seriousErrorMessage =
