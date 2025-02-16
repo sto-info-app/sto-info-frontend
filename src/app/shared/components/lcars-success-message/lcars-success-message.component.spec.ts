@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { getMessageElement, setComponentProperties } from '../test-utils';
 import { LcarsSuccessMessageComponent } from './lcars-success-message.component';
 
 describe('LcarsSuccessMessageComponent', () => {
@@ -15,46 +16,39 @@ describe('LcarsSuccessMessageComponent', () => {
     component = fixture.componentInstance;
   });
 
-  const setComponentProperties = (
-    title: string,
-    message: string,
-    blinkMessage: boolean,
-  ) => {
-    component.title = title;
-    component.message = message;
-    component.blinkMessage = blinkMessage;
-    fixture.detectChanges();
-  };
-
-  const getMessageElement = () =>
-    fixture.debugElement.query(By.css('.lcars-success-message'));
-
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
   it('should display the title and message', () => {
-    setComponentProperties('Test Title', 'Test Message', false);
+    setComponentProperties(fixture, component, {
+      title: 'Test Title',
+      message: 'Test Message',
+      blinkMessage: false,
+    });
 
     const titleElement = fixture.debugElement.query(
       By.css('.lcars-text-bar span'),
     );
-    const messageElement = getMessageElement().query(By.css('p'));
+    const messageElement = getMessageElement(
+      fixture,
+      '.lcars-success-message',
+    ).query(By.css('p'));
     expect(titleElement.nativeElement.textContent).toBe('Test Title');
     expect(messageElement.nativeElement.textContent).toBe('Test Message');
   });
 
   it('should add blink class if blinkMessage is true', () => {
-    setComponentProperties('', '', true);
+    setComponentProperties(fixture, component, { blinkMessage: true });
 
-    const messageElement = getMessageElement();
+    const messageElement = getMessageElement(fixture, '.lcars-success-message');
     expect(messageElement.nativeElement.classList.contains('blink')).toBeTrue();
   });
 
   it('should not add blink class if blinkMessage is false', () => {
-    setComponentProperties('', '', false);
+    setComponentProperties(fixture, component, { blinkMessage: false });
 
-    const messageElement = getMessageElement();
+    const messageElement = getMessageElement(fixture, '.lcars-success-message');
     expect(
       messageElement.nativeElement.classList.contains('blink'),
     ).toBeFalse();
