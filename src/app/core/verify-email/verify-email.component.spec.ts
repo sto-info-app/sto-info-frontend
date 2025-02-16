@@ -7,9 +7,12 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
-import { Subject, of } from 'rxjs';
+import {
+  ActivatedRoute,
+  convertToParamMap,
+  RouterModule,
+} from '@angular/router';
+import { of, Subject } from 'rxjs';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { MessageType } from 'src/app/shared/models/lcars-message-type.enum';
 import { environment } from 'src/environments/environment';
@@ -30,7 +33,7 @@ describe('VerifyEmailComponent', () => {
 
     await TestBed.configureTestingModule({
       declarations: [VerifyEmailComponent, LcarsErrorMessageComponent],
-      imports: [RouterTestingModule],
+      imports: [RouterModule.forRoot([])],
       providers: [
         {
           provide: ActivatedRoute,

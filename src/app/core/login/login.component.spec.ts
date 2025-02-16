@@ -12,8 +12,7 @@ import {
 } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { LoginResponse } from 'src/app/models/user-auth.models';
 import { AuthService } from '../auth/auth.service';
@@ -28,8 +27,9 @@ describe('LoginComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [LoginComponent],
-      imports: [RouterTestingModule, FormsModule, BrowserAnimationsModule],
+      imports: [FormsModule, BrowserAnimationsModule],
       providers: [
+        provideRouter([]),
         AuthService,
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
@@ -73,7 +73,9 @@ describe('LoginComponent', () => {
       error: { message: 'Unauthorised: Invalid email or password.' },
       status: 401,
     });
-    spyOn(authService, 'login').and.returnValue(throwError(mockErrorResponse));
+    spyOn(authService, 'login').and.returnValue(
+      throwError(() => mockErrorResponse),
+    );
     spyOn(component, 'displayErrorMessage');
 
     component.email = 'test@example.com';
