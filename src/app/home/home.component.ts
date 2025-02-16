@@ -5,10 +5,9 @@ import { APP_ROUTES } from '../shared/constants/app-routing.constants';
 import { RoutingService } from '../shared/services/routing.service';
 
 @Component({
-    selector: 'app-home',
-    templateUrl: './home.component.html',
-    styleUrls: ['./home.component.scss'],
-    standalone: false
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  standalone: false,
 })
 export class HomeComponent {
   appTitle: string = environment.appTitle;
@@ -16,8 +15,8 @@ export class HomeComponent {
   appRoutes = APP_ROUTES;
 
   constructor(
-    private authService: AuthService,
-    private routingService: RoutingService,
+    private readonly authService: AuthService,
+    private readonly routingService: RoutingService,
   ) {
     this.authService.isAuthenticated$.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;

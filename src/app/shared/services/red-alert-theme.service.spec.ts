@@ -48,5 +48,5 @@ describe('RedAlertThemeService', () => {
     );
   });
 
-  //TODO: Insert other tests
+  //NOTE: Insert other tests - https://app.shortcut.com/startrekonlineinfo/story/314/add-unit-tests-for-all-components
 });

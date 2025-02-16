@@ -7,10 +7,10 @@ import { User } from './models/user.model';
 import { DashboardService } from './services/dashboard.service';
 
 @Component({
-    selector: 'app-dashboard',
-    templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.scss'],
-    standalone: false
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.scss'],
+  standalone: false,
 })
 export class DashboardComponent implements OnInit {
   appRoutes = APP_ROUTES;
@@ -19,9 +19,9 @@ export class DashboardComponent implements OnInit {
   userGreeting = '';
 
   constructor(
-    private dashboardService: DashboardService,
-    private authService: AuthService,
-    private routingService: RoutingService,
+    private readonly dashboardService: DashboardService,
+    private readonly authService: AuthService,
+    private readonly routingService: RoutingService,
   ) {}
 
   ngOnInit() {

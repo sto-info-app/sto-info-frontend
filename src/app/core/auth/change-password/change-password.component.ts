@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import {
+  FormBuilder,
+  FormGroup,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { MustMatch } from 'src/app/shared/_helpers/must-match.validator';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
@@ -17,10 +22,10 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { AuthService } from '../auth.service';
 
 @Component({
-    selector: 'app-change-password',
-    templateUrl: './change-password.component.html',
-    styleUrls: ['./change-password.component.scss'],
-    standalone: false
+  selector: 'app-change-password',
+  templateUrl: './change-password.component.html',
+  styleUrls: ['./change-password.component.scss'],
+  standalone: false,
 })
 export class ChangePasswordComponent implements OnInit {
   token = '';
@@ -39,13 +44,12 @@ export class ChangePasswordComponent implements OnInit {
   errorTextPasswordsDoNotMatch: string = FORM_ERROR_PASSWORDS_DO_NOT_MATCH;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService,
-    private routingService: RoutingService,
+    private readonly formBuilder: FormBuilder,
+    private readonly route: ActivatedRoute,
+    private readonly authService: AuthService,
+    private readonly routingService: RoutingService,
   ) {
-    this.changePasswordForm = this.formBuilder.group(
+    this.changePasswordForm = this.formBuilder.nonNullable.group(
       {
         password: [
           '',
@@ -65,18 +69,17 @@ export class ChangePasswordComponent implements OnInit {
         ],
       },
       {
-        validator: MustMatch('password', 'confirmPassword'),
+        validators: MustMatch('password', 'confirmPassword') as ValidatorFn,
       },
     );
   }
 
   ngOnInit() {
-    this.token = this.route.snapshot.queryParamMap.get('token') || '';
+    this.token = this.route.snapshot.queryParamMap.get('token') ?? '';
 
     if (!this.token) {
       this.seriousErrorMessage =
         'Invalid or missing token. Please request a new password reset.';
-      return; // No need to continue the function execution
     }
   }
 
@@ -84,8 +87,8 @@ export class ChangePasswordComponent implements OnInit {
     if (this.changePasswordForm.valid) {
       this.authService
         .changePassword(this.token, this.changePasswordForm.value.password)
-        .subscribe(
-          () => {
+        .subscribe({
+          next: _response => {
             this.successMessage = 'Your password has been changed.';
             if (this.authService.isLoggedIn()) {
               // Logout the user after successfully changing the password
@@ -93,7 +96,7 @@ export class ChangePasswordComponent implements OnInit {
               this.successMessage += ' You will need to login again.';
             }
           },
-          error => {
+          error: error => {
             console.error(error);
 
             if (
@@ -108,7 +111,7 @@ export class ChangePasswordComponent implements OnInit {
               this.resetErrorMessage();
             }
           },
-        );
+        });
     }
   }
 

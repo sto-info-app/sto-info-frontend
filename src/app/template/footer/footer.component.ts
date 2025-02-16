@@ -4,10 +4,9 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-    selector: 'app-footer',
-    templateUrl: './footer.component.html',
-    styleUrls: ['./footer.component.scss'],
-    standalone: false
+  selector: 'app-footer',
+  templateUrl: './footer.component.html',
+  standalone: false,
 })
 export class FooterComponent {
   appTitle = environment.appTitle;
@@ -15,7 +14,7 @@ export class FooterComponent {
   currentYear: number;
   appRoutes = APP_ROUTES;
 
-  constructor(private routingService: RoutingService) {
+  constructor(private readonly routingService: RoutingService) {
     this.currentYear = new Date().getFullYear();
   }
 

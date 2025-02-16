@@ -1,5 +1,10 @@
 import { Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { RegistrationFormValues } from 'src/app/models/user-auth.models';
 import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
@@ -47,11 +52,11 @@ import { MustMatch } from '../../shared/_helpers/must-match.validator';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
-    selector: 'app-register',
-    templateUrl: './register.component.html',
-    styleUrls: ['./register.component.scss'],
-    animations: [progressBarAnimation],
-    standalone: false
+  selector: 'app-register',
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.scss'],
+  animations: [progressBarAnimation],
+  standalone: false,
 })
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
@@ -81,17 +86,17 @@ export class RegisterComponent implements OnInit {
     FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private router: Router,
-    private authService: AuthService,
-    private routingService: RoutingService,
-    private renderer: Renderer2,
-    private el: ElementRef,
-    private redAlertThemeService: RedAlertThemeService,
+    private readonly formBuilder: FormBuilder,
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly routingService: RoutingService,
+    private readonly renderer: Renderer2,
+    private readonly el: ElementRef,
+    private readonly redAlertThemeService: RedAlertThemeService,
   ) {}
 
   ngOnInit() {
-    this.registerForm = this.formBuilder.group(
+    this.registerForm = this.formBuilder.nonNullable.group(
       {
         firstName: [
           '',
@@ -137,7 +142,7 @@ export class RegisterComponent implements OnInit {
           ],
         ],
       },
-      { validator: MustMatch('password', 'confirmPassword') },
+      { validators: MustMatch('password', 'confirmPassword') as ValidatorFn },
     );
   }
 
@@ -158,7 +163,6 @@ export class RegisterComponent implements OnInit {
     const registrationFormValues: RegistrationFormValues =
       this.registerForm.value;
 
-    //TODO: Display error messages?
     this.authService.register(registrationFormValues).subscribe({
       next: () => {
         this.router.navigate(['/register/complete']);
@@ -185,13 +189,11 @@ export class RegisterComponent implements OnInit {
           }
         } else {
           console.error('Registration error:', error);
-          //TODO: Handle other types of errors (or delete this comment!)
         }
         this.displayErrorMessage(errMessage);
         this.isSubmitting = false;
       },
       complete: () => {
-        // console.log('Registration complete');
         this.isSubmitting = false;
       },
     });

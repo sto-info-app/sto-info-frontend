@@ -4,16 +4,15 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-    selector: 'app-credits',
-    templateUrl: './credits.component.html',
-    styleUrls: ['./credits.component.scss'],
-    standalone: false
+  selector: 'app-credits',
+  templateUrl: './credits.component.html',
+  standalone: false,
 })
 export class CreditsComponent {
   appTitle = environment.appTitle;
   appRoutes = APP_ROUTES;
 
-  constructor(private routingService: RoutingService) {}
+  constructor(private readonly routingService: RoutingService) {}
 
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);

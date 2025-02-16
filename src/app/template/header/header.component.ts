@@ -13,10 +13,10 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-    selector: 'app-header',
-    templateUrl: './header.component.html',
-    styleUrls: ['./header.component.scss'],
-    standalone: false
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.scss'],
+  standalone: false,
 })
 export class HeaderComponent implements AfterViewInit {
   @Input() showScrollButton = false;
@@ -44,11 +44,10 @@ export class HeaderComponent implements AfterViewInit {
   showScrollTop = false;
 
   constructor(
-    private zone: NgZone,
-
-    private routingService: RoutingService,
-    private generalThemeService: GeneralThemeService,
-    private debuggingService: DebuggingService,
+    private readonly zone: NgZone,
+    private readonly routingService: RoutingService,
+    private readonly generalThemeService: GeneralThemeService,
+    private readonly debuggingService: DebuggingService,
   ) {
     this.dataCascade = this.generalThemeService.createDynamicDataCascade();
     this.themePanel2RandomText =
@@ -65,7 +64,7 @@ export class HeaderComponent implements AfterViewInit {
   }
 
   toggleScrollTopButton() {
-    this.showScrollButton = window.pageYOffset > 100;
+    this.showScrollButton = window.scrollY > 100;
   }
 
   scrollToTop() {

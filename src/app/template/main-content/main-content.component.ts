@@ -5,22 +5,20 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-    selector: 'app-main-content',
-    templateUrl: './main-content.component.html',
-    styleUrls: ['./main-content.component.scss'],
-    standalone: false
+  selector: 'app-main-content',
+  templateUrl: './main-content.component.html',
+  standalone: false,
 })
 export class MainContentComponent {
   @Input() isLoggedIn!: boolean;
 
   appTitle = environment.appTitle;
-  // appVersion = environment.version;
   appRoutes = APP_ROUTES;
   themePanel6RandomText: string;
 
   constructor(
-    private routingService: RoutingService,
-    private generalThemeService: GeneralThemeService,
+    private readonly routingService: RoutingService,
+    private readonly generalThemeService: GeneralThemeService,
   ) {
     this.themePanel6RandomText =
       this.generalThemeService.createDynamicSideColumnText();

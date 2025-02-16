@@ -5,14 +5,14 @@ import { AppComponent } from 'src/app/app.component';
 import { TimeFormatPipe } from '../../pipes/time-format.pipe';
 import { RefreshSessionDialogComponent } from './refresh-session-dialog.component';
 
-//TODO: Add tests!
+//NOTE: Add tests! - https://app.shortcut.com/startrekonlineinfo/story/314/add-unit-tests-for-all-components
 
 describe('RefreshSessionDialogComponent', () => {
   let component: RefreshSessionDialogComponent;
   let fixture: ComponentFixture<RefreshSessionDialogComponent>;
 
   const mockAppComponent = {
-    //TODO: Mock properties and methods here
+    //NOTE: Mock properties and methods here - https://app.shortcut.com/startrekonlineinfo/story/314/add-unit-tests-for-all-components
     // For example:
     // autoLogoutCountdown: 5,
     // startCountdown: () => {},

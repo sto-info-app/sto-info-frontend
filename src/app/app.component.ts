@@ -7,10 +7,9 @@ import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss'],
-    standalone: false
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  standalone: false,
 })
 export class AppComponent {
   isLoggedIn = false;
@@ -18,19 +17,18 @@ export class AppComponent {
 
   showScrollButton = false;
 
-  private destroy$ = new Subject<void>();
-  private warningSubscription: Subscription | undefined;
-  private expirySubscription: Subscription | undefined;
+  destroy$ = new Subject<void>();
+  warningSubscription: Subscription | undefined;
+  expirySubscription: Subscription | undefined;
   private intervalId: number | null = null;
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
 
   constructor(
-    private authService: AuthService,
-    private titleService: Title,
-
-    public dialog: MatDialog,
-    private zone: NgZone,
+    private readonly authService: AuthService,
+    private readonly titleService: Title,
+    private readonly zone: NgZone,
+    public readonly dialog: MatDialog,
   ) {
     this.setAppTitle();
 
