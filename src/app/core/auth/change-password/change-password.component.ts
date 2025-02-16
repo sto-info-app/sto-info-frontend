@@ -75,7 +75,6 @@ export class ChangePasswordComponent implements OnInit {
     if (!this.token) {
       this.seriousErrorMessage =
         'Invalid or missing token. Please request a new password reset.';
-      return; // No need to continue the function execution
     }
   }
 
