@@ -45,15 +45,12 @@ export class ResetPasswordRequestComponent {
       return;
     }
 
-    this.authService.resetPassword(this.email).subscribe(
-      // Handle response
-      //response => {  //NOTE: Not using the response, but if need to, use this line, not the one below
-      () => {
+    this.authService.resetPassword(this.email).subscribe({
+      next: _response => {
         this.successMessage = `Check your email and follow the instructions to reset your password.`;
         this.errorMessage = '';
       },
-      error => {
-        // Handle error
+      error: error => {
         if (typeof error === 'object' && error.message) {
           console.error('Login error:', error);
           this.errorMessage = error.message;
@@ -62,7 +59,7 @@ export class ResetPasswordRequestComponent {
           this.errorMessage = 'An error occurred while resetting the password';
         }
       },
-    );
+    });
   }
 
   getRouteLink(route: string): string {
