@@ -23,7 +23,7 @@ export class DashboardService {
     const httpOptions = this.authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       // Handle the case when there is no token (e.g., user is not logged in)
-      return throwError('No token found');
+      return throwError(() => new Error('No token found'));
     }
     return this.http.get<User>(`${this.apiUrl}/user`, httpOptions);
   }
