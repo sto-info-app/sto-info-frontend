@@ -44,10 +44,10 @@ export class DashboardComponent implements OnInit {
     const randomGreeting: string =
       greetings[Math.floor(Math.random() * greetings.length)];
 
-    if (this.user?.lastName)
-      return randomGreeting + ', Captain ' + this.user?.lastName + '!';
-    if (this.user?.firstName)
-      return randomGreeting + ', ' + this.user?.firstName + '!';
+    if (this.user?.profile?.lastName)
+      return randomGreeting + ', Captain ' + this.user.profile.lastName + '!';
+    if (this.user?.profile?.firstName)
+      return randomGreeting + ', ' + this.user.profile.firstName + '!';
     return randomGreeting + '!';
   }
 
