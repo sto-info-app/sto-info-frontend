@@ -16,18 +16,38 @@ export class DatesTimeHelperService {
     const months = Math.floor(days / 30);
     const years = Math.floor(months / 12);
 
-    if (years > 0) {
-      return years === 1 ? `${years} year ago` : `${years} years ago`;
-    } else if (months > 0) {
-      return months === 1 ? `${months} month ago` : `${months} months ago`;
-    } else if (days > 0) {
-      return days === 1 ? `${days} day ago` : `${days} days ago`;
-    } else if (hours > 0) {
-      return hours === 1 ? `${hours} hour ago` : `${hours} hours ago`;
-    } else if (minutes > 0) {
-      return minutes === 1 ? `${minutes} minute ago` : `${minutes} minutes ago`;
-    } else {
-      return seconds === 1 ? `${seconds} second ago` : `${seconds} seconds ago`;
+    return this.formatTimeSince({
+      years,
+      months,
+      days,
+      hours,
+      minutes,
+      seconds,
+    });
+  }
+
+  private formatTimeSince(time: {
+    years: number;
+    months: number;
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  }): string {
+    return (
+      this.formatUnit(time.years, 'year') ||
+      this.formatUnit(time.months, 'month') ||
+      this.formatUnit(time.days, 'day') ||
+      this.formatUnit(time.hours, 'hour') ||
+      this.formatUnit(time.minutes, 'minute') ||
+      this.formatUnit(time.seconds, 'second')
+    );
+  }
+
+  private formatUnit(value: number, unit: string): string {
+    if (value > 0) {
+      return value === 1 ? `${value} ${unit} ago` : `${value} ${unit}s ago`;
     }
+    return '';
   }
 }
