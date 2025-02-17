@@ -26,8 +26,8 @@
           alt="Photo unavilable"
           class="border" />
         <p class="caption">
-          Captain {{ user.lastName || 'Unknown' }},
-          {{ user.firstName || 'Unknown' }}
+          Captain {{ user.profile?.lastName || 'Unknown' }},
+          {{ user.profile?.firstName || '' }}
         </p>
       </div>
     </div>

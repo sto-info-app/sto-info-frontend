@@ -12,10 +12,13 @@
         <span>Personal Details</span>
       </div>
       <p>
-        <span class="record-title">Name:</span> {{ user.firstName }}
-        {{ user.lastName }}
+        <span class="record-title">Name:</span>
+        {{ user.profile?.firstName || 'Unknown' }}
+        {{ user.profile?.lastName }}
       </p>
-      <p><span class="record-title">Username:</span> {{ user.username }}</p>
+      <p>
+        <span class="record-title">Username:</span> {{ user.profile?.username }}
+      </p>
       <p><span class="record-title">Email:</span> {{ user.email }}</p>
 
       <div class="lcars-text-bar personnel-lcars-text-bar">
