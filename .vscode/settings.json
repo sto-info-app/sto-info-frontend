@@ -9,7 +9,7 @@
   "typescript.suggest.paths": false,
   "javascript.suggest.paths": false,
   "cSpell.language": "en-GB",
-  "cSpell.words": ["vars"],
+  "cSpell.words": ["fontawesome", "lcars", "vars"],
   "sonarlint.connectedMode.project": {
     "connectionId": "steverobertsuk",
     "projectKey": "steverobertsuk_sto-info-frontend"
