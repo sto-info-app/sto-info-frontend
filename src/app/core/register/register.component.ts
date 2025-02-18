@@ -64,7 +64,7 @@ export class RegisterComponent implements OnInit {
   isSubmitting = false;
   appRoutes = APP_ROUTES;
 
-  // Allow contstants to be used in the HTML
+  // Allow constants to be used in the HTML
   showErrorMilliseconds: number = MILLISECONDS_SHOW_ERROR_MSG;
   errorTextFirstNameRequired: string = FORM_ERROR_FIRSTNAME_REQUIRED;
   errorTextLastNameRequired: string = FORM_ERROR_LASTNAME_REQUIRED;
