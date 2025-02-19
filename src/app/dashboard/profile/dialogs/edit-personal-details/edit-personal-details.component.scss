@@ -1,0 +1,46 @@
+.lcars-edit-personal-details-container {
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+
+  .form-container {
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+
+    .form-group {
+      width: 100%;
+    }
+  }
+
+  .edit-personal-details-main-col {
+    flex: 10;
+
+    .form-container {
+      width: 100%;
+    }
+  }
+
+  .edit-personal-details-side-col {
+    flex: 2;
+    margin-left: 20px;
+    padding: 0 20px;
+  }
+
+  .lcars-edit-personal-details-inner-container {
+    padding: 0 20px;
+
+    .lcars-bar {
+      margin: 0 0 20px 0;
+    }
+
+    .lcars-text-bar {
+      margin: 20px 0;
+    }
+
+    .lcars-edit-personal-details-message {
+      padding: 0 40px;
+      text-align: left;
+    }
+  }
+}

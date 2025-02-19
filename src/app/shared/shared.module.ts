@@ -6,7 +6,11 @@ import {
   FaIconLibrary,
   FontAwesomeModule,
 } from '@fortawesome/angular-fontawesome';
-import { faExternalLink, faHandSpock } from '@fortawesome/free-solid-svg-icons';
+import {
+  faExternalLink,
+  faHandSpock,
+  faUserPen,
+} from '@fortawesome/free-solid-svg-icons';
 import { LcarsErrorMessageComponent } from './components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from './components/lcars-information-message/lcars-information-message.component';
 import { LcarsSuccessMessageComponent } from './components/lcars-success-message/lcars-success-message.component';
@@ -65,7 +69,7 @@ export class SharedModule {
     // Add an individual FontAwesome icon to the library for convenient access in other components
     // NOTE: Use `<fa-icon [icon]="['fas', 'hand-spock']"></fa-icon>` to use icon in the HTML
     // NOTE: FontAwesome prefixes are: fas = solid, far = regular, fal = light, fat = thin, fad = duotone
-    library.addIcons(faHandSpock, faExternalLink);
+    library.addIcons(faHandSpock, faExternalLink, faUserPen);
 
     // Add entire icon packs
     // NOTE: This imports all icons into the bundle and increases app size!

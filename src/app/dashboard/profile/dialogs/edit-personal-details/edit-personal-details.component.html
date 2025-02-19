@@ -1,0 +1,215 @@
+<div class="lcars-edit-personal-details-container">
+  <div class="lcars-edit-personal-details-inner-container">
+    <div class="lcars-text-bar">
+      <span>Starfleet Personnel Record: Edit</span>
+    </div>
+
+    <div
+      *ngIf="data?.user"
+      class="lcars-edit-personal-details-message">
+      <app-loading-bar
+        *ngIf="isSubmitting"
+        loadingText="Saving"></app-loading-bar>
+      <div class="edit-personal-details-container">
+        <form
+          [formGroup]="editPersonalDetailsForm"
+          (ngSubmit)="onSaveClick()"
+          class="form"
+          novalidate>
+          <div class="flexbox">
+            <div class="col edit-personal-details-main-col">
+              <div class="form-container">
+                <div class="form-group">
+                  <label for="firstName">First Name:</label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    formControlName="firstName" />
+                  <div
+                    *ngIf="
+                      (editPersonalDetailsForm.controls['firstName'].invalid &&
+                        editPersonalDetailsForm.controls['firstName']
+                          .touched) ||
+                      (isSubmitting &&
+                        editPersonalDetailsForm.controls['firstName'].errors)
+                    "
+                    class="invalid-feedback"
+                    id="firstName-invalid-feedback">
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['firstName'].errors?.['required']">
+                      {{ errorTextFirstNameRequired }}
+                    </div>
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['firstName'].errors?.['maxlength']">
+                      {{ errorTextNamesMaxLength }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="lastName">Last Name:</label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    formControlName="lastName" />
+                  <div
+                    *ngIf="
+                      (editPersonalDetailsForm.controls['lastName'].invalid &&
+                        editPersonalDetailsForm.controls['lastName'].touched) ||
+                      (isSubmitting &&
+                        editPersonalDetailsForm.controls['lastName'].errors)
+                    "
+                    class="invalid-feedback"
+                    id="lastName-invalid-feedback">
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['lastName'].errors?.['required']">
+                      {{ errorTextLastNameRequired }}
+                    </div>
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['lastName'].errors?.['maxlength']">
+                      {{ errorTextNamesMaxLength }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="username">Username:</label>
+                  <input
+                    type="text"
+                    id="username"
+                    formControlName="username" />
+                  <div
+                    *ngIf="
+                      (editPersonalDetailsForm.controls['username'].invalid &&
+                        editPersonalDetailsForm.controls['username'].touched) ||
+                      (isSubmitting &&
+                        editPersonalDetailsForm.controls['username'].errors)
+                    "
+                    class="invalid-feedback"
+                    id="username-invalid-feedback">
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['username'].errors?.['required']">
+                      {{ errorTextUsernameRequired }}
+                    </div>
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['username'].errors?.['minlength']">
+                      {{ errorTextUsernameMinLength }}
+                    </div>
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['username'].errors?.['maxlength']">
+                      {{ errorTextUsernameMaxLength }}
+                    </div>
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['username'].errors?.['uniqueUsername']">
+                      {{ errorTextUsernameTaken }}
+                    </div>
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['username'].errors?.['pattern']">
+                      {{ errorTextUsernamePattern }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="email">Email:</label>
+                  <input
+                    type="email"
+                    id="email"
+                    formControlName="email" />
+                  <div
+                    *ngIf="
+                      (editPersonalDetailsForm.controls['email'].invalid &&
+                        editPersonalDetailsForm.controls['email'].touched) ||
+                      (isSubmitting &&
+                        editPersonalDetailsForm.controls['email'].errors)
+                    "
+                    class="invalid-feedback"
+                    id="email-invalid-feedback">
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['email'].errors?.['required']">
+                      {{ errorTextEmailRequired }}
+                    </div>
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['email'].errors?.['pattern']">
+                      {{ errorTextEmailInvalidFormat }}
+                    </div>
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['email'].errors?.['uniqueEmail']">
+                      {{ errorTextEmailAlreadyRegistered }}
+                    </div>
+                    <div
+                      class="helper-error-text"
+                      *ngIf="editPersonalDetailsForm.controls['email'].errors?.['maxlength']">
+                      {{ errorTextEmailAlreadyRegistered }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col edit-personal-details-side-col">
+              <div class="lcars-edit-personal-details-buttons">
+                <div class="lcars-text-bar">
+                  <span>Primary Controls</span>
+                </div>
+                <div
+                  class="buttons-container"
+                  mat-dialog-actions>
+                  <button
+                    type="submit"
+                    class="submit-button"
+                    mat-button
+                    [disabled]="
+                      !editPersonalDetailsForm.valid ||
+                      !editPersonalDetailsForm.dirty ||
+                      isSubmitting
+                    "
+                    [ngClass]="{ submitting: isSubmitting }"
+                    [@progressBarAnimation]="
+                      isSubmitting ? 'submitting' : 'idle'
+                    ">
+                    Save
+                  </button>
+                  <button
+                    class="red"
+                    mat-button
+                    mat-dialog-close
+                    (click)="onCloseClick()">
+                    Close
+                  </button>
+                </div>
+              </div>
+              <app-lcars-error-message
+                *ngIf="errorMessage"
+                title="Transmission Error"
+                [message]="errorMessage"></app-lcars-error-message>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div
+      *ngIf="!data?.user"
+      class="lcars-edit-personal-details-message">
+      <p class="error-message-text">
+        Connection to the Starfleet Personnel Database has failed!
+      </p>
+    </div>
+
+    <div class="lcars-bar">
+      <div class="lcars-bar-inner"></div>
+    </div>
+  </div>
+</div>

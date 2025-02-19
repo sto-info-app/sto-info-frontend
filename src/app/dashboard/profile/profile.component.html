@@ -10,6 +10,13 @@
       id="personnel-record-main-content">
       <div class="lcars-text-bar personnel-lcars-text-bar">
         <span>Personal Details</span>
+        <span
+          class="cta-icon"
+          (click)="editUserProfile()"
+          (keypress)="editUserProfile()"
+          title="Edit Personal Details"
+          ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+        ></span>
       </div>
       <p>
         <span class="record-title">Name:</span>
