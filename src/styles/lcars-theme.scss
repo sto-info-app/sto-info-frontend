@@ -230,13 +230,11 @@
 
 .cdk-overlay-pane {
   border: 10px solid #ccdeff;
-  min-width: 60%;
+  border-radius: 8px;
+  min-width: 80%;
   -moz-box-shadow: 2px 2px 3px #444a77;
   -webkit-box-shadow: 2px 2px 3px #444a77;
   box-shadow: 2px 2px 3px #444a77;
-  -moz-border-radius: 20px;
-  -webkit-border-radius: 20px;
-  border-radius: 20px 20px 20px 20px;
 }
 
 // Fonts
@@ -1433,6 +1431,17 @@ button:hover {
   padding-inline: 10px;
   font-size: 1.4rem;
   line-height: 1.7rem;
+}
+
+.lcars-text-bar span.cta-icon {
+  right: 1px;
+  font-size: 1rem;
+  padding-left: 15px;
+}
+
+.lcars-text-bar span.cta-icon:hover {
+  cursor: pointer;
+  color: #fc6;
 }
 
 .lcars-text-bar::before {

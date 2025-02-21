@@ -10,6 +10,13 @@
       id="personnel-record-main-content">
       <div class="lcars-text-bar personnel-lcars-text-bar">
         <span>Personal Details</span>
+        <span
+          class="cta-icon"
+          (click)="editUserProfile()"
+          (keypress)="editUserProfile()"
+          title="Edit Personal Details"
+          ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+        ></span>
       </div>
       <p>
         <span class="record-title">Name:</span>
@@ -19,7 +26,12 @@
       <p>
         <span class="record-title">Username:</span> {{ user.profile?.username }}
       </p>
-      <p><span class="record-title">Email:</span> {{ user.email }}</p>
+      <p>
+        <span class="record-title">Email:</span> {{ user.email }}
+        <fa-icon
+          [icon]="['fas', 'lock']"
+          class="go-red"></fa-icon>
+      </p>
 
       <div class="lcars-text-bar personnel-lcars-text-bar">
         <span>Activity</span>
@@ -49,7 +61,7 @@
       <div class="pics-right">
         <img
           src="/assets/photo_unavailable.png"
-          alt="Photo unavilable"
+          alt="Photo unavailable"
           class="border" />
       </div>
     </div>
@@ -60,7 +72,12 @@
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
         class="full-width-btn-link sunflower"
-        >Dashboard</a
+        >Return to Dashboard</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.RESET_PASSWORD)"
+        class="full-width-btn-link gold"
+        >Reset Password</a
       >
     </div>
   </div>

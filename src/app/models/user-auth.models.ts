@@ -22,3 +22,9 @@ export interface ChangePasswordValues {
   token: string;
   password: string;
 }
+
+export interface EditPersonalDetailsFormValues {
+  firstName: string;
+  lastName: string;
+  username: string;
+}
