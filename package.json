@@ -40,6 +40,7 @@
     "http-proxy-middleware": "^3.0.2",
     "lru-cache": "^11.0.1",
     "moment": "^2.29.4",
+    "ngx-image-cropper": "^9.1.2",
     "ngx-pagination": "^6.0.3",
     "ngx-toastr": "^19.0.0",
     "rimraf": "^6.0.1",
