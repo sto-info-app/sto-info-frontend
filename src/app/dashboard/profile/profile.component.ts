@@ -47,17 +47,21 @@ export class ProfileComponent {
 
   timeSinceLastLogin(): string {
     if (!this.user?.lastLoginAt) return 'Never';
-    return this.dateTimeHelper.timeSince(this.user.lastLoginAt);
+    return this.dateTimeHelper.timeSince(this.user.lastLoginAt) || 'Just now';
   }
 
   timeSinceLastPasswordReset(): string {
     if (!this.user?.lastPasswordReset) return 'Never';
-    return this.dateTimeHelper.timeSince(this.user.lastPasswordReset);
+    return (
+      this.dateTimeHelper.timeSince(this.user.lastPasswordReset) || 'Just now'
+    );
   }
 
   timeSinceLastUpdated(): string {
     if (!this.user?.profile?.updatedAt) return 'Unknown';
-    return this.dateTimeHelper.timeSince(this.user.profile.updatedAt);
+    return (
+      this.dateTimeHelper.timeSince(this.user.profile.updatedAt) || 'Just now'
+    );
   }
 
   editUserProfile(): void {
