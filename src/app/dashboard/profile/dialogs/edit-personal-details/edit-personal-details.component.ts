@@ -1,16 +1,12 @@
 import { Component, Inject, OnInit, Optional } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Router } from '@angular/router';
-import { AuthService } from 'src/app/core/auth/auth.service';
 import { User } from 'src/app/dashboard/models/user.model';
+import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
 import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import {
-  FORM_ERROR_EMAIL_ALREADY_REGISTERED,
-  FORM_ERROR_EMAIL_REQUIRED,
   FORM_ERROR_FIRSTNAME_REQUIRED,
-  FORM_ERROR_INVALID_EMAIL_FORMAT,
   FORM_ERROR_LASTNAME_REQUIRED,
   FORM_ERROR_NAME_MAX_LENGTH,
   FORM_ERROR_USERNAME_MAX_LENGTH,
@@ -24,15 +20,11 @@ import {
   MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT,
 } from 'src/app/shared/constants/error-messages.constants';
 import {
-  MAX_CHARS_GENERAL_STRING,
   MAX_CHARS_NAMES,
   MAX_CHARS_USERNAME,
   MIN_CHARS_USERNAME,
 } from 'src/app/shared/constants/forms.constants';
-import {
-  EMAIL_PATTERN,
-  USERNAME_PATTERN,
-} from 'src/app/shared/constants/regex-patterns.constants';
+import { USERNAME_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 
@@ -58,15 +50,11 @@ export class EditPersonalDetailsComponent implements OnInit {
   errorTextUsernameMaxLength: string = FORM_ERROR_USERNAME_MAX_LENGTH;
   errorTextUsernameTaken: string = FORM_ERROR_USERNAME_TAKEN;
   errorTextUsernamePattern: string = FORM_ERROR_USERNAME_PATTERN;
-  errorTextEmailRequired: string = FORM_ERROR_EMAIL_REQUIRED;
-  errorTextEmailInvalidFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
-  errorTextEmailAlreadyRegistered: string = FORM_ERROR_EMAIL_ALREADY_REGISTERED;
 
   constructor(
     private readonly formBuilder: FormBuilder,
-    private readonly router: Router,
     private readonly routingService: RoutingService,
-    private readonly authService: AuthService,
+    private readonly dashboardService: DashboardService,
     private readonly dialogRef: MatDialogRef<EditPersonalDetailsComponent>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: { user: User } | null,
   ) {}
@@ -90,14 +78,6 @@ export class EditPersonalDetailsComponent implements OnInit {
           Validators.pattern(USERNAME_PATTERN),
         ],
       ],
-      email: [
-        this.data?.user?.email ?? '',
-        [
-          Validators.required,
-          Validators.pattern(EMAIL_PATTERN),
-          Validators.maxLength(MAX_CHARS_GENERAL_STRING),
-        ],
-      ],
     });
   }
 
@@ -107,11 +87,13 @@ export class EditPersonalDetailsComponent implements OnInit {
     const editPersonalDetailsFormValues: EditPersonalDetailsFormValues =
       this.editPersonalDetailsForm.value;
 
-    this.authService
+    this.dashboardService
       .updatePersonalDetails(editPersonalDetailsFormValues)
       .subscribe({
         next: () => {
-          this.router.navigate(['/dashboard/profile']);
+          this.dialogRef?.close({
+            stayLoggedIn: true,
+          });
           this.isSubmitting = false;
         },
         error: error => {
@@ -124,11 +106,7 @@ export class EditPersonalDetailsComponent implements OnInit {
             errMessage = MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT;
           } else if (error.status === 409) {
             console.error('Conflict Exception error:', error);
-            if (error.error.message.includes('Email')) {
-              this.editPersonalDetailsForm.controls['email'].setErrors({
-                uniqueEmail: true,
-              });
-            } else if (error.error.message.includes('Username')) {
+            if (error.error.message.includes('Username')) {
               this.editPersonalDetailsForm.controls['username'].setErrors({
                 uniqueUsername: true,
               });
@@ -142,6 +120,7 @@ export class EditPersonalDetailsComponent implements OnInit {
         },
         complete: () => {
           this.isSubmitting = false;
+          this.dialogRef?.close(true);
         },
       });
   }
@@ -163,7 +142,6 @@ export class EditPersonalDetailsComponent implements OnInit {
   }
 
   onCloseClick(): void {
-    console.log('Close:', this.data);
     this.dialogRef?.close();
   }
 }

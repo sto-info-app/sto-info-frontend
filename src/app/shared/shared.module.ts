@@ -9,6 +9,7 @@ import {
 import {
   faExternalLink,
   faHandSpock,
+  faLock,
   faUserPen,
 } from '@fortawesome/free-solid-svg-icons';
 import { LcarsErrorMessageComponent } from './components/lcars-error-message/lcars-error-message.component';
@@ -69,7 +70,7 @@ export class SharedModule {
     // Add an individual FontAwesome icon to the library for convenient access in other components
     // NOTE: Use `<fa-icon [icon]="['fas', 'hand-spock']"></fa-icon>` to use icon in the HTML
     // NOTE: FontAwesome prefixes are: fas = solid, far = regular, fal = light, fat = thin, fad = duotone
-    library.addIcons(faHandSpock, faExternalLink, faUserPen);
+    library.addIcons(faHandSpock, faExternalLink, faUserPen, faLock);
 
     // Add entire icon packs
     // NOTE: This imports all icons into the bundle and increases app size!

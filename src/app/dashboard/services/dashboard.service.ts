@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { Observable, throwError } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 
 import { User } from '../models/user.model';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -26,5 +27,16 @@ export class DashboardService {
       return throwError(() => new Error('No token found'));
     }
     return this.http.get<User>(`${this.apiUrl}/user`, httpOptions);
+  }
+
+  updatePersonalDetails(userPersonalDetails: EditPersonalDetailsFormValues) {
+    return this.http
+      .post(`${this.apiUrl}/user/update-profile`, userPersonalDetails)
+      .pipe(
+        catchError(error => {
+          console.error('Error updating personal details:', error);
+          return throwError(() => error);
+        }),
+      );
   }
 }

@@ -22,3 +22,8 @@ export interface UserProfile {
   updatedAt: Date;
   deletedAt?: Date | null;
 }
+
+export interface UserProfileUpdateResult {
+  affected: number;
+  userProfileData: UserProfile | null;
+}

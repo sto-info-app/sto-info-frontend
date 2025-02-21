@@ -26,7 +26,12 @@
       <p>
         <span class="record-title">Username:</span> {{ user.profile?.username }}
       </p>
-      <p><span class="record-title">Email:</span> {{ user.email }}</p>
+      <p>
+        <span class="record-title">Email:</span> {{ user.email }}
+        <fa-icon
+          [icon]="['fas', 'lock']"
+          class="go-red"></fa-icon>
+      </p>
 
       <div class="lcars-text-bar personnel-lcars-text-bar">
         <span>Activity</span>
@@ -67,7 +72,12 @@
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
         class="full-width-btn-link sunflower"
-        >Dashboard</a
+        >Return to Dashboard</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.RESET_PASSWORD)"
+        class="full-width-btn-link gold"
+        >Reset Password</a
       >
     </div>
   </div>

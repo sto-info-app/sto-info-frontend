@@ -118,44 +118,6 @@
                     </div>
                   </div>
                 </div>
-
-                <div class="form-group">
-                  <label for="email">Email:</label>
-                  <input
-                    type="email"
-                    id="email"
-                    formControlName="email" />
-                  <div
-                    *ngIf="
-                      (editPersonalDetailsForm.controls['email'].invalid &&
-                        editPersonalDetailsForm.controls['email'].touched) ||
-                      (isSubmitting &&
-                        editPersonalDetailsForm.controls['email'].errors)
-                    "
-                    class="invalid-feedback"
-                    id="email-invalid-feedback">
-                    <div
-                      class="helper-error-text"
-                      *ngIf="editPersonalDetailsForm.controls['email'].errors?.['required']">
-                      {{ errorTextEmailRequired }}
-                    </div>
-                    <div
-                      class="helper-error-text"
-                      *ngIf="editPersonalDetailsForm.controls['email'].errors?.['pattern']">
-                      {{ errorTextEmailInvalidFormat }}
-                    </div>
-                    <div
-                      class="helper-error-text"
-                      *ngIf="editPersonalDetailsForm.controls['email'].errors?.['uniqueEmail']">
-                      {{ errorTextEmailAlreadyRegistered }}
-                    </div>
-                    <div
-                      class="helper-error-text"
-                      *ngIf="editPersonalDetailsForm.controls['email'].errors?.['maxlength']">
-                      {{ errorTextEmailAlreadyRegistered }}
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
             <div class="col edit-personal-details-side-col">
@@ -182,6 +144,7 @@
                     Save
                   </button>
                   <button
+                    type="button"
                     class="red"
                     mat-button
                     mat-dialog-close

@@ -29,11 +29,16 @@ export class ProfileComponent {
   ) {}
 
   ngOnInit() {
+    this.getUserData();
+  }
+
+  getUserData(): User | undefined {
     this.dashboardService.getUser().subscribe(user => {
       if (user.isAccountDisabled) this.authService.performLogout();
 
       this.user = user;
     });
+    return this.user;
   }
 
   getRouteLink(route: string): string {
@@ -67,7 +72,9 @@ export class ProfileComponent {
     });
 
     // Handle the result (if any action needed)
-    this.dialogRef.afterClosed().subscribe((stayLoggedIn = false) => {
+    this.dialogRef.afterClosed().subscribe(stayLoggedIn => {
+      this.getUserData(); // Update the user data
+
       if (stayLoggedIn) {
         this.authService.refreshToken().subscribe();
       }

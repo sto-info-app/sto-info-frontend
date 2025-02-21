@@ -12,7 +12,6 @@ import {
 } from 'rxjs';
 import {
   ChangePasswordValues,
-  EditPersonalDetailsFormValues,
   LoginCredentials,
   LoginResponse,
   RegistrationFormValues,
@@ -300,16 +299,5 @@ export class AuthService {
     const secondsUntilExpiry = this.getSecondsUntilLoginSessionExpiry();
 
     return secondsUntilExpiry < thresholdSecs;
-  }
-
-  updatePersonalDetails(user: EditPersonalDetailsFormValues) {
-    return this.http
-      .post(`${this.apiUrl}/auth/update-personal-details`, user)
-      .pipe(
-        catchError(error => {
-          console.error('Error updating personal details:', error);
-          return throwError(() => error);
-        }),
-      );
   }
 }

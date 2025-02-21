@@ -27,5 +27,4 @@ export interface EditPersonalDetailsFormValues {
   firstName: string;
   lastName: string;
   username: string;
-  email: string;
 }
