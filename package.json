@@ -42,7 +42,7 @@
     "@fortawesome/pro-light-svg-icons": "^6.7.2",
     "@fortawesome/pro-regular-svg-icons": "^6.7.2",
     "@fortawesome/pro-solid-svg-icons": "^6.7.2",
-    "@fortawesome/pro-thin-svg-icons": "^6.4.0",
+    "@fortawesome/pro-thin-svg-icons": "^6.7.2",
     "glob": "^11.0.0",
     "http-proxy-middleware": "^3.0.2",
     "lru-cache": "^11.0.1",
