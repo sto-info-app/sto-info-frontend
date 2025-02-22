@@ -36,7 +36,7 @@
     "@eslint/object-schema": "^2.1.4",
     "@fortawesome/angular-fontawesome": "^1.0.0",
     "@fortawesome/fontawesome-pro": "^6.7.2",
-    "@fortawesome/fontawesome-svg-core": "^6.4.0",
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@fortawesome/pro-duotone-svg-icons": "^6.4.0",
     "@fortawesome/pro-light-svg-icons": "^6.4.0",
