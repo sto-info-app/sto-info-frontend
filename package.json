@@ -1,6 +1,14 @@
 {
   "name": "sto-info-frontend",
   "version": "0.1.54",
+  "description": "Star Trek Online Information App",
+  "author": "Steve Roberts",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/steverobertsuk/sto-info-frontend.git"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -12,7 +20,6 @@
     "lint": "eslint \"src/**/*.ts\"",
     "e2e": "ng e2e"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^19.1.4",
     "@angular/cdk": "^18.0.3",
