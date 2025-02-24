@@ -7,6 +7,7 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { User } from '../models/user.model';
 import { DashboardService } from '../services/dashboard.service';
 import { EditPersonalDetailsComponent } from './dialogs/edit-personal-details/edit-personal-details.component';
+import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component';
 
 @Component({
   selector: 'app-profile',
@@ -18,7 +19,9 @@ export class ProfileComponent {
   appRoutes = APP_ROUTES;
 
   user: User | undefined;
-  private dialogRef: MatDialogRef<EditPersonalDetailsComponent> | null = null;
+  private editProfileDialogRef: MatDialogRef<EditPersonalDetailsComponent> | null =
+    null;
+  private profilePicDialogRef: MatDialogRef<ProfilePicComponent> | null = null;
 
   constructor(
     private readonly dashboardService: DashboardService,
@@ -66,7 +69,7 @@ export class ProfileComponent {
 
   editUserProfile(): void {
     // Open the edit personal details dialog
-    this.dialogRef = this.dialog.open(EditPersonalDetailsComponent, {
+    this.editProfileDialogRef = this.dialog.open(EditPersonalDetailsComponent, {
       hasBackdrop: true,
       disableClose: true,
       width: '75%',
@@ -76,7 +79,7 @@ export class ProfileComponent {
     });
 
     // Handle the result (if any action needed)
-    this.dialogRef.afterClosed().subscribe(stayLoggedIn => {
+    this.editProfileDialogRef.afterClosed().subscribe(stayLoggedIn => {
       this.getUserData(); // Update the user data
 
       if (stayLoggedIn) {
@@ -84,7 +87,31 @@ export class ProfileComponent {
       }
 
       // Allow opening the dialog box again
-      this.dialogRef = null;
+      this.editProfileDialogRef = null;
+    });
+  }
+
+  editUserProfilePhoto(): void {
+    // Open the edit personal details dialog
+    this.profilePicDialogRef = this.dialog.open(ProfilePicComponent, {
+      hasBackdrop: true,
+      disableClose: true,
+      width: '75%',
+      data: {
+        user: this.user,
+      },
+    });
+
+    // Handle the result (if any action needed)
+    this.profilePicDialogRef.afterClosed().subscribe(stayLoggedIn => {
+      this.getUserData(); // Update the user data
+
+      if (stayLoggedIn) {
+        this.authService.refreshToken().subscribe();
+      }
+
+      // Allow opening the dialog box again
+      this.profilePicDialogRef = null;
     });
   }
 }

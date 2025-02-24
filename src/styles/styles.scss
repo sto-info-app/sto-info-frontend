@@ -68,11 +68,13 @@ input.errored {
   background-color: #0056b3;
 }
 
-.submit-button:disabled {
+.submit-button:disabled,
+button:disabled {
   background-color: #344470;
 }
 
-.submit-button:disabled:hover {
+.submit-button:disabled:hover,
+button:disabled:hover {
   cursor: not-allowed;
 }
 

@@ -56,12 +56,25 @@
     class="col">
     <div class="lcars-text-bar">
       <span>Photo</span>
+      <span
+        class="cta-icon"
+        (click)="editUserProfilePhoto()"
+        (keypress)="editUserProfilePhoto()"
+        title="Edit Photo"
+        ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+      ></span>
     </div>
     <div id="personnel-image">
       <div class="pics-right">
         <img
+          *ngIf="!user.profile?.profilePicture"
           src="/assets/photo_unavailable.png"
           alt="Photo unavailable"
+          class="border" />
+        <img
+          *ngIf="user.profile?.profilePicture"
+          [src]="user.profile?.profilePicture"
+          alt="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
           class="border" />
       </div>
     </div>
