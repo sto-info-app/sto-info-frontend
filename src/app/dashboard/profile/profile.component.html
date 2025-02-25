@@ -18,24 +18,34 @@
           ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
         ></span>
       </div>
+      <div class="personnel-record-inner-content">
+        <p>
+          <span class="record-title">Rank:</span>
+          Captain
+        </p>
       <p>
         <span class="record-title">Name:</span>
         {{ user.profile?.firstName || 'Unknown' }}
         {{ user.profile?.lastName }}
       </p>
       <p>
-        <span class="record-title">Username:</span> {{ user.profile?.username }}
+          <span class="record-title">Username:</span>
+          {{ user.profile?.username }}
       </p>
       <p>
         <span class="record-title">Email:</span> {{ user.email }}
         <fa-icon
           [icon]="['fas', 'lock']"
-          class="go-red"></fa-icon>
+            class="restricted-icon go-red"
+            title="Restricted: Cannot be changed"></fa-icon>
       </p>
+      </div>
 
       <div class="lcars-text-bar personnel-lcars-text-bar">
         <span>Activity</span>
       </div>
+
+      <div class="personnel-record-inner-content">
       <p>
         <span class="record-title">Last logged in:</span>
         {{ timeSinceLastLogin() }}
@@ -48,13 +58,14 @@
         <span class="record-title">Record last updated:</span>
         {{ timeSinceLastUpdated() }}
       </p>
+      </div>
     </div>
   </div>
   <div
     *ngIf="user"
     id="personnel-record-side-column"
     class="col">
-    <div class="lcars-text-bar">
+    <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Photo</span>
       <span
         class="cta-icon"

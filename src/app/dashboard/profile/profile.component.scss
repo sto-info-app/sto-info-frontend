@@ -10,11 +10,21 @@
       margin-top: 60px;
     }
 
-    p {
-      .record-title {
-        color: #6cf;
-        text-transform: uppercase;
+    .personnel-record-inner-content {
+      margin: auto 20px;
+
+      p {
+        .record-title {
+          color: #6cf;
+          text-transform: uppercase;
+        }
+
+        .restricted-icon {
+          font-size: small;
+          vertical-align: top;
+        }
       }
+
     }
   }
 
@@ -25,10 +35,14 @@
     #personnel-image {
       display: flex;
 
-      .caption {
-        text-transform: uppercase;
-        line-height: 1.2;
-        font-size: 1.2rem;
+      .pics-right {
+        margin: 10px 30px;
+        width: 100%;
+
+        img {
+          max-width: 100%;
+          height: auto;
+        }
       }
     }
 
