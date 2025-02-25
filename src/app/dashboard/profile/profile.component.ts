@@ -67,6 +67,13 @@ export class ProfileComponent {
     );
   }
 
+  timeSinceUserCreated(): string {
+    if (!this.user?.profile?.createdAt) return 'Unknown';
+    return (
+      this.dateTimeHelper.timeSince(this.user.profile.createdAt) || 'Just now'
+    );
+  }
+
   editUserProfile(): void {
     // Open the edit personal details dialog
     this.editProfileDialogRef = this.dialog.open(EditPersonalDetailsComponent, {

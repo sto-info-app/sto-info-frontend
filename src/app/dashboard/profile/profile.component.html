@@ -23,22 +23,22 @@
           <span class="record-title">Rank:</span>
           Captain
         </p>
-      <p>
-        <span class="record-title">Name:</span>
-        {{ user.profile?.firstName || 'Unknown' }}
-        {{ user.profile?.lastName }}
-      </p>
-      <p>
+        <p>
+          <span class="record-title">Name:</span>
+          {{ user.profile?.firstName || 'Unknown' }}
+          {{ user.profile?.lastName }}
+        </p>
+        <p>
           <span class="record-title">Username:</span>
           {{ user.profile?.username }}
-      </p>
-      <p>
-        <span class="record-title">Email:</span> {{ user.email }}
-        <fa-icon
-          [icon]="['fas', 'lock']"
+        </p>
+        <p>
+          <span class="record-title">Email:</span> {{ user.email }}
+          <fa-icon
+            [icon]="['fas', 'lock']"
             class="restricted-icon go-red"
             title="Restricted: Cannot be changed"></fa-icon>
-      </p>
+        </p>
       </div>
 
       <div class="lcars-text-bar personnel-lcars-text-bar">
@@ -46,18 +46,22 @@
       </div>
 
       <div class="personnel-record-inner-content">
-      <p>
-        <span class="record-title">Last logged in:</span>
-        {{ timeSinceLastLogin() }}
-      </p>
-      <p>
-        <span class="record-title">Password last reset:</span>
-        {{ timeSinceLastPasswordReset() }}
-      </p>
-      <p>
-        <span class="record-title">Record last updated:</span>
-        {{ timeSinceLastUpdated() }}
-      </p>
+        <p>
+          <span class="record-title">Last logged in:</span>
+          {{ timeSinceLastLogin() }}
+        </p>
+        <p>
+          <span class="record-title">Password last reset:</span>
+          {{ timeSinceLastPasswordReset() }}
+        </p>
+        <p>
+          <span class="record-title">Record last updated:</span>
+          {{ timeSinceLastUpdated() }}
+        </p>
+        <p>
+          <span class="record-title">Commissioned:</span>
+          {{ timeSinceUserCreated() }}
+        </p>
       </div>
     </div>
   </div>
