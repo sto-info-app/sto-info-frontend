@@ -114,4 +114,8 @@ export class ProfileComponent {
       this.profilePicDialogRef = null;
     });
   }
+
+  onProfileImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = '/assets/photo_unavailable.png';
+  }
 }

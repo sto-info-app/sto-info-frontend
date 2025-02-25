@@ -86,7 +86,8 @@
           *ngIf="user.profile?.profilePicture"
           [src]="user.profile?.profilePicture"
           alt="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
-          class="border" />
+          class="border"
+          (error)="onProfileImageError($event)" />
       </div>
     </div>
     <div class="lcars-text-bar">
