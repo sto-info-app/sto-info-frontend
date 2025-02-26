@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, Optional } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
@@ -14,8 +13,6 @@ import {
   MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT,
 } from 'src/app/shared/constants/error-messages.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
-import { FileHandlingService } from 'src/app/shared/services/file-handling.service';
-import { RoutingService } from 'src/app/shared/services/routing.service';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { EditPersonalDetailsComponent } from '../edit-personal-details/edit-personal-details.component';
 
@@ -34,15 +31,13 @@ export class ProfilePicComponent {
 
   imageChangedEvent: Event | null = null;
   croppedImage: SafeUrl = '';
+  croppedImageBlob: Blob | null = null;
   cropper: ImageCropperComponent | null = null;
 
   // Allow constants to be used in the HTML
   showErrorMilliseconds: number = MILLISECONDS_SHOW_ERROR_MSG;
 
   constructor(
-    private readonly formBuilder: FormBuilder,
-    private readonly routingService: RoutingService,
-    private readonly fileHandlingService: FileHandlingService,
     private readonly dashboardService: DashboardService,
     private readonly sanitizer: DomSanitizer,
     private readonly dialogRef: MatDialogRef<EditPersonalDetailsComponent>,
@@ -76,38 +71,41 @@ export class ProfilePicComponent {
   }
 
   onImageCropped(event: ImageCroppedEvent) {
-    if (!event.objectUrl) {
+    if (!event.blob) {
+      console.error('Cropped image is not defined correctly');
       return;
     }
 
-    if (event.blob) {
-      const reader = new FileReader();
-      reader.readAsDataURL(event.blob);
-      reader.onloadend = () => {
-        this.croppedImage = this.sanitizer.bypassSecurityTrustUrl(
-          reader.result as string,
-        );
-      };
-    } else {
-      console.error('Cropped image is not defined correctly');
-    }
+    this.croppedImageBlob = event.blob;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(event.blob);
+    reader.onloadend = () => {
+      this.croppedImage = this.sanitizer.bypassSecurityTrustUrl(
+        reader.result as string,
+      );
+    };
   }
 
   onUploadImageClick() {
-    if (!this.croppedImage) {
+    if (!this.croppedImageBlob) {
       console.error('No image to upload');
       this.displayErrorMessage('Please crop an image before uploading.');
       return;
     }
 
-    // Convert SafeUrl to string
-    const dataURI = this.sanitizer.sanitize(4, this.croppedImage) as string;
+    // Check if the Blob is in PNG format
+    if (this.croppedImageBlob.type !== 'image/png') {
+      console.error('Cropped image is not in PNG format');
+      this.displayErrorMessage('The cropped image must be in PNG format.');
+      return;
+    }
 
-    // Fetch the Blob from the URL
+    // Use the Blob from the image cropper event
     try {
-      const blob = this.fileHandlingService.dataURItoBlob(dataURI);
+      const blob = this.croppedImageBlob;
 
-      if (blob.size > 0) {
+      if (blob?.size > 0) {
         const formData = new FormData();
         formData.append('profilePicture', blob, 'profile-pic.png');
 
@@ -145,7 +143,7 @@ export class ProfilePicComponent {
         this.isSubmitting = false;
       }
     } catch (error) {
-      console.error('Error converting data URI to Blob:', error);
+      console.error('Error processing image blob:', error);
       this.displayErrorMessage('Invalid image format.');
       this.isSubmitting = false;
     }
@@ -154,6 +152,7 @@ export class ProfilePicComponent {
   loadImageFailed() {
     this.cropper = null;
     this.croppedImage = '';
+    this.croppedImageBlob = null;
     this.imageChangedEvent = null;
 
     if (!this.uploadedInvalidImageType) {
