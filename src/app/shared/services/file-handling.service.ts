@@ -19,7 +19,7 @@ export class FileHandlingService {
       base64 = this.cleanBase64String(base64);
 
       // Validate base64 string
-      if (!this.isValidBase64(base64)) {
+      if (!Base64.isValid(base64)) {
         throw new Error('Invalid base64 string');
       }
 
@@ -34,23 +34,6 @@ export class FileHandlingService {
     } catch (error) {
       console.error('Failed to convert data URI to Blob:', error);
       throw new Error('Invalid base64 string');
-    }
-  }
-
-  /**
-   * Validate if a string is a valid base64 encoded string
-   * @param str - The string to validate
-   * @returns True if the string is valid base64, false otherwise
-   */
-  private isValidBase64(str: string): boolean {
-    try {
-      // Remove padding characters
-      const cleanedStr = str.replace(/=+$/, '');
-      const isValid = Base64.btoa(Base64.atob(cleanedStr)) === cleanedStr;
-      return isValid;
-    } catch (err) {
-      console.error('Base64 validation error:', err);
-      return false;
     }
   }
 
