@@ -81,6 +81,7 @@ export class ProfilePicComponent {
     const reader = new FileReader();
     reader.readAsDataURL(event.blob);
     reader.onloadend = () => {
+      //NOTE: The input to bypassSecurityTrustUrl is from a trusted source (FileReader) and is validated to be an image blob.
       this.croppedImage = this.sanitizer.bypassSecurityTrustUrl(
         reader.result as string,
       );
