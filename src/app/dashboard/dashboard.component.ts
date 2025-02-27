@@ -54,4 +54,8 @@ export class DashboardComponent implements OnInit {
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
   }
+
+  onProfileImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = '/assets/photo_unavailable.png';
+  }
 }

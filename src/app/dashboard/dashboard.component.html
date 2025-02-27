@@ -16,19 +16,23 @@
     *ngIf="user"
     id="dashboard-info-side-column"
     class="col">
-    <div class="lcars-text-bar">
+    <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Personnel Record</span>
     </div>
     <div id="personnel-image">
       <div class="pics-right">
         <img
+          *ngIf="!user.profile?.profilePicture"
           src="/assets/photo_unavailable.png"
-          alt="Photo unavilable"
+          alt="Photo unavailable"
           class="border" />
-        <p class="caption">
-          Captain {{ user.profile?.lastName || 'Unknown' }},
-          {{ user.profile?.firstName || '' }}
-        </p>
+        <img
+          *ngIf="user.profile?.profilePicture"
+          [src]="user.profile?.profilePicture"
+          alt="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
+          class="border"
+          (error)="onProfileImageError($event)" />
+        <p class="caption">Captain {{ user.profile?.lastName || '' }}</p>
       </div>
     </div>
     <div class="buttons personnel-buttons">

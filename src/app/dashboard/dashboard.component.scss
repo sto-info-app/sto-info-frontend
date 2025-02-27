@@ -15,8 +15,21 @@
 
       .caption {
         text-transform: uppercase;
-        line-height: 1.2;
-        font-size: 1.2rem;
+        line-height: 1.1;
+        font-size: 1.1rem;
+        margin-top: 0;
+        margin-bottom: 20px;
+      }
+
+      .pics-right {
+        margin: 10px 30px;
+        width: 100%;
+
+        img {
+          min-width: 100%;
+          max-width: 100%;
+          height: auto;
+        }
       }
     }
 

@@ -1,0 +1,71 @@
+.lcars-profile-pic-container {
+  align-items: center;
+  width: 100%;
+  min-height: 80vh;
+  max-height: 80vh;
+  margin: 0 auto;
+
+  .form-container {
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+
+    .form-group {
+      width: 100%;
+    }
+  }
+
+  .profile-pic-main-col {
+    flex: 10;
+
+    .form-container {
+      width: 100%;
+    }
+
+    --cropper-overlay-color: transparent;
+
+    image-cropper,
+    image-cropper div,
+    image-cropper div img {
+      max-height: 80%;
+      min-height: 80%;
+      height: 80%;
+      width: auto
+    }
+  }
+
+  .profile-pic-side-col {
+    flex: 2;
+    margin-left: 20px;
+    padding: 0 20px;
+
+    .cropped-image-container {
+      text-align: center;
+    }
+
+    #cropped-image-preview {
+      border: 2px solid #fa0;
+      max-width: 85%;
+      min-width: 85%;
+      width: 85%;
+      height: auto;
+    }
+  }
+
+  .lcars-profile-pic-inner-container {
+    padding: 0 20px;
+
+    .lcars-bar {
+      margin: 0 0 20px 0;
+    }
+
+    .lcars-text-bar {
+      margin: 20px 0;
+    }
+
+    .lcars-profile-pic-message {
+      padding: 0 40px;
+      text-align: left;
+    }
+  }
+}

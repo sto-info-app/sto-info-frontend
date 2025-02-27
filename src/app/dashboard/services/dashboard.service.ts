@@ -39,4 +39,30 @@ export class DashboardService {
         }),
       );
   }
+
+  updateProfilePic(profilePicForm: FormData) {
+    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+
+    // Remove the Content-Type header if it exists
+    if (httpOptions?.headers.has('Content-Type')) {
+      httpOptions.headers = httpOptions.headers.delete('Content-Type');
+    }
+
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+
+    return this.http
+      .post(
+        `${this.apiUrl}/user/update-profile-pic`,
+        profilePicForm,
+        httpOptions,
+      )
+      .pipe(
+        catchError(error => {
+          console.error('Error updating profile image:', error);
+          return throwError(() => error);
+        }),
+      );
+  }
 }
