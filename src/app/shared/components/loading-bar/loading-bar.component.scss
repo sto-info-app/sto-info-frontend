@@ -27,7 +27,7 @@
   /* Limit size to prevent image distortion */
   max-width: 512px;
   max-height: 512px;
-  background-image: url('/assets/ufp_emblem.png');
+  background-image: url('https://imagedelivery.net/jQ0uSdJ3ty-KasNpXGxyuA/08c58f21-6168-4b9e-0fa8-2a10d7462a00/square512');
   /* Ensure emblem fits within the div */
   background-size: contain;
   /* Prevent the image from repeating */
@@ -37,7 +37,7 @@
 }
 
 .loading-bar {
-  width: 80%;
+  width: 50%;
   height: 40px;
   border: 2px solid #fff;
   border-radius: 10px;

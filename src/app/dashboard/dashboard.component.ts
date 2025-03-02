@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { AuthService } from '../core/auth/auth.service';
+import { SRC_PHOTO_UNAVAILABLE_300PX } from '../shared/constants/app-image-assets.constants';
 import { APP_ROUTES } from '../shared/constants/app-routing.constants';
 import { RoutingService } from '../shared/services/routing.service';
 import { User } from './models/user.model';
@@ -14,6 +15,7 @@ import { DashboardService } from './services/dashboard.service';
 })
 export class DashboardComponent implements OnInit {
   appRoutes = APP_ROUTES;
+  unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
   user: User | undefined;
   userGreeting = '';
@@ -56,6 +58,6 @@ export class DashboardComponent implements OnInit {
   }
 
   onProfileImageError(event: Event): void {
-    (event.target as HTMLImageElement).src = '/assets/photo_unavailable.png';
+    (event.target as HTMLImageElement).src = this.unavailablePhotoSrc;
   }
 }
