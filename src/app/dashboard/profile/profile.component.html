@@ -85,13 +85,15 @@
           *ngIf="!user.profile?.profilePicture300"
           src="{{ unavailablePhotoSrc }}"
           alt="Photo unavailable"
-          class="border" />
+          class="border"
+          loading="lazy" />
         <img
           *ngIf="user.profile?.profilePicture300"
           [src]="user.profile?.profilePicture300"
           alt="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
           class="border"
-          (error)="onProfileImageError($event)" />
+          (error)="onProfileImageError($event)"
+          loading="lazy" />
       </div>
     </div>
     <div class="lcars-text-bar">
