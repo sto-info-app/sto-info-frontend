@@ -22,13 +22,13 @@
     <div id="personnel-image">
       <div class="pics-right">
         <img
-          *ngIf="!user.profile?.profilePicture"
-          src="/assets/photo_unavailable.png"
+          *ngIf="!user.profile?.profilePicture300"
+          src="{{ unavailablePhotoSrc }}"
           alt="Photo unavailable"
           class="border" />
         <img
-          *ngIf="user.profile?.profilePicture"
-          [src]="user.profile?.profilePicture"
+          *ngIf="user.profile?.profilePicture300"
+          [src]="user.profile?.profilePicture300"
           alt="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
           class="border"
           (error)="onProfileImageError($event)" />

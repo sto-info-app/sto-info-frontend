@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { SRC_PHOTO_UNAVAILABLE_300PX } from 'src/app/shared/constants/app-image-assets.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { DatesTimeHelperService } from 'src/app/shared/services/dates-time-helper.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -17,6 +18,7 @@ import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component
 })
 export class ProfileComponent {
   appRoutes = APP_ROUTES;
+  unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
   user: User | undefined;
   private editProfileDialogRef: MatDialogRef<EditPersonalDetailsComponent> | null =
@@ -123,6 +125,6 @@ export class ProfileComponent {
   }
 
   onProfileImageError(event: Event): void {
-    (event.target as HTMLImageElement).src = '/assets/photo_unavailable.png';
+    (event.target as HTMLImageElement).src = this.unavailablePhotoSrc;
   }
 }

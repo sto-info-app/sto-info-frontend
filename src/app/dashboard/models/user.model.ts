@@ -16,7 +16,8 @@ export interface UserProfile {
   username: string;
   firstName: string;
   lastName: string;
-  profilePicture?: string;
+  profilePicture?: string | null;
+  profilePicture300?: string | null;
   publiclyVisible: boolean;
   createdAt: Date;
   updatedAt: Date;
