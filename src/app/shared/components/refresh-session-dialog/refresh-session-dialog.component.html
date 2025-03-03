@@ -1,0 +1,27 @@
+<div id="refresh-session-dialog-container">
+  <div mat-dialog-content>
+    <app-lcars-warning-message
+      message="Attention, your subspace channel is about close; please indicate if you want to stay connected."></app-lcars-warning-message>
+  </div>
+  <div class="countdownMessage">
+    Automatic logout in {{ appComponent.autoLogoutCountdown | timeFormat }}
+  </div>
+  <div
+    class="buttons-container"
+    mat-dialog-actions>
+    <button
+      class="green"
+      mat-button
+      mat-dialog-close
+      (click)="onStayConnected()">
+      Stay connected
+    </button>
+    <button
+      class="red"
+      mat-button
+      mat-dialog-close
+      (click)="onLogout()">
+      Logout
+    </button>
+  </div>
+</div>

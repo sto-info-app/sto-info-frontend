@@ -1,14 +1,19 @@
 <div>
   <h1>Welcome to the {{ appTitle }}!</h1>
-  <p>This is a work in progress!</p>
-  <div class="buttons">
+  <p>
+    This is a work in progress!
+    <fa-icon [icon]="['fas', 'hand-spock']"></fa-icon>
+  </p>
+  <div
+    class="buttons"
+    *ngIf="!isLoggedIn">
     <a
-      href="/login"
+      [routerLink]="getRouteLink(appRoutes.LOGIN)"
       class="bluey"
       >Login</a
     >
     <a
-      href="/register"
+      [routerLink]="getRouteLink(appRoutes.REGISTER)"
       class="sunflower"
       >Register</a
     >

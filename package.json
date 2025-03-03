@@ -1,46 +1,113 @@
 {
   "name": "sto-info-frontend",
-  "version": "0.0.0",
+  "version": "0.1.54",
+  "description": "Star Trek Online Information App",
+  "author": "Steve Roberts",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/steverobertsuk/sto-info-frontend.git"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:dev": "ng build --configuration development",
+    "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lint": "eslint \"src/**/*.ts\"",
+    "e2e": "ng e2e"
   },
-  "private": true,
   "dependencies": {
-    "@angular/animations": "~13.2.0",
-    "@angular/cdk": "^13.3.9",
-    "@angular/common": "~13.2.0",
-    "@angular/compiler": "~13.2.0",
-    "@angular/core": "~13.2.0",
-    "@angular/forms": "~13.2.0",
-    "@angular/material": "^13.3.9",
-    "@angular/platform-browser": "~13.2.0",
-    "@angular/platform-browser-dynamic": "~13.2.0",
-    "@angular/router": "~13.2.0",
+    "@angular/animations": "^19.1.4",
+    "@angular/cdk": "^18.0.3",
+    "@angular/common": "^19.1.4",
+    "@angular/compiler": "^19.1.4",
+    "@angular/core": "^19.1.4",
+    "@angular/forms": "^19.1.4",
+    "@angular/material": "^18.0.3",
+    "@angular/platform-browser": "^19.1.4",
+    "@angular/platform-browser-dynamic": "^19.1.4",
+    "@angular/router": "^19.1.4",
     "@auth0/angular-jwt": "^5.1.2",
+    "@eslint/config-array": "^0.18.0",
+    "@eslint/object-schema": "^2.1.4",
+    "@fortawesome/angular-fontawesome": "^1.0.0",
+    "@fortawesome/fontawesome-pro": "^6.7.2",
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/pro-duotone-svg-icons": "^6.7.2",
+    "@fortawesome/pro-light-svg-icons": "^6.7.2",
+    "@fortawesome/pro-regular-svg-icons": "^6.7.2",
+    "@fortawesome/pro-solid-svg-icons": "^6.7.2",
+    "@fortawesome/pro-thin-svg-icons": "^6.7.2",
+    "glob": "^11.0.0",
+    "http-proxy-middleware": "^3.0.2",
+    "js-base64": "^3.7.7",
+    "lru-cache": "^11.0.1",
     "moment": "^2.29.4",
+    "ngx-image-cropper": "^9.1.2",
     "ngx-pagination": "^6.0.3",
-    "ngx-toastr": "^14.3.0",
+    "ngx-toastr": "^19.0.0",
+    "rimraf": "^6.0.1",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.11.4"
+    "undici": "^6.19.1",
+    "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^13.3.11",
-    "@angular/cli": "~13.2.5",
-    "@angular/compiler-cli": "~13.2.0",
+    "@angular-devkit/build-angular": "^19.1.5",
+    "@angular/cli": "^19.1.5",
+    "@angular/compiler-cli": "^19.1.4",
     "@types/jasmine": "~3.10.0",
     "@types/node": "^12.11.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.6",
+    "@typescript-eslint/parser": "^5.59.6",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.3",
     "jasmine-core": "~4.0.0",
     "karma": "~6.3.0",
     "karma-chrome-launcher": "~3.1.0",
     "karma-coverage": "~2.1.0",
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "~1.7.0",
+    "lint-staged": "^15.2.10",
+    "ng-mocks": "^14.13.0",
     "prettier": "^2.8.8",
-    "typescript": "~4.5.2"
+    "typescript": "~5.7.3"
+  },
+  "projects": {
+    "sto-info-frontend": {
+      "architect": {
+        "build": {
+          "options": {
+            "outputPath": "dist/sto-info-frontend"
+          },
+          "configurations": {
+            "production": {
+              "outputPath": "dist/sto-info-frontend"
+            },
+            "development": {
+              "outputPath": "dist/sto-info-frontend"
+            }
+          }
+        }
+      }
+    }
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }

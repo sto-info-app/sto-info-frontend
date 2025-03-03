@@ -1,0 +1,115 @@
+.loading-bar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 30vh;
+  width: 100vw;
+}
+
+.starfleet-emblem {
+  width: 75vw;
+  height: 75vh;
+  /* Limit size to prevent image distortion */
+  max-width: 512px;
+  max-height: 512px;
+  background-image: url('https://cdn.startrekonline.info/cdn-cgi/imagedelivery/jQ0uSdJ3ty-KasNpXGxyuA/08c58f21-6168-4b9e-0fa8-2a10d7462a00/square512');
+  /* Ensure emblem fits within the div */
+  background-size: contain;
+  /* Prevent the image from repeating */
+  background-repeat: no-repeat;
+  background-position: center;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.loading-bar {
+  width: 50%;
+  height: 40px;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #1560bd 25%, #fff 50%, #1560bd 75%);
+  /* Set background size to ensure the gradient pattern repeats allowing for the sliding effect */
+  background-size: 200%;
+  animation: gradient 2s linear infinite;
+}
+
+.loading-text {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  color: #000;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-left: 20px;
+
+  span.dots {
+    min-width: 20px;
+    display: inline-flex;
+  }
+}
+
+.dots::after {
+  content: ' ';
+  animation: dots 2s steps(5, end) infinite;
+}
+
+@keyframes dots {
+
+  0%,
+  20% {
+    content: '.';
+  }
+
+  40% {
+    content: '..';
+  }
+
+  60% {
+    content: '...';
+  }
+
+  80%,
+  100% {
+    content: '';
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}

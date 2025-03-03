@@ -1,0 +1,55 @@
+#personnel-record-container {
+  display: flex;
+
+  #personnel-record-main-column {
+    flex: 2;
+    flex-basis: 69%;
+
+    .personnel-lcars-text-bar {
+      width: 85%;
+      margin-top: 60px;
+    }
+
+    .personnel-record-inner-content {
+      margin: auto 20px;
+
+      p {
+        .record-title {
+          color: #6cf;
+          text-transform: uppercase;
+        }
+
+        .restricted-icon {
+          font-size: small;
+          vertical-align: top;
+        }
+      }
+
+    }
+  }
+
+  #personnel-record-side-column {
+    flex: 1;
+    flex-basis: 30%;
+
+    #personnel-image {
+      display: flex;
+
+      .pics-right {
+        margin: 10px 30px;
+        width: 100%;
+
+        img {
+          min-width: 100%;
+          max-width: 100%;
+          height: auto;
+        }
+      }
+    }
+
+    .buttons {
+      margin-top: 0;
+      padding-top: 0;
+    }
+  }
+}

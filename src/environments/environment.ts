@@ -1,20 +1,19 @@
-// This file can be replaced during build by using the `fileReplacements` array.
-// `ng build` replaces `environment.ts` with `environment.prod.ts`.
-// The list of file replacements can be found in `angular.json`.
+//NOTE: Add *ALL* variables to the environment model.
+//NOTE: The app will throw an error if env vars missing/invalid.
+//NOTE: This will assist if variables are missing upon release!
 
-export const environment = {
+import packageJson from '../../package.json';
+import { Environment } from './models/environment.model';
+
+export const environment: Environment = {
   production: false,
+  version: packageJson.version,
   env_name: 'local',
   env_label: 'Local Development',
   apiUrl: 'http://localhost:3000',
-  appTitle: 'Star Trek Online Info App',
+  appTitle: 'Star Trek Online Info Portal',
+  appLoggedInHome: '/dashboard',
+  allowDebugging: true,
+  minsBeforeLogoutExpiryToShowWarning: 5,
+  minsBeforeLogoutExpiryToRefreshToken: 15,
 };
-
-/*
- * For easier debugging in development mode, you can import the following file
- * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a negative impact
- * on performance if an error is thrown.
- */
-// import 'zone.js/plugins/zone-error';  // Included with Angular CLI.

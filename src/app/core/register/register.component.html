@@ -1,0 +1,245 @@
+<app-loading-bar
+  *ngIf="isSubmitting"
+  loadingText="Registering"></app-loading-bar>
+<div class="register-container">
+  <div class="flexbox">
+    <div class="col">
+      <div class="form-container">
+        <h1>Register</h1>
+        <form
+          [formGroup]="registerForm"
+          (ngSubmit)="onRegister()"
+          class="form"
+          novalidate>
+          <div class="form-group">
+            <label for="firstName">First Name:</label>
+            <input
+              type="text"
+              id="firstName"
+              formControlName="firstName" />
+            <div
+              *ngIf="
+                (registerForm.controls['firstName'].invalid &&
+                  registerForm.controls['firstName'].touched) ||
+                (isSubmitting && registerForm.controls['firstName'].errors)
+              "
+              class="invalid-feedback"
+              id="firstName-invalid-feedback">
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['firstName'].errors?.['required']">
+                {{ errorTextFirstNameRequired }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['firstName'].errors?.['maxlength']">
+                {{ errorTextNamesMaxLength }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="lastName">Last Name:</label>
+            <input
+              type="text"
+              id="lastName"
+              formControlName="lastName" />
+            <div
+              *ngIf="
+                (registerForm.controls['lastName'].invalid &&
+                  registerForm.controls['lastName'].touched) ||
+                (isSubmitting && registerForm.controls['lastName'].errors)
+              "
+              class="invalid-feedback"
+              id="lastName-invalid-feedback">
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['lastName'].errors?.['required']">
+                {{ errorTextLastNameRequired }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['lastName'].errors?.['maxlength']">
+                {{ errorTextNamesMaxLength }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="username">Username:</label>
+            <input
+              type="text"
+              id="username"
+              formControlName="username" />
+            <div
+              *ngIf="
+                (registerForm.controls['username'].invalid &&
+                  registerForm.controls['username'].touched) ||
+                (isSubmitting && registerForm.controls['username'].errors)
+              "
+              class="invalid-feedback"
+              id="username-invalid-feedback">
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['username'].errors?.['required']">
+                {{ errorTextUsernameRequired }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['username'].errors?.['minlength']">
+                {{ errorTextUsernameMinLength }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['username'].errors?.['maxlength']">
+                {{ errorTextUsernameMaxLength }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['username'].errors?.['uniqueUsername']">
+                {{ errorTextUsernameTaken }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['username'].errors?.['pattern']">
+                {{ errorTextUsernamePattern }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input
+              type="email"
+              id="email"
+              formControlName="email" />
+            <div
+              *ngIf="
+                (registerForm.controls['email'].invalid &&
+                  registerForm.controls['email'].touched) ||
+                (isSubmitting && registerForm.controls['email'].errors)
+              "
+              class="invalid-feedback"
+              id="email-invalid-feedback">
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['email'].errors?.['required']">
+                {{ errorTextEmailRequired }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['email'].errors?.['pattern']">
+                {{ errorTextEmailInvalidFormat }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['email'].errors?.['uniqueEmail']">
+                {{ errorTextEmailAlreadyRegistered }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['email'].errors?.['maxlength']">
+                {{ errorTextEmailAlreadyRegistered }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input
+              type="password"
+              id="password"
+              formControlName="password" />
+
+            <div
+              *ngIf="
+                (registerForm.controls['password'].invalid &&
+                  registerForm.controls['password'].touched) ||
+                (isSubmitting && registerForm.controls['password'].errors)
+              "
+              class="invalid-feedback"
+              id="password-invalid-feedback">
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['password'].errors?.['required']">
+                {{ errorTextPasswordRequired }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['password'].errors?.['minlength']">
+                {{ errorTextPasswordMinLength }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['password'].errors?.['maxlength']">
+                {{ errorTextPasswordMaxLength }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['password'].errors?.['pattern']">
+                {{ errorTextPasswordComplexity }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password:</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              formControlName="confirmPassword" />
+            <div
+              *ngIf="
+                (registerForm.controls['confirmPassword'].invalid &&
+                  registerForm.controls['confirmPassword'].touched) ||
+                (isSubmitting &&
+                  registerForm.controls['confirmPassword'].errors)
+              "
+              class="invalid-feedback"
+              id="confirmPassword-invalid-feedback">
+              <div
+                class="helper-error-text"
+                *ngIf="
+                  registerForm.controls['confirmPassword'].errors?.['required']
+                ">
+                {{ errorTextConfirmationPasswordRequired }}
+              </div>
+              <div
+                class="helper-error-text"
+                *ngIf="registerForm.controls['confirmPassword'].errors?.['mustMatch']">
+                {{ errorTextPasswordsDoNotMatch }}
+              </div>
+            </div>
+          </div>
+
+          <button
+            [disabled]="!registerForm.valid || isSubmitting"
+            [ngClass]="{ submitting: isSubmitting }"
+            [@progressBarAnimation]="isSubmitting ? 'submitting' : 'idle'"
+            type="submit"
+            class="submit-button">
+            Register
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="col register-side-col">
+      <div class="column-container">
+        <div class="lcars-text-bar">
+          <span>Already registered?</span>
+        </div>
+        <div class="buttons">
+          <a
+            [routerLink]="getRouteLink(appRoutes.LOGIN)"
+            class="full-width-btn-link sunflower"
+            >Login</a
+          >
+        </div>
+      </div>
+      <app-lcars-error-message
+        *ngIf="errorMessage"
+        title="Access Denied"
+        [message]="errorMessage"></app-lcars-error-message>
+    </div>
+  </div>
+</div>

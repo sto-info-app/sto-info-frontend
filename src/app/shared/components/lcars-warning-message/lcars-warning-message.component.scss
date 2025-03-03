@@ -1,0 +1,26 @@
+.lcars-warning-message-container {
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+
+  .lcars-text-bar {
+    background-color: #fa4;
+    border-right: 28px solid #f70;
+    border-left: 28px solid #f70;
+  }
+
+  .lcars-bar {
+    border-right: 28px solid #f70;
+    border-left: 28px solid #f70;
+
+    .lcars-bar-inner {
+      background-color: #fa4;
+    }
+  }
+
+  .lcars-warning-message {
+    color: #f74;
+    padding: 0 40px;
+    text-align: left;
+  }
+}

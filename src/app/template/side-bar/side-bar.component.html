@@ -1,0 +1,48 @@
+<div
+  id="lcars-side-bar"
+  class="left-frame"
+  appResizeObserver
+  (appResizeObserver)="onResize($event)">
+  <div class="panel-grow-container">
+    <div class="panel panel-3"></div>
+    <div class="sidebar-buttons">
+      <a
+        *ngIf="!isLoggedIn"
+        [routerLink]="getRouteLink(appRoutes.REGISTER)"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="peach"
+        >Register</a
+      >
+      <a
+        *ngIf="isLoggedIn"
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="peach"
+        >Dashboard</a
+      >
+      <a
+        [routerLink]="getRouteLink('page-not-found')"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="peach"
+        >Error Page</a
+      >
+    </div>
+    <div class="panel panel-4"></div>
+    <div
+      class="panel panel-5"
+      *ngIf="isPenel5Hidden"></div>
+    <div
+      class="panel panel-6"
+      [innerHTML]="themePanel6RandomText"></div>
+    <div
+      class="panel panel-7"
+      *ngIf="isPenel7Hidden"></div>
+    <div
+      class="panel panel-8"
+      *ngIf="isPenel8Hidden"></div>
+    <div class="panel panel-9"></div>
+    <div
+      class="panel panel-10"
+      *ngIf="isPenel10Hidden"></div>
+  </div>
+</div>

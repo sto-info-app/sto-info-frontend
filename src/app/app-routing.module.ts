@@ -1,44 +1,94 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AboutComponent } from './about/about.component';
-import { AuthGuard } from './auth.guard';
-import { ContactComponent } from './contact/contact.component';
+import { AuthGuard } from './core/auth/auth.guard';
+import { ChangePasswordComponent } from './core/auth/change-password/change-password.component';
+import { ResetPasswordRequestComponent } from './core/auth/reset-password-request/reset-password-request.component';
+import { LoginComponent } from './core/login/login.component';
+import { RegisterComponent } from './core/register/register.component';
+import { RegistrationCompleteComponent } from './core/registration-complete/registration-complete.component';
+import { VerifyEmailComponent } from './core/verify-email/verify-email.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { ProfileComponent } from './dashboard/profile/profile.component';
+import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
 import { HomeComponent } from './home/home.component';
-import { InfoComponent } from './info/info.component';
-import { LoginComponent } from './login/login.component';
-import { ProtectedComponent } from './protected/protected.component';
-import { RegisterComponent } from './register/register.component';
+import { APP_ROUTES } from './shared/constants/app-routing.constants';
+import { AboutComponent } from './static-pages/about/about.component';
+import { ContactComponent } from './static-pages/contact/contact.component';
+import { CreditsComponent } from './static-pages/credits/credits.component';
+import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 
 const routes: Routes = [
+  // *****************************************
+  // * Default route
   {
     path: '',
     component: HomeComponent,
   },
+
+  // *****************************************
+  // * User auth, registration and validation
   {
-    path: 'login',
+    path: APP_ROUTES.LOGIN,
     component: LoginComponent,
   },
   {
-    path: 'register',
+    path: APP_ROUTES.REGISTER,
     component: RegisterComponent,
   },
   {
-    path: 'protected',
-    component: ProtectedComponent,
-    canActivate: [AuthGuard],
+    path: APP_ROUTES.REGISTER_COMPLETE,
+    component: RegistrationCompleteComponent,
   },
   {
-    path: 'about',
+    path: APP_ROUTES.VERIFY_EMAIL,
+    component: VerifyEmailComponent,
+  },
+  {
+    path: APP_ROUTES.RESET_PASSWORD,
+    component: ResetPasswordRequestComponent,
+  },
+  {
+    path: APP_ROUTES.CHANGE_PASSWORD,
+    component: ChangePasswordComponent,
+  },
+
+  // *****************************************
+  // * Static pages
+  {
+    path: APP_ROUTES.ABOUT,
     component: AboutComponent,
   },
   {
-    path: 'contact',
+    path: APP_ROUTES.CONTACT,
     component: ContactComponent,
   },
   {
-    path: 'info',
-    component: InfoComponent,
+    path: APP_ROUTES.TERMS_OF_USE,
+    component: TermsOfUseComponent,
+  },
+  {
+    path: APP_ROUTES.CREDITS,
+    component: CreditsComponent,
+  },
+
+  // *****************************************
+  // * STO App routes
+  {
+    path: APP_ROUTES.STO_DASHBOARD,
+    component: DashboardComponent,
     canActivate: [AuthGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_PROFILE,
+    component: ProfileComponent,
+    canActivate: [AuthGuard],
+  },
+
+  // *****************************************
+  // * Errors
+  {
+    path: '**',
+    component: PageNotFoundComponent,
   },
 ];
 

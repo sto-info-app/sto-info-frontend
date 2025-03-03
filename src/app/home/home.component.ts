@@ -1,15 +1,29 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { environment } from 'src/environments/environment';
+import { AuthService } from '../core/auth/auth.service';
+import { APP_ROUTES } from '../shared/constants/app-routing.constants';
+import { RoutingService } from '../shared/services/routing.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+  standalone: false,
 })
-export class HomeComponent implements OnInit {
-  appTitle = environment.appTitle;
+export class HomeComponent {
+  appTitle: string = environment.appTitle;
+  isLoggedIn = false;
+  appRoutes = APP_ROUTES;
 
-  constructor() {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly routingService: RoutingService,
+  ) {
+    this.authService.isAuthenticated$.subscribe(loggedIn => {
+      this.isLoggedIn = loggedIn;
+    });
+  }
 
-  ngOnInit(): void {}
+  getRouteLink(route: string): string {
+    return this.routingService.getLink(route);
+  }
 }

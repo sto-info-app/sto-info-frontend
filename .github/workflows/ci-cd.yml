@@ -1,0 +1,93 @@
+name: CI/CD
+
+on:
+  workflow_dispatch:
+
+  # pull_request:
+  #   types:
+  #     - closed
+  #   branches:
+  #     - production
+  #     - development
+
+  workflow_run:
+    workflows:
+      - Pull Request Check
+    types:
+      - completed
+
+env:
+  NODE_VERSION: 22
+  BUMP_VERSION_COMMIT_MSG: 'Bump version number'
+
+jobs:
+  prerequisite_check:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+
+    # Check commit message
+    outputs:
+      skip: ${{ steps.commit.outputs.skip }}
+      branch: ${{ steps.get-branch-name.outputs.branch }}
+
+    steps:
+      - name: Check if NODE_VERSION exists
+        run: echo "NODE_VERSION=$NODE_VERSION"
+        if: ${{ env.NODE_VERSION }}
+
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: commit
+        name: Get commit message
+        run: |
+          COMMIT_MESSAGE=$(git log --no-merges -1 --format=%B)
+          echo "Current commit message: $COMMIT_MESSAGE"
+          if [[ "$COMMIT_MESSAGE" == "${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
+            echo "::set-output name=skip::true"
+          else
+            echo "::set-output name=skip::false"
+          fi
+        shell: bash
+
+      - id: get-branch-name
+        name: Get branch name
+        run: |
+          branch_name=$(echo ${GITHUB_HEAD_REF})
+          if [ -z "$branch_name" ]
+          then
+            branch_name=$(echo "${{ github.head_ref }}")
+          fi
+          echo "Branch name is: $branch_name"
+          echo "::set-output name=branch::$branch_name"
+        shell: bash
+
+  test:
+    needs: prerequisite_check
+    if: needs.prerequisite_check.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          ref: ${{ github.event_name == 'pull_request' && needs.prerequisite_check.outputs.branch || 'production' }}
+          fetch-depth: 0 # Fetch all history to enable proper commit and push
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm run test

@@ -1,0 +1,26 @@
+.lcars-error-message-container {
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+
+  .lcars-text-bar {
+    background-color: #ffaa90;
+    border-right: 28px solid #d44;
+    border-left: 28px solid #d44;
+  }
+
+  .lcars-bar {
+    border-right: 28px solid #d44;
+    border-left: 28px solid #d44;
+
+    .lcars-bar-inner {
+      background-color: #ffaa90;
+    }
+  }
+
+  .lcars-error-message {
+    color: #cc2233;
+    padding: 0 40px;
+    text-align: left;
+  }
+}

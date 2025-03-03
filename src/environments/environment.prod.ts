@@ -1,7 +1,15 @@
-export const environment = {
+import packageJson from '../../package.json';
+import { Environment } from './models/environment.model';
+
+export const environment: Environment = {
   production: true,
+  version: packageJson.version,
   env_name: 'prod',
   env_label: 'Production',
-  apiUrl: 'http://localhost:3000',
-  appTitle: 'Star Trek Online Info App',
+  apiUrl: 'https://api.startrekonline.info',
+  appTitle: 'Star Trek Online Info Portal',
+  appLoggedInHome: '/dashboard',
+  allowDebugging: false,
+  minsBeforeLogoutExpiryToShowWarning: 5,
+  minsBeforeLogoutExpiryToRefreshToken: 15,
 };

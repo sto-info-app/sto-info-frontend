@@ -59,6 +59,7 @@
 
 .panel-1 a {
   animation: redalert 1s infinite;
+  background-color: #c00;
 }
 
 .panel-4 {
@@ -81,10 +82,11 @@
   animation-delay: 0.3s;
 }
 
+/* Animate Red Alert & Moving Bars */
 .bar-2,
 .bar-7 {
-  animation: redalert 1s infinite;
-  animation-delay: 0.3s;
+  animation: redalert 1s infinite 0.3s,
+    resizeGroup1 60s linear infinite alternate;
 }
 
 .bar-3,
@@ -95,13 +97,27 @@
 
 .bar-4,
 .bar-9 {
-  animation: redalert 1s infinite;
-  animation-delay: 0.5s;
+  animation: redalert 1s infinite 0.5s,
+    resizeGroup2 60s linear infinite alternate;
 }
+/* END: Animate Red Alert & Moving Bars */
 
 .button#top-left a {
   animation: redalert 1s infinite;
   animation-delay: 0.6s;
+  background-color: #c00;
+}
+
+.button#bottom-left a {
+  background-color: #c00;
+}
+
+.button#top-right a {
+  background-color: #e00;
+}
+
+.button#bottom-right a {
+  background-color: #dfdfdf;
 }
 
 .bar-5,
@@ -119,15 +135,19 @@
   animation-delay: 0.8s;
 }
 
+.panel-7,
+.panel-8,
+.panel-9,
+.panel-10 {
+  animation: redalert 1s infinite;
+  animation-delay: 0.9s;
+}
+
 .left-frame-top {
   background-color: #c00;
 }
 
 .left-frame {
-  background-color: #c00;
-}
-
-.panel-1 a {
   background-color: #c00;
 }
 
@@ -170,22 +190,6 @@
   color: #f7f7f7;
 }
 
-.button#top-left a {
-  background-color: #c00;
-}
-
-.button#bottom-left a {
-  background-color: #c00;
-}
-
-.button#top-right a {
-  background-color: #e00;
-}
-
-.button#bottom-right a {
-  background-color: #dfdfdf;
-}
-
 .top-corner-bg {
   background-color: #c00;
 }
@@ -203,7 +207,7 @@
   background-color: #c00;
 }
 
-#gap {
+.gap {
   margin-top: 10px;
 }
 
@@ -285,33 +289,20 @@ footer {
   background: linear-gradient(#ff8866 50%, #dd4444 50%);
 }
 
-.footer-panel {
+#footer-panel {
   background-color: #ff5555;
 }
 
-.footer-inside::before {
+#footer-inside::before {
   background-color: #ff8866;
 }
 
-.footer-inside::after {
+#footer-inside::after {
   background-color: #dd4444;
 }
 
-.footer-text a {
+#footer-text a {
   color: #e00;
-}
-
-/* Animate Red Alert & Moving Bars */
-.bar-2,
-.bar-7 {
-  animation: redalert 1s infinite 0.3s,
-    resizeGroup1 60s linear infinite alternate;
-}
-
-.bar-4,
-.bar-9 {
-  animation: redalert 1s infinite 0.5s,
-    resizeGroup2 60s linear infinite alternate;
 }
 
 @keyframes resizeGroup1 {
