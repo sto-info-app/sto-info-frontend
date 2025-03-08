@@ -1,19 +1,58 @@
 <h1>Terms of use</h1>
 
 <p>
-  Welcome to the {{ appTitle }} for tracking your Star Trek Online accounts,
-  characters, and activities. The portal gets provided as-is to users as a free
-  resource to the Star Trek Online community, and by using this portal, you
-  agree to the following terms of use.
+  By using the {{ appTitle }} app, you agree to the following terms of use. If
+  you do not agree, you should not use the app.
 </p>
 
-<h2>1. Acceptance of Terms</h2>
 <p>
-  By using this portal, you agree to comply with these terms of use. If you do
-  not agree with any of these terms, please do not use this portal.
+  <strong class="go-gold">Last updated: </strong>
+  <span class="go-roseblush">8th March 2025</span>.
 </p>
 
-<h2>2. Intellectual Property Rights</h2>
+<p>
+  <strong class="go-gold">Definitions:</strong> "we", "our", or "us" refers to
+  the developers and maintainers of the {{ appTitle }} app.
+</p>
+
+<div class="lcars-bar">
+  <div class="lcars-bar-inner"></div>
+</div>
+<h2>1. Use of the App</h2>
+<ul class="lcars-list">
+  <li>
+    You must be at least 13 years old (or the minimum age required by your local
+    laws).
+  </li>
+  <li>
+    You are responsible for maintaining the confidentiality of your account.
+  </li>
+  <li>You agree not to use the app for illegal or harmful activity.</li>
+</ul>
+
+<hr />
+<h2>2. User Content</h2>
+<ul class="lcars-list">
+  <li>Any content you create or upload remains your property.</li>
+  <li>
+    By using the app, you grant us a limited license to use your content to
+    provide and improve the app.
+  </li>
+  <li>
+    You must not upload content that is offensive, illegal, or infringes on
+    intellectual property rights.
+  </li>
+</ul>
+
+<hr />
+<h2>
+  3. Intellectual Property, Copyright and
+  <abbr title="Digital Millennium Copyright Act">DMCA</abbr>
+</h2>
+<p>
+  This app is a fan-made project and is not affiliated with or sponsored by
+  Cryptic Studios, CBS Studios, or Paramount Global.
+</p>
 <p>
   This app respects the copyright and intellectual property rights of
   <a
@@ -21,6 +60,7 @@
     href="https://playstartrekonline.com/"
     >Star Trek Online<fa-icon
       [icon]="['fas', 'external-link']"
+      title="(*external link)"
       class="ext-link"></fa-icon
   ></a>
   and
@@ -29,35 +69,108 @@
     href="https://startrek.com/"
     >Star Trek<fa-icon
       [icon]="['fas', 'external-link']"
+      title="(*external link)"
       class="ext-link"></fa-icon></a
-  >. CBS Studios Inc. owns STAR TREK, and Cryptic Studios Inc owns STAR TREK
-  ONLINE with all their related marks, logos and characters. The LCARS-inspired
-  template was designed & developed by Jim Robertus and modified by Steve
-  Roberts. Users are prohibited from reproducing, distributing, or modifying any
-  content from this portal without permission from the respective creative or
-  copyright owner.
+  >. CBS Studios Inc. and Paramount Global owns STAR TREK, and Cryptic Studios
+  Inc owns STAR TREK ONLINE with all their related marks, logos and characters.
+</p>
+<p>
+  The LCARS-inspired template was designed & developed by Jim Robertus and
+  modified by Steve Roberts.
+</p>
+<p>
+  Users are prohibited from reproducing, distributing, or modifying any content
+  from this portal without permission from the respective creative or copyright
+  owner.
+</p>
+<p>
+  If you believe content on the app infringes copyright, you can submit an
+  enquiry using the
+  <a [routerLink]="getRouteLink(appRoutes.CONTACT)">contact us</a>
+  form.
 </p>
 
-<h2>3. Prohibited Actions</h2>
+<hr />
+<h2>4. Prohibited Behaviour</h2>
+<ul class="no-bullets">
+  <li>
+    <fa-icon
+      [icon]="['fas', 'square-xmark']"
+      class="go-red"></fa-icon>
+    Use cheats, hacks, or automation tools.
+  </li>
+  <li>
+    <fa-icon
+      [icon]="['fas', 'square-xmark']"
+      class="go-red"></fa-icon>
+    Attempt to reverse engineer or modify the app.
+  </li>
+  <li>
+    <fa-icon
+      [icon]="['fas', 'square-xmark']"
+      class="go-red"></fa-icon>
+    Harass or abuse other users.
+  </li>
+  <li>
+    <fa-icon
+      [icon]="['fas', 'square-xmark']"
+      class="go-red"></fa-icon>
+    Attempt to gain unauthorised access to the app.
+  </li>
+</ul>
+
+<hr />
+<h2>5. Account Termination</h2>
 <p>
-  Users are prohibited from using this portal for any illegal or unauthorised
-  purpose, including, but not limited to, hacking, spamming, or distributing
-  malware. Users are also prohibited from harassing or threatening other users
-  or engaging in any activity that interferes with the regular operation of this
-  app.
+  We reserve the right to suspend or terminate your account if you violate these
+  terms or engage in misconduct.
 </p>
 
-<h2>4. Consequences of Violation</h2>
+<hr />
+<h2>6. Limitation of Liability</h2>
 <p>
-  Any user who violates these terms of use may be subject to account suspension
-  or termination without warning.
+  The {{ appTitle }} app is provided free of charge. We accept no liability for
+  any loss or damage resulting from:
+</p>
+<ul class="lcars-list">
+  <li>Your use or inability to use the app.</li>
+  <li>
+    Service interruptions caused by Render, Cloudflare, or other third-party
+    providers.
+  </li>
+  <li>
+    Unauthorised access or data breaches not caused by our direct negligence.
+  </li>
+</ul>
+
+<hr />
+<h2>7. Governing Law</h2>
+<p>These terms are governed by the laws of the United Kingdom.</p>
+
+<hr />
+<h2>8. Data Transfers</h2>
+<p>
+  Data processed by Cloudflare and Render may be transferred to and processed in
+  countries outside your place of residence.
+</p>
+<p>
+  Check out our
+  <a [routerLink]="getRouteLink(appRoutes.PRIVACY_POLICY)">privacy policy</a>
+  for more information on data transfers and data security.
 </p>
 
-<div class="lcars-bar">
-  <div class="lcars-bar-inner"></div>
-</div>
-
+<hr />
+<h2>9. Changes to the Terms</h2>
 <p>
-  We hope you enjoy your experience and appreciate your commitment to following
-  these terms of use.
+  We may update these terms periodically. Continued use of the
+  {{ appTitle }} app after updates means you accept the revised terms.
+</p>
+
+<hr />
+<h2>10. Contact Us</h2>
+<p>
+  If you have any questions regarding these terms, you can submit an enquiry
+  using the
+  <a [routerLink]="getRouteLink(appRoutes.CONTACT)">contact us</a>
+  form.
 </p>
