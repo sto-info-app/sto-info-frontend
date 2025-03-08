@@ -2,14 +2,14 @@
 
 /*
 	CSS Document
-	LCARS Colors
+	LCARS Colors v23-Ultra
 	Last modified 2023 Feb 22
 	By Jim Robertus www.thelcars.com
-
+  Modified by: Steve Roberts
 */
 
 .space-white,
-.oc-space-white::before { 
+.oc-space-white::before {
 	background-color: #f5f6fa !important;
 }
 
@@ -370,6 +370,15 @@
 
 .go-butter {
 	color: #fec !important;
+}
+
+.lima-bean,
+.oc-lima-bean::before {
+	background-color: #cc6 !important;
+}
+
+.go-lima-bean {
+	color: #cc6 !important;
 }
 
 /* Lower Decks PADD */
