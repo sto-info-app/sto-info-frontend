@@ -14,6 +14,7 @@ export const APP_ROUTES = {
   CONTACT: 'contact',
   TERMS_OF_USE: 'terms-of-use',
   CREDITS: 'credits',
+  PRIVACY_POLICY: 'privacy-policy',
 
   // STO App Routes
   STO_DASHBOARD: rootDashboard,

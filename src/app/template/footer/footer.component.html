@@ -56,6 +56,14 @@
             </li>
             <li>
               <a
+                [routerLink]="getRouteLink(appRoutes.PRIVACY_POLICY)"
+                [routerLinkActiveOptions]="{ exact: true }"
+                routerLinkActive="active"
+                >Privacy policy</a
+              >
+            </li>
+            <li>
+              <a
                 [routerLink]="getRouteLink(appRoutes.TERMS_OF_USE)"
                 [routerLinkActiveOptions]="{ exact: true }"
                 routerLinkActive="active"

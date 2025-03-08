@@ -4,6 +4,7 @@ import { SharedModule } from '../shared/shared.module';
 import { AboutComponent } from './about/about.component';
 import { ContactComponent } from './contact/contact.component';
 import { CreditsComponent } from './credits/credits.component';
+import { PrivacyPolicyComponent } from './privacy-policy/privacy-policy.component';
 import { TermsOfUseComponent } from './terms-of-use/terms-of-use.component';
 
 @NgModule({
@@ -12,6 +13,7 @@ import { TermsOfUseComponent } from './terms-of-use/terms-of-use.component';
     ContactComponent,
     TermsOfUseComponent,
     CreditsComponent,
+    PrivacyPolicyComponent,
   ],
   imports: [CommonModule, SharedModule],
   exports: [
@@ -19,6 +21,7 @@ import { TermsOfUseComponent } from './terms-of-use/terms-of-use.component';
     ContactComponent,
     TermsOfUseComponent,
     CreditsComponent,
+    PrivacyPolicyComponent,
   ],
 })
 export class StaticPagesModule {}
