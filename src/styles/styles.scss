@@ -1,5 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
 
+strong {
+  font-weight: bold !important;
+}
+
+ul {
+  margin-left: 25px;
+}
+
+ul.no-bullets {
+  list-style-type: none;
+  margin-left: 5px;
+}
+
+ul.no-bullets ul {
+  margin-left: 50px;
+}
+
 .form-container {
   display: flex;
   flex-direction: column;
