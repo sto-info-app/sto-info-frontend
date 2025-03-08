@@ -4,11 +4,11 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-terms-of-use',
-  templateUrl: './terms-of-use.component.html',
+  selector: 'app-privacy-policy',
+  templateUrl: './privacy-policy.component.html',
   standalone: false,
 })
-export class TermsOfUseComponent {
+export class PrivacyPolicyComponent {
   appTitle = environment.appTitle;
   appRoutes = APP_ROUTES;
 
