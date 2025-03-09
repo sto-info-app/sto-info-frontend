@@ -81,6 +81,20 @@ export class AppComponent {
       });
 
     this.loadCookieYesScript();
+
+    // Listen for the cookie consent update event
+    window.addEventListener('cookie-consent-update', event => {
+      const customEvent = event as CustomEvent<{ consented: boolean }>;
+      console.log('Consent update:', customEvent.detail);
+      if (customEvent.detail && customEvent.detail.consented) {
+        this.consentGiven();
+      } else {
+        this.consentDenied();
+      }
+    });
+
+    // Also handle existing cookie consent state on load
+    this.checkConsentState();
   }
 
   ngOnDestroy() {
@@ -202,4 +216,81 @@ export class AppComponent {
       };
     }
   }
+
+  checkConsentState(): void {
+    const consent = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('cky-consent='))
+      ?.split('=')[1];
+
+    if (consent === 'accepted') {
+      this.consentGiven();
+    } else {
+      this.consentDenied();
+    }
+  }
+
+  consentGiven(): void {
+    console.log('Consent already given — loading tracking scripts...');
+    this.loadGoogleAnalytics();
+    // this.loadLogRocket();
+  }
+
+  consentDenied(): void {
+    console.log('Consent not given — disabling tracking...');
+    this.disableGoogleAnalytics();
+    // this.disableLogRocket();
+  }
+
+  loadGoogleAnalytics(): void {
+    if (environment.env_name !== 'local' && environment.gaMeasurementId) {
+      interface WindowWithGA extends Window {
+        ga?: string;
+      }
+      const typedWindow = window as WindowWithGA;
+      if (!typedWindow.ga) {
+        const script = this.renderer.createElement('script');
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${environment.gaMeasurementId}`; // Replace with your GA ID
+        script.async = true;
+        this.renderer.appendChild(document.head, script);
+
+        (window as unknown as { dataLayer: unknown[] }).dataLayer =
+          (window as unknown as { dataLayer: unknown[] }).dataLayer || [];
+
+        const gtag = (...args: unknown[]) => {
+          (window as unknown as { dataLayer: unknown[] }).dataLayer.push(args);
+        };
+
+        gtag('js', new Date());
+        gtag('config', environment.gaMeasurementId, { anonymize_ip: true });
+        console.log('Google Analytics loaded');
+      }
+    }
+  }
+
+  disableGoogleAnalytics(): void {
+    console.log('Disabling Google Analytics...');
+    // Prevent GA from tracking
+    (window as unknown as { [key: string]: boolean })[
+      `ga-disable-${environment.gaMeasurementId}`
+    ] = true;
+  }
+
+  // loadLogRocket(): void {
+  //   if (
+  //     !(window as { LogRocket?: { init: (id: string) => void } })['LogRocket']
+  //   ) {
+  //     import('logrocket').then(LogRocket => {
+  //       LogRocket.default.init('your-app-id'); // Replace with LogRocket ID
+  //       console.log('LogRocket loaded');
+  //     });
+  //   }
+  // }
+
+  // disableLogRocket(): void {
+  //   console.log('Disabling LogRocket...');
+  //   if (window['LogRocket']) {
+  //     window['LogRocket'].shutdown(); // Stop LogRocket session recording
+  //   }
+  // }
 }
