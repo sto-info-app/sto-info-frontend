@@ -5,7 +5,6 @@ import { Subject, Subscription, takeUntil } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
-import { CookieService } from './shared/services/cookie.service';
 
 /// <reference types="cookieyes" />
 declare global {
@@ -53,7 +52,7 @@ function getCkyConsent() {
 })
 export class AppComponent implements OnInit, OnDestroy {
   private readonly cookieYesScriptId = 'cookieyes';
-  private readonly cookieYesCookieName = 'cookieyes-consent';
+  // private readonly cookieYesCookieName = 'cookieyes-consent';
 
   isLoggedIn = false;
   autoLogoutCountdown = 0;
@@ -72,7 +71,7 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(
     private readonly authService: AuthService,
     private readonly titleService: Title,
-    private readonly cookieService: CookieService,
+    // private readonly cookieService: CookieService,
     private readonly zone: NgZone,
     private readonly renderer: Renderer2,
     public readonly dialog: MatDialog,
@@ -125,22 +124,22 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       });
 
-    // Subscribe to updates on the cookie status
-    this.cookieService.cookieStatus$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(status => {
-        console.log('Cookie status updated:', status);
-        this.cookieStatus = status;
-        // Perform additional actions based on the cookie status
-        if (status) {
-          this.consentGiven();
-        } else {
-          this.consentDenied();
-        }
-      });
+    // // Subscribe to updates on the cookie status
+    // this.cookieService.cookieStatus$
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe(status => {
+    //     console.log('Cookie status updated:', status);
+    //     this.cookieStatus = status;
+    //     // Perform additional actions based on the cookie status
+    //     if (status) {
+    //       this.consentGiven();
+    //     } else {
+    //       this.consentDenied();
+    //     }
+    //   });
 
-    // Trigger an update check for the cookieYes cookie
-    this.cookieService.getSpecificCookieStatus(this.cookieYesCookieName);
+    // // Trigger an update check for the cookieYes cookie
+    // this.cookieService.getSpecificCookieStatus(this.cookieYesCookieName);
 
     this.loadCookieYesScript();
   }
@@ -288,6 +287,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   checkConsentState(): void {
     const consent = getCkyConsent();
+    console.log('Checking consent state:', consent);
 
     if (consent.isUserActionCompleted && consent.categories.analytics) {
       this.consentGiven();
@@ -297,13 +297,13 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   consentGiven(): void {
-    console.log('Consent already given — loading tracking scripts...');
+    console.log('Consent IS given — loading tracking scripts...');
     this.loadGoogleAnalytics();
     // this.loadLogRocket();
   }
 
   consentDenied(): void {
-    console.log('Consent not given — disabling tracking...');
+    console.log('Consent IS NOT given — disabling tracking...');
     this.disableGoogleAnalytics();
     // this.disableLogRocket();
   }
@@ -330,7 +330,11 @@ export class AppComponent implements OnInit, OnDestroy {
         gtag('js', new Date());
         gtag('config', environment.gaMeasurementId, { anonymize_ip: true });
         console.log('Google Analytics loaded');
+      } else {
+        console.log('Google Analytics already loaded');
       }
+    } else {
+      console.warn('Google Analytics not loaded due to environment settings');
     }
   }
 
