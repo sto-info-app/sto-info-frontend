@@ -9,6 +9,11 @@ import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
 import { CookieService } from './shared/services/cookie.service';
 
+declare let ga: (
+  command: string,
+  ...fields: (string | number | boolean | object)[]
+) => void;
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -91,14 +96,24 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.loadCookieYesScript();
 
-    // Track page views
+    // // Track page views
+    // this.router.events
+    //   .pipe(
+    //     filter(event => event instanceof NavigationEnd),
+    //     takeUntil(this.destroy$),
+    //   )
+    //   .subscribe((event: NavigationEnd) => {
+    //     this.trackPageView(event.urlAfterRedirects);
+    //   });
+
     this.router.events
-      .pipe(
-        filter(event => event instanceof NavigationEnd),
-        takeUntil(this.destroy$),
-      )
+      .pipe(takeUntil(this.destroy$))
+      .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
-        this.trackPageView(event.urlAfterRedirects);
+        // Delay the GA call slightly if needed to ensure GA has fully loaded
+        setTimeout(() => {
+          this.sendPageView(event.urlAfterRedirects);
+        }, 0);
       });
   }
 
@@ -319,9 +334,18 @@ export class AppComponent implements OnInit, OnDestroy {
       } else {
         console.warn('gtag function not available');
       }
-      console.log(`Tracked page view: ${url}`);
     } else {
       console.warn('gtag function not available');
+    }
+  }
+
+  private sendPageView(url: string): void {
+    if (typeof ga === 'function') {
+      ga('set', 'page', url);
+      ga('send', 'pageview');
+      console.log('GA pageview sent for', url);
+    } else {
+      console.error('Google Analytics not available');
     }
   }
 
