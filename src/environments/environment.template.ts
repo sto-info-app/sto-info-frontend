@@ -13,4 +13,5 @@ export const environment: Environment = {
   minsBeforeLogoutExpiryToShowWarning: __minsBeforeLogoutExpiryToShowWarning__,
   minsBeforeLogoutExpiryToRefreshToken:
     __minsBeforeLogoutExpiryToRefreshToken__,
+  cookieYesUrl: '__cookieYesUrl__',
 };
