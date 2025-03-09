@@ -1,3 +1,7 @@
+//NOTE: Add *ALL* variables to the environment model.
+//NOTE: The app will throw an error if env vars missing/invalid.
+//NOTE: This will assist if variables are missing upon release!
+
 import packageJson from '../../package.json';
 import { Environment } from './models/environment.model';
 
