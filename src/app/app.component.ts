@@ -100,6 +100,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.cookieService.getCookieStatus();
 
     this.loadCookieYesScript();
+
+    this.cookieService.createTestCookie('testCookie', 'true', 1);
   }
 
   ngOnDestroy() {

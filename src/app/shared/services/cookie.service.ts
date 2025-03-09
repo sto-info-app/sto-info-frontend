@@ -41,4 +41,21 @@ export class CookieService {
       this.cookieStatusSubject.next(status);
     }
   }
+
+  // Method to create a test cookie
+  createTestCookie(
+    cookieName: string,
+    cookieValue: string,
+    days: number,
+  ): void {
+    const date = new Date();
+    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+    const expires = `expires=${date.toUTCString()}`;
+    document.cookie = `${cookieName}=${cookieValue};${expires};path=/`;
+  }
+
+  // Method to delete the test cookie
+  deleteTestCookie(cookieName: string): void {
+    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  }
 }
