@@ -5,45 +5,46 @@ import { Subject, Subscription, takeUntil } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
+import { CookieService } from './shared/services/cookie.service';
 
-/// <reference types="cookieyes" />
-declare global {
-  interface Window {
-    getCkyConsent?: () => {
-      activeLaw: string;
-      categories: {
-        necessary: boolean;
-        functional: boolean;
-        analytics: boolean;
-        performance: boolean;
-        advertisement: boolean;
-      };
-      isUserActionCompleted: boolean;
-      consentID: string;
-      languageCode: string;
-    };
-  }
-}
+// /// <reference types="cookieyes" />
+// declare global {
+//   interface Window {
+//     getCkyConsent?: () => {
+//       activeLaw: string;
+//       categories: {
+//         necessary: boolean;
+//         functional: boolean;
+//         analytics: boolean;
+//         performance: boolean;
+//         advertisement: boolean;
+//       };
+//       isUserActionCompleted: boolean;
+//       consentID: string;
+//       languageCode: string;
+//     };
+//   }
+// }
 
-function getCkyConsent() {
-  if (window.getCkyConsent) {
-    return window.getCkyConsent();
-  } else {
-    return {
-      activeLaw: '',
-      categories: {
-        necessary: false,
-        functional: false,
-        analytics: false,
-        performance: false,
-        advertisement: false,
-      },
-      isUserActionCompleted: false,
-      consentID: '',
-      languageCode: '',
-    };
-  }
-}
+// function getCkyConsent() {
+//   if (window.getCkyConsent) {
+//     return window.getCkyConsent();
+//   } else {
+//     return {
+//       activeLaw: '',
+//       categories: {
+//         necessary: false,
+//         functional: false,
+//         analytics: false,
+//         performance: false,
+//         advertisement: false,
+//       },
+//       isUserActionCompleted: false,
+//       consentID: '',
+//       languageCode: '',
+//     };
+//   }
+// }
 
 @Component({
   selector: 'app-root',
@@ -71,7 +72,7 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(
     private readonly authService: AuthService,
     private readonly titleService: Title,
-    // private readonly cookieService: CookieService,
+    private readonly cookieService: CookieService,
     private readonly zone: NgZone,
     private readonly renderer: Renderer2,
     public readonly dialog: MatDialog,
@@ -266,15 +267,17 @@ export class AppComponent implements OnInit, OnDestroy {
         document.addEventListener('cookieyes_consent_update', eventData => {
           const data = (eventData as CustomEvent).detail;
           console.log('CookieYes consent update:', data);
-          if (data.accepted.includes('analytics')) {
+          this.cookieService.setCookieStatus(data.accepted); // Save the accepted cookie categories allowed by the user
+
+          if (this.cookieService.isCookieCategoryAccepted('analytics')) {
             this.consentGiven();
           } else {
             this.consentDenied();
           }
         });
 
-        // Also handle existing cookie consent state on load
-        this.checkConsentState();
+        // // Also handle existing cookie consent state on load
+        // this.checkConsentState();
       };
 
       script.onerror = () => {
@@ -285,16 +288,16 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  checkConsentState(): void {
-    const consent = getCkyConsent();
-    console.log('Checking consent state:', consent);
+  // checkConsentState(): void {
+  //   const consent = getCkyConsent();
+  //   console.log('Checking consent state:', consent);
 
-    if (consent.isUserActionCompleted && consent.categories.analytics) {
-      this.consentGiven();
-    } else {
-      this.consentDenied();
-    }
-  }
+  //   if (consent.isUserActionCompleted && consent.categories.analytics) {
+  //     this.consentGiven();
+  //   } else {
+  //     this.consentDenied();
+  //   }
+  // }
 
   consentGiven(): void {
     console.log('Consent IS given — loading tracking scripts...');
@@ -311,10 +314,10 @@ export class AppComponent implements OnInit, OnDestroy {
   loadGoogleAnalytics(): void {
     if (environment.env_name !== 'local' && environment.gaMeasurementId) {
       interface WindowWithGA extends Window {
-        ga?: string;
+        gtag?: (...args: unknown[]) => void;
       }
       const typedWindow = window as WindowWithGA;
-      if (!typedWindow.ga) {
+      if (!typedWindow.gtag) {
         const script = this.renderer.createElement('script');
         script.src = `https://www.googletagmanager.com/gtag/js?id=${environment.gaMeasurementId}`; // Replace with your GA ID
         script.async = true;
@@ -323,13 +326,23 @@ export class AppComponent implements OnInit, OnDestroy {
         (window as unknown as { dataLayer: unknown[] }).dataLayer =
           (window as unknown as { dataLayer: unknown[] }).dataLayer || [];
 
-        const gtag = (...args: unknown[]) => {
+        typedWindow.gtag = (...args: unknown[]) => {
           (window as unknown as { dataLayer: unknown[] }).dataLayer.push(args);
         };
 
-        gtag('js', new Date());
-        gtag('config', environment.gaMeasurementId, { anonymize_ip: true });
-        console.log('Google Analytics loaded');
+        script.onload = () => {
+          if (typedWindow.gtag) {
+            typedWindow.gtag('js', new Date());
+            typedWindow.gtag('config', environment.gaMeasurementId, {
+              anonymize_ip: true,
+            });
+          }
+          console.log('Google Analytics loaded and initialized');
+        };
+
+        script.onerror = () => {
+          console.error('Failed to load Google Analytics script');
+        };
       } else {
         console.log('Google Analytics already loaded');
       }

@@ -5,6 +5,20 @@ import { BehaviorSubject, Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class CookieService {
+  private userAcceptedCookies: string[] = [];
+
+  // Method to check if a specific cookie category is accepted
+  public isCookieCategoryAccepted(category: string): boolean {
+    return this.userAcceptedCookies.includes(category);
+  }
+
+  // Method to overwrite the entire userAcceptedCookies array
+  public setUserAcceptedCookieCategories(
+    acceptedCookieCategories: string[],
+  ): void {
+    this.userAcceptedCookies = acceptedCookieCategories;
+  }
+
   // Initialise the BehaviorSubject with a default 'false' value
   private readonly cookieStatusSubject: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
