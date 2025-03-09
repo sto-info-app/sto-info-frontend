@@ -390,18 +390,10 @@ export class AppComponent implements OnInit, OnDestroy {
   //   }
   // }
 
-  extractAcceptedConsentCookieCategories(cookieValue: string): string[] {
+  extractAcceptedConsentCookieCategories(cookieValue: string) {
     console.log('Extracting accepted consent cookie categories:', cookieValue);
 
-    // Check if the cookie string contains the cookieyes-consent cookie
-    const cookieString = cookieValue
-      .split('; ')
-      .find(row => row.startsWith(`${this.cookieYesCookieName}=`));
-
-    if (cookieString) {
-      console.log('Cookie string:', cookieString);
-      const cookieValue = cookieString.split('=')[1];
-      console.log('Cookie value:', cookieValue);
+    if (cookieValue) {
       const cookieParts = cookieValue.split(',');
       console.log('Cookie parts:', cookieParts);
 
@@ -417,8 +409,5 @@ export class AppComponent implements OnInit, OnDestroy {
       console.log('Accepted categories:', acceptedCategories);
       this.cookieService.setUserAcceptedCookieCategories(acceptedCategories);
     }
-    const categories = cookieValue.split(',');
-    console.log('Extracted categories:', categories);
-    return categories;
   }
 }
