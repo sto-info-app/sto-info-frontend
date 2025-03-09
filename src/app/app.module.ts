@@ -1,3 +1,4 @@
+import { LocationStrategy, PathLocationStrategy } from '@angular/common';
 import {
   provideHttpClient,
   withInterceptorsFromDi,
@@ -69,6 +70,7 @@ const globalRippleConfig: RippleGlobalOptions = {
       provide: 'API_URL',
       useValue: environment.apiUrl,
     },
+    { provide: LocationStrategy, useClass: PathLocationStrategy },
     provideHttpClient(withInterceptorsFromDi()),
   ],
 })
