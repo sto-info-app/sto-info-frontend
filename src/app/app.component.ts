@@ -229,7 +229,7 @@ export class AppComponent {
     console.log('checkConsentState document.cookie:', document.cookie);
     const consent = document.cookie
       .split('; ')
-      .find(row => row.startsWith('cky-consent='))
+      .find(row => row.startsWith('cookieyes-consent='))
       ?.split('=')[1];
 
     console.log('Cookie consent state:', consent);
