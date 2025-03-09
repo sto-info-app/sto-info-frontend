@@ -269,15 +269,12 @@ export class AppComponent implements OnInit, OnDestroy {
           console.log('CookieYes consent update:', data);
           this.cookieService.setUserAcceptedCookieCategories(data.accepted); // Save the accepted cookie categories allowed by the user
 
-          if (this.cookieService.isCookieCategoryAccepted('analytics')) {
-            this.consentGiven();
-          } else {
-            this.consentDenied();
-          }
+          // Check if the user has accepted the analytics category since the user has changed their consent
+          this.checkCookieConsentState();
         });
 
-        // // Also handle existing cookie consent state on load
-        // this.checkConsentState();
+        // Check cookie consent state on load
+        this.checkCookieConsentState();
       };
 
       script.onerror = () => {
@@ -285,6 +282,14 @@ export class AppComponent implements OnInit, OnDestroy {
       };
     } else {
       console.error('CookieYes URL not set in environment');
+    }
+  }
+
+  checkCookieConsentState(): void {
+    if (this.cookieService.isCookieCategoryAccepted('analytics')) {
+      this.consentGiven();
+    } else {
+      this.consentDenied();
     }
   }
 
