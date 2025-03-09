@@ -176,6 +176,7 @@ export class AppComponent {
    * NOTE: This script is only loaded if the environment is not on localhost
    */
   loadCookieYesScript(): void {
+    console.log('loadCookieYesScript document.cookie:', document.cookie);
     console.log('Loading CookieYes script...');
     // Clean up any existing script before loading a new one
     const existingScript = document.getElementById(this.cookieYesScriptId);
@@ -225,11 +226,13 @@ export class AppComponent {
   }
 
   checkConsentState(): void {
+    console.log('checkConsentState document.cookie:', document.cookie);
     const consent = document.cookie
       .split('; ')
       .find(row => row.startsWith('cky-consent='))
       ?.split('=')[1];
 
+    console.log('Cookie consent state:', consent);
     if (consent === 'accepted') {
       this.consentGiven();
     } else {
