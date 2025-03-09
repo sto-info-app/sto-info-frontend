@@ -125,23 +125,6 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       });
 
-    // // Subscribe to updates on the cookie status
-    // this.cookieService.cookieStatus$
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(status => {
-    //     console.log('Cookie status updated:', status);
-    //     this.cookieStatus = status;
-    //     // Perform additional actions based on the cookie status
-    //     if (status) {
-    //       this.consentGiven();
-    //     } else {
-    //       this.consentDenied();
-    //     }
-    //   });
-
-    // // Trigger an update check for the cookieYes cookie
-    // this.cookieService.getSpecificCookieStatus(this.cookieYesCookieName);
-
     this.loadCookieYesScript();
   }
 
@@ -238,9 +221,6 @@ export class AppComponent implements OnInit, OnDestroy {
    * NOTE: This script is only loaded if the environment is not on localhost
    */
   loadCookieYesScript(): void {
-    console.log('loadCookieYesScript document.cookie:', document.cookie);
-    console.log('Loading CookieYes script...');
-
     const consentCookieValues =
       this.cookieService.readCookie(this.cookieYesCookieName)?.split(',') || [];
     this.extractAcceptedConsentCookieCategories(consentCookieValues);
@@ -248,7 +228,6 @@ export class AppComponent implements OnInit, OnDestroy {
     // Clean up any existing script before loading a new one
     const existingScript = document.getElementById(this.cookieYesScriptId);
     if (existingScript) {
-      console.log('Removing existing CookieYes script...');
       existingScript.parentNode?.removeChild(existingScript);
     }
 
@@ -262,16 +241,13 @@ export class AppComponent implements OnInit, OnDestroy {
       this.renderer.appendChild(document.head, script);
 
       script.onload = () => {
-        console.log('CookieYes script loaded.');
         if ((window as { CookieYes?: { run: () => void } }).CookieYes) {
           (window as { CookieYes?: { run: () => void } }).CookieYes?.run(); // Trigger manual load
         }
 
-        console.log('CookieYes script run. Listening for consent update...');
         // Listen for the cookie consent update event
         document.addEventListener('cookieyes_consent_update', eventData => {
           const data = (eventData as CustomEvent).detail;
-          console.log('CookieYes consent update:', data);
           this.cookieService.setUserAcceptedCookieCategories(data.accepted); // Save the accepted cookie categories allowed by the user
 
           // Check if the user has accepted the analytics category since the user has changed their consent
@@ -297,17 +273,6 @@ export class AppComponent implements OnInit, OnDestroy {
       this.consentDenied();
     }
   }
-
-  // checkConsentState(): void {
-  //   const consent = getCkyConsent();
-  //   console.log('Checking consent state:', consent);
-
-  //   if (consent.isUserActionCompleted && consent.categories.analytics) {
-  //     this.consentGiven();
-  //   } else {
-  //     this.consentDenied();
-  //   }
-  // }
 
   consentGiven(): void {
     console.log('Consent IS given — loading tracking scripts...');
@@ -388,23 +353,19 @@ export class AppComponent implements OnInit, OnDestroy {
   // }
 
   extractAcceptedConsentCookieCategories(cookieValues: string[]) {
-    console.log('Extracting accepted consent cookie categories:', cookieValues);
-
     const acceptedCategories: string[] = [];
 
     cookieValues.forEach(cookieValue => {
-      console.log('Cookie value:', cookieValue);
       const [cookieCategory, consentValue] = cookieValue.split(':');
       if (
         consentValue === 'yes' &&
-        !['consentid', 'consent', 'action'].includes(cookieCategory)
+        !['consentid', 'consent', 'action'].includes(cookieCategory) // Ignore non-category values
       ) {
         acceptedCategories.push(cookieCategory);
       }
     });
 
     if (acceptedCategories.length) {
-      console.log('Accepted categories from Cookie:', acceptedCategories);
       this.cookieService.setUserAcceptedCookieCategories(acceptedCategories);
     }
   }
