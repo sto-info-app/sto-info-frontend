@@ -100,8 +100,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.cookieService.getCookieStatus();
 
     this.loadCookieYesScript();
-
-    this.cookieService.createTestCookie('testCookie', 'true', 1);
   }
 
   ngOnDestroy() {
@@ -248,13 +246,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   checkConsentState(): void {
     console.log('checkConsentState document.cookie:', document.cookie);
-    const consent = document.cookie
-      .split('; ')
-      .find(row => row.startsWith(`${this.cookieYesCookieName}=`))
-      ?.split('=')[1];
-
-    console.log('Cookie consent state:', consent);
-    if (consent === 'accepted') {
+    this.cookieService.getSpecificCookieStatus(this.cookieYesCookieName);
+    const consent = this.cookieService.getCookieStatus();
+    console.log('checkConsentState() Cookie consent state:', consent);
+    if (consent) {
       this.consentGiven();
     } else {
       this.consentDenied();
