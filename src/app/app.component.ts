@@ -171,6 +171,10 @@ export class AppComponent {
     );
   }
 
+  /***
+   * Load the CookieYes script to handle cookie consent
+   * NOTE: This script is only loaded if the environment is not on localhost
+   */
   loadCookieYesScript(): void {
     // Clean up any existing script before loading a new one
     const existingScript = document.getElementById(this.cookieYesScriptId);
@@ -178,7 +182,7 @@ export class AppComponent {
       existingScript.parentNode?.removeChild(existingScript);
     }
 
-    if (environment.cookieYesUrl) {
+    if (environment.env_name !== 'local' && environment.cookieYesUrl) {
       const script = this.renderer.createElement('script');
       script.type = 'text/javascript';
       script.src = environment.cookieYesUrl;
