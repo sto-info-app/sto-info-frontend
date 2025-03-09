@@ -175,7 +175,6 @@ export class AppComponent {
     // Clean up any existing script before loading a new one
     const existingScript = document.getElementById(this.cookieYesScriptId);
     if (existingScript) {
-      console.log('Removing existing CookieYes script...');
       existingScript.parentNode?.removeChild(existingScript);
     }
 
@@ -189,7 +188,6 @@ export class AppComponent {
       this.renderer.appendChild(document.head, script);
 
       script.onload = () => {
-        console.log('CookieYes script loaded.'); //TODO: Delete me!
         if ((window as { CookieYes?: { run: () => void } }).CookieYes) {
           (window as { CookieYes?: { run: () => void } }).CookieYes?.run(); // Trigger manual load
         }
