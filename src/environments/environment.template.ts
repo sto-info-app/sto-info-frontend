@@ -14,4 +14,5 @@ export const environment: Environment = {
   minsBeforeLogoutExpiryToRefreshToken:
     __minsBeforeLogoutExpiryToRefreshToken__,
   cookieYesUrl: '__cookieYesUrl__',
+  gaMeasurementId: '__gaMeasurementId__',
 };

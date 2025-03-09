@@ -16,6 +16,6 @@ export const environment: Environment = {
   allowDebugging: true,
   minsBeforeLogoutExpiryToShowWarning: 5,
   minsBeforeLogoutExpiryToRefreshToken: 15,
-  cookieYesUrl:
-    'https://cdn-cookieyes.com/client_data/ae98f0409dea1815c8ee9f9e/script.js',
+  cookieYesUrl: '',
+  gaMeasurementId: '',
 };

@@ -12,4 +12,6 @@ export const environment: Environment = {
   allowDebugging: false,
   minsBeforeLogoutExpiryToShowWarning: 5,
   minsBeforeLogoutExpiryToRefreshToken: 15,
+  cookieYesUrl: '',
+  gaMeasurementId: '',
 };
