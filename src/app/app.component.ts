@@ -7,6 +7,45 @@ import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
 import { CookieService } from './shared/services/cookie.service';
 
+/// <reference types="cookieyes" />
+declare global {
+  interface Window {
+    getCkyConsent?: () => {
+      activeLaw: string;
+      categories: {
+        necessary: boolean;
+        functional: boolean;
+        analytics: boolean;
+        performance: boolean;
+        advertisement: boolean;
+      };
+      isUserActionCompleted: boolean;
+      consentID: string;
+      languageCode: string;
+    };
+  }
+}
+
+function getCkyConsent() {
+  if (window.getCkyConsent) {
+    return window.getCkyConsent();
+  } else {
+    return {
+      activeLaw: '',
+      categories: {
+        necessary: false,
+        functional: false,
+        analytics: false,
+        performance: false,
+        advertisement: false,
+      },
+      isUserActionCompleted: false,
+      consentID: '',
+      languageCode: '',
+    };
+  }
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -92,12 +131,16 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe(status => {
         console.log('Cookie status updated:', status);
         this.cookieStatus = status;
-        //TODO: Perform additional actions based on the cookie status
+        // Perform additional actions based on the cookie status
+        if (status) {
+          this.consentGiven();
+        } else {
+          this.consentDenied();
+        }
       });
 
     // Trigger an update check for the cookieYes cookie
-    // this.cookieService.getSpecificCookieStatus(this.cookieYesCookieName);
-    this.cookieService.getCookieStatus();
+    this.cookieService.getSpecificCookieStatus(this.cookieYesCookieName);
 
     this.loadCookieYesScript();
   }
@@ -225,11 +268,9 @@ export class AppComponent implements OnInit, OnDestroy {
           console.log('Event Listener: Cookie consent update event:', event);
           const customEvent = event as CustomEvent<{ consented: boolean }>;
           console.log('Consent update:', customEvent.detail);
-          if (customEvent?.detail?.consented) {
-            this.consentGiven();
-          } else {
-            this.consentDenied();
-          }
+          this.cookieService.setCookieStatus(
+            customEvent?.detail?.consented ?? false,
+          );
         });
 
         // Also handle existing cookie consent state on load
@@ -245,11 +286,9 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   checkConsentState(): void {
-    console.log('checkConsentState document.cookie:', document.cookie);
-    this.cookieService.getSpecificCookieStatus(this.cookieYesCookieName);
-    const consent = this.cookieService.getCookieStatus();
-    console.log('checkConsentState() Cookie consent state:', consent);
-    if (consent) {
+    const consent = getCkyConsent();
+
+    if (consent.isUserActionCompleted && consent.categories.analytics) {
       this.consentGiven();
     } else {
       this.consentDenied();
