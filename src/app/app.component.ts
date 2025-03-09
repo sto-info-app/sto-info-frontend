@@ -90,6 +90,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.cookieService.cookieStatus$
       .pipe(takeUntil(this.destroy$))
       .subscribe(status => {
+        console.log('Cookie status updated:', status);
         this.cookieStatus = status;
         //TODO: Perform additional actions based on the cookie status
       });
