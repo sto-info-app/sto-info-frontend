@@ -1,18 +1,21 @@
-import { Component, NgZone, Renderer2 } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
+import { CookieService } from './shared/services/cookie.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   standalone: false,
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   private readonly cookieYesScriptId = 'cookieyes';
+  private readonly cookieYesCookieName = 'cookieyes-consent';
+
   isLoggedIn = false;
   autoLogoutCountdown = 0;
 
@@ -25,9 +28,12 @@ export class AppComponent {
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
 
+  cookieStatus = false;
+
   constructor(
     private readonly authService: AuthService,
     private readonly titleService: Title,
+    private readonly cookieService: CookieService,
     private readonly zone: NgZone,
     private readonly renderer: Renderer2,
     public readonly dialog: MatDialog,
@@ -79,6 +85,17 @@ export class AppComponent {
           }
         }
       });
+
+    // Subscribe to updates on the cookie status
+    this.cookieService.cookieStatus$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(status => {
+        this.cookieStatus = status;
+        //TODO: Perform additional actions based on the cookie status
+      });
+
+    // Trigger an update check for the cookieYes cookie
+    this.cookieService.getSpecificCookieStatus(this.cookieYesCookieName);
 
     this.loadCookieYesScript();
   }
