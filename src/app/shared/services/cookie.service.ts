@@ -9,6 +9,12 @@ export class CookieService {
 
   // Method to check if a specific cookie category is accepted
   public isCookieCategoryAccepted(category: string): boolean {
+    console.log(
+      'Checking if cookie category is accepted:',
+      category,
+      this.userAcceptedCookies.includes(category),
+      this.userAcceptedCookies,
+    );
     return this.userAcceptedCookies.includes(category);
   }
 
@@ -16,6 +22,7 @@ export class CookieService {
   public setUserAcceptedCookieCategories(
     acceptedCookieCategories: string[],
   ): void {
+    console.log('Setting user accepted cookies:', acceptedCookieCategories);
     this.userAcceptedCookies = acceptedCookieCategories;
   }
 
