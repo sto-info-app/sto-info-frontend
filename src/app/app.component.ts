@@ -53,7 +53,7 @@ import { CookieService } from './shared/services/cookie.service';
 })
 export class AppComponent implements OnInit, OnDestroy {
   private readonly cookieYesScriptId = 'cookieyes';
-  // private readonly cookieYesCookieName = 'cookieyes-consent';
+  private readonly cookieYesCookieName = 'cookieyes-consent';
 
   isLoggedIn = false;
   autoLogoutCountdown = 0;
@@ -240,6 +240,14 @@ export class AppComponent implements OnInit, OnDestroy {
   loadCookieYesScript(): void {
     console.log('loadCookieYesScript document.cookie:', document.cookie);
     console.log('Loading CookieYes script...');
+
+    const consentCookie = this.cookieService.readCookie(
+      this.cookieYesCookieName,
+    );
+    if (consentCookie) {
+      this.extractAcceptedConsentCookieCategories(consentCookie);
+    }
+
     // Clean up any existing script before loading a new one
     const existingScript = document.getElementById(this.cookieYesScriptId);
     if (existingScript) {
@@ -381,4 +389,29 @@ export class AppComponent implements OnInit, OnDestroy {
   //     window['LogRocket'].shutdown(); // Stop LogRocket session recording
   //   }
   // }
+
+  extractAcceptedConsentCookieCategories(cookieValue: string): string[] {
+    // Check if the cookie string contains the cookieyes-consent cookie
+    const cookieString = cookieValue
+      .split('; ')
+      .find(row => row.startsWith(`${this.cookieYesCookieName}=`));
+
+    if (cookieString) {
+      const cookieValue = cookieString.split('=')[1];
+      const cookieParts = cookieValue.split(',');
+
+      const acceptedCategories = cookieParts
+        .filter(part => {
+          const [key, value] = part.split(':');
+          return (
+            value === 'yes' && !['consentid', 'consent', 'action'].includes(key)
+          );
+        })
+        .map(part => part.split(':')[0]);
+
+      this.cookieService.setUserAcceptedCookieCategories(acceptedCategories);
+    }
+    const categories = cookieValue.split(',');
+    return categories;
+  }
 }
