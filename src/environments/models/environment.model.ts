@@ -10,4 +10,5 @@ export interface Environment {
   minsBeforeLogoutExpiryToShowWarning: number;
   minsBeforeLogoutExpiryToRefreshToken: number;
   cookieYesUrl: string;
+  gaMeasurementId: string;
 }
