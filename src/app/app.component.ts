@@ -12,7 +12,7 @@ import { RefreshSessionDialogComponent } from './shared/components/refresh-sessi
   standalone: false,
 })
 export class AppComponent {
-  cookieYesScriptId = 'cookieyes';
+  private readonly cookieYesScriptId = 'cookieyes';
   isLoggedIn = false;
   autoLogoutCountdown = 0;
 
