@@ -81,20 +81,6 @@ export class AppComponent {
       });
 
     this.loadCookieYesScript();
-
-    // Listen for the cookie consent update event
-    window.addEventListener('cookie-consent-update', event => {
-      const customEvent = event as CustomEvent<{ consented: boolean }>;
-      console.log('Consent update:', customEvent.detail);
-      if (customEvent.detail && customEvent.detail.consented) {
-        this.consentGiven();
-      } else {
-        this.consentDenied();
-      }
-    });
-
-    // Also handle existing cookie consent state on load
-    this.checkConsentState();
   }
 
   ngOnDestroy() {
@@ -211,6 +197,22 @@ export class AppComponent {
         console.log('CookieYes script loaded.');
         if ((window as { CookieYes?: { run: () => void } }).CookieYes) {
           (window as { CookieYes?: { run: () => void } }).CookieYes?.run(); // Trigger manual load
+
+          console.log('CookieYes script run. Listening for consent update...');
+          // Listen for the cookie consent update event
+          window.addEventListener('cookie-consent-update', event => {
+            console.log('Event Listener: Cookie consent update event:', event);
+            const customEvent = event as CustomEvent<{ consented: boolean }>;
+            console.log('Consent update:', customEvent.detail);
+            if (customEvent?.detail?.consented) {
+              this.consentGiven();
+            } else {
+              this.consentDenied();
+            }
+          });
+
+          // Also handle existing cookie consent state on load
+          this.checkConsentState();
         }
       };
 
