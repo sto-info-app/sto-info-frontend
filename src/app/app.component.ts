@@ -190,6 +190,7 @@ export class AppComponent {
    * NOTE: This script is only loaded if the environment is not on localhost
    */
   loadCookieYesScript(): void {
+    console.log('Loading CookieYes script...');
     // Clean up any existing script before loading a new one
     const existingScript = document.getElementById(this.cookieYesScriptId);
     if (existingScript) {
@@ -216,6 +217,8 @@ export class AppComponent {
       script.onerror = () => {
         console.error('Failed to load CookieYes script');
       };
+    } else {
+      console.error('CookieYes URL not set in environment');
     }
   }
 
