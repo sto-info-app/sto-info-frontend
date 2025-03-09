@@ -1,50 +1,13 @@
 import { Component, NgZone, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
+import { NavigationEnd, Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
 import { CookieService } from './shared/services/cookie.service';
-
-// /// <reference types="cookieyes" />
-// declare global {
-//   interface Window {
-//     getCkyConsent?: () => {
-//       activeLaw: string;
-//       categories: {
-//         necessary: boolean;
-//         functional: boolean;
-//         analytics: boolean;
-//         performance: boolean;
-//         advertisement: boolean;
-//       };
-//       isUserActionCompleted: boolean;
-//       consentID: string;
-//       languageCode: string;
-//     };
-//   }
-// }
-
-// function getCkyConsent() {
-//   if (window.getCkyConsent) {
-//     return window.getCkyConsent();
-//   } else {
-//     return {
-//       activeLaw: '',
-//       categories: {
-//         necessary: false,
-//         functional: false,
-//         analytics: false,
-//         performance: false,
-//         advertisement: false,
-//       },
-//       isUserActionCompleted: false,
-//       consentID: '',
-//       languageCode: '',
-//     };
-//   }
-// }
 
 @Component({
   selector: 'app-root',
@@ -75,6 +38,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private readonly cookieService: CookieService,
     private readonly zone: NgZone,
     private readonly renderer: Renderer2,
+    private readonly router: Router,
     public readonly dialog: MatDialog,
   ) {
     this.setAppTitle();
@@ -126,6 +90,16 @@ export class AppComponent implements OnInit, OnDestroy {
       });
 
     this.loadCookieYesScript();
+
+    // Track page views
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.destroy$),
+      )
+      .subscribe((event: NavigationEnd) => {
+        this.trackPageView(event.urlAfterRedirects);
+      });
   }
 
   ngOnDestroy() {
@@ -294,7 +268,7 @@ export class AppComponent implements OnInit, OnDestroy {
       const typedWindow = window as WindowWithGA;
       if (!typedWindow.gtag) {
         const script = this.renderer.createElement('script');
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${environment.gaMeasurementId}`; // Replace with your GA ID
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${environment.gaMeasurementId}`;
         script.async = true;
         this.renderer.appendChild(document.head, script);
 
@@ -334,23 +308,22 @@ export class AppComponent implements OnInit, OnDestroy {
     ] = true;
   }
 
-  // loadLogRocket(): void {
-  //   if (
-  //     !(window as { LogRocket?: { init: (id: string) => void } })['LogRocket']
-  //   ) {
-  //     import('logrocket').then(LogRocket => {
-  //       LogRocket.default.init('your-app-id'); // Replace with LogRocket ID
-  //       console.log('LogRocket loaded');
-  //     });
-  //   }
-  // }
-
-  // disableLogRocket(): void {
-  //   console.log('Disabling LogRocket...');
-  //   if (window['LogRocket']) {
-  //     window['LogRocket'].shutdown(); // Stop LogRocket session recording
-  //   }
-  // }
+  trackPageView(url: string): void {
+    if ((window as { gtag?: (...args: unknown[]) => void }).gtag) {
+      const gtag = (window as { gtag?: (...args: unknown[]) => void }).gtag;
+      if (gtag) {
+        gtag('config', environment.gaMeasurementId, {
+          page_path: url,
+        });
+        console.log(`Tracked page view: ${url}`);
+      } else {
+        console.warn('gtag function not available');
+      }
+      console.log(`Tracked page view: ${url}`);
+    } else {
+      console.warn('gtag function not available');
+    }
+  }
 
   extractAcceptedConsentCookieCategories(cookieValues: string[]) {
     const acceptedCategories: string[] = [];
@@ -369,4 +342,22 @@ export class AppComponent implements OnInit, OnDestroy {
       this.cookieService.setUserAcceptedCookieCategories(acceptedCategories);
     }
   }
+
+  // loadLogRocket(): void {
+  //   if (
+  //     !(window as { LogRocket?: { init: (id: string) => void } })['LogRocket']
+  //   ) {
+  //     import('logrocket').then(LogRocket => {
+  //       LogRocket.default.init('your-app-id'); // Replace with LogRocket ID
+  //       console.log('LogRocket loaded');
+  //     });
+  //   }
+  // }
+
+  // disableLogRocket(): void {
+  //   console.log('Disabling LogRocket...');
+  //   if (window['LogRocket']) {
+  //     window['LogRocket'].shutdown(); // Stop LogRocket session recording
+  //   }
+  // }
 }
