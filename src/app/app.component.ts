@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, Renderer2 } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { Subject, Subscription, takeUntil } from 'rxjs';
@@ -12,6 +12,7 @@ import { RefreshSessionDialogComponent } from './shared/components/refresh-sessi
   standalone: false,
 })
 export class AppComponent {
+  cookieYesScriptId = 'cookieyes';
   isLoggedIn = false;
   autoLogoutCountdown = 0;
 
@@ -28,6 +29,7 @@ export class AppComponent {
     private readonly authService: AuthService,
     private readonly titleService: Title,
     private readonly zone: NgZone,
+    private readonly renderer: Renderer2,
     public readonly dialog: MatDialog,
   ) {
     this.setAppTitle();
@@ -77,6 +79,8 @@ export class AppComponent {
           }
         }
       });
+
+    this.loadCookieYesScript();
   }
 
   ngOnDestroy() {
@@ -165,5 +169,35 @@ export class AppComponent {
         ? environment.appTitle
         : 'Star Trek Online Info Portal') + appTitleTestTag,
     );
+  }
+
+  loadCookieYesScript(): void {
+    // Clean up any existing script before loading a new one
+    const existingScript = document.getElementById(this.cookieYesScriptId);
+    if (existingScript) {
+      console.log('Removing existing CookieYes script...');
+      existingScript.parentNode?.removeChild(existingScript);
+    }
+
+    if (environment.cookieYesUrl) {
+      const script = this.renderer.createElement('script');
+      script.type = 'text/javascript';
+      script.src = environment.cookieYesUrl;
+      script.id = this.cookieYesScriptId; // Prevent duplicate loading
+      script.async = true;
+
+      this.renderer.appendChild(document.head, script);
+
+      script.onload = () => {
+        console.log('CookieYes script loaded.'); //TODO: Delete me!
+        if ((window as { CookieYes?: { run: () => void } }).CookieYes) {
+          (window as { CookieYes?: { run: () => void } }).CookieYes?.run(); // Trigger manual load
+        }
+      };
+
+      script.onerror = () => {
+        console.error('Failed to load CookieYes script');
+      };
+    }
   }
 }

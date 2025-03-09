@@ -27,6 +27,11 @@ const replacedContent = environmentTemplate
   .replace(
     '__minsBeforeLogoutExpiryToRefreshToken__',
     process.env.MINS_BEFORE_LOGOUT_EXPIRY_TO_REFRESH_TOKEN || 15,
+  )
+  .replace(
+    '__cookieYesUrl__',
+    process.env.COOKIE_YES_URL ||
+      'https://cdn-cookieyes.com/client_data/ae98f0409dea1815c8ee9f9e/script.js',
   );
 
 // Write out the final environment.ts
