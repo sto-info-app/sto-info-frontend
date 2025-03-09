@@ -241,12 +241,9 @@ export class AppComponent implements OnInit, OnDestroy {
     console.log('loadCookieYesScript document.cookie:', document.cookie);
     console.log('Loading CookieYes script...');
 
-    const consentCookie = this.cookieService.readCookie(
-      this.cookieYesCookieName,
-    );
-    if (consentCookie) {
-      this.extractAcceptedConsentCookieCategories(consentCookie);
-    }
+    const consentCookieValues =
+      this.cookieService.readCookie(this.cookieYesCookieName)?.split(',') || [];
+    this.extractAcceptedConsentCookieCategories(consentCookieValues);
 
     // Clean up any existing script before loading a new one
     const existingScript = document.getElementById(this.cookieYesScriptId);
@@ -390,23 +387,24 @@ export class AppComponent implements OnInit, OnDestroy {
   //   }
   // }
 
-  extractAcceptedConsentCookieCategories(cookieValue: string) {
-    console.log('Extracting accepted consent cookie categories:', cookieValue);
+  extractAcceptedConsentCookieCategories(cookieValues: string[]) {
+    console.log('Extracting accepted consent cookie categories:', cookieValues);
 
-    if (cookieValue) {
-      const cookieParts = cookieValue.split(',');
-      console.log('Cookie parts:', cookieParts);
+    const acceptedCategories: string[] = [];
 
-      const acceptedCategories = cookieParts
-        .filter(part => {
-          const [key, value] = part.split(':');
-          return (
-            value === 'yes' && !['consentid', 'consent', 'action'].includes(key)
-          );
-        })
-        .map(part => part.split(':')[0]);
+    cookieValues.forEach(cookieValue => {
+      console.log('Cookie value:', cookieValue);
+      const [cookieCategory, consentValue] = cookieValue.split(':');
+      if (
+        consentValue === 'yes' &&
+        !['consentid', 'consent', 'action'].includes(cookieCategory)
+      ) {
+        acceptedCategories.push(cookieCategory);
+      }
+    });
 
-      console.log('Accepted categories:', acceptedCategories);
+    if (acceptedCategories.length) {
+      console.log('Accepted categories from Cookie:', acceptedCategories);
       this.cookieService.setUserAcceptedCookieCategories(acceptedCategories);
     }
   }
