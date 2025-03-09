@@ -267,7 +267,7 @@ export class AppComponent implements OnInit, OnDestroy {
         document.addEventListener('cookieyes_consent_update', eventData => {
           const data = (eventData as CustomEvent).detail;
           console.log('CookieYes consent update:', data);
-          this.cookieService.setCookieStatus(data.accepted); // Save the accepted cookie categories allowed by the user
+          this.cookieService.setUserAcceptedCookieCategories(data.accepted); // Save the accepted cookie categories allowed by the user
 
           if (this.cookieService.isCookieCategoryAccepted('analytics')) {
             this.consentGiven();
