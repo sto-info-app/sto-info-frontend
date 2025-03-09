@@ -96,7 +96,8 @@ export class AppComponent implements OnInit, OnDestroy {
       });
 
     // Trigger an update check for the cookieYes cookie
-    this.cookieService.getSpecificCookieStatus(this.cookieYesCookieName);
+    // this.cookieService.getSpecificCookieStatus(this.cookieYesCookieName);
+    this.cookieService.getCookieStatus();
 
     this.loadCookieYesScript();
   }
@@ -247,7 +248,7 @@ export class AppComponent implements OnInit, OnDestroy {
     console.log('checkConsentState document.cookie:', document.cookie);
     const consent = document.cookie
       .split('; ')
-      .find(row => row.startsWith('cookieyes-consent='))
+      .find(row => row.startsWith(`${this.cookieYesCookieName}=`))
       ?.split('=')[1];
 
     console.log('Cookie consent state:', consent);
