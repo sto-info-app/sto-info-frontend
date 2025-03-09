@@ -264,7 +264,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
         console.log('CookieYes script run. Listening for consent update...');
         // Listen for the cookie consent update event
-        window.addEventListener('cookieyes_consent_update', eventData => {
+        document.addEventListener('cookieyes_consent_update', eventData => {
           const data = (eventData as CustomEvent).detail;
           console.log('CookieYes consent update:', data);
           if (data.accepted.includes('analytics')) {
