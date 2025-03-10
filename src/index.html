@@ -46,19 +46,7 @@
         dataLayer.push(arguments);
       }
       gtag('js', new Date());
-
-      // Disable page view tracking by default
-      disableTracking();
-
-      // Function to enable tracking
-      function enableTracking() {
-        gtag('config', 'G-4VP93JMVMF', { send_page_view: true });
-      }
-
-      // Function to disable tracking
-      function disableTracking() {
-        gtag('config', 'G-4VP93JMVMF', { send_page_view: false });
-      }
+      gtag('config', 'G-4VP93JMVMF', { send_page_view: false });
     </script>
   </head>
   <body class="mat-typography">
