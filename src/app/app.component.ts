@@ -286,13 +286,31 @@ export class AppComponent implements OnInit, OnDestroy {
       `ga-disable-${environment.gaMeasurementId}`
     ] = false;
 
-    // Reconfigure GA to send a page view
-    (window as { dataLayer?: unknown[] })['dataLayer']?.push([
-      'config',
-      environment.gaMeasurementId,
-      { send_page_view: true },
-    ]);
-    console.log('GA tracking enabled.');
+    // Send an initial page view.
+    if (
+      typeof (
+        window as {
+          gtag?: (
+            event: string,
+            action: string,
+            params: { page_path: string },
+          ) => void;
+        }
+      )['gtag'] === 'function'
+    ) {
+      (
+        window as unknown as {
+          gtag: (
+            event: string,
+            action: string,
+            params: { page_path: string },
+          ) => void;
+        }
+      ).gtag('event', 'page_view', {
+        page_path: window.location.pathname,
+      });
+      console.log('GA tracking enabled and initial pageview sent.');
+    }
   }
 
   private disableGoogleAnalyticsTracking(): void {
@@ -318,6 +336,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Create the GA script element
     const script = document.createElement('script');
+    script.id = 'ga-script';
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${environment.gaMeasurementId}`;
     document.head.appendChild(script);
@@ -326,15 +345,33 @@ export class AppComponent implements OnInit, OnDestroy {
     script.onload = () => {
       (window as { dataLayer?: unknown[] })['dataLayer'] =
         (window as { dataLayer?: unknown[] })['dataLayer'] || [];
-      function gtag(...args: unknown[]) {
-        (window as unknown as { dataLayer: unknown[] }).dataLayer.push(args);
-      }
-      gtag('js', new Date()); // Initialize GA
 
-      // Disable automatic page view tracking by setting send_page_view to false
-      this.disableGoogleAnalyticsTracking();
-      console.log('GA loaded with tracking disabled.');
+      // Assign gtag to the window object so it's globally accessible.
+      (window as unknown as { gtag?: (...args: unknown[]) => void })['gtag'] =
+        function (...args: unknown[]) {
+          if ((window as { dataLayer?: unknown[] })['dataLayer']) {
+            (window as { dataLayer?: unknown[] })['dataLayer']?.push(args);
+          }
+        };
+
+      // Initialize GA, disabling automatic page view tracking.
+      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+        'js',
+        new Date(),
+      );
+      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+        'config',
+        environment.gaMeasurementId,
+        {
+          send_page_view: false,
+        },
+      );
+      console.log(
+        'Google Analytics loaded and initialized with tracking disabled.',
+      );
     };
+
+    console.log('GA script injected into the page.');
   }
 
   // disableGoogleAnalytics(): void {
@@ -362,9 +399,28 @@ export class AppComponent implements OnInit, OnDestroy {
   // }
 
   private sendPageView(url: string): void {
-    if (typeof ga === 'function') {
-      ga('set', 'page', url);
-      ga('send', 'pageview');
+    if (
+      typeof (
+        window as {
+          gtag?: (
+            event: string,
+            action: string,
+            params: { page_path: string },
+          ) => void;
+        }
+      )['gtag'] === 'function'
+    ) {
+      (
+        window as unknown as {
+          gtag: (
+            event: string,
+            action: string,
+            params: { page_path: string },
+          ) => void;
+        }
+      ).gtag('event', 'page_view', {
+        page_path: url,
+      });
       console.log('GA pageview sent for', url);
     } else {
       console.error('Google Analytics not available');
