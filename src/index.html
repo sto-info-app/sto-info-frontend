@@ -37,10 +37,29 @@
       type="image/png"
       sizes="120x120"
       href="/assets/favicons/favicon120.png" />
-    <link
-      rel="preload"
-      as="fetch"
-      href="https://cdn.startrekonline.info/cdn-cgi/imagedelivery/jQ0uSdJ3ty-KasNpXGxyuA/08c58f21-6168-4b9e-0fa8-2a10d7462a00/square512" />
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-4VP93JMVMF"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
+
+      // Disable page view tracking by default
+      disableTracking();
+
+      // Function to enable tracking
+      function enableTracking() {
+        gtag('config', 'G-4VP93JMVMF', { send_page_view: true });
+      }
+
+      // Function to disable tracking
+      function disableTracking() {
+        gtag('config', 'G-4VP93JMVMF', { send_page_view: false });
+      }
+    </script>
   </head>
   <body class="mat-typography">
     <app-root></app-root>
