@@ -94,6 +94,7 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       });
 
+    this.loadGoogleAnalyticsWithTrackingDisabled();
     this.loadCookieYesScript();
 
     // // Track page views
@@ -256,88 +257,109 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   checkCookieConsentState(): void {
-    if (this.cookieService.isCookieCategoryAccepted('analytics')) {
+    if (this.hasUserConsentedToAnalytics()) {
       this.consentGiven();
     } else {
       this.consentDenied();
     }
   }
 
+  hasUserConsentedToAnalytics(): boolean {
+    return this.cookieService.isCookieCategoryAccepted('analytics');
+  }
+
   consentGiven(): void {
     console.log('Consent IS given — loading tracking scripts...');
-    this.loadGoogleAnalytics();
+    this.enableGoogleAnalyticsTracking();
     // this.loadLogRocket();
   }
 
   consentDenied(): void {
     console.log('Consent IS NOT given — disabling tracking...');
-    this.disableGoogleAnalytics();
+    this.disableGoogleAnalyticsTracking();
     // this.disableLogRocket();
   }
 
-  loadGoogleAnalytics(): void {
-    if (environment.env_name !== 'local' && environment.gaMeasurementId) {
-      interface WindowWithGA extends Window {
-        gtag?: (...args: unknown[]) => void;
-      }
-      const typedWindow = window as WindowWithGA;
-      if (!typedWindow.gtag) {
-        const script = this.renderer.createElement('script');
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${environment.gaMeasurementId}`;
-        script.async = true;
-        this.renderer.appendChild(document.head, script);
+  private enableGoogleAnalyticsTracking(): void {
+    // Remove the disable flag
+    (window as unknown as { [key: string]: boolean })[
+      `ga-disable-${environment.gaMeasurementId}`
+    ] = false;
 
-        (window as unknown as { dataLayer: unknown[] }).dataLayer =
-          (window as unknown as { dataLayer: unknown[] }).dataLayer || [];
-
-        typedWindow.gtag = (...args: unknown[]) => {
-          (window as unknown as { dataLayer: unknown[] }).dataLayer.push(args);
-        };
-
-        script.onload = () => {
-          if (typedWindow.gtag) {
-            typedWindow.gtag('js', new Date());
-            typedWindow.gtag('config', environment.gaMeasurementId, {
-              anonymize_ip: true,
-            });
-          }
-          console.log('Google Analytics loaded and initialized');
-        };
-
-        script.onerror = () => {
-          console.error('Failed to load Google Analytics script');
-        };
-      } else {
-        console.log('Google Analytics already loaded');
-      }
-    } else {
-      console.warn('Google Analytics not loaded due to environment settings');
-    }
+    // Reconfigure GA to send a page view
+    (window as { dataLayer?: unknown[] })['dataLayer']?.push([
+      'config',
+      environment.gaMeasurementId,
+      { send_page_view: true },
+    ]);
+    console.log('GA tracking enabled.');
   }
 
-  disableGoogleAnalytics(): void {
-    console.log('Disabling Google Analytics...');
-    // Prevent GA from tracking
+  private disableGoogleAnalyticsTracking(): void {
+    // Set the global flag to true so GA stops sending events.
     (window as unknown as { [key: string]: boolean })[
       `ga-disable-${environment.gaMeasurementId}`
     ] = true;
+
+    // update GA configuration to ensure no page view is sent.
+    (window as { dataLayer?: unknown[] })['dataLayer']?.push([
+      'config',
+      environment.gaMeasurementId,
+      { send_page_view: false },
+    ]);
+    console.log('GA tracking disabled.');
   }
 
-  trackPageView(url: string): void {
-    if ((window as { gtag?: (...args: unknown[]) => void }).gtag) {
-      const gtag = (window as { gtag?: (...args: unknown[]) => void }).gtag;
-      if (gtag) {
-        gtag('config', environment.gaMeasurementId, {
-          page_path: url,
-        });
-        console.log(`Tracked page view: ${url}`);
-      } else {
-        console.warn('gtag function not available');
+  private loadGoogleAnalyticsWithTrackingDisabled(): void {
+    // Disable GA tracking by default using the global flag
+    (window as unknown as { [key: string]: boolean })[
+      `ga-disable-${environment.gaMeasurementId}`
+    ] = true;
+
+    // Create the GA script element
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${environment.gaMeasurementId}`;
+    document.head.appendChild(script);
+
+    // Once the script loads, initialize GA without sending page views automatically
+    script.onload = () => {
+      (window as { dataLayer?: unknown[] })['dataLayer'] =
+        (window as { dataLayer?: unknown[] })['dataLayer'] || [];
+      function gtag(...args: unknown[]) {
+        (window as unknown as { dataLayer: unknown[] }).dataLayer.push(args);
       }
-    } else {
-      console.warn('gtag function not available');
-    }
+      gtag('js', new Date()); // Initialize GA
+
+      // Disable automatic page view tracking by setting send_page_view to false
+      this.disableGoogleAnalyticsTracking();
+      console.log('GA loaded with tracking disabled.');
+    };
   }
+
+  // disableGoogleAnalytics(): void {
+  //   console.log('Disabling Google Analytics...');
+  //   // Prevent GA from tracking
+  //   (window as unknown as { [key: string]: boolean })[
+  //     `ga-disable-${environment.gaMeasurementId}`
+  //   ] = true;
+  // }
+
+  // trackPageView(url: string): void {
+  //   if ((window as { gtag?: (...args: unknown[]) => void }).gtag) {
+  //     const gtag = (window as { gtag?: (...args: unknown[]) => void }).gtag;
+  //     if (gtag) {
+  //       gtag('config', environment.gaMeasurementId, {
+  //         page_path: url,
+  //       });
+  //       console.log(`Tracked page view: ${url}`);
+  //     } else {
+  //       console.warn('gtag function not available');
+  //     }
+  //   } else {
+  //     console.warn('gtag function not available');
+  //   }
+  // }
 
   private sendPageView(url: string): void {
     if (typeof ga === 'function') {
