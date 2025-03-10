@@ -1,6 +1,5 @@
 import { Component, NgZone, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -8,11 +7,7 @@ import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
 import { CookieService } from './shared/services/cookie.service';
-
-declare let ga: (
-  command: string,
-  ...fields: (string | number | boolean | object)[]
-) => void;
+import { PageTitleService } from './shared/services/page-title.service';
 
 @Component({
   selector: 'app-root',
@@ -39,14 +34,14 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly titleService: Title,
+    private readonly pageTitleService: PageTitleService,
     private readonly cookieService: CookieService,
     private readonly zone: NgZone,
     private readonly renderer: Renderer2,
     private readonly router: Router,
     public readonly dialog: MatDialog,
   ) {
-    this.setAppTitle();
+    this.pageTitleService.init();
 
     this.logout = this.logout.bind(this);
   }
@@ -96,16 +91,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.loadGoogleAnalyticsWithTrackingDisabled();
     this.loadCookieYesScript();
-
-    // // Track page views
-    // this.router.events
-    //   .pipe(
-    //     filter(event => event instanceof NavigationEnd),
-    //     takeUntil(this.destroy$),
-    //   )
-    //   .subscribe((event: NavigationEnd) => {
-    //     this.trackPageView(event.urlAfterRedirects);
-    //   });
 
     this.router.events
       .pipe(takeUntil(this.destroy$))
@@ -191,19 +176,6 @@ export class AppComponent implements OnInit, OnDestroy {
       this.intervalId = null;
       this.autoLogoutCountdown = 0;
     }
-  }
-
-  setAppTitle() {
-    // Tags to add to titles to help identify the environment in use
-    let appTitleTestTag = '';
-    if (environment.env_name === 'local') appTitleTestTag = ' [Local Dev]';
-    if (environment.env_name === 'dev') appTitleTestTag = ' [Dev]';
-
-    this.titleService.setTitle(
-      (environment.appTitle
-        ? environment.appTitle
-        : 'Star Trek Online Info Portal') + appTitleTestTag,
-    );
   }
 
   /***
