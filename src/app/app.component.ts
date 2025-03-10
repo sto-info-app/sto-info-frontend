@@ -30,8 +30,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
 
-  cookieStatus = false;
-
   constructor(
     private readonly authService: AuthService,
     private readonly pageTitleService: PageTitleService,
@@ -241,13 +239,11 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   consentGiven(): void {
-    console.log('Consent IS given — loading tracking scripts...');
     this.enableGoogleAnalyticsTracking();
     // this.loadLogRocket();
   }
 
   consentDenied(): void {
-    console.log('Consent IS NOT given — disabling tracking...');
     this.disableGoogleAnalyticsTracking();
     // this.disableLogRocket();
   }
@@ -281,8 +277,10 @@ export class AppComponent implements OnInit, OnDestroy {
       ).gtag('event', 'page_view', {
         page_path: window.location.pathname,
       });
-      console.log('GA tracking enabled and initial pageview sent.');
     }
+
+    // Log the current page
+    this.sendPageView(window.location.pathname);
   }
 
   private disableGoogleAnalyticsTracking(): void {
@@ -297,7 +295,6 @@ export class AppComponent implements OnInit, OnDestroy {
       environment.gaMeasurementId,
       { send_page_view: false },
     ]);
-    console.log('GA tracking disabled.');
   }
 
   private loadGoogleAnalyticsWithTrackingDisabled(): void {
@@ -338,37 +335,8 @@ export class AppComponent implements OnInit, OnDestroy {
           send_page_view: false,
         },
       );
-      console.log(
-        'Google Analytics loaded and initialized with tracking disabled.',
-      );
     };
-
-    console.log('GA script injected into the page.');
   }
-
-  // disableGoogleAnalytics(): void {
-  //   console.log('Disabling Google Analytics...');
-  //   // Prevent GA from tracking
-  //   (window as unknown as { [key: string]: boolean })[
-  //     `ga-disable-${environment.gaMeasurementId}`
-  //   ] = true;
-  // }
-
-  // trackPageView(url: string): void {
-  //   if ((window as { gtag?: (...args: unknown[]) => void }).gtag) {
-  //     const gtag = (window as { gtag?: (...args: unknown[]) => void }).gtag;
-  //     if (gtag) {
-  //       gtag('config', environment.gaMeasurementId, {
-  //         page_path: url,
-  //       });
-  //       console.log(`Tracked page view: ${url}`);
-  //     } else {
-  //       console.warn('gtag function not available');
-  //     }
-  //   } else {
-  //     console.warn('gtag function not available');
-  //   }
-  // }
 
   private sendPageView(url: string): void {
     const gtag = (
@@ -380,10 +348,8 @@ export class AppComponent implements OnInit, OnDestroy {
         ) => void;
       }
     ).gtag;
-    console.log('gtag:', gtag);
     if (typeof gtag === 'function') {
       gtag('event', 'page_view', { page_path: url });
-      console.log('GA pageview sent for', url);
     } else {
       console.error('Google Analytics not available');
     }
