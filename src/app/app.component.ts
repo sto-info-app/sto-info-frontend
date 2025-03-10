@@ -399,28 +399,18 @@ export class AppComponent implements OnInit, OnDestroy {
   // }
 
   private sendPageView(url: string): void {
-    if (
-      typeof (
-        window as {
-          gtag?: (
-            event: string,
-            action: string,
-            params: { page_path: string },
-          ) => void;
-        }
-      )['gtag'] === 'function'
-    ) {
-      (
-        window as unknown as {
-          gtag: (
-            event: string,
-            action: string,
-            params: { page_path: string },
-          ) => void;
-        }
-      ).gtag('event', 'page_view', {
-        page_path: url,
-      });
+    const gtag = (
+      window as {
+        gtag?: (
+          event: string,
+          action: string,
+          params: { page_path: string },
+        ) => void;
+      }
+    ).gtag;
+    console.log('gtag:', gtag);
+    if (typeof gtag === 'function') {
+      gtag('event', 'page_view', { page_path: url });
       console.log('GA pageview sent for', url);
     } else {
       console.error('Google Analytics not available');
