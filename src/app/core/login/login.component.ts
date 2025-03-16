@@ -29,10 +29,10 @@ import { AuthService } from '../auth/auth.service';
   standalone: false,
 })
 export class LoginComponent {
-  // Allow environment contstants to be used in the HTML
+  // Allow environment constants to be used in the HTML
   appLoggedInHome: string = environment.appLoggedInHome;
 
-  // Allow contstants to be used in the HTML
+  // Allow constants to be used in the HTML
   showErrorMilliseconds: number = MILLISECONDS_SHOW_ERROR_MSG;
   errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
 
