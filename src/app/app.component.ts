@@ -1,18 +1,24 @@
-import { Component, NgZone, Renderer2 } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Title } from '@angular/platform-browser';
+import { NavigationEnd, Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
+import { CookieService } from './shared/services/cookie.service';
+import { LogRocketService } from './shared/services/log-rocket.service';
+import { PageTitleService } from './shared/services/page-title.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   standalone: false,
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   private readonly cookieYesScriptId = 'cookieyes';
+  private readonly cookieYesCookieName = 'cookieyes-consent';
+
   isLoggedIn = false;
   autoLogoutCountdown = 0;
 
@@ -27,12 +33,15 @@ export class AppComponent {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly titleService: Title,
+    private readonly logRocketService: LogRocketService,
+    private readonly pageTitleService: PageTitleService,
+    private readonly cookieService: CookieService,
     private readonly zone: NgZone,
     private readonly renderer: Renderer2,
+    private readonly router: Router,
     public readonly dialog: MatDialog,
   ) {
-    this.setAppTitle();
+    this.pageTitleService.init();
 
     this.logout = this.logout.bind(this);
   }
@@ -80,7 +89,18 @@ export class AppComponent {
         }
       });
 
+    this.loadGoogleAnalyticsWithTrackingDisabled();
     this.loadCookieYesScript();
+
+    this.router.events
+      .pipe(takeUntil(this.destroy$))
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        // Delay the GA call slightly if needed to ensure GA has fully loaded
+        setTimeout(() => {
+          this.sendPageView(event.urlAfterRedirects);
+        }, 0);
+      });
   }
 
   ngOnDestroy() {
@@ -158,29 +178,18 @@ export class AppComponent {
     }
   }
 
-  setAppTitle() {
-    // Tags to add to titles to help identify the environment in use
-    let appTitleTestTag = '';
-    if (environment.env_name === 'local') appTitleTestTag = ' [Local Dev]';
-    if (environment.env_name === 'dev') appTitleTestTag = ' [Dev]';
-
-    this.titleService.setTitle(
-      (environment.appTitle
-        ? environment.appTitle
-        : 'Star Trek Online Info Portal') + appTitleTestTag,
-    );
-  }
-
   /***
    * Load the CookieYes script to handle cookie consent
    * NOTE: This script is only loaded if the environment is not on localhost
    */
   loadCookieYesScript(): void {
-    console.log('Loading CookieYes script...');
+    const consentCookieValues =
+      this.cookieService.readCookie(this.cookieYesCookieName)?.split(',') || [];
+    this.extractAcceptedConsentCookieCategories(consentCookieValues);
+
     // Clean up any existing script before loading a new one
     const existingScript = document.getElementById(this.cookieYesScriptId);
     if (existingScript) {
-      console.log('Removing existing CookieYes script...');
       existingScript.parentNode?.removeChild(existingScript);
     }
 
@@ -194,26 +203,21 @@ export class AppComponent {
       this.renderer.appendChild(document.head, script);
 
       script.onload = () => {
-        console.log('CookieYes script loaded.');
         if ((window as { CookieYes?: { run: () => void } }).CookieYes) {
           (window as { CookieYes?: { run: () => void } }).CookieYes?.run(); // Trigger manual load
-
-          console.log('CookieYes script run. Listening for consent update...');
-          // Listen for the cookie consent update event
-          window.addEventListener('cookie-consent-update', event => {
-            console.log('Event Listener: Cookie consent update event:', event);
-            const customEvent = event as CustomEvent<{ consented: boolean }>;
-            console.log('Consent update:', customEvent.detail);
-            if (customEvent?.detail?.consented) {
-              this.consentGiven();
-            } else {
-              this.consentDenied();
-            }
-          });
-
-          // Also handle existing cookie consent state on load
-          this.checkConsentState();
         }
+
+        // Listen for the cookie consent update event
+        document.addEventListener('cookieyes_consent_update', eventData => {
+          const data = (eventData as CustomEvent).detail;
+          this.cookieService.setUserAcceptedCookieCategories(data.accepted); // Save the accepted cookie categories allowed by the user
+
+          // Check if the user has accepted the analytics category since the user has changed their consent
+          this.checkCookieConsentState();
+        });
+
+        // Check cookie consent state on load
+        this.checkCookieConsentState();
       };
 
       script.onerror = () => {
@@ -224,80 +228,158 @@ export class AppComponent {
     }
   }
 
-  checkConsentState(): void {
-    const consent = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('cky-consent='))
-      ?.split('=')[1];
-
-    if (consent === 'accepted') {
+  checkCookieConsentState(): void {
+    if (this.hasUserConsentedToAnalytics()) {
       this.consentGiven();
     } else {
       this.consentDenied();
     }
   }
 
+  hasUserConsentedToAnalytics(): boolean {
+    return this.cookieService.isCookieCategoryAccepted('analytics');
+  }
+
   consentGiven(): void {
-    console.log('Consent already given — loading tracking scripts...');
-    this.loadGoogleAnalytics();
-    // this.loadLogRocket();
+    this.enableGoogleAnalyticsTracking();
+    this.loadLogRocket();
   }
 
   consentDenied(): void {
-    console.log('Consent not given — disabling tracking...');
-    this.disableGoogleAnalytics();
-    // this.disableLogRocket();
+    this.disableGoogleAnalyticsTracking();
+    this.disableLogRocket();
   }
 
-  loadGoogleAnalytics(): void {
-    if (environment.env_name !== 'local' && environment.gaMeasurementId) {
-      interface WindowWithGA extends Window {
-        ga?: string;
-      }
-      const typedWindow = window as WindowWithGA;
-      if (!typedWindow.ga) {
-        const script = this.renderer.createElement('script');
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${environment.gaMeasurementId}`; // Replace with your GA ID
-        script.async = true;
-        this.renderer.appendChild(document.head, script);
+  private enableGoogleAnalyticsTracking(): void {
+    // Remove the disable flag
+    (window as unknown as { [key: string]: boolean })[
+      `ga-disable-${environment.gaMeasurementId}`
+    ] = false;
 
-        (window as unknown as { dataLayer: unknown[] }).dataLayer =
-          (window as unknown as { dataLayer: unknown[] }).dataLayer || [];
-
-        const gtag = (...args: unknown[]) => {
-          (window as unknown as { dataLayer: unknown[] }).dataLayer.push(args);
-        };
-
-        gtag('js', new Date());
-        gtag('config', environment.gaMeasurementId, { anonymize_ip: true });
-        console.log('Google Analytics loaded');
-      }
+    // Send an initial page view.
+    if (
+      typeof (
+        window as {
+          gtag?: (
+            event: string,
+            action: string,
+            params: { page_path: string },
+          ) => void;
+        }
+      )['gtag'] === 'function'
+    ) {
+      (
+        window as unknown as {
+          gtag: (
+            event: string,
+            action: string,
+            params: { page_path: string },
+          ) => void;
+        }
+      ).gtag('event', 'page_view', {
+        page_path: window.location.pathname,
+      });
     }
+
+    // Log the current page
+    this.sendPageView(window.location.pathname);
   }
 
-  disableGoogleAnalytics(): void {
-    console.log('Disabling Google Analytics...');
-    // Prevent GA from tracking
+  private disableGoogleAnalyticsTracking(): void {
+    // Set the global flag to true so GA stops sending events.
     (window as unknown as { [key: string]: boolean })[
       `ga-disable-${environment.gaMeasurementId}`
     ] = true;
+
+    // update GA configuration to ensure no page view is sent.
+    (window as { dataLayer?: unknown[] })['dataLayer']?.push([
+      'config',
+      environment.gaMeasurementId,
+      { send_page_view: false },
+    ]);
   }
 
-  // loadLogRocket(): void {
-  //   if (
-  //     !(window as { LogRocket?: { init: (id: string) => void } })['LogRocket']
-  //   ) {
-  //     import('logrocket').then(LogRocket => {
-  //       LogRocket.default.init('your-app-id'); // Replace with LogRocket ID
-  //       console.log('LogRocket loaded');
-  //     });
-  //   }
-  // }
+  private loadGoogleAnalyticsWithTrackingDisabled(): void {
+    // Disable GA tracking by default using the global flag
+    (window as unknown as { [key: string]: boolean })[
+      `ga-disable-${environment.gaMeasurementId}`
+    ] = true;
 
-  // disableLogRocket(): void {
-  //   console.log('Disabling LogRocket...');
-  //   if (window['LogRocket']) {
-  //     window['LogRocket'].shutdown(); // Stop LogRocket session recording
-  //   }
-  // }
+    // Create the GA script element
+    const script = document.createElement('script');
+    script.id = 'ga-script';
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${environment.gaMeasurementId}`;
+    document.head.appendChild(script);
+
+    // Once the script loads, initialize GA without sending page views automatically
+    script.onload = () => {
+      (window as { dataLayer?: unknown[] })['dataLayer'] =
+        (window as { dataLayer?: unknown[] })['dataLayer'] || [];
+
+      // Assign gtag to the window object so it's globally accessible.
+      (window as unknown as { gtag?: (...args: unknown[]) => void })['gtag'] =
+        function (...args: unknown[]) {
+          if ((window as { dataLayer?: unknown[] })['dataLayer']) {
+            (window as { dataLayer?: unknown[] })['dataLayer']?.push(args);
+          }
+        };
+
+      // Initialize GA, disabling automatic page view tracking.
+      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+        'js',
+        new Date(),
+      );
+      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+        'config',
+        environment.gaMeasurementId,
+        {
+          send_page_view: false,
+        },
+      );
+    };
+  }
+
+  private sendPageView(url: string): void {
+    const gtag = (
+      window as {
+        gtag?: (
+          event: string,
+          action: string,
+          params: { page_path: string },
+        ) => void;
+      }
+    ).gtag;
+    if (typeof gtag === 'function') {
+      gtag('event', 'page_view', { page_path: url });
+    } else {
+      console.error('Google Analytics not available');
+    }
+  }
+
+  extractAcceptedConsentCookieCategories(cookieValues: string[]) {
+    const acceptedCategories: string[] = [];
+
+    cookieValues.forEach(cookieValue => {
+      const [cookieCategory, consentValue] = cookieValue.split(':');
+      if (
+        consentValue === 'yes' &&
+        !['consentid', 'consent', 'action'].includes(cookieCategory) // Ignore non-category values
+      ) {
+        acceptedCategories.push(cookieCategory);
+      }
+    });
+
+    if (acceptedCategories.length) {
+      this.cookieService.setUserAcceptedCookieCategories(acceptedCategories);
+    }
+  }
+
+  loadLogRocket(): void {
+    this.logRocketService.init();
+  }
+
+  disableLogRocket(): void {
+    this.logRocketService.shutdown();
+  }
 }
