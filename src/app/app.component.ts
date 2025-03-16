@@ -7,6 +7,7 @@ import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
 import { CookieService } from './shared/services/cookie.service';
+import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
 
 @Component({
@@ -32,6 +33,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly logRocketService: LogRocketService,
     private readonly pageTitleService: PageTitleService,
     private readonly cookieService: CookieService,
     private readonly zone: NgZone,
@@ -240,12 +242,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
   consentGiven(): void {
     this.enableGoogleAnalyticsTracking();
-    // this.loadLogRocket();
+    this.loadLogRocket();
   }
 
   consentDenied(): void {
     this.disableGoogleAnalyticsTracking();
-    // this.disableLogRocket();
+    this.disableLogRocket();
   }
 
   private enableGoogleAnalyticsTracking(): void {
@@ -373,21 +375,11 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  // loadLogRocket(): void {
-  //   if (
-  //     !(window as { LogRocket?: { init: (id: string) => void } })['LogRocket']
-  //   ) {
-  //     import('logrocket').then(LogRocket => {
-  //       LogRocket.default.init('your-app-id'); // Replace with LogRocket ID
-  //       console.log('LogRocket loaded');
-  //     });
-  //   }
-  // }
+  loadLogRocket(): void {
+    this.logRocketService.init();
+  }
 
-  // disableLogRocket(): void {
-  //   console.log('Disabling LogRocket...');
-  //   if (window['LogRocket']) {
-  //     window['LogRocket'].shutdown(); // Stop LogRocket session recording
-  //   }
-  // }
+  disableLogRocket(): void {
+    this.logRocketService.shutdown();
+  }
 }

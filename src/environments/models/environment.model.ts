@@ -11,4 +11,5 @@ export interface Environment {
   minsBeforeLogoutExpiryToRefreshToken: number;
   cookieYesUrl: string;
   gaMeasurementId: string;
+  logRocketAppId?: string;
 }

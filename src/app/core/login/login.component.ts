@@ -18,6 +18,7 @@ import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
 import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
+import { SharedDataService } from 'src/app/shared/services/shared-data.service';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
 
@@ -43,6 +44,7 @@ export class LoginComponent {
   isSubmitting = false;
 
   constructor(
+    private readonly sharedDataService: SharedDataService,
     private readonly authService: AuthService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -69,6 +71,9 @@ export class LoginComponent {
           response.refresh_token,
           response.expires_in,
         );
+
+        // Store the user ID in the shared data service
+        this.sharedDataService.updateUserId(response.user_id);
 
         // Get the URL the user was originally trying to access
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
