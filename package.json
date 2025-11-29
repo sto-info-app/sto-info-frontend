@@ -23,7 +23,7 @@
   "dependencies": {
     "@angular/animations": "^19.1.4",
     "@angular/cdk": "^18.0.3",
-    "@angular/common": "^19.1.4",
+    "@angular/common": "^19.2.16",
     "@angular/compiler": "^19.1.4",
     "@angular/core": "^19.1.4",
     "@angular/forms": "^19.1.4",
@@ -43,7 +43,7 @@
     "@fortawesome/pro-regular-svg-icons": "^6.7.2",
     "@fortawesome/pro-solid-svg-icons": "^6.7.2",
     "@fortawesome/pro-thin-svg-icons": "^6.7.2",
-    "glob": "^11.0.0",
+    "glob": "^11.1.0",
     "http-proxy-middleware": "^3.0.5",
     "js-base64": "^3.7.7",
     "logrocket": "^9.0.2",
@@ -55,11 +55,11 @@
     "rimraf": "^6.0.1",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
-    "undici": "^6.19.1",
+    "undici": "^6.21.2",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^19.1.5",
+    "@angular-devkit/build-angular": "^20.0.1",
     "@angular/cli": "^19.1.5",
     "@angular/compiler-cli": "^19.1.4",
     "@types/jasmine": "~3.10.0",
