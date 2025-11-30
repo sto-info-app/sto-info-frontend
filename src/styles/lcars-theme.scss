@@ -152,23 +152,23 @@
 
 // Angular Material overrides!
 .mat-mdc-card {
-  --mdc-elevated-card-container-color: #0d0d0d;
-  --mdc-outlined-card-container-color: #0d0d0d;
+  --mat-card-elevated-container-color: #0d0d0d;
+  --mat-card-outlined-container-color: #0d0d0d;
 }
 
 .mat-mdc-dialog-container {
-  --mdc-dialog-container-color: #0d0d0d;
-  --mdc-dialog-subhead-color: rgba(255, 255, 255, 0.87);
-  --mdc-dialog-supporting-text-color: rgba(255, 255, 255, 0.6);
-  --mdc-dialog-subhead-font: Antonio, 'Arial Narrow', 'Avenir Next Condensed',
+  --mat-dialog-container-color: #0d0d0d;
+  --mat-dialog-subhead-color: rgba(255, 255, 255, 0.87);
+  --mat-dialog-supporting-text-color: rgba(255, 255, 255, 0.6);
+  --mat-dialog-subhead-font: Antonio, 'Arial Narrow', 'Avenir Next Condensed',
     sans-serif !important;
-  --mdc-dialog-supporting-text-font: Antonio, 'Arial Narrow',
+  --mat-dialog-supporting-text-font: Antonio, 'Arial Narrow',
     'Avenir Next Condensed', sans-serif !important;
 }
 
 .mdc-menu-surface {
-  background-color: var(--mdc-theme-surface, #0d0d0d);
-  color: var(--mdc-theme-on-surface, #fff);
+  background-color: var(--mat-theme-surface, #0d0d0d);
+  color: var(--mat-theme-on-surface, #fff);
 }
 
 .mat-mdc-paginator {
@@ -177,29 +177,29 @@
 }
 
 .mat-mdc-unelevated-button.mat-unthemed {
-  --mdc-filled-button-container-color: #0d0d0d;
-  --mdc-filled-button-label-text-color: #fff;
+  --mat-button-filled-container-color: #0d0d0d;
+  --mat-button-filled-label-text-color: #fff;
 }
 
 .mat-mdc-raised-button.mat-unthemed {
-  --mdc-protected-button-container-color: #0d0d0d;
-  --mdc-protected-button-label-text-color: #fff;
+  --mat-button-protected-container-color: #0d0d0d;
+  --mat-button-protected-label-text-color: #fff;
 }
 
 .mat-mdc-fab.mat-unthemed,
 .mat-mdc-mini-fab.mat-unthemed {
-  --mdc-fab-container-color: #0d0d0d;
-  --mdc-fab-icon-color: #fff;
+  --mat-fab-container-color: #0d0d0d;
+  --mat-fab-icon-color: #fff;
   --mat-mdc-fab-color: #fff;
 }
 
 .mdc-data-table {
-  background-color: var(--mdc-theme-surface, #0d0d0d);
+  background-color: var(--mat-theme-surface, #0d0d0d);
   border-color: rgba(255, 255, 255, 0.12);
 }
 
 .mdc-data-table__header-cell {
-  background-color: var(--mdc-theme-surface, #0d0d0d);
+  background-color: var(--mat-theme-surface, #0d0d0d);
 }
 
 .mat-mdc-table,
