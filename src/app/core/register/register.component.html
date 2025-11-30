@@ -1,6 +1,7 @@
-<app-loading-bar
-  *ngIf="isSubmitting"
+@if (isSubmitting) {
+  <app-loading-bar
   loadingText="Registering"></app-loading-bar>
+}
 <div class="register-container">
   <div class="flexbox">
     <div class="col">
@@ -17,25 +18,30 @@
               type="text"
               id="firstName"
               formControlName="firstName" />
-            <div
-              *ngIf="
-                (registerForm.controls['firstName'].invalid &&
-                  registerForm.controls['firstName'].touched) ||
-                (isSubmitting && registerForm.controls['firstName'].errors)
-              "
-              class="invalid-feedback"
-              id="firstName-invalid-feedback">
+            @if (
+              (registerForm.controls['firstName'].invalid &&
+              registerForm.controls['firstName'].touched) ||
+              (isSubmitting && registerForm.controls['firstName'].errors)
+              ) {
               <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['firstName'].errors?.['required']">
-                {{ errorTextFirstNameRequired }}
+                class="invalid-feedback"
+                id="firstName-invalid-feedback">
+                @if (registerForm.controls['firstName'].errors?.['required']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextFirstNameRequired }}
+                  </div>
+                }
+                @if (registerForm.controls['firstName'].errors?.['maxlength']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextNamesMaxLength }}
+                  </div>
+                }
               </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['firstName'].errors?.['maxlength']">
-                {{ errorTextNamesMaxLength }}
-              </div>
-            </div>
+            }
           </div>
 
           <div class="form-group">
@@ -44,25 +50,30 @@
               type="text"
               id="lastName"
               formControlName="lastName" />
-            <div
-              *ngIf="
-                (registerForm.controls['lastName'].invalid &&
-                  registerForm.controls['lastName'].touched) ||
-                (isSubmitting && registerForm.controls['lastName'].errors)
-              "
-              class="invalid-feedback"
-              id="lastName-invalid-feedback">
+            @if (
+              (registerForm.controls['lastName'].invalid &&
+              registerForm.controls['lastName'].touched) ||
+              (isSubmitting && registerForm.controls['lastName'].errors)
+              ) {
               <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['lastName'].errors?.['required']">
-                {{ errorTextLastNameRequired }}
+                class="invalid-feedback"
+                id="lastName-invalid-feedback">
+                @if (registerForm.controls['lastName'].errors?.['required']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextLastNameRequired }}
+                  </div>
+                }
+                @if (registerForm.controls['lastName'].errors?.['maxlength']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextNamesMaxLength }}
+                  </div>
+                }
               </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['lastName'].errors?.['maxlength']">
-                {{ errorTextNamesMaxLength }}
-              </div>
-            </div>
+            }
           </div>
 
           <div class="form-group">
@@ -71,40 +82,51 @@
               type="text"
               id="username"
               formControlName="username" />
-            <div
-              *ngIf="
-                (registerForm.controls['username'].invalid &&
-                  registerForm.controls['username'].touched) ||
-                (isSubmitting && registerForm.controls['username'].errors)
-              "
-              class="invalid-feedback"
-              id="username-invalid-feedback">
+            @if (
+              (registerForm.controls['username'].invalid &&
+              registerForm.controls['username'].touched) ||
+              (isSubmitting && registerForm.controls['username'].errors)
+              ) {
               <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['username'].errors?.['required']">
-                {{ errorTextUsernameRequired }}
+                class="invalid-feedback"
+                id="username-invalid-feedback">
+                @if (registerForm.controls['username'].errors?.['required']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextUsernameRequired }}
+                  </div>
+                }
+                @if (registerForm.controls['username'].errors?.['minlength']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextUsernameMinLength }}
+                  </div>
+                }
+                @if (registerForm.controls['username'].errors?.['maxlength']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextUsernameMaxLength }}
+                  </div>
+                }
+                @if (registerForm.controls['username'].errors?.['uniqueUsername']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextUsernameTaken }}
+                  </div>
+                }
+                @if (registerForm.controls['username'].errors?.['pattern']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextUsernamePattern }}
+                  </div>
+                }
               </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['username'].errors?.['minlength']">
-                {{ errorTextUsernameMinLength }}
-              </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['username'].errors?.['maxlength']">
-                {{ errorTextUsernameMaxLength }}
-              </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['username'].errors?.['uniqueUsername']">
-                {{ errorTextUsernameTaken }}
-              </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['username'].errors?.['pattern']">
-                {{ errorTextUsernamePattern }}
-              </div>
-            </div>
+            }
           </div>
 
           <div class="form-group">
@@ -113,35 +135,44 @@
               type="email"
               id="email"
               formControlName="email" />
-            <div
-              *ngIf="
-                (registerForm.controls['email'].invalid &&
-                  registerForm.controls['email'].touched) ||
-                (isSubmitting && registerForm.controls['email'].errors)
-              "
-              class="invalid-feedback"
-              id="email-invalid-feedback">
+            @if (
+              (registerForm.controls['email'].invalid &&
+              registerForm.controls['email'].touched) ||
+              (isSubmitting && registerForm.controls['email'].errors)
+              ) {
               <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['email'].errors?.['required']">
-                {{ errorTextEmailRequired }}
+                class="invalid-feedback"
+                id="email-invalid-feedback">
+                @if (registerForm.controls['email'].errors?.['required']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextEmailRequired }}
+                  </div>
+                }
+                @if (registerForm.controls['email'].errors?.['pattern']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextEmailInvalidFormat }}
+                  </div>
+                }
+                @if (registerForm.controls['email'].errors?.['uniqueEmail']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextEmailAlreadyRegistered }}
+                  </div>
+                }
+                @if (registerForm.controls['email'].errors?.['maxlength']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextEmailAlreadyRegistered }}
+                  </div>
+                }
               </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['email'].errors?.['pattern']">
-                {{ errorTextEmailInvalidFormat }}
-              </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['email'].errors?.['uniqueEmail']">
-                {{ errorTextEmailAlreadyRegistered }}
-              </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['email'].errors?.['maxlength']">
-                {{ errorTextEmailAlreadyRegistered }}
-              </div>
-            </div>
+            }
           </div>
 
           <div
@@ -153,35 +184,44 @@
               id="password"
               formControlName="password" />
 
-            <div
-              *ngIf="
-                (registerForm.controls['password'].invalid &&
-                  registerForm.controls['password'].touched) ||
-                (isSubmitting && registerForm.controls['password'].errors)
-              "
-              class="invalid-feedback"
-              id="password-invalid-feedback">
+            @if (
+              (registerForm.controls['password'].invalid &&
+              registerForm.controls['password'].touched) ||
+              (isSubmitting && registerForm.controls['password'].errors)
+              ) {
               <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['password'].errors?.['required']">
-                {{ errorTextPasswordRequired }}
+                class="invalid-feedback"
+                id="password-invalid-feedback">
+                @if (registerForm.controls['password'].errors?.['required']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextPasswordRequired }}
+                  </div>
+                }
+                @if (registerForm.controls['password'].errors?.['minlength']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextPasswordMinLength }}
+                  </div>
+                }
+                @if (registerForm.controls['password'].errors?.['maxlength']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextPasswordMaxLength }}
+                  </div>
+                }
+                @if (registerForm.controls['password'].errors?.['pattern']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextPasswordComplexity }}
+                  </div>
+                }
               </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['password'].errors?.['minlength']">
-                {{ errorTextPasswordMinLength }}
-              </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['password'].errors?.['maxlength']">
-                {{ errorTextPasswordMaxLength }}
-              </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['password'].errors?.['pattern']">
-                {{ errorTextPasswordComplexity }}
-              </div>
-            </div>
+            }
           </div>
 
           <div
@@ -192,28 +232,33 @@
               type="password"
               id="confirmPassword"
               formControlName="confirmPassword" />
-            <div
-              *ngIf="
-                (registerForm.controls['confirmPassword'].invalid &&
-                  registerForm.controls['confirmPassword'].touched) ||
-                (isSubmitting &&
-                  registerForm.controls['confirmPassword'].errors)
-              "
-              class="invalid-feedback"
-              id="confirmPassword-invalid-feedback">
+            @if (
+              (registerForm.controls['confirmPassword'].invalid &&
+              registerForm.controls['confirmPassword'].touched) ||
+              (isSubmitting &&
+              registerForm.controls['confirmPassword'].errors)
+              ) {
               <div
-                class="helper-error-text"
-                *ngIf="
+                class="invalid-feedback"
+                id="confirmPassword-invalid-feedback">
+                @if (
                   registerForm.controls['confirmPassword'].errors?.['required']
-                ">
-                {{ errorTextConfirmationPasswordRequired }}
+                  ) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextConfirmationPasswordRequired }}
+                  </div>
+                }
+                @if (registerForm.controls['confirmPassword'].errors?.['mustMatch']) {
+                  <div
+                    class="helper-error-text"
+                    >
+                    {{ errorTextPasswordsDoNotMatch }}
+                  </div>
+                }
               </div>
-              <div
-                class="helper-error-text"
-                *ngIf="registerForm.controls['confirmPassword'].errors?.['mustMatch']">
-                {{ errorTextPasswordsDoNotMatch }}
-              </div>
-            </div>
+            }
           </div>
 
           <button
@@ -237,13 +282,14 @@
             [routerLink]="getRouteLink(appRoutes.LOGIN)"
             class="full-width-btn-link sunflower"
             >Login</a
-          >
+            >
+          </div>
         </div>
+        @if (errorMessage) {
+          <app-lcars-error-message
+            title="Access Denied"
+          [message]="errorMessage"></app-lcars-error-message>
+        }
       </div>
-      <app-lcars-error-message
-        *ngIf="errorMessage"
-        title="Access Denied"
-        [message]="errorMessage"></app-lcars-error-message>
     </div>
   </div>
-</div>

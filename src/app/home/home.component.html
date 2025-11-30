@@ -4,18 +4,20 @@
     This is a work in progress!
     <fa-icon [icon]="['fas', 'hand-spock']"></fa-icon>
   </p>
-  <div
-    class="buttons"
-    *ngIf="!isLoggedIn">
-    <a
-      [routerLink]="getRouteLink(appRoutes.LOGIN)"
-      class="bluey"
-      >Login</a
-    >
-    <a
-      [routerLink]="getRouteLink(appRoutes.REGISTER)"
-      class="sunflower"
-      >Register</a
-    >
-  </div>
-</div>
+  @if (!isLoggedIn) {
+    <div
+      class="buttons"
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.LOGIN)"
+        class="bluey"
+        >Login</a
+        >
+        <a
+          [routerLink]="getRouteLink(appRoutes.REGISTER)"
+          class="sunflower"
+          >Register</a
+          >
+        </div>
+      }
+    </div>
