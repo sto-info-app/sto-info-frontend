@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Inject, Optional } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -22,7 +22,7 @@ import { EditPersonalDetailsComponent } from '../edit-personal-details/edit-pers
   styleUrls: ['./profile-pic.component.scss'],
   standalone: true,
   animations: [progressBarAnimation],
-  imports: [ImageCropperComponent, CommonModule, SharedModule],
+  imports: [ImageCropperComponent, SharedModule],
 })
 export class ProfilePicComponent {
   errorMessage = '';
