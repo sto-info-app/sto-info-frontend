@@ -50,6 +50,7 @@ export class AppComponent implements OnInit, OnDestroy {
   ) {
     this.pageTitleService.init();
 
+    //NOTE: Added fix to scroll to top on route change to avoid retaining scroll position from previous route
     router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe(() => {
