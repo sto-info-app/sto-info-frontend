@@ -1,4 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { GeneralThemeService } from 'src/app/shared/services/general-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -6,7 +8,8 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 @Component({
   selector: 'app-side-bar',
   templateUrl: './side-bar.component.html',
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, RouterModule],
 })
 export class SideBarComponent {
   @Input() isLoggedIn!: boolean;
@@ -31,10 +34,12 @@ export class SideBarComponent {
     return this.routingService.getLink(route);
   }
 
-  onResize(event: DOMRectReadOnly): void {
-    this.isPenel5Hidden = event.height >= 900;
-    this.isPenel7Hidden = event.height >= 1200;
-    this.isPenel10Hidden = event.height >= 1500;
-    this.isPenel8Hidden = event.height >= 1800;
+  onResize(event: Event): void {
+    const target = event.target as HTMLElement | null;
+    const height = target?.getBoundingClientRect().height ?? 0;
+    this.isPenel5Hidden = height >= 900;
+    this.isPenel7Hidden = height >= 1200;
+    this.isPenel10Hidden = height >= 1500;
+    this.isPenel8Hidden = height >= 1800;
   }
 }

@@ -8,7 +8,8 @@ import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.se
     '../../../assets/lcars/lcars-red-alert.css',
     './page-not-found.component.scss',
   ],
-  standalone: false,
+  standalone: true,
+  imports: [],
 })
 export class PageNotFoundComponent {
   constructor(

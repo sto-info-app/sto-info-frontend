@@ -21,7 +21,7 @@ import { CreditsComponent } from './static-pages/credits/credits.component';
 import { PrivacyPolicyComponent } from './static-pages/privacy-policy/privacy-policy.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   // *****************************************
   // * Default route
   {

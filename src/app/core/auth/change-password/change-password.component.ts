@@ -2,10 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
+  ReactiveFormsModule,
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { MustMatch } from 'src/app/shared/_helpers/must-match.validator';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
@@ -25,7 +28,13 @@ import { AuthService } from '../auth.service';
   selector: 'app-change-password',
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    RouterModule,
+    LcarsErrorMessageComponent,
+    LcarsInformationMessageComponent,
+  ],
 })
 export class ChangePasswordComponent implements OnInit {
   token = '';

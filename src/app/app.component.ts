@@ -1,11 +1,17 @@
 import { Component, NgZone, OnDestroy, OnInit, Renderer2 } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
+import { HeaderComponent } from './template/header/header.component';
+import { MainContentComponent } from './template/main-content/main-content.component';
 import { CookieService } from './shared/services/cookie.service';
 import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
@@ -13,7 +19,8 @@ import { PageTitleService } from './shared/services/page-title.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  standalone: false,
+  standalone: true,
+  imports: [HeaderComponent, MainContentComponent, MatDialogModule],
 })
 export class AppComponent implements OnInit, OnDestroy {
   private readonly cookieYesScriptId = 'cookieyes';

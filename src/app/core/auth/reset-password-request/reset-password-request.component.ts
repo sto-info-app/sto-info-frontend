@@ -1,15 +1,27 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { FORM_ERROR_INVALID_EMAIL_FORMAT } from 'src/app/shared/constants/error-messages.constants';
 import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { AuthService } from '../auth.service';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 
 @Component({
   selector: 'app-reset-password-request',
   templateUrl: './reset-password-request.component.html',
   styleUrls: ['./reset-password-request.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    LcarsErrorMessageComponent,
+    LcarsInformationMessageComponent,
+  ],
 })
 export class ResetPasswordRequestComponent {
   email = '';

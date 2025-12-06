@@ -29,19 +29,8 @@ import { TimeFormatPipe } from './pipes/time-format.pipe';
 
 @NgModule({
   declarations: [
-    // Pipes
-    TimeFormatPipe,
-
     // Directives
     ResizeObserverDirective,
-
-    // Components
-    LcarsErrorMessageComponent,
-    LcarsInformationMessageComponent,
-    LcarsSuccessMessageComponent,
-    LcarsWarningMessageComponent,
-    RefreshSessionDialogComponent,
-    LoadingBarComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   exports: [
@@ -52,37 +41,8 @@ import { TimeFormatPipe } from './pipes/time-format.pipe';
     RouterModule,
     FontAwesomeModule,
 
-    // Pipes
-    TimeFormatPipe,
-
     // Directives
     ResizeObserverDirective,
-
-    // Components
-    LcarsErrorMessageComponent,
-    LcarsInformationMessageComponent,
-    LcarsSuccessMessageComponent,
-    LcarsWarningMessageComponent,
-    RefreshSessionDialogComponent,
-    LoadingBarComponent,
   ],
 })
-export class SharedModule {
-  constructor(library: FaIconLibrary) {
-    // Add an individual FontAwesome icon to the library for convenient access in other components
-    // NOTE: Use `<fa-icon [icon]="['fas', 'hand-spock']"></fa-icon>` to use icon in the HTML
-    // NOTE: FontAwesome prefixes are: fas = solid, far = regular, fal = light, fat = thin, fad = duotone
-    library.addIcons(
-      faHandSpock,
-      faExternalLink,
-      faUserPen,
-      faLock,
-      faSquareCheck,
-      faSquareXmark,
-    );
-
-    // Add entire icon packs
-    // NOTE: This imports all icons into the bundle and increases app size!
-    // library.addIconPacks(fas, far);
-  }
-}
+export class SharedModule {}
