@@ -9,6 +9,10 @@ import {
   faUserPen,
 } from '@fortawesome/free-solid-svg-icons';
 
+// NOTE: This imports all icons into the bundle and increases app size!
+// import { fas } from '@fortawesome/pro-solid-svg-icons';
+// import { far } from '@fortawesome/pro-regular-svg-icons';
+
 @Injectable({ providedIn: 'root' })
 export class FontAwesomeIconService {
   constructor(private readonly library: FaIconLibrary) {
