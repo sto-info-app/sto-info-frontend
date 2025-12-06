@@ -44,7 +44,7 @@ export class ChangePasswordComponent implements OnInit {
   successMessage = '';
   appRoutes = APP_ROUTES;
 
-  // Allow contstants to be used in the HTML
+  // Allow constants to be used in the HTML
   errorTextPasswordRequired: string = FORM_ERROR_PASSWORD_REQUIRED;
   errorTextPasswordMinLength: string = FORM_ERROR_PASSWORD_MIN_LENGTH;
   errorTextPasswordComplexity: string = FORM_ERROR_PASSWORD_COMPLEXITY;
