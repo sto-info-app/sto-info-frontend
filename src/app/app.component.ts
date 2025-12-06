@@ -50,6 +50,14 @@ export class AppComponent implements OnInit, OnDestroy {
   ) {
     this.pageTitleService.init();
 
+    router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => {
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'auto' });
+        }, 0);
+      });
+
     this.logout = this.logout.bind(this);
   }
 
