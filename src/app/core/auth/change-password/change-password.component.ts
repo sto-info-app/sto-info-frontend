@@ -97,7 +97,7 @@ export class ChangePasswordComponent implements OnInit {
       this.authService
         .changePassword(this.token, this.changePasswordForm.value.password)
         .subscribe({
-          next: _response => {
+          next: () => {
             this.successMessage = 'Your password has been changed.';
             if (this.authService.isLoggedIn()) {
               // Logout the user after successfully changing the password

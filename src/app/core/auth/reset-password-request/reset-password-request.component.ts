@@ -58,7 +58,7 @@ export class ResetPasswordRequestComponent {
     }
 
     this.authService.resetPassword(this.email).subscribe({
-      next: _response => {
+      next: () => {
         this.successMessage = `Check your email and follow the instructions to reset your password.`;
         this.errorMessage = '';
       },
