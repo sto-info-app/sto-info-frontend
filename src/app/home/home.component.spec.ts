@@ -20,7 +20,7 @@ describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
   let mockAuthService: MockAuthService;
-  let routingService: RoutingService = new RoutingService();
+  const routingService: RoutingService = new RoutingService();
 
   beforeEach(async () => {
     library.add(fas); // Add FontAwesome icons to the library
