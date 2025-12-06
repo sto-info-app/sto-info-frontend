@@ -26,5 +26,6 @@ export class RefreshSessionDialogComponent {
 
   onLogout(): void {
     this.appComponent.logout();
+    this.dialogRef.close(false);
   }
 }
