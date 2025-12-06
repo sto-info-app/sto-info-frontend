@@ -3,15 +3,15 @@ name: Lint and Test
 on:
   workflow_dispatch:
 
-  # pull_request:
-  #   types: [opened, synchronize, edited, reopened]
-  #   branches:
-  #     - 'master'
-  #     - 'development'
-  #     - 'epic/*'
+  pull_request:
+    types: [opened, synchronize, edited, reopened]
+    branches:
+      - 'master'
+      - 'development'
+      - 'epic/*'
 
 env:
-  NODE_VERSION: 22
+  NODE_VERSION: 24
 
 jobs:
   prerequisite_check:
@@ -19,8 +19,8 @@ jobs:
 
     steps:
       - name: Check if NODE_VERSION exists
-        run: echo "NODE_VERSION=$NODE_VERSION"
-        if: env.NODE_VERSION
+        run: echo "NODE_VERSION=${{ env.NODE_VERSION }}"
+        if: ${{ env.NODE_VERSION != '' }}
 
   lint_and_test:
     runs-on: ubuntu-latest
