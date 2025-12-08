@@ -16,7 +16,8 @@
     "build:dev": "ng build --configuration development",
     "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "test": "ng test --watch=false",
+    "test-and-watch": "ng test --watch=true",
     "lint": "eslint \"src/**/*.ts\"",
     "e2e": "ng e2e"
   },

@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 import { RegistrationCompleteComponent } from './registration-complete.component';
 
 describe('RegistrationCompleteComponent', () => {
@@ -8,7 +10,16 @@ describe('RegistrationCompleteComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [RegistrationCompleteComponent],
+      imports: [RegistrationCompleteComponent],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { paramMap: new Map(), data: {} },
+            queryParams: of({}),
+          },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RegistrationCompleteComponent);

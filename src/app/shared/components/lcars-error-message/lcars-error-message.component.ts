@@ -1,10 +1,11 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-    selector: 'app-lcars-error-message',
-    templateUrl: './lcars-error-message.component.html',
-    styleUrls: ['./lcars-error-message.component.scss'],
-    standalone: false
+  selector: 'app-lcars-error-message',
+  templateUrl: './lcars-error-message.component.html',
+  styleUrls: ['./lcars-error-message.component.scss'],
+  standalone: true,
+  imports: [],
 })
 export class LcarsErrorMessageComponent {
   @Input() title = 'Red Alert';

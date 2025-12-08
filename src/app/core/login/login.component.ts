@@ -1,6 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Renderer2 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   LoginCredentials,
   LoginResponse,
@@ -21,13 +23,22 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { SharedDataService } from 'src/app/shared/services/shared-data.service';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   animations: [progressBarAnimation],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    LoadingBarComponent,
+    LcarsErrorMessageComponent,
+  ],
 })
 export class LoginComponent {
   // Allow environment constants to be used in the HTML

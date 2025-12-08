@@ -4,7 +4,8 @@ import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-about',
   templateUrl: './about.component.html',
-  standalone: false,
+  standalone: true,
+  imports: [],
 })
 export class AboutComponent {
   appTitle = environment.appTitle;

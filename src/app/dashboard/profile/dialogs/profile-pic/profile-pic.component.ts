@@ -1,6 +1,9 @@
-
 import { Component, Inject, Optional } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { User } from 'src/app/dashboard/models/user.model';
@@ -13,7 +16,8 @@ import {
   MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT,
 } from 'src/app/shared/constants/error-messages.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
-import { SharedModule } from 'src/app/shared/shared.module';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { EditPersonalDetailsComponent } from '../edit-personal-details/edit-personal-details.component';
 
 @Component({
@@ -22,7 +26,12 @@ import { EditPersonalDetailsComponent } from '../edit-personal-details/edit-pers
   styleUrls: ['./profile-pic.component.scss'],
   standalone: true,
   animations: [progressBarAnimation],
-  imports: [ImageCropperComponent, SharedModule],
+  imports: [
+    ImageCropperComponent,
+    MatDialogModule,
+    LoadingBarComponent,
+    LcarsErrorMessageComponent,
+  ],
 })
 export class ProfilePicComponent {
   errorMessage = '';

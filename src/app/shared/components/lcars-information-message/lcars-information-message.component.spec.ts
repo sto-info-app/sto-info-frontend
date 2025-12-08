@@ -9,7 +9,7 @@ describe('LcarsInformationMessageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [LcarsInformationMessageComponent],
+      imports: [LcarsInformationMessageComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LcarsInformationMessageComponent);

@@ -1,46 +1,42 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  FaIconComponent,
-  FontAwesomeModule,
-} from '@fortawesome/angular-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { fas } from '@fortawesome/free-solid-svg-icons';
-import { MockComponent } from 'ng-mocks';
-import { Observable, of } from 'rxjs';
+import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
+import { faHandSpock } from '@fortawesome/free-solid-svg-icons';
+import { of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../core/auth/auth.service';
 import { RoutingService } from '../shared/services/routing.service';
 import { HomeComponent } from './home.component';
 
-interface MockAuthService {
-  isAuthenticated$: Observable<boolean>;
-}
-
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
-  let mockAuthService: MockAuthService;
-  let routingService: RoutingService = new RoutingService();
+  let routingService: jasmine.SpyObj<RoutingService>;
 
   beforeEach(async () => {
-    library.add(fas); // Add FontAwesome icons to the library
-    mockAuthService = { isAuthenticated$: of(true) };
-  });
+    const authServiceSpy = jasmine.createSpyObj('AuthService', [], {
+      isAuthenticated$: of(true),
+    });
+    const routingServiceSpy = jasmine.createSpyObj('RoutingService', [
+      'getLink',
+    ]);
 
-  beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FontAwesomeModule],
-      declarations: [HomeComponent, MockComponent(FaIconComponent)],
+      imports: [HomeComponent],
       providers: [
-        { provide: AuthService, useValue: mockAuthService },
-        { provide: RoutingService },
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: RoutingService, useValue: routingServiceSpy },
+        FaIconLibrary,
       ],
     }).compileComponents();
-  });
 
-  beforeEach(() => {
+    const library = TestBed.inject(FaIconLibrary);
+    library.addIcons(faHandSpock);
+
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
+    routingService = TestBed.inject(
+      RoutingService,
+    ) as jasmine.SpyObj<RoutingService>;
     fixture.detectChanges();
   });
 
@@ -52,11 +48,15 @@ describe('HomeComponent', () => {
     expect(component.appTitle).toEqual(environment.appTitle);
   });
 
-  it('should subscribe to authentication state on creation', () => {
-    component = new HomeComponent(
-      mockAuthService as unknown as AuthService,
-      routingService,
-    );
+  it('should update isLoggedIn when auth state changes', () => {
+    // isAuthenticated$ is already true from the spy's property
     expect(component.isLoggedIn).toBeTrue();
+  });
+
+  it('should delegate route link generation to routing service', () => {
+    routingService.getLink.and.returnValue('/test-route');
+    const link = component.getRouteLink('test');
+    expect(routingService.getLink).toHaveBeenCalledWith('test');
+    expect(link).toBe('/test-route');
   });
 });

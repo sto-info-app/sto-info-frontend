@@ -1,8 +1,3 @@
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -13,24 +8,27 @@ import { ResetPasswordRequestComponent } from './reset-password-request.componen
 describe('ResetPasswordRequestComponent', () => {
   let component: ResetPasswordRequestComponent;
   let fixture: ComponentFixture<ResetPasswordRequestComponent>;
-  let authService: AuthService;
+  let authService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
+    const authServiceSpy = jasmine.createSpyObj('AuthService', [
+      'resetPassword',
+    ]);
+
     await TestBed.configureTestingModule({
-      declarations: [ResetPasswordRequestComponent],
-      imports: [RouterTestingModule, FormsModule],
-      providers: [
-        AuthService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
+      imports: [
+        RouterTestingModule,
+        FormsModule,
+        ResetPasswordRequestComponent,
       ],
+      providers: [{ provide: AuthService, useValue: authServiceSpy }],
     }).compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ResetPasswordRequestComponent);
     component = fixture.componentInstance;
-    authService = TestBed.inject(AuthService);
+    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
     fixture.detectChanges();
   });
 
@@ -58,7 +56,7 @@ describe('ResetPasswordRequestComponent', () => {
   });
 
   it('should handle password reset correctly', () => {
-    spyOn(authService, 'resetPassword').and.returnValue(of(undefined));
+    authService.resetPassword.and.returnValue(of(undefined));
     component.email = 'test@example.com';
     component.inputsValid = true;
     component.onPasswordReset();
@@ -72,9 +70,7 @@ describe('ResetPasswordRequestComponent', () => {
 
   it('should handle password reset error correctly', () => {
     const errorObject = { message: 'Some error occurred' };
-    spyOn(authService, 'resetPassword').and.returnValue(
-      throwError(errorObject),
-    );
+    authService.resetPassword.and.returnValue(throwError(errorObject));
 
     // Suppress console.error
     spyOn(console, 'error');

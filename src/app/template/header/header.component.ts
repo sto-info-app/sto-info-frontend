@@ -6,6 +6,9 @@ import {
   NgZone,
   ViewChild,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { TimeFormatPipe } from 'src/app/shared/pipes/time-format.pipe';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { DebuggingService } from 'src/app/shared/services/debugging.service';
 import { GeneralThemeService } from 'src/app/shared/services/general-theme.service';
@@ -16,7 +19,8 @@ import { environment } from 'src/environments/environment';
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, RouterModule, TimeFormatPipe],
 })
 export class HeaderComponent implements AfterViewInit {
   @Input() showScrollButton = false;

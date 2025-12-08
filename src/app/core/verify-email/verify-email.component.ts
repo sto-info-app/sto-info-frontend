@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
@@ -9,12 +10,22 @@ import {
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 import { MessageType } from '../../shared/models/lcars-message-type.enum';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
+import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 
 @Component({
   selector: 'app-verify-email',
   templateUrl: './verify-email.component.html',
   styleUrls: ['./verify-email.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    LcarsErrorMessageComponent,
+    LcarsInformationMessageComponent,
+    LcarsSuccessMessageComponent,
+  ],
 })
 export class VerifyEmailComponent implements OnInit {
   messageType: MessageType = MessageType.Info;

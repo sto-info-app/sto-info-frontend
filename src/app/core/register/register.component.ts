@@ -1,11 +1,13 @@
+import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
+  ReactiveFormsModule,
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { RegistrationFormValues } from 'src/app/models/user-auth.models';
 import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -50,13 +52,22 @@ import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.se
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { MustMatch } from '../../shared/_helpers/must-match.validator';
 import { AuthService } from '../auth/auth.service';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
   animations: [progressBarAnimation],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    LoadingBarComponent,
+    LcarsErrorMessageComponent,
+  ],
 })
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;

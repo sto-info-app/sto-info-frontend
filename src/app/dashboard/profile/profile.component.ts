@@ -1,5 +1,13 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
+import { RouterModule } from '@angular/router';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { SRC_PHOTO_UNAVAILABLE_300PX } from 'src/app/shared/constants/app-image-assets.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -14,7 +22,14 @@ import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    RouterModule,
+    FontAwesomeModule,
+    LoadingBarComponent,
+  ],
 })
 export class ProfileComponent {
   appRoutes = APP_ROUTES;

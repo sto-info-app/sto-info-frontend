@@ -19,12 +19,13 @@ describe('PageNotFoundComponent', () => {
     const redAlertSpy = jasmine.createSpyObj('RedAlertThemeService', [
       'applyRedAlertThemeThenApplyStaticRedTheme',
       'clearRedAlertStylesheet',
+      'clearTimers',
     ]);
 
     mockElementRef = new ElementRef({});
 
     await TestBed.configureTestingModule({
-      declarations: [PageNotFoundComponent],
+      imports: [PageNotFoundComponent],
       providers: [
         { provide: ElementRef, useValue: mockElementRef },
         { provide: RedAlertThemeService, useValue: redAlertSpy },

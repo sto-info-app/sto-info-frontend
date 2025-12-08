@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 
@@ -6,7 +7,8 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
   selector: 'app-registration-complete',
   templateUrl: './registration-complete.component.html',
   styleUrls: ['./registration-complete.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [RouterModule],
 })
 export class RegistrationCompleteComponent {
   appRoutes = APP_ROUTES;

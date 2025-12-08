@@ -1,6 +1,16 @@
+import { CommonModule } from '@angular/common';
 import { Component, Inject, OnInit, Optional } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { User } from 'src/app/dashboard/models/user.model';
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
@@ -27,13 +37,22 @@ import {
 import { USERNAME_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 
 @Component({
   selector: 'app-edit-personal-details',
   templateUrl: './edit-personal-details.component.html',
   styleUrls: ['./edit-personal-details.component.scss'],
   animations: [progressBarAnimation],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    LoadingBarComponent,
+    LcarsErrorMessageComponent,
+  ],
 })
 export class EditPersonalDetailsComponent implements OnInit {
   editPersonalDetailsForm!: FormGroup;

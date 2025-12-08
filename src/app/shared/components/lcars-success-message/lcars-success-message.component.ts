@@ -1,10 +1,11 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-    selector: 'app-lcars-success-message',
-    templateUrl: './lcars-success-message.component.html',
-    styleUrls: ['./lcars-success-message.component.scss'],
-    standalone: false
+  selector: 'app-lcars-success-message',
+  templateUrl: './lcars-success-message.component.html',
+  styleUrls: ['./lcars-success-message.component.scss'],
+  standalone: true,
+  imports: [],
 })
 export class LcarsSuccessMessageComponent {
   @Input() title = 'Incoming message';

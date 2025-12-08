@@ -1,14 +1,11 @@
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import {
   MAX_CHARS_NAMES,
@@ -25,22 +22,25 @@ describe('RegisterComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [RegisterComponent, DummyComponent],
       imports: [
+        RegisterComponent,
         ReactiveFormsModule,
-        provideRouter([
-          { path: 'register/complete', component: DummyComponent },
-        ]),
         BrowserAnimationsModule,
       ],
       providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { paramMap: new Map(), data: {} },
+          },
+        },
         {
           provide: AuthService,
           useValue: {
             register: () => of({}),
           },
         },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(),
         provideHttpClientTesting(),
       ],
     }).compileComponents();
@@ -226,6 +226,6 @@ describe('RegisterComponent', () => {
 
 @Component({
   template: '',
-  standalone: false,
+  standalone: true,
 })
 class DummyComponent {}

@@ -1,17 +1,20 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-
+import { RouterModule } from '@angular/router';
 import { AuthService } from '../core/auth/auth.service';
 import { SRC_PHOTO_UNAVAILABLE_300PX } from '../shared/constants/app-image-assets.constants';
 import { APP_ROUTES } from '../shared/constants/app-routing.constants';
 import { RoutingService } from '../shared/services/routing.service';
 import { User } from './models/user.model';
 import { DashboardService } from './services/dashboard.service';
+import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, RouterModule, LoadingBarComponent],
 })
 export class DashboardComponent implements OnInit {
   appRoutes = APP_ROUTES;

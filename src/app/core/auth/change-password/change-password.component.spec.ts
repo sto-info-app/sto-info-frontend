@@ -23,8 +23,7 @@ describe('ChangePasswordComponent', () => {
     ]);
 
     await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule],
-      declarations: [ChangePasswordComponent],
+      imports: [ReactiveFormsModule, ChangePasswordComponent],
       providers: [
         {
           provide: AuthService,
