@@ -9,83 +9,79 @@
       (click)="scrollToTop()"
       id="scroll-top"
       ><span class="hop">screen</span> top</a
+    >
+  </div>
+  <div class="left-frame-top">
+    <div class="panel panel-1">
+      @if (!isLoggedIn) {
+      <a
+        [routerLink]="getRouteLink(appRoutes.LOGIN)"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="peach"
+        id="header-login-link"
+        >Login</a
       >
+      } @if (isLoggedIn) {
+      <a
+        (click)="logout()"
+        id="header-logout-link"
+        >Logout @if (appDebugging && autoLogoutCountdown > 0) {
+        <span> in {{ autoLogoutCountdown | timeFormat }}</span>
+        }</a
+      >
+      }
     </div>
-    <div class="left-frame-top">
-      <div class="panel panel-1">
-        @if (!isLoggedIn) {
-          <a
-            [routerLink]="getRouteLink(appRoutes.LOGIN)"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="peach"
-            id="header-login-link"
-            >Login</a
-            >
-          }
-          @if (isLoggedIn) {
-            <a
-              (click)="logout()"
-              id="header-logout-link"
-              >Logout
-              @if (appDebugging && autoLogoutCountdown > 0) {
-                <span>
-                  in {{ autoLogoutCountdown | timeFormat }}</span
-                  >
-                  }</a
-                  >
-                }
-              </div>
-              <div
-                class="panel panel-2"
-              [innerHTML]="themePanel2RandomText"></div>
-            </div>
-            <div class="right-frame-top">
-              <div class="banner">{{ appTitle }}</div>
-              <div class="data-cascade-button-group">
-                <div class="cascade-wrapper">
-                  <div
-                    class="data-cascade"
-                    id="default">
-                    <div [innerHTML]="dataCascade"></div>
-                  </div>
-                </div>
-                <nav id="nav-standard">
-                  <a
-                    [routerLink]="getRouteLink('HOME')"
-                    [routerLinkActiveOptions]="{ exact: true }"
-                    routerLinkActive="almond-creme"
-                    id="b-one"
-                    >Home</a
-                    >
-                    <a
-                      [routerLink]="getRouteLink(appRoutes.ABOUT)"
-                      [routerLinkActiveOptions]="{ exact: true }"
-                      routerLinkActive="almond-creme"
-                      id="b-two"
-                      >About</a
-                      >
-                      <a
-                        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
-                        [routerLinkActiveOptions]="{ exact: true }"
-                        routerLinkActive="almond-creme"
-                        id="b-three"
-                        >Dashboard</a
-                        >
-                        <a
-                          [routerLink]="getRouteLink(appRoutes.CONTACT)"
-                          [routerLinkActiveOptions]="{ exact: true }"
-                          routerLinkActive="almond-creme"
-                          id="b-four"
-                          >Contact</a
-                          >
-                        </nav>
-                      </div>
-                      <div class="bar-panel first-bar-panel">
-                        <div class="bar-1"></div>
-                        <div class="bar-2"></div>
-                        <div class="bar-3"></div>
-                        <div class="bar-4"></div>
-                        <div class="bar-5"></div>
-                      </div>
-                    </div>
-                  </div>
+    <div
+      class="panel panel-2"
+      [innerHTML]="themePanel2RandomText"></div>
+  </div>
+  <div class="right-frame-top">
+    <div class="banner">{{ appTitle }}</div>
+    <div class="data-cascade-button-group">
+      <div class="cascade-wrapper">
+        <div
+          class="data-cascade"
+          id="default">
+          <div [innerHTML]="dataCascade"></div>
+        </div>
+      </div>
+      <nav id="nav-standard">
+        <a
+          [routerLink]="getRouteLink('HOME')"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="almond-creme"
+          id="b-one"
+          >Home</a
+        >
+        <a
+          [routerLink]="getRouteLink(appRoutes.ABOUT)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="almond-creme"
+          id="b-two"
+          >About</a
+        >
+        <a
+          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="almond-creme"
+          id="b-three"
+          >Dashboard</a
+        >
+        <a
+          [routerLink]="getRouteLink(appRoutes.CONTACT)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="almond-creme"
+          id="b-four"
+          >Contact</a
+        >
+      </nav>
+    </div>
+    <div class="bar-panel first-bar-panel">
+      <div class="bar-1"></div>
+      <div class="bar-2"></div>
+      <div class="bar-3"></div>
+      <div class="bar-4"></div>
+      <div class="bar-5"></div>
+    </div>
+  </div>
+</div>

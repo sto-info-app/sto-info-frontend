@@ -7,52 +7,42 @@
     <div class="panel panel-3"></div>
     <div class="sidebar-buttons">
       @if (!isLoggedIn) {
-        <a
-          [routerLink]="getRouteLink(appRoutes.REGISTER)"
-          [routerLinkActiveOptions]="{ exact: true }"
-          routerLinkActive="peach"
-          >Register</a
-          >
-        }
-        @if (isLoggedIn) {
-          <a
-            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="peach"
-            >Dashboard</a
-            >
-          }
-          <a
-            [routerLink]="getRouteLink('page-not-found')"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="peach"
-            >Error Page</a
-            >
-          </div>
-          <div class="panel panel-4"></div>
-          @if (isPenel5Hidden) {
-            <div
-              class="panel panel-5"
-            ></div>
-          }
-          <div
-            class="panel panel-6"
-          [innerHTML]="themePanel6RandomText"></div>
-          @if (isPenel7Hidden) {
-            <div
-              class="panel panel-7"
-            ></div>
-          }
-          @if (isPenel8Hidden) {
-            <div
-              class="panel panel-8"
-            ></div>
-          }
-          <div class="panel panel-9"></div>
-          @if (isPenel10Hidden) {
-            <div
-              class="panel panel-10"
-            ></div>
-          }
-        </div>
-      </div>
+      <a
+        [routerLink]="getRouteLink(appRoutes.REGISTER)"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="peach"
+        >Register</a
+      >
+      } @if (isLoggedIn) {
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="peach"
+        >Dashboard</a
+      >
+      }
+      <a
+        [routerLink]="getRouteLink('page-not-found')"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="peach"
+        >Error Page</a
+      >
+    </div>
+    <div class="panel panel-4"></div>
+    @if (isPenel5Hidden) {
+    <div class="panel panel-5"></div>
+    }
+    <div
+      class="panel panel-6"
+      [innerHTML]="themePanel6RandomText"></div>
+    @if (isPenel7Hidden) {
+    <div class="panel panel-7"></div>
+    } @if (isPenel8Hidden) {
+    <div class="panel panel-8"></div>
+    }
+    <div class="panel panel-9"></div>
+    @if (isPenel10Hidden) {
+    <div class="panel panel-10"></div>
+    }
+  </div>
+</div>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   MatDialog,
   MatDialogModule,
@@ -31,7 +31,7 @@ import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component
     LoadingBarComponent,
   ],
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
   appRoutes = APP_ROUTES;
   unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 

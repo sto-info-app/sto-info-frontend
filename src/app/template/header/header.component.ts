@@ -5,6 +5,7 @@ import {
   Input,
   NgZone,
   ViewChild,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -22,7 +23,7 @@ import { environment } from 'src/environments/environment';
   standalone: true,
   imports: [CommonModule, RouterModule, TimeFormatPipe],
 })
-export class HeaderComponent implements AfterViewInit {
+export class HeaderComponent implements AfterViewInit, OnDestroy {
   @Input() showScrollButton = false;
   @Input() isLoggedIn!: boolean;
   @Input() autoLogoutCountdown = 0;
