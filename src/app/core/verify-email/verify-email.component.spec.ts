@@ -21,8 +21,6 @@ describe('VerifyEmailComponent', () => {
   let fixture: ComponentFixture<VerifyEmailComponent>;
   let httpTestingController: HttpTestingController;
   let queryParamsSubject: Subject<QueryParams>;
-  let authService: jasmine.SpyObj<AuthService>;
-  let route: ActivatedRoute;
 
   beforeEach(async () => {
     queryParamsSubject = new Subject();
@@ -49,13 +47,11 @@ describe('VerifyEmailComponent', () => {
     }).compileComponents();
 
     httpTestingController = TestBed.inject(HttpTestingController);
-    route = TestBed.inject(ActivatedRoute);
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(VerifyEmailComponent);
     component = fixture.componentInstance;
-    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
     fixture.detectChanges();
   });
 
