@@ -35,4 +35,6 @@ jasmineEnv.addReporter({
 
 // Loads all specs:
 const context = require.context('./', true, /\.spec\.ts$/);
-context.keys().forEach(context);
+for (const key of context.keys()) {
+  context(key);
+}
