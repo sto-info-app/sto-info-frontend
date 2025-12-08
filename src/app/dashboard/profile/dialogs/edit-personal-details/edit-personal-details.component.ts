@@ -76,7 +76,7 @@ export class EditPersonalDetailsComponent implements OnInit {
   private readonly dialogRef = inject(
     MatDialogRef<EditPersonalDetailsComponent>,
   );
-  @Optional() @Inject(MAT_DIALOG_DATA) public data: { user: User } | null;
+  @Optional() @Inject(MAT_DIALOG_DATA) public data?: { user: User } | null;
 
   ngOnInit() {
     this.editPersonalDetailsForm = this.formBuilder.nonNullable.group({
