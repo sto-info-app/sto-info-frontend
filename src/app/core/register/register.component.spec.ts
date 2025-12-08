@@ -223,9 +223,3 @@ describe('RegisterComponent', () => {
     });
   });
 });
-
-@Component({
-  template: '',
-  standalone: true,
-})
-class DummyComponent {}
