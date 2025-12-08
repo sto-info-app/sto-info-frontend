@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  Renderer2,
+  inject,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -10,6 +16,8 @@ import {
 import { Router, RouterModule } from '@angular/router';
 import { RegistrationFormValues } from 'src/app/models/user-auth.models';
 import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED,
@@ -52,8 +60,6 @@ import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.se
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { MustMatch } from '../../shared/_helpers/must-match.validator';
 import { AuthService } from '../auth/auth.service';
-import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 
 @Component({
   selector: 'app-register',
@@ -96,15 +102,13 @@ export class RegisterComponent implements OnInit {
   errorTextConfirmationPasswordRequired: string =
     FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED;
 
-  constructor(
-    private readonly formBuilder: FormBuilder,
-    private readonly router: Router,
-    private readonly authService: AuthService,
-    private readonly routingService: RoutingService,
-    private readonly renderer: Renderer2,
-    private readonly el: ElementRef,
-    private readonly redAlertThemeService: RedAlertThemeService,
-  ) {}
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly routingService = inject(RoutingService);
+  private readonly renderer = inject(Renderer2);
+  private readonly el = inject(ElementRef);
+  private readonly redAlertThemeService = inject(RedAlertThemeService);
 
   ngOnInit() {
     this.registerForm = this.formBuilder.nonNullable.group(

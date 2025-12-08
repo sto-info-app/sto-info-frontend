@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit, Optional } from '@angular/core';
+import { Component, Inject, OnInit, Optional, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -15,6 +15,8 @@ import { User } from 'src/app/dashboard/models/user.model';
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
 import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
   FORM_ERROR_FIRSTNAME_REQUIRED,
   FORM_ERROR_LASTNAME_REQUIRED,
@@ -37,8 +39,6 @@ import {
 import { USERNAME_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
-import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 
 @Component({
   selector: 'app-edit-personal-details',
@@ -70,13 +70,13 @@ export class EditPersonalDetailsComponent implements OnInit {
   errorTextUsernameTaken: string = FORM_ERROR_USERNAME_TAKEN;
   errorTextUsernamePattern: string = FORM_ERROR_USERNAME_PATTERN;
 
-  constructor(
-    private readonly formBuilder: FormBuilder,
-    private readonly routingService: RoutingService,
-    private readonly dashboardService: DashboardService,
-    private readonly dialogRef: MatDialogRef<EditPersonalDetailsComponent>,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: { user: User } | null,
-  ) {}
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly routingService = inject(RoutingService);
+  private readonly dashboardService = inject(DashboardService);
+  private readonly dialogRef = inject(
+    MatDialogRef<EditPersonalDetailsComponent>,
+  );
+  @Optional() @Inject(MAT_DIALOG_DATA) public data: { user: User } | null;
 
   ngOnInit() {
     this.editPersonalDetailsForm = this.formBuilder.nonNullable.group({

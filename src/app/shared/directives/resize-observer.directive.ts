@@ -5,6 +5,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  inject,
 } from '@angular/core';
 
 @Directive({
@@ -16,8 +17,7 @@ export class ResizeObserverDirective implements OnInit, OnDestroy {
   appResizeObserver = new EventEmitter<DOMRectReadOnly>();
 
   private observer!: ResizeObserver;
-
-  constructor(private readonly elementRef: ElementRef) {}
+  private readonly elementRef = inject(ElementRef);
 
   ngOnInit(): void {
     this.observer = new ResizeObserver(entries => {

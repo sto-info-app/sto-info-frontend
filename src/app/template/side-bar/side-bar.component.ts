@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { GeneralThemeService } from 'src/app/shared/services/general-theme.service';
@@ -22,10 +22,10 @@ export class SideBarComponent {
   isPenel8Hidden = false;
   isPenel10Hidden = false;
 
-  constructor(
-    private readonly routingService: RoutingService,
-    private readonly generalThemeService: GeneralThemeService,
-  ) {
+  private readonly routingService = inject(RoutingService);
+  private readonly generalThemeService = inject(GeneralThemeService);
+
+  constructor() {
     this.themePanel6RandomText =
       this.generalThemeService.createDynamicSideColumnText();
   }

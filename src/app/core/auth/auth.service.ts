@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   BehaviorSubject,
@@ -47,10 +47,10 @@ export class AuthService {
 
   private refreshTokenTimeout: NodeJS.Timeout | null = null;
 
-  constructor(
-    private readonly http: HttpClient,
-    private readonly router: Router,
-  ) {
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+
+  constructor() {
     // Check if there's a login token and update the BehaviorSubject
     this.isAuthenticatedSubject.next(this.isTokenValid());
 

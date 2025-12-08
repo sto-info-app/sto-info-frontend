@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { environment } from 'src/environments/environment';
@@ -18,10 +18,10 @@ export class HomeComponent {
   isLoggedIn = false;
   appRoutes = APP_ROUTES;
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly routingService: RoutingService,
-  ) {
+  private readonly authService = inject(AuthService);
+  private readonly routingService = inject(RoutingService);
+
+  constructor() {
     this.authService.isAuthenticated$.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
     });

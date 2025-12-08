@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -7,9 +7,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { MustMatch } from 'src/app/shared/_helpers/must-match.validator';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
-import { MustMatch } from 'src/app/shared/_helpers/must-match.validator';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED,
@@ -52,12 +52,12 @@ export class ChangePasswordComponent implements OnInit {
     FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED;
   errorTextPasswordsDoNotMatch: string = FORM_ERROR_PASSWORDS_DO_NOT_MATCH;
 
-  constructor(
-    private readonly formBuilder: FormBuilder,
-    private readonly route: ActivatedRoute,
-    private readonly authService: AuthService,
-    private readonly routingService: RoutingService,
-  ) {
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly authService = inject(AuthService);
+  private readonly routingService = inject(RoutingService);
+
+  constructor() {
     this.changePasswordForm = this.formBuilder.nonNullable.group(
       {
         password: [

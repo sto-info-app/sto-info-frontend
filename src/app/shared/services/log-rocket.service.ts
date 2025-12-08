@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import LogRocket from 'logrocket';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -14,7 +14,7 @@ export class LogRocketService implements OnDestroy {
   private readonly logRocketAppId = environment.logRocketAppId ?? null;
   private initialised = false;
 
-  constructor(private readonly sharedDataService: SharedDataService) {}
+  private readonly sharedDataService = inject(SharedDataService);
 
   /**
    * Unsubscribe from the Observables when the component is destroyed

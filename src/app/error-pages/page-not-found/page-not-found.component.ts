@@ -1,9 +1,10 @@
 import {
   Component,
   ElementRef,
-  Renderer2,
-  OnInit,
   OnDestroy,
+  OnInit,
+  Renderer2,
+  inject,
 } from '@angular/core';
 import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
 
@@ -18,11 +19,9 @@ import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.se
   imports: [],
 })
 export class PageNotFoundComponent implements OnInit, OnDestroy {
-  constructor(
-    private readonly redAlertThemeService: RedAlertThemeService,
-    private readonly renderer: Renderer2,
-    private readonly el: ElementRef,
-  ) {}
+  private readonly redAlertThemeService = inject(RedAlertThemeService);
+  private readonly renderer = inject(Renderer2);
+  private readonly el = inject(ElementRef);
 
   ngOnInit(): void {
     this.redAlertThemeService.applyRedAlertThemeThenApplyStaticRedTheme(

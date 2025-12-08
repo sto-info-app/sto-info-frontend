@@ -1,4 +1,11 @@
-import { Component, NgZone, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import {
+  Component,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  Renderer2,
+  inject,
+} from '@angular/core';
 import {
   MatDialog,
   MatDialogModule,
@@ -10,11 +17,11 @@ import { filter } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
-import { HeaderComponent } from './template/header/header.component';
-import { MainContentComponent } from './template/main-content/main-content.component';
 import { CookieService } from './shared/services/cookie.service';
 import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
+import { HeaderComponent } from './template/header/header.component';
+import { MainContentComponent } from './template/main-content/main-content.component';
 
 @Component({
   selector: 'app-root',
@@ -37,17 +44,16 @@ export class AppComponent implements OnInit, OnDestroy {
   private intervalId: number | null = null;
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
+  private readonly authService = inject(AuthService);
+  private readonly logRocketService = inject(LogRocketService);
+  private readonly pageTitleService = inject(PageTitleService);
+  private readonly cookieService = inject(CookieService);
+  private readonly zone = inject(NgZone);
+  private readonly renderer = inject(Renderer2);
+  private readonly router = inject(Router);
+  public readonly dialog = inject(MatDialog);
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly logRocketService: LogRocketService,
-    private readonly pageTitleService: PageTitleService,
-    private readonly cookieService: CookieService,
-    private readonly zone: NgZone,
-    private readonly renderer: Renderer2,
-    private readonly router: Router,
-    public readonly dialog: MatDialog,
-  ) {
+  constructor() {
     this.pageTitleService.init();
 
     //NOTE: Added fix to scroll to top on route change to avoid retaining scroll position from previous route
