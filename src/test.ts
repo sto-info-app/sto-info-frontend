@@ -32,8 +32,20 @@ jasmineEnv.addReporter({
     );
   },
 });
-// --- END DEBUG ---
 
 // Then the usual Angular CLI bit that loads all specs:
-const context = require.context('./', true, /\.spec\.ts$/);
-context.keys().map(context);
+async function loadTests() {
+  const context = (require as any).context?.('./', true, /\.spec\.ts$/);
+
+  if (context) {
+    // Webpack-style (older Angular builders)
+    context.keys().forEach(context);
+  } else {
+    // Vite/esbuild-style (Angular 17+ builders)
+    const modules = import.meta.glob('./**/*.spec.ts');
+    await Promise.all(Object.values(modules).map(loader => loader()));
+  }
+}
+
+loadTests();
+// --- END DEBUG ---
