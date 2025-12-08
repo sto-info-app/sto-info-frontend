@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppComponent } from 'src/app/app.component';
-import { TimeFormatPipe } from '../../pipes/time-format.pipe';
 import { RefreshSessionDialogComponent } from './refresh-session-dialog.component';
 
 //NOTE: Add tests! - https://app.shortcut.com/startrekonlineinfo/story/314/add-unit-tests-for-all-components
