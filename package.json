@@ -18,7 +18,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
     "test-and-watch": "ng test --watch=true",
-    "lint": "eslint \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.{ts,js,html}\"",
     "e2e": "ng e2e"
   },
   "dependencies": {
