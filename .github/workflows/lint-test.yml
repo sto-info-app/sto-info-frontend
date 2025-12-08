@@ -65,5 +65,11 @@ jobs:
       - name: Run Linter
         run: npm run lint
 
-      - name: Run Tests
-        run: npm run test
+      - name: Run each spec file individually
+        run: |
+          set -e
+          SPECS=$(ls src/app/**/*.spec.ts)
+          for spec in $SPECS; do
+            echo "Running spec: $spec"
+            npx ng test --watch=false --main=src/test.ts --include "$spec"
+          done
