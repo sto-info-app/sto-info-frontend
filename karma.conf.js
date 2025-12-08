@@ -41,7 +41,9 @@ module.exports = function (config) {
     singleRun: true,
     restartOnFileChange: true,
     files: ['src/test-setup.ts'],
-    browserNoActivityTimeout: 60000,
-    captureTimeout: 60000,
+    browserNoActivityTimeout: 120000,
+    captureTimeout: 120000,
+    browserDisconnectTimeout: 10000,
+    browserDisconnectTolerance: 1,
   });
 };
