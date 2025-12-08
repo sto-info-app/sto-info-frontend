@@ -10,7 +10,7 @@ import {
 
 @Directive({
   selector: '[appResizeObserver]',
-  standalone: false,
+  standalone: true,
 })
 export class ResizeObserverDirective implements OnInit, OnDestroy {
   @Output()
