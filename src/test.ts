@@ -33,5 +33,6 @@ jasmineEnv.addReporter({
   },
 });
 
-// Then the usual Angular CLI bit that loads all specs:
-import.meta.glob('./**/*.spec.ts', { eager: true });
+// Loads all specs:
+const context = require.context('./', true, /\.spec\.ts$/);
+context.keys().forEach(context);
