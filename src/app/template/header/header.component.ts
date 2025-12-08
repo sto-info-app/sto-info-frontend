@@ -33,6 +33,11 @@ export class HeaderComponent implements AfterViewInit, OnDestroy {
   @ViewChild('scrollTopButton')
   scrollTopButton!: ElementRef;
 
+  private readonly zone = inject(NgZone);
+  private readonly routingService = inject(RoutingService);
+  private readonly generalThemeService = inject(GeneralThemeService);
+  private readonly debuggingService = inject(DebuggingService);
+
   appTitle = environment.appTitle;
   appRoutes = APP_ROUTES;
 
@@ -48,11 +53,6 @@ export class HeaderComponent implements AfterViewInit, OnDestroy {
     });
   };
   showScrollTop = false;
-
-  private readonly zone = inject(NgZone);
-  private readonly routingService = inject(RoutingService);
-  private readonly generalThemeService = inject(GeneralThemeService);
-  private readonly debuggingService = inject(DebuggingService);
 
   constructor() {
     this.dataCascade = this.generalThemeService.createDynamicDataCascade();
