@@ -123,6 +123,9 @@ export class AppComponent implements OnInit, OnDestroy {
     // Unsubscribe from the Observables when the component is destroyed
     this.destroy$.next();
     this.destroy$.complete();
+
+    // Ensure any active countdown interval is cleared on destroy
+    this.stopCountdown();
   }
 
   logout(): void {
