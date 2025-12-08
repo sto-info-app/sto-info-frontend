@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 
 import { FooterComponent } from './footer.component';
 
@@ -8,7 +10,16 @@ describe('FooterComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [FooterComponent],
+      imports: [FooterComponent],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { paramMap: new Map(), data: {} },
+            queryParams: of({}),
+          },
+        },
+      ],
     });
     fixture = TestBed.createComponent(FooterComponent);
     component = fixture.componentInstance;

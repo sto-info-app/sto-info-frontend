@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppComponent } from 'src/app/app.component';
 import { TimeFormatPipe } from '../../pipes/time-format.pipe';
@@ -21,7 +20,7 @@ describe('RefreshSessionDialogComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [RefreshSessionDialogComponent, TimeFormatPipe],
+      imports: [RefreshSessionDialogComponent],
       providers: [
         {
           provide: MatDialogRef,

@@ -1,8 +1,4 @@
-import {
-  HttpErrorResponse,
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
   ComponentFixture,
@@ -26,12 +22,11 @@ describe('LoginComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [LoginComponent],
-      imports: [FormsModule, BrowserAnimationsModule],
+      imports: [LoginComponent, FormsModule, BrowserAnimationsModule],
       providers: [
         provideRouter([]),
         AuthService,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(),
         provideHttpClientTesting(),
       ],
     }).compileComponents();
@@ -100,6 +95,7 @@ describe('LoginComponent', () => {
       access_token: 'test_token',
       refresh_token: 'test_refresh_token',
       expires_in: expectedExpiration,
+      user_id: 'test-user-id',
     };
     spyOn(authService, 'login').and.returnValue(of(mockLoginResponse));
     spyOn(authService, 'saveToken');

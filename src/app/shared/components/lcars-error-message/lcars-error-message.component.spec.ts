@@ -9,14 +9,13 @@ describe('LcarsErrorMessageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [LcarsErrorMessageComponent],
+      imports: [LcarsErrorMessageComponent],
     }).compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LcarsErrorMessageComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -29,7 +28,7 @@ describe('LcarsErrorMessageComponent', () => {
       message: 'Test Message',
     });
 
-    const titleElement = fixture.debugElement.query(By.css('.go-mars'));
+    const titleElement = getMessageElement(fixture, '.lcars-text-bar .go-mars');
     expect(titleElement.nativeElement.textContent).toEqual('Test Title');
 
     const messageElement = getMessageElement(fixture, '.lcars-error-message p');

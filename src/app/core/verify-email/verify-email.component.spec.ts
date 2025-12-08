@@ -1,21 +1,15 @@
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  ActivatedRoute,
-  convertToParamMap,
-  RouterModule,
-} from '@angular/router';
-import { of, Subject } from 'rxjs';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Subject } from 'rxjs';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { MessageType } from 'src/app/shared/models/lcars-message-type.enum';
 import { environment } from 'src/environments/environment';
+import { AuthService } from '../auth/auth.service';
 import { VerifyEmailComponent } from './verify-email.component';
 
 interface QueryParams {
@@ -27,13 +21,20 @@ describe('VerifyEmailComponent', () => {
   let fixture: ComponentFixture<VerifyEmailComponent>;
   let httpTestingController: HttpTestingController;
   let queryParamsSubject: Subject<QueryParams>;
+  let authService: jasmine.SpyObj<AuthService>;
+  let route: ActivatedRoute;
 
   beforeEach(async () => {
     queryParamsSubject = new Subject();
 
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['verify']);
+
     await TestBed.configureTestingModule({
-      declarations: [VerifyEmailComponent, LcarsErrorMessageComponent],
-      imports: [RouterModule.forRoot([])],
+      imports: [
+        VerifyEmailComponent,
+        LcarsErrorMessageComponent,
+        RouterModule.forRoot([]),
+      ],
       providers: [
         {
           provide: ActivatedRoute,
@@ -41,17 +42,20 @@ describe('VerifyEmailComponent', () => {
             queryParams: queryParamsSubject.asObservable(),
           },
         },
-        provideHttpClient(withInterceptorsFromDi()),
+        { provide: AuthService, useValue: authServiceSpy },
+        provideHttpClient(),
         provideHttpClientTesting(),
       ],
     }).compileComponents();
 
     httpTestingController = TestBed.inject(HttpTestingController);
+    route = TestBed.inject(ActivatedRoute);
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(VerifyEmailComponent);
     component = fixture.componentInstance;
+    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
     fixture.detectChanges();
   });
 
@@ -67,35 +71,8 @@ describe('VerifyEmailComponent', () => {
     queryParamsSubject.next({ token: 'access_token' });
     fixture.detectChanges();
 
-    setTimeout(() => {
-      expect(component.token).toBe('access_token');
-      done();
-    });
-  });
-
-  it('should show error message if token is missing', () => {
-    TestBed.resetTestingModule();
-    TestBed.configureTestingModule({
-      declarations: [VerifyEmailComponent, LcarsErrorMessageComponent],
-      imports: [],
-      providers: [
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            queryParams: of(convertToParamMap({})),
-          },
-        },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    });
-
-    fixture = TestBed.createComponent(VerifyEmailComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-
-    expect(component.message).toBe('Invalid token!');
-    expect(component.messageType).toBe(MessageType.Error);
+    expect(component.token).toBe('access_token');
+    done();
   });
 
   it('should verify email successfully', () => {

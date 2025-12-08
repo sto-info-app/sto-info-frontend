@@ -35,18 +35,13 @@ module.exports = function (config) {
     customLaunchers: {
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
-        flags: [
-          '--no-sandbox',
-          '--disable-gpu',
-          '--disable-translate',
-          '--disable-extensions',
-          '--remote-debugging-port=9223',
-          '--headless',
-        ],
+        flags: ['--no-sandbox', '--disable-dev-shm-usage'],
       },
     },
     singleRun: true,
     restartOnFileChange: true,
     files: ['src/test-setup.ts'],
+    browserNoActivityTimeout: 60000,
+    captureTimeout: 60000,
   });
 };
