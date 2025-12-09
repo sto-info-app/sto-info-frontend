@@ -1,4 +1,4 @@
-import { Component, Inject, Optional, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -16,23 +16,20 @@ import { LcarsWarningMessageComponent } from '../lcars-warning-message/lcars-war
   imports: [MatDialogModule, LcarsWarningMessageComponent, TimeFormatPipe],
 })
 export class RefreshSessionDialogComponent {
-  appComponent: AppComponent;
-
   public dialogRef = inject(MatDialogRef<RefreshSessionDialogComponent>);
-  @Optional()
-  @Inject(MAT_DIALOG_DATA)
-  public data!: { appComponent: AppComponent };
+  private readonly data = inject<{ appComponent: AppComponent } | null>(
+    MAT_DIALOG_DATA,
+    { optional: true },
+  );
 
-  constructor() {
-    this.appComponent = this.data.appComponent;
-  }
+  appComponent: AppComponent | null = this.data?.appComponent ?? null;
 
   onStayConnected(): void {
     this.dialogRef.close(true);
   }
 
   onLogout(): void {
-    this.appComponent.logout();
+    this.appComponent?.logout();
     this.dialogRef.close(false);
   }
 }
