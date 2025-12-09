@@ -4,20 +4,26 @@ description: 'Get the dependencies (via npm) and cache them.'
 runs:
   using: 'composite'
   steps:
-    - name: Cache Node modules
-      id: cache
-      uses: actions/cache@v4
+    - name: Restore node_modules cache
+      id: node-modules-cache
+      uses: actions/cache/restore@v4
       with:
         path: node_modules
         key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
-        save-always: true
 
-    - name: Install dependencies (first run or when lockfile changes)
-      if: steps.cache.outputs.cache-hit != 'true'
+    - name: Install dependencies (cache miss)
+      if: steps.node-modules-cache.outputs.cache-hit != 'true'
       run: npm ci
       shell: bash
 
-    - name: Use cached dependencies
-      if: steps.cache.outputs.cache-hit == 'true'
-      run: echo "Using cached node_modules from GitHub cache."
+    - name: Save node_modules cache
+      if: steps.node-modules-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+
+    - name: Using cached node_modules
+      if: steps.node-modules-cache.outputs.cache-hit == 'true'
+      run: echo "Using cached node_modules"
       shell: bash
