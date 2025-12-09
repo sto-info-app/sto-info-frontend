@@ -235,7 +235,7 @@ export class AuthService {
 
   getSecondsUntilLoginSessionExpiry(): number {
     const expiresAt = Number(localStorage.getItem('expires_at'));
-    const now = new Date().getTime();
+    const now = Date.now();
     return Math.max(0, expiresAt - now) / 1000; // Convert to seconds
   }
 
