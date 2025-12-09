@@ -165,10 +165,10 @@ export class ProfilePicComponent {
     this.croppedImageBlob = null;
     this.imageChangedEvent = null;
 
-    if (!this.uploadedInvalidImageType) {
-      this.displayErrorMessage('Invalid image type. Please upload an image.');
-    } else {
+    if (this.uploadedInvalidImageType) {
       this.displayErrorMessage('Failed to load image');
+    } else {
+      this.displayErrorMessage('Invalid image type. Please upload an image.');
     }
   }
 
