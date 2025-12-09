@@ -1,4 +1,8 @@
 {
   "extends": "./tsconfig.app.json",
-  "include": ["src/**/*.ts"]
+  "compilerOptions": {
+    "types": ["jest"]
+  },
+  "include": ["src/**/*.ts", "src/jest-jasmine-compat.d.ts"],
+  "exclude": []
 }
