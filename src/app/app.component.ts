@@ -377,7 +377,7 @@ export class AppComponent implements OnInit, OnDestroy {
   extractAcceptedConsentCookieCategories(cookieValues: string[]) {
     const acceptedCategories: string[] = [];
 
-    cookieValues.forEach(cookieValue => {
+    for (const cookieValue of cookieValues) {
       const [cookieCategory, consentValue] = cookieValue.split(':');
       if (
         consentValue === 'yes' &&
@@ -385,7 +385,7 @@ export class AppComponent implements OnInit, OnDestroy {
       ) {
         acceptedCategories.push(cookieCategory);
       }
-    });
+    }
 
     if (acceptedCategories.length) {
       this.cookieService.setUserAcceptedCookieCategories(acceptedCategories);
