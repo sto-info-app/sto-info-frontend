@@ -106,7 +106,7 @@ export class AuthService {
   }
 
   saveToken(accessToken: string, refreshToken: string, expiresIn: number) {
-    const expiresAt = this.getNewExpriresMilliseconds(expiresIn);
+    const expiresAt = this.getNewExpiresMilliseconds(expiresIn);
     const warningAt = expiresAt - this.autoLogoutWarningMilliSecs; // The warning time
 
     localStorage.setItem('access_token', accessToken);
@@ -163,9 +163,7 @@ export class AuthService {
             response.expires_in,
           );
 
-          const expiresAt = this.getNewExpriresMilliseconds(
-            response.expires_in,
-          );
+          const expiresAt = this.getNewExpiresMilliseconds(response.expires_in);
           this.expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time
         }),
         catchError(error => {
@@ -239,7 +237,7 @@ export class AuthService {
     return Math.max(0, expiresAt - now) / 1000; // Convert to seconds
   }
 
-  getNewExpriresMilliseconds(seconds: number): number {
+  getNewExpiresMilliseconds(seconds: number): number {
     return Date.now() + seconds * 1000;
   }
 
