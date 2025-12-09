@@ -8,12 +8,12 @@ import { ResetPasswordRequestComponent } from './reset-password-request.componen
 describe('ResetPasswordRequestComponent', () => {
   let component: ResetPasswordRequestComponent;
   let fixture: ComponentFixture<ResetPasswordRequestComponent>;
-  let authService: jasmine.SpyObj<AuthService>;
+  let authService: jest.Mocked<AuthService>;
 
   beforeEach(async () => {
-    const authServiceSpy = jasmine.createSpyObj('AuthService', [
-      'resetPassword',
-    ]);
+    const authServiceSpy: jest.Mocked<AuthService> = {
+      resetPassword: jest.fn(),
+    } as unknown as jest.Mocked<AuthService>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -28,7 +28,7 @@ describe('ResetPasswordRequestComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ResetPasswordRequestComponent);
     component = fixture.componentInstance;
-    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    authService = TestBed.inject(AuthService) as jest.Mocked<AuthService>;
     fixture.detectChanges();
   });
 
@@ -37,26 +37,26 @@ describe('ResetPasswordRequestComponent', () => {
   });
 
   it('should validate email correctly', () => {
-    expect(component.validateEmail('test@example.com')).toBeTrue();
-    expect(component.validateEmail('invalid_email')).toBeFalse();
+    expect(component.validateEmail('test@example.com')).toBe(true);
+    expect(component.validateEmail('invalid_email')).toBe(false);
   });
 
   it('should validate inputs correctly', () => {
     component.email = 'test@example.com';
     component.validateInputs();
 
-    expect(component.inputsValid).toBeTrue();
+    expect(component.inputsValid).toBe(true);
     expect(component.errorMessage).toBe('');
 
     component.email = 'invalid_email';
     component.validateInputs();
 
-    expect(component.inputsValid).toBeFalse();
+    expect(component.inputsValid).toBe(false);
     expect(component.errorMessage).toBe('Invalid email format');
   });
 
   it('should handle password reset correctly', () => {
-    authService.resetPassword.and.returnValue(of(undefined));
+    authService.resetPassword.mockReturnValue(of(undefined));
     component.email = 'test@example.com';
     component.inputsValid = true;
     component.onPasswordReset();
@@ -70,10 +70,10 @@ describe('ResetPasswordRequestComponent', () => {
 
   it('should handle password reset error correctly', () => {
     const errorObject = { message: 'Some error occurred' };
-    authService.resetPassword.and.returnValue(throwError(errorObject));
+    authService.resetPassword.mockReturnValue(throwError(() => errorObject));
 
     // Suppress console.error
-    spyOn(console, 'error');
+    jest.spyOn(console, 'error').mockImplementation(() => {});
 
     component.email = 'test@example.com';
     component.inputsValid = true;

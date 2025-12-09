@@ -9,25 +9,28 @@ import { AuthService } from './auth.service';
 
 describe('AuthGuard', () => {
   let guard: AuthGuard;
-  let authService: jasmine.SpyObj<AuthService>;
+  let authService: jest.Mocked<AuthService>;
   let router: Router;
 
   beforeEach(() => {
+    const authServiceMock: Partial<jest.Mocked<AuthService>> = {
+      isTokenValid: jest.fn(),
+      isTokenExpiringSoon: jest.fn(),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         AuthGuard,
         {
           provide: AuthService,
-          useValue: jasmine.createSpyObj<AuthService>('AuthService', [
-            'isTokenValid',
-            'isTokenExpiringSoon',
-          ]),
+          useValue: authServiceMock,
         },
       ],
     });
     guard = TestBed.inject(AuthGuard);
-    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    authService = TestBed.inject(AuthService) as jest.Mocked<AuthService>;
     router = TestBed.inject(Router);
+    jest.clearAllMocks();
   });
 
   it('should be created', () => {
@@ -36,27 +39,27 @@ describe('AuthGuard', () => {
 
   //NOTE: Check this test! - https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
   it('should allow navigation if user is authenticated', async () => {
-    authService.isTokenValid.and.returnValue(true);
-    authService.isTokenExpiringSoon.and.returnValue(false);
+    authService.isTokenValid.mockReturnValue(true);
+    authService.isTokenExpiringSoon.mockReturnValue(false);
 
     const result = await guard.canActivate(
       {} as ActivatedRouteSnapshot,
       { url: '/cookies' } as RouterStateSnapshot,
     );
-    expect(result).toBeTrue();
+    expect(result).toBe(true);
   });
 
   //NOTE: Check this test! - https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
   it('should not allow navigation if user is not authenticated', async () => {
-    authService.isTokenValid.and.returnValue(false);
-    authService.isTokenExpiringSoon.and.returnValue(false);
-    const navigateSpy = spyOn(router, 'navigate');
+    authService.isTokenValid.mockReturnValue(false);
+    authService.isTokenExpiringSoon.mockReturnValue(false);
+    const navigateSpy = jest.spyOn(router, 'navigate');
 
     const result = await guard.canActivate(
       {} as ActivatedRouteSnapshot,
       { url: '/cookies' } as RouterStateSnapshot,
     );
-    expect(result).toBeFalse();
-    expect(navigateSpy).toHaveBeenCalledWith(['/login'], jasmine.any(Object));
+    expect(result).toBe(false);
+    expect(navigateSpy).toHaveBeenCalledWith(['/login'], expect.any(Object));
   });
 });

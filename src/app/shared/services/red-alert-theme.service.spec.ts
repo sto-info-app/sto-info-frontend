@@ -17,11 +17,11 @@ describe('RedAlertThemeService', () => {
   it('#applyRedAlertThemeThenApplyStaticRedTheme should create a link element with correct attributes and append it to the head', () => {
     const mockLinkElement = document.createElement('link');
 
-    const spyCreateElement = spyOn(renderer, 'createElement').and.returnValue(
-      mockLinkElement,
-    );
-    const spySetAttribute = spyOn(renderer, 'setAttribute');
-    const spyAppendChild = spyOn(renderer, 'appendChild');
+    const spyCreateElement = jest
+      .spyOn(renderer, 'createElement')
+      .mockReturnValue(mockLinkElement as any);
+    const spySetAttribute = jest.spyOn(renderer, 'setAttribute');
+    const spyAppendChild = jest.spyOn(renderer, 'appendChild');
 
     const mockElement = document.createElement('div');
     service.applyRedAlertThemeThenApplyStaticRedTheme(renderer, mockElement);

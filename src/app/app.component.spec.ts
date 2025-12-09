@@ -17,7 +17,7 @@ describe('AppComponent', () => {
       providers: [
         AuthService,
         { provide: 'API_URL', useValue: environment.apiUrl },
-        { provide: MatDialog, useValue: { open: jasmine.createSpy('open') } },
+        { provide: MatDialog, useValue: { open: jest.fn() } },
       ],
     }).compileComponents();
 
@@ -37,7 +37,7 @@ describe('AppComponent', () => {
   });
 
   it('should logout', () => {
-    spyOn(authService, 'performLogout');
+    jest.spyOn(authService, 'performLogout');
     component.logout();
     expect(authService.performLogout).toHaveBeenCalled();
   });

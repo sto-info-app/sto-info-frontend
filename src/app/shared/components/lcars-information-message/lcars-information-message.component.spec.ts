@@ -42,16 +42,16 @@ describe('LcarsInformationMessageComponent', () => {
     setComponentProperties(fixture, component, { blinkMessage: true });
 
     const messageElement = getMessageElement(fixture, '.lcars-info-message');
-    expect(messageElement.nativeElement.classList.contains('blink')).toBeTrue();
+    expect(messageElement.nativeElement.classList.contains('blink')).toBe(true);
   });
 
   it('should not add blink class if blinkMessage is false', () => {
     setComponentProperties(fixture, component, { blinkMessage: false });
 
     const messageElement = getMessageElement(fixture, '.lcars-info-message');
-    expect(
-      messageElement.nativeElement.classList.contains('blink'),
-    ).toBeFalse();
+    expect(messageElement.nativeElement.classList.contains('blink')).toBe(
+      false,
+    );
   });
 
   it('should update title when title input changes', () => {
