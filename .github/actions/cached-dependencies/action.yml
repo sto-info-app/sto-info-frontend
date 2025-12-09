@@ -9,7 +9,7 @@ runs:
       uses: actions/cache/restore@v4
       with:
         path: node_modules
-        key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+        key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
 
     - name: Install dependencies (cache miss)
       if: steps.node-modules-cache.outputs.cache-hit != 'true'
@@ -21,7 +21,7 @@ runs:
       uses: actions/cache/save@v4
       with:
         path: node_modules
-        key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+        key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
 
     - name: Using cached node_modules
       if: steps.node-modules-cache.outputs.cache-hit == 'true'
