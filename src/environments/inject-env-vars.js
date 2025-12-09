@@ -1,6 +1,6 @@
-const fs = require('node:fs');
+import { readFileSync, writeFileSync } from 'node:fs';
 
-const environmentTemplate = fs.readFileSync(
+const environmentTemplate = readFileSync(
   'src/environments/environment.template.ts',
   'utf8',
 );
@@ -32,5 +32,5 @@ const replacedContent = environmentTemplate
   .replace('__gaMeasurementId__', process.env.GA_MEASUREMENT_ID || '');
 
 // Write out the final environment.ts
-fs.writeFileSync('src/environments/environment.ts', replacedContent);
+writeFileSync('src/environments/environment.ts', replacedContent);
 console.log('Environment file generated!');
