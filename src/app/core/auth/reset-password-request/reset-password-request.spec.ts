@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AuthService } from '../auth.service';
 import { ResetPasswordRequestComponent } from './reset-password-request.component';
@@ -16,12 +16,11 @@ describe('ResetPasswordRequestComponent', () => {
     } as unknown as jest.Mocked<AuthService>;
 
     await TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
-        FormsModule,
-        ResetPasswordRequestComponent,
+      imports: [FormsModule, ResetPasswordRequestComponent],
+      providers: [
+        { provide: AuthService, useValue: authServiceSpy },
+        provideRouter([]),
       ],
-      providers: [{ provide: AuthService, useValue: authServiceSpy }],
     }).compileComponents();
   });
 
