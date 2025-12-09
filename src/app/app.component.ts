@@ -215,7 +215,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // Clean up any existing script before loading a new one
     const existingScript = document.getElementById(this.cookieYesScriptId);
     if (existingScript) {
-      existingScript.parentNode?.removeChild(existingScript);
+      existingScript.remove();
     }
 
     if (environment.cookieYesUrl) {
