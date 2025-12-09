@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import {
   faExternalLink,
@@ -15,7 +15,9 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class FontAwesomeIconService {
-  constructor(private readonly library: FaIconLibrary) {
+  private readonly library = inject(FaIconLibrary);
+
+  constructor() {
     this.library.addIcons(
       faHandSpock,
       faExternalLink,

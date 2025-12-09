@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -16,7 +16,9 @@ export class FooterComponent {
   currentYear: number;
   appRoutes = APP_ROUTES;
 
-  constructor(private readonly routingService: RoutingService) {
+  private readonly routingService = inject(RoutingService);
+
+  constructor() {
     this.currentYear = new Date().getFullYear();
   }
 

@@ -1,4 +1,4 @@
-import { Component, Inject, Optional } from '@angular/core';
+import { Component, Inject, Optional, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -9,6 +9,8 @@ import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { User } from 'src/app/dashboard/models/user.model';
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
   MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
   MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
@@ -16,8 +18,6 @@ import {
   MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT,
 } from 'src/app/shared/constants/error-messages.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
-import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { EditPersonalDetailsComponent } from '../edit-personal-details/edit-personal-details.component';
 
 @Component({
@@ -46,12 +46,12 @@ export class ProfilePicComponent {
   // Allow constants to be used in the HTML
   showErrorMilliseconds: number = MILLISECONDS_SHOW_ERROR_MSG;
 
-  constructor(
-    private readonly dashboardService: DashboardService,
-    private readonly sanitizer: DomSanitizer,
-    private readonly dialogRef: MatDialogRef<EditPersonalDetailsComponent>,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: { user: User } | null,
-  ) {}
+  private readonly dashboardService = inject(DashboardService);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly dialogRef = inject(
+    MatDialogRef<EditPersonalDetailsComponent>,
+  );
+  @Optional() @Inject(MAT_DIALOG_DATA) public data!: { user: User } | null;
 
   onFileChangeEvent(event: Event): void {
     this.uploadedInvalidImageType = false;
@@ -165,10 +165,10 @@ export class ProfilePicComponent {
     this.croppedImageBlob = null;
     this.imageChangedEvent = null;
 
-    if (!this.uploadedInvalidImageType) {
-      this.displayErrorMessage('Invalid image type. Please upload an image.');
-    } else {
+    if (this.uploadedInvalidImageType) {
       this.displayErrorMessage('Failed to load image');
+    } else {
+      this.displayErrorMessage('Invalid image type. Please upload an image.');
     }
   }
 

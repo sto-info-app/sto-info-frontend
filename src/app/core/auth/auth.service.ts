@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   BehaviorSubject,
@@ -47,10 +47,10 @@ export class AuthService {
 
   private refreshTokenTimeout: NodeJS.Timeout | null = null;
 
-  constructor(
-    private readonly http: HttpClient,
-    private readonly router: Router,
-  ) {
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+
+  constructor() {
     // Check if there's a login token and update the BehaviorSubject
     this.isAuthenticatedSubject.next(this.isTokenValid());
 
@@ -106,7 +106,7 @@ export class AuthService {
   }
 
   saveToken(accessToken: string, refreshToken: string, expiresIn: number) {
-    const expiresAt = this.getNewExpriresMilliseconds(expiresIn);
+    const expiresAt = this.getNewExpiresMilliseconds(expiresIn);
     const warningAt = expiresAt - this.autoLogoutWarningMilliSecs; // The warning time
 
     localStorage.setItem('access_token', accessToken);
@@ -163,9 +163,7 @@ export class AuthService {
             response.expires_in,
           );
 
-          const expiresAt = this.getNewExpriresMilliseconds(
-            response.expires_in,
-          );
+          const expiresAt = this.getNewExpiresMilliseconds(response.expires_in);
           this.expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time
         }),
         catchError(error => {
@@ -235,11 +233,11 @@ export class AuthService {
 
   getSecondsUntilLoginSessionExpiry(): number {
     const expiresAt = Number(localStorage.getItem('expires_at'));
-    const now = new Date().getTime();
+    const now = Date.now();
     return Math.max(0, expiresAt - now) / 1000; // Convert to seconds
   }
 
-  getNewExpriresMilliseconds(seconds: number): number {
+  getNewExpiresMilliseconds(seconds: number): number {
     return Date.now() + seconds * 1000;
   }
 

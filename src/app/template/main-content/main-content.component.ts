@@ -1,12 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { FooterComponent } from '../footer/footer.component';
-import { SideBarComponent } from '../side-bar/side-bar.component';
-import { MainContentBarPanelComponent } from '../main-content-bar-panel/main-content-bar-panel.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { GeneralThemeService } from 'src/app/shared/services/general-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
+import { FooterComponent } from '../footer/footer.component';
+import { MainContentBarPanelComponent } from '../main-content-bar-panel/main-content-bar-panel.component';
+import { SideBarComponent } from '../side-bar/side-bar.component';
 
 @Component({
   selector: 'app-main-content',
@@ -26,10 +26,10 @@ export class MainContentComponent {
   appRoutes = APP_ROUTES;
   themePanel6RandomText: string;
 
-  constructor(
-    private readonly routingService: RoutingService,
-    private readonly generalThemeService: GeneralThemeService,
-  ) {
+  private readonly routingService = inject(RoutingService);
+  private readonly generalThemeService = inject(GeneralThemeService);
+
+  constructor() {
     this.themePanel6RandomText =
       this.generalThemeService.createDynamicSideColumnText();
   }

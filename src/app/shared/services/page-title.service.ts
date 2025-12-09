@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, map, mergeMap } from 'rxjs';
@@ -10,11 +10,9 @@ import { environment } from '../../../../src/environments/environment';
 export class PageTitleService {
   private readonly defaultSiteTitle = 'Star Trek Online Info Portal';
 
-  constructor(
-    private readonly title: Title,
-    private readonly router: Router,
-    private readonly activatedRoute: ActivatedRoute,
-  ) {}
+  private readonly title = inject(Title);
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
 
   init() {
     this.router.events

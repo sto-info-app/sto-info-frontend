@@ -41,9 +41,9 @@
       src="https://www.googletagmanager.com/gtag/js?id=G-4VP93JMVMF"
       crossorigin="anonymous"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
+      globalThis.dataLayer = globalThis.dataLayer || [];
       function gtag() {
-        dataLayer.push(arguments);
+        globalThis.dataLayer.push(arguments);
       }
       gtag('js', new Date());
       gtag('config', 'G-4VP93JMVMF', { send_page_view: false });

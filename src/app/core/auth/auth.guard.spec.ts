@@ -1,5 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  Router,
+  RouterStateSnapshot,
+} from '@angular/router';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 
@@ -36,8 +40,8 @@ describe('AuthGuard', () => {
     authService.isTokenExpiringSoon.and.returnValue(false);
 
     const result = await guard.canActivate(
-      {} as any,
-      { url: '/cookies' } as any,
+      {} as ActivatedRouteSnapshot,
+      { url: '/cookies' } as RouterStateSnapshot,
     );
     expect(result).toBeTrue();
   });
@@ -49,8 +53,8 @@ describe('AuthGuard', () => {
     const navigateSpy = spyOn(router, 'navigate');
 
     const result = await guard.canActivate(
-      {} as any,
-      { url: '/cookies' } as any,
+      {} as ActivatedRouteSnapshot,
+      { url: '/cookies' } as RouterStateSnapshot,
     );
     expect(result).toBeFalse();
     expect(navigateSpy).toHaveBeenCalledWith(['/login'], jasmine.any(Object));

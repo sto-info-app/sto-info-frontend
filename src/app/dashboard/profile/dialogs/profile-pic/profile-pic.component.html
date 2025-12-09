@@ -1,6 +1,5 @@
 @if (isSubmitting) {
-  <app-loading-bar
-  loadingText="Saving"></app-loading-bar>
+<app-loading-bar loadingText="Saving"></app-loading-bar>
 }
 <div class="lcars-profile-pic-container">
   <div class="lcars-profile-pic-inner-container">
@@ -8,73 +7,70 @@
       <span>Starfleet Personnel Record Photo: Edit</span>
     </div>
     @if (data?.user) {
-      <div
-        class="lcars-profile-pic-message">
-        <div class="flexbox">
-          <div class="col profile-pic-main-col">
-            <input
-              type="file"
-              (change)="onFileChangeEvent($event)"
-              accept="image/jpg, image/jpeg, image/png"
-              [disabled]="isSubmitting"
-              class="file-input" />
-            @if (imageChangedEvent) {
-              <image-cropper
-                [imageChangedEvent]="imageChangedEvent"
-                [maintainAspectRatio]="true"
-                [aspectRatio]="1 / 1"
-                [output]="'blob'"
-                format="png"
-                (imageCropped)="onImageCropped($event)"
-              (loadImageFailed)="loadImageFailed()"></image-cropper>
-            }
+    <div class="lcars-profile-pic-message">
+      <div class="flexbox">
+        <div class="col profile-pic-main-col">
+          <input
+            type="file"
+            (change)="onFileChangeEvent($event)"
+            accept="image/jpg, image/jpeg, image/png"
+            [disabled]="isSubmitting"
+            class="file-input" />
+          @if (imageChangedEvent) {
+          <image-cropper
+            [imageChangedEvent]="imageChangedEvent"
+            [maintainAspectRatio]="true"
+            [aspectRatio]="1 / 1"
+            [output]="'blob'"
+            format="png"
+            (imageCropped)="onImageCropped($event)"
+            (loadImageFailed)="loadImageFailed()"></image-cropper>
+          }
+        </div>
+        <div class="col profile-pic-side-col">
+          @if (errorMessage) {
+          <app-lcars-error-message
+            title="Transmission Error"
+            [message]="errorMessage"></app-lcars-error-message>
+          } @if (croppedImage && !errorMessage) {
+          <div class="lcars-profile-pic-preview">
+            <div class="lcars-text-bar">
+              <span>Picture Preview</span>
+            </div>
+            <div class="cropped-image-container">
+              <img
+                [src]="croppedImage"
+                id="cropped-image-preview"
+                alt="Your cropped selection" />
+            </div>
           </div>
-          <div class="col profile-pic-side-col">
-            @if (errorMessage) {
-              <app-lcars-error-message
-                title="Transmission Error"
-              [message]="errorMessage"></app-lcars-error-message>
-            }
-            @if (croppedImage && !errorMessage) {
-              <div
-                class="lcars-profile-pic-preview">
-                <div class="lcars-text-bar">
-                  <span>Picture Preview</span>
-                </div>
-                <div class="cropped-image-container">
-                  <img
-                    [src]="croppedImage"
-                    id="cropped-image-preview"
-                    alt="Your cropped selection" />
-                </div>
-              </div>
-            }
-            <div class="lcars-profile-pic-buttons">
-              <div
-                class="buttons-container"
-                mat-dialog-actions>
-                <button
-                  type="submit"
-                  class="submit-button"
-                  mat-button
-                  [disabled]="!croppedImage || isSubmitting || errorMessage"
-                  (click)="onUploadImageClick(); $event.preventDefault()">
-                  Upload
-                </button>
-                <button
-                  type="button"
-                  class="red"
-                  mat-button
-                  mat-dialog-close
-                  [disabled]="isSubmitting"
-                  (click)="onCloseClick()">
-                  Close
-                </button>
-              </div>
+          }
+          <div class="lcars-profile-pic-buttons">
+            <div
+              class="buttons-container"
+              mat-dialog-actions>
+              <button
+                type="submit"
+                class="submit-button"
+                mat-button
+                [disabled]="!croppedImage || isSubmitting || errorMessage"
+                (click)="onUploadImageClick(); $event.preventDefault()">
+                Upload
+              </button>
+              <button
+                type="button"
+                class="red"
+                mat-button
+                mat-dialog-close
+                [disabled]="isSubmitting"
+                (click)="onCloseClick()">
+                Close
+              </button>
             </div>
           </div>
         </div>
       </div>
+    </div>
     }
   </div>
 </div>

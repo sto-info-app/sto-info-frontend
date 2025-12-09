@@ -1,6 +1,6 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Renderer2 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, ElementRef, Renderer2, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
@@ -8,6 +8,8 @@ import {
   LoginResponse,
 } from 'src/app/models/user-auth.models';
 import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   FORM_ERROR_INVALID_EMAIL_FORMAT,
@@ -23,8 +25,6 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { SharedDataService } from 'src/app/shared/services/shared-data.service';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service';
-import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 
 @Component({
   selector: 'app-login',
@@ -54,16 +54,14 @@ export class LoginComponent {
   inputsValid = false;
   isSubmitting = false;
 
-  constructor(
-    private readonly sharedDataService: SharedDataService,
-    private readonly authService: AuthService,
-    private readonly route: ActivatedRoute,
-    private readonly router: Router,
-    private readonly renderer: Renderer2,
-    private readonly el: ElementRef,
-    private readonly redAlertThemeService: RedAlertThemeService,
-    private readonly routingService: RoutingService,
-  ) {}
+  private readonly sharedDataService = inject(SharedDataService);
+  private readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly renderer = inject(Renderer2);
+  private readonly el = inject(ElementRef);
+  private readonly redAlertThemeService = inject(RedAlertThemeService);
+  private readonly routingService = inject(RoutingService);
   appRoutes = APP_ROUTES;
 
   onLogin() {

@@ -1,6 +1,5 @@
 @if (isSubmitting) {
-  <app-loading-bar
-  loadingText="Authenticating"></app-loading-bar>
+<app-loading-bar loadingText="Authenticating"></app-loading-bar>
 }
 <div class="login-container">
   <div class="flexbox">
@@ -22,10 +21,9 @@
               [class.errored]="errorMessage ? true : false"
               (input)="validateInputs()" />
             @if (email.trim() !== '' && !validateEmail(email)) {
-              <div
-                class="helper-error-text">
-                {{ errorTextInvalidEmailFormat }}
-              </div>
+            <div class="helper-error-text">
+              {{ errorTextInvalidEmailFormat }}
+            </div>
             }
           </div>
           <div
@@ -62,19 +60,19 @@
             [routerLink]="getRouteLink(appRoutes.REGISTER)"
             class="full-width-btn-link gold"
             >Register</a
-            >
-            <a
-              [routerLink]="getRouteLink(appRoutes.RESET_PASSWORD)"
-              class="full-width-btn-link sunflower"
-              >Reset Password</a
-              >
-            </div>
-          </div>
-          @if (errorMessage) {
-            <app-lcars-error-message
-              title="Access Denied"
-            [message]="errorMessage"></app-lcars-error-message>
-          }
+          >
+          <a
+            [routerLink]="getRouteLink(appRoutes.RESET_PASSWORD)"
+            class="full-width-btn-link sunflower"
+            >Reset Password</a
+          >
         </div>
       </div>
+      @if (errorMessage) {
+      <app-lcars-error-message
+        title="Access Denied"
+        [message]="errorMessage"></app-lcars-error-message>
+      }
     </div>
+  </div>
+</div>

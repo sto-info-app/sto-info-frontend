@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -13,7 +13,7 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 export class RegistrationCompleteComponent {
   appRoutes = APP_ROUTES;
 
-  constructor(private readonly routingService: RoutingService) {}
+  private readonly routingService = inject(RoutingService);
 
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);

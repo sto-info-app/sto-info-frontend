@@ -1,4 +1,11 @@
-import { Component, NgZone, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import {
+  Component,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  Renderer2,
+  inject,
+} from '@angular/core';
 import {
   MatDialog,
   MatDialogModule,
@@ -10,11 +17,11 @@ import { filter } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
-import { HeaderComponent } from './template/header/header.component';
-import { MainContentComponent } from './template/main-content/main-content.component';
 import { CookieService } from './shared/services/cookie.service';
 import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
+import { HeaderComponent } from './template/header/header.component';
+import { MainContentComponent } from './template/main-content/main-content.component';
 
 @Component({
   selector: 'app-root',
@@ -34,28 +41,27 @@ export class AppComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   warningSubscription: Subscription | undefined;
   expirySubscription: Subscription | undefined;
-  private intervalId: number | null = null;
+  private intervalId: ReturnType<typeof setInterval> | null = null;
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
+  private readonly authService = inject(AuthService);
+  private readonly logRocketService = inject(LogRocketService);
+  private readonly pageTitleService = inject(PageTitleService);
+  private readonly cookieService = inject(CookieService);
+  private readonly zone = inject(NgZone);
+  private readonly renderer = inject(Renderer2);
+  private readonly router = inject(Router);
+  public readonly dialog = inject(MatDialog);
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly logRocketService: LogRocketService,
-    private readonly pageTitleService: PageTitleService,
-    private readonly cookieService: CookieService,
-    private readonly zone: NgZone,
-    private readonly renderer: Renderer2,
-    private readonly router: Router,
-    public readonly dialog: MatDialog,
-  ) {
+  constructor() {
     this.pageTitleService.init();
 
     //NOTE: Added fix to scroll to top on route change to avoid retaining scroll position from previous route
-    router.events
+    this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe(() => {
         setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: 'auto' });
+          globalThis.scrollTo?.({ top: 0, behavior: 'auto' });
         }, 0);
       });
 
@@ -171,7 +177,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     this.zone.run(() => {
-      this.intervalId = window.setInterval(() => {
+      this.intervalId = globalThis.setInterval(() => {
         this.autoLogoutCountdown =
           this.authService.getSecondsUntilLoginSessionExpiry();
         if (this.autoLogoutCountdown <= 0) {
@@ -209,7 +215,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // Clean up any existing script before loading a new one
     const existingScript = document.getElementById(this.cookieYesScriptId);
     if (existingScript) {
-      existingScript.parentNode?.removeChild(existingScript);
+      existingScript.remove();
     }
 
     if (environment.cookieYesUrl) {
@@ -222,8 +228,8 @@ export class AppComponent implements OnInit, OnDestroy {
       this.renderer.appendChild(document.head, script);
 
       script.onload = () => {
-        if ((window as { CookieYes?: { run: () => void } }).CookieYes) {
-          (window as { CookieYes?: { run: () => void } }).CookieYes?.run(); // Trigger manual load
+        if ((globalThis as { CookieYes?: { run: () => void } }).CookieYes) {
+          (globalThis as { CookieYes?: { run: () => void } }).CookieYes?.run(); // Trigger manual load
         }
 
         // Listen for the cookie consent update event
@@ -271,47 +277,38 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private enableGoogleAnalyticsTracking(): void {
     // Remove the disable flag
-    (window as unknown as { [key: string]: boolean })[
+    (globalThis as unknown as { [key: string]: boolean })[
       `ga-disable-${environment.gaMeasurementId}`
     ] = false;
 
     // Send an initial page view.
-    if (
-      typeof (
-        window as {
-          gtag?: (
-            event: string,
-            action: string,
-            params: { page_path: string },
-          ) => void;
-        }
-      )['gtag'] === 'function'
-    ) {
-      (
-        window as unknown as {
-          gtag: (
-            event: string,
-            action: string,
-            params: { page_path: string },
-          ) => void;
-        }
-      ).gtag('event', 'page_view', {
-        page_path: window.location.pathname,
+    const globalWithGtag = globalThis as unknown as {
+      gtag?: (
+        event: string,
+        action: string,
+        params: { page_path: string },
+      ) => void;
+      location: Location;
+    };
+
+    if (typeof globalWithGtag.gtag === 'function') {
+      globalWithGtag.gtag('event', 'page_view', {
+        page_path: globalWithGtag.location.pathname,
       });
     }
 
     // Log the current page
-    this.sendPageView(window.location.pathname);
+    this.sendPageView(globalWithGtag.location.pathname);
   }
 
   private disableGoogleAnalyticsTracking(): void {
     // Set the global flag to true so GA stops sending events.
-    (window as unknown as { [key: string]: boolean })[
+    (globalThis as unknown as { [key: string]: boolean })[
       `ga-disable-${environment.gaMeasurementId}`
     ] = true;
 
     // update GA configuration to ensure no page view is sent.
-    (window as { dataLayer?: unknown[] })['dataLayer']?.push([
+    (globalThis as { dataLayer?: unknown[] })['dataLayer']?.push([
       'config',
       environment.gaMeasurementId,
       { send_page_view: false },
@@ -320,7 +317,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private loadGoogleAnalyticsWithTrackingDisabled(): void {
     // Disable GA tracking by default using the global flag
-    (window as unknown as { [key: string]: boolean })[
+    (globalThis as unknown as { [key: string]: boolean })[
       `ga-disable-${environment.gaMeasurementId}`
     ] = true;
 
@@ -333,23 +330,24 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Once the script loads, initialize GA without sending page views automatically
     script.onload = () => {
-      (window as { dataLayer?: unknown[] })['dataLayer'] =
-        (window as { dataLayer?: unknown[] })['dataLayer'] || [];
+      (globalThis as { dataLayer?: unknown[] })['dataLayer'] =
+        (globalThis as { dataLayer?: unknown[] })['dataLayer'] || [];
 
-      // Assign gtag to the window object so it's globally accessible.
-      (window as unknown as { gtag?: (...args: unknown[]) => void })['gtag'] =
-        function (...args: unknown[]) {
-          if ((window as { dataLayer?: unknown[] })['dataLayer']) {
-            (window as { dataLayer?: unknown[] })['dataLayer']?.push(args);
-          }
-        };
+      // Assign gtag to the global object so it's globally accessible.
+      (globalThis as unknown as { gtag?: (...args: unknown[]) => void })[
+        'gtag'
+      ] = function (...args: unknown[]) {
+        if ((globalThis as { dataLayer?: unknown[] })['dataLayer']) {
+          (globalThis as { dataLayer?: unknown[] })['dataLayer']?.push(args);
+        }
+      };
 
       // Initialize GA, disabling automatic page view tracking.
-      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+      (globalThis as unknown as { gtag: (...args: unknown[]) => void }).gtag(
         'js',
         new Date(),
       );
-      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+      (globalThis as unknown as { gtag: (...args: unknown[]) => void }).gtag(
         'config',
         environment.gaMeasurementId,
         {
@@ -361,7 +359,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private sendPageView(url: string): void {
     const gtag = (
-      window as {
+      globalThis as {
         gtag?: (
           event: string,
           action: string,
@@ -379,7 +377,7 @@ export class AppComponent implements OnInit, OnDestroy {
   extractAcceptedConsentCookieCategories(cookieValues: string[]) {
     const acceptedCategories: string[] = [];
 
-    cookieValues.forEach(cookieValue => {
+    for (const cookieValue of cookieValues) {
       const [cookieCategory, consentValue] = cookieValue.split(':');
       if (
         consentValue === 'yes' &&
@@ -387,7 +385,7 @@ export class AppComponent implements OnInit, OnDestroy {
       ) {
         acceptedCategories.push(cookieCategory);
       }
-    });
+    }
 
     if (acceptedCategories.length) {
       this.cookieService.setUserAcceptedCookieCategories(acceptedCategories);

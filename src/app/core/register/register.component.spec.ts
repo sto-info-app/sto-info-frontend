@@ -1,6 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Component } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
@@ -223,9 +222,3 @@ describe('RegisterComponent', () => {
     });
   });
 });
-
-@Component({
-  template: '',
-  standalone: true,
-})
-class DummyComponent {}
