@@ -10,6 +10,7 @@ runs:
       with:
         path: node_modules
         key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+        save-always: true
 
     - name: Install dependencies (first run or when lockfile changes)
       if: steps.cache.outputs.cache-hit != 'true'
