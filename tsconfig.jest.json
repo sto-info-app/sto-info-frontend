@@ -2,10 +2,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/jest",
-    // Use Node-style modules/resolution compatible with Jest while still
-    // understanding modern package exports (Angular publishes via exports).
-    "module": "node16",
-    "moduleResolution": "node16",
+    // Keep the same ESM/bundler story as the Angular app so TypeScript
+    // resolves `@angular/*` exports consistently on every environment.
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "types": ["jest", "node"]
   },
   "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
