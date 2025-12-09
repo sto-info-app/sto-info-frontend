@@ -11,7 +11,9 @@ module.exports = {
     ...cjsPreset.globals,
     'ts-jest': {
       ...(cjsPreset.globals && cjsPreset.globals['ts-jest']),
-      tsconfig: '<rootDir>/tsconfig.jest.json',
+      // Use the standard Angular test tsconfig so module resolution
+      // matches CI and local builds.
+      tsconfig: '<rootDir>/tsconfig.spec.json',
     },
   },
 
