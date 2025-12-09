@@ -186,7 +186,7 @@ describe('RegisterComponent', () => {
   });
 
   it('should call authService.register when the form is submitted', () => {
-    spyOn(authService, 'register').and.returnValue(of({}));
+    jest.spyOn(authService, 'register').mockReturnValue(of({}));
 
     // Fill in the form inputs
     component.registerForm.controls['firstName'].setValue('Test');
@@ -202,8 +202,10 @@ describe('RegisterComponent', () => {
   });
 
   it('should navigate to /register/complete when the form is submitted successfully', done => {
-    spyOn(authService, 'register').and.returnValue(of({}));
-    spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
+    jest.spyOn(authService, 'register').mockReturnValue(of({}));
+    jest
+      .spyOn(router, 'navigate')
+      .mockReturnValue(Promise.resolve(true) as unknown as Promise<boolean>);
 
     // Fill in the form inputs
     component.registerForm.controls['firstName'].setValue('Test');

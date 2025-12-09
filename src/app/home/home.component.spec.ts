@@ -10,21 +10,21 @@ import { HomeComponent } from './home.component';
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
-  let routingService: jasmine.SpyObj<RoutingService>;
+  let routingService: jest.Mocked<RoutingService>;
 
   beforeEach(async () => {
-    const authServiceSpy = jasmine.createSpyObj('AuthService', [], {
+    const authServiceMock: Partial<jest.Mocked<AuthService>> = {
       isAuthenticated$: of(true),
-    });
-    const routingServiceSpy = jasmine.createSpyObj('RoutingService', [
-      'getLink',
-    ]);
+    };
+    const routingServiceMock: jest.Mocked<RoutingService> = {
+      getLink: jest.fn(),
+    } as unknown as jest.Mocked<RoutingService>;
 
     await TestBed.configureTestingModule({
       imports: [HomeComponent],
       providers: [
-        { provide: AuthService, useValue: authServiceSpy },
-        { provide: RoutingService, useValue: routingServiceSpy },
+        { provide: AuthService, useValue: authServiceMock },
+        { provide: RoutingService, useValue: routingServiceMock },
         FaIconLibrary,
       ],
     }).compileComponents();
@@ -36,7 +36,7 @@ describe('HomeComponent', () => {
     component = fixture.componentInstance;
     routingService = TestBed.inject(
       RoutingService,
-    ) as jasmine.SpyObj<RoutingService>;
+    ) as jest.Mocked<RoutingService>;
     fixture.detectChanges();
   });
 
@@ -50,11 +50,11 @@ describe('HomeComponent', () => {
 
   it('should update isLoggedIn when auth state changes', () => {
     // isAuthenticated$ is already true from the spy's property
-    expect(component.isLoggedIn).toBeTrue();
+    expect(component.isLoggedIn).toBe(true);
   });
 
   it('should delegate route link generation to routing service', () => {
-    routingService.getLink.and.returnValue('/test-route');
+    routingService.getLink.mockReturnValue('/test-route');
     const link = component.getRouteLink('test');
     expect(routingService.getLink).toHaveBeenCalledWith('test');
     expect(link).toBe('/test-route');

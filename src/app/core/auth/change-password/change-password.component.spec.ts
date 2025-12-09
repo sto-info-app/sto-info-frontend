@@ -14,13 +14,13 @@ interface ValidationErrors {
 describe('ChangePasswordComponent', () => {
   let component: ChangePasswordComponent;
   let fixture: ComponentFixture<ChangePasswordComponent>;
-  let authService: jasmine.SpyObj<AuthService>;
+  let authService: jest.Mocked<AuthService>;
 
   beforeEach(async () => {
-    const authServiceSpy = jasmine.createSpyObj('AuthService', [
-      'changePassword',
-      'isLoggedIn',
-    ]);
+    const authServiceSpy: jest.Mocked<AuthService> = {
+      changePassword: jest.fn(),
+      isLoggedIn: jest.fn(),
+    } as unknown as jest.Mocked<AuthService>;
 
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, ChangePasswordComponent],
@@ -44,9 +44,9 @@ describe('ChangePasswordComponent', () => {
 
     fixture = TestBed.createComponent(ChangePasswordComponent);
     component = fixture.componentInstance;
-    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    authService = TestBed.inject(AuthService) as jest.Mocked<AuthService>;
 
-    spyOn(console, 'error');
+    jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   it('should create', () => {
@@ -86,23 +86,23 @@ describe('ChangePasswordComponent', () => {
     );
     expect(component.changePasswordForm.valid).toBeTruthy();
 
-    authService.changePassword.and.returnValue(of(undefined));
+    authService.changePassword.mockReturnValue(of(undefined));
+
+    // Ensure the component has a valid token set before submitting.
+    component.token = 'token123';
 
     component.onSubmit();
 
-    expect(authService.changePassword.calls.count()).toBe(
-      1,
-      'spy method was called once',
-    );
-    expect(authService.changePassword.calls.mostRecent().args[1]).toBe(
+    expect(authService.changePassword).toHaveBeenCalledTimes(1);
+    expect(authService.changePassword).toHaveBeenCalledWith(
+      'token123',
       'Test@123',
-      'service was called with form value',
     );
   });
 
   it('should handle password change error', () => {
-    authService.changePassword.and.returnValue(
-      throwError({ status: 400, error: { message: 'Token expired' } }),
+    authService.changePassword.mockReturnValue(
+      throwError(() => ({ status: 400, error: { message: 'Token expired' } })),
     );
 
     component.changePasswordForm.controls['password'].setValue('Test@123');

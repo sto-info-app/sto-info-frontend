@@ -12,15 +12,15 @@ import { PageNotFoundComponent } from './page-not-found.component';
 describe('PageNotFoundComponent', () => {
   let component: PageNotFoundComponent;
   let fixture: ComponentFixture<PageNotFoundComponent>;
-  let mockRedAlertThemeService: jasmine.SpyObj<RedAlertThemeService>;
+  let mockRedAlertThemeService: jest.Mocked<RedAlertThemeService>;
   let mockElementRef: ElementRef;
 
   beforeEach(async () => {
-    const redAlertSpy = jasmine.createSpyObj('RedAlertThemeService', [
-      'applyRedAlertThemeThenApplyStaticRedTheme',
-      'clearRedAlertStylesheet',
-      'clearTimers',
-    ]);
+    const redAlertSpy: jest.Mocked<RedAlertThemeService> = {
+      applyRedAlertThemeThenApplyStaticRedTheme: jest.fn(),
+      clearRedAlertStylesheet: jest.fn(),
+      clearTimers: jest.fn(),
+    } as unknown as jest.Mocked<RedAlertThemeService>;
 
     mockElementRef = new ElementRef({});
 
@@ -34,7 +34,7 @@ describe('PageNotFoundComponent', () => {
 
     mockRedAlertThemeService = TestBed.inject(
       RedAlertThemeService,
-    ) as jasmine.SpyObj<RedAlertThemeService>;
+    ) as jest.Mocked<RedAlertThemeService>;
   });
 
   beforeEach(() => {

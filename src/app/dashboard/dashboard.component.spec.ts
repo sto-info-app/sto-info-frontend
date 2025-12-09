@@ -9,14 +9,12 @@ describe('DashboardComponent', () => {
 
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
-  let dashboardServiceSpy: jasmine.SpyObj<DashboardService>;
+  let dashboardServiceSpy: jest.Mocked<DashboardService>;
 
   beforeEach(async () => {
-    dashboardServiceSpy = jasmine.createSpyObj<DashboardService>(
-      'DashboardService',
-      ['getUser'],
-    );
-    dashboardServiceSpy.getUser.and.returnValue(of());
+    dashboardServiceSpy = {
+      getUser: jest.fn().mockReturnValue(of()),
+    } as unknown as jest.Mocked<DashboardService>;
 
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
@@ -13,11 +13,12 @@ describe('AppComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AppComponent, RouterTestingModule],
+      imports: [AppComponent],
       providers: [
+        provideRouter([]),
         AuthService,
         { provide: 'API_URL', useValue: environment.apiUrl },
-        { provide: MatDialog, useValue: { open: jasmine.createSpy('open') } },
+        { provide: MatDialog, useValue: { open: jest.fn() } },
       ],
     }).compileComponents();
 
@@ -37,7 +38,7 @@ describe('AppComponent', () => {
   });
 
   it('should logout', () => {
-    spyOn(authService, 'performLogout');
+    jest.spyOn(authService, 'performLogout');
     component.logout();
     expect(authService.performLogout).toHaveBeenCalled();
   });

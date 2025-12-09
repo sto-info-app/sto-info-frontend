@@ -47,7 +47,7 @@ describe('LcarsWarningMessageComponent', () => {
     fixture.detectChanges();
 
     const messageElement = getMessageElement(fixture, '.lcars-warning-message');
-    expect(messageElement.nativeElement.classList.contains('blink')).toBeTrue();
+    expect(messageElement.nativeElement.classList.contains('blink')).toBe(true);
   });
 
   it('should not add blink class if blinkMessage is false', () => {
@@ -55,8 +55,8 @@ describe('LcarsWarningMessageComponent', () => {
     fixture.detectChanges();
 
     const messageElement = getMessageElement(fixture, '.lcars-warning-message');
-    expect(
-      messageElement.nativeElement.classList.contains('blink'),
-    ).toBeFalse();
+    expect(messageElement.nativeElement.classList.contains('blink')).toBe(
+      false,
+    );
   });
 });
