@@ -5,13 +5,13 @@ const cjsPreset = createCjsPreset();
 module.exports = {
   ...cjsPreset,
 
-  // Ensure the test TypeScript config is used for Jest while
-  // keeping ts-jest diagnostics enabled (default behavior).
+  // Use a Jest-specific tsconfig to avoid conflicts with the
+  // Angular bundler config while keeping ts-jest diagnostics enabled.
   globals: {
     ...cjsPreset.globals,
     'ts-jest': {
       ...(cjsPreset.globals && cjsPreset.globals['ts-jest']),
-      tsconfig: '<rootDir>/tsconfig.spec.json',
+      tsconfig: '<rootDir>/tsconfig.jest.json',
     },
   },
 

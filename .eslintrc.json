@@ -43,6 +43,16 @@
         "@typescript-eslint/no-require-imports": "off",
         "no-undef": "off"
       }
+    },
+    {
+      "files": ["jest.config.cjs"],
+      "env": {
+        "node": true
+      },
+      "rules": {
+        "@typescript-eslint/no-require-imports": "off",
+        "no-undef": "off"
+      }
     }
   ],
   "parser": "@typescript-eslint/parser",
