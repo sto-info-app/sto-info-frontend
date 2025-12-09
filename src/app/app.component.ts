@@ -41,7 +41,7 @@ export class AppComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   warningSubscription: Subscription | undefined;
   expirySubscription: Subscription | undefined;
-  private intervalId: number | null = null;
+  private intervalId: ReturnType<typeof setInterval> | null = null;
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
   private readonly authService = inject(AuthService);
@@ -61,7 +61,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe(() => {
         setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: 'auto' });
+          globalThis.scrollTo?.({ top: 0, behavior: 'auto' });
         }, 0);
       });
 
@@ -177,7 +177,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     this.zone.run(() => {
-      this.intervalId = window.setInterval(() => {
+      this.intervalId = globalThis.setInterval(() => {
         this.autoLogoutCountdown =
           this.authService.getSecondsUntilLoginSessionExpiry();
         if (this.autoLogoutCountdown <= 0) {
@@ -228,8 +228,8 @@ export class AppComponent implements OnInit, OnDestroy {
       this.renderer.appendChild(document.head, script);
 
       script.onload = () => {
-        if ((window as { CookieYes?: { run: () => void } }).CookieYes) {
-          (window as { CookieYes?: { run: () => void } }).CookieYes?.run(); // Trigger manual load
+        if ((globalThis as { CookieYes?: { run: () => void } }).CookieYes) {
+          (globalThis as { CookieYes?: { run: () => void } }).CookieYes?.run(); // Trigger manual load
         }
 
         // Listen for the cookie consent update event
