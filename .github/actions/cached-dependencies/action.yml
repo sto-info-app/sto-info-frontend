@@ -11,11 +11,12 @@ runs:
         path: node_modules
         key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
-    - name: Install dependencies
-      run: |
-        if [[ "${{ steps.cache.outputs.cache-hit }}" == "true" ]]; then
-          npm ci
-        else
-          npm install
-        fi
+    - name: Install dependencies (first run or when lockfile changes)
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: npm ci
+      shell: bash
+
+    - name: Use cached dependencies
+      if: steps.cache.outputs.cache-hit == 'true'
+      run: echo "Using cached node_modules from GitHub cache."
       shell: bash
