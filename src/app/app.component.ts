@@ -277,47 +277,38 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private enableGoogleAnalyticsTracking(): void {
     // Remove the disable flag
-    (window as unknown as { [key: string]: boolean })[
+    (globalThis as unknown as { [key: string]: boolean })[
       `ga-disable-${environment.gaMeasurementId}`
     ] = false;
 
     // Send an initial page view.
-    if (
-      typeof (
-        window as {
-          gtag?: (
-            event: string,
-            action: string,
-            params: { page_path: string },
-          ) => void;
-        }
-      )['gtag'] === 'function'
-    ) {
-      (
-        window as unknown as {
-          gtag: (
-            event: string,
-            action: string,
-            params: { page_path: string },
-          ) => void;
-        }
-      ).gtag('event', 'page_view', {
-        page_path: window.location.pathname,
+    const globalWithGtag = globalThis as unknown as {
+      gtag?: (
+        event: string,
+        action: string,
+        params: { page_path: string },
+      ) => void;
+      location: Location;
+    };
+
+    if (typeof globalWithGtag.gtag === 'function') {
+      globalWithGtag.gtag('event', 'page_view', {
+        page_path: globalWithGtag.location.pathname,
       });
     }
 
     // Log the current page
-    this.sendPageView(window.location.pathname);
+    this.sendPageView(globalWithGtag.location.pathname);
   }
 
   private disableGoogleAnalyticsTracking(): void {
     // Set the global flag to true so GA stops sending events.
-    (window as unknown as { [key: string]: boolean })[
+    (globalThis as unknown as { [key: string]: boolean })[
       `ga-disable-${environment.gaMeasurementId}`
     ] = true;
 
     // update GA configuration to ensure no page view is sent.
-    (window as { dataLayer?: unknown[] })['dataLayer']?.push([
+    (globalThis as { dataLayer?: unknown[] })['dataLayer']?.push([
       'config',
       environment.gaMeasurementId,
       { send_page_view: false },
@@ -326,7 +317,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private loadGoogleAnalyticsWithTrackingDisabled(): void {
     // Disable GA tracking by default using the global flag
-    (window as unknown as { [key: string]: boolean })[
+    (globalThis as unknown as { [key: string]: boolean })[
       `ga-disable-${environment.gaMeasurementId}`
     ] = true;
 
@@ -339,23 +330,24 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Once the script loads, initialize GA without sending page views automatically
     script.onload = () => {
-      (window as { dataLayer?: unknown[] })['dataLayer'] =
-        (window as { dataLayer?: unknown[] })['dataLayer'] || [];
+      (globalThis as { dataLayer?: unknown[] })['dataLayer'] =
+        (globalThis as { dataLayer?: unknown[] })['dataLayer'] || [];
 
-      // Assign gtag to the window object so it's globally accessible.
-      (window as unknown as { gtag?: (...args: unknown[]) => void })['gtag'] =
-        function (...args: unknown[]) {
-          if ((window as { dataLayer?: unknown[] })['dataLayer']) {
-            (window as { dataLayer?: unknown[] })['dataLayer']?.push(args);
-          }
-        };
+      // Assign gtag to the global object so it's globally accessible.
+      (globalThis as unknown as { gtag?: (...args: unknown[]) => void })[
+        'gtag'
+      ] = function (...args: unknown[]) {
+        if ((globalThis as { dataLayer?: unknown[] })['dataLayer']) {
+          (globalThis as { dataLayer?: unknown[] })['dataLayer']?.push(args);
+        }
+      };
 
       // Initialize GA, disabling automatic page view tracking.
-      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+      (globalThis as unknown as { gtag: (...args: unknown[]) => void }).gtag(
         'js',
         new Date(),
       );
-      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+      (globalThis as unknown as { gtag: (...args: unknown[]) => void }).gtag(
         'config',
         environment.gaMeasurementId,
         {
@@ -367,7 +359,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private sendPageView(url: string): void {
     const gtag = (
-      window as {
+      globalThis as {
         gtag?: (
           event: string,
           action: string,

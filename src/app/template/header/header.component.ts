@@ -61,20 +61,24 @@ export class HeaderComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    window.addEventListener('scroll', this.scrollCallbackFunction);
+    globalThis.addEventListener?.('scroll', this.scrollCallbackFunction);
   }
 
   ngOnDestroy() {
     // Unsubscribe from the Observables when the component is destroyed
-    window.addEventListener('scroll', this.scrollCallbackFunction);
+    globalThis.removeEventListener?.('scroll', this.scrollCallbackFunction);
   }
 
   toggleScrollTopButton() {
-    this.showScrollButton = window.scrollY > 100;
+    const scrollY = (globalThis as Window | typeof globalThis).scrollY ?? 0;
+    this.showScrollButton = scrollY > 100;
   }
 
   scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    (globalThis as Window | typeof globalThis).scrollTo?.({
+      top: 0,
+      behavior: 'smooth',
+    });
   }
 
   getRouteLink(route: string): string {
