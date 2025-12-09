@@ -47,3 +47,16 @@ expect.extend({
 // Global spyOn delegating to Jest's spy implementation
 (globalThis as any).spyOn = (object: any, method: string) =>
   jest.spyOn(object, method as any);
+
+// JSDOM does not implement URL.createObjectURL by default, but some
+// browser-focused libraries (e.g. ngx-image-cropper) rely on it.
+// Provide a minimal stub so those libraries work under Jest.
+if (typeof URL !== 'undefined') {
+  const urlAny = URL as any;
+  if (typeof urlAny.createObjectURL !== 'function') {
+    urlAny.createObjectURL = jest.fn(() => 'blob:mock-url');
+  }
+  if (typeof urlAny.revokeObjectURL !== 'function') {
+    urlAny.revokeObjectURL = jest.fn();
+  }
+}

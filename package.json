@@ -16,9 +16,9 @@
     "build:dev": "ng build --configuration development",
     "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:ci": "jest --runInBand --coverage",
+    "test": "jest --config jest.config.cjs",
+    "test:watch": "jest --config jest.config.cjs --watch",
+    "test:ci": "jest --config jest.config.cjs --runInBand --coverage",
     "lint": "eslint \"src/**/*.{ts,js,html}\"",
     "e2e": "ng e2e"
   },
