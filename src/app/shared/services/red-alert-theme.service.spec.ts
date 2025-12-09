@@ -19,7 +19,7 @@ describe('RedAlertThemeService', () => {
 
     const spyCreateElement = jest
       .spyOn(renderer, 'createElement')
-      .mockReturnValue(mockLinkElement as any);
+      .mockReturnValue(mockLinkElement);
     const spySetAttribute = jest.spyOn(renderer, 'setAttribute');
     const spyAppendChild = jest.spyOn(renderer, 'appendChild');
 
