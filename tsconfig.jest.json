@@ -2,7 +2,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/jest",
-    "module": "Node16",
+    // Use Node-style modules and resolution for Jest to avoid
+    // issues with the Angular bundler settings used by the app build.
+    "module": "commonjs",
+    "moduleResolution": "node",
     "types": ["jest", "node"]
   },
   "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
