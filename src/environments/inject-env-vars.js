@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('node:fs');
 
 const environmentTemplate = fs.readFileSync(
   'src/environments/environment.template.ts',
