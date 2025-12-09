@@ -4,8 +4,8 @@
     "outDir": "./out-tsc/jest",
     // Use Node-style modules/resolution compatible with Jest while still
     // understanding modern package exports (Angular publishes via exports).
-    "module": "commonjs",
-    "moduleResolution": "nodenext",
+    "module": "node16",
+    "moduleResolution": "node16",
     "types": ["jest", "node"]
   },
   "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
