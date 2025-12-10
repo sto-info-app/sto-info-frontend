@@ -35,8 +35,22 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
+      - name: Resolve cache toggle
+        id: cache-toggle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          value=$(gh api repos/$REPO/actions/variables/CACHE_NODE_MODULES --jq '.value' 2>/dev/null || echo '')
+          if [ -z "$value" ]; then
+            value=true
+          fi
+          echo "use_cache=$value" >> "$GITHUB_OUTPUT"
+
       - name: Load & cache dependencies
         uses: ./.github/actions/cached-dependencies
+        with:
+          use-cache: ${{ steps.cache-toggle.outputs.use_cache }}
 
       - name: Create test environment.ts
         run: |
