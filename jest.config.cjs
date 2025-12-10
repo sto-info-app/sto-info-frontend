@@ -5,13 +5,16 @@ const cjsPreset = createCjsPreset();
 module.exports = {
   ...cjsPreset,
 
-  // Ensure the test TypeScript config is used for Jest while
-  // keeping ts-jest diagnostics enabled (default behavior).
+  // Use a Jest-specific tsconfig to keep Angular's bundler resolution
+  // separate from the main application tsconfig while leaving ts-jest
+  // diagnostics enabled.
   globals: {
     ...cjsPreset.globals,
     'ts-jest': {
       ...(cjsPreset.globals && cjsPreset.globals['ts-jest']),
-      tsconfig: '<rootDir>/tsconfig.spec.json',
+      // Always compile specs with bundler-style resolution so Angular's
+      // ESM exports resolve consistently on Node 20 runners.
+      tsconfig: '<rootDir>/tsconfig.jest.json',
     },
   },
 

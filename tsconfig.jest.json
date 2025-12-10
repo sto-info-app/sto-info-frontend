@@ -2,7 +2,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/jest",
-    "module": "Node16",
+    // Use classic Node resolution so ts-jest can locate Angular's
+    // `@angular/*/testing` typings that are still shipped via
+    // `typesVersions` rather than package exports.
+    "module": "commonjs",
+    "moduleResolution": "node",
     "types": ["jest", "node"]
   },
   "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
