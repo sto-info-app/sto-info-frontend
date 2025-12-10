@@ -1,13 +1,10 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.spec.json",
   "compilerOptions": {
     "outDir": "./out-tsc/jest",
-    // Use classic Node resolution so ts-jest can locate Angular's
-    // `@angular/*/testing` typings that are still shipped via
-    // `typesVersions` rather than package exports.
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "types": ["jest", "node"]
-  },
-  "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "moduleDetection": "force",
+    "isolatedModules": true
+  }
 }

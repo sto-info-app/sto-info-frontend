@@ -70,9 +70,9 @@ jobs:
             allowDebugging: false,
             minsBeforeLogoutExpiryToShowWarning: 5,
             minsBeforeLogoutExpiryToRefreshToken: 2,
-            cookieYesUrl: '',
+            cookieYesUrl: 'https://cdn-cookieyes.com/client_data/test/script.js',
             gaMeasurementId: 'G-XXXXXXX',
-            logRocketAppId: '',
+            logRocketAppId: 'test/appid',
           };
           EOF
 

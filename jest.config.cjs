@@ -2,26 +2,40 @@ const { createCjsPreset } = require('jest-preset-angular/presets');
 
 const cjsPreset = createCjsPreset();
 
+const tsTransformKey = Object.keys(cjsPreset.transform || {}).find(key => {
+  const transformEntry = cjsPreset.transform[key];
+  return (
+    Array.isArray(transformEntry) && transformEntry[0] === 'jest-preset-angular'
+  );
+});
+
+const transform = {
+  ...cjsPreset.transform,
+  ...(tsTransformKey
+    ? {
+        [tsTransformKey]: [
+          cjsPreset.transform[tsTransformKey][0],
+          {
+            ...cjsPreset.transform[tsTransformKey][1],
+            tsconfig: '<rootDir>/tsconfig.jest.json',
+          },
+        ],
+      }
+    : {}),
+};
+
+const presetModuleNameMapper = cjsPreset.moduleNameMapper || {};
+
 module.exports = {
   ...cjsPreset,
 
-  // Use a Jest-specific tsconfig to keep Angular's bundler resolution
-  // separate from the main application tsconfig while leaving ts-jest
-  // diagnostics enabled.
-  globals: {
-    ...cjsPreset.globals,
-    'ts-jest': {
-      ...(cjsPreset.globals && cjsPreset.globals['ts-jest']),
-      // Always compile specs with bundler-style resolution so Angular's
-      // ESM exports resolve consistently on Node 20 runners.
-      tsconfig: '<rootDir>/tsconfig.jest.json',
-    },
-  },
+  transform,
 
   testMatch: ['**/*.spec.ts'],
   setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
 
   moduleNameMapper: {
+    ...presetModuleNameMapper,
     '^src/(.*)$': '<rootDir>/src/$1',
   },
 
