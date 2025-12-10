@@ -1,10 +1,10 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.spec.json",
   "compilerOptions": {
     "outDir": "./out-tsc/jest",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "types": ["jest", "node"]
-  },
-  "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "moduleDetection": "force",
+    "isolatedModules": true
+  }
 }
