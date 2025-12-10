@@ -39,10 +39,3 @@ runs:
       if: inputs.use-cache != 'true'
       run: echo "Cache disabled via use-cache input"
       shell: bash
-
-
-    # Every run to be cache-free while diagnosing Jest issues
-    - name: Install dependencies (no cache)
-      uses: ./.github/actions/cached-dependencies
-      with:
-        use-cache: 'false'
