@@ -27,3 +27,10 @@ runs:
       if: steps.node-modules-cache.outputs.cache-hit == 'true'
       run: echo "Using cached node_modules"
       shell: bash
+
+
+    # Every run to be cache-free while diagnosing Jest issues
+    - name: Install dependencies (no cache)
+      uses: ./.github/actions/cached-dependencies
+      with:
+        use-cache: 'false'
