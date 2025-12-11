@@ -29,6 +29,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           fetch-depth: 0
 
       - id: commit
