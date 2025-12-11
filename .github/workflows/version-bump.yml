@@ -7,6 +7,10 @@ on:
   issue_comment:
     types: [created]
 
+permissions:
+  contents: write # needed for checkout and pushing the bumped version
+  issues: read
+
 env:
   BUMP_VERSION_COMMIT_MSG: 'Bump version number'
 
