@@ -19,6 +19,7 @@ jobs:
     # Run for manual dispatch, or when commenting on a PR
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.issue.pull_request }}
     runs-on: ubuntu-latest
+    environment: development
 
     outputs:
       skip: ${{ steps.commit.outputs.skip }}
@@ -82,6 +83,7 @@ jobs:
     needs: prerequisite_check
     if: needs.prerequisite_check.outputs.skip != 'true' && needs.prerequisite_check.outputs.branch != '' && needs.prerequisite_check.outputs.do_version_bump == 'true'
     runs-on: ubuntu-latest
+    environment: development
 
     steps:
       - name: Set Environment Variables
