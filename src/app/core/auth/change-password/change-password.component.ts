@@ -1,12 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
+  ReactiveFormsModule,
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { MustMatch } from 'src/app/shared/_helpers/must-match.validator';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED,
@@ -25,7 +28,13 @@ import { AuthService } from '../auth.service';
   selector: 'app-change-password',
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    RouterModule,
+    LcarsErrorMessageComponent,
+    LcarsInformationMessageComponent,
+  ],
 })
 export class ChangePasswordComponent implements OnInit {
   token = '';
@@ -35,7 +44,7 @@ export class ChangePasswordComponent implements OnInit {
   successMessage = '';
   appRoutes = APP_ROUTES;
 
-  // Allow contstants to be used in the HTML
+  // Allow constants to be used in the HTML
   errorTextPasswordRequired: string = FORM_ERROR_PASSWORD_REQUIRED;
   errorTextPasswordMinLength: string = FORM_ERROR_PASSWORD_MIN_LENGTH;
   errorTextPasswordComplexity: string = FORM_ERROR_PASSWORD_COMPLEXITY;
@@ -43,12 +52,12 @@ export class ChangePasswordComponent implements OnInit {
     FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED;
   errorTextPasswordsDoNotMatch: string = FORM_ERROR_PASSWORDS_DO_NOT_MATCH;
 
-  constructor(
-    private readonly formBuilder: FormBuilder,
-    private readonly route: ActivatedRoute,
-    private readonly authService: AuthService,
-    private readonly routingService: RoutingService,
-  ) {
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly authService = inject(AuthService);
+  private readonly routingService = inject(RoutingService);
+
+  constructor() {
     this.changePasswordForm = this.formBuilder.nonNullable.group(
       {
         password: [
@@ -88,7 +97,7 @@ export class ChangePasswordComponent implements OnInit {
       this.authService
         .changePassword(this.token, this.changePasswordForm.value.password)
         .subscribe({
-          next: _response => {
+          next: () => {
             this.successMessage = 'Your password has been changed.';
             if (this.authService.isLoggedIn()) {
               // Logout the user after successfully changing the password

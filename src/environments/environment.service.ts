@@ -4,8 +4,6 @@ import { Environment } from './models/environment.model';
 
 @Injectable({ providedIn: 'root' })
 export class EnvCheckService {
-  constructor() {}
-
   checkEnvVariables(): void {
     const envKeys = Object.keys(environment) as (keyof Environment)[];
     const missingKeys = envKeys.filter(

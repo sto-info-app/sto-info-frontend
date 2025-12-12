@@ -1,17 +1,38 @@
-import { Component, NgZone } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Title } from '@angular/platform-browser';
+import {
+  Component,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  Renderer2,
+  inject,
+} from '@angular/core';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
+import { NavigationEnd, Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
+import { CookieService } from './shared/services/cookie.service';
+import { LogRocketService } from './shared/services/log-rocket.service';
+import { PageTitleService } from './shared/services/page-title.service';
+import { HeaderComponent } from './template/header/header.component';
+import { MainContentComponent } from './template/main-content/main-content.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  standalone: false,
+  standalone: true,
+  imports: [HeaderComponent, MainContentComponent, MatDialogModule],
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
+  private readonly cookieYesScriptId = 'cookieyes';
+  private readonly cookieYesCookieName = 'cookieyes-consent';
+
   isLoggedIn = false;
   autoLogoutCountdown = 0;
 
@@ -20,17 +41,29 @@ export class AppComponent {
   destroy$ = new Subject<void>();
   warningSubscription: Subscription | undefined;
   expirySubscription: Subscription | undefined;
-  private intervalId: number | null = null;
+  private intervalId: ReturnType<typeof setInterval> | null = null;
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
+  private readonly authService = inject(AuthService);
+  private readonly logRocketService = inject(LogRocketService);
+  private readonly pageTitleService = inject(PageTitleService);
+  private readonly cookieService = inject(CookieService);
+  private readonly zone = inject(NgZone);
+  private readonly renderer = inject(Renderer2);
+  private readonly router = inject(Router);
+  public readonly dialog = inject(MatDialog);
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly titleService: Title,
-    private readonly zone: NgZone,
-    public readonly dialog: MatDialog,
-  ) {
-    this.setAppTitle();
+  constructor() {
+    this.pageTitleService.init();
+
+    //NOTE: Added fix to scroll to top on route change to avoid retaining scroll position from previous route
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => {
+        setTimeout(() => {
+          globalThis.scrollTo?.({ top: 0, behavior: 'auto' });
+        }, 0);
+      });
 
     this.logout = this.logout.bind(this);
   }
@@ -77,12 +110,28 @@ export class AppComponent {
           }
         }
       });
+
+    this.loadGoogleAnalyticsWithTrackingDisabled();
+    this.loadCookieYesScript();
+
+    this.router.events
+      .pipe(takeUntil(this.destroy$))
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        // Delay the GA call slightly if needed to ensure GA has fully loaded
+        setTimeout(() => {
+          this.sendPageView(event.urlAfterRedirects);
+        }, 0);
+      });
   }
 
   ngOnDestroy() {
     // Unsubscribe from the Observables when the component is destroyed
     this.destroy$.next();
     this.destroy$.complete();
+
+    // Ensure any active countdown interval is cleared on destroy
+    this.stopCountdown();
   }
 
   logout(): void {
@@ -128,7 +177,7 @@ export class AppComponent {
     }
 
     this.zone.run(() => {
-      this.intervalId = window.setInterval(() => {
+      this.intervalId = globalThis.setInterval(() => {
         this.autoLogoutCountdown =
           this.authService.getSecondsUntilLoginSessionExpiry();
         if (this.autoLogoutCountdown <= 0) {
@@ -154,16 +203,200 @@ export class AppComponent {
     }
   }
 
-  setAppTitle() {
-    // Tags to add to titles to help identify the environment in use
-    let appTitleTestTag = '';
-    if (environment.env_name === 'local') appTitleTestTag = ' [Local Dev]';
-    if (environment.env_name === 'dev') appTitleTestTag = ' [Dev]';
+  /***
+   * Load the CookieYes script to handle cookie consent
+   * NOTE: This script is only loaded if the environment is not on localhost
+   */
+  loadCookieYesScript(): void {
+    const consentCookieValues =
+      this.cookieService.readCookie(this.cookieYesCookieName)?.split(',') || [];
+    this.extractAcceptedConsentCookieCategories(consentCookieValues);
 
-    this.titleService.setTitle(
-      (environment.appTitle
-        ? environment.appTitle
-        : 'Star Trek Online Info Portal') + appTitleTestTag,
-    );
+    // Clean up any existing script before loading a new one
+    const existingScript = document.getElementById(this.cookieYesScriptId);
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    if (environment.cookieYesUrl) {
+      const script = this.renderer.createElement('script');
+      script.type = 'text/javascript';
+      script.src = environment.cookieYesUrl;
+      script.id = this.cookieYesScriptId; // Prevent duplicate loading
+      script.async = true;
+
+      this.renderer.appendChild(document.head, script);
+
+      script.onload = () => {
+        if ((globalThis as { CookieYes?: { run: () => void } }).CookieYes) {
+          (globalThis as { CookieYes?: { run: () => void } }).CookieYes?.run(); // Trigger manual load
+        }
+
+        // Listen for the cookie consent update event
+        document.addEventListener('cookieyes_consent_update', eventData => {
+          const data = (eventData as CustomEvent).detail;
+          this.cookieService.setUserAcceptedCookieCategories(data.accepted); // Save the accepted cookie categories allowed by the user
+
+          // Check if the user has accepted the analytics category since the user has changed their consent
+          this.checkCookieConsentState();
+        });
+
+        // Check cookie consent state on load
+        this.checkCookieConsentState();
+      };
+
+      script.onerror = () => {
+        console.error('Failed to load CookieYes script');
+      };
+    } else {
+      console.error('CookieYes URL not set in environment');
+    }
+  }
+
+  checkCookieConsentState(): void {
+    if (this.hasUserConsentedToAnalytics()) {
+      this.consentGiven();
+    } else {
+      this.consentDenied();
+    }
+  }
+
+  hasUserConsentedToAnalytics(): boolean {
+    return this.cookieService.isCookieCategoryAccepted('analytics');
+  }
+
+  consentGiven(): void {
+    this.enableGoogleAnalyticsTracking();
+    this.loadLogRocket();
+  }
+
+  consentDenied(): void {
+    this.disableGoogleAnalyticsTracking();
+    this.disableLogRocket();
+  }
+
+  private enableGoogleAnalyticsTracking(): void {
+    // Remove the disable flag
+    (globalThis as unknown as { [key: string]: boolean })[
+      `ga-disable-${environment.gaMeasurementId}`
+    ] = false;
+
+    // Send an initial page view.
+    const globalWithGtag = globalThis as unknown as {
+      gtag?: (
+        event: string,
+        action: string,
+        params: { page_path: string },
+      ) => void;
+      location: Location;
+    };
+
+    if (typeof globalWithGtag.gtag === 'function') {
+      globalWithGtag.gtag('event', 'page_view', {
+        page_path: globalWithGtag.location.pathname,
+      });
+    }
+
+    // Log the current page
+    this.sendPageView(globalWithGtag.location.pathname);
+  }
+
+  private disableGoogleAnalyticsTracking(): void {
+    // Set the global flag to true so GA stops sending events.
+    (globalThis as unknown as { [key: string]: boolean })[
+      `ga-disable-${environment.gaMeasurementId}`
+    ] = true;
+
+    // update GA configuration to ensure no page view is sent.
+    (globalThis as { dataLayer?: unknown[] })['dataLayer']?.push([
+      'config',
+      environment.gaMeasurementId,
+      { send_page_view: false },
+    ]);
+  }
+
+  private loadGoogleAnalyticsWithTrackingDisabled(): void {
+    // Disable GA tracking by default using the global flag
+    (globalThis as unknown as { [key: string]: boolean })[
+      `ga-disable-${environment.gaMeasurementId}`
+    ] = true;
+
+    // Create the GA script element
+    const script = document.createElement('script');
+    script.id = 'ga-script';
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${environment.gaMeasurementId}`;
+    document.head.appendChild(script);
+
+    // Once the script loads, initialize GA without sending page views automatically
+    script.onload = () => {
+      (globalThis as { dataLayer?: unknown[] })['dataLayer'] =
+        (globalThis as { dataLayer?: unknown[] })['dataLayer'] || [];
+
+      // Assign gtag to the global object so it's globally accessible.
+      (globalThis as unknown as { gtag?: (...args: unknown[]) => void })[
+        'gtag'
+      ] = function (...args: unknown[]) {
+        if ((globalThis as { dataLayer?: unknown[] })['dataLayer']) {
+          (globalThis as { dataLayer?: unknown[] })['dataLayer']?.push(args);
+        }
+      };
+
+      // Initialize GA, disabling automatic page view tracking.
+      (globalThis as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+        'js',
+        new Date(),
+      );
+      (globalThis as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+        'config',
+        environment.gaMeasurementId,
+        {
+          send_page_view: false,
+        },
+      );
+    };
+  }
+
+  private sendPageView(url: string): void {
+    const gtag = (
+      globalThis as {
+        gtag?: (
+          event: string,
+          action: string,
+          params: { page_path: string },
+        ) => void;
+      }
+    ).gtag;
+    if (typeof gtag === 'function') {
+      gtag('event', 'page_view', { page_path: url });
+    } else {
+      console.error('Google Analytics not available');
+    }
+  }
+
+  extractAcceptedConsentCookieCategories(cookieValues: string[]) {
+    const acceptedCategories: string[] = [];
+
+    for (const cookieValue of cookieValues) {
+      const [cookieCategory, consentValue] = cookieValue.split(':');
+      if (
+        consentValue === 'yes' &&
+        !['consentid', 'consent', 'action'].includes(cookieCategory) // Ignore non-category values
+      ) {
+        acceptedCategories.push(cookieCategory);
+      }
+    }
+
+    if (acceptedCategories.length) {
+      this.cookieService.setUserAcceptedCookieCategories(acceptedCategories);
+    }
+  }
+
+  loadLogRocket(): void {
+    this.logRocketService.init();
+  }
+
+  disableLogRocket(): void {
+    this.logRocketService.shutdown();
   }
 }

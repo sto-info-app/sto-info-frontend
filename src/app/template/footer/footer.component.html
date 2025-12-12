@@ -56,6 +56,14 @@
             </li>
             <li>
               <a
+                [routerLink]="getRouteLink(appRoutes.PRIVACY_POLICY)"
+                [routerLinkActiveOptions]="{ exact: true }"
+                routerLinkActive="active"
+                >Privacy policy</a
+              >
+            </li>
+            <li>
+              <a
                 [routerLink]="getRouteLink(appRoutes.TERMS_OF_USE)"
                 [routerLinkActiveOptions]="{ exact: true }"
                 routerLinkActive="active"
@@ -67,7 +75,14 @@
       </div>
     </div>
     <div id="copyright-text">
-      <p>Copyright &#169; {{ currentYear }} {{ appTitle }}.</p>
+      <p>
+        Copyright &#169; {{ currentYear }} {{ appTitle }}. All rights reserved.
+      </p>
+      <p class="fan-made">
+        This app is a fan-made project and is not affiliated with or sponsored
+        by Cryptic Studios, CBS Studios, or Paramount Global. Star Trek Online
+        and related marks are the property of their respective owners.
+      </p>
     </div>
   </div>
 </div>

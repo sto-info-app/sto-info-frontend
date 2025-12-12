@@ -152,23 +152,21 @@
 
 // Angular Material overrides!
 .mat-mdc-card {
-  --mdc-elevated-card-container-color: #0d0d0d;
-  --mdc-outlined-card-container-color: #0d0d0d;
+  --mat-card-elevated-container-color: #0d0d0d;
+  --mat-card-outlined-container-color: #0d0d0d;
 }
 
 .mat-mdc-dialog-container {
-  --mdc-dialog-container-color: #0d0d0d;
-  --mdc-dialog-subhead-color: rgba(255, 255, 255, 0.87);
-  --mdc-dialog-supporting-text-color: rgba(255, 255, 255, 0.6);
-  --mdc-dialog-subhead-font: Antonio, 'Arial Narrow', 'Avenir Next Condensed',
-    sans-serif !important;
-  --mdc-dialog-supporting-text-font: Antonio, 'Arial Narrow',
-    'Avenir Next Condensed', sans-serif !important;
+  --mat-dialog-container-color: #0d0d0d;
+  --mat-dialog-subhead-color: rgba(255, 255, 255, 0.87);
+  --mat-dialog-supporting-text-color: rgba(255, 255, 255, 0.6);
+  --mat-dialog-subhead-font: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif !important;
+  --mat-dialog-supporting-text-font: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif !important;
 }
 
 .mdc-menu-surface {
-  background-color: var(--mdc-theme-surface, #0d0d0d);
-  color: var(--mdc-theme-on-surface, #fff);
+  background-color: var(--mat-theme-surface, #0d0d0d);
+  color: var(--mat-theme-on-surface, #fff);
 }
 
 .mat-mdc-paginator {
@@ -177,29 +175,29 @@
 }
 
 .mat-mdc-unelevated-button.mat-unthemed {
-  --mdc-filled-button-container-color: #0d0d0d;
-  --mdc-filled-button-label-text-color: #fff;
+  --mat-button-filled-container-color: #0d0d0d;
+  --mat-button-filled-label-text-color: #fff;
 }
 
 .mat-mdc-raised-button.mat-unthemed {
-  --mdc-protected-button-container-color: #0d0d0d;
-  --mdc-protected-button-label-text-color: #fff;
+  --mat-button-protected-container-color: #0d0d0d;
+  --mat-button-protected-label-text-color: #fff;
 }
 
 .mat-mdc-fab.mat-unthemed,
 .mat-mdc-mini-fab.mat-unthemed {
-  --mdc-fab-container-color: #0d0d0d;
-  --mdc-fab-icon-color: #fff;
+  --mat-fab-container-color: #0d0d0d;
+  --mat-fab-icon-color: #fff;
   --mat-mdc-fab-color: #fff;
 }
 
 .mdc-data-table {
-  background-color: var(--mdc-theme-surface, #0d0d0d);
+  background-color: var(--mat-theme-surface, #0d0d0d);
   border-color: rgba(255, 255, 255, 0.12);
 }
 
 .mdc-data-table__header-cell {
-  background-color: var(--mdc-theme-surface, #0d0d0d);
+  background-color: var(--mat-theme-surface, #0d0d0d);
 }
 
 .mat-mdc-table,
@@ -244,7 +242,7 @@
 .mat-typography .mat-headline-5,
 .mat-typography h1,
 h1 {
-  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   margin: 30px 0;
   font-weight: 400;
   text-transform: uppercase;
@@ -259,7 +257,7 @@ h1 {
 .mat-typography .mat-headline-6,
 .mat-typography h2,
 h2 {
-  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   margin: 30px 0 10px 0;
   font-weight: 400;
   text-transform: uppercase;
@@ -274,7 +272,7 @@ h2 {
 .mat-typography .mat-subtitle-1,
 .mat-typography h3,
 h3 {
-  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   margin: 30px 0 10px 0;
   font-weight: 400;
   text-transform: uppercase;
@@ -289,7 +287,7 @@ h3 {
 .mat-typography .mat-body-1,
 .mat-typography h4,
 h4 {
-  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
   line-height: 1.2;
@@ -300,7 +298,7 @@ h4 {
 .mat-typography .mat-h5,
 .mat-typography h5,
 h5 {
-  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
   text-decoration: underline;
@@ -312,7 +310,7 @@ h5 {
 .mat-typography .mat-h6,
 .mat-typography h6,
 h6 {
-  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   font-weight: 400;
   text-transform: none;
   text-decoration: underline;
@@ -326,10 +324,10 @@ h6 {
 .mat-typography .mat-body-2 p,
 .mat-typography p,
 p {
-  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   margin-block: 1rem;
   margin: 0 0 15px;
-  line-height: 1.2;
+  line-height: 1.3;
   font-size: 1rem;
 }
 
@@ -378,7 +376,7 @@ body {
   padding: 5px 0;
   background-color: #0d0d0d;
   font-size: 100%;
-  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   font-weight: 400;
   line-height: 1.5;
   color: #79d;
@@ -448,12 +446,15 @@ a:active {
 
 .lcars-list {
   list-style: none;
+  margin-left: 10px;
 }
 
 .lcars-list li {
   position: relative;
-  padding: 0 0 5px 42px;
-  font-size: 1.3rem;
+  padding: 7px 0 0 38px;
+  line-height: 1.3;
+  font-size: 1rem;
+  margin-left: 0;
 }
 
 .lcars-list li::before {
@@ -1106,8 +1107,8 @@ article> :first-child {
 }
 
 .col.right {
-  text-align: right;
   text-align: -webkit-right;
+  text-align: right;
 }
 
 h1,
@@ -1433,7 +1434,8 @@ button:hover {
   text-transform: uppercase;
   color: #9bf;
   padding-inline: 10px;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
+  font-weight: bold;
   line-height: 1.7rem;
 }
 
@@ -1598,6 +1600,11 @@ footer::after {
     font-size: 0.8rem;
   }
 
+  p.fan-made {
+    padding: 0 15%;
+    font-size: 0.6rem;
+  }
+
   #footer-links-container {
     display: block;
     margin-bottom: 25px;
@@ -1641,7 +1648,7 @@ body,
 .mat-typography,
 .mat-button,
 .mat-card {
-  font-family: 'Antonio', 'Arial Narrow', 'Avenir Next Condensed', sans-serif !important;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif !important;
   line-height: 1.5;
   font-size: 1rem;
 }

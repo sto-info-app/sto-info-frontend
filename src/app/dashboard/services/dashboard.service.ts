@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 import { catchError, Observable, throwError } from 'rxjs';
 
@@ -15,10 +15,8 @@ import { environment } from 'src/environments/environment';
 export class DashboardService {
   private readonly apiUrl = environment.apiUrl;
 
-  constructor(
-    private readonly http: HttpClient,
-    private readonly authService: AuthService,
-  ) {}
+  private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
 
   getUser(): Observable<User> {
     const httpOptions = this.authService.getHttpOptionsWithAccessToken();

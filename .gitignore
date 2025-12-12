@@ -1,8 +1,10 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # Environment files
-#src/environments/environment.ts
-#src/environments/environment.prod.ts
+src/environments/environment.ts
+src/environments/environment.dev.ts
+src/environments/environment.prod.ts
+!src/environments/environment.template.ts
 
 # Compiled output / Build files
 /dist
@@ -50,6 +52,7 @@ yarn-error.log
 /libpeerconnection.log
 testem.log
 /typings
+debug.log
 
 # System files
 .DS_Store

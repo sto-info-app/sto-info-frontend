@@ -1,13 +1,14 @@
-<app-loading-bar *ngIf="!user"></app-loading-bar>
+@if (!user) {
+<app-loading-bar></app-loading-bar>
+}
 
 <div id="personnel-record-container">
   <div
     id="personnel-record-main-column"
     class="col">
     <h1>Personnel Record</h1>
-    <div
-      *ngIf="user"
-      id="personnel-record-main-content">
+    @if (user) {
+    <div id="personnel-record-main-content">
       <div class="lcars-text-bar personnel-lcars-text-bar">
         <span>Personal Details</span>
         <span
@@ -40,11 +41,9 @@
             title="Restricted: Cannot be changed"></fa-icon>
         </p>
       </div>
-
       <div class="lcars-text-bar personnel-lcars-text-bar">
         <span>Activity</span>
       </div>
-
       <div class="personnel-record-inner-content">
         <p>
           <span class="record-title">Last logged in:</span>
@@ -64,9 +63,10 @@
         </p>
       </div>
     </div>
+    }
   </div>
+  @if (user) {
   <div
-    *ngIf="user"
     id="personnel-record-side-column"
     class="col">
     <div class="lcars-text-bar small-lcars-bar-gap">
@@ -81,19 +81,20 @@
     </div>
     <div id="personnel-image">
       <div class="pics-right">
+        @if (!user.profile?.profilePicture300) {
         <img
-          *ngIf="!user.profile?.profilePicture300"
           src="{{ unavailablePhotoSrc }}"
           alt="Photo unavailable"
           class="border"
           loading="lazy" />
+        } @if (user.profile?.profilePicture300) {
         <img
-          *ngIf="user.profile?.profilePicture300"
           [src]="user.profile?.profilePicture300"
           alt="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
           class="border"
           (error)="onProfileImageError($event)"
           loading="lazy" />
+        }
       </div>
     </div>
     <div class="lcars-text-bar">
@@ -112,4 +113,5 @@
       >
     </div>
   </div>
+  }
 </div>

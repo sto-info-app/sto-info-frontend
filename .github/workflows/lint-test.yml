@@ -3,15 +3,15 @@ name: Lint and Test
 on:
   workflow_dispatch:
 
-  # pull_request:
-  #   types: [opened, synchronize, edited, reopened]
-  #   branches:
-  #     - 'master'
-  #     - 'development'
-  #     - 'epic/*'
+  pull_request:
+    types: [opened, synchronize, edited, reopened]
+    branches:
+      - 'master'
+      - 'development'
+      - 'epic/*'
 
 env:
-  NODE_VERSION: 22
+  NODE_VERSION: 20
 
 jobs:
   prerequisite_check:
@@ -19,8 +19,8 @@ jobs:
 
     steps:
       - name: Check if NODE_VERSION exists
-        run: echo "NODE_VERSION=$NODE_VERSION"
-        if: env.NODE_VERSION
+        run: echo "NODE_VERSION=${{ env.NODE_VERSION }}"
+        if: ${{ env.NODE_VERSION != '' }}
 
   lint_and_test:
     runs-on: ubuntu-latest
@@ -35,8 +35,46 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
+      - name: Resolve cache toggle
+        id: cache-toggle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          value=$(gh api repos/$REPO/actions/variables/CACHE_NODE_MODULES --jq '.value' 2>/dev/null || echo '')
+          if [ -z "$value" ]; then
+            value=true
+          fi
+          echo "use_cache=$value" >> "$GITHUB_OUTPUT"
+
       - name: Load & cache dependencies
         uses: ./.github/actions/cached-dependencies
+        with:
+          use-cache: ${{ steps.cache-toggle.outputs.use_cache }}
+
+      - name: Create test environment.ts
+        run: |
+          mkdir -p src/environments
+          cat << 'EOF' > src/environments/environment.ts
+          import packageJson from '../../package.json';
+          import type { Environment } from './models/environment.model';
+
+          export const environment: Environment = {
+            production: false,
+            version: packageJson.version,
+            env_name: 'ci',
+            env_label: 'CI',
+            apiUrl: 'http://localhost:3000',
+            appTitle: 'STO Info (CI)',
+            appLoggedInHome: '/dashboard',
+            allowDebugging: false,
+            minsBeforeLogoutExpiryToShowWarning: 5,
+            minsBeforeLogoutExpiryToRefreshToken: 2,
+            cookieYesUrl: 'https://cdn-cookieyes.com/client_data/test/script.js',
+            gaMeasurementId: 'G-XXXXXXX',
+            logRocketAppId: 'test/appid',
+          };
+          EOF
 
       - name: Run Linter
         run: npm run lint

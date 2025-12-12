@@ -1,14 +1,13 @@
-<app-loading-bar
-  *ngIf="isSubmitting"
-  loadingText="Saving"></app-loading-bar>
+@if (isSubmitting) {
+<app-loading-bar loadingText="Saving"></app-loading-bar>
+}
 <div class="lcars-profile-pic-container">
   <div class="lcars-profile-pic-inner-container">
     <div class="lcars-text-bar">
       <span>Starfleet Personnel Record Photo: Edit</span>
     </div>
-    <div
-      *ngIf="data?.user"
-      class="lcars-profile-pic-message">
+    @if (data?.user) {
+    <div class="lcars-profile-pic-message">
       <div class="flexbox">
         <div class="col profile-pic-main-col">
           <input
@@ -17,9 +16,8 @@
             accept="image/jpg, image/jpeg, image/png"
             [disabled]="isSubmitting"
             class="file-input" />
-
+          @if (imageChangedEvent) {
           <image-cropper
-            *ngIf="imageChangedEvent"
             [imageChangedEvent]="imageChangedEvent"
             [maintainAspectRatio]="true"
             [aspectRatio]="1 / 1"
@@ -27,16 +25,15 @@
             format="png"
             (imageCropped)="onImageCropped($event)"
             (loadImageFailed)="loadImageFailed()"></image-cropper>
+          }
         </div>
         <div class="col profile-pic-side-col">
+          @if (errorMessage) {
           <app-lcars-error-message
-            *ngIf="errorMessage"
             title="Transmission Error"
             [message]="errorMessage"></app-lcars-error-message>
-
-          <div
-            *ngIf="croppedImage && !errorMessage"
-            class="lcars-profile-pic-preview">
+          } @if (croppedImage && !errorMessage) {
+          <div class="lcars-profile-pic-preview">
             <div class="lcars-text-bar">
               <span>Picture Preview</span>
             </div>
@@ -47,11 +44,8 @@
                 alt="Your cropped selection" />
             </div>
           </div>
-
+          }
           <div class="lcars-profile-pic-buttons">
-            <div class="lcars-text-bar">
-              <span>Primary Controls</span>
-            </div>
             <div
               class="buttons-container"
               mat-dialog-actions>
@@ -77,5 +71,6 @@
         </div>
       </div>
     </div>
+    }
   </div>
 </div>

@@ -1,12 +1,17 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
   ElementRef,
   Input,
   NgZone,
+  OnDestroy,
   ViewChild,
+  inject,
 } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { TimeFormatPipe } from 'src/app/shared/pipes/time-format.pipe';
 import { DebuggingService } from 'src/app/shared/services/debugging.service';
 import { GeneralThemeService } from 'src/app/shared/services/general-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -16,9 +21,10 @@ import { environment } from 'src/environments/environment';
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, RouterModule, TimeFormatPipe],
 })
-export class HeaderComponent implements AfterViewInit {
+export class HeaderComponent implements AfterViewInit, OnDestroy {
   @Input() showScrollButton = false;
   @Input() isLoggedIn!: boolean;
   @Input() autoLogoutCountdown = 0;
@@ -26,6 +32,11 @@ export class HeaderComponent implements AfterViewInit {
 
   @ViewChild('scrollTopButton')
   scrollTopButton!: ElementRef;
+
+  private readonly zone = inject(NgZone);
+  private readonly routingService = inject(RoutingService);
+  private readonly generalThemeService = inject(GeneralThemeService);
+  private readonly debuggingService = inject(DebuggingService);
 
   appTitle = environment.appTitle;
   appRoutes = APP_ROUTES;
@@ -43,32 +54,31 @@ export class HeaderComponent implements AfterViewInit {
   };
   showScrollTop = false;
 
-  constructor(
-    private readonly zone: NgZone,
-    private readonly routingService: RoutingService,
-    private readonly generalThemeService: GeneralThemeService,
-    private readonly debuggingService: DebuggingService,
-  ) {
+  constructor() {
     this.dataCascade = this.generalThemeService.createDynamicDataCascade();
     this.themePanel2RandomText =
       this.generalThemeService.createDynamicSideColumnText();
   }
 
   ngAfterViewInit() {
-    window.addEventListener('scroll', this.scrollCallbackFunction);
+    globalThis.addEventListener?.('scroll', this.scrollCallbackFunction);
   }
 
   ngOnDestroy() {
     // Unsubscribe from the Observables when the component is destroyed
-    window.addEventListener('scroll', this.scrollCallbackFunction);
+    globalThis.removeEventListener?.('scroll', this.scrollCallbackFunction);
   }
 
   toggleScrollTopButton() {
-    this.showScrollButton = window.scrollY > 100;
+    const scrollY = (globalThis as Window | typeof globalThis).scrollY ?? 0;
+    this.showScrollButton = scrollY > 100;
   }
 
   scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    (globalThis as Window | typeof globalThis).scrollTo?.({
+      top: 0,
+      behavior: 'smooth',
+    });
   }
 
   getRouteLink(route: string): string {

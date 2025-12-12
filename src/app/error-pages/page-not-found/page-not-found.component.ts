@@ -1,4 +1,11 @@
-import { Component, ElementRef, Renderer2 } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  Renderer2,
+  inject,
+} from '@angular/core';
 import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
 
 @Component({
@@ -8,14 +15,13 @@ import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.se
     '../../../assets/lcars/lcars-red-alert.css',
     './page-not-found.component.scss',
   ],
-  standalone: false,
+  standalone: true,
+  imports: [],
 })
-export class PageNotFoundComponent {
-  constructor(
-    private readonly redAlertThemeService: RedAlertThemeService,
-    private readonly renderer: Renderer2,
-    private readonly el: ElementRef,
-  ) {}
+export class PageNotFoundComponent implements OnInit, OnDestroy {
+  private readonly redAlertThemeService = inject(RedAlertThemeService);
+  private readonly renderer = inject(Renderer2);
+  private readonly el = inject(ElementRef);
 
   ngOnInit(): void {
     this.redAlertThemeService.applyRedAlertThemeThenApplyStaticRedTheme(

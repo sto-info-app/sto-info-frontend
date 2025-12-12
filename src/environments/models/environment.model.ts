@@ -9,4 +9,7 @@ export interface Environment {
   allowDebugging: boolean;
   minsBeforeLogoutExpiryToShowWarning: number;
   minsBeforeLogoutExpiryToRefreshToken: number;
+  cookieYesUrl: string;
+  gaMeasurementId: string;
+  logRocketAppId?: string;
 }

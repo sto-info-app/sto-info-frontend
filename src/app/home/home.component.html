@@ -4,9 +4,8 @@
     This is a work in progress!
     <fa-icon [icon]="['fas', 'hand-spock']"></fa-icon>
   </p>
-  <div
-    class="buttons"
-    *ngIf="!isLoggedIn">
+  @if (!isLoggedIn) {
+  <div class="buttons">
     <a
       [routerLink]="getRouteLink(appRoutes.LOGIN)"
       class="bluey"
@@ -18,4 +17,5 @@
       >Register</a
     >
   </div>
+  }
 </div>

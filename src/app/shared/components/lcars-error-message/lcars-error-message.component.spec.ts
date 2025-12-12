@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
 import { getMessageElement, setComponentProperties } from '../test-utils';
 import { LcarsErrorMessageComponent } from './lcars-error-message.component';
 
@@ -9,14 +8,13 @@ describe('LcarsErrorMessageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [LcarsErrorMessageComponent],
+      imports: [LcarsErrorMessageComponent],
     }).compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LcarsErrorMessageComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -29,7 +27,7 @@ describe('LcarsErrorMessageComponent', () => {
       message: 'Test Message',
     });
 
-    const titleElement = fixture.debugElement.query(By.css('.go-mars'));
+    const titleElement = getMessageElement(fixture, '.lcars-text-bar .go-mars');
     expect(titleElement.nativeElement.textContent).toEqual('Test Title');
 
     const messageElement = getMessageElement(fixture, '.lcars-error-message p');
@@ -40,15 +38,15 @@ describe('LcarsErrorMessageComponent', () => {
     setComponentProperties(fixture, component, { blinkMessage: true });
 
     const messageElement = getMessageElement(fixture, '.lcars-error-message');
-    expect(messageElement.nativeElement.classList.contains('blink')).toBeTrue();
+    expect(messageElement.nativeElement.classList.contains('blink')).toBe(true);
   });
 
   it('should not add blink class if blinkMessage is false', () => {
     setComponentProperties(fixture, component, { blinkMessage: false });
 
     const messageElement = getMessageElement(fixture, '.lcars-error-message');
-    expect(
-      messageElement.nativeElement.classList.contains('blink'),
-    ).toBeFalse();
+    expect(messageElement.nativeElement.classList.contains('blink')).toBe(
+      false,
+    );
   });
 });

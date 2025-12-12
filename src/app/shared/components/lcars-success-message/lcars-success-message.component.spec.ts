@@ -9,7 +9,7 @@ describe('LcarsSuccessMessageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [LcarsSuccessMessageComponent],
+      imports: [LcarsSuccessMessageComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LcarsSuccessMessageComponent);
@@ -40,17 +40,19 @@ describe('LcarsSuccessMessageComponent', () => {
 
   it('should add blink class if blinkMessage is true', () => {
     setComponentProperties(fixture, component, { blinkMessage: true });
+    fixture.detectChanges();
 
     const messageElement = getMessageElement(fixture, '.lcars-success-message');
-    expect(messageElement.nativeElement.classList.contains('blink')).toBeTrue();
+    expect(messageElement.nativeElement.classList.contains('blink')).toBe(true);
   });
 
   it('should not add blink class if blinkMessage is false', () => {
     setComponentProperties(fixture, component, { blinkMessage: false });
+    fixture.detectChanges();
 
     const messageElement = getMessageElement(fixture, '.lcars-success-message');
-    expect(
-      messageElement.nativeElement.classList.contains('blink'),
-    ).toBeFalse();
+    expect(messageElement.nativeElement.classList.contains('blink')).toBe(
+      false,
+    );
   });
 });

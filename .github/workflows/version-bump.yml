@@ -3,17 +3,23 @@ name: Version Bump
 on:
   workflow_dispatch:
 
-  # Check pull request comment when it is created
-  pull_request_review_comment:
+  # Check pull request (issue) comment when it is created
+  issue_comment:
     types: [created]
+
+permissions:
+  contents: write # needed for checkout and pushing the bumped version
+  issues: read
 
 env:
   BUMP_VERSION_COMMIT_MSG: 'Bump version number'
 
 jobs:
   prerequisite_check:
-    if: ${{ github.event.issue.pull_request || github.event.pull_request }}
+    # Run for manual dispatch, or when commenting on a PR
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.issue.pull_request }}
     runs-on: ubuntu-latest
+    environment: development
 
     outputs:
       skip: ${{ steps.commit.outputs.skip }}
@@ -24,6 +30,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           fetch-depth: 0
 
       - id: commit
@@ -32,9 +39,9 @@ jobs:
           COMMIT_MESSAGE=$(git log --no-merges -1 --format=%B)
           echo "Current commit message: $COMMIT_MESSAGE"
           if [[ "$COMMIT_MESSAGE" == "${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
-            echo "::set-output name=skip::true"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::set-output name=skip::false"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
         shell: bash
 
@@ -47,18 +54,22 @@ jobs:
             branch_name=${GITHUB_REF#refs/heads/}
           fi
           echo "Branch name is: $branch_name"
-          echo "::set-output name=branch::$branch_name"
+          echo "branch=$branch_name" >> "$GITHUB_OUTPUT"
         shell: bash
 
       - id: check_comment
         name: Check for /bump_version comment
-        if: ${{ github.event_name == 'issue_comment' }}
         run: |
-          COMMENT_BODY="${{ github.event.comment.body }}"
-          if [[ "$COMMENT_BODY" == *"/bump_version"* ]]; then
-            echo "::set-output name=do_version_bump::true"
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "Manual dispatch detected; forcing version bump."
+            echo "do_version_bump=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::set-output name=do_version_bump::false"
+            COMMENT_BODY="${{ github.event.comment.body }}"
+            if [[ "$COMMENT_BODY" == *"/bump_version"* ]]; then
+              echo "do_version_bump=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "do_version_bump=false" >> "$GITHUB_OUTPUT"
+            fi
           fi
         shell: bash
 
@@ -72,6 +83,7 @@ jobs:
     needs: prerequisite_check
     if: needs.prerequisite_check.outputs.skip != 'true' && needs.prerequisite_check.outputs.branch != '' && needs.prerequisite_check.outputs.do_version_bump == 'true'
     runs-on: ubuntu-latest
+    environment: development
 
     steps:
       - name: Set Environment Variables
@@ -96,8 +108,8 @@ jobs:
       - name: Get Old App Version
         id: old-app-ver
         run: |
-          version=$(jq -r '.version' package.json)
-          echo "::set-output name=version::$version"
+          version=$(node -p "require('./package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Old version: $version"
 
       - name: Bump Version and Push Changes Back
@@ -105,7 +117,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
           npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }} from ${{ steps.old-app-ver.outputs.version }} to %s"
-          echo "Pushing to branch: $branch_name"
-          git push origin HEAD:$branch_name
+          echo "Pushing to branch: $BRANCH_NAME"
+          git push origin HEAD:"$BRANCH_NAME"
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}

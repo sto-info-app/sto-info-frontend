@@ -1,21 +1,41 @@
 name: 'Get & Cache Dependencies'
 description: 'Get the dependencies (via npm) and cache them.'
 
+inputs:
+  use-cache:
+    description: 'Set to false to skip restoring/saving the node_modules cache.'
+    required: false
+    default: 'true'
+
 runs:
   using: 'composite'
   steps:
-    - name: Cache Node modules
-      id: cache
-      uses: actions/cache@v4
+    - name: Restore node_modules cache
+      if: inputs.use-cache == 'true'
+      id: node-modules-cache
+      uses: actions/cache/restore@v4
       with:
         path: node_modules
-        key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+        key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
 
     - name: Install dependencies
-      run: |
-        if [[ "${{ steps.cache.outputs.cache-hit }}" == "true" ]]; then
-          npm ci
-        else
-          npm install
-        fi
+      if: inputs.use-cache != 'true' || steps.node-modules-cache.outputs.cache-hit != 'true'
+      run: npm ci
+      shell: bash
+
+    - name: Save node_modules cache
+      if: inputs.use-cache == 'true' && steps.node-modules-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+
+    - name: Using cached node_modules
+      if: inputs.use-cache == 'true' && steps.node-modules-cache.outputs.cache-hit == 'true'
+      run: echo "Using cached node_modules"
+      shell: bash
+
+    - name: Skipping cache usage
+      if: inputs.use-cache != 'true'
+      run: echo "Cache disabled via use-cache input"
       shell: bash

@@ -1,39 +1,32 @@
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
+
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
-  let service: AuthService;
   let httpMock: HttpTestingController;
   let authService: AuthService;
 
   beforeEach(() => {
     localStorage.removeItem('access_token');
     TestBed.configureTestingModule({
-      providers: [
-        AuthService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
+      providers: [AuthService, provideHttpClient(), provideHttpClientTesting()],
     });
-    service = TestBed.inject(AuthService);
-    httpMock = TestBed.inject(HttpTestingController);
+
     authService = TestBed.inject(AuthService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
-    httpMock.verify(); // Verify that no unmatched requests are outstanding.
+    httpMock.verify();
   });
 
   it('should be created', () => {
-    expect(service).toBeTruthy();
+    expect(authService).toBeTruthy();
   });
 
   it('should return true from isAuthenticated$ when there is a token', () => {
@@ -55,19 +48,23 @@ describe('AuthService', () => {
   });
 
   it('should save tokens correctly', () => {
-    service.saveToken('test-token', 'test-refresh-token', Date.now() + 3600);
+    authService.saveToken(
+      'test-token',
+      'test-refresh-token',
+      Date.now() + 3600,
+    );
     expect(localStorage.getItem('access_token')).toBe('test-token');
     expect(localStorage.getItem('refresh_token')).toBe('test-refresh-token');
-    service.isAuthenticated$.subscribe(authenticated => {
+    authService.isAuthenticated$.subscribe(authenticated => {
       expect(authenticated).toBeTruthy();
     });
   });
 
   it('should remove token correctly', () => {
     localStorage.setItem('access_token', 'test-token');
-    service.removeToken();
+    authService.removeToken();
     expect(localStorage.getItem('access_token')).toBeNull();
-    service.isAuthenticated$.subscribe(authenticated => {
+    authService.isAuthenticated$.subscribe(authenticated => {
       expect(authenticated).toBeFalsy();
     });
   });

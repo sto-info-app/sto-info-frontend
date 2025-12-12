@@ -1,14 +1,10 @@
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Component } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import {
   MAX_CHARS_NAMES,
@@ -25,22 +21,25 @@ describe('RegisterComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [RegisterComponent, DummyComponent],
       imports: [
+        RegisterComponent,
         ReactiveFormsModule,
-        provideRouter([
-          { path: 'register/complete', component: DummyComponent },
-        ]),
         BrowserAnimationsModule,
       ],
       providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { paramMap: new Map(), data: {} },
+          },
+        },
         {
           provide: AuthService,
           useValue: {
             register: () => of({}),
           },
         },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(),
         provideHttpClientTesting(),
       ],
     }).compileComponents();
@@ -187,7 +186,7 @@ describe('RegisterComponent', () => {
   });
 
   it('should call authService.register when the form is submitted', () => {
-    spyOn(authService, 'register').and.returnValue(of({}));
+    jest.spyOn(authService, 'register').mockReturnValue(of({}));
 
     // Fill in the form inputs
     component.registerForm.controls['firstName'].setValue('Test');
@@ -203,8 +202,10 @@ describe('RegisterComponent', () => {
   });
 
   it('should navigate to /register/complete when the form is submitted successfully', done => {
-    spyOn(authService, 'register').and.returnValue(of({}));
-    spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
+    jest.spyOn(authService, 'register').mockReturnValue(of({}));
+    jest
+      .spyOn(router, 'navigate')
+      .mockReturnValue(Promise.resolve(true) as unknown as Promise<boolean>);
 
     // Fill in the form inputs
     component.registerForm.controls['firstName'].setValue('Test');
@@ -223,9 +224,3 @@ describe('RegisterComponent', () => {
     });
   });
 });
-
-@Component({
-  template: '',
-  standalone: false,
-})
-class DummyComponent {}

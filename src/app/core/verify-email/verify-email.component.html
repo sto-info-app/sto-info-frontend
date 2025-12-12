@@ -1,9 +1,8 @@
 <div class="flexbox">
   <div class="col">
     <h1>Verify Email</h1>
-    <div
-      *ngIf="!message"
-      class="result-message-container">
+    @if (!message) {
+    <div class="result-message-container">
       <p>Welcome! We're glad you registered with us. You're almost there!</p>
       <p>
         Click the button below to complete the process and gain full access to
@@ -16,26 +15,23 @@
         Verify Email
       </button>
     </div>
-
-    <div
-      *ngIf="message"
-      [ngSwitch]="messageType"
-      class="result-message-container">
+    } @if (message) {
+    <div class="result-message-container">
+      @switch (messageType) { @case (MessageType.Error) {
       <app-lcars-error-message
-        *ngSwitchCase="MessageType.Error"
         title="Verification Status"
         [message]="message"></app-lcars-error-message>
-
+      } @case (MessageType.Success) {
       <app-lcars-success-message
-        *ngSwitchCase="MessageType.Success"
         title="Verification Status"
         [message]="message"></app-lcars-success-message>
-
+      } @case (MessageType.Info) {
       <app-lcars-information-message
-        *ngSwitchCase="MessageType.Info"
         title="Verification Status"
         [message]="message"></app-lcars-information-message>
+      } }
     </div>
+    }
   </div>
   <div class="col right">
     <div class="lcars-login-link-container">
@@ -50,9 +46,8 @@
         >
       </div>
 
-      <div
-        *ngIf="showResendVerificationEmailButton"
-        class="lcars-retry-verify-link-container">
+      @if (showResendVerificationEmailButton) {
+      <div class="lcars-retry-verify-link-container">
         <div class="buttons">
           <a
             (click)="resendVerificationEmail()"
@@ -61,6 +56,7 @@
           >
         </div>
       </div>
+      }
     </div>
   </div>
 </div>

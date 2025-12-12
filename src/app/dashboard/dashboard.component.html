@@ -1,19 +1,21 @@
-<app-loading-bar *ngIf="!user"></app-loading-bar>
+@if (!user) {
+<app-loading-bar></app-loading-bar>
+}
 
 <div id="dashboard-container">
   <div
     id="dashboard-info-main-column"
     class="col">
     <h1>Dashboard</h1>
-    <div
-      *ngIf="user"
-      id="dashboard-info-main-content">
+    @if (user) {
+    <div id="dashboard-info-main-content">
       <p>{{ userGreeting }}</p>
       <p>Summaries will installed on Tuesday!</p>
     </div>
+    }
   </div>
+  @if (user) {
   <div
-    *ngIf="user"
     id="dashboard-info-side-column"
     class="col">
     <div class="lcars-text-bar small-lcars-bar-gap">
@@ -21,19 +23,20 @@
     </div>
     <div id="personnel-image">
       <div class="pics-right">
+        @if (!user.profile?.profilePicture300) {
         <img
-          *ngIf="!user.profile?.profilePicture300"
           src="{{ unavailablePhotoSrc }}"
           alt="Photo unavailable"
           class="border"
           loading="lazy" />
+        } @if (user.profile?.profilePicture300) {
         <img
-          *ngIf="user.profile?.profilePicture300"
           [src]="user.profile?.profilePicture300"
           alt="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
           class="border"
           (error)="onProfileImageError($event)"
           loading="lazy" />
+        }
         <p class="caption">Captain {{ user.profile?.lastName || '' }}</p>
       </div>
     </div>
@@ -45,4 +48,5 @@
       >
     </div>
   </div>
+  }
 </div>

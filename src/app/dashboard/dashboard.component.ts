@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { AuthService } from '../core/auth/auth.service';
+import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { SRC_PHOTO_UNAVAILABLE_300PX } from '../shared/constants/app-image-assets.constants';
 import { APP_ROUTES } from '../shared/constants/app-routing.constants';
 import { RoutingService } from '../shared/services/routing.service';
@@ -11,7 +13,8 @@ import { DashboardService } from './services/dashboard.service';
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, RouterModule, LoadingBarComponent],
 })
 export class DashboardComponent implements OnInit {
   appRoutes = APP_ROUTES;
@@ -20,11 +23,9 @@ export class DashboardComponent implements OnInit {
   user: User | undefined;
   userGreeting = '';
 
-  constructor(
-    private readonly dashboardService: DashboardService,
-    private readonly authService: AuthService,
-    private readonly routingService: RoutingService,
-  ) {}
+  private readonly dashboardService = inject(DashboardService);
+  private readonly authService = inject(AuthService);
+  private readonly routingService = inject(RoutingService);
 
   ngOnInit() {
     this.dashboardService.getUser().subscribe(user => {

@@ -1,6 +1,10 @@
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
+import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
@@ -14,7 +18,14 @@ import { MessageType } from '../../shared/models/lcars-message-type.enum';
   selector: 'app-verify-email',
   templateUrl: './verify-email.component.html',
   styleUrls: ['./verify-email.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    LcarsErrorMessageComponent,
+    LcarsInformationMessageComponent,
+    LcarsSuccessMessageComponent,
+  ],
 })
 export class VerifyEmailComponent implements OnInit {
   messageType: MessageType = MessageType.Info;
@@ -24,11 +35,9 @@ export class VerifyEmailComponent implements OnInit {
   showResendVerificationEmailButton = false;
   appRoutes = APP_ROUTES;
 
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly http: HttpClient,
-    private readonly routingService: RoutingService,
-  ) {}
+  private readonly route = inject(ActivatedRoute);
+  private readonly http = inject(HttpClient);
+  private readonly routingService = inject(RoutingService);
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {

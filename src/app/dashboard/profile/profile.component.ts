@@ -1,6 +1,14 @@
-import { Component } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
+import { RouterModule } from '@angular/router';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { SRC_PHOTO_UNAVAILABLE_300PX } from 'src/app/shared/constants/app-image-assets.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { DatesTimeHelperService } from 'src/app/shared/services/dates-time-helper.service';
@@ -14,9 +22,16 @@ import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    RouterModule,
+    FontAwesomeModule,
+    LoadingBarComponent,
+  ],
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
   appRoutes = APP_ROUTES;
   unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
@@ -25,13 +40,11 @@ export class ProfileComponent {
     null;
   private profilePicDialogRef: MatDialogRef<ProfilePicComponent> | null = null;
 
-  constructor(
-    private readonly dashboardService: DashboardService,
-    private readonly authService: AuthService,
-    private readonly routingService: RoutingService,
-    private readonly dateTimeHelper: DatesTimeHelperService,
-    private readonly dialog: MatDialog,
-  ) {}
+  private readonly dashboardService = inject(DashboardService);
+  private readonly authService = inject(AuthService);
+  private readonly routingService = inject(RoutingService);
+  private readonly dateTimeHelper = inject(DatesTimeHelperService);
+  private readonly dialog = inject(MatDialog);
 
   ngOnInit() {
     this.getUserData();

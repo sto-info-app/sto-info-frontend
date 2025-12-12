@@ -1,5 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
 
+strong {
+  font-weight: bold !important;
+}
+
+ul {
+  margin-left: 25px;
+}
+
+ul.no-bullets {
+  list-style-type: none;
+  margin-left: 5px;
+}
+
+ul.no-bullets ul {
+  margin-left: 50px;
+}
+
 .form-container {
   display: flex;
   flex-direction: column;
@@ -54,7 +71,7 @@ input.errored {
   padding: 20px 25px 0 0;
   font-size: 1rem;
   cursor: pointer;
-  background-color: #007bff;
+  background-color: #0056b3;
   border: none;
   color: white;
   margin: 0px 8px 16px 8px;
@@ -65,7 +82,7 @@ input.errored {
 }
 
 .submit-button:hover {
-  background-color: #0056b3;
+  background-color: #007bff;
 }
 
 .submit-button:disabled,

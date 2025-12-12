@@ -11,18 +11,23 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { ProfileComponent } from './dashboard/profile/profile.component';
 import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
 import { HomeComponent } from './home/home.component';
-import { APP_ROUTES } from './shared/constants/app-routing.constants';
+import {
+  APP_ROUTE_TITLES,
+  APP_ROUTES,
+} from './shared/constants/app-routing.constants';
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { CreditsComponent } from './static-pages/credits/credits.component';
+import { PrivacyPolicyComponent } from './static-pages/privacy-policy/privacy-policy.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   // *****************************************
   // * Default route
   {
     path: '',
     component: HomeComponent,
+    data: { title: APP_ROUTE_TITLES.HOME },
   },
 
   // *****************************************
@@ -30,26 +35,32 @@ const routes: Routes = [
   {
     path: APP_ROUTES.LOGIN,
     component: LoginComponent,
+    data: { title: APP_ROUTE_TITLES.LOGIN },
   },
   {
     path: APP_ROUTES.REGISTER,
     component: RegisterComponent,
+    data: { title: APP_ROUTE_TITLES.REGISTER },
   },
   {
     path: APP_ROUTES.REGISTER_COMPLETE,
     component: RegistrationCompleteComponent,
+    data: { title: APP_ROUTE_TITLES.REGISTER_COMPLETE },
   },
   {
     path: APP_ROUTES.VERIFY_EMAIL,
     component: VerifyEmailComponent,
+    data: { title: APP_ROUTE_TITLES.VERIFY_EMAIL },
   },
   {
     path: APP_ROUTES.RESET_PASSWORD,
     component: ResetPasswordRequestComponent,
+    data: { title: APP_ROUTE_TITLES.RESET_PASSWORD },
   },
   {
     path: APP_ROUTES.CHANGE_PASSWORD,
     component: ChangePasswordComponent,
+    data: { title: APP_ROUTE_TITLES.CHANGE_PASSWORD },
   },
 
   // *****************************************
@@ -57,18 +68,27 @@ const routes: Routes = [
   {
     path: APP_ROUTES.ABOUT,
     component: AboutComponent,
+    data: { title: APP_ROUTE_TITLES.ABOUT },
   },
   {
     path: APP_ROUTES.CONTACT,
     component: ContactComponent,
+    data: { title: APP_ROUTE_TITLES.CONTACT },
   },
   {
     path: APP_ROUTES.TERMS_OF_USE,
     component: TermsOfUseComponent,
+    data: { title: APP_ROUTE_TITLES.TERMS_OF_USE },
   },
   {
     path: APP_ROUTES.CREDITS,
     component: CreditsComponent,
+    data: { title: APP_ROUTE_TITLES.CREDITS },
+  },
+  {
+    path: APP_ROUTES.PRIVACY_POLICY,
+    component: PrivacyPolicyComponent,
+    data: { title: APP_ROUTE_TITLES.PRIVACY_POLICY },
   },
 
   // *****************************************
@@ -76,11 +96,13 @@ const routes: Routes = [
   {
     path: APP_ROUTES.STO_DASHBOARD,
     component: DashboardComponent,
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD },
     canActivate: [AuthGuard],
   },
   {
     path: APP_ROUTES.STO_DASHBOARD_PROFILE,
     component: ProfileComponent,
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_PROFILE },
     canActivate: [AuthGuard],
   },
 
@@ -89,6 +111,7 @@ const routes: Routes = [
   {
     path: '**',
     component: PageNotFoundComponent,
+    data: { title: APP_ROUTE_TITLES.PAGE_NOT_FOUND },
   },
 ];
 
