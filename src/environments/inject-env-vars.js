@@ -29,7 +29,8 @@ const replacedContent = environmentTemplate
     process.env.MINS_BEFORE_LOGOUT_EXPIRY_TO_REFRESH_TOKEN || 15,
   )
   .replace('__cookieYesUrl__', process.env.COOKIE_YES_URL || '')
-  .replace('__gaMeasurementId__', process.env.GA_MEASUREMENT_ID || '');
+  .replace('__gaMeasurementId__', process.env.GA_MEASUREMENT_ID || '')
+  .replace('__logRocketAppId__', process.env.LOG_ROCKET_APP_ID || '');
 
 // Write out the final environment.ts
 writeFileSync('src/environments/environment.ts', replacedContent);
