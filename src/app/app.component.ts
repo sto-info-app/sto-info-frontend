@@ -1,11 +1,4 @@
-import {
-  Component,
-  NgZone,
-  OnDestroy,
-  OnInit,
-  Renderer2,
-  inject,
-} from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
 import {
   MatDialog,
   MatDialogModule,
@@ -20,6 +13,7 @@ import { RefreshSessionDialogComponent } from './shared/components/refresh-sessi
 import { CookieService } from './shared/services/cookie.service';
 import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
+import { ScriptLoaderService } from './shared/services/script-loader.service';
 import { HeaderComponent } from './template/header/header.component';
 import { MainContentComponent } from './template/main-content/main-content.component';
 
@@ -35,7 +29,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   isLoggedIn = false;
   autoLogoutCountdown = 0;
-
   showScrollButton = false;
 
   destroy$ = new Subject<void>();
@@ -49,52 +42,43 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly pageTitleService = inject(PageTitleService);
   private readonly cookieService = inject(CookieService);
   private readonly zone = inject(NgZone);
-  private readonly renderer = inject(Renderer2);
   private readonly router = inject(Router);
+  private readonly scriptLoader = inject(ScriptLoaderService);
   public readonly dialog = inject(MatDialog);
 
+  /**
+   * Initialises the AppComponent, sets up page title service and scroll to top on route change.
+   * @returns void
+   */
   constructor() {
     this.pageTitleService.init();
-
-    //NOTE: Added fix to scroll to top on route change to avoid retaining scroll position from previous route
-    this.router.events
-      .pipe(filter(e => e instanceof NavigationEnd))
-      .subscribe(() => {
-        setTimeout(() => {
-          globalThis.scrollTo?.({ top: 0, behavior: 'auto' });
-        }, 0);
-      });
-
+    this.resetScrollPositionOnNavigationEnd();
     this.logout = this.logout.bind(this);
   }
 
+  /**
+   * Initialises the component, sets up subscriptions for authentication state,
+   * warning and expiry announcements, and loads necessary scripts.
+   * @returns void
+   */
   ngOnInit() {
-    this.authService.isAuthenticated$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(loggedIn => {
-        this.isLoggedIn = loggedIn;
-        if (this.isLoggedIn && this.intervalId === null) {
-          this.startCountdown();
-        } else if (!this.isLoggedIn && this.intervalId !== null) {
-          this.stopCountdown();
-        }
-      });
+    this.subscribeToAuthenticationState();
+    this.subscribeToWarningAnnouncements();
+    this.subscribeTExpiryAnnouncements();
 
-    // Subscribe to the warningAnnounced$ Observable - display of auto logout warning message
-    this.warningSubscription = this.authService.warningAnnounced$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((warningTime: number) => {
-        if (this.isLoggedIn && this.intervalId !== null) {
-          const delay = warningTime - Date.now(); // calculate the delay in milliseconds
-          if (delay > 0) {
-            setTimeout(() => {
-              this.openRefreshSessionDialog();
-            }, delay);
-          }
-        }
-      });
+    if (environment?.env_name !== 'local') {
+      this.loadGoogleAnalyticsWithTrackingDisabled();
+      this.loadCookieYesScript();
+      this.trackPageViewsOnNavigation();
+    }
+  }
 
-    // Subscribe to the expiryAnnounced$ Observable - auto logout
+  /**
+   * Subscribes to expiry announcements from AuthService to handle auto-logout for the display of auto logout
+   * @returns void
+   * @remarks Subscribe to the expiryAnnounced$ Observable to handle auto-logout when the session expires.
+   */
+  private subscribeTExpiryAnnouncements() {
     this.expirySubscription = this.authService.expiryAnnounced$
       .pipe(takeUntil(this.destroy$))
       .subscribe(expiryTime => {
@@ -110,10 +94,53 @@ export class AppComponent implements OnInit, OnDestroy {
           }
         }
       });
+  }
 
-    this.loadGoogleAnalyticsWithTrackingDisabled();
-    this.loadCookieYesScript();
+  /**
+   * Subscribes to warning announcements from AuthService to handle display of auto logout warning message
+   * @returns void
+   * @remarks Subscribe to the warningAnnounced$ Observable to handle display of auto-logout warning message.
+   */
+  private subscribeToWarningAnnouncements() {
+    this.warningSubscription = this.authService.warningAnnounced$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((warningTime: number) => {
+        if (this.isLoggedIn && this.intervalId !== null) {
+          const delay = warningTime - Date.now(); // calculate the delay in milliseconds
+          if (delay > 0) {
+            setTimeout(() => {
+              this.openRefreshSessionDialog();
+            }, delay);
+          }
+        }
+      });
+  }
 
+  /**
+   * Subscribes to authentication state changes from AuthService
+   * to manage auto-logout countdown timer
+   * @returns void
+   * @remarks Subscribes to the isAuthenticated$ Observable to start/stop the countdown timer based on login state.
+   */
+  private subscribeToAuthenticationState() {
+    this.authService.isAuthenticated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(loggedIn => {
+        this.isLoggedIn = loggedIn;
+        if (this.isLoggedIn && this.intervalId === null) {
+          this.startCountdown();
+        } else if (!this.isLoggedIn && this.intervalId !== null) {
+          this.stopCountdown();
+        }
+      });
+  }
+
+  /**
+   * Tracks page views on navigation end events for Google Analytics
+   * @returns void
+   * @remarks Subscribes to the Router's navigation end events and sends page view events to Google Analytics.
+   */
+  private trackPageViewsOnNavigation() {
     this.router.events
       .pipe(takeUntil(this.destroy$))
       .pipe(filter(event => event instanceof NavigationEnd))
@@ -125,6 +152,10 @@ export class AppComponent implements OnInit, OnDestroy {
       });
   }
 
+  /**
+   * Cleans up subscriptions and intervals on component destroy
+   * @returns void
+   */
   ngOnDestroy() {
     // Unsubscribe from the Observables when the component is destroyed
     this.destroy$.next();
@@ -134,12 +165,21 @@ export class AppComponent implements OnInit, OnDestroy {
     this.stopCountdown();
   }
 
+  /**
+   * Logs out the user immediately
+   * Stops the countdown and performs logout via AuthService
+   * @returns void
+   */
   logout(): void {
     this.stopCountdown();
     this.authService.performLogout();
   }
 
-  openRefreshSessionDialog() {
+  /**
+   * Opens the refresh session dialog to warn the user of impending logout
+   * @returns void
+   */
+  private openRefreshSessionDialog(): void {
     // If a dialog box is already open, do nothing
     if (this.dialogRef) {
       return;
@@ -171,7 +211,11 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  startCountdown(): void {
+  /**
+   * Starts the auto-logout countdown timer
+   * @returns void
+   */
+  private startCountdown(): void {
     if (!this.isLoggedIn || this.intervalId !== null) {
       return;
     }
@@ -195,7 +239,11 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  stopCountdown(): void {
+  /**
+   * Stops the auto-logout countdown timer
+   * @returns void
+   */
+  private stopCountdown(): void {
     if (this.intervalId !== null) {
       clearInterval(this.intervalId);
       this.intervalId = null;
@@ -205,55 +253,45 @@ export class AppComponent implements OnInit, OnDestroy {
 
   /***
    * Load the CookieYes script to handle cookie consent
-   * NOTE: This script is only loaded if the environment is not on localhost
    */
-  loadCookieYesScript(): void {
+  private loadCookieYesScript(): void {
     const consentCookieValues =
       this.cookieService.readCookie(this.cookieYesCookieName)?.split(',') || [];
     this.extractAcceptedConsentCookieCategories(consentCookieValues);
 
-    // Clean up any existing script before loading a new one
-    const existingScript = document.getElementById(this.cookieYesScriptId);
-    if (existingScript) {
-      existingScript.remove();
+    if (!environment?.cookieYesUrl) {
+      console.error('CookieYes URL not set in environment');
+      return;
     }
 
-    if (environment.cookieYesUrl) {
-      const script = this.renderer.createElement('script');
-      script.type = 'text/javascript';
-      script.src = environment.cookieYesUrl;
-      script.id = this.cookieYesScriptId; // Prevent duplicate loading
-      script.async = true;
-
-      this.renderer.appendChild(document.head, script);
-
-      script.onload = () => {
+    this.scriptLoader.loadScript({
+      id: this.cookieYesScriptId,
+      src: environment?.cookieYesUrl,
+      async: true,
+      onLoad: () => {
         if ((globalThis as { CookieYes?: { run: () => void } }).CookieYes) {
-          (globalThis as { CookieYes?: { run: () => void } }).CookieYes?.run(); // Trigger manual load
+          (globalThis as { CookieYes?: { run: () => void } }).CookieYes?.run();
         }
 
-        // Listen for the cookie consent update event
         document.addEventListener('cookieyes_consent_update', eventData => {
           const data = (eventData as CustomEvent).detail;
-          this.cookieService.setUserAcceptedCookieCategories(data.accepted); // Save the accepted cookie categories allowed by the user
-
-          // Check if the user has accepted the analytics category since the user has changed their consent
+          this.cookieService.setUserAcceptedCookieCategories(data.accepted);
           this.checkCookieConsentState();
         });
 
-        // Check cookie consent state on load
         this.checkCookieConsentState();
-      };
-
-      script.onerror = () => {
+      },
+      onError: () => {
         console.error('Failed to load CookieYes script');
-      };
-    } else {
-      console.error('CookieYes URL not set in environment');
-    }
+      },
+    });
   }
 
-  checkCookieConsentState(): void {
+  /**
+   * Checks the user's cookie consent state and enables/disables analytics accordingly
+   * @returns void
+   */
+  private checkCookieConsentState(): void {
     if (this.hasUserConsentedToAnalytics()) {
       this.consentGiven();
     } else {
@@ -261,21 +299,43 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  hasUserConsentedToAnalytics(): boolean {
+  /**
+   * Checks if the user has consented to analytics cookies
+   * @returns boolean - true if consented, false otherwise
+   */
+  private hasUserConsentedToAnalytics(): boolean {
     return this.cookieService.isCookieCategoryAccepted('analytics');
   }
 
-  consentGiven(): void {
-    this.enableGoogleAnalyticsTracking();
-    this.loadLogRocket();
+  /**
+   * Handles actions to take when user gives cookie consent
+   * @returns void
+   */
+  private consentGiven(): void {
+    if (environment?.env_name !== 'local') {
+      this.enableGoogleAnalyticsTracking();
+      this.loadLogRocket();
+    }
   }
 
-  consentDenied(): void {
+  /**
+   * Handles actions to take when user denies cookie consent
+   * @returns void
+   */
+  private consentDenied(): void {
     this.disableGoogleAnalyticsTracking();
     this.disableLogRocket();
   }
 
+  /**
+   * Enables Google Analytics tracking
+   * @returns void
+   */
   private enableGoogleAnalyticsTracking(): void {
+    if (!environment?.gaMeasurementId) {
+      return;
+    }
+
     // Remove the disable flag
     (globalThis as unknown as { [key: string]: boolean })[
       `ga-disable-${environment.gaMeasurementId}`
@@ -301,7 +361,15 @@ export class AppComponent implements OnInit, OnDestroy {
     this.sendPageView(globalWithGtag.location.pathname);
   }
 
+  /**
+   * Disables Google Analytics tracking
+   * @returns void
+   */
   private disableGoogleAnalyticsTracking(): void {
+    if (!environment?.gaMeasurementId) {
+      return;
+    }
+
     // Set the global flag to true so GA stops sending events.
     (globalThis as unknown as { [key: string]: boolean })[
       `ga-disable-${environment.gaMeasurementId}`
@@ -315,48 +383,60 @@ export class AppComponent implements OnInit, OnDestroy {
     ]);
   }
 
+  /**
+   * Loads the Google Analytics script with tracking disabled by default
+   * @returns void
+   */
   private loadGoogleAnalyticsWithTrackingDisabled(): void {
+    if (!environment?.gaMeasurementId) {
+      console.warn('Google Analytics measurement ID not set; skipping load.');
+      return;
+    }
+
     // Disable GA tracking by default using the global flag
     (globalThis as unknown as { [key: string]: boolean })[
       `ga-disable-${environment.gaMeasurementId}`
     ] = true;
 
-    // Create the GA script element
-    const script = document.createElement('script');
-    script.id = 'ga-script';
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${environment.gaMeasurementId}`;
-    document.head.appendChild(script);
+    this.scriptLoader.loadScript({
+      id: 'ga-script',
+      src: `https://www.googletagmanager.com/gtag/js?id=${environment?.gaMeasurementId}`,
+      async: true,
+      attributes: { crossorigin: 'anonymous' },
+      onLoad: () => {
+        (globalThis as { dataLayer?: unknown[] })['dataLayer'] =
+          (globalThis as { dataLayer?: unknown[] })['dataLayer'] || [];
 
-    // Once the script loads, initialize GA without sending page views automatically
-    script.onload = () => {
-      (globalThis as { dataLayer?: unknown[] })['dataLayer'] =
-        (globalThis as { dataLayer?: unknown[] })['dataLayer'] || [];
+        (globalThis as unknown as { gtag?: (...args: unknown[]) => void })[
+          'gtag'
+        ] = function (...args: unknown[]) {
+          if ((globalThis as { dataLayer?: unknown[] })['dataLayer']) {
+            (globalThis as { dataLayer?: unknown[] })['dataLayer']?.push(args);
+          }
+        };
 
-      // Assign gtag to the global object so it's globally accessible.
-      (globalThis as unknown as { gtag?: (...args: unknown[]) => void })[
-        'gtag'
-      ] = function (...args: unknown[]) {
-        if ((globalThis as { dataLayer?: unknown[] })['dataLayer']) {
-          (globalThis as { dataLayer?: unknown[] })['dataLayer']?.push(args);
-        }
-      };
-
-      // Initialize GA, disabling automatic page view tracking.
-      (globalThis as unknown as { gtag: (...args: unknown[]) => void }).gtag(
-        'js',
-        new Date(),
-      );
-      (globalThis as unknown as { gtag: (...args: unknown[]) => void }).gtag(
-        'config',
-        environment.gaMeasurementId,
-        {
-          send_page_view: false,
-        },
-      );
-    };
+        (globalThis as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+          'js',
+          new Date(),
+        );
+        (globalThis as unknown as { gtag: (...args: unknown[]) => void }).gtag(
+          'config',
+          environment.gaMeasurementId,
+          {
+            send_page_view: false,
+          },
+        );
+      },
+      onError: () => {
+        console.error('Failed to load Google Analytics script');
+      },
+    });
   }
 
+  /**
+   * Sends a page view event to Google Analytics
+   * @param url The URL of the page to send a view event for
+   */
   private sendPageView(url: string): void {
     const gtag = (
       globalThis as {
@@ -374,7 +454,12 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  extractAcceptedConsentCookieCategories(cookieValues: string[]) {
+  /**
+   * Extracts accepted cookie categories from CookieYes consent cookie values
+   * @param cookieValues Array of cookie consent values
+   * @returns void
+   */
+  private extractAcceptedConsentCookieCategories(cookieValues: string[]) {
     const acceptedCategories: string[] = [];
 
     for (const cookieValue of cookieValues) {
@@ -392,11 +477,37 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadLogRocket(): void {
+  /**
+   * Loads LogRocket if user has consented to analytics cookies
+   * @returns void
+   */
+  private loadLogRocket(): void {
     this.logRocketService.init();
   }
 
-  disableLogRocket(): void {
+  /**
+   * Disables LogRocket tracking
+   * @returns void
+   */
+  private disableLogRocket(): void {
     this.logRocketService.shutdown();
+  }
+
+  /**
+   * Resets the scroll position to the top on navigation end events
+   * @returns void
+   * @remarks
+   * This method subscribes to the Router's navigation end events and sets the scroll position to the top of the page.
+   * It uses a timeout to ensure the scroll occurs after the navigation has fully completed.
+   * This fix was added to scroll to top on route change to avoid retaining scroll position from previous route.
+   */
+  private resetScrollPositionOnNavigationEnd() {
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => {
+        setTimeout(() => {
+          globalThis.scrollTo?.({ top: 0, behavior: 'auto' });
+        }, 0);
+      });
   }
 }

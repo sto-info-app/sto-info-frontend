@@ -5,6 +5,11 @@
 import packageJson from '../../package.json';
 import { Environment } from './models/environment.model';
 
+declare const __production__: boolean;
+declare const __allowDebugging__: boolean;
+declare const __minsBeforeLogoutExpiryToShowWarning__: number;
+declare const __minsBeforeLogoutExpiryToRefreshToken__: number;
+
 export const environment: Environment = {
   production: __production__,
   version: packageJson.version,
@@ -19,4 +24,5 @@ export const environment: Environment = {
     __minsBeforeLogoutExpiryToRefreshToken__,
   cookieYesUrl: '__cookieYesUrl__',
   gaMeasurementId: '__gaMeasurementId__',
+  logRocketAppId: '__logRocketAppId__',
 };
