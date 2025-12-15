@@ -5,10 +5,15 @@
 import packageJson from '../../package.json';
 import { Environment } from './models/environment.model';
 
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// These declarations silence type checking; build step replaces the tokens.
 declare const __production__: boolean;
 declare const __allowDebugging__: boolean;
 declare const __minsBeforeLogoutExpiryToShowWarning__: number;
 declare const __minsBeforeLogoutExpiryToRefreshToken__: number;
+/* eslint-enable @typescript-eslint/no-unused-vars */
+/* eslint-enable @typescript-eslint/naming-convention */
 
 export const environment: Environment = {
   production: __production__,
