@@ -6,5 +6,11 @@
     "/assets/favicons/*.png": {
       "Cache-Control": "public, max-age=604800"
     }
-  }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
