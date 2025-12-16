@@ -6,6 +6,7 @@
   font-weight: 400;
   src: url(Antonio-Regular.woff2) format('woff2'),
     url(Antonio-Regular.woff) format('woff');
+  font-display: swap;
 }
 
 @font-face {
@@ -13,6 +14,7 @@
   font-weight: 700;
   src: url(Antonio-Bold.woff2) format('woff2'),
     url(Antonio-Bold.woff) format('woff');
+  font-display: swap;
 }
 
 // Keyframe animations
