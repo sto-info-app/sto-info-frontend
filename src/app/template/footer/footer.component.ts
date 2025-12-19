@@ -12,7 +12,6 @@ import { environment } from 'src/environments/environment';
 })
 export class FooterComponent {
   appTitle = environment.appTitle;
-  appVersion = environment.version;
   currentYear: number;
   appRoutes = APP_ROUTES;
 
