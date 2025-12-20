@@ -46,6 +46,7 @@ describe('AppComponent', () => {
         },
       ]
     >;
+    shouldDisableAnalytics: jest.Mock<boolean, []>;
   };
 
   let routerEvents$: Subject<unknown>;
@@ -92,6 +93,7 @@ describe('AppComponent', () => {
 
     mockScriptLoaderService = {
       loadScript: jest.fn(),
+      shouldDisableAnalytics: jest.fn().mockReturnValue(false),
     };
 
     mockDialog = {
@@ -461,8 +463,9 @@ describe('AppComponent', () => {
     errorSpy.mockRestore();
   });
 
-  it('should check cookie consent state and call consentGiven when analytics accepted', () => {
+  it('should check cookie consent state and call consentGiven when analytics accepted and analytics not disabled', () => {
     mockCookieService.isCookieCategoryAccepted.mockReturnValue(true);
+    mockScriptLoaderService.shouldDisableAnalytics.mockReturnValue(false);
 
     const consentGivenSpy = jest.spyOn(
       component as unknown as { consentGiven: () => void },
@@ -477,12 +480,14 @@ describe('AppComponent', () => {
       component as unknown as { checkCookieConsentState: () => void }
     ).checkCookieConsentState();
 
+    expect(mockScriptLoaderService.shouldDisableAnalytics).toHaveBeenCalled();
     expect(consentGivenSpy).toHaveBeenCalled();
     expect(consentDeniedSpy).not.toHaveBeenCalled();
   });
 
   it('should check cookie consent state and call consentDenied when analytics not accepted', () => {
     mockCookieService.isCookieCategoryAccepted.mockReturnValue(false);
+    mockScriptLoaderService.shouldDisableAnalytics.mockReturnValue(false);
 
     const consentGivenSpy = jest.spyOn(
       component as unknown as { consentGiven: () => void },
@@ -497,6 +502,29 @@ describe('AppComponent', () => {
       component as unknown as { checkCookieConsentState: () => void }
     ).checkCookieConsentState();
 
+    expect(mockScriptLoaderService.shouldDisableAnalytics).toHaveBeenCalled();
+    expect(consentDeniedSpy).toHaveBeenCalled();
+    expect(consentGivenSpy).not.toHaveBeenCalled();
+  });
+
+  it('should call consentDenied when analytics is disabled by the script loader even if user has consented', () => {
+    mockCookieService.isCookieCategoryAccepted.mockReturnValue(true);
+    mockScriptLoaderService.shouldDisableAnalytics.mockReturnValue(true);
+
+    const consentGivenSpy = jest.spyOn(
+      component as unknown as { consentGiven: () => void },
+      'consentGiven',
+    );
+    const consentDeniedSpy = jest.spyOn(
+      component as unknown as { consentDenied: () => void },
+      'consentDenied',
+    );
+
+    (
+      component as unknown as { checkCookieConsentState: () => void }
+    ).checkCookieConsentState();
+
+    expect(mockScriptLoaderService.shouldDisableAnalytics).toHaveBeenCalled();
     expect(consentDeniedSpy).toHaveBeenCalled();
     expect(consentGivenSpy).not.toHaveBeenCalled();
   });
