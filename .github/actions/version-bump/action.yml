@@ -18,25 +18,29 @@ runs:
 
     - name: Get Current Protected Branch Name
       id: current_branch_name
-      run: echo "::set-output name=branch::${{ github.ref }}"
+      run: |
+        echo "branch=${{ github.ref }}" >> "$GITHUB_OUTPUT"
       shell: bash
 
     - id: old-app-ver
       name: Get Old App Version
-      run: echo "::set-output name=version::$(jq -r '.version' package.json)"
+      run: |
+        echo "version=$(jq -r '.version' package.json)" >> "$GITHUB_OUTPUT"
       shell: bash
 
     - name: Set Date and Time
       id: set_datetime
-      run: echo "::set-output name=datetime::$(date +'%Y%m%d%H%M%S')"
+      run: |
+        echo "datetime=$(date +'%Y%m%d%H%M%S')" >> "$GITHUB_OUTPUT"
       shell: bash
 
     - name: Create Temp Branch for Version Bump
       id: create_temp_branch
       run: |
         branch_name="version-bump/${{ steps.current_branch_name.outputs.branch }}-${{ steps.set_datetime.outputs.datetime }}"
-        git checkout -b $branch_name
-        git push origin $branch_name
+        git checkout -b "$branch_name"
+        git push origin "$branch_name"
+        echo "branch_name=$branch_name" >> "$GITHUB_OUTPUT"
       shell: bash
 
     - name: Bump Version
