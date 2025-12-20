@@ -23,6 +23,7 @@ export class MainContentComponent {
   @Input() isLoggedIn!: boolean;
 
   appTitle = environment.appTitle;
+  appVersion = environment.version;
   appRoutes = APP_ROUTES;
   themePanel6RandomText: string;
 

@@ -292,7 +292,10 @@ export class AppComponent implements OnInit, OnDestroy {
    * @returns void
    */
   private checkCookieConsentState(): void {
-    if (this.hasUserConsentedToAnalytics()) {
+    if (
+      !this.scriptLoader.shouldDisableAnalytics() &&
+      this.hasUserConsentedToAnalytics()
+    ) {
       this.consentGiven();
     } else {
       this.consentDenied();
