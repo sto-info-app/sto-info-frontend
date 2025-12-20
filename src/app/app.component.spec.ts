@@ -679,15 +679,15 @@ describe('AppComponent', () => {
   it('should log error when sending page view without gtag', () => {
     (globalThis as unknown as { gtag: undefined }).gtag = undefined;
 
-    const errorSpy = jest
-      .spyOn(console, 'error')
+    const infoSpy = jest
+      .spyOn(console, 'info')
       .mockImplementation(() => undefined);
 
     (
       component as unknown as { sendPageView: (url: string) => void }
     ).sendPageView('/no-gtag');
 
-    expect(errorSpy).toHaveBeenCalledWith('Google Analytics not available');
+    expect(infoSpy).toHaveBeenCalledWith('Google Analytics not available');
   });
 
   it('should load and disable LogRocket tracking appropriately', () => {

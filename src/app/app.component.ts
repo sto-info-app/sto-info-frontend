@@ -460,7 +460,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (typeof gtag === 'function') {
       gtag('event', 'page_view', { page_path: url });
     } else {
-      console.error('Google Analytics not available');
+      console.info('Google Analytics not available');
     }
   }
 
