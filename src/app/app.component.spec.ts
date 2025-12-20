@@ -64,6 +64,40 @@ describe('AppComponent', () => {
     >;
   };
 
+  const runWithPatchedTimer = <K extends 'setTimeout' | 'setInterval'>(
+    key: K,
+    testBody: () => void,
+  ) => {
+    const original = globalThis[key];
+
+    (globalThis as unknown as Record<string, unknown>)[key] = ((
+      handler: TimerHandler,
+    ) => {
+      if (typeof handler === 'function') {
+        handler();
+      }
+      return 1;
+    }) as unknown;
+
+    try {
+      testBody();
+    } finally {
+      (globalThis as unknown as Record<string, unknown>)[key] = original;
+    }
+  };
+
+  const mockScriptLoadSuccess = () => {
+    mockScriptLoaderService.loadScript.mockImplementation(options => {
+      options.onLoad?.();
+    });
+  };
+
+  const mockScriptLoadFailure = () => {
+    mockScriptLoaderService.loadScript.mockImplementation(options => {
+      options.onError?.();
+    });
+  };
+
   beforeEach(async () => {
     routerEvents$ = new Subject<unknown>();
 
@@ -136,25 +170,15 @@ describe('AppComponent', () => {
   });
 
   it('should update login state and start countdown when authenticated', () => {
-    const originalSetInterval = globalThis.setInterval;
-    (globalThis as unknown as { setInterval: typeof setInterval }).setInterval =
-      ((handler: TimerHandler) => {
-        if (typeof handler === 'function') {
-          handler();
-        }
-        return 1 as unknown as ReturnType<typeof setInterval>;
-      }) as unknown as typeof setInterval;
+    runWithPatchedTimer('setInterval', () => {
+      mockAuthService.getSecondsUntilLoginSessionExpiry.mockReturnValue(0);
 
-    mockAuthService.getSecondsUntilLoginSessionExpiry.mockReturnValue(0);
+      component.ngOnInit();
+      mockAuthService.isAuthenticated$.next(true);
 
-    component.ngOnInit();
-    mockAuthService.isAuthenticated$.next(true);
-
-    expect(component.isLoggedIn).toBe(true);
-    expect(mockAuthService.performLogout).toHaveBeenCalled();
-
-    (globalThis as unknown as { setInterval: typeof setInterval }).setInterval =
-      originalSetInterval;
+      expect(component.isLoggedIn).toBe(true);
+      expect(mockAuthService.performLogout).toHaveBeenCalled();
+    });
   });
 
   it('should stop countdown when authentication state changes to not logged in', () => {
@@ -245,16 +269,6 @@ describe('AppComponent', () => {
   });
 
   it('should trigger refresh session warning on warning announcement', () => {
-    const originalSetTimeout = globalThis.setTimeout;
-    (globalThis as unknown as { setTimeout: typeof setTimeout }).setTimeout = ((
-      handler: TimerHandler,
-    ) => {
-      if (typeof handler === 'function') {
-        handler();
-      }
-      return 1 as unknown as ReturnType<typeof setTimeout>;
-    }) as unknown as typeof setTimeout;
-
     const openRefreshSessionDialogSpy = jest.spyOn(
       component as unknown as { openRefreshSessionDialog: () => void },
       'openRefreshSessionDialog',
@@ -269,13 +283,12 @@ describe('AppComponent', () => {
       component as unknown as { subscribeToWarningAnnouncements: () => void }
     ).subscribeToWarningAnnouncements();
 
-    const futureTime = Date.now() + 1000;
-    mockAuthService.warningAnnounced$.next(futureTime);
+    runWithPatchedTimer('setTimeout', () => {
+      const futureTime = Date.now() + 1000;
+      mockAuthService.warningAnnounced$.next(futureTime);
 
-    expect(openRefreshSessionDialogSpy).toHaveBeenCalled();
-
-    (globalThis as unknown as { setTimeout: typeof setTimeout }).setTimeout =
-      originalSetTimeout;
+      expect(openRefreshSessionDialogSpy).toHaveBeenCalled();
+    });
   });
 
   it('should handle expiry announcements by logging out when expired', () => {
@@ -318,20 +331,8 @@ describe('AppComponent', () => {
   });
 
   it('should reset scroll position on navigation end', () => {
-    const originalSetTimeout = globalThis.setTimeout;
     const scrollToSpy = jest.fn();
-
-    (
-      globalThis as unknown as {
-        setTimeout: typeof setTimeout;
-        scrollTo?: typeof scrollTo;
-      }
-    ).setTimeout = ((handler: TimerHandler) => {
-      if (typeof handler === 'function') {
-        handler();
-      }
-      return 1 as unknown as ReturnType<typeof setTimeout>;
-    }) as unknown as typeof setTimeout;
+    const originalScrollTo = globalThis.scrollTo;
 
     (globalThis as { scrollTo?: typeof scrollTo }).scrollTo =
       scrollToSpy as unknown as typeof scrollTo;
@@ -340,13 +341,14 @@ describe('AppComponent', () => {
       component as unknown as { resetScrollPositionOnNavigationEnd: () => void }
     ).resetScrollPositionOnNavigationEnd();
 
-    const event = new NavigationEnd(1, '/old', '/new');
-    routerEvents$.next(event);
+    runWithPatchedTimer('setTimeout', () => {
+      const event = new NavigationEnd(1, '/old', '/new');
+      routerEvents$.next(event);
 
-    expect(scrollToSpy).toHaveBeenCalledWith({ top: 0, behavior: 'auto' });
+      expect(scrollToSpy).toHaveBeenCalledWith({ top: 0, behavior: 'auto' });
+    });
 
-    (globalThis as unknown as { setTimeout: typeof setTimeout }).setTimeout =
-      originalSetTimeout;
+    (globalThis as { scrollTo?: typeof scrollTo }).scrollTo = originalScrollTo;
   });
 
   it('should track page views on navigation when environment is not local', () => {
@@ -450,9 +452,7 @@ describe('AppComponent', () => {
 
     mockCookieService.readCookie.mockReturnValue(undefined);
 
-    mockScriptLoaderService.loadScript.mockImplementation(options => {
-      options.onError?.();
-    });
+    mockScriptLoadFailure();
 
     (
       component as unknown as { loadCookieYesScript: () => void }
@@ -547,9 +547,7 @@ describe('AppComponent', () => {
   it('should call Google Analytics and LogRocket when consent is given in non-local env', () => {
     (environment as { env_name: string }).env_name = 'test';
 
-    mockScriptLoaderService.loadScript.mockImplementation(options => {
-      options.onLoad?.();
-    });
+    mockScriptLoadSuccess();
 
     (component as unknown as { consentGiven: () => void }).consentGiven();
 
@@ -635,9 +633,7 @@ describe('AppComponent', () => {
       'enableGoogleAnalyticsTracking',
     );
 
-    mockScriptLoaderService.loadScript.mockImplementation(options => {
-      options.onLoad?.();
-    });
+    mockScriptLoadSuccess();
 
     (
       component as unknown as {
@@ -652,9 +648,7 @@ describe('AppComponent', () => {
   it('should log an error when Google Analytics script fails to load', () => {
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    mockScriptLoaderService.loadScript.mockImplementation(options => {
-      options.onError?.();
-    });
+    mockScriptLoadFailure();
 
     (
       component as unknown as {
