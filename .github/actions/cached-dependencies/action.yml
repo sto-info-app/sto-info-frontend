@@ -32,6 +32,12 @@ runs:
         restore-keys: |
           ${{ runner.os }}-node${{ inputs.node-version }}-node-modules-
 
+    - name: Debug npm registry (temporary)
+      shell: bash
+      run: |
+        npm config get @fortawesome:registry || true
+        npm ping --registry=https://npm.fontawesome.com/ || true
+
     - name: Install dependencies
       shell: bash
       run: npm ci
