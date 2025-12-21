@@ -18,7 +18,11 @@ runs:
     - name: Configure npm auth
       shell: bash
       run: |
-        echo "//npm.fontawesome.com/:_authToken=${{ inputs.fontawesome-npm-auth-token }}" > ~/.npmrc
+        cat << 'EOF' > ~/.npmrc
+        @fortawesome:registry=https://npm.fontawesome.com/
+        //npm.fontawesome.com/:_authToken=${{ inputs.fontawesome-npm-auth-token }}
+        always-auth=true
+        EOF
 
     - name: Restore node_modules cache
       if: inputs.use-cache == 'true'
