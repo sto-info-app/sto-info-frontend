@@ -1,5 +1,5 @@
 name: 'Setup Project'
-description: 'Checkout code, set up Node.js, and set up .npmrc file'
+description: 'Set up Node.js, and set up .npmrc file'
 
 inputs:
   node-version:
@@ -15,17 +15,12 @@ runs:
   using: 'composite'
 
   steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
-        cache: 'npm'
-        cache-dependency-path: '**/package-lock.json'
 
     - name: Setup .npmrc file to publish to npm
       run: |
-        echo "//npm.fontawesome.com/:_authToken=${{ inputs.fontawesome-npm-auth-token }}" > .npmrc
+        echo "//npm.fontawesome.com/:_authToken=${{ inputs.fontawesome-npm-auth-token }}" > ~/.npmrc
       shell: bash

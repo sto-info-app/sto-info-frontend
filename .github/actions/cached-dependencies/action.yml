@@ -6,6 +6,9 @@ inputs:
     description: 'Set to false to skip restoring/saving the node_modules cache.'
     required: false
     default: 'true'
+  node-version:
+    description: 'Node.js version (for cache key purposes).'
+    required: true
 
 runs:
   using: 'composite'
@@ -16,7 +19,7 @@ runs:
       uses: actions/cache/restore@v4
       with:
         path: node_modules
-        key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+        key: ${{ runner.os }}-node${{ inputs['node-version'] }}-node-modules-${{ hashFiles('package-lock.json') }}
 
     - name: Install dependencies
       if: inputs.use-cache != 'true' || steps.node-modules-cache.outputs.cache-hit != 'true'
@@ -28,7 +31,7 @@ runs:
       uses: actions/cache/save@v4
       with:
         path: node_modules
-        key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+        key: ${{ runner.os }}-node${{ inputs['node-version'] }}-node-modules-${{ hashFiles('package-lock.json') }}
 
     - name: Using cached node_modules
       if: inputs.use-cache == 'true' && steps.node-modules-cache.outputs.cache-hit == 'true'
