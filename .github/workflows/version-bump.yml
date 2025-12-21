@@ -31,13 +31,28 @@ jobs:
             echo "is_fork=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Capture and validate PR branch info
+        if: steps.fork-check.outputs.is_fork != 'true'
+        id: pr-info
+        env:
+          PR_BRANCH_RAW: ${{ github.event.pull_request.head.ref }}
+          PR_REPO_RAW: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          # Allow only safe branch characters
+          if ! [[ "$PR_BRANCH_RAW" =~ ^[A-Za-z0-9._/-]+$ ]]; then
+            echo "Unsafe branch name detected. Aborting."
+            exit 1
+          fi
+
+          echo "pr_branch=$PR_BRANCH_RAW" >> "$GITHUB_OUTPUT"
+          echo "pr_repo=$PR_REPO_RAW" >> "$GITHUB_OUTPUT"
+
       - name: Checkout PR head branch
         if: steps.fork-check.outputs.is_fork != 'true'
         uses: actions/checkout@v4
         with:
-          # Checkout the PR source branch, not the base branch
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ steps.pr-info.outputs.pr_branch }}
+          repository: ${{ steps.pr-info.outputs.pr_repo }}
           fetch-depth: 0
 
       - name: Set up Node
@@ -60,12 +75,12 @@ jobs:
 
       - name: Bump patch version (commit to PR branch)
         if: steps.fork-check.outputs.is_fork != 'true'
+        env:
+          PR_BRANCH: ${{ steps.pr-info.outputs.pr_branch }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Bump package.json/package-lock.json and create a commit.
-          # No git tag is created.
           npm version patch --no-git-tag-version -m "chore: bump version to %s"
 
-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          git push origin "HEAD:$PR_BRANCH"
