@@ -57,6 +57,7 @@ jobs:
         with:
           use-cache: ${{ steps.cache-toggle.outputs.use_cache }}
           node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Create test environment.ts
         run: |

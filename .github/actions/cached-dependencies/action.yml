@@ -1,44 +1,38 @@
-name: 'Get & Cache Dependencies'
-description: 'Get the dependencies (via npm) and cache them.'
+name: Cached dependencies
+description: Restore and cache node_modules, then install dependencies
 
 inputs:
   use-cache:
-    description: 'Set to false to skip restoring/saving the node_modules cache.'
-    required: false
-    default: 'true'
+    description: 'Whether to use node_modules cache'
+    required: true
   node-version:
-    description: 'Node.js version (for cache key purposes).'
+    description: 'Node.js major version (used in cache key)'
+    required: true
+  fontawesome-npm-auth-token:
+    description: 'Font Awesome npm auth token'
     required: true
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
+    - name: Configure npm auth
+      shell: bash
+      run: |
+        echo "//npm.fontawesome.com/:_authToken=${{ inputs.fontawesome-npm-auth-token }}" > ~/.npmrc
+
     - name: Restore node_modules cache
       if: inputs.use-cache == 'true'
-      id: node-modules-cache
-      uses: actions/cache/restore@v4
+      uses: actions/cache@v4
       with:
         path: node_modules
-        key: ${{ runner.os }}-node${{ inputs['node-version'] }}-node-modules-${{ hashFiles('package-lock.json') }}
+        key: ${{ runner.os }}-node${{ inputs.node-version }}-node-modules-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node${{ inputs.node-version }}-node-modules-
 
     - name: Install dependencies
-      if: inputs.use-cache != 'true' || steps.node-modules-cache.outputs.cache-hit != 'true'
+      shell: bash
       run: npm ci
-      shell: bash
 
-    - name: Save node_modules cache
-      if: inputs.use-cache == 'true' && steps.node-modules-cache.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-node${{ inputs['node-version'] }}-node-modules-${{ hashFiles('package-lock.json') }}
-
-    - name: Using cached node_modules
-      if: inputs.use-cache == 'true' && steps.node-modules-cache.outputs.cache-hit == 'true'
-      run: echo "Using cached node_modules"
+    - name: Clean up npm auth
       shell: bash
-
-    - name: Skipping cache usage
-      if: inputs.use-cache != 'true'
-      run: echo "Cache disabled via use-cache input"
-      shell: bash
+      run: rm -f ~/.npmrc
