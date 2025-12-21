@@ -1,123 +1,71 @@
-name: Version Bump
+name: Version bump on PR open (to development branch)
 
 on:
-  workflow_dispatch:
-
-  # Check pull request (issue) comment when it is created
-  issue_comment:
-    types: [created]
+  pull_request:
+    branches: [development]
+    types: [opened, reopened]
 
 permissions:
-  contents: write # needed for checkout and pushing the bumped version
-  issues: read
+  contents: write
+  pull-requests: read
 
 env:
-  BUMP_VERSION_COMMIT_MSG: 'Bump version number'
+  NODE_VERSION: 24
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
-  prerequisite_check:
-    # Run for manual dispatch, or when commenting on a PR
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.issue.pull_request }}
+  bump_version:
     runs-on: ubuntu-latest
-    environment: development
-
-    outputs:
-      skip: ${{ steps.commit.outputs.skip }}
-      branch: ${{ steps.get_branch_name.outputs.branch }}
-      do_version_bump: ${{ steps.check_comment.outputs.do_version_bump }}
 
     steps:
-      - name: Checkout Repo
+      - name: Detect fork PR
+        id: fork-check
+        run: |
+          if [ "${{ github.event.pull_request.head.repo.fork }}" = "true" ]; then
+            echo "is_fork=true" >> "$GITHUB_OUTPUT"
+            echo "PR is from a fork. Skipping version bump."
+          else
+            echo "is_fork=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout PR head branch
+        if: steps.fork-check.outputs.is_fork != 'true'
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          # Checkout the PR source branch, not the base branch
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 0
 
-      - id: commit
-        name: Get commit message
-        run: |
-          COMMIT_MESSAGE=$(git log --no-merges -1 --format=%B)
-          echo "Current commit message: $COMMIT_MESSAGE"
-          if [[ "$COMMIT_MESSAGE" == "${{ env.BUMP_VERSION_COMMIT_MSG }}"* ]]; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-          fi
-        shell: bash
-
-      - id: get_branch_name
-        name: Get branch name
-        run: |
-          if [ -n "${GITHUB_HEAD_REF}" ]; then
-            branch_name=${GITHUB_HEAD_REF}
-          else
-            branch_name=${GITHUB_REF#refs/heads/}
-          fi
-          echo "Branch name is: $branch_name"
-          echo "branch=$branch_name" >> "$GITHUB_OUTPUT"
-        shell: bash
-
-      - id: check_comment
-        name: Check for /bump_version comment
-        run: |
-          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
-            echo "Manual dispatch detected; forcing version bump."
-            echo "do_version_bump=true" >> "$GITHUB_OUTPUT"
-          else
-            COMMENT_BODY="${{ github.event.comment.body }}"
-            if [[ "$COMMENT_BODY" == *"/bump_version"* ]]; then
-              echo "do_version_bump=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "do_version_bump=false" >> "$GITHUB_OUTPUT"
-            fi
-          fi
-        shell: bash
-
-      - name: Print Outputs
-        run: |
-          echo "skip: ${{ steps.commit.outputs.skip }}"
-          echo "branch: ${{ steps.get_branch_name.outputs.branch }}"
-          echo "do_version_bump: ${{ steps.check_comment.outputs.do_version_bump }}"
-
-  version_bump:
-    needs: prerequisite_check
-    if: needs.prerequisite_check.outputs.skip != 'true' && needs.prerequisite_check.outputs.branch != '' && needs.prerequisite_check.outputs.do_version_bump == 'true'
-    runs-on: ubuntu-latest
-    environment: development
-
-    steps:
-      - name: Set Environment Variables
-        run: |
-          echo "BRANCH_NAME=${{ needs.prerequisite_check.outputs.branch }}" >> $GITHUB_ENV
-          echo "SKIP=${{ needs.prerequisite_check.outputs.skip }}" >> $GITHUB_ENV
-          echo "DO_VERSION_BUMP=${{ needs.prerequisite_check.outputs.do_version_bump }}" >> $GITHUB_ENV
-
-      - name: Print Environment Variables
-        run: printenv
-
-      - name: Checkout Repo
-        uses: actions/checkout@v4
+      - name: Set up Node
+        if: steps.fork-check.outputs.is_fork != 'true'
+        uses: actions/setup-node@v4
         with:
-          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          fetch-depth: 0 # Fetch all history to enable proper commit and push
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: Debug Branch Name
+      - name: Stop if already bumped on this branch
+        if: steps.fork-check.outputs.is_fork != 'true'
         run: |
-          echo "Branch to push to: $BRANCH_NAME"
+          if git log -50 --pretty=%s | grep -qi "^chore: bump version to"; then
+            echo "Version bump commit already present. Exiting."
+            exit 0
+          fi
 
-      - name: Get Old App Version
-        id: old-app-ver
-        run: |
-          version=$(node -p "require('./package.json').version")
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "Old version: $version"
+      - name: Show current version
+        if: steps.fork-check.outputs.is_fork != 'true'
+        run: node -p "require('./package.json').version"
 
-      - name: Bump Version and Push Changes Back
+      - name: Bump patch version (commit to PR branch)
+        if: steps.fork-check.outputs.is_fork != 'true'
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "github-actions@github.com"
-          npm version patch -m "${{ env.BUMP_VERSION_COMMIT_MSG }} from ${{ steps.old-app-ver.outputs.version }} to %s"
-          echo "Pushing to branch: $BRANCH_NAME"
-          git push origin HEAD:"$BRANCH_NAME"
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Bump package.json/package-lock.json and create a commit.
+          # No git tag is created.
+          npm version patch --no-git-tag-version -m "chore: bump version to %s"
+
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
