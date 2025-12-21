@@ -21,7 +21,6 @@ runs:
         cat << 'EOF' > ~/.npmrc
         @fortawesome:registry=https://npm.fontawesome.com/
         //npm.fontawesome.com/:_authToken=${{ inputs.fontawesome-npm-auth-token }}
-        always-auth=true
         EOF
 
     - name: Restore node_modules cache
