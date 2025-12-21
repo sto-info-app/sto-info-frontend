@@ -18,10 +18,10 @@ runs:
     - name: Configure npm auth (project .npmrc)
       shell: bash
       run: |
-        cat > .npmrc <<'EOF'
-        @fortawesome:registry=https://npm.fontawesome.com/
-        //npm.fontawesome.com/:_authToken=${{ inputs.fontawesome-npm-auth-token }}
-        EOF
+        printf "%s\n" \
+          "@fortawesome:registry=https://npm.fontawesome.com/" \
+          "//npm.fontawesome.com/:_authToken=${{ inputs.fontawesome-npm-auth-token }}" \
+          > .npmrc
 
     - name: Restore node_modules cache
       if: inputs.use-cache == 'true'
@@ -31,12 +31,6 @@ runs:
         key: ${{ runner.os }}-node${{ inputs.node-version }}-node-modules-${{ hashFiles('package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node${{ inputs.node-version }}-node-modules-
-
-    - name: Debug npm registry (temporary)
-      shell: bash
-      run: |
-        npm config get @fortawesome:registry || true
-        npm ping --registry=https://npm.fontawesome.com/ || true
 
     - name: Install dependencies
       shell: bash
