@@ -15,10 +15,10 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Configure npm auth
+    - name: Configure npm auth (project .npmrc)
       shell: bash
       run: |
-        cat << 'EOF' > ~/.npmrc
+        cat > .npmrc <<'EOF'
         @fortawesome:registry=https://npm.fontawesome.com/
         //npm.fontawesome.com/:_authToken=${{ inputs.fontawesome-npm-auth-token }}
         EOF
@@ -44,4 +44,4 @@ runs:
 
     - name: Clean up npm auth
       shell: bash
-      run: rm -f ~/.npmrc
+      run: rm -f .npmrc
