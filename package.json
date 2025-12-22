@@ -45,7 +45,7 @@
     "@fortawesome/pro-regular-svg-icons": "^7.1.0",
     "@fortawesome/pro-solid-svg-icons": "^7.1.0",
     "@fortawesome/pro-thin-svg-icons": "^7.1.0",
-    "glob": "^11.1.0",
+    "glob": "^13.0.0",
     "http-proxy-middleware": "^3.0.5",
     "js-base64": "^3.7.7",
     "logrocket": "^11.0.0",
