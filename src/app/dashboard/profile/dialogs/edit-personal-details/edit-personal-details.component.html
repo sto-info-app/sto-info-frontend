@@ -5,172 +5,202 @@
     </div>
 
     @if (data?.user) {
-    <div class="lcars-edit-personal-details-message">
-      @if (isSubmitting) {
-      <app-loading-bar loadingText="Saving"></app-loading-bar>
-      }
-      <div class="edit-personal-details-container">
-        <form
-          [formGroup]="editPersonalDetailsForm"
-          (ngSubmit)="onSaveClick()"
-          class="form"
-          novalidate>
-          <div class="flexbox">
-            <div class="col edit-personal-details-main-col">
-              <div class="form-container">
-                <div class="form-group">
-                  <label for="firstName">First Name:</label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    formControlName="firstName" />
-                  @if ( (editPersonalDetailsForm.controls['firstName'].invalid
-                  && editPersonalDetailsForm.controls['firstName'] .touched) ||
-                  (isSubmitting &&
-                  editPersonalDetailsForm.controls['firstName'].errors) ) {
-                  <div
-                    class="invalid-feedback"
-                    id="firstName-invalid-feedback">
-                    @if
-                    (editPersonalDetailsForm.controls['firstName'].errors?.['required'])
-                    {
-                    <div class="helper-error-text">
-                      {{ errorTextFirstNameRequired }}
-                    </div>
-                    } @if
-                    (editPersonalDetailsForm.controls['firstName'].errors?.['maxlength'])
-                    {
-                    <div class="helper-error-text">
-                      {{ errorTextNamesMaxLength }}
-                    </div>
+      <div class="lcars-edit-personal-details-message">
+        @if (isSubmitting) {
+          <app-loading-bar loadingText="Saving"></app-loading-bar>
+        }
+        <div class="edit-personal-details-container">
+          <form
+            [formGroup]="editPersonalDetailsForm"
+            (ngSubmit)="onSaveClick()"
+            class="form"
+            novalidate>
+            <div class="flexbox">
+              <div class="col edit-personal-details-main-col">
+                <div class="form-container">
+                  <div class="form-group">
+                    <label for="firstName">First Name:</label>
+                    <input
+                      type="text"
+                      id="firstName"
+                      formControlName="firstName" />
+                    @if (
+                      (editPersonalDetailsForm.controls['firstName'].invalid &&
+                        editPersonalDetailsForm.controls['firstName']
+                          .touched) ||
+                      (isSubmitting &&
+                        editPersonalDetailsForm.controls['firstName'].errors)
+                    ) {
+                      <div
+                        class="invalid-feedback"
+                        id="firstName-invalid-feedback">
+                        @if (
+                          editPersonalDetailsForm.controls['firstName']
+                            .errors?.['required']
+                        ) {
+                          <div class="helper-error-text">
+                            {{ errorTextFirstNameRequired }}
+                          </div>
+                        }
+                        @if (
+                          editPersonalDetailsForm.controls['firstName']
+                            .errors?.['maxlength']
+                        ) {
+                          <div class="helper-error-text">
+                            {{ errorTextNamesMaxLength }}
+                          </div>
+                        }
+                      </div>
                     }
                   </div>
-                  }
-                </div>
-                <div class="form-group">
-                  <label for="lastName">Last Name:</label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    formControlName="lastName" />
-                  @if ( (editPersonalDetailsForm.controls['lastName'].invalid &&
-                  editPersonalDetailsForm.controls['lastName'].touched) ||
-                  (isSubmitting &&
-                  editPersonalDetailsForm.controls['lastName'].errors) ) {
-                  <div
-                    class="invalid-feedback"
-                    id="lastName-invalid-feedback">
-                    @if
-                    (editPersonalDetailsForm.controls['lastName'].errors?.['required'])
-                    {
-                    <div class="helper-error-text">
-                      {{ errorTextLastNameRequired }}
-                    </div>
-                    } @if
-                    (editPersonalDetailsForm.controls['lastName'].errors?.['maxlength'])
-                    {
-                    <div class="helper-error-text">
-                      {{ errorTextNamesMaxLength }}
-                    </div>
+                  <div class="form-group">
+                    <label for="lastName">Last Name:</label>
+                    <input
+                      type="text"
+                      id="lastName"
+                      formControlName="lastName" />
+                    @if (
+                      (editPersonalDetailsForm.controls['lastName'].invalid &&
+                        editPersonalDetailsForm.controls['lastName'].touched) ||
+                      (isSubmitting &&
+                        editPersonalDetailsForm.controls['lastName'].errors)
+                    ) {
+                      <div
+                        class="invalid-feedback"
+                        id="lastName-invalid-feedback">
+                        @if (
+                          editPersonalDetailsForm.controls['lastName'].errors?.[
+                            'required'
+                          ]
+                        ) {
+                          <div class="helper-error-text">
+                            {{ errorTextLastNameRequired }}
+                          </div>
+                        }
+                        @if (
+                          editPersonalDetailsForm.controls['lastName'].errors?.[
+                            'maxlength'
+                          ]
+                        ) {
+                          <div class="helper-error-text">
+                            {{ errorTextNamesMaxLength }}
+                          </div>
+                        }
+                      </div>
                     }
                   </div>
-                  }
-                </div>
-                <div class="form-group">
-                  <label for="username">Username:</label>
-                  <input
-                    type="text"
-                    id="username"
-                    formControlName="username" />
-                  @if ( (editPersonalDetailsForm.controls['username'].invalid &&
-                  editPersonalDetailsForm.controls['username'].touched) ||
-                  (isSubmitting &&
-                  editPersonalDetailsForm.controls['username'].errors) ) {
-                  <div
-                    class="invalid-feedback"
-                    id="username-invalid-feedback">
-                    @if
-                    (editPersonalDetailsForm.controls['username'].errors?.['required'])
-                    {
-                    <div class="helper-error-text">
-                      {{ errorTextUsernameRequired }}
-                    </div>
-                    } @if
-                    (editPersonalDetailsForm.controls['username'].errors?.['minlength'])
-                    {
-                    <div class="helper-error-text">
-                      {{ errorTextUsernameMinLength }}
-                    </div>
-                    } @if
-                    (editPersonalDetailsForm.controls['username'].errors?.['maxlength'])
-                    {
-                    <div class="helper-error-text">
-                      {{ errorTextUsernameMaxLength }}
-                    </div>
-                    } @if
-                    (editPersonalDetailsForm.controls['username'].errors?.['uniqueUsername'])
-                    {
-                    <div class="helper-error-text">
-                      {{ errorTextUsernameTaken }}
-                    </div>
-                    } @if
-                    (editPersonalDetailsForm.controls['username'].errors?.['pattern'])
-                    {
-                    <div class="helper-error-text">
-                      {{ errorTextUsernamePattern }}
-                    </div>
+                  <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input
+                      type="text"
+                      id="username"
+                      formControlName="username" />
+                    @if (
+                      (editPersonalDetailsForm.controls['username'].invalid &&
+                        editPersonalDetailsForm.controls['username'].touched) ||
+                      (isSubmitting &&
+                        editPersonalDetailsForm.controls['username'].errors)
+                    ) {
+                      <div
+                        class="invalid-feedback"
+                        id="username-invalid-feedback">
+                        @if (
+                          editPersonalDetailsForm.controls['username'].errors?.[
+                            'required'
+                          ]
+                        ) {
+                          <div class="helper-error-text">
+                            {{ errorTextUsernameRequired }}
+                          </div>
+                        }
+                        @if (
+                          editPersonalDetailsForm.controls['username'].errors?.[
+                            'minlength'
+                          ]
+                        ) {
+                          <div class="helper-error-text">
+                            {{ errorTextUsernameMinLength }}
+                          </div>
+                        }
+                        @if (
+                          editPersonalDetailsForm.controls['username'].errors?.[
+                            'maxlength'
+                          ]
+                        ) {
+                          <div class="helper-error-text">
+                            {{ errorTextUsernameMaxLength }}
+                          </div>
+                        }
+                        @if (
+                          editPersonalDetailsForm.controls['username'].errors?.[
+                            'uniqueUsername'
+                          ]
+                        ) {
+                          <div class="helper-error-text">
+                            {{ errorTextUsernameTaken }}
+                          </div>
+                        }
+                        @if (
+                          editPersonalDetailsForm.controls['username'].errors?.[
+                            'pattern'
+                          ]
+                        ) {
+                          <div class="helper-error-text">
+                            {{ errorTextUsernamePattern }}
+                          </div>
+                        }
+                      </div>
                     }
                   </div>
-                  }
                 </div>
               </div>
-            </div>
-            <div class="col edit-personal-details-side-col">
-              <div class="lcars-edit-personal-details-buttons">
-                <div
-                  class="buttons-container"
-                  mat-dialog-actions>
-                  <button
-                    type="submit"
-                    class="submit-button"
-                    mat-button
-                    [disabled]="
-                      !editPersonalDetailsForm.valid ||
-                      !editPersonalDetailsForm.dirty ||
-                      isSubmitting
-                    "
-                    [ngClass]="{ submitting: isSubmitting }"
-                    [@progressBarAnimation]="
-                      isSubmitting ? 'submitting' : 'idle'
-                    ">
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    class="red"
-                    mat-button
-                    mat-dialog-close
-                    (click)="onCloseClick()">
-                    Close
-                  </button>
+              <div class="col edit-personal-details-side-col">
+                <div class="lcars-edit-personal-details-buttons">
+                  <div
+                    class="buttons-container"
+                    mat-dialog-actions>
+                    <button
+                      type="submit"
+                      class="submit-button"
+                      mat-button
+                      [disabled]="
+                        !editPersonalDetailsForm.valid ||
+                        !editPersonalDetailsForm.dirty ||
+                        isSubmitting
+                      "
+                      [ngClass]="{ submitting: isSubmitting }"
+                      [@progressBarAnimation]="
+                        isSubmitting ? 'submitting' : 'idle'
+                      ">
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      class="red"
+                      mat-button
+                      mat-dialog-close
+                      (click)="onCloseClick()">
+                      Close
+                    </button>
+                  </div>
                 </div>
+                @if (errorMessage) {
+                  <app-lcars-error-message
+                    title="Transmission Error"
+                    [message]="errorMessage"></app-lcars-error-message>
+                }
               </div>
-              @if (errorMessage) {
-              <app-lcars-error-message
-                title="Transmission Error"
-                [message]="errorMessage"></app-lcars-error-message>
-              }
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
-    } @if (!data?.user) {
-    <div class="lcars-edit-personal-details-message">
-      <p class="error-message-text">
-        Connection to the Starfleet Personnel Database has failed!
-      </p>
-    </div>
+    }
+    @if (!data?.user) {
+      <div class="lcars-edit-personal-details-message">
+        <p class="error-message-text">
+          Connection to the Starfleet Personnel Database has failed!
+        </p>
+      </div>
     }
 
     <div class="lcars-bar">

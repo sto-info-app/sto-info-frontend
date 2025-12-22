@@ -5,9 +5,7 @@ import {
   MIN_CHARS_USERNAME,
 } from './forms.constants';
 
-export const EMAIL_PATTERN =
-  // eslint-disable-next-line no-useless-escape
-  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+export const EMAIL_PATTERN = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 export const USERNAME_PATTERN = new RegExp(
   `^[a-zA-Z0-9]{${MIN_CHARS_USERNAME},${MAX_CHARS_USERNAME}}$`,

@@ -5,17 +5,17 @@
     <fa-icon [icon]="['fas', 'hand-spock']"></fa-icon>
   </p>
   @if (!isLoggedIn) {
-  <div class="buttons">
-    <a
-      [routerLink]="getRouteLink(appRoutes.LOGIN)"
-      class="bluey"
-      >Login</a
-    >
-    <a
-      [routerLink]="getRouteLink(appRoutes.REGISTER)"
-      class="sunflower"
-      >Register</a
-    >
-  </div>
+    <div class="buttons">
+      <a
+        [routerLink]="getRouteLink(appRoutes.LOGIN)"
+        class="bluey"
+        >Login</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.REGISTER)"
+        class="sunflower"
+        >Register</a
+      >
+    </div>
   }
 </div>

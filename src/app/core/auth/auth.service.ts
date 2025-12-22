@@ -244,11 +244,14 @@ export class AuthService {
     this.clearRefreshTokenTimer();
 
     // Start a new timer to automatically remove the token when it expires
-    this.refreshTokenTimeout = setTimeout(() => {
-      if (this.getSecondsUntilLoginSessionExpiry() > 5) {
-        this.refreshToken().subscribe();
-      }
-    }, expiresIn * 1000 - 5000); // Refresh the token 5 seconds before it expires
+    this.refreshTokenTimeout = setTimeout(
+      () => {
+        if (this.getSecondsUntilLoginSessionExpiry() > 5) {
+          this.refreshToken().subscribe();
+        }
+      },
+      expiresIn * 1000 - 5000,
+    ); // Refresh the token 5 seconds before it expires
   }
 
   clearRefreshTokenTimer(): void {
