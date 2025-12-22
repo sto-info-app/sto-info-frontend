@@ -14,21 +14,23 @@
   <div class="left-frame-top">
     <div class="panel panel-1">
       @if (!isLoggedIn) {
-      <a
-        [routerLink]="getRouteLink(appRoutes.LOGIN)"
-        [routerLinkActiveOptions]="{ exact: true }"
-        routerLinkActive="peach"
-        id="header-login-link"
-        >Login</a
-      >
-      } @if (isLoggedIn) {
-      <a
-        (click)="logout()"
-        id="header-logout-link"
-        >Logout @if (appDebugging && autoLogoutCountdown > 0) {
-        <span> in {{ autoLogoutCountdown | timeFormat }}</span>
-        }</a
-      >
+        <a
+          [routerLink]="getRouteLink(appRoutes.LOGIN)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="peach"
+          id="header-login-link"
+          >Login</a
+        >
+      }
+      @if (isLoggedIn) {
+        <a
+          (click)="logout()"
+          id="header-logout-link"
+          >Logout
+          @if (appDebugging && autoLogoutCountdown > 0) {
+            <span> in {{ autoLogoutCountdown | timeFormat }}</span>
+          }
+        </a>
       }
     </div>
     <div
