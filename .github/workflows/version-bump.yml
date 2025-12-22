@@ -49,7 +49,7 @@ jobs:
 
       - name: Checkout PR head branch
         if: steps.fork-check.outputs.is_fork != 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ steps.pr-info.outputs.pr_branch }}
           repository: ${{ steps.pr-info.outputs.pr_repo }}
