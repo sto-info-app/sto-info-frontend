@@ -1,28 +1,33 @@
 name: Lint and Test
 
 on:
-  workflow_dispatch:
-
   pull_request:
-    types: [opened, synchronize, edited, reopened]
     branches:
-      - 'master'
-      - 'development'
+      - development
       - 'epic/*'
+      - production
+    types: [opened, synchronize, reopened, ready_for_review]
+
+  push:
+    branches:
+      - development
+      - production
+
+permissions:
+  contents: read
+  actions: read
 
 env:
-  NODE_VERSION: 20
+  NODE_VERSION: 24
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  prerequisite_check:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check if NODE_VERSION exists
-        run: echo "NODE_VERSION=${{ env.NODE_VERSION }}"
-        if: ${{ env.NODE_VERSION != '' }}
-
   lint_and_test:
+    # Don't run for draft PRs (but still run for pushes)
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
 
     steps:
@@ -51,6 +56,8 @@ jobs:
         uses: ./.github/actions/cached-dependencies
         with:
           use-cache: ${{ steps.cache-toggle.outputs.use_cache }}
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Create test environment.ts
         run: |
@@ -81,3 +88,7 @@ jobs:
 
       - name: Run Tests
         run: npm run test
+
+      - name: Build (push only)
+        if: github.event_name == 'push'
+        run: npm run build
