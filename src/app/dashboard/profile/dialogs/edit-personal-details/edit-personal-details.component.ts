@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit, Optional, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -80,6 +80,9 @@ export class EditPersonalDetailsComponent implements OnInit {
     user: User;
   } | null;
 
+  /**
+   * Angular lifecycle hook that initialises the form with the current user details.
+   */
   ngOnInit() {
     this.editPersonalDetailsForm = this.formBuilder.nonNullable.group({
       firstName: [
@@ -102,6 +105,10 @@ export class EditPersonalDetailsComponent implements OnInit {
     });
   }
 
+  /**
+   * Submits the edited personal details to the dashboard service and handles response states.
+   * Sets field-level validation errors when the username is not unique.
+   */
   onSaveClick() {
     this.isSubmitting = true;
 
@@ -146,10 +153,21 @@ export class EditPersonalDetailsComponent implements OnInit {
       });
   }
 
+  /**
+   * Resolves a named application route to a router link string.
+   *
+   * @param route Application route key.
+   * @returns Router link string for the given route.
+   */
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
   }
 
+  /**
+   * Displays an error message for a limited duration before clearing it.
+   *
+   * @param message Error message text to display.
+   */
   displayErrorMessage(message: string) {
     this.errorMessage = message;
 
@@ -158,10 +176,16 @@ export class EditPersonalDetailsComponent implements OnInit {
     }, this.showErrorMilliseconds);
   }
 
+  /**
+   * Clears the currently displayed error message.
+   */
   resetErrorMessage(): void {
-    this.errorMessage = ''; // Reset error message
+    this.errorMessage = '';
   }
 
+  /**
+   * Closes the dialog without returning any specific result.
+   */
   onCloseClick(): void {
     this.dialogRef?.close();
   }
