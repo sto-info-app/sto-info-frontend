@@ -4,7 +4,8 @@
 @font-face {
   font-family: 'Antonio';
   font-weight: 400;
-  src: url(Antonio-Regular.woff2) format('woff2'),
+  src:
+    url(Antonio-Regular.woff2) format('woff2'),
     url(Antonio-Regular.woff) format('woff');
   font-display: swap;
 }
@@ -12,7 +13,8 @@
 @font-face {
   font-family: 'Antonio';
   font-weight: 700;
-  src: url(Antonio-Bold.woff2) format('woff2'),
+  src:
+    url(Antonio-Bold.woff2) format('woff2'),
     url(Antonio-Bold.woff) format('woff');
   font-display: swap;
 }
@@ -162,10 +164,10 @@
   --mat-dialog-container-color: #0d0d0d;
   --mat-dialog-subhead-color: rgba(255, 255, 255, 0.87);
   --mat-dialog-supporting-text-color: rgba(255, 255, 255, 0.6);
-  --mat-dialog-subhead-font: 'Antonio', 'Helvetica', 'Arial Narrow',
-    'Avenir Next Condensed', sans-serif !important;
-  --mat-dialog-supporting-text-font: 'Antonio', 'Helvetica', 'Arial Narrow',
-    'Avenir Next Condensed', sans-serif !important;
+  --mat-dialog-subhead-font:
+    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif !important;
+  --mat-dialog-supporting-text-font:
+    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif !important;
 }
 
 .mdc-menu-surface {
@@ -247,8 +249,8 @@
 .mat-typography .mat-headline-5,
 .mat-typography h1,
 h1 {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed',
-    sans-serif;
+  font-family:
+    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   margin: 30px 0;
   font-weight: 400;
   text-transform: uppercase;
@@ -263,8 +265,8 @@ h1 {
 .mat-typography .mat-headline-6,
 .mat-typography h2,
 h2 {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed',
-    sans-serif;
+  font-family:
+    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   margin: 30px 0 10px 0;
   font-weight: 400;
   text-transform: uppercase;
@@ -279,8 +281,8 @@ h2 {
 .mat-typography .mat-subtitle-1,
 .mat-typography h3,
 h3 {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed',
-    sans-serif;
+  font-family:
+    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   margin: 30px 0 10px 0;
   font-weight: 400;
   text-transform: uppercase;
@@ -295,8 +297,8 @@ h3 {
 .mat-typography .mat-body-1,
 .mat-typography h4,
 h4 {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed',
-    sans-serif;
+  font-family:
+    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
   line-height: 1.2;
@@ -307,8 +309,8 @@ h4 {
 .mat-typography .mat-h5,
 .mat-typography h5,
 h5 {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed',
-    sans-serif;
+  font-family:
+    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
   text-decoration: underline;
@@ -320,8 +322,8 @@ h5 {
 .mat-typography .mat-h6,
 .mat-typography h6,
 h6 {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed',
-    sans-serif;
+  font-family:
+    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   font-weight: 400;
   text-transform: none;
   text-decoration: underline;
@@ -335,8 +337,8 @@ h6 {
 .mat-typography .mat-body-2 p,
 .mat-typography p,
 p {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed',
-    sans-serif;
+  font-family:
+    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   margin-block: 1rem;
   margin: 0 0 15px;
   line-height: 1.3;
@@ -354,13 +356,10 @@ p {
 *,
 :after,
 :before {
-  box-sizing: border-box;
-}
-
-* {
   margin: 0;
   padding: 0;
   font: inherit;
+  box-sizing: border-box;
 }
 
 img {
@@ -388,8 +387,8 @@ body {
   padding: 5px 0;
   background-color: #0d0d0d;
   font-size: 100%;
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed',
-    sans-serif;
+  font-family:
+    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
   font-weight: 400;
   line-height: 1.5;
   color: #79d;
@@ -1420,7 +1419,7 @@ button:hover {
 .lcars-text-bar {
   display: flex;
   position: relative;
-  margin: 32px 0;
+  margin: 32px 0 8px 0;
   overflow: visible;
   border-radius: 14px;
   height: 32px;
@@ -1430,7 +1429,7 @@ button:hover {
 }
 
 .lcars-text-bar.small-lcars-bar-gap {
-  margin: 10px 0;
+  margin-top: 10px;
 }
 
 .the-end {
@@ -1661,8 +1660,8 @@ body,
 .mat-typography,
 .mat-button,
 .mat-card {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed',
-    sans-serif !important;
+  font-family:
+    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif !important;
   line-height: 1.5;
   font-size: 1rem;
 }

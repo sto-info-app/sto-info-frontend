@@ -2,12 +2,12 @@
   <app-loading-bar></app-loading-bar>
 }
 
-<div id="personnel-record-container">
-  <div
-    id="personnel-record-main-column"
-    class="col">
-    <h1>Personnel Record</h1>
-    @if (user) {
+@if (user) {
+  <div id="personnel-record-container">
+    <div
+      id="personnel-record-main-column"
+      class="col">
+      <h1>Personnel Record</h1>
       <div id="personnel-record-main-content">
         <div class="lcars-text-bar personnel-lcars-text-bar">
           <span>Personal Details</span>
@@ -63,9 +63,7 @@
           </p>
         </div>
       </div>
-    }
-  </div>
-  @if (user) {
+    </div>
     <div
       id="personnel-record-side-column"
       class="col">
@@ -84,7 +82,7 @@
           @if (!user.profile?.profilePicture300) {
             <img
               src="{{ unavailablePhotoSrc }}"
-              alt="Photo unavailable"
+              alt="Unavailable"
               class="border"
               loading="lazy" />
           }
@@ -114,5 +112,5 @@
         >
       </div>
     </div>
-  }
-</div>
+  </div>
+}

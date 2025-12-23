@@ -12,6 +12,7 @@
           <div class="col profile-pic-main-col">
             <input
               type="file"
+              title="Select a new profile picture"
               (change)="onFileChangeEvent($event)"
               accept="image/jpg, image/jpeg, image/png"
               [disabled]="isSubmitting"
@@ -70,6 +71,23 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    }
+    @if (!data?.user) {
+      <div class="lcars-profile-pic-message">
+        <p class="error-message-text">
+          Connection to the Starfleet Personnel Database has failed!
+        </p>
+        <div class="buttons">
+          <button
+            type="button"
+            class="sky"
+            mat-button
+            mat-dialog-close
+            (click)="onCloseClick()">
+            Close
+          </button>
         </div>
       </div>
     }
