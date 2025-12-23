@@ -51,7 +51,9 @@ export class ProfilePicComponent {
   private readonly dialogRef = inject(
     MatDialogRef<EditPersonalDetailsComponent>,
   );
-  @Optional() @Inject(MAT_DIALOG_DATA) public data!: { user: User } | null;
+  public data = inject(MAT_DIALOG_DATA, { optional: true }) as {
+    user: User;
+  } | null;
 
   onFileChangeEvent(event: Event): void {
     this.uploadedInvalidImageType = false;
