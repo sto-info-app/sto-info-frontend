@@ -46,10 +46,19 @@ export class ProfileComponent implements OnInit {
   private readonly dateTimeHelper = inject(DatesTimeHelperService);
   private readonly dialog = inject(MatDialog);
 
+  /**
+   * Angular lifecycle hook that initialises the component by loading user data.
+   */
   ngOnInit() {
     this.getUserData();
   }
 
+  /**
+   * Retrieves the current user data from the dashboard service and updates the local state.
+   * Logs the user out if the account is disabled.
+   *
+   * @returns The most recently cached user data, if available.
+   */
   getUserData(): User | undefined {
     this.dashboardService.getUser().subscribe(user => {
       if (user.isAccountDisabled) this.authService.performLogout();
@@ -59,15 +68,31 @@ export class ProfileComponent implements OnInit {
     return this.user;
   }
 
+  /**
+   * Resolves a navigation route into a router link string.
+   *
+   * @param route Application route key.
+   * @returns A router link string for the given route.
+   */
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
   }
 
+  /**
+   * Returns a human-readable description of the time since the user's last login.
+   *
+   * @returns A formatted relative time string, or 'Never' if no login is recorded.
+   */
   timeSinceLastLogin(): string {
     if (!this.user?.lastLoginAt) return 'Never';
     return this.dateTimeHelper.timeSince(this.user.lastLoginAt) || 'Just now';
   }
 
+  /**
+   * Returns a human-readable description of the time since the user's last password reset.
+   *
+   * @returns A formatted relative time string, or 'Never' if no reset is recorded.
+   */
   timeSinceLastPasswordReset(): string {
     if (!this.user?.lastPasswordReset) return 'Never';
     return (
@@ -75,6 +100,11 @@ export class ProfileComponent implements OnInit {
     );
   }
 
+  /**
+   * Returns a human-readable description of the time since the user's profile was last updated.
+   *
+   * @returns A formatted relative time string, or 'Unknown' if the timestamp is not available.
+   */
   timeSinceLastUpdated(): string {
     if (!this.user?.profile?.updatedAt) return 'Unknown';
     return (
@@ -82,6 +112,11 @@ export class ProfileComponent implements OnInit {
     );
   }
 
+  /**
+   * Returns a human-readable description of the time since the user's profile was created.
+   *
+   * @returns A formatted relative time string, or 'Unknown' if the timestamp is not available.
+   */
   timeSinceUserCreated(): string {
     if (!this.user?.profile?.createdAt) return 'Unknown';
     return (
@@ -89,6 +124,10 @@ export class ProfileComponent implements OnInit {
     );
   }
 
+  /**
+   * Opens the edit personal details dialog and refreshes user data when it closes.
+   * Also refreshes the authentication token if the user chooses to stay logged in.
+   */
   editUserProfile(): void {
     // Open the edit personal details dialog
     this.editProfileDialogRef = this.dialog.open(EditPersonalDetailsComponent, {
@@ -113,6 +152,10 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  /**
+   * Opens the profile picture edit dialog and refreshes user data when it closes.
+   * Also refreshes the authentication token if the user chooses to stay logged in.
+   */
   editUserProfilePhoto(): void {
     // Open the edit personal details dialog
     this.profilePicDialogRef = this.dialog.open(ProfilePicComponent, {
@@ -137,6 +180,11 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  /**
+   * Fallback handler for profile image load errors that substitutes a default image.
+   *
+   * @param event Image error event emitted by the browser.
+   */
   onProfileImageError(event: Event): void {
     (event.target as HTMLImageElement).src = this.unavailablePhotoSrc;
   }

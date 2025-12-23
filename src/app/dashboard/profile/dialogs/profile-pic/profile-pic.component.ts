@@ -1,4 +1,4 @@
-import { Component, Inject, Optional, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -51,8 +51,15 @@ export class ProfilePicComponent {
   private readonly dialogRef = inject(
     MatDialogRef<EditPersonalDetailsComponent>,
   );
-  @Optional() @Inject(MAT_DIALOG_DATA) public data!: { user: User } | null;
+  public data = inject(MAT_DIALOG_DATA, { optional: true }) as {
+    user: User;
+  } | null;
 
+  /**
+   * Handles file input change events and validates that the selected file is an image.
+   *
+   * @param event File input change event.
+   */
   onFileChangeEvent(event: Event): void {
     this.uploadedInvalidImageType = false;
     this.resetErrorMessage();
@@ -79,6 +86,11 @@ export class ProfilePicComponent {
     }
   }
 
+  /**
+   * Updates the cropped image preview and backing Blob when the cropper emits a new crop.
+   *
+   * @param event Cropper output event containing the cropped image data.
+   */
   onImageCropped(event: ImageCroppedEvent) {
     if (!event.blob) {
       console.error('Cropped image is not defined correctly');
@@ -97,6 +109,10 @@ export class ProfilePicComponent {
     };
   }
 
+  /**
+   * Validates the cropped image and uploads it as the user's profile picture.
+   * Displays appropriate error messages for invalid state or server errors.
+   */
   onUploadImageClick() {
     if (!this.croppedImageBlob) {
       console.error('No image to upload');
@@ -159,6 +175,9 @@ export class ProfilePicComponent {
     }
   }
 
+  /**
+   * Resets cropper state when the image fails to load and shows an appropriate error message.
+   */
   loadImageFailed() {
     this.cropper = null;
     this.croppedImage = '';
@@ -172,6 +191,11 @@ export class ProfilePicComponent {
     }
   }
 
+  /**
+   * Displays an error message for a limited duration before clearing it.
+   *
+   * @param message Error message text to display.
+   */
   displayErrorMessage(message: string) {
     this.errorMessage = message;
 
@@ -180,10 +204,16 @@ export class ProfilePicComponent {
     }, this.showErrorMilliseconds);
   }
 
+  /**
+   * Clears the currently displayed error message.
+   */
   resetErrorMessage(): void {
-    this.errorMessage = ''; // Reset error message
+    this.errorMessage = '';
   }
 
+  /**
+   * Closes the profile picture dialog without returning any specific result.
+   */
   onCloseClick(): void {
     this.dialogRef?.close();
   }

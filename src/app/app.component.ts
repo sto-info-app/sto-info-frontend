@@ -26,6 +26,7 @@ import { MainContentComponent } from './template/main-content/main-content.compo
 export class AppComponent implements OnInit, OnDestroy {
   private readonly cookieYesScriptId = 'cookieyes';
   private readonly cookieYesCookieName = 'cookieyes-consent';
+  private googleAnalyticsLoaded = false;
 
   isLoggedIn = false;
   autoLogoutCountdown = 0;
@@ -67,7 +68,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscribeTExpiryAnnouncements();
 
     if (environment?.env_name !== 'local') {
-      this.loadGoogleAnalyticsWithTrackingDisabled();
       this.loadCookieYesScript();
       this.trackPageViewsOnNavigation();
     }
@@ -292,7 +292,10 @@ export class AppComponent implements OnInit, OnDestroy {
    * @returns void
    */
   private checkCookieConsentState(): void {
-    if (this.hasUserConsentedToAnalytics()) {
+    if (
+      !this.scriptLoader.shouldDisableAnalytics() &&
+      this.hasUserConsentedToAnalytics()
+    ) {
       this.consentGiven();
     } else {
       this.consentDenied();
@@ -313,7 +316,11 @@ export class AppComponent implements OnInit, OnDestroy {
    */
   private consentGiven(): void {
     if (environment?.env_name !== 'local') {
-      this.enableGoogleAnalyticsTracking();
+      if (this.googleAnalyticsLoaded) {
+        this.enableGoogleAnalyticsTracking();
+      } else {
+        this.loadGoogleAnalyticsWithTrackingDisabled();
+      }
       this.loadLogRocket();
     }
   }
@@ -384,7 +391,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Loads the Google Analytics script with tracking disabled by default
+   * Loads the Google Analytics script and enables tracking once loaded
    * @returns void
    */
   private loadGoogleAnalyticsWithTrackingDisabled(): void {
@@ -393,10 +400,11 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Disable GA tracking by default using the global flag
-    (globalThis as unknown as { [key: string]: boolean })[
-      `ga-disable-${environment.gaMeasurementId}`
-    ] = true;
+    if (this.googleAnalyticsLoaded) {
+      return;
+    }
+
+    this.googleAnalyticsLoaded = true;
 
     this.scriptLoader.loadScript({
       id: 'ga-script',
@@ -426,6 +434,8 @@ export class AppComponent implements OnInit, OnDestroy {
             send_page_view: false,
           },
         );
+
+        this.enableGoogleAnalyticsTracking();
       },
       onError: () => {
         console.error('Failed to load Google Analytics script');
@@ -450,7 +460,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (typeof gtag === 'function') {
       gtag('event', 'page_view', { page_path: url });
     } else {
-      console.error('Google Analytics not available');
+      console.info('Google Analytics not available');
     }
   }
 

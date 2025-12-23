@@ -2,35 +2,40 @@
   <div class="col">
     <h1>Verify Email</h1>
     @if (!message) {
-    <div class="result-message-container">
-      <p>Welcome! We're glad you registered with us. You're almost there!</p>
-      <p>
-        Click the button below to complete the process and gain full access to
-        our service.
-      </p>
-      <button
-        (click)="verifyEmail()"
-        class="submit-button gold blink"
-        id="verify-btn">
-        Verify Email
-      </button>
-    </div>
-    } @if (message) {
-    <div class="result-message-container">
-      @switch (messageType) { @case (MessageType.Error) {
-      <app-lcars-error-message
-        title="Verification Status"
-        [message]="message"></app-lcars-error-message>
-      } @case (MessageType.Success) {
-      <app-lcars-success-message
-        title="Verification Status"
-        [message]="message"></app-lcars-success-message>
-      } @case (MessageType.Info) {
-      <app-lcars-information-message
-        title="Verification Status"
-        [message]="message"></app-lcars-information-message>
-      } }
-    </div>
+      <div class="result-message-container">
+        <p>Welcome! We're glad you registered with us. You're almost there!</p>
+        <p>
+          Click the button below to complete the process and gain full access to
+          our service.
+        </p>
+        <button
+          (click)="verifyEmail()"
+          class="submit-button gold blink"
+          id="verify-btn">
+          Verify Email
+        </button>
+      </div>
+    }
+    @if (message) {
+      <div class="result-message-container">
+        @switch (messageType) {
+          @case (MessageType.Error) {
+            <app-lcars-error-message
+              title="Verification Status"
+              [message]="message"></app-lcars-error-message>
+          }
+          @case (MessageType.Success) {
+            <app-lcars-success-message
+              title="Verification Status"
+              [message]="message"></app-lcars-success-message>
+          }
+          @case (MessageType.Info) {
+            <app-lcars-information-message
+              title="Verification Status"
+              [message]="message"></app-lcars-information-message>
+          }
+        }
+      </div>
     }
   </div>
   <div class="col right">
@@ -47,15 +52,15 @@
       </div>
 
       @if (showResendVerificationEmailButton) {
-      <div class="lcars-retry-verify-link-container">
-        <div class="buttons">
-          <a
-            (click)="resendVerificationEmail()"
-            class="full-width-btn-link"
-            >Resend Verification Email</a
-          >
+        <div class="lcars-retry-verify-link-container">
+          <div class="buttons">
+            <a
+              (click)="resendVerificationEmail()"
+              class="full-width-btn-link"
+              >Resend Verification Email</a
+            >
+          </div>
         </div>
-      </div>
       }
     </div>
   </div>

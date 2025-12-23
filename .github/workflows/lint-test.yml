@@ -1,33 +1,88 @@
 name: Lint and Test
 
 on:
-  workflow_dispatch:
-
   pull_request:
-    types: [opened, synchronize, edited, reopened]
     branches:
-      - 'master'
-      - 'development'
+      - development
       - 'epic/*'
+      - production
+    types: [opened, synchronize, reopened, ready_for_review]
+
+  push:
+    branches:
+      - development
+      - production
+
+permissions:
+  contents: read
+  actions: read
 
 env:
-  NODE_VERSION: 20
+  NODE_VERSION: 24
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  prerequisite_check:
+  dependabot_note:
+    if: github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
 
     steps:
-      - name: Check if NODE_VERSION exists
-        run: echo "NODE_VERSION=${{ env.NODE_VERSION }}"
-        if: ${{ env.NODE_VERSION != '' }}
+      - name: Comment on Dependabot PR (private dependencies)
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+
+            const commentLines = [
+              "### CI skipped for Dependabot PRs",
+              "",
+              "This repository uses **private npm dependencies** (e.g. Font Awesome Pro)",
+              "which require secrets that are **not available to Dependabot workflows**.",
+              "",
+              "For this reason:",
+              "- Dependency installation, linting, tests, and builds are intentionally **skipped**",
+              "- Dependency security is still covered by **Dependabot alerts**",
+              "- Full CI runs for all human-authored PRs",
+              "",
+              "This behaviour is intentional and documented to avoid misleading CI failures."
+            ];
+
+            const commentBody = commentLines.join("\n");
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number
+            });
+
+            const alreadyCommented = comments.some(c =>
+              c.body.includes("CI skipped for Dependabot PRs")
+            );
+
+            if (!alreadyCommented) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body: commentBody
+              });
+            }
 
   lint_and_test:
+    # Don't run for draft PRs (but still run for pushes)
+    if: github.actor != 'dependabot[bot]' && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup project
         uses: ./.github/actions/setup-project
@@ -51,6 +106,8 @@ jobs:
         uses: ./.github/actions/cached-dependencies
         with:
           use-cache: ${{ steps.cache-toggle.outputs.use_cache }}
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Create test environment.ts
         run: |
@@ -81,3 +138,7 @@ jobs:
 
       - name: Run Tests
         run: npm run test
+
+      - name: Build (push only)
+        if: github.event_name == 'push'
+        run: npm run build

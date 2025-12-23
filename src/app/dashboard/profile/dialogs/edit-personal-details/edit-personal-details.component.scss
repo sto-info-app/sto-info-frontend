@@ -41,6 +41,12 @@
     .lcars-edit-personal-details-message {
       padding: 0 40px;
       text-align: left;
+
+      .buttons {
+        margin-top: 0;
+        display: flex;
+        justify-content: flex-end;
+      }
     }
   }
 }

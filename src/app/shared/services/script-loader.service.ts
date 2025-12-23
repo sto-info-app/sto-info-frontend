@@ -1,17 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, Renderer2, RendererFactory2, inject } from '@angular/core';
-
-export interface ScriptLoadOptions {
-  id: string;
-  src?: string;
-  type?: string;
-  async?: boolean;
-  defer?: boolean;
-  textContent?: string;
-  attributes?: Record<string, string>;
-  onLoad?: () => void;
-  onError?: (event: Event) => void;
-}
+import { ScriptLoadOptions } from '../models/script-loader.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ScriptLoaderService {
@@ -24,6 +13,11 @@ export class ScriptLoaderService {
     this._documentRef = inject(DOCUMENT, { optional: true });
   }
 
+  /**
+   * Load a script dynamically into the document head
+   * @param options Script load options
+   * @returns The created script element or null if document is not available
+   */
   loadScript(options: ScriptLoadOptions): HTMLScriptElement | null {
     if (!this._documentRef?.head) {
       return null;
@@ -67,6 +61,11 @@ export class ScriptLoaderService {
     return script;
   }
 
+  /**
+   * Remove a previously loaded script by ID
+   * @param id The script element ID
+   * @returns void
+   */
   removeScript(id: string): void {
     if (!this._documentRef) {
       return;
@@ -74,5 +73,17 @@ export class ScriptLoaderService {
 
     const existingScript = this._documentRef.getElementById(id);
     existingScript?.remove();
+  }
+
+  /**
+   * Check for the presence of a cookie that indicates analytics should be disabled.
+   * @returns True when analytics should be disabled.
+   * @remarks This is based on the presence of a cookie named `stoi_no_analytics`
+   * with a value of `1` that is set via a Cloudflare worker for testing.
+   */
+  shouldDisableAnalytics(): boolean {
+    return document.cookie
+      .split('; ')
+      .some(c => c.startsWith('stoi_no_analytics=1'));
   }
 }

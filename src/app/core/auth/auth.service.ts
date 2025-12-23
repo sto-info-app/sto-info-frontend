@@ -43,9 +43,8 @@ export class AuthService {
     environment.minsBeforeLogoutExpiryToShowWarning || 5; // 5 minutes before expiration if not set in environment settings
   public autoLogoutWarningSecs = this.autoLogoutWarningMins * 60;
   public autoLogoutWarningMilliSecs = this.autoLogoutWarningSecs * 1000;
-  private autoLogoutTimeout: NodeJS.Timeout | null = null;
-
-  private refreshTokenTimeout: NodeJS.Timeout | null = null;
+  private autoLogoutTimeout: ReturnType<typeof setTimeout> | null = null;
+  private refreshTokenTimeout: ReturnType<typeof setTimeout> | null = null;
 
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
@@ -245,11 +244,14 @@ export class AuthService {
     this.clearRefreshTokenTimer();
 
     // Start a new timer to automatically remove the token when it expires
-    this.refreshTokenTimeout = setTimeout(() => {
-      if (this.getSecondsUntilLoginSessionExpiry() > 5) {
-        this.refreshToken().subscribe();
-      }
-    }, expiresIn * 1000 - 5000); // Refresh the token 5 seconds before it expires
+    this.refreshTokenTimeout = setTimeout(
+      () => {
+        if (this.getSecondsUntilLoginSessionExpiry() > 5) {
+          this.refreshToken().subscribe();
+        }
+      },
+      expiresIn * 1000 - 5000,
+    ); // Refresh the token 5 seconds before it expires
   }
 
   clearRefreshTokenTimer(): void {

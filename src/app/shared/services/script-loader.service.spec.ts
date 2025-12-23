@@ -28,7 +28,7 @@ describe('ScriptLoaderService', () => {
       querySelectorAll: jest
         .fn()
         .mockReturnValue([] as unknown as NodeListOf<Element>),
-    } as unknown as Document);
+    }) as unknown as Document;
 
   afterEach(() => {
     removeTestScripts(document);
