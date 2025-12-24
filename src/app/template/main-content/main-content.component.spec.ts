@@ -1,3 +1,8 @@
+import { HttpResponse } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
@@ -11,6 +16,8 @@ import { MainContentComponent } from './main-content.component';
 describe('MainContentComponent', () => {
   let component: MainContentComponent;
   let fixture: ComponentFixture<MainContentComponent>;
+
+  let httpTestingController: HttpTestingController;
 
   let mockRoutingService: { getLink: jest.Mock<string, [string]> };
   let mockGeneralThemeService: {
@@ -31,6 +38,7 @@ describe('MainContentComponent', () => {
     TestBed.configureTestingModule({
       imports: [MainContentComponent],
       providers: [
+        provideHttpClientTesting(),
         {
           provide: ActivatedRoute,
           useValue: {
@@ -43,9 +51,21 @@ describe('MainContentComponent', () => {
       ],
     });
 
+    httpTestingController = TestBed.inject(HttpTestingController);
+
     fixture = TestBed.createComponent(MainContentComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+
+    const req = httpTestingController.expectOne(
+      `${environment.apiUrl}/version`,
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush('backend-version', { status: 200, statusText: 'OK' });
+  });
+
+  afterEach(() => {
+    httpTestingController.verify();
   });
 
   it('should create and initialise theme panel text from the theme service', () => {
@@ -56,10 +76,77 @@ describe('MainContentComponent', () => {
     expect(component.themePanel6RandomText).toBe('random-theme-text');
   });
 
-  it('should expose app title, version and routes from environment and constants', () => {
+  it('should expose app title, versions and routes from environment and constants', () => {
     expect(component.appTitle).toBe(environment.appTitle);
-    expect(component.appVersion).toBe(environment.version);
+    expect(component.frontendAppVersion).toBe(environment.version || '');
     expect(component.appRoutes).toBe(APP_ROUTES);
+  });
+
+  it('should fall back to empty frontend version when environment.version is falsy', () => {
+    const originalVersion: string = environment.version;
+    environment.version = '';
+
+    const localFixture: ComponentFixture<MainContentComponent> =
+      TestBed.createComponent(MainContentComponent);
+    const localComponent: MainContentComponent = localFixture.componentInstance;
+
+    localFixture.detectChanges();
+
+    try {
+      const req = httpTestingController.expectOne(
+        `${environment.apiUrl}/version`,
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush('ignored-version', { status: 200, statusText: 'OK' });
+
+      expect(localComponent.frontendAppVersion).toBe('');
+    } finally {
+      environment.version = originalVersion;
+    }
+  });
+
+  it('should fetch and expose the backend app version from the API', () => {
+    expect(component.backendAppVersion).toBe('backend-version');
+  });
+
+  it('should not update backend version when response status is not 200', () => {
+    type MainContentWithTestApi = {
+      // Access private method for targeted branch testing
+      updateBackendVersion(response: HttpResponse<string>): void;
+    };
+
+    const componentWithApi = component as unknown as MainContentWithTestApi;
+
+    component.backendAppVersion = '';
+
+    const response: HttpResponse<string> = new HttpResponse<string>({
+      status: 500,
+      body: 'ignored',
+    });
+
+    componentWithApi.updateBackendVersion(response);
+
+    expect(component.backendAppVersion).toBe('');
+  });
+
+  it('should not update backend version when response body is not a string', () => {
+    type MainContentWithTestApi = {
+      updateBackendVersion(response: HttpResponse<string>): void;
+    };
+
+    const componentWithApi = component as unknown as MainContentWithTestApi;
+
+    component.backendAppVersion = '';
+
+    const nonStringBody: unknown = undefined;
+    const response: HttpResponse<string> = new HttpResponse<string>({
+      status: 200,
+      body: nonStringBody as string,
+    });
+
+    componentWithApi.updateBackendVersion(response);
+
+    expect(component.backendAppVersion).toBe('');
   });
 
   it('should return a route link using the routing service', () => {

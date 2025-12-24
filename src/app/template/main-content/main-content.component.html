@@ -22,7 +22,17 @@
         </div>
       </div>
       <div id="footer-panel-container">
-        <div id="footer-panel">v{{ appVersion }}</div>
+        <div id="footer-panel">
+          @if (backendAppVersion) {
+            FV-{{ frontendAppVersion }}
+          }
+          @if (frontendAppVersion && backendAppVersion) {
+            <br />
+          }
+          @if (backendAppVersion) {
+            BV-{{ backendAppVersion }}
+          }
+        </div>
       </div>
     </footer>
   </div>
