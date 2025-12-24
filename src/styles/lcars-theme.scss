@@ -165,9 +165,9 @@
   --mat-dialog-subhead-color: rgba(255, 255, 255, 0.87);
   --mat-dialog-supporting-text-color: rgba(255, 255, 255, 0.6);
   --mat-dialog-subhead-font:
-    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif !important;
+    'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
   --mat-dialog-supporting-text-font:
-    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif !important;
+    'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
 }
 
 .mdc-menu-surface {
@@ -249,8 +249,7 @@
 .mat-typography .mat-headline-5,
 .mat-typography h1,
 h1 {
-  font-family:
-    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
   margin: 30px 0;
   font-weight: 400;
   text-transform: uppercase;
@@ -265,8 +264,7 @@ h1 {
 .mat-typography .mat-headline-6,
 .mat-typography h2,
 h2 {
-  font-family:
-    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
   margin: 30px 0 10px 0;
   font-weight: 400;
   text-transform: uppercase;
@@ -281,8 +279,7 @@ h2 {
 .mat-typography .mat-subtitle-1,
 .mat-typography h3,
 h3 {
-  font-family:
-    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
   margin: 30px 0 10px 0;
   font-weight: 400;
   text-transform: uppercase;
@@ -297,8 +294,7 @@ h3 {
 .mat-typography .mat-body-1,
 .mat-typography h4,
 h4 {
-  font-family:
-    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
   line-height: 1.2;
@@ -309,8 +305,7 @@ h4 {
 .mat-typography .mat-h5,
 .mat-typography h5,
 h5 {
-  font-family:
-    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
   text-decoration: underline;
@@ -322,8 +317,7 @@ h5 {
 .mat-typography .mat-h6,
 .mat-typography h6,
 h6 {
-  font-family:
-    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
   font-weight: 400;
   text-transform: none;
   text-decoration: underline;
@@ -337,8 +331,7 @@ h6 {
 .mat-typography .mat-body-2 p,
 .mat-typography p,
 p {
-  font-family:
-    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
   margin-block: 1rem;
   margin: 0 0 15px;
   line-height: 1.3;
@@ -387,8 +380,7 @@ body {
   padding: 5px 0;
   background-color: #0d0d0d;
   font-size: 100%;
-  font-family:
-    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
   font-weight: 400;
   line-height: 1.5;
   color: #79d;
@@ -1576,15 +1568,16 @@ footer::after {
   width: 100%;
   height: 100px;
   margin: 15px 0;
-  padding: 55px 15px 0 1%;
+  padding: 40px 15px 0 1%;
   background-color: #6cf;
   border-top: 5px solid #0d0d0d;
   border-bottom: 5px solid #0d0d0d;
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   font-weight: 700;
   color: #0d0d0d;
   text-align: right;
   float: right;
+  text-transform: uppercase;
 }
 
 #footer-text > * {
@@ -1660,8 +1653,7 @@ body,
 .mat-typography,
 .mat-button,
 .mat-card {
-  font-family:
-    'Antonio', 'Helvetica', 'Arial Narrow', 'Avenir Next Condensed', sans-serif !important;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
   line-height: 1.5;
   font-size: 1rem;
 }

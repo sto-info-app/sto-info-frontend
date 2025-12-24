@@ -14,7 +14,7 @@ export class PageTitleService {
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
 
-  init() {
+  init(): void {
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),

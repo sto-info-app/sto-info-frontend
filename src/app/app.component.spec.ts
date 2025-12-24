@@ -10,6 +10,7 @@ import { CookieService } from './shared/services/cookie.service';
 import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
 import { ScriptLoaderService } from './shared/services/script-loader.service';
+import { SeoService } from './shared/services/seo.service';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -32,6 +33,7 @@ describe('AppComponent', () => {
 
   let mockLogRocketService: { init: jest.Mock; shutdown: jest.Mock };
   let mockPageTitleService: { init: jest.Mock };
+  let mockSeoService: { init: jest.Mock };
   let mockScriptLoaderService: {
     loadScript: jest.Mock<
       void,
@@ -125,6 +127,10 @@ describe('AppComponent', () => {
       init: jest.fn(),
     };
 
+    mockSeoService = {
+      init: jest.fn(),
+    };
+
     mockScriptLoaderService = {
       loadScript: jest.fn(),
       shouldDisableAnalytics: jest.fn().mockReturnValue(false),
@@ -146,6 +152,7 @@ describe('AppComponent', () => {
         { provide: CookieService, useValue: mockCookieService },
         { provide: LogRocketService, useValue: mockLogRocketService },
         { provide: PageTitleService, useValue: mockPageTitleService },
+        { provide: SeoService, useValue: mockSeoService },
         { provide: ScriptLoaderService, useValue: mockScriptLoaderService },
         { provide: MatDialog, useValue: mockDialog },
         { provide: 'API_URL', useValue: environment.apiUrl },
@@ -167,6 +174,7 @@ describe('AppComponent', () => {
   it('should create the app and initialise the page title service', () => {
     expect(component).toBeTruthy();
     expect(mockPageTitleService.init).toHaveBeenCalled();
+    expect(mockSeoService.init).toHaveBeenCalled();
   });
 
   it('should update login state and start countdown when authenticated', () => {

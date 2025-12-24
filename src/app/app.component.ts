@@ -14,6 +14,7 @@ import { CookieService } from './shared/services/cookie.service';
 import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
 import { ScriptLoaderService } from './shared/services/script-loader.service';
+import { SeoService } from './shared/services/seo.service';
 import { HeaderComponent } from './template/header/header.component';
 import { MainContentComponent } from './template/main-content/main-content.component';
 
@@ -41,6 +42,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly logRocketService = inject(LogRocketService);
   private readonly pageTitleService = inject(PageTitleService);
+  private readonly seoService = inject(SeoService);
   private readonly cookieService = inject(CookieService);
   private readonly zone = inject(NgZone);
   private readonly router = inject(Router);
@@ -53,6 +55,7 @@ export class AppComponent implements OnInit, OnDestroy {
    */
   constructor() {
     this.pageTitleService.init();
+    this.seoService.init();
     this.resetScrollPositionOnNavigationEnd();
     this.logout = this.logout.bind(this);
   }
