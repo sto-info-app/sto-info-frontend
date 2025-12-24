@@ -16,42 +16,53 @@ describe('SeoService', () => {
   let mockDocument: Document;
   let mockPageTitleService: { getTitleSuffix: jest.Mock };
 
-  beforeEach(() => {
+  const configureSeoServiceTestBed = (options?: {
+    routerUrl?: string;
+    routeData?: Record<string, unknown>;
+    documentFactory?: () => Document;
+    titleSuffix?: string;
+  }) => {
     routerEvents$ = new Subject<unknown>();
 
     mockRouter = {
       events: routerEvents$ as unknown as Router['events'],
-      url: '/test-path',
+      url: options?.routerUrl ?? '/test-path',
     };
 
     mockMeta = {
       updateTag: jest.fn(),
     } as unknown as { updateTag: jest.Mock };
 
-    mockDocument = document.implementation.createHTMLDocument('Test');
+    mockDocument = options?.documentFactory
+      ? options.documentFactory()
+      : document.implementation.createHTMLDocument('Test');
 
     mockPageTitleService = {
-      getTitleSuffix: jest.fn(() => 'Mock Suffix'),
+      getTitleSuffix: jest.fn(() => options?.titleSuffix ?? 'Mock Suffix'),
     } as unknown as { getTitleSuffix: jest.Mock };
+
+    const route = {
+      firstChild: null,
+      data: of(options?.routeData ?? { title: 'Test Page' }),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         SeoService,
         { provide: Router, useValue: mockRouter },
         { provide: Meta, useValue: mockMeta },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            firstChild: null,
-            data: of({ title: 'Test Page' }),
-          },
-        },
+        { provide: ActivatedRoute, useValue: route },
         { provide: DOCUMENT, useValue: mockDocument },
         { provide: PageTitleService, useValue: mockPageTitleService },
       ],
     });
 
     service = TestBed.inject(SeoService);
+  };
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    configureSeoServiceTestBed();
   });
 
   it('should be created', () => {
@@ -77,7 +88,8 @@ describe('SeoService', () => {
   });
 
   it('should fall back to default title when suffix is empty', () => {
-    mockPageTitleService.getTitleSuffix.mockReturnValue('');
+    TestBed.resetTestingModule();
+    configureSeoServiceTestBed({ titleSuffix: '' });
 
     service.init();
 
@@ -91,6 +103,16 @@ describe('SeoService', () => {
 
   it('should use deepest child route title', () => {
     TestBed.resetTestingModule();
+
+    const childRoute = {
+      firstChild: null,
+      data: of({ title: 'Child Page' }),
+    };
+
+    const rootRoute = {
+      firstChild: childRoute,
+      data: of({}),
+    };
 
     routerEvents$ = new Subject<unknown>();
 
@@ -108,16 +130,6 @@ describe('SeoService', () => {
     mockPageTitleService = {
       getTitleSuffix: jest.fn(() => 'Mock Suffix'),
     } as unknown as { getTitleSuffix: jest.Mock };
-
-    const childRoute = {
-      firstChild: null,
-      data: of({ title: 'Child Page' }),
-    };
-
-    const rootRoute = {
-      firstChild: childRoute,
-      data: of({}),
-    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -145,43 +157,13 @@ describe('SeoService', () => {
   it('should fall back to root path when router url is empty', () => {
     TestBed.resetTestingModule();
 
-    routerEvents$ = new Subject<unknown>();
-
-    mockRouter = {
-      events: routerEvents$ as unknown as Router['events'],
-      url: '',
-    };
-
-    mockMeta = {
-      updateTag: jest.fn(),
-    } as unknown as { updateTag: jest.Mock };
-
-    mockDocument = document.implementation.createHTMLDocument('Root');
-
-    mockPageTitleService = {
-      getTitleSuffix: jest.fn(() => 'Mock Suffix'),
-    } as unknown as { getTitleSuffix: jest.Mock };
-
-    TestBed.configureTestingModule({
-      providers: [
-        SeoService,
-        { provide: Router, useValue: mockRouter },
-        { provide: Meta, useValue: mockMeta },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            firstChild: null,
-            data: of({ title: 'Root Path' }),
-          },
-        },
-        { provide: DOCUMENT, useValue: mockDocument },
-        { provide: PageTitleService, useValue: mockPageTitleService },
-      ],
+    configureSeoServiceTestBed({
+      routerUrl: '',
+      routeData: { title: 'Root Path' },
+      documentFactory: () => document.implementation.createHTMLDocument('Root'),
     });
 
-    const serviceWithEmptyUrl = TestBed.inject(SeoService);
-
-    serviceWithEmptyUrl.init();
+    service.init();
 
     const canonicalLink = mockDocument.head.querySelector(
       "link[rel='canonical']",
@@ -219,42 +201,12 @@ describe('SeoService', () => {
   it('should handle missing document head without error', () => {
     TestBed.resetTestingModule();
 
-    routerEvents$ = new Subject<unknown>();
-
-    mockRouter = {
-      events: routerEvents$ as unknown as Router['events'],
-      url: '/no-head',
-    };
-
-    mockMeta = {
-      updateTag: jest.fn(),
-    } as unknown as { updateTag: jest.Mock };
-
-    const documentWithoutHead = { head: null } as unknown as Document;
-
-    mockPageTitleService = {
-      getTitleSuffix: jest.fn(() => 'Mock Suffix'),
-    } as unknown as { getTitleSuffix: jest.Mock };
-
-    TestBed.configureTestingModule({
-      providers: [
-        SeoService,
-        { provide: Router, useValue: mockRouter },
-        { provide: Meta, useValue: mockMeta },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            firstChild: null,
-            data: of({ title: 'No Head' }),
-          },
-        },
-        { provide: DOCUMENT, useValue: documentWithoutHead },
-        { provide: PageTitleService, useValue: mockPageTitleService },
-      ],
+    configureSeoServiceTestBed({
+      routerUrl: '/no-head',
+      routeData: { title: 'No Head' },
+      documentFactory: () => ({ head: null }) as unknown as Document,
     });
 
-    const serviceWithoutHead = TestBed.inject(SeoService);
-
-    expect(() => serviceWithoutHead.init()).not.toThrow();
+    expect(() => service.init()).not.toThrow();
   });
 });
