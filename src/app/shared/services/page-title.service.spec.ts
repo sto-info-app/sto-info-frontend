@@ -12,32 +12,50 @@ describe('PageTitleService', () => {
   let mockRouter: { events: Subject<unknown> };
   let mockActivatedRoute: ActivatedRoute;
 
-  beforeEach(() => {
-    mockTitle = {
-      setTitle: jest.fn(),
-    } as unknown as { setTitle: jest.Mock };
+  const configurePageTitleTestBed = (options?: {
+    route?: ActivatedRoute;
+    routeData?: Record<string, unknown>;
+    envName?: string;
+    appTitle?: string;
+  }): void => {
+    if (options?.envName !== undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (environment as any).env_name = options.envName;
+    }
+
+    if (options?.appTitle !== undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (environment as any).appTitle = options.appTitle;
+    }
 
     mockRouter = {
       events: new Subject<unknown>(),
     } as unknown as { events: Subject<unknown> };
 
-    mockActivatedRoute = {
+    mockActivatedRoute = (options?.route ?? {
       firstChild: null,
-      data: of({ title: 'Test Page' }),
-    } as unknown as ActivatedRoute;
+      data: of(options?.routeData ?? { title: 'Test Page' }),
+    }) as unknown as ActivatedRoute;
 
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         PageTitleService,
         { provide: Title, useValue: mockTitle },
         { provide: Router, useValue: mockRouter },
-        {
-          provide: ActivatedRoute,
-          useValue: mockActivatedRoute,
-        },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
       ],
     });
+
     service = TestBed.inject(PageTitleService);
+  };
+
+  beforeEach(() => {
+    mockTitle = {
+      setTitle: jest.fn(),
+    } as unknown as { setTitle: jest.Mock };
+
+    configurePageTitleTestBed();
   });
 
   it('should be created', () => {
@@ -82,8 +100,7 @@ describe('PageTitleService', () => {
   });
 
   it('should set full title when pageTitle and suffix exist', () => {
-    environment.env_name = 'local';
-    environment.appTitle = 'My App';
+    configurePageTitleTestBed({ envName: 'local', appTitle: 'My App' });
 
     service.init();
 
@@ -98,9 +115,6 @@ describe('PageTitleService', () => {
   });
 
   it('should use deepest child route title when nested routes exist', () => {
-    environment.env_name = 'local';
-    environment.appTitle = 'Nested App';
-
     const deepestRoute = {
       firstChild: null,
       data: of({ title: 'Deep Page' }),
@@ -111,27 +125,16 @@ describe('PageTitleService', () => {
       data: of({}),
     } as unknown as ActivatedRoute;
 
-    mockActivatedRoute = {
+    const rootRoute = {
       firstChild: childRoute,
       data: of({}),
     } as unknown as ActivatedRoute;
 
-    TestBed.resetTestingModule();
-
-    mockRouter = {
-      events: new Subject<unknown>(),
-    } as unknown as { events: Subject<unknown> };
-
-    TestBed.configureTestingModule({
-      providers: [
-        PageTitleService,
-        { provide: Title, useValue: mockTitle },
-        { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute },
-      ],
+    configurePageTitleTestBed({
+      route: rootRoute,
+      envName: 'local',
+      appTitle: 'Nested App',
     });
-
-    service = TestBed.inject(PageTitleService);
 
     service.init();
 
@@ -143,30 +146,11 @@ describe('PageTitleService', () => {
   });
 
   it('should set only suffix when no pageTitle but suffix exists', () => {
-    environment.env_name = 'dev';
-    environment.appTitle = 'My Dev App';
-
-    mockActivatedRoute = {
-      firstChild: null,
-      data: of({}),
-    } as unknown as ActivatedRoute;
-
-    TestBed.resetTestingModule();
-
-    mockRouter = {
-      events: new Subject<unknown>(),
-    } as unknown as { events: Subject<unknown> };
-
-    TestBed.configureTestingModule({
-      providers: [
-        PageTitleService,
-        { provide: Title, useValue: mockTitle },
-        { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute },
-      ],
+    configurePageTitleTestBed({
+      envName: 'dev',
+      appTitle: 'My Dev App',
+      routeData: {},
     });
-
-    service = TestBed.inject(PageTitleService);
 
     service.init();
 
@@ -176,27 +160,7 @@ describe('PageTitleService', () => {
   });
 
   it('should fall back to default site title when no pageTitle or suffix', () => {
-    mockActivatedRoute = {
-      firstChild: null,
-      data: of({}),
-    } as unknown as ActivatedRoute;
-
-    TestBed.resetTestingModule();
-
-    mockRouter = {
-      events: new Subject<unknown>(),
-    } as unknown as { events: Subject<unknown> };
-
-    TestBed.configureTestingModule({
-      providers: [
-        PageTitleService,
-        { provide: Title, useValue: mockTitle },
-        { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute },
-      ],
-    });
-
-    service = TestBed.inject(PageTitleService);
+    configurePageTitleTestBed({ routeData: {} });
 
     jest.spyOn(service, 'getTitleSuffix').mockReturnValue('');
 
