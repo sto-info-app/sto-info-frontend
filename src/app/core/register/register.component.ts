@@ -56,7 +56,7 @@ import {
   USERNAME_PATTERN,
 } from 'src/app/shared/constants/regex-patterns.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
-import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
+import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { MustMatch } from '../../shared/_helpers/must-match.validator';
 import { AuthService } from '../auth/auth.service';
@@ -108,7 +108,7 @@ export class RegisterComponent implements OnInit {
   private readonly routingService = inject(RoutingService);
   private readonly renderer = inject(Renderer2);
   private readonly el = inject(ElementRef);
-  private readonly redAlertThemeService = inject(RedAlertThemeService);
+  private readonly alertThemeService = inject(AlertThemeService);
 
   ngOnInit() {
     this.registerForm = this.formBuilder.nonNullable.group(
@@ -219,9 +219,10 @@ export class RegisterComponent implements OnInit {
   }
 
   displayErrorMessage(message: string) {
-    this.redAlertThemeService.applyRedAlertThemeThenClearAfterAShortTime(
+    this.alertThemeService.applyAlertThemeThenApplyStaticTheme(
       this.renderer,
       this.el.nativeElement,
+      'red',
     );
     this.errorMessage = message;
 

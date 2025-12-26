@@ -20,7 +20,7 @@ import {
 } from 'src/app/shared/constants/error-messages.constants';
 import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
-import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
+import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { SharedDataService } from 'src/app/shared/services/shared-data.service';
 import { environment } from 'src/environments/environment';
@@ -60,7 +60,7 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly renderer = inject(Renderer2);
   private readonly el = inject(ElementRef);
-  private readonly redAlertThemeService = inject(RedAlertThemeService);
+  private readonly alertThemeService = inject(AlertThemeService);
   private readonly routingService = inject(RoutingService);
   appRoutes = APP_ROUTES;
 
@@ -147,9 +147,10 @@ export class LoginComponent {
   }
 
   private applyErrorStylesheet() {
-    this.redAlertThemeService.applyRedAlertThemeThenClearAfterAShortTime(
+    this.alertThemeService.applyAlertThemeThenClearAfterAShortTime(
       this.renderer,
       this.el.nativeElement,
+      'red',
     );
   }
 

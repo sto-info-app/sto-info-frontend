@@ -2,7 +2,7 @@
 /*
   CSS Document
   Modified 2025 Dec 25
-  LCARS Yellow Alert Theme
+  LCARS Green Alert Theme
   Derived from LCARS Red Alert Theme
   By Jim Robertus www.thelcars.com
 
@@ -12,16 +12,16 @@
 
 @keyframes colorchange {
   0% {
-    color: #ffcc00;
+    color: #0f0;
   }
   25% {
-    color: #ffcc00;
+    color: #0f0;
   }
   50% {
-    color: #ffcc00;
+    color: #0f0;
   }
   75% {
-    color: #ffcc00;
+    color: #0f0;
   }
   80% {
     color: #000;
@@ -34,7 +34,7 @@
   }
 }
 
-@keyframes yellowalert {
+@keyframes redalert {
   0% {
     background-color: #f7f7f7;
   }
@@ -42,13 +42,13 @@
     background-color: #f7f7f7;
   }
   50% {
-    background-color: #e6b800;
+    background-color: #0c0;
   }
   75% {
-    background-color: #e6b800;
+    background-color: #0c0;
   }
   80% {
-    background-color: #e6b800;
+    background-color: #0c0;
   }
   90% {
     background-color: #f7f7f7;
@@ -59,17 +59,17 @@
 }
 
 .panel-1 a {
-  animation: yellowalert 1s infinite;
-  background-color: #e6b800;
+  animation: redalert 1s infinite;
+  background-color: #0c0;
 }
 
 .panel-4 {
-  animation: yellowalert 1s infinite;
+  animation: redalert 1s infinite;
   animation-delay: 0.1s;
 }
 
 .submit-button {
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 .left-frame-top,
@@ -79,44 +79,44 @@
 .corner-bg,
 .bar-1,
 .bar-6 {
-  animation: yellowalert 1s infinite;
+  animation: redalert 1s infinite;
   animation-delay: 0.3s;
 }
 
-/* Animate Yellow Alert & Moving Bars */
+/* Animate Red Alert & Moving Bars */
 .bar-2,
 .bar-7 {
   animation:
-    yellowalert 1s infinite 0.3s,
+    redalert 1s infinite 0.3s,
     resizeGroup1 60s linear infinite alternate;
 }
 
 .bar-3,
 .bar-8 {
-  animation: yellowalert 1s infinite;
+  animation: redalert 1s infinite;
   animation-delay: 0.4s;
 }
 
 .bar-4,
 .bar-9 {
   animation:
-    yellowalert 1s infinite 0.5s,
+    redalert 1s infinite 0.5s,
     resizeGroup2 60s linear infinite alternate;
 }
-/* END: Animate Yellow Alert & Moving Bars */
+/* END: Animate Red Alert & Moving Bars */
 
 .button#top-left a {
-  animation: yellowalert 1s infinite;
+  animation: redalert 1s infinite;
   animation-delay: 0.6s;
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 .button#bottom-left a {
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 .button#top-right a {
-  background-color: #ffcc00;
+  background-color: #0e0;
 }
 
 .button#bottom-right a {
@@ -125,16 +125,16 @@
 
 .bar-5,
 .bar-10 {
-  animation: yellowalert 1s infinite;
+  animation: redalert 1s infinite;
   animation-delay: 0.7s;
 }
 
 .panel-5 {
-  animation: yellowalert 1s infinite;
+  animation: redalert 1s infinite;
 }
 
 .panel-6 {
-  animation: yellowalert 1s infinite;
+  animation: redalert 1s infinite;
   animation-delay: 0.8s;
 }
 
@@ -142,16 +142,16 @@
 .panel-8,
 .panel-9,
 .panel-10 {
-  animation: yellowalert 1s infinite;
+  animation: redalert 1s infinite;
   animation-delay: 0.9s;
 }
 
 .left-frame-top {
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 .left-frame {
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 .data-cascade .row-1,
@@ -182,11 +182,11 @@
 .data-cascade#frozen .row-2,
 .data-cascade#frozen .row-3,
 .data-cascade#frozen .row-6 {
-  color: #ffcc00;
+  color: #0f0;
 }
 
 .data-cascade#frozen .row-4 {
-  color: #ffe066;
+  color: #4f4;
 }
 
 .data-cascade#frozen .row-5 {
@@ -194,7 +194,7 @@
 }
 
 .top-corner-bg {
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 .bar-1,
@@ -207,7 +207,7 @@
 .bar-8,
 .bar-9,
 .bar-10 {
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 .gap {
@@ -224,32 +224,32 @@
 .panel-8,
 .panel-9,
 .panel-10 {
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 .corner-bg {
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 code {
-  color: #ffcc00;
+  color: #0f0;
 }
 
 hr {
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 .border {
-  border: 2px solid #e6b800;
+  border: 2px solid #0c0;
 }
 
 .buttons a {
-  background-color: #ffcc00;
+  background-color: #0e0;
   color: #000;
 }
 
 .buttons a:nth-child(odd) {
-  background-color: #ffcc00;
+  background-color: #0e0;
 }
 
 .buttons a:nth-child(even) {
@@ -261,51 +261,51 @@ hr {
 }
 
 .alert-red {
-  background-color: #ffcc00 !important;
+  background-color: #0e0 !important;
 }
 
 .sidebar-buttons a {
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 .lcars-bar {
   background-color: #000;
-  border-right: 18px solid #ffcc00;
-  border-left: 18px solid #ffcc00;
+  border-right: 18px solid #0e0;
+  border-left: 18px solid #0e0;
 }
 
 .lcars-bar-inner {
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 .lcars-bar-slice-bottom {
-  background-color: #e6b800;
+  background-color: #0c0;
 }
 
 .lcars-text-bar {
-  background-color: #e6b800;
-  border-right: 28px solid #ffcc00;
-  border-left: 28px solid #ffcc00;
+  background-color: #0c0;
+  border-right: 28px solid #0e0;
+  border-left: 28px solid #0e0;
 }
 
 footer {
-  background: linear-gradient(#ffe066 50%, #cc9900 50%);
+  background: linear-gradient(#88ff66 50%, #44dd44 50%);
 }
 
 #footer-panel {
-  background-color: #ffd24d;
+  background-color: #55ff55;
 }
 
 #footer-inside::before {
-  background-color: #ffe066;
+  background-color: #88ff66;
 }
 
 #footer-inside::after {
-  background-color: #cc9900;
+  background-color: #44dd44;
 }
 
 #footer-text a {
-  color: #ffcc00;
+  color: #0e0;
 }
 
 @keyframes resizeGroup1 {
