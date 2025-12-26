@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/auth/auth.guard';
 import { ChangePasswordComponent } from './core/auth/change-password/change-password.component';
 import { ResetPasswordRequestComponent } from './core/auth/reset-password-request/reset-password-request.component';
+import { ApiRequiredGuard } from './core/health/api-required.guard';
 import { LoginComponent } from './core/login/login.component';
 import { RegisterComponent } from './core/register/register.component';
 import { RegistrationCompleteComponent } from './core/registration-complete/registration-complete.component';
@@ -10,6 +11,7 @@ import { VerifyEmailComponent } from './core/verify-email/verify-email.component
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ProfileComponent } from './dashboard/profile/profile.component';
 import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
+import { ServiceInterruptionComponent } from './error-pages/service-interruption/service-interruption.component';
 import { HomeComponent } from './home/home.component';
 import {
   APP_ROUTE_TITLES,
@@ -35,32 +37,38 @@ export const routes: Routes = [
   {
     path: APP_ROUTES.LOGIN,
     component: LoginComponent,
-    data: { title: APP_ROUTE_TITLES.LOGIN },
+    data: { title: APP_ROUTE_TITLES.LOGIN, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
   },
   {
     path: APP_ROUTES.REGISTER,
     component: RegisterComponent,
-    data: { title: APP_ROUTE_TITLES.REGISTER },
+    data: { title: APP_ROUTE_TITLES.REGISTER, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
   },
   {
     path: APP_ROUTES.REGISTER_COMPLETE,
     component: RegistrationCompleteComponent,
-    data: { title: APP_ROUTE_TITLES.REGISTER_COMPLETE },
+    data: { title: APP_ROUTE_TITLES.REGISTER_COMPLETE, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
   },
   {
     path: APP_ROUTES.VERIFY_EMAIL,
     component: VerifyEmailComponent,
-    data: { title: APP_ROUTE_TITLES.VERIFY_EMAIL },
+    data: { title: APP_ROUTE_TITLES.VERIFY_EMAIL, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
   },
   {
     path: APP_ROUTES.RESET_PASSWORD,
     component: ResetPasswordRequestComponent,
-    data: { title: APP_ROUTE_TITLES.RESET_PASSWORD },
+    data: { title: APP_ROUTE_TITLES.RESET_PASSWORD, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
   },
   {
     path: APP_ROUTES.CHANGE_PASSWORD,
     component: ChangePasswordComponent,
-    data: { title: APP_ROUTE_TITLES.CHANGE_PASSWORD },
+    data: { title: APP_ROUTE_TITLES.CHANGE_PASSWORD, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
   },
 
   // *****************************************
@@ -96,18 +104,24 @@ export const routes: Routes = [
   {
     path: APP_ROUTES.STO_DASHBOARD,
     component: DashboardComponent,
-    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD },
-    canActivate: [AuthGuard],
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
   },
   {
     path: APP_ROUTES.STO_DASHBOARD_PROFILE,
     component: ProfileComponent,
-    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_PROFILE },
-    canActivate: [AuthGuard],
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_PROFILE, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
   },
 
   // *****************************************
   // * Errors
+  {
+    path: APP_ROUTES.SERVICE_INTERRUPTION,
+    component: ServiceInterruptionComponent,
+    data: { title: APP_ROUTE_TITLES.SERVICE_INTERRUPTION, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
+  },
   {
     path: '**',
     component: PageNotFoundComponent,

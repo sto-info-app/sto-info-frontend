@@ -6,7 +6,15 @@
   <div class="right-frame">
     <app-main-content-bar-panel></app-main-content-bar-panel>
     <main>
-      <router-outlet></router-outlet>
+      @if (showBackendWarning$ | async) {
+        <app-backend-status-banner></app-backend-status-banner>
+      } @else if (!hasActiveRoute && isServiceInterruptionRoute) {
+        <app-unknown-service-interruption></app-unknown-service-interruption>
+      } @else {
+        <router-outlet
+          (activate)="onRouteActivate()"
+          (deactivate)="onRouteDeactivate()"></router-outlet>
+      }
     </main>
 
     <footer>

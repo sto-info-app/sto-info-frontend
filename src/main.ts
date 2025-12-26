@@ -1,3 +1,8 @@
+import { LocationStrategy, PathLocationStrategy } from '@angular/common';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import {
   APP_INITIALIZER,
   ApplicationConfig,
@@ -5,25 +10,20 @@ import {
   inject,
   provideZoneChangeDetection,
 } from '@angular/core';
-import { bootstrapApplication } from '@angular/platform-browser';
-import { RouterModule, provideRouter } from '@angular/router';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
-import { LocationStrategy, PathLocationStrategy } from '@angular/common';
-import { JwtModule } from '@auth0/angular-jwt';
 import {
   MAT_RIPPLE_GLOBAL_OPTIONS,
   RippleGlobalOptions,
 } from '@angular/material/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterModule, provideRouter } from '@angular/router';
+import { JwtModule } from '@auth0/angular-jwt';
 
-import { AppComponent } from './app/app.component';
 import { routes } from './app/app-routing.module';
-import { environment } from './environments/environment';
-import { EnvCheckService } from './environments/environment.service';
+import { AppComponent } from './app/app.component';
+import { API_URLS } from './app/shared/constants/api-routing.constants';
 import { FontAwesomeIconService } from './app/shared/services/font-awesome-icon.service';
+import { EnvCheckService } from './environments/environment.service';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -43,7 +43,7 @@ export const appConfig: ApplicationConfig = {
       JwtModule.forRoot({
         config: {
           tokenGetter: tokenGetter,
-          allowedDomains: [new URL(environment.apiUrl).host],
+          allowedDomains: [new URL(API_URLS.ROOT).host],
           disallowedRoutes: [],
         },
       }),
@@ -51,7 +51,7 @@ export const appConfig: ApplicationConfig = {
     { provide: MAT_RIPPLE_GLOBAL_OPTIONS, useValue: globalRippleConfig },
     {
       provide: 'API_URL',
-      useValue: environment.apiUrl,
+      useValue: API_URLS.ROOT,
     },
     { provide: LocationStrategy, useClass: PathLocationStrategy },
     provideHttpClient(withInterceptorsFromDi()),

@@ -155,7 +155,6 @@ describe('AppComponent', () => {
         { provide: SeoService, useValue: mockSeoService },
         { provide: ScriptLoaderService, useValue: mockScriptLoaderService },
         { provide: MatDialog, useValue: mockDialog },
-        { provide: 'API_URL', useValue: environment.apiUrl },
       ],
     })
       .overrideComponent(AppComponent, {

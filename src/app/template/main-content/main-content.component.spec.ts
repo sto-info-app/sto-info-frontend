@@ -11,6 +11,7 @@ import { GeneralThemeService } from 'src/app/shared/services/general-theme.servi
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 
+import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { MainContentComponent } from './main-content.component';
 
 describe('MainContentComponent', () => {
@@ -57,9 +58,7 @@ describe('MainContentComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    const req = httpTestingController.expectOne(
-      `${environment.apiUrl}/version`,
-    );
+    const req = httpTestingController.expectOne(API_URLS.VERSION);
     expect(req.request.method).toBe('GET');
     req.flush('backend-version', { status: 200, statusText: 'OK' });
   });
@@ -93,9 +92,7 @@ describe('MainContentComponent', () => {
     localFixture.detectChanges();
 
     try {
-      const req = httpTestingController.expectOne(
-        `${environment.apiUrl}/version`,
-      );
+      const req = httpTestingController.expectOne(API_URLS.VERSION);
       expect(req.request.method).toBe('GET');
       req.flush('ignored-version', { status: 200, statusText: 'OK' });
 

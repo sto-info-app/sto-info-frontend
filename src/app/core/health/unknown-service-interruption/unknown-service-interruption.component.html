@@ -1,0 +1,15 @@
+<div class="unknown-service-interruption">
+  @if (errorCode !== 100) {
+    <div
+      id="warning-code-container"
+      class="blink">
+      {{ errorCode }} Error
+    </div>
+  }
+  <h1 class="code{{ errorCode }}">{{ errorTitle }}</h1>
+  <p>
+    {{ errorDescription }}
+  </p>
+  <p>Live long and prosper!</p>
+  <p>Starfleet Web Development Team</p>
+</div>

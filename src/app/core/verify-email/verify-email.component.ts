@@ -5,13 +5,13 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
+import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
   MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
 } from 'src/app/shared/constants/error-messages.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
-import { environment } from 'src/environments/environment';
 import { MessageType } from '../../shared/models/lcars-message-type.enum';
 
 @Component({
@@ -51,7 +51,7 @@ export class VerifyEmailComponent implements OnInit {
 
   verifyEmail() {
     this.http
-      .post(`${environment.apiUrl}/auth/verify-email`, { token: this.token })
+      .post(API_URLS.AUTH_VERIFICATION_EMAIL, { token: this.token })
       .subscribe({
         next: () => {
           this.message = 'Verification successful! You can now login.';
@@ -78,7 +78,7 @@ export class VerifyEmailComponent implements OnInit {
 
   resendVerificationEmail() {
     this.http
-      .post(`${environment.apiUrl}/auth/resend-verification-email`, {
+      .post(API_URLS.AUTH_RESEND_VERIFICATION_EMAIL, {
         token: this.token,
       })
       .subscribe({
