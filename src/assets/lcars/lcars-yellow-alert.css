@@ -1,0 +1,152 @@
+@charset "utf-8";
+/*
+  CSS Document
+  Modified 2025 Dec 25
+  LCARS Yellow Alert Theme
+  Derived from LCARS Red Alert Theme
+  By Jim Robertus www.thelcars.com
+  
+  Amended 2023 Dec 25
+  By Steve Roberts
+*/
+
+@keyframes colorchange {
+  0%,
+  25%,
+  50%,
+  75% {
+    color: #ffcc00;
+  }
+  80%,
+  90% {
+    color: #000;
+  }
+  100% {
+    color: #f7f7f7;
+  }
+}
+
+@keyframes yellowalert {
+  0%,
+  25% {
+    background-color: #f7f7f7;
+  }
+  50%,
+  75%,
+  80% {
+    background-color: #e6b800;
+  }
+  90%,
+  100% {
+    background-color: #f7f7f7;
+  }
+}
+
+.panel-1 a,
+.panel-4,
+.left-frame-top,
+.left-frame,
+.panel-3,
+.top-corner-bg,
+.corner-bg,
+.bar-1,
+.bar-6,
+.bar-5,
+.bar-10,
+.panel-5,
+.panel-6,
+.panel-7,
+.panel-8,
+.panel-9,
+.panel-10 {
+  animation: yellowalert 1s infinite;
+}
+
+.submit-button,
+.button#top-left a,
+.button#bottom-left a,
+.left-frame-top,
+.left-frame,
+.top-corner-bg,
+.corner-bg,
+.bar-1,
+.bar-2,
+.bar-3,
+.bar-4,
+.bar-5,
+.bar-6,
+.bar-7,
+.bar-8,
+.bar-9,
+.bar-10,
+.panel-3,
+.panel-4,
+.panel-5,
+.panel-6,
+.panel-7,
+.panel-8,
+.panel-9,
+.panel-10,
+hr,
+.border,
+.sidebar-buttons a,
+.lcars-bar-inner,
+.lcars-bar-slice-bottom,
+.lcars-text-bar {
+  background-color: #e6b800;
+}
+
+.button#top-right a,
+.buttons a,
+.buttons a:nth-child(odd) {
+  background-color: #ffcc00;
+}
+
+.buttons a:nth-child(even),
+.button#bottom-right a,
+.silver {
+  background-color: #dfdfdf;
+}
+
+.alert-yellow {
+  background-color: #ffcc00 !important;
+}
+
+code {
+  color: #ffcc00;
+}
+
+.border {
+  border: 2px solid #e6b800;
+}
+
+.lcars-bar {
+  background-color: #000;
+  border-right: 18px solid #ffcc00;
+  border-left: 18px solid #ffcc00;
+}
+
+.lcars-text-bar {
+  border-right: 28px solid #ffcc00;
+  border-left: 28px solid #ffcc00;
+}
+
+footer {
+  background: linear-gradient(#ffe066 50%, #cc9900 50%);
+}
+
+#footer-panel {
+  background-color: #ffd24d;
+}
+
+#footer-inside::before {
+  background-color: #ffe066;
+}
+
+#footer-inside::after {
+  background-color: #cc9900;
+}
+
+#footer-text a {
+  color: #ffcc00;
+}
