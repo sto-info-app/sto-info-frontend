@@ -54,6 +54,7 @@ module.exports = {
     '!src/**/*.enum.ts',
     '!src/**/*.constant.ts',
     '!src/**/*.constants.ts',
+    '!src/**/*.template.ts',
   ],
   coverageDirectory: '<rootDir>/coverage',
 };
