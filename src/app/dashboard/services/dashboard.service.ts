@@ -7,14 +7,12 @@ import { User } from '../models/user.model';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
-import { environment } from 'src/environments/environment';
+import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DashboardService {
-  private readonly apiUrl = environment.apiUrl;
-
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
 
@@ -24,12 +22,12 @@ export class DashboardService {
       // Handle the case when there is no token (e.g., user is not logged in)
       return throwError(() => new Error('No token found'));
     }
-    return this.http.get<User>(`${this.apiUrl}/user`, httpOptions);
+    return this.http.get<User>(API_URLS.USER, httpOptions);
   }
 
   updatePersonalDetails(userPersonalDetails: EditPersonalDetailsFormValues) {
     return this.http
-      .post(`${this.apiUrl}/user/update-profile`, userPersonalDetails)
+      .post(API_URLS.UPDATE_USER_PROFILE, userPersonalDetails)
       .pipe(
         catchError(error => {
           console.error('Error updating personal details:', error);
@@ -51,11 +49,7 @@ export class DashboardService {
     }
 
     return this.http
-      .post(
-        `${this.apiUrl}/user/update-profile-pic`,
-        profilePicForm,
-        httpOptions,
-      )
+      .post(API_URLS.UPDATE_USER_PROFILE_PIC, profilePicForm, httpOptions)
       .pipe(
         catchError(error => {
           console.error('Error updating profile image:', error);

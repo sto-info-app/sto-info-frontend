@@ -6,7 +6,7 @@ import {
   Renderer2,
   inject,
 } from '@angular/core';
-import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
+import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
 
 @Component({
   selector: 'app-page-not-found',
@@ -19,22 +19,23 @@ import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.se
   imports: [],
 })
 export class PageNotFoundComponent implements OnInit, OnDestroy {
-  private readonly redAlertThemeService = inject(RedAlertThemeService);
+  private readonly alertThemeService = inject(AlertThemeService);
   private readonly renderer = inject(Renderer2);
   private readonly el = inject(ElementRef);
 
   ngOnInit(): void {
-    this.redAlertThemeService.applyRedAlertThemeThenApplyStaticRedTheme(
+    this.alertThemeService.applyAlertThemeThenApplyStaticTheme(
       this.renderer,
       this.el.nativeElement,
+      'red',
     );
   }
 
   ngOnDestroy(): void {
-    this.redAlertThemeService.clearRedAlertStylesheet(
+    this.alertThemeService.clearAlertStylesheet(
       this.renderer,
       this.el.nativeElement,
     );
-    this.redAlertThemeService.clearTimers();
+    this.alertThemeService.clearTimers(this.el.nativeElement);
   }
 }

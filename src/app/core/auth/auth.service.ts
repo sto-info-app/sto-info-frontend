@@ -16,14 +16,14 @@ import {
   LoginResponse,
   RegistrationFormValues,
 } from 'src/app/models/user-auth.models';
+import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly apiUrl = environment.apiUrl;
-
   private readonly isAuthenticatedSubject: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
   public isAuthenticated$: Observable<boolean> =
@@ -58,12 +58,12 @@ export class AuthService {
   }
 
   register(user: RegistrationFormValues) {
-    return this.http.post(`${this.apiUrl}/auth/register`, user);
+    return this.http.post(API_URLS.AUTH_REGISTER, user);
   }
 
   login(credentials: LoginCredentials): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials, {
+      .post<LoginResponse>(API_URLS.AUTH_LOGIN, credentials, {
         withCredentials: true,
       })
       .pipe(
@@ -83,7 +83,7 @@ export class AuthService {
       // Handle the case when there is no token (e.g., user is not logged in)
       return throwError(() => new Error('No token found'));
     }
-    return this.http.post(`${this.apiUrl}/auth/logout`, {}, httpOptions);
+    return this.http.post(API_URLS.AUTH_LOGOUT, {}, httpOptions);
   }
 
   private getHttpOptionsWithRefreshToken(): { headers: HttpHeaders } | null {
@@ -152,24 +152,22 @@ export class AuthService {
       return throwError(() => new Error('No token found'));
     }
     const body = { refresh_token: refreshToken };
-    return this.http
-      .post<LoginResponse>(`${this.apiUrl}/auth/refresh`, body)
-      .pipe(
-        tap(response => {
-          this.saveToken(
-            response.access_token,
-            response.refresh_token,
-            response.expires_in,
-          );
+    return this.http.post<LoginResponse>(API_URLS.AUTH_REFRESH, body).pipe(
+      tap(response => {
+        this.saveToken(
+          response.access_token,
+          response.refresh_token,
+          response.expires_in,
+        );
 
-          const expiresAt = this.getNewExpiresMilliseconds(response.expires_in);
-          this.expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time
-        }),
-        catchError(error => {
-          this.router.navigate(['/login']);
-          return throwError(() => error);
-        }),
-      );
+        const expiresAt = this.getNewExpiresMilliseconds(response.expires_in);
+        this.expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time
+      }),
+      catchError(error => {
+        this.router.navigate([APP_ROUTES.LOGIN]);
+        return throwError(() => error);
+      }),
+    );
   }
 
   isTokenValid(): boolean {
@@ -192,14 +190,14 @@ export class AuthService {
     const refreshToken = localStorage.getItem('refresh_token');
     if (refreshToken) {
       this.http
-        .post(`${this.apiUrl}/auth/logout`, { tokenId: refreshToken })
+        .post(API_URLS.AUTH_LOGOUT, { tokenId: refreshToken })
         .subscribe();
     }
 
     this.clearRefreshTokenTimer();
     this.removeToken();
 
-    this.router.navigate(['/login']);
+    this.router.navigate([APP_ROUTES.LOGIN]);
   }
 
   isLoggedIn(): boolean {
@@ -207,8 +205,7 @@ export class AuthService {
   }
 
   resetPassword(email: string): Observable<void> {
-    const url = `${environment.apiUrl}/auth/request-password-reset`;
-    return this.http.post(url, { email }).pipe(
+    return this.http.post(API_URLS.AUTH_RESET_PASSWORD_REQUEST, { email }).pipe(
       map(() => {
         return;
       }),
@@ -221,13 +218,11 @@ export class AuthService {
       password: password,
     };
 
-    return this.http
-      .post(`${environment.apiUrl}/auth/reset-password`, data)
-      .pipe(
-        map(() => {
-          return;
-        }),
-      );
+    return this.http.post(API_URLS.AUTH_RESET_PASSWORD, data).pipe(
+      map(() => {
+        return;
+      }),
+    );
   }
 
   getSecondsUntilLoginSessionExpiry(): number {

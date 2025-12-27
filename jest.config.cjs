@@ -31,7 +31,10 @@ module.exports = {
 
   transform,
 
-  testMatch: ['**/*.spec.ts'],
+  // Align with backend Jest settings where possible
+  moduleFileExtensions: ['ts', 'html', 'js', 'json'],
+
+  testRegex: String.raw`.*\.spec\.ts$`,
   setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
 
   moduleNameMapper: {
@@ -39,5 +42,19 @@ module.exports = {
     '^src/(.*)$': '<rootDir>/src/$1',
   },
 
-  collectCoverage: false,
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.module.ts',
+    '!src/main.ts',
+    '!src/**/*.d.ts',
+    '!src/**/*.model.ts',
+    '!src/**/*.models.ts',
+    '!src/**/*.interface.ts',
+    '!src/**/*.interfaces.ts',
+    '!src/**/*.enum.ts',
+    '!src/**/*.constant.ts',
+    '!src/**/*.constants.ts',
+    '!src/**/*.template.ts',
+  ],
+  coverageDirectory: '<rootDir>/coverage',
 };

@@ -34,7 +34,7 @@
   }
 }
 
-@keyframes colorchange {
+@keyframes data-cascade-colour-change {
   0% {
     color: #455580;
   }
@@ -686,112 +686,112 @@ a:active {
 }
 
 .data-cascade .row-1 {
-  animation: colorchange 6s infinite;
+  animation: data-cascade-colour-change 6s infinite;
   animation-delay: 0.1s;
 }
 
 .data-cascade .row-2 {
-  animation: colorchange 7s infinite;
+  animation: data-cascade-colour-change 7s infinite;
   animation-delay: 0.2s;
 }
 
 .data-cascade .row-3 {
-  animation: colorchange 6s infinite;
+  animation: data-cascade-colour-change 6s infinite;
   animation-delay: 0.3s;
 }
 
 .data-cascade .row-4 {
-  animation: colorchange 6s infinite;
+  animation: data-cascade-colour-change 6s infinite;
   animation-delay: 0.4s;
 }
 
 .data-cascade .row-5 {
-  animation: colorchange 7s infinite;
+  animation: data-cascade-colour-change 7s infinite;
   animation-delay: 0.5s;
 }
 
 .data-cascade .row-6 {
-  animation: colorchange 6s infinite;
+  animation: data-cascade-colour-change 6s infinite;
   animation-delay: 0.6s;
 }
 
 .data-cascade .row-7 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.7s;
 }
 
 .data-cascade .row-8 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.8s;
 }
 
 .data-cascade#niagara .row-1 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.1s;
 }
 
 .data-cascade#niagara .row-2 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.2s;
 }
 
 .data-cascade#niagara .row-3 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.3s;
 }
 
 .data-cascade#niagara .row-4 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.4s;
 }
 
 .data-cascade#niagara .row-5 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.5s;
 }
 
 .data-cascade#niagara .row-6 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.6s;
 }
 
 .data-cascade#niagara .row-7 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.7s;
 }
 
 .data-cascade#niagara .row-8 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.8s;
 }
 
 .data-cascade#orinoco .row-1 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.1s;
 }
 
 .data-cascade#orinoco .row-2 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.2s;
 }
 
 .data-cascade#orinoco .row-3 {
-  animation: colorchange 3s infinite;
+  animation: data-cascade-colour-change 3s infinite;
   animation-delay: 0.3s;
 }
 
 .data-cascade#orinoco .row-4 {
-  animation: colorchange 3s infinite;
+  animation: data-cascade-colour-change 3s infinite;
   animation-delay: 0.4s;
 }
 
 .data-cascade#orinoco .row-5 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.5s;
 }
 
 .data-cascade#orinoco .row-6 {
-  animation: colorchange 2s infinite;
+  animation: data-cascade-colour-change 2s infinite;
   animation-delay: 0.6s;
 }
 
@@ -1220,17 +1220,17 @@ blockquote {
 
 .blink-slower {
   animation: blink 3s infinite;
-  animation-delay: 1s;
+  animation-delay: 5s;
 }
 
 .blink {
   animation: blink 2s infinite;
-  animation-delay: 1s;
+  animation-delay: 5s;
 }
 
 .blink-faster {
   animation: blink 1s infinite;
-  animation-delay: 1s;
+  animation-delay: 5s;
 }
 
 .blink:hover,
@@ -2615,7 +2615,6 @@ button.gold {
   .left-frame {
     width: 180px;
     min-width: 180px;
-    border-radius: 100px 0 0 0;
     padding-top: 70px;
   }
 

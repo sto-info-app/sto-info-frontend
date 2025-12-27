@@ -1,0 +1,24 @@
+<div class="service-interruption-content">
+  <div id="alert-panel-container">
+    <app-alert-panel
+      [state]="alertState"
+      [title]="alertTitle"
+      [subtitle]="alertSubtitle" />
+  </div>
+
+  @if (errorCode >= 300 && errorCode < 600) {
+    <div
+      id="warning-code-container"
+      class="blink-slower">
+      {{ errorCode }} Error
+    </div>
+  }
+
+  <h1>{{ errorTitle }}</h1>
+
+  <div class="description-container">
+    <div
+      class="description"
+      [innerHTML]="errorDescription"></div>
+  </div>
+</div>
