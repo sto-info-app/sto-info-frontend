@@ -12,6 +12,7 @@ describe('ServiceInterruptionComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ServiceInterruptionComponent],
+      teardown: { destroyAfterEach: false },
       providers: [
         {
           provide: AlertThemeService,
