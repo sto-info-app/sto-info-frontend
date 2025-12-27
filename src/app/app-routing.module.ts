@@ -120,7 +120,6 @@ export const routes: Routes = [
     path: APP_ROUTES.SERVICE_INTERRUPTION,
     component: ServiceInterruptionComponent,
     data: { title: APP_ROUTE_TITLES.SERVICE_INTERRUPTION, requiresApi: true },
-    canActivate: [ApiRequiredGuard],
   },
   {
     path: '**',

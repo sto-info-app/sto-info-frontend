@@ -1,0 +1,21 @@
+.service-interruption-content {
+  text-align: center;
+  text-transform: uppercase;
+
+  #alert-panel-container {
+    margin-bottom: 30px;
+  }
+
+  #warning-code-container {
+    width: 100%;
+    font-weight: normal;
+    text-transform: uppercase;
+    line-height: 1.1;
+    font-size: clamp(1rem, 1rem + 2.7vw, 2rem);
+    color: #ffcc00;
+  }
+
+  h1 {
+    margin-top: 10px;
+  }
+}

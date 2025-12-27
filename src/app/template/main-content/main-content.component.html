@@ -6,10 +6,11 @@
   <div class="right-frame">
     <app-main-content-bar-panel></app-main-content-bar-panel>
     <main>
-      @if (showBackendWarning$ | async) {
-        <app-backend-status-banner></app-backend-status-banner>
-      } @else if (!hasActiveRoute && isServiceInterruptionRoute) {
-        <app-unknown-service-interruption></app-unknown-service-interruption>
+      @if (
+        (!hasActiveRoute && isServiceInterruptionRoute) ||
+        (showBackendWarning$ | async)
+      ) {
+        <app-service-interruption-content></app-service-interruption-content>
       } @else {
         <router-outlet
           (activate)="onRouteActivate()"

@@ -1,1 +1,1 @@
-export type AlertColor = 'red' | 'yellow' | 'green';
+export type AlertState = 'red' | 'yellow' | 'green' | 'blue' | 'grey';

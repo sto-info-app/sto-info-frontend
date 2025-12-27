@@ -15,9 +15,8 @@ import {
   startWith,
   Subscription,
 } from 'rxjs';
-import { BackendStatusBannerComponent } from 'src/app/core/health/backend-status-banner/backend-status-banner.component';
 import { HealthService } from 'src/app/core/health/health.service';
-import { UnknownServiceInterruptionComponent } from 'src/app/core/health/unknown-service-interruption/unknown-service-interruption.component';
+import { ServiceInterruptionContentComponent } from 'src/app/error-pages/service-interruption/service-interruption-content/service-interruption-content.component';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { API_HEALTH_STATE_DOWN } from 'src/app/shared/constants/health.constants';
@@ -41,8 +40,7 @@ import { SideBarComponent } from '../side-bar/side-bar.component';
     MainContentBarPanelComponent,
     RouterOutlet,
     FooterComponent,
-    BackendStatusBannerComponent,
-    UnknownServiceInterruptionComponent,
+    ServiceInterruptionContentComponent,
     AsyncPipe,
   ],
 })

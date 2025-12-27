@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   ElementRef,
+  OnDestroy,
   OnInit,
   Renderer2,
   inject,
@@ -15,6 +16,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { RegistrationFormValues } from 'src/app/models/user-auth.models';
+import { alertStateFromHttpStatus } from 'src/app/shared/_helpers/alert-state-from-http-status';
 import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -75,7 +77,7 @@ import { AuthService } from '../auth/auth.service';
     LcarsErrorMessageComponent,
   ],
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, OnDestroy {
   registerForm!: FormGroup;
   errorMessage = '';
   isSubmitting = false;
@@ -205,7 +207,7 @@ export class RegisterComponent implements OnInit {
         } else {
           console.error('Registration error:', error);
         }
-        this.displayErrorMessage(errMessage);
+        this.displayErrorMessage(errMessage, error?.status);
         this.isSubmitting = false;
       },
       complete: () => {
@@ -218,11 +220,16 @@ export class RegisterComponent implements OnInit {
     return this.routingService.getLink(route);
   }
 
-  displayErrorMessage(message: string) {
+  displayErrorMessage(message: string, httpStatus?: number) {
+    const state =
+      typeof httpStatus === 'number'
+        ? alertStateFromHttpStatus(httpStatus)
+        : 'red';
+
     this.alertThemeService.applyAlertThemeThenApplyStaticTheme(
       this.renderer,
       this.el.nativeElement,
-      'red',
+      state,
     );
     this.errorMessage = message;
 
@@ -233,5 +240,13 @@ export class RegisterComponent implements OnInit {
 
   resetErrorMessage(): void {
     this.errorMessage = ''; // Reset error message
+  }
+
+  ngOnDestroy(): void {
+    this.alertThemeService.clearAlertStylesheet(
+      this.renderer,
+      this.el.nativeElement,
+    );
+    this.alertThemeService.clearTimers(this.el.nativeElement);
   }
 }

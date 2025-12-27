@@ -1220,17 +1220,17 @@ blockquote {
 
 .blink-slower {
   animation: blink 3s infinite;
-  animation-delay: 1s;
+  animation-delay: 5s;
 }
 
 .blink {
   animation: blink 2s infinite;
-  animation-delay: 1s;
+  animation-delay: 5s;
 }
 
 .blink-faster {
   animation: blink 1s infinite;
-  animation-delay: 1s;
+  animation-delay: 5s;
 }
 
 .blink:hover,

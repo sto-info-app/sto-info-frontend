@@ -36,6 +36,6 @@ export class PageNotFoundComponent implements OnInit, OnDestroy {
       this.renderer,
       this.el.nativeElement,
     );
-    this.alertThemeService.clearTimers();
+    this.alertThemeService.clearTimers(this.el.nativeElement);
   }
 }
