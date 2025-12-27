@@ -1,12 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, ElementRef, Renderer2, inject } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnDestroy,
+  Renderer2,
+  inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   LoginCredentials,
   LoginResponse,
 } from 'src/app/models/user-auth.models';
+import { alertStateFromHttpStatus } from 'src/app/shared/_helpers/alert-state-from-http-status';
 import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -20,7 +27,7 @@ import {
 } from 'src/app/shared/constants/error-messages.constants';
 import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
-import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
+import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { SharedDataService } from 'src/app/shared/services/shared-data.service';
 import { environment } from 'src/environments/environment';
@@ -40,7 +47,7 @@ import { AuthService } from '../auth/auth.service';
     LcarsErrorMessageComponent,
   ],
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
   // Allow environment constants to be used in the HTML
   appLoggedInHome: string = environment.appLoggedInHome;
 
@@ -60,7 +67,7 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly renderer = inject(Renderer2);
   private readonly el = inject(ElementRef);
-  private readonly redAlertThemeService = inject(RedAlertThemeService);
+  private readonly alertThemeService = inject(AlertThemeService);
   private readonly routingService = inject(RoutingService);
   appRoutes = APP_ROUTES;
 
@@ -110,7 +117,7 @@ export class LoginComponent {
             errMessage = error.error?.message || 'Unknown error!';
             break;
         }
-        this.displayErrorMessage(errMessage);
+        this.displayErrorMessage(errMessage, error.status);
         this.isSubmitting = false;
       },
       complete: () => {
@@ -120,8 +127,8 @@ export class LoginComponent {
     });
   }
 
-  displayErrorMessage(message: string) {
-    this.applyErrorStylesheet();
+  displayErrorMessage(message: string, httpStatus?: number) {
+    this.applyErrorStylesheet(httpStatus);
     this.errorMessage = message;
 
     setTimeout(() => {
@@ -146,14 +153,28 @@ export class LoginComponent {
     return regex.test(email);
   }
 
-  private applyErrorStylesheet() {
-    this.redAlertThemeService.applyRedAlertThemeThenClearAfterAShortTime(
+  private applyErrorStylesheet(httpStatus?: number) {
+    const state =
+      typeof httpStatus === 'number'
+        ? alertStateFromHttpStatus(httpStatus)
+        : 'red';
+
+    this.alertThemeService.applyAlertThemeThenClearAfterAShortTime(
       this.renderer,
       this.el.nativeElement,
+      state,
     );
   }
 
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
+  }
+
+  ngOnDestroy(): void {
+    this.alertThemeService.clearAlertStylesheet(
+      this.renderer,
+      this.el.nativeElement,
+    );
+    this.alertThemeService.clearTimers(this.el.nativeElement);
   }
 }

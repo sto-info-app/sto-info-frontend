@@ -5,22 +5,22 @@ import {
   TestBed,
   tick,
 } from '@angular/core/testing';
-import { MILLISECONDS_SWITCH_TO_RED_ALERT_STATIC_THEME } from 'src/app/shared/constants/timings.constants';
-import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
+import { MILLISECONDS_SWITCH_TO_ALERT_STATIC_THEME } from 'src/app/shared/constants/timings.constants';
+import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
 import { PageNotFoundComponent } from './page-not-found.component';
 
 describe('PageNotFoundComponent', () => {
   let component: PageNotFoundComponent;
   let fixture: ComponentFixture<PageNotFoundComponent>;
-  let mockRedAlertThemeService: jest.Mocked<RedAlertThemeService>;
+  let mockAlertThemeService: jest.Mocked<AlertThemeService>;
   let mockElementRef: ElementRef;
 
   beforeEach(async () => {
-    const redAlertSpy: jest.Mocked<RedAlertThemeService> = {
-      applyRedAlertThemeThenApplyStaticRedTheme: jest.fn(),
-      clearRedAlertStylesheet: jest.fn(),
+    const alertSpy = {
+      applyAlertThemeThenApplyStaticTheme: jest.fn(),
+      clearAlertStylesheet: jest.fn(),
       clearTimers: jest.fn(),
-    } as unknown as jest.Mocked<RedAlertThemeService>;
+    } as unknown as jest.Mocked<AlertThemeService>;
 
     mockElementRef = new ElementRef({});
 
@@ -28,13 +28,13 @@ describe('PageNotFoundComponent', () => {
       imports: [PageNotFoundComponent],
       providers: [
         { provide: ElementRef, useValue: mockElementRef },
-        { provide: RedAlertThemeService, useValue: redAlertSpy },
+        { provide: AlertThemeService, useValue: alertSpy },
       ],
     }).compileComponents();
 
-    mockRedAlertThemeService = TestBed.inject(
-      RedAlertThemeService,
-    ) as jest.Mocked<RedAlertThemeService>;
+    mockAlertThemeService = TestBed.inject(
+      AlertThemeService,
+    ) as jest.Mocked<AlertThemeService>;
   });
 
   beforeEach(() => {
@@ -47,20 +47,20 @@ describe('PageNotFoundComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call applyRedAlertThemeThenApplyStaticRedTheme on init', fakeAsync(() => {
+  it('should call applyAlertThemeThenApplyStaticTheme on init', fakeAsync(() => {
     const testFixture = TestBed.createComponent(PageNotFoundComponent);
-    const testComponent = testFixture.componentInstance;
-    testComponent.ngOnInit();
-    tick(MILLISECONDS_SWITCH_TO_RED_ALERT_STATIC_THEME);
+    testFixture.detectChanges();
+    tick(MILLISECONDS_SWITCH_TO_ALERT_STATIC_THEME);
     expect(
-      mockRedAlertThemeService.applyRedAlertThemeThenApplyStaticRedTheme,
+      mockAlertThemeService.applyAlertThemeThenApplyStaticTheme,
     ).toHaveBeenCalled();
   }));
 
-  it('should call clearRedAlertStylesheet on destroy', () => {
+  it('should call clearAlertStylesheet and clearTimers on destroy', () => {
     const testFixture = TestBed.createComponent(PageNotFoundComponent);
     const testComponent = testFixture.componentInstance;
     testComponent.ngOnDestroy();
-    expect(mockRedAlertThemeService.clearRedAlertStylesheet).toHaveBeenCalled();
+    expect(mockAlertThemeService.clearAlertStylesheet).toHaveBeenCalled();
+    expect(mockAlertThemeService.clearTimers).toHaveBeenCalled();
   });
 });

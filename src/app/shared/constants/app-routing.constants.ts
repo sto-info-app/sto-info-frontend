@@ -20,6 +20,9 @@ export const APP_ROUTES = {
   STO_DASHBOARD: rootDashboard,
   STO_DASHBOARD_PROFILE: rootDashboard + '/profile',
   STO_DASHBOARD_ACCOUNTS: rootDashboard + '/accounts',
+
+  // Error Pages
+  SERVICE_INTERRUPTION: 'service-interruption',
 };
 
 export const APP_ROUTE_TITLES = {
@@ -46,4 +49,7 @@ export const APP_ROUTE_TITLES = {
   STO_DASHBOARD: 'Dashboard',
   STO_DASHBOARD_PROFILE: 'Profile',
   STO_DASHBOARD_ACCOUNTS: 'Your Accounts',
+
+  // Error Pages
+  SERVICE_INTERRUPTION: 'Service Interruption',
 };

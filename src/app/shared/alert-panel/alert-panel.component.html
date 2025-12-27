@@ -1,0 +1,24 @@
+<div
+  class="alert-panel-container"
+  [class.is-red]="state === 'red'"
+  [class.is-yellow]="state === 'yellow'"
+  [class.is-green]="state === 'green'"
+  [class.is-blue]="state === 'blue'"
+  [class.is-grey]="state === 'grey'"
+  [attr.aria-label]="ariaLabel || title + ' ' + subtitle"
+  [attr.aria-live]="ariaLive">
+  <div class="alert-panel">
+    <div
+      class="alert-panel__side alert-panel__side--left"
+      aria-hidden="true"></div>
+
+    <div class="core">
+      <div class="title">{{ title }}</div>
+      <div class="sub">{{ subtitle }}</div>
+    </div>
+
+    <div
+      class="alert-panel__side alert-panel__side--right"
+      aria-hidden="true"></div>
+  </div>
+</div>

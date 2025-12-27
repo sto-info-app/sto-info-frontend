@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   ElementRef,
+  OnDestroy,
   OnInit,
   Renderer2,
   inject,
@@ -15,6 +16,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { RegistrationFormValues } from 'src/app/models/user-auth.models';
+import { alertStateFromHttpStatus } from 'src/app/shared/_helpers/alert-state-from-http-status';
 import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -56,7 +58,7 @@ import {
   USERNAME_PATTERN,
 } from 'src/app/shared/constants/regex-patterns.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
-import { RedAlertThemeService } from 'src/app/shared/services/red-alert-theme.service';
+import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { MustMatch } from '../../shared/_helpers/must-match.validator';
 import { AuthService } from '../auth/auth.service';
@@ -75,7 +77,7 @@ import { AuthService } from '../auth/auth.service';
     LcarsErrorMessageComponent,
   ],
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, OnDestroy {
   registerForm!: FormGroup;
   errorMessage = '';
   isSubmitting = false;
@@ -108,7 +110,7 @@ export class RegisterComponent implements OnInit {
   private readonly routingService = inject(RoutingService);
   private readonly renderer = inject(Renderer2);
   private readonly el = inject(ElementRef);
-  private readonly redAlertThemeService = inject(RedAlertThemeService);
+  private readonly alertThemeService = inject(AlertThemeService);
 
   ngOnInit() {
     this.registerForm = this.formBuilder.nonNullable.group(
@@ -205,7 +207,7 @@ export class RegisterComponent implements OnInit {
         } else {
           console.error('Registration error:', error);
         }
-        this.displayErrorMessage(errMessage);
+        this.displayErrorMessage(errMessage, error?.status);
         this.isSubmitting = false;
       },
       complete: () => {
@@ -218,10 +220,16 @@ export class RegisterComponent implements OnInit {
     return this.routingService.getLink(route);
   }
 
-  displayErrorMessage(message: string) {
-    this.redAlertThemeService.applyRedAlertThemeThenClearAfterAShortTime(
+  displayErrorMessage(message: string, httpStatus?: number) {
+    const state =
+      typeof httpStatus === 'number'
+        ? alertStateFromHttpStatus(httpStatus)
+        : 'red';
+
+    this.alertThemeService.applyAlertThemeThenApplyStaticTheme(
       this.renderer,
       this.el.nativeElement,
+      state,
     );
     this.errorMessage = message;
 
@@ -232,5 +240,13 @@ export class RegisterComponent implements OnInit {
 
   resetErrorMessage(): void {
     this.errorMessage = ''; // Reset error message
+  }
+
+  ngOnDestroy(): void {
+    this.alertThemeService.clearAlertStylesheet(
+      this.renderer,
+      this.el.nativeElement,
+    );
+    this.alertThemeService.clearTimers(this.el.nativeElement);
   }
 }
