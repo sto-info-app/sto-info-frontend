@@ -56,6 +56,14 @@ describe('ProfilePicComponent', () => {
     fixture.detectChanges();
   });
 
+  beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });

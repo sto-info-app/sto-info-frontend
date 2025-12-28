@@ -47,8 +47,13 @@ describe('VerifyEmailComponent', () => {
     fixture.detectChanges();
   });
 
+  beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
   afterEach(() => {
     httpMock.verify();
+    jest.restoreAllMocks();
   });
 
   it('should create', () => {
@@ -88,7 +93,6 @@ describe('VerifyEmailComponent', () => {
     });
 
     it('should handle status 0 error', () => {
-      spyOn(console, 'error');
       component.verifyEmail();
       const req = httpMock.expectOne(API_URLS.AUTH_VERIFICATION_EMAIL);
       req.error(new ProgressEvent('error'), { status: 0 });
@@ -142,7 +146,6 @@ describe('VerifyEmailComponent', () => {
     });
 
     it('should handle status 0 error', () => {
-      spyOn(console, 'error');
       component.resendVerificationEmail();
       const req = httpMock.expectOne(API_URLS.AUTH_RESEND_VERIFICATION_EMAIL);
       req.error(new ProgressEvent('error'), { status: 0 });

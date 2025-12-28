@@ -42,6 +42,14 @@ describe('ResetPasswordRequestComponent', () => {
     fixture.detectChanges();
   });
 
+  beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -89,8 +97,6 @@ describe('ResetPasswordRequestComponent', () => {
       const error = { message: 'Server error' };
       authServiceSpy.resetPassword.mockReturnValue(throwError(() => error));
 
-      spyOn(console, 'error'); // Suppress console error
-
       component.onPasswordReset();
 
       expect(component.errorMessage).toBe('Server error');
@@ -102,8 +108,6 @@ describe('ResetPasswordRequestComponent', () => {
       authServiceSpy.resetPassword.mockReturnValue(
         throwError(() => 'Unknown error'),
       );
-
-      spyOn(console, 'error');
 
       component.onPasswordReset();
 

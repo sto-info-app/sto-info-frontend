@@ -164,6 +164,8 @@ describe('AppComponent', () => {
 
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
+
+    jest.spyOn(console, 'info').mockImplementation(() => {});
   });
 
   afterEach(() => {

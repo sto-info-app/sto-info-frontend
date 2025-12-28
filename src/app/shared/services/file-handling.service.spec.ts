@@ -12,6 +12,14 @@ describe('FileHandlingService', () => {
     service = TestBed.inject(FileHandlingService);
   });
 
+  beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
