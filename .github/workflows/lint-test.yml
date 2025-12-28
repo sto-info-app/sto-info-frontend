@@ -83,6 +83,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Setup project
         uses: ./.github/actions/setup-project
@@ -136,8 +138,20 @@ jobs:
       - name: Run Linter
         run: npm run lint
 
-      - name: Run Tests
-        run: npm run test
+      - name: Run Tests (with coverage)
+        run: npm run test:ci
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@ba3875ecf642b2129de2b589510c81a8b53dbf4e
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+        # Skip analysis for draft PRs and PRs from forks where secrets are unavailable
+        if: >-
+          github.event_name == 'push' ||
+          (github.event_name == 'pull_request' &&
+           github.event.pull_request.draft == false &&
+           github.event.pull_request.head.repo.full_name == github.repository)
 
       - name: Build (push only)
         if: github.event_name == 'push'
