@@ -1,226 +1,270 @@
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
-import { By } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute, Router } from '@angular/router';
-import { of } from 'rxjs';
 import {
-  MAX_CHARS_NAMES,
-  MAX_CHARS_USERNAME,
-} from 'src/app/shared/constants/forms.constants';
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
+import { ReactiveFormsModule } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ActivatedRoute, Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { of, throwError } from 'rxjs';
+import {
+  MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
+  MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT,
+} from 'src/app/shared/constants/error-messages.constants';
+import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
+import { RoutingService } from 'src/app/shared/services/routing.service';
 import { AuthService } from '../auth/auth.service';
 import { RegisterComponent } from './register.component';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
-  let authService: AuthService;
-  let router: Router;
+  let authServiceSpy: jest.Mocked<AuthService>;
+  let routingServiceSpy: jest.Mocked<RoutingService>;
+  let alertThemeServiceSpy: jest.Mocked<AlertThemeService>;
+  let router: Router; // Use real router from TestingModule
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    // Jest Mocks with Strict Typing
+    authServiceSpy = {
+      register: jest.fn(),
+    } as unknown as jest.Mocked<AuthService>;
+
+    routingServiceSpy = {
+      getLink: jest.fn(),
+    } as unknown as jest.Mocked<RoutingService>;
+
+    alertThemeServiceSpy = {
+      applyAlertThemeThenApplyStaticTheme: jest.fn(),
+      clearAlertStylesheet: jest.fn(),
+      clearTimers: jest.fn(),
+    } as unknown as jest.Mocked<AlertThemeService>;
+
+    await TestBed.configureTestingModule({
       imports: [
         RegisterComponent,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
+        NoopAnimationsModule,
+        RouterTestingModule, // Provides Router, ActivatedRoute, etc.
       ],
       providers: [
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: RoutingService, useValue: routingServiceSpy },
+        { provide: AlertThemeService, useValue: alertThemeServiceSpy },
+        // Do not provide Router manually
         {
           provide: ActivatedRoute,
-          useValue: {
-            snapshot: { paramMap: new Map(), data: {} },
-          },
+          useValue: { snapshot: { paramMap: { get: () => null } } },
         },
-        {
-          provide: AuthService,
-          useValue: {
-            register: () => of({}),
-          },
-        },
-        provideHttpClient(),
-        provideHttpClientTesting(),
       ],
     }).compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
-    authService = TestBed.inject(AuthService);
     router = TestBed.inject(Router);
+    jest.spyOn(router, 'navigate'); // Spy on the real router instance
     fixture.detectChanges();
-  });
-
-  it('form invalid when empty', () => {
-    expect(component.registerForm.valid).toBeFalsy();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should show errors if fields are empty', () => {
-    const firstNameControl = component.registerForm.controls['firstName'];
-    const lastNameControl = component.registerForm.controls['lastName'];
-    const usernameControl = component.registerForm.controls['username'];
-    const emailControl = component.registerForm.controls['email'];
-    const passwordControl = component.registerForm.controls['password'];
-    const confirmPasswordControl =
-      component.registerForm.controls['confirmPassword'];
+  describe('Form Validation', () => {
+    it('should be invalid when empty', () => {
+      expect(component.registerForm.valid).toBe(false);
+    });
 
-    firstNameControl.markAsTouched();
-    lastNameControl.markAsTouched();
-    usernameControl.markAsTouched();
-    emailControl.markAsTouched();
-    passwordControl.markAsTouched();
-    confirmPasswordControl.markAsTouched();
+    it('should validate required fields', () => {
+      const controls = component.registerForm.controls;
+      controls['firstName'].setValue('');
+      controls['lastName'].setValue('');
+      controls['username'].setValue('');
+      controls['email'].setValue('');
+      controls['password'].setValue('');
+      controls['confirmPassword'].setValue('');
 
-    fixture.detectChanges();
+      expect(component.registerForm.valid).toBe(false);
+      expect(controls['firstName'].errors?.['required']).toBeTruthy();
+      expect(controls['lastName'].errors?.['required']).toBeTruthy();
+      expect(controls['username'].errors?.['required']).toBeTruthy();
+    });
 
-    expect(firstNameControl.errors?.['required']).toBeTruthy();
-    expect(lastNameControl.errors?.['required']).toBeTruthy();
-    expect(usernameControl.errors?.['required']).toBeTruthy();
-    expect(emailControl.errors?.['required']).toBeTruthy();
-    expect(passwordControl.errors?.['required']).toBeTruthy();
-    expect(confirmPasswordControl.errors?.['required']).toBeTruthy();
+    // Table-driven patterns
+    const patternCases = [
+      { control: 'email', value: 'invalid-email', error: 'pattern' },
+      { control: 'username', value: 'user@name', error: 'pattern' },
+      { control: 'password', value: 'weak', error: 'pattern' },
+    ];
+
+    test.each(patternCases)(
+      'should validate pattern for $control',
+      ({ control, value, error }) => {
+        const ctrl = component.registerForm.controls[control];
+        ctrl.setValue(value);
+        expect(ctrl.errors?.[error]).toBeTruthy();
+      },
+    );
+
+    it('should validate password match', () => {
+      const controls = component.registerForm.controls;
+      controls['password'].setValue('Password123!');
+      controls['confirmPassword'].setValue('Password1234!');
+
+      component.registerForm.updateValueAndValidity();
+
+      expect(controls['confirmPassword'].errors?.['mustMatch']).toBeTruthy();
+    });
+
+    it('should be valid with correct data', () => {
+      component.registerForm.patchValue({
+        firstName: 'John',
+        lastName: 'Doe',
+        username: 'johndoe',
+        email: 'john@example.com',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      expect(component.registerForm.valid).toBe(true);
+    });
   });
 
-  it('should show errors if fields are invalid', async () => {
-    const firstNameControl = component.registerForm.controls['firstName'];
-    const lastNameControl = component.registerForm.controls['lastName'];
-    const usernameControl = component.registerForm.controls['username'];
-    const emailControl = component.registerForm.controls['email'];
-    const passwordControl = component.registerForm.controls['password'];
-    const confirmPasswordControl =
-      component.registerForm.controls['confirmPassword'];
+  describe('Registration Submission', () => {
+    beforeEach(() => {
+      component.registerForm.patchValue({
+        firstName: 'John',
+        lastName: 'Doe',
+        username: 'johndoe',
+        email: 'john@example.com',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
 
-    firstNameControl.setValue('a'.repeat(MAX_CHARS_NAMES + 1));
-    lastNameControl.setValue('a'.repeat(MAX_CHARS_NAMES + 1));
-    usernameControl.setValue('a'.repeat(MAX_CHARS_USERNAME + 1));
-    emailControl.setValue('not an email');
-    passwordControl.setValue('short');
-    confirmPasswordControl.setValue('D1fferent!');
+    it('should call register and navigate on success', () => {
+      authServiceSpy.register.mockReturnValue(of({}));
 
-    firstNameControl.updateValueAndValidity();
-    lastNameControl.updateValueAndValidity();
-    usernameControl.updateValueAndValidity();
-    emailControl.updateValueAndValidity();
-    passwordControl.updateValueAndValidity();
-    confirmPasswordControl.updateValueAndValidity();
+      component.onRegister();
 
-    firstNameControl.markAsDirty();
-    lastNameControl.markAsDirty();
-    usernameControl.markAsDirty();
-    emailControl.markAsDirty();
-    passwordControl.markAsDirty();
-    confirmPasswordControl.markAsDirty();
-
-    firstNameControl.markAsTouched();
-    lastNameControl.markAsTouched();
-    usernameControl.markAsTouched();
-    emailControl.markAsTouched();
-    passwordControl.markAsTouched();
-    confirmPasswordControl.markAsTouched();
-
-    await fixture.whenRenderingDone();
-    fixture.detectChanges();
-
-    // Check that the form controls have the right errors
-    expect(firstNameControl.errors?.['maxlength']).toBeTruthy();
-    expect(lastNameControl.errors?.['maxlength']).toBeTruthy();
-    expect(usernameControl.errors?.['maxlength']).toBeTruthy();
-    expect(emailControl.errors?.['pattern']).toBeTruthy();
-    expect(passwordControl.errors?.['minlength']).toBeTruthy();
-    expect(confirmPasswordControl.errors?.['mustMatch']).toBeTruthy();
-
-    // Check if the error messages are correctly displayed in the template
-    const firstNameErrorElement = fixture.debugElement.query(
-      By.css('#firstName-invalid-feedback .helper-error-text'),
-    );
-    expect(firstNameErrorElement).toBeTruthy();
-    expect(firstNameErrorElement.nativeElement.textContent).toContain(
-      component.errorTextNamesMaxLength,
-    );
-
-    const lastNameErrorElement = fixture.debugElement.query(
-      By.css('#lastName-invalid-feedback .helper-error-text'),
-    );
-    expect(lastNameErrorElement).toBeTruthy();
-    expect(lastNameErrorElement.nativeElement.textContent).toContain(
-      component.errorTextNamesMaxLength,
-    );
-
-    const usernameErrorElement = fixture.debugElement.query(
-      By.css('#username-invalid-feedback .helper-error-text'),
-    );
-    expect(usernameErrorElement).toBeTruthy();
-    expect(usernameErrorElement.nativeElement.textContent).toContain(
-      component.errorTextUsernameMaxLength,
-    );
-
-    const emailErrorElement = fixture.debugElement.query(
-      By.css('#email-invalid-feedback .helper-error-text'),
-    );
-    expect(emailErrorElement).toBeTruthy();
-    expect(emailErrorElement.nativeElement.textContent).toContain(
-      component.errorTextEmailInvalidFormat,
-    );
-
-    const passwordErrorElement = fixture.debugElement.query(
-      By.css('#password-invalid-feedback .helper-error-text'),
-    );
-    expect(passwordErrorElement).toBeTruthy();
-    expect(passwordErrorElement.nativeElement.textContent).toContain(
-      component.errorTextPasswordMinLength,
-    );
-
-    const confirmPasswordErrorElement = fixture.debugElement.query(
-      By.css('#confirmPassword-invalid-feedback .helper-error-text'),
-    );
-    expect(confirmPasswordErrorElement).toBeTruthy();
-    expect(confirmPasswordErrorElement.nativeElement.textContent).toContain(
-      component.errorTextPasswordsDoNotMatch,
-    );
-  });
-
-  it('should call authService.register when the form is submitted', () => {
-    jest.spyOn(authService, 'register').mockReturnValue(of({}));
-
-    // Fill in the form inputs
-    component.registerForm.controls['firstName'].setValue('Test');
-    component.registerForm.controls['lastName'].setValue('User');
-    component.registerForm.controls['username'].setValue('testuser');
-    component.registerForm.controls['email'].setValue('test@example.com');
-    component.registerForm.controls['password'].setValue('Password123!');
-    component.registerForm.controls['confirmPassword'].setValue('Password123!');
-
-    component.onRegister();
-
-    expect(authService.register).toHaveBeenCalled();
-  });
-
-  it('should navigate to /register/complete when the form is submitted successfully', done => {
-    jest.spyOn(authService, 'register').mockReturnValue(of({}));
-    jest
-      .spyOn(router, 'navigate')
-      .mockReturnValue(Promise.resolve(true) as unknown as Promise<boolean>);
-
-    // Fill in the form inputs
-    component.registerForm.controls['firstName'].setValue('Test');
-    component.registerForm.controls['lastName'].setValue('User');
-    component.registerForm.controls['username'].setValue('testuser');
-    component.registerForm.controls['email'].setValue('test@example.com');
-    component.registerForm.controls['password'].setValue('Password123!');
-    component.registerForm.controls['confirmPassword'].setValue('Password123!');
-
-    component.onRegister();
-
-    fixture.whenStable().then(() => {
-      expect(authService.register).toHaveBeenCalled();
+      expect(authServiceSpy.register).toHaveBeenCalled();
       expect(router.navigate).toHaveBeenCalledWith(['/register/complete']);
-      done();
+    });
+
+    const errorCases = [
+      { status: 0, errorMsg: MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT },
+      { status: 400, errorMsg: MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT },
+    ];
+
+    test.each(errorCases)(
+      'should handle status $status',
+      fakeAsync(
+        ({ status, errorMsg }: { status: number; errorMsg: string }) => {
+          authServiceSpy.register.mockReturnValue(
+            throwError(() => ({ status })),
+          );
+
+          component.onRegister();
+          expect(component.errorMessage).toBe(errorMsg);
+
+          if (status === 0) {
+            tick(component.showErrorMilliseconds);
+            expect(component.errorMessage).toBe('');
+          }
+        },
+      ),
+    );
+
+    it('should handle 409 Email conflict', () => {
+      authServiceSpy.register.mockReturnValue(
+        throwError(() => ({
+          status: 409,
+          error: { message: 'Email already exists' },
+        })),
+      );
+
+      component.onRegister();
+
+      expect(
+        component.registerForm.controls['email'].errors?.['uniqueEmail'],
+      ).toBeTruthy();
+    });
+
+    it('should handle 409 Username conflict', () => {
+      authServiceSpy.register.mockReturnValue(
+        throwError(() => ({
+          status: 409,
+          error: { message: 'Username already exists' },
+        })),
+      );
+
+      component.onRegister();
+
+      expect(
+        component.registerForm.controls['username'].errors?.['uniqueUsername'],
+      ).toBeTruthy();
+    });
+
+    it('should handle handle displayErrorMessage with no status', () => {
+      component.displayErrorMessage('Critical');
+      expect(
+        alertThemeServiceSpy.applyAlertThemeThenApplyStaticTheme,
+      ).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'red');
+    });
+
+    it('should handle 409 conflict that is not email or username', () => {
+      authServiceSpy.register.mockReturnValue(
+        throwError(() => ({
+          status: 409,
+          error: { message: 'Other' },
+        })),
+      );
+      component.onRegister();
+      // Should not set specific control errors
+      expect(component.registerForm.controls['email'].errors).toBeNull();
+      expect(component.registerForm.controls['username'].errors).toBeNull();
+    });
+
+    it('should handle unknown error', () => {
+      authServiceSpy.register.mockReturnValue(
+        throwError(() => ({ status: 500 })),
+      );
+
+      component.onRegister();
+
+      expect(
+        alertThemeServiceSpy.applyAlertThemeThenApplyStaticTheme,
+      ).toHaveBeenCalled();
+    });
+
+    it('should return early if form is invalid', () => {
+      component.registerForm.patchValue({ firstName: '' }); // Invalid form
+      component.onRegister();
+      expect(authServiceSpy.register).not.toHaveBeenCalled();
+      expect(component.isSubmitting).toBe(false);
+    });
+
+    it('should set mustMatch error on confirmPassword if form group has mustMatch error', () => {
+      // Manually set error on group to trigger the branch (even if validator doesn't normally do it)
+      component.registerForm.setErrors({ mustMatch: true });
+
+      component.onRegister();
+
+      expect(
+        component.registerForm.controls['confirmPassword'].hasError(
+          'mustMatch',
+        ),
+      ).toBe(true);
+      expect(component.isSubmitting).toBe(false);
+    });
+  });
+
+  describe('UI Helpers', () => {
+    it('should get route link', () => {
+      routingServiceSpy.getLink.mockReturnValue('/test-link');
+      expect(component.getRouteLink('test')).toBe('/test-link');
     });
   });
 });

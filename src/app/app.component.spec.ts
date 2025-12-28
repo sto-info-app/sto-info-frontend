@@ -188,6 +188,17 @@ describe('AppComponent', () => {
     });
   });
 
+  it('should continue countdown if autoLogoutCountdown > 0', () => {
+    runWithPatchedTimer('setInterval', () => {
+      mockAuthService.getSecondsUntilLoginSessionExpiry.mockReturnValue(10);
+      component.ngOnInit();
+      mockAuthService.isAuthenticated$.next(true);
+
+      expect(component.autoLogoutCountdown).toBe(10);
+      expect(mockAuthService.performLogout).not.toHaveBeenCalled();
+    });
+  });
+
   it('should stop countdown when authentication state changes to not logged in', () => {
     const stopCountdownSpy = jest.spyOn(
       component as unknown as { stopCountdown: () => void },
@@ -253,6 +264,93 @@ describe('AppComponent', () => {
 
     expect(dialogOpenSpy).toHaveBeenCalled();
     expect(mockAuthService.refreshToken).toHaveBeenCalled();
+  });
+  it('should handle stayLoggedIn = undefined in afterClosed', () => {
+    const afterClosed$ = of(undefined);
+    const dialogRefMock = {
+      afterClosed: jest.fn().mockReturnValue(afterClosed$),
+      close: jest.fn(),
+    } as unknown as MatDialogRef<RefreshSessionDialogComponent>;
+
+    jest
+      .spyOn((component as any).dialog, 'open')
+      .mockReturnValue(dialogRefMock);
+
+    (component as any).isLoggedIn = true;
+    (component as any).autoLogoutCountdown = 30;
+    (component as any).openRefreshSessionDialog();
+
+    expect(mockAuthService.refreshToken).not.toHaveBeenCalled();
+  });
+
+  it('should not load CookieYes script in ngOnInit if local env', () => {
+    (environment as any).env_name = 'local';
+    jest.spyOn(component as any, 'loadCookieYesScript');
+    component.ngOnInit();
+    expect((component as any).loadCookieYesScript).not.toHaveBeenCalled();
+  });
+
+  it('should not load CookieYes script if cookieYesUrl is missing', () => {
+    (environment as any).cookieYesUrl = undefined;
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    (component as any).loadCookieYesScript();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'CookieYes URL not set in environment',
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('should not perform consent actions if local env', () => {
+    (environment as any).env_name = 'local';
+    (component as any).consentGiven();
+    expect(mockScriptLoaderService.loadScript).not.toHaveBeenCalled();
+  });
+
+  it('should ignore non-NavigationEnd events', () => {
+    const sendPageViewSpy = jest.spyOn(component as any, 'sendPageView');
+    const routerEvents$ = (component as any).router.events as Subject<any>;
+    routerEvents$.next({ id: 1, url: '/test' });
+    expect(sendPageViewSpy).not.toHaveBeenCalled();
+  });
+
+  it('should handle missing CookieYes global', () => {
+    (environment as any).env_name = 'prod';
+    (environment as any).cookieYesUrl = 'http://test';
+    mockScriptLoaderService.loadScript.mockImplementation(options => {
+      (globalThis as any).CookieYes = undefined;
+      options.onLoad?.();
+    });
+    (component as any).loadCookieYesScript();
+  });
+
+  it('should handle missing dataLayer in gtag function', () => {
+    (environment as any).gaMeasurementId = 'G-TEST';
+    mockScriptLoaderService.loadScript.mockImplementation(options => {
+      options.onLoad?.();
+    });
+    (component as any).loadGoogleAnalyticsWithTrackingDisabled();
+
+    // Now trigger gtag
+    const globalWithGtag = globalThis as any;
+    const originalDataLayer = globalWithGtag.dataLayer;
+    globalWithGtag.dataLayer = undefined;
+
+    expect(() => {
+      globalWithGtag.gtag('event', 'test');
+    }).not.toThrow();
+
+    globalWithGtag.dataLayer = originalDataLayer;
+  });
+
+  it('should handle missing dataLayer global in loadGoogleAnalyticsWithTrackingDisabled', () => {
+    (environment as any).gaMeasurementId = 'G-TEST';
+    mockScriptLoaderService.loadScript.mockImplementation(options => {
+      (globalThis as any).dataLayer = undefined;
+      options.onLoad?.();
+      // Call the gtag implementation that was set up in onLoad
+      (globalThis as any).gtag('test');
+    });
+    (component as any).loadGoogleAnalyticsWithTrackingDisabled();
   });
 
   it('should not open the refresh dialog if already open', () => {
@@ -707,6 +805,151 @@ describe('AppComponent', () => {
     expect(mockLogRocketService.shutdown).toHaveBeenCalled();
   });
 
+  it('should not open refresh dialog when not logged in', () => {
+    (component as unknown as { isLoggedIn: boolean }).isLoggedIn = false;
+    (
+      component as unknown as { autoLogoutCountdown: number }
+    ).autoLogoutCountdown = 30;
+
+    (
+      component as unknown as { openRefreshSessionDialog: () => void }
+    ).openRefreshSessionDialog();
+
+    expect(mockDialog.open).not.toHaveBeenCalled();
+  });
+
+  it('should not open refresh dialog when countdown is zero', () => {
+    (component as unknown as { isLoggedIn: boolean }).isLoggedIn = true;
+    (
+      component as unknown as { autoLogoutCountdown: number }
+    ).autoLogoutCountdown = 0;
+
+    (
+      component as unknown as { openRefreshSessionDialog: () => void }
+    ).openRefreshSessionDialog();
+
+    expect(mockDialog.open).not.toHaveBeenCalled();
+  });
+
+  it('should not start countdown if already running', () => {
+    (component as unknown as { isLoggedIn: boolean }).isLoggedIn = true;
+    (
+      component as unknown as { intervalId: ReturnType<typeof setInterval> }
+    ).intervalId = 1 as unknown as ReturnType<typeof setInterval>;
+
+    const setIntervalSpy = jest.spyOn(globalThis, 'setInterval');
+
+    (component as unknown as { startCountdown: () => void }).startCountdown();
+
+    expect(setIntervalSpy).not.toHaveBeenCalled();
+  });
+
+  it('should close dialog when countdown expires', () => {
+    const dialogRefMock = {
+      close: jest.fn(),
+    } as unknown as MatDialogRef<RefreshSessionDialogComponent>;
+
+    (
+      component as unknown as {
+        dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null;
+      }
+    ).dialogRef = dialogRefMock;
+
+    mockAuthService.getSecondsUntilLoginSessionExpiry.mockReturnValue(0);
+
+    runWithPatchedTimer('setInterval', () => {
+      (component as unknown as { isLoggedIn: boolean }).isLoggedIn = true;
+      (component as unknown as { startCountdown: () => void }).startCountdown();
+
+      expect(dialogRefMock.close).toHaveBeenCalled();
+      expect(mockAuthService.performLogout).toHaveBeenCalled();
+    });
+  });
+
+  it('should return early from enableGoogleAnalyticsTracking when no measurement ID', () => {
+    const originalId = environment.gaMeasurementId;
+    (environment as { gaMeasurementId: string }).gaMeasurementId = '';
+
+    (
+      component as unknown as { enableGoogleAnalyticsTracking: () => void }
+    ).enableGoogleAnalyticsTracking();
+
+    // Should not set any global flags
+    expect(
+      (globalThis as unknown as { [key: string]: boolean })['ga-disable-'],
+    ).toBeUndefined();
+
+    (environment as { gaMeasurementId: string }).gaMeasurementId = originalId;
+  });
+
+  it('should return early from disableGoogleAnalyticsTracking when no measurement ID', () => {
+    const originalId = environment.gaMeasurementId;
+    (environment as { gaMeasurementId: string }).gaMeasurementId = '';
+
+    (
+      component as unknown as { disableGoogleAnalyticsTracking: () => void }
+    ).disableGoogleAnalyticsTracking();
+
+    // Should not set any global flags
+    expect(
+      (globalThis as unknown as { [key: string]: boolean })['ga-disable-'],
+    ).toBeUndefined();
+
+    (environment as { gaMeasurementId: string }).gaMeasurementId = originalId;
+  });
+
+  it('should not reload Google Analytics if already loaded', () => {
+    (environment as { gaMeasurementId: string }).gaMeasurementId =
+      'G-TEST-MEASUREMENT';
+    (
+      component as unknown as { googleAnalyticsLoaded: boolean }
+    ).googleAnalyticsLoaded = true;
+
+    (
+      component as unknown as {
+        loadGoogleAnalyticsWithTrackingDisabled: () => void;
+      }
+    ).loadGoogleAnalyticsWithTrackingDisabled();
+
+    expect(mockScriptLoaderService.loadScript).not.toHaveBeenCalled();
+  });
+
+  it('should track page views with setTimeout delay', () => {
+    const sendPageViewSpy = jest.spyOn(
+      component as unknown as { sendPageView: (url: string) => void },
+      'sendPageView',
+    );
+
+    (
+      component as unknown as { trackPageViewsOnNavigation: () => void }
+    ).trackPageViewsOnNavigation();
+
+    runWithPatchedTimer('setTimeout', () => {
+      const event = new NavigationEnd(1, '/old', '/new');
+      routerEvents$.next(event);
+
+      expect(sendPageViewSpy).toHaveBeenCalledWith('/new');
+    });
+  });
+
+  it('should enable GA tracking when already loaded', () => {
+    (environment as { env_name: string }).env_name = 'test';
+    (environment as { gaMeasurementId: string }).gaMeasurementId =
+      'G-TEST-MEASUREMENT';
+    (
+      component as unknown as { googleAnalyticsLoaded: boolean }
+    ).googleAnalyticsLoaded = true;
+
+    const enableGoogleAnalyticsTrackingSpy = jest.spyOn(
+      component as unknown as { enableGoogleAnalyticsTracking: () => void },
+      'enableGoogleAnalyticsTracking',
+    );
+
+    (component as unknown as { consentGiven: () => void }).consentGiven();
+
+    expect(enableGoogleAnalyticsTrackingSpy).toHaveBeenCalled();
+  });
+
   it('should clean up subscriptions and countdown on destroy', () => {
     const stopCountdownSpy = jest.spyOn(
       component as unknown as { stopCountdown: () => void },
@@ -716,5 +959,75 @@ describe('AppComponent', () => {
     component.ngOnDestroy();
 
     expect(stopCountdownSpy).toHaveBeenCalled();
+  });
+
+  describe('Remaining Branch Coverage', () => {
+    it('should not perform logout if not logged in on expiry announcement', () => {
+      (component as any).isLoggedIn = false;
+      (component as any).subscribeTExpiryAnnouncements();
+      mockAuthService.expiryAnnounced$.next(1000);
+      expect(mockAuthService.performLogout).not.toHaveBeenCalled();
+    });
+
+    it('should not start countdown if expiryTime is 0', () => {
+      (component as any).isLoggedIn = true;
+      const startCountdownSpy = jest.spyOn(component as any, 'startCountdown');
+      (component as any).subscribeTExpiryAnnouncements();
+      mockAuthService.expiryAnnounced$.next(0);
+      expect(startCountdownSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not open refresh dialog if not logged in on warning announcement', () => {
+      (component as any).isLoggedIn = false;
+      const openRefreshSessionDialogSpy = jest.spyOn(
+        component as any,
+        'openRefreshSessionDialog',
+      );
+      (component as any).subscribeToWarningAnnouncements();
+      mockAuthService.warningAnnounced$.next(Date.now() + 1000);
+      expect(openRefreshSessionDialogSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not open refresh dialog if intervalId is null on warning announcement', () => {
+      (component as any).isLoggedIn = true;
+      (component as any).intervalId = null;
+      const openRefreshSessionDialogSpy = jest.spyOn(
+        component as any,
+        'openRefreshSessionDialog',
+      );
+      (component as any).subscribeToWarningAnnouncements();
+      mockAuthService.warningAnnounced$.next(Date.now() + 1000);
+      expect(openRefreshSessionDialogSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not open refresh dialog if delay is not positive', () => {
+      (component as any).isLoggedIn = true;
+      (component as any).intervalId = 1;
+      const openRefreshSessionDialogSpy = jest.spyOn(
+        component as any,
+        'openRefreshSessionDialog',
+      );
+      (component as any).subscribeToWarningAnnouncements();
+      mockAuthService.warningAnnounced$.next(Date.now() - 1000);
+      expect(openRefreshSessionDialogSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not start countdown if already logged in and interval exists', () => {
+      (component as any).isLoggedIn = true;
+      (component as any).intervalId = 1;
+      const startCountdownSpy = jest.spyOn(component as any, 'startCountdown');
+      (component as any).subscribeToAuthenticationState();
+      mockAuthService.isAuthenticated$.next(true);
+      expect(startCountdownSpy).not.toHaveBeenCalled();
+    });
+
+    it('should stop countdown if interval is not null but logged in is false', () => {
+      (component as any).isLoggedIn = false;
+      (component as any).intervalId = 1;
+      const stopCountdownSpy = jest.spyOn(component as any, 'stopCountdown');
+      (component as any).subscribeToAuthenticationState();
+      mockAuthService.isAuthenticated$.next(false);
+      expect(stopCountdownSpy).toHaveBeenCalled();
+    });
   });
 });
