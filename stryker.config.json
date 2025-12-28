@@ -24,8 +24,7 @@
     "!src/**/*.constants.ts",
     "!src/test-setup.ts"
   ],
-  "checkers": ["typescript"],
-  "tsconfigFile": "tsconfig.jest.json",
+  "checkers": [],
   "coverageAnalysis": "perTest",
   "concurrency": 2,
   "thresholds": {
