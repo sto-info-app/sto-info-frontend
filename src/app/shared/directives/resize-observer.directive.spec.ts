@@ -21,7 +21,7 @@ describe('ResizeObserverDirective', () => {
   let component: TestHostComponent;
   let fixture: ComponentFixture<TestHostComponent>;
   let mockResizeObserver: jest.Mock;
-  let observerCallback: (entries: any[]) => void;
+  let observerCallback: (entries: Partial<ResizeObserverEntry>[]) => void;
 
   beforeEach(async () => {
     mockResizeObserver = jest.fn().mockImplementation(callback => {
@@ -34,7 +34,8 @@ describe('ResizeObserverDirective', () => {
     });
 
     // Mock global ResizeObserver
-    global.ResizeObserver = mockResizeObserver as any;
+    global.ResizeObserver =
+      mockResizeObserver as unknown as typeof ResizeObserver;
 
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
@@ -65,7 +66,11 @@ describe('ResizeObserverDirective', () => {
 
   it('should disconnect observer on destroy', () => {
     const disconnectSpy = jest.spyOn(
-      (component.directive as any).observer,
+      (
+        component.directive as unknown as {
+          observer: { disconnect: () => void };
+        }
+      ).observer,
       'disconnect',
     );
     fixture.destroy();

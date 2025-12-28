@@ -19,8 +19,18 @@ describe('DebuggingService', () => {
     });
     service = TestBed.inject(DebuggingService);
     // Reset mocks default
-    (environment as any).production = false;
-    (environment as any).allowDebugging = false;
+    (
+      environment as unknown as {
+        production: boolean;
+        allowDebugging: boolean | undefined;
+      }
+    ).production = false;
+    (
+      environment as unknown as {
+        production: boolean;
+        allowDebugging: boolean | undefined;
+      }
+    ).allowDebugging = false;
     // Typescript might complain about assigning to read-only property if strictly typed.
     // In Jest module mocks, it's often a plain object.
   });
@@ -30,8 +40,18 @@ describe('DebuggingService', () => {
   });
 
   it('should return false if production is true', () => {
-    (environment as any).production = true;
-    (environment as any).allowDebugging = true; // Even if true, prod overrides?
+    (
+      environment as unknown as {
+        production: boolean;
+        allowDebugging: boolean | undefined;
+      }
+    ).production = true;
+    (
+      environment as unknown as {
+        production: boolean;
+        allowDebugging: boolean | undefined;
+      }
+    ).allowDebugging = true; // Even if true, prod overrides?
     // Implementation:
     // if (environment.production) return false;
 
@@ -39,17 +59,42 @@ describe('DebuggingService', () => {
   });
 
   it('should return allowDebugging value if production is false', () => {
-    (environment as any).production = false;
-    (environment as any).allowDebugging = true;
+    (
+      environment as unknown as {
+        production: boolean;
+        allowDebugging: boolean | undefined;
+      }
+    ).production = false;
+    (
+      environment as unknown as {
+        production: boolean;
+        allowDebugging: boolean | undefined;
+      }
+    ).allowDebugging = true;
     expect(service.allowDebugging()).toBe(true);
 
-    (environment as any).allowDebugging = false;
+    (
+      environment as unknown as {
+        production: boolean;
+        allowDebugging: boolean | undefined;
+      }
+    ).allowDebugging = false;
     expect(service.allowDebugging()).toBe(false);
   });
 
   it('should return false if allowDebugging is undefined', () => {
-    (environment as any).production = false;
-    (environment as any).allowDebugging = undefined;
+    (
+      environment as unknown as {
+        production: boolean;
+        allowDebugging: boolean | undefined;
+      }
+    ).production = false;
+    (
+      environment as unknown as {
+        production: boolean;
+        allowDebugging: boolean | undefined;
+      }
+    ).allowDebugging = undefined;
     expect(service.allowDebugging()).toBe(false);
   });
 });

@@ -25,7 +25,7 @@ describe('ProfilePicComponent', () => {
   let component: ProfilePicComponent;
   let fixture: ComponentFixture<ProfilePicComponent>;
   let mockDashboardService: jest.Mocked<DashboardService>;
-  let mockDialogRef: jest.Mocked<MatDialogRef<any>>;
+  let mockDialogRef: jest.Mocked<MatDialogRef<ProfilePicComponent>>;
   let mockSanitizer: jest.Mocked<DomSanitizer>;
 
   beforeEach(async () => {
@@ -35,7 +35,7 @@ describe('ProfilePicComponent', () => {
 
     mockDialogRef = {
       close: jest.fn(),
-    } as unknown as jest.Mocked<MatDialogRef<any>>;
+    } as unknown as jest.Mocked<MatDialogRef<ProfilePicComponent>>;
 
     mockSanitizer = {
       bypassSecurityTrustUrl: jest.fn().mockImplementation(val => val),
@@ -89,7 +89,7 @@ describe('ProfilePicComponent', () => {
     });
 
     it('should return early if event is null', () => {
-      component.onFileChangeEvent(null as any);
+      component.onFileChangeEvent(null as unknown as Event);
       expect(component.imageChangedEvent).toBeNull();
     });
 
@@ -102,7 +102,7 @@ describe('ProfilePicComponent', () => {
     it('should handle event.target existing but files being null', () => {
       const event = { target: {} } as unknown as Event;
       component.onFileChangeEvent(event);
-      expect(component.imageChangedEvent).toBe(event as any);
+      expect(component.imageChangedEvent).toBe(event);
     });
   });
 
@@ -113,12 +113,12 @@ describe('ProfilePicComponent', () => {
     // Mock FileReader
     const mockFileReader = {
       readAsDataURL: jest.fn(),
-      onloadend: null as any,
+      onloadend: null as unknown as () => void,
       result: 'data:image/png;base64,test',
     };
     jest
       .spyOn(window, 'FileReader')
-      .mockImplementation(() => mockFileReader as any);
+      .mockImplementation(() => mockFileReader as unknown as FileReader);
 
     component.onImageCropped(event);
 
@@ -229,7 +229,7 @@ describe('ProfilePicComponent', () => {
       const originalFormData = globalThis.FormData;
       globalThis.FormData = jest.fn().mockImplementation(() => {
         throw new Error('Form data error');
-      }) as any;
+      }) as unknown as typeof FormData;
 
       const consoleSpy = jest
         .spyOn(console, 'error')

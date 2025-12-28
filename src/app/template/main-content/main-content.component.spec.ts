@@ -25,7 +25,13 @@ describe('MainContentComponent', () => {
   };
   let healthServiceSpy: jest.Mocked<HealthService>;
   let router: Router;
-  let routerEventsSubject: Subject<any>;
+  let routerEventsSubject: Subject<unknown>;
+
+  interface MainContentComponentInternals {
+    getDeepestRouteRequiresApi(route: ActivatedRoute): boolean;
+    updateBackendVersion(response: HttpResponse<string>): void;
+    subs: { unsubscribe: () => void };
+  }
 
   beforeEach(() => {
     mockRoutingService = {
@@ -38,7 +44,7 @@ describe('MainContentComponent', () => {
         .mockReturnValue('random-theme-text'),
     };
 
-    routerEventsSubject = new Subject<any>();
+    routerEventsSubject = new Subject<unknown>();
     const stateSubject = new Subject<string>();
 
     healthServiceSpy = {
@@ -101,7 +107,11 @@ describe('MainContentComponent', () => {
   });
 
   it('should handle empty frontend version from environment', () => {
-    (environment as any).version = undefined;
+    (
+      environment as unknown as {
+        version: string | undefined;
+      }
+    ).version = undefined;
 
     // We need to re-instantiate or manually trigger to test the initial value
     // But since it's a property initialization, we can just check if we can set it
@@ -222,7 +232,10 @@ describe('MainContentComponent', () => {
 
       // Mock the private method to return true
       jest
-        .spyOn(component as any, 'getDeepestRouteRequiresApi')
+        .spyOn(
+          component as unknown as MainContentComponentInternals,
+          'getDeepestRouteRequiresApi',
+        )
         .mockReturnValue(true);
 
       // Trigger navigation event to refresh requiresApi$
@@ -247,7 +260,10 @@ describe('MainContentComponent', () => {
 
       // Mock the private method to return false
       jest
-        .spyOn(component as any, 'getDeepestRouteRequiresApi')
+        .spyOn(
+          component as unknown as MainContentComponentInternals,
+          'getDeepestRouteRequiresApi',
+        )
         .mockReturnValue(false);
 
       // Trigger navigation event
@@ -265,7 +281,10 @@ describe('MainContentComponent', () => {
   describe('Health polling triggers', () => {
     it('should start polling when requiresApi becomes true', () => {
       jest
-        .spyOn(component as any, 'getDeepestRouteRequiresApi')
+        .spyOn(
+          component as unknown as MainContentComponentInternals,
+          'getDeepestRouteRequiresApi',
+        )
         .mockReturnValue(true);
       routerEventsSubject.next(
         new NavigationEnd(1, '/dashboard', '/dashboard'),
@@ -275,7 +294,10 @@ describe('MainContentComponent', () => {
 
     it('should stop polling when requiresApi becomes false', () => {
       jest
-        .spyOn(component as any, 'getDeepestRouteRequiresApi')
+        .spyOn(
+          component as unknown as MainContentComponentInternals,
+          'getDeepestRouteRequiresApi',
+        )
         .mockReturnValue(false);
       routerEventsSubject.next(new NavigationEnd(1, '/home', '/home'));
       expect(healthServiceSpy.stopPolling).toHaveBeenCalled();
@@ -286,13 +308,18 @@ describe('MainContentComponent', () => {
         snapshot: { data: undefined },
         firstChild: null,
       } as unknown as ActivatedRoute;
-      const result = (component as any).getDeepestRouteRequiresApi(mockRoute);
+      const result = (
+        component as unknown as MainContentComponentInternals
+      ).getDeepestRouteRequiresApi(mockRoute);
       expect(result).toBe(false);
     });
   });
 
   it('should unsubscribe on destroy', () => {
-    const unsubscribeSpy = jest.spyOn(component['subs'], 'unsubscribe');
+    const unsubscribeSpy = jest.spyOn(
+      (component as unknown as MainContentComponentInternals).subs,
+      'unsubscribe',
+    );
     component.ngOnDestroy();
     expect(unsubscribeSpy).toHaveBeenCalled();
   });
@@ -304,17 +331,21 @@ describe('MainContentComponent', () => {
         body: '1.2.3',
         status: 400,
       });
-      (component as any).updateBackendVersion(response);
+      (
+        component as unknown as MainContentComponentInternals
+      ).updateBackendVersion(response);
       expect(component.backendAppVersion).toBe('');
     });
 
     it('should not update backend version if body is not a string', () => {
       component.backendAppVersion = '';
       const response = new HttpResponse({
-        body: { version: '1.2.3' } as any,
+        body: { version: '1.2.3' } as unknown as string,
         status: 200,
       });
-      (component as any).updateBackendVersion(response);
+      (
+        component as unknown as MainContentComponentInternals
+      ).updateBackendVersion(response);
       expect(component.backendAppVersion).toBe('');
     });
 
@@ -324,7 +355,9 @@ describe('MainContentComponent', () => {
         body: '1.0.0',
         status: 200,
       });
-      (component as any).updateBackendVersion(response);
+      (
+        component as unknown as MainContentComponentInternals
+      ).updateBackendVersion(response);
       expect(component.backendAppVersion).toBe('1.0.0');
     });
   });
@@ -344,29 +377,31 @@ describe('MainContentComponent', () => {
 
   it('should use empty string if version is missing', () => {
     const originalVersion = environment.version;
-    (environment as any).version = undefined;
+    (environment as unknown as { version: string | undefined }).version =
+      undefined;
     const localFixture = TestBed.createComponent(MainContentComponent);
 
     const req = httpTestingController.expectOne(API_URLS.VERSION);
     req.flush('1.0.0');
 
     expect(localFixture.componentInstance.frontendAppVersion).toBe('');
-    (environment as any).version = originalVersion;
+    (environment as unknown as { version: string | undefined }).version =
+      originalVersion;
   });
 
   it('should traverse to the deepest route for requiresApi', () => {
     const childRoute = {
       firstChild: null,
       snapshot: { data: { requiresApi: true } },
-    } as any;
+    } as unknown as ActivatedRoute;
     const parentRoute = {
       firstChild: childRoute,
       snapshot: { data: { requiresApi: false } },
-    } as any;
+    } as unknown as ActivatedRoute;
 
-    const requiresApi = (component as any).getDeepestRouteRequiresApi(
-      parentRoute,
-    );
+    const requiresApi = (
+      component as unknown as MainContentComponentInternals
+    ).getDeepestRouteRequiresApi(parentRoute);
     expect(requiresApi).toBe(true);
   });
 });

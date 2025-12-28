@@ -16,7 +16,7 @@ describe('RefreshSessionDialogComponent', () => {
   beforeEach(async () => {
     mockDialogRef = {
       close: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<MatDialogRef<RefreshSessionDialogComponent>>;
 
     mockAppComponent = {
       logout: jest.fn(),

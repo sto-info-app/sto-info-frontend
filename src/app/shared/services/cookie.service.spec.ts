@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { BehaviorSubject } from 'rxjs';
 import { CookieService } from './cookie.service';
 
 describe('CookieService', () => {
@@ -124,7 +125,14 @@ describe('CookieService', () => {
 
     it('should not update status if it has not changed', () => {
       service.setCookieStatus(true);
-      const nextSpy = jest.spyOn((service as any).cookieStatusSubject, 'next');
+      const nextSpy = jest.spyOn(
+        (
+          service as unknown as {
+            cookieStatusSubject: BehaviorSubject<boolean>;
+          }
+        ).cookieStatusSubject,
+        'next',
+      );
       document.cookie = 'my_status=true';
       service.getSpecificCookieStatus('my_status');
       // next should not be called because status is already true

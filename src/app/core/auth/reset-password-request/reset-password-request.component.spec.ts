@@ -10,8 +10,12 @@ import { ResetPasswordRequestComponent } from './reset-password-request.componen
 describe('ResetPasswordRequestComponent', () => {
   let component: ResetPasswordRequestComponent;
   let fixture: ComponentFixture<ResetPasswordRequestComponent>;
-  let authServiceSpy: any;
-  let routingServiceSpy: any;
+  let authServiceSpy: {
+    resetPassword: jest.Mock;
+  };
+  let routingServiceSpy: {
+    getLink: jest.Mock;
+  };
 
   beforeEach(async () => {
     authServiceSpy = {

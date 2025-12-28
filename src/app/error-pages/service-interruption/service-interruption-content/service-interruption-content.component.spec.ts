@@ -18,6 +18,11 @@ describe('ServiceInterruptionContentComponent', () => {
   let mockHealthService: { state$: BehaviorSubject<string> };
   let mockRenderer: jest.Mocked<Renderer2>;
 
+  interface ComponentInternals {
+    applyAlertStylesheet(color?: string): void;
+    subs: { unsubscribe: () => void };
+  }
+
   beforeEach(async () => {
     mockAlertThemeService = {
       applyAlertThemeThenApplyStaticTheme: jest.fn(),
@@ -109,7 +114,7 @@ describe('ServiceInterruptionContentComponent', () => {
     });
 
     it('should use default yellow color in applyAlertStylesheet if none provided', () => {
-      (component as any).applyAlertStylesheet();
+      (component as unknown as ComponentInternals).applyAlertStylesheet();
       expect(
         mockAlertThemeService.applyAlertThemeThenApplyStaticTheme,
       ).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), 'yellow');
@@ -118,7 +123,10 @@ describe('ServiceInterruptionContentComponent', () => {
 
   it('should cleanup on destroy', () => {
     fixture.detectChanges();
-    const unsubscribeSpy = jest.spyOn((component as any).subs, 'unsubscribe');
+    const unsubscribeSpy = jest.spyOn(
+      (component as unknown as ComponentInternals).subs,
+      'unsubscribe',
+    );
 
     component.ngOnDestroy();
 

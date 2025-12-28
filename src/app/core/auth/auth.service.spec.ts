@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpClient, provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -19,6 +19,12 @@ describe('AuthService', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
   let routerSpy: jest.Mocked<Router>;
+
+  interface AuthServiceInternals {
+    http: HttpClient;
+    autoLogoutTimeout: ReturnType<typeof setTimeout> | null;
+    refreshTokenTimeout: ReturnType<typeof setTimeout> | null;
+  }
 
   beforeEach(() => {
     localStorage.clear();
@@ -314,7 +320,10 @@ describe('AuthService', () => {
       localStorage.setItem('expires_at', (Date.now() + 10000).toString());
       localStorage.removeItem('refresh_token');
 
-      const postSpy = jest.spyOn((service as any).http, 'post');
+      const postSpy = jest.spyOn(
+        (service as unknown as AuthServiceInternals).http,
+        'post',
+      );
       service.performLogout();
       expect(postSpy).not.toHaveBeenCalled();
     });
@@ -385,7 +394,7 @@ describe('AuthService', () => {
     }));
 
     it('should clear auto logout timer', () => {
-      service['autoLogoutTimeout'] = setTimeout(() => {}, 1000) as any;
+      service['autoLogoutTimeout'] = setTimeout(() => {}, 1000);
       service.clearAutoLogoutTimer();
       expect(service['autoLogoutTimeout']).toBeNull();
     });
@@ -436,8 +445,16 @@ describe('AuthService', () => {
     });
 
     it('should use default values for timings when not in environment', () => {
-      (environment as any).minsBeforeLogoutExpiryToShowWarning = undefined;
-      (environment as any).minsBeforeLogoutExpiryToRefreshToken = undefined;
+      (
+        environment as unknown as {
+          minsBeforeLogoutExpiryToShowWarning: number | undefined;
+        }
+      ).minsBeforeLogoutExpiryToShowWarning = undefined;
+      (
+        environment as unknown as {
+          minsBeforeLogoutExpiryToRefreshToken: number | undefined;
+        }
+      ).minsBeforeLogoutExpiryToRefreshToken = undefined;
 
       // We can't easily re-instantiate the service to test property initializers
       // because they are already set. But we can test isTokenExpiringSoon calls.

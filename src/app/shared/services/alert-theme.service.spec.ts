@@ -37,7 +37,9 @@ describe('AlertThemeService', () => {
     } as unknown as Element;
 
     // basic mock return values
-    rendererSpy.createElement.mockReturnValue('mockLinkElement' as any); // Cast because createElement returns actual T
+    rendererSpy.createElement.mockReturnValue(
+      'mockLinkElement' as unknown as HTMLLinkElement,
+    );
   });
 
   it('should be created', () => {
