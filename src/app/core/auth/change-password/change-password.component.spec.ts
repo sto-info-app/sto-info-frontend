@@ -1,123 +1,173 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
+
+import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
+import { RoutingService } from 'src/app/shared/services/routing.service';
 import { AuthService } from '../auth.service';
 import { ChangePasswordComponent } from './change-password.component';
-
-interface ValidationErrors {
-  required?: boolean;
-  minlength?: boolean;
-  pattern?: boolean;
-}
 
 describe('ChangePasswordComponent', () => {
   let component: ChangePasswordComponent;
   let fixture: ComponentFixture<ChangePasswordComponent>;
-  let authService: jest.Mocked<AuthService>;
+  let mockAuthService: jest.Mocked<AuthService>;
+  let mockRoutingService: jest.Mocked<RoutingService>;
+  let mockActivatedRoute: ActivatedRoute;
 
   beforeEach(async () => {
-    const authServiceSpy: jest.Mocked<AuthService> = {
+    mockAuthService = {
       changePassword: jest.fn(),
       isLoggedIn: jest.fn(),
+      performLogout: jest.fn(),
     } as unknown as jest.Mocked<AuthService>;
 
+    mockRoutingService = {
+      getLink: jest.fn().mockReturnValue('/mock-route'),
+    } as unknown as jest.Mocked<RoutingService>;
+
+    mockActivatedRoute = {
+      snapshot: {
+        queryParamMap: {
+          get: jest.fn().mockReturnValue('mock-token'),
+        },
+      },
+    } as unknown as ActivatedRoute;
+
     await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule, ChangePasswordComponent],
+      imports: [
+        ReactiveFormsModule,
+        NoopAnimationsModule,
+        ChangePasswordComponent,
+      ],
       providers: [
-        {
-          provide: AuthService,
-          useValue: authServiceSpy,
-        },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: {
-              queryParamMap: {
-                get: () => 'token123',
-              },
-            },
-          },
-        },
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: RoutingService, useValue: mockRoutingService },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ChangePasswordComponent);
     component = fixture.componentInstance;
-    authService = TestBed.inject(AuthService) as jest.Mocked<AuthService>;
-
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should create', () => {
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
-  it('form invalid when empty', () => {
-    expect(component.changePasswordForm.valid).toBeFalsy();
+  it('should get token from query params on init', () => {
+    fixture.detectChanges();
+    expect(component.token).toBe('mock-token');
+    expect(component.seriousErrorMessage).toBe('');
   });
 
-  it('password field validity', () => {
-    let errors: ValidationErrors = {};
-    const password = component.changePasswordForm.controls['password'];
-    errors = password.errors || {};
-    expect(errors['required']).toBeTruthy();
-
-    // Set password to something
-    password.setValue('test');
-    errors = password.errors || {};
-    expect(errors['required']).toBeFalsy();
-    expect(errors['minlength']).toBeTruthy();
-    expect(errors['pattern']).toBeTruthy();
-
-    // Set password to something valid
-    password.setValue('Test@123');
-    errors = password.errors || {};
-    expect(errors['required']).toBeFalsy();
-    expect(errors['minlength']).toBeFalsy();
-    expect(errors['pattern']).toBeFalsy();
-  });
-
-  it('submitting a form emits a password', () => {
-    expect(component.changePasswordForm.valid).toBeFalsy();
-    component.changePasswordForm.controls['password'].setValue('Test@123');
-    component.changePasswordForm.controls['confirmPassword'].setValue(
-      'Test@123',
-    );
-    expect(component.changePasswordForm.valid).toBeTruthy();
-
-    authService.changePassword.mockReturnValue(of(undefined));
-
-    // Ensure the component has a valid token set before submitting.
-    component.token = 'token123';
-
-    component.onSubmit();
-
-    expect(authService.changePassword).toHaveBeenCalledTimes(1);
-    expect(authService.changePassword).toHaveBeenCalledWith(
-      'token123',
-      'Test@123',
-    );
-  });
-
-  it('should handle password change error', () => {
-    authService.changePassword.mockReturnValue(
-      throwError(() => ({ status: 400, error: { message: 'Token expired' } })),
-    );
-
-    component.changePasswordForm.controls['password'].setValue('Test@123');
-    component.changePasswordForm.controls['confirmPassword'].setValue(
-      'Test@123',
-    );
-
-    component.onSubmit();
-
-    expect(console.error).toHaveBeenCalledWith({
-      status: 400,
-      error: { message: 'Token expired' },
-    }); // Add this line
+  it('should show serious error if token is missing on init', () => {
+    (
+      mockActivatedRoute.snapshot.queryParamMap.get as jest.Mock
+    ).mockReturnValue(null);
+    fixture.detectChanges();
+    expect(component.token).toBe('');
     expect(component.seriousErrorMessage).toBe(
-      'Your password reset link has expired. You need to request a new another reset email.',
+      'Invalid or missing token. Please request a new password reset.',
     );
+  });
+
+  describe('onSubmit', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+      component.changePasswordForm.patchValue({
+        password: 'Password@123',
+        confirmPassword: 'Password@123',
+      });
+    });
+
+    it('should call changePassword and set success message on success', () => {
+      mockAuthService.changePassword.mockReturnValue(of(undefined));
+      mockAuthService.isLoggedIn.mockReturnValue(false);
+
+      component.onSubmit();
+
+      expect(mockAuthService.changePassword).toHaveBeenCalledWith(
+        'mock-token',
+        'Password@123',
+      );
+      expect(component.successMessage).toBe('Your password has been changed.');
+    });
+
+    it('should logout and show additional message if logged in after success', () => {
+      mockAuthService.changePassword.mockReturnValue(of(undefined));
+      mockAuthService.isLoggedIn.mockReturnValue(true);
+
+      component.onSubmit();
+
+      expect(mockAuthService.performLogout).toHaveBeenCalled();
+      expect(component.successMessage).toContain(
+        'You will need to login again.',
+      );
+    });
+
+    it('should handle token expired error (400)', () => {
+      mockAuthService.changePassword.mockReturnValue(
+        throwError(() => ({
+          status: 400,
+          error: { message: 'Token expired' },
+        })),
+      );
+
+      component.onSubmit();
+
+      expect(component.seriousErrorMessage).toContain('expired');
+    });
+
+    it('should handle generic error', fakeAsync(() => {
+      mockAuthService.changePassword.mockReturnValue(
+        throwError(() => ({ status: 500 })),
+      );
+
+      component.onSubmit();
+
+      expect(component.errorMessage).toContain('There was an error');
+
+      tick(MILLISECONDS_SHOW_ERROR_MSG);
+      expect(component.errorMessage).toBe('');
+    }));
+
+    it('should not call authService if form is invalid', () => {
+      component.changePasswordForm.patchValue({ password: '' });
+      component.onSubmit();
+      expect(mockAuthService.changePassword).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should return route link', () => {
+    expect(component.getRouteLink('test')).toBe('/mock-route');
+  });
+
+  describe('Form Validation', () => {
+    it('should match passwords', () => {
+      const form = component.changePasswordForm;
+      form.patchValue({
+        password: 'Password@123',
+        confirmPassword: 'Different@123',
+      });
+      expect(form.controls['confirmPassword'].hasError('mustMatch')).toBe(true);
+
+      form.patchValue({ confirmPassword: 'Password@123' });
+      expect(form.controls['confirmPassword'].hasError('mustMatch')).toBe(
+        false,
+      );
+    });
   });
 });

@@ -42,8 +42,10 @@ module.exports = {
     '^src/(.*)$': '<rootDir>/src/$1',
   },
 
+  collectCoverage: true,
+  coverageReporters: ['text-summary', 'text', 'lcov', 'cobertura'],
   collectCoverageFrom: [
-    'src/**/*.ts',
+    'src/**/*.{ts,tsx,js,jsx}',
     '!src/**/*.module.ts',
     '!src/main.ts',
     '!src/**/*.d.ts',
@@ -55,6 +57,23 @@ module.exports = {
     '!src/**/*.constant.ts',
     '!src/**/*.constants.ts',
     '!src/**/*.template.ts',
+    '!src/**/index.{ts,js}', // barrel exports
+    '!src/**/main.{ts,js}', // app bootstrap
+    '!src/**/polyfills.{ts,js}', // FE only
+    '!src/**/environment*.{ts,js}', // FE env files
+    '!src/**/generated/**', // if you have any
+    '!src/**/migrations/**', // if applicable
+    '!src/environments/inject-env-vars.js', // Build script
+    '!src/test.ts', // Legacy Karma
+    '!src/test-setup.ts', // Legacy setup
   ],
+  coverageThreshold: {
+    global: {
+      statements: 100,
+      branches: 100,
+      functions: 100,
+      lines: 100,
+    },
+  },
   coverageDirectory: '<rootDir>/coverage',
 };

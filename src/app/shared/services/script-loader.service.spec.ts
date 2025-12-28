@@ -33,6 +33,9 @@ describe('ScriptLoaderService', () => {
   afterEach(() => {
     removeTestScripts(document);
     TestBed.resetTestingModule();
+    // Clear cookies
+    document.cookie =
+      'stoi_no_analytics=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
   });
 
   it('should load a script into the document head with defaults', () => {
@@ -119,5 +122,24 @@ describe('ScriptLoaderService', () => {
     (service as unknown as { _documentRef: Document | null })._documentRef =
       null;
     expect(() => service.removeScript('orphaned')).not.toThrow();
+  });
+
+  describe('shouldDisableAnalytics', () => {
+    it('should return true when stoi_no_analytics cookie is set to 1', () => {
+      const service = configureService();
+      document.cookie = 'stoi_no_analytics=1; path=/';
+      expect(service.shouldDisableAnalytics()).toBe(true);
+    });
+
+    it('should return false when stoi_no_analytics cookie is not set', () => {
+      const service = configureService();
+      expect(service.shouldDisableAnalytics()).toBe(false);
+    });
+
+    it('should return false when stoi_no_analytics cookie is set to 0', () => {
+      const service = configureService();
+      document.cookie = 'stoi_no_analytics=0; path=/';
+      expect(service.shouldDisableAnalytics()).toBe(false);
+    });
   });
 });

@@ -103,3 +103,6 @@ if (extendedGlobal.IntersectionObserver === undefined) {
   extendedGlobal.IntersectionObserver =
     MockIntersectionObserver as unknown as typeof IntersectionObserver;
 }
+
+// JSDOM throws "Not implemented" for window.scrollTo. Provide a stub to silence it.
+globalThis.scrollTo = jest.fn();

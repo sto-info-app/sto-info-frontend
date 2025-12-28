@@ -1,0 +1,72 @@
+name: Mutation Testing (Full)
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Run every Sunday at midnight
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: 24
+
+jobs:
+  stryker_full:
+    name: Full Mutation Analysis
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+        with:
+          use-cache: true
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Create test environment.ts
+        run: |
+          mkdir -p src/environments
+          cat << 'EOF' > src/environments/environment.ts
+          import packageJson from '../../package.json';
+          import type { Environment } from './models/environment.model';
+
+          export const environment: Environment = {
+            production: false,
+            version: packageJson.version,
+            env_name: 'ci',
+            env_label: 'CI',
+            apiUrl: 'http://localhost:3000',
+            appTitle: 'STO Info (CI)',
+            appLoggedInHome: '/dashboard',
+            allowDebugging: false,
+            minsBeforeLogoutExpiryToShowWarning: 5,
+            minsBeforeLogoutExpiryToRefreshToken: 2,
+            cookieYesUrl: 'https://cdn-cookieyes.com/client_data/test/script.js',
+            gaMeasurementId: 'G-XXXXXXX',
+            logRocketAppId: 'test/appid',
+          };
+          EOF
+
+      - name: Run Stryker (Full)
+        run: npm run stryker
+
+      - name: Upload Mutation Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stryker-full-report
+          path: reports/mutation/
+          retention-days: 30
