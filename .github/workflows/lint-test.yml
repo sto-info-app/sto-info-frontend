@@ -166,7 +166,7 @@ jobs:
             grep -v 'main.ts' | \
             grep -v 'test.ts' | \
             grep -v 'test-setup.ts' | \
-            tr '\n' ',' | sed 's/,$//')
+            tr '\n' ',' | sed 's/,$//' || true)
 
           if [ -z "$CHANGED_FILES" ]; then
             echo "No relevant source files changed. Skipping mutation testing."
