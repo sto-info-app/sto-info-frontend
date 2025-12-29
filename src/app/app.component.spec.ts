@@ -351,7 +351,7 @@ describe('AppComponent', () => {
   it('should handle missing CookieYes global', () => {
     (environment as { env_name: string }).env_name = 'prod';
     (environment as { cookieYesUrl: string | undefined }).cookieYesUrl =
-      'http://test';
+      'https://test';
     mockScriptLoaderService.loadScript.mockImplementation(options => {
       (globalThis as unknown as { CookieYes: unknown }).CookieYes = undefined;
       options.onLoad?.();

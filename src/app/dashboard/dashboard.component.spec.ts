@@ -87,25 +87,25 @@ describe('DashboardComponent', () => {
     it('should show random greeting with last name if available', () => {
       component.user = { profile: { lastName: 'Riker' } } as User;
       const greeting = component.displayWelcomeText();
-      expect(greeting).toMatch(/.*, Captain Riker!/);
+      expect(greeting).toMatch(/, Captain Riker!$/);
     });
 
     it('should show random greeting with first name if last name is missing', () => {
       component.user = { profile: { firstName: 'Will' } } as User;
       const greeting = component.displayWelcomeText();
-      expect(greeting).toMatch(/.*, Will!/);
+      expect(greeting).toMatch(/, Will!$/);
     });
 
     it('should show random greeting if both names are missing', () => {
       component.user = { profile: {} } as User;
       const greeting = component.displayWelcomeText();
-      expect(greeting).toMatch(/.*!/);
+      expect(greeting).toMatch(/!$/);
     });
 
     it('should show random greeting if user profile is missing', () => {
       component.user = undefined;
       const greeting = component.displayWelcomeText();
-      expect(greeting).toMatch(/.*!/);
+      expect(greeting).toMatch(/!$/);
     });
   });
 
