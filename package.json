@@ -1,6 +1,6 @@
 {
   "name": "sto-info-frontend",
-  "version": "0.1.66",
+  "version": "0.1.67",
   "description": "Star Trek Online Information App",
   "author": "Steve Roberts",
   "private": true,
@@ -18,7 +18,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "jest --config jest.config.cjs",
     "test:watch": "jest --config jest.config.cjs --watch",
-    "test:ci": "jest --config jest.config.cjs --runInBand --coverage",
+    "test:cov": "jest --config jest.config.cjs --runInBand --coverage",
     "lint": "eslint \"src/**/*.{ts,js,html}\"",
     "stryker": "stryker run",
     "e2e": "ng e2e"
