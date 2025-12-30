@@ -12,18 +12,22 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { MessageType } from '../../shared/models/lcars-message-type.enum';
 import { VerifyEmailComponent } from './verify-email.component';
 
+type VerifyEmailQueryParams = {
+  token?: string;
+};
+
 describe('VerifyEmailComponent', () => {
   let component: VerifyEmailComponent;
   let fixture: ComponentFixture<VerifyEmailComponent>;
   let httpMock: HttpTestingController;
   let routingServiceSpy: jest.Mocked<RoutingService>;
-  let queryParamsSubject: Subject<any>;
+  let queryParamsSubject: Subject<VerifyEmailQueryParams>;
 
   beforeEach(async () => {
     routingServiceSpy = {
       getLink: jest.fn(),
     } as unknown as jest.Mocked<RoutingService>;
-    queryParamsSubject = new Subject<any>();
+    queryParamsSubject = new Subject<VerifyEmailQueryParams>();
 
     await TestBed.configureTestingModule({
       imports: [
