@@ -16,12 +16,13 @@ describe('VerifyEmailComponent', () => {
   let component: VerifyEmailComponent;
   let fixture: ComponentFixture<VerifyEmailComponent>;
   let httpMock: HttpTestingController;
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  let routingServiceSpy: any;
+  let routingServiceSpy: jest.Mocked<RoutingService>;
   let queryParamsSubject: Subject<any>;
 
   beforeEach(async () => {
-    routingServiceSpy = jasmine.createSpyObj('RoutingService', ['getLink']);
+    routingServiceSpy = {
+      getLink: jest.fn(),
+    } as unknown as jest.Mocked<RoutingService>;
     queryParamsSubject = new Subject<any>();
 
     await TestBed.configureTestingModule({

@@ -76,7 +76,9 @@ describe('DashboardService', () => {
       mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
 
       service.getUser().subscribe({
-        next: () => fail('should have failed'),
+        next: () => {
+          throw new Error('should have failed');
+        },
         error: error => {
           expect(error.message).toBe('No token found');
         },
@@ -109,7 +111,9 @@ describe('DashboardService', () => {
         .mockImplementation(() => {});
 
       service.updatePersonalDetails(details).subscribe({
-        next: () => fail('should have failed'),
+        next: () => {
+          throw new Error('should have failed');
+        },
         error: error => {
           expect(error.status).toBe(500);
         },
@@ -158,7 +162,9 @@ describe('DashboardService', () => {
       mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
 
       service.updateProfilePic(formData).subscribe({
-        next: () => fail('should have failed'),
+        next: () => {
+          throw new Error('should have failed');
+        },
         error: error => {
           expect(error.message).toBe('No token found');
         },
@@ -176,7 +182,9 @@ describe('DashboardService', () => {
       });
 
       service.updateProfilePic(formData).subscribe({
-        next: () => fail('should have failed'),
+        next: () => {
+          throw new Error('should have failed');
+        },
         error: error => {
           expect(error.status).toBe(400);
         },
