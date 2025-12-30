@@ -61,13 +61,14 @@ module.exports = {
     '!src/**/index.{ts,js}', // barrel exports
     '!src/**/main.{ts,js}', // app bootstrap
     '!src/**/polyfills.{ts,js}', // FE only
-    '!src/**/environment*.{ts,js}', // FE env files
+    '!src/environment*.{ts,js}', // FE env files
     '!src/**/generated/**', // if you have any
     '!src/**/migrations/**', // if applicable
     '!src/environments/inject-env-vars.js', // Build script
     '!src/test.ts', // Legacy Karma
     '!src/test-setup.ts', // Legacy setup
   ],
+  coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/coverage/'],
   coverageThreshold: {
     global: {
       statements: 100,
