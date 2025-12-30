@@ -153,6 +153,7 @@ jobs:
           # Get changed files in src/ that match mutation criteria (exclude specs, modules, etc.)
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | \
             grep '^src/.*\.ts$' | \
+            grep -v '\.d\.ts$' | \
             grep -v '\.spec\.ts$' | \
             grep -v '\.module\.ts$' | \
             grep -v 'environments/' | \
