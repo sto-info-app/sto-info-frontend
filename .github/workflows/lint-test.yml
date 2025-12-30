@@ -140,7 +140,7 @@ jobs:
         run: npm run lint
 
       - name: Run Tests (with coverage)
-        run: npm run test:ci
+        run: npm run test:cov
 
       - name: Run Incremental Mutation Testing
         # Only run on PRs
