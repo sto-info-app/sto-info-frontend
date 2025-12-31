@@ -23,7 +23,10 @@
     "!src/**/*.enum.ts",
     "!src/**/*.constant.ts",
     "!src/**/*.constants.ts",
-    "!src/test-setup.ts"
+    "!src/test-setup.ts",
+    "!src/app/static-pages/**",
+    "!src/app/shared/components/lcars-*/**",
+    "!src/app/template/footer/**"
   ],
   "checkers": [],
   "coverageAnalysis": "perTest",

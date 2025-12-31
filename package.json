@@ -18,9 +18,9 @@
     "watch": "ng build --watch --configuration development",
     "test": "jest --config jest.config.cjs",
     "test:watch": "jest --config jest.config.cjs --watch",
-    "test:cov": "jest --config jest.config.cjs --runInBand --coverage",
+    "test:cov": "jest --config jest.config.cjs --runInBand --coverage --coverageDirectory=reports/coverage --coverageReporters=lcov --coverageReporters=text-summary",
     "lint": "eslint \"src/**/*.{ts,js,html}\"",
-    "stryker": "stryker run",
+    "stryker": "stryker run --reporters clear-text --reporters html --reporters progress",
     "e2e": "ng e2e"
   },
   "dependencies": {
@@ -89,7 +89,9 @@
     "jsdom": "^27.4.0",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "cross-env": "^7.0.3",
+    "jest-junit": "^16.0.0"
   },
   "projects": {
     "sto-info-frontend": {
@@ -120,5 +122,12 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
+  },
+  "jest-junit": {
+    "suiteName": "sto-info-frontend",
+    "outputDirectory": "reports/junit",
+    "outputName": "junit.xml",
+    "addFileAttribute": "true",
+    "usePathForSuiteName": "true"
   }
 }
