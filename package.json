@@ -90,7 +90,7 @@
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "typescript": "~5.9.3",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "jest-junit": "^16.0.0"
   },
   "projects": {
