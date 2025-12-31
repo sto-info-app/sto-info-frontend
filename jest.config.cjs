@@ -79,7 +79,7 @@ module.exports = {
   coveragePathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
-    '/coverage/',
+    '/reports/',
     '/src/environments/',
     '/src/main.ts',
     '/src/polyfills.ts',
@@ -92,5 +92,5 @@ module.exports = {
       lines: 100,
     },
   },
-  coverageDirectory: '<rootDir>/coverage',
+  coverageDirectory: '<rootDir>/reports/coverage',
 };

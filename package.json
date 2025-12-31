@@ -16,11 +16,11 @@
     "build:dev": "ng build --configuration development",
     "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
+    "lint": "eslint \"src/**/*.{ts,js,html}\"",
     "test": "jest --config jest.config.cjs",
     "test:watch": "jest --config jest.config.cjs --watch",
     "test:cov": "jest --config jest.config.cjs --runInBand --coverage --coverageDirectory=reports/coverage --coverageReporters=lcov --coverageReporters=text-summary",
-    "lint": "eslint \"src/**/*.{ts,js,html}\"",
-    "stryker": "stryker run --reporters clear-text --reporters html --reporters progress",
+    "test:mutation": "stryker run --reporters clear-text --reporters html --reporters progress",
     "e2e": "ng e2e"
   },
   "dependencies": {
