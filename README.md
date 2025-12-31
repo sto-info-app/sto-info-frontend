@@ -20,7 +20,15 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 
 ## Running unit tests
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+### Coverage (local / CI)
+
+To generate a coverage report, run:
+
+```bash
+npm run test:cov
+```
+
+Coverage output is written to `coverage/` (including an `lcov.info` file used by tooling such as SonarQube).
 
 ## Running end-to-end tests
 

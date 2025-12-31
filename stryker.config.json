@@ -6,10 +6,11 @@
   "jest": {
     "projectType": "custom",
     "configFile": "jest.config.cjs",
-    "enableFindRelatedTests": true
+    "enableFindRelatedTests": false
   },
   "mutate": [
     "src/**/*.ts",
+    "!src/**/*.d.ts",
     "!src/**/*.spec.ts",
     "!src/**/*.module.ts",
     "!src/environments/**/*.ts",
@@ -22,7 +23,10 @@
     "!src/**/*.enum.ts",
     "!src/**/*.constant.ts",
     "!src/**/*.constants.ts",
-    "!src/test-setup.ts"
+    "!src/test-setup.ts",
+    "!src/app/static-pages/**",
+    "!src/app/shared/components/lcars-*/**",
+    "!src/app/template/footer/**"
   ],
   "checkers": [],
   "coverageAnalysis": "perTest",

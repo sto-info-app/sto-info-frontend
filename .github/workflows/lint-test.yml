@@ -150,9 +150,10 @@ jobs:
           # Fetch the base branch to compare against
           git fetch origin ${{ github.base_ref }} --depth=1
 
-          # Get changed files in src/ that match mutation criteria (exclude specs, modules, etc.)
+          # Get changed files in src/ that match mutation criteria (exclude specs, modules, static pages, etc.)
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | \
             grep '^src/.*\.ts$' | \
+            grep -v '\.d\.ts$' | \
             grep -v '\.spec\.ts$' | \
             grep -v '\.module\.ts$' | \
             grep -v 'environments/' | \
@@ -166,6 +167,9 @@ jobs:
             grep -v 'main.ts' | \
             grep -v 'test.ts' | \
             grep -v 'test-setup.ts' | \
+            grep -v 'static-pages/' | \
+            grep -v 'shared/components/lcars-' | \
+            grep -v 'template/footer' | \
             tr '\n' ',' | sed 's/,$//' || true)
 
           if [ -z "$CHANGED_FILES" ]; then

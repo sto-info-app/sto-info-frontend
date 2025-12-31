@@ -140,34 +140,6 @@
           "options": {
             "buildTarget": "sto-info-frontend:build"
           }
-        },
-        "test": {
-          "builder": "@angular/build:karma",
-          "options": {
-            "main": "src/test.ts",
-            "polyfills": ["src/polyfills.ts"],
-            "tsConfig": "tsconfig.spec.json",
-            "karmaConfig": "karma.conf.js",
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              "src/favicon.ico",
-              "src/manifest.webmanifest",
-              {
-                "glob": "**/*",
-                "input": "src/assets",
-                "output": "assets",
-                "ignore": ["**/*.psd"]
-              },
-              "src/static.json"
-            ],
-            "styles": [
-              "node_modules/@angular/material/prebuilt-themes/purple-green.css",
-              "src/styles/lcars-theme.scss",
-              "src/styles/lcars-theme-colours.scss",
-              "src/styles/styles.scss"
-            ],
-            "scripts": []
-          }
         }
       }
     }

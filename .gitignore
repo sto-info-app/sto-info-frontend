@@ -12,6 +12,7 @@ src/environments/environment.prod.ts
 /out-tsc
 /bazel-out
 *.swp
+/.stryker-tmp/
 
 # Node
 /node_modules
