@@ -4,88 +4,128 @@ import { FileHandlingService } from './file-handling.service';
 
 describe('FileHandlingService', () => {
   let service: FileHandlingService;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [FileHandlingService],
     });
     service = TestBed.inject(FileHandlingService);
-  });
 
-  beforeEach(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
+    consoleErrorSpy.mockRestore();
     jest.restoreAllMocks();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('validateBase64Image', () => {
-    const cases = [
-      { input: 'data:image/png;base64,valid', expected: true },
-      { input: 'data:image/jpeg;base64,valid', expected: true },
-      { input: 'data:image/jpg;base64,valid', expected: true },
-      { input: 'data:application/pdf;base64,valid', expected: false },
-      { input: 'invalid', expected: false },
-    ];
+    it('should return true for valid image data URIs', () => {
+      expect(service.validateBase64Image('data:image/png;base64,AAAA')).toBe(
+        true,
+      );
 
-    test.each(cases)(
-      'should return $expected for input "$input"',
-      ({ input, expected }) => {
-        expect(service.validateBase64Image(input)).toBe(expected);
-      },
-    );
+      expect(service.validateBase64Image('data:image/jpeg;base64,AAAA')).toBe(
+        true,
+      );
+
+      expect(service.validateBase64Image('data:image/jpg;base64,AAAA')).toBe(
+        true,
+      );
+    });
+
+    it('should return false for non-image / invalid data URIs', () => {
+      expect(service.validateBase64Image('AAAA')).toBe(false);
+      expect(service.validateBase64Image('data:text/plain;base64,AAAA')).toBe(
+        false,
+      );
+      expect(service.validateBase64Image('data:image/gif;base64,AAAA')).toBe(
+        false,
+      );
+    });
   });
 
   describe('dataURItoBlob', () => {
-    it('should convert valid dataURI to Blob', () => {
-      // A tiny 1x1 png base64
-      const base64 =
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
-      const dataURI = `data:image/png;base64,${base64}`;
+    it('should convert a valid base64 data URI to a Blob', () => {
+      // "Hello"
+      const base64 = 'SGVsbG8=';
+      const dataURI = `data:text/plain;base64,${base64}`;
 
       const blob = service.dataURItoBlob(dataURI);
+
       expect(blob).toBeInstanceOf(Blob);
-      expect(blob.type).toBe('image/png');
+      expect(blob.type).toBe('text/plain');
       expect(blob.size).toBeGreaterThan(0);
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
     });
 
-    it('should handle error in conversion', () => {
-      // Malformed URI that will cause error
-      const malformed = 'invalid';
-
-      expect(() => service.dataURItoBlob(malformed)).toThrow();
-    });
-
-    it('should throw error for invalid base64 content', () => {
-      const invalidBase64 = 'data:image/png;base64,ABC';
-      // Assuming Base64 is imported or globally available for jest.spyOn
-      // If Base64 is a utility within FileHandlingService, it might need a different mocking approach
-      // For this example, I'm assuming Base64 is a separate module/object that can be spied on.
-      // If it's an internal helper, you might need to mock the internal method or the service itself.
-      // For a typical Angular setup, if Base64 is a dependency, it would be injected or imported.
-      // If it's a simple helper function, it might be harder to mock directly without refactoring.
-      // Assuming `Base64` is an object/module that can be spied on.
+    it('should throw and log when base64 is invalid (Base64.isValid false branch)', () => {
       const isValidSpy = jest.spyOn(Base64, 'isValid').mockReturnValue(false);
-      try {
-        expect(() => service.dataURItoBlob(invalidBase64)).toThrow(
-          'Invalid base64 string',
-        );
-      } finally {
-        isValidSpy.mockRestore();
-      }
+
+      expect(() =>
+        service.dataURItoBlob('data:text/plain;base64,%%%NOT_BASE64%%%'),
+      ).toThrow(new Error('Invalid base64 string'));
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      isValidSpy.mockRestore();
     });
 
-    it('should clean base64 string with invalid characters', () => {
+    it('should throw and log when decoding fails (catch branch)', () => {
+      const isValidSpy = jest.spyOn(Base64, 'isValid').mockReturnValue(true);
+      const atobSpy = jest.spyOn(Base64, 'atob').mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      expect(() =>
+        service.dataURItoBlob('data:text/plain;base64,SGVsbG8='),
+      ).toThrow(new Error('Invalid base64 string'));
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+
+      atobSpy.mockRestore();
+      isValidSpy.mockRestore();
+    });
+
+    it('should clean base64 string with invalid characters before converting', () => {
+      // Valid 1x1 png base64, with newline + space appended to force cleaning.
       const base64 =
         'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=\n ';
       const dataURI = `data:image/png;base64,${base64}`;
+
       const blob = service.dataURItoBlob(dataURI);
+
       expect(blob).toBeInstanceOf(Blob);
+      expect(blob.type).toBe('image/png');
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
+
+    it('should cover the "codePointAt(i) ?? 0" fallback (line 31)', () => {
+      // Force codePointAt to return undefined so the "?? 0" path is executed.
+      const cpSpy = jest
+        .spyOn(String.prototype, 'codePointAt')
+        .mockReturnValue(undefined as unknown as number);
+
+      const base64 = 'SGVsbG8='; // "Hello"
+      const dataURI = `data:text/plain;base64,${base64}`;
+
+      const blob = service.dataURItoBlob(dataURI);
+
+      expect(blob).toBeInstanceOf(Blob);
+      expect(blob.type).toBe('text/plain');
+      expect(blob.size).toBeGreaterThan(0);
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+
+      cpSpy.mockRestore();
+    });
+  });
+
+  describe('private cleanBase64String', () => {
+    it('should strip invalid base64 characters', () => {
+      const cleaned = (
+        service as unknown as { cleanBase64String: (value: string) => string }
+      ).cleanBase64String('ab+c/= \n\t$£%');
+      expect(cleaned).toBe('ab+c/=');
     });
   });
 });
