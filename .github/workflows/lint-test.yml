@@ -158,7 +158,7 @@ jobs:
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.spec.ts
             -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,**/reports/**,**/*.spec.ts,**/*.test.ts
-            -Dsonar.coverage.exclusions=src/main.ts,src/test.ts,src/polyfills.ts,src/environments/**,src/**/index.ts,src/**/index.js,src/environments/inject-env-vars.js,setup-jest.ts,src/test-setup.ts
+            -Dsonar.coverage.exclusions=src/main.ts,src/test.ts,src/polyfills.ts,src/environments/**,src/**/index.ts,src/**/index.js,src/environments/inject-env-vars.js,**/*.module.ts,**/*.constants.ts
             -Dsonar.issue.ignore.multicriteria=e1,e2
             -Dsonar.issue.ignore.multicriteria.e1.ruleKey=typescript:S1313
             -Dsonar.issue.ignore.multicriteria.e1.resourceKey=**/*.spec.ts,**/*.test.ts,**/__tests__/**,**/test/**,**/tests/**
@@ -188,8 +188,6 @@ jobs:
             grep -v '\.constant\.ts$' | \
             grep -v '\.constants\.ts$' | \
             grep -v 'main.ts' | \
-            grep -v 'test.ts' | \
-            grep -v 'test-setup.ts' | \
             grep -v 'static-pages/' | \
             grep -v 'shared/components/lcars-' | \
             grep -v 'template/footer' | \
