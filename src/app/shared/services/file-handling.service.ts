@@ -28,7 +28,7 @@ export class FileHandlingService {
       const ab = new ArrayBuffer(byteString.length);
       const ia = new Uint8Array(ab);
       for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
+        ia[i] = (byteString.codePointAt(i) ?? 0) & 0xff;
       }
       return new Blob([ab], { type: mimeString });
     } catch (error) {
@@ -43,7 +43,7 @@ export class FileHandlingService {
    * @returns The cleaned base64 string
    */
   private cleanBase64String(str: string): string {
-    const cleanedStr = str.replace(/[^A-Za-z0-9+/=]/g, '');
+    const cleanedStr = str.replaceAll(/[^A-Za-z0-9+/=]/g, '');
     return cleanedStr;
   }
 
