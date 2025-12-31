@@ -4,9 +4,6 @@ on:
   push:
     branches: [production]
 
-permissions:
-  contents: write
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -14,6 +11,8 @@ concurrency:
 jobs:
   tag_release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repo

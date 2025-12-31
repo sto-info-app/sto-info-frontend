@@ -42,10 +42,21 @@ module.exports = {
     '^src/(.*)$': '<rootDir>/src/$1',
   },
 
+  collectCoverage: true,
+  coverageReporters: ['text-summary', 'text', 'lcov', 'cobertura'],
   collectCoverageFrom: [
-    'src/**/*.ts',
+    'src/**/*.{ts,tsx,js,jsx}',
+
+    // Tests
+    '!src/**/*.spec.ts',
     '!src/**/*.module.ts',
+
+    // Angular bootstrap / wiring
     '!src/main.ts',
+    '!src/**/*.template.ts',
+    '!src/**/polyfills.{ts,js}', // FE only
+
+    // Typings
     '!src/**/*.d.ts',
     '!src/**/*.model.ts',
     '!src/**/*.models.ts',
@@ -54,7 +65,32 @@ module.exports = {
     '!src/**/*.enum.ts',
     '!src/**/*.constant.ts',
     '!src/**/*.constants.ts',
-    '!src/**/*.template.ts',
+
+    '!src/**/index.{ts,js}', // barrel exports
+
+    // Environments
+    '!src/environments/**', // FE env files
+
+    // Build files
+    '!src/**/generated/**', // if you have any
+    '!src/**/migrations/**', // if applicable
+    '!src/environments/inject-env-vars.js', // Build script
   ],
-  coverageDirectory: '<rootDir>/coverage',
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+    '/reports/',
+    '/src/environments/',
+    '/src/main.ts',
+    '/src/polyfills.ts',
+  ],
+  coverageThreshold: {
+    global: {
+      statements: 100,
+      branches: 100,
+      functions: 100,
+      lines: 100,
+    },
+  },
+  coverageDirectory: '<rootDir>/reports/coverage',
 };

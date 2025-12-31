@@ -125,7 +125,7 @@ export class MainContentComponent implements OnDestroy {
    * Recursively traverses the activated route tree to find the deepest
    */
   ngOnDestroy(): void {
-    this.subs?.unsubscribe();
+    this.subs.unsubscribe();
   }
 
   /**
@@ -137,7 +137,9 @@ export class MainContentComponent implements OnDestroy {
    */
   private getDeepestRouteRequiresApi(route: ActivatedRoute): boolean {
     let activeRoute: ActivatedRoute = route;
-    while (activeRoute.firstChild) activeRoute = activeRoute.firstChild;
+    while (activeRoute.firstChild) {
+      activeRoute = activeRoute.firstChild;
+    }
     return activeRoute.snapshot.data?.['requiresApi'] === true;
   }
 

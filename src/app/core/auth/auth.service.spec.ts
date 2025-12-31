@@ -1,85 +1,479 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpClient, provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import {
+  LoginCredentials,
+  LoginResponse,
+  RegistrationFormValues,
+} from 'src/app/models/user-auth.models';
+import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { environment } from 'src/environments/environment';
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
+  let service: AuthService;
   let httpMock: HttpTestingController;
-  let authService: AuthService;
+  let routerSpy: jest.Mocked<Router>;
+
+  interface AuthServiceInternals {
+    http: HttpClient;
+    autoLogoutTimeout: ReturnType<typeof setTimeout> | null;
+    refreshTokenTimeout: ReturnType<typeof setTimeout> | null;
+  }
 
   beforeEach(() => {
-    localStorage.removeItem('access_token');
+    localStorage.clear();
+
+    const routerMock = {
+      navigate: jest.fn(),
+    };
+
     TestBed.configureTestingModule({
-      providers: [AuthService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        AuthService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: Router, useValue: routerMock },
+      ],
     });
 
-    authService = TestBed.inject(AuthService);
+    service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
+    routerSpy = TestBed.inject(Router) as jest.Mocked<Router>;
   });
 
   afterEach(() => {
     httpMock.verify();
+    localStorage.clear();
+    jest.clearAllMocks();
   });
 
   it('should be created', () => {
-    expect(authService).toBeTruthy();
+    expect(service).toBeTruthy();
   });
 
-  it('should return true from isAuthenticated$ when there is a token', () => {
-    authService.saveToken(
-      'valid-token',
-      'valid-refresh-token',
-      Date.now() + 3600,
-    );
-    authService.isAuthenticated$.subscribe(isAuthenticated => {
-      expect(isAuthenticated).toBe(true);
+  describe('Login', () => {
+    it('should login and save tokens', () => {
+      const credentials: LoginCredentials = {
+        email: 'test@example.com',
+        password: 'password',
+      };
+      const mockResponse: LoginResponse = {
+        access_token: 'access123',
+        refresh_token: 'refresh123',
+        expires_in: 3600,
+        user_id: 'user1',
+      };
+
+      service.login(credentials).subscribe(response => {
+        expect(response).toEqual(mockResponse);
+        expect(localStorage.getItem('access_token')).toBe('access123');
+        expect(localStorage.getItem('refresh_token')).toBe('refresh123');
+        expect(localStorage.getItem('expires_at')).toBeTruthy();
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_LOGIN);
+      expect(req.request.method).toBe('POST');
+      req.flush(mockResponse);
     });
   });
 
-  it('should return false from isAuthenticated$ when there is no token', () => {
-    authService.removeToken();
-    authService.isAuthenticated$.subscribe(isAuthenticated => {
-      expect(isAuthenticated).toBe(false);
+  describe('Register', () => {
+    it('should register a user', () => {
+      const userData: RegistrationFormValues = {
+        email: 'new@example.com',
+        password: 'password',
+        confirmPassword: 'password',
+        username: 'user',
+        firstName: 'First',
+        lastName: 'Last',
+      };
+
+      service.register(userData).subscribe();
+
+      const req = httpMock.expectOne(API_URLS.AUTH_REGISTER);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(userData);
+      req.flush({});
     });
   });
 
-  it('should save tokens correctly', () => {
-    authService.saveToken(
-      'test-token',
-      'test-refresh-token',
-      Date.now() + 3600,
-    );
-    expect(localStorage.getItem('access_token')).toBe('test-token');
-    expect(localStorage.getItem('refresh_token')).toBe('test-refresh-token');
-    authService.isAuthenticated$.subscribe(authenticated => {
-      expect(authenticated).toBeTruthy();
+  describe('Logout', () => {
+    it('should logout and clear tokens', () => {
+      localStorage.setItem('access_token', 'access123');
+      localStorage.setItem('refresh_token', 'refresh123');
+      localStorage.setItem('expires_at', (Date.now() + 10000).toString());
+
+      service.logout().subscribe();
+
+      const req = httpMock.expectOne(API_URLS.AUTH_LOGOUT);
+      expect(req.request.method).toBe('POST');
+      req.flush({});
+    });
+
+    it('should throw error if no token found during logout', () => {
+      localStorage.clear();
+
+      service.logout().subscribe({
+        error: err => {
+          expect(err.message).toBe('No token found');
+        },
+      });
+
+      httpMock.expectNone(API_URLS.AUTH_LOGOUT);
     });
   });
 
-  it('should remove token correctly', () => {
-    localStorage.setItem('access_token', 'test-token');
-    authService.removeToken();
-    expect(localStorage.getItem('access_token')).toBeNull();
-    authService.isAuthenticated$.subscribe(authenticated => {
-      expect(authenticated).toBeFalsy();
+  describe('Token Management', () => {
+    it('should get token if valid', () => {
+      const expiresAt = Date.now() + 10000;
+      localStorage.setItem('access_token', 'valid_token');
+      localStorage.setItem('expires_at', expiresAt.toString());
+
+      expect(service.getToken()).toBe('valid_token');
+    });
+
+    it('should remove token if expired', () => {
+      const expiresAt = Date.now() - 10000;
+      localStorage.setItem('access_token', 'expired_token');
+      localStorage.setItem('expires_at', expiresAt.toString());
+
+      expect(service.getToken()).toBeNull();
+      expect(localStorage.getItem('access_token')).toBeNull();
+    });
+
+    it('should return null if no token', () => {
+      expect(service.getToken()).toBeNull();
+    });
+
+    it('should validate token correctly', () => {
+      const expiresAt = Date.now() + 10000;
+      localStorage.setItem('access_token', 'token');
+      localStorage.setItem('expires_at', expiresAt.toString());
+
+      expect(service.isTokenValid()).toBe(true);
+    });
+
+    it('should return false for invalid token', () => {
+      expect(service.isTokenValid()).toBe(false);
+    });
+
+    it('should return false for expired token', () => {
+      const expiresAt = Date.now() - 10000;
+      localStorage.setItem('access_token', 'token');
+      localStorage.setItem('expires_at', expiresAt.toString());
+
+      expect(service.isTokenValid()).toBe(false);
     });
   });
 
-  it('should return true from isLoggedIn when there is a token', () => {
-    localStorage.setItem('access_token', 'valid-token');
-    localStorage.setItem('expires_at', '1687002446481507');
-    expect(authService.isLoggedIn()).toBe(true);
+  describe('HTTP Options', () => {
+    it('should get HTTP options with access token', () => {
+      localStorage.setItem('access_token', 'access123');
+
+      const options = service.getHttpOptionsWithAccessToken();
+
+      expect(options).toBeTruthy();
+      expect(options?.headers.get('Authorization')).toBe('Bearer access123');
+    });
+
+    it('should return null when no access token', () => {
+      const options = service.getHttpOptionsWithAccessToken();
+      expect(options).toBeNull();
+    });
   });
 
-  it('should return false from isLoggedIn when there is no token', () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('expires_at');
-    expect(authService.isLoggedIn()).toBe(false);
+  describe('Perform Logout', () => {
+    it('should perform logout actions', () => {
+      const expiresAt = Date.now() + 10000;
+      localStorage.setItem('access_token', 'token');
+      localStorage.setItem('refresh_token', 'refresh');
+      localStorage.setItem('expires_at', expiresAt.toString());
+
+      service.performLogout();
+
+      const req = httpMock.expectOne(API_URLS.AUTH_LOGOUT);
+      expect(req.request.method).toBe('POST');
+      req.flush({});
+
+      expect(localStorage.getItem('access_token')).toBeNull();
+      expect(routerSpy.navigate).toHaveBeenCalledWith([APP_ROUTES.LOGIN]);
+    });
+
+    it('should not perform logout if not logged in', () => {
+      // isTokenValid (and thus isLoggedIn) depends on access_token and expires_at
+      localStorage.clear();
+
+      service.performLogout();
+
+      httpMock.expectNone(API_URLS.AUTH_LOGOUT);
+      expect(routerSpy.navigate).not.toHaveBeenCalled();
+    });
   });
 
-  //NOTE: Add more tests for other methods like login, register, logout, etc. - https://app.shortcut.com/startrekonlineinfo/story/314/add-unit-tests-for-all-components
+  describe('Refresh Token', () => {
+    it('should refresh token successfully', () => {
+      localStorage.setItem('refresh_token', 'old_refresh');
+      const mockResponse: LoginResponse = {
+        access_token: 'new_access',
+        refresh_token: 'new_refresh',
+        expires_in: 3600,
+        user_id: 'user1',
+      };
+
+      service.refreshToken().subscribe(response => {
+        expect(response).toEqual(mockResponse);
+        expect(localStorage.getItem('access_token')).toBe('new_access');
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_REFRESH);
+      expect(req.request.method).toBe('POST');
+      req.flush(mockResponse);
+    });
+
+    it('should handle refresh token error', () => {
+      localStorage.setItem('refresh_token', 'bad_refresh');
+
+      service.refreshToken().subscribe({
+        error: () => {
+          // Error handling expectations
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_REFRESH);
+      req.flush('Error', { status: 401, statusText: 'Unauthorized' });
+
+      expect(routerSpy.navigate).toHaveBeenCalledWith([APP_ROUTES.LOGIN]);
+    });
+
+    it('should throw error when no refresh token', () => {
+      service.refreshToken().subscribe({
+        error: err => {
+          expect(err.message).toBe('No token found');
+        },
+      });
+
+      httpMock.expectNone(API_URLS.AUTH_REFRESH);
+    });
+  });
+
+  describe('Password Management', () => {
+    it('should request reset password', () => {
+      service.resetPassword('test@example.com').subscribe();
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD_REQUEST);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ email: 'test@example.com' });
+      req.flush({});
+    });
+
+    it('should change password', () => {
+      service.changePassword('token123', 'newpass').subscribe();
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({
+        token: 'token123',
+        password: 'newpass',
+      });
+      req.flush({});
+    });
+  });
+
+  describe('Session Expiry', () => {
+    it('should calculate seconds until expiry', () => {
+      const expiresAt = Date.now() + 10000;
+      localStorage.setItem('expires_at', expiresAt.toString());
+
+      const seconds = service.getSecondsUntilLoginSessionExpiry();
+      expect(seconds).toBeGreaterThan(9);
+      expect(seconds).toBeLessThanOrEqual(10);
+    });
+
+    it('should return 0 for expired session', () => {
+      const expiresAt = Date.now() - 10000;
+      localStorage.setItem('expires_at', expiresAt.toString());
+
+      const seconds = service.getSecondsUntilLoginSessionExpiry();
+      expect(seconds).toBe(0);
+    });
+
+    it('should calculate new expires milliseconds', () => {
+      const fixedNow = 1000000;
+      jest.spyOn(Date, 'now').mockReturnValue(fixedNow);
+
+      const expiresMs = service.getNewExpiresMilliseconds(3600);
+      expect(expiresMs).toBe(fixedNow + 3600000);
+    });
+  });
+
+  describe('Edge Cases and Environment Config', () => {
+    it('should use default warning minutes if not in environment', () => {
+      expect(service.autoLogoutWarningMins).toBeDefined();
+    });
+
+    it('should not call logout API if refresh token is missing in performLogout', () => {
+      localStorage.setItem('access_token', 'valid');
+      localStorage.setItem('expires_at', (Date.now() + 10000).toString());
+      localStorage.removeItem('refresh_token');
+
+      const postSpy = jest.spyOn(
+        (service as unknown as AuthServiceInternals).http,
+        'post',
+      );
+      service.performLogout();
+      expect(postSpy).not.toHaveBeenCalled();
+    });
+
+    it('should return boolean for isTokenExpiringSoon', () => {
+      expect(typeof service.isTokenExpiringSoon()).toBe('boolean');
+    });
+  });
+
+  describe('Refresh Token Timer', () => {
+    it('should create refresh token timer', fakeAsync(() => {
+      const mockObservable = {
+        subscribe: jest.fn(),
+      } as unknown as ReturnType<typeof service.refreshToken>;
+
+      jest.spyOn(service, 'refreshToken').mockReturnValue(mockObservable);
+
+      // Set expiry far enough that it's > 5 after 5s tick
+      localStorage.setItem('expires_at', (Date.now() + 15000).toString());
+
+      service.createRefreshTokenTimer(10); // timeout at 10 - 5 = 5s
+
+      tick(5001);
+
+      expect(service.refreshToken).toHaveBeenCalled();
+    }));
+
+    it('should clear refresh token timer', () => {
+      service['refreshTokenTimeout'] = setTimeout(
+        () => {},
+        1000,
+      ) as unknown as ReturnType<typeof setTimeout>;
+
+      service.clearRefreshTokenTimer();
+
+      expect(service['refreshTokenTimeout']).toBeNull();
+    });
+
+    it('should not refresh if less than 5 seconds remaining', fakeAsync(() => {
+      jest.spyOn(service, 'refreshToken');
+      jest
+        .spyOn(service, 'getSecondsUntilLoginSessionExpiry')
+        .mockReturnValue(3);
+
+      service.createRefreshTokenTimer(10);
+
+      tick(5001);
+
+      expect(service.refreshToken).not.toHaveBeenCalled();
+    }));
+  });
+
+  describe('Auto Logout Timer', () => {
+    it('should create auto logout timer and trigger warning', fakeAsync(() => {
+      const warningAt = Date.now() + 2000;
+      localStorage.setItem('warning_at', warningAt.toString());
+
+      let warningEmitted = false;
+      service.warningAnnounced$.subscribe(() => {
+        warningEmitted = true;
+      });
+
+      service.createAutoLogoutTimer();
+
+      tick(2001);
+
+      expect(warningEmitted).toBe(true);
+    }));
+
+    it('should clear auto logout timer', () => {
+      service['autoLogoutTimeout'] = setTimeout(() => {}, 1000);
+      service.clearAutoLogoutTimer();
+      expect(service['autoLogoutTimeout']).toBeNull();
+    });
+
+    it('should trigger performLogout when session expires', fakeAsync(() => {
+      const expiresAt = Date.now() + 2000;
+      localStorage.setItem('expires_at', expiresAt.toString());
+
+      const performLogoutSpy = jest
+        .spyOn(service, 'performLogout')
+        .mockImplementation(() => {});
+
+      service.createAutoLogoutTimer();
+
+      tick(2001);
+
+      expect(performLogoutSpy).toHaveBeenCalled();
+    }));
+  });
+
+  describe('isLoggedIn', () => {
+    it('should return true when token is valid', () => {
+      const expiresAt = Date.now() + 10000;
+      localStorage.setItem('access_token', 'token');
+      localStorage.setItem('expires_at', expiresAt.toString());
+
+      expect(service.isLoggedIn()).toBe(true);
+    });
+
+    it('should return false when token is invalid', () => {
+      expect(service.isLoggedIn()).toBe(false);
+    });
+  });
+
+  describe('isTokenExpiringSoon', () => {
+    it('should return true when token expires within threshold', () => {
+      const expiresAt = Date.now() + 30000; // 30 seconds
+      localStorage.setItem('expires_at', expiresAt.toString());
+
+      expect(service.isTokenExpiringSoon()).toBe(true);
+    });
+
+    it('should return false when token has plenty of time', () => {
+      const expiresAt = Date.now() + 3600000; // 60 minutes
+      localStorage.setItem('expires_at', expiresAt.toString());
+
+      expect(service.isTokenExpiringSoon()).toBe(false);
+    });
+
+    it('should use default values for timings when not in environment', () => {
+      (
+        environment as unknown as {
+          minsBeforeLogoutExpiryToShowWarning: number | undefined;
+        }
+      ).minsBeforeLogoutExpiryToShowWarning = undefined;
+      (
+        environment as unknown as {
+          minsBeforeLogoutExpiryToRefreshToken: number | undefined;
+        }
+      ).minsBeforeLogoutExpiryToRefreshToken = undefined;
+
+      // We can't easily re-instantiate the service to test property initializers
+      // because they are already set. But we can test isTokenExpiringSoon calls.
+      const getSecondsSpy = jest
+        .spyOn(service, 'getSecondsUntilLoginSessionExpiry')
+        .mockReturnValue(800);
+
+      // threshold 15 mins = 900 secs. 800 < 900 => true.
+      expect(service.isTokenExpiringSoon()).toBe(true);
+
+      getSecondsSpy.mockReturnValue(1000);
+      // 1000 > 900 => false.
+      expect(service.isTokenExpiringSoon()).toBe(false);
+    });
+
+    it('should return true when no token (0 seconds remaining)', () => {
+      // When there's no token, getSecondsUntilLoginSessionExpiry returns 0
+      // which is less than the threshold
+      expect(service.isTokenExpiringSoon()).toBe(true);
+    });
+  });
 });

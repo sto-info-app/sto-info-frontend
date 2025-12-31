@@ -1,3 +1,4 @@
+import { Renderer2 } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
@@ -8,24 +9,23 @@ import { ServiceInterruptionComponent } from './service-interruption.component';
 describe('ServiceInterruptionComponent', () => {
   let component: ServiceInterruptionComponent;
   let fixture: ComponentFixture<ServiceInterruptionComponent>;
+  let mockAlertThemeService: jest.Mocked<AlertThemeService>;
+  let mockRenderer: jest.Mocked<Renderer2>;
 
   beforeEach(async () => {
+    mockAlertThemeService = {
+      clearAlertStylesheet: jest.fn(),
+      clearTimers: jest.fn(),
+    } as unknown as jest.Mocked<AlertThemeService>;
+
+    mockRenderer = {} as unknown as jest.Mocked<Renderer2>;
+
     await TestBed.configureTestingModule({
       imports: [ServiceInterruptionComponent],
-      teardown: { destroyAfterEach: false },
       providers: [
-        {
-          provide: AlertThemeService,
-          useValue: {
-            applyAlertThemeThenApplyStaticTheme: jest.fn(),
-          },
-        },
-        {
-          provide: HealthService,
-          useValue: {
-            state$: of(''),
-          },
-        },
+        { provide: AlertThemeService, useValue: mockAlertThemeService },
+        { provide: HealthService, useValue: { state$: of('UP') } },
+        { provide: Renderer2, useValue: mockRenderer },
       ],
     }).compileComponents();
 
@@ -36,5 +36,11 @@ describe('ServiceInterruptionComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should cleanup on destroy', () => {
+    component.ngOnDestroy();
+    expect(mockAlertThemeService.clearAlertStylesheet).toHaveBeenCalled();
+    expect(mockAlertThemeService.clearTimers).toHaveBeenCalled();
   });
 });

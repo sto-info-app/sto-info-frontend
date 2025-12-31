@@ -4,62 +4,110 @@ import {
   Router,
   RouterStateSnapshot,
 } from '@angular/router';
+import { of, throwError } from 'rxjs';
+import { LoginResponse } from 'src/app/models/user-auth.models';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 
 describe('AuthGuard', () => {
   let guard: AuthGuard;
-  let authService: jest.Mocked<AuthService>;
-  let router: Router;
+  let authServiceSpy: jest.Mocked<AuthService>;
+  let routerSpy: jest.Mocked<Router>;
 
   beforeEach(() => {
-    const authServiceMock: Partial<jest.Mocked<AuthService>> = {
+    const authSpy = {
       isTokenValid: jest.fn(),
       isTokenExpiringSoon: jest.fn(),
+      refreshToken: jest.fn(),
+    };
+
+    const routerMock = {
+      navigate: jest.fn(),
     };
 
     TestBed.configureTestingModule({
       providers: [
         AuthGuard,
-        {
-          provide: AuthService,
-          useValue: authServiceMock,
-        },
+        { provide: AuthService, useValue: authSpy },
+        { provide: Router, useValue: routerMock },
       ],
     });
+
     guard = TestBed.inject(AuthGuard);
-    authService = TestBed.inject(AuthService) as jest.Mocked<AuthService>;
-    router = TestBed.inject(Router);
-    jest.clearAllMocks();
+    authServiceSpy = TestBed.inject(AuthService) as jest.Mocked<AuthService>;
+    routerSpy = TestBed.inject(Router) as jest.Mocked<Router>;
   });
 
   it('should be created', () => {
     expect(guard).toBeTruthy();
   });
 
-  //NOTE: Check this test! - https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
-  it('should allow navigation if user is authenticated', async () => {
-    authService.isTokenValid.mockReturnValue(true);
-    authService.isTokenExpiringSoon.mockReturnValue(false);
+  it('should allow navigation if token is valid and not expiring', async () => {
+    authServiceSpy.isTokenValid.mockReturnValue(true);
+    authServiceSpy.isTokenExpiringSoon.mockReturnValue(false);
 
     const result = await guard.canActivate(
       {} as ActivatedRouteSnapshot,
-      { url: '/cookies' } as RouterStateSnapshot,
+      { url: '/dashboard' } as RouterStateSnapshot,
     );
+
     expect(result).toBe(true);
+    expect(authServiceSpy.refreshToken).not.toHaveBeenCalled();
   });
 
-  //NOTE: Check this test! - https://app.shortcut.com/startrekonlineinfo/story/176/restore-and-fix-auth-guard-tests
-  it('should not allow navigation if user is not authenticated', async () => {
-    authService.isTokenValid.mockReturnValue(false);
-    authService.isTokenExpiringSoon.mockReturnValue(false);
-    const navigateSpy = jest.spyOn(router, 'navigate');
+  it('should redirect to login if token is invalid', async () => {
+    authServiceSpy.isTokenValid.mockReturnValue(false);
 
     const result = await guard.canActivate(
       {} as ActivatedRouteSnapshot,
-      { url: '/cookies' } as RouterStateSnapshot,
+      { url: '/dashboard' } as RouterStateSnapshot,
     );
+
     expect(result).toBe(false);
-    expect(navigateSpy).toHaveBeenCalledWith(['/login'], expect.any(Object));
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/login'], {
+      queryParams: { returnUrl: '/dashboard' },
+    });
+  });
+
+  it('should attempt refresh if token is expiring', async () => {
+    authServiceSpy.isTokenValid.mockReturnValue(true);
+    authServiceSpy.isTokenExpiringSoon.mockReturnValue(true);
+
+    // Mock successful refresh
+    const mockResponse: LoginResponse = {
+      access_token: 'new',
+      refresh_token: 'new',
+      expires_in: 3600,
+      user_id: '1',
+    };
+    authServiceSpy.refreshToken.mockReturnValue(of(mockResponse));
+
+    const result = await guard.canActivate(
+      {} as ActivatedRouteSnapshot,
+      { url: '/dashboard' } as RouterStateSnapshot,
+    );
+
+    expect(result).toBe(true);
+    expect(authServiceSpy.refreshToken).toHaveBeenCalled();
+  });
+
+  it('should redirect to login if refresh fails', async () => {
+    authServiceSpy.isTokenValid.mockReturnValue(true);
+    authServiceSpy.isTokenExpiringSoon.mockReturnValue(true);
+
+    // Mock failed refresh
+    authServiceSpy.refreshToken.mockReturnValue(
+      throwError(() => new Error('Refresh failed')),
+    );
+
+    const result = await guard.canActivate(
+      {} as ActivatedRouteSnapshot,
+      { url: '/dashboard' } as RouterStateSnapshot,
+    );
+
+    expect(result).toBe(false);
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/login'], {
+      queryParams: { returnUrl: '/dashboard' },
+    });
   });
 });

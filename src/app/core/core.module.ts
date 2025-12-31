@@ -11,7 +11,9 @@ import { RegistrationCompleteComponent } from './registration-complete/registrat
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
 
 @NgModule({
-  declarations: [
+  imports: [
+    CommonModule,
+    SharedModule,
     ChangePasswordComponent,
     ResetPasswordRequestComponent,
     LoginComponent,
@@ -19,7 +21,6 @@ import { VerifyEmailComponent } from './verify-email/verify-email.component';
     RegistrationCompleteComponent,
     VerifyEmailComponent,
   ],
-  imports: [CommonModule, SharedModule],
   providers: [AuthService, AuthGuard],
 })
 export class CoreModule {}

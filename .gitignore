@@ -12,6 +12,7 @@ src/environments/environment.prod.ts
 /out-tsc
 /bazel-out
 *.swp
+/.stryker-tmp/
 
 # Node
 /node_modules
@@ -49,6 +50,7 @@ yarn-error.log
 .sass-cache/
 /connect.lock
 /coverage
+/reports
 /libpeerconnection.log
 testem.log
 /typings
