@@ -143,7 +143,7 @@ jobs:
         run: npm run test:cov
 
       - name: Verify coverage exists
-        run: test -f coverage/lcov.info
+        run: test -f reports/coverage/lcov.info
 
       - name: SonarQube Cloud Scan
         uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
@@ -153,11 +153,11 @@ jobs:
         with:
           args: >
             -Dproject.settings=sonar-project.properties
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=reports/coverage/lcov.info
             -Dsonar.sources=src
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.spec.ts
-            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,**/*.spec.ts,**/*.test.ts
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,**/reports/**,**/*.spec.ts,**/*.test.ts
             -Dsonar.coverage.exclusions=src/main.ts,src/test.ts,src/polyfills.ts,src/environments/**,src/**/index.ts,src/**/index.js,src/environments/inject-env-vars.js,setup-jest.ts,src/test-setup.ts
             -Dsonar.issue.ignore.multicriteria=e1,e2
             -Dsonar.issue.ignore.multicriteria.e1.ruleKey=typescript:S1313
