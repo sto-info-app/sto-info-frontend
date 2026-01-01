@@ -743,6 +743,9 @@ describe('AppComponent', () => {
     (environment as { gaMeasurementId: string }).gaMeasurementId =
       'G-TEST-MEASUREMENT';
 
+    const gtagMock = jest.fn();
+    (globalThis as unknown as { gtag?: typeof gtagMock }).gtag = gtagMock;
+
     const dataLayer: unknown[] = [];
     (globalThis as { dataLayer?: unknown[] }).dataLayer = dataLayer;
 
@@ -755,6 +758,9 @@ describe('AppComponent', () => {
         'ga-disable-G-TEST-MEASUREMENT'
       ],
     ).toBe(true);
+    expect(gtagMock).toHaveBeenCalledWith('consent', 'update', {
+      analytics_storage: 'denied',
+    });
     expect(dataLayer.length).toBe(1);
   });
 
@@ -1097,6 +1103,26 @@ describe('AppComponent', () => {
       ).subscribeToAuthenticationState();
       mockAuthService.isAuthenticated$.next(false);
       expect(stopCountdownSpy).toHaveBeenCalled();
+    });
+
+    it('should return early from initGoogleConsentMode when no measurement ID', () => {
+      const originalId = environment.gaMeasurementId;
+      (environment as { gaMeasurementId: string | undefined }).gaMeasurementId =
+        '';
+
+      const ensureGtagSpy = jest.spyOn(
+        component as unknown as { ensureGtag: () => void },
+        'ensureGtag',
+      );
+
+      (
+        component as unknown as { initGoogleConsentMode: () => void }
+      ).initGoogleConsentMode();
+
+      expect(ensureGtagSpy).not.toHaveBeenCalled();
+
+      (environment as { gaMeasurementId: string | undefined }).gaMeasurementId =
+        originalId;
     });
   });
 });
