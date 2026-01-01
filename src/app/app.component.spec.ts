@@ -1098,5 +1098,25 @@ describe('AppComponent', () => {
       mockAuthService.isAuthenticated$.next(false);
       expect(stopCountdownSpy).toHaveBeenCalled();
     });
+
+    it('should return early from initGoogleConsentMode when no measurement ID', () => {
+      const originalId = environment.gaMeasurementId;
+      (environment as { gaMeasurementId: string | undefined }).gaMeasurementId =
+        '';
+
+      const ensureGtagSpy = jest.spyOn(
+        component as unknown as { ensureGtag: () => void },
+        'ensureGtag',
+      );
+
+      (
+        component as unknown as { initGoogleConsentMode: () => void }
+      ).initGoogleConsentMode();
+
+      expect(ensureGtagSpy).not.toHaveBeenCalled();
+
+      (environment as { gaMeasurementId: string | undefined }).gaMeasurementId =
+        originalId;
+    });
   });
 });
