@@ -743,6 +743,9 @@ describe('AppComponent', () => {
     (environment as { gaMeasurementId: string }).gaMeasurementId =
       'G-TEST-MEASUREMENT';
 
+    const gtagMock = jest.fn();
+    (globalThis as unknown as { gtag?: typeof gtagMock }).gtag = gtagMock;
+
     const dataLayer: unknown[] = [];
     (globalThis as { dataLayer?: unknown[] }).dataLayer = dataLayer;
 
@@ -755,6 +758,9 @@ describe('AppComponent', () => {
         'ga-disable-G-TEST-MEASUREMENT'
       ],
     ).toBe(true);
+    expect(gtagMock).toHaveBeenCalledWith('consent', 'update', {
+      analytics_storage: 'denied',
+    });
     expect(dataLayer.length).toBe(1);
   });
 
