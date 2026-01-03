@@ -28,4 +28,10 @@ export const API_URLS = {
   USER: apiUrl + '/user',
   UPDATE_USER_PROFILE: apiUrl + '/user/update-profile',
   UPDATE_USER_PROFILE_PIC: apiUrl + '/user/update-profile-pic',
+
+  // STO Account
+  STO_ACCOUNT: apiUrl + '/account',
+  STO_PLATFORM: apiUrl + '/platform',
+  STO_LAUNCHER: apiUrl + '/launcher',
+  STO_PLATFORM_LAUNCHER: apiUrl + '/platform-launcher',
 };
