@@ -1,10 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import {
   faPlaystation,
+  faSteam,
   faWindows,
   faXbox,
 } from '@awesome.me/kit-5812c6b103/icons/classic/brands';
+
 import {
+  faBadgeCheck,
   faCircleQuestion,
   faExternalLink,
   faHandSpock,
@@ -15,6 +18,11 @@ import {
   faTrash,
   faUserPen,
 } from '@awesome.me/kit-5812c6b103/icons/classic/solid';
+import {
+  faArcGames,
+  faEpicGames,
+} from '@awesome.me/kit-5812c6b103/icons/kit/custom';
+
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 
 @Injectable({ providedIn: 'root' })
@@ -35,6 +43,10 @@ export class FontAwesomeIconService {
       faWindows,
       faXbox,
       faPlaystation,
+      faArcGames,
+      faEpicGames,
+      faSteam,
+      faBadgeCheck,
     );
   }
 }
