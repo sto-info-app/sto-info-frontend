@@ -164,23 +164,21 @@ export class AccountsComponent implements OnInit {
    * @param platformId The platform ID.
    * @returns An array representing the Font Awesome icon.
    */
-  getPlatformIcon(platformId?: string): [IconPrefix, IconName] {
-    if (!platformId) return ['fas', 'circle-question'];
+  getPlatformIcon(platformId?: string): [IconPrefix, IconName] | null {
+    if (!platformId) return null;
 
     const platform = this.platforms.find(p => p.id === platformId);
-    if (!platform) return ['fas', 'circle-question'];
+    if (!platform) return null;
 
     const name = platform.name.toLowerCase();
-    if (name.includes('arc')) return ['fak', 'arc-games' as IconName];
-    if (name.includes('epic')) return ['fak', 'epic-games' as IconName];
-    if (name.includes('steam')) return ['fab', 'steam'];
-    if (name.includes('windows') || name.includes('pc'))
-      return ['fab', 'windows'];
-    if (name.includes('playstation') || name.includes('ps'))
-      return ['fab', 'playstation'];
-    if (name.includes('xbox')) return ['fab', 'xbox'];
+    if (name === 'arc') return ['fak', 'arc-games' as IconName];
+    if (name === 'epic') return ['fak', 'epic-games' as IconName];
+    if (name === 'steam') return ['fab', 'steam'];
+    if (name === 'windows' || name === 'pc') return ['fab', 'windows'];
+    if (name === 'playstation' || name === 'ps') return ['fab', 'playstation'];
+    if (name === 'xbox') return ['fab', 'xbox'];
 
-    return ['fas', 'circle-question'];
+    return null;
   }
 
   /**
@@ -207,9 +205,9 @@ export class AccountsComponent implements OnInit {
     if (!launcher) return null;
 
     const name = launcher.name.toLowerCase();
-    if (name.includes('arc')) return ['fak', 'arc-games' as IconName];
-    if (name.includes('epic')) return ['fak', 'epic-games' as IconName];
-    if (name.includes('steam')) return ['fab', 'steam'];
+    if (name === 'arc') return ['fak', 'arc-games' as IconName];
+    if (name === 'epic') return ['fak', 'epic-games' as IconName];
+    if (name === 'steam') return ['fab', 'steam'];
 
     return null;
   }
