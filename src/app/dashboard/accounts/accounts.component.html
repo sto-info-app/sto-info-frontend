@@ -27,18 +27,33 @@
         <div class="accounts-grid">
           @for (account of accounts; track account.id) {
             <div class="account-card">
-              <div class="platform-icon">
-                <fa-icon [icon]="getPlatformIcon(account.platformId)"></fa-icon>
-              </div>
               <div class="account-details">
                 <p>
                   <span class="record-title">Handle:</span>
                   {{ account.handle }}
+                  @if (account.lifetimeSubscription) {
+                    <fa-icon
+                      [icon]="['fas', 'badge-check']"
+                      title="Lifetime Subscription"
+                      class="lifetime-icon"></fa-icon>
+                  }
                 </p>
-                <p>
-                  <span class="record-title">Username:</span>
-                  {{ account.username || 'N/A' }}
-                </p>
+                <div class="account-icons">
+                  <fa-icon
+                    [icon]="getPlatformIcon(account.platformId)"
+                    [title]="
+                      getPlatform(account.platformId)?.name ?? 'Platform'
+                    "
+                    class="platform-mini-icon"></fa-icon>
+                  @if (getLauncher(account.launcherId); as launcher) {
+                    @if (getLauncherIcon(launcher.id); as launcherIcon) {
+                      <fa-icon
+                        [icon]="launcherIcon"
+                        [title]="launcher.name"
+                        class="launcher-icon"></fa-icon>
+                    }
+                  }
+                </div>
               </div>
               <div class="account-actions">
                 <span

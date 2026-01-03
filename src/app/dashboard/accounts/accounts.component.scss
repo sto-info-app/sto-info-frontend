@@ -21,9 +21,7 @@
 }
 
 .accounts-inner-content {
-  background-color: rgba(0, 0, 0, 0.3);
   padding: 20px;
-  border-radius: 10px;
 }
 
 .accounts-grid {
@@ -43,12 +41,8 @@
   gap: 20px;
 }
 
-.platform-icon {
-  font-size: 2rem;
+.platform-mini-icon {
   color: #6cf;
-  min-width: 45px;
-  display: flex;
-  justify-content: center;
 }
 
 .account-details {
@@ -57,6 +51,20 @@
 
 .account-details p {
   margin: 5px 0;
+}
+.account-icons {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+  font-size: 1.2rem;
+}
+.lifetime-icon {
+  color: var(--lcars-gold, #ff9933);
+  font-size: 0.7rem;
+  vertical-align: top;
+}
+.launcher-icon {
+  color: #6cf;
 }
 
 .record-title {
