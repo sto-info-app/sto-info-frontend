@@ -1,0 +1,493 @@
+:root {
+  /* LCARS colours (from thelcars.com) */
+  --lcars-mat-primary: #ff9900; /* golden-orange */
+  --lcars-mat-primary-variant: #ff8800; /* orange */
+  --lcars-mat-primary-rgb: 255, 153, 0;
+
+  //   --lcars-mat-accent: #cccc66; /* lima-bean */
+  //   --lcars-mat-accent-variant: #999933; /* green */
+  //   --lcars-mat-accent-rgb: 204, 204, 102;
+
+  --lcars-mat-accent: #5566ff; /* blue */
+  --lcars-mat-accent-variant: #8899ff; /* bluey */
+  --lcars-mat-accent-rgb: 85, 102, 255;
+}
+
+/* Overrides for Angular Material "purple-green" prebuilt theme
+   Place this AFTER:
+   node_modules/@angular/material/prebuilt-themes/purple-green.css
+*/
+
+/* Extracted + colour-swapped rules from your attached purple-green.css */
+html {
+  --mat-option-selected-state-label-text-color: var(--lcars-mat-primary);
+
+  /* Filled */
+  --mat-form-field-filled-caret-color: var(--lcars-mat-primary);
+  --mat-form-field-filled-focus-active-indicator-color: var(
+    --lcars-mat-primary
+  );
+  --mat-form-field-filled-focus-label-text-color: rgba(
+    var(--lcars-mat-primary-rgb),
+    0.87
+  );
+
+  /* Outlined */
+  --mat-form-field-outlined-caret-color: var(--lcars-mat-primary);
+  --mat-form-field-outlined-focus-outline-color: var(--lcars-mat-primary);
+  --mat-form-field-outlined-focus-label-text-color: rgba(
+    var(--lcars-mat-primary-rgb),
+    0.87
+  );
+
+  /* Select arrow when focused */
+  --mat-form-field-focus-select-arrow-color: rgba(
+    var(--lcars-mat-primary-rgb),
+    0.87
+  );
+}
+
+.mat-pseudo-checkbox {
+  --mat-pseudo-checkbox-full-selected-icon-color: var(--lcars-mat-primary);
+  --mat-pseudo-checkbox-full-selected-checkmark-color: black;
+  --mat-pseudo-checkbox-full-selected-container-color: var(--lcars-mat-primary);
+  --mat-pseudo-checkbox-full-selected-outline-color: var(--lcars-mat-primary);
+  --mat-pseudo-checkbox-full-unselected-icon-color: rgba(255, 255, 255, 0.7);
+  --mat-pseudo-checkbox-full-unselected-outline-color: rgba(255, 255, 255, 0.7);
+  --mat-pseudo-checkbox-full-disabled-selected-icon-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-pseudo-checkbox-full-disabled-unselected-icon-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-pseudo-checkbox-full-disabled-selected-container-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-pseudo-checkbox-full-disabled-unselected-outline-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-pseudo-checkbox-minimal-selected-checkmark-color: var(
+    --lcars-mat-primary
+  );
+  --mat-pseudo-checkbox-minimal-disabled-selected-checkmark-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+}
+
+.mat-mdc-option {
+  --mdc-list-list-item-focus-label-text-color: var(--lcars-mat-primary);
+  --mdc-list-list-item-hover-label-text-color: var(--lcars-mat-primary);
+}
+
+.mat-primary {
+  --mat-full-pseudo-checkbox-selected-icon-color: var(--lcars-mat-primary);
+  --mat-full-pseudo-checkbox-selected-checkmark-color: black;
+  --mat-full-pseudo-checkbox-selected-container-color: var(--lcars-mat-primary);
+  --mat-full-pseudo-checkbox-selected-outline-color: var(--lcars-mat-primary);
+  --mat-minimal-pseudo-checkbox-selected-checkmark-color: var(
+    --lcars-mat-primary
+  );
+  --mat-stepper-header-selected-state-icon-background-color: var(
+    --lcars-mat-primary
+  );
+  --mat-stepper-header-selected-state-icon-foreground-color: black;
+  --mat-stepper-header-edit-state-icon-background-color: var(
+    --lcars-mat-primary
+  );
+  --mat-stepper-header-edit-state-icon-foreground-color: black;
+  --mat-stepper-header-done-state-icon-background-color: var(
+    --lcars-mat-primary
+  );
+  --mat-stepper-header-done-state-icon-foreground-color: black;
+  --mat-datepicker-calendar-date-selected-state-background-color: var(
+    --lcars-mat-primary
+  );
+  --mat-datepicker-calendar-date-selected-state-text-color: black;
+  --mat-datepicker-calendar-date-today-selected-state-outline-color: black;
+  --mat-datepicker-calendar-date-today-outline-color: rgba(255, 255, 255, 0.7);
+  --mat-datepicker-calendar-date-in-range-state-background-color: rgba(
+    var(--lcars-mat-primary-rgb),
+    0.2
+  );
+  --mat-datepicker-calendar-date-in-comparison-range-state-background-color: rgba(
+    var(--lcars-mat-primary-rgb),
+    0.2
+  );
+  --mat-datepicker-calendar-date-in-overlap-range-state-background-color: rgba(
+    var(--lcars-mat-primary-rgb),
+    0.2
+  );
+  --mat-datepicker-calendar-date-in-overlap-range-state-text-color: rgba(
+    255,
+    255,
+    255,
+    0.7
+  );
+  --mat-datepicker-calendar-date-selected-disabled-state-background-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-datepicker-calendar-date-selected-disabled-state-text-color: black;
+  --mat-datepicker-calendar-date-today-disabled-state-outline-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-datepicker-calendar-date-preview-state-outline-color: rgba(
+    255,
+    255,
+    255,
+    0.7
+  );
+  --mat-datepicker-calendar-date-range-filler-background-color: rgba(
+    var(--lcars-mat-primary-rgb),
+    0.2
+  );
+  --mat-datepicker-calendar-date-range-filler-text-color: rgba(
+    255,
+    255,
+    255,
+    0.7
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-background-color: rgba(
+    255,
+    255,
+    255,
+    0.3
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-text-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-hover-background-color: rgba(
+    255,
+    255,
+    255,
+    0.3
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-hover-text-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-active-background-color: rgba(
+    255,
+    255,
+    255,
+    0.3
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-active-text-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-focus-background-color: rgba(
+    255,
+    255,
+    255,
+    0.3
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-focus-text-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-selected-background-color: rgba(
+    255,
+    255,
+    255,
+    0.3
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-selected-text-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-selected-hover-background-color: rgba(
+    255,
+    255,
+    255,
+    0.3
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-selected-hover-text-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-selected-active-background-color: rgba(
+    255,
+    255,
+    255,
+    0.3
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-selected-active-text-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-selected-focus-background-color: rgba(
+    255,
+    255,
+    255,
+    0.3
+  );
+  --mat-datepicker-calendar-date-range-filler-disabled-state-selected-focus-text-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  );
+}
+
+.mat-accent {
+  --mat-full-pseudo-checkbox-selected-icon-color: var(--lcars-mat-accent);
+  --mat-full-pseudo-checkbox-selected-checkmark-color: black;
+  --mat-full-pseudo-checkbox-selected-container-color: var(--lcars-mat-accent);
+  --mat-full-pseudo-checkbox-selected-outline-color: var(--lcars-mat-accent);
+  --mat-minimal-pseudo-checkbox-selected-checkmark-color: var(
+    --lcars-mat-accent
+  );
+  --mat-stepper-header-selected-state-icon-background-color: var(
+    --lcars-mat-accent
+  );
+  --mat-stepper-header-selected-state-icon-foreground-color: black;
+  --mat-stepper-header-edit-state-icon-background-color: var(
+    --lcars-mat-accent
+  );
+  --mat-stepper-header-edit-state-icon-foreground-color: black;
+  --mat-stepper-header-done-state-icon-background-color: var(
+    --lcars-mat-accent
+  );
+  --mat-stepper-header-done-state-icon-foreground-color: black;
+}
+
+.mat-mdc-checkbox {
+  --mdc-checkbox-selected-checkmark-color: black;
+  --mdc-checkbox-selected-icon-color: var(--lcars-mat-primary);
+  --mdc-checkbox-selected-hover-icon-color: var(--lcars-mat-primary);
+  --mdc-checkbox-selected-focus-icon-color: var(--lcars-mat-primary);
+  --mdc-checkbox-selected-pressed-icon-color: var(--lcars-mat-primary);
+  --mdc-checkbox-unselected-hover-icon-color: rgba(255, 255, 255, 0.7);
+  --mdc-checkbox-unselected-focus-icon-color: rgba(255, 255, 255, 0.7);
+  --mdc-checkbox-unselected-pressed-icon-color: rgba(255, 255, 255, 0.7);
+  --mdc-checkbox-selected-disabled-icon-color: rgba(255, 255, 255, 0.5);
+  --mdc-checkbox-unselected-disabled-icon-color: rgba(255, 255, 255, 0.5);
+  --mdc-checkbox-selected-focus-state-layer-color: var(--lcars-mat-primary);
+  --mdc-checkbox-selected-hover-state-layer-color: var(--lcars-mat-primary);
+  --mdc-checkbox-selected-pressed-state-layer-color: var(--lcars-mat-primary);
+  --mdc-checkbox-unselected-focus-state-layer-color: white;
+  --mdc-checkbox-unselected-hover-state-layer-color: white;
+  --mdc-checkbox-unselected-pressed-state-layer-color: white;
+}
+
+.mat-mdc-radio-button {
+  --mdc-radio-selected-icon-color: var(--lcars-mat-primary);
+  --mdc-radio-selected-hover-icon-color: var(--lcars-mat-primary);
+  --mdc-radio-selected-focus-icon-color: var(--lcars-mat-primary);
+  --mdc-radio-selected-pressed-icon-color: var(--lcars-mat-primary);
+  --mdc-radio-unselected-hover-icon-color: rgba(255, 255, 255, 0.7);
+  --mdc-radio-unselected-focus-icon-color: rgba(255, 255, 255, 0.7);
+  --mdc-radio-unselected-pressed-icon-color: rgba(255, 255, 255, 0.7);
+  --mdc-radio-disabled-selected-icon-color: rgba(255, 255, 255, 0.5);
+  --mdc-radio-disabled-unselected-icon-color: rgba(255, 255, 255, 0.5);
+  --mdc-radio-unselected-icon-color: rgba(255, 255, 255, 0.7);
+  --mdc-radio-selected-focus-state-layer-color: var(--lcars-mat-primary);
+  --mdc-radio-selected-hover-state-layer-color: var(--lcars-mat-primary);
+  --mdc-radio-selected-pressed-state-layer-color: var(--lcars-mat-primary);
+  --mdc-radio-unselected-focus-state-layer-color: white;
+  --mdc-radio-unselected-hover-state-layer-color: white;
+  --mdc-radio-unselected-pressed-state-layer-color: white;
+}
+
+.mat-mdc-slide-toggle {
+  --mdc-switch-selected-handle-color: black;
+  --mdc-switch-selected-track-color: var(--lcars-mat-primary);
+  --mdc-switch-selected-hover-track-color: var(--lcars-mat-primary);
+  --mdc-switch-selected-focus-track-color: var(--lcars-mat-primary);
+  --mdc-switch-selected-pressed-track-color: var(--lcars-mat-primary);
+  --mdc-switch-selected-hover-handle-color: black;
+  --mdc-switch-selected-focus-handle-color: black;
+  --mdc-switch-selected-pressed-handle-color: black;
+  --mdc-switch-selected-focus-state-layer-color: var(--lcars-mat-primary);
+  --mdc-switch-selected-hover-state-layer-color: var(--lcars-mat-primary);
+  --mdc-switch-selected-pressed-state-layer-color: var(--lcars-mat-primary);
+}
+
+.mat-mdc-progress-bar {
+  --mdc-linear-progress-active-indicator-color: var(--lcars-mat-primary);
+  --mdc-linear-progress-track-color: rgba(var(--lcars-mat-primary-rgb), 0.25);
+}
+
+.mat-mdc-slider {
+  --mdc-slider-handle-color: var(--lcars-mat-primary);
+  --mdc-slider-focus-handle-color: var(--lcars-mat-primary);
+  --mdc-slider-hover-handle-color: var(--lcars-mat-primary);
+  --mdc-slider-active-track-color: var(--lcars-mat-primary);
+  --mdc-slider-inactive-track-color: rgba(var(--lcars-mat-primary-rgb), 0.25);
+  --mdc-slider-with-tick-marks-active-container-color: var(--lcars-mat-primary);
+  --mdc-slider-with-tick-marks-inactive-container-color: rgba(
+    var(--lcars-mat-primary-rgb),
+    0.25
+  );
+  --mat-slider-ripple-color: var(--lcars-mat-primary);
+}
+
+.mat-mdc-tab-group {
+  --mdc-tab-indicator-active-indicator-color: var(--lcars-mat-primary);
+  --mat-tab-header-active-label-text-color: var(--lcars-mat-primary);
+  --mat-tab-header-active-ripple-color: var(--lcars-mat-primary);
+  --mat-tab-header-active-focus-label-text-color: var(--lcars-mat-primary);
+  --mat-tab-header-active-hover-label-text-color: var(--lcars-mat-primary);
+  --mat-tab-header-active-focus-indicator-color: var(--lcars-mat-primary);
+  --mat-tab-header-active-hover-indicator-color: var(--lcars-mat-primary);
+}
+
+.mat-mdc-tab-nav-bar {
+  --mdc-tab-indicator-active-indicator-color: var(--lcars-mat-primary);
+  --mat-tab-header-active-label-text-color: var(--lcars-mat-primary);
+  --mat-tab-header-active-ripple-color: var(--lcars-mat-primary);
+  --mat-tab-header-active-focus-label-text-color: var(--lcars-mat-primary);
+  --mat-tab-header-active-hover-label-text-color: var(--lcars-mat-primary);
+  --mat-tab-header-active-focus-indicator-color: var(--lcars-mat-primary);
+  --mat-tab-header-active-hover-indicator-color: var(--lcars-mat-primary);
+}
+
+.mat-mdc-form-field {
+  --mat-mdc-form-field-caret-color: var(--lcars-mat-primary);
+  --mat-mdc-form-field-focus-select-arrow-color: var(--lcars-mat-primary);
+  --mat-mdc-form-field-focus-outline-color: var(--lcars-mat-primary);
+  --mat-mdc-form-field-focus-label-text-color: var(--lcars-mat-primary);
+  --mat-mdc-form-field-focus-floating-label-text-color: var(
+    --lcars-mat-primary
+  );
+  --mat-mdc-form-field-focus-active-indicator-color: var(--lcars-mat-primary);
+  --mat-mdc-form-field-focus-active-indicator-height: 2px;
+}
+
+.mat-mdc-select {
+  --mat-select-focused-arrow-color: var(--lcars-mat-primary);
+}
+
+.mat-mdc-paginator {
+  --mat-paginator-container-text-color: rgba(255, 255, 255, 0.7);
+  --mat-paginator-container-background-color: #424242;
+  --mat-paginator-enabled-icon-color: rgba(255, 255, 255, 0.7);
+  --mat-paginator-disabled-icon-color: rgba(255, 255, 255, 0.5);
+}
+
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: #323232;
+  --mdc-snackbar-supporting-text-color: rgba(255, 255, 255, 0.7);
+  --mdc-snackbar-button-color: var(--lcars-mat-accent);
+}
+
+/* Accent colour usage for a handful of components */
+.mat-mdc-checkbox.mat-accent {
+  --mdc-checkbox-selected-icon-color: var(--lcars-mat-accent);
+  --mdc-checkbox-selected-hover-icon-color: var(--lcars-mat-accent);
+  --mdc-checkbox-selected-focus-icon-color: var(--lcars-mat-accent);
+  --mdc-checkbox-selected-pressed-icon-color: var(--lcars-mat-accent);
+  --mdc-checkbox-selected-focus-state-layer-color: var(--lcars-mat-accent);
+  --mdc-checkbox-selected-hover-state-layer-color: var(--lcars-mat-accent);
+  --mdc-checkbox-selected-pressed-state-layer-color: var(--lcars-mat-accent);
+}
+
+.mat-mdc-radio-button.mat-accent {
+  --mdc-radio-selected-icon-color: var(--lcars-mat-accent);
+  --mdc-radio-selected-hover-icon-color: var(--lcars-mat-accent);
+  --mdc-radio-selected-focus-icon-color: var(--lcars-mat-accent);
+  --mdc-radio-selected-pressed-icon-color: var(--lcars-mat-accent);
+  --mdc-radio-selected-focus-state-layer-color: var(--lcars-mat-accent);
+  --mdc-radio-selected-hover-state-layer-color: var(--lcars-mat-accent);
+  --mdc-radio-selected-pressed-state-layer-color: var(--lcars-mat-accent);
+}
+
+.mat-mdc-slide-toggle.mat-accent {
+  --mdc-switch-selected-track-color: var(--lcars-mat-accent);
+  --mdc-switch-selected-hover-track-color: var(--lcars-mat-accent);
+  --mdc-switch-selected-focus-track-color: var(--lcars-mat-accent);
+  --mdc-switch-selected-pressed-track-color: var(--lcars-mat-accent);
+  --mdc-switch-selected-focus-state-layer-color: var(--lcars-mat-accent);
+  --mdc-switch-selected-hover-state-layer-color: var(--lcars-mat-accent);
+  --mdc-switch-selected-pressed-state-layer-color: var(--lcars-mat-accent);
+}
+
+/* Progress bar "accent" mappings */
+.mat-mdc-progress-bar.mat-accent {
+  --mdc-linear-progress-active-indicator-color: var(--lcars-mat-accent);
+  --mdc-linear-progress-track-color: rgba(var(--lcars-mat-accent-rgb), 0.25);
+}
+
+/* Slider "accent" mappings */
+.mat-mdc-slider.mat-accent {
+  --mdc-slider-handle-color: var(--lcars-mat-accent);
+  --mdc-slider-focus-handle-color: var(--lcars-mat-accent);
+  --mdc-slider-hover-handle-color: var(--lcars-mat-accent);
+  --mdc-slider-active-track-color: var(--lcars-mat-accent);
+  --mdc-slider-inactive-track-color: rgba(var(--lcars-mat-accent-rgb), 0.25);
+  --mdc-slider-with-tick-marks-active-container-color: var(--lcars-mat-accent);
+  --mdc-slider-with-tick-marks-inactive-container-color: rgba(
+    var(--lcars-mat-accent-rgb),
+    0.25
+  );
+  --mat-slider-ripple-color: var(--lcars-mat-accent);
+}
+
+/* Some remaining purple variant references (mapped to LCARS primary variant) */
+.mat-mdc-fab,
+.mat-mdc-mini-fab {
+  --mdc-fab-container-color: var(--lcars-mat-primary-variant);
+}
+
+/* A couple of places the prebuilt theme used the darker green */
+.mat-mdc-checkbox.mat-accent .mdc-checkbox__background {
+  border-color: var(--lcars-mat-accent-variant);
+}
+
+/* If you use mat-accent form fields anywhere, make them LCARS blue */
+.mat-mdc-form-field.mat-accent {
+  --mat-form-field-filled-caret-color: var(--lcars-mat-accent);
+  --mat-form-field-filled-focus-active-indicator-color: var(--lcars-mat-accent);
+  --mat-form-field-filled-focus-label-text-color: rgba(
+    var(--lcars-mat-accent-rgb),
+    0.87
+  );
+
+  --mat-form-field-outlined-caret-color: var(--lcars-mat-accent);
+  --mat-form-field-outlined-focus-outline-color: var(--lcars-mat-accent);
+  --mat-form-field-outlined-focus-label-text-color: rgba(
+    var(--lcars-mat-accent-rgb),
+    0.87
+  );
+
+  --mat-form-field-focus-select-arrow-color: rgba(
+    var(--lcars-mat-accent-rgb),
+    0.87
+  );
+}
