@@ -6,10 +6,13 @@ import {
 } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import {
+  faLock,
+  faUserPen,
+} from '@awesome.me/kit-5812c6b103/icons/classic/solid';
+import {
   FaIconLibrary,
   FontAwesomeModule,
 } from '@fortawesome/angular-fontawesome';
-import { faImage, faLock, faUserPen } from '@fortawesome/free-solid-svg-icons';
 import { of } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -92,7 +95,7 @@ describe('ProfileComponent', () => {
       .compileComponents();
 
     const library = TestBed.inject(FaIconLibrary);
-    library.addIcons(faUserPen, faLock, faImage);
+    library.addIcons(faUserPen, faLock);
 
     fixture = TestBed.createComponent(ProfileComponent);
     component = fixture.componentInstance;
