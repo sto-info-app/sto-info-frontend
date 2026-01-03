@@ -43,7 +43,8 @@
                     <fa-icon
                       [icon]="platformIcon"
                       [title]="
-                        getPlatform(account.platformId)?.name ?? 'Platform'
+                        'Platform: ' +
+                        (getPlatform(account.platformId)?.name ?? 'Platform')
                       "
                       class="platform-mini-icon"></fa-icon>
                   }
@@ -51,7 +52,7 @@
                     @if (getLauncherIcon(launcher.id); as launcherIcon) {
                       <fa-icon
                         [icon]="launcherIcon"
-                        [title]="launcher.name"
+                        [title]="'Launcher: ' + launcher.name"
                         class="launcher-icon"></fa-icon>
                     }
                   }
