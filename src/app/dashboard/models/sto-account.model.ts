@@ -6,6 +6,7 @@ export interface StoAccount {
   notes?: string;
   accountCreatedDate?: string;
   publiclyVisible: boolean;
+  lifetimeSubscription: boolean;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;
@@ -45,6 +46,7 @@ export interface CreateStoAccountRequest {
   notes?: string;
   accountCreatedDate?: string;
   publiclyVisible: boolean;
+  lifetimeSubscription: boolean;
   platformId?: string;
   launcherId?: string;
 }

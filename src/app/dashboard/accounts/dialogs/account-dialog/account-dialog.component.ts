@@ -7,7 +7,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -16,6 +15,7 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { forkJoin } from 'rxjs';
 import {
   Launcher,
@@ -52,7 +52,7 @@ interface AccountDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatCheckboxModule,
+    MatSlideToggleModule,
     MatButtonModule,
     LoadingBarComponent,
   ],
@@ -85,6 +85,7 @@ export class AccountDialogComponent implements OnInit {
       notes: [''],
       accountCreatedDate: [null],
       publiclyVisible: [true],
+      lifetimeSubscription: [false],
       platformId: [''],
       launcherId: [''],
     });
@@ -134,6 +135,7 @@ export class AccountDialogComponent implements OnInit {
               ? acc.accountCreatedDate.split('T')[0]
               : '',
             publiclyVisible: acc.publiclyVisible,
+            lifetimeSubscription: acc.lifetimeSubscription || false,
             platformId: acc.platformId || '',
             launcherId: acc.launcherId || '',
           });

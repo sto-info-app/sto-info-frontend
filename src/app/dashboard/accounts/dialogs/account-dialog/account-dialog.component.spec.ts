@@ -39,12 +39,13 @@ describe('AccountDialogComponent', () => {
 
   const mockAccount: StoAccount = {
     id: '1',
-    handle: 'Test#1234',
+    handle: 'Test',
     username: 'user',
     email: 'test@test.com',
     notes: 'notes',
     accountCreatedDate: '2023-01-01T00:00:00.000Z',
     publiclyVisible: true,
+    lifetimeSubscription: true,
     platformId: 'p1',
     launcherId: 'l1',
     userId: 'u1',
@@ -124,6 +125,9 @@ describe('AccountDialogComponent', () => {
     fixture.detectChanges();
 
     expect(component.accountForm.value.handle).toBe(mockAccount.handle);
+    expect(component.accountForm.value.lifetimeSubscription).toBe(
+      mockAccount.lifetimeSubscription,
+    );
     expect(component.accountForm.value.platformId).toBe(mockAccount.platformId);
   });
 
@@ -339,6 +343,17 @@ describe('AccountDialogComponent', () => {
       expect(component.accountForm.value.accountCreatedDate).toBe('');
       expect(component.accountForm.value.platformId).toBe('');
       expect(component.accountForm.value.launcherId).toBe('');
+    });
+
+    it('should handle undefined lifetimeSubscription in edit mode', () => {
+      const accountWithoutLifetime: StoAccount = {
+        ...mockAccount,
+        lifetimeSubscription: undefined as unknown as boolean,
+      };
+      component.data = { mode: 'edit', account: accountWithoutLifetime };
+      fixture.detectChanges();
+
+      expect(component.accountForm.value.lifetimeSubscription).toBe(false);
     });
   });
 
