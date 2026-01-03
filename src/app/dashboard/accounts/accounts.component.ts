@@ -12,7 +12,7 @@ import {
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
-import { Platform, StoAccount } from '../models/sto-account.model';
+import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
 import { StoAccountService } from '../services/sto-account.service';
 import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.component';
 
@@ -42,6 +42,9 @@ export class AccountsComponent implements OnInit {
   /** List of available platforms. */
   platforms: Platform[] = [];
 
+  /** List of available launchers. */
+  launchers: Launcher[] = [];
+
   /** Flag to indicate if data is being loaded. */
   isLoading = true;
 
@@ -66,10 +69,12 @@ export class AccountsComponent implements OnInit {
     forkJoin({
       accounts: this.stoAccountService.getAccounts(),
       platforms: this.stoAccountService.getPlatforms(),
+      launchers: this.stoAccountService.getLaunchers(),
     }).subscribe({
-      next: ({ accounts, platforms }) => {
+      next: ({ accounts, platforms, launchers }) => {
         this.accounts = accounts;
         this.platforms = platforms;
+        this.launchers = launchers;
         this.isLoading = false;
       },
       error: () => {
@@ -166,6 +171,9 @@ export class AccountsComponent implements OnInit {
     if (!platform) return ['fas', 'circle-question'];
 
     const name = platform.name.toLowerCase();
+    if (name.includes('arc')) return ['fak', 'arc-games' as IconName];
+    if (name.includes('epic')) return ['fak', 'epic-games' as IconName];
+    if (name.includes('steam')) return ['fab', 'steam'];
     if (name.includes('windows') || name.includes('pc'))
       return ['fab', 'windows'];
     if (name.includes('playstation') || name.includes('ps'))
@@ -173,5 +181,47 @@ export class AccountsComponent implements OnInit {
     if (name.includes('xbox')) return ['fab', 'xbox'];
 
     return ['fas', 'circle-question'];
+  }
+
+  /**
+   * Returns the platform for a given platform ID.
+   *
+   * @param platformId The platform ID.
+   * @returns The platform object or undefined.
+   */
+  getPlatform(platformId?: string): Platform | undefined {
+    if (!platformId) return undefined;
+    return this.platforms.find(p => p.id === platformId);
+  }
+
+  /**
+   * Returns the Font Awesome icon for a given launcher.
+   *
+   * @param launcherId The launcher ID.
+   * @returns An array representing the Font Awesome icon.
+   */
+  getLauncherIcon(launcherId?: string): [IconPrefix, IconName] | null {
+    if (!launcherId) return null;
+
+    const launcher = this.launchers.find(l => l.id === launcherId);
+    if (!launcher) return null;
+
+    const name = launcher.name.toLowerCase();
+    if (name.includes('arc')) return ['fak', 'arc-games' as IconName];
+    if (name.includes('epic')) return ['fak', 'epic-games' as IconName];
+    if (name.includes('steam')) return ['fab', 'steam'];
+
+    return null;
+  }
+
+  /**
+   * Returns the launcher for a given launcher ID.
+   *
+   * @param launcherId The launcher ID.
+   * @returns The launcher object or undefined.
+   */
+  getLauncher(launcherId?: string): Launcher | undefined {
+    if (!launcherId) return undefined;
+    return this.launchers.find(l => l.id === launcherId);
   }
 }
