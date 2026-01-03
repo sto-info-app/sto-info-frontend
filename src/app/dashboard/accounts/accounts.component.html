@@ -1,0 +1,98 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+<div id="accounts-container">
+  <div
+    id="accounts-main-column"
+    class="col">
+    <h1>Your STO Accounts</h1>
+    <div id="accounts-main-content">
+      <div class="lcars-text-bar accounts-lcars-text-bar">
+        <span>Account List</span>
+        <span
+          class="cta-icon"
+          (click)="addAccount()"
+          (keypress)="addAccount()"
+          title="Add STO Account"
+          ><fa-icon [icon]="['fas', 'plus']"></fa-icon
+        ></span>
+      </div>
+
+      <div class="accounts-inner-content">
+        @if (accounts.length === 0 && !isLoading) {
+          <p>No STO accounts found. Click the + icon above to add one.</p>
+        }
+
+        <div class="accounts-grid">
+          @for (account of accounts; track account.id) {
+            <div class="account-card">
+              <div class="account-details">
+                <p>
+                  <span class="record-title">Handle:</span>
+                  {{ account.handle }}
+                  @if (account.lifetimeSubscription) {
+                    <fa-icon
+                      [icon]="['fas', 'badge-check']"
+                      title="Lifetime Subscription"
+                      class="lifetime-icon"></fa-icon>
+                  }
+                </p>
+                <div class="account-icons">
+                  @if (getPlatformIcon(account.platformId); as platformIcon) {
+                    <fa-icon
+                      [icon]="platformIcon"
+                      [title]="
+                        'Platform: ' +
+                        (getPlatform(account.platformId)?.name ?? 'Platform')
+                      "
+                      class="platform-mini-icon"></fa-icon>
+                  }
+                  @if (getLauncher(account.launcherId); as launcher) {
+                    @if (getLauncherIcon(launcher.id); as launcherIcon) {
+                      <fa-icon
+                        [icon]="launcherIcon"
+                        [title]="'Launcher: ' + launcher.name"
+                        class="launcher-icon"></fa-icon>
+                    }
+                  }
+                </div>
+              </div>
+              <div class="account-actions">
+                <span
+                  class="cta-icon"
+                  (click)="editAccount(account)"
+                  (keypress)="editAccount(account)"
+                  title="Edit Account"
+                  ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+                ></span>
+                <span
+                  class="cta-icon delete-icon"
+                  (click)="deleteAccount(account)"
+                  (keypress)="deleteAccount(account)"
+                  title="Delete Account"
+                  ><fa-icon [icon]="['fas', 'trash']"></fa-icon
+                ></span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="accounts-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+        class="full-width-btn-link sunflower"
+        >Return to Dashboard</a
+      >
+    </div>
+  </div>
+</div>

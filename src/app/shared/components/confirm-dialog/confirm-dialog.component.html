@@ -1,0 +1,25 @@
+<div id="confirm-dialog-container">
+  <div mat-dialog-content>
+    <app-lcars-warning-message
+      [title]="data.title || 'Yellow Alert'"
+      [message]="data.message"></app-lcars-warning-message>
+  </div>
+  <div
+    class="buttons-container lcars-flex-right"
+    mat-dialog-actions>
+    <button
+      type="button"
+      class="lcars-btn red"
+      mat-button
+      (click)="onCancel()">
+      {{ data.cancelText || 'Cancel' }}
+    </button>
+    <button
+      type="button"
+      class="lcars-btn green"
+      mat-button
+      (click)="onConfirm()">
+      {{ data.confirmText || 'Confirm' }}
+    </button>
+  </div>
+</div>

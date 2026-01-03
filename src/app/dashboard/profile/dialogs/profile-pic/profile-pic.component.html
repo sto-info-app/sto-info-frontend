@@ -53,7 +53,7 @@
                 mat-dialog-actions>
                 <button
                   type="submit"
-                  class="submit-button"
+                  class="lcars-btn submit-button sunflower"
                   mat-button
                   [disabled]="!croppedImage || isSubmitting || errorMessage"
                   (click)="onUploadImageClick(); $event.preventDefault()">
@@ -61,7 +61,7 @@
                 </button>
                 <button
                   type="button"
-                  class="red"
+                  class="lcars-btn red"
                   mat-button
                   mat-dialog-close
                   [disabled]="isSubmitting"
@@ -82,7 +82,7 @@
         <div class="buttons">
           <button
             type="button"
-            class="sky"
+            class="lcars-btn sky"
             mat-button
             mat-dialog-close
             (click)="onCloseClick()">

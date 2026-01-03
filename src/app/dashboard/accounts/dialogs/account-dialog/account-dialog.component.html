@@ -1,0 +1,119 @@
+<h2 mat-dialog-title>{{ data.mode === 'add' ? 'Add' : 'Edit' }} STO Account</h2>
+
+<mat-dialog-content>
+  @if (isSubmitting) {
+    <app-loading-bar
+      [loadingText]="
+        isLoadingMetadata
+          ? 'Loading Metadata'
+          : data.mode === 'add'
+            ? 'Creating Account'
+            : 'Updating Account'
+      "></app-loading-bar>
+  }
+  @if (errorMessage) {
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+  }
+  <form
+    [formGroup]="accountForm"
+    class="account-form">
+    <mat-form-field appearance="fill">
+      <mat-label>Handle</mat-label>
+      <input
+        matInput
+        formControlName="handle"
+        placeholder="e.g. Username#1234" />
+      @if (accountForm.get('handle')?.hasError('required')) {
+        <mat-error>Handle is required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Username (Optional)</mat-label>
+      <input
+        matInput
+        formControlName="username" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Email (Optional)</mat-label>
+      <input
+        matInput
+        formControlName="email"
+        type="email" />
+      @if (accountForm.get('email')?.hasError('email')) {
+        <mat-error>Invalid email format</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Account Created Date</mat-label>
+      <input
+        matInput
+        formControlName="accountCreatedDate"
+        type="date" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Platform</mat-label>
+      <mat-select formControlName="platformId">
+        @for (platform of platforms; track platform.id) {
+          <mat-option [value]="platform.id">{{ platform.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Launcher (Optional)</mat-label>
+      <mat-select formControlName="launcherId">
+        <mat-option [value]="''">None</mat-option>
+        @for (launcher of filteredLaunchers; track launcher.id) {
+          <mat-option [value]="launcher.id">{{ launcher.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Notes</mat-label>
+      <textarea
+        matInput
+        formControlName="notes"></textarea>
+    </mat-form-field>
+
+    <div class="toggle-container">
+      <mat-slide-toggle formControlName="lifetimeSubscription"
+        >Lifetime Subscription</mat-slide-toggle
+      >
+    </div>
+
+    <div class="toggle-container">
+      <mat-slide-toggle formControlName="publiclyVisible"
+        >Publicly Visible</mat-slide-toggle
+      >
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <div class="buttons-container">
+    <button
+      type="button"
+      class="lcars-btn red"
+      mat-button
+      (click)="onCancelClick()">
+      Cancel
+    </button>
+    <button
+      type="submit"
+      class="lcars-btn green"
+      mat-button
+      [disabled]="!accountForm.valid || isSubmitting"
+      [ngClass]="{ submitting: isSubmitting }"
+      [@progressBarAnimation]="isSubmitting ? 'submitting' : 'idle'"
+      (click)="onSaveClick()">
+      {{ data.mode === 'add' ? 'Add' : 'Save' }}
+    </button>
+  </div>
+</mat-dialog-actions>

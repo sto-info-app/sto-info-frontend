@@ -8,6 +8,7 @@ import { LoginComponent } from './core/login/login.component';
 import { RegisterComponent } from './core/register/register.component';
 import { RegistrationCompleteComponent } from './core/registration-complete/registration-complete.component';
 import { VerifyEmailComponent } from './core/verify-email/verify-email.component';
+import { AccountsComponent } from './dashboard/accounts/accounts.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ProfileComponent } from './dashboard/profile/profile.component';
 import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
@@ -111,6 +112,12 @@ export const routes: Routes = [
     path: APP_ROUTES.STO_DASHBOARD_PROFILE,
     component: ProfileComponent,
     data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_PROFILE, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_ACCOUNTS,
+    component: AccountsComponent,
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_ACCOUNTS, requiresApi: true },
     canActivate: [AuthGuard, ApiRequiredGuard],
   },
 
