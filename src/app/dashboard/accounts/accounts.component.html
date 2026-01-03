@@ -39,12 +39,14 @@
                   }
                 </p>
                 <div class="account-icons">
-                  <fa-icon
-                    [icon]="getPlatformIcon(account.platformId)"
-                    [title]="
-                      getPlatform(account.platformId)?.name ?? 'Platform'
-                    "
-                    class="platform-mini-icon"></fa-icon>
+                  @if (getPlatformIcon(account.platformId); as platformIcon) {
+                    <fa-icon
+                      [icon]="platformIcon"
+                      [title]="
+                        getPlatform(account.platformId)?.name ?? 'Platform'
+                      "
+                      class="platform-mini-icon"></fa-icon>
+                  }
                   @if (getLauncher(account.launcherId); as launcher) {
                     @if (getLauncherIcon(launcher.id); as launcherIcon) {
                       <fa-icon

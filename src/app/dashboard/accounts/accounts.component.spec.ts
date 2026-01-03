@@ -193,7 +193,7 @@ describe('AccountsComponent', () => {
     component.platforms = [{ id: 'p2', name: 'PlayStation' } as Platform];
     expect(component.getPlatformIcon('p2')).toEqual(['fab', 'playstation']);
 
-    component.platforms = [{ id: 'ps', name: 'PS5' } as Platform];
+    component.platforms = [{ id: 'ps', name: 'PS' } as Platform];
     expect(component.getPlatformIcon('ps')).toEqual(['fab', 'playstation']);
 
     component.platforms = [{ id: 'pc', name: 'PC' } as Platform];
@@ -205,20 +205,17 @@ describe('AccountsComponent', () => {
     component.platforms = [{ id: 'p4', name: 'Arc' } as Platform];
     expect(component.getPlatformIcon('p4')).toEqual(['fak', 'arc-games']);
 
-    component.platforms = [{ id: 'p5', name: 'Epic Games' } as Platform];
+    component.platforms = [{ id: 'p5', name: 'Epic' } as Platform];
     expect(component.getPlatformIcon('p5')).toEqual(['fak', 'epic-games']);
 
     component.platforms = [{ id: 'p6', name: 'Steam' } as Platform];
     expect(component.getPlatformIcon('p6')).toEqual(['fab', 'steam']);
 
     component.platforms = [{ id: 'p7', name: 'Nintendo Switch' } as Platform];
-    expect(component.getPlatformIcon('p7')).toEqual(['fas', 'circle-question']);
+    expect(component.getPlatformIcon('p7')).toBeNull();
 
-    expect(component.getPlatformIcon('unknown')).toEqual([
-      'fas',
-      'circle-question',
-    ]);
-    expect(component.getPlatformIcon()).toEqual(['fas', 'circle-question']);
+    expect(component.getPlatformIcon('unknown')).toBeNull();
+    expect(component.getPlatformIcon()).toBeNull();
   });
 
   it('should get platform by id', () => {
@@ -236,12 +233,13 @@ describe('AccountsComponent', () => {
     component.launchers = [{ id: 'l2', name: 'Arc' } as Launcher];
     expect(component.getLauncherIcon('l2')).toEqual(['fak', 'arc-games']);
 
-    component.launchers = [{ id: 'l3', name: 'Epic Games' } as Launcher];
+    component.launchers = [{ id: 'l3', name: 'Epic' } as Launcher];
     expect(component.getLauncherIcon('l3')).toEqual(['fak', 'epic-games']);
 
     component.launchers = [{ id: 'l4', name: 'Other' } as Launcher];
     expect(component.getLauncherIcon('l4')).toBeNull();
 
+    expect(component.getLauncherIcon('unknown')).toBeNull();
     expect(component.getLauncherIcon()).toBeNull();
   });
 
