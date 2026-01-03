@@ -35,11 +35,25 @@ describe('LcarsWarningMessageComponent', () => {
     );
     expect(titleElement.nativeElement.textContent).toEqual('Test Title');
 
-    const messageElement = getMessageElement(
-      fixture,
-      '.lcars-warning-message p',
-    );
+    const messageElement = getMessageElement(fixture, '.lcars-warning-message');
     expect(messageElement.nativeElement.textContent).toEqual('Test Message');
+  });
+
+  it('should display default values', () => {
+    fixture.detectChanges();
+
+    const titleElement = fixture.debugElement.query(
+      By.css('.go-october-sunset'),
+    );
+    expect(titleElement.nativeElement.textContent).toEqual('Yellow Alert');
+
+    const messageElement = getMessageElement(fixture, '.lcars-warning-message');
+    expect(messageElement.nativeElement.textContent).toEqual(
+      'Warning, Janeway is out of coffee!',
+    );
+    expect(messageElement.nativeElement.classList.contains('blink')).toBe(
+      false,
+    );
   });
 
   it('should add blink class if blinkMessage is true', () => {
