@@ -82,9 +82,17 @@
         formControlName="notes"></textarea>
     </mat-form-field>
 
-    <mat-checkbox formControlName="publiclyVisible"
-      >Publicly Visible</mat-checkbox
-    >
+    <div class="toggle-container">
+      <mat-slide-toggle formControlName="lifetimeSubscription"
+        >Lifetime Subscription</mat-slide-toggle
+      >
+    </div>
+
+    <div class="toggle-container">
+      <mat-slide-toggle formControlName="publiclyVisible"
+        >Publicly Visible</mat-slide-toggle
+      >
+    </div>
   </form>
 </mat-dialog-content>
 
