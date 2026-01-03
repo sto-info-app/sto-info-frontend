@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { RoutingService } from 'src/app/shared/services/routing.service';
-import { Platform, StoAccount } from '../models/sto-account.model';
+import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
 import { StoAccountService } from '../services/sto-account.service';
 import { AccountsComponent } from './accounts.component';
 import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.component';
@@ -21,6 +21,7 @@ describe('AccountsComponent', () => {
     handle: 'Test#1234',
     accountCreatedDate: '2023-01-01',
     publiclyVisible: true,
+    lifetimeSubscription: true,
     createdAt: '2023-01-01',
     updatedAt: '2023-01-01',
     platformId: 'p1',
@@ -31,6 +32,7 @@ describe('AccountsComponent', () => {
     stoAccountServiceSpy = {
       getAccounts: jest.fn().mockReturnValue(of([])),
       getPlatforms: jest.fn().mockReturnValue(of([])),
+      getLaunchers: jest.fn().mockReturnValue(of([])),
       deleteAccount: jest.fn().mockReturnValue(of(undefined)),
     } as unknown as jest.Mocked<StoAccountService>;
 
@@ -67,13 +69,16 @@ describe('AccountsComponent', () => {
   it('should load accounts on init', () => {
     const accounts = [mockAccount];
     const platforms: Platform[] = [{ id: 'p1', name: 'Windows' } as Platform];
+    const launchers: Launcher[] = [{ id: 'l1', name: 'Steam' } as Launcher];
     stoAccountServiceSpy.getAccounts.mockReturnValue(of(accounts));
     stoAccountServiceSpy.getPlatforms.mockReturnValue(of(platforms));
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(of(launchers));
 
     component.ngOnInit();
 
     expect(component.accounts).toEqual(accounts);
     expect(component.platforms).toEqual(platforms);
+    expect(component.launchers).toEqual(launchers);
     expect(component.isLoading).toBe(false);
   });
 
@@ -188,16 +193,63 @@ describe('AccountsComponent', () => {
     component.platforms = [{ id: 'p2', name: 'PlayStation' } as Platform];
     expect(component.getPlatformIcon('p2')).toEqual(['fab', 'playstation']);
 
+    component.platforms = [{ id: 'ps', name: 'PS5' } as Platform];
+    expect(component.getPlatformIcon('ps')).toEqual(['fab', 'playstation']);
+
+    component.platforms = [{ id: 'pc', name: 'PC' } as Platform];
+    expect(component.getPlatformIcon('pc')).toEqual(['fab', 'windows']);
+
     component.platforms = [{ id: 'p3', name: 'Xbox' } as Platform];
     expect(component.getPlatformIcon('p3')).toEqual(['fab', 'xbox']);
 
-    component.platforms = [{ id: 'p4', name: 'Nintendo Switch' } as Platform];
-    expect(component.getPlatformIcon('p4')).toEqual(['fas', 'circle-question']);
+    component.platforms = [{ id: 'p4', name: 'Arc' } as Platform];
+    expect(component.getPlatformIcon('p4')).toEqual(['fak', 'arc-games']);
+
+    component.platforms = [{ id: 'p5', name: 'Epic Games' } as Platform];
+    expect(component.getPlatformIcon('p5')).toEqual(['fak', 'epic-games']);
+
+    component.platforms = [{ id: 'p6', name: 'Steam' } as Platform];
+    expect(component.getPlatformIcon('p6')).toEqual(['fab', 'steam']);
+
+    component.platforms = [{ id: 'p7', name: 'Nintendo Switch' } as Platform];
+    expect(component.getPlatformIcon('p7')).toEqual(['fas', 'circle-question']);
 
     expect(component.getPlatformIcon('unknown')).toEqual([
       'fas',
       'circle-question',
     ]);
     expect(component.getPlatformIcon()).toEqual(['fas', 'circle-question']);
+  });
+
+  it('should get platform by id', () => {
+    const platform = { id: 'p1', name: 'Windows' } as Platform;
+    component.platforms = [platform];
+    expect(component.getPlatform('p1')).toEqual(platform);
+    expect(component.getPlatform('unknown')).toBeUndefined();
+    expect(component.getPlatform()).toBeUndefined();
+  });
+
+  it('should return correct launcher icon', () => {
+    component.launchers = [{ id: 'l1', name: 'Steam' } as Launcher];
+    expect(component.getLauncherIcon('l1')).toEqual(['fab', 'steam']);
+
+    component.launchers = [{ id: 'l2', name: 'Arc' } as Launcher];
+    expect(component.getLauncherIcon('l2')).toEqual(['fak', 'arc-games']);
+
+    component.launchers = [{ id: 'l3', name: 'Epic Games' } as Launcher];
+    expect(component.getLauncherIcon('l3')).toEqual(['fak', 'epic-games']);
+
+    component.launchers = [{ id: 'l4', name: 'Other' } as Launcher];
+    expect(component.getLauncherIcon('l4')).toBeNull();
+
+    expect(component.getLauncherIcon()).toBeNull();
+  });
+
+  it('should get launcher by id', () => {
+    const launcher = { id: 'l1', name: 'Steam' } as Launcher;
+    component.launchers = [launcher];
+    expect(component.getLauncher('l1')).toEqual(launcher);
+    expect(component.getLauncher('unknown')).toBeUndefined();
+    expect(component.getLauncher()).toBeUndefined();
   });
 });
