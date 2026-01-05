@@ -1,3 +1,6 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
 /* You can add global styles to this file, and also import other style files */
 
 strong {
@@ -74,7 +77,7 @@ button.lcars-btn,
   height: 60px !important;
   border-radius: 30px !important;
   padding: 0 25px 8px 0 !important;
-  font-family: 'Antonio', sans-serif !important;
+  font-family: vars.$font-antonio !important;
   font-size: 1rem !important;
   text-transform: uppercase !important;
   text-align: right !important;
@@ -170,4 +173,59 @@ button.lcars-btn,
 
 .lcars-flex-right {
   justify-content: flex-end !important;
+}
+
+/* LCARS Standard Layouts */
+.info-grid {
+  @include mixins.lcars-info-grid;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+
+  .label {
+    @include mixins.lcars-label;
+  }
+
+  .value {
+    @include mixins.lcars-value;
+  }
+}
+
+.cta-icon {
+  @include mixins.lcars-icon-button;
+
+  &.delete-icon:hover {
+    color: vars.$lcars-red;
+  }
+}
+
+.faction-badge {
+  @include mixins.lcars-badge;
+
+  &.federation {
+    background: vars.$faction-federation;
+    color: #fff;
+  }
+  &.klingon {
+    background: vars.$faction-klingon;
+    color: #fff;
+  }
+  &.undecided {
+    background: vars.$faction-undecided;
+    color: #fff;
+  }
+}
+
+.error-container {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 0, 0, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+.full-width-btn-link {
+  width: 100%;
 }
