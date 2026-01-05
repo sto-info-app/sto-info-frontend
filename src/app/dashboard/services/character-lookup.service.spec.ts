@@ -5,6 +5,14 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import {
+  CharacterClass,
+  Faction,
+  GeneralFaction,
+  RecruitType,
+  Sex,
+  Species,
+} from '../models/character.model';
 import { CharacterLookupService } from './character-lookup.service';
 
 describe('CharacterLookupService', () => {
@@ -33,7 +41,7 @@ describe('CharacterLookupService', () => {
 
   it('should getGeneralFactions', () => {
     const dummy = [{ id: '1' }];
-    service.getGeneralFactions().subscribe((res: any) => {
+    service.getGeneralFactions().subscribe((res: GeneralFaction[]) => {
       expect(res).toEqual(dummy);
     });
     const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_GENERAL_FACTIONS);
@@ -43,7 +51,7 @@ describe('CharacterLookupService', () => {
 
   it('should getFactions', () => {
     const dummy = [{ id: '1' }];
-    service.getFactions().subscribe((res: any) => {
+    service.getFactions().subscribe((res: Faction[]) => {
       expect(res).toEqual(dummy);
     });
     const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_FACTIONS);
@@ -53,7 +61,7 @@ describe('CharacterLookupService', () => {
 
   it('should getSexes', () => {
     const dummy = [{ id: '1' }];
-    service.getSexes().subscribe((res: any) => {
+    service.getSexes().subscribe((res: Sex[]) => {
       expect(res).toEqual(dummy);
     });
     const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_SEXES);
@@ -63,7 +71,7 @@ describe('CharacterLookupService', () => {
 
   it('should getClasses', () => {
     const dummy = [{ id: '1' }];
-    service.getClasses().subscribe((res: any) => {
+    service.getClasses().subscribe((res: CharacterClass[]) => {
       expect(res).toEqual(dummy);
     });
     const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_CLASSES);
@@ -74,7 +82,7 @@ describe('CharacterLookupService', () => {
   describe('getRecruitTypes', () => {
     it('should get recruit types without params', () => {
       const dummy = [{ id: '1' }];
-      service.getRecruitTypes().subscribe((res: any) => {
+      service.getRecruitTypes().subscribe((res: RecruitType[]) => {
         expect(res).toEqual(dummy);
       });
       const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_RECRUIT_TYPES);
@@ -85,7 +93,7 @@ describe('CharacterLookupService', () => {
 
     it('should get recruit types with factionId', () => {
       const dummy = [{ id: '1' }];
-      service.getRecruitTypes('fed').subscribe((res: any) => {
+      service.getRecruitTypes('fed').subscribe((res: RecruitType[]) => {
         expect(res).toEqual(dummy);
       });
       const req = httpMock.expectOne(
@@ -101,7 +109,7 @@ describe('CharacterLookupService', () => {
   describe('getSpecies', () => {
     it('should get species without params', () => {
       const dummy = [{ id: '1' }];
-      service.getSpecies().subscribe((res: any) => {
+      service.getSpecies().subscribe((res: Species[]) => {
         expect(res).toEqual(dummy);
       });
       const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_SPECIES);
@@ -112,7 +120,7 @@ describe('CharacterLookupService', () => {
 
     it('should get species with params', () => {
       const dummy = [{ id: '1' }];
-      service.getSpecies('fed', 'std').subscribe((res: any) => {
+      service.getSpecies('fed', 'std').subscribe((res: Species[]) => {
         expect(res).toEqual(dummy);
       });
       const req = httpMock.expectOne(

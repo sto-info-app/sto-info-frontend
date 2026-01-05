@@ -21,9 +21,13 @@ import { CharacterPicComponent } from './character-pic.component';
 describe('CharacterPicComponent', () => {
   let component: CharacterPicComponent;
   let fixture: ComponentFixture<CharacterPicComponent>;
-  let mockCharacterService: any;
-  let mockDialogRef: any;
-  let mockSanitizer: any;
+  let mockCharacterService: jest.Mocked<
+    Pick<CharacterService, 'updateCharacterProfilePic'>
+  >;
+  let mockDialogRef: jest.Mocked<
+    Pick<MatDialogRef<CharacterPicComponent>, 'close'>
+  >;
+  let mockSanitizer: jest.Mocked<Pick<DomSanitizer, 'bypassSecurityTrustUrl'>>;
 
   const mockCharacter = {
     id: 'char1',
@@ -67,14 +71,14 @@ describe('CharacterPicComponent', () => {
 
   describe('onFileChangeEvent', () => {
     it('should return if event is null', () => {
-      component.onFileChangeEvent(null as any);
+      component.onFileChangeEvent(null as unknown as Event);
       expect(component.imageChangedEvent).toBeNull(); // or remains what it was, but here it sets it to event (null) logic check?
       // line 64: this.imageChangedEvent = event;
     });
 
     it('should handle valid image file', () => {
       const mockFile = { type: 'image/png' };
-      const mockEvent = { target: { files: [mockFile] } } as any;
+      const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
       component.onFileChangeEvent(mockEvent);
       expect(component.uploadedInvalidImageType).toBe(false);
       expect(component.imageChangedEvent).toBe(mockEvent);
@@ -82,39 +86,42 @@ describe('CharacterPicComponent', () => {
 
     it('should set invalid type error if file is not image', () => {
       const mockFile = { type: 'text/plain' };
-      const mockEvent = { target: { files: [mockFile] } } as any;
+      const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
       component.onFileChangeEvent(mockEvent);
       expect(component.uploadedInvalidImageType).toBe(true);
     });
 
     it('should do nothing if no files provided in target', () => {
-      const mockEvent = { target: { files: [] } } as any; // Empty files
+      const mockEvent = { target: { files: [] } } as unknown as Event; // Empty files
       component.onFileChangeEvent(mockEvent);
       // logic checked lines 72-74
       expect(component.uploadedInvalidImageType).toBe(false);
     });
 
     it('should return if event target is null', () => {
-      const mockEvent = { target: null } as any;
+      const mockEvent = { target: null } as unknown as Event;
       component.onFileChangeEvent(mockEvent);
       expect(component.imageChangedEvent).toBe(mockEvent);
     });
 
     it('should return if target files is null', () => {
-      const mockEvent = { target: { files: null } } as any;
+      const mockEvent = { target: { files: null } } as unknown as Event;
       component.onFileChangeEvent(mockEvent);
       expect(component.imageChangedEvent).toBe(mockEvent);
     });
   });
 
   describe('onImageCropped', () => {
-    let originalFileReader: any;
+    let originalFileReader: typeof FileReader;
 
     beforeAll(() => {
       originalFileReader = window.FileReader;
       // Mock FileReader
       const mockFileReader = {
-        readAsDataURL: jest.fn(function (this: any) {
+        readAsDataURL: jest.fn(function (this: {
+          result: string;
+          onloadend: (() => void) | null;
+        }) {
           setTimeout(() => {
             this.result = 'data:image/png;base64,mock';
             if (this.onloadend) this.onloadend();
@@ -123,7 +130,9 @@ describe('CharacterPicComponent', () => {
         onloadend: null,
         result: '',
       };
-      window.FileReader = jest.fn(() => mockFileReader) as any;
+      window.FileReader = jest.fn(
+        () => mockFileReader,
+      ) as unknown as typeof FileReader;
     });
 
     afterAll(() => {
@@ -138,7 +147,8 @@ describe('CharacterPicComponent', () => {
         width: 100,
         height: 100,
         cropperPosition: { x1: 0, y1: 0, x2: 100, y2: 100 },
-      } as any;
+        imagePosition: { x1: 0, y1: 0, x2: 100, y2: 100 },
+      };
 
       component.onImageCropped(event);
       tick(); // wait for filereader
@@ -151,7 +161,7 @@ describe('CharacterPicComponent', () => {
 
     it('should log error if blob is missing', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      const event: ImageCroppedEvent = {} as any;
+      const event: ImageCroppedEvent = {} as ImageCroppedEvent;
       component.onImageCropped(event);
       expect(spy).toHaveBeenCalledWith(
         'Cropped image is not defined correctly',
@@ -178,7 +188,7 @@ describe('CharacterPicComponent', () => {
       const spyConsole = jest
         .spyOn(console, 'error')
         .mockImplementation(() => {});
-      component.croppedImageBlob = { type: 'image/jpeg' } as any;
+      component.croppedImageBlob = { type: 'image/jpeg' } as Blob;
       const spyDisplay = jest.spyOn(component, 'displayErrorMessage');
       component.onUploadImageClick();
       expect(spyDisplay).toHaveBeenCalledWith(
@@ -268,7 +278,7 @@ describe('CharacterPicComponent', () => {
           },
         });
 
-        component.croppedImageBlob = blob as any;
+        component.croppedImageBlob = blob as Blob;
 
         component.onUploadImageClick();
         expect(spy).toHaveBeenCalledWith('Invalid image format.');

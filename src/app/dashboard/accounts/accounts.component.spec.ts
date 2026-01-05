@@ -6,6 +6,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { RoutingService } from 'src/app/shared/services/routing.service';
+import { Character } from '../models/character.model';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
 import { CharacterService } from '../services/character.service';
 import { StoAccountService } from '../services/sto-account.service';
@@ -85,12 +86,17 @@ describe('AccountsComponent', () => {
     const accounts = [mockAccount];
     const platforms: Platform[] = [{ id: 'p1', name: 'Windows' } as Platform];
     const launchers: Launcher[] = [{ id: 'l1', name: 'Steam' } as Launcher];
-    const characters = [{ accountId: '1' }, { accountId: '1' }]; // 2 chars for account 1
+    const characters: Partial<Character>[] = [
+      { accountId: '1' },
+      { accountId: '1' },
+    ]; // 2 chars for account 1
 
     stoAccountServiceSpy.getAccounts.mockReturnValue(of(accounts));
     stoAccountServiceSpy.getPlatforms.mockReturnValue(of(platforms));
     stoAccountServiceSpy.getLaunchers.mockReturnValue(of(launchers));
-    characterServiceSpy.getCharacters.mockReturnValue(of(characters as any));
+    characterServiceSpy.getCharacters.mockReturnValue(
+      of(characters as Character[]),
+    );
 
     component.ngOnInit();
 

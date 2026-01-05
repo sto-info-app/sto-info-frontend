@@ -2,7 +2,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
@@ -18,11 +18,19 @@ import { AccountDetailComponent } from './account-detail.component';
 describe('AccountDetailComponent', () => {
   let component: AccountDetailComponent;
   let fixture: ComponentFixture<AccountDetailComponent>;
-  let mockRouter: any;
-  let mockStoAccountService: any;
-  let mockCharacterService: any;
-  let mockDialog: any;
-  let routeParamsSubject: Subject<any>;
+  let mockRouter: jest.Mocked<
+    Pick<Router, 'navigate' | 'createUrlTree' | 'serializeUrl' | 'events'>
+  >;
+  let mockStoAccountService: jest.Mocked<
+    Pick<StoAccountService, 'getAccounts' | 'getAccount'>
+  >;
+  let mockCharacterService: jest.Mocked<
+    Pick<CharacterService, 'getCharactersByAccount' | 'deleteCharacter'>
+  >;
+  let mockDialog: jest.Mocked<
+    Pick<MatDialog, 'open' | 'closeAll' | 'afterOpened' | 'afterAllClosed'>
+  >;
+  let routeParamsSubject: Subject<Params>;
 
   const mockAccount = {
     id: 'acc1',
@@ -383,19 +391,19 @@ describe('AccountDetailComponent', () => {
         component.getFactionClass({
           ...mockCharacter,
           generalFaction: { id: 'x', name: 'Alien Domain' },
-        } as any),
+        } as Character),
       ).toBe('alien-domain');
       expect(
         component.getFactionClass({
           ...mockCharacter,
           generalFaction: undefined,
-        } as any),
+        } as Character),
       ).toBe('unknown');
       expect(
         component.getFactionClass({
           ...mockCharacter,
           generalFaction: { id: 'x', name: undefined },
-        } as any),
+        } as unknown as Character),
       ).toBe('unknown');
     });
 
@@ -405,25 +413,25 @@ describe('AccountDetailComponent', () => {
         component.getClassCategory({
           ...mockCharacter,
           class: { id: 'eng', name: 'Engineering' },
-        } as any),
+        } as Character),
       ).toBe('engineering');
       expect(
         component.getClassCategory({
           ...mockCharacter,
           class: { id: 'sci', name: 'Science' },
-        } as any),
+        } as Character),
       ).toBe('science');
       expect(
         component.getClassCategory({
           ...mockCharacter,
           class: { id: 'unk', name: 'Unknown' },
-        } as any),
+        } as Character),
       ).toBe('unknown');
       expect(
         component.getClassCategory({
           ...mockCharacter,
           class: undefined,
-        } as any),
+        } as Character),
       ).toBe('unknown');
     });
 
@@ -433,19 +441,19 @@ describe('AccountDetailComponent', () => {
         component.getSexIcon({
           ...mockCharacter,
           sex: { id: 'f', name: 'Female' },
-        } as any),
+        } as Character),
       ).toBe('venus');
       expect(
         component.getSexIcon({
           ...mockCharacter,
           sex: { id: 'u', name: 'Unknown' },
-        } as any),
+        } as Character),
       ).toBe('circle-question');
       expect(
         component.getSexIcon({
           ...mockCharacter,
           sex: undefined,
-        } as any),
+        } as Character),
       ).toBe('circle-question');
     });
   });
@@ -469,7 +477,7 @@ describe('AccountDetailComponent', () => {
 
     it('getProfileImageUrl should fall back to 300px if 100px missing', () => {
       const char = { ...mockCharacter, profilePicture100: undefined };
-      const url = component.getProfileImageUrl(char as any);
+      const url = component.getProfileImageUrl(char as Character);
       expect(url).toContain('img1-300');
     });
 
@@ -479,7 +487,7 @@ describe('AccountDetailComponent', () => {
         profilePicture100: undefined,
         profilePicture300: undefined,
       };
-      const url = component.getProfileImageUrl(char as any);
+      const url = component.getProfileImageUrl(char as Character);
       expect(url).toContain('img1');
       expect(url).not.toContain('img1-300');
     });
@@ -491,7 +499,7 @@ describe('AccountDetailComponent', () => {
         profilePicture300: undefined,
         profilePicture: undefined,
       };
-      const url = component.getProfileImageUrl(char as any);
+      const url = component.getProfileImageUrl(char as Character);
       expect(url).toBe(SRC_PHOTO_UNAVAILABLE_100PX);
     });
 
@@ -500,7 +508,7 @@ describe('AccountDetailComponent', () => {
         ...mockCharacter,
         profilePicture100: 'http://example.com/img.jpg',
       };
-      expect(component.getProfileImageUrl(char as any)).toBe(
+      expect(component.getProfileImageUrl(char as Character)).toBe(
         'http://example.com/img.jpg',
       );
     });
@@ -508,7 +516,7 @@ describe('AccountDetailComponent', () => {
     it('getProfileImageUrl should handle local/ paths', () => {
       const char = { ...mockCharacter, profilePicture100: 'local/img.jpg' };
       // logic checks for startWith local/ and prepends R2 url
-      expect(component.getProfileImageUrl(char as any)).toContain(
+      expect(component.getProfileImageUrl(char as Character)).toContain(
         'local/img.jpg',
       );
     });

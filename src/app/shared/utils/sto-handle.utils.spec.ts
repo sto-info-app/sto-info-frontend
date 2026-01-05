@@ -8,8 +8,8 @@ describe('STO Handle Utils', () => {
   describe('encodeStoHandle', () => {
     it('should return empty string if handle is null/undefined/empty', () => {
       expect(encodeStoHandle('')).toBe('');
-      expect(encodeStoHandle(null as any)).toBe('');
-      expect(encodeStoHandle(undefined as any)).toBe('');
+      expect(encodeStoHandle(null as unknown as string)).toBe('');
+      expect(encodeStoHandle(undefined as unknown as string)).toBe('');
     });
 
     it('should replace # with ~', () => {
@@ -24,8 +24,8 @@ describe('STO Handle Utils', () => {
   describe('decodeStoHandle', () => {
     it('should return empty string if handle is null/undefined/empty', () => {
       expect(decodeStoHandle('')).toBe('');
-      expect(decodeStoHandle(null as any)).toBe('');
-      expect(decodeStoHandle(undefined as any)).toBe('');
+      expect(decodeStoHandle(null as unknown as string)).toBe('');
+      expect(decodeStoHandle(undefined as unknown as string)).toBe('');
     });
 
     it('should replace ~ with #', () => {
@@ -40,8 +40,8 @@ describe('STO Handle Utils', () => {
   describe('slugifyCharacterName', () => {
     it('should return empty string if name is null/undefined/empty', () => {
       expect(slugifyCharacterName('')).toBe('');
-      expect(slugifyCharacterName(null as any)).toBe('');
-      expect(slugifyCharacterName(undefined as any)).toBe('');
+      expect(slugifyCharacterName(null as unknown as string)).toBe('');
+      expect(slugifyCharacterName(undefined as unknown as string)).toBe('');
     });
 
     it('should lower case and trim', () => {

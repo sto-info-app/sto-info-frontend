@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpHeaders, provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -25,7 +25,26 @@ describe('CharacterService', () => {
       has: jest.fn(),
       delete: jest.fn(),
     },
-  } as any;
+  } as unknown as ReturnType<AuthService['getHttpOptionsWithAccessToken']>;
+
+  const createMockCharacter = (
+    overrides: Partial<Character> = {},
+  ): Character => ({
+    id: '1',
+    accountId: 'acc1',
+    handle: 'TestHandle',
+    generalFactionId: 'gf1',
+    factionId: 'f1',
+    sexId: 's1',
+    classId: 'c1',
+    recruitTypeId: 'r1',
+    speciesId: 'sp1',
+    level: 65,
+    userId: 'u1',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+    ...overrides,
+  });
 
   beforeEach(() => {
     mockAuthService = {
@@ -55,7 +74,9 @@ describe('CharacterService', () => {
   describe('getCharacters', () => {
     it('should return characters when token is present', () => {
       mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(mockHeader);
-      const mockCharacters = [{ id: '1', name: 'Char 1' } as Character];
+      const mockCharacters = [
+        createMockCharacter({ id: '1', handle: 'Char1' }),
+      ];
 
       service.getCharacters().subscribe(chars => {
         expect(chars).toEqual(mockCharacters);
@@ -82,7 +103,9 @@ describe('CharacterService', () => {
   describe('getCharactersByAccount', () => {
     it('should return characters for account when token is present', () => {
       mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(mockHeader);
-      const mockCharacters = [{ id: '1', name: 'Char 1' } as Character];
+      const mockCharacters = [
+        createMockCharacter({ id: '1', handle: 'Char1' }),
+      ];
       const accountId = 'acc1';
 
       service.getCharactersByAccount(accountId).subscribe(chars => {
@@ -110,7 +133,7 @@ describe('CharacterService', () => {
   describe('getCharacter', () => {
     it('should return character by id', () => {
       mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(mockHeader);
-      const mockCharacter = { id: '1', name: 'Char 1' } as Character;
+      const mockCharacter = createMockCharacter({ id: '1', handle: 'Char1' });
 
       service.getCharacter('1').subscribe(char => {
         expect(char).toEqual(mockCharacter);
@@ -134,15 +157,17 @@ describe('CharacterService', () => {
     it('should create character', () => {
       mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(mockHeader);
       const newChar: CreateCharacterRequest = {
-        name: 'New',
-        handle: 'Handle',
-        speciesId: 'aaa',
-        genderId: 'aaa',
-        careerId: 'aaa',
-        factionId: 'aaa',
         accountId: 'aaa',
+        handle: 'NewHandle',
+        generalFactionId: 'gf1',
+        factionId: 'f1',
+        sexId: 's1',
+        classId: 'c1',
+        recruitTypeId: 'r1',
+        speciesId: 'sp1',
+        level: 1,
       };
-      const createdChar = { id: '1', ...newChar } as Character;
+      const createdChar = createMockCharacter({ id: '1', ...newChar });
 
       service.createCharacter(newChar).subscribe(char => {
         expect(char).toEqual(createdChar);
@@ -156,7 +181,7 @@ describe('CharacterService', () => {
 
     it('should throw error when no token', () => {
       mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
-      service.createCharacter({} as any).subscribe({
+      service.createCharacter({} as CreateCharacterRequest).subscribe({
         error: err => expect(err.message).toBe('No token found'),
       });
       httpMock.expectNone(API_URLS.CHARACTER);
@@ -166,8 +191,11 @@ describe('CharacterService', () => {
   describe('updateCharacter', () => {
     it('should update character', () => {
       mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(mockHeader);
-      const updateReq: UpdateCharacterRequest = { id: '1', name: 'Upd' };
-      const updatedChar = { id: '1', name: 'Upd' } as Character;
+      const updateReq: UpdateCharacterRequest = { handle: 'UpdatedHandle' };
+      const updatedChar = createMockCharacter({
+        id: '1',
+        handle: 'UpdatedHandle',
+      });
 
       service.updateCharacter('1', updateReq).subscribe(char => {
         expect(char).toEqual(updatedChar);
@@ -181,7 +209,7 @@ describe('CharacterService', () => {
 
     it('should throw error when no token', () => {
       mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
-      service.updateCharacter('1', {} as any).subscribe({
+      service.updateCharacter('1', {} as UpdateCharacterRequest).subscribe({
         error: err => expect(err.message).toBe('No token found'),
       });
       httpMock.expectNone(`${API_URLS.CHARACTER}/1`);
@@ -216,7 +244,11 @@ describe('CharacterService', () => {
       headersMap.set('Content-Type', 'multipart/form-data');
       headersMap.set('Authorization', 'Bearer token');
 
-      const mockHeadersObj = {
+      const mockHeadersObj: {
+        has: jest.Mock<boolean, [string]>;
+        delete: jest.Mock<typeof mockHeadersObj, [string]>;
+        get: jest.Mock<string | undefined, [string]>;
+      } = {
         has: jest.fn(k => headersMap.has(k)),
         delete: jest.fn(k => {
           headersMap.delete(k);
@@ -225,14 +257,19 @@ describe('CharacterService', () => {
         get: jest.fn(k => headersMap.get(k)),
       };
 
-      const mockOptions = { headers: mockHeadersObj };
+      const mockOptions = {
+        headers: mockHeadersObj as unknown as HttpHeaders,
+      };
       mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(
-        mockOptions as any,
+        mockOptions,
       );
 
       const formData = new FormData();
       formData.append('file', 'data');
-      const updatedChar = { id: '1', profilePicture: 'url' } as Character;
+      const updatedChar = createMockCharacter({
+        id: '1',
+        profilePicture: 'url',
+      });
 
       service.updateCharacterProfilePic('1', formData).subscribe(char => {
         expect(char).toEqual(updatedChar);

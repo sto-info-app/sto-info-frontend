@@ -6,8 +6,8 @@ import {
   tick,
 } from '@angular/core/testing';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ActivatedRoute, Router, Event as RouterEvent } from '@angular/router';
 import { faUserPen } from '@awesome.me/kit-5812c6b103/icons/classic/solid';
 import {
   FaIconLibrary,
@@ -36,7 +36,7 @@ describe('CharacterDetailComponent', () => {
   let mockStoAccountService: jest.Mocked<StoAccountService>;
   let mockRouter: Partial<Router>;
   let mockDialog: jest.Mocked<MatDialog>;
-  let routeParamsSubject: BehaviorSubject<any>;
+  let routeParamsSubject: BehaviorSubject<Record<string, string>>;
 
   const mockAccount: StoAccount = {
     id: 'acc-1',
@@ -47,13 +47,20 @@ describe('CharacterDetailComponent', () => {
   const mockCharacter: Character = {
     id: 'char-1',
     handle: 'TestChar',
-    name: 'TestChar',
     accountId: 'acc-1',
     profilePicture: 'img-123',
     profilePicture300: 'img-123-300',
+    generalFactionId: 'general-fed',
     factionId: 'fed',
+    sexId: 'male',
+    classId: 'tactical',
+    recruitTypeId: 'standard',
     speciesId: 'human',
-  } as Character;
+    level: 65,
+    userId: 'user-1',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  };
 
   beforeEach(async () => {
     mockCharacterService = {
@@ -69,14 +76,14 @@ describe('CharacterDetailComponent', () => {
       navigate: jest.fn(),
       createUrlTree: jest.fn(),
       serializeUrl: jest.fn(),
-      events: new BehaviorSubject<any>(null),
+      events: new BehaviorSubject<RouterEvent>(null as unknown as RouterEvent),
     };
 
     mockDialog = {
       open: jest.fn(),
     } as unknown as jest.Mocked<MatDialog>;
 
-    routeParamsSubject = new BehaviorSubject<any>({});
+    routeParamsSubject = new BehaviorSubject<Record<string, string>>({});
 
     await TestBed.configureTestingModule({
       imports: [
@@ -275,7 +282,11 @@ describe('CharacterDetailComponent', () => {
       const dialogRefMock = {
         afterClosed: jest.fn().mockReturnValue(of(true)),
       };
-      mockDialog.open.mockReturnValue(dialogRefMock as any);
+      mockDialog.open.mockReturnValue(
+        dialogRefMock as Partial<
+          MatDialogRef<CharacterPicComponent>
+        > as MatDialogRef<CharacterPicComponent>,
+      );
       const spyLoad = jest
         .spyOn(component, 'loadCharacterData')
         .mockImplementation(() => {});
@@ -302,7 +313,11 @@ describe('CharacterDetailComponent', () => {
       const dialogRefMock = {
         afterClosed: jest.fn().mockReturnValue(of(false)), // cancelled
       };
-      mockDialog.open.mockReturnValue(dialogRefMock as any);
+      mockDialog.open.mockReturnValue(
+        dialogRefMock as Partial<
+          MatDialogRef<CharacterPicComponent>
+        > as MatDialogRef<CharacterPicComponent>,
+      );
       const spyLoad = jest.spyOn(component, 'loadCharacterData');
 
       component.editCharacterPhoto();
@@ -341,7 +356,7 @@ describe('CharacterDetailComponent', () => {
       component.character = {
         ...mockCharacter,
         profilePicture300: null,
-      } as any;
+      } as Character;
       expect(component.getProfileImageUrl()).toContain('img-123');
     });
 
@@ -350,7 +365,7 @@ describe('CharacterDetailComponent', () => {
         ...mockCharacter,
         profilePicture300: null,
         profilePicture: null,
-      } as any;
+      } as Character;
       expect(component.getProfileImageUrl()).toBe(SRC_PHOTO_UNAVAILABLE_300PX);
     });
 
@@ -358,7 +373,7 @@ describe('CharacterDetailComponent', () => {
       component.character = {
         ...mockCharacter,
         profilePicture300: 'https://example.com/img.jpg',
-      } as any;
+      } as Character;
       expect(component.getProfileImageUrl()).toBe(
         'https://example.com/img.jpg',
       );
@@ -368,7 +383,7 @@ describe('CharacterDetailComponent', () => {
       component.character = {
         ...mockCharacter,
         profilePicture300: 'local/image.png',
-      } as any;
+      } as Character;
       expect(component.getProfileImageUrl()).toBe(
         `${CLOUDFLARE_R2_PUBLIC_URL}/local/image.png`,
       );

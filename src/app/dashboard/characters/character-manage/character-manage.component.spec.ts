@@ -7,7 +7,7 @@ import {
 } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { Character, Species } from 'src/app/dashboard/models/character.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
@@ -20,11 +20,33 @@ import { CharacterManageComponent } from './character-manage.component';
 describe('CharacterManageComponent', () => {
   let component: CharacterManageComponent;
   let fixture: ComponentFixture<CharacterManageComponent>;
-  let mockRouter: any;
-  let mockCharacterService: any;
-  let mockStoAccountService: any;
-  let mockLookupService: any;
-  let routeParamsSubject: Subject<any>;
+  let mockRouter: jest.Mocked<
+    Pick<Router, 'navigate' | 'createUrlTree' | 'serializeUrl'>
+  >;
+  let mockCharacterService: jest.Mocked<
+    Pick<
+      CharacterService,
+      | 'getCharactersByAccount'
+      | 'getCharacter'
+      | 'createCharacter'
+      | 'updateCharacter'
+    >
+  >;
+  let mockStoAccountService: jest.Mocked<
+    Pick<StoAccountService, 'getAccounts'>
+  >;
+  let mockLookupService: jest.Mocked<
+    Pick<
+      CharacterLookupService,
+      | 'getGeneralFactions'
+      | 'getFactions'
+      | 'getSexes'
+      | 'getClasses'
+      | 'getRecruitTypes'
+      | 'getSpecies'
+    >
+  >;
+  let routeParamsSubject: Subject<Params>;
 
   const mockAccount = {
     id: 'acc1',
