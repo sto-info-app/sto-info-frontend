@@ -1,0 +1,58 @@
+@use 'lcars-variables' as vars;
+
+@mixin lcars-card {
+  background: vars.$lcars-grey-bg;
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 10px;
+  overflow: hidden;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+@mixin lcars-icon-button(
+  $base-color: vars.$lcars-perano,
+  $hover-color: vars.$lcars-sunflower
+) {
+  cursor: pointer;
+  color: $base-color;
+  transition:
+    color 0.2s,
+    transform 0.1s;
+
+  &:hover {
+    color: $hover-color;
+    transform: scale(1.2);
+  }
+}
+
+@mixin lcars-label {
+  font-size: 0.8rem;
+  color: vars.$lcars-perano;
+  text-transform: uppercase;
+}
+
+@mixin lcars-value {
+  font-size: 1rem;
+  color: #fff;
+  overflow-wrap: break-word;
+}
+
+@mixin lcars-info-grid($cols: 2) {
+  display: grid;
+  grid-template-columns: repeat($cols, 1fr);
+  gap: 1rem;
+}
+
+@mixin lcars-badge {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: bold;
+}
