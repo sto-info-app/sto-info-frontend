@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
-import { catchError, Observable, throwError } from 'rxjs';
+import { catchError, Observable, shareReplay, throwError } from 'rxjs';
 
 import {
   CreateStoAccountRequest,
@@ -24,6 +24,10 @@ import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 export class StoAccountService {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
+
+  private platforms$?: Observable<Platform[]>;
+  private launchers$?: Observable<Launcher[]>;
+  private platformLaunchers$?: Observable<PlatformLauncher[]>;
 
   /**
    * Fetches the current user's STO accounts.
@@ -109,12 +113,17 @@ export class StoAccountService {
    * @returns An observable of platform array.
    */
   getPlatforms(): Observable<Platform[]> {
-    return this.http.get<Platform[]>(API_URLS.STO_PLATFORM).pipe(
-      catchError(error => {
-        console.error('Error fetching platforms:', error);
-        return throwError(() => error);
-      }),
-    );
+    if (!this.platforms$) {
+      this.platforms$ = this.http.get<Platform[]>(API_URLS.STO_PLATFORM).pipe(
+        shareReplay(1),
+        catchError(error => {
+          this.platforms$ = undefined;
+          console.error('Error fetching platforms:', error);
+          return throwError(() => error);
+        }),
+      );
+    }
+    return this.platforms$;
   }
 
   /**
@@ -122,12 +131,17 @@ export class StoAccountService {
    * @returns An observable of launcher array.
    */
   getLaunchers(): Observable<Launcher[]> {
-    return this.http.get<Launcher[]>(API_URLS.STO_LAUNCHER).pipe(
-      catchError(error => {
-        console.error('Error fetching launchers:', error);
-        return throwError(() => error);
-      }),
-    );
+    if (!this.launchers$) {
+      this.launchers$ = this.http.get<Launcher[]>(API_URLS.STO_LAUNCHER).pipe(
+        shareReplay(1),
+        catchError(error => {
+          this.launchers$ = undefined;
+          console.error('Error fetching launchers:', error);
+          return throwError(() => error);
+        }),
+      );
+    }
+    return this.launchers$;
   }
 
   /**
@@ -135,13 +149,18 @@ export class StoAccountService {
    * @returns An observable of platform-launcher mapping array.
    */
   getPlatformLaunchers(): Observable<PlatformLauncher[]> {
-    return this.http
-      .get<PlatformLauncher[]>(API_URLS.STO_PLATFORM_LAUNCHER)
-      .pipe(
-        catchError(error => {
-          console.error('Error fetching platform-launchers:', error);
-          return throwError(() => error);
-        }),
-      );
+    if (!this.platformLaunchers$) {
+      this.platformLaunchers$ = this.http
+        .get<PlatformLauncher[]>(API_URLS.STO_PLATFORM_LAUNCHER)
+        .pipe(
+          shareReplay(1),
+          catchError(error => {
+            this.platformLaunchers$ = undefined;
+            console.error('Error fetching platform-launchers:', error);
+            return throwError(() => error);
+          }),
+        );
+    }
+    return this.platformLaunchers$;
   }
 }
