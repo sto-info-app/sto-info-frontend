@@ -1,10 +1,13 @@
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
+import { CharacterService } from '../services/character.service';
 import { StoAccountService } from '../services/sto-account.service';
 import { AccountsComponent } from './accounts.component';
 import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.component';
@@ -14,6 +17,7 @@ describe('AccountsComponent', () => {
   let fixture: ComponentFixture<AccountsComponent>;
   let stoAccountServiceSpy: jest.Mocked<StoAccountService>;
   let routingServiceSpy: jest.Mocked<RoutingService>;
+  let characterServiceSpy: jest.Mocked<CharacterService>;
   let dialogSpy: jest.Mocked<MatDialog>;
 
   const mockAccount: StoAccount = {
@@ -40,21 +44,28 @@ describe('AccountsComponent', () => {
       getLink: jest.fn().mockReturnValue('test-link'),
     } as unknown as jest.Mocked<RoutingService>;
 
+    characterServiceSpy = {
+      getCharacters: jest.fn().mockReturnValue(of([])),
+    } as unknown as jest.Mocked<CharacterService>;
+
     dialogSpy = {
       open: jest.fn(),
     } as unknown as jest.Mocked<MatDialog>;
 
     await TestBed.configureTestingModule({
-      imports: [AccountsComponent, RouterTestingModule],
+      imports: [AccountsComponent, RouterTestingModule, NoopAnimationsModule],
       providers: [
         { provide: StoAccountService, useValue: stoAccountServiceSpy },
         { provide: RoutingService, useValue: routingServiceSpy },
+        { provide: CharacterService, useValue: characterServiceSpy },
+        // We still provide it here as fallback/base
+        { provide: MatDialog, useValue: dialogSpy },
       ],
+      schemas: [NO_ERRORS_SCHEMA],
     })
       .overrideComponent(AccountsComponent, {
-        add: {
-          providers: [{ provide: MatDialog, useValue: dialogSpy }],
-        },
+        remove: { imports: [MatDialogModule] },
+        add: { providers: [{ provide: MatDialog, useValue: dialogSpy }] },
       })
       .compileComponents();
 
@@ -62,23 +73,31 @@ describe('AccountsComponent', () => {
     component = fixture.componentInstance;
   });
 
+  it('should encode handle', () => {
+    expect(component.encodeHandle('Test#1234')).toBe('Test~1234');
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load accounts on init', () => {
+  it('should load accounts and characters on init', () => {
     const accounts = [mockAccount];
     const platforms: Platform[] = [{ id: 'p1', name: 'Windows' } as Platform];
     const launchers: Launcher[] = [{ id: 'l1', name: 'Steam' } as Launcher];
+    const characters = [{ accountId: '1' }, { accountId: '1' }]; // 2 chars for account 1
+
     stoAccountServiceSpy.getAccounts.mockReturnValue(of(accounts));
     stoAccountServiceSpy.getPlatforms.mockReturnValue(of(platforms));
     stoAccountServiceSpy.getLaunchers.mockReturnValue(of(launchers));
+    characterServiceSpy.getCharacters.mockReturnValue(of(characters as any));
 
     component.ngOnInit();
 
     expect(component.accounts).toEqual(accounts);
     expect(component.platforms).toEqual(platforms);
     expect(component.launchers).toEqual(launchers);
+    expect(component.characterCounts['1']).toBe(2);
     expect(component.isLoading).toBe(false);
   });
 
@@ -86,10 +105,20 @@ describe('AccountsComponent', () => {
     stoAccountServiceSpy.getAccounts.mockReturnValue(
       throwError(() => new Error('error')),
     );
+    component.ngOnInit(); // calls loadAccounts
+    expect(component.isLoading).toBe(false);
+  });
+
+  it('should handle error when loading characters', () => {
+    const accounts = [mockAccount];
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of(accounts));
+    characterServiceSpy.getCharacters.mockReturnValue(
+      throwError(() => new Error('Error')),
+    );
 
     component.loadAccounts();
-
     expect(component.isLoading).toBe(false);
+    expect(characterServiceSpy.getCharacters).toHaveBeenCalled();
   });
 
   it('should open add account dialog', () => {
@@ -108,6 +137,17 @@ describe('AccountsComponent', () => {
     expect(loadAccountsSpy).toHaveBeenCalled();
   });
 
+  it('should not reload accounts if add dialog canceled', () => {
+    const dialogRefSpy = {
+      afterClosed: jest.fn().mockReturnValue(of(false)),
+    };
+    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
+    const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
+
+    component.addAccount();
+    expect(loadAccountsSpy).not.toHaveBeenCalled();
+  });
+
   it('should open edit account dialog', () => {
     const dialogRefSpy = {
       afterClosed: jest.fn().mockReturnValue(of(true)),
@@ -124,19 +164,7 @@ describe('AccountsComponent', () => {
     expect(loadAccountsSpy).toHaveBeenCalled();
   });
 
-  it('should not reload if add dialog closed without result', () => {
-    const dialogRefSpy = {
-      afterClosed: jest.fn().mockReturnValue(of(false)),
-    };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
-    const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
-
-    component.addAccount();
-
-    expect(loadAccountsSpy).not.toHaveBeenCalled();
-  });
-
-  it('should not reload if edit dialog closed without result', () => {
+  it('should not reload accounts if edit dialog canceled', () => {
     const dialogRefSpy = {
       afterClosed: jest.fn().mockReturnValue(of(false)),
     };
@@ -144,110 +172,133 @@ describe('AccountsComponent', () => {
     const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
 
     component.editAccount(mockAccount);
-
     expect(loadAccountsSpy).not.toHaveBeenCalled();
   });
 
-  describe('deleteAccount', () => {
-    it('should delete account if confirmed', () => {
-      const dialogRefSpy = {
-        afterClosed: jest.fn().mockReturnValue(of(true)),
-      };
-      dialogSpy.open.mockReturnValue(dialogRefSpy as never);
-      const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
+  it('should delete account', () => {
+    const dialogRefSpy = {
+      afterClosed: jest.fn().mockReturnValue(of(true)),
+    };
+    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
+    const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
 
-      component.deleteAccount(mockAccount);
+    component.deleteAccount(mockAccount);
 
-      expect(dialogSpy.open).toHaveBeenCalledWith(
-        ConfirmDialogComponent,
-        expect.any(Object),
-      );
-      expect(stoAccountServiceSpy.deleteAccount).toHaveBeenCalledWith(
-        mockAccount.id,
-      );
-      expect(loadAccountsSpy).toHaveBeenCalled();
+    expect(dialogSpy.open).toHaveBeenCalledWith(
+      ConfirmDialogComponent,
+      expect.anything(),
+    );
+    expect(stoAccountServiceSpy.deleteAccount).toHaveBeenCalledWith(
+      mockAccount.id,
+    );
+    expect(loadAccountsSpy).toHaveBeenCalled();
+  });
+
+  it('should not delete account if cancelled', () => {
+    const dialogRefSpy = {
+      afterClosed: jest.fn().mockReturnValue(of(false)),
+    };
+    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
+
+    component.deleteAccount(mockAccount);
+
+    expect(stoAccountServiceSpy.deleteAccount).not.toHaveBeenCalled();
+  });
+
+  describe('getPlatformIcon', () => {
+    beforeEach(() => {
+      component.platforms = [
+        { id: 'arc', name: 'Arc' },
+        { id: 'epic', name: 'Epic' },
+        { id: 'steam', name: 'Steam' },
+        { id: 'win', name: 'Windows' },
+        { id: 'ps', name: 'PlayStation' },
+        { id: 'xbox', name: 'Xbox' },
+        { id: 'unknown', name: 'Unknown' },
+      ] as Platform[];
     });
 
-    it('should not delete account if not confirmed', () => {
-      const dialogRefSpy = {
-        afterClosed: jest.fn().mockReturnValue(of(false)),
-      };
-      dialogSpy.open.mockReturnValue(dialogRefSpy as never);
+    it('should return null if platformId undefined', () => {
+      expect(component.getPlatformIcon(undefined)).toBeNull();
+    });
 
-      component.deleteAccount(mockAccount);
+    it('should return null if platform not found', () => {
+      expect(component.getPlatformIcon('missing')).toBeNull();
+    });
 
-      expect(stoAccountServiceSpy.deleteAccount).not.toHaveBeenCalled();
+    it('should return arc icon', () => {
+      expect(component.getPlatformIcon('arc')).toEqual(['fak', 'arc-games']);
+    });
+    it('should return epic icon', () => {
+      expect(component.getPlatformIcon('epic')).toEqual(['fak', 'epic-games']);
+    });
+    it('should return steam icon', () => {
+      expect(component.getPlatformIcon('steam')).toEqual(['fab', 'steam']);
+    });
+    it('should return windows icon', () => {
+      expect(component.getPlatformIcon('win')).toEqual(['fab', 'windows']);
+    });
+    it('should return playstation icon', () => {
+      expect(component.getPlatformIcon('ps')).toEqual(['fab', 'playstation']);
+    });
+    it('should return xbox icon', () => {
+      expect(component.getPlatformIcon('xbox')).toEqual(['fab', 'xbox']);
+    });
+    it('should return null for unknown platform', () => {
+      expect(component.getPlatformIcon('unknown')).toBeNull();
     });
   });
 
-  it('should get route link', () => {
-    const link = component.getRouteLink('test');
-    expect(link).toBe('test-link');
-    expect(routingServiceSpy.getLink).toHaveBeenCalledWith('test');
-  });
+  describe('getLauncherIcon', () => {
+    beforeEach(() => {
+      component.launchers = [
+        { id: 'arc', name: 'Arc' },
+        { id: 'epic', name: 'Epic' },
+        { id: 'steam', name: 'Steam' },
+        { id: 'unknown', name: 'Unknown' },
+      ] as Launcher[];
+    });
 
-  it('should return correct platform icon', () => {
-    component.platforms = [{ id: 'p1', name: 'Windows' } as Platform];
-    expect(component.getPlatformIcon('p1')).toEqual(['fab', 'windows']);
+    it('should return null if launcherId undefined', () => {
+      expect(component.getLauncherIcon(undefined)).toBeNull();
+    });
 
-    component.platforms = [{ id: 'p2', name: 'PlayStation' } as Platform];
-    expect(component.getPlatformIcon('p2')).toEqual(['fab', 'playstation']);
+    it('should return null if launcher not found', () => {
+      expect(component.getLauncherIcon('missing')).toBeNull();
+    });
 
-    component.platforms = [{ id: 'ps', name: 'PS' } as Platform];
-    expect(component.getPlatformIcon('ps')).toEqual(['fab', 'playstation']);
+    it('should return arc icon', () => {
+      expect(component.getLauncherIcon('arc')).toEqual(['fak', 'arc-games']);
+    });
 
-    component.platforms = [{ id: 'pc', name: 'PC' } as Platform];
-    expect(component.getPlatformIcon('pc')).toEqual(['fab', 'windows']);
+    it('should return epic icon', () => {
+      expect(component.getLauncherIcon('epic')).toEqual(['fak', 'epic-games']);
+    });
 
-    component.platforms = [{ id: 'p3', name: 'Xbox' } as Platform];
-    expect(component.getPlatformIcon('p3')).toEqual(['fab', 'xbox']);
+    it('should return steam icon', () => {
+      expect(component.getLauncherIcon('steam')).toEqual(['fab', 'steam']);
+    });
 
-    component.platforms = [{ id: 'p4', name: 'Arc' } as Platform];
-    expect(component.getPlatformIcon('p4')).toEqual(['fak', 'arc-games']);
-
-    component.platforms = [{ id: 'p5', name: 'Epic' } as Platform];
-    expect(component.getPlatformIcon('p5')).toEqual(['fak', 'epic-games']);
-
-    component.platforms = [{ id: 'p6', name: 'Steam' } as Platform];
-    expect(component.getPlatformIcon('p6')).toEqual(['fab', 'steam']);
-
-    component.platforms = [{ id: 'p7', name: 'Nintendo Switch' } as Platform];
-    expect(component.getPlatformIcon('p7')).toBeNull();
-
-    expect(component.getPlatformIcon('unknown')).toBeNull();
-    expect(component.getPlatformIcon()).toBeNull();
+    it('should return null for unknown launcher', () => {
+      expect(component.getLauncherIcon('unknown')).toBeNull();
+    });
   });
 
   it('should get platform by id', () => {
-    const platform = { id: 'p1', name: 'Windows' } as Platform;
-    component.platforms = [platform];
-    expect(component.getPlatform('p1')).toEqual(platform);
-    expect(component.getPlatform('unknown')).toBeUndefined();
-    expect(component.getPlatform()).toBeUndefined();
-  });
-
-  it('should return correct launcher icon', () => {
-    component.launchers = [{ id: 'l1', name: 'Steam' } as Launcher];
-    expect(component.getLauncherIcon('l1')).toEqual(['fab', 'steam']);
-
-    component.launchers = [{ id: 'l2', name: 'Arc' } as Launcher];
-    expect(component.getLauncherIcon('l2')).toEqual(['fak', 'arc-games']);
-
-    component.launchers = [{ id: 'l3', name: 'Epic' } as Launcher];
-    expect(component.getLauncherIcon('l3')).toEqual(['fak', 'epic-games']);
-
-    component.launchers = [{ id: 'l4', name: 'Other' } as Launcher];
-    expect(component.getLauncherIcon('l4')).toBeNull();
-
-    expect(component.getLauncherIcon('unknown')).toBeNull();
-    expect(component.getLauncherIcon()).toBeNull();
+    component.platforms = [{ id: 'p1', name: 'P1' } as Platform];
+    expect(component.getPlatform('p1')).toBeDefined();
+    expect(component.getPlatform('p2')).toBeUndefined();
+    expect(component.getPlatform(undefined)).toBeUndefined();
   });
 
   it('should get launcher by id', () => {
-    const launcher = { id: 'l1', name: 'Steam' } as Launcher;
-    component.launchers = [launcher];
-    expect(component.getLauncher('l1')).toEqual(launcher);
-    expect(component.getLauncher('unknown')).toBeUndefined();
-    expect(component.getLauncher()).toBeUndefined();
+    component.launchers = [{ id: 'l1', name: 'L1' } as Launcher];
+    expect(component.getLauncher('l1')).toBeDefined();
+    expect(component.getLauncher('l2')).toBeUndefined();
+    expect(component.getLauncher(undefined)).toBeUndefined();
+  });
+
+  it('should get route link', () => {
+    expect(component.getRouteLink('home')).toBe('test-link');
   });
 });

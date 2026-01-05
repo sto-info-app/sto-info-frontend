@@ -240,6 +240,22 @@ describe('StoAccountService', () => {
       const req = httpMock.expectOne(API_URLS.STO_PLATFORM);
       req.error(new ProgressEvent('error'));
     });
+    it('should return cached platforms on subsequent calls', () => {
+      const mockPlatforms = [{ id: '1', name: 'PC' }];
+
+      // First call
+      service.getPlatforms().subscribe();
+      const req = httpMock.expectOne(API_URLS.STO_PLATFORM);
+      req.flush(mockPlatforms);
+
+      // Second call
+      service.getPlatforms().subscribe(platforms => {
+        expect(platforms).toEqual(mockPlatforms);
+      });
+
+      // Should not trigger another request
+      httpMock.expectNone(API_URLS.STO_PLATFORM);
+    });
   });
 
   describe('getLaunchers', () => {
@@ -271,6 +287,23 @@ describe('StoAccountService', () => {
       const req = httpMock.expectOne(API_URLS.STO_LAUNCHER);
       req.error(new ProgressEvent('error'));
     });
+
+    it('should return cached launchers on subsequent calls', () => {
+      const mockLaunchers = [{ id: '1', name: 'Arc' }];
+
+      // First call
+      service.getLaunchers().subscribe();
+      const req = httpMock.expectOne(API_URLS.STO_LAUNCHER);
+      req.flush(mockLaunchers);
+
+      // Second call
+      service.getLaunchers().subscribe(launchers => {
+        expect(launchers).toEqual(mockLaunchers);
+      });
+
+      // Should not trigger another request
+      httpMock.expectNone(API_URLS.STO_LAUNCHER);
+    });
   });
 
   describe('getPlatformLaunchers', () => {
@@ -301,6 +334,23 @@ describe('StoAccountService', () => {
 
       const req = httpMock.expectOne(API_URLS.STO_PLATFORM_LAUNCHER);
       req.error(new ProgressEvent('error'));
+    });
+
+    it('should return cached platform launchers on subsequent calls', () => {
+      const mockMappings = [{ platformId: 'p1', launcherId: 'l1' }];
+
+      // First call
+      service.getPlatformLaunchers().subscribe();
+      const req = httpMock.expectOne(API_URLS.STO_PLATFORM_LAUNCHER);
+      req.flush(mockMappings);
+
+      // Second call
+      service.getPlatformLaunchers().subscribe(mappings => {
+        expect(mappings).toEqual(mockMappings);
+      });
+
+      // Should not trigger another request
+      httpMock.expectNone(API_URLS.STO_PLATFORM_LAUNCHER);
     });
   });
 });
