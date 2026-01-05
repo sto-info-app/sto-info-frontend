@@ -21,6 +21,7 @@
     "test:watch": "jest --config jest.config.cjs --watch",
     "test:cov": "jest --config jest.config.cjs --runInBand --coverage --coverageDirectory=reports/coverage --coverageReporters=lcov --coverageReporters=text-summary",
     "test:mutation": "stryker run --reporters clear-text --reporters html --reporters progress",
+    "test:mutation:dry": "stryker run --reporters clear-text --reporters html --reporters progress --dryRunOnly",
     "e2e": "ng e2e"
   },
   "dependencies": {
