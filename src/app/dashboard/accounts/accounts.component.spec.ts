@@ -225,7 +225,7 @@ describe('AccountsComponent', () => {
     });
 
     it('should return null if platformId undefined', () => {
-      expect(component.getPlatformIcon(undefined)).toBeNull();
+      expect(component.getPlatformIcon()).toBeNull();
     });
 
     it('should return null if platform not found', () => {
@@ -266,7 +266,7 @@ describe('AccountsComponent', () => {
     });
 
     it('should return null if launcherId undefined', () => {
-      expect(component.getLauncherIcon(undefined)).toBeNull();
+      expect(component.getLauncherIcon()).toBeNull();
     });
 
     it('should return null if launcher not found', () => {
@@ -294,14 +294,14 @@ describe('AccountsComponent', () => {
     component.platforms = [{ id: 'p1', name: 'P1' } as Platform];
     expect(component.getPlatform('p1')).toBeDefined();
     expect(component.getPlatform('p2')).toBeUndefined();
-    expect(component.getPlatform(undefined)).toBeUndefined();
+    expect(component.getPlatform()).toBeUndefined();
   });
 
   it('should get launcher by id', () => {
     component.launchers = [{ id: 'l1', name: 'L1' } as Launcher];
     expect(component.getLauncher('l1')).toBeDefined();
     expect(component.getLauncher('l2')).toBeUndefined();
-    expect(component.getLauncher(undefined)).toBeUndefined();
+    expect(component.getLauncher()).toBeUndefined();
   });
 
   it('should get route link', () => {
