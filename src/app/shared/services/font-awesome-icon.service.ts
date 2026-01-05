@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+// @ts-ignore
 import {
   faPlaystation,
   faSteam,
@@ -6,18 +7,25 @@ import {
   faXbox,
 } from '@awesome.me/kit-5812c6b103/icons/classic/brands';
 
+// @ts-ignore
 import {
   faBadgeCheck,
   faCircleQuestion,
   faExternalLink,
   faHandSpock,
   faLock,
+  faMars,
   faPlus,
   faSquareCheck,
   faSquareXmark,
   faTrash,
+  faUser,
   faUserPen,
+  // @ts-ignore
+  faUserVisor,
+  faVenus,
 } from '@awesome.me/kit-5812c6b103/icons/classic/solid';
+// @ts-ignore
 import {
   faArcGames,
   faEpicGames,
@@ -35,7 +43,9 @@ export class FontAwesomeIconService {
       faExternalLink,
       faPlus,
       faTrash,
+      faUser,
       faUserPen,
+      faUserVisor,
       faLock,
       faSquareCheck,
       faSquareXmark,
@@ -47,6 +57,8 @@ export class FontAwesomeIconService {
       faEpicGames,
       faSteam,
       faBadgeCheck,
+      faMars,
+      faVenus,
     );
   }
 }
