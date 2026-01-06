@@ -1,0 +1,170 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+<div id="character-detail-container">
+  <div
+    id="character-detail-main-column"
+    class="col">
+    @if (character) {
+      <div class="character-header-section">
+        @if (character.rank?.iconUrl) {
+          <img
+            [src]="character.rank!.iconUrl"
+            height="20"
+            class="rank-icon"
+            alt="character.rank?.title ?? Rank Icon" />
+        }
+        <h1>{{ character.handle }}</h1>
+      </div>
+
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Character Data</span>
+        <span
+          class="cta-icon"
+          (click)="editCharacter()"
+          (keypress)="editCharacter()"
+          title="Edit Character"
+          ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+        ></span>
+      </div>
+
+      <div class="character-details-content">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="label">Rank</span>
+            <span class="value">{{ character.rank?.title || 'Unknown' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Level</span>
+            <span class="value">{{ character.level }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Sex</span>
+            <span class="value">{{ character.sex?.name || 'Unknown' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Class</span>
+            <span class="value">{{ character.class?.name || 'Unknown' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">General Faction</span>
+            <span class="value">{{
+              character.generalFaction?.name || 'Unknown'
+            }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Faction</span>
+            <span class="value">{{
+              character.faction?.name || 'Unknown'
+            }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Species</span>
+            <span class="value">{{
+              character.species?.name || 'Unknown'
+            }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Recruit Type</span>
+            <span class="value">{{
+              character.recruitType?.name || 'Standard'
+            }}</span>
+          </div>
+          @if (character.createdDate) {
+            <div class="detail-item">
+              <span class="label">Created Date</span>
+              <span class="value">{{
+                character.createdDate | date: 'longDate'
+              }}</span>
+            </div>
+          }
+          @if (character.firstName || character.lastName) {
+            <div class="detail-item">
+              <span class="label">Full Name</span>
+              <span class="value">
+                {{ character.firstName }} {{ character.middleName }}
+                {{ character.lastName }}
+              </span>
+            </div>
+          }
+        </div>
+
+        @if (character.biography) {
+          <div class="character-bio-section">
+            <div class="lcars-text-bar small-lcars-bar-gap">
+              <span>Biography</span>
+            </div>
+            <div class="bio-content">{{ character.biography }}</div>
+          </div>
+        }
+
+        @if (character.notes) {
+          <div class="character-notes-section">
+            <div class="lcars-text-bar small-lcars-bar-gap">
+              <span>Commander's Notes</span>
+            </div>
+            <div class="notes-content">{{ character.notes }}</div>
+          </div>
+        }
+      </div>
+    } @else if (!isLoading && errorMessage) {
+      <div class="error-container">
+        <p>{{ errorMessage }}</p>
+        <button
+          mat-raised-button
+          color="primary"
+          [routerLink]="getAccountLink()">
+          Back to Account
+        </button>
+      </div>
+    }
+  </div>
+
+  <div
+    id="character-detail-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Photo</span>
+      <span
+        class="cta-icon"
+        (click)="editCharacterPhoto()"
+        (keypress)="editCharacterPhoto()"
+        title="Edit Photo"
+        ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+      ></span>
+    </div>
+    <div id="character-image">
+      <div class="pics-right">
+        <img
+          [src]="getProfileImageUrl()"
+          alt="{{ character?.handle }}"
+          class="border"
+          (error)="onProfileImageError()"
+          loading="lazy" />
+      </div>
+    </div>
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="getAccountLink()"
+        [fragment]="'characters-section'"
+        class="full-width-btn-link peach"
+        >Captain List</a
+      >
+      <a
+        [routerLink]="getAccountLink()"
+        class="full-width-btn-link sunflower"
+        >Account Profile</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+        class="full-width-btn-link bluey"
+        >All Accounts</a
+      >
+    </div>
+  </div>
+</div>

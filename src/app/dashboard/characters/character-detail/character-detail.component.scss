@@ -1,0 +1,124 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+#character-detail-container {
+  display: flex;
+
+  #character-detail-main-column {
+    flex: 2;
+    flex-basis: 69%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    .character-header-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        h1 {
+          margin: 0;
+          color: vars.$lcars-orange;
+          text-transform: uppercase;
+        }
+
+        .rank-icon {
+          height: 48px;
+          width: auto;
+          filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+        }
+      }
+
+      .rank-title {
+        color: vars.$lcars-perano;
+        font-size: 1.5rem;
+        font-family: vars.$font-antonio;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .character-slug {
+        color: vars.$lcars-perano;
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  #character-detail-side-column {
+    flex: 1;
+    flex-basis: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+
+    #character-image {
+      display: flex;
+
+      .pics-right {
+        margin: 10px 30px;
+        width: 100%;
+
+        img {
+          min-width: 100%;
+          max-width: 100%;
+          height: auto;
+        }
+      }
+    }
+  }
+}
+
+.character-details-content {
+  padding: 0.5rem 2rem 2rem 2rem;
+
+  .detail-grid {
+    @include mixins.lcars-info-grid;
+    gap: 1.5rem;
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+
+      .label {
+        @include mixins.lcars-label;
+        letter-spacing: 1px;
+      }
+      .value {
+        @include mixins.lcars-value;
+        font-size: 1.3rem;
+        font-family: vars.$font-antonio;
+      }
+    }
+  }
+}
+
+.character-bio-section,
+.character-notes-section {
+  margin-top: 2rem;
+
+  .bio-content,
+  .notes-content {
+    background-color: vars.$lcars-grey-bg;
+    padding: 1.5rem;
+    border-radius: 4px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    font-size: 1.1rem;
+    color: #b3e5fc;
+  }
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 5px !important;
+  padding-top: 5px !important;
+}

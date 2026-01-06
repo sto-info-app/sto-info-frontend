@@ -9,12 +9,15 @@ import { RoutingService } from '../shared/services/routing.service';
 import { User } from './models/user.model';
 import { DashboardService } from './services/dashboard.service';
 
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { StoAccountService } from './services/sto-account.service';
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, LoadingBarComponent],
+  imports: [CommonModule, RouterModule, LoadingBarComponent, FontAwesomeModule],
 })
 export class DashboardComponent implements OnInit {
   appRoutes = APP_ROUTES;
@@ -22,6 +25,9 @@ export class DashboardComponent implements OnInit {
 
   user: User | undefined;
   userGreeting = '';
+  accountsCount = 0;
+
+  private readonly stoAccountService = inject(StoAccountService);
 
   private readonly dashboardService = inject(DashboardService);
   private readonly authService = inject(AuthService);
@@ -33,6 +39,10 @@ export class DashboardComponent implements OnInit {
 
       this.user = user;
       this.userGreeting = this.displayWelcomeText();
+    });
+
+    this.stoAccountService.getAccounts().subscribe(accounts => {
+      this.accountsCount = accounts.length;
     });
   }
 

@@ -1,4 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
@@ -169,22 +174,25 @@ describe('AccountDialogComponent', () => {
       expect(stoAccountServiceSpy.createAccount).not.toHaveBeenCalled();
     });
 
-    it('should call createAccount in add mode', () => {
+    it('should call createAccount in add mode', fakeAsync(() => {
       fixture.detectChanges();
+      tick(); // Flush metadata loading
       component.accountForm.patchValue({
-        handle: 'New#1',
+        handle: 'New#1234',
         platformId: 'p1',
         accountCreatedDate: '2023-01-01',
       });
       component.onSaveClick();
+      tick();
       expect(stoAccountServiceSpy.createAccount).toHaveBeenCalled();
       expect(dialogRefSpy.close).toHaveBeenCalledWith(true);
-    });
+    }));
 
-    it('should call createAccount with only handle', () => {
+    it('should call createAccount with only handle', fakeAsync(() => {
       fixture.detectChanges();
+      tick(); // Flush metadata loading
       component.accountForm.patchValue({
-        handle: 'New#1',
+        handle: 'New#1234',
         platformId: '',
         launcherId: '',
       });
@@ -192,30 +200,34 @@ describe('AccountDialogComponent', () => {
       // but the requirement is that ONLY handle is required.
       expect(component.accountForm.valid).toBe(true);
       component.onSaveClick();
+      tick();
       expect(stoAccountServiceSpy.createAccount).toHaveBeenCalled();
-    });
+    }));
 
-    it('should handle error in createAccount', () => {
+    it('should handle error in createAccount', fakeAsync(() => {
       fixture.detectChanges();
+      tick(); // Flush metadata loading
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       stoAccountServiceSpy.createAccount.mockReturnValue(
         throwError(() => new Error('error')),
       );
       component.accountForm.patchValue({
-        handle: 'New#1',
+        handle: 'New#1234',
         platformId: 'p1',
         accountCreatedDate: '2023-01-01',
       });
       component.onSaveClick();
+      tick();
       expect(component.errorMessage).toBe(
         'An error occurred while creating the account. Please try again.',
       );
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
-    });
+    }));
 
-    it('should handle 409 error in createAccount', () => {
+    it('should handle 409 error in createAccount', fakeAsync(() => {
       fixture.detectChanges();
+      tick(); // Flush metadata loading
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       const errorResponse = {
         status: 409,
@@ -224,12 +236,13 @@ describe('AccountDialogComponent', () => {
       stoAccountServiceSpy.createAccount.mockReturnValue(
         throwError(() => errorResponse),
       );
-      component.accountForm.patchValue({ handle: 'New#1' });
+      component.accountForm.patchValue({ handle: 'New#1234' });
       component.onSaveClick();
+      tick();
 
       expect(component.errorMessage).toBe('Handle already exists');
       consoleSpy.mockRestore();
-    });
+    }));
 
     it('should call updateAccount in edit mode', () => {
       component.data = { mode: 'edit', account: mockAccount };
@@ -289,8 +302,9 @@ describe('AccountDialogComponent', () => {
       expect(stoAccountServiceSpy.updateAccount).not.toHaveBeenCalled();
     });
 
-    it('should use default error message for 409 error in createAccount if message is missing', () => {
+    it('should use default error message for 409 error in createAccount if message is missing', fakeAsync(() => {
       fixture.detectChanges();
+      tick(); // Flush metadata loading
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       const errorResponse = {
         status: 409,
@@ -299,14 +313,15 @@ describe('AccountDialogComponent', () => {
       stoAccountServiceSpy.createAccount.mockReturnValue(
         throwError(() => errorResponse),
       );
-      component.accountForm.patchValue({ handle: 'New#1' });
+      component.accountForm.patchValue({ handle: 'New#1234' });
       component.onSaveClick();
+      tick();
 
       expect(component.errorMessage).toBe(
         'A STO account with this handle already exists.',
       );
       consoleSpy.mockRestore();
-    });
+    }));
 
     it('should use default error message for 409 error in updateAccount if message is missing', () => {
       component.data = { mode: 'edit', account: mockAccount };
