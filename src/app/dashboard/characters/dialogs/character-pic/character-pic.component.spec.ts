@@ -77,7 +77,7 @@ describe('CharacterPicComponent', () => {
     });
 
     it('should handle valid image file', () => {
-      const mockFile = { type: 'image/png' };
+      const mockFile = { type: 'image/png', name: 'test.png' };
       const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
       component.onFileChangeEvent(mockEvent);
       expect(component.uploadedInvalidImageType).toBe(false);
@@ -85,10 +85,38 @@ describe('CharacterPicComponent', () => {
     });
 
     it('should set invalid type error if file is not image', () => {
-      const mockFile = { type: 'text/plain' };
+      const mockFile = { type: 'text/plain', name: 'test.txt' };
       const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
       component.onFileChangeEvent(mockEvent);
       expect(component.uploadedInvalidImageType).toBe(true);
+    });
+
+    it('should block SVG files for security', () => {
+      const mockFile = { type: 'image/svg+xml', name: 'test.svg' };
+      const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
+      const consoleSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
+      component.onFileChangeEvent(mockEvent);
+      expect(component.uploadedInvalidImageType).toBe(true);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'SVG files are not allowed for security reasons',
+      );
+      consoleSpy.mockRestore();
+    });
+
+    it('should reject file with valid MIME but invalid extension', () => {
+      const mockFile = { type: 'image/png', name: 'test.bmp' };
+      const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
+      component.onFileChangeEvent(mockEvent);
+      expect(component.uploadedInvalidImageType).toBe(true);
+    });
+
+    it('should accept JPEG files', () => {
+      const mockFile = { type: 'image/jpeg', name: 'test.jpg' };
+      const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
+      component.onFileChangeEvent(mockEvent);
+      expect(component.uploadedInvalidImageType).toBe(false);
     });
 
     it('should do nothing if no files provided in target', () => {
