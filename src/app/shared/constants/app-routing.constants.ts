@@ -20,6 +20,10 @@ export const APP_ROUTES = {
   STO_DASHBOARD: rootDashboard,
   STO_DASHBOARD_PROFILE: rootDashboard + '/profile',
   STO_DASHBOARD_ACCOUNTS: rootDashboard + '/accounts',
+  STO_ACCOUNT_DETAIL: rootDashboard + '/accounts/:handle',
+  STO_CHARACTER_DETAIL: rootDashboard + '/accounts/:handle/:characterHandle',
+  STO_CHARACTER_ADD: rootDashboard + '/accounts/:handle/characters/add',
+  STO_CHARACTER_EDIT: rootDashboard + '/accounts/:handle/:characterHandle/edit',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'service-interruption',
@@ -49,6 +53,10 @@ export const APP_ROUTE_TITLES = {
   STO_DASHBOARD: 'Dashboard',
   STO_DASHBOARD_PROFILE: 'Profile',
   STO_DASHBOARD_ACCOUNTS: 'Your Accounts',
+  STO_ACCOUNT_DETAIL: 'Account Details',
+  STO_CHARACTER_DETAIL: 'Character Details',
+  STO_CHARACTER_ADD: 'Add Character',
+  STO_CHARACTER_EDIT: 'Edit Character',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'Service Interruption',

@@ -1,0 +1,78 @@
+@use 'sass:color';
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+#character-manage-container {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #character-manage-main-column {
+    flex: 3;
+  }
+
+  #character-manage-side-column {
+    flex: 1;
+    min-width: 250px;
+  }
+}
+
+.character-manage-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+.error-message {
+  background-color: rgba(vars.$lcars-red, 0.1);
+  color: color.adjust(vars.$lcars-red, $lightness: 20%);
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border: 1px solid vars.$lcars-red;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: flex-end;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 5px !important;
+  padding-top: 5px !important;
+}
+
+@media (max-width: 768px) {
+  #character-manage-container {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  #character-manage-side-column {
+    order: -1;
+  }
+}

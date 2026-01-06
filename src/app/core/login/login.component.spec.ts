@@ -6,7 +6,7 @@ import {
   tick,
 } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Event, Router } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { LoginResponse } from 'src/app/models/user-auth.models';
 import {
@@ -28,7 +28,7 @@ describe('LoginComponent', () => {
   let alertThemeServiceSpy: jest.Mocked<AlertThemeService>;
   let routingServiceSpy: jest.Mocked<RoutingService>;
   // Router needs special handling because it has properties (events) and methods
-  let routerSpy: Partial<jest.Mocked<Router>> & { events: Subject<unknown> };
+  let routerSpy: Partial<jest.Mocked<Router>> & { events: Subject<Event> };
 
   beforeEach(async () => {
     // Correct Jest Mocks
@@ -54,7 +54,7 @@ describe('LoginComponent', () => {
 
     routerSpy = {
       navigate: jest.fn(),
-      events: new Subject<unknown>(),
+      events: new Subject<Event>(),
       // Add other properties/methods if needed
     };
 

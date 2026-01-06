@@ -1,0 +1,210 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+<div id="character-manage-container">
+  <div
+    id="character-manage-main-column"
+    class="col">
+    @if (!isLoading) {
+      <h1>{{ mode === 'add' ? 'Add' : 'Edit' }} Captain</h1>
+
+      @if (errorMessage) {
+        <div class="error-message">{{ errorMessage }}</div>
+      }
+
+      <form
+        [formGroup]="characterForm"
+        class="character-manage-form">
+        <!-- Section: Basic Identification -->
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Identification</span>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field
+            appearance="fill"
+            class="full-width">
+            <mat-label>Captain Name</mat-label>
+            <input
+              matInput
+              formControlName="handle"
+              placeholder="e.g. Jean-Luc Picard" />
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>First Name</mat-label>
+            <input
+              matInput
+              formControlName="firstName" />
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Middle Name</mat-label>
+            <input
+              matInput
+              formControlName="middleName" />
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Last Name</mat-label>
+            <input
+              matInput
+              formControlName="lastName" />
+          </mat-form-field>
+        </div>
+
+        <!-- Section: Service History -->
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Service History</span>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Level</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="level"
+              min="0"
+              max="65" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Created Date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="createdDate" />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>General Allegiance</mat-label>
+            <mat-select formControlName="generalFactionId">
+              @for (gf of generalFactions; track gf.id) {
+                <mat-option [value]="gf.id">{{ gf.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Starting Faction</mat-label>
+            <mat-select formControlName="factionId">
+              @for (f of factions; track f.id) {
+                <mat-option [value]="f.id">{{ f.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Recruit Type</mat-label>
+            <mat-select formControlName="recruitTypeId">
+              @for (rt of recruitTypes; track rt.id) {
+                <mat-option [value]="rt.id">{{ rt.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Career Path (Class)</mat-label>
+            <mat-select formControlName="classId">
+              @for (c of classes; track c.id) {
+                <mat-option [value]="c.id">{{ c.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field
+            appearance="fill"
+            class="full-width">
+            <mat-label>Species</mat-label>
+            <mat-select
+              formControlName="speciesId"
+              [disabled]="!characterForm.get('factionId')?.value">
+              @for (s of speciesList; track s.id) {
+                <mat-option [value]="s.id">{{ s.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Sex</mat-label>
+            <mat-select formControlName="sexId">
+              @for (sex of sexes; track sex.id) {
+                <mat-option [value]="sex.id">{{ sex.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Section: Biography & Notes -->
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Personal Data</span>
+        </div>
+
+        <mat-form-field
+          appearance="fill"
+          class="full-width">
+          <mat-label>Biography</mat-label>
+          <textarea
+            matInput
+            formControlName="biography"
+            rows="5"></textarea>
+        </mat-form-field>
+
+        <mat-form-field
+          appearance="fill"
+          class="full-width">
+          <mat-label>Notes</mat-label>
+          <textarea
+            matInput
+            formControlName="notes"
+            rows="3"></textarea>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button
+            mat-button
+            class="lcars-btn red"
+            type="button"
+            (click)="onCancel()">
+            Cancel
+          </button>
+          <button
+            mat-button
+            class="lcars-btn green"
+            type="submit"
+            [disabled]="characterForm.invalid || isSubmitting"
+            (click)="onSave()">
+            {{ mode === 'add' ? 'Create' : 'Save' }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+
+  <div
+    id="character-manage-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        (click)="onCancel()"
+        class="full-width-btn-link sunflower"
+        >Return</a
+      >
+    </div>
+  </div>
+</div>
