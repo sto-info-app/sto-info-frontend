@@ -60,7 +60,7 @@ jobs:
           EOF
 
       - name: Run Stryker (Full)
-        run: npm run stryker
+        run: npx stryker run
 
       - name: Upload Mutation Report
         uses: actions/upload-artifact@v6

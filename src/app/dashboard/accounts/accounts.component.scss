@@ -1,3 +1,6 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
 #accounts-container {
   display: flex;
   flex-direction: row;
@@ -34,11 +37,15 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  background: var(--lcars-grey-background, #333);
+  background: #333;
   padding: 15px;
-  border-left: 10px solid var(--lcars-sunflower, #ffcc33);
+  border-left: 10px solid vars.$lcars-sunflower;
   border-radius: 5px;
   gap: 20px;
+  cursor: pointer;
+}
+.account-card:hover {
+  background-color: rgba(vars.$lcars-sunflower, 0.1);
 }
 
 .platform-mini-icon {
@@ -47,29 +54,58 @@
 
 .account-details {
   flex: 1;
+
+  p {
+    margin: 5px 0;
+  }
 }
 
-.account-details p {
-  margin: 5px 0;
-}
 .account-icons {
-  display: flex;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: 32px 32px auto;
+  align-items: center;
+  gap: 5px;
   margin-top: 5px;
   font-size: 0.9rem;
+
+  .icon-slot {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
 }
+
 .lifetime-icon {
-  color: var(--lcars-gold, #ff9933);
+  color: vars.$lcars-gold;
   font-size: 0.7rem;
   vertical-align: top;
 }
+
 .launcher-icon {
   color: #6cf;
 }
 
+.character-count {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  width: fit-content;
+  gap: 5px;
+  color: vars.$lcars-perano;
+  background: rgba(vars.$lcars-perano, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+
+  fa-icon {
+    font-size: 0.75rem;
+    color: vars.$lcars-sunflower;
+  }
+}
+
 .record-title {
   font-weight: bold;
-  color: var(--lcars-orange, #ff9900);
+  color: vars.$lcars-orange;
   margin-right: 10px;
 }
 
@@ -78,10 +114,7 @@
   gap: 15px;
 
   span {
-    cursor: pointer;
-  }
-  span:hover {
-    color: var(--lcars-orange, #ff9900);
+    @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);
   }
 }
 
@@ -90,16 +123,8 @@
   padding-top: 5px;
 }
 
-.delete-icon {
-  color: var(--lcars-red, #cc0000);
-}
-
-.full-width-btn-link {
-  width: 100%;
-}
-
 .sunflower {
-  background-color: var(--lcars-sunflower, #ffcc33);
+  background-color: vars.$lcars-sunflower;
 }
 
 @media (max-width: 768px) {

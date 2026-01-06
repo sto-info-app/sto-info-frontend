@@ -1,0 +1,175 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { Character } from 'src/app/dashboard/models/character.model';
+import { CharacterService } from 'src/app/dashboard/services/character.service';
+import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import {
+  BASE_CLOUDFLARE_IMAGES_URL,
+  CLOUDFLARE_R2_PUBLIC_URL,
+  CLOUDFLARE_VARIANT_SQUARE_300PX_NAME,
+  SRC_PHOTO_UNAVAILABLE_300PX,
+} from 'src/app/shared/constants/app-image-assets.constants';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  decodeStoHandle,
+  encodeStoHandle,
+} from 'src/app/shared/utils/sto-handle.utils';
+import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.component';
+
+@Component({
+  selector: 'app-character-detail',
+  templateUrl: './character-detail.component.html',
+  styleUrls: ['./character-detail.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    FontAwesomeModule,
+    LoadingBarComponent,
+    MatButtonModule,
+  ],
+})
+export class CharacterDetailComponent implements OnInit {
+  character: Character | null = null;
+  accountHandle = '';
+  isLoading = true;
+  errorMessage = '';
+  imageFailed = false;
+
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly characterService = inject(CharacterService);
+  private readonly stoAccountService = inject(StoAccountService);
+  private readonly dialog = inject(MatDialog);
+
+  public readonly appRoutes = APP_ROUTES;
+  public readonly unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
+
+  ngOnInit(): void {
+    this.route.params.subscribe(params => {
+      this.accountHandle = decodeStoHandle(params['handle']);
+      const charHandle = params['characterHandle'];
+      if (this.accountHandle && charHandle) {
+        this.loadCharacterData(this.accountHandle, charHandle);
+      }
+    });
+  }
+
+  loadCharacterData(accHandle: string, charHandle: string): void {
+    this.isLoading = true;
+    this.stoAccountService.getAccounts().subscribe({
+      next: accounts => {
+        const account = accounts.find(a => a.handle === accHandle);
+        if (account) {
+          this.characterService.getCharactersByAccount(account.id).subscribe({
+            next: characters => {
+              const char = characters.find(c => c.handle === charHandle);
+              if (char) {
+                // Now fetch full details by ID
+                this.characterService.getCharacter(char.id).subscribe({
+                  next: fullChar => {
+                    this.character = fullChar;
+                    this.isLoading = false;
+                  },
+                  error: err => {
+                    this.isLoading = false;
+                    this.errorMessage = 'Failed to load character details';
+                    console.error(err);
+                  },
+                });
+              } else {
+                this.isLoading = false;
+                this.errorMessage = 'Character not found';
+              }
+            },
+            error: err => {
+              this.isLoading = false;
+              this.errorMessage = 'Failed to load account characters';
+              console.error(err);
+            },
+          });
+        } else {
+          this.isLoading = false;
+          this.errorMessage = 'Account not found';
+        }
+      },
+      error: err => {
+        this.isLoading = false;
+        this.errorMessage = 'Failed to load account';
+        console.error(err);
+      },
+    });
+  }
+
+  editCharacter(): void {
+    if (!this.character) return;
+    this.router.navigate([
+      '/dashboard/accounts',
+      encodeStoHandle(this.accountHandle),
+      this.character.handle,
+      'edit',
+    ]);
+  }
+
+  editCharacterPhoto(): void {
+    if (!this.character) return;
+    const dialogRef = this.dialog.open(CharacterPicComponent, {
+      hasBackdrop: true,
+      disableClose: true,
+      data: { character: this.character },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.character) {
+        // Refresh character data
+        const charHandle = this.character.handle;
+        this.loadCharacterData(this.accountHandle, charHandle);
+      }
+    });
+  }
+
+  onProfileImageError(): void {
+    this.imageFailed = true;
+  }
+
+  getProfileImageUrl(): string {
+    if (this.imageFailed || !this.character) {
+      return this.unavailablePhotoSrc;
+    }
+
+    if (this.character.profilePicture300) {
+      return this.formatImageUrl(this.character.profilePicture300);
+    }
+    if (this.character.profilePicture) {
+      return this.formatImageUrl(this.character.profilePicture);
+    }
+    return this.unavailablePhotoSrc;
+  }
+
+  private formatImageUrl(element: string): string {
+    if (element.startsWith('http')) {
+      return element;
+    }
+
+    // If it starts with 'local/', represent a path in Cloudflare R2
+    if (element.startsWith('local/')) {
+      return `${CLOUDFLARE_R2_PUBLIC_URL}/${element}`;
+    }
+
+    // Otherwise assume it's a Cloudflare Images ID
+    return `${BASE_CLOUDFLARE_IMAGES_URL}/${element}/${CLOUDFLARE_VARIANT_SQUARE_300PX_NAME}`;
+  }
+
+  getAccountLink(): string[] {
+    return ['/dashboard/accounts', encodeStoHandle(this.accountHandle)];
+  }
+
+  getRouteLink(route: string): string {
+    return `/${route}`;
+  }
+}

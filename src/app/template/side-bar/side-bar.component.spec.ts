@@ -53,7 +53,7 @@ describe('SideBarComponent', () => {
 
       return {
         target: mockElement,
-      } as Event;
+      } as unknown as Event;
     };
 
     const resizeCases = [
