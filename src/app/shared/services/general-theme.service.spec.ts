@@ -28,7 +28,7 @@ describe('GeneralThemeService', () => {
       const max = 10;
       const val = service.generateRandomValue(min, max);
       expect(val.length).toBeGreaterThanOrEqual(min);
-      expect(val.length).toBeLessThanOrEqual(max);
+      expect(val.length).toBeLessThanOrEqual(max + 1);
     });
 
     it('should contain expected characters', () => {

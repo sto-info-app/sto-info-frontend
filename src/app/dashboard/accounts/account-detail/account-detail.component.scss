@@ -1,0 +1,272 @@
+@use 'sass:color';
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+#account-detail-container {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem;
+  min-height: calc(100vh - 200px);
+
+  #account-detail-main-column {
+    flex: 3;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    h1 {
+      margin: 0;
+      color: vars.$lcars-orange;
+      text-transform: uppercase;
+      font-size: 2rem;
+    }
+  }
+
+  #account-detail-side-column {
+    flex: 1;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+.account-info-content {
+  padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+}
+
+.characters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.character-card {
+  @include mixins.lcars-card;
+  border-left: 4px solid #555;
+
+  // Faction Colors
+  &.starfleet,
+  &.starfleet-2409,
+  &.starfleet-tos,
+  &.starfleet-discovery,
+  &.federation {
+    border-left-color: vars.$lcars-bluey;
+    background: linear-gradient(
+      180deg,
+      rgba(vars.$lcars-bluey, 0.05) 0%,
+      vars.$lcars-grey-bg 100%
+    );
+  }
+  &.klingon,
+  &.klingon-empire {
+    border-left-color: vars.$lcars-orange;
+    background: linear-gradient(
+      180deg,
+      rgba(vars.$lcars-orange, 0.05) 0%,
+      vars.$lcars-grey-bg 100%
+    );
+  }
+  &.romulan,
+  &.romulan-republic {
+    border-left-color: vars.$lcars-green;
+    background: linear-gradient(
+      180deg,
+      rgba(vars.$lcars-green, 0.05) 0%,
+      vars.$lcars-grey-bg 100%
+    );
+  }
+  &.dominion {
+    border-left-color: vars.$lcars-violet;
+    background: linear-gradient(
+      180deg,
+      rgba(vars.$lcars-violet, 0.05) 0%,
+      vars.$lcars-grey-bg 100%
+    );
+  }
+
+  .character-header-row {
+    padding: 0.6rem 1rem;
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+
+    &.tactical {
+      background-color: vars.$career-tactical;
+      border-bottom-color: color.adjust(
+        vars.$career-tactical,
+        $lightness: -20%
+      );
+    }
+    &.engineering {
+      background-color: vars.$career-engineering;
+      border-bottom-color: color.adjust(
+        vars.$career-engineering,
+        $lightness: -20%
+      );
+    }
+    &.science {
+      background-color: vars.$career-science;
+      border-bottom-color: color.adjust(vars.$career-science, $lightness: -20%);
+    }
+
+    .character-name {
+      font-weight: bold;
+      font-size: 1.15rem;
+      color: #000;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.5px;
+    }
+
+    .faction-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+    }
+  }
+
+  .character-main-area {
+    display: flex;
+    flex: 1;
+    min-height: 110px;
+    background: rgba(0, 0, 0, 0.5);
+
+    .character-image-container {
+      width: 100px;
+      height: 100px;
+      min-width: 100px;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin: 10px;
+
+      .character-list-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        position: relative;
+        z-index: 2;
+        display: block;
+        margin: 5px;
+        padding: 0;
+        border: 2px solid #79d;
+        background: rgba(0, 0, 0, 0.4);
+
+        &[src*='photo-unavailable'] {
+          opacity: 0.4;
+          border-color: rgba(119, 153, 221, 0.3);
+        }
+      }
+
+      .image-fallback-icon {
+        position: absolute;
+        font-size: 3rem;
+        color: rgba(255, 255, 255, 0.08);
+        z-index: 1;
+      }
+    }
+
+    .character-details {
+      flex: 1;
+      min-width: 0;
+      padding: 0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      .character-body {
+        padding: 0.6rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .character-rank-row {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+
+        .rank-icon-mini {
+          height: 20px;
+          width: auto;
+          filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+          margin-bottom: 2px;
+        }
+
+        .rank-name {
+          color: #eee;
+          font-size: 0.95rem;
+          font-weight: bold;
+          text-transform: uppercase;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .character-species-row {
+        color: vars.$lcars-perano;
+        font-size: 0.85rem;
+        text-transform: capitalize;
+        padding-left: 2px;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+
+        .gender-icon {
+          font-size: 0.8rem;
+          opacity: 0.8;
+        }
+      }
+    }
+
+    .character-actions {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      gap: 0.8rem;
+      padding: 0.8rem;
+      background: rgba(0, 0, 0, 0.4);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+
+      .cta-icon {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          color: vars.$lcars-sunflower;
+          transform: scale(1.1);
+        }
+
+        &.delete-icon:hover {
+          color: vars.$lcars-red;
+        }
+      }
+    }
+  }
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 5px !important;
+  padding-top: 5px !important;
+}

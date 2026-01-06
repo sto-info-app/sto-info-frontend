@@ -10,7 +10,34 @@
     @if (user) {
       <div id="dashboard-info-main-content">
         <p>{{ userGreeting }}</p>
-        <p>Summaries will installed on Tuesday!</p>
+
+        <p class="announcement">
+          Further enhancements will be installed on Tuesday!
+        </p>
+
+        <div class="dashboard-tiles">
+          <div
+            class="dashboard-tile sunflower"
+            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)">
+            <div class="tile-icon">
+              <fa-icon [icon]="['fas', 'users']"></fa-icon>
+            </div>
+            <div class="tile-content">
+              <span class="tile-stat">{{ accountsCount }} Accounts</span>
+            </div>
+          </div>
+
+          <div
+            class="dashboard-tile perano"
+            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_PROFILE)">
+            <div class="tile-icon">
+              <fa-icon [icon]="['fas', 'id-card']"></fa-icon>
+            </div>
+            <div class="tile-content">
+              <span class="tile-stat">Personnel Record</span>
+            </div>
+          </div>
+        </div>
       </div>
     }
   </div>

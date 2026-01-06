@@ -53,6 +53,9 @@ describe('DashboardService', () => {
         birthday: '1990-01-01',
         gender: 'Male',
       },
+      emailVerified: true,
+      createdAt: new Date('2023-01-01'),
+      updatedAt: new Date('2023-01-01'),
     } as User;
 
     it('should fetch user details successfully', () => {

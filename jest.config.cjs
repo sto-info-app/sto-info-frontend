@@ -50,6 +50,7 @@ module.exports = {
     // Tests
     '!src/**/*.spec.ts',
     '!src/**/*.module.ts',
+    '!**/.stryker-tmp/**',
 
     // Angular bootstrap / wiring
     '!src/main.ts',
@@ -83,6 +84,7 @@ module.exports = {
     '/src/environments/',
     '/src/main.ts',
     '/src/polyfills.ts',
+    '/.stryker-tmp/',
   ],
   coverageThreshold: {
     global: {

@@ -1,9 +1,87 @@
 #dashboard-container {
   display: flex;
+  gap: 1rem;
+  padding: 1rem;
 
   #dashboard-info-main-column {
     flex: 2;
     flex-basis: 69%;
+
+    #dashboard-info-main-content {
+      margin-top: 1rem;
+
+      .announcement {
+        margin-top: 2rem;
+        font-style: italic;
+        opacity: 0.8;
+      }
+
+      .dashboard-tiles {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+
+        .dashboard-tile {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem 1rem;
+          border-radius: 20px;
+          min-width: 140px;
+          color: #000;
+          cursor: pointer;
+          transition:
+            transform 0.2s ease,
+            filter 0.2s ease;
+          gap: 1rem;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+
+          &:hover {
+            transform: translateY(-4px);
+            filter: brightness(1.1);
+          }
+
+          .tile-icon {
+            font-size: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.9;
+          }
+
+          .tile-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 0.2rem;
+
+            .tile-stat {
+              font-size: 1.2rem;
+              font-weight: 800;
+              opacity: 0.8;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+          }
+
+          &.sunflower {
+            background-color: #ffcc66;
+          }
+          &.perano {
+            background-color: #99ccff;
+          }
+          &.bahama {
+            background-color: #3366cc;
+          }
+          &.atomic {
+            background-color: #ff9966;
+          }
+        }
+      }
+    }
   }
 
   #dashboard-info-side-column {
