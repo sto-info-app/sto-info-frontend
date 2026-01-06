@@ -91,6 +91,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe(expiryTime => {
         if (this.isLoggedIn) {
           if (expiryTime !== 0 && Date.now() >= expiryTime) {
+            this.dialog.closeAll(); // Close all dialogs before logout
             this.authService.performLogout();
           } else if (
             expiryTime !== 0 &&
@@ -182,6 +183,7 @@ export class AppComponent implements OnInit, OnDestroy {
    */
   logout(): void {
     this.stopCountdown();
+    this.dialog.closeAll(); // Close all open dialogs before logout
     this.authService.performLogout();
   }
 
@@ -239,11 +241,9 @@ export class AppComponent implements OnInit, OnDestroy {
         if (this.autoLogoutCountdown <= 0) {
           this.stopCountdown();
 
-          // If the warning dialog is open
-          if (this.dialogRef) {
-            this.dialogRef.close(); // Close the dialog
-            this.dialogRef = null; // Allow opening the dialog box again
-          }
+          // Close all open dialogs (refresh session dialog, character dialogs, etc.)
+          this.dialog.closeAll();
+          this.dialogRef = null; // Reset the dialog reference
 
           this.authService.performLogout();
         }
