@@ -295,7 +295,7 @@ describe('CharacterManageComponent', () => {
       const charWithNoDate = {
         ...mockCharacter,
         id: 'char1',
-        createdDate: null,
+        createdDate: undefined,
       };
       mockCharacterService.getCharacter.mockReturnValue(of(charWithNoDate));
       fixture.detectChanges();
@@ -328,7 +328,7 @@ describe('CharacterManageComponent', () => {
         classId: 'tac',
         recruitTypeId: 'std',
         speciesId: 'human',
-        createdDate: null,
+        createdDate: undefined,
       });
 
       component.onSave();
@@ -336,7 +336,7 @@ describe('CharacterManageComponent', () => {
 
       expect(mockCharacterService.createCharacter).toHaveBeenCalledWith(
         expect.objectContaining({
-          createdDate: null,
+          createdDate: null as any,
         }),
       );
     }));

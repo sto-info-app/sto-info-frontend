@@ -1,8 +1,8 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import { ActivatedRoute, Event, Params, Router } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
@@ -73,7 +73,7 @@ describe('AccountDetailComponent', () => {
       navigate: jest.fn(),
       createUrlTree: jest.fn(),
       serializeUrl: jest.fn(),
-      events: of(null),
+      events: new Subject<Event>(),
     };
 
     mockStoAccountService = {
@@ -89,8 +89,8 @@ describe('AccountDetailComponent', () => {
     mockDialog = {
       open: jest.fn(),
       closeAll: jest.fn(),
-      afterOpened: of(),
-      afterAllClosed: of(),
+      afterOpened: new Subject<MatDialogRef<unknown, unknown>>(),
+      afterAllClosed: new Subject<void>(),
     };
 
     routeParamsSubject = new Subject();
@@ -190,7 +190,7 @@ describe('AccountDetailComponent', () => {
       const updatedAccount = { ...mockAccount, notes: 'Updated' };
       mockDialog.open.mockReturnValue({
         afterClosed: () => of(true),
-      });
+      } as MatDialogRef<unknown, unknown>);
       mockStoAccountService.getAccount.mockReturnValue(of(updatedAccount));
 
       component.editAccount();
@@ -207,7 +207,7 @@ describe('AccountDetailComponent', () => {
       const updatedAccount = { ...mockAccount, handle: 'New#9999' };
       mockDialog.open.mockReturnValue({
         afterClosed: () => of(true),
-      });
+      } as MatDialogRef<unknown, unknown>);
       mockStoAccountService.getAccount.mockReturnValue(of(updatedAccount));
 
       component.editAccount();
@@ -228,8 +228,10 @@ describe('AccountDetailComponent', () => {
       component.account = mockAccount;
       mockDialog.open.mockReturnValue({
         afterClosed: () => of(true),
-      });
-      mockStoAccountService.getAccount.mockReturnValue(of(null));
+      } as MatDialogRef<unknown, unknown>);
+      mockStoAccountService.getAccount.mockReturnValue(
+        of(null as unknown as StoAccount),
+      );
 
       component.editAccount();
 
@@ -249,7 +251,7 @@ describe('AccountDetailComponent', () => {
             component.account = null;
             return of(true);
           },
-        };
+        } as unknown as MatDialogRef<unknown, unknown>;
       });
 
       component.editAccount();
@@ -303,7 +305,7 @@ describe('AccountDetailComponent', () => {
       component.account = mockAccount;
       mockDialog.open.mockReturnValue({
         afterClosed: () => of(true),
-      });
+      } as MatDialogRef<unknown, unknown>);
 
       component.deleteCharacter(mockCharacter);
 
@@ -321,7 +323,7 @@ describe('AccountDetailComponent', () => {
       component.account = null;
       mockDialog.open.mockReturnValue({
         afterClosed: () => of(true),
-      });
+      } as MatDialogRef<unknown, unknown>);
 
       component.deleteCharacter(mockCharacter);
 
@@ -334,7 +336,7 @@ describe('AccountDetailComponent', () => {
     it('should not delete if dialog cancelled', () => {
       mockDialog.open.mockReturnValue({
         afterClosed: () => of(false),
-      });
+      } as MatDialogRef<unknown, unknown>);
 
       component.deleteCharacter(mockCharacter);
 
@@ -345,7 +347,7 @@ describe('AccountDetailComponent', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       mockDialog.open.mockReturnValue({
         afterClosed: () => of(true),
-      });
+      } as MatDialogRef<unknown, unknown>);
       mockCharacterService.deleteCharacter.mockReturnValue(
         throwError(() => new Error('Error')),
       );

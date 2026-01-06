@@ -26,6 +26,7 @@ describe('StoAccountService', () => {
     notes: 'Some notes',
     accountCreatedDate: '2023-01-01T00:00:00Z',
     publiclyVisible: true,
+    lifetimeSubscription: false,
     createdAt: '2023-01-01T00:00:00Z',
     updatedAt: '2023-01-01T00:00:00Z',
     platformId: 'p1',
@@ -128,6 +129,7 @@ describe('StoAccountService', () => {
         handle: 'New#1',
         accountCreatedDate: '2023-01-01',
         publiclyVisible: true,
+        lifetimeSubscription: false,
         platformId: 'p1',
       };
 
