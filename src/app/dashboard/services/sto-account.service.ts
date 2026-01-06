@@ -113,16 +113,14 @@ export class StoAccountService {
    * @returns An observable of platform array.
    */
   getPlatforms(): Observable<Platform[]> {
-    if (!this.platforms$) {
-      this.platforms$ = this.http.get<Platform[]>(API_URLS.STO_PLATFORM).pipe(
-        shareReplay(1),
-        catchError(error => {
-          this.platforms$ = undefined;
-          console.error('Error fetching platforms:', error);
-          return throwError(() => error);
-        }),
-      );
-    }
+    this.platforms$ ??= this.http.get<Platform[]>(API_URLS.STO_PLATFORM).pipe(
+      shareReplay(1),
+      catchError(error => {
+        this.platforms$ = undefined;
+        console.error('Error fetching platforms:', error);
+        return throwError(() => error);
+      }),
+    );
     return this.platforms$;
   }
 
@@ -131,16 +129,14 @@ export class StoAccountService {
    * @returns An observable of launcher array.
    */
   getLaunchers(): Observable<Launcher[]> {
-    if (!this.launchers$) {
-      this.launchers$ = this.http.get<Launcher[]>(API_URLS.STO_LAUNCHER).pipe(
-        shareReplay(1),
-        catchError(error => {
-          this.launchers$ = undefined;
-          console.error('Error fetching launchers:', error);
-          return throwError(() => error);
-        }),
-      );
-    }
+    this.launchers$ ??= this.http.get<Launcher[]>(API_URLS.STO_LAUNCHER).pipe(
+      shareReplay(1),
+      catchError(error => {
+        this.launchers$ = undefined;
+        console.error('Error fetching launchers:', error);
+        return throwError(() => error);
+      }),
+    );
     return this.launchers$;
   }
 
@@ -149,18 +145,16 @@ export class StoAccountService {
    * @returns An observable of platform-launcher mapping array.
    */
   getPlatformLaunchers(): Observable<PlatformLauncher[]> {
-    if (!this.platformLaunchers$) {
-      this.platformLaunchers$ = this.http
-        .get<PlatformLauncher[]>(API_URLS.STO_PLATFORM_LAUNCHER)
-        .pipe(
-          shareReplay(1),
-          catchError(error => {
-            this.platformLaunchers$ = undefined;
-            console.error('Error fetching platform-launchers:', error);
-            return throwError(() => error);
-          }),
-        );
-    }
+    this.platformLaunchers$ ??= this.http
+      .get<PlatformLauncher[]>(API_URLS.STO_PLATFORM_LAUNCHER)
+      .pipe(
+        shareReplay(1),
+        catchError(error => {
+          this.platformLaunchers$ = undefined;
+          console.error('Error fetching platform-launchers:', error);
+          return throwError(() => error);
+        }),
+      );
     return this.platformLaunchers$;
   }
 }
