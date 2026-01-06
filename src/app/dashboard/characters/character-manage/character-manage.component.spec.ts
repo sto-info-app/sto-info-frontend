@@ -336,7 +336,7 @@ describe('CharacterManageComponent', () => {
 
       expect(mockCharacterService.createCharacter).toHaveBeenCalledWith(
         expect.objectContaining({
-          createdDate: null as any,
+          createdDate: undefined,
         }),
       );
     }));

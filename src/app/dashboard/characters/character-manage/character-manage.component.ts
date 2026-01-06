@@ -264,7 +264,7 @@ export class CharacterManageComponent implements OnInit {
       accountId: this.accountId,
       createdDate: this.characterForm.value.createdDate
         ? this.characterForm.value.createdDate.toISOString()
-        : null,
+        : undefined,
     };
 
     if (this.mode === 'add') {
