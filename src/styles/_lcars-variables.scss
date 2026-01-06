@@ -1,0 +1,32 @@
+// LCARS Standard Colors
+$lcars-black: #0d0d0d;
+$lcars-white: #f5f6fa;
+$lcars-grey-bg: rgba(255, 255, 255, 0.05);
+$lcars-grey-border: rgba(255, 255, 255, 0.1);
+
+// LCARS Palette
+$lcars-sunflower: #fc6;
+$lcars-perano: #9cf;
+$lcars-bluey: #78f;
+$lcars-orange: #f70;
+$lcars-green: #3c9;
+$lcars-violet: #94f;
+$lcars-cardinal: #c23;
+$lcars-cool: #58f;
+$lcars-gold: #fa0;
+$lcars-tangerine: #f83;
+$lcars-red: #d44;
+$lcars-sky: #aaf;
+
+// Career Colors
+$career-tactical: $lcars-cardinal;
+$career-engineering: $lcars-sunflower;
+$career-science: $lcars-cool;
+
+// Faction Colors
+$faction-federation: #005a9c;
+$faction-klingon: #8b0000;
+$faction-undecided: #555;
+
+// Font Variables
+$font-antonio: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;

@@ -12,7 +12,9 @@ import {
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
+import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
+import { CharacterService } from '../services/character.service';
 import { StoAccountService } from '../services/sto-account.service';
 import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.component';
 
@@ -49,8 +51,12 @@ export class AccountsComponent implements OnInit {
   isLoading = true;
 
   private readonly stoAccountService = inject(StoAccountService);
+  private readonly characterService = inject(CharacterService);
   private readonly routingService = inject(RoutingService);
   private readonly dialog = inject(MatDialog);
+
+  /** Map of character counts by account ID. */
+  characterCounts: Record<string, number> = {};
 
   /**
    * Initializes the component by fetching STO accounts.
@@ -75,7 +81,27 @@ export class AccountsComponent implements OnInit {
         this.accounts = accounts;
         this.platforms = platforms;
         this.launchers = launchers;
-        this.isLoading = false;
+
+        if (accounts.length > 0) {
+          this.characterService.getCharacters().subscribe({
+            next: characters => {
+              // Group characters by accountId and count them
+              this.characterCounts = characters.reduce(
+                (acc, char) => {
+                  acc[char.accountId] = (acc[char.accountId] || 0) + 1;
+                  return acc;
+                },
+                {} as Record<string, number>,
+              );
+              this.isLoading = false;
+            },
+            error: () => {
+              this.isLoading = false;
+            },
+          });
+        } else {
+          this.isLoading = false;
+        }
       },
       error: () => {
         this.isLoading = false;
@@ -221,5 +247,12 @@ export class AccountsComponent implements OnInit {
   getLauncher(launcherId?: string): Launcher | undefined {
     if (!launcherId) return undefined;
     return this.launchers.find(l => l.id === launcherId);
+  }
+
+  /**
+   * Encodes an STO handle for URL safety.
+   */
+  encodeHandle(handle: string): string {
+    return encodeStoHandle(handle);
   }
 }

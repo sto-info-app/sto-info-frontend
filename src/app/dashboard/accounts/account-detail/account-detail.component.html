@@ -1,0 +1,178 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+<div id="account-detail-container">
+  <div
+    id="account-detail-main-column"
+    class="col">
+    @if (account) {
+      <h1>Account: {{ account.handle }}</h1>
+
+      <div id="account-info-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Account Information</span>
+          <span
+            class="cta-icon"
+            (click)="editAccount()"
+            (keypress)="editAccount()"
+            title="Edit Account"
+            ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+          ></span>
+        </div>
+        <div class="account-info-content">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Handle:</span>
+              <span class="value">{{ account.handle }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Username:</span>
+              <span class="value">{{ account.username || 'N/A' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Email:</span>
+              <span class="value">{{ account.email || 'N/A' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Lifetime Subscription:</span>
+              <span class="value">{{
+                account.lifetimeSubscription ? 'Yes' : 'No'
+              }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="characters-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Captain List</span>
+          <span
+            class="cta-icon"
+            (click)="addCharacter()"
+            (keypress)="addCharacter()"
+            title="Add Character"
+            ><fa-icon [icon]="['fas', 'plus']"></fa-icon
+          ></span>
+        </div>
+
+        <div class="characters-content">
+          @if (characters.length === 0 && !isLoading) {
+            <p class="go-center">
+              No characters found for this account. Click the + icon to add one.
+            </p>
+          }
+
+          <div class="characters-grid">
+            @for (character of characters; track character.id) {
+              <div
+                class="character-card"
+                [class]="getFactionClass(character)">
+                <div
+                  class="character-header-row"
+                  [class]="getClassCategory(character)"
+                  [routerLink]="getCharacterLink(character)">
+                  <span class="character-name"
+                    >{{ character.handle }} (Lvl {{ character.level }})</span
+                  >
+                  @if (character.faction?.iconUrl) {
+                    <img
+                      [src]="character.faction!.iconUrl!"
+                      class="faction-icon"
+                      alt="Faction Icon"
+                      width="20"
+                      height="20" />
+                  }
+                </div>
+                <div class="character-main-area">
+                  <div
+                    class="character-image-container"
+                    [routerLink]="getCharacterLink(character)">
+                    <img
+                      [src]="getProfileImageUrl(character)"
+                      [alt]="character.handle"
+                      (error)="onProfileImageError(character.id)"
+                      class="character-list-image" />
+                    <div class="image-fallback-icon">
+                      <fa-icon [icon]="['fas', 'user']"></fa-icon>
+                    </div>
+                  </div>
+                  <div
+                    class="character-details"
+                    [routerLink]="getCharacterLink(character)">
+                    <div class="character-body">
+                      <div class="character-rank-row">
+                        @if (character.rank?.iconUrl) {
+                          <img
+                            [src]="character.rank!.iconUrl"
+                            class="rank-icon-mini"
+                            height="14"
+                            alt="Rank" />
+                        }
+                        <span class="rank-name">{{
+                          character.rank?.title || 'Unknown Rank'
+                        }}</span>
+                      </div>
+                      <div class="character-species-row">
+                        <fa-icon
+                          [icon]="['fas', getSexIcon(character)]"
+                          class="gender-icon"></fa-icon>
+                        {{ character.species?.name }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="character-actions">
+                    <span
+                      class="cta-icon"
+                      (click)="editCharacter(character)"
+                      (keypress)="editCharacter(character)"
+                      title="Edit Character"
+                      ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+                    ></span>
+                    <span
+                      class="cta-icon delete-icon"
+                      (click)="deleteCharacter(character)"
+                      (keypress)="deleteCharacter(character)"
+                      title="Delete Character"
+                      ><fa-icon [icon]="['fas', 'trash']"></fa-icon
+                    ></span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    } @else if (!isLoading && errorMessage) {
+      <div class="error-container">
+        <p>{{ errorMessage }}</p>
+        <button
+          mat-raised-button
+          color="primary"
+          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)">
+          Back to Accounts
+        </button>
+      </div>
+    }
+  </div>
+
+  <div
+    id="account-detail-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+        class="full-width-btn-link sunflower"
+        >Back to Accounts</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+        class="full-width-btn-link bluey"
+        >Return to Dashboard</a
+      >
+    </div>
+  </div>
+</div>

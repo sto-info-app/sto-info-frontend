@@ -26,6 +26,7 @@ import {
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { STO_HANDLE_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 
 /**
  * Interface for data passed to the account dialog.
@@ -79,7 +80,10 @@ export class AccountDialogComponent implements OnInit {
    */
   constructor() {
     this.accountForm = this.fb.group({
-      handle: ['', [Validators.required]],
+      handle: [
+        '',
+        [Validators.required, Validators.pattern(STO_HANDLE_PATTERN)],
+      ],
       username: [''],
       email: ['', [Validators.email]],
       notes: [''],
