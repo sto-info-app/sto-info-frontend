@@ -97,8 +97,12 @@ describe('CharacterPicComponent', () => {
     it('should set invalid type error if file is not image', () => {
       const mockFile = { type: 'text/plain', name: 'test.txt' };
       const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
+      const consoleSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
       component.onFileChangeEvent(mockEvent);
       expect(component.uploadedInvalidImageType).toBe(true);
+      consoleSpy.mockRestore();
     });
 
     it('should block SVG files for security', () => {
@@ -118,8 +122,12 @@ describe('CharacterPicComponent', () => {
     it('should reject file with valid MIME but invalid extension', () => {
       const mockFile = { type: 'image/png', name: 'test.bmp' };
       const mockEvent = { target: { files: [mockFile] } } as unknown as Event;
+      const consoleSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
       component.onFileChangeEvent(mockEvent);
       expect(component.uploadedInvalidImageType).toBe(true);
+      consoleSpy.mockRestore();
     });
 
     it('should accept JPEG files', () => {
