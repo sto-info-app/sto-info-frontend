@@ -487,3 +487,39 @@ html {
     0.87
   );
 }
+
+/* CRITICAL: Override Angular Material typography to use condensed fonts
+   Angular Material's .mat-typography sets font-stretch: normal which causes
+   issues with condensed fonts. This override ensures all text uses the
+   condensed width that Antonio was designed for. */
+.mat-typography,
+.mat-typography * {
+  font-stretch: condensed !important;
+  /* Firefox-specific rendering improvements */
+  -moz-osx-font-smoothing: grayscale;
+  font-synthesis: none; /* Prevent Firefox from synthesizing bold/italic */
+  text-rendering: optimizeLegibility;
+}
+
+/* Firefox-specific font override
+   Firefox renders Antonio wider than Chrome. Use Roboto Condensed instead,
+   which has better cross-browser consistency. */
+@-moz-document url-prefix() {
+  body,
+  .mat-typography,
+  .mat-typography *,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  a,
+  button,
+  label {
+    font-family:
+      'Roboto Condensed', 'Helvetica', 'Arial Narrow', sans-serif !important;
+  }
+}
