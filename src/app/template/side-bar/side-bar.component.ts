@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  APP_ROUTE_TITLES,
+  APP_ROUTES,
+} from 'src/app/shared/constants/app-routing.constants';
 import { GeneralThemeService } from 'src/app/shared/services/general-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 
@@ -15,12 +18,13 @@ export class SideBarComponent {
   @Input() isLoggedIn!: boolean;
 
   appRoutes = APP_ROUTES;
+  appRouteTitles = APP_ROUTE_TITLES;
   themePanel6RandomText: string;
 
-  isPenel5Hidden = false;
-  isPenel7Hidden = false;
-  isPenel8Hidden = false;
-  isPenel10Hidden = false;
+  isPanel5Hidden = false;
+  isPanel7Hidden = false;
+  isPanel8Hidden = false;
+  isPanel10Hidden = false;
 
   private readonly routingService = inject(RoutingService);
   private readonly generalThemeService = inject(GeneralThemeService);
@@ -37,9 +41,9 @@ export class SideBarComponent {
   onResize(event: Event): void {
     const target = event.target as HTMLElement | null;
     const height = target?.getBoundingClientRect().height ?? 0;
-    this.isPenel5Hidden = height >= 900;
-    this.isPenel7Hidden = height >= 1200;
-    this.isPenel10Hidden = height >= 1500;
-    this.isPenel8Hidden = height >= 1800;
+    this.isPanel5Hidden = height >= 900;
+    this.isPanel7Hidden = height >= 1200;
+    this.isPanel10Hidden = height >= 1500;
+    this.isPanel8Hidden = height >= 1800;
   }
 }
