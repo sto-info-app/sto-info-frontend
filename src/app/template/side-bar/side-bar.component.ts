@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  APP_ROUTE_TITLES,
+  APP_ROUTES,
+} from 'src/app/shared/constants/app-routing.constants';
 import { GeneralThemeService } from 'src/app/shared/services/general-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 
@@ -15,6 +18,7 @@ export class SideBarComponent {
   @Input() isLoggedIn!: boolean;
 
   appRoutes = APP_ROUTES;
+  appRouteTitles = APP_ROUTE_TITLES;
   themePanel6RandomText: string;
 
   isPanel5Hidden = false;

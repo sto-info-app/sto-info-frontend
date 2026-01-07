@@ -11,7 +11,7 @@
           [routerLink]="getRouteLink(appRoutes.REGISTER)"
           [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="peach"
-          >Register</a
+          >{{ appRouteTitles.REGISTER }}</a
         >
       }
       @if (isLoggedIn) {
@@ -19,15 +19,15 @@
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
           [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="peach"
-          >Dashboard</a
+          >{{ appRouteTitles.STO_DASHBOARD }}</a
+        >
+        <a
+          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="peach"
+          >{{ appRouteTitles.STO_DASHBOARD_ACCOUNTS }}</a
         >
       }
-      <a
-        [routerLink]="getRouteLink('page-not-found')"
-        [routerLinkActiveOptions]="{ exact: true }"
-        routerLinkActive="peach"
-        >Error Page</a
-      >
     </div>
     <div class="panel panel-4"></div>
     @if (isPanel5Hidden) {
