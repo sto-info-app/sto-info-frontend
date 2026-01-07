@@ -1,23 +1,7 @@
 @charset "utf-8";
 
-// Font imports
-@font-face {
-  font-family: 'Antonio';
-  font-weight: 400;
-  src:
-    url(Antonio-Regular.woff2) format('woff2'),
-    url(Antonio-Regular.woff) format('woff');
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Antonio';
-  font-weight: 700;
-  src:
-    url(Antonio-Bold.woff2) format('woff2'),
-    url(Antonio-Bold.woff) format('woff');
-  font-display: swap;
-}
+// Import both Antonio (for Chrome/Edge) and Roboto Condensed (for Firefox)
+@import url('https://fonts.googleapis.com/css2?family=Antonio:wght@300;400;500;600;700&family=Roboto+Condensed:wght@300;400;500;600;700&display=swap');
 
 // Keyframe animations
 @keyframes blink {
@@ -382,6 +366,10 @@ body {
   font-size: 100%;
   font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
   font-weight: 400;
+  font-stretch: condensed;
+  font-synthesis: none; /* Prevent synthetic bold/italic in Firefox */
+  -moz-osx-font-smoothing: grayscale; /* Better rendering in Firefox */
+  text-rendering: optimizeLegibility;
   line-height: 1.5;
   color: #79d;
 }
@@ -1653,7 +1641,8 @@ body,
 .mat-typography,
 .mat-button,
 .mat-card {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
+  font-family:
+    'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
   line-height: 1.5;
   font-size: 1rem;
 }
