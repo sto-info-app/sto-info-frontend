@@ -8,6 +8,7 @@ import { LoginComponent } from './core/login/login.component';
 import { RegisterComponent } from './core/register/register.component';
 import { RegistrationCompleteComponent } from './core/registration-complete/registration-complete.component';
 import { VerifyEmailComponent } from './core/verify-email/verify-email.component';
+import { AccountsComponent } from './dashboard/accounts/accounts.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ProfileComponent } from './dashboard/profile/profile.component';
 import { PageNotFoundComponent } from './error-pages/page-not-found/page-not-found.component';
@@ -111,6 +112,48 @@ export const routes: Routes = [
     path: APP_ROUTES.STO_DASHBOARD_PROFILE,
     component: ProfileComponent,
     data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_PROFILE, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_ACCOUNTS,
+    component: AccountsComponent,
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_ACCOUNTS, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_ACCOUNT_DETAIL,
+    loadComponent: () =>
+      import('./dashboard/accounts/account-detail/account-detail.component').then(
+        m => m.AccountDetailComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_ACCOUNT_DETAIL, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_CHARACTER_DETAIL,
+    loadComponent: () =>
+      import('./dashboard/characters/character-detail/character-detail.component').then(
+        m => m.CharacterDetailComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_CHARACTER_DETAIL, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_CHARACTER_ADD,
+    loadComponent: () =>
+      import('./dashboard/characters/character-manage/character-manage.component').then(
+        m => m.CharacterManageComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_CHARACTER_ADD, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_CHARACTER_EDIT,
+    loadComponent: () =>
+      import('./dashboard/characters/character-manage/character-manage.component').then(
+        m => m.CharacterManageComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_CHARACTER_EDIT, requiresApi: true },
     canActivate: [AuthGuard, ApiRequiredGuard],
   },
 

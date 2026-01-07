@@ -1,6 +1,6 @@
 {
   "name": "sto-info-frontend",
-  "version": "0.1.75",
+  "version": "1.0.5",
   "description": "Star Trek Online Information App",
   "author": "Steve Roberts",
   "private": true,
@@ -21,6 +21,7 @@
     "test:watch": "jest --config jest.config.cjs --watch",
     "test:cov": "jest --config jest.config.cjs --runInBand --coverage --coverageDirectory=reports/coverage --coverageReporters=lcov --coverageReporters=text-summary",
     "test:mutation": "stryker run --reporters clear-text --reporters html --reporters progress",
+    "test:mutation:dry": "stryker run --reporters clear-text --reporters html --reporters progress --dryRunOnly",
     "e2e": "ng e2e"
   },
   "dependencies": {
@@ -35,17 +36,11 @@
     "@angular/platform-browser-dynamic": "^21.0.6",
     "@angular/router": "^21.0.6",
     "@auth0/angular-jwt": "^5.1.2",
+    "@awesome.me/kit-5812c6b103": "^1.0.12",
     "@eslint/config-array": "^0.23.0",
     "@eslint/object-schema": "^3.0.0",
     "@fortawesome/angular-fontawesome": "^4.0.0",
-    "@fortawesome/fontawesome-pro": "^7.1.0",
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
-    "@fortawesome/free-solid-svg-icons": "^7.1.0",
-    "@fortawesome/pro-duotone-svg-icons": "^7.1.0",
-    "@fortawesome/pro-light-svg-icons": "^7.1.0",
-    "@fortawesome/pro-regular-svg-icons": "^7.1.0",
-    "@fortawesome/pro-solid-svg-icons": "^7.1.0",
-    "@fortawesome/pro-thin-svg-icons": "^7.1.0",
     "glob": "^13.0.0",
     "http-proxy-middleware": "^3.0.5",
     "js-base64": "^3.7.7",
@@ -58,7 +53,7 @@
     "rimraf": "^6.0.1",
     "rxjs": "~7.8.2",
     "tslib": "^2.3.0",
-    "undici": "^7.16.0",
+    "undici": "^7.18.2",
     "zone.js": "~0.16.0"
   },
   "devDependencies": {
@@ -76,22 +71,22 @@
     "@stryker-mutator/typescript-checker": "^9.4.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.51.0",
-    "@typescript-eslint/parser": "^8.50.1",
+    "@typescript-eslint/eslint-plugin": "^8.52.0",
+    "@typescript-eslint/parser": "^8.52.0",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
-    "globals": "^16.5.0",
+    "globals": "^17.0.0",
     "husky": "^9.1.7",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
+    "jest-junit": "^16.0.0",
     "jest-preset-angular": "^16.0.0",
     "jsdom": "^27.4.0",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
-    "typescript": "~5.9.3",
-    "cross-env": "^10.1.0",
-    "jest-junit": "^16.0.0"
+    "typescript": "~5.9.3"
   },
   "projects": {
     "sto-info-frontend": {

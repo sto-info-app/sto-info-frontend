@@ -11,7 +11,7 @@
           [routerLink]="getRouteLink(appRoutes.REGISTER)"
           [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="peach"
-          >Register</a
+          >{{ appRouteTitles.REGISTER }}</a
         >
       }
       @if (isLoggedIn) {
@@ -19,31 +19,31 @@
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
           [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="peach"
-          >Dashboard</a
+          >{{ appRouteTitles.STO_DASHBOARD }}</a
+        >
+        <a
+          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="peach"
+          >{{ appRouteTitles.STO_DASHBOARD_ACCOUNTS }}</a
         >
       }
-      <a
-        [routerLink]="getRouteLink('page-not-found')"
-        [routerLinkActiveOptions]="{ exact: true }"
-        routerLinkActive="peach"
-        >Error Page</a
-      >
     </div>
     <div class="panel panel-4"></div>
-    @if (isPenel5Hidden) {
+    @if (isPanel5Hidden) {
       <div class="panel panel-5"></div>
     }
     <div
       class="panel panel-6"
       [innerHTML]="themePanel6RandomText"></div>
-    @if (isPenel7Hidden) {
+    @if (isPanel7Hidden) {
       <div class="panel panel-7"></div>
     }
-    @if (isPenel8Hidden) {
+    @if (isPanel8Hidden) {
       <div class="panel panel-8"></div>
     }
     <div class="panel panel-9"></div>
-    @if (isPenel10Hidden) {
+    @if (isPanel10Hidden) {
       <div class="panel panel-10"></div>
     }
   </div>

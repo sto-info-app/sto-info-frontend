@@ -1,3 +1,4 @@
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
@@ -7,6 +8,7 @@ import { RoutingService } from '../shared/services/routing.service';
 import { DashboardComponent } from './dashboard.component';
 import { User } from './models/user.model';
 import { DashboardService } from './services/dashboard.service';
+import { StoAccountService } from './services/sto-account.service';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -14,6 +16,7 @@ describe('DashboardComponent', () => {
   let mockDashboardService: jest.Mocked<DashboardService>;
   let mockAuthService: jest.Mocked<AuthService>;
   let mockRoutingService: jest.Mocked<RoutingService>;
+  let mockStoAccountService: jest.Mocked<StoAccountService>;
 
   const mockUser: User = {
     id: '123',
@@ -40,18 +43,27 @@ describe('DashboardComponent', () => {
 
     mockAuthService = {
       performLogout: jest.fn(),
+      getHttpOptionsWithAccessToken: jest.fn().mockReturnValue({
+        headers: { Authorization: 'Bearer mock-token' },
+      }),
     } as unknown as jest.Mocked<AuthService>;
 
     mockRoutingService = {
       getLink: jest.fn().mockReturnValue('/mock-route'),
     } as unknown as jest.Mocked<RoutingService>;
 
+    mockStoAccountService = {
+      getAccounts: jest.fn().mockReturnValue(of([])),
+    } as unknown as jest.Mocked<StoAccountService>;
+
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
+      schemas: [NO_ERRORS_SCHEMA],
       providers: [
         { provide: DashboardService, useValue: mockDashboardService },
         { provide: AuthService, useValue: mockAuthService },
         { provide: RoutingService, useValue: mockRoutingService },
+        { provide: StoAccountService, useValue: mockStoAccountService },
         { provide: ActivatedRoute, useValue: {} },
       ],
     }).compileComponents();
@@ -63,12 +75,11 @@ describe('DashboardComponent', () => {
   });
 
   it('should create', () => {
-    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   it('should load user data and set greeting on init', () => {
-    fixture.detectChanges();
+    component.ngOnInit();
     expect(mockDashboardService.getUser).toHaveBeenCalled();
     expect(component.user).toEqual(mockUser);
     expect(component.userGreeting).toContain('Picard');
@@ -78,7 +89,7 @@ describe('DashboardComponent', () => {
     const disabledUser = { ...mockUser, isAccountDisabled: true };
     mockDashboardService.getUser.mockReturnValue(of(disabledUser));
 
-    fixture.detectChanges();
+    component.ngOnInit();
 
     expect(mockAuthService.performLogout).toHaveBeenCalled();
   });

@@ -1,0 +1,42 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+h2 {
+  font-size: 1.5rem !important;
+}
+
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.toggle-container {
+  margin: 10px 0;
+}
+
+mat-dialog-content {
+  min-width: 400px;
+}
+
+.error-message {
+  color: vars.$lcars-red;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.submitting {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+mat-dialog-actions {
+  padding: 1rem 1.5rem;
+  gap: 1rem;
+}

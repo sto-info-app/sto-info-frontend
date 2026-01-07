@@ -87,6 +87,7 @@ describe('AppComponent', () => {
         },
       ]
     >;
+    closeAll: jest.Mock<void, []>;
   };
 
   const runWithPatchedTimer = <K extends 'setTimeout' | 'setInterval'>(
@@ -161,6 +162,7 @@ describe('AppComponent', () => {
 
     mockDialog = {
       open: jest.fn(),
+      closeAll: jest.fn(),
     };
 
     mockRouter = {
@@ -204,11 +206,18 @@ describe('AppComponent', () => {
   it('should update login state and start countdown when authenticated', () => {
     runWithPatchedTimer('setInterval', () => {
       mockAuthService.getSecondsUntilLoginSessionExpiry.mockReturnValue(0);
+      const closeAllSpy = jest
+        .spyOn(
+          (component as unknown as { dialog: MatDialog }).dialog,
+          'closeAll',
+        )
+        .mockImplementation(() => {});
 
       component.ngOnInit();
       mockAuthService.isAuthenticated$.next(true);
 
       expect(component.isLoggedIn).toBe(true);
+      expect(closeAllSpy).toHaveBeenCalled();
       expect(mockAuthService.performLogout).toHaveBeenCalled();
     });
   });
@@ -250,6 +259,10 @@ describe('AppComponent', () => {
       globalThis as unknown as { clearInterval: typeof clearInterval }
     ).clearInterval = clearIntervalSpy as unknown as typeof clearInterval;
 
+    const closeAllSpy = jest
+      .spyOn((component as unknown as { dialog: MatDialog }).dialog, 'closeAll')
+      .mockImplementation(() => {});
+
     (
       component as unknown as { intervalId: ReturnType<typeof setInterval> }
     ).intervalId = 1 as unknown as ReturnType<typeof setInterval>;
@@ -257,6 +270,7 @@ describe('AppComponent', () => {
     component.logout();
 
     expect(clearIntervalSpy).toHaveBeenCalled();
+    expect(closeAllSpy).toHaveBeenCalled();
     expect(mockAuthService.performLogout).toHaveBeenCalled();
 
     (
@@ -442,6 +456,10 @@ describe('AppComponent', () => {
   it('should handle expiry announcements by logging out when expired', () => {
     const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(2000);
 
+    const closeAllSpy = jest
+      .spyOn((component as unknown as { dialog: MatDialog }).dialog, 'closeAll')
+      .mockImplementation(() => {});
+
     (component as unknown as { isLoggedIn: boolean }).isLoggedIn = true;
 
     (
@@ -450,6 +468,7 @@ describe('AppComponent', () => {
 
     mockAuthService.expiryAnnounced$.next(1000);
 
+    expect(closeAllSpy).toHaveBeenCalled();
     expect(mockAuthService.performLogout).toHaveBeenCalled();
 
     dateNowSpy.mockRestore();
@@ -898,6 +917,10 @@ describe('AppComponent', () => {
       close: jest.fn(),
     } as unknown as MatDialogRef<RefreshSessionDialogComponent>;
 
+    const closeAllSpy = jest
+      .spyOn((component as unknown as { dialog: MatDialog }).dialog, 'closeAll')
+      .mockImplementation(() => {});
+
     (
       component as unknown as {
         dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null;
@@ -910,7 +933,7 @@ describe('AppComponent', () => {
       (component as unknown as { isLoggedIn: boolean }).isLoggedIn = true;
       (component as unknown as { startCountdown: () => void }).startCountdown();
 
-      expect(dialogRefMock.close).toHaveBeenCalled();
+      expect(closeAllSpy).toHaveBeenCalled();
       expect(mockAuthService.performLogout).toHaveBeenCalled();
     });
   });

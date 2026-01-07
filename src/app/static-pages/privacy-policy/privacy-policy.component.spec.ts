@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import {
   faArrowUpRightFromSquare,
   faSquareCheck,
   faSquareXmark,
-} from '@fortawesome/free-solid-svg-icons';
+} from '@awesome.me/kit-5812c6b103/icons/classic/solid';
+import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { of } from 'rxjs';
 
 import { PrivacyPolicyComponent } from './privacy-policy.component';

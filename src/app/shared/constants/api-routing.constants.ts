@@ -28,4 +28,20 @@ export const API_URLS = {
   USER: apiUrl + '/user',
   UPDATE_USER_PROFILE: apiUrl + '/user/update-profile',
   UPDATE_USER_PROFILE_PIC: apiUrl + '/user/update-profile-pic',
+
+  // STO Account
+  STO_ACCOUNT: apiUrl + '/account',
+  STO_PLATFORM: apiUrl + '/platform',
+  STO_LAUNCHER: apiUrl + '/launcher',
+  STO_PLATFORM_LAUNCHER: apiUrl + '/platform-launcher',
+
+  // Character
+  CHARACTER: apiUrl + '/character',
+  CHARACTER_LOOKUP_GENERAL_FACTIONS:
+    apiUrl + '/character/lookup/general-factions',
+  CHARACTER_LOOKUP_FACTIONS: apiUrl + '/character/lookup/factions',
+  CHARACTER_LOOKUP_SEXES: apiUrl + '/character/lookup/sexes',
+  CHARACTER_LOOKUP_CLASSES: apiUrl + '/character/lookup/classes',
+  CHARACTER_LOOKUP_RECRUIT_TYPES: apiUrl + '/character/lookup/recruit-types',
+  CHARACTER_LOOKUP_SPECIES: apiUrl + '/character/lookup/species',
 };

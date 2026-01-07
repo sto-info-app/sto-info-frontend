@@ -1,17 +1,36 @@
-import { Injectable, inject } from '@angular/core';
-import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
+import { inject, Injectable } from '@angular/core';
 import {
+  faPlaystation,
+  faSteam,
+  faWindows,
+  faXbox,
+} from '@awesome.me/kit-5812c6b103/icons/classic/brands';
+
+import {
+  faBadgeCheck,
+  faCircleQuestion,
   faExternalLink,
   faHandSpock,
+  faIdCard,
   faLock,
+  faMars,
+  faPlus,
   faSquareCheck,
   faSquareXmark,
+  faTrash,
+  faUser,
   faUserPen,
-} from '@fortawesome/free-solid-svg-icons';
+  faUsers,
+  faUserVisor,
+  faVenus,
+} from '@awesome.me/kit-5812c6b103/icons/classic/solid';
 
-// NOTE: This imports all icons into the bundle and increases app size!
-// import { fas } from '@fortawesome/pro-solid-svg-icons';
-// import { far } from '@fortawesome/pro-regular-svg-icons';
+import {
+  faArcGames,
+  faEpicGames,
+} from '@awesome.me/kit-5812c6b103/icons/kit/custom';
+
+import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 
 @Injectable({ providedIn: 'root' })
 export class FontAwesomeIconService {
@@ -21,10 +40,26 @@ export class FontAwesomeIconService {
     this.library.addIcons(
       faHandSpock,
       faExternalLink,
+      faPlus,
+      faTrash,
+      faUser,
       faUserPen,
+      faUserVisor,
       faLock,
       faSquareCheck,
       faSquareXmark,
+      faCircleQuestion,
+      faWindows,
+      faXbox,
+      faPlaystation,
+      faArcGames,
+      faEpicGames,
+      faSteam,
+      faBadgeCheck,
+      faMars,
+      faVenus,
+      faUsers,
+      faIdCard,
     );
   }
 }

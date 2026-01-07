@@ -161,7 +161,6 @@ export class ProfileComponent implements OnInit {
     this.profilePicDialogRef = this.dialog.open(ProfilePicComponent, {
       hasBackdrop: true,
       disableClose: true,
-      width: '75%',
       data: {
         user: this.user,
       },

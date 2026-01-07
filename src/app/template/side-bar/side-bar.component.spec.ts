@@ -53,7 +53,7 @@ describe('SideBarComponent', () => {
 
       return {
         target: mockElement,
-      } as Event;
+      } as unknown as Event;
     };
 
     const resizeCases = [
@@ -94,10 +94,10 @@ describe('SideBarComponent', () => {
         const event = createMockEvent(height);
         component.onResize(event);
 
-        expect(component.isPenel5Hidden).toBe(panel5);
-        expect(component.isPenel7Hidden).toBe(panel7);
-        expect(component.isPenel10Hidden).toBe(panel10);
-        expect(component.isPenel8Hidden).toBe(panel8);
+        expect(component.isPanel5Hidden).toBe(panel5);
+        expect(component.isPanel7Hidden).toBe(panel7);
+        expect(component.isPanel10Hidden).toBe(panel10);
+        expect(component.isPanel8Hidden).toBe(panel8);
       },
     );
 
@@ -105,10 +105,10 @@ describe('SideBarComponent', () => {
       const event = { target: null } as Event;
       component.onResize(event);
 
-      expect(component.isPenel5Hidden).toBe(false);
-      expect(component.isPenel7Hidden).toBe(false);
-      expect(component.isPenel10Hidden).toBe(false);
-      expect(component.isPenel8Hidden).toBe(false);
+      expect(component.isPanel5Hidden).toBe(false);
+      expect(component.isPanel7Hidden).toBe(false);
+      expect(component.isPanel10Hidden).toBe(false);
+      expect(component.isPanel8Hidden).toBe(false);
     });
   });
 });

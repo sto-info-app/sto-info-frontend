@@ -1,0 +1,81 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.lcars-profile-pic-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 20px;
+
+  .lcars-pic-layout {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 30px;
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .lcars-pic-main-col {
+    flex: 2;
+    min-width: 0;
+
+    --cropper-overlay-color: transparent;
+
+    image-cropper {
+      width: 100%;
+      max-height: 70vh;
+
+      div,
+      div img {
+        max-height: 70vh;
+        width: auto;
+      }
+    }
+  }
+
+  .lcars-pic-side-col {
+    flex: 1;
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .cropped-image-container {
+      width: 100%;
+      text-align: center;
+    }
+
+    #cropped-image-preview {
+      border: 2px solid vars.$lcars-sunflower;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+  }
+
+  .lcars-profile-pic-inner-container {
+    padding: 0 20px;
+    width: 100%;
+    box-sizing: border-box;
+
+    .lcars-text-bar {
+      width: 100%;
+      margin: 20px 0;
+      span {
+        white-space: nowrap;
+      }
+    }
+
+    .lcars-profile-pic-message {
+      width: 100%;
+    }
+  }
+}

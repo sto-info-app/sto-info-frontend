@@ -1,3 +1,6 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
 /* You can add global styles to this file, and also import other style files */
 
 strong {
@@ -67,32 +70,47 @@ input.errored {
   }
 }
 
+/* LCARS Standard Buttons */
+.lcars-btn,
+button.lcars-btn,
 .submit-button {
-  padding: 20px 25px 0 0;
-  font-size: 1rem;
+  height: 60px !important;
+  border-radius: 30px !important;
+  padding: 0 25px 8px 0 !important;
+  font-family: vars.$font-antonio !important;
+  font-size: 1rem !important;
+  text-transform: uppercase !important;
+  text-align: right !important;
+  display: inline-flex !important;
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+  color: #000 !important;
+  border: none !important;
   cursor: pointer;
-  background-color: #0056b3;
-  border: none;
-  color: white;
+  min-width: 150px !important;
+  transition: filter 0.2s ease !important;
+  line-height: 1.1 !important;
+
+  // Target Material Label to prevent it from centering or overriding alignment
+  .mdc-button__label {
+    width: 100%;
+    text-align: right;
+    display: block;
+  }
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.2);
+  }
+
+  &:disabled {
+    background-color: #344470 !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    cursor: not-allowed;
+  }
+}
+
+.submit-button {
   margin: 0px 8px 16px 8px;
-  border-radius: 26px;
-  text-transform: uppercase;
-  text-align: right;
-  height: 60px;
-}
-
-.submit-button:hover {
-  background-color: #007bff;
-}
-
-.submit-button:disabled,
-button:disabled {
-  background-color: #344470;
-}
-
-.submit-button:disabled:hover,
-button:disabled:hover {
-  cursor: not-allowed;
 }
 
 .buttons .full-width-btn-link {
@@ -142,4 +160,72 @@ button:disabled:hover {
   background-size: 400% 100%;
   background-position: 100% 50%;
   animation: progressBar 2s linear infinite;
+}
+
+/* LCARS Flex Alignment Utilities */
+.lcars-flex-left {
+  justify-content: flex-start !important;
+}
+
+.lcars-flex-center {
+  justify-content: center !important;
+}
+
+.lcars-flex-right {
+  justify-content: flex-end !important;
+}
+
+/* LCARS Standard Layouts */
+.info-grid {
+  @include mixins.lcars-info-grid;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+
+  .label {
+    @include mixins.lcars-label;
+  }
+
+  .value {
+    @include mixins.lcars-value;
+  }
+}
+
+.cta-icon {
+  @include mixins.lcars-icon-button;
+
+  &.delete-icon:hover {
+    color: vars.$lcars-red;
+  }
+}
+
+.faction-badge {
+  @include mixins.lcars-badge;
+
+  &.federation {
+    background: vars.$faction-federation;
+    color: #fff;
+  }
+  &.klingon {
+    background: vars.$faction-klingon;
+    color: #fff;
+  }
+  &.undecided {
+    background: vars.$faction-undecided;
+    color: #fff;
+  }
+}
+
+.error-container {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 0, 0, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+.full-width-btn-link {
+  width: 100%;
 }

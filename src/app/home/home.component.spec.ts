@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { faHandSpock } from '@awesome.me/kit-5812c6b103/icons/classic/solid';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
-import { faHandSpock } from '@fortawesome/free-solid-svg-icons';
 import { of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../core/auth/auth.service';
