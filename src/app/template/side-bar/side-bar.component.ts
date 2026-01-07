@@ -17,10 +17,10 @@ export class SideBarComponent {
   appRoutes = APP_ROUTES;
   themePanel6RandomText: string;
 
-  isPenel5Hidden = false;
-  isPenel7Hidden = false;
-  isPenel8Hidden = false;
-  isPenel10Hidden = false;
+  isPanel5Hidden = false;
+  isPanel7Hidden = false;
+  isPanel8Hidden = false;
+  isPanel10Hidden = false;
 
   private readonly routingService = inject(RoutingService);
   private readonly generalThemeService = inject(GeneralThemeService);
@@ -37,9 +37,9 @@ export class SideBarComponent {
   onResize(event: Event): void {
     const target = event.target as HTMLElement | null;
     const height = target?.getBoundingClientRect().height ?? 0;
-    this.isPenel5Hidden = height >= 900;
-    this.isPenel7Hidden = height >= 1200;
-    this.isPenel10Hidden = height >= 1500;
-    this.isPenel8Hidden = height >= 1800;
+    this.isPanel5Hidden = height >= 900;
+    this.isPanel7Hidden = height >= 1200;
+    this.isPanel10Hidden = height >= 1500;
+    this.isPanel8Hidden = height >= 1800;
   }
 }
