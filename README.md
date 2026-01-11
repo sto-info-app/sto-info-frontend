@@ -4,7 +4,7 @@
 
 The `sto-info-frontend` is a frontend static site to provide information related to STO (Star Trek Online) player's accounts, characters and fleets. It is built using modern web technologies and follows best practices.
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 19.1.5.
+This project uses [Angular CLI](https://github.com/angular/angular-cli) (see `package.json` devDependency `@angular/cli`, currently `^21.0.5`).
 
 ## Development server
 
