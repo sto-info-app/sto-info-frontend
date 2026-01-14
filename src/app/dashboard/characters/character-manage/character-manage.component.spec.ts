@@ -572,4 +572,28 @@ describe('CharacterManageComponent', () => {
       spy.mockRestore();
     }));
   });
+
+  describe('ngOnDestroy', () => {
+    it('should complete the destroy$ subject', () => {
+      const nextSpy = jest.spyOn(component['destroy$'], 'next');
+      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+
+      component.ngOnDestroy();
+
+      expect(nextSpy).toHaveBeenCalled();
+      expect(completeSpy).toHaveBeenCalled();
+    });
+
+    it('should unsubscribe from all subscriptions on destroy', fakeAsync(() => {
+      fixture.detectChanges();
+      routeParamsSubject.next({ handle: encodeStoHandle('TestAccount') });
+      tick();
+
+      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+
+      component.ngOnDestroy();
+
+      expect(completeSpy).toHaveBeenCalled();
+    }));
+  });
 });

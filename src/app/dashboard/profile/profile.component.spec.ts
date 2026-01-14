@@ -223,4 +223,50 @@ describe('ProfileComponent', () => {
       component.unavailablePhotoSrc,
     );
   });
+
+  describe('ngOnDestroy', () => {
+    it('should complete the destroy$ subject', () => {
+      const nextSpy = jest.spyOn(component['destroy$'], 'next');
+      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+
+      component.ngOnDestroy();
+
+      expect(nextSpy).toHaveBeenCalled();
+      expect(completeSpy).toHaveBeenCalled();
+    });
+
+    it('should close edit profile dialog if open', () => {
+      const mockDialogRef = {
+        afterClosed: jest.fn().mockReturnValue(of(false)), // Don't auto-close
+        close: jest.fn(),
+      };
+
+      // Manually set the dialog ref before calling ngOnDestroy
+      component['editProfileDialogRef'] =
+        mockDialogRef as unknown as MatDialogRef<unknown>;
+
+      component.ngOnDestroy();
+
+      expect(mockDialogRef.close).toHaveBeenCalled();
+    });
+
+    it('should close profile pic dialog if open', () => {
+      const mockDialogRef = {
+        afterClosed: jest.fn().mockReturnValue(of(false)), // Don't auto-close
+        close: jest.fn(),
+      };
+
+      // Manually set the dialog ref before calling ngOnDestroy
+      component['profilePicDialogRef'] =
+        mockDialogRef as unknown as MatDialogRef<unknown>;
+
+      component.ngOnDestroy();
+
+      expect(mockDialogRef.close).toHaveBeenCalled();
+    });
+
+    it('should not throw error if no dialogs are open', () => {
+      expect(() => component.ngOnDestroy()).not.toThrow();
+    });
+  });
 });
