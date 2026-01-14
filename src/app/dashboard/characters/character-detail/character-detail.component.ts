@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { Subject, takeUntil } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
@@ -34,7 +35,7 @@ import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.co
     MatButtonModule,
   ],
 })
-export class CharacterDetailComponent implements OnInit {
+export class CharacterDetailComponent implements OnInit, OnDestroy {
   character: Character | null = null;
   accountHandle = '';
   isLoading = true;
@@ -46,12 +47,13 @@ export class CharacterDetailComponent implements OnInit {
   private readonly characterService = inject(CharacterService);
   private readonly stoAccountService = inject(StoAccountService);
   private readonly dialog = inject(MatDialog);
+  private readonly destroy$ = new Subject<void>();
 
   public readonly appRoutes = APP_ROUTES;
   public readonly unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
       this.accountHandle = decodeStoHandle(params['handle']);
       const charHandle = params['characterHandle'];
       if (this.accountHandle && charHandle) {
@@ -62,48 +64,58 @@ export class CharacterDetailComponent implements OnInit {
 
   loadCharacterData(accHandle: string, charHandle: string): void {
     this.isLoading = true;
-    this.stoAccountService.getAccounts().subscribe({
-      next: accounts => {
-        const account = accounts.find(a => a.handle === accHandle);
-        if (account) {
-          this.characterService.getCharactersByAccount(account.id).subscribe({
-            next: characters => {
-              const char = characters.find(c => c.handle === charHandle);
-              if (char) {
-                // Now fetch full details by ID
-                this.characterService.getCharacter(char.id).subscribe({
-                  next: fullChar => {
-                    this.character = fullChar;
+    this.stoAccountService
+      .getAccounts()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: accounts => {
+          const account = accounts.find(a => a.handle === accHandle);
+          if (account) {
+            this.characterService
+              .getCharactersByAccount(account.id)
+              .pipe(takeUntil(this.destroy$))
+              .subscribe({
+                next: characters => {
+                  const char = characters.find(c => c.handle === charHandle);
+                  if (char) {
+                    // Now fetch full details by ID
+                    this.characterService
+                      .getCharacter(char.id)
+                      .pipe(takeUntil(this.destroy$))
+                      .subscribe({
+                        next: fullChar => {
+                          this.character = fullChar;
+                          this.isLoading = false;
+                        },
+                        error: err => {
+                          this.isLoading = false;
+                          this.errorMessage =
+                            'Failed to load character details';
+                          console.error(err);
+                        },
+                      });
+                  } else {
                     this.isLoading = false;
-                  },
-                  error: err => {
-                    this.isLoading = false;
-                    this.errorMessage = 'Failed to load character details';
-                    console.error(err);
-                  },
-                });
-              } else {
-                this.isLoading = false;
-                this.errorMessage = 'Character not found';
-              }
-            },
-            error: err => {
-              this.isLoading = false;
-              this.errorMessage = 'Failed to load account characters';
-              console.error(err);
-            },
-          });
-        } else {
+                    this.errorMessage = 'Character not found';
+                  }
+                },
+                error: err => {
+                  this.isLoading = false;
+                  this.errorMessage = 'Failed to load account characters';
+                  console.error(err);
+                },
+              });
+          } else {
+            this.isLoading = false;
+            this.errorMessage = 'Account not found';
+          }
+        },
+        error: err => {
           this.isLoading = false;
-          this.errorMessage = 'Account not found';
-        }
-      },
-      error: err => {
-        this.isLoading = false;
-        this.errorMessage = 'Failed to load account';
-        console.error(err);
-      },
-    });
+          this.errorMessage = 'Failed to load account';
+          console.error(err);
+        },
+      });
   }
 
   editCharacter(): void {
@@ -124,13 +136,16 @@ export class CharacterDetailComponent implements OnInit {
       data: { character: this.character },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && this.character) {
-        // Refresh character data
-        const charHandle = this.character.handle;
-        this.loadCharacterData(this.accountHandle, charHandle);
-      }
-    });
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result && this.character) {
+          // Refresh character data
+          const charHandle = this.character.handle;
+          this.loadCharacterData(this.accountHandle, charHandle);
+        }
+      });
   }
 
   onProfileImageError(): void {
@@ -171,5 +186,16 @@ export class CharacterDetailComponent implements OnInit {
 
   getRouteLink(route: string): string {
     return `/${route}`;
+  }
+
+  /**
+   * Cleans up subscriptions when the component is destroyed.
+   * Completes the destroy$ subject to unsubscribe from all active subscriptions.
+   *
+   * @returns void
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

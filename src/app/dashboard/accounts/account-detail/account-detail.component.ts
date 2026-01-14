@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { Subject, takeUntil } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
@@ -38,7 +39,7 @@ import { AccountDialogComponent } from '../dialogs/account-dialog/account-dialog
     MatDialogModule,
   ],
 })
-export class AccountDetailComponent implements OnInit {
+export class AccountDetailComponent implements OnInit, OnDestroy {
   account: StoAccount | null = null;
   characters: Character[] = [];
   isLoading = true;
@@ -50,12 +51,13 @@ export class AccountDetailComponent implements OnInit {
   private readonly stoAccountService = inject(StoAccountService);
   private readonly characterService = inject(CharacterService);
   private readonly dialog = inject(MatDialog);
+  private readonly destroy$ = new Subject<void>();
 
   public readonly appRoutes = APP_ROUTES;
   public readonly unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_100PX;
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const handle = decodeStoHandle(params['handle']);
       if (handle) {
         this.loadAccountData(handle);
@@ -67,36 +69,42 @@ export class AccountDetailComponent implements OnInit {
     this.isLoading = true;
     // We fetch all accounts and find the one with the handle
     // In a real app with many accounts, a backend endpoint for this would be better
-    this.stoAccountService.getAccounts().subscribe({
-      next: accounts => {
-        this.account = accounts.find(a => a.handle === handle) || null;
-        if (this.account) {
-          this.loadCharacters(this.account.id);
-        } else {
+    this.stoAccountService
+      .getAccounts()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: accounts => {
+          this.account = accounts.find(a => a.handle === handle) || null;
+          if (this.account) {
+            this.loadCharacters(this.account.id);
+          } else {
+            this.isLoading = false;
+            this.errorMessage = 'Account not found';
+          }
+        },
+        error: err => {
           this.isLoading = false;
-          this.errorMessage = 'Account not found';
-        }
-      },
-      error: err => {
-        this.isLoading = false;
-        this.errorMessage = 'Failed to load account details';
-        console.error(err);
-      },
-    });
+          this.errorMessage = 'Failed to load account details';
+          console.error(err);
+        },
+      });
   }
 
   loadCharacters(accountId: string): void {
-    this.characterService.getCharactersByAccount(accountId).subscribe({
-      next: characters => {
-        this.characters = characters;
-        this.isLoading = false;
-      },
-      error: err => {
-        this.isLoading = false;
-        this.errorMessage = 'Failed to load characters';
-        console.error(err);
-      },
-    });
+    this.characterService
+      .getCharactersByAccount(accountId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: characters => {
+          this.characters = characters;
+          this.isLoading = false;
+        },
+        error: err => {
+          this.isLoading = false;
+          this.errorMessage = 'Failed to load characters';
+          console.error(err);
+        },
+      });
   }
 
   editAccount(): void {
@@ -110,25 +118,28 @@ export class AccountDetailComponent implements OnInit {
       },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && this.account) {
-        // Reload account data. If the handle changed, we need to navigate.
-        const currentHandle = this.account.handle;
-        this.stoAccountService
-          .getAccount(this.account.id)
-          .subscribe(updatedAccount => {
-            if (updatedAccount) {
-              this.account = updatedAccount;
-              if (updatedAccount.handle !== currentHandle) {
-                this.router.navigate([
-                  '/dashboard/accounts',
-                  encodeStoHandle(updatedAccount.handle),
-                ]);
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result && this.account) {
+          // Reload account data. If the handle changed, we need to navigate.
+          const currentHandle = this.account.handle;
+          this.stoAccountService
+            .getAccount(this.account.id)
+            .subscribe(updatedAccount => {
+              if (updatedAccount) {
+                this.account = updatedAccount;
+                if (updatedAccount.handle !== currentHandle) {
+                  this.router.navigate([
+                    '/dashboard/accounts',
+                    encodeStoHandle(updatedAccount.handle),
+                  ]);
+                }
               }
-            }
-          });
-      }
-    });
+            });
+        }
+      });
   }
 
   addCharacter(): void {
@@ -161,18 +172,21 @@ export class AccountDetailComponent implements OnInit {
       },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.characterService.deleteCharacter(character.id).subscribe({
-          next: () => {
-            if (this.account) this.loadCharacters(this.account.id);
-          },
-          error: err => {
-            console.error('Failed to delete character', err);
-          },
-        });
-      }
-    });
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result) {
+          this.characterService.deleteCharacter(character.id).subscribe({
+            next: () => {
+              if (this.account) this.loadCharacters(this.account.id);
+            },
+            error: err => {
+              console.error('Failed to delete character', err);
+            },
+          });
+        }
+      });
   }
 
   getCharacterLink(character: Character): string[] {
@@ -250,5 +264,16 @@ export class AccountDetailComponent implements OnInit {
 
     // Otherwise assume it's a Cloudflare Images ID
     return `${BASE_CLOUDFLARE_IMAGES_URL}/${element}/${variant}`;
+  }
+
+  /**
+   * Cleans up subscriptions when the component is destroyed.
+   * Completes the destroy$ subject to unsubscribe from all active subscriptions.
+   *
+   * @returns void
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

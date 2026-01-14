@@ -37,6 +37,8 @@ export class AppComponent implements OnInit, OnDestroy {
   warningSubscription: Subscription | undefined;
   expirySubscription: Subscription | undefined;
   private intervalId: ReturnType<typeof setInterval> | null = null;
+  private warningTimeout: ReturnType<typeof setTimeout> | null = null;
+  private cookieConsentUpdateHandler?: (event: Event) => void;
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
   private readonly authService = inject(AuthService);
@@ -114,11 +116,18 @@ export class AppComponent implements OnInit, OnDestroy {
     this.warningSubscription = this.authService.warningAnnounced$
       .pipe(takeUntil(this.destroy$))
       .subscribe((warningTime: number) => {
+        // Clear any existing warning timeout
+        if (this.warningTimeout) {
+          clearTimeout(this.warningTimeout);
+          this.warningTimeout = null;
+        }
+
         if (this.isLoggedIn && this.intervalId !== null) {
           const delay = warningTime - Date.now(); // calculate the delay in milliseconds
           if (delay > 0) {
-            setTimeout(() => {
+            this.warningTimeout = setTimeout(() => {
               this.openRefreshSessionDialog();
+              this.warningTimeout = null;
             }, delay);
           }
         }
@@ -174,6 +183,20 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Ensure any active countdown interval is cleared on destroy
     this.stopCountdown();
+
+    // Clear warning timeout
+    if (this.warningTimeout) {
+      clearTimeout(this.warningTimeout);
+      this.warningTimeout = null;
+    }
+
+    // Remove CookieYes event listener
+    if (this.cookieConsentUpdateHandler) {
+      document.removeEventListener(
+        'cookieyes_consent_update',
+        this.cookieConsentUpdateHandler,
+      );
+    }
   }
 
   /**
@@ -288,11 +311,17 @@ export class AppComponent implements OnInit, OnDestroy {
           (globalThis as { CookieYes?: { run: () => void } }).CookieYes?.run();
         }
 
-        document.addEventListener('cookieyes_consent_update', eventData => {
+        // Store handler reference for cleanup
+        this.cookieConsentUpdateHandler = (eventData: Event) => {
           const data = (eventData as CustomEvent).detail;
           this.cookieService.setUserAcceptedCookieCategories(data.accepted);
           this.checkCookieConsentState();
-        });
+        };
+
+        document.addEventListener(
+          'cookieyes_consent_update',
+          this.cookieConsentUpdateHandler,
+        );
 
         this.checkCookieConsentState();
       },
@@ -577,7 +606,10 @@ export class AppComponent implements OnInit, OnDestroy {
    */
   private resetScrollPositionOnNavigationEnd() {
     this.router.events
-      .pipe(filter(e => e instanceof NavigationEnd))
+      .pipe(
+        filter(e => e instanceof NavigationEnd),
+        takeUntil(this.destroy$),
+      )
       .subscribe(() => {
         setTimeout(() => {
           globalThis.scrollTo?.({ top: 0, behavior: 'auto' });

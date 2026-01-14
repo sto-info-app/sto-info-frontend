@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../core/auth/auth.service';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { SRC_PHOTO_UNAVAILABLE_300PX } from '../shared/constants/app-image-assets.constants';
@@ -19,7 +20,7 @@ import { StoAccountService } from './services/sto-account.service';
   standalone: true,
   imports: [CommonModule, RouterModule, LoadingBarComponent, FontAwesomeModule],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   appRoutes = APP_ROUTES;
   unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
@@ -28,22 +29,39 @@ export class DashboardComponent implements OnInit {
   accountsCount = 0;
 
   private readonly stoAccountService = inject(StoAccountService);
-
   private readonly dashboardService = inject(DashboardService);
   private readonly authService = inject(AuthService);
   private readonly routingService = inject(RoutingService);
+  private readonly destroy$ = new Subject<void>();
 
   ngOnInit() {
-    this.dashboardService.getUser().subscribe(user => {
-      if (user.isAccountDisabled) this.authService.performLogout();
+    this.dashboardService
+      .getUser()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        if (user.isAccountDisabled) this.authService.performLogout();
 
-      this.user = user;
-      this.userGreeting = this.displayWelcomeText();
-    });
+        this.user = user;
+        this.userGreeting = this.displayWelcomeText();
+      });
 
-    this.stoAccountService.getAccounts().subscribe(accounts => {
-      this.accountsCount = accounts.length;
-    });
+    this.stoAccountService
+      .getAccounts()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(accounts => {
+        this.accountsCount = accounts.length;
+      });
+  }
+
+  /**
+   * Cleans up subscriptions when the component is destroyed.
+   * Completes the destroy$ subject to unsubscribe from all active subscriptions.
+   *
+   * @returns void
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   displayWelcomeText(): string {

@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
-import { forkJoin } from 'rxjs';
+import { Subject, forkJoin, takeUntil } from 'rxjs';
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
@@ -34,7 +34,7 @@ import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.
     LoadingBarComponent,
   ],
 })
-export class AccountsComponent implements OnInit {
+export class AccountsComponent implements OnInit, OnDestroy {
   /** Application routes for navigation. */
   appRoutes = APP_ROUTES;
 
@@ -54,6 +54,7 @@ export class AccountsComponent implements OnInit {
   private readonly characterService = inject(CharacterService);
   private readonly routingService = inject(RoutingService);
   private readonly dialog = inject(MatDialog);
+  private readonly destroy$ = new Subject<void>();
 
   /** Map of character counts by account ID. */
   characterCounts: Record<string, number> = {};
@@ -76,37 +77,42 @@ export class AccountsComponent implements OnInit {
       accounts: this.stoAccountService.getAccounts(),
       platforms: this.stoAccountService.getPlatforms(),
       launchers: this.stoAccountService.getLaunchers(),
-    }).subscribe({
-      next: ({ accounts, platforms, launchers }) => {
-        this.accounts = accounts;
-        this.platforms = platforms;
-        this.launchers = launchers;
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ accounts, platforms, launchers }) => {
+          this.accounts = accounts;
+          this.platforms = platforms;
+          this.launchers = launchers;
 
-        if (accounts.length > 0) {
-          this.characterService.getCharacters().subscribe({
-            next: characters => {
-              // Group characters by accountId and count them
-              this.characterCounts = characters.reduce(
-                (acc, char) => {
-                  acc[char.accountId] = (acc[char.accountId] || 0) + 1;
-                  return acc;
+          if (accounts.length > 0) {
+            this.characterService
+              .getCharacters()
+              .pipe(takeUntil(this.destroy$))
+              .subscribe({
+                next: characters => {
+                  // Group characters by accountId and count them
+                  this.characterCounts = characters.reduce(
+                    (acc, char) => {
+                      acc[char.accountId] = (acc[char.accountId] || 0) + 1;
+                      return acc;
+                    },
+                    {} as Record<string, number>,
+                  );
+                  this.isLoading = false;
                 },
-                {} as Record<string, number>,
-              );
-              this.isLoading = false;
-            },
-            error: () => {
-              this.isLoading = false;
-            },
-          });
-        } else {
+                error: () => {
+                  this.isLoading = false;
+                },
+              });
+          } else {
+            this.isLoading = false;
+          }
+        },
+        error: () => {
           this.isLoading = false;
-        }
-      },
-      error: () => {
-        this.isLoading = false;
-      },
-    });
+        },
+      });
   }
 
   /**
@@ -165,13 +171,16 @@ export class AccountsComponent implements OnInit {
       } as ConfirmDialogData,
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.stoAccountService.deleteAccount(account.id).subscribe(() => {
-          this.loadAccounts();
-        });
-      }
-    });
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result) {
+          this.stoAccountService.deleteAccount(account.id).subscribe(() => {
+            this.loadAccounts();
+          });
+        }
+      });
   }
 
   /**
@@ -254,5 +263,16 @@ export class AccountsComponent implements OnInit {
    */
   encodeHandle(handle: string): string {
     return encodeStoHandle(handle);
+  }
+
+  /**
+   * Cleans up subscriptions when the component is destroyed.
+   * Completes the destroy$ subject to unsubscribe from all active subscriptions.
+   *
+   * @returns void
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
