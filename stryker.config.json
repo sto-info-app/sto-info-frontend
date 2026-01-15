@@ -6,7 +6,7 @@
   "jest": {
     "projectType": "custom",
     "configFile": "jest.config.cjs",
-    "enableFindRelatedTests": false
+    "enableFindRelatedTests": true
   },
   "mutate": [
     "src/**/*.ts",
@@ -31,9 +31,10 @@
   "checkers": ["typescript"],
   "tsconfigFile": "tsconfig.json",
   "coverageAnalysis": "perTest",
-  "concurrency": 4,
+  "concurrency": 2,
   "timeoutMS": 60000,
   "timeoutFactor": 1.5,
+  "incrementalFile": ".stryker-tmp/incremental.json",
   "thresholds": {
     "high": 80,
     "low": 60,
