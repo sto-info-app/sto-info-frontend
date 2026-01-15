@@ -20,6 +20,8 @@ import { DatesTimeHelperService } from 'src/app/shared/services/dates-time-helpe
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { User } from '../models/user.model';
 import { DashboardService } from '../services/dashboard.service';
+import { EditPersonalDetailsComponent } from './dialogs/edit-personal-details/edit-personal-details.component';
+import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component';
 import { ProfileComponent } from './profile.component';
 
 describe('ProfileComponent', () => {
@@ -243,7 +245,7 @@ describe('ProfileComponent', () => {
 
       // Manually set the dialog ref before calling ngOnDestroy
       component['editProfileDialogRef'] =
-        mockDialogRef as unknown as MatDialogRef<unknown>;
+        mockDialogRef as unknown as MatDialogRef<EditPersonalDetailsComponent>;
 
       component.ngOnDestroy();
 
@@ -258,7 +260,7 @@ describe('ProfileComponent', () => {
 
       // Manually set the dialog ref before calling ngOnDestroy
       component['profilePicDialogRef'] =
-        mockDialogRef as unknown as MatDialogRef<unknown>;
+        mockDialogRef as unknown as MatDialogRef<ProfilePicComponent>;
 
       component.ngOnDestroy();
 
