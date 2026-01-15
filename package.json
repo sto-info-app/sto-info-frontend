@@ -4,6 +4,9 @@
   "description": "Star Trek Online Information App",
   "author": "Steve Roberts",
   "private": true,
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || ^24.0.0"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -12,9 +15,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "generate-env": "node src/environments/inject-env-vars.js",
     "build": "ng build",
     "build:dev": "ng build --configuration development",
     "build:prod": "ng build --configuration production",
+    "build:render": "npm run generate-env && npm run build:prod",
     "watch": "ng build --watch --configuration development",
     "lint": "eslint \"src/**/*.{ts,js,html}\"",
     "test": "jest --config jest.config.cjs",
