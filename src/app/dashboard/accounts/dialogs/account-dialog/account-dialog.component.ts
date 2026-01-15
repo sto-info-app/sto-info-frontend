@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -16,7 +16,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { forkJoin } from 'rxjs';
+import { Subject, forkJoin, takeUntil } from 'rxjs';
 import {
   Launcher,
   Platform,
@@ -59,7 +59,7 @@ interface AccountDialogData {
   ],
   animations: [progressBarAnimation],
 })
-export class AccountDialogComponent implements OnInit {
+export class AccountDialogComponent implements OnInit, OnDestroy {
   errorMessage = '';
   isSubmitting = false;
   isLoadingMetadata = false;
@@ -74,6 +74,7 @@ export class AccountDialogComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly stoAccountService = inject(StoAccountService);
   private readonly dialogRef = inject(MatDialogRef<AccountDialogComponent>);
+  private readonly destroy$ = new Subject<void>();
 
   /**
    * Initializes the dialog component formulas.
@@ -101,7 +102,8 @@ export class AccountDialogComponent implements OnInit {
   ngOnInit(): void {
     this.accountForm
       .get('platformId')
-      ?.valueChanges.subscribe((platformId: string | null) => {
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe((platformId: string | null) => {
         if (platformId) {
           this.filterLaunchers(platformId);
         }
@@ -120,40 +122,42 @@ export class AccountDialogComponent implements OnInit {
       platforms: this.stoAccountService.getPlatforms(),
       launchers: this.stoAccountService.getLaunchers(),
       mappings: this.stoAccountService.getPlatformLaunchers(),
-    }).subscribe({
-      next: ({ platforms, launchers, mappings }) => {
-        this.platforms = platforms;
-        this.launchers = launchers;
-        this.platformLaunchers = mappings;
-        this.isSubmitting = false;
-        this.isLoadingMetadata = false;
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ platforms, launchers, mappings }) => {
+          this.platforms = platforms;
+          this.launchers = launchers;
+          this.platformLaunchers = mappings;
+          this.isSubmitting = false;
+          this.isLoadingMetadata = false;
 
-        if (this.data.mode === 'edit' && this.data.account) {
-          const acc = this.data.account;
-          this.accountForm.patchValue({
-            handle: acc.handle,
-            username: acc.username,
-            email: acc.email,
-            notes: acc.notes,
-            accountCreatedDate: acc.accountCreatedDate
-              ? acc.accountCreatedDate.split('T')[0]
-              : '',
-            publiclyVisible: acc.publiclyVisible,
-            lifetimeSubscription: acc.lifetimeSubscription || false,
-            platformId: acc.platformId || '',
-            launcherId: acc.launcherId || '',
-          });
-        } else if (this.accountForm.get('platformId')?.value) {
-          this.filterLaunchers(this.accountForm.get('platformId')?.value);
-        }
-      },
-      error: error => {
-        this.isSubmitting = false;
-        this.isLoadingMetadata = false;
-        this.errorMessage = 'Error loading metadata. Please try again.';
-        console.error('Error loading metadata:', error);
-      },
-    });
+          if (this.data.mode === 'edit' && this.data.account) {
+            const acc = this.data.account;
+            this.accountForm.patchValue({
+              handle: acc.handle,
+              username: acc.username,
+              email: acc.email,
+              notes: acc.notes,
+              accountCreatedDate: acc.accountCreatedDate
+                ? acc.accountCreatedDate.split('T')[0]
+                : '',
+              publiclyVisible: acc.publiclyVisible,
+              lifetimeSubscription: acc.lifetimeSubscription || false,
+              platformId: acc.platformId || '',
+              launcherId: acc.launcherId || '',
+            });
+          } else if (this.accountForm.get('platformId')?.value) {
+            this.filterLaunchers(this.accountForm.get('platformId')?.value);
+          }
+        },
+        error: error => {
+          this.isSubmitting = false;
+          this.isLoadingMetadata = false;
+          this.errorMessage = 'Error loading metadata. Please try again.';
+          console.error('Error loading metadata:', error);
+        },
+      });
   }
 
   /**
@@ -237,5 +241,16 @@ export class AccountDialogComponent implements OnInit {
    */
   onCancelClick(): void {
     this.dialogRef.close(false);
+  }
+
+  /**
+   * Cleans up subscriptions when the component is destroyed.
+   * Completes the destroy$ subject to unsubscribe from all active subscriptions.
+   *
+   * @returns void
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
