@@ -59,4 +59,24 @@ describe('HomeComponent', () => {
     expect(routingService.getLink).toHaveBeenCalledWith('test');
     expect(link).toBe('/test-route');
   });
+
+  describe('ngOnDestroy', () => {
+    it('should complete the destroy$ subject', () => {
+      const nextSpy = jest.spyOn(component['destroy$'], 'next');
+      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+
+      component.ngOnDestroy();
+
+      expect(nextSpy).toHaveBeenCalled();
+      expect(completeSpy).toHaveBeenCalled();
+    });
+
+    it('should unsubscribe from authentication state on destroy', () => {
+      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+
+      component.ngOnDestroy();
+
+      expect(completeSpy).toHaveBeenCalled();
+    });
+  });
 });

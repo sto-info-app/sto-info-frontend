@@ -133,4 +133,25 @@ describe('DashboardComponent', () => {
       component.unavailablePhotoSrc,
     );
   });
+
+  describe('ngOnDestroy', () => {
+    it('should complete the destroy$ subject', () => {
+      const nextSpy = jest.spyOn(component['destroy$'], 'next');
+      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+
+      component.ngOnDestroy();
+
+      expect(nextSpy).toHaveBeenCalled();
+      expect(completeSpy).toHaveBeenCalled();
+    });
+
+    it('should unsubscribe from all subscriptions on destroy', () => {
+      component.ngOnInit();
+      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+
+      component.ngOnDestroy();
+
+      expect(completeSpy).toHaveBeenCalled();
+    });
+  });
 });

@@ -165,6 +165,17 @@ jobs:
             -Dsonar.issue.ignore.multicriteria.e2.ruleKey=secrets:S6684
             -Dsonar.issue.ignore.multicriteria.e2.resourceKey=**/*.spec.ts,**/*.test.ts,**/__tests__/**,**/test/**,**/tests/**
 
+      - name: Restore Stryker incremental cache
+        # Only run on PRs
+        if: github.event_name == 'pull_request'
+        uses: actions/cache@v4
+        with:
+          path: .stryker-tmp/incremental.json
+          key: stryker-incremental-${{ github.base_ref }}-${{ hashFiles('src/**/*.ts', '!src/**/*.spec.ts') }}
+          restore-keys: |
+            stryker-incremental-${{ github.base_ref }}-
+            stryker-incremental-
+
       - name: Run Incremental Mutation Testing
         # Only run on PRs
         if: github.event_name == 'pull_request'
@@ -197,7 +208,12 @@ jobs:
             echo "No relevant source files changed. Skipping mutation testing."
           else
             echo "Mutating files: $CHANGED_FILES"
-            npx stryker run --mutate "$CHANGED_FILES"
+            # Run with incremental mode and limited concurrency
+            npx stryker run \
+              --mutate "$CHANGED_FILES" \
+              --concurrency 2 \
+              --incremental \
+              --force
           fi
 
       - name: Build (push only)

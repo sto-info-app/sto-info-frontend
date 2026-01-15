@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { Subject, takeUntil } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../core/auth/auth.service';
 import { APP_ROUTES } from '../shared/constants/app-routing.constants';
@@ -13,18 +14,32 @@ import { RoutingService } from '../shared/services/routing.service';
   standalone: true,
   imports: [CommonModule, RouterModule, FontAwesomeModule],
 })
-export class HomeComponent {
+export class HomeComponent implements OnDestroy {
   appTitle: string = environment.appTitle;
   isLoggedIn = false;
   appRoutes = APP_ROUTES;
 
   private readonly authService = inject(AuthService);
   private readonly routingService = inject(RoutingService);
+  private readonly destroy$ = new Subject<void>();
 
   constructor() {
-    this.authService.isAuthenticated$.subscribe(loggedIn => {
-      this.isLoggedIn = loggedIn;
-    });
+    this.authService.isAuthenticated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(loggedIn => {
+        this.isLoggedIn = loggedIn;
+      });
+  }
+
+  /**
+   * Cleans up subscriptions when the component is destroyed.
+   * Completes the destroy$ subject to unsubscribe from all active subscriptions.
+   *
+   * @returns void
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getRouteLink(route: string): string {

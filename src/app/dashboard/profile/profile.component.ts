@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {
   MatDialog,
   MatDialogModule,
@@ -7,6 +7,7 @@ import {
 } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { SRC_PHOTO_UNAVAILABLE_300PX } from 'src/app/shared/constants/app-image-assets.constants';
@@ -31,7 +32,7 @@ import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component
     LoadingBarComponent,
   ],
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   appRoutes = APP_ROUTES;
   unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
@@ -45,6 +46,7 @@ export class ProfileComponent implements OnInit {
   private readonly routingService = inject(RoutingService);
   private readonly dateTimeHelper = inject(DatesTimeHelperService);
   private readonly dialog = inject(MatDialog);
+  private readonly destroy$ = new Subject<void>();
 
   /**
    * Angular lifecycle hook that initialises the component by loading user data.
@@ -60,11 +62,14 @@ export class ProfileComponent implements OnInit {
    * @returns The most recently cached user data, if available.
    */
   getUserData(): User | undefined {
-    this.dashboardService.getUser().subscribe(user => {
-      if (user.isAccountDisabled) this.authService.performLogout();
+    this.dashboardService
+      .getUser()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        if (user.isAccountDisabled) this.authService.performLogout();
 
-      this.user = user;
-    });
+        this.user = user;
+      });
     return this.user;
   }
 
@@ -140,16 +145,19 @@ export class ProfileComponent implements OnInit {
     });
 
     // Handle the result (if any action needed)
-    this.editProfileDialogRef.afterClosed().subscribe(stayLoggedIn => {
-      this.getUserData(); // Update the user data
+    this.editProfileDialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(stayLoggedIn => {
+        this.getUserData(); // Update the user data
 
-      if (stayLoggedIn) {
-        this.authService.refreshToken().subscribe();
-      }
+        if (stayLoggedIn) {
+          this.authService.refreshToken().subscribe();
+        }
 
-      // Allow opening the dialog box again
-      this.editProfileDialogRef = null;
-    });
+        // Allow opening the dialog box again
+        this.editProfileDialogRef = null;
+      });
   }
 
   /**
@@ -167,16 +175,35 @@ export class ProfileComponent implements OnInit {
     });
 
     // Handle the result (if any action needed)
-    this.profilePicDialogRef.afterClosed().subscribe(stayLoggedIn => {
-      this.getUserData(); // Update the user data
+    this.profilePicDialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(stayLoggedIn => {
+        this.getUserData(); // Update the user data
 
-      if (stayLoggedIn) {
-        this.authService.refreshToken().subscribe();
-      }
+        if (stayLoggedIn) {
+          this.authService.refreshToken().subscribe();
+        }
 
-      // Allow opening the dialog box again
-      this.profilePicDialogRef = null;
-    });
+        // Allow opening the dialog box again
+        this.profilePicDialogRef = null;
+      });
+  }
+
+  /**
+   * Cleans up subscriptions and closes any open dialogs on component destroy.
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+
+    // Close any open dialogs
+    if (this.editProfileDialogRef) {
+      this.editProfileDialogRef.close();
+    }
+    if (this.profilePicDialogRef) {
+      this.profilePicDialogRef.close();
+    }
   }
 
   /**

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -13,7 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, Subject, forkJoin, takeUntil } from 'rxjs';
 import {
   CharacterClass,
   Faction,
@@ -51,7 +51,7 @@ import {
     LoadingBarComponent,
   ],
 })
-export class CharacterManageComponent implements OnInit {
+export class CharacterManageComponent implements OnInit, OnDestroy {
   characterForm: FormGroup;
   isSubmitting = false;
   isLoading = true;
@@ -76,6 +76,7 @@ export class CharacterManageComponent implements OnInit {
   private readonly characterService = inject(CharacterService);
   private readonly stoAccountService = inject(StoAccountService);
   private readonly lookupService = inject(CharacterLookupService);
+  private readonly destroy$ = new Subject<void>();
 
   constructor() {
     this.characterForm = this.fb.group({
@@ -100,7 +101,7 @@ export class CharacterManageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
       this.accountHandle = decodeStoHandle(params['handle']);
       this.characterHandle = params['characterHandle'];
       this.mode = this.characterHandle ? 'edit' : 'add';
@@ -109,23 +110,35 @@ export class CharacterManageComponent implements OnInit {
     });
 
     // Setup dynamic filtering
-    this.characterForm.get('factionId')?.valueChanges.subscribe(factionId => {
-      this.updateSpecies();
-      if (factionId) {
-        this.lookupService.getRecruitTypes(factionId).subscribe(types => {
-          this.recruitTypes = types;
-          const currentRecruitId =
-            this.characterForm.get('recruitTypeId')?.value;
-          if (currentRecruitId && !types.some(t => t.id === currentRecruitId)) {
-            this.characterForm.patchValue({ recruitTypeId: '' });
-          }
-        });
-      }
-    });
+    this.characterForm
+      .get('factionId')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe(factionId => {
+        this.updateSpecies();
+        if (factionId) {
+          this.lookupService
+            .getRecruitTypes(factionId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(types => {
+              this.recruitTypes = types;
+              const currentRecruitId =
+                this.characterForm.get('recruitTypeId')?.value;
+              if (
+                currentRecruitId &&
+                !types.some(t => t.id === currentRecruitId)
+              ) {
+                this.characterForm.patchValue({ recruitTypeId: '' });
+              }
+            });
+        }
+      });
 
-    this.characterForm.get('recruitTypeId')?.valueChanges.subscribe(() => {
-      this.updateSpecies();
-    });
+    this.characterForm
+      .get('recruitTypeId')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.updateSpecies();
+      });
   }
 
   loadInitialData(): void {
@@ -147,85 +160,93 @@ export class CharacterManageComponent implements OnInit {
       accounts: this.stoAccountService.getAccounts(),
     };
 
-    forkJoin(observables).subscribe({
-      next: res => {
-        this.generalFactions = res.generalFactions;
-        this.factions = res.factions;
-        this.sexes = res.sexes;
-        this.classes = res.classes;
-        this.recruitTypes = res.recruitTypes;
+    forkJoin(observables)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: res => {
+          this.generalFactions = res.generalFactions;
+          this.factions = res.factions;
+          this.sexes = res.sexes;
+          this.classes = res.classes;
+          this.recruitTypes = res.recruitTypes;
 
-        const account = res.accounts.find(
-          (a: StoAccount) => a.handle === this.accountHandle,
-        );
-        if (account) {
-          this.accountId = account.id;
+          const account = res.accounts.find(
+            (a: StoAccount) => a.handle === this.accountHandle,
+          );
+          if (account) {
+            this.accountId = account.id;
 
-          if (this.mode === 'edit') {
-            this.loadCharacter();
+            if (this.mode === 'edit') {
+              this.loadCharacter();
+            } else {
+              this.isLoading = false;
+            }
           } else {
+            this.errorMessage = 'Account not found';
             this.isLoading = false;
           }
-        } else {
-          this.errorMessage = 'Account not found';
+        },
+        error: err => {
+          this.errorMessage = 'Failed to load form data';
           this.isLoading = false;
-        }
-      },
-      error: err => {
-        this.errorMessage = 'Failed to load form data';
-        this.isLoading = false;
-        console.error(err);
-      },
-    });
+          console.error(err);
+        },
+      });
   }
 
   loadCharacter(): void {
-    this.characterService.getCharactersByAccount(this.accountId).subscribe({
-      next: characters => {
-        const char = characters.find(c => c.handle === this.characterHandle);
-        if (char) {
-          this.characterId = char.id;
-          // Fetch full character data
-          this.characterService.getCharacter(char.id).subscribe({
-            next: fullChar => {
-              this.characterForm.patchValue({
-                handle: fullChar.handle,
-                firstName: fullChar.firstName,
-                middleName: fullChar.middleName,
-                lastName: fullChar.lastName,
-                biography: fullChar.biography,
-                notes: fullChar.notes,
-                createdDate: fullChar.createdDate
-                  ? new Date(fullChar.createdDate)
-                  : null,
-                level: fullChar.level,
-                generalFactionId: fullChar.generalFactionId,
-                factionId: fullChar.factionId,
-                sexId: fullChar.sexId,
-                classId: fullChar.classId,
-                recruitTypeId: fullChar.recruitTypeId,
-                speciesId: fullChar.speciesId,
+    this.characterService
+      .getCharactersByAccount(this.accountId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: characters => {
+          const char = characters.find(c => c.handle === this.characterHandle);
+          if (char) {
+            this.characterId = char.id;
+            // Fetch full character data
+            this.characterService
+              .getCharacter(char.id)
+              .pipe(takeUntil(this.destroy$))
+              .subscribe({
+                next: fullChar => {
+                  this.characterForm.patchValue({
+                    handle: fullChar.handle,
+                    firstName: fullChar.firstName,
+                    middleName: fullChar.middleName,
+                    lastName: fullChar.lastName,
+                    biography: fullChar.biography,
+                    notes: fullChar.notes,
+                    createdDate: fullChar.createdDate
+                      ? new Date(fullChar.createdDate)
+                      : null,
+                    level: fullChar.level,
+                    generalFactionId: fullChar.generalFactionId,
+                    factionId: fullChar.factionId,
+                    sexId: fullChar.sexId,
+                    classId: fullChar.classId,
+                    recruitTypeId: fullChar.recruitTypeId,
+                    speciesId: fullChar.speciesId,
+                  });
+                  this.updateSpecies();
+                  this.isLoading = false;
+                },
+                error: err => {
+                  this.errorMessage = 'Failed to load character details';
+                  this.isLoading = false;
+                  console.error(err);
+                },
               });
-              this.updateSpecies();
-              this.isLoading = false;
-            },
-            error: err => {
-              this.errorMessage = 'Failed to load character details';
-              this.isLoading = false;
-              console.error(err);
-            },
-          });
-        } else {
-          this.errorMessage = 'Character not found';
+          } else {
+            this.errorMessage = 'Character not found';
+            this.isLoading = false;
+          }
+        },
+        error: err => {
+          this.errorMessage = 'Failed to load characters';
           this.isLoading = false;
-        }
-      },
-      error: err => {
-        this.errorMessage = 'Failed to load characters';
-        this.isLoading = false;
-        console.error(err);
-      },
-    });
+          console.error(err);
+        },
+      });
   }
 
   updateSpecies(): void {
@@ -233,19 +254,22 @@ export class CharacterManageComponent implements OnInit {
     const recruitTypeId = this.characterForm.get('recruitTypeId')?.value;
 
     if (factionId) {
-      this.lookupService.getSpecies(factionId, recruitTypeId).subscribe({
-        next: species => {
-          this.speciesList = species;
-          const currentSpeciesId = this.characterForm.get('speciesId')?.value;
-          if (
-            currentSpeciesId &&
-            !species.some(s => s.id === currentSpeciesId)
-          ) {
-            this.characterForm.patchValue({ speciesId: '' });
-          }
-        },
-        error: err => console.error('Failed to load species', err),
-      });
+      this.lookupService
+        .getSpecies(factionId, recruitTypeId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: species => {
+            this.speciesList = species;
+            const currentSpeciesId = this.characterForm.get('speciesId')?.value;
+            if (
+              currentSpeciesId &&
+              !species.some(s => s.id === currentSpeciesId)
+            ) {
+              this.characterForm.patchValue({ speciesId: '' });
+            }
+          },
+          error: err => console.error('Failed to load species', err),
+        });
     } else {
       this.speciesList = [];
       this.characterForm.patchValue({ speciesId: '' });
@@ -268,23 +292,27 @@ export class CharacterManageComponent implements OnInit {
     };
 
     if (this.mode === 'add') {
-      this.characterService.createCharacter(formData).subscribe({
-        next: () => {
-          this.router.navigate([
-            '/dashboard/accounts',
-            encodeStoHandle(this.accountHandle),
-          ]);
-        },
-        error: err => {
-          this.isSubmitting = false;
-          this.errorMessage =
-            err.error?.message || 'Failed to create character.';
-          console.error(err);
-        },
-      });
+      this.characterService
+        .createCharacter(formData)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.router.navigate([
+              '/dashboard/accounts',
+              encodeStoHandle(this.accountHandle),
+            ]);
+          },
+          error: err => {
+            this.isSubmitting = false;
+            this.errorMessage =
+              err.error?.message || 'Failed to create character.';
+            console.error(err);
+          },
+        });
     } else {
       this.characterService
         .updateCharacter(this.characterId, formData)
+        .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
             this.router.navigate([
@@ -316,5 +344,17 @@ export class CharacterManageComponent implements OnInit {
         encodeStoHandle(this.accountHandle),
       ]);
     }
+  }
+
+  /**
+   * Cleans up subscriptions when the component is destroyed.
+   * Completes the destroy$ subject to unsubscribe from all active subscriptions
+   * including route params, form value changes, and API calls.
+   *
+   * @returns void
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
