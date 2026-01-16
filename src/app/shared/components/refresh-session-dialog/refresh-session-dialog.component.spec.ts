@@ -4,7 +4,9 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { Subject } from 'rxjs';
 import { AppComponent } from 'src/app/app.component';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { RefreshSessionDialogComponent } from './refresh-session-dialog.component';
 
 describe('RefreshSessionDialogComponent', () => {
@@ -12,6 +14,9 @@ describe('RefreshSessionDialogComponent', () => {
   let fixture: ComponentFixture<RefreshSessionDialogComponent>;
   let mockDialogRef: jest.Mocked<MatDialogRef<RefreshSessionDialogComponent>>;
   let mockAppComponent: Partial<AppComponent>;
+  let mockAuthService: {
+    isAuthenticated$: Subject<boolean>;
+  };
 
   beforeEach(async () => {
     mockDialogRef = {
@@ -22,10 +27,15 @@ describe('RefreshSessionDialogComponent', () => {
       logout: jest.fn(),
     };
 
+    mockAuthService = {
+      isAuthenticated$: new Subject<boolean>(),
+    };
+
     await TestBed.configureTestingModule({
       imports: [RefreshSessionDialogComponent, MatDialogModule],
       providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: AuthService, useValue: mockAuthService },
         {
           provide: MAT_DIALOG_DATA,
           useValue: { appComponent: mockAppComponent },
@@ -70,5 +80,28 @@ describe('RefreshSessionDialogComponent', () => {
     expect(newComponent.appComponent).toBeNull();
     newComponent.onLogout();
     expect(mockDialogRef.close).toHaveBeenCalledWith(false);
+  });
+
+  it('should handle data object without appComponent', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [RefreshSessionDialogComponent, MatDialogModule],
+      providers: [
+        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: {} },
+        { provide: AuthService, useValue: mockAuthService },
+      ],
+    }).compileComponents();
+
+    const newFixture = TestBed.createComponent(RefreshSessionDialogComponent);
+    const newComponent = newFixture.componentInstance;
+    newFixture.detectChanges();
+
+    expect(newComponent.appComponent).toBeNull();
+  });
+
+  it('should close on logout announced by AuthService', () => {
+    mockAuthService.isAuthenticated$.next(false);
+    expect(mockDialogRef.close).toHaveBeenCalled();
   });
 });
