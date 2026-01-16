@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   BehaviorSubject,
@@ -43,11 +43,12 @@ export class AuthService {
     environment.minsBeforeLogoutExpiryToShowWarning || 5; // 5 minutes before expiration if not set in environment settings
   public autoLogoutWarningSecs = this.autoLogoutWarningMins * 60;
   public autoLogoutWarningMilliSecs = this.autoLogoutWarningSecs * 1000;
-  private autoLogoutTimeout: ReturnType<typeof setTimeout> | null = null;
-  private refreshTokenTimeout: ReturnType<typeof setTimeout> | null = null;
+  private warningTimeout: ReturnType<typeof setTimeout> | null = null;
+  private logoutTimeout: ReturnType<typeof setTimeout> | null = null;
 
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly zone = inject(NgZone);
 
   constructor() {
     // Check if there's a login token and update the BehaviorSubject
@@ -77,24 +78,6 @@ export class AuthService {
       );
   }
 
-  logout() {
-    const httpOptions = this.getHttpOptionsWithRefreshToken();
-    if (!httpOptions) {
-      // Handle the case when there is no token (e.g., user is not logged in)
-      return throwError(() => new Error('No token found'));
-    }
-    return this.http.post(API_URLS.AUTH_LOGOUT, {}, httpOptions);
-  }
-
-  private getHttpOptionsWithRefreshToken(): { headers: HttpHeaders } | null {
-    const token = localStorage.getItem('refresh_token');
-    if (!token) {
-      return null;
-    }
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return { headers };
-  }
-
   getHttpOptionsWithAccessToken(): { headers: HttpHeaders } | null {
     const token = localStorage.getItem('access_token');
     if (!token) {
@@ -106,7 +89,7 @@ export class AuthService {
 
   saveToken(accessToken: string, refreshToken: string, expiresIn: number) {
     const expiresAt = this.getNewExpiresMilliseconds(expiresIn);
-    const warningAt = expiresAt - this.autoLogoutWarningMilliSecs; // The warning time
+    const warningAt = expiresAt - this.autoLogoutWarningMilliSecs;
 
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
@@ -114,10 +97,10 @@ export class AuthService {
     localStorage.setItem('warning_at', warningAt.toString());
 
     this.isAuthenticatedSubject.next(true);
-    this.expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time
-    this.warningAnnouncedSubject.next(warningAt); // Notify subscribers of the new warning time
+    this.expiryAnnouncedSubject.next(expiresAt);
+    // Don't announce warning here - let the timer announce it when it fires
 
-    this.createRefreshTokenTimer(expiresIn);
+    this.createAutoLogoutTimer();
   }
 
   getToken(): string | null {
@@ -182,22 +165,48 @@ export class AuthService {
   }
 
   performLogout() {
-    if (!this.isLoggedIn()) {
-      return;
-    }
-
     // Send a request to the backend to revoke the refresh token
     const refreshToken = localStorage.getItem('refresh_token');
     if (refreshToken) {
       this.http
         .post(API_URLS.AUTH_LOGOUT, { tokenId: refreshToken })
-        .subscribe();
+        .subscribe({
+          error: err => {
+            // Ignore 401 errors - token may already be expired
+            if (err.status !== 401) {
+              console.error('Logout error:', err);
+            }
+          },
+        });
     }
 
-    this.clearRefreshTokenTimer();
+    this.clearLogoutTimer();
+    this.clearAutoLogoutTimer();
     this.removeToken();
 
-    this.router.navigate([APP_ROUTES.LOGIN]);
+    // Signal expiry to trigger cleanup in app component
+    this.expiryAnnouncedSubject.next(0);
+
+    // Get the current URL
+    let currentUrl = this.router.url;
+
+    // If we're already on the login page, don't capture it as the returnUrl
+    if (currentUrl.includes('/login')) {
+      // Try to extract an existing returnUrl if possible
+      const urlTree = this.router.parseUrl(currentUrl);
+      const existingReturnUrl = urlTree.queryParams['returnUrl'];
+      if (existingReturnUrl) {
+        currentUrl = existingReturnUrl;
+      } else {
+        // If no existing returnUrl, just default to empty or home
+        currentUrl = '';
+      }
+    }
+
+    // Navigate to login page with return URL using Angular Router (no page reload)
+    this.router.navigate(['/login'], {
+      queryParams: currentUrl ? { returnUrl: currentUrl } : {},
+    });
   }
 
   isLoggedIn(): boolean {
@@ -235,54 +244,54 @@ export class AuthService {
     return Date.now() + seconds * 1000;
   }
 
-  createRefreshTokenTimer(expiresIn: number): void {
-    this.clearRefreshTokenTimer();
-
-    // Start a new timer to automatically remove the token when it expires
-    this.refreshTokenTimeout = setTimeout(
-      () => {
-        if (this.getSecondsUntilLoginSessionExpiry() > 5) {
-          this.refreshToken().subscribe();
-        }
-      },
-      expiresIn * 1000 - 5000,
-    ); // Refresh the token 5 seconds before it expires
-  }
-
-  clearRefreshTokenTimer(): void {
-    // If there's an existing timer, clear it
-    if (this.refreshTokenTimeout && this.refreshTokenTimeout !== null) {
-      clearTimeout(this.refreshTokenTimeout);
-      this.refreshTokenTimeout = null;
+  clearLogoutTimer(): void {
+    if (this.logoutTimeout) {
+      clearTimeout(this.logoutTimeout);
+      this.logoutTimeout = null;
     }
   }
 
   createAutoLogoutTimer(): void {
     this.clearAutoLogoutTimer();
+    this.clearLogoutTimer();
 
     const expiresAt = Number(localStorage.getItem('expires_at'));
     const warningAt = Number(localStorage.getItem('warning_at'));
 
-    if (warningAt && Date.now() < warningAt) {
-      // If now is before the warning time, set a timer to trigger the warning
-      this.autoLogoutTimeout = setTimeout(() => {
-        this.warningAnnouncedSubject.next(Date.now()); // Trigger the warning
-      }, warningAt - Date.now());
+    // If token is already expired, logout immediately
+    if (expiresAt && Date.now() >= expiresAt) {
+      this.zone.run(() => {
+        this.performLogout();
+      });
+      return;
     }
 
+    // Set timer to trigger warning
+    if (warningAt && Date.now() < warningAt) {
+      const delay = warningAt - Date.now();
+      this.warningTimeout = setTimeout(() => {
+        this.zone.run(() => {
+          // Send 0 to signal that the dialog should open immediately
+          this.warningAnnouncedSubject.next(0);
+        });
+      }, delay);
+    }
+
+    // Set timer to perform logout
     if (expiresAt && Date.now() < expiresAt) {
-      // If now is before the expiration time, set a timer to perform the logout
-      this.refreshTokenTimeout = setTimeout(() => {
-        this.performLogout();
-      }, expiresAt - Date.now());
+      const delay = expiresAt - Date.now();
+      this.logoutTimeout = setTimeout(() => {
+        this.zone.run(() => {
+          this.performLogout();
+        });
+      }, delay);
     }
   }
 
   clearAutoLogoutTimer(): void {
-    // If there's an existing timer, clear it
-    if (this.autoLogoutTimeout && this.autoLogoutTimeout !== null) {
-      clearTimeout(this.autoLogoutTimeout);
-      this.autoLogoutTimeout = null;
+    if (this.warningTimeout) {
+      clearTimeout(this.warningTimeout);
+      this.warningTimeout = null;
     }
   }
 

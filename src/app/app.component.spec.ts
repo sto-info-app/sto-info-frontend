@@ -20,6 +20,8 @@ describe('AppComponent', () => {
     isLoggedIn: boolean;
     autoLogoutCountdown: number;
     intervalId: ReturnType<typeof setInterval> | null;
+    warningTimeout: ReturnType<typeof setTimeout> | null;
+    dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null;
     dialog: MatDialog;
     router: Router;
     googleAnalyticsLoaded: boolean;
@@ -28,7 +30,7 @@ describe('AppComponent', () => {
     consentGiven(): void;
     sendPageView(url: string | undefined): void;
     loadGoogleAnalyticsWithTrackingDisabled(): void;
-    subscribeTExpiryAnnouncements(): void;
+    subscribeToExpiryAnnouncements(): void;
     startCountdown(): void;
     subscribeToWarningAnnouncements(): void;
     subscribeToAuthenticationState(): void;
@@ -161,7 +163,10 @@ describe('AppComponent', () => {
     };
 
     mockDialog = {
-      open: jest.fn(),
+      open: jest.fn().mockReturnValue({
+        afterClosed: () => of(true),
+        close: () => {},
+      }),
       closeAll: jest.fn(),
     };
 
@@ -183,7 +188,10 @@ describe('AppComponent', () => {
       ],
     })
       .overrideComponent(AppComponent, {
-        set: { template: '' },
+        set: {
+          template: '',
+          providers: [{ provide: MatDialog, useValue: mockDialog }],
+        },
       })
       .compileComponents();
 
@@ -218,7 +226,7 @@ describe('AppComponent', () => {
 
       expect(component.isLoggedIn).toBe(true);
       expect(closeAllSpy).toHaveBeenCalled();
-      expect(mockAuthService.performLogout).toHaveBeenCalled();
+      expect(mockAuthService.performLogout).not.toHaveBeenCalled();
     });
   });
 
@@ -259,23 +267,34 @@ describe('AppComponent', () => {
       globalThis as unknown as { clearInterval: typeof clearInterval }
     ).clearInterval = clearIntervalSpy as unknown as typeof clearInterval;
 
-    const closeAllSpy = jest
+    const originalClearTimeout = globalThis.clearTimeout;
+    const clearTimeoutSpy = jest.fn();
+    (
+      globalThis as unknown as { clearTimeout: typeof clearTimeout }
+    ).clearTimeout = clearTimeoutSpy as unknown as typeof clearTimeout;
+
+    jest
       .spyOn((component as unknown as { dialog: MatDialog }).dialog, 'closeAll')
       .mockImplementation(() => {});
 
-    (
-      component as unknown as { intervalId: ReturnType<typeof setInterval> }
-    ).intervalId = 1 as unknown as ReturnType<typeof setInterval>;
+    (component as unknown as AppComponentInternals).warningTimeout =
+      2 as unknown as ReturnType<typeof setTimeout>;
+    (component as unknown as AppComponentInternals).intervalId =
+      1 as unknown as ReturnType<typeof setInterval>;
 
     component.logout();
 
-    expect(clearIntervalSpy).toHaveBeenCalled();
-    expect(closeAllSpy).toHaveBeenCalled();
+    expect(clearIntervalSpy).toHaveBeenCalledWith(1);
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(2);
+    expect(mockDialog.closeAll).toHaveBeenCalled();
     expect(mockAuthService.performLogout).toHaveBeenCalled();
 
     (
       globalThis as unknown as { clearInterval: typeof clearInterval }
     ).clearInterval = originalClearInterval;
+    (
+      globalThis as unknown as { clearTimeout: typeof clearTimeout }
+    ).clearTimeout = originalClearTimeout;
   });
 
   it('should open the refresh session dialog when appropriate', () => {
@@ -463,8 +482,8 @@ describe('AppComponent', () => {
     (component as unknown as { isLoggedIn: boolean }).isLoggedIn = true;
 
     (
-      component as unknown as { subscribeTExpiryAnnouncements: () => void }
-    ).subscribeTExpiryAnnouncements();
+      component as unknown as { subscribeToExpiryAnnouncements: () => void }
+    ).subscribeToExpiryAnnouncements();
 
     mockAuthService.expiryAnnounced$.next(1000);
 
@@ -487,8 +506,8 @@ describe('AppComponent', () => {
       .mockImplementation(() => {});
 
     (
-      component as unknown as { subscribeTExpiryAnnouncements: () => void }
-    ).subscribeTExpiryAnnouncements();
+      component as unknown as { subscribeToExpiryAnnouncements: () => void }
+    ).subscribeToExpiryAnnouncements();
 
     mockAuthService.expiryAnnounced$.next(2000);
 
@@ -934,7 +953,7 @@ describe('AppComponent', () => {
       (component as unknown as { startCountdown: () => void }).startCountdown();
 
       expect(closeAllSpy).toHaveBeenCalled();
-      expect(mockAuthService.performLogout).toHaveBeenCalled();
+      expect(mockAuthService.performLogout).not.toHaveBeenCalled();
     });
   });
 
@@ -1038,7 +1057,7 @@ describe('AppComponent', () => {
       (component as unknown as AppComponentInternals).isLoggedIn = false;
       (
         component as unknown as AppComponentInternals
-      ).subscribeTExpiryAnnouncements();
+      ).subscribeToExpiryAnnouncements();
       mockAuthService.expiryAnnounced$.next(1000);
       expect(mockAuthService.performLogout).not.toHaveBeenCalled();
     });
@@ -1051,7 +1070,7 @@ describe('AppComponent', () => {
       );
       (
         component as unknown as AppComponentInternals
-      ).subscribeTExpiryAnnouncements();
+      ).subscribeToExpiryAnnouncements();
       mockAuthService.expiryAnnounced$.next(0);
       expect(startCountdownSpy).not.toHaveBeenCalled();
     });
@@ -1095,7 +1114,7 @@ describe('AppComponent', () => {
         component as unknown as AppComponentInternals
       ).subscribeToWarningAnnouncements();
       mockAuthService.warningAnnounced$.next(Date.now() - 1000);
-      expect(openRefreshSessionDialogSpy).not.toHaveBeenCalled();
+      expect(openRefreshSessionDialogSpy).toHaveBeenCalled();
     });
 
     it('should not start countdown if already logged in and interval exists', () => {
@@ -1128,6 +1147,71 @@ describe('AppComponent', () => {
       expect(stopCountdownSpy).toHaveBeenCalled();
     });
 
+    it('should clear existing warningTimeout when new warning announced', () => {
+      const clearTimeoutSpy = jest.spyOn(globalThis, 'clearTimeout');
+      (component as unknown as AppComponentInternals).warningTimeout =
+        123 as unknown as ReturnType<typeof setTimeout>;
+      (component as unknown as AppComponentInternals).isLoggedIn = true;
+
+      (
+        component as unknown as AppComponentInternals
+      ).subscribeToWarningAnnouncements();
+      mockAuthService.warningAnnounced$.next(0);
+
+      expect(clearTimeoutSpy).toHaveBeenCalledWith(123);
+      expect(
+        (component as unknown as AppComponentInternals).warningTimeout,
+      ).toBeNull();
+    });
+
+    it('should clear warningTimeout and close dialogRef on auth state change to logged out', () => {
+      const clearTimeoutSpy = jest.spyOn(globalThis, 'clearTimeout');
+      const dialogRefCloseSpy = jest.fn();
+      (component as unknown as AppComponentInternals).warningTimeout =
+        456 as unknown as ReturnType<typeof setTimeout>;
+      (component as unknown as AppComponentInternals).dialogRef = {
+        close: dialogRefCloseSpy,
+      } as unknown as MatDialogRef<RefreshSessionDialogComponent>;
+
+      (
+        component as unknown as AppComponentInternals
+      ).subscribeToAuthenticationState();
+      mockAuthService.isAuthenticated$.next(false);
+
+      expect(clearTimeoutSpy).toHaveBeenCalledWith(456);
+      expect(dialogRefCloseSpy).toHaveBeenCalled();
+      expect(
+        (component as unknown as AppComponentInternals).warningTimeout,
+      ).toBeNull();
+      expect(
+        (component as unknown as AppComponentInternals).dialogRef,
+      ).toBeNull();
+    });
+
+    it('should clear warningTimeout and close dialogRef on countdown expiry', () => {
+      const clearTimeoutSpy = jest.spyOn(globalThis, 'clearTimeout');
+      const dialogRefCloseSpy = jest.fn();
+      (component as unknown as AppComponentInternals).warningTimeout =
+        789 as unknown as ReturnType<typeof setTimeout>;
+      (component as unknown as AppComponentInternals).dialogRef = {
+        close: dialogRefCloseSpy,
+      } as unknown as MatDialogRef<RefreshSessionDialogComponent>;
+      (component as unknown as AppComponentInternals).isLoggedIn = true;
+      mockAuthService.getSecondsUntilLoginSessionExpiry.mockReturnValue(0);
+
+      runWithPatchedTimer('setInterval', () => {
+        (component as unknown as AppComponentInternals).startCountdown();
+        expect(clearTimeoutSpy).toHaveBeenCalledWith(789);
+        expect(dialogRefCloseSpy).toHaveBeenCalled();
+        expect(
+          (component as unknown as AppComponentInternals).warningTimeout,
+        ).toBeNull();
+        expect(
+          (component as unknown as AppComponentInternals).dialogRef,
+        ).toBeNull();
+      });
+    });
+
     it('should return early from initGoogleConsentMode when no measurement ID', () => {
       const originalId = environment.gaMeasurementId;
       (environment as { gaMeasurementId: string | undefined }).gaMeasurementId =
@@ -1146,6 +1230,30 @@ describe('AppComponent', () => {
 
       (environment as { gaMeasurementId: string | undefined }).gaMeasurementId =
         originalId;
+    });
+
+    it('should fall through when expiryTime is in future but interval already exists', () => {
+      (component as unknown as AppComponentInternals).isLoggedIn = true;
+      (component as unknown as AppComponentInternals).intervalId =
+        123 as unknown as ReturnType<typeof setInterval>;
+      const startCountdownSpy = jest.spyOn(
+        component as unknown as AppComponentInternals,
+        'startCountdown',
+      );
+
+      (
+        component as unknown as AppComponentInternals
+      ).subscribeToExpiryAnnouncements();
+      mockAuthService.expiryAnnounced$.next(Date.now() + 10000);
+
+      expect(startCountdownSpy).not.toHaveBeenCalled();
+    });
+
+    it('should handle logout when warningTimeout is null', () => {
+      const clearTimeoutSpy = jest.spyOn(globalThis, 'clearTimeout');
+      (component as unknown as AppComponentInternals).warningTimeout = null;
+      component.logout();
+      expect(clearTimeoutSpy).not.toHaveBeenCalled();
     });
   });
 });
