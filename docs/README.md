@@ -143,7 +143,20 @@ Key behaviours:
 - Auto logout warning:
   - a warning dialog is shown before expiry based on `MINS_BEFORE_LOGOUT_EXPIRY_TO_SHOW_WARNING`
   - user can choose to refresh their session
-  - implementation lives in [src/app/app.component.ts](../src/app/app.component.ts)
+  - dialog automatically closes if the user logs out in another tab or session expires
+  - implementation lives in [src/app/app.component.ts](../src/app/app.component.ts) and [src/app/shared/components/refresh-session-dialog](../src/app/shared/components/refresh-session-dialog)
+- Logout handling:
+  - Manual logout clears all active timers and dialogs
+  - Attempts to revoke the refresh token on the backend (ignores 401 errors for already-expired tokens)
+  - Preserves return URL when already on login page to avoid redirect loops
+  - All cleanup is handled through `ngOnDestroy` hooks to prevent memory leaks
+
+Memory leak prevention:
+
+- All subscriptions use `takeUntil(destroy$)` pattern
+- HTTP requests (including nested subscriptions) are properly managed
+- Timers (`setTimeout`, `setInterval`) are explicitly cleared on component destruction
+- See [Memory leak prevention guide](memory-leak-prevention-guide.md) for comprehensive patterns
 
 Security note: access and refresh tokens are stored in `localStorage` which increases impact of any XSS. This is a deliberate trade-off here; see [Security, rate limiting, retention](security-and-data.md).
 
