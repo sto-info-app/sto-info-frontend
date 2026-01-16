@@ -5,7 +5,7 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subject, Subscription, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
@@ -34,8 +34,7 @@ export class AppComponent implements OnInit, OnDestroy {
   showScrollButton = false;
 
   destroy$ = new Subject<void>();
-  warningSubscription: Subscription | undefined;
-  expirySubscription: Subscription | undefined;
+
   private intervalId: ReturnType<typeof setInterval> | null = null;
   private warningTimeout: ReturnType<typeof setTimeout> | null = null;
   private cookieConsentUpdateHandler?: (event: Event) => void;
@@ -72,7 +71,7 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscribeToAuthenticationState();
     this.subscribeToWarningAnnouncements();
-    this.subscribeTExpiryAnnouncements();
+    this.subscribeToExpiryAnnouncements();
 
     if (environment?.env_name !== 'local') {
       this.initGoogleConsentMode();
@@ -87,12 +86,15 @@ export class AppComponent implements OnInit, OnDestroy {
    * @returns void
    * @remarks Subscribe to the expiryAnnounced$ Observable to handle auto-logout when the session expires.
    */
-  private subscribeTExpiryAnnouncements() {
-    this.expirySubscription = this.authService.expiryAnnounced$
+  private subscribeToExpiryAnnouncements() {
+    this.authService.expiryAnnounced$
       .pipe(takeUntil(this.destroy$))
       .subscribe(expiryTime => {
         if (this.isLoggedIn) {
-          if (expiryTime !== 0 && Date.now() >= expiryTime) {
+          if (
+            expiryTime === 0 ||
+            (expiryTime !== 0 && Date.now() >= expiryTime)
+          ) {
             this.dialog.closeAll(); // Close all dialogs before logout
             this.authService.performLogout();
           } else if (
@@ -113,7 +115,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * @remarks Subscribe to the warningAnnounced$ Observable to handle display of auto-logout warning message.
    */
   private subscribeToWarningAnnouncements() {
-    this.warningSubscription = this.authService.warningAnnounced$
+    this.authService.warningAnnounced$
       .pipe(takeUntil(this.destroy$))
       .subscribe((warningTime: number) => {
         // Clear any existing warning timeout
@@ -122,12 +124,19 @@ export class AppComponent implements OnInit, OnDestroy {
           this.warningTimeout = null;
         }
 
-        if (this.isLoggedIn && this.intervalId !== null) {
-          const delay = warningTime - Date.now(); // calculate the delay in milliseconds
-          if (delay > 0) {
-            this.warningTimeout = setTimeout(() => {
+        if (this.isLoggedIn) {
+          const delay = warningTime - Date.now();
+          // If warningTime is 0 or delay <= 0, open dialog immediately
+          if (warningTime === 0 || delay <= 0) {
+            this.zone.run(() => {
               this.openRefreshSessionDialog();
-              this.warningTimeout = null;
+            });
+          } else {
+            this.warningTimeout = setTimeout(() => {
+              this.zone.run(() => {
+                this.openRefreshSessionDialog();
+                this.warningTimeout = null;
+              });
             }, delay);
           }
         }
@@ -145,10 +154,26 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(loggedIn => {
         this.isLoggedIn = loggedIn;
-        if (this.isLoggedIn && this.intervalId === null) {
-          this.startCountdown();
-        } else if (!this.isLoggedIn && this.intervalId !== null) {
-          this.stopCountdown();
+        if (this.isLoggedIn) {
+          if (this.intervalId === null) {
+            this.startCountdown();
+          }
+        } else {
+          // Clean up on logout
+          this.zone.run(() => {
+            if (this.intervalId !== null) {
+              this.stopCountdown();
+            }
+            if (this.warningTimeout) {
+              clearTimeout(this.warningTimeout);
+              this.warningTimeout = null;
+            }
+            if (this.dialogRef) {
+              this.dialogRef.close();
+              this.dialogRef = null;
+            }
+            this.dialog.closeAll(); // Close all dialogs on logout
+          });
         }
       });
   }
@@ -206,6 +231,10 @@ export class AppComponent implements OnInit, OnDestroy {
    */
   logout(): void {
     this.stopCountdown();
+    if (this.warningTimeout) {
+      clearTimeout(this.warningTimeout);
+      this.warningTimeout = null;
+    }
     this.dialog.closeAll(); // Close all open dialogs before logout
     this.authService.performLogout();
   }
@@ -216,17 +245,8 @@ export class AppComponent implements OnInit, OnDestroy {
    * @returns void
    */
   private openRefreshSessionDialog(): void {
-    // If a dialog box is already open, do nothing
-    if (this.dialogRef) {
-      return;
-    }
-
-    // If the countdown has ended, do nothing
-    if (!this.autoLogoutCountdown || this.autoLogoutCountdown <= 0) {
-      return;
-    }
-
-    if (!this.isLoggedIn) {
+    // If a dialog box is already open, or not logged in, or countdown expired, do nothing
+    if (this.dialogRef || !this.isLoggedIn || this.autoLogoutCountdown <= 0) {
       return;
     }
 
@@ -237,14 +257,25 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     // Handle the result (if any action needed)
-    this.dialogRef.afterClosed().subscribe((stayLoggedIn = false) => {
-      if (stayLoggedIn) {
-        this.authService.refreshToken().subscribe();
-      }
+    this.dialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((stayLoggedIn = false) => {
+        if (stayLoggedIn) {
+          this.authService
+            .refreshToken()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe();
+        } else {
+          // If the user closes the dialog without choosing to stay logged in,
+          // and the countdown is still active, it means they let the session expire.
+          // The expiryAnnounced$ subscription will handle the actual logout.
+          // We just need to ensure the dialogRef is cleared.
+        }
 
-      // Allow opening the dialog box again
-      this.dialogRef = null;
-    });
+        // Allow opening the dialog box again
+        this.dialogRef = null;
+      });
   }
 
   /**
@@ -257,21 +288,30 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.zone.run(() => {
-      this.intervalId = globalThis.setInterval(() => {
+    this.intervalId = globalThis.setInterval(() => {
+      this.zone.run(() => {
         this.autoLogoutCountdown =
           this.authService.getSecondsUntilLoginSessionExpiry();
         if (this.autoLogoutCountdown <= 0) {
           this.stopCountdown();
 
+          if (this.warningTimeout) {
+            clearTimeout(this.warningTimeout);
+            this.warningTimeout = null;
+          }
+
+          if (this.dialogRef) {
+            this.dialogRef.close();
+            this.dialogRef = null;
+          }
+
           // Close all open dialogs (refresh session dialog, character dialogs, etc.)
           this.dialog.closeAll();
-          this.dialogRef = null; // Reset the dialog reference
 
-          this.authService.performLogout();
+          // Don't call performLogout here - the AuthService expiry timer handles this
         }
-      }, 1000);
-    });
+      });
+    }, 1000);
   }
 
   /**
