@@ -61,6 +61,19 @@ jobs:
 
           # Create a new branch for the version bump
           BRANCH_NAME="chore/bump-version-to-$NEW_VERSION"
+
+          # Check if a PR already exists for this version
+          EXISTING_PR=$(gh pr list --base development --head "$BRANCH_NAME" --json number --jq '.[0].number' || echo "")
+
+          if [ -n "$EXISTING_PR" ]; then
+            echo "PR #$EXISTING_PR already exists for version $NEW_VERSION. Skipping."
+            exit 0
+          fi
+
+          # Delete the remote branch if it exists from a previous failed run
+          git push origin --delete "$BRANCH_NAME" 2>/dev/null || echo "Branch $BRANCH_NAME does not exist remotely, continuing..."
+
+          # Create the branch
           git checkout -b "$BRANCH_NAME"
 
           # Commit the changes
