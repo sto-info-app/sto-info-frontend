@@ -11,6 +11,7 @@ permissions:
 jobs:
   auto_approve:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     # Only run for PRs created by github-actions bot with version bump title
     if: >
