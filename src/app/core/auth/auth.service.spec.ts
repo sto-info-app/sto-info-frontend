@@ -18,19 +18,22 @@ import { AuthService } from './auth.service';
 describe('AuthService', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
-  let routerSpy: jest.Mocked<Router>;
+  let routerSpy: jest.Mocked<Omit<Router, 'url'>> & { url: string };
 
   interface AuthServiceInternals {
     http: HttpClient;
-    autoLogoutTimeout: ReturnType<typeof setTimeout> | null;
-    refreshTokenTimeout: ReturnType<typeof setTimeout> | null;
+    router: Router;
+    warningTimeout: ReturnType<typeof setTimeout> | null;
+    logoutTimeout: ReturnType<typeof setTimeout> | null;
   }
 
   beforeEach(() => {
     localStorage.clear();
 
-    const routerMock = {
+    const routerMock: Partial<Router> & { url: string } = {
       navigate: jest.fn(),
+      url: '/',
+      parseUrl: jest.fn().mockReturnValue({ queryParams: {} }),
     };
 
     TestBed.configureTestingModule({
@@ -44,7 +47,11 @@ describe('AuthService', () => {
 
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
-    routerSpy = TestBed.inject(Router) as jest.Mocked<Router>;
+    routerSpy = TestBed.inject(Router) as unknown as jest.Mocked<
+      Omit<Router, 'url'>
+    > & {
+      url: string;
+    };
   });
 
   afterEach(() => {
@@ -61,7 +68,7 @@ describe('AuthService', () => {
     it('should login and save tokens', () => {
       const credentials: LoginCredentials = {
         email: 'test@example.com',
-        password: 'password',
+        password: 'password', // NOSONAR - Test fixture password
       };
       const mockResponse: LoginResponse = {
         access_token: 'access123',
@@ -87,8 +94,8 @@ describe('AuthService', () => {
     it('should register a user', () => {
       const userData: RegistrationFormValues = {
         email: 'new@example.com',
-        password: 'password',
-        confirmPassword: 'password',
+        password: 'password', // NOSONAR - Test fixture password
+        confirmPassword: 'password', // NOSONAR - Test fixture password
         username: 'user',
         firstName: 'First',
         lastName: 'Last',
@@ -100,32 +107,6 @@ describe('AuthService', () => {
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(userData);
       req.flush({});
-    });
-  });
-
-  describe('Logout', () => {
-    it('should logout and clear tokens', () => {
-      localStorage.setItem('access_token', 'access123');
-      localStorage.setItem('refresh_token', 'refresh123');
-      localStorage.setItem('expires_at', (Date.now() + 10000).toString());
-
-      service.logout().subscribe();
-
-      const req = httpMock.expectOne(API_URLS.AUTH_LOGOUT);
-      expect(req.request.method).toBe('POST');
-      req.flush({});
-    });
-
-    it('should throw error if no token found during logout', () => {
-      localStorage.clear();
-
-      service.logout().subscribe({
-        error: err => {
-          expect(err.message).toBe('No token found');
-        },
-      });
-
-      httpMock.expectNone(API_URLS.AUTH_LOGOUT);
     });
   });
 
@@ -195,14 +176,67 @@ describe('AuthService', () => {
       localStorage.setItem('refresh_token', 'refresh');
       localStorage.setItem('expires_at', expiresAt.toString());
 
+      routerSpy.url = '/dashboard';
       service.performLogout();
 
       const req = httpMock.expectOne(API_URLS.AUTH_LOGOUT);
       expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ tokenId: 'refresh' });
       req.flush({});
 
       expect(localStorage.getItem('access_token')).toBeNull();
-      expect(routerSpy.navigate).toHaveBeenCalledWith([APP_ROUTES.LOGIN]);
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/login'], {
+        queryParams: { returnUrl: '/dashboard' },
+      });
+    });
+
+    it('should log non-401 errors on logout', () => {
+      localStorage.setItem('refresh_token', 'refresh');
+      const errorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      service.performLogout();
+
+      const req = httpMock.expectOne(API_URLS.AUTH_LOGOUT);
+      req.flush(null, { status: 500, statusText: 'Server Error' });
+
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
+
+    it('should ignore 401 errors on logout', () => {
+      localStorage.setItem('refresh_token', 'refresh');
+      const errorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      service.performLogout();
+
+      const req = httpMock.expectOne(API_URLS.AUTH_LOGOUT);
+      req.flush(null, { status: 401, statusText: 'Unauthorized' });
+
+      expect(errorSpy).not.toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
+
+    it('should handle logout when already on login page', () => {
+      routerSpy.url = '/login';
+      service.performLogout();
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/login'], {
+        queryParams: {},
+      });
+    });
+
+    it('should handle logout when already on login page with returnUrl', () => {
+      routerSpy.url = '/login?returnUrl=/secret';
+      routerSpy.parseUrl.mockReturnValue({
+        queryParams: { returnUrl: '/secret' },
+      } as unknown as ReturnType<Router['parseUrl']>);
+      service.performLogout();
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/login'], {
+        queryParams: { returnUrl: '/secret' },
+      });
     });
 
     it('should not perform logout if not logged in', () => {
@@ -212,7 +246,7 @@ describe('AuthService', () => {
       service.performLogout();
 
       httpMock.expectNone(API_URLS.AUTH_LOGOUT);
-      expect(routerSpy.navigate).not.toHaveBeenCalled();
+      expect(routerSpy.navigate).toHaveBeenCalled(); // It still navigates to login if not logged in
     });
   });
 
@@ -277,7 +311,7 @@ describe('AuthService', () => {
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({
         token: 'token123',
-        password: 'newpass',
+        password: 'newpass', // NOSONAR - Test fixture password
       });
       req.flush({});
     });
@@ -333,49 +367,6 @@ describe('AuthService', () => {
     });
   });
 
-  describe('Refresh Token Timer', () => {
-    it('should create refresh token timer', fakeAsync(() => {
-      const mockObservable = {
-        subscribe: jest.fn(),
-      } as unknown as ReturnType<typeof service.refreshToken>;
-
-      jest.spyOn(service, 'refreshToken').mockReturnValue(mockObservable);
-
-      // Set expiry far enough that it's > 5 after 5s tick
-      localStorage.setItem('expires_at', (Date.now() + 15000).toString());
-
-      service.createRefreshTokenTimer(10); // timeout at 10 - 5 = 5s
-
-      tick(5001);
-
-      expect(service.refreshToken).toHaveBeenCalled();
-    }));
-
-    it('should clear refresh token timer', () => {
-      service['refreshTokenTimeout'] = setTimeout(
-        () => {},
-        1000,
-      ) as unknown as ReturnType<typeof setTimeout>;
-
-      service.clearRefreshTokenTimer();
-
-      expect(service['refreshTokenTimeout']).toBeNull();
-    });
-
-    it('should not refresh if less than 5 seconds remaining', fakeAsync(() => {
-      jest.spyOn(service, 'refreshToken');
-      jest
-        .spyOn(service, 'getSecondsUntilLoginSessionExpiry')
-        .mockReturnValue(3);
-
-      service.createRefreshTokenTimer(10);
-
-      tick(5001);
-
-      expect(service.refreshToken).not.toHaveBeenCalled();
-    }));
-  });
-
   describe('Auto Logout Timer', () => {
     it('should create auto logout timer and trigger warning', fakeAsync(() => {
       const warningAt = Date.now() + 2000;
@@ -393,10 +384,32 @@ describe('AuthService', () => {
       expect(warningEmitted).toBe(true);
     }));
 
-    it('should clear auto logout timer', () => {
-      service['autoLogoutTimeout'] = setTimeout(() => {}, 1000);
-      service.clearAutoLogoutTimer();
-      expect(service['autoLogoutTimeout']).toBeNull();
+    it('should logout immediately if token is already expired', () => {
+      const performLogoutSpy = jest.spyOn(service, 'performLogout');
+      localStorage.setItem('expires_at', (Date.now() - 1000).toString());
+
+      service.createAutoLogoutTimer();
+
+      expect(performLogoutSpy).toHaveBeenCalled();
+    });
+
+    it('should not set timers if no expiration is set', () => {
+      localStorage.clear();
+      service.createAutoLogoutTimer();
+      expect(
+        (service as unknown as AuthServiceInternals).warningTimeout,
+      ).toBeNull();
+      expect(
+        (service as unknown as AuthServiceInternals).logoutTimeout,
+      ).toBeNull();
+    });
+
+    it('should set timer to perform logout', () => {
+      localStorage.setItem('expires_at', (Date.now() + 1000).toString());
+      service.createAutoLogoutTimer();
+      expect(
+        (service as unknown as AuthServiceInternals).logoutTimeout,
+      ).toBeDefined();
     });
 
     it('should trigger performLogout when session expires', fakeAsync(() => {
@@ -413,6 +426,12 @@ describe('AuthService', () => {
 
       expect(performLogoutSpy).toHaveBeenCalled();
     }));
+
+    it('should clear logout timer', () => {
+      service['logoutTimeout'] = setTimeout(() => {}, 1000);
+      service.clearLogoutTimer();
+      expect(service['logoutTimeout']).toBeNull();
+    });
   });
 
   describe('isLoggedIn', () => {
@@ -474,6 +493,47 @@ describe('AuthService', () => {
       // When there's no token, getSecondsUntilLoginSessionExpiry returns 0
       // which is less than the threshold
       expect(service.isTokenExpiringSoon()).toBe(true);
+    });
+
+    it('should use environment value for threshold if set', () => {
+      (
+        environment as unknown as {
+          minsBeforeLogoutExpiryToRefreshToken: number;
+        }
+      ).minsBeforeLogoutExpiryToRefreshToken = 20;
+
+      jest
+        .spyOn(service, 'getSecondsUntilLoginSessionExpiry')
+        .mockReturnValue(1100);
+
+      // 20 mins = 1200 secs. 1100 < 1200 => true.
+      expect(service.isTokenExpiringSoon()).toBe(true);
+
+      (
+        environment as unknown as {
+          minsBeforeLogoutExpiryToRefreshToken: number | undefined;
+        }
+      ).minsBeforeLogoutExpiryToRefreshToken = undefined;
+    });
+  });
+
+  describe('clearAutoLogoutTimer', () => {
+    it('should clear warningTimeout if it exists', () => {
+      const clearTimeoutSpy = jest.spyOn(globalThis, 'clearTimeout');
+      (service as unknown as AuthServiceInternals).warningTimeout =
+        123 as unknown as ReturnType<typeof setTimeout>;
+      service.clearAutoLogoutTimer();
+      expect(clearTimeoutSpy).toHaveBeenCalledWith(123);
+      expect(
+        (service as unknown as AuthServiceInternals).warningTimeout,
+      ).toBeNull();
+    });
+
+    it('should do nothing if warningTimeout is null', () => {
+      const clearTimeoutSpy = jest.spyOn(globalThis, 'clearTimeout');
+      (service as unknown as AuthServiceInternals).warningTimeout = null;
+      service.clearAutoLogoutTimer();
+      expect(clearTimeoutSpy).not.toHaveBeenCalled();
     });
   });
 });
