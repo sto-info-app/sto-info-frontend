@@ -75,7 +75,11 @@ jobs:
 
   lint_and_test:
     # Don't run for draft PRs (but still run for pushes)
-    if: github.actor != 'dependabot[bot]' && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
+    # Skip version bump PRs from github-actions bot
+    if: >
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
+      !(github.event_name == 'pull_request' && github.event.pull_request.user.login == 'github-actions[bot]' && startsWith(github.event.pull_request.title, 'chore: bump version to'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
