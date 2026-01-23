@@ -88,4 +88,5 @@ jobs:
             --title "chore: bump version to $NEW_VERSION" \
             --body "Automated version bump from $CURRENT_VERSION to $NEW_VERSION" \
             --base development \
-            --head "$BRANCH_NAME"
+            --head "$BRANCH_NAME" \
+            --delete-branch
