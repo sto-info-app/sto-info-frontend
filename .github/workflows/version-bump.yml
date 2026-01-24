@@ -102,9 +102,9 @@ jobs:
           # Create the branch
           git checkout -b "$BRANCH_NAME"
 
-          # Commit the changes
+          # Commit the changes with GPG signing
           git add package.json package-lock.json
-          git commit -m "chore: bump version to $NEW_VERSION"
+          echo "$GPG_PASSPHRASE" | git -c "gpg.program=gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback" commit -S -m "chore: bump version to $NEW_VERSION"
 
           # Push the branch
           git push origin "$BRANCH_NAME"
