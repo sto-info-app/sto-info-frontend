@@ -41,6 +41,16 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
+      - name: Import GPG key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          echo "allow-preset-passphrase" >> ~/.gnupg/gpg-agent.conf
+          gpg-connect-agent reloadagent /bye
+          echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback --quick-sign-key 874F69DE0E737C03
+
       - name: Install deps
         run: npm ci --ignore-scripts
 
@@ -51,6 +61,11 @@ jobs:
           # Configure git to use the PAT owner's identity
           git config user.name "Steve Roberts"
           git config user.email "1162407+steverobertsuk@users.noreply.github.com"
+
+          # Configure GPG signing
+          git config user.signingkey 874F69DE0E737C03
+          git config commit.gpgsign true
+          git config gpg.program gpg
 
           CURRENT_VERSION="$(node -p "require('./package.json').version")"
           echo "Current version: $CURRENT_VERSION"
