@@ -44,21 +44,16 @@ jobs:
       - name: Import GPG key
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           # Import the GPG key
           echo "$GPG_PRIVATE_KEY" | gpg --batch --import
 
-          # Configure GPG agent for non-interactive use
-          echo "allow-preset-passphrase" >> ~/.gnupg/gpg-agent.conf
+          # Configure GPG for non-interactive signing
+          mkdir -p ~/.gnupg
+          echo "use-agent" >> ~/.gnupg/gpg.conf
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
           gpg-connect-agent reloadagent /bye
-
-          # Get the keygrip for preset-passphrase
-          KEYGRIP=$(gpg --with-keygrip --list-secret-keys 874F69DE0E737C03 | grep -A 1 "^sec" | tail -n 1 | awk '{print $3}')
-          echo "Keygrip: $KEYGRIP"
-
-          # Preset the passphrase
-          echo "$GPG_PASSPHRASE" | /usr/lib/gnupg/gpg-preset-passphrase --preset "$KEYGRIP"
 
       - name: Install deps
         run: npm ci --ignore-scripts
@@ -66,6 +61,7 @@ jobs:
       - name: Bump patch version and create PR
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_TTY: $(tty)
         run: |
           # Configure git to use the PAT owner's identity
@@ -75,6 +71,10 @@ jobs:
           # Configure GPG signing
           git config user.signingkey 874F69DE0E737C03
           git config commit.gpgsign true
+          git config gpg.program "gpg"
+
+          # Set up passphrase for signing
+          export GNUPGHOME=~/.gnupg
 
           CURRENT_VERSION="$(node -p "require('./package.json').version")"
           echo "Current version: $CURRENT_VERSION"
@@ -102,9 +102,9 @@ jobs:
           # Create the branch
           git checkout -b "$BRANCH_NAME"
 
-          # Commit the changes
+          # Commit the changes with GPG signing
           git add package.json package-lock.json
-          git commit -m "chore: bump version to $NEW_VERSION"
+          echo "$GPG_PASSPHRASE" | git -c "gpg.program=gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback" commit -S -m "chore: bump version to $NEW_VERSION"
 
           # Push the branch
           git push origin "$BRANCH_NAME"

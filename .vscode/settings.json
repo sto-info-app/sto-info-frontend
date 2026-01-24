@@ -24,6 +24,10 @@
     "filereader",
     "floatbar",
     "fontawesome",
+<<<<<<< Updated upstream
+=======
+    "GNUPGHOME",
+>>>>>>> Stashed changes
     "gpgsign",
     "harvestgold",
     "keygrip",
