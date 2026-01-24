@@ -50,7 +50,7 @@ jobs:
         run: |
           # Configure git to use the PAT owner's identity
           git config user.name "Steve Roberts"
-          git config user.email "steve@shadowcomputers.co.uk"
+          git config user.email "1162407+steverobertsuk@users.noreply.github.com"
 
           CURRENT_VERSION="$(node -p "require('./package.json').version")"
           echo "Current version: $CURRENT_VERSION"
