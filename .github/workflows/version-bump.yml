@@ -64,17 +64,21 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_TTY: $(tty)
         run: |
+          # Create GPG wrapper script to handle passphrase
+          cat > /tmp/gpg-with-passphrase.sh << 'EOFGPG'
+#!/bin/bash
+echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback "$@"
+EOFGPG
+          chmod +x /tmp/gpg-with-passphrase.sh
+          
           # Configure git to use the PAT owner's identity
           git config user.name "Steve Roberts"
           git config user.email "1162407+steverobertsuk@users.noreply.github.com"
 
-          # Configure GPG signing
+          # Configure GPG signing with wrapper
           git config user.signingkey 874F69DE0E737C03
           git config commit.gpgsign true
-          git config gpg.program "gpg"
-
-          # Set up passphrase for signing
-          export GNUPGHOME=~/.gnupg
+          git config gpg.program /tmp/gpg-with-passphrase.sh
 
           CURRENT_VERSION="$(node -p "require('./package.json').version")"
           echo "Current version: $CURRENT_VERSION"
@@ -102,9 +106,9 @@ jobs:
           # Create the branch
           git checkout -b "$BRANCH_NAME"
 
-          # Commit the changes with GPG signing
+          # Commit the changes (GPG signing handled by wrapper)
           git add package.json package-lock.json
-          echo "$GPG_PASSPHRASE" | git -c "gpg.program=gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback" commit -S -m "chore: bump version to $NEW_VERSION"
+          git commit -m "chore: bump version to $NEW_VERSION"
 
           # Push the branch
           git push origin "$BRANCH_NAME"
