@@ -71,6 +71,10 @@ jobs:
           # Configure GPG signing
           git config user.signingkey 874F69DE0E737C03
           git config commit.gpgsign true
+          git config gpg.program "gpg"
+
+          # Set up passphrase for signing
+          export GNUPGHOME=~/.gnupg
 
           CURRENT_VERSION="$(node -p "require('./package.json').version")"
           echo "Current version: $CURRENT_VERSION"
