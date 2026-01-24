@@ -65,12 +65,10 @@ jobs:
           GPG_TTY: $(tty)
         run: |
           # Create GPG wrapper script to handle passphrase
-          cat > /tmp/gpg-with-passphrase.sh << 'EOFGPG'
-#!/bin/bash
-echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback "$@"
-EOFGPG
+          echo '#!/bin/bash' > /tmp/gpg-with-passphrase.sh
+          echo 'echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback "$@"' >> /tmp/gpg-with-passphrase.sh
           chmod +x /tmp/gpg-with-passphrase.sh
-          
+
           # Configure git to use the PAT owner's identity
           git config user.name "Steve Roberts"
           git config user.email "1162407+steverobertsuk@users.noreply.github.com"
