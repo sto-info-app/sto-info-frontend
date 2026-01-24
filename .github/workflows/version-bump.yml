@@ -107,7 +107,7 @@ jobs:
           # Commit the changes (GPG signing handled by wrapper)
           git add package.json package-lock.json
           export GPG_PASSPHRASE  # Make passphrase available to wrapper script
-          git commit -m "chore: bump version to $NEW_VERSION"
+          git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
 
           # Push the branch
           git push origin "$BRANCH_NAME"
