@@ -42,42 +42,16 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Import GPG key
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        run: |
-          # Import the GPG key
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
-
-          # Configure GPG for non-interactive signing
-          mkdir -p ~/.gnupg
-          echo "use-agent" >> ~/.gnupg/gpg.conf
-          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          gpg-connect-agent reloadagent /bye
-
       - name: Install deps
         run: npm ci --ignore-scripts
 
       - name: Bump patch version and create PR
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          GPG_TTY: $(tty)
         run: |
-          # Create GPG wrapper script to handle passphrase
-          echo '#!/bin/bash' > /tmp/gpg-with-passphrase.sh
-          echo 'echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback "$@"' >> /tmp/gpg-with-passphrase.sh
-          chmod +x /tmp/gpg-with-passphrase.sh
-
-          # Configure git to use the PAT owner's identity
-          git config user.name "Steve Roberts"
-          git config user.email "1162407+steverobertsuk@users.noreply.github.com"
-
-          # Configure GPG signing with wrapper
-          git config user.signingkey 874F69DE0E737C03
-          git config commit.gpgsign true
-          git config gpg.program /tmp/gpg-with-passphrase.sh
+          # Configure git to use the bot's identity
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
           CURRENT_VERSION="$(node -p "require('./package.json').version")"
           echo "Current version: $CURRENT_VERSION"
@@ -105,9 +79,8 @@ jobs:
           # Create the branch
           git checkout -b "$BRANCH_NAME"
 
-          # Commit the changes (GPG signing handled by wrapper)
+          # Commit the changes
           git add package.json package-lock.json
-          export GPG_PASSPHRASE  # Make passphrase available to wrapper script
           git commit -m "chore: bump version to $NEW_VERSION"
 
           # Push the branch
