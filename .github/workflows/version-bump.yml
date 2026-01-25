@@ -26,7 +26,8 @@ jobs:
     # Note: Commits are authored by the PAT owner (not bot) to enable GPG signing
     if: >
       !startsWith(github.event.head_commit.message, 'chore: bump version to ') &&
-      !contains(github.event.head_commit.message, 'Automated version bump from')
+      !contains(github.event.head_commit.message, 'Automated version bump from') &&
+      !(contains(github.event.head_commit.message, 'Merge pull request') && contains(github.event.head_commit.message, 'chore/bump-version-to'))
 
     steps:
       - name: Checkout
@@ -107,7 +108,7 @@ jobs:
           # Commit the changes (GPG signing handled by wrapper)
           git add package.json package-lock.json
           export GPG_PASSPHRASE  # Make passphrase available to wrapper script
-          git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
+          git commit -m "chore: bump version to $NEW_VERSION"
 
           # Push the branch
           git push origin "$BRANCH_NAME"
