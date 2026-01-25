@@ -24,7 +24,13 @@
     "filereader",
     "floatbar",
     "fontawesome",
+<<<<<<< Updated upstream
+=======
+    "GNUPGHOME",
+>>>>>>> Stashed changes
+    "gpgsign",
     "harvestgold",
+    "keygrip",
     "lcars",
     "logrocket",
     "multicriteria",
@@ -32,10 +38,13 @@
     "nomar",
     "Okuda",
     "PADD",
+    "pinentry",
     "pumpkinshade",
+    "reloadagent",
     "Robertus",
     "Romulan",
     "roseblush",
+    "signingkey",
     "sonarcloud",
     "sonarqube",
     "square-xmark",
