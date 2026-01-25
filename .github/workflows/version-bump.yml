@@ -22,9 +22,9 @@ jobs:
     environment: Development
 
     # Hardening: prevent infinite loops
-    # - Do not run if the commit message matches our version bump pattern
-    # Note: Commits are authored by the PAT owner (not bot) to enable GPG signing
-    if: >
+    # - Skip if the commit message matches our version bump pattern
+    # - Skip if it's a merge commit from a version bump PR
+    if: |
       !startsWith(github.event.head_commit.message, 'chore: bump version to ') &&
       !contains(github.event.head_commit.message, 'Automated version bump from') &&
       !(contains(github.event.head_commit.message, 'Merge pull request') && contains(github.event.head_commit.message, 'chore/bump-version-to'))
