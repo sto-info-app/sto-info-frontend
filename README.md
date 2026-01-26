@@ -1,4 +1,4 @@
-# sto-info-frontend  [![Uptime status](https://img.shields.io/uptimerobot/status/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/) [![Uptime 30 days](https://img.shields.io/uptimerobot/ratio/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
+# sto-info-frontend [![Uptime status](https://img.shields.io/uptimerobot/status/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/) [![Uptime 30 days](https://img.shields.io/uptimerobot/ratio/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
 
 ## Project Overview
 
@@ -46,7 +46,7 @@ We welcome contributions! Please read our [contributing guidelines](CONTRIBUTING
 
 We use SonarQube Cloud to ensure the code quality of this project. SonarQube helps us to identify bugs, vulnerabilities, and code smells in our codebase.
 
-[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-light.svg)](https://sonarcloud.io/summary/new_code?id=steverobertsuk_sto-info-frontend)
+[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-highlight.svg)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 
 ### Running SonarQube Analysis
 
@@ -61,7 +61,7 @@ Install the [SonarQube IDE](https://www.sonarsource.com/products/sonarlint/) and
 ```json
 {
   "sonarCloudOrganization": "steverobertsuk",
-  "projectKey": "steverobertsuk_sto-info-frontend"
+  "projectKey": "sto-info-app_sto-info-frontend"
 }
 ```
 
@@ -69,7 +69,7 @@ The analysis results will be available on the SonarQube dashboard.
 
 ### Current SonarQube Analysis
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=steverobertsuk_sto-info-frontend&metric=alert_status&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=steverobertsuk_sto-info-frontend) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=steverobertsuk_sto-info-frontend&metric=bugs&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=steverobertsuk_sto-info-frontend) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=steverobertsuk_sto-info-frontend&metric=code_smells&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=steverobertsuk_sto-info-frontend) [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=steverobertsuk_sto-info-frontend&metric=duplicated_lines_density&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=steverobertsuk_sto-info-frontend)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=alert_status&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=bugs&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=code_smells&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend) [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=duplicated_lines_density&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 
 ## Licence
 
