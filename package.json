@@ -50,7 +50,7 @@
     "http-proxy-middleware": "^3.0.5",
     "js-base64": "^3.7.7",
     "logrocket": "^11.0.0",
-    "lru-cache": "^11.0.1",
+    "lru-cache": "^11.2.5",
     "moment": "^2.29.4",
     "ngx-image-cropper": "^9.1.6",
     "ngx-pagination": "^6.0.3",
