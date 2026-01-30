@@ -70,7 +70,7 @@
     "@angular/compiler-cli": "^21.1.2",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
-    "@stryker-mutator/core": "^9.4.0",
+    "@stryker-mutator/core": "^9.5.0",
     "@stryker-mutator/jest-runner": "^9.4.0",
     "@stryker-mutator/typescript-checker": "^9.4.0",
     "@types/jest": "^30.0.0",
