@@ -128,5 +128,8 @@
     "outputName": "junit.xml",
     "addFileAttribute": "true",
     "usePathForSuiteName": "true"
+  },
+  "overrides": {
+    "@modelcontextprotocol/sdk": "1.26.0"
   }
 }
