@@ -6,9 +6,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { RoutingService } from 'src/app/shared/services/routing.service';
-import { Character } from '../models/character.model';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
-import { CharacterService } from '../services/character.service';
 import { StoAccountService } from '../services/sto-account.service';
 import { AccountsComponent } from './accounts.component';
 import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.component';
@@ -18,7 +16,6 @@ describe('AccountsComponent', () => {
   let fixture: ComponentFixture<AccountsComponent>;
   let stoAccountServiceSpy: jest.Mocked<StoAccountService>;
   let routingServiceSpy: jest.Mocked<RoutingService>;
-  let characterServiceSpy: jest.Mocked<CharacterService>;
   let dialogSpy: jest.Mocked<MatDialog>;
 
   const mockAccount: StoAccount = {
@@ -45,10 +42,6 @@ describe('AccountsComponent', () => {
       getLink: jest.fn().mockReturnValue('test-link'),
     } as unknown as jest.Mocked<RoutingService>;
 
-    characterServiceSpy = {
-      getCharacters: jest.fn().mockReturnValue(of([])),
-    } as unknown as jest.Mocked<CharacterService>;
-
     dialogSpy = {
       open: jest.fn(),
     } as unknown as jest.Mocked<MatDialog>;
@@ -58,7 +51,6 @@ describe('AccountsComponent', () => {
       providers: [
         { provide: StoAccountService, useValue: stoAccountServiceSpy },
         { provide: RoutingService, useValue: routingServiceSpy },
-        { provide: CharacterService, useValue: characterServiceSpy },
         // We still provide it here as fallback/base
         { provide: MatDialog, useValue: dialogSpy },
       ],
@@ -82,28 +74,21 @@ describe('AccountsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load accounts and characters on init', () => {
-    const accounts = [mockAccount];
+  it('should load accounts on init', () => {
+    const accounts = [{ ...mockAccount, characterCount: 2 }];
     const platforms: Platform[] = [{ id: 'p1', name: 'Windows' } as Platform];
     const launchers: Launcher[] = [{ id: 'l1', name: 'Steam' } as Launcher];
-    const characters: Partial<Character>[] = [
-      { accountId: '1' },
-      { accountId: '1' },
-    ]; // 2 chars for account 1
 
     stoAccountServiceSpy.getAccounts.mockReturnValue(of(accounts));
     stoAccountServiceSpy.getPlatforms.mockReturnValue(of(platforms));
     stoAccountServiceSpy.getLaunchers.mockReturnValue(of(launchers));
-    characterServiceSpy.getCharacters.mockReturnValue(
-      of(characters as Character[]),
-    );
 
     component.ngOnInit();
 
     expect(component.accounts).toEqual(accounts);
     expect(component.platforms).toEqual(platforms);
     expect(component.launchers).toEqual(launchers);
-    expect(component.characterCounts['1']).toBe(2);
+    expect(component.accounts[0].characterCount).toBe(2);
     expect(component.isLoading).toBe(false);
   });
 
@@ -113,18 +98,6 @@ describe('AccountsComponent', () => {
     );
     component.ngOnInit(); // calls loadAccounts
     expect(component.isLoading).toBe(false);
-  });
-
-  it('should handle error when loading characters', () => {
-    const accounts = [mockAccount];
-    stoAccountServiceSpy.getAccounts.mockReturnValue(of(accounts));
-    characterServiceSpy.getCharacters.mockReturnValue(
-      throwError(() => new Error('Error')),
-    );
-
-    component.loadAccounts();
-    expect(component.isLoading).toBe(false);
-    expect(characterServiceSpy.getCharacters).toHaveBeenCalled();
   });
 
   it('should open add account dialog', () => {
