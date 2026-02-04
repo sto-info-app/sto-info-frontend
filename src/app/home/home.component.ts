@@ -23,6 +23,10 @@ export class HomeComponent implements OnDestroy {
   private readonly routingService = inject(RoutingService);
   private readonly destroy$ = new Subject<void>();
 
+  /**
+   * Initializes the component.
+   * Subscribes to the authentication service to determine if the user is logged in.
+   */
   constructor() {
     this.authService.isAuthenticated$
       .pipe(takeUntil(this.destroy$))
@@ -42,6 +46,12 @@ export class HomeComponent implements OnDestroy {
     this.destroy$.complete();
   }
 
+  /**
+   * Returns the link for the given route.
+   *
+   * @param route The route to get the link for.
+   * @returns The link for the given route.
+   */
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
   }
