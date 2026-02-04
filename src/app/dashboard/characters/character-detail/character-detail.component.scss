@@ -13,24 +13,24 @@
 
     .character-header-section {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      align-items: flex-end;
       gap: 1rem;
       margin-bottom: 0.5rem;
 
       .header-left {
         display: flex;
-        align-items: center;
-        gap: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
 
         h1 {
           margin: 0;
-          color: vars.$lcars-orange;
           text-transform: uppercase;
+          line-height: 1;
         }
 
         .rank-icon {
-          height: 48px;
+          height: 14px;
           width: auto;
           filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
         }

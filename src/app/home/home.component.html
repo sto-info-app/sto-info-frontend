@@ -1,20 +1,44 @@
 <div>
   <h1>Welcome to the {{ appTitle }}!</h1>
   <p>
-    This is a work in progress!
-    <fa-icon [icon]="['fas', 'hand-spock']"></fa-icon>
+    A community-driven companion for Star Trek Online players.<br />
+    Track your accounts, characters, and soon stats and managing your fleet data
+    — all in one place.
+  </p>
+  <p>
+    This is a work in progress, features will be added regularly.
+    <fa-icon
+      [icon]="['fas', 'hand-spock']"
+      class="go-sunflower"></fa-icon>
+  </p>
+  <p>
+    The Star Trek Online Info portal is a fan-made project and is not affiliated
+    with or endorsed by Cryptic Studios or Paramount.
   </p>
   @if (!isLoggedIn) {
     <div class="buttons">
       <a
         [routerLink]="getRouteLink(appRoutes.LOGIN)"
-        class="bluey"
+        class="sunflower"
         >Login</a
       >
       <a
         [routerLink]="getRouteLink(appRoutes.REGISTER)"
-        class="sunflower"
+        class="almond"
         >Register</a
+      >
+    </div>
+  } @else {
+    <div class="buttons">
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+        class="sunflower"
+        >Accounts</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_PROFILE)"
+        class="almond"
+        >Profile</a
       >
     </div>
   }
