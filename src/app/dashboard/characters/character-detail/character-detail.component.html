@@ -8,14 +8,16 @@
     class="col">
     @if (character) {
       <div class="character-header-section">
-        @if (character.rank?.iconUrl) {
-          <img
-            [src]="character.rank!.iconUrl"
-            height="20"
-            class="rank-icon"
-            alt="character.rank?.title ?? Rank Icon" />
-        }
-        <h1>{{ character.handle }}</h1>
+        <div class="header-left">
+          @if (character.rank?.iconUrl) {
+            <img
+              [src]="character.rank!.iconUrl"
+              height="20"
+              class="rank-icon"
+              alt="character.rank?.title ?? Rank Icon" />
+          }
+          <h1>{{ character.handle }}</h1>
+        </div>
       </div>
 
       <div class="lcars-text-bar small-lcars-bar-gap">
