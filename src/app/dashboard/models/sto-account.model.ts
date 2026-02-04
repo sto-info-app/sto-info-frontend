@@ -13,6 +13,8 @@ export interface StoAccount {
   platformId?: string;
   launcherId?: string;
   userId: string;
+  characterCount?: number;
+  userCharacterCount?: number;
 }
 
 export interface Platform {
