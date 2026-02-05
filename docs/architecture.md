@@ -83,6 +83,7 @@ See [src/environments/environment.service.ts](../src/environments/environment.se
 
 - CookieYes script is loaded dynamically.
 - Google Analytics is loaded with tracking disabled, then enabled if consent is present.
+- Sentry captures errors and session replays (sample rate controlled by config).
 - LogRocket is initialised only when analytics consent is granted.
 - A Cloudflare Worker can force-disable analytics via the `stoi_no_analytics=1` cookie.
 
