@@ -6,6 +6,7 @@ import {
 import {
   APP_INITIALIZER,
   ApplicationConfig,
+  ErrorHandler,
   importProvidersFrom,
   inject,
   provideZoneChangeDetection,
@@ -16,13 +17,15 @@ import {
 } from '@angular/material/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterModule, provideRouter } from '@angular/router';
+import { Router, RouterModule, provideRouter } from '@angular/router';
 import { JwtModule } from '@auth0/angular-jwt';
 
+import * as Sentry from '@sentry/angular';
 import { routes } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
 import { API_URLS } from './app/shared/constants/api-routing.constants';
 import { FontAwesomeIconService } from './app/shared/services/font-awesome-icon.service';
+import { environment } from './environments/environment';
 import { EnvCheckService } from './environments/environment.service';
 
 export function tokenGetter() {
@@ -32,6 +35,37 @@ export function tokenGetter() {
 const globalRippleConfig: RippleGlobalOptions = {
   disabled: true,
 };
+
+if (environment.sentryDsn) {
+  Sentry.init({
+    dsn: environment.sentryDsn,
+    environment: environment.env_name ?? 'dev',
+    release: `sto-info-frontend@${environment.version}`,
+
+    // Setting this option to true will send default PII data to Sentry.
+    // For example, automatic IP address collection on events
+    sendDefaultPii: false,
+
+    // Integrations
+    integrations: [Sentry.replayIntegration()],
+
+    // Error Sampling
+    sampleRate: 1.0,
+    tracesSampleRate: 0.2,
+
+    // Session Replay
+    replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
+    replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+
+    // Error Filtering
+    ignoreErrors: ['ResizeObserver loop limit exceeded'],
+
+    // Error Processing
+    beforeSend(event) {
+      return event;
+    },
+  });
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -53,6 +87,14 @@ export const appConfig: ApplicationConfig = {
       provide: 'API_URL',
       useValue: API_URLS.ROOT,
     },
+    {
+      provide: ErrorHandler,
+      useValue: Sentry.createErrorHandler(),
+    },
+    {
+      provide: Sentry.TraceService,
+      deps: [Router],
+    },
     { provide: LocationStrategy, useClass: PathLocationStrategy },
     provideHttpClient(withInterceptorsFromDi()),
     {
@@ -62,6 +104,7 @@ export const appConfig: ApplicationConfig = {
         // Force creation so its constructor registers icons
         inject(FontAwesomeIconService);
       },
+      deps: [Sentry.TraceService],
     },
   ],
 };
