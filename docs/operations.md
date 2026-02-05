@@ -79,6 +79,7 @@ Where to look:
 
 - Consent flow: [src/app/app.component.ts](../src/app/app.component.ts)
 - Kill-switch cookie: [src/app/shared/services/script-loader.service.ts](../src/app/shared/services/script-loader.service.ts)
+- Sentry config: [src/main.ts](../src/main.ts)
 
 ### 5) Profile picture upload issues
 
@@ -104,6 +105,7 @@ If you need to reproduce a "works locally but not on Render" issue:
 Frontend has two main external observability paths:
 
 - Google Analytics (consent-gated)
+- Sentry (error tracking and session replay)
 - LogRocket (consent-gated, with request body redaction for password-like fields)
 
 > TODO Document backend observability (structured logs, request IDs, correlation IDs, error tracking, metrics).
