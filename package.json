@@ -46,6 +46,7 @@
     "@eslint/object-schema": "^3.0.0",
     "@fortawesome/angular-fontawesome": "^4.0.0",
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
+    "@sentry/angular": "^10.38.0",
     "glob": "^13.0.1",
     "http-proxy-middleware": "^3.0.5",
     "js-base64": "^3.7.7",
