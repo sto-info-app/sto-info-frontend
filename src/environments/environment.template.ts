@@ -26,4 +26,5 @@ export const environment: Environment = {
   cookieYesUrl: '__cookieYesUrl__',
   gaMeasurementId: '__gaMeasurementId__',
   logRocketAppId: '__logRocketAppId__',
+  sentryDsn: '__sentryDsn__',
 };
