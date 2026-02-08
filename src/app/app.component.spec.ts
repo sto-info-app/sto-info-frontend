@@ -816,7 +816,8 @@ describe('AppComponent', () => {
 
     expect(warnSpy).toHaveBeenCalled();
 
-    (environment as { gaMeasurementId: string }).gaMeasurementId = originalId;
+    (environment as { gaMeasurementId: string | undefined }).gaMeasurementId =
+      originalId;
   });
 
   it('should load Google Analytics script and then enable tracking', () => {
@@ -970,7 +971,8 @@ describe('AppComponent', () => {
       (globalThis as unknown as { [key: string]: boolean })['ga-disable-'],
     ).toBeUndefined();
 
-    (environment as { gaMeasurementId: string }).gaMeasurementId = originalId;
+    (environment as { gaMeasurementId: string | undefined }).gaMeasurementId =
+      originalId;
   });
 
   it('should return early from disableGoogleAnalyticsTracking when no measurement ID', () => {
@@ -986,7 +988,8 @@ describe('AppComponent', () => {
       (globalThis as unknown as { [key: string]: boolean })['ga-disable-'],
     ).toBeUndefined();
 
-    (environment as { gaMeasurementId: string }).gaMeasurementId = originalId;
+    (environment as { gaMeasurementId: string | undefined }).gaMeasurementId =
+      originalId;
   });
 
   it('should not reload Google Analytics if already loaded', () => {
