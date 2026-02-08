@@ -10,7 +10,8 @@
       <h1>{{ mode === 'add' ? 'Add' : 'Edit' }} Captain</h1>
 
       @if (errorMessage) {
-        <div class="error-message">{{ errorMessage }}</div>
+        <app-lcars-error-message
+          [message]="errorMessage"></app-lcars-error-message>
       }
 
       <form

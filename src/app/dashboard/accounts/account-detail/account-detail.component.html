@@ -145,7 +145,8 @@
       </div>
     } @else if (!isLoading && errorMessage) {
       <div class="error-container">
-        <p>{{ errorMessage }}</p>
+        <app-lcars-error-message
+          [message]="errorMessage"></app-lcars-error-message>
         <button
           mat-raised-button
           color="primary"

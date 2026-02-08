@@ -74,9 +74,9 @@
     }
     @if (!data.character) {
       <div class="lcars-profile-pic-message">
-        <p class="error-message-text">
-          Connection to the Starfleet Character Database has failed!
-        </p>
+        <app-lcars-error-message
+          title="Transmission Error"
+          message="Connection to the Starfleet Character Database has failed!"></app-lcars-error-message>
         <div class="buttons">
           <button
             type="button"

@@ -12,9 +12,7 @@
       "></app-loading-bar>
   }
   @if (errorMessage) {
-    <div class="error-message">
-      {{ errorMessage }}
-    </div>
+    <app-lcars-error-message [message]="errorMessage"></app-lcars-error-message>
   }
   <form
     [formGroup]="accountForm"
