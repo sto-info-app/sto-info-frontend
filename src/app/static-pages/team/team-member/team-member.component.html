@@ -1,0 +1,109 @@
+<div id="team-member-detail-container">
+  <div
+    id="team-member-detail-main-column"
+    class="col">
+    @if (member) {
+      <div class="member-header-section">
+        <div class="header-left">
+          <h1>{{ member.name }}</h1>
+          <div class="member-title">{{ member.title }}</div>
+        </div>
+      </div>
+
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Profile</span>
+      </div>
+
+      <div class="member-details-content">
+        <div class="detail-grid">
+          @for (item of member.info; track item.label) {
+            <div class="detail-item">
+              <span class="label">{{ item.label }}</span>
+              <span class="value">{{ item.value }}</span>
+            </div>
+          }
+        </div>
+
+        @if (member.bio) {
+          <div class="member-bio-section">
+            <div class="lcars-text-bar small-lcars-bar-gap">
+              <span>Biography</span>
+            </div>
+            <div
+              class="bio-content"
+              [innerHTML]="member.bio"></div>
+          </div>
+        }
+
+        @if (member.highlights?.length) {
+          <div class="member-highlights-section">
+            <div class="lcars-text-bar small-lcars-bar-gap">
+              <span>Highlights</span>
+            </div>
+            <div
+              class="highlights-list"
+              role="list">
+              @for (highlight of member.highlights; track highlight) {
+                <div
+                  class="highlights-item"
+                  role="listitem">
+                  {{ highlight }}
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="error-container">
+        <app-lcars-error-message
+          message="We could not find that team member."></app-lcars-error-message>
+        <a
+          class="full-width-btn-link peach"
+          [routerLink]="getGroupLink()">
+          Back to {{ groupLabel }}
+        </a>
+      </div>
+    }
+  </div>
+
+  <div
+    id="team-member-detail-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Photo</span>
+    </div>
+    <div id="team-member-image">
+      <div class="pics-right">
+        <img
+          [src]="getMemberPhotoUrl(member?.photoUrl)"
+          [alt]="member?.name || 'Team member'"
+          title="Team member photo"
+          class="border"
+          (error)="onPhotoError($event)"
+          loading="lazy" />
+      </div>
+    </div>
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="getGroupLink()"
+        class="full-width-btn-link peach"
+        >Back to {{ groupLabel }}</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.ABOUT)"
+        class="full-width-btn-link sunflower"
+        >About the App</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.ABOUT_SUPPORTERS)"
+        class="full-width-btn-link bluey"
+        >Supporters</a
+      >
+    </div>
+  </div>
+</div>
