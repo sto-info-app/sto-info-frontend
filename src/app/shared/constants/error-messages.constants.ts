@@ -1,5 +1,6 @@
 import {
   MAX_CHARS_GENERAL_STRING,
+  MAX_CHARS_MESSAGE,
   MAX_CHARS_NAMES,
   MAX_CHARS_PASSWORD,
   MAX_CHARS_USERNAME,
@@ -41,3 +42,7 @@ export const FORM_ERROR_USERNAME_PATTERN = `Username must contain only alphanume
 export const FORM_ERROR_FIRSTNAME_REQUIRED = `First Name is required.`;
 export const FORM_ERROR_LASTNAME_REQUIRED = `Last Name is required.`;
 export const FORM_ERROR_NAME_MAX_LENGTH = `Names must be less than ${MAX_CHARS_NAMES} characters.`;
+export const FORM_ERROR_NAME_REQUIRED = `Name is required.`;
+export const FORM_ERROR_TOPIC_REQUIRED = `Please select a topic.`;
+export const FORM_ERROR_MESSAGE_REQUIRED = `A message is required.`;
+export const FORM_ERROR_MESSAGE_MAX_LENGTH = `Message must be less than ${MAX_CHARS_MESSAGE} characters.`;
