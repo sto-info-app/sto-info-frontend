@@ -100,6 +100,11 @@ replacedContent = replaceAll(
   '__logRocketAppId__',
   process.env.LOG_ROCKET_APP_ID || '',
 );
+replacedContent = replaceAll(
+  replacedContent,
+  '__sentryDsn__',
+  process.env.SENTRY_DSN || '',
+);
 
 // Write out the final environment.ts
 writeFileSync('src/environments/environment.ts', replacedContent);

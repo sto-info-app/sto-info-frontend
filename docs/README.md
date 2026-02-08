@@ -88,6 +88,7 @@ These are read by [src/environments/inject-env-vars.js](../src/environments/inje
 - `COOKIE_YES_URL` (default empty)
 - `GA_MEASUREMENT_ID` (default empty)
 - `LOG_ROCKET_APP_ID` (default empty)
+- `SENTRY_DSN` (default empty)
 
 Notes:
 
@@ -177,10 +178,13 @@ Non-obvious operational/testing feature:
 - If a cookie named `stoi_no_analytics` is set to `1`, the frontend disables analytics regardless of consent.
 - This cookie is intended to be set by a Cloudflare Worker for testing (see [src/app/shared/services/script-loader.service.ts](../src/app/shared/services/script-loader.service.ts)).
 
-Session replay:
+Session replay and error tracking:
 
+- Sentry is used for error tracking and optional session replay.
 - LogRocket is only initialised after analytics consent.
 - Password-like fields in captured request bodies are redacted (see [src/app/shared/services/log-rocket.service.ts](../src/app/shared/services/log-rocket.service.ts)).
+- Sentry captures errors automatically and is configured with session replays (sample rate depends on environment).
+- Sentry replays also respect user privacy and redact sensitive data.
 
 > TODO Document where the Cloudflare Worker lives and how it is deployed.
 

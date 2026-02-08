@@ -68,10 +68,10 @@
                   <div
                     class="character-count"
                     [title]="
-                      'Total Captains: ' + (characterCounts[account.id] || 0)
+                      'Total Captains: ' + (account.characterCount || 0)
                     ">
                     <fa-icon [icon]="['fas', 'user-visor']"></fa-icon>
-                    <span>{{ characterCounts[account.id] || 0 }}</span>
+                    <span>{{ account.characterCount || 0 }}</span>
                   </div>
                 </div>
               </div>
