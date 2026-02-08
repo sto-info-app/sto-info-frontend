@@ -30,6 +30,7 @@
             <input
               matInput
               formControlName="handle"
+              title="Captain Name"
               placeholder="e.g. Jean-Luc Picard" />
           </mat-form-field>
         </div>
@@ -39,19 +40,22 @@
             <mat-label>First Name</mat-label>
             <input
               matInput
-              formControlName="firstName" />
+              formControlName="firstName"
+              title="First Name" />
           </mat-form-field>
           <mat-form-field appearance="fill">
             <mat-label>Middle Name</mat-label>
             <input
               matInput
-              formControlName="middleName" />
+              formControlName="middleName"
+              title="Middle Name" />
           </mat-form-field>
           <mat-form-field appearance="fill">
             <mat-label>Last Name</mat-label>
             <input
               matInput
-              formControlName="lastName" />
+              formControlName="lastName"
+              title="Last Name" />
           </mat-form-field>
         </div>
 
@@ -67,6 +71,7 @@
               matInput
               type="number"
               formControlName="level"
+              title="Level"
               min="0"
               max="65" />
           </mat-form-field>
@@ -76,7 +81,8 @@
             <input
               matInput
               [matDatepicker]="picker"
-              formControlName="createdDate" />
+              formControlName="createdDate"
+              title="Created Date" />
             <mat-datepicker-toggle
               matIconSuffix
               [for]="picker"></mat-datepicker-toggle>
@@ -87,7 +93,9 @@
         <div class="form-row">
           <mat-form-field appearance="fill">
             <mat-label>General Allegiance</mat-label>
-            <mat-select formControlName="generalFactionId">
+            <mat-select
+              formControlName="generalFactionId"
+              title="General Allegiance">
               @for (gf of generalFactions; track gf.id) {
                 <mat-option [value]="gf.id">{{ gf.name }}</mat-option>
               }
@@ -96,7 +104,9 @@
 
           <mat-form-field appearance="fill">
             <mat-label>Starting Faction</mat-label>
-            <mat-select formControlName="factionId">
+            <mat-select
+              formControlName="factionId"
+              title="Starting Faction">
               @for (f of factions; track f.id) {
                 <mat-option [value]="f.id">{{ f.name }}</mat-option>
               }
@@ -107,7 +117,9 @@
         <div class="form-row">
           <mat-form-field appearance="fill">
             <mat-label>Recruit Type</mat-label>
-            <mat-select formControlName="recruitTypeId">
+            <mat-select
+              formControlName="recruitTypeId"
+              title="Recruit Type">
               @for (rt of recruitTypes; track rt.id) {
                 <mat-option [value]="rt.id">{{ rt.name }}</mat-option>
               }
@@ -116,7 +128,9 @@
 
           <mat-form-field appearance="fill">
             <mat-label>Career Path (Class)</mat-label>
-            <mat-select formControlName="classId">
+            <mat-select
+              formControlName="classId"
+              title="Career Path (Class)">
               @for (c of classes; track c.id) {
                 <mat-option [value]="c.id">{{ c.name }}</mat-option>
               }
@@ -131,6 +145,7 @@
             <mat-label>Species</mat-label>
             <mat-select
               formControlName="speciesId"
+              title="Species"
               [disabled]="!characterForm.get('factionId')?.value">
               @for (s of speciesList; track s.id) {
                 <mat-option [value]="s.id">{{ s.name }}</mat-option>
@@ -140,7 +155,9 @@
 
           <mat-form-field appearance="fill">
             <mat-label>Sex</mat-label>
-            <mat-select formControlName="sexId">
+            <mat-select
+              formControlName="sexId"
+              title="Sex">
               @for (sex of sexes; track sex.id) {
                 <mat-option [value]="sex.id">{{ sex.name }}</mat-option>
               }
@@ -160,6 +177,7 @@
           <textarea
             matInput
             formControlName="biography"
+            title="Biography"
             rows="5"></textarea>
         </mat-form-field>
 
@@ -170,6 +188,7 @@
           <textarea
             matInput
             formControlName="notes"
+            title="Notes"
             rows="3"></textarea>
         </mat-form-field>
 

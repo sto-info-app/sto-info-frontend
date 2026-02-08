@@ -90,7 +90,8 @@
                     [routerLink]="getCharacterLink(character)">
                     <img
                       [src]="getProfileImageUrl(character)"
-                      [alt]="character.handle"
+                      alt="{{ character.handle }}"
+                      title="{{ character.handle }}"
                       (error)="onProfileImageError(character.id)"
                       class="character-list-image" />
                     <div class="image-fallback-icon">
