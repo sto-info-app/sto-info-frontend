@@ -6,3 +6,4 @@ export const MAX_CHARS_PASSWORD = 200;
 
 export const MAX_CHARS_NAMES = 100;
 export const MAX_CHARS_GENERAL_STRING = 250;
+export const MAX_CHARS_MESSAGE = 2000;

@@ -44,4 +44,7 @@ export const API_URLS = {
   CHARACTER_LOOKUP_CLASSES: apiUrl + '/character/lookup/classes',
   CHARACTER_LOOKUP_RECRUIT_TYPES: apiUrl + '/character/lookup/recruit-types',
   CHARACTER_LOOKUP_SPECIES: apiUrl + '/character/lookup/species',
+
+  // Contact
+  CONTACT: apiUrl + '/contact',
 };

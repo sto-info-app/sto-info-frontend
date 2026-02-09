@@ -10,6 +10,7 @@ import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
   BASE_CLOUDFLARE_IMAGES_URL,
@@ -35,6 +36,7 @@ import { AccountDialogComponent } from '../dialogs/account-dialog/account-dialog
     RouterModule,
     FontAwesomeModule,
     LoadingBarComponent,
+    LcarsErrorMessageComponent,
     MatButtonModule,
     MatDialogModule,
   ],

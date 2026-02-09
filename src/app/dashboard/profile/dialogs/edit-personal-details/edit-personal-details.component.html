@@ -23,7 +23,8 @@
                     <input
                       type="text"
                       id="firstName"
-                      formControlName="firstName" />
+                      formControlName="firstName"
+                      aria-label="First Name" />
                     @if (
                       (editPersonalDetailsForm.controls['firstName'].invalid &&
                         editPersonalDetailsForm.controls['firstName']
@@ -58,7 +59,8 @@
                     <input
                       type="text"
                       id="lastName"
-                      formControlName="lastName" />
+                      formControlName="lastName"
+                      aria-label="Last Name" />
                     @if (
                       (editPersonalDetailsForm.controls['lastName'].invalid &&
                         editPersonalDetailsForm.controls['lastName'].touched) ||
@@ -94,7 +96,8 @@
                     <input
                       type="text"
                       id="username"
-                      formControlName="username" />
+                      formControlName="username"
+                      aria-label="Username" />
                     @if (
                       (editPersonalDetailsForm.controls['username'].invalid &&
                         editPersonalDetailsForm.controls['username'].touched) ||
@@ -197,9 +200,9 @@
     }
     @if (!data?.user) {
       <div class="lcars-edit-personal-details-message">
-        <p class="error-message-text">
-          Connection to the Starfleet Personnel Database has failed!
-        </p>
+        <app-lcars-error-message
+          title="Transmission Error"
+          message="Connection to the Starfleet Personnel Database has failed!"></app-lcars-error-message>
         <div class="buttons">
           <button
             type="button"

@@ -26,6 +26,7 @@ import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterLookupService } from 'src/app/dashboard/services/character-lookup.service';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { CHARACTER_NAME_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import {
@@ -49,6 +50,7 @@ import {
     MatNativeDateModule,
     RouterModule,
     LoadingBarComponent,
+    LcarsErrorMessageComponent,
   ],
 })
 export class CharacterManageComponent implements OnInit, OnDestroy {

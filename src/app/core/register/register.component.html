@@ -16,7 +16,8 @@
             <input
               type="text"
               id="firstName"
-              formControlName="firstName" />
+              formControlName="firstName"
+              aria-label="First Name" />
             @if (
               (registerForm.controls['firstName'].invalid &&
                 registerForm.controls['firstName'].touched) ||
@@ -44,7 +45,8 @@
             <input
               type="text"
               id="lastName"
-              formControlName="lastName" />
+              formControlName="lastName"
+              aria-label="Last Name" />
             @if (
               (registerForm.controls['lastName'].invalid &&
                 registerForm.controls['lastName'].touched) ||
@@ -72,7 +74,8 @@
             <input
               type="text"
               id="username"
-              formControlName="username" />
+              formControlName="username"
+              aria-label="Username" />
             @if (
               (registerForm.controls['username'].invalid &&
                 registerForm.controls['username'].touched) ||
@@ -117,7 +120,8 @@
             <input
               type="email"
               id="email"
-              formControlName="email" />
+              formControlName="email"
+              aria-label="Email" />
             @if (
               (registerForm.controls['email'].invalid &&
                 registerForm.controls['email'].touched) ||
@@ -157,7 +161,8 @@
             <input
               type="password"
               id="password"
-              formControlName="password" />
+              formControlName="password"
+              aria-label="Password" />
 
             @if (
               (registerForm.controls['password'].invalid &&
@@ -198,7 +203,8 @@
             <input
               type="password"
               id="confirmPassword"
-              formControlName="confirmPassword" />
+              formControlName="confirmPassword"
+              aria-label="Confirm Password" />
             @if (
               (registerForm.controls['confirmPassword'].invalid &&
                 registerForm.controls['confirmPassword'].touched) ||
