@@ -1,0 +1,131 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+#team-member-detail-container {
+  display: flex;
+
+  #team-member-detail-main-column {
+    flex: 2;
+    flex-basis: 69%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    .member-header-section {
+      display: flex;
+      align-items: flex-end;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+
+      .header-left {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+
+        h1 {
+          margin: 0;
+          text-transform: uppercase;
+          line-height: 1;
+        }
+
+        .member-title {
+          color: vars.$lcars-perano;
+          font-size: 1.2rem;
+          font-family: vars.$font-antonio;
+          text-transform: uppercase;
+        }
+      }
+    }
+  }
+
+  #team-member-detail-side-column {
+    flex: 1;
+    flex-basis: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+
+    #team-member-image {
+      display: flex;
+
+      .pics-right {
+        margin: 10px 30px;
+        width: 100%;
+
+        img {
+          min-width: 100%;
+          max-width: 100%;
+          height: auto;
+        }
+      }
+    }
+  }
+}
+
+.member-details-content {
+  padding: 0.5rem 2rem 2rem 2rem;
+
+  .detail-grid {
+    @include mixins.lcars-info-grid;
+    gap: 1.5rem;
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+
+      .label {
+        @include mixins.lcars-label;
+        letter-spacing: 1px;
+      }
+      .value {
+        @include mixins.lcars-value;
+        font-size: 1.2rem;
+        font-family: vars.$font-antonio;
+      }
+    }
+  }
+}
+
+.member-bio-section,
+.member-highlights-section {
+  margin-top: 2rem;
+
+  .bio-content {
+    background-color: vars.$lcars-grey-bg;
+    padding: 1.5rem;
+    border-radius: 4px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    font-size: 1.05rem;
+    color: #b3e5fc;
+  }
+
+  .highlights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 1.25rem 1.5rem;
+    list-style: none;
+    background-color: vars.$lcars-grey-bg;
+    border-radius: 4px;
+  }
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 5px !important;
+  padding-top: 5px !important;
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: vars.$lcars-grey-bg;
+  border-radius: 6px;
+}

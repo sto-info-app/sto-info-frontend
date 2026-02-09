@@ -1,0 +1,80 @@
+<div
+  id="team-volunteers-container"
+  class="team-page">
+  <h1>Volunteers</h1>
+  <p>
+    Volunteers help the {{ appTitle }} stay aligned with the community through
+    feedback, testing, data entry, and content support.
+  </p>
+
+  <div class="lcars-text-bar">
+    <h2><span>Active Duty</span></h2>
+  </div>
+  @if (currentMembers.length > 0) {
+    <div class="team-grid">
+      @for (member of currentMembers; track member.slug) {
+        <a
+          class="team-card"
+          [routerLink]="getMemberLink(member)">
+          <img
+            [src]="getThumbnailUrl(member.photoUrl)"
+            [alt]="member.name"
+            title="Team member photo"
+            loading="lazy" />
+          <div class="team-card-details">
+            <div class="team-card-name">{{ member.name }}</div>
+            <div class="team-card-title">{{ member.title }}</div>
+          </div>
+        </a>
+      }
+    </div>
+  } @else {
+    <p class="empty-state">No current volunteers listed yet.</p>
+  }
+
+  <div class="lcars-text-bar">
+    <h2><span>Retired</span></h2>
+  </div>
+  @if (pastMembers.length > 0) {
+    <div class="team-grid">
+      @for (member of pastMembers; track member.slug) {
+        <a
+          class="team-card"
+          [routerLink]="getMemberLink(member)">
+          <img
+            [src]="getThumbnailUrl(member.photoUrl)"
+            [alt]="member.name"
+            title="Team member photo"
+            loading="lazy" />
+          <div class="team-card-details">
+            <div class="team-card-name">{{ member.name }}</div>
+            <div class="team-card-title">{{ member.title }}</div>
+          </div>
+        </a>
+      }
+    </div>
+  } @else {
+    <p class="empty-state">No retired volunteers listed yet.</p>
+  }
+
+  <div class="lcars-text-bar">
+    <h2><span>Want to Join the Crew?</span></h2>
+  </div>
+  <p>
+    Not all contributions involve code. STO Info relies on volunteers who help
+    with moderation, data verification, content review, accessibility feedback,
+    and community support.
+  </p>
+  <p>
+    If you enjoy organising, explaining, checking details, or simply making
+    spaces more welcoming, your time and skills are genuinely valued here. Every
+    role helps keep the project accurate, friendly, and sustainable.
+  </p>
+  <p>
+    Use the
+    <a [routerLink]="getRouteLink(appRoutes.CONTACT)">{{
+      appRouteTitles.CONTACT
+    }}</a>
+    page to get in touch.
+  </p>
+</div>
