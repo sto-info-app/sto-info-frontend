@@ -42,4 +42,14 @@ describe('TeamDevelopersComponent', () => {
     );
     expect(component.getThumbnailUrl()).toBe(component.fallbackPhotoUrl);
   });
+
+  it('should get member link', () => {
+    const member = TEST_TEAM_MEMBERS[0];
+    expect(component.getMemberLink(member)).toContain(member.slug);
+  });
+
+  it('should get route link', () => {
+    const route = 'test-route';
+    expect(component.getRouteLink(route)).toContain(route);
+  });
 });

@@ -76,6 +76,35 @@ describe('TeamMemberComponent', () => {
     expect(component.getMemberPhotoUrl()).toBe(component.fallbackPhotoUrl);
   });
 
+  it('should get group link for developers', () => {
+    expect(component.getGroupLink()).toContain('developers');
+  });
+
+  it('should get group link for volunteers', async () => {
+    TestBed.resetTestingModule();
+    await createComponent('janeway', 'volunteers');
+    expect(component.groupLabel).toBe('Volunteers');
+    expect(component.getGroupLink()).toContain('volunteers');
+  });
+
+  it('should handle missing slug in route', async () => {
+    TestBed.resetTestingModule();
+    await createComponent(undefined, 'developers');
+    expect(component.member).toBeUndefined();
+  });
+
+  it('should get route link', () => {
+    const route = 'test-route';
+    expect(component.getRouteLink(route)).toContain(route);
+  });
+
+  it('should handle null target in onPhotoError', () => {
+    // Should not throw
+    expect(() =>
+      component.onPhotoError({ target: null } as unknown as Event),
+    ).not.toThrow();
+  });
+
   it('should swap to fallback on photo error', () => {
     const img = document.createElement('img');
     img.src = 'https://example.com/missing.jpg';

@@ -22,4 +22,9 @@ describe('AboutComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should get route link', () => {
+    const route = 'test-route';
+    expect(component.getRouteLink(route)).toContain(route);
+  });
 });
