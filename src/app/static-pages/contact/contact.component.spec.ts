@@ -1,11 +1,14 @@
 import {
-  HttpClientTestingModule,
-  HttpTestingController,
+    HttpClientTestingModule,
+    HttpTestingController,
 } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 
 import { ContactComponent } from './contact.component';
+import { ContactTopic } from './models/contact-form.models';
+
+const feedbackTopic: ContactTopic = 'feedback';
 
 describe('ContactComponent', () => {
   let component: ContactComponent;
@@ -52,7 +55,7 @@ describe('ContactComponent', () => {
     component.contactForm.setValue({
       name: 'Jean-Luc Picard',
       email: 'picard@enterprise.com',
-      topic: 'feedback',
+      topic: feedbackTopic,
       message: 'Tea. Earl Grey. Hot.',
     });
 
@@ -81,7 +84,7 @@ describe('ContactComponent', () => {
     component.contactForm.setValue({
       name: 'Jean-Luc Picard',
       email: 'picard@enterprise.com',
-      topic: 'feedback',
+      topic: feedbackTopic,
       message: 'Tea. Earl Grey. Hot.',
     });
 
@@ -98,7 +101,7 @@ describe('ContactComponent', () => {
     component.contactForm.setValue({
       name: 'Jean-Luc Picard',
       email: 'picard@enterprise.com',
-      topic: 'feedback',
+      topic: feedbackTopic,
       message: 'Tea. Earl Grey. Hot.',
     });
 
@@ -115,7 +118,7 @@ describe('ContactComponent', () => {
     component.contactForm.setValue({
       name: 'Jean-Luc Picard',
       email: 'picard@enterprise.com',
-      topic: 'feedback',
+      topic: feedbackTopic,
       message: 'Tea. Earl Grey. Hot.',
     });
 

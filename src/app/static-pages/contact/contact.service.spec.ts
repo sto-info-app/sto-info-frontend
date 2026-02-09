@@ -5,6 +5,7 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { ContactService } from './contact.service';
+import { ContactTopic } from './models/contact-form.models';
 
 describe('ContactService', () => {
   let service: ContactService;
@@ -25,10 +26,11 @@ describe('ContactService', () => {
   });
 
   it('should submit the contact form payload', () => {
+    const topic: ContactTopic = 'feedback';
     const payload = {
       name: 'Nyota Uhura',
       email: 'uhura@enterprise.com',
-      topic: 'feedback',
+      topic,
       message: 'Hailing frequencies open.',
     };
 

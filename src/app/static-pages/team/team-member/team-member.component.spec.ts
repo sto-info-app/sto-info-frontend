@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
+import { TeamGroup } from '../models/team-group.model';
 import { TEST_SUPPORTERS, TEST_TEAM_MEMBERS } from '../testing/team-test-data';
 
 import { TeamMemberComponent } from './team-member.component';
@@ -15,9 +16,12 @@ describe('TeamMemberComponent', () => {
   let component: TeamMemberComponent;
   let fixture: ComponentFixture<TeamMemberComponent>;
 
+  const developersGroup: TeamGroup = 'developers';
+  const volunteersGroup: TeamGroup = 'volunteers';
+
   const createComponent = async (
     slug: string | null | undefined,
-    teamGroup: string | undefined,
+    teamGroup: TeamGroup | undefined,
   ) => {
     const paramMap = new Map();
     if (slug !== undefined) {
@@ -45,7 +49,7 @@ describe('TeamMemberComponent', () => {
   };
 
   beforeEach(async () => {
-    await createComponent('spock', 'developers');
+    await createComponent('spock', developersGroup);
   });
 
   it('should create', () => {
@@ -59,7 +63,7 @@ describe('TeamMemberComponent', () => {
 
   it('should fall back when no member is found', async () => {
     TestBed.resetTestingModule();
-    await createComponent('missing-slug', 'developers');
+    await createComponent('missing-slug', developersGroup);
 
     expect(component.member).toBeUndefined();
     expect(component.groupLabel).toBe('Developers');
@@ -77,19 +81,19 @@ describe('TeamMemberComponent', () => {
   });
 
   it('should get group link for developers', () => {
-    expect(component.getGroupLink()).toContain('developers');
+    expect(component.getGroupLink()).toContain(developersGroup);
   });
 
   it('should get group link for volunteers', async () => {
     TestBed.resetTestingModule();
-    await createComponent('janeway', 'volunteers');
+    await createComponent('janeway', volunteersGroup);
     expect(component.groupLabel).toBe('Volunteers');
-    expect(component.getGroupLink()).toContain('volunteers');
+    expect(component.getGroupLink()).toContain(volunteersGroup);
   });
 
   it('should handle missing slug in route', async () => {
     TestBed.resetTestingModule();
-    await createComponent(undefined, 'developers');
+    await createComponent(undefined, developersGroup);
     expect(component.member).toBeUndefined();
   });
 
