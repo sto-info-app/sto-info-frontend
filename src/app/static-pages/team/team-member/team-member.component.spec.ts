@@ -16,9 +16,14 @@ describe('TeamMemberComponent', () => {
   let fixture: ComponentFixture<TeamMemberComponent>;
 
   const createComponent = async (
-    slug: string,
+    slug: string | null | undefined,
     teamGroup: string | undefined,
   ) => {
+    const paramMap = new Map();
+    if (slug !== undefined) {
+      paramMap.set('slug', slug);
+    }
+
     await TestBed.configureTestingModule({
       imports: [TeamMemberComponent],
       providers: [
@@ -26,7 +31,7 @@ describe('TeamMemberComponent', () => {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
-              paramMap: new Map([['slug', slug]]),
+              paramMap: paramMap,
               data: { teamGroup },
             },
           },
