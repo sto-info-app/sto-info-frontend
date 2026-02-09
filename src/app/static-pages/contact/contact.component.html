@@ -10,6 +10,18 @@
     received.
   </p>
 
+  @if (successMessage) {
+    <app-lcars-success-message
+      title="Message received"
+      [message]="successMessage"></app-lcars-success-message>
+  }
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Transmission failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
   <div class="form-container">
     <form
       class="form"
@@ -137,16 +149,4 @@
       </button>
     </form>
   </div>
-
-  @if (successMessage) {
-    <app-lcars-information-message
-      title="Message received"
-      [message]="successMessage"></app-lcars-information-message>
-  }
-
-  @if (errorMessage) {
-    <app-lcars-error-message
-      title="Transmission failed"
-      [message]="errorMessage"></app-lcars-error-message>
-  }
 </div>

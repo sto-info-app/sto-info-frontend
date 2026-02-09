@@ -4,7 +4,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
-import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
+import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
   FORM_ERROR_EMAIL_MAX_LENGTH,
@@ -43,7 +43,7 @@ import {
     ReactiveFormsModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
-    LcarsInformationMessageComponent,
+    LcarsSuccessMessageComponent,
   ],
 })
 export class ContactComponent {
