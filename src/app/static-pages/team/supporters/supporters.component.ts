@@ -8,7 +8,6 @@ import {
 import { PATREON_URL } from 'src/app/shared/constants/external-routes.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
-import { Supporter } from '../models/supporter.model';
 import { SUPPORTERS } from '../team.data';
 
 @Component({
@@ -34,6 +33,4 @@ export class TeamSupportersComponent {
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
   }
-
-  trackByName = (_: number, supporter: Supporter): string => supporter.name;
 }
