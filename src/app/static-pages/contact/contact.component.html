@@ -21,6 +21,7 @@
           id="contactName"
           type="text"
           formControlName="name"
+          aria-label="Name"
           [class.errored]="
             formControls.name.touched && formControls.name.invalid
           " />
@@ -46,6 +47,7 @@
           id="contactEmail"
           type="email"
           formControlName="email"
+          aria-label="Email"
           [class.errored]="
             formControls.email.touched && formControls.email.invalid
           " />
@@ -77,6 +79,7 @@
         <select
           id="contactTopic"
           formControlName="topic"
+          aria-label="Topic"
           [class.errored]="
             formControls.topic.touched && formControls.topic.invalid
           ">
@@ -103,6 +106,7 @@
         <textarea
           id="contactMessage"
           formControlName="message"
+          aria-label="Message"
           [class.errored]="
             formControls.message.touched && formControls.message.invalid
           "></textarea>

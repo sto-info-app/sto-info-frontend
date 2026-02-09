@@ -13,6 +13,7 @@
             <input
               type="file"
               title="Select a new profile picture"
+              aria-label="Select a new profile picture"
               (change)="onFileChangeEvent($event)"
               accept="image/jpg, image/jpeg, image/png"
               [disabled]="isSubmitting"
