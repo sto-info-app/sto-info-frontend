@@ -109,6 +109,12 @@ button.lcars-btn,
   }
 }
 
+.lcars-btn-auto {
+  width: auto !important;
+  min-width: 0 !important;
+  padding-left: 45px !important;
+}
+
 .submit-button {
   margin: 0px 8px 16px 8px;
 }
@@ -173,6 +179,19 @@ button.lcars-btn,
 
 .lcars-flex-right {
   justify-content: flex-end !important;
+}
+
+/* LCARS Self Alignment Utilities */
+.lcars-self-left {
+  align-self: flex-start !important;
+}
+
+.lcars-self-center {
+  align-self: center !important;
+}
+
+.lcars-self-right {
+  align-self: flex-end !important;
 }
 
 /* LCARS Standard Layouts */

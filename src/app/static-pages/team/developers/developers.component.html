@@ -1,0 +1,81 @@
+<div
+  id="team-developers-container"
+  class="team-page">
+  <h1>Developers</h1>
+  <p>
+    The developers keep the {{ appTitle }} moving forward by building features,
+    maintaining the data model, and shaping the user experience.
+  </p>
+
+  <div class="lcars-text-bar">
+    <h2><span>Active Duty</span></h2>
+  </div>
+  @if (currentMembers.length > 0) {
+    <div class="team-grid">
+      @for (member of currentMembers; track member.slug) {
+        <a
+          class="team-card"
+          [routerLink]="getMemberLink(member)">
+          <img
+            [src]="getThumbnailUrl(member.photoUrl)"
+            [alt]="member.name"
+            title="Team member photo"
+            loading="lazy" />
+          <div class="team-card-details">
+            <div class="team-card-name">{{ member.name }}</div>
+            <div class="team-card-title">{{ member.title }}</div>
+          </div>
+        </a>
+      }
+    </div>
+  } @else {
+    <p class="empty-state">No current developers listed yet.</p>
+  }
+
+  <div class="lcars-text-bar">
+    <h2><span>Retired</span></h2>
+  </div>
+  @if (pastMembers.length > 0) {
+    <div class="team-grid">
+      @for (member of pastMembers; track member.slug) {
+        <a
+          class="team-card"
+          [routerLink]="getMemberLink(member)">
+          <img
+            [src]="getThumbnailUrl(member.photoUrl)"
+            [alt]="member.name"
+            title="Team member photo"
+            loading="lazy" />
+          <div class="team-card-details">
+            <div class="team-card-name">{{ member.name }}</div>
+            <div class="team-card-title">{{ member.title }}</div>
+          </div>
+        </a>
+      }
+    </div>
+  } @else {
+    <p class="empty-state">No retired developers listed yet.</p>
+  }
+
+  <div class="lcars-text-bar">
+    <h2><span>Want to Join the Crew?</span></h2>
+  </div>
+  <p>
+    STO Info is an open, community-led project built with modern tooling and a
+    strong focus on security, accessibility, and maintainability. Contributions
+    range from frontend and backend development to documentation, testing,
+    automation, and review.
+  </p>
+  <p>
+    You do not need to know everything on day one. Clear guidance, documented
+    standards, and supportive collaboration are part of how this project
+    operates. Curiosity and care matter more than perfection.
+  </p>
+  <p>
+    Use the
+    <a [routerLink]="getRouteLink(appRoutes.CONTACT)">{{
+      appRouteTitles.CONTACT
+    }}</a>
+    page to get in touch.
+  </p>
+</div>

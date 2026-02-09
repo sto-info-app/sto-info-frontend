@@ -13,6 +13,7 @@
             <input
               type="file"
               title="Select a new profile picture"
+              aria-label="Select a new profile picture"
               (change)="onFileChangeEvent($event)"
               accept="image/jpg, image/jpeg, image/png"
               [disabled]="isSubmitting"
@@ -43,7 +44,8 @@
                   <img
                     [src]="croppedImage"
                     id="cropped-image-preview"
-                    alt="Your cropped selection" />
+                    alt="Your cropped selection"
+                    title="Your cropped selection" />
                 </div>
               </div>
             }
@@ -74,9 +76,9 @@
     }
     @if (!data.character) {
       <div class="lcars-profile-pic-message">
-        <p class="error-message-text">
-          Connection to the Starfleet Character Database has failed!
-        </p>
+        <app-lcars-error-message
+          title="Transmission Error"
+          message="Connection to the Starfleet Character Database has failed!"></app-lcars-error-message>
         <div class="buttons">
           <button
             type="button"

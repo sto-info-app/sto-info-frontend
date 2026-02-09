@@ -80,6 +80,7 @@
                       [src]="character.faction!.iconUrl!"
                       class="faction-icon"
                       alt="Faction Icon"
+                      title="Faction Icon"
                       width="20"
                       height="20" />
                   }
@@ -90,7 +91,8 @@
                     [routerLink]="getCharacterLink(character)">
                     <img
                       [src]="getProfileImageUrl(character)"
-                      [alt]="character.handle"
+                      alt="{{ character.handle }}"
+                      title="{{ character.handle }}"
                       (error)="onProfileImageError(character.id)"
                       class="character-list-image" />
                     <div class="image-fallback-icon">
@@ -107,7 +109,8 @@
                             [src]="character.rank!.iconUrl"
                             class="rank-icon-mini"
                             height="14"
-                            alt="Rank" />
+                            alt="Rank"
+                            title="Rank" />
                         }
                         <span class="rank-name">{{
                           character.rank?.title || 'Unknown Rank'
@@ -145,7 +148,8 @@
       </div>
     } @else if (!isLoading && errorMessage) {
       <div class="error-container">
-        <p>{{ errorMessage }}</p>
+        <app-lcars-error-message
+          [message]="errorMessage"></app-lcars-error-message>
         <button
           mat-raised-button
           color="primary"
