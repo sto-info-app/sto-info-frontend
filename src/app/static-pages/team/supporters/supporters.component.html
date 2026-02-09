@@ -1,0 +1,86 @@
+<div
+  id="team-supporters-container"
+  class="team-page">
+  <h1>{{ appRouteTitles.ABOUT_SUPPORTERS }}</h1>
+  <p>Starfleet runs on cooperation, and STO Info is no different.</p>
+  <p>
+    {{ appTitle }} is free to use and always will be. The people listed here
+    help cover running costs and ongoing development through voluntary support,
+    allowing the project to remain independent, ad-free, and community-focused.
+  </p>
+  <p>
+    Every supporter listed on this page has chosen to back the project simply
+    because they find it useful or believe in what it is trying to achieve. That
+    support is genuinely appreciated.
+  </p>
+
+  <div class="lcars-text-bar">
+    <h2><span>Current Supporters</span></h2>
+  </div>
+  @if (currentSupporters.length > 0) {
+    <ul class="team-grid">
+      @for (supporter of currentSupporters; track supporter.name) {
+        <li class="team-card">
+          <div class="team-card-details">
+            <div class="team-card-name">{{ supporter.name }}</div>
+            @if (supporter.note) {
+              <div class="team-card-title">{{ supporter.note }}</div>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="empty-state">
+      We currently have no
+      <a
+        [href]="patreonUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Patreon</a
+      >
+      supporters.
+    </p>
+  }
+
+  <div class="lcars-text-bar">
+    <h2><span>Past Supporters</span></h2>
+  </div>
+  @if (pastSupporters.length > 0) {
+    <ul class="team-grid">
+      @for (supporter of pastSupporters; track supporter.name) {
+        <li class="team-card">
+          <div class="team-card-details">
+            <div class="team-card-name">{{ supporter.name }}</div>
+            @if (supporter.note) {
+              <div class="team-card-title">{{ supporter.note }}</div>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="empty-state">No past supporters listed yet.</p>
+  }
+
+  <div class="lcars-text-bar">
+    <h2><span>Want to support STO Info?</span></h2>
+  </div>
+  <p>
+    Reach out via the
+    <a [routerLink]="getRouteLink(appRoutes.CONTACT)">{{
+      appRouteTitles.CONTACT
+    }}</a>
+    page if you want to know more about how you can support the project.
+  </p>
+  <p>
+    Alternatively, if you want to make a contribution, you can check out the
+    <a
+      [href]="patreonUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Patreon</a
+    >
+    page.
+  </p>
+</div>

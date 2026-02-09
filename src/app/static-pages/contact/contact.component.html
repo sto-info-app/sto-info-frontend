@@ -1,4 +1,151 @@
+@if (isSubmitting) {
+  <app-loading-bar loadingText="Sending message"></app-loading-bar>
+}
+
 <div>
   <h1>Contact us</h1>
-  <p>This will be installed on Tuesday!</p>
+  <p>
+    Use the form below to send feedback, ask a question, or get involved with
+    the project. We will send a confirmation email once your message is
+    received.
+  </p>
+
+  @if (successMessage) {
+    <app-lcars-success-message
+      title="Message received"
+      [message]="successMessage"></app-lcars-success-message>
+  }
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Transmission failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <div class="form-container">
+    <form
+      class="form"
+      [formGroup]="contactForm"
+      (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="contactName">Name</label>
+        <input
+          id="contactName"
+          type="text"
+          formControlName="name"
+          aria-label="Name"
+          [class.errored]="
+            formControls.name.touched && formControls.name.invalid
+          " />
+        @if (
+          formControls.name.touched && formControls.name.hasError('required')
+        ) {
+          <div class="helper-error-text">
+            {{ errorTextNameRequired }}
+          </div>
+        }
+        @if (
+          formControls.name.touched && formControls.name.hasError('maxlength')
+        ) {
+          <div class="helper-error-text">
+            {{ errorTextNameMaxLength }}
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="contactEmail">Email</label>
+        <input
+          id="contactEmail"
+          type="email"
+          formControlName="email"
+          aria-label="Email"
+          [class.errored]="
+            formControls.email.touched && formControls.email.invalid
+          " />
+        @if (
+          formControls.email.touched && formControls.email.hasError('required')
+        ) {
+          <div class="helper-error-text">
+            {{ errorTextEmailRequired }}
+          </div>
+        }
+        @if (
+          formControls.email.touched && formControls.email.hasError('pattern')
+        ) {
+          <div class="helper-error-text">
+            {{ errorTextEmailInvalidFormat }}
+          </div>
+        }
+        @if (
+          formControls.email.touched && formControls.email.hasError('maxlength')
+        ) {
+          <div class="helper-error-text">
+            {{ errorTextEmailMaxLength }}
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="contactTopic">Topic</label>
+        <select
+          id="contactTopic"
+          formControlName="topic"
+          [class.errored]="
+            formControls.topic.touched && formControls.topic.invalid
+          ">
+          <option
+            value=""
+            disabled>
+            Select a topic
+          </option>
+          @for (topic of topics; track topic.value) {
+            <option [value]="topic.value">{{ topic.label }}</option>
+          }
+        </select>
+        @if (
+          formControls.topic.touched && formControls.topic.hasError('required')
+        ) {
+          <div class="helper-error-text">
+            {{ errorTextTopicRequired }}
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="contactMessage">Message</label>
+        <textarea
+          id="contactMessage"
+          formControlName="message"
+          aria-label="Message"
+          [class.errored]="
+            formControls.message.touched && formControls.message.invalid
+          "></textarea>
+        @if (
+          formControls.message.touched &&
+          formControls.message.hasError('required')
+        ) {
+          <div class="helper-error-text">
+            {{ errorTextMessageRequired }}
+          </div>
+        }
+        @if (
+          formControls.message.touched &&
+          formControls.message.hasError('maxlength')
+        ) {
+          <div class="helper-error-text">
+            {{ errorTextMessageMaxLength }}
+          </div>
+        }
+      </div>
+
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="contactForm.invalid || isSubmitting"
+        [ngClass]="{ submitting: isSubmitting }">
+        Send message
+      </button>
+    </form>
+  </div>
 </div>

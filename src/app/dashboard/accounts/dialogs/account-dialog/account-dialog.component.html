@@ -12,9 +12,7 @@
       "></app-loading-bar>
   }
   @if (errorMessage) {
-    <div class="error-message">
-      {{ errorMessage }}
-    </div>
+    <app-lcars-error-message [message]="errorMessage"></app-lcars-error-message>
   }
   <form
     [formGroup]="accountForm"
@@ -24,6 +22,8 @@
       <input
         matInput
         formControlName="handle"
+        title="Handle"
+        aria-label="Handle"
         placeholder="e.g. Username#1234" />
       @if (accountForm.get('handle')?.hasError('required')) {
         <mat-error>Handle is required</mat-error>
@@ -34,7 +34,9 @@
       <mat-label>Username (Optional)</mat-label>
       <input
         matInput
-        formControlName="username" />
+        formControlName="username"
+        title="Username"
+        aria-label="Username" />
     </mat-form-field>
 
     <mat-form-field appearance="fill">
@@ -42,6 +44,8 @@
       <input
         matInput
         formControlName="email"
+        title="Email"
+        aria-label="Email"
         type="email" />
       @if (accountForm.get('email')?.hasError('email')) {
         <mat-error>Invalid email format</mat-error>
@@ -53,12 +57,17 @@
       <input
         matInput
         formControlName="accountCreatedDate"
+        title="Account Created Date"
+        aria-label="Account Created Date"
         type="date" />
     </mat-form-field>
 
     <mat-form-field appearance="fill">
       <mat-label>Platform</mat-label>
-      <mat-select formControlName="platformId">
+      <mat-select
+        formControlName="platformId"
+        title="Platform"
+        aria-label="Platform">
         @for (platform of platforms; track platform.id) {
           <mat-option [value]="platform.id">{{ platform.name }}</mat-option>
         }
@@ -67,7 +76,10 @@
 
     <mat-form-field appearance="fill">
       <mat-label>Launcher (Optional)</mat-label>
-      <mat-select formControlName="launcherId">
+      <mat-select
+        formControlName="launcherId"
+        title="Launcher"
+        aria-label="Launcher">
         <mat-option [value]="''">None</mat-option>
         @for (launcher of filteredLaunchers; track launcher.id) {
           <mat-option [value]="launcher.id">{{ launcher.name }}</mat-option>
@@ -79,17 +91,23 @@
       <mat-label>Notes</mat-label>
       <textarea
         matInput
-        formControlName="notes"></textarea>
+        formControlName="notes"
+        title="Notes"
+        aria-label="Notes"></textarea>
     </mat-form-field>
 
     <div class="toggle-container">
-      <mat-slide-toggle formControlName="lifetimeSubscription"
+      <mat-slide-toggle
+        formControlName="lifetimeSubscription"
+        aria-label="Lifetime Subscription"
         >Lifetime Subscription</mat-slide-toggle
       >
     </div>
 
     <div class="toggle-container">
-      <mat-slide-toggle formControlName="publiclyVisible"
+      <mat-slide-toggle
+        formControlName="publiclyVisible"
+        aria-label="Publicly Visible"
         >Publicly Visible</mat-slide-toggle
       >
     </div>
