@@ -80,6 +80,7 @@
                       [src]="character.faction!.iconUrl!"
                       class="faction-icon"
                       alt="Faction Icon"
+                      title="Faction Icon"
                       width="20"
                       height="20" />
                   }
@@ -108,7 +109,8 @@
                             [src]="character.rank!.iconUrl"
                             class="rank-icon-mini"
                             height="14"
-                            alt="Rank" />
+                            alt="Rank"
+                            title="Rank" />
                         }
                         <span class="rank-name">{{
                           character.rank?.title || 'Unknown Rank'

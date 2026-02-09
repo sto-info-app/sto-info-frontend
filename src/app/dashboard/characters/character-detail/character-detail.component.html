@@ -14,7 +14,8 @@
               [src]="character.rank!.iconUrl"
               height="20"
               class="rank-icon"
-              alt="character.rank?.title ?? Rank Icon" />
+              alt="character.rank?.title ?? Rank Icon"
+              title="Rank Icon" />
           }
           <h1>{{ character.handle }}</h1>
         </div>
@@ -142,6 +143,7 @@
         <img
           [src]="getProfileImageUrl()"
           alt="{{ character?.handle }}"
+          title="{{ character?.handle }}"
           class="border"
           (error)="onProfileImageError()"
           loading="lazy" />
