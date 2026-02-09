@@ -18,25 +18,18 @@
     <h2><span>Current Supporters</span></h2>
   </div>
   @if (currentSupporters.length > 0) {
-    <div
-      class="team-grid"
-      role="list">
-      @for (
-        supporter of currentSupporters;
-        track trackByName($index, supporter)
-      ) {
-        <div
-          class="team-card"
-          role="listitem">
-          <div class="team-card-details">
-            <div class="team-card-name">{{ supporter.name }}</div>
-            @if (supporter.note) {
-              <div class="team-card-title">{{ supporter.note }}</div>
-            }
-          </div>
+    <ul class="team-grid">
+      <li
+        class="team-card"
+        *ngFor="let supporter of currentSupporters; trackBy: trackByName">
+        <div class="team-card-details">
+          <div class="team-card-name">{{ supporter.name }}</div>
+          @if (supporter.note) {
+            <div class="team-card-title">{{ supporter.note }}</div>
+          }
         </div>
-      }
-    </div>
+      </li>
+    </ul>
   } @else {
     <p class="empty-state">
       We currently have no
@@ -54,22 +47,18 @@
     <h2><span>Past Supporters</span></h2>
   </div>
   @if (pastSupporters.length > 0) {
-    <div
-      class="team-grid"
-      role="list">
-      @for (supporter of pastSupporters; track trackByName($index, supporter)) {
-        <div
-          class="team-card"
-          role="listitem">
-          <div class="team-card-details">
-            <div class="team-card-name">{{ supporter.name }}</div>
-            @if (supporter.note) {
-              <div class="team-card-title">{{ supporter.note }}</div>
-            }
-          </div>
+    <ul class="team-grid">
+      <li
+        class="team-card"
+        *ngFor="let supporter of pastSupporters; trackBy: trackByName">
+        <div class="team-card-details">
+          <div class="team-card-name">{{ supporter.name }}</div>
+          @if (supporter.note) {
+            <div class="team-card-title">{{ supporter.note }}</div>
+          }
         </div>
-      }
-    </div>
+      </li>
+    </ul>
   } @else {
     <p class="empty-state">No past supporters listed yet.</p>
   }

@@ -40,17 +40,13 @@
             <div class="lcars-text-bar small-lcars-bar-gap">
               <span>Highlights</span>
             </div>
-            <div
-              class="highlights-list"
-              role="list">
-              @for (highlight of member.highlights; track highlight) {
-                <div
-                  class="highlights-item"
-                  role="listitem">
-                  {{ highlight }}
-                </div>
-              }
-            </div>
+            <ul class="highlights-list">
+              <li
+                class="highlights-item"
+                *ngFor="let highlight of member.highlights">
+                {{ highlight }}
+              </li>
+            </ul>
           </div>
         }
       </div>
