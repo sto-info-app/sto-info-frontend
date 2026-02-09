@@ -41,11 +41,11 @@
               <span>Highlights</span>
             </div>
             <ul class="highlights-list">
-              <li
-                class="highlights-item"
-                *ngFor="let highlight of member.highlights">
-                {{ highlight }}
-              </li>
+              @for (highlight of member.highlights; track highlight) {
+                <li class="highlights-item">
+                  {{ highlight }}
+                </li>
+              }
             </ul>
           </div>
         }

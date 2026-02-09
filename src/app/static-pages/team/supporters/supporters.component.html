@@ -19,16 +19,16 @@
   </div>
   @if (currentSupporters.length > 0) {
     <ul class="team-grid">
-      <li
-        class="team-card"
-        *ngFor="let supporter of currentSupporters; trackBy: trackByName">
-        <div class="team-card-details">
-          <div class="team-card-name">{{ supporter.name }}</div>
-          @if (supporter.note) {
-            <div class="team-card-title">{{ supporter.note }}</div>
-          }
-        </div>
-      </li>
+      @for (supporter of currentSupporters; track supporter.name) {
+        <li class="team-card">
+          <div class="team-card-details">
+            <div class="team-card-name">{{ supporter.name }}</div>
+            @if (supporter.note) {
+              <div class="team-card-title">{{ supporter.note }}</div>
+            }
+          </div>
+        </li>
+      }
     </ul>
   } @else {
     <p class="empty-state">
@@ -48,16 +48,16 @@
   </div>
   @if (pastSupporters.length > 0) {
     <ul class="team-grid">
-      <li
-        class="team-card"
-        *ngFor="let supporter of pastSupporters; trackBy: trackByName">
-        <div class="team-card-details">
-          <div class="team-card-name">{{ supporter.name }}</div>
-          @if (supporter.note) {
-            <div class="team-card-title">{{ supporter.note }}</div>
-          }
-        </div>
-      </li>
+      @for (supporter of pastSupporters; track supporter.name) {
+        <li class="team-card">
+          <div class="team-card-details">
+            <div class="team-card-name">{{ supporter.name }}</div>
+            @if (supporter.note) {
+              <div class="team-card-title">{{ supporter.note }}</div>
+            }
+          </div>
+        </li>
+      }
     </ul>
   } @else {
     <p class="empty-state">No past supporters listed yet.</p>
