@@ -1,6 +1,6 @@
 import {
-    HttpClientTestingModule,
-    HttpTestingController,
+  HttpClientTestingModule,
+  HttpTestingController,
 } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
