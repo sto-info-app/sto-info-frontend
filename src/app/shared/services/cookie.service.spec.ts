@@ -64,9 +64,17 @@ describe('CookieService', () => {
     // JSDOM supports document.cookie but sometimes it's flakey if not configured.
     // We will try standard access.
 
-    it('should create a cookie', () => {
+    it('should create a cookie with secure and samesite attributes', () => {
+      const cookieSpy = jest.spyOn(document, 'cookie', 'set');
       service.createCookie('test_cookie', 'test_value', 1);
-      expect(document.cookie).toContain('test_cookie=test_value');
+      expect(cookieSpy).toHaveBeenCalledWith(
+        expect.stringContaining('test_cookie=test_value'),
+      );
+      expect(cookieSpy).toHaveBeenCalledWith(
+        expect.stringContaining('SameSite=Lax'),
+      );
+      expect(cookieSpy).toHaveBeenCalledWith(expect.stringContaining('Secure'));
+      cookieSpy.mockRestore();
     });
 
     it('should read a cookie', () => {
@@ -81,24 +89,18 @@ describe('CookieService', () => {
       expect(value).toBeNull();
     });
 
-    it('should delete a cookie', () => {
-      document.cookie = 'delete_me=value';
+    it('should delete a cookie with secure and samesite attributes', () => {
+      const cookieSpy = jest.spyOn(document, 'cookie', 'set');
       service.deleteTestCookie('delete_me');
-      // Start of string match or check it's gone/empty (expiration handling in JSDOM might not clear immediately from property string, but it sets expiry)
-      // Actually JSDOM respects expiry?
-      // Usually clearing cookie sets it to empty string or removes it.
-      // service.deleteTestCookie sets expires to 1970.
-      // Verify 'delete_me' is NOT in document.cookie or value is empty
 
-      // Note: JSDOM might not process expiry instantly to remove from string unless time passes or re-read?
-      // Let's assert that the set command was effective by checking if readCookie returns null or empty.
-
-      const val = service.readCookie('delete_me');
-      // If expired, readCookie (which parses document.cookie) should likely miss it or JSDOM removed it.
-      // If this is flaky, we might need to mock document.cookie accessors.
-
-      // JSDOM sets expired cookies to empty string rather than removing them
-      expect(val).toBe('');
+      expect(cookieSpy).toHaveBeenCalledWith(
+        expect.stringContaining('delete_me='),
+      );
+      expect(cookieSpy).toHaveBeenCalledWith(
+        expect.stringContaining('SameSite=Lax'),
+      );
+      expect(cookieSpy).toHaveBeenCalledWith(expect.stringContaining('Secure'));
+      cookieSpy.mockRestore();
     });
   });
 
