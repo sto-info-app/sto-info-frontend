@@ -1,16 +1,20 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, Renderer2, RendererFactory2, inject } from '@angular/core';
 import { ScriptLoadOptions } from '../models/script-loader.interface';
+import { CookieService } from './cookie.service';
 
 @Injectable({ providedIn: 'root' })
 export class ScriptLoaderService {
   private readonly _renderer: Renderer2;
   private readonly _documentRef: Document | null;
 
+  private readonly _cookieService: CookieService;
+
   constructor() {
     const rendererFactory = inject(RendererFactory2);
     this._renderer = rendererFactory.createRenderer(null, null);
     this._documentRef = inject(DOCUMENT, { optional: true });
+    this._cookieService = inject(CookieService);
   }
 
   /**
@@ -82,8 +86,6 @@ export class ScriptLoaderService {
    * with a value of `1` that is set via a Cloudflare worker for testing.
    */
   shouldDisableAnalytics(): boolean {
-    return document.cookie
-      .split('; ')
-      .some(c => c.startsWith('stoi_no_analytics=1'));
+    return this._cookieService.readCookie('stoi_no_analytics') === '1';
   }
 }

@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 import { CookieService } from './cookie.service';
@@ -7,7 +8,7 @@ describe('CookieService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CookieService],
+      providers: [CookieService, { provide: DOCUMENT, useValue: document }],
     });
     service = TestBed.inject(CookieService);
 
