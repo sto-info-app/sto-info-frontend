@@ -69,7 +69,7 @@ describe('CookieService', () => {
     // We will try standard access.
 
     it('should create a cookie with secure and samesite attributes', () => {
-      const cookieSpy = jest.spyOn(document, 'cookie', 'set');
+      const cookieSpy = jest.spyOn(mockDocument, 'cookie', 'set');
       service.createCookie('test_cookie', 'test_value', 1);
       expect(cookieSpy).toHaveBeenCalledWith(
         expect.stringContaining('test_cookie=test_value'),
@@ -82,19 +82,19 @@ describe('CookieService', () => {
     });
 
     it('should read a cookie', () => {
-      document.cookie = 'read_me=read_value';
+      mockDocument.cookie = 'read_me=read_value';
       const value = service.readCookie('read_me');
       expect(value).toBe('read_value');
     });
 
     it('should return null if cookie not found', () => {
-      document.cookie = 'other=value';
+      mockDocument.cookie = 'other=value';
       const value = service.readCookie('missing');
       expect(value).toBeNull();
     });
 
     it('should delete a cookie with secure and samesite attributes', () => {
-      const cookieSpy = jest.spyOn(document, 'cookie', 'set');
+      const cookieSpy = jest.spyOn(mockDocument, 'cookie', 'set');
       service.deleteTestCookie('delete_me');
 
       expect(cookieSpy).toHaveBeenCalledWith(
@@ -110,14 +110,14 @@ describe('CookieService', () => {
 
   describe('Get Specific Cookie Status', () => {
     it('should update status to true if cookie value is true', () => {
-      document.cookie = 'my_status=true';
+      mockDocument.cookie = 'my_status=true';
       service.getSpecificCookieStatus('my_status');
       expect(service.getCookieStatus()).toBe(true);
     });
 
     it('should update status to false if cookie value is false', () => {
       service.setCookieStatus(true);
-      document.cookie = 'my_status=false';
+      mockDocument.cookie = 'my_status=false';
       service.getSpecificCookieStatus('my_status');
       expect(service.getCookieStatus()).toBe(false);
     });
@@ -125,7 +125,7 @@ describe('CookieService', () => {
     it('should default to false if cookie not found', () => {
       service.setCookieStatus(true);
       // clear cookies
-      Object.defineProperty(document, 'cookie', { value: '', writable: true });
+      mockDocument.cookie = '';
 
       service.getSpecificCookieStatus('missing_status');
       expect(service.getCookieStatus()).toBe(false);
@@ -141,21 +141,21 @@ describe('CookieService', () => {
         ).cookieStatusSubject,
         'next',
       );
-      document.cookie = 'my_status=true';
+      mockDocument.cookie = 'my_status=true';
       service.getSpecificCookieStatus('my_status');
       // next should not be called because status is already true
       expect(nextSpy).not.toHaveBeenCalled();
     });
 
     it('should read the correct cookie when multiple exist', () => {
-      document.cookie = 'a=1; b=2; c=3';
+      mockDocument.cookie = 'a=1; b=2; c=3';
       expect(service.readCookie('b')).toBe('2');
       expect(service.readCookie('a')).toBe('1');
       expect(service.readCookie('c')).toBe('3');
     });
 
     it('should decode cookie value', () => {
-      document.cookie = 'enc=' + encodeURIComponent('val with spaces');
+      mockDocument.cookie = 'enc=' + encodeURIComponent('val with spaces');
       expect(service.readCookie('enc')).toBe('val with spaces');
     });
   });
