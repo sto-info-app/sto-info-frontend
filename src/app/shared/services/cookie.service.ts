@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CookieService {
+  private readonly _document = inject(DOCUMENT);
   private userAcceptedCookies: string[] = [];
 
   // Method to check if a specific cookie category is accepted
@@ -40,7 +42,9 @@ export class CookieService {
   // This method checks for a specific cookie name and updates the status
   getSpecificCookieStatus(cookieName: string): void {
     // Read the document cookies and split them into individual items
-    const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+    const cookies = this._document.cookie
+      .split(';')
+      .map(cookie => cookie.trim());
     // Find the cookie with the specified name
     const targetCookie = cookies.find(cookie =>
       cookie.startsWith(`${cookieName}=`),
@@ -61,18 +65,18 @@ export class CookieService {
     const date = new Date();
     date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
     const expires = `expires=${date.toUTCString()}`;
-    document.cookie = `${cookieName}=${cookieValue};${expires};path=/;SameSite=Lax;Secure`;
+    this._document.cookie = `${cookieName}=${cookieValue};${expires};path=/;SameSite=Lax;Secure`;
   }
 
   // Method to delete the cookie
   deleteTestCookie(cookieName: string): void {
-    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;SameSite=Lax;Secure`;
+    this._document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;SameSite=Lax;Secure`;
   }
 
   // Method to read a cookie value by name
   readCookie(cookieName: string): string | null {
     const name = `${cookieName}=`;
-    const decodedCookie = decodeURIComponent(document.cookie);
+    const decodedCookie = decodeURIComponent(this._document.cookie);
     const cookies = decodedCookie.split(';');
     for (const cookie of cookies) {
       if (cookie.trim().startsWith(name)) {
