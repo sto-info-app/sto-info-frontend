@@ -22,6 +22,10 @@ import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { CreditsComponent } from './static-pages/credits/credits.component';
 import { PrivacyPolicyComponent } from './static-pages/privacy-policy/privacy-policy.component';
+import { TeamDevelopersComponent } from './static-pages/team/developers/developers.component';
+import { TeamMemberComponent } from './static-pages/team/team-member/team-member.component';
+import { TeamSupportersComponent } from './static-pages/team/supporters/supporters.component';
+import { TeamVolunteersComponent } from './static-pages/team/volunteers/volunteers.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 
 export const routes: Routes = [
@@ -78,6 +82,37 @@ export const routes: Routes = [
     path: APP_ROUTES.ABOUT,
     component: AboutComponent,
     data: { title: APP_ROUTE_TITLES.ABOUT },
+  },
+  {
+    path: APP_ROUTES.ABOUT_DEVELOPERS,
+    component: TeamDevelopersComponent,
+    data: { title: APP_ROUTE_TITLES.ABOUT_DEVELOPERS },
+  },
+  {
+    path: APP_ROUTES.ABOUT_DEVELOPER_DETAIL,
+    component: TeamMemberComponent,
+    data: {
+      title: APP_ROUTE_TITLES.ABOUT_DEVELOPER_DETAIL,
+      teamGroup: 'developers',
+    },
+  },
+  {
+    path: APP_ROUTES.ABOUT_VOLUNTEERS,
+    component: TeamVolunteersComponent,
+    data: { title: APP_ROUTE_TITLES.ABOUT_VOLUNTEERS },
+  },
+  {
+    path: APP_ROUTES.ABOUT_VOLUNTEER_DETAIL,
+    component: TeamMemberComponent,
+    data: {
+      title: APP_ROUTE_TITLES.ABOUT_VOLUNTEER_DETAIL,
+      teamGroup: 'volunteers',
+    },
+  },
+  {
+    path: APP_ROUTES.ABOUT_SUPPORTERS,
+    component: TeamSupportersComponent,
+    data: { title: APP_ROUTE_TITLES.ABOUT_SUPPORTERS },
   },
   {
     path: APP_ROUTES.CONTACT,

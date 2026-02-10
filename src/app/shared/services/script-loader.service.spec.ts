@@ -1,14 +1,24 @@
 import { DOCUMENT } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
+import { CookieService } from './cookie.service';
 import { ScriptLoaderService } from './script-loader.service';
 
 const TEST_SCRIPT_PREFIX = 'script-loader-test';
 
 describe('ScriptLoaderService', () => {
+  let cookieServiceMock: jest.Mocked<CookieService>;
+
   const configureService = (docValue: Document = document) => {
+    cookieServiceMock = {
+      readCookie: jest.fn(),
+    } as unknown as jest.Mocked<CookieService>;
+
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      providers: [{ provide: DOCUMENT, useValue: docValue }],
+      providers: [
+        { provide: DOCUMENT, useValue: docValue },
+        { provide: CookieService, useValue: cookieServiceMock },
+      ],
     });
 
     return TestBed.inject(ScriptLoaderService);
@@ -33,9 +43,6 @@ describe('ScriptLoaderService', () => {
   afterEach(() => {
     removeTestScripts(document);
     TestBed.resetTestingModule();
-    // Clear cookies
-    document.cookie =
-      'stoi_no_analytics=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
   });
 
   it('should load a script into the document head with defaults', () => {
@@ -127,18 +134,22 @@ describe('ScriptLoaderService', () => {
   describe('shouldDisableAnalytics', () => {
     it('should return true when stoi_no_analytics cookie is set to 1', () => {
       const service = configureService();
-      document.cookie = 'stoi_no_analytics=1; path=/';
+      cookieServiceMock.readCookie.mockReturnValue('1');
       expect(service.shouldDisableAnalytics()).toBe(true);
+      expect(cookieServiceMock.readCookie).toHaveBeenCalledWith(
+        'stoi_no_analytics',
+      );
     });
 
     it('should return false when stoi_no_analytics cookie is not set', () => {
       const service = configureService();
+      cookieServiceMock.readCookie.mockReturnValue(null);
       expect(service.shouldDisableAnalytics()).toBe(false);
     });
 
     it('should return false when stoi_no_analytics cookie is set to 0', () => {
       const service = configureService();
-      document.cookie = 'stoi_no_analytics=0; path=/';
+      cookieServiceMock.readCookie.mockReturnValue('0');
       expect(service.shouldDisableAnalytics()).toBe(false);
     });
   });

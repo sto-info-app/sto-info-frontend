@@ -1,47 +1,139 @@
 <div>
   <h1>About the {{ appTitle }}</h1>
-  <div class="lcars-text-bar">
-    <h2><span>About me, the developer</span></h2>
-  </div>
   <p>
-    I am Steve Roberts, primarily known in the Star Trek Online (STO) community
-    as MidNiteShadow7 from my podcasting. I was a STO forum moderator but have
-    never worked for Star Trek Online, Cryptic Studios, Paramount or CBS.
+    The {{ appTitle }} was born from its creator's need to track his characters
+    and accounts in a massive Excel spreadsheet. The problem was, there was so
+    much data to manage that it was getting harder to manage his ninety-seven
+    characters across seven accounts on three platforms!
   </p>
-  <p>
-    In real life, I am a husband, father and all-around geek! For work, I am a
-    senior software developer in the UK, and I love finding solutions and
-    creating applications that enhance user experiences.
-  </p>
-
-  <div class="lcars-text-bar">
-    <h2><span>The App</span></h2>
-  </div>
-  <p>
-    This app was born from having my Excel spreadsheet getting too big to manage
-    ninety-seven characters across seven accounts on three platforms! As my
-    spreadsheet struggled to keep up, I made this app.
-  </p>
+  <p>His solution was to create the {{ appTitle }}.</p>
   <p>
     The plan is for this companion app to help you track your STO accounts,
-    characters, and fleets. It will also help you track your reputations, duty
-    officers, and more. The app will also provide you with a way to track your
-    progress in the game and help you plan your next steps. Additionally, it
-    will include feature updates that enhance gameplay and user engagement. Stay
-    tuned for exciting new functionalities in future updates!
+    characters, fleets, reputations, duty officers, statistics, and, eventually,
+    a lot more.
   </p>
   <p>
-    It is still a work in progress and will be released with minimal features,
-    but I aim to add more features as soon as possible.
+    This app will also provide you with a way to track your progress in Star
+    Trek Online, share your data with friends, and help you plan your next
+    steps. Additionally, it will include feature updates that enhance gameplay
+    and user engagement. Stay tuned for exciting new functionalities in future
+    updates!
+  </p>
+  <p>
+    The {{ appTitle }} is still a work in progress and its initial release has
+    minimal features, but the creator aims to add more functionality as soon as
+    possible... trust me, it will be installed on Tuesday!
   </p>
 
   <div class="lcars-text-bar">
-    <h2><span>Connect with me in-game</span></h2>
+    <h2><span>Social Media</span></h2>
   </div>
   <p>
-    If you want to connect with me in Star Trek Online, my PC handle is
-    <span class="go-sunflower">&#64;MidNiteShadow7</span>; on PlayStation, it is
-    <span class="go-sunflower">&#64;MidNiteGeek</span>; and on Xbox, it is
-    <span class="go-sunflower">&#64;MidNiteShadow77</span>.
+    We only have a small social media footprint. We are not about advertising,
+    earning money, or selling your data. We are about sharing our love of Star
+    Trek Online and helping each other out. But, if you would like to follow us
+    on the limited social media platforms we have to provide feedback, share
+    your thoughts, learn about updates to the app or just want to open hailing
+    frequencies to say hi, feel free to do so using the links below.
   </p>
+  <div class="buttons">
+    <a
+      [href]="socialMediaRoutes.REDDIT"
+      class="sunflower"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Reddit</a
+    >
+    <a
+      [href]="socialMediaRoutes.GITHUB"
+      class="almond"
+      target="_blank"
+      rel="noopener noreferrer"
+      >GitHub</a
+    >
+    <a
+      [href]="socialMediaRoutes.DISCORD"
+      class="sky"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Discord</a
+    >
+    <a
+      [href]="socialMediaRoutes.BLUESKY"
+      class="blue"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Bluesky</a
+    >
+  </div>
+
+  <div class="lcars-text-bar">
+    <h2><span>The Crew</span></h2>
+  </div>
+  <p>
+    No ship is complete without a crew. The {{ appTitle }} is a community
+    project and we rely on the help of our volunteers and supporters to keep it
+    going. Meet the people who build, test, and support the project.
+  </p>
+  <div class="buttons">
+    <a
+      [routerLink]="getRouteLink(appRoutes.ABOUT_DEVELOPERS)"
+      class="evening"
+      >Developers</a
+    >
+    <a
+      [routerLink]="getRouteLink(appRoutes.ABOUT_VOLUNTEERS)"
+      class="violet"
+      >Volunteers</a
+    >
+    <a
+      [routerLink]="getRouteLink(appRoutes.ABOUT_SUPPORTERS)"
+      class="ice"
+      >Supporters</a
+    >
+  </div>
+
+  <div class="lcars-text-bar">
+    <h2><span>Costs</span></h2>
+  </div>
+  <p>
+    The STO Info (Star Trek Online Info) application is a free, independent,
+    fan-run project built for the community.
+  </p>
+  <p>
+    Patreon is not required to use the app, unlock features, or gain access to
+    anything.
+  </p>
+  <p>
+    If you choose to support the project, you are helping cover infrastructure
+    costs and the time needed to maintain and improve it — nothing more, nothing
+    less.
+  </p>
+  <p>
+    Estimated costs during development are over £600 (~$800 USD) per year, with
+    this expected to increase as the user base grows.
+  </p>
+  <p>
+    If you find the site useful and would like to help keep it running, you can
+    choose to support it with a voluntary donation.
+  </p>
+  <p>
+    There are no paid features, no exclusive access, and no obligation to
+    contribute. The project will remain free for everyone.
+  </p>
+  <p>
+    The only reward for supporting the project is the satisfaction of knowing
+    you are helping to keep it going and your name will be added to the
+    <a [routerLink]="getRouteLink(appRoutes.ABOUT_SUPPORTERS)">Supporters</a>
+    page (a single list; no amounts shown).
+  </p>
+  <div class="buttons lcars-flex-center">
+    <a
+      [href]="patreonUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="lcars-btn-auto tangerine"
+      >Become a Patron Supporter</a
+    >
+  </div>
 </div>

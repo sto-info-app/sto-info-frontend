@@ -16,6 +16,7 @@
               id="email"
               name="email"
               [(ngModel)]="email"
+              aria-label="Email"
               required
               pattern="EMAIL_PATTERN"
               [class.errored]="errorMessage ? true : false"
@@ -35,6 +36,7 @@
               id="password"
               name="password"
               [(ngModel)]="password"
+              aria-label="Password"
               required
               [class.errored]="errorMessage ? true : false"
               (input)="validateInputs()" />

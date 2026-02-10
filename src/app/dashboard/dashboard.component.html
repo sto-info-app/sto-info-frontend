@@ -54,6 +54,7 @@
             <img
               src="{{ unavailablePhotoSrc }}"
               alt="Photo unavailable"
+              title="Photo unavailable"
               class="border"
               loading="lazy" />
           }
@@ -61,6 +62,7 @@
             <img
               [src]="user.profile?.profilePicture300"
               alt="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
+              title="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
               class="border"
               (error)="onProfileImageError($event)"
               loading="lazy" />
