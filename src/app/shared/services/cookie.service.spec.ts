@@ -11,11 +11,13 @@ describe('CookieService', () => {
     });
     service = TestBed.inject(CookieService);
 
-    // Clear cookies before each test
-    // Note: checking if document.cookie is writable in this environment
+    let cookieStore = '';
     Object.defineProperty(document, 'cookie', {
-      writable: true,
-      value: '',
+      get: () => cookieStore,
+      set: (val: string) => {
+        cookieStore = val;
+      },
+      configurable: true,
     });
   });
 
