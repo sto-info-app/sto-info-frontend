@@ -61,12 +61,12 @@ export class CookieService {
     const date = new Date();
     date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
     const expires = `expires=${date.toUTCString()}`;
-    document.cookie = `${cookieName}=${cookieValue};${expires};path=/`;
+    document.cookie = `${cookieName}=${cookieValue};${expires};path=/;SameSite=Lax;Secure`;
   }
 
   // Method to delete the cookie
   deleteTestCookie(cookieName: string): void {
-    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;SameSite=Lax;Secure`;
   }
 
   // Method to read a cookie value by name
