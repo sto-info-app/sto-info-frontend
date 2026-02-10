@@ -5,21 +5,24 @@ import { CookieService } from './cookie.service';
 
 describe('CookieService', () => {
   let service: CookieService;
+  let mockDocument: Partial<Document>;
+  let cookieStore: string;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [CookieService, { provide: DOCUMENT, useValue: document }],
-    });
-    service = TestBed.inject(CookieService);
-
-    let cookieStore = '';
-    Object.defineProperty(document, 'cookie', {
-      get: () => cookieStore,
-      set: (val: string) => {
+    cookieStore = '';
+    mockDocument = {
+      get cookie() {
+        return cookieStore;
+      },
+      set cookie(val: string) {
         cookieStore = val;
       },
-      configurable: true,
+    };
+
+    TestBed.configureTestingModule({
+      providers: [CookieService, { provide: DOCUMENT, useValue: mockDocument }],
     });
+    service = TestBed.inject(CookieService);
   });
 
   it('should be created', () => {
