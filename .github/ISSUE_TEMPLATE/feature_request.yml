@@ -1,0 +1,54 @@
+name: Feature Request
+description: Suggest an idea for this project.
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea for STO Info? We'd love to hear it!
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A concise description of the feature you'd like.
+    validations:
+      required: true
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem? Please describe.
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the application would this affect?
+      options:
+        - UI / UX
+        - Auth / Account
+        - Forms / Data Entry
+        - Accessibility
+        - Performance
+        - Build / Tooling
+        - New Feature
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context or screenshots about the feature request here.
+  - type: checkboxes
+    id: safeguards
+    attributes:
+      label: Safeguards
+      options:
+        - label: I confirm that I have not included any secrets or PII (Personally Identifiable Information) in logs or screenshots.
+          required: true
