@@ -16,7 +16,11 @@ Snyk is used to scan dependencies and source code for known vulnerabilities.
 
 - **Scans**: Monitors `package.json` for vulnerable dependencies and performs Static Analysis (SAST) on code.
 - **Findings**: Results appear in the Snyk dashboard and as checks on Pull Requests.
-- **Remediation**: Snyk provides guidance on upgrading packages or patching code to fix identified issues.
+- **Blocking**: Critical or "High" severity vulnerabilities with a known fix will block the PR check.
+- **Remediation**:
+  - Follow the link in the GitHub check to see the specific vulnerable package.
+  - Snyk typically suggests a minimal version upgrade to resolve the issue.
+  - Update your `package.json` and run `npm install` (or `npm ci`) to update the lockfile.
 
 ## SonarCloud
 
@@ -24,7 +28,8 @@ SonarCloud performs deep code analysis, focusing on Security Hotspots and vulner
 
 - **Security Hotspots**: Highlights code areas that require manual review (e.g., sensitive configuration, cryptographic usage).
 - **Findings**: Results are linked from PR checks to the SonarCloud dashboard.
-- **Rules**: We enforce a set of security-specific rules to prevent common coding errors.
+- **Rules**: We enforce a set of security-specific rules (e.g., preventing hardcoded secrets) to catch common errors.
+- **Remediation**: Review the 'Vulnerabilities' tab in SonarCloud. High-risk issues must be fixed or marked as 'Safe' by a maintainer before the Quality Gate passes.
 
 ## GitHub Code Scanning (SARIF)
 
