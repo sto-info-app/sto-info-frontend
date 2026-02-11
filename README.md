@@ -1,4 +1,4 @@
-# sto-info-frontend [![Uptime status](https://img.shields.io/uptimerobot/status/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/) [![Uptime 30 days](https://img.shields.io/uptimerobot/ratio/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
+# sto-info-frontend [![Uptime status](https://img.shields.io/uptimerobot/status/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/) [![Uptime 30 days](https://img.shields.io/uptimerobot/ratio/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/sto-info-app/sto-info-frontend/badge)](https://scorecard.dev/viewer/?uri=github.com/sto-info-app/sto-info-frontend)
 
 ## Project Overview
 
@@ -78,6 +78,13 @@ This project is licensed under the MIT Licence. See the [LICENCE](LICENCE) file 
 ## Intellectual Property Rights
 
 This app respects the copyright and intellectual property rights of Star Trek Online and Star Trek. CBS Studios Inc. owns STAR TREK, and Cryptic Studios Inc owns STAR TREK ONLINE with all their related marks, logos and characters.
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 ## Contact
 

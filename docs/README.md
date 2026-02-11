@@ -32,6 +32,7 @@ Supporting docs:
 - [Operations runbook](operations.md)
 - [Security, rate limiting, retention](security-and-data.md)
 - [Memory leak prevention](memory-leak-prevention-guide.md)
+- [GitHub Automation & Standards](github/README.md)
 
 ## Local development
 

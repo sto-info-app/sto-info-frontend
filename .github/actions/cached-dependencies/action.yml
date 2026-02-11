@@ -34,7 +34,7 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: npm ci --ignore-scripts
+      run: npm ci --ignore-scripts --legacy-peer-deps
 
     - name: Clean up npm auth
       shell: bash
