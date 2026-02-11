@@ -1,0 +1,29 @@
+name: Contributors
+on:
+  push:
+    branches: ['development']
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sundays
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-contributors:
+    name: Update Contributors
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'sto-info-app' || github.event.repository.fork == false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Contributors List
+        uses: all-contributors/all-contributors-action@81309f928e07971df296e8576472283995f5904d # v0.6.0
+        with:
+          project-name: sto-info-frontend
+          project-owner: sto-info-app

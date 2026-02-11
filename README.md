@@ -79,6 +79,13 @@ This project is licensed under the MIT Licence. See the [LICENCE](LICENCE) file 
 
 This app respects the copyright and intellectual property rights of Star Trek Online and Star Trek. CBS Studios Inc. owns STAR TREK, and Cryptic Studios Inc owns STAR TREK ONLINE with all their related marks, logos and characters.
 
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
 ## Contact
 
 For any enquiries, please contact us at [support@startrekonline.info](mailto:support@startrekonline.info).
