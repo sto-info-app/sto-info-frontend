@@ -234,3 +234,54 @@ jobs:
       - name: Build (push only)
         if: github.event_name == 'push'
         run: npm run build
+
+  npm_audit:
+    # Match lint_and_test conditions: skip Dependabot, skip draft PRs, skip version bump PRs
+    if: |
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
+      !(github.event_name == 'pull_request' && (
+        (github.event.pull_request.user.login == 'github-actions[bot]' && startsWith(github.event.pull_request.title, 'chore: bump version to')) ||
+        startsWith(github.event.pull_request.head.ref, 'chore/bump-version-to-')
+      ))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: Resolve cache toggle
+        id: cache-toggle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          value=$(gh api repos/$REPO/actions/variables/CACHE_NODE_MODULES --jq '.value' 2>/dev/null || echo '')
+          if [ -z "$value" ]; then
+            value=true
+          fi
+          echo "use_cache=$value" >> "$GITHUB_OUTPUT"
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+        with:
+          use-cache: ${{ steps.cache-toggle.outputs.use_cache }}
+          node-version: ${{ env.NODE_VERSION }}
+          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+
+      - name: npm audit (production dependencies)
+        # Extra-safe: do not block merges if npm audit is noisy
+        continue-on-error: true
+        run: npm audit --audit-level=high --omit=dev
