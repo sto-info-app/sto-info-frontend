@@ -1,0 +1,4 @@
+# CODEOWNERS file for sto-info-frontend
+# These owners will be requested for review when a PR touches these files.
+
+*       @sto-info-app/maintainers
