@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:
-      contents: read
+      contents: read # To fetch repo content for testing
 
     steps:
       - name: Checkout Repo
