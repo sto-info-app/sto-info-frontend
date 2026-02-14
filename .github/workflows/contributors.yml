@@ -10,8 +10,8 @@ env:
   NODE_VERSION: 24
 
 # Declare default permissions as read only.
-permissions:
-  contents: read
+# Declare default permissions as read only.
+permissions: {}
 
 jobs:
   update-contributors:
@@ -20,7 +20,8 @@ jobs:
     # Run only on the canonical repository
     if: github.repository_owner == 'sto-info-app' || github.event.repository.fork == false
     permissions:
-      contents: write
+      contents: write # To push updates to README/CONTRIBUTORS
+      actions: read # To check workflow runs if needed (optional but safer)
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

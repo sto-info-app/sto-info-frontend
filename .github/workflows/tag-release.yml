@@ -4,6 +4,9 @@ on:
   push:
     branches: [production]
 
+# Declare default permissions as read only.
+permissions: {}
+
 env:
   NODE_VERSION: 24
 
@@ -16,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write
+      contents: write # To create and push tags
 
     steps:
       - name: Checkout repo

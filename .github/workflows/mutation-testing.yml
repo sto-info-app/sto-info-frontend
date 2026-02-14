@@ -5,6 +5,9 @@ on:
     - cron: '0 0 * * 0' # Run every Sunday at midnight
   workflow_dispatch: # Allow manual trigger
 
+# Declare default permissions as read only.
+permissions: {}
+
 env:
   NODE_VERSION: 24
 
@@ -15,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:
-      contents: read
+      contents: read # To fetch repo content for testing
 
     steps:
       - name: Checkout Repo
