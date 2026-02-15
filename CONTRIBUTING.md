@@ -34,6 +34,18 @@ Ensure that your changes do not break existing functionality by running the test
 
 Update the documentation to reflect your changes. This includes comments in the code, as well as updates to any relevant markdown files.
 
+### Developer Certificate of Origin (DCO)
+
+To ensure that all contributions are legally cleared, we require all contributors to sign off on their commits. This is done by adding a `Signed-off-by` line to your commit messages.
+
+You can do this automatically by using the `-s` or `--signoff` flag when committing:
+
+```bash
+git commit -s -m "Your descriptive commit message"
+```
+
+By signing off on your commits, you certify that you have the right to submit the code under the project's licence.
+
 ## Code of Conduct
 
 Please adhere to our [Code of Conduct](CODE_OF_CONDUCT.md) in all interactions with the project.
