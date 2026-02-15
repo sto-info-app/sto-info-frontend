@@ -1,4 +1,4 @@
-name: CodeQL
+name: 'CodeQL Static Analysis'
 
 on:
   push:
@@ -12,8 +12,8 @@ permissions:
   contents: read
 
 jobs:
-  analyze:
-    name: Analyze
+  code_scanning:
+    name: 'Analyze Source Code'
     runs-on: ubuntu-latest
     timeout-minutes: 360
     permissions:
