@@ -4,7 +4,7 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/sto-info-app/sto-info-frontend/badge)](https://securityscorecards.dev/viewer/?uri=github.com/sto-info-app/sto-info-frontend)
 [![Security Policy](https://img.shields.io/badge/security%20policy-SECURITY.md-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/SECURITY.md)
 
-[![CodeQL](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/codeql.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/codeql.yml)
+[![CodeQL Analysis](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/codeql.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/codeql.yml)
 [![Dependency Review](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml)
 [![OpenSSF Scorecard workflow](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml)
 [![npm audit](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml)
