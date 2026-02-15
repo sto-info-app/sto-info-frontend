@@ -13,14 +13,14 @@
 
 [![Lint and Test](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lint-test.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lint-test.yml)
 [![Version bump](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/version-bump.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/version-bump.yml)
-[![Tag release](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/tag-release.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/tag-release.yml)
+[![Tag release](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/tag-release.yml/badge.svg?branch=production)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/tag-release.yml)
 
 [![Uptime status](https://img.shields.io/uptimerobot/status/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
 [![Uptime 30 days](https://img.shields.io/uptimerobot/ratio/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
 
 ## Quality and testing
 
-[![Mutation testing](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml)
+[![Mutation testing](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml)
 
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
