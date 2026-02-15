@@ -1,3 +1,5 @@
+# sto-info-app-frontend
+
 ## Security posture
 
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11941/badge)](https://www.bestpractices.dev/projects/11941)
