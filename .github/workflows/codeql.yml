@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   code_scanning:
-    name: 'Analyze Source Code'
+    name: 'Analyse Source Code'
     runs-on: ubuntu-latest
     timeout-minutes: 360
     permissions:
@@ -30,8 +30,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      # Initializes the CodeQL tools for scanning.
-      - name: Initialize CodeQL
+      # Initialises the CodeQL tools for scanning.
+      - name: Initialise CodeQL
         uses: github/codeql-action/init@f5c2471be782132e47a6e6f9c725e56730d6e9a3 # v3.32.3
         with:
           languages: ${{ matrix.language }}
