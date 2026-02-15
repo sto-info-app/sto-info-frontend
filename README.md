@@ -1,6 +1,50 @@
-# sto-info-frontend [![Uptime status](https://img.shields.io/uptimerobot/status/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/) [![Uptime 30 days](https://img.shields.io/uptimerobot/ratio/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/sto-info-app/sto-info-frontend/badge)](https://scorecard.dev/viewer/?uri=github.com/sto-info-app/sto-info-frontend)
+## Security posture
 
-## Project Overview
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11941/badge)](https://www.bestpractices.dev/projects/11941)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/sto-info-app/sto-info-frontend/badge)](https://securityscorecards.dev/viewer/?uri=github.com/sto-info-app/sto-info-frontend)
+[![Security Policy](https://img.shields.io/badge/security%20policy-SECURITY.md-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/SECURITY.md)
+
+[![CodeQL](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/codeql.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/codeql.yml)
+[![Dependency Review](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml)
+[![OpenSSF Scorecard workflow](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml)
+[![npm audit](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml)
+
+## CI and delivery
+
+[![Lint and Test](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lint-test.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lint-test.yml)
+[![Version bump](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/version-bump.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/version-bump.yml)
+[![Tag release](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/tag-release.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/tag-release.yml)
+
+[![Uptime status](https://img.shields.io/uptimerobot/status/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
+[![Uptime 30 days](https://img.shields.io/uptimerobot/ratio/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
+
+## Quality and testing
+
+[![Mutation testing](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml)
+
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+
+## Code metrics
+
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+
+## Release and project
+
+[![Release](https://img.shields.io/github/v/release/sto-info-app/sto-info-frontend?display_name=tag&sort=semver)](https://github.com/sto-info-app/sto-info-frontend/releases)
+[![Licence](https://img.shields.io/github/license/sto-info-app/sto-info-frontend)](https://github.com/sto-info-app/sto-info-frontend/blob/development/LICENCE)
+[![All Contributors](https://img.shields.io/github/all-contributors/sto-info-app/sto-info-frontend?label=all%20contributors)](https://github.com/sto-info-app/sto-info-frontend#contributors)
+[![Angular](https://img.shields.io/github/package-json/dependency-version/sto-info-app/sto-info-frontend/@angular/core?label=angular&branch=development)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
+[![Node](https://img.shields.io/badge/node-24.x-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
+
+## Project overview
 
 The `sto-info-frontend` is a frontend static site to provide information related to STO (Star Trek Online) player's accounts, characters and fleets. It is built using modern web technologies and follows best practices.
 
@@ -66,10 +110,6 @@ Install the [SonarQube IDE](https://www.sonarsource.com/products/sonarlint/) and
 ```
 
 The analysis results will be available on the SonarQube dashboard.
-
-### Current SonarQube Analysis
-
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=alert_status&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=bugs&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=code_smells&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend) [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=duplicated_lines_density&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 
 ## Licence
 
