@@ -31,6 +31,14 @@ SonarCloud performs deep code analysis, focusing on Security Hotspots and vulner
 - **Rules**: We enforce a set of security-specific rules (e.g., preventing hardcoded secrets) to catch common errors.
 - **Remediation**: Review the 'Vulnerabilities' tab in SonarCloud. High-risk issues must be fixed or marked as 'Safe' by a maintainer before the Quality Gate passes.
 
+## CodeQL Static Analysis
+
+CodeQL is GitHub's industry-leading semantic analysis engine that treats code as data to find security vulnerabilities.
+
+- **Findings**: Viewable in **Security -> Code scanning alerts**.
+- **Execution**: Runs on every Pull Request to `development`, on pushes to `development` and `production`, and weekly.
+- **Suites**: We use `security-extended` and `security-and-quality` for comprehensive coverage.
+
 ## GitHub Code Scanning (SARIF)
 
 We use the SARIF (Static Analysis Results Interchange Format) to integrate various security tools into the GitHub interface.
