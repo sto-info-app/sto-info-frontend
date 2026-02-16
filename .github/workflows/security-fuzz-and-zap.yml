@@ -213,7 +213,7 @@ jobs:
 
       - name: Run ZAP baseline scan (PR)
         if: github.event_name == 'pull_request'
-        uses: zaproxy/action-baseline@fcad600881c0eb1a1e1c1eb3ab1e46bfe0ef4bb8 # v0.15.0
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
         with:
           target: 'http://localhost:4200'
           rules_file_name: '.zap/rules.tsv'
@@ -223,7 +223,7 @@ jobs:
 
       - name: Run ZAP full scan (weekly/manual)
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.zap_scan_type == 'full')
-        uses: zaproxy/action-full-scan@fcad600881c0eb1a1e1c1eb3ab1e46bfe0ef4bb8 # v0.15.0
+        uses: zaproxy/action-full-scan@3c58388149901b9a03b7718852c5ba889646c27c # v0.13.0
         with:
           target: 'http://localhost:4200'
           rules_file_name: '.zap/rules.tsv'
