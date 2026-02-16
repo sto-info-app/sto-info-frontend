@@ -11,6 +11,7 @@
 [![OpenSSF Scorecard workflow](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml)
 [![npm audit](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml)
 [![DCO Enforcement](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml)
+[![Security: Fuzz + ZAP](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz-and-zap.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz-and-zap.yml)
 
 ## CI and delivery
 
@@ -74,6 +75,57 @@ npm run test:cov
 ```
 
 Coverage output is written to `coverage/` (including an `lcov.info` file used by tooling such as SonarQube).
+
+## Security Testing
+
+### Property-based fuzz testing
+
+This project uses [fast-check](https://github.com/dubzzz/fast-check) for property-based fuzz testing to ensure robustness against unexpected inputs.
+
+**Run locally (lightweight):**
+
+```bash
+npm run test:fuzz
+```
+
+**Run locally (comprehensive):**
+
+```bash
+npm run test:fuzz:full
+```
+
+**Customise iteration count:**
+
+Set the `FUZZ_NUM_RUNS` environment variable to control the number of test iterations:
+
+```bash
+FUZZ_NUM_RUNS=500 npm run test:fuzz
+```
+
+Default: 100 iterations (if not set)
+
+**CI behaviour:**
+
+- **Pull requests**: Runs lightweight fuzz tests (50 iterations) to catch obvious issues quickly
+- **Weekly schedule**: Runs comprehensive fuzz tests (1000 iterations) for deeper analysis
+
+### OWASP ZAP DAST scanning
+
+Dynamic Application Security Testing (DAST) is performed using OWASP ZAP to identify security vulnerabilities in the running application.
+
+**CI behaviour:**
+
+- **Pull requests**: Runs ZAP baseline scan with 10-minute timeout
+- **Weekly schedule**: Runs ZAP full scan with 30-minute timeout
+- **Scan reports**: Available as workflow artifacts for 30 days
+
+**Limitations:**
+
+- Scans run against unauthenticated endpoints only
+- Does not test authenticated user flows
+- False positives can be tuned via `.zap/rules.tsv`
+
+See [SECURITY.md](SECURITY.md) for more details.
 
 ## Running end-to-end tests
 
