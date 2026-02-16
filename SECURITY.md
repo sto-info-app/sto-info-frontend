@@ -13,6 +13,98 @@ We provide security updates for the following versions:
 
 Please ensure you are using the latest tagged release or the `development` branch for the most secure experience.
 
+## Automated Security Testing
+
+This repository employs multiple layers of automated security testing to identify vulnerabilities early in the development lifecycle.
+
+### Property-based fuzz testing with fast-check
+
+**What it does:**
+Property-based fuzz testing generates thousands of random inputs to test code behaviour under unexpected conditions. This helps identify edge cases, crashes, and unhandled exceptions.
+
+**When it runs:**
+
+- **Pull requests**: Lightweight tests (~50 iterations per property) to provide fast feedback
+- **Weekly schedule**: Comprehensive tests (~1000 iterations per property) for deep analysis
+- **Manual trigger**: Available via workflow_dispatch with configurable iteration counts
+
+**How to run locally:**
+
+```bash
+# Lightweight (fast feedback)
+npm run test:fuzz
+
+# Comprehensive (deep analysis)
+npm run test:fuzz:full
+
+# Custom iteration count
+FUZZ_NUM_RUNS=500 npm run test:fuzz
+```
+
+**Current test coverage:**
+
+- URL parsing and query parameter handling
+- Environment configuration validation
+- String manipulation utilities
+
+### OWASP ZAP DAST scanning
+
+**What it does:**
+ZAP (Zed Attack Proxy) performs Dynamic Application Security Testing by actively scanning the running application for common web vulnerabilities including:
+
+- Cross-site scripting (XSS)
+- SQL injection
+- Security header misconfigurations
+- Information disclosure
+- And 50+ other vulnerability types
+
+**When it runs:**
+
+- **Pull requests**: ZAP baseline scan (fast, ~10 minutes, targets common issues)
+- **Weekly schedule**: ZAP full scan (comprehensive, ~30 minutes, deep spider + active scan)
+- **Manual trigger**: Available via workflow_dispatch with configurable scan type
+
+**Scan execution:**
+
+- Application is built in production mode
+- Static files served via npx serve on localhost:4200
+- ZAP scans against local server (no external dependencies)
+- Reports stored as workflow artifacts for 30 days
+
+**Failure criteria:**
+
+- Scan fails on Medium or High severity findings
+- Low and Informational findings logged but do not fail the build
+
+**Limitations:**
+
+- **Authentication**: Scans run against unauthenticated endpoints only; authenticated user flows are not currently tested
+- **Coverage**: Full scan uses automated spider which may not discover all routes; consider adding authenticated scan contexts in future
+- **False positives**: Some findings may be false positives; tune via `.zap/rules.tsv`
+
+**Tuning false positives:**
+
+Edit `.zap/rules.tsv` to suppress known false positives:
+
+```tsv
+# Format: <scanId>	<action>	<url>
+10202	IGNORE	https://example.com/known-safe-endpoint
+```
+
+Common scan IDs are documented in `.zap/rules.tsv`.
+
+**How to interpret results:**
+
+1. Download ZAP report artifact from workflow run
+2. Open `index.html` in browser
+3. Review findings by severity
+4. Investigate Medium/High findings first
+5. Add legitimate false positives to `.zap/rules.tsv`
+
+### Continuous updates
+
+Both fast-check and ZAP are updated regularly via Dependabot to ensure the latest vulnerability signatures and testing capabilities.
+
 ## Reporting a Vulnerability
 
 If you discover a potential security vulnerability, please report it privately. Do **not** create public issues for security-related findings.
