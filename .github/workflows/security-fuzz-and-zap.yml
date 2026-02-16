@@ -233,7 +233,7 @@ jobs:
 
       - name: Upload ZAP report
         if: always()
-        uses: actions/upload-artifact@ea0331d7338ce0df01d8c6ca6eacc5e8ea4cf733 # v6.0.1
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: zap-scan-report-${{ github.event_name }}
           path: |
