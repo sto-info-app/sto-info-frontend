@@ -34,7 +34,7 @@ module.exports = {
   // Align with backend Jest settings where possible
   moduleFileExtensions: ['ts', 'html', 'js', 'json'],
 
-  testRegex: String.raw`.*\.spec\.ts$`,
+  testRegex: String.raw`\.spec\.ts$`,
   setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
 
   moduleNameMapper: {
@@ -49,6 +49,7 @@ module.exports = {
 
     // Tests
     '!src/**/*.spec.ts',
+    '!src/**/*.fuzz.spec.ts',
     '!src/**/*.module.ts',
     '!**/.stryker-tmp/**',
 
