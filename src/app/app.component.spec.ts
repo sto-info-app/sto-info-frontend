@@ -365,6 +365,59 @@ describe('AppComponent', () => {
     consoleSpy.mockRestore();
   });
 
+  it('should not load Font Awesome Kit script if fontAwesomeKitId is missing', () => {
+    const originalFontAwesomeKitId = environment.fontAwesomeKitId;
+
+    try {
+      (environment as { fontAwesomeKitId?: string }).fontAwesomeKitId =
+        undefined;
+
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      (component as unknown as AppComponentInternals).loadFontAwesomeKit();
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        'Font Awesome Kit ID not set in environment',
+      );
+      expect(mockScriptLoaderService.loadScript).not.toHaveBeenCalled();
+    } finally {
+      (environment as { fontAwesomeKitId?: string }).fontAwesomeKitId =
+        originalFontAwesomeKitId;
+    }
+  });
+
+  it('should log an error if the Font Awesome Kit script fails to load', () => {
+    const originalFontAwesomeKitId = environment.fontAwesomeKitId;
+
+    try {
+      (environment as { fontAwesomeKitId?: string }).fontAwesomeKitId = 'TEST';
+
+      mockScriptLoadFailure();
+      const errorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      (component as unknown as AppComponentInternals).loadFontAwesomeKit();
+
+      expect(mockScriptLoaderService.loadScript).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'font-awesome-kit',
+          src: 'https://kit.fontawesome.com/TEST.js',
+          async: false,
+          attributes: {
+            crossorigin: 'anonymous',
+          },
+        }),
+      );
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Failed to load Font Awesome Kit script',
+      );
+    } finally {
+      (environment as { fontAwesomeKitId?: string }).fontAwesomeKitId =
+        originalFontAwesomeKitId;
+    }
+  });
+
   it('should not perform consent actions if local env', () => {
     (environment as { env_name: string }).env_name = 'local';
     (component as unknown as AppComponentInternals).consentGiven();
