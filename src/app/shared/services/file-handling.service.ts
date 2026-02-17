@@ -33,7 +33,7 @@ export class FileHandlingService {
       return new Blob([ab], { type: mimeString });
     } catch (error) {
       console.error('Failed to convert data URI to Blob:', error);
-      throw new Error('Invalid base64 string');
+      throw new Error('Invalid base64 string', { cause: error });
     }
   }
 

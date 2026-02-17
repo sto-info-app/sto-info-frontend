@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
 
 import { TEST_SUPPORTERS, TEST_TEAM_MEMBERS } from '../testing/team-test-data';
 import { TeamSupportersComponent } from './supporters.component';
@@ -17,7 +17,8 @@ describe('TeamSupportersComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TeamSupportersComponent, RouterTestingModule],
+      imports: [TeamSupportersComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TeamSupportersComponent);

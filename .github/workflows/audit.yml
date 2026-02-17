@@ -28,11 +28,9 @@ env:
 jobs:
   audit:
     name: Security Audit
-    # Skip for Dependabot (since it's already doing its own thing)
     # Skip draft PRs
     # Skip version bump PRs from github-actions bot
     if: |
-      github.actor != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
       !(github.event_name == 'pull_request' && (
         (github.event.pull_request.user.login == 'github-actions[bot]' && startsWith(github.event.pull_request.title, 'chore: bump version to')) ||
@@ -51,7 +49,6 @@ jobs:
         uses: ./.github/actions/setup-project
         with:
           node-version: ${{ env.NODE_VERSION }}
-          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Resolve cache toggle
         id: cache-toggle
@@ -70,7 +67,6 @@ jobs:
         with:
           use-cache: ${{ steps.cache-toggle.outputs.use_cache }}
           node-version: ${{ env.NODE_VERSION }}
-          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: npm audit (production dependencies)
         # Extra-safe: do not block merges if npm audit is noisy, but badge will show fail if exit code > 0

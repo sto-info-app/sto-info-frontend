@@ -1,11 +1,15 @@
-import { HttpResponse } from '@angular/common/http';
+import { HttpResponse, provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  provideRouter,
+  Router,
+} from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { HealthService } from 'src/app/core/health/health.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
@@ -54,8 +58,10 @@ describe('MainContentComponent', () => {
     } as unknown as jest.Mocked<HealthService>;
 
     TestBed.configureTestingModule({
-      imports: [MainContentComponent, RouterTestingModule],
+      imports: [MainContentComponent],
       providers: [
+        provideRouter([]),
+        provideHttpClient(),
         provideHttpClientTesting(),
         {
           provide: ActivatedRoute,

@@ -43,14 +43,12 @@ jobs:
         uses: ./.github/actions/setup-project
         with:
           node-version: ${{ env.NODE_VERSION }}
-          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Load & cache dependencies
         uses: ./.github/actions/cached-dependencies
         with:
           use-cache: true
           node-version: ${{ env.NODE_VERSION }}
-          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Bump patch version and create PR
         env:
