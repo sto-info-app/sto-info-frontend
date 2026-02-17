@@ -28,11 +28,9 @@ env:
 jobs:
   audit:
     name: Security Audit
-    # Skip for Dependabot (since it's already doing its own thing)
     # Skip draft PRs
     # Skip version bump PRs from github-actions bot
     if: |
-      github.actor != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
       !(github.event_name == 'pull_request' && (
         (github.event.pull_request.user.login == 'github-actions[bot]' && startsWith(github.event.pull_request.title, 'chore: bump version to')) ||

@@ -25,64 +25,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  dependabot_note:
-    if: github.actor == 'dependabot[bot]'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      actions: read
-      pull-requests: write
-
-    steps:
-      - name: Comment on Dependabot PR (private dependencies)
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        with:
-          script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const issue_number = context.issue.number;
-
-            const commentLines = [
-              "### CI skipped for Dependabot PRs",
-              "",
-              "This repository uses **private npm dependencies** (e.g. Font Awesome Pro)",
-              "which require secrets that are **not available to Dependabot workflows**.",
-              "",
-              "For this reason:",
-              "- Dependency installation, linting, tests, and builds are intentionally **skipped**",
-              "- Dependency security is still covered by **Dependabot alerts**",
-              "- Full CI runs for all human-authored PRs",
-              "",
-              "This behaviour is intentional and documented to avoid misleading CI failures."
-            ];
-
-            const commentBody = commentLines.join("\n");
-
-            const { data: comments } = await github.rest.issues.listComments({
-              owner,
-              repo,
-              issue_number
-            });
-
-            const alreadyCommented = comments.some(c =>
-              c.body.includes("CI skipped for Dependabot PRs")
-            );
-
-            if (!alreadyCommented) {
-              await github.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number,
-                body: commentBody
-              });
-            }
-
   lint_and_test:
     # Don't run for draft PRs (but still run for pushes)
     # Skip version bump PRs from github-actions bot or with version bump branch pattern
     if: |
-      github.actor != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
       !(github.event_name == 'pull_request' && (
         (github.event.pull_request.user.login == 'github-actions[bot]' && startsWith(github.event.pull_request.title, 'chore: bump version to')) ||
@@ -157,8 +103,6 @@ jobs:
         run: test -f reports/coverage/lcov.info
 
       - name: SonarQube Cloud Scan
-        # Skip for Dependabot PRs (no code changes, avoids errors)
-        if: github.actor != 'dependabot[bot]'
         uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -179,8 +123,8 @@ jobs:
             -Dsonar.issue.ignore.multicriteria.e2.resourceKey=**/*.spec.ts,**/*.test.ts,**/__tests__/**,**/test/**,**/tests/**
 
       - name: Restore Stryker incremental cache
-        # Only run on PRs, skip for Dependabot
-        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+        # Only run on PRs
+        if: github.event_name == 'pull_request'
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: .stryker-tmp/incremental.json
@@ -190,8 +134,8 @@ jobs:
             stryker-incremental-
 
       - name: Run Incremental Mutation Testing
-        # Only run on PRs, skip for Dependabot (not needed for dependency updates)
-        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+        # Only run on PRs
+        if: github.event_name == 'pull_request'
         shell: bash
         run: |
           # Fetch the base branch to compare against
