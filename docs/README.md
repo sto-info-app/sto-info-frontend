@@ -50,6 +50,45 @@ Supporting docs:
 
 Default local URL: `http://localhost:4200/`
 
+### Quality checks
+
+Before committing changes, run the comprehensive quality check script:
+
+```bash
+npm run verify
+```
+
+This runs all critical quality checks in sequence:
+
+1. **Security audit** - `npm audit --audit-level=high --omit=dev`
+   - Checks for high/critical vulnerabilities in production dependencies
+   - Fails fast if critical security issues are found
+
+2. **Linting** - `npm run lint`
+   - ESLint checks for code quality and style issues
+   - Ensures code follows project standards
+
+3. **Unit tests with coverage** - `npm run test:cov`
+   - Runs all unit tests with 100% coverage requirement
+   - Generates coverage reports in `reports/coverage/`
+
+4. **Fuzz testing** - `npm run test:fuzz`
+   - Property-based fuzz tests (50 iterations)
+   - Tests edge cases and unexpected inputs
+
+5. **Build verification** - `npm run build`
+   - Production build to ensure everything compiles
+   - Catches build-time errors before pushing
+
+The script stops at the first failure, allowing you to fix issues incrementally.
+
+**Intentionally excluded (run separately when needed):**
+
+- Mutation testing: `npm run test:mutation` (very slow, 10-30+ minutes)
+- Full fuzz tests: `npm run test:fuzz:full` (1000 iterations)
+- SonarQube analysis (CI-only, requires cloud service)
+- OWASP ZAP DAST scans (CI-only, requires running server)
+
 ### Backend dependency
 
 Most routes require a working backend.
