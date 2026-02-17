@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Subject, takeUntil } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../core/auth/auth.service';
@@ -12,7 +11,7 @@ import { RoutingService } from '../shared/services/routing.service';
   selector: 'app-home',
   templateUrl: './home.component.html',
   standalone: true,
-  imports: [CommonModule, RouterModule, FontAwesomeModule],
+  imports: [CommonModule, RouterModule],
 })
 export class HomeComponent implements OnDestroy {
   appTitle: string = environment.appTitle;

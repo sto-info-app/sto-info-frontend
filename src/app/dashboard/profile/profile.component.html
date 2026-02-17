@@ -16,7 +16,7 @@
             (click)="editUserProfile()"
             (keypress)="editUserProfile()"
             title="Edit Personal Details"
-            ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+            ><i class="fas fa-user-pen"></i
           ></span>
         </div>
         <div class="personnel-record-inner-content">
@@ -35,10 +35,9 @@
           </p>
           <p>
             <span class="record-title">Email:</span> {{ user.email }}
-            <fa-icon
-              [icon]="['fas', 'lock']"
-              class="restricted-icon go-red"
-              title="Restricted: Cannot be changed"></fa-icon>
+            <i
+              class="fas fa-lock restricted-icon go-red"
+              title="Restricted: Cannot be changed"></i>
           </p>
         </div>
         <div class="lcars-text-bar personnel-lcars-text-bar">
@@ -74,7 +73,7 @@
           (click)="editUserProfilePhoto()"
           (keypress)="editUserProfilePhoto()"
           title="Edit Photo"
-          ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+          ><i class="fas fa-user-pen"></i
         ></span>
       </div>
       <div id="personnel-image">

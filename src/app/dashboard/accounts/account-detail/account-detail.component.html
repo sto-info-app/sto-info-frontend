@@ -17,7 +17,7 @@
             (click)="editAccount()"
             (keypress)="editAccount()"
             title="Edit Account"
-            ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+            ><i class="fas fa-user-pen"></i
           ></span>
         </div>
         <div class="account-info-content">
@@ -52,7 +52,7 @@
             (click)="addCharacter()"
             (keypress)="addCharacter()"
             title="Add Character"
-            ><fa-icon [icon]="['fas', 'plus']"></fa-icon
+            ><i class="fas fa-plus"></i
           ></span>
         </div>
 
@@ -96,7 +96,7 @@
                       (error)="onProfileImageError(character.id)"
                       class="character-list-image" />
                     <div class="image-fallback-icon">
-                      <fa-icon [icon]="['fas', 'user']"></fa-icon>
+                      <i class="fas fa-user"></i>
                     </div>
                   </div>
                   <div
@@ -117,9 +117,10 @@
                         }}</span>
                       </div>
                       <div class="character-species-row">
-                        <fa-icon
-                          [icon]="['fas', getSexIcon(character)]"
-                          class="gender-icon"></fa-icon>
+                        <i
+                          [class]="
+                            'fas fa-' + getSexIcon(character) + ' gender-icon'
+                          "></i>
                         {{ character.species?.name }}
                       </div>
                     </div>
@@ -130,14 +131,14 @@
                       (click)="editCharacter(character)"
                       (keypress)="editCharacter(character)"
                       title="Edit Character"
-                      ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+                      ><i class="fas fa-user-pen"></i
                     ></span>
                     <span
                       class="cta-icon delete-icon"
                       (click)="deleteCharacter(character)"
                       (keypress)="deleteCharacter(character)"
                       title="Delete Character"
-                      ><fa-icon [icon]="['fas', 'trash']"></fa-icon
+                      ><i class="fas fa-trash"></i
                     ></span>
                   </div>
                 </div>

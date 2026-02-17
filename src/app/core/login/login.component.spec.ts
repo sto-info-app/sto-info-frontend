@@ -5,7 +5,7 @@ import {
   fakeAsync,
   tick,
 } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, Event, Router } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { LoginResponse } from 'src/app/models/user-auth.models';
@@ -59,7 +59,7 @@ describe('LoginComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [LoginComponent, NoopAnimationsModule],
+      imports: [LoginComponent],
       providers: [
         { provide: AuthService, useValue: authServiceSpy },
         { provide: SharedDataService, useValue: sharedDataServiceSpy },
@@ -78,6 +78,7 @@ describe('LoginComponent', () => {
             },
           },
         },
+        provideNoopAnimations(),
       ],
     }).compileComponents();
 

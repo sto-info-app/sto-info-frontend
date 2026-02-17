@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -26,11 +26,7 @@ describe('ResetPasswordRequestComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [
-        ResetPasswordRequestComponent,
-        FormsModule,
-        NoopAnimationsModule,
-      ], // Standalone
+      imports: [ResetPasswordRequestComponent, FormsModule], // Standalone
       providers: [
         { provide: AuthService, useValue: authServiceSpy },
         { provide: RoutingService, useValue: routingServiceSpy },
@@ -38,6 +34,7 @@ describe('ResetPasswordRequestComponent', () => {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: { get: () => null } } },
         },
+        provideNoopAnimations(),
       ],
     }).compileComponents();
 
