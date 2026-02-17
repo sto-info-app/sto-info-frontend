@@ -59,6 +59,20 @@ Most routes require a working backend.
 
 > TODO Document how to run the backend locally (NestJS commands, database setup, seed data, migrations).
 
+### Font Awesome icons
+
+This project uses **Font Awesome** for icons, but **not via traditional npm authentication**.
+
+Key details:
+
+- Icons are provided by a **Font Awesome Kit** package (`@awesome.me/kit-5812c6b103`)
+- The kit package is available on the **public npm registry** and requires no special authentication or `.npmrc` configuration
+- Icons are loaded at runtime via the Angular Font Awesome library
+- The kit is **domain-restricted** to startrekonline.info and its development domain in Font Awesome's settings to prevent unauthorised use on other domains
+- No `FONTAWESOME_NPM_AUTH_TOKEN` or similar secrets are needed in CI/CD workflows
+
+This approach provides security through domain restrictions rather than npm authentication, simplifying the development and deployment process.
+
 ## Configuration and environment variables
 
 ### Important: environment values are generated at build time
