@@ -1,10 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import {
-  faArrowUpRightFromSquare,
-  faSquareXmark,
-} from '@awesome.me/kit-5812c6b103/icons/classic/solid';
-import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { of } from 'rxjs';
 
 import { TermsOfUseComponent } from './terms-of-use.component';
@@ -12,7 +7,6 @@ import { TermsOfUseComponent } from './terms-of-use.component';
 describe('TermsOfUseComponent', () => {
   let component: TermsOfUseComponent;
   let fixture: ComponentFixture<TermsOfUseComponent>;
-  let library: FaIconLibrary;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -27,9 +21,6 @@ describe('TermsOfUseComponent', () => {
         },
       ],
     }).compileComponents();
-
-    library = TestBed.inject(FaIconLibrary);
-    library.addIcons(faArrowUpRightFromSquare, faSquareXmark);
   });
 
   beforeEach(() => {

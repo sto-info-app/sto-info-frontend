@@ -144,7 +144,7 @@ export class ProfilePicComponent {
             this.isSubmitting = false;
           },
           error: error => {
-            let errMessage = '';
+            let errMessage: string;
             if (error.status === 0) {
               console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
               errMessage = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;

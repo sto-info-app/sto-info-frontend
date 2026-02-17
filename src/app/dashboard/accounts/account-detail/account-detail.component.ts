@@ -3,7 +3,6 @@ import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Subject, takeUntil } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
@@ -34,7 +33,6 @@ import { AccountDialogComponent } from '../dialogs/account-dialog/account-dialog
   imports: [
     CommonModule,
     RouterModule,
-    FontAwesomeModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     MatButtonModule,
