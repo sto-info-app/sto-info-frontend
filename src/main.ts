@@ -4,11 +4,9 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import {
-  APP_INITIALIZER,
   ApplicationConfig,
   ErrorHandler,
   importProvidersFrom,
-  inject,
   provideZoneChangeDetection,
 } from '@angular/core';
 import {
@@ -24,7 +22,6 @@ import * as Sentry from '@sentry/angular';
 import { routes } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
 import { API_URLS } from './app/shared/constants/api-routing.constants';
-import { FontAwesomeIconService } from './app/shared/services/font-awesome-icon.service';
 import { environment } from './environments/environment';
 import { EnvCheckService } from './environments/environment.service';
 
@@ -97,15 +94,6 @@ export const appConfig: ApplicationConfig = {
     },
     { provide: LocationStrategy, useClass: PathLocationStrategy },
     provideHttpClient(withInterceptorsFromDi()),
-    {
-      provide: APP_INITIALIZER,
-      multi: true,
-      useFactory: () => () => {
-        // Force creation so its constructor registers icons
-        inject(FontAwesomeIconService);
-      },
-      deps: [Sentry.TraceService],
-    },
   ],
 };
 

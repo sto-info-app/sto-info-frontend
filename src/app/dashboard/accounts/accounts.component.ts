@@ -2,8 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
 import {
   ConfirmDialogComponent,
@@ -25,13 +23,7 @@ import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.
   templateUrl: './accounts.component.html',
   styleUrls: ['./accounts.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    MatDialogModule,
-    RouterModule,
-    FontAwesomeModule,
-    LoadingBarComponent,
-  ],
+  imports: [CommonModule, MatDialogModule, RouterModule, LoadingBarComponent],
 })
 export class AccountsComponent implements OnInit, OnDestroy {
   /** Application routes for navigation. */
