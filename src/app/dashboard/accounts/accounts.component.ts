@@ -163,19 +163,19 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * @param platformId The platform ID.
    * @returns An array representing the Font Awesome icon.
    */
-  getPlatformIcon(platformId?: string): [IconPrefix, IconName] | null {
+  getPlatformIcon(platformId?: string): string | null {
     if (!platformId) return null;
 
     const platform = this.platforms.find(p => p.id === platformId);
     if (!platform) return null;
 
     const name = platform.name.toLowerCase();
-    if (name === 'arc') return ['fak', 'arc-games' as IconName];
-    if (name === 'epic') return ['fak', 'epic-games' as IconName];
-    if (name === 'steam') return ['fab', 'steam'];
-    if (name === 'windows' || name === 'pc') return ['fab', 'windows'];
-    if (name === 'playstation' || name === 'ps') return ['fab', 'playstation'];
-    if (name === 'xbox') return ['fab', 'xbox'];
+    if (name === 'arc') return 'fak fa-arc-games';
+    if (name === 'epic') return 'fak fa-epic-games';
+    if (name === 'steam') return 'fab fa-steam';
+    if (name === 'windows' || name === 'pc') return 'fab fa-windows';
+    if (name === 'playstation' || name === 'ps') return 'fab fa-playstation';
+    if (name === 'xbox') return 'fab fa-xbox';
 
     return null;
   }
@@ -197,16 +197,16 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * @param launcherId The launcher ID.
    * @returns An array representing the Font Awesome icon.
    */
-  getLauncherIcon(launcherId?: string): [IconPrefix, IconName] | null {
+  getLauncherIcon(launcherId?: string): string | null {
     if (!launcherId) return null;
 
     const launcher = this.launchers.find(l => l.id === launcherId);
     if (!launcher) return null;
 
     const name = launcher.name.toLowerCase();
-    if (name === 'arc') return ['fak', 'arc-games' as IconName];
-    if (name === 'epic') return ['fak', 'epic-games' as IconName];
-    if (name === 'steam') return ['fab', 'steam'];
+    if (name === 'arc') return 'fak fa-arc-games';
+    if (name === 'epic') return 'fak fa-epic-games';
+    if (name === 'steam') return 'fab fa-steam';
 
     return null;
   }

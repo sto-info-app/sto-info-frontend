@@ -208,22 +208,22 @@ describe('AccountsComponent', () => {
     });
 
     it('should return arc icon', () => {
-      expect(component.getPlatformIcon('arc')).toEqual(['fak', 'arc-games']);
+      expect(component.getPlatformIcon('arc')).toEqual('fak fa-arc-games');
     });
     it('should return epic icon', () => {
-      expect(component.getPlatformIcon('epic')).toEqual(['fak', 'epic-games']);
+      expect(component.getPlatformIcon('epic')).toEqual('fak fa-epic-games');
     });
     it('should return steam icon', () => {
-      expect(component.getPlatformIcon('steam')).toEqual(['fab', 'steam']);
+      expect(component.getPlatformIcon('steam')).toEqual('fab fa-steam');
     });
     it('should return windows icon', () => {
-      expect(component.getPlatformIcon('win')).toEqual(['fab', 'windows']);
+      expect(component.getPlatformIcon('win')).toEqual('fab fa-windows');
     });
     it('should return playstation icon', () => {
-      expect(component.getPlatformIcon('ps')).toEqual(['fab', 'playstation']);
+      expect(component.getPlatformIcon('ps')).toEqual('fab fa-playstation');
     });
     it('should return xbox icon', () => {
-      expect(component.getPlatformIcon('xbox')).toEqual(['fab', 'xbox']);
+      expect(component.getPlatformIcon('xbox')).toEqual('fab fa-xbox');
     });
     it('should return null for unknown platform', () => {
       expect(component.getPlatformIcon('unknown')).toBeNull();
@@ -249,15 +249,15 @@ describe('AccountsComponent', () => {
     });
 
     it('should return arc icon', () => {
-      expect(component.getLauncherIcon('arc')).toEqual(['fak', 'arc-games']);
+      expect(component.getLauncherIcon('arc')).toEqual('fak fa-arc-games');
     });
 
     it('should return epic icon', () => {
-      expect(component.getLauncherIcon('epic')).toEqual(['fak', 'epic-games']);
+      expect(component.getLauncherIcon('epic')).toEqual('fak fa-epic-games');
     });
 
     it('should return steam icon', () => {
-      expect(component.getLauncherIcon('steam')).toEqual(['fab', 'steam']);
+      expect(component.getLauncherIcon('steam')).toEqual('fab fa-steam');
     });
 
     it('should return null for unknown launcher', () => {

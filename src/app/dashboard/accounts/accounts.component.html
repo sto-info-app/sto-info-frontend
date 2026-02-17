@@ -15,7 +15,7 @@
           (click)="addAccount()"
           (keypress)="addAccount()"
           title="Add STO Account"
-          ><fa-icon [icon]="['fas', 'plus']"></fa-icon
+          ><i class="fas fa-plus"></i
         ></span>
       </div>
 
@@ -37,31 +37,28 @@
                   <span class="record-title">Handle:</span>
                   {{ account.handle }}
                   @if (account.lifetimeSubscription) {
-                    <fa-icon
-                      [icon]="['fas', 'badge-check']"
-                      title="Lifetime Subscription"
-                      class="lifetime-icon"></fa-icon>
+                    <i
+                      class="fas fa-badge-check lifetime-icon"
+                      title="Lifetime Subscription"></i>
                   }
                 </p>
                 <div class="account-icons">
                   <div class="icon-slot">
                     @if (getPlatformIcon(account.platformId); as platformIcon) {
-                      <fa-icon
-                        [icon]="platformIcon"
+                      <i
+                        [class]="platformIcon + ' platform-mini-icon'"
                         [title]="
                           'Platform: ' +
                           (getPlatform(account.platformId)?.name ?? 'Platform')
-                        "
-                        class="platform-mini-icon"></fa-icon>
+                        "></i>
                     }
                   </div>
                   <div class="icon-slot">
                     @if (getLauncher(account.launcherId); as launcher) {
                       @if (getLauncherIcon(launcher.id); as launcherIcon) {
-                        <fa-icon
-                          [icon]="launcherIcon"
-                          [title]="'Launcher: ' + launcher.name"
-                          class="launcher-icon"></fa-icon>
+                        <i
+                          [class]="launcherIcon + ' launcher-icon'"
+                          [title]="'Launcher: ' + launcher.name"></i>
                       }
                     }
                   </div>
@@ -70,7 +67,7 @@
                     [title]="
                       'Total Captains: ' + (account.characterCount || 0)
                     ">
-                    <fa-icon [icon]="['fas', 'user-visor']"></fa-icon>
+                    <i class="fas fa-user-visor"></i>
                     <span>{{ account.characterCount || 0 }}</span>
                   </div>
                 </div>
@@ -81,14 +78,14 @@
                   (click)="$event.stopPropagation(); editAccount(account)"
                   (keypress)="$event.stopPropagation(); editAccount(account)"
                   title="Edit Account"
-                  ><fa-icon [icon]="['fas', 'user-pen']"></fa-icon
+                  ><i class="fas fa-user-pen"></i
                 ></span>
                 <span
                   class="cta-icon delete-icon"
                   (click)="$event.stopPropagation(); deleteAccount(account)"
                   (keypress)="$event.stopPropagation(); deleteAccount(account)"
                   title="Delete Account"
-                  ><fa-icon [icon]="['fas', 'trash']"></fa-icon
+                  ><i class="fas fa-trash"></i
                 ></span>
               </div>
             </div>
