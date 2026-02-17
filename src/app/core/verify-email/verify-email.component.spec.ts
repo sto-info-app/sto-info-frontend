@@ -1,9 +1,10 @@
+import { provideHttpClient } from '@angular/common/http';
 import {
-  HttpClientTestingModule,
   HttpTestingController,
+  provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
@@ -30,11 +31,7 @@ describe('VerifyEmailComponent', () => {
     queryParamsSubject = new Subject<VerifyEmailQueryParams>();
 
     await TestBed.configureTestingModule({
-      imports: [
-        VerifyEmailComponent,
-        HttpClientTestingModule,
-        NoopAnimationsModule,
-      ],
+      imports: [VerifyEmailComponent],
       providers: [
         { provide: RoutingService, useValue: routingServiceSpy },
         {
@@ -43,6 +40,9 @@ describe('VerifyEmailComponent', () => {
             queryParams: queryParamsSubject.asObservable(),
           },
         },
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
       ],
     }).compileComponents();
 

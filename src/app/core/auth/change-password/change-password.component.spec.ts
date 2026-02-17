@@ -5,7 +5,7 @@ import {
   tick,
 } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
@@ -41,15 +41,12 @@ describe('ChangePasswordComponent', () => {
     } as unknown as ActivatedRoute;
 
     await TestBed.configureTestingModule({
-      imports: [
-        ReactiveFormsModule,
-        NoopAnimationsModule,
-        ChangePasswordComponent,
-      ],
+      imports: [ReactiveFormsModule, ChangePasswordComponent],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
         { provide: RoutingService, useValue: mockRoutingService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        provideNoopAnimations(),
       ],
     }).compileComponents();
 

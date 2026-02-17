@@ -1,7 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { faHandSpock } from '@awesome.me/kit-5812c6b103/icons/classic/solid';
-import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../core/auth/auth.service';
@@ -27,12 +25,8 @@ describe('HomeComponent', () => {
         { provide: AuthService, useValue: authServiceMock },
         { provide: RoutingService, useValue: routingServiceMock },
         provideRouter([]),
-        FaIconLibrary,
       ],
     }).compileComponents();
-
-    const library = TestBed.inject(FaIconLibrary);
-    library.addIcons(faHandSpock);
 
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;

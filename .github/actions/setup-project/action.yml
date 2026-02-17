@@ -1,15 +1,11 @@
 name: 'Setup Project'
-description: 'Set up Node.js, and set up .npmrc file'
+description: 'Set up Node.js'
 
 inputs:
   node-version:
     description: 'Node.js version'
     required: true
     default: '24'
-
-  fontawesome-npm-auth-token:
-    description: 'FontAwesome NPM Auth Token'
-    required: true
 
 runs:
   using: 'composite'
@@ -19,8 +15,3 @@ runs:
       uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
       with:
         node-version: ${{ inputs.node-version }}
-
-    - name: Setup .npmrc file to publish to npm
-      run: |
-        echo "//npm.fontawesome.com/:_authToken=${{ inputs.fontawesome-npm-auth-token }}" > ~/.npmrc
-      shell: bash

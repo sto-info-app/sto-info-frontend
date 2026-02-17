@@ -65,7 +65,7 @@ describe('FileHandlingService', () => {
 
       expect(() =>
         service.dataURItoBlob('data:text/plain;base64,%%%NOT_BASE64%%%'),
-      ).toThrow(new Error('Invalid base64 string'));
+      ).toThrow('Invalid base64 string');
 
       expect(consoleErrorSpy).toHaveBeenCalled();
       isValidSpy.mockRestore();
@@ -79,7 +79,7 @@ describe('FileHandlingService', () => {
 
       expect(() =>
         service.dataURItoBlob('data:text/plain;base64,SGVsbG8='),
-      ).toThrow(new Error('Invalid base64 string'));
+      ).toThrow('Invalid base64 string');
 
       expect(consoleErrorSpy).toHaveBeenCalled();
 

@@ -6,7 +6,6 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -24,13 +23,7 @@ import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    MatDialogModule,
-    RouterModule,
-    FontAwesomeModule,
-    LoadingBarComponent,
-  ],
+  imports: [CommonModule, MatDialogModule, RouterModule, LoadingBarComponent],
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   appRoutes = APP_ROUTES;

@@ -97,7 +97,7 @@ export class LoginComponent implements OnDestroy {
         this.router.navigate([returnUrl ?? this.appLoggedInHome]);
       },
       error: (error: HttpErrorResponse) => {
-        let errMessage = '';
+        let errMessage: string;
         switch (error.status) {
           case 0:
             console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);

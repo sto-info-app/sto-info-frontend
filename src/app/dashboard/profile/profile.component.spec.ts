@@ -5,14 +5,6 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import {
-  faLock,
-  faUserPen,
-} from '@awesome.me/kit-5812c6b103/icons/classic/solid';
-import {
-  FaIconLibrary,
-  FontAwesomeModule,
-} from '@fortawesome/angular-fontawesome';
 import { of } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -76,7 +68,7 @@ describe('ProfileComponent', () => {
     } as unknown as jest.Mocked<MatDialog>;
 
     await TestBed.configureTestingModule({
-      imports: [ProfileComponent, FontAwesomeModule],
+      imports: [ProfileComponent],
       providers: [
         { provide: DashboardService, useValue: mockDashboardService },
         { provide: AuthService, useValue: mockAuthService },
@@ -95,9 +87,6 @@ describe('ProfileComponent', () => {
         },
       })
       .compileComponents();
-
-    const library = TestBed.inject(FaIconLibrary);
-    library.addIcons(faUserPen, faLock);
 
     fixture = TestBed.createComponent(ProfileComponent);
     component = fixture.componentInstance;

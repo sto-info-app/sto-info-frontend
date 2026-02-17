@@ -3,7 +3,6 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ApiHealthInterceptor } from '../core/health/api-health.interceptor';
 import { ResizeObserverDirective } from './directives/resize-observer.directive';
 
@@ -21,7 +20,6 @@ import { ResizeObserverDirective } from './directives/resize-observer.directive'
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-    FontAwesomeModule,
 
     // Directives
     ResizeObserverDirective,
