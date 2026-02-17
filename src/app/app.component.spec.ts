@@ -27,6 +27,7 @@ describe('AppComponent', () => {
     googleAnalyticsLoaded: boolean;
     openRefreshSessionDialog(): void;
     loadCookieYesScript(): void;
+    loadFontAwesomeKit(): void;
     consentGiven(): void;
     sendPageView(url: string | undefined): void;
     loadGoogleAnalyticsWithTrackingDisabled(): void;
