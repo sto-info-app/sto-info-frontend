@@ -100,17 +100,42 @@ Most routes require a working backend.
 
 ### Font Awesome icons
 
-This project uses **Font Awesome** for icons, but **not via traditional npm authentication**.
+This project uses **Font Awesome icons loaded via CDN** using standard HTML `<i>` tags.
 
 Key details:
 
-- Icons are provided by a **Font Awesome Kit** package (`@awesome.me/kit-5812c6b103`)
-- The kit package is available on the **public npm registry** and requires no special authentication or `.npmrc` configuration
-- Icons are loaded at runtime via the Angular Font Awesome library
-- The kit is **domain-restricted** to startrekonline.info and its development domain in Font Awesome's settings to prevent unauthorised use on other domains
-- No `FONTAWESOME_NPM_AUTH_TOKEN` or similar secrets are needed in CI/CD workflows
+- Icons are loaded via **Font Awesome Kit** CDN script in `src/index.html`
+- Kit URL: `https://kit.fontawesome.com/5812c6b103.js`
+- **No npm packages required** - icons are globally available in the browser
+- **No authentication needed** - locally or in CI/CD
+- Icons are used via standard HTML `<i>` tags: `<i class="fas fa-icon-name"></i>`
+- The kit is **domain-restricted** to startrekonline.info and its development domain for security
 
-This approach provides security through domain restrictions rather than npm authentication, simplifying the development and deployment process.
+**Using icons:**
+
+```html
+<!-- Solid icons -->
+<i class="fas fa-home"></i>
+
+<!-- Regular icons -->
+<i class="far fa-circle"></i>
+
+<!-- Brands -->
+<i class="fab fa-github"></i>
+
+<!-- With custom classes -->
+<i class="fas fa-external-link ext-link"></i>
+```
+
+**Benefits of this approach:**
+
+- ✅ No npm authentication required
+- ✅ Dependabot PRs can run full CI checks
+- ✅ Simpler development setup
+- ✅ Domain-restricted security
+- ✅ Automatic updates when kit is updated
+
+> Note: Icons are loaded asynchronously. Font Awesome automatically replaces `<i>` tags with SVG elements at runtime.
 
 ## Configuration and environment variables
 
