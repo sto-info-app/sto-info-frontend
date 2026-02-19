@@ -31,6 +31,8 @@ module.exports = {
 
   transform,
 
+  reporters: ['default', 'jest-junit'],
+
   // Align with backend Jest settings where possible
   moduleFileExtensions: ['ts', 'html', 'js', 'json'],
 

@@ -26,6 +26,7 @@
 [![Mutation testing](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![codecov](https://codecov.io/gh/sto-info-app/sto-info-frontend/graph/badge.svg?token=ZX5Y9GQ3ZR)](https://codecov.io/gh/sto-info-app/sto-info-frontend)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
