@@ -234,7 +234,6 @@
           <button
             [disabled]="!registerForm.valid || isSubmitting"
             [ngClass]="{ submitting: isSubmitting }"
-            [@progressBarAnimation]="isSubmitting ? 'submitting' : 'idle'"
             type="submit"
             class="submit-button">
             Register

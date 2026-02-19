@@ -1,8 +1,7 @@
 import {
-  HTTP_INTERCEPTORS,
   HttpClient,
   provideHttpClient,
-  withInterceptorsFromDi,
+  withInterceptors,
 } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -10,10 +9,10 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
-import { ApiHealthInterceptor } from './api-health.interceptor';
+import { apiHealthInterceptor } from './api-health.interceptor';
 import { HealthService } from './health.service';
 
-describe('ApiHealthInterceptor', () => {
+describe('apiHealthInterceptor', () => {
   let httpMock: HttpTestingController;
   let httpClient: HttpClient;
   let healthServiceSpy: jest.Mocked<HealthService>;
@@ -25,13 +24,8 @@ describe('ApiHealthInterceptor', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withInterceptors([apiHealthInterceptor])),
         provideHttpClientTesting(),
-        {
-          provide: HTTP_INTERCEPTORS,
-          useClass: ApiHealthInterceptor,
-          multi: true,
-        },
         { provide: HealthService, useValue: spy },
       ],
     });

@@ -8,7 +8,6 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
-import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
@@ -24,7 +23,6 @@ import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.co
   templateUrl: './character-pic.component.html',
   styleUrls: ['./character-pic.component.scss'],
   standalone: true,
-  animations: [progressBarAnimation],
   imports: [
     ImageCropperComponent,
     MatDialogModule,

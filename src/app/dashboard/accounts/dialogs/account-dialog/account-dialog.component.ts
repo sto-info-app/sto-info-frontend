@@ -24,7 +24,6 @@ import {
   StoAccount,
 } from 'src/app/dashboard/models/sto-account.model';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
-import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { STO_HANDLE_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
@@ -59,7 +58,6 @@ interface AccountDialogData {
     LoadingBarComponent,
     LcarsErrorMessageComponent,
   ],
-  animations: [progressBarAnimation],
 })
 export class AccountDialogComponent implements OnInit, OnDestroy {
   errorMessage = '';

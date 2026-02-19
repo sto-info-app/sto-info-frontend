@@ -14,7 +14,6 @@ import {
   LoginResponse,
 } from 'src/app/models/user-auth.models';
 import { alertStateFromHttpStatus } from 'src/app/shared/_helpers/alert-state-from-http-status';
-import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -37,7 +36,6 @@ import { AuthService } from '../auth/auth.service';
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-  animations: [progressBarAnimation],
   standalone: true,
   imports: [
     CommonModule,

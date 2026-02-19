@@ -45,8 +45,7 @@
             type="submit"
             class="submit-button"
             [disabled]="!inputsValid || isSubmitting"
-            [ngClass]="{ submitting: isSubmitting }"
-            [@progressBarAnimation]="isSubmitting ? 'submitting' : 'idle'">
+            [ngClass]="{ submitting: isSubmitting }">
             Login
           </button>
         </form>
