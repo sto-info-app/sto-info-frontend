@@ -119,11 +119,6 @@
       "prettier --write"
     ]
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "jest-junit": {
     "suiteName": "sto-info-frontend",
     "outputDirectory": "reports/junit",
