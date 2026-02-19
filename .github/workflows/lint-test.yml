@@ -103,7 +103,7 @@ jobs:
         run: test -f reports/coverage/lcov.info
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         with:
           files: reports/coverage/lcov.info
           fail_ci_if_error: false
