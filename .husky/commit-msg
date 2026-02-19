@@ -1,0 +1,9 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+if ! grep -q "^Signed-off-by:" "$1"; then
+  echo "Error: Commit message must contain a 'Signed-off-by' line."
+  echo ""
+  echo "Add it with:  git commit -s  (or amend:  git commit --amend -s)"
+  exit 1
+fi
