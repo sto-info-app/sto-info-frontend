@@ -11,14 +11,14 @@ import {
   RippleGlobalOptions,
 } from '@angular/material/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Router, RouterModule, provideRouter } from '@angular/router';
 import { JwtModule } from '@auth0/angular-jwt';
 
 import * as Sentry from '@sentry/angular';
-import { apiHealthInterceptor } from './app/core/health/api-health.interceptor';
 import { routes } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
+import { apiHealthInterceptor } from './app/core/health/api-health.interceptor';
 import { API_URLS } from './app/shared/constants/api-routing.constants';
 import { environment } from './environments/environment';
 import { EnvCheckService } from './environments/environment.service';
@@ -66,7 +66,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection(),
     provideRouter(routes),
-    provideAnimations(),
+    provideAnimationsAsync(),
     importProvidersFrom(
       RouterModule,
       JwtModule.forRoot({
