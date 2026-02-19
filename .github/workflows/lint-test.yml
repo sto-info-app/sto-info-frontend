@@ -103,6 +103,8 @@ jobs:
         run: test -f reports/coverage/lcov.info
 
       - name: SonarQube Cloud Scan
+        # Skip on fork PRs (e.g. Dependabot); secrets like SONAR_TOKEN are not available there
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
