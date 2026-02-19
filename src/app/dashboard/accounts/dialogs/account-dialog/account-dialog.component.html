@@ -129,7 +129,6 @@
       mat-button
       [disabled]="!accountForm.valid || isSubmitting"
       [ngClass]="{ submitting: isSubmitting }"
-      [@progressBarAnimation]="isSubmitting ? 'submitting' : 'idle'"
       (click)="onSaveClick()">
       {{ data.mode === 'add' ? 'Add' : 'Save' }}
     </button>

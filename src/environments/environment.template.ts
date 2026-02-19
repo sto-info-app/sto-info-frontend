@@ -23,6 +23,7 @@ export const environment: Environment = {
   minsBeforeLogoutExpiryToShowWarning: __minsBeforeLogoutExpiryToShowWarning__,
   minsBeforeLogoutExpiryToRefreshToken:
     __minsBeforeLogoutExpiryToRefreshToken__,
+  fontAwesomeKitId: '__fontAwesomeKitId__',
   cookieYesUrl: '__cookieYesUrl__',
   gaMeasurementId: '__gaMeasurementId__',
   logRocketAppId: '__logRocketAppId__',

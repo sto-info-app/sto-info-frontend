@@ -166,6 +166,7 @@ button.lcars-btn,
   background-size: 400% 100%;
   background-position: 100% 50%;
   animation: progressBar 2s linear infinite;
+  transition: background 400ms ease-in-out;
 }
 
 /* LCARS Flex Alignment Utilities */

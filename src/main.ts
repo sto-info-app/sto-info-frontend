@@ -1,8 +1,5 @@
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   ApplicationConfig,
   ErrorHandler,
@@ -14,13 +11,14 @@ import {
   RippleGlobalOptions,
 } from '@angular/material/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Router, RouterModule, provideRouter } from '@angular/router';
 import { JwtModule } from '@auth0/angular-jwt';
 
 import * as Sentry from '@sentry/angular';
 import { routes } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
+import { apiHealthInterceptor } from './app/core/health/api-health.interceptor';
 import { API_URLS } from './app/shared/constants/api-routing.constants';
 import { environment } from './environments/environment';
 import { EnvCheckService } from './environments/environment.service';
@@ -68,9 +66,9 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection(),
     provideRouter(routes),
+    provideAnimationsAsync(),
     importProvidersFrom(
       RouterModule,
-      BrowserAnimationsModule,
       JwtModule.forRoot({
         config: {
           tokenGetter: tokenGetter,
@@ -93,7 +91,7 @@ export const appConfig: ApplicationConfig = {
       deps: [Router],
     },
     { provide: LocationStrategy, useClass: PathLocationStrategy },
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptors([apiHealthInterceptor])),
   ],
 };
 

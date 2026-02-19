@@ -14,7 +14,6 @@ import {
 import { User } from 'src/app/dashboard/models/user.model';
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
-import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
@@ -44,7 +43,6 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
   selector: 'app-edit-personal-details',
   templateUrl: './edit-personal-details.component.html',
   styleUrls: ['./edit-personal-details.component.scss'],
-  animations: [progressBarAnimation],
   standalone: true,
   imports: [
     CommonModule,
