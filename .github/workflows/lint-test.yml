@@ -102,6 +102,24 @@ jobs:
       - name: Verify coverage exists
         run: test -f reports/coverage/lcov.info
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          files: reports/coverage/lcov.info
+          fail_ci_if_error: false
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          files: reports/junit/junit.xml
+          report_type: test_results
+          fail_ci_if_error: false
+
       - name: SonarQube Cloud Scan
         # Skip on fork PRs (e.g. Dependabot); secrets like SONAR_TOKEN are not available there
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
@@ -175,6 +193,10 @@ jobs:
               --force
           fi
 
-      - name: Build (push only)
-        if: github.event_name == 'push'
+      - name: Build
         run: npm run build
+
+      - name: Upload bundle analysis to Codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: npx @codecov/bundle-analyzer ./dist/sto-info-frontend --bundle-name=sto-info-frontend --upload-token=$CODECOV_TOKEN
