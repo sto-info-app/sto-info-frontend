@@ -10,8 +10,8 @@
 [![Dependency Review](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml)
 [![OpenSSF Scorecard workflow](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml)
 [![npm audit](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml)
-[![DCO Enforcement](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml)
-[![Security: Fuzz + ZAP](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz-and-zap.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz-and-zap.yml)
+[![DCO Enforcement](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml)
+[![Security: Fuzz + ZAP](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz-and-zap.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz-and-zap.yml)
 
 ## CI and delivery
 
