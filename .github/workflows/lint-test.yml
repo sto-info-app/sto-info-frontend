@@ -102,6 +102,12 @@ jobs:
       - name: Verify coverage exists
         run: test -f reports/coverage/lcov.info
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: reports/coverage/lcov.info
+          fail_ci_if_error: false
+
       - name: SonarQube Cloud Scan
         # Skip on fork PRs (e.g. Dependabot); secrets like SONAR_TOKEN are not available there
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
