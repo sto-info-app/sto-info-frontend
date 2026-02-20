@@ -103,6 +103,7 @@ jobs:
         run: test -f reports/coverage/lcov.info
 
       - name: Upload coverage to Codecov
+        if: github.actor != 'dependabot[bot]'
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -111,7 +112,7 @@ jobs:
           fail_ci_if_error: false
 
       - name: Upload test results to Codecov
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && github.actor != 'dependabot[bot]' }}
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -122,7 +123,7 @@ jobs:
 
       - name: SonarQube Cloud Scan
         # Skip on fork PRs (e.g. Dependabot); secrets like SONAR_TOKEN are not available there
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        if: github.actor != 'dependabot[bot]' || github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -197,6 +198,7 @@ jobs:
         run: npm run build
 
       - name: Upload bundle analysis to Codecov
+        if: github.event_name == 'pull_request'
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: npx @codecov/bundle-analyzer ./dist/sto-info-frontend --bundle-name=sto-info-frontend --upload-token=$CODECOV_TOKEN
