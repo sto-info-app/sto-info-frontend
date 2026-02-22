@@ -2,6 +2,7 @@
   "ci": {
     "collect": {
       "startServerCommand": "serve -s dist/sto-info-frontend/browser -p 4201",
+      "startServerReadyPattern": "Accepting connections at",
       "url": [
         "http://localhost:4201/",
         "http://localhost:4201/login",
@@ -32,7 +33,16 @@
         "categories:seo": ["error", { "minScore": 0.9 }],
         "offscreen-images": "off",
         "uses-webp-images": "off",
-        "color-contrast": "warn"
+        "color-contrast": "warn",
+        "errors-in-console": "warn",
+        "unused-css-rules": "warn",
+        "unused-javascript": "warn",
+        "uses-rel-preconnect": "warn",
+        "prioritize-lcp-image": "off",
+        "lcp-lazy-loaded": "off",
+        "non-composited-animations": "warn",
+        "cumulative-layout-shift": ["warn", { "minScore": 0.9 }],
+        "largest-contentful-paint": ["warn", { "minScore": 0.9 }]
       }
     },
     "upload": {
