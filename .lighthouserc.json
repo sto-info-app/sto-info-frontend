@@ -46,10 +46,8 @@
       }
     },
     "upload": {
-      "target": "temporary-public-storage",
-      "filesystem": {
-        "outputDir": "reports/lighthouse"
-      }
+      "target": "filesystem",
+      "outputDir": "reports/lighthouse"
     }
   }
 }
