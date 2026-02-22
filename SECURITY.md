@@ -15,7 +15,27 @@ Please ensure you are using the latest tagged release or the `development` branc
 
 ## Automated Security Testing
 
-This repository employs multiple layers of automated security testing to identify vulnerabilities early in the development lifecycle.
+Automated security testing is performed on every pull request and on a regular schedule.
+
+### Static Analysis Security Testing (SAST)
+
+**Tool:** [GitHub CodeQL](https://codeql.github.com/)
+
+- **What it does**: Scans the source code for common vulnerabilities, security hotspots, and coding errors using data flow analysis.
+- **When it runs**:
+  - On every push to `development` and `production`.
+  - On pull requests targeting `development` or `production` (smart skips if no code changes).
+  - Weekly full scan for deep analysis.
+
+### Dependency Auditing
+
+**Tool:** `npm audit`
+
+- **What it does**: Checks the dependency tree for known vulnerabilities in third-party packages.
+- **When it runs**:
+  - On pull requests that modify `package.json` or `package-lock.json`.
+  - Weekly on a schedule to catch newly discovered vulnerabilities.
+- **Action**: Fails the build if "High" or "Critical" vulnerabilities are found in production dependencies.
 
 ### Property-based fuzz testing with fast-check
 
@@ -67,7 +87,7 @@ ZAP (Zed Attack Proxy) performs Dynamic Application Security Testing by actively
 **Scan execution:**
 
 - Application is built in production mode
-- Static files served via npx serve on localhost:4200
+- Static files served via npx serve on localhost:4202
 - ZAP scans against local server (no external dependencies)
 - Reports stored as workflow artifacts for 30 days
 

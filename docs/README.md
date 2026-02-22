@@ -47,6 +47,7 @@ Supporting docs:
 - Run locally: `npm start` (Angular dev server)
 - Run tests: `npm test`
 - Run lint: `npm run lint`
+- Generate CI summary: `npm run summary:ci` (Parses latest local reports)
 
 Default local URL: `http://localhost:4200/`
 
@@ -57,6 +58,16 @@ Before committing changes, run the comprehensive quality check script:
 ```bash
 npm run verify
 ```
+
+For a comprehensive check (including performance and mutation testing), use:
+
+```bash
+npm run verify:full
+```
+
+This runs: `verify` (see below) + `lighthouse` (Performance/SEO) + `summary:ci` (Dashboard preview) + `mutation:incremental` (Test effectiveness).
+
+### verify (Standard)
 
 This runs all critical quality checks in sequence:
 
@@ -82,9 +93,14 @@ This runs all critical quality checks in sequence:
 
 The script stops at the first failure, allowing you to fix issues incrementally.
 
+**Note on CI usage:**
+In GitHub Actions, most of these checks use **Smart Skip** logic. If your PR only changes documentation or meta-files (like `.vscode/`), heavy jobs like builds and tests will be skipped automatically while still reporting a "Passed" status to satisfy branch protection rules.
+
 **Intentionally excluded (run separately when needed):**
 
-- Mutation testing: `npm run test:mutation` (very slow, 10-30+ minutes)
+- Mutation testing: `npm run test:mutation` (very slow, 30+ minutes)
+- Incremental Mutation testing: `npm run test:mutation:incremental` (fast, CI-standard)
+- Lighthouse Audit: `npm run lighthouse` (Production build + Full audit)
 - Full fuzz tests: `npm run test:fuzz:full` (1000 iterations)
 - SonarQube analysis (CI-only, requires cloud service)
 - OWASP ZAP DAST scans (CI-only, requires running server)

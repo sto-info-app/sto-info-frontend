@@ -31,12 +31,23 @@ SonarCloud performs deep code analysis, focusing on Security Hotspots and vulner
 - **Rules**: We enforce a set of security-specific rules (e.g., preventing hardcoded secrets) to catch common errors.
 - **Remediation**: Review the 'Vulnerabilities' tab in SonarCloud. High-risk issues must be fixed or marked as 'Safe' by a maintainer before the Quality Gate passes.
 
+## npm audit
+
+The `npm audit` command is used to catch known vulnerabilities in third-party dependencies.
+
+- **Action**: Fails the build if "High" or "Critical" vulnerabilities are found in production dependencies (`--omit=dev`).
+- **Execution**:
+  - On Pull Requests that modify `package.json` or `package-lock.json`.
+  - On a weekly schedule to detect newly reported vulnerabilities in existing deps.
+- **Ruleset**: This is typically a **Required** check for merging.
+
 ## CodeQL Static Analysis
 
 CodeQL is GitHub's industry-leading semantic analysis engine that treats code as data to find security vulnerabilities.
 
 - **Findings**: Viewable in **Security -> Code scanning alerts**.
-- **Execution**: Runs on every Pull Request to `development`, on pushes to `development` and `production`, and weekly.
+- **Execution**: Runs on every Pull Request to `development` and `production`, on pushes to both branches, and weekly.
+- **Smart Skip**: Employs path-filtering to skip analysis if only non-code files (e.g. docs) are modified.
 - **Suites**: We use `security-extended` and `security-and-quality` for comprehensive coverage.
 
 ## GitHub Code Scanning (SARIF)
@@ -48,5 +59,6 @@ We use the SARIF (Static Analysis Results Interchange Format) to integrate vario
 
 ## Feedback and Results
 
-- Most security tools run on every Pull Request to the `development` branch.
+- Most security tools run on every Pull Request to the `development` and `production` branches.
+- **Smart Skip Logic**: To optimize CI time, many scans (like `npm audit` and `CodeQL`) will skip the expensive analysis steps if no relevant files were changed in the PR.
 - Critical vulnerabilities may block merges if the relevant quality gates are not met.

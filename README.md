@@ -6,18 +6,20 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/sto-info-app/sto-info-frontend/badge)](https://securityscorecards.dev/viewer/?uri=github.com/sto-info-app/sto-info-frontend)
 [![Security Policy](https://img.shields.io/badge/security%20policy-SECURITY.md-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/SECURITY.md)
 
-[![CodeQL Analysis](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/codeql.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/codeql.yml)
-[![Dependency Review](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml)
-[![OpenSSF Scorecard workflow](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml)
-[![npm audit](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml)
+[![CodeQL Analysis](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/codeql.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/codeql.yml)
+[![Dependency Review](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml)
+[![OpenSSF Scorecard workflow](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml)
+[![npm audit](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml)
 [![DCO Enforcement](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml)
-[![Security: Fuzz + ZAP](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz-and-zap.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz-and-zap.yml)
+[![Security: Fuzz](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz.yml)
+[![Security: ZAP](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap.yml)
 
 ## CI and delivery
 
-[![Lint and Test](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lint-test.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lint-test.yml)
+[![Lint and Test](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lint-test.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lint-test.yml)
 [![Version bump](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/version-bump.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/version-bump.yml)
 [![Tag release](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/tag-release.yml/badge.svg?branch=production)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/tag-release.yml)
+[![Lighthouse Audit](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lighthouse.yml)
 [![Uptime status](https://img.shields.io/uptimerobot/status/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
 [![Uptime 30 days](https://img.shields.io/uptimerobot/ratio/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
 
@@ -77,6 +79,28 @@ npm run test:cov
 
 Coverage output is written to `coverage/` (including an `lcov.info` file used by tooling such as SonarQube).
 
+### Mutation testing
+
+We use [Stryker Mutator](https://stryker-mutator.io/) to measure the effectiveness of our tests.
+
+**Full run (weekly/manual):**
+
+```bash
+npm run test:mutation
+```
+
+**Incremental run (CI / local PRs):**
+
+This script analyse your Git history to only mutate files that have changed compared to the base branch (`development` or `production`), making the process significantly faster.
+
+```bash
+# Compare against development (default)
+npm run test:mutation:incremental
+
+# Compare against a specific branch/ref
+BASE_REF=origin/production npm run test:mutation:incremental
+```
+
 ## Security Testing
 
 ### Property-based fuzz testing
@@ -135,6 +159,18 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+## CI/CD and Automation
+
+This project uses GitHub Actions for continuous integration and security automation.
+
+### Smart Skip Logic
+
+To optimize CI usage, our workflows employ "Smart Skip" logic. This means:
+
+- **Documentation/Meta changes**: Workflows trigger but skip heavy jobs (like builds and tests) for PRs that only change non-code files (e.g. `*.md`, `.agent/**`, `.vscode/**`).
+- **Targeted scans**: Security scans like `npm audit` only run if dependency files (`package.json`) are modified.
+- **Ruleset compatibility**: Jobs always report a status (even if skipped), ensuring they can be listed as "Required" in branch protection rules without blocking documentation-only PRs.
 
 ## Contributing
 
