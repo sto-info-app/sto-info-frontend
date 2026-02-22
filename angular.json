@@ -30,6 +30,7 @@
             "assets": [
               "src/favicon.ico",
               "src/manifest.webmanifest",
+              "src/robots.txt",
               {
                 "glob": "**/*",
                 "input": "src/assets",
