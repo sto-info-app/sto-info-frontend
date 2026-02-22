@@ -101,6 +101,15 @@ export default defineConfig([
     },
   },
   {
+    files: ['scripts/**/*.mjs', 'scripts/**/*.js'],
+
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+  {
     files: ['**/jest.config.cjs'],
 
     languageOptions: {

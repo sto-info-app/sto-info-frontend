@@ -3,12 +3,20 @@
 
 /* You can add global styles to this file, and also import other style files */
 
+html {
+  scrollbar-gutter: stable;
+}
+
 strong {
   font-weight: bold !important;
 }
 
 ul {
   margin-left: 25px;
+}
+
+input::placeholder {
+  color: #aaaaaa !important;
 }
 
 ul.no-bullets {
@@ -104,7 +112,7 @@ button.lcars-btn,
 
   &:disabled {
     background-color: #344470 !important;
-    color: rgba(255, 255, 255, 0.5) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
     cursor: not-allowed;
   }
 }

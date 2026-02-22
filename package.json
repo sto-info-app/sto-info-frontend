@@ -22,6 +22,9 @@
     "build:render": "npm run generate-env && npm run build:prod",
     "watch": "ng build --watch --configuration development",
     "lint": "eslint \"src/**/*.{ts,js,html}\"",
+    "lint:lighthouse": "lhci autorun",
+    "lighthouse": "cross-env API_URL=${API_URL:-https://dev-api.startrekonline.info} npm run build:prod && lhci collect && lhci upload --target=filesystem --outputDir=reports/lighthouse && npm run summary:ci",
+    "summary:ci": "node scripts/generate-ci-summary.mjs",
     "test": "jest --config jest.config.cjs --testPathIgnorePatterns='.fuzz.spec.ts'",
     "test:fuzz": "cross-env FUZZ_NUM_RUNS=${FUZZ_NUM_RUNS:-50} jest --config jest.config.cjs --testRegex='.*\\.fuzz\\.spec\\.ts$' --coverage=false",
     "test:fuzz:full": "cross-env FUZZ_NUM_RUNS=${FUZZ_NUM_RUNS:-1000} jest --config jest.config.cjs --testRegex='.*\\.fuzz\\.spec\\.ts$' --coverage=false",
@@ -29,8 +32,11 @@
     "test:cov": "jest --config jest.config.cjs --runInBand --coverage --coverageDirectory=reports/coverage --coverageReporters=lcov --coverageReporters=text-summary --testPathIgnorePatterns='.fuzz.spec.ts'",
     "test:mutation": "stryker run --reporters clear-text --reporters html --reporters progress",
     "test:mutation:dry": "stryker run --reporters clear-text --reporters html --reporters progress --dryRunOnly",
+    "test:mutation:incremental": "node ./scripts/run-incremental-mutation.mjs",
     "verify": "npm audit --audit-level=high --omit=dev && npm run lint && npm run test:cov && npm run test:fuzz && npm run build",
-    "e2e": "ng e2e"
+    "verify:full": "npm run verify && npm run lighthouse && npm run test:mutation:incremental",
+    "e2e": "ng e2e",
+    "prepare": "husky"
   },
   "dependencies": {
     "@angular/animations": "^21.1.5",
@@ -71,6 +77,7 @@
     "@angular/compiler-cli": "^21.1.5",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^10.0.1",
+    "@lhci/cli": "^0.14.0",
     "@stryker-mutator/core": "^9.5.1",
     "@stryker-mutator/jest-runner": "^9.5.1",
     "@stryker-mutator/typescript-checker": "^9.5.1",
@@ -92,6 +99,7 @@
     "jsdom": "^28.0.0",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
+    "serve": "^14.2.4",
     "typescript": "~5.9.3"
   },
   "projects": {
