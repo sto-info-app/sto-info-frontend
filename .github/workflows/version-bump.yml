@@ -98,10 +98,15 @@ jobs:
           # Push the branch
           git push origin "$BRANCH_NAME"
 
+          # Ensure the labels exist
+          gh label create version-bump --color "ededed" --description "Automated version bump" || true
+          gh label create chore --color "ededed" --description "Maintenance task" || true
+
           # Create a pull request
           PR_URL=$(gh pr create \
             --title "chore: bump version to $NEW_VERSION" \
             --body "Automated version bump from $CURRENT_VERSION to $NEW_VERSION" \
+            --label "version-bump,chore" \
             --base development \
             --head "$BRANCH_NAME")
 
