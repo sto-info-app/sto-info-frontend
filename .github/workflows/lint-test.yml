@@ -261,9 +261,3 @@ jobs:
       - name: Build (push only)
         if: github.event_name == 'push'
         run: npm run build
-
-      - name: Upload bundle analysis to Codecov
-        if: github.event_name == 'pull_request'
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        run: npx @codecov/bundle-analyzer ./dist/sto-info-frontend --bundle-name=sto-info-frontend --upload-token=$CODECOV_TOKEN
