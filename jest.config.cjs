@@ -45,7 +45,13 @@ module.exports = {
   },
 
   collectCoverage: true,
-  coverageReporters: ['text-summary', 'text', 'lcov', 'cobertura'],
+  coverageReporters: [
+    'text-summary',
+    'text',
+    'lcov',
+    'cobertura',
+    'json-summary',
+  ],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx,js,jsx}',
 
