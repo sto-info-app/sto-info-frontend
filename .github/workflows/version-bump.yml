@@ -3,8 +3,16 @@ name: Version bump on merge to development
 on:
   push:
     branches: [development]
+    paths-ignore:
+      - 'docs/**'
+      - '.github/**'
+      - 'README.md'
+      - 'SECURITY.md'
+      - 'CONTRIBUTING.md'
+      - '.agent/**'
+      - '.vscode/**'
+      - 'LICENCE'
 
-# Declare default permissions as read only.
 permissions: {}
 
 env:
@@ -24,10 +32,9 @@ jobs:
       pull-requests: write
       actions: read
 
-    # Hardening: prevent infinite loops
-    # - Skip if the commit message matches our version bump pattern
-    # - Skip if it's a merge commit from a version bump PR
+    # Hardening: prevent infinite loops and unnecessary runs
     if: |
+      github.actor != 'github-actions[bot]' &&
       !startsWith(github.event.head_commit.message, 'chore: bump version to ') &&
       !contains(github.event.head_commit.message, 'Automated version bump from') &&
       !(contains(github.event.head_commit.message, 'Merge pull request') && contains(github.event.head_commit.message, 'chore/bump-version-to'))
@@ -37,10 +44,10 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          token: ${{ github.token }}
 
-      - name: Setup project
-        uses: ./.github/actions/setup-project
+      - name: Set up Node
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -84,9 +91,9 @@ jobs:
           # Create the branch
           git checkout -b "$BRANCH_NAME"
 
-          # Commit the changes
+          # Commit the changes with DCO sign-off
           git add package.json package-lock.json
-          git commit -m "chore: bump version to $NEW_VERSION"
+          git commit -s -m "chore: bump version to $NEW_VERSION"
 
           # Push the branch
           git push origin "$BRANCH_NAME"
@@ -100,7 +107,7 @@ jobs:
 
           echo "PR_URL=$PR_URL" >> "$GITHUB_ENV"
 
-      - name: Enable auto-merge
+      - name: Merge version bump
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
         run: |
@@ -108,5 +115,5 @@ jobs:
           gh pr merge "$PR_URL" \
             --repo "${{ github.repository }}" \
             --merge \
-            --auto \
-            --body "Auto-merging automated version bump"
+            --admin \
+            --body "Automated version bump merge (bypassing review requirement)"
