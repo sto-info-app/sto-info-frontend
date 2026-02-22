@@ -3,12 +3,20 @@
 
 /* You can add global styles to this file, and also import other style files */
 
+html {
+  scrollbar-gutter: stable;
+}
+
 strong {
   font-weight: bold !important;
 }
 
 ul {
   margin-left: 25px;
+}
+
+input::placeholder {
+  color: #aaaaaa !important;
 }
 
 ul.no-bullets {
