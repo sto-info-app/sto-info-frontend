@@ -77,7 +77,7 @@
     "@angular/compiler-cli": "^21.1.5",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^10.0.1",
-    "@lhci/cli": "^0.14.0",
+    "@lhci/cli": "^0.15.1",
     "@stryker-mutator/core": "^9.5.1",
     "@stryker-mutator/jest-runner": "^9.5.1",
     "@stryker-mutator/typescript-checker": "^9.5.1",
