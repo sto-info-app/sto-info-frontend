@@ -378,7 +378,7 @@ a {
   color: #8ff;
   text-decoration: underline;
 
-  fa-icon.ext-link {
+  i.ext-link {
     color: #fa4;
     font-size: small;
     vertical-align: top;
@@ -1641,8 +1641,7 @@ body,
 .mat-typography,
 .mat-button,
 .mat-card {
-  font-family:
-    'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
   line-height: 1.5;
   font-size: 1rem;
 }
