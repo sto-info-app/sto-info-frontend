@@ -4,7 +4,7 @@
   <span class="go-roseblush">8th March 2025</span>.<br />
 
   <strong class="go-gold">Last updated: </strong>
-  <span class="go-roseblush">7th February 2026</span>.
+  <span class="go-roseblush">24th February 2026</span>.
 </p>
 
 <p>
@@ -55,6 +55,25 @@
       <li>
         Account activity data (retained for
         <strong class="go-gold">180 days</strong> and then deleted)
+      </li>
+    </ul>
+  </li>
+  <li>
+    When we send you transactional emails, we record delivery events, soft
+    bounces, hard bounces, and spam complaint notifications via our email
+    providers (AWS SES and SendGrid). These records are stored as irreversible
+    cryptographic hashes of email addresses &mdash; the originating address is
+    never stored in plaintext.
+    <ul class="lcars-list">
+      <li>
+        Delivery and soft bounce records are retained for
+        <strong class="go-gold">180 days</strong> and then deleted.
+      </li>
+      <li>
+        Hard bounce and complaint records (which suppress future emails to the
+        affected address to protect our email deliverability and your inbox) are
+        retained for <strong class="go-gold">7 years</strong>, after which the
+        suppression expires.
       </li>
     </ul>
   </li>
@@ -155,6 +174,33 @@
     example: page URL, device/browser details, timestamps, and error stack
     traces) to help us detect and fix issues.
   </li>
+  <li>
+    <a
+      target="_blank"
+      rel="noopener noreferrer"
+      href="https://aws.amazon.com/ses/"
+      >AWS Simple Email Service (SES)<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
+    ></a>
+    - We use AWS SES to send transactional emails (such as account verification
+    and password reset emails). AWS SES processes recipient email addresses and
+    delivery metadata in order to deliver messages and report on bounce and
+    complaint events.
+  </li>
+  <li>
+    <a
+      target="_blank"
+      rel="noopener noreferrer"
+      href="https://sendgrid.com/"
+      >SendGrid<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
+    ></a>
+    - SendGrid is used as a backup alternative transactional email delivery
+    provider. SendGrid processes recipient email addresses and delivery metadata
+    in order to deliver messages and report on bounce and complaint events.
+  </li>
 </ul>
 
 <hr />
@@ -198,6 +244,15 @@
     <strong class="go-sky">Audit and login data</strong> - Retained for
     <strong class="go-gold">180 days</strong> (IP addresses get deleted after
     <strong class="go-gold">90 days</strong>).
+  </li>
+  <li>
+    <strong class="go-sky">Email delivery and suppression data</strong> -
+    Delivery confirmations and soft bounce records are retained for
+    <strong class="go-gold">180 days</strong>. Hard bounce and spam complaint
+    records, which suppress future emails to the affected address, are retained
+    for <strong class="go-gold">7 years</strong> to protect email
+    deliverability. These records contain no personally identifiable information
+    &mdash; email addresses are stored only as one-way cryptographic hashes.
   </li>
   <li>
     <strong class="go-sky">Automatically collected data</strong> - Retained for
