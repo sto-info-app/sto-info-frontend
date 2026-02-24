@@ -31,7 +31,11 @@ const globalRippleConfig: RippleGlobalOptions = {
   disabled: true,
 };
 
-if (environment.sentryDsn) {
+if (
+  environment.sentryDsn &&
+  environment.env_name !== 'local' &&
+  environment.env_name !== 'lighthouse-audit'
+) {
   Sentry.init({
     dsn: environment.sentryDsn,
     environment: environment.env_name ?? 'dev',

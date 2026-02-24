@@ -73,13 +73,21 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscribeToWarningAnnouncements();
     this.subscribeToExpiryAnnouncements();
 
-    if (environment?.env_name !== 'local') {
+    if (
+      environment?.env_name !== 'local' &&
+      environment?.env_name !== 'lighthouse-audit'
+    ) {
       this.initGoogleConsentMode();
       this.loadCookieYesScript();
       this.trackPageViewsOnNavigation();
     }
 
-    this.loadFontAwesomeKit();
+    if (
+      environment?.env_name !== 'local' &&
+      environment?.env_name !== 'lighthouse-audit'
+    ) {
+      this.loadFontAwesomeKit();
+    }
   }
 
   /**

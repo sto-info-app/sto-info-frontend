@@ -1,6 +1,6 @@
 {
   "name": "sto-info-frontend",
-  "version": "1.0.127",
+  "version": "1.0.129",
   "description": "Star Trek Online Information App",
   "author": "Steve Roberts",
   "private": true,
@@ -22,14 +22,14 @@
     "build:render": "npm run generate-env && npm run build:prod",
     "watch": "ng build --watch --configuration development",
     "lint": "eslint \"src/**/*.{ts,js,html}\"",
-    "lint:lighthouse": "lhci autorun",
+    "lint:lighthouse": "cross-env ENV_NAME=lighthouse-audit npm run build:render && lhci autorun",
     "lighthouse": "cross-env API_URL=${API_URL:-https://dev-api.startrekonline.info} npm run build:prod && lhci collect && lhci upload --target=filesystem --outputDir=reports/lighthouse && npm run summary:ci",
     "summary:ci": "node scripts/generate-ci-summary.mjs",
     "test": "jest --config jest.config.cjs --testPathIgnorePatterns='.fuzz.spec.ts'",
     "test:fuzz": "cross-env FUZZ_NUM_RUNS=${FUZZ_NUM_RUNS:-50} jest --config jest.config.cjs --testRegex='.*\\.fuzz\\.spec\\.ts$' --coverage=false",
     "test:fuzz:full": "cross-env FUZZ_NUM_RUNS=${FUZZ_NUM_RUNS:-1000} jest --config jest.config.cjs --testRegex='.*\\.fuzz\\.spec\\.ts$' --coverage=false",
     "test:watch": "jest --config jest.config.cjs --watch",
-    "test:cov": "jest --config jest.config.cjs --runInBand --coverage --coverageDirectory=reports/coverage --coverageReporters=lcov --coverageReporters=text-summary --testPathIgnorePatterns='.fuzz.spec.ts'",
+    "test:cov": "jest --config jest.config.cjs --runInBand --coverage --coverageDirectory=reports/coverage --coverageReporters=lcov --coverageReporters=text-summary --coverageReporters=json-summary --coverageReporters=text --testPathIgnorePatterns='.fuzz.spec.ts'",
     "test:mutation": "stryker run --reporters clear-text --reporters html --reporters progress",
     "test:mutation:dry": "stryker run --reporters clear-text --reporters html --reporters progress --dryRunOnly",
     "test:mutation:incremental": "node ./scripts/run-incremental-mutation.mjs",
@@ -52,7 +52,7 @@
     "@auth0/angular-jwt": "^5.1.2",
     "@eslint/config-array": "^0.23.2",
     "@eslint/object-schema": "^3.0.1",
-    "@sentry/angular": "^10.38.0",
+    "@sentry/angular": "^10.40.0",
     "glob": "^13.0.6",
     "http-proxy-middleware": "^3.0.5",
     "js-base64": "^3.7.7",
@@ -136,6 +136,12 @@
   },
   "overrides": {
     "@modelcontextprotocol/sdk": "1.26.0",
-    "eslint": "^9.22.0"
+    "eslint": "^9.22.0",
+    "ajv@^8.0.0": "8.18.0",
+    "cookie@0.4.2": "0.7.2",
+    "@stryker-mutator/core": {
+      "minimatch": "10.2.2"
+    },
+    "tmp": "0.2.5"
   }
 }
