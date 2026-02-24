@@ -54,10 +54,20 @@ label {
 }
 
 input {
-  padding: 0.5rem;
+  padding: 0.75rem 0.5rem;
   font-size: 1rem;
   width: 100%;
   box-sizing: border-box;
+  background-color: vars.$lcars-black;
+  color: vars.$a11y-white;
+  border: 1px solid vars.$lcars-c47;
+  font-family: vars.$font-antonio;
+
+  &:focus {
+    outline: none;
+    border-color: vars.$lcars-c48;
+    box-shadow: 0 0 5px rgba(102, 204, 255, 0.5);
+  }
 }
 
 input.errored {
@@ -255,5 +265,21 @@ button.lcars-btn,
 }
 
 .full-width-btn-link {
+  display: block;
   width: 100%;
+  text-decoration: none !important;
+  color: vars.$a11y-black !important;
+  text-align: right;
+  padding: 15px 25px;
+  font-family: vars.$font-antonio;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 1rem;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  border-radius: 30px; // Match lcars-btn look
+
+  &:hover {
+    filter: brightness(1.2);
+  }
 }

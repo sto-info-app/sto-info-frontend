@@ -19,6 +19,14 @@ $lcars-tangerine: #f83;
 $lcars-red: #d44;
 $lcars-sky: #aaf;
 
+// Accessibility Colors (Pure Black/White for Lighthouse compliance)
+$a11y-black: #000;
+$a11y-white: #fff;
+
+// LCARS Palette Extensions (from lcars-theme-colours.scss)
+$lcars-c47: #79d;
+$lcars-c48: #6cf;
+
 // Career Colors
 $career-tactical: $lcars-cardinal;
 $career-engineering: $lcars-sunflower;
