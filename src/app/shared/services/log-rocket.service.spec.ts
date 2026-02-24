@@ -34,6 +34,14 @@ describe('LogRocketService', () => {
 
   beforeEach(() => {
     sharedDataService = new MockSharedDataService();
+    // Ensure environment variables are set for tests
+    (
+      environment as unknown as { logRocketAppId: string; env_name: string }
+    ).logRocketAppId = 'test-app-id';
+    (
+      environment as unknown as { logRocketAppId: string; env_name: string }
+    ).env_name = 'dev';
+
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [{ provide: SharedDataService, useValue: sharedDataService }],
