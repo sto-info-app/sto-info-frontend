@@ -1,7 +1,4 @@
-@charset "utf-8";
-
-// Import both Antonio (for Chrome/Edge) and Roboto Condensed (for Firefox)
-@import url('https://fonts.googleapis.com/css2?family=Antonio:wght@300;400;500;600;700&family=Roboto+Condensed:wght@300;400;500;600;700&display=swap');
+@use 'lcars-variables' as vars;
 
 // Keyframe animations
 @keyframes blink {
@@ -378,7 +375,7 @@ a {
   color: #8ff;
   text-decoration: underline;
 
-  fa-icon.ext-link {
+  i.ext-link {
     color: #fa4;
     font-size: small;
     vertical-align: top;
@@ -1318,7 +1315,8 @@ button:hover {
   text-decoration: none;
   font-weight: 700;
   text-transform: uppercase;
-  color: #0d0d0d;
+  color: vars.$a11y-black;
+  font-family: vars.$font-antonio;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -1595,7 +1593,8 @@ footer::after {
 
   p.fan-made {
     padding: 0 15%;
-    font-size: 0.6rem;
+    font-size: 0.8rem;
+    opacity: 0.8;
   }
 
   #footer-links-container {
@@ -1641,8 +1640,7 @@ body,
 .mat-typography,
 .mat-button,
 .mat-card {
-  font-family:
-    'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
+  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
   line-height: 1.5;
   font-size: 1rem;
 }
