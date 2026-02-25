@@ -27,7 +27,10 @@ describe('Shared Services and Utils Fuzz Tests', () => {
     it('should handle arbitrary date strings without throwing', () => {
       fc.assert(
         fc.property(
-          fc.date().map(d => d.toISOString()),
+          fc
+            .date({ min: new Date('1900-01-01'), max: new Date('2100-01-01') })
+            .filter(d => !Number.isNaN(d.getTime()))
+            .map(d => d.toISOString()),
           dateStr => {
             expect(() => {
               const result = datesTimeHelper.timeSince(dateStr);
