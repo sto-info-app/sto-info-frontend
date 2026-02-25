@@ -40,7 +40,8 @@ export class DatesTimeHelperService {
       this.formatUnit(time.days, 'day') ||
       this.formatUnit(time.hours, 'hour') ||
       this.formatUnit(time.minutes, 'minute') ||
-      this.formatUnit(time.seconds, 'second')
+      this.formatUnit(time.seconds, 'second') ||
+      'just now'
     );
   }
 
