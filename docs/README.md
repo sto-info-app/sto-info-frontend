@@ -38,7 +38,7 @@ Supporting docs:
 
 ### Prerequisites
 
-- Node.js version compatible with [package.json](../package.json) engines (currently Node 24)
+- Node.js version compatible with [package.json](../package.json) engines (currently Node 24, support for Node 25 types)
 - npm
 
 ### Install and run
