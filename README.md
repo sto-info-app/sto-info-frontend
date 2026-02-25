@@ -47,13 +47,13 @@
 [![Licence](https://img.shields.io/github/license/sto-info-app/sto-info-frontend)](https://github.com/sto-info-app/sto-info-frontend/blob/development/LICENCE)
 [![All Contributors](https://img.shields.io/github/all-contributors/sto-info-app/sto-info-frontend?label=all%20contributors)](https://github.com/sto-info-app/sto-info-frontend#contributors)
 [![Angular](https://img.shields.io/github/package-json/dependency-version/sto-info-app/sto-info-frontend/@angular/core?label=angular&branch=development)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
-[![Node](https://img.shields.io/badge/node-24.x-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
+[![Node](https://img.shields.io/badge/node->=24%20<25-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
 
 ## Project overview
 
 The `sto-info-frontend` is a frontend static site to provide information related to STO (Star Trek Online) player's accounts, characters and fleets. It is built using modern web technologies and follows best practices.
 
-This project uses [Angular CLI](https://github.com/angular/angular-cli) (see `package.json` devDependency `@angular/cli`, currently `^21.0.5`).
+This project uses [Angular CLI](https://github.com/angular/angular-cli) (see `package.json` devDependency `@angular/cli`, currently `^21.1.5`).
 
 ## Development server
 
@@ -127,12 +127,14 @@ Set the `FUZZ_NUM_RUNS` environment variable to control the number of test itera
 FUZZ_NUM_RUNS=500 npm run test:fuzz
 ```
 
-Default: 100 iterations (if not set)
+Default: 50 iterations (via `npm run test:fuzz`) or 100 (fallback if no environment variable is set).
 
 **CI behaviour:**
 
 - **Pull requests**: Runs lightweight fuzz tests (50 iterations) to catch obvious issues quickly
 - **Weekly schedule**: Runs comprehensive fuzz tests (1000 iterations) for deeper analysis
+
+**Note on Type Safety:** We enforce strict linting. Use `error: unknown` in catch blocks with type guards (e.g., `error instanceof Error`) instead of `any`.
 
 ### OWASP ZAP DAST scanning
 

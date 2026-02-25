@@ -1312,5 +1312,24 @@ describe('AppComponent', () => {
       component.logout();
       expect(clearTimeoutSpy).not.toHaveBeenCalled();
     });
+
+    it('should handle missing gtag function in disableGoogleAnalyticsTracking', () => {
+      (environment as { gaMeasurementId: string }).gaMeasurementId = 'G-TEST';
+      const originalGtag = (globalThis as unknown as { gtag: unknown }).gtag;
+      (globalThis as unknown as { gtag: undefined }).gtag = undefined;
+
+      try {
+        (
+          component as unknown as { disableGoogleAnalyticsTracking: () => void }
+        ).disableGoogleAnalyticsTracking();
+        expect(
+          (globalThis as unknown as Record<string, boolean>)[
+            'ga-disable-G-TEST'
+          ],
+        ).toBe(true);
+      } finally {
+        (globalThis as unknown as { gtag: unknown }).gtag = originalGtag;
+      }
+    });
   });
 });

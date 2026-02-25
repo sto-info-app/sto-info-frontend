@@ -38,7 +38,7 @@ Supporting docs:
 
 ### Prerequisites
 
-- Node.js version compatible with [package.json](../package.json) engines (currently Node 24)
+- Node.js version compatible with [package.json](../package.json) engines (currently Node 24, support for Node 25 types)
 - npm
 
 ### Install and run
@@ -86,6 +86,7 @@ This runs all critical quality checks in sequence:
 4. **Fuzz testing** - `npm run test:fuzz`
    - Property-based fuzz tests (50 iterations)
    - Tests edge cases and unexpected inputs
+   - Enforces strict type safety (no `any` in catch blocks)
 
 5. **Build verification** - `npm run build`
    - Production build to ensure everything compiles
@@ -95,6 +96,8 @@ The script stops at the first failure, allowing you to fix issues incrementally.
 
 **Note on CI usage:**
 In GitHub Actions, most of these checks use **Smart Skip** logic. If your PR only changes documentation or meta-files (like `.vscode/`), heavy jobs like builds and tests will be skipped automatically while still reporting a "Passed" status to satisfy branch protection rules.
+
+**Note on Type Safety:** We enforce strict linting across the codebase, including tests. Use `error: unknown` in catch blocks with type guards (e.g., `error instanceof Error`) instead of `any`.
 
 **Intentionally excluded (run separately when needed):**
 
