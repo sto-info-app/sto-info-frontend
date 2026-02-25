@@ -1,14 +1,9 @@
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
-import {
-  APP_INITIALIZER,
   ApplicationConfig,
   ErrorHandler,
   importProvidersFrom,
-  inject,
   provideZoneChangeDetection,
 } from '@angular/core';
 import {
@@ -16,15 +11,15 @@ import {
   RippleGlobalOptions,
 } from '@angular/material/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Router, RouterModule, provideRouter } from '@angular/router';
 import { JwtModule } from '@auth0/angular-jwt';
 
 import * as Sentry from '@sentry/angular';
 import { routes } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
+import { apiHealthInterceptor } from './app/core/health/api-health.interceptor';
 import { API_URLS } from './app/shared/constants/api-routing.constants';
-import { FontAwesomeIconService } from './app/shared/services/font-awesome-icon.service';
 import { environment } from './environments/environment';
 import { EnvCheckService } from './environments/environment.service';
 
@@ -36,7 +31,11 @@ const globalRippleConfig: RippleGlobalOptions = {
   disabled: true,
 };
 
-if (environment.sentryDsn) {
+if (
+  environment.sentryDsn &&
+  environment.env_name !== 'local' &&
+  environment.env_name !== 'lighthouse-audit'
+) {
   Sentry.init({
     dsn: environment.sentryDsn,
     environment: environment.env_name ?? 'dev',
@@ -71,9 +70,9 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection(),
     provideRouter(routes),
+    provideAnimationsAsync(),
     importProvidersFrom(
       RouterModule,
-      BrowserAnimationsModule,
       JwtModule.forRoot({
         config: {
           tokenGetter: tokenGetter,
@@ -96,16 +95,7 @@ export const appConfig: ApplicationConfig = {
       deps: [Router],
     },
     { provide: LocationStrategy, useClass: PathLocationStrategy },
-    provideHttpClient(withInterceptorsFromDi()),
-    {
-      provide: APP_INITIALIZER,
-      multi: true,
-      useFactory: () => () => {
-        // Force creation so its constructor registers icons
-        inject(FontAwesomeIconService);
-      },
-      deps: [Sentry.TraceService],
-    },
+    provideHttpClient(withInterceptors([apiHealthInterceptor])),
   ],
 };
 

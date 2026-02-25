@@ -8,7 +8,6 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { User } from 'src/app/dashboard/models/user.model';
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
-import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
@@ -25,7 +24,6 @@ import { EditPersonalDetailsComponent } from '../edit-personal-details/edit-pers
   templateUrl: './profile-pic.component.html',
   styleUrls: ['./profile-pic.component.scss'],
   standalone: true,
-  animations: [progressBarAnimation],
   imports: [
     ImageCropperComponent,
     MatDialogModule,
@@ -144,7 +142,7 @@ export class ProfilePicComponent {
             this.isSubmitting = false;
           },
           error: error => {
-            let errMessage = '';
+            let errMessage: string;
             if (error.status === 0) {
               console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
               errMessage = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;

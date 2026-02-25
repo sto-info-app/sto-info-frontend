@@ -4,10 +4,7 @@ on:
   push:
     branches: [development]
 
-permissions:
-  contents: write
-  pull-requests: write
-  actions: read
+permissions: {}
 
 env:
   NODE_VERSION: 24
@@ -17,15 +14,53 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check_changes:
+    name: Check for changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      src_changed: ${{ steps.filter.outputs.src_changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check for source changes
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          filters: |
+            src_changed:
+              - 'src/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'angular.json'
+              - 'tsconfig.json'
+              - 'tsconfig.*.json'
+              - 'eslint.config.mjs'
+              - 'jest.config.cjs'
+              - 'stryker.config.json'
+              - 'setup-jest.ts'
+              - 'sonar-project.properties'
+              - '.prettierrc'
+
   bump_version:
+    name: Bump Version
+    needs: check_changes
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: Development
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
 
-    # Hardening: prevent infinite loops
-    # - Skip if the commit message matches our version bump pattern
-    # - Skip if it's a merge commit from a version bump PR
+    # Smart skip: only run if source changed AND it's not a bot/self-merge
+    # By using a dependency on check_changes, we ensure the workflow triggers
+    # and reports success even when this job is skipped.
     if: |
+      needs.check_changes.outputs.src_changed == 'true' &&
+      github.actor != 'github-actions[bot]' &&
       !startsWith(github.event.head_commit.message, 'chore: bump version to ') &&
       !contains(github.event.head_commit.message, 'Automated version bump from') &&
       !(contains(github.event.head_commit.message, 'Merge pull request') && contains(github.event.head_commit.message, 'chore/bump-version-to'))
@@ -35,22 +70,21 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          token: ${{ github.token }}
 
-      - name: Setup project
-        uses: ./.github/actions/setup-project
+      - name: Set up Node
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
-          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Load & cache dependencies
         uses: ./.github/actions/cached-dependencies
         with:
           use-cache: true
           node-version: ${{ env.NODE_VERSION }}
-          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Bump patch version and create PR
+        id: create_pr
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
         run: |
@@ -84,29 +118,36 @@ jobs:
           # Create the branch
           git checkout -b "$BRANCH_NAME"
 
-          # Commit the changes
+          # Commit the changes with DCO sign-off
           git add package.json package-lock.json
-          git commit -m "chore: bump version to $NEW_VERSION"
+          git commit -s -m "chore: bump version to $NEW_VERSION"
 
           # Push the branch
           git push origin "$BRANCH_NAME"
+
+          # Ensure the labels exist
+          gh label create version-bump --color "ededed" --description "Automated version bump" || true
+          gh label create chore --color "ededed" --description "Maintenance task" || true
 
           # Create a pull request
           PR_URL=$(gh pr create \
             --title "chore: bump version to $NEW_VERSION" \
             --body "Automated version bump from $CURRENT_VERSION to $NEW_VERSION" \
+            --label "version-bump,chore" \
             --base development \
             --head "$BRANCH_NAME")
 
+          echo "PR_URL=$PR_URL" >> "$GITHUB_OUTPUT"
           echo "PR_URL=$PR_URL" >> "$GITHUB_ENV"
 
-      - name: Enable auto-merge
+      - name: Merge version bump
+        if: steps.create_pr.outputs.PR_URL != ''
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
         run: |
-          sleep 5
-          gh pr merge "$PR_URL" \
+          sleep 10
+          gh pr merge "${{ steps.create_pr.outputs.PR_URL }}" \
             --repo "${{ github.repository }}" \
             --merge \
-            --auto \
-            --body "Auto-merging automated version bump"
+            --admin \
+            --body "Automated version bump merge (bypassing review requirement)"

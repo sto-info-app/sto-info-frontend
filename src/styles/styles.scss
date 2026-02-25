@@ -1,7 +1,12 @@
+@use 'fonts';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 
 /* You can add global styles to this file, and also import other style files */
+
+html {
+  scrollbar-gutter: stable;
+}
 
 strong {
   font-weight: bold !important;
@@ -9,6 +14,10 @@ strong {
 
 ul {
   margin-left: 25px;
+}
+
+input::placeholder {
+  color: #aaaaaa !important;
 }
 
 ul.no-bullets {
@@ -46,10 +55,20 @@ label {
 }
 
 input {
-  padding: 0.5rem;
+  padding: 0.75rem 0.5rem;
   font-size: 1rem;
   width: 100%;
   box-sizing: border-box;
+  background-color: vars.$lcars-black;
+  color: vars.$a11y-white;
+  border: 1px solid vars.$lcars-c47;
+  font-family: vars.$font-antonio;
+
+  &:focus {
+    outline: none;
+    border-color: vars.$lcars-c48;
+    box-shadow: 0 0 5px rgba(102, 204, 255, 0.5);
+  }
 }
 
 input.errored {
@@ -104,7 +123,7 @@ button.lcars-btn,
 
   &:disabled {
     background-color: #344470 !important;
-    color: rgba(255, 255, 255, 0.5) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
     cursor: not-allowed;
   }
 }
@@ -166,6 +185,7 @@ button.lcars-btn,
   background-size: 400% 100%;
   background-position: 100% 50%;
   animation: progressBar 2s linear infinite;
+  transition: background 400ms ease-in-out;
 }
 
 /* LCARS Flex Alignment Utilities */
@@ -246,5 +266,21 @@ button.lcars-btn,
 }
 
 .full-width-btn-link {
+  display: block;
   width: 100%;
+  text-decoration: none !important;
+  color: vars.$a11y-black !important;
+  text-align: right;
+  padding: 15px 25px;
+  font-family: vars.$font-antonio;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 1rem;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  border-radius: 30px; // Match lcars-btn look
+
+  &:hover {
+    filter: brightness(1.2);
+  }
 }

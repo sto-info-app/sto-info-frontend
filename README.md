@@ -1,10 +1,59 @@
-# sto-info-frontend [![Uptime status](https://img.shields.io/uptimerobot/status/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/) [![Uptime 30 days](https://img.shields.io/uptimerobot/ratio/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
+# sto-info-app-frontend
 
-## Project Overview
+## Security posture
+
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11941/badge)](https://www.bestpractices.dev/projects/11941)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/sto-info-app/sto-info-frontend/badge)](https://securityscorecards.dev/viewer/?uri=github.com/sto-info-app/sto-info-frontend)
+[![Security Policy](https://img.shields.io/badge/security%20policy-SECURITY.md-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/SECURITY.md)
+
+[![CodeQL Analysis](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/codeql.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/codeql.yml)
+[![Dependency Review](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml)
+[![OpenSSF Scorecard workflow](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml)
+[![npm audit](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml)
+[![DCO Enforcement](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml)
+[![Security: Fuzz](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz.yml)
+[![Security: ZAP](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap.yml)
+
+## CI and delivery
+
+[![Lint and Test](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lint-test.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lint-test.yml)
+[![Version bump](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/version-bump.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/version-bump.yml)
+[![Tag release](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/tag-release.yml/badge.svg?branch=production)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/tag-release.yml)
+[![Lighthouse Audit](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lighthouse.yml)
+[![Uptime status](https://img.shields.io/uptimerobot/status/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
+[![Uptime 30 days](https://img.shields.io/uptimerobot/ratio/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
+
+## Quality and testing
+
+[![Mutation testing](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![codecov](https://codecov.io/gh/sto-info-app/sto-info-frontend/graph/badge.svg?token=ZX5Y9GQ3ZR)](https://codecov.io/gh/sto-info-app/sto-info-frontend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+
+## Code metrics
+
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+
+## Release and project
+
+[![Release](https://img.shields.io/github/v/release/sto-info-app/sto-info-frontend?display_name=tag&sort=semver)](https://github.com/sto-info-app/sto-info-frontend/releases)
+[![Licence](https://img.shields.io/github/license/sto-info-app/sto-info-frontend)](https://github.com/sto-info-app/sto-info-frontend/blob/development/LICENCE)
+[![All Contributors](https://img.shields.io/github/all-contributors/sto-info-app/sto-info-frontend?label=all%20contributors)](https://github.com/sto-info-app/sto-info-frontend#contributors)
+[![Angular](https://img.shields.io/github/package-json/dependency-version/sto-info-app/sto-info-frontend/@angular/core?label=angular&branch=development)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
+[![Node](https://img.shields.io/badge/node->=24%20<25-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
+
+## Project overview
 
 The `sto-info-frontend` is a frontend static site to provide information related to STO (Star Trek Online) player's accounts, characters and fleets. It is built using modern web technologies and follows best practices.
 
-This project uses [Angular CLI](https://github.com/angular/angular-cli) (see `package.json` devDependency `@angular/cli`, currently `^21.0.5`).
+This project uses [Angular CLI](https://github.com/angular/angular-cli) (see `package.json` devDependency `@angular/cli`, currently `^21.1.5`).
 
 ## Development server
 
@@ -30,6 +79,81 @@ npm run test:cov
 
 Coverage output is written to `coverage/` (including an `lcov.info` file used by tooling such as SonarQube).
 
+### Mutation testing
+
+We use [Stryker Mutator](https://stryker-mutator.io/) to measure the effectiveness of our tests.
+
+**Full run (weekly/manual):**
+
+```bash
+npm run test:mutation
+```
+
+**Incremental run (CI / local PRs):**
+
+This script analyse your Git history to only mutate files that have changed compared to the base branch (`development` or `production`), making the process significantly faster.
+
+```bash
+# Compare against development (default)
+npm run test:mutation:incremental
+
+# Compare against a specific branch/ref
+BASE_REF=origin/production npm run test:mutation:incremental
+```
+
+## Security Testing
+
+### Property-based fuzz testing
+
+This project uses [fast-check](https://github.com/dubzzz/fast-check) for property-based fuzz testing to ensure robustness against unexpected inputs.
+
+**Run locally (lightweight):**
+
+```bash
+npm run test:fuzz
+```
+
+**Run locally (comprehensive):**
+
+```bash
+npm run test:fuzz:full
+```
+
+**Customise iteration count:**
+
+Set the `FUZZ_NUM_RUNS` environment variable to control the number of test iterations:
+
+```bash
+FUZZ_NUM_RUNS=500 npm run test:fuzz
+```
+
+Default: 50 iterations (via `npm run test:fuzz`) or 100 (fallback if no environment variable is set).
+
+**CI behaviour:**
+
+- **Pull requests**: Runs lightweight fuzz tests (50 iterations) to catch obvious issues quickly
+- **Weekly schedule**: Runs comprehensive fuzz tests (1000 iterations) for deeper analysis
+
+**Note on Type Safety:** We enforce strict linting. Use `error: unknown` in catch blocks with type guards (e.g., `error instanceof Error`) instead of `any`.
+
+### OWASP ZAP DAST scanning
+
+Dynamic Application Security Testing (DAST) is performed using OWASP ZAP to identify security vulnerabilities in the running application.
+
+**CI behaviour:**
+
+- **Pull requests**: Runs ZAP baseline scan with 10-minute timeout
+- **Weekly schedule**: Runs ZAP full scan with 30-minute timeout
+- **Scan reports**: Available as workflow artifacts for 30 days
+
+**Limitations:**
+
+- Scans run against unauthenticated endpoints only
+- Does not test authenticated user flows
+- False positives can be tuned via `.zap/rules.tsv`
+
+See [SECURITY.md](SECURITY.md) for more details.
+
 ## Running end-to-end tests
 
 Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
@@ -37,6 +161,18 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+## CI/CD and Automation
+
+This project uses GitHub Actions for continuous integration and security automation.
+
+### Smart Skip Logic
+
+To optimize CI usage, our workflows employ "Smart Skip" logic. This means:
+
+- **Documentation/Meta changes**: Workflows trigger but skip heavy jobs (like builds and tests) for PRs that only change non-code files (e.g. `*.md`, `.agent/**`, `.vscode/**`).
+- **Targeted scans**: Security scans like `npm audit` only run if dependency files (`package.json`) are modified.
+- **Ruleset compatibility**: Jobs always report a status (even if skipped), ensuring they can be listed as "Required" in branch protection rules without blocking documentation-only PRs.
 
 ## Contributing
 
@@ -67,10 +203,6 @@ Install the [SonarQube IDE](https://www.sonarsource.com/products/sonarlint/) and
 
 The analysis results will be available on the SonarQube dashboard.
 
-### Current SonarQube Analysis
-
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=alert_status&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=bugs&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=code_smells&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend) [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=duplicated_lines_density&token=7eecc822c359d319aa1ae202c99601cbff43af90)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
-
 ## Licence
 
 This project is licensed under the MIT Licence. See the [LICENCE](LICENCE) file for more information.
@@ -78,6 +210,13 @@ This project is licensed under the MIT Licence. See the [LICENCE](LICENCE) file 
 ## Intellectual Property Rights
 
 This app respects the copyright and intellectual property rights of Star Trek Online and Star Trek. CBS Studios Inc. owns STAR TREK, and Cryptic Studios Inc owns STAR TREK ONLINE with all their related marks, logos and characters.
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 ## Contact
 

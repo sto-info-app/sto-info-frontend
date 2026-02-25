@@ -8,7 +8,6 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
-import { progressBarAnimation } from 'src/app/shared/animation/progress-bar.animation';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
@@ -24,7 +23,6 @@ import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.co
   templateUrl: './character-pic.component.html',
   styleUrls: ['./character-pic.component.scss'],
   standalone: true,
-  animations: [progressBarAnimation],
   imports: [
     ImageCropperComponent,
     MatDialogModule,
@@ -186,7 +184,7 @@ export class CharacterPicComponent {
    * @param error HTTP error object.
    */
   private handleHttpError(error: { status: number }): void {
-    let errMessage = '';
+    let errMessage: string;
     if (error.status === 0) {
       console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
       errMessage = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;

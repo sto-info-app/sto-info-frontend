@@ -9,8 +9,6 @@ import { APP_ROUTES } from '../shared/constants/app-routing.constants';
 import { RoutingService } from '../shared/services/routing.service';
 import { User } from './models/user.model';
 import { DashboardService } from './services/dashboard.service';
-
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { StoAccountService } from './services/sto-account.service';
 
 @Component({
@@ -18,7 +16,7 @@ import { StoAccountService } from './services/sto-account.service';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, LoadingBarComponent, FontAwesomeModule],
+  imports: [CommonModule, RouterModule, LoadingBarComponent],
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   appRoutes = APP_ROUTES;

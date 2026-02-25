@@ -4,7 +4,7 @@
   <span class="go-roseblush">8th March 2025</span>.<br />
 
   <strong class="go-gold">Last updated: </strong>
-  <span class="go-roseblush">7th February 2026</span>.
+  <span class="go-roseblush">24th February 2026</span>.
 </p>
 
 <p>
@@ -58,6 +58,25 @@
       </li>
     </ul>
   </li>
+  <li>
+    When we send you transactional emails, we record delivery events, soft
+    bounces, hard bounces, and spam complaint notifications via our email
+    providers (AWS SES and SendGrid). These records are stored as irreversible
+    cryptographic hashes of email addresses &mdash; the originating address is
+    never stored in plaintext.
+    <ul class="lcars-list">
+      <li>
+        Delivery and soft bounce records are retained for
+        <strong class="go-gold">180 days</strong> and then deleted.
+      </li>
+      <li>
+        Hard bounce and complaint records (which suppress future emails to the
+        affected address to protect our email deliverability and your inbox) are
+        retained for <strong class="go-gold">7 years</strong>, after which the
+        suppression expires.
+      </li>
+    </ul>
+  </li>
 </ul>
 
 <h3>D. Automatically Collected Data</h3>
@@ -83,10 +102,9 @@
       target="_blank"
       rel="noopener noreferrer"
       href="https://www.cookieyes.com/"
-      >CookieYes<fa-icon
-        [icon]="['fas', 'external-link']"
-        title="(*external link)"
-        class="ext-link"></fa-icon
+      >CookieYes<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
     ></a>
     - CookieYes is used to manage user consent for cookies and tracking
     technologies. It helps ensure compliance with data protection regulations by
@@ -97,10 +115,9 @@
       target="_blank"
       rel="noopener noreferrer"
       href="https://render.com/"
-      >Render<fa-icon
-        [icon]="['fas', 'external-link']"
-        title="(*external link)"
-        class="ext-link"></fa-icon
+      >Render<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
     ></a>
     - Our app is hosted on Render.com. Render may process your data to provide
     hosting and infrastructure services.
@@ -110,10 +127,9 @@
       target="_blank"
       rel="noopener noreferrer"
       href="https://cloudflare.com/"
-      >Cloudflare<fa-icon
-        [icon]="['fas', 'external-link']"
-        title="(*external link)"
-        class="ext-link"></fa-icon
+      >Cloudflare<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
     ></a>
     - We use Cloudflare for content delivery, caching, and security. Cloudflare
     may process specific data, such as IP addresses and request details, to
@@ -124,10 +140,9 @@
       target="_blank"
       rel="noopener noreferrer"
       href="https://analytics.google.com/"
-      >Google Analytics<fa-icon
-        [icon]="['fas', 'external-link']"
-        title="(*external link)"
-        class="ext-link"></fa-icon
+      >Google Analytics<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
     ></a>
     - Tracks user behaviour and app usage patterns. This data is collected
     anonymously to improve the app's performance and user experience.
@@ -137,10 +152,9 @@
       target="_blank"
       rel="noopener noreferrer"
       href="https://logrocket.com/"
-      >LogRocket<fa-icon
-        [icon]="['fas', 'external-link']"
-        title="(*external link)"
-        class="ext-link"></fa-icon
+      >LogRocket<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
     ></a>
     - Records user sessions to help diagnose issues and improve app
     functionality. LogRocket may capture user interactions, including clicks,
@@ -151,15 +165,41 @@
       target="_blank"
       rel="noopener noreferrer"
       href="https://sentry.io/"
-      >Sentry<fa-icon
-        [icon]="['fas', 'external-link']"
-        title="(*external link)"
-        class="ext-link"></fa-icon
+      >Sentry<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
     ></a>
     - Used for application monitoring such as error tracking and performance
     diagnostics. When enabled, Sentry may collect technical information (for
     example: page URL, device/browser details, timestamps, and error stack
     traces) to help us detect and fix issues.
+  </li>
+  <li>
+    <a
+      target="_blank"
+      rel="noopener noreferrer"
+      href="https://aws.amazon.com/ses/"
+      >AWS Simple Email Service (SES)<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
+    ></a>
+    - We use AWS SES to send transactional emails (such as account verification
+    and password reset emails). AWS SES processes recipient email addresses and
+    delivery metadata in order to deliver messages and report on bounce and
+    complaint events.
+  </li>
+  <li>
+    <a
+      target="_blank"
+      rel="noopener noreferrer"
+      href="https://sendgrid.com/"
+      >SendGrid<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
+    ></a>
+    - SendGrid is used as a backup alternative transactional email delivery
+    provider. SendGrid processes recipient email addresses and delivery metadata
+    in order to deliver messages and report on bounce and complaint events.
   </li>
 </ul>
 
@@ -204,6 +244,15 @@
     <strong class="go-sky">Audit and login data</strong> - Retained for
     <strong class="go-gold">180 days</strong> (IP addresses get deleted after
     <strong class="go-gold">90 days</strong>).
+  </li>
+  <li>
+    <strong class="go-sky">Email delivery and suppression data</strong> -
+    Delivery confirmations and soft bounce records are retained for
+    <strong class="go-gold">180 days</strong>. Hard bounce and spam complaint
+    records, which suppress future emails to the affected address, are retained
+    for <strong class="go-gold">7 years</strong> to protect email
+    deliverability. These records contain no personally identifiable information
+    &mdash; email addresses are stored only as one-way cryptographic hashes.
   </li>
   <li>
     <strong class="go-sky">Automatically collected data</strong> - Retained for
@@ -287,10 +336,9 @@
       target="_blank"
       rel="noopener noreferrer"
       href="https://support.google.com/accounts/answer/32050"
-      >https://support.google.com/accounts/answer/32050<fa-icon
-        [icon]="['fas', 'external-link']"
-        title="(*external link)"
-        class="ext-link"></fa-icon
+      >https://support.google.com/accounts/answer/32050<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
     ></a>
   </li>
   <li>
@@ -299,10 +347,9 @@
       target="_blank"
       rel="noopener noreferrer"
       href="https://support.mozilla.org/en-US/kb/clear-cookies-and-site-data-firefox?redirectslug=delete-cookies-remove-info-websites-stored&redirectlocale=en-US"
-      >https://support.mozilla.org/en-US/kb/clear-cookies-and-site-data-firefox?redirectslug=delete-cookies-remove-info-websites-stored&redirectlocale=en-US<fa-icon
-        [icon]="['fas', 'external-link']"
-        title="(*external link)"
-        class="ext-link"></fa-icon
+      >https://support.mozilla.org/en-US/kb/clear-cookies-and-site-data-firefox?redirectslug=delete-cookies-remove-info-websites-stored&redirectlocale=en-US<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
     ></a>
   </li>
   <li>
@@ -311,10 +358,9 @@
       target="_blank"
       rel="noopener noreferrer"
       href="https://support.microsoft.com/en-gb/windows/manage-cookies-in-microsoft-edge-view-allow-block-delete-and-use-168dab11-0753-043d-7c16-ede5947fc64d"
-      >https://support.microsoft.com/en-gb/windows/manage-cookies-in-microsoft-edge-view-allow-block-delete-and-use-168dab11-0753-043d-7c16-ede5947fc64d<fa-icon
-        [icon]="['fas', 'external-link']"
-        title="(*external link)"
-        class="ext-link"></fa-icon
+      >https://support.microsoft.com/en-gb/windows/manage-cookies-in-microsoft-edge-view-allow-block-delete-and-use-168dab11-0753-043d-7c16-ede5947fc64d<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
     ></a>
   </li>
   <li>
@@ -323,10 +369,9 @@
       target="_blank"
       rel="noopener noreferrer"
       href="https://support.apple.com/en-in/guide/safari/sfri11471/mac"
-      >https://support.apple.com/en-in/guide/safari/sfri11471/mac<fa-icon
-        [icon]="['fas', 'external-link']"
-        title="(*external link)"
-        class="ext-link"></fa-icon
+      >https://support.apple.com/en-in/guide/safari/sfri11471/mac<i
+        class="fas fa-external-link ext-link"
+        title="(*external link)"></i
     ></a>
   </li>
   <li>
@@ -354,27 +399,19 @@
 <h2>9. Your Rights</h2>
 <ul class="no-bullets">
   <li>
-    <fa-icon
-      [icon]="['fas', 'square-check']"
-      class="go-green"></fa-icon>
+    <i class="fas fa-square-check go-green"></i>
     Access your data and receive a copy of our information about you.
   </li>
   <li>
-    <fa-icon
-      [icon]="['fas', 'square-check']"
-      class="go-green"></fa-icon>
+    <i class="fas fa-square-check go-green"></i>
     Correct or delete your personal data (subject to legal retention periods).
   </li>
   <li>
-    <fa-icon
-      [icon]="['fas', 'square-check']"
-      class="go-green"></fa-icon>
+    <i class="fas fa-square-check go-green"></i>
     Withdraw consent at any time.
   </li>
   <li>
-    <fa-icon
-      [icon]="['fas', 'square-xmark']"
-      class="go-red"></fa-icon>
+    <i class="fas fa-square-xmark go-red"></i>
     Restricted processing of your data cannot be accommodated:
     <ul class="lcars-list">
       <li>We require complete processing to provide the app's services</li>

@@ -5,9 +5,8 @@ import {
   tick,
 } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute, Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import {
   MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
@@ -43,17 +42,13 @@ describe('RegisterComponent', () => {
     } as unknown as jest.Mocked<AlertThemeService>;
 
     await TestBed.configureTestingModule({
-      imports: [
-        RegisterComponent,
-        ReactiveFormsModule,
-        NoopAnimationsModule,
-        RouterTestingModule, // Provides Router, ActivatedRoute, etc.
-      ],
+      imports: [RegisterComponent, ReactiveFormsModule],
       providers: [
         { provide: AuthService, useValue: authServiceSpy },
         { provide: RoutingService, useValue: routingServiceSpy },
         { provide: AlertThemeService, useValue: alertThemeServiceSpy },
-        // Do not provide Router manually
+        provideRouter([]),
+        provideNoopAnimations(),
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: { get: () => null } } },

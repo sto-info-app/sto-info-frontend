@@ -1,0 +1,179 @@
+name: 'Security: ZAP'
+
+on:
+  pull_request:
+    branches:
+      - development
+      - production
+    types: [opened, synchronize, reopened, ready_for_review]
+
+  schedule:
+    # Weekly full scan every Monday at 02:00 UTC
+    - cron: '0 2 * * 1'
+
+  workflow_dispatch:
+    inputs:
+      zap_scan_type:
+        description: 'ZAP scan type (baseline or full)'
+        required: false
+        default: 'full'
+
+permissions: {}
+
+env:
+  NODE_VERSION: 24
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      src_changed: ${{ steps.filter.outputs.src_changed }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          filters: |
+            src_changed:
+              - 'src/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'angular.json'
+              - 'tsconfig.json'
+              - 'tsconfig.*.json'
+              - 'eslint.config.mjs'
+              - 'jest.config.cjs'
+              - 'stryker.config.json'
+              - 'setup-jest.ts'
+              - 'sonar-project.properties'
+
+  zap:
+    name: 'OWASP ZAP DAST scan'
+    needs: check_changes
+    # Skip if no src changed (unless scheduled or manual)
+    if: |
+      needs.check_changes.outputs.src_changed == 'true' || 
+      github.event_name == 'schedule' || 
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Resolve cache toggle
+        id: cache-toggle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          value=$(gh api repos/$REPO/actions/variables/CACHE_NODE_MODULES --jq '.value' 2>/dev/null || echo '')
+          if [ -z "$value" ]; then
+            value=true
+          fi
+          echo "use_cache=$value" >> "$GITHUB_OUTPUT"
+
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-dependencies
+        with:
+          use-cache: ${{ steps.cache-toggle.outputs.use_cache }}
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Create production environment.ts
+        run: |
+          mkdir -p src/environments
+          cat << 'EOF' > src/environments/environment.ts
+          import packageJson from '../../package.json';
+          import type { Environment } from './models/environment.model';
+
+          export const environment: Environment = {
+            production: true,
+            version: packageJson.version,
+            env_name: 'zap-test',
+            env_label: 'ZAP Test',
+            apiUrl: 'http://localhost:3000',
+            appTitle: 'STO Info (ZAP)',
+            appLoggedInHome: '/dashboard',
+            allowDebugging: false,
+            minsBeforeLogoutExpiryToShowWarning: 5,
+            minsBeforeLogoutExpiryToRefreshToken: 2,
+            cookieYesUrl: 'https://cdn-cookieyes.com/client_data/test/script.js',
+            gaMeasurementId: 'G-XXXXXXX',
+            logRocketAppId: 'test/appid',
+          };
+          EOF
+
+      - name: Build Angular application
+        run: npm run build:prod
+
+      - name: Locate dist folder containing index.html
+        id: locate-dist
+        run: |
+          # Find the directory containing index.html within dist/
+          DIST_DIR=$(find dist -name "index.html" -type f -printf '%h\n' | head -n 1)
+          if [ -z "$DIST_DIR" ]; then
+            echo "Error: Could not find index.html in dist/"
+            exit 1
+          fi
+          echo "dist_path=$DIST_DIR" >> "$GITHUB_OUTPUT"
+          echo "Found dist folder: $DIST_DIR"
+
+      - name: Start local web server
+        run: |
+          npx --yes serve@14.2.4 -s "${{ steps.locate-dist.outputs.dist_path }}" -l 4202 &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+          echo "Started server with PID: $SERVER_PID"
+
+          # Wait for server to be ready (max 60 seconds)
+          timeout=60
+          counter=0
+          until curl -sf http://localhost:4202 > /dev/null 2>&1; do
+            if [ $counter -ge $timeout ]; then
+              echo "Server failed to start within ${timeout}s"
+              exit 1
+            fi
+            echo "Waiting for server to start... ($counter/$timeout)"
+            sleep 2
+            counter=$((counter + 2))
+          done
+          echo "Server is ready at http://localhost:4202"
+
+      - name: Run ZAP baseline scan (PR)
+        if: github.event_name == 'pull_request'
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
+        with:
+          target: 'http://localhost:4202'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -m 3 -T 600'
+          allow_issue_writing: false
+          artifact_name: 'zap-baseline-report-frontend'
+
+      - name: Run ZAP full scan (weekly/manual)
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.zap_scan_type == 'full')
+        uses: zaproxy/action-full-scan@3c58388149901b9a03b7718852c5ba889646c27c # v0.13.0
+        with:
+          target: 'http://localhost:4202'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -m 3 -T 1800'
+          allow_issue_writing: false
+          artifact_name: 'zap-full-scan-report-frontend'
+
+      - name: Cleanup server
+        if: always()
+        run: |
+          if [ -n "$SERVER_PID" ]; then
+            kill $SERVER_PID 2>/dev/null || true
+          fi

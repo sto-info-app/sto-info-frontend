@@ -8,11 +8,6 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, Router, Event as RouterEvent } from '@angular/router';
-import { faUserPen } from '@awesome.me/kit-5812c6b103/icons/classic/solid';
-import {
-  FaIconLibrary,
-  FontAwesomeModule,
-} from '@fortawesome/angular-fontawesome';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
@@ -86,12 +81,7 @@ describe('CharacterDetailComponent', () => {
     routeParamsSubject = new BehaviorSubject<Record<string, string>>({});
 
     await TestBed.configureTestingModule({
-      imports: [
-        CharacterDetailComponent,
-        MatButtonModule,
-        LoadingBarComponent,
-        FontAwesomeModule,
-      ],
+      imports: [CharacterDetailComponent, MatButtonModule, LoadingBarComponent],
       providers: [
         { provide: CharacterService, useValue: mockCharacterService },
         { provide: StoAccountService, useValue: mockStoAccountService },
@@ -107,8 +97,6 @@ describe('CharacterDetailComponent', () => {
   });
 
   beforeEach(() => {
-    const library = TestBed.inject(FaIconLibrary);
-    library.addIcons(faUserPen);
     fixture = TestBed.createComponent(CharacterDetailComponent);
     component = fixture.componentInstance;
   });

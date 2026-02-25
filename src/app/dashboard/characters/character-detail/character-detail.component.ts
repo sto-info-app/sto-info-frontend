@@ -3,7 +3,6 @@ import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Subject, takeUntil } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
@@ -31,7 +30,6 @@ import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.co
   imports: [
     CommonModule,
     RouterModule,
-    FontAwesomeModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     MatButtonModule,

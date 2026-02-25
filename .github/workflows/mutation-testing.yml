@@ -5,6 +5,9 @@ on:
     - cron: '0 0 * * 0' # Run every Sunday at midnight
   workflow_dispatch: # Allow manual trigger
 
+# Declare default permissions as none.
+permissions: {}
+
 env:
   NODE_VERSION: 24
 
@@ -13,7 +16,7 @@ jobs:
     name: Full Mutation Analysis
     if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
 
@@ -23,18 +26,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup project
-        uses: ./.github/actions/setup-project
+      - name: Set up Node
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
-          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Load & cache dependencies
         uses: ./.github/actions/cached-dependencies
         with:
           use-cache: true
           node-version: ${{ env.NODE_VERSION }}
-          fontawesome-npm-auth-token: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
       - name: Create test environment.ts
         run: |

@@ -32,12 +32,13 @@ Supporting docs:
 - [Operations runbook](operations.md)
 - [Security, rate limiting, retention](security-and-data.md)
 - [Memory leak prevention](memory-leak-prevention-guide.md)
+- [GitHub Automation & Standards](github/README.md)
 
 ## Local development
 
 ### Prerequisites
 
-- Node.js version compatible with [package.json](../package.json) engines (currently Node 20/22/24)
+- Node.js version compatible with [package.json](../package.json) engines (currently Node 24, support for Node 25 types)
 - npm
 
 ### Install and run
@@ -46,8 +47,66 @@ Supporting docs:
 - Run locally: `npm start` (Angular dev server)
 - Run tests: `npm test`
 - Run lint: `npm run lint`
+- Generate CI summary: `npm run summary:ci` (Parses latest local reports)
 
 Default local URL: `http://localhost:4200/`
+
+### Quality checks
+
+Before committing changes, run the comprehensive quality check script:
+
+```bash
+npm run verify
+```
+
+For a comprehensive check (including performance and mutation testing), use:
+
+```bash
+npm run verify:full
+```
+
+This runs: `verify` (see below) + `lighthouse` (Performance/SEO) + `summary:ci` (Dashboard preview) + `mutation:incremental` (Test effectiveness).
+
+### verify (Standard)
+
+This runs all critical quality checks in sequence:
+
+1. **Security audit** - `npm audit --audit-level=high --omit=dev`
+   - Checks for high/critical vulnerabilities in production dependencies
+   - Fails fast if critical security issues are found
+
+2. **Linting** - `npm run lint`
+   - ESLint checks for code quality and style issues
+   - Ensures code follows project standards
+
+3. **Unit tests with coverage** - `npm run test:cov`
+   - Runs all unit tests with 100% coverage requirement
+   - Generates coverage reports in `reports/coverage/`
+
+4. **Fuzz testing** - `npm run test:fuzz`
+   - Property-based fuzz tests (50 iterations)
+   - Tests edge cases and unexpected inputs
+   - Enforces strict type safety (no `any` in catch blocks)
+
+5. **Build verification** - `npm run build`
+   - Production build to ensure everything compiles
+   - Catches build-time errors before pushing
+
+The script stops at the first failure, allowing you to fix issues incrementally.
+
+**Note on CI usage:**
+In GitHub Actions, most of these checks use **Smart Skip** logic. If your PR only changes documentation or meta-files (like `.vscode/`), heavy jobs like builds and tests will be skipped automatically while still reporting a "Passed" status to satisfy branch protection rules.
+
+**Note on Type Safety:** We enforce strict linting across the codebase, including tests. Use `error: unknown` in catch blocks with type guards (e.g., `error instanceof Error`) instead of `any`.
+
+**Intentionally excluded (run separately when needed):**
+
+- Mutation testing: `npm run test:mutation` (very slow, 30+ minutes)
+- Incremental Mutation testing: `npm run test:mutation:incremental` (fast, CI-standard)
+- Lighthouse Audit: `npm run lighthouse` (Production build + Full audit)
+- Full fuzz tests: `npm run test:fuzz:full` (1000 iterations)
+- SonarQube analysis (CI-only, requires cloud service)
+- OWASP ZAP DAST scans (CI-only, requires running server)
 
 ### Backend dependency
 
@@ -57,6 +116,45 @@ Most routes require a working backend.
 - The UI performs health checks against the backend and will show a warning state if the backend is down.
 
 > TODO Document how to run the backend locally (NestJS commands, database setup, seed data, migrations).
+
+### Font Awesome icons
+
+This project uses **Font Awesome icons loaded via CDN** using standard HTML `<i>` tags.
+
+Key details:
+
+- Icons are loaded via **Font Awesome Kit** CDN script in `src/index.html`
+- Kit URL: `https://kit.fontawesome.com/5812c6b103.js`
+- **No npm packages required** - icons are globally available in the browser
+- **No authentication needed** - locally or in CI/CD
+- Icons are used via standard HTML `<i>` tags: `<i class="fas fa-icon-name"></i>`
+- The kit is **domain-restricted** to startrekonline.info and its development domain for security
+
+**Using icons:**
+
+```html
+<!-- Solid icons -->
+<i class="fas fa-home"></i>
+
+<!-- Regular icons -->
+<i class="far fa-circle"></i>
+
+<!-- Brands -->
+<i class="fab fa-github"></i>
+
+<!-- With custom classes -->
+<i class="fas fa-external-link ext-link"></i>
+```
+
+**Benefits of this approach:**
+
+- ✅ No npm authentication required
+- ✅ Dependabot PRs can run full CI checks
+- ✅ Simpler development setup
+- ✅ Domain-restricted security
+- ✅ Automatic updates when kit is updated
+
+> Note: Icons are loaded asynchronously. Font Awesome automatically replaces `<i>` tags with SVG elements at runtime.
 
 ## Configuration and environment variables
 

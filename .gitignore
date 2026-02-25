@@ -51,6 +51,7 @@ yarn-error.log
 /connect.lock
 /coverage
 /reports
+/.lighthouseci/
 /libpeerconnection.log
 testem.log
 /typings

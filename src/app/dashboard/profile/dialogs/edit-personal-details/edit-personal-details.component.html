@@ -171,10 +171,7 @@
                         !editPersonalDetailsForm.dirty ||
                         isSubmitting
                       "
-                      [ngClass]="{ submitting: isSubmitting }"
-                      [@progressBarAnimation]="
-                        isSubmitting ? 'submitting' : 'idle'
-                      ">
+                      [ngClass]="{ submitting: isSubmitting }">
                       Save
                     </button>
                     <button

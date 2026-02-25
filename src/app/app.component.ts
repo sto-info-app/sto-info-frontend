@@ -73,10 +73,20 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscribeToWarningAnnouncements();
     this.subscribeToExpiryAnnouncements();
 
-    if (environment?.env_name !== 'local') {
+    if (
+      environment?.env_name !== 'local' &&
+      environment?.env_name !== 'lighthouse-audit'
+    ) {
       this.initGoogleConsentMode();
       this.loadCookieYesScript();
       this.trackPageViewsOnNavigation();
+    }
+
+    if (
+      environment?.env_name !== 'local' &&
+      environment?.env_name !== 'lighthouse-audit'
+    ) {
+      this.loadFontAwesomeKit();
     }
   }
 
@@ -367,6 +377,30 @@ export class AppComponent implements OnInit, OnDestroy {
       },
       onError: () => {
         console.error('Failed to load CookieYes script');
+      },
+    });
+  }
+
+  /**
+   * Load the Font Awesome Kit script to provide icon support
+   *
+   * @returns void
+   */
+  private loadFontAwesomeKit(): void {
+    if (!environment?.fontAwesomeKitId) {
+      console.warn('Font Awesome Kit ID not set in environment');
+      return;
+    }
+
+    this.scriptLoader.loadScript({
+      id: 'font-awesome-kit',
+      src: `https://kit.fontawesome.com/${environment.fontAwesomeKitId}.js`,
+      attributes: {
+        crossorigin: 'anonymous',
+      },
+      async: false,
+      onError: () => {
+        console.error('Failed to load Font Awesome Kit script');
       },
     });
   }

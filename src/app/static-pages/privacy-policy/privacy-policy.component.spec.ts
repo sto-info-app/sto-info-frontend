@@ -1,11 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import {
-  faArrowUpRightFromSquare,
-  faSquareCheck,
-  faSquareXmark,
-} from '@awesome.me/kit-5812c6b103/icons/classic/solid';
-import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { of } from 'rxjs';
 
 import { PrivacyPolicyComponent } from './privacy-policy.component';
@@ -13,7 +7,6 @@ import { PrivacyPolicyComponent } from './privacy-policy.component';
 describe('PrivacyPolicyComponent', () => {
   let component: PrivacyPolicyComponent;
   let fixture: ComponentFixture<PrivacyPolicyComponent>;
-  let library: FaIconLibrary;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -28,9 +21,6 @@ describe('PrivacyPolicyComponent', () => {
         },
       ],
     }).compileComponents();
-
-    library = TestBed.inject(FaIconLibrary);
-    library.addIcons(faArrowUpRightFromSquare, faSquareCheck, faSquareXmark);
 
     fixture = TestBed.createComponent(PrivacyPolicyComponent);
     component = fixture.componentInstance;

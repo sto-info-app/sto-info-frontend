@@ -31,10 +31,12 @@ module.exports = {
 
   transform,
 
+  reporters: ['default', 'jest-junit'],
+
   // Align with backend Jest settings where possible
   moduleFileExtensions: ['ts', 'html', 'js', 'json'],
 
-  testRegex: String.raw`.*\.spec\.ts$`,
+  testRegex: String.raw`\.spec\.ts$`,
   setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
 
   moduleNameMapper: {
@@ -43,12 +45,19 @@ module.exports = {
   },
 
   collectCoverage: true,
-  coverageReporters: ['text-summary', 'text', 'lcov', 'cobertura'],
+  coverageReporters: [
+    'text-summary',
+    'text',
+    'lcov',
+    'cobertura',
+    'json-summary',
+  ],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx,js,jsx}',
 
     // Tests
     '!src/**/*.spec.ts',
+    '!src/**/*.fuzz.spec.ts',
     '!src/**/*.module.ts',
     '!**/.stryker-tmp/**',
 

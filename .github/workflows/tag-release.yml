@@ -4,6 +4,12 @@ on:
   push:
     branches: [production]
 
+# Declare default permissions as read only.
+permissions: {}
+
+env:
+  NODE_VERSION: 24
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -13,13 +19,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write
+      contents: write # To create and push tags
+      pull-requests: write # To unmask the last version bump PR
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # required to create/push tags reliably
+
+      - name: Set up Node
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Read version from package.json
         id: version
@@ -42,3 +54,31 @@ jobs:
 
           git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
           git push origin "$TAG_NAME"
+
+      - name: Unmask last version bump in release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "Finding PR for version $VERSION..."
+
+          # Search for the merged version bump PR
+          PR_NUMBER=$(gh pr list --repo "${{ github.repository }}" --state merged --search "chore: bump version to $VERSION" --json number --jq '.[0].number' || echo "")
+
+          if [ -n "$PR_NUMBER" ]; then
+            echo "Removing 'version-bump' label from PR #$PR_NUMBER to include it in release notes."
+            gh pr edit "$PR_NUMBER" --repo "${{ github.repository }}" --remove-label version-bump || echo "Failed to remove label, but continuing..."
+          else
+            echo "No matching version bump PR found for version $VERSION."
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
