@@ -40,7 +40,15 @@ jobs:
               - 'package.json'
               - 'package-lock.json'
               - 'angular.json'
+              - 'tsconfig.json'
+              - 'tsconfig.*.json'
+              - 'eslint.config.mjs'
+              - 'jest.config.cjs'
+              - 'stryker.config.json'
+              - 'setup-jest.ts'
+              - 'sonar-project.properties'
               - '.lighthouserc.json'
+              - '.prettierrc'
 
   lighthouse:
     name: 'Lighthouse Audit'
