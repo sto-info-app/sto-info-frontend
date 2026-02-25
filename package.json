@@ -22,6 +22,7 @@
     "build:render": "npm run generate-env && npm run build:prod",
     "watch": "ng build --watch --configuration development",
     "lint": "eslint \"src/**/*.{ts,js,html}\"",
+    "lint:fix": "eslint \"src/**/*.{ts,js,html}\" --fix",
     "lint:lighthouse": "cross-env ENV_NAME=lighthouse-audit npm run build:render && lhci autorun",
     "lighthouse": "cross-env API_URL=${API_URL:-https://dev-api.startrekonline.info} npm run build:prod && lhci collect && lhci upload --target=filesystem --outputDir=reports/lighthouse && npm run summary:ci",
     "summary:ci": "node scripts/generate-ci-summary.mjs",
