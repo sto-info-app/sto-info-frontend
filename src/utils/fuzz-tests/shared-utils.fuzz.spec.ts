@@ -29,7 +29,7 @@ describe('Shared Services and Utils Fuzz Tests', () => {
         fc.property(
           fc
             .date({ min: new Date('1900-01-01'), max: new Date('2100-01-01') })
-            .filter(d => !isNaN(d.getTime()))
+            .filter(d => !Number.isNaN(d.getTime()))
             .map(d => d.toISOString()),
           dateStr => {
             expect(() => {
