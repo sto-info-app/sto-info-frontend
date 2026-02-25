@@ -127,12 +127,14 @@ Set the `FUZZ_NUM_RUNS` environment variable to control the number of test itera
 FUZZ_NUM_RUNS=500 npm run test:fuzz
 ```
 
-Default: 100 iterations (if not set)
+Default: 50 iterations (via `npm run test:fuzz`) or 100 (fallback if no environment variable is set).
 
 **CI behaviour:**
 
 - **Pull requests**: Runs lightweight fuzz tests (50 iterations) to catch obvious issues quickly
 - **Weekly schedule**: Runs comprehensive fuzz tests (1000 iterations) for deeper analysis
+
+**Note on Type Safety:** We enforce strict linting. Use `error: unknown` in catch blocks with type guards (e.g., `error instanceof Error`) instead of `any`.
 
 ### OWASP ZAP DAST scanning
 
