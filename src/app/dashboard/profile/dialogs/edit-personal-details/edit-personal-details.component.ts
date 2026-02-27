@@ -132,7 +132,7 @@ export class EditPersonalDetailsComponent implements OnInit {
             errMessage = MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT;
           } else if (error.status === 409) {
             console.error('Conflict Exception error:', error);
-            if (error.error.message.includes('Username')) {
+            if (error.error?.message?.includes('Username')) {
               this.editPersonalDetailsForm.controls['username'].setErrors({
                 uniqueUsername: true,
               });
