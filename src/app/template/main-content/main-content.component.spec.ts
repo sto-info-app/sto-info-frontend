@@ -142,6 +142,25 @@ describe('MainContentComponent', () => {
     expect(component.backendAppVersion).toBe('backend-version');
   });
 
+  it('should handle version API error and leave backend version empty', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const errorFixture = TestBed.createComponent(MainContentComponent);
+    const errorComponent = errorFixture.componentInstance;
+
+    const req = httpTestingController.expectOne(API_URLS.VERSION);
+    req.flush('Server Error', {
+      status: 500,
+      statusText: 'Internal Server Error',
+    });
+
+    expect(errorComponent.backendAppVersion).toBe('');
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Backend version endpoint failed or returned non-200',
+      expect.anything(),
+    );
+    warnSpy.mockRestore();
+  });
+
   it('should not update backend version when response status is not 200', () => {
     type MainContentWithTestApi = {
       updateBackendVersion(response: HttpResponse<string>): void;
