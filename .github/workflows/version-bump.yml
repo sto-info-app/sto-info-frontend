@@ -17,6 +17,7 @@ jobs:
   check_changes:
     name: Check for changes
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     permissions:
       contents: read
     outputs:
@@ -24,25 +25,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
 
       - name: Check for source changes
         uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: filter
         with:
+          base: ${{ github.event.before }}
+          ref: ${{ github.sha }}
           filters: |
             src_changed:
-              - 'src/**'
-              - 'package.json'
-              - 'package-lock.json'
-              - 'angular.json'
-              - 'tsconfig.json'
-              - 'tsconfig.*.json'
-              - 'eslint.config.mjs'
-              - 'jest.config.cjs'
-              - 'stryker.config.json'
-              - 'setup-jest.ts'
-              - 'sonar-project.properties'
-              - '.prettierrc'
+              - '**'
+              - "!docs/**"
+              - "!.github/**"
+              - "!**/*.md"
+              - "!.agent/**"
+              - "!.vscode/**"
+              - "!LICENSE"
 
   bump_version:
     name: Bump Version
@@ -86,14 +86,33 @@ jobs:
       - name: Bump patch version and create PR
         id: create_pr
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Configure git to use the bot's identity
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          # Ensure the labels exist
+          gh label create version-bump --color "ededed" --description "Automated version bump" || true
+          gh label create chore --color "ededed" --description "Maintenance task" || true
+
           CURRENT_VERSION="$(node -p "require('./package.json').version")"
           echo "Current version: $CURRENT_VERSION"
+
+          # Compute the expected next patch version without touching the working tree,
+          # so we can detect an existing version bump PR and avoid creating a duplicate.
+          NEXT_VERSION="$(CURRENT_VERSION="$CURRENT_VERSION" node -e 'const v=process.env.CURRENT_VERSION||""; const m=v.match(/^(\d+)\.(\d+)\.(\d+)(?:[-+].+)?$/); if (m == null) { console.error("Unsupported version format: "+v); process.exit(1); } console.log([m[1], m[2], String(Number(m[3]) + 1)].join("."));' )"
+          echo "Next version would be: $NEXT_VERSION"
+
+          BRANCH_NAME="chore/bump-version-to-$NEXT_VERSION"
+
+          # Check if a PR already exists for this next version (no auto-merge; approve and merge)
+          EXISTING_PR_URL=$(gh pr list --repo "${{ github.repository }}" --base development --head "$BRANCH_NAME" --json url --jq '.[0].url' || echo "")
+
+          if [ -n "$EXISTING_PR_URL" ]; then
+            echo "PR already exists for version $NEXT_VERSION: $EXISTING_PR_URL (no duplicate created)"
+            exit 0
+          fi
 
           # Bump patch without creating a git tag
           npm version patch --no-git-tag-version
@@ -103,14 +122,6 @@ jobs:
 
           # Create a new branch for the version bump
           BRANCH_NAME="chore/bump-version-to-$NEW_VERSION"
-
-          # Check if a PR already exists for this version
-          EXISTING_PR=$(gh pr list --base development --head "$BRANCH_NAME" --json number --jq '.[0].number' || echo "")
-
-          if [ -n "$EXISTING_PR" ]; then
-            echo "PR #$EXISTING_PR already exists for version $NEW_VERSION. Skipping."
-            exit 0
-          fi
 
           # Delete the remote branch if it exists from a previous failed run
           git push origin --delete "$BRANCH_NAME" 2>/dev/null || echo "Branch $BRANCH_NAME does not exist remotely, continuing..."
@@ -125,29 +136,11 @@ jobs:
           # Push the branch
           git push origin "$BRANCH_NAME"
 
-          # Ensure the labels exist
-          gh label create version-bump --color "ededed" --description "Automated version bump" || true
-          gh label create chore --color "ededed" --description "Maintenance task" || true
-
-          # Create a pull request
-          PR_URL=$(gh pr create \
+          # Create a pull request (you approve and merge; no PAT or auto-merge due to branch protection)
+          gh pr create \
             --title "chore: bump version to $NEW_VERSION" \
             --body "Automated version bump from $CURRENT_VERSION to $NEW_VERSION" \
             --label "version-bump,chore" \
             --base development \
-            --head "$BRANCH_NAME")
+            --head "$BRANCH_NAME"
 
-          echo "PR_URL=$PR_URL" >> "$GITHUB_OUTPUT"
-          echo "PR_URL=$PR_URL" >> "$GITHUB_ENV"
-
-      - name: Merge version bump
-        if: steps.create_pr.outputs.PR_URL != ''
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
-        run: |
-          sleep 10
-          gh pr merge "${{ steps.create_pr.outputs.PR_URL }}" \
-            --repo "${{ github.repository }}" \
-            --merge \
-            --admin \
-            --body "Automated version bump merge (bypassing review requirement)"
