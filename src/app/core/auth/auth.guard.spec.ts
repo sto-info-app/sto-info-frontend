@@ -110,4 +110,32 @@ describe('AuthGuard', () => {
       queryParams: { returnUrl: '/dashboard' },
     });
   });
+
+  it('should pass returnUrl when state url is empty (root)', async () => {
+    authServiceSpy.isTokenValid.mockReturnValue(false);
+
+    await guard.canActivate(
+      {} as ActivatedRouteSnapshot,
+      { url: '' } as RouterStateSnapshot,
+    );
+
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/login'], {
+      queryParams: { returnUrl: '' },
+    });
+  });
+
+  it('should pass returnUrl including query params when present', async () => {
+    authServiceSpy.isTokenValid.mockReturnValue(false);
+
+    await guard.canActivate(
+      {} as ActivatedRouteSnapshot,
+      {
+        url: '/dashboard/accounts?tab=characters',
+      } as RouterStateSnapshot,
+    );
+
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/login'], {
+      queryParams: { returnUrl: '/dashboard/accounts?tab=characters' },
+    });
+  });
 });
