@@ -11,6 +11,19 @@ export class FileHandlingService {
    * @returns The converted Blob
    */
   dataURItoBlob(dataURI: string): Blob {
+    if (!dataURI || typeof dataURI !== 'string') {
+      throw new Error('Invalid base64 string');
+    }
+    const commaIdx = dataURI.indexOf(',');
+    const header = commaIdx === -1 ? '' : dataURI.slice(0, commaIdx);
+    if (
+      commaIdx === -1 ||
+      !header.includes('data:') ||
+      !header.includes(';base64')
+    ) {
+      throw new Error('Invalid base64 string');
+    }
+
     try {
       const base64Index = dataURI.indexOf('base64,') + 'base64,'.length;
       let base64 = dataURI.substring(base64Index);
@@ -24,7 +37,7 @@ export class FileHandlingService {
       }
 
       const byteString = Base64.atob(base64);
-      const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+      const mimeString = header.split(':')[1].split(';')[0];
       const ab = new ArrayBuffer(byteString.length);
       const ia = new Uint8Array(ab);
       for (let i = 0; i < byteString.length; i++) {
