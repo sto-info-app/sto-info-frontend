@@ -83,13 +83,15 @@ export class MyComponent implements OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
 
-    // Close any open dialogs
+    // Close any open dialogs (if you have multiple dialogs, close each ref)
     if (this.dialogRef) {
       this.dialogRef.close();
     }
   }
 }
 ```
+
+**Multiple dialogs:** Use a separate `MatDialogRef` per dialog and close each in `ngOnDestroy` (e.g. `editProfileDialogRef`, `profilePicDialogRef`).
 
 ---
 
