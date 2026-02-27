@@ -98,4 +98,28 @@ describe('apiHealthInterceptor', () => {
 
     expect(healthServiceSpy.markDown).not.toHaveBeenCalled();
   });
+
+  it('should mark down on status 503 (service unavailable)', () => {
+    const url = API_URLS.ROOT + '/test';
+    httpClient.get(url).subscribe({
+      error: () => {},
+    });
+
+    const req = httpMock.expectOne(url);
+    req.flush('error', { status: 503, statusText: 'Service Unavailable' });
+
+    expect(healthServiceSpy.markDown).toHaveBeenCalled();
+  });
+
+  it('should NOT mark down on 4xx client errors (e.g. 404)', () => {
+    const url = API_URLS.ROOT + '/missing';
+    httpClient.get(url).subscribe({
+      error: () => {},
+    });
+
+    const req = httpMock.expectOne(url);
+    req.flush('Not Found', { status: 404, statusText: 'Not Found' });
+
+    expect(healthServiceSpy.markDown).not.toHaveBeenCalled();
+  });
 });
