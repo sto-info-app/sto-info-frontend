@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -30,7 +31,7 @@ export class ResetPasswordRequestComponent {
   inputsValid = false;
   appRoutes = APP_ROUTES;
 
-  // Allow contstants to be used in the HTML
+  // Allow constants to be used in the HTML
   errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
 
   private readonly authService = inject(AuthService);
@@ -60,13 +61,15 @@ export class ResetPasswordRequestComponent {
         this.successMessage = `Check your email and follow the instructions to reset your password.`;
         this.errorMessage = '';
       },
-      error: error => {
-        if (typeof error === 'object' && error.message) {
-          console.error('Login error:', error);
-          this.errorMessage = error.message;
+      error: (error: HttpErrorResponse) => {
+        const message = error?.error?.message;
+        if (message) {
+          console.error('Reset password error:', error);
+          this.errorMessage = message;
         } else {
-          console.error('Login error:', error);
-          this.errorMessage = 'An error occurred while resetting the password';
+          console.error('Reset password error:', error);
+          this.errorMessage =
+            'An error occurred while resetting the password. Please try again.';
         }
       },
     });
