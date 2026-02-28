@@ -25,6 +25,8 @@ concurrency:
 jobs:
   check_changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       src_changed: ${{ steps.filter.outputs.src_changed }}
     steps:
@@ -104,19 +106,14 @@ jobs:
   lint_and_test:
     name: 'Lint and Test'
     needs: check_changes
-    # Don't run for draft PRs (but still run for pushes)
-    # Skip version bump PRs from github-actions bot or with version bump branch pattern
-    # Skip for Dependabot
+    # Skip if dependabot
+    # Skip draft PRs
+    # Skip version bump PRs
     # ONLY RUN if src_changed is true OR if it's a push (to keep badges updated)
     if: |
       github.actor != 'dependabot[bot]' &&
-      github.actor != 'github-actions[bot]' &&
       (needs.check_changes.outputs.src_changed == 'true' || github.event_name == 'push') &&
-      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
-      !(github.event_name == 'pull_request' && (
-        (github.event.pull_request.user.login == 'github-actions[bot]' && startsWith(github.event.pull_request.title, 'chore: bump version to')) ||
-        startsWith(github.event.pull_request.head.ref, 'chore/bump-version-to-')
-      ))
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -205,7 +202,7 @@ jobs:
           fail_ci_if_error: false
 
       - name: SonarQube Cloud Scan
-        # Skip for Dependabot PRs
+        # Skip for Dependabot PRs (no code changes, avoids errors)
         if: github.actor != 'dependabot[bot]'
         uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
         env:
@@ -240,8 +237,8 @@ jobs:
           allow-repeats: true
 
       - name: Restore Stryker incremental cache
-        # Only run on PRs
-        if: github.event_name == 'pull_request'
+        # Only run on PRs, skip for Dependabot
+        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: .stryker-tmp/incremental.json
@@ -251,8 +248,8 @@ jobs:
             stryker-incremental-
 
       - name: Run Incremental Mutation Testing
-        # Only run on PRs
-        if: github.event_name == 'pull_request'
+        # Only run on PRs, skip for Dependabot (not needed for dependency updates)
+        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
         shell: bash
         run: |
           # Fetch the base branch to compare against
