@@ -1,5 +1,9 @@
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptors,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import {
   ApplicationConfig,
   ErrorHandler,
@@ -95,7 +99,10 @@ export const appConfig: ApplicationConfig = {
       deps: [Router],
     },
     { provide: LocationStrategy, useClass: PathLocationStrategy },
-    provideHttpClient(withInterceptors([apiHealthInterceptor])),
+    provideHttpClient(
+      withInterceptors([apiHealthInterceptor]),
+      withInterceptorsFromDi(),
+    ),
   ],
 };
 
