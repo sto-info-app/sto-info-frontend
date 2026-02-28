@@ -38,6 +38,7 @@
                 "ignore": ["**/*.psd"]
               },
               "src/static.json",
+              "src/version.json",
               {
                 "glob": "serve.json",
                 "input": "src",
