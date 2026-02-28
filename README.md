@@ -10,9 +10,10 @@
 [![Dependency Review](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml)
 [![OpenSSF Scorecard workflow](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml)
 [![npm audit](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml)
-[![DCO Enforcement](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml)
-[![Security: Fuzz](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz.yml)
-[![Security: ZAP](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap.yml)
+[![Security: Fuzz](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz.yml)
+[![Security: ZAP (Dev)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap-dev.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap-dev.yml)
+[![Security: ZAP (Prod)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap-prod.yml/badge.svg?branch=production)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap-prod.yml)
+[![Security: ZAP (PR)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap.yml)
 
 ## CI and delivery
 
@@ -143,9 +144,12 @@ Dynamic Application Security Testing (DAST) is performed using OWASP ZAP to iden
 
 **CI behaviour:**
 
-- **Pull requests**: Runs ZAP baseline scan with 10-minute timeout
-- **Weekly schedule**: Runs ZAP full scan with 30-minute timeout
-- **Scan reports**: Available as workflow artifacts for 30 days
+- **Pull requests**: Runs ZAP baseline scan against a locally built version of the app (using `npx serve` on `localhost:4202`).
+- **Development/Production version bumps**: Runs a ZAP baseline scan against the deployed frontend (using a smart polling loop for up to 10 minutes to wait for `version.json` deployment).
+- **Weekly schedule**: Runs a ZAP full scan against the dev frontend base URL.
+- **Manual trigger**: Can run baseline or full scan via `workflow_dispatch` on the environment-specific workflows.
+- **WAF Bypass**: Scans and connectivity checks use a custom `User-Agent` to bypass edge protection.
+- **Scan reports**: Available as workflow artifacts for 30 days.
 
 **Limitations:**
 
