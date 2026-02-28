@@ -186,6 +186,30 @@ describe('AccountsComponent', () => {
     expect(stoAccountServiceSpy.deleteAccount).not.toHaveBeenCalled();
   });
 
+  it('should set isLoading to false and log when delete account API fails', () => {
+    const dialogRefSpy = {
+      afterClosed: jest.fn().mockReturnValue(of(true)),
+    };
+    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
+    const err = new Error('delete failed');
+    stoAccountServiceSpy.deleteAccount.mockReturnValue(throwError(() => err));
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    component.deleteAccount(mockAccount);
+
+    expect(stoAccountServiceSpy.deleteAccount).toHaveBeenCalledWith(
+      mockAccount.id,
+    );
+    expect(component.isLoading).toBe(false);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Failed to delete STO account:',
+      err,
+    );
+    consoleErrorSpy.mockRestore();
+  });
+
   describe('getPlatformIcon', () => {
     beforeEach(() => {
       component.platforms = [

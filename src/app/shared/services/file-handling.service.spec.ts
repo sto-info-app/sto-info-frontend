@@ -87,6 +87,24 @@ describe('FileHandlingService', () => {
       isValidSpy.mockRestore();
     });
 
+    it('should throw for empty or non-string input without logging', () => {
+      expect(() => service.dataURItoBlob('')).toThrow('Invalid base64 string');
+      expect(() => service.dataURItoBlob(null as unknown as string)).toThrow(
+        'Invalid base64 string',
+      );
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
+
+    it('should throw for data URI without comma or invalid header', () => {
+      expect(() => service.dataURItoBlob('no-comma-here')).toThrow(
+        'Invalid base64 string',
+      );
+      expect(() =>
+        service.dataURItoBlob('data:image/png,missing-base64'),
+      ).toThrow('Invalid base64 string');
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
+
     it('should clean base64 string with invalid characters before converting', () => {
       // Valid 1x1 png base64, with newline + space appended to force cleaning.
       const base64 =

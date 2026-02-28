@@ -79,9 +79,14 @@ describe('ResetPasswordRequestComponent', () => {
     component.onPasswordReset();
 
     expect(authService.resetPassword).toHaveBeenCalledWith('test@example.com');
-    expect(component.errorMessage).toBe(errorObject.message);
+    expect(component.errorMessage).toBe(
+      'An error occurred while resetting the password. Please try again.',
+    );
 
     // Expect console.error to have been called with the correct arguments
-    expect(console.error).toHaveBeenCalledWith('Login error:', errorObject);
+    expect(console.error).toHaveBeenCalledWith(
+      'Reset password error:',
+      errorObject,
+    );
   });
 });

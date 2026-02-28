@@ -58,10 +58,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.dashboardService
       .getUser()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(user => {
-        if (user.isAccountDisabled) this.authService.performLogout();
+      .subscribe({
+        next: user => {
+          if (user.isAccountDisabled) this.authService.performLogout();
 
-        this.user = user;
+          this.user = user;
+        },
+        error: err => {
+          console.warn('Failed to load user (non-200 or network error)', err);
+        },
       });
     return this.user;
   }
@@ -145,7 +150,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.getUserData(); // Update the user data
 
         if (stayLoggedIn) {
-          this.authService.refreshToken().subscribe();
+          this.authService.refreshToken().subscribe({
+            error: err => {
+              console.warn('Token refresh failed after profile edit', err);
+            },
+          });
         }
 
         // Allow opening the dialog box again
@@ -175,7 +184,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.getUserData(); // Update the user data
 
         if (stayLoggedIn) {
-          this.authService.refreshToken().subscribe();
+          this.authService.refreshToken().subscribe({
+            error: err => {
+              console.warn(
+                'Token refresh failed after profile photo update',
+                err,
+              );
+            },
+          });
         }
 
         // Allow opening the dialog box again

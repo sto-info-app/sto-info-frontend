@@ -3,6 +3,7 @@ import { alertStateFromHttpStatus } from '../../app/shared/_helpers/alert-state-
 import { TimeFormatPipe } from '../../app/shared/pipes/time-format.pipe';
 import { DatesTimeHelperService } from '../../app/shared/services/dates-time-helper.service';
 import { FileHandlingService } from '../../app/shared/services/file-handling.service';
+import { RoutingService } from '../../app/shared/services/routing.service';
 
 describe('Shared Services and Utils Fuzz Tests', () => {
   const numRuns = Number(process.env['FUZZ_NUM_RUNS']) || 100;
@@ -10,6 +11,7 @@ describe('Shared Services and Utils Fuzz Tests', () => {
   const datesTimeHelper = new DatesTimeHelperService();
   const fileHandlingService = new FileHandlingService();
   const timeFormatPipe = new TimeFormatPipe();
+  const routingService = new RoutingService();
 
   describe('DatesTimeHelperService.timeSince', () => {
     it('should handle arbitrary dates without throwing', () => {
@@ -56,6 +58,18 @@ describe('Shared Services and Utils Fuzz Tests', () => {
   });
 
   describe('FileHandlingService.dataURItoBlob', () => {
+    let consoleErrorSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleErrorSpy.mockRestore();
+    });
+
     it('should handle arbitrary strings without crashing', () => {
       fc.assert(
         fc.property(fc.string(), dataURI => {
@@ -130,6 +144,21 @@ describe('Shared Services and Utils Fuzz Tests', () => {
             expect(['green', 'yellow', 'red', 'blue', 'grey']).toContain(
               result,
             );
+          }).not.toThrow();
+        }),
+        { numRuns },
+      );
+    });
+  });
+
+  describe('RoutingService.getLink', () => {
+    it('should handle arbitrary route strings without throwing and return path starting with /', () => {
+      fc.assert(
+        fc.property(fc.string(), route => {
+          expect(() => {
+            const link = routingService.getLink(route);
+            expect(typeof link).toBe('string');
+            expect(link.startsWith('/')).toBe(true);
           }).not.toThrow();
         }),
         { numRuns },

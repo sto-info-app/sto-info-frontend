@@ -193,11 +193,11 @@ export class RegisterComponent implements OnInit, OnDestroy {
           errMessage = MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT;
         } else if (error.status === 409) {
           console.error('Registration Conflict Exception error:', error);
-          if (error.error.message.includes('Email')) {
+          if (error.error?.message?.includes('Email')) {
             this.registerForm.controls['email'].setErrors({
               uniqueEmail: true,
             });
-          } else if (error.error.message.includes('Username')) {
+          } else if (error.error?.message?.includes('Username')) {
             this.registerForm.controls['username'].setErrors({
               uniqueUsername: true,
             });

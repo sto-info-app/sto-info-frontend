@@ -95,7 +95,7 @@ describe('ResetPasswordRequestComponent', () => {
     it('should handle error with message property', () => {
       component.email = 'test@example.com';
       component.inputsValid = true;
-      const error = { message: 'Server error' };
+      const error = { error: { message: 'Server error' } };
       authServiceSpy.resetPassword.mockReturnValue(throwError(() => error));
 
       component.onPasswordReset();
@@ -113,7 +113,7 @@ describe('ResetPasswordRequestComponent', () => {
       component.onPasswordReset();
 
       expect(component.errorMessage).toBe(
-        'An error occurred while resetting the password',
+        'An error occurred while resetting the password. Please try again.',
       );
     });
   });

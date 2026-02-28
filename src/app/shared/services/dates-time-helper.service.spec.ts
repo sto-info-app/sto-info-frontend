@@ -61,5 +61,15 @@ describe('DatesTimeHelperService', () => {
       const date = new Date('2023-01-01T11:59:55Z');
       expect(service.timeSince(date)).toBe('5 seconds ago');
     });
+
+    it('should return "just now" when date is the same as current time', () => {
+      const date = new Date('2023-01-01T12:00:00Z');
+      expect(service.timeSince(date)).toBe('just now');
+    });
+
+    it('should return "just now" when elapsed time is under one second', () => {
+      const date = new Date('2023-01-01T11:59:59.500Z');
+      expect(service.timeSince(date)).toBe('just now');
+    });
   });
 });

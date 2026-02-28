@@ -10,9 +10,10 @@
 [![Dependency Review](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dependency-review.yml)
 [![OpenSSF Scorecard workflow](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/openssf-scorecard.yml)
 [![npm audit](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/audit.yml)
-[![DCO Enforcement](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml)
-[![Security: Fuzz](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz.yml)
-[![Security: ZAP](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap.yml)
+[![Security: Fuzz](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-fuzz.yml)
+[![Security: ZAP (Dev)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap-dev.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap-dev.yml)
+[![Security: ZAP (Prod)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap-prod.yml/badge.svg?branch=production)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap-prod.yml)
+[![Security: ZAP (PR)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/security-zap.yml)
 
 ## CI and delivery
 
@@ -44,10 +45,11 @@
 ## Release and project
 
 [![Release](https://img.shields.io/github/v/release/sto-info-app/sto-info-frontend?display_name=tag&sort=semver)](https://github.com/sto-info-app/sto-info-frontend/releases)
-[![Licence](https://img.shields.io/github/license/sto-info-app/sto-info-frontend)](https://github.com/sto-info-app/sto-info-frontend/blob/development/LICENCE)
+[![Licence](https://img.shields.io/github/license/sto-info-app/sto-info-frontend?branch=development&label=licence)](https://github.com/sto-info-app/sto-info-frontend/blob/development/LICENSE)
 [![All Contributors](https://img.shields.io/github/all-contributors/sto-info-app/sto-info-frontend?label=all%20contributors)](https://github.com/sto-info-app/sto-info-frontend#contributors)
 [![Angular](https://img.shields.io/github/package-json/dependency-version/sto-info-app/sto-info-frontend/@angular/core?label=angular&branch=development)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
 [![Node](https://img.shields.io/badge/node->=24%20<25-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
+[![Written language](https://img.shields.io/badge/written%20language-en--GB-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/README.md)
 
 ## Project overview
 
@@ -77,7 +79,7 @@ To generate a coverage report, run:
 npm run test:cov
 ```
 
-Coverage output is written to `coverage/` (including an `lcov.info` file used by tooling such as SonarQube).
+Coverage output is written to `reports/coverage/` (including an `lcov.info` file used by tooling such as SonarQube).
 
 ### Mutation testing
 
@@ -127,7 +129,7 @@ Set the `FUZZ_NUM_RUNS` environment variable to control the number of test itera
 FUZZ_NUM_RUNS=500 npm run test:fuzz
 ```
 
-Default: 50 iterations (via `npm run test:fuzz`) or 100 (fallback if no environment variable is set).
+Default: 50 iterations for `npm run test:fuzz`, 1000 for `npm run test:fuzz:full` (when `FUZZ_NUM_RUNS` is not set).
 
 **CI behaviour:**
 
@@ -142,9 +144,12 @@ Dynamic Application Security Testing (DAST) is performed using OWASP ZAP to iden
 
 **CI behaviour:**
 
-- **Pull requests**: Runs ZAP baseline scan with 10-minute timeout
-- **Weekly schedule**: Runs ZAP full scan with 30-minute timeout
-- **Scan reports**: Available as workflow artifacts for 30 days
+- **Pull requests**: Runs ZAP baseline scan against a locally built version of the app (using `npx serve` on `localhost:4202`).
+- **Development/Production version bumps**: Runs a ZAP baseline scan against the deployed frontend (using a smart polling loop for up to 10 minutes to wait for `version.json` deployment).
+- **Weekly schedule**: Runs a ZAP full scan against the dev frontend base URL.
+- **Manual trigger**: Can run baseline or full scan via `workflow_dispatch` on the environment-specific workflows.
+- **WAF Bypass**: Scans and connectivity checks use a custom `User-Agent` to bypass edge protection.
+- **Scan reports**: Available as workflow artifacts for 30 days.
 
 **Limitations:**
 
@@ -205,7 +210,7 @@ The analysis results will be available on the SonarQube dashboard.
 
 ## Licence
 
-This project is licensed under the MIT Licence. See the [LICENCE](LICENCE) file for more information.
+This project is licensed under the MIT Licence. See the [LICENCE](LICENSE) file for more information.
 
 ## Intellectual Property Rights
 

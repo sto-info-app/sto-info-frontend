@@ -16,7 +16,7 @@ import { TestBed } from '@angular/core/testing';
 // But this is Class-based.
 // So I should test it as an INJECTABLE service.
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import {
   API_HEALTH_STATE_DOWN,
   API_HEALTH_STATE_UP,
@@ -68,6 +68,23 @@ describe('ApiRequiredGuard', () => {
       expect(healthServiceSpy.markUp).toHaveBeenCalled();
       expect(healthServiceSpy.markDown).not.toHaveBeenCalled();
       done();
+    });
+  });
+
+  it('should error and not allow navigation when checkOnce fails', done => {
+    healthServiceSpy.checkOnce.mockReturnValue(
+      throwError(() => new Error('Health check failed')),
+    );
+
+    guard.canActivate().subscribe({
+      next: () => {
+        done.fail('Guard should not emit when health check errors');
+      },
+      error: () => {
+        expect(healthServiceSpy.markDown).not.toHaveBeenCalled();
+        expect(healthServiceSpy.markUp).not.toHaveBeenCalled();
+        done();
+      },
     });
   });
 });

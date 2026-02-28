@@ -64,7 +64,7 @@ export class VerifyEmailComponent implements OnInit {
             this.message = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;
           } else if (
             error.status === 400 &&
-            error.error.message === 'Token expired'
+            error.error?.message === 'Token expired'
           ) {
             this.message = 'Your verification link has expired';
           } else {

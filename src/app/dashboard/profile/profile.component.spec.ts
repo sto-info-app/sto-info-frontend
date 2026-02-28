@@ -5,7 +5,7 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { DatesTimeHelperService } from 'src/app/shared/services/dates-time-helper.service';
@@ -111,6 +111,22 @@ describe('ProfileComponent', () => {
     expect(mockAuthService.performLogout).toHaveBeenCalled();
   });
 
+  it('should handle getUser error and log warning', () => {
+    const consoleWarnSpy = jest
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {});
+    const err = new Error('network error');
+    mockDashboardService.getUser.mockReturnValue(throwError(() => err));
+
+    component.getUserData();
+
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      'Failed to load user (non-200 or network error)',
+      err,
+    );
+    consoleWarnSpy.mockRestore();
+  });
+
   it('should get route link', () => {
     const link = component.getRouteLink('test');
     expect(mockRoutingService.getLink).toHaveBeenCalledWith('test');
@@ -204,6 +220,40 @@ describe('ProfileComponent', () => {
       mockDialogRef.afterClosed.mockReturnValue(of(false));
       component.editUserProfilePhoto();
       expect(mockAuthService.refreshToken).not.toHaveBeenCalled();
+    });
+
+    it('should log warning when refresh token fails after profile edit', () => {
+      mockDialogRef.afterClosed.mockReturnValue(of(true));
+      const err = new Error('refresh failed');
+      mockAuthService.refreshToken.mockReturnValue(throwError(() => err));
+      const consoleWarnSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
+
+      component.editUserProfile();
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Token refresh failed after profile edit',
+        err,
+      );
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('should log warning when refresh token fails after profile photo update', () => {
+      mockDialogRef.afterClosed.mockReturnValue(of(true));
+      const err = new Error('refresh failed');
+      mockAuthService.refreshToken.mockReturnValue(throwError(() => err));
+      const consoleWarnSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
+
+      component.editUserProfilePhoto();
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Token refresh failed after profile photo update',
+        err,
+      );
+      consoleWarnSpy.mockRestore();
     });
   });
 
