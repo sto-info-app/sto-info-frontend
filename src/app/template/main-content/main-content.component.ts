@@ -96,8 +96,14 @@ export class MainContentComponent implements OnDestroy {
         observe: 'response',
         responseType: HTTP_RESPONSE_TYPE_TEXT,
       })
-      .subscribe(response => {
-        this.updateBackendVersion(response);
+      .subscribe({
+        next: response => this.updateBackendVersion(response),
+        error: err => {
+          console.warn(
+            'Backend version endpoint failed or returned non-200',
+            err,
+          );
+        },
       });
 
     // Start/stop polling only while on API-required routes

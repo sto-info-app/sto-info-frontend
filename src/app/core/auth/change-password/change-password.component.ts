@@ -110,7 +110,7 @@ export class ChangePasswordComponent implements OnInit {
 
             if (
               error.status === 400 &&
-              error.error.message === 'Token expired'
+              error.error?.message === 'Token expired'
             ) {
               this.seriousErrorMessage =
                 'Your password reset link has expired. You need to request a new another reset email.';

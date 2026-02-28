@@ -140,8 +140,12 @@ export class AccountsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(result => {
         if (result) {
-          this.stoAccountService.deleteAccount(account.id).subscribe(() => {
-            this.loadAccounts();
+          this.stoAccountService.deleteAccount(account.id).subscribe({
+            next: () => this.loadAccounts(),
+            error: err => {
+              this.isLoading = false;
+              console.error('Failed to delete STO account:', err);
+            },
           });
         }
       });

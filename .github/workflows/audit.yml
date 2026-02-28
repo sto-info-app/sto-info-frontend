@@ -28,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      actions: read
     outputs:
       pkg_changed: ${{ steps.filter.outputs.pkg_changed }}
     steps:
@@ -44,19 +43,14 @@ jobs:
   audit:
     name: 'npm audit'
     needs: check_changes
-    # Skip for Dependabot (since it's already doing its own thing)
+    # Skip for Dependabot
     # Skip draft PRs
     # Skip version bump PRs
     # Run if pkg_changed or push or schedule/dispatch
     if: |
       github.actor != 'dependabot[bot]' &&
-      github.actor != 'github-actions[bot]' &&
       (needs.check_changes.outputs.pkg_changed == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push') &&
-      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
-      !(github.event_name == 'pull_request' && (
-        (github.event.pull_request.user.login == 'github-actions[bot]' && startsWith(github.event.pull_request.title, 'chore: bump version to')) ||
-        startsWith(github.event.pull_request.head.ref, 'chore/bump-version-to-')
-      ))
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -69,7 +63,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Use Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}

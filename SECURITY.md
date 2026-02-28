@@ -70,26 +70,21 @@ FUZZ_NUM_RUNS=500 npm run test:fuzz
 ### OWASP ZAP DAST scanning
 
 **What it does:**
-ZAP (Zed Attack Proxy) performs Dynamic Application Security Testing by actively scanning the running application for common web vulnerabilities including:
-
-- Cross-site scripting (XSS)
-- SQL injection
-- Security header misconfigurations
-- Information disclosure
-- And 50+ other vulnerability types
+ZAP (Zed Attack Proxy) performs Dynamic Application Security Testing by actively scanning the running application for common web vulnerabilities.
 
 **When it runs:**
 
-- **Pull requests**: ZAP baseline scan (fast, ~10 minutes, targets common issues)
-- **Weekly schedule**: ZAP full scan (comprehensive, ~30 minutes, deep spider + active scan)
-- **Manual trigger**: Available via workflow_dispatch with configurable scan type
+- **Pull requests**: ZAP baseline scan against a **local build** (fast feedback on code changes).
+- **Environment updates (Push)**: ZAP baseline scan against the **deployed site** (Development or Production) after a version bump. Uses a smart polling loop for up to 10 minutes to wait for the new version to be live.
+- **Weekly schedule**: ZAP full scan against the development site for deep analysis.
+- **Manual trigger**: Baseline or full scans can be triggered manually via `workflow_dispatch`.
 
-**Scan execution:**
+**Scan execution details:**
 
-- Application is built in production mode
-- Static files served via npx serve on localhost:4202
-- ZAP scans against local server (no external dependencies)
-- Reports stored as workflow artifacts for 30 days
+- **Local scans**: Application built and served via `npx serve` on `localhost:4202`.
+- **Remote scans**: Performed against `dev.startrekonline.info` or `startrekonline.info`.
+- **WAF Bypass**: Scans use a custom `User-Agent` to bypass edge protection and WAF blocking.
+- **Artifacts**: Reports stored as workflow artifacts for 30 days.
 
 **Failure criteria:**
 
