@@ -59,7 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           expected_version=$(node -p "require('./package.json').version")
-          echo "Expected repo version: ${expected_version}"
+          echo "Local repository version to verify: ${expected_version}"
 
           max_attempts=10
           delay=60
@@ -74,17 +74,29 @@ jobs:
             fi
 
             # Check actual version from version.json
-            version_response=$(curl -sSL -w "\n%{http_code}" -H "User-Agent: Mozilla/5.0" --proto '=https' --proto-redir '=https' "${DEV_FRONTEND_VERSION_URL}" --max-time 15 2>/dev/null || true)
-            http_code=$(echo "${version_response}" | tail -n1)
-            raw_body=$(echo "${version_response}" | sed '$d')
+            # We use a temporary file to safely separate body and status code
+            curl -sSL -H "User-Agent: Mozilla/5.0" --proto '=https' --proto-redir '=https' \
+                 -o response_body.txt -w "%{http_code}" \
+                 "${DEV_FRONTEND_VERSION_URL}" --max-time 15 > http_code.txt || echo "000" > http_code.txt
+            
+            http_code=$(cat http_code.txt)
+            raw_body=$(cat response_body.txt)
 
             if [ "${http_code}" = "200" ] && [ -n "${raw_body}" ]; then
-              actual_version=$(echo "${raw_body}" | jq -r '.version' 2>/dev/null || echo "")
+              # Check if the response looks like HTML (common for 404 fallbacks in SPAs)
+              if echo "${raw_body}" | grep -qEi "<html|<!DOCTYPE html"; then
+                echo "Warning: Received HTML response instead of JSON. The deployment may not have included version.json yet, or the SPA is falling back to index.html."
+                actual_version=""
+              else
+                actual_version=$(echo "${raw_body}" | jq -r '.version' 2>/dev/null || echo "")
+              fi
+
               if [ "${actual_version}" = "${expected_version}" ]; then
                 echo "Success: Deployed version matches (${actual_version}). Proceeding to scan."
                 exit 0
+              elif [ -n "${actual_version}" ]; then
+                echo "Version mismatch: Deployed version is ${actual_version} (waiting for ${expected_version})."
               fi
-              echo "Version mismatch: expected ${expected_version}, found ${actual_version}."
             else
               echo "Frontend or version.json unreachable (HTTP ${http_code})."
             fi
