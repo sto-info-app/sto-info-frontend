@@ -54,7 +54,7 @@
     "@auth0/angular-jwt": "^5.1.2",
     "@eslint/config-array": "^0.23.2",
     "@eslint/object-schema": "^3.0.1",
-    "@sentry/angular": "^10.40.0",
+    "@sentry/angular": "^10.41.0",
     "glob": "^13.0.6",
     "http-proxy-middleware": "^3.0.5",
     "js-base64": "^3.7.7",
