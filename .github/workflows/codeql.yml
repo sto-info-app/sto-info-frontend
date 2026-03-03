@@ -44,9 +44,10 @@ jobs:
     if: |
       needs.check_changes.outputs.src_changed == 'true' || 
       github.event_name == 'schedule' || 
-      github.event_name == 'push'
+      github.event_name == 'push' ||
+      github.event_name == 'pull_request 
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 60
     permissions:
       actions: read
       contents: read
