@@ -40,12 +40,13 @@ jobs:
   code_scanning:
     name: 'CodeQL Analysis'
     needs: check_changes
-    # Skip if no src changed (unless scheduled or push)
+    # Always run on push and schedule (for Scorecard coverage).
+    # On pull_request, only run if src files changed (smart skip).
+    # This avoids skipped jobs registering as failures on PRs with no src changes.
     if: |
-      needs.check_changes.outputs.src_changed == 'true' || 
-      github.event_name == 'schedule' || 
-      github.event_name == 'push' ||
-      github.event_name == 'pull_request'
+      needs.check_changes.outputs.src_changed == 'true' ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
