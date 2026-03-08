@@ -1,0 +1,89 @@
+<div class="smart-chart-container">
+  @if (data.length > 0 && totalCount > 0) {
+    @if (showPie) {
+      <div class="chart-wrapper">
+        <!-- Left Panel: The Chart -->
+        <div class="chart-box">
+          <div class="chart-grid-bg"></div>
+
+          <svg
+            viewBox="-1.1 -1.1 2.2 2.2"
+            class="pie-chart">
+            @for (segment of pieSegments; track segment.name) {
+              <path
+                [attr.d]="segment.path"
+                [attr.fill]="segment.color"
+                class="pie-segment">
+                <title>
+                  {{ segment.name }}: {{ segment.count }} ({{
+                    segment.percentage
+                  }}%)
+                </title>
+              </path>
+            }
+            @if (isDonut) {
+              <circle
+                cx="0"
+                cy="0"
+                r="0.5"
+                fill="#000000"
+                class="donut-hole"></circle>
+            }
+          </svg>
+        </div>
+
+        <!-- Right Panel: Legend -->
+        <div class="legend-panel">
+          <div class="legend-header">Breakdown Indices</div>
+          <div class="legend-items">
+            @for (segment of pieSegments; track segment.name) {
+              <div class="legend-item">
+                <div
+                  class="status-box"
+                  [style.background-color]="segment.color">
+                  <i class="fas fa-check"></i>
+                </div>
+                <div class="item-info">
+                  <span class="item-name">{{ segment.name }}</span>
+                  <span class="item-value"
+                    ><span class="lcars-number-highlight">{{
+                      segment.count | number
+                    }}</span></span
+                  >
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    } @else {
+      <!-- Bar Chart with improved technical layout -->
+      <div class="bar-chart-wrapper">
+        <div class="breakdown-list">
+          @for (item of data; track item.name; let i = $index) {
+            <div class="breakdown-item">
+              <span class="breakdown-name">{{ item.name }}</span>
+              <div class="bar-track">
+                <div
+                  class="bar-fill {{ getBarColorClass(i) }}"
+                  [style.width]="getBarWidth(item.count)"></div>
+              </div>
+              <span class="breakdown-count"
+                ><span class="lcars-number-highlight">{{
+                  item.count | number
+                }}</span></span
+              >
+            </div>
+          }
+        </div>
+      </div>
+    }
+  } @else {
+    <div class="no-data-msg">
+      <app-lcars-information-message
+        title="No Data"
+        message="No telemetry data available for this sector.">
+      </app-lcars-information-message>
+    </div>
+  }
+</div>
