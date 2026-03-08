@@ -23,8 +23,8 @@ import { ContactComponent } from './static-pages/contact/contact.component';
 import { CreditsComponent } from './static-pages/credits/credits.component';
 import { PrivacyPolicyComponent } from './static-pages/privacy-policy/privacy-policy.component';
 import { TeamDevelopersComponent } from './static-pages/team/developers/developers.component';
-import { TeamMemberComponent } from './static-pages/team/team-member/team-member.component';
 import { TeamSupportersComponent } from './static-pages/team/supporters/supporters.component';
+import { TeamMemberComponent } from './static-pages/team/team-member/team-member.component';
 import { TeamVolunteersComponent } from './static-pages/team/volunteers/volunteers.component';
 import { TermsOfUseComponent } from './static-pages/terms-of-use/terms-of-use.component';
 
@@ -189,6 +189,25 @@ export const routes: Routes = [
         m => m.CharacterManageComponent,
       ),
     data: { title: APP_ROUTE_TITLES.STO_CHARACTER_EDIT, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_STATS,
+    loadComponent: () =>
+      import('./dashboard/stats/stats.component').then(m => m.StatsComponent),
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_STATS, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_STATS_DETAIL,
+    loadComponent: () =>
+      import('./dashboard/stats/stat-detail/stat-detail.component').then(
+        m => m.StatDetailComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.STO_DASHBOARD_STATS_DETAIL,
+      requiresApi: true,
+    },
     canActivate: [AuthGuard, ApiRequiredGuard],
   },
 
