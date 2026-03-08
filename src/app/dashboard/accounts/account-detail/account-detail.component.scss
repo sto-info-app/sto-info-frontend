@@ -37,7 +37,7 @@
 
 .characters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1rem;
   padding: 1rem 0;
 }
@@ -58,6 +58,10 @@
       rgba(vars.$lcars-bluey, 0.05) 0%,
       vars.$lcars-grey-bg 100%
     );
+
+    .character-main-area {
+      background: rgba(vars.$lcars-bluey, 0.08);
+    }
   }
   &.klingon,
   &.klingon-empire {
@@ -67,6 +71,10 @@
       rgba(vars.$lcars-orange, 0.05) 0%,
       vars.$lcars-grey-bg 100%
     );
+
+    .character-main-area {
+      background: rgba(vars.$lcars-orange, 0.1);
+    }
   }
   &.romulan,
   &.romulan-republic {
@@ -76,6 +84,10 @@
       rgba(vars.$lcars-green, 0.05) 0%,
       vars.$lcars-grey-bg 100%
     );
+
+    .character-main-area {
+      background: rgba(vars.$lcars-green, 0.12);
+    }
   }
   &.dominion {
     border-left-color: vars.$lcars-violet;
@@ -84,6 +96,10 @@
       rgba(vars.$lcars-violet, 0.05) 0%,
       vars.$lcars-grey-bg 100%
     );
+
+    .character-main-area {
+      background: rgba(vars.$lcars-violet, 0.1);
+    }
   }
 
   .character-header-row {
@@ -138,7 +154,7 @@
     display: flex;
     flex: 1;
     min-height: 110px;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(255, 255, 255, 0.03); // Fallback light tint
 
     .character-image-container {
       width: 100px;
@@ -196,15 +212,17 @@
 
       .character-rank-row {
         display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 2px;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
 
         .rank-icon-mini {
           height: 14px;
           width: auto;
           filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
           margin-bottom: 2px;
+          padding: 2px;
+          border-radius: 2px;
         }
 
         .rank-name {
@@ -262,10 +280,32 @@
   }
 }
 
-.buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 5px !important;
-  padding-top: 5px !important;
+#characters-section {
+  .lcars-text-bar {
+    margin-bottom: 25px;
+
+    span:not(.cta-icon) {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+
+      .header-count-badge {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: vars.$lcars-tangerine;
+        color: #000;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        font-size: 0.95rem;
+        font-weight: 900;
+        font-family: vars.$font-antonio;
+        line-height: 1;
+        flex-shrink: 0;
+        margin-top: 8px;
+      }
+    }
+  }
 }
