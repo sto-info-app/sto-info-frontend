@@ -1,0 +1,135 @@
+@use 'lcars-variables' as vars;
+
+.stat-info-card {
+  display: flex;
+  flex-direction: column;
+  background-color: vars.$lcars-grey-bg; // Fallback
+  border-radius: 15px 15px 0 0;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  height: 100%;
+  transition: transform 0.2s ease;
+  min-height: 140px;
+  position: relative; // For background icon positioning
+
+  .card-main {
+    display: flex;
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    flex: 1;
+    align-items: flex-start;
+    justify-content: flex-start; // Text to the left
+    position: relative;
+    z-index: 2; // Above icon
+  }
+
+  .card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    max-width: 100%; // Take up full width since icon is background
+
+    .card-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.7;
+      color: vars.$lcars-black;
+    }
+
+    .card-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1.1;
+      color: vars.$lcars-black;
+    }
+  }
+
+  .card-visual {
+    position: absolute;
+    bottom: -1rem; // Bleed off bottom slightly
+    right: -1rem; // Bleed off right slightly
+    font-size: 8rem; // Much larger for watermark
+    color: vars.$lcars-black;
+    opacity: 0.15; // Slightly increased for better visibility as requested
+    z-index: 1;
+    pointer-events: none; // Don't block clicks
+  }
+
+  .card-cta {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 2rem 1fr 2rem;
+    align-items: center;
+    padding: 0.75rem 0;
+    background-color: rgba(0, 0, 0, 0.15);
+    color: vars.$lcars-black;
+    text-decoration: none;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: background-color 0.2s ease;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 2;
+    box-sizing: border-box;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.25);
+    }
+
+    .cta-text {
+      grid-column: 2;
+      text-align: center;
+      line-height: 1;
+    }
+
+    i {
+      grid-column: 3;
+      justify-self: flex-start;
+      font-size: 0.7rem;
+      opacity: 0.8;
+      line-height: 1;
+    }
+  }
+
+  // Size modifiers — cap the card width without overriding fluid grid/flex layouts
+  &.size-sm { width: 100%; max-width: 140px; }
+  &.size-md { width: 100%; max-width: 200px; }
+  &.size-lg { width: 100%; max-width: 280px; }
+  &.size-xl { width: 100%; max-width: 360px; }
+
+  // Theme Colors - Apply to background to match user screenshot
+  &.sunflower {
+    background-color: vars.$lcars-sunflower;
+  }
+  &.perano {
+    background-color: vars.$lcars-perano;
+  }
+  &.bluey {
+    background-color: vars.$lcars-bluey;
+  }
+  &.orange,
+  &.atomic {
+    background-color: vars.$lcars-orange;
+  }
+  &.green {
+    background-color: vars.$lcars-green;
+  }
+  &.violet {
+    background-color: vars.$lcars-violet;
+  }
+  &.gold {
+    background-color: vars.$lcars-gold;
+  }
+  &.tangerine {
+    background-color: vars.$lcars-tangerine;
+  }
+  &.cool {
+    background-color: vars.$lcars-cool;
+  }
+  &.sky {
+    background-color: vars.$lcars-sky;
+  }
+}
