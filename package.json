@@ -144,6 +144,8 @@
     "@stryker-mutator/core": {
       "minimatch": "10.2.4"
     },
-    "tmp": "0.2.5"
+    "tmp": "0.2.5",
+    "express-rate-limit": "^8.2.2",
+    "underscore": "^1.13.8"
   }
 }

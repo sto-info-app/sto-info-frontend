@@ -31,6 +31,7 @@ Supporting docs:
 - [Deployment (Render + Cloudflare)](deployment.md)
 - [Operations runbook](operations.md)
 - [Security, rate limiting, retention](security-and-data.md)
+- [Dependency security overrides](security.md)
 - [Memory leak prevention](memory-leak-prevention-guide.md)
 - [GitHub Automation & Standards](github/README.md)
 
