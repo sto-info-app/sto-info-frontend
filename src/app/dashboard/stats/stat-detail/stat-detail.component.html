@@ -1,0 +1,112 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+<div id="stat-detail-container">
+  <div
+    id="stat-detail-main"
+    class="col">
+    @if (config) {
+      <h1>{{ config.title }}</h1>
+
+      @if (isLoading) {
+        <p class="loading-msg">Loading&hellip;</p>
+      }
+
+      @if (!isLoading && stats) {
+        <!-- Level mini-cards (only for Level page) -->
+        @if (config.showLevelCards && stats) {
+          <div class="level-mini-cards">
+            <app-stat-info-card
+              label="Min"
+              [value]="stats.minLevel"
+              icon="fas fa-circle-chevron-down"
+              color="tangerine">
+            </app-stat-info-card>
+
+            <app-stat-info-card
+              label="Avg"
+              [value]="stats.avgLevel"
+              icon="fas fa-sigma"
+              color="sunflower">
+            </app-stat-info-card>
+
+            <app-stat-info-card
+              label="Max"
+              [value]="stats.maxLevel"
+              icon="fas fa-circle-chevron-up"
+              color="green">
+            </app-stat-info-card>
+          </div>
+        }
+
+        <!-- Smart Chart -->
+        <app-smart-chart [data]="displayedItems"></app-smart-chart>
+      }
+
+      @if (!isLoading && !stats) {
+        <app-lcars-information-message
+          title="Data Error"
+          message="Unable to load statistics. Please try again later.">
+        </app-lcars-information-message>
+      }
+    } @else {
+      <h1>Unknown Stat</h1>
+      <app-lcars-information-message
+        title="Category Error"
+        message="No telemetry data available for this sector.">
+      </app-lcars-information-message>
+    }
+  </div>
+
+  <!-- Side navigation -->
+  <div
+    id="stat-detail-side"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Filters</span>
+    </div>
+    <div class="buttons filter-buttons">
+      @if (accounts.length > 1) {
+        <div class="lcars-select-container sunflower">
+          <label for="account-select">Select Account</label>
+          <select
+            id="account-select"
+            [(ngModel)]="selectedAccountId"
+            (change)="onAccountChange($any($event.target).value)">
+            <option value="all">All Accounts</option>
+            @for (account of accounts; track account.id) {
+              <option [value]="account.id">{{ account.handle }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      @if (hasData) {
+        <button
+          type="button"
+          class="full-width-btn-link filter-btn"
+          [class.active]="!hideZeros"
+          (click)="toggleHideZeros()">
+          {{ hideZeros ? 'Show Zero Stats' : 'Hide Zero Stats' }}
+        </button>
+      }
+    </div>
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)"
+        class="full-width-btn-link sunflower"
+        >Back to Stats</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+        class="full-width-btn-link sunflower"
+        >Dashboard</a
+      >
+    </div>
+  </div>
+</div>
