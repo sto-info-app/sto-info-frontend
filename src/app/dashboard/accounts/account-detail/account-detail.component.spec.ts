@@ -528,4 +528,275 @@ describe('AccountDetailComponent', () => {
       expect(component.failedImageIds.has('123')).toBe(true);
     });
   });
+
+  describe('Filter getters', () => {
+    const charWithRank: Character = {
+      ...mockCharacter,
+      rank: { title: 'Admiral', levelRange: '60-65' },
+      species: { id: 'sp1', name: 'Human' },
+      faction: { id: 'f1', name: 'Starfleet', generalFactionId: 'fed' },
+      generalFaction: { id: 'fed', name: 'Federation' },
+      recruitType: { id: 'rt1', name: 'Normal' },
+    };
+
+    const charKlingon: Character = {
+      ...mockCharacter,
+      id: 'char2',
+      handle: 'Klang',
+      sex: { id: 'f', name: 'Female' },
+      class: { id: 'sci', name: 'Science' },
+      rank: { title: 'General', levelRange: '50-59' },
+      species: { id: 'sp2', name: 'Klingon' },
+      faction: { id: 'f2', name: 'KDF', generalFactionId: 'kdf' },
+      generalFaction: { id: 'kdf', name: 'Klingon Empire' },
+      recruitType: { id: 'rt2', name: 'Delta Recruit' },
+    };
+
+    beforeEach(() => {
+      component.characters = [charWithRank, charKlingon];
+    });
+
+    describe('uniqueRanks', () => {
+      it('should return sorted unique rank level ranges', () => {
+        expect(component.uniqueRanks).toEqual(['50-59', '60-65']);
+      });
+
+      it('should exclude characters without rank', () => {
+        component.characters = [
+          { ...mockCharacter, rank: undefined },
+          charWithRank,
+        ];
+        expect(component.uniqueRanks).toEqual(['60-65']);
+      });
+    });
+
+    describe('uniqueSpecies', () => {
+      it('should return sorted unique species names', () => {
+        expect(component.uniqueSpecies).toEqual(['Human', 'Klingon']);
+      });
+
+      it('should exclude characters without species', () => {
+        component.characters = [
+          { ...mockCharacter, species: undefined },
+          charWithRank,
+        ];
+        expect(component.uniqueSpecies).toEqual(['Human']);
+      });
+    });
+
+    describe('uniqueFactions', () => {
+      it('should return sorted unique faction names', () => {
+        expect(component.uniqueFactions).toEqual(['KDF', 'Starfleet']);
+      });
+    });
+
+    describe('uniqueGeneralFactions', () => {
+      it('should return sorted unique general faction names', () => {
+        expect(component.uniqueGeneralFactions).toEqual([
+          'Federation',
+          'Klingon Empire',
+        ]);
+      });
+    });
+
+    describe('uniqueSexes', () => {
+      it('should return sorted unique sex names', () => {
+        expect(component.uniqueSexes).toEqual(['Female', 'Male']);
+      });
+
+      it('should exclude characters without sex', () => {
+        component.characters = [
+          { ...mockCharacter, sex: undefined },
+          { ...charKlingon },
+        ];
+        expect(component.uniqueSexes).toEqual(['Female']);
+      });
+    });
+
+    describe('uniqueClasses', () => {
+      it('should return sorted unique class names', () => {
+        expect(component.uniqueClasses).toEqual(['Science', 'Tactical']);
+      });
+
+      it('should exclude characters without class', () => {
+        component.characters = [
+          { ...mockCharacter, class: undefined },
+          charKlingon,
+        ];
+        expect(component.uniqueClasses).toEqual(['Science']);
+      });
+    });
+
+    describe('uniqueRecruitTypes', () => {
+      it('should return sorted unique recruit type names', () => {
+        expect(component.uniqueRecruitTypes).toEqual([
+          'Delta Recruit',
+          'Normal',
+        ]);
+      });
+    });
+  });
+
+  describe('filteredCharacters', () => {
+    const charWithRank: Character = {
+      ...mockCharacter,
+      rank: { title: 'Admiral', levelRange: '60-65' },
+      species: { id: 'sp1', name: 'Human' },
+      faction: { id: 'f1', name: 'Starfleet', generalFactionId: 'fed' },
+      generalFaction: { id: 'fed', name: 'Federation' },
+      recruitType: { id: 'rt1', name: 'Normal' },
+    };
+
+    const charKlingon: Character = {
+      ...mockCharacter,
+      id: 'char2',
+      handle: 'Klang',
+      firstName: 'Bat',
+      lastName: 'Leth',
+      sex: { id: 'f', name: 'Female' },
+      class: { id: 'sci', name: 'Science' },
+      rank: { title: 'General', levelRange: '50-59' },
+      species: { id: 'sp2', name: 'Klingon' },
+      faction: { id: 'f2', name: 'KDF', generalFactionId: 'kdf' },
+      generalFaction: { id: 'kdf', name: 'Klingon Empire' },
+      recruitType: { id: 'rt2', name: 'Delta Recruit' },
+    };
+
+    beforeEach(() => {
+      component.characters = [charWithRank, charKlingon];
+      component.searchText = '';
+      component.filterRank = '';
+      component.filterSpecies = '';
+      component.filterFaction = '';
+      component.filterGeneralFaction = '';
+      component.filterSex = '';
+      component.filterClass = '';
+      component.filterRecruitType = '';
+    });
+
+    it('should return all characters when no filters active', () => {
+      expect(component.filteredCharacters.length).toBe(2);
+    });
+
+    it('should filter by searchText matching handle', () => {
+      component.searchText = 'Klang';
+      expect(component.filteredCharacters).toEqual([charKlingon]);
+    });
+
+    it('should filter by searchText matching firstName', () => {
+      component.searchText = 'bat';
+      expect(component.filteredCharacters).toEqual([charKlingon]);
+    });
+
+    it('should filter by searchText matching lastName', () => {
+      component.searchText = 'leth';
+      expect(component.filteredCharacters).toEqual([charKlingon]);
+    });
+
+    it('should return empty when searchText matches nothing', () => {
+      component.searchText = 'zzznomatch';
+      expect(component.filteredCharacters).toEqual([]);
+    });
+
+    it('should filter by rank', () => {
+      component.filterRank = '60-65';
+      expect(component.filteredCharacters).toEqual([charWithRank]);
+    });
+
+    it('should filter by species', () => {
+      component.filterSpecies = 'Klingon';
+      expect(component.filteredCharacters).toEqual([charKlingon]);
+    });
+
+    it('should filter by faction', () => {
+      component.filterFaction = 'Starfleet';
+      expect(component.filteredCharacters).toEqual([charWithRank]);
+    });
+
+    it('should filter by general faction', () => {
+      component.filterGeneralFaction = 'Klingon Empire';
+      expect(component.filteredCharacters).toEqual([charKlingon]);
+    });
+
+    it('should filter by sex', () => {
+      component.filterSex = 'Female';
+      expect(component.filteredCharacters).toEqual([charKlingon]);
+    });
+
+    it('should filter by class', () => {
+      component.filterClass = 'Science';
+      expect(component.filteredCharacters).toEqual([charKlingon]);
+    });
+
+    it('should filter by recruit type', () => {
+      component.filterRecruitType = 'Delta Recruit';
+      expect(component.filteredCharacters).toEqual([charKlingon]);
+    });
+
+    it('should combine multiple filters', () => {
+      component.filterSpecies = 'Human';
+      component.filterRank = '50-59';
+      expect(component.filteredCharacters).toEqual([]);
+    });
+  });
+
+  describe('activeFilterCount', () => {
+    beforeEach(() => {
+      component.searchText = '';
+      component.filterRank = '';
+      component.filterSpecies = '';
+      component.filterFaction = '';
+      component.filterGeneralFaction = '';
+      component.filterSex = '';
+      component.filterClass = '';
+      component.filterRecruitType = '';
+    });
+
+    it('should return 0 when no filters active', () => {
+      expect(component.activeFilterCount).toBe(0);
+    });
+
+    it('should count each active filter', () => {
+      component.searchText = 'x';
+      expect(component.activeFilterCount).toBe(1);
+      component.filterRank = 'x';
+      expect(component.activeFilterCount).toBe(2);
+      component.filterSpecies = 'x';
+      expect(component.activeFilterCount).toBe(3);
+      component.filterFaction = 'x';
+      expect(component.activeFilterCount).toBe(4);
+      component.filterGeneralFaction = 'x';
+      expect(component.activeFilterCount).toBe(5);
+      component.filterSex = 'x';
+      expect(component.activeFilterCount).toBe(6);
+      component.filterClass = 'x';
+      expect(component.activeFilterCount).toBe(7);
+      component.filterRecruitType = 'x';
+      expect(component.activeFilterCount).toBe(8);
+    });
+  });
+
+  describe('clearFilters', () => {
+    it('should reset all filter fields to empty strings', () => {
+      component.searchText = 'something';
+      component.filterRank = 'Admiral';
+      component.filterSpecies = 'Human';
+      component.filterFaction = 'Starfleet';
+      component.filterGeneralFaction = 'Federation';
+      component.filterSex = 'Male';
+      component.filterClass = 'Tactical';
+      component.filterRecruitType = 'Normal';
+
+      component.clearFilters();
+
+      expect(component.searchText).toBe('');
+      expect(component.filterRank).toBe('');
+      expect(component.filterSpecies).toBe('');
+      expect(component.filterFaction).toBe('');
+      expect(component.filterGeneralFaction).toBe('');
+      expect(component.filterSex).toBe('');
+      expect(component.filterClass).toBe('');
+      expect(component.filterRecruitType).toBe('');
+    });
+  });
 });

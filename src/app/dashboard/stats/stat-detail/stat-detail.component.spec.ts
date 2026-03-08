@@ -2,6 +2,8 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
+import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { StatsService } from '../../services/stats.service';
 import { StatsData } from '../stats.component';
@@ -12,6 +14,7 @@ describe('StatDetailComponent', () => {
   let fixture: ComponentFixture<StatDetailComponent>;
   let statsServiceSpy: jest.Mocked<StatsService>;
   let routingServiceSpy: jest.Mocked<RoutingService>;
+  let stoAccountServiceSpy: jest.Mocked<StoAccountService>;
 
   const mockStats: StatsData = {
     accountCount: 2,
@@ -43,6 +46,11 @@ describe('StatDetailComponent', () => {
     byLauncher: [{ name: 'Steam', count: 2 }],
   };
 
+  const mockAccount = {
+    id: 'acc1',
+    handle: 'Test#1234',
+  } as unknown as StoAccount;
+
   const createComponent = async (breakdownId: string) => {
     await TestBed.configureTestingModule({
       imports: [StatDetailComponent],
@@ -55,6 +63,26 @@ describe('StatDetailComponent', () => {
         },
         { provide: StatsService, useValue: statsServiceSpy },
         { provide: RoutingService, useValue: routingServiceSpy },
+        { provide: StoAccountService, useValue: stoAccountServiceSpy },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(StatDetailComponent);
+    component = fixture.componentInstance;
+  };
+
+  const createComponentNoParam = async () => {
+    await TestBed.configureTestingModule({
+      imports: [StatDetailComponent],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: convertToParamMap({}) } },
+        },
+        { provide: StatsService, useValue: statsServiceSpy },
+        { provide: RoutingService, useValue: routingServiceSpy },
+        { provide: StoAccountService, useValue: stoAccountServiceSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
@@ -71,6 +99,10 @@ describe('StatDetailComponent', () => {
     routingServiceSpy = {
       getLink: jest.fn().mockReturnValue('/mock-route'),
     } as unknown as jest.Mocked<RoutingService>;
+
+    stoAccountServiceSpy = {
+      getAccounts: jest.fn().mockReturnValue(of([mockAccount])),
+    } as unknown as jest.Mocked<StoAccountService>;
   });
 
   afterEach(() => TestBed.resetTestingModule());
@@ -105,6 +137,26 @@ describe('StatDetailComponent', () => {
     expect(component.config).toBeNull();
     expect(component.isLoading).toBe(false);
     expect(statsServiceSpy.getStats).not.toHaveBeenCalled();
+  });
+
+  it('should treat missing breakdownId param as empty string (config null)', async () => {
+    await createComponentNoParam();
+    component.ngOnInit();
+
+    expect(component.config).toBeNull();
+    expect(component.isLoading).toBe(false);
+    expect(statsServiceSpy.getStats).not.toHaveBeenCalled();
+  });
+
+  it('should not update items when config is null during loadStats callback', async () => {
+    await createComponent('species');
+    // loadStats with config=null exercises the false branch of "if (this.config)"
+    component.config = null;
+    component.loadStats();
+
+    // items should not be populated since config is null
+    expect(component.items).toEqual([]);
+    expect(component.isLoading).toBe(false);
   });
 
   it('should set isLoading false and stats null on error', async () => {
@@ -166,5 +218,89 @@ describe('StatDetailComponent', () => {
 
     expect(nextSpy).toHaveBeenCalled();
     expect(completeSpy).toHaveBeenCalled();
+  });
+
+  describe('displayedItems when hideZeros is false', () => {
+    it('should return all items including zeros', async () => {
+      await createComponent('species');
+      component.items = [
+        { name: 'Human', count: 5 },
+        { name: 'Gorn', count: 0 },
+        { name: 'Klingon', count: 3 },
+      ];
+      component.hideZeros = false;
+      expect(component.displayedItems.length).toBe(3);
+      expect(component.displayedItems).toContainEqual(
+        expect.objectContaining({ name: 'Gorn' }),
+      );
+    });
+  });
+
+  describe('hasData', () => {
+    it('should return true when any item has count > 0', async () => {
+      await createComponent('species');
+      component.items = [
+        { name: 'Human', count: 0 },
+        { name: 'Klingon', count: 3 },
+      ];
+      expect(component.hasData).toBe(true);
+    });
+
+    it('should return false when all items have count 0', async () => {
+      await createComponent('species');
+      component.items = [
+        { name: 'Human', count: 0 },
+        { name: 'Klingon', count: 0 },
+      ];
+      expect(component.hasData).toBe(false);
+    });
+
+    it('should return false when items is empty', async () => {
+      await createComponent('species');
+      component.items = [];
+      expect(component.hasData).toBe(false);
+    });
+  });
+
+  describe('loadAccounts', () => {
+    it('should populate accounts from service', async () => {
+      await createComponent('species');
+      component.ngOnInit();
+      expect(stoAccountServiceSpy.getAccounts).toHaveBeenCalled();
+      expect(component.accounts).toEqual([mockAccount]);
+    });
+  });
+
+  describe('onAccountChange', () => {
+    it('should update selectedAccountId and reload stats', async () => {
+      await createComponent('species');
+      component.ngOnInit();
+      statsServiceSpy.getStats.mockClear();
+
+      component.onAccountChange('acc1');
+
+      expect(component.selectedAccountId).toBe('acc1');
+      expect(statsServiceSpy.getStats).toHaveBeenCalledWith('acc1');
+    });
+
+    it('should pass null to getStats when "all" is selected', async () => {
+      await createComponent('species');
+      component.ngOnInit();
+      statsServiceSpy.getStats.mockClear();
+
+      component.onAccountChange('all');
+
+      expect(statsServiceSpy.getStats).toHaveBeenCalledWith(null);
+    });
+  });
+
+  describe('getRouteLink', () => {
+    it('should delegate to routingService.getLink', async () => {
+      await createComponent('species');
+      routingServiceSpy.getLink.mockReturnValue('/dashboard/stats');
+      const link = component.getRouteLink('some-route');
+      expect(routingServiceSpy.getLink).toHaveBeenCalledWith('some-route');
+      expect(link).toBe('/dashboard/stats');
+    });
   });
 });
