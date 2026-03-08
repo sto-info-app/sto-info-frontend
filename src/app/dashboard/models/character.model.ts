@@ -35,6 +35,7 @@ export interface Character {
 
 export interface Rank {
   title: string;
+  levelRange: string;
   iconUrl?: string | null;
 }
 
