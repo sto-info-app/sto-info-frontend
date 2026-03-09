@@ -187,7 +187,7 @@ export class StatDetailComponent implements OnInit, OnDestroy {
         next: stats => {
           this.stats = stats;
           if (this.config) {
-            this.items = stats[this.config.key] as CountItem[];
+            this.items = stats[this.config.key];
           }
           this.isLoading = false;
         },
