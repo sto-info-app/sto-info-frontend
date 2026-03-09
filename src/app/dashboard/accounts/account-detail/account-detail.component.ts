@@ -83,35 +83,32 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
    *
    */
   get filteredCharacters(): Character[] {
-    return this.characters.filter(c => {
-      if (this.searchText) {
-        const term = this.searchText.toLowerCase();
-        const haystack = [c.handle, c.firstName, c.lastName]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        if (!haystack.includes(term)) return false;
-      }
-      if (this.filterRank && c.rank?.levelRange !== this.filterRank)
-        return false;
-      if (this.filterSpecies && c.species?.name !== this.filterSpecies)
-        return false;
-      if (this.filterFaction && c.faction?.name !== this.filterFaction)
-        return false;
-      if (
-        this.filterGeneralFaction &&
-        c.generalFaction?.name !== this.filterGeneralFaction
-      )
-        return false;
-      if (this.filterSex && c.sex?.name !== this.filterSex) return false;
-      if (this.filterClass && c.class?.name !== this.filterClass) return false;
-      if (
-        this.filterRecruitType &&
-        c.recruitType?.name !== this.filterRecruitType
-      )
-        return false;
-      return true;
-    });
+    return this.characters.filter(c => this.characterMatchesFilters(c));
+  }
+
+  private characterMatchesFilters(c: Character): boolean {
+    if (this.searchText && !this.matchesSearch(c)) return false;
+
+    return (
+      [
+        [this.filterRank, c.rank?.levelRange],
+        [this.filterSpecies, c.species?.name],
+        [this.filterFaction, c.faction?.name],
+        [this.filterGeneralFaction, c.generalFaction?.name],
+        [this.filterSex, c.sex?.name],
+        [this.filterClass, c.class?.name],
+        [this.filterRecruitType, c.recruitType?.name],
+      ] as [string, string | undefined][]
+    ).every(([filter, value]) => !filter || value === filter);
+  }
+
+  private matchesSearch(c: Character): boolean {
+    const term = this.searchText.toLowerCase();
+    return [c.handle, c.firstName, c.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+      .includes(term);
   }
 
   /**
@@ -139,7 +136,7 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
           .map(c => c.rank?.levelRange)
           .filter(Boolean) as string[],
       ),
-    ].sort();
+    ].sort((a, b) => a.localeCompare(b));
   }
 
   /** Unique species names from the current character list. */
@@ -148,7 +145,7 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
       ...new Set(
         this.characters.map(c => c.species?.name).filter(Boolean) as string[],
       ),
-    ].sort();
+    ].sort((a, b) => a.localeCompare(b));
   }
 
   /** Unique faction names from the current character list. */
@@ -157,7 +154,7 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
       ...new Set(
         this.characters.map(c => c.faction?.name).filter(Boolean) as string[],
       ),
-    ].sort();
+    ].sort((a, b) => a.localeCompare(b));
   }
 
   /** Unique general faction names from the current character list. */
@@ -168,7 +165,7 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
           .map(c => c.generalFaction?.name)
           .filter(Boolean) as string[],
       ),
-    ].sort();
+    ].sort((a, b) => a.localeCompare(b));
   }
 
   /** Unique sex names from the current character list. */
@@ -177,7 +174,7 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
       ...new Set(
         this.characters.map(c => c.sex?.name).filter(Boolean) as string[],
       ),
-    ].sort();
+    ].sort((a, b) => a.localeCompare(b));
   }
 
   /** Unique class names from the current character list. */
@@ -186,7 +183,7 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
       ...new Set(
         this.characters.map(c => c.class?.name).filter(Boolean) as string[],
       ),
-    ].sort();
+    ].sort((a, b) => a.localeCompare(b));
   }
 
   /** Unique recruit type names from the current character list. */
@@ -197,7 +194,7 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
           .map(c => c.recruitType?.name)
           .filter(Boolean) as string[],
       ),
-    ].sort();
+    ].sort((a, b) => a.localeCompare(b));
   }
 
   /**
