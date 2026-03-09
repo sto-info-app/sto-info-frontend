@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
-import { StatsData } from '../stats/stats.component';
+import { StatsData } from '../stats/stats.models';
 
 @Injectable({
   providedIn: 'root',

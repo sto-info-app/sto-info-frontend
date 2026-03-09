@@ -6,7 +6,7 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
-import { StatsData } from '../stats/stats.component';
+import { StatsData } from '../stats/stats.models';
 import { StatsService } from './stats.service';
 
 describe('StatsService', () => {

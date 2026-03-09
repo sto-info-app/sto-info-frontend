@@ -6,7 +6,7 @@ import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { StatsService } from '../../services/stats.service';
-import { StatsData } from '../stats.component';
+import { StatsData } from '../stats.models';
 import { StatDetailComponent } from './stat-detail.component';
 
 describe('StatDetailComponent', () => {

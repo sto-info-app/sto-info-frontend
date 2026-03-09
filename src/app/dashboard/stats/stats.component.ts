@@ -1,36 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { takeUntil } from 'rxjs';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
+import { StatInfoCardComponent } from 'src/app/shared/components/stat-info-card/stat-info-card.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
-import { RoutingService } from 'src/app/shared/services/routing.service';
-import { StatsService } from '../services/stats.service';
+import { StatsBaseComponent } from './stats-base.component';
 
-/** Represents a name-count pair used for breakdown stats. */
-export interface CountItem {
-  name: string;
-  count: number;
-}
-
-/** The full set of stats returned by GET /stats. */
-export interface StatsData {
-  accountCount: number;
-  lifetimeSubCount: number;
-  characterCount: number;
-  avgLevel: number;
-  minLevel: number;
-  maxLevel: number;
-  bySpecies: CountItem[];
-  byGeneralFaction: CountItem[];
-  byFaction: CountItem[];
-  byClass: CountItem[];
-  bySex: CountItem[];
-  byRecruitType: CountItem[];
-  byLevelRange: CountItem[];
-  byPlatform: CountItem[];
-  byLauncher: CountItem[];
-}
+// Re-export for consumers that import these types from this file.
+export type { CountItem, StatsData } from './stats.models';
 
 /** Config for a breakdown category tile on the stats hub. */
 export interface StatTile {
@@ -88,12 +68,6 @@ export const STAT_TILES: StatTile[] = [
   },
 ];
 
-import { FormsModule } from '@angular/forms';
-import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
-import { StatInfoCardComponent } from 'src/app/shared/components/stat-info-card/stat-info-card.component';
-import { StoAccount } from '../models/sto-account.model';
-import { StoAccountService } from '../services/sto-account.service';
-
 /**
  * Stats hub page — shows high-level hero tiles and links to each breakdown sub-page.
  */
@@ -111,32 +85,15 @@ import { StoAccountService } from '../services/sto-account.service';
     FormsModule,
   ],
 })
-export class StatsComponent implements OnInit, OnDestroy {
+export class StatsComponent extends StatsBaseComponent implements OnInit {
   appRoutes = APP_ROUTES;
   statTiles = STAT_TILES;
 
-  stats: StatsData | null = null;
-  accounts: StoAccount[] = [];
-  selectedAccountId: string = 'all';
-  isLoading = true;
-
-  private readonly statsService = inject(StatsService);
-  private readonly stoAccountService = inject(StoAccountService);
-  private readonly routingService = inject(RoutingService);
-  private readonly destroy$ = new Subject<void>();
-
-  /**
-   * Initialises the component by fetching all statistics and accounts.
-   *
-   */
   ngOnInit(): void {
     this.loadAccounts();
     this.loadStats();
   }
 
-  /**
-   * Fetches the statistics, optionally filtered by account.
-   */
   loadStats(): void {
     this.isLoading = true;
     const accountId =
@@ -153,46 +110,6 @@ export class StatsComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         },
       });
-  }
-
-  /**
-   * Fetches the user's accounts.
-   */
-  private loadAccounts(): void {
-    this.stoAccountService
-      .getAccounts()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: accounts => {
-          this.accounts = accounts;
-        },
-      });
-  }
-
-  /**
-   * Handles account selection changes.
-   * @param accountId The selected account ID or null for all accounts.
-   */
-  onAccountChange(accountId: string): void {
-    this.selectedAccountId = accountId;
-    this.loadStats();
-  }
-
-  /**
-   * Cleans up subscriptions.
-   */
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  /**
-   * Returns the full URL for a route constant.
-   *
-   * @param route The route constant name.
-   */
-  getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
   }
 
   /**
