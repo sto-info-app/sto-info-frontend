@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -32,6 +33,7 @@ import { AccountDialogComponent } from '../dialogs/account-dialog/account-dialog
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
@@ -55,6 +57,160 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
 
   public readonly appRoutes = APP_ROUTES;
   public readonly unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_100PX;
+
+  /** Filter: free-text search. */
+  searchText = '';
+  /** Filter: rank title. */
+  filterRank = '';
+  /** Filter: species name. */
+  filterSpecies = '';
+  /** Filter: faction name. */
+  filterFaction = '';
+  /** Filter: general faction name. */
+  filterGeneralFaction = '';
+  /** Filter: sex name. */
+  filterSex = '';
+  /** Filter: class name. */
+  filterClass = '';
+  /** Filter: recruit type name. */
+  filterRecruitType = '';
+
+  /** Whether the filter section is collapsed. */
+  filtersCollapsed = false;
+
+  /**
+   * Returns the characters that match all active filters.
+   *
+   */
+  get filteredCharacters(): Character[] {
+    return this.characters.filter(c => this.characterMatchesFilters(c));
+  }
+
+  private characterMatchesFilters(c: Character): boolean {
+    if (this.searchText && !this.matchesSearch(c)) return false;
+
+    return (
+      [
+        [this.filterRank, c.rank?.levelRange],
+        [this.filterSpecies, c.species?.name],
+        [this.filterFaction, c.faction?.name],
+        [this.filterGeneralFaction, c.generalFaction?.name],
+        [this.filterSex, c.sex?.name],
+        [this.filterClass, c.class?.name],
+        [this.filterRecruitType, c.recruitType?.name],
+      ] as [string, string | undefined][]
+    ).every(([filter, value]) => !filter || value === filter);
+  }
+
+  private matchesSearch(c: Character): boolean {
+    const term = this.searchText.toLowerCase();
+    return [c.handle, c.firstName, c.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+      .includes(term);
+  }
+
+  /**
+   * Returns the number of currently active filters.
+   *
+   */
+  get activeFilterCount(): number {
+    let count = 0;
+    if (this.searchText) count++;
+    if (this.filterRank) count++;
+    if (this.filterSpecies) count++;
+    if (this.filterFaction) count++;
+    if (this.filterGeneralFaction) count++;
+    if (this.filterSex) count++;
+    if (this.filterClass) count++;
+    if (this.filterRecruitType) count++;
+    return count;
+  }
+
+  /** Unique rank level ranges from the current character list. */
+  get uniqueRanks(): string[] {
+    return [
+      ...new Set(
+        this.characters
+          .map(c => c.rank?.levelRange)
+          .filter(Boolean) as string[],
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+  }
+
+  /** Unique species names from the current character list. */
+  get uniqueSpecies(): string[] {
+    return [
+      ...new Set(
+        this.characters.map(c => c.species?.name).filter(Boolean) as string[],
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+  }
+
+  /** Unique faction names from the current character list. */
+  get uniqueFactions(): string[] {
+    return [
+      ...new Set(
+        this.characters.map(c => c.faction?.name).filter(Boolean) as string[],
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+  }
+
+  /** Unique general faction names from the current character list. */
+  get uniqueGeneralFactions(): string[] {
+    return [
+      ...new Set(
+        this.characters
+          .map(c => c.generalFaction?.name)
+          .filter(Boolean) as string[],
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+  }
+
+  /** Unique sex names from the current character list. */
+  get uniqueSexes(): string[] {
+    return [
+      ...new Set(
+        this.characters.map(c => c.sex?.name).filter(Boolean) as string[],
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+  }
+
+  /** Unique class names from the current character list. */
+  get uniqueClasses(): string[] {
+    return [
+      ...new Set(
+        this.characters.map(c => c.class?.name).filter(Boolean) as string[],
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+  }
+
+  /** Unique recruit type names from the current character list. */
+  get uniqueRecruitTypes(): string[] {
+    return [
+      ...new Set(
+        this.characters
+          .map(c => c.recruitType?.name)
+          .filter(Boolean) as string[],
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+  }
+
+  /**
+   * Resets all filters to their default (empty) values.
+   *
+   */
+  clearFilters(): void {
+    this.searchText = '';
+    this.filterRank = '';
+    this.filterSpecies = '';
+    this.filterFaction = '';
+    this.filterGeneralFaction = '';
+    this.filterSex = '';
+    this.filterClass = '';
+    this.filterRecruitType = '';
+  }
 
   ngOnInit(): void {
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
