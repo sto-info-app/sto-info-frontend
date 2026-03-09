@@ -1,0 +1,145 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// ─── Layout ──────────────────────────────────────────────────────────────────
+
+#stats-container {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+
+  #stats-main-column {
+    flex: 2;
+    flex-basis: 69%;
+
+    #stats-main-content {
+      margin-top: 1rem;
+    }
+  }
+
+  #stats-side-column {
+    flex: 1;
+    flex-basis: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+// ─── Hero Stat Tiles ─────────────────────────────────────────────────────────
+
+.stats-hero-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 1.5rem 0 2rem;
+}
+
+// ─── Section Bar ─────────────────────────────────────────────────────────────
+
+.stats-section-bar {
+  margin-bottom: 1rem;
+}
+
+// ─── Category Card Grid ───────────────────────────────────────────────────────
+
+.stat-category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 700px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-category-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.4rem 1rem;
+    border-radius: 14px;
+    color: #000;
+    text-decoration: none;
+    font-weight: 700;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.25);
+    transition:
+      transform 0.2s ease,
+      filter 0.2s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+      filter: brightness(1.1);
+    }
+
+    .card-icon {
+      font-size: 1.8rem;
+      opacity: 0.85;
+    }
+
+    .card-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+
+    // Colour variants
+    &.gold {
+      background-color: vars.$lcars-gold;
+    }
+    &.perano {
+      background-color: vars.$lcars-perano;
+    }
+    &.cool {
+      background-color: vars.$lcars-cool;
+    }
+    &.sunflower {
+      background-color: vars.$lcars-sunflower;
+    }
+    &.violet {
+      background-color: vars.$lcars-violet;
+    }
+    &.green {
+      background-color: vars.$lcars-green;
+    }
+    &.tangerine {
+      background-color: vars.$lcars-tangerine;
+    }
+    &.sky {
+      background-color: vars.$lcars-sky;
+    }
+    &.bluey {
+      background-color: vars.$lcars-bluey;
+    }
+  }
+}
+
+// ─── Empty / Error States ────────────────────────────────────────────────────
+.no-accounts-msg,
+.no-characters-msg {
+  padding: 2rem;
+  text-align: center;
+  background: rgba(vars.$lcars-grey-bg, 0.5);
+  border: 1px dashed vars.$lcars-grey-border;
+  border-radius: 8px;
+  margin-top: 2rem;
+
+  p {
+    font-size: 1.2rem;
+    opacity: 0.8;
+  }
+}
+
+// ─── Filters ─────────────────────────────────────────────────────────────────
+
+#stats-filters {
+  margin-bottom: 2rem;
+}
+
+.no-data-msg {
+  font-style: italic;
+  opacity: 0.7;
+  margin-top: 1rem;
+}

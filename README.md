@@ -46,7 +46,7 @@
 
 [![Release](https://img.shields.io/github/v/release/sto-info-app/sto-info-frontend?display_name=tag&sort=semver)](https://github.com/sto-info-app/sto-info-frontend/releases)
 [![Licence](https://img.shields.io/github/license/sto-info-app/sto-info-frontend?branch=development&label=licence)](https://github.com/sto-info-app/sto-info-frontend/blob/development/LICENSE)
-[![All Contributors](https://img.shields.io/github/all-contributors/sto-info-app/sto-info-frontend?label=all%20contributors)](https://github.com/sto-info-app/sto-info-frontend#contributors)
+[![Contributors](https://img.shields.io/github/contributors/sto-info-app/sto-info-frontend?label=all%20contributors)](CONTRIBUTORS.md)
 [![Angular](https://img.shields.io/github/package-json/dependency-version/sto-info-app/sto-info-frontend/@angular/core?label=angular&branch=development)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
 [![Node](https://img.shields.io/badge/node->=24%20<25-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
 [![Written language](https://img.shields.io/badge/written%20language-en--GB-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/README.md)

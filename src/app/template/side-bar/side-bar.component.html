@@ -27,6 +27,12 @@
           routerLinkActive="peach"
           >{{ appRouteTitles.STO_DASHBOARD_ACCOUNTS }}</a
         >
+        <a
+          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="peach"
+          >{{ appRouteTitles.STO_DASHBOARD_STATS }}</a
+        >
       }
     </div>
     <div class="panel panel-4"></div>

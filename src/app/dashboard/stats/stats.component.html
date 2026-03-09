@@ -1,0 +1,118 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+<div id="stats-container">
+  <div
+    id="stats-main-column"
+    class="col">
+    <h1>Statistics</h1>
+
+    @if (stats) {
+      <div id="stats-main-content">
+        @if (stats.accountCount > 0) {
+          <!-- Hero stat tiles -->
+          <div class="stats-hero-tiles">
+            <app-stat-info-card
+              size="xl"
+              label="Accounts"
+              [value]="stats.accountCount"
+              icon="fas fa-users"
+              color="sunflower"
+              ctaText="Manage Accounts"
+              [ctaLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)">
+            </app-stat-info-card>
+
+            <app-stat-info-card
+              size="xl"
+              label="Characters"
+              [value]="stats.characterCount"
+              icon="fas fa-user"
+              color="perano"
+              [ctaText]="
+                selectedAccountId !== 'all' ? 'Manage Characters' : undefined
+              "
+              [ctaLink]="getCharacterCtaLink()">
+            </app-stat-info-card>
+          </div>
+
+          @if (stats.characterCount > 0) {
+            <!-- Category cards -->
+            <div class="lcars-text-bar stats-section-bar">
+              <span>Breakdown Categories</span>
+            </div>
+            <div class="stat-category-grid">
+              @for (tile of statTiles; track tile.breakdownId) {
+                <a
+                  class="stat-category-card {{ tile.colour }}"
+                  [routerLink]="getDetailLink(tile.breakdownId)">
+                  <i class="fas {{ tile.icon }} card-icon"></i>
+                  <span class="card-label">{{ tile.label }}</span>
+                </a>
+              }
+            </div>
+          } @else {
+            <app-lcars-information-message
+              title="No Data"
+              message="No telemetry data available for this sector.">
+            </app-lcars-information-message>
+          }
+        } @else {
+          <app-lcars-information-message
+            title="No Data"
+            message="No telemetry data available for this sector.">
+          </app-lcars-information-message>
+        }
+      </div>
+    }
+
+    @if (!isLoading && !stats) {
+      <p class="no-data-msg">
+        Unable to load statistics. Please try again later.
+      </p>
+    }
+  </div>
+
+  <!-- Side navigation column -->
+  <div
+    id="stats-side-column"
+    class="col">
+    @if (accounts.length > 1) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Filters</span>
+      </div>
+      <div
+        id="stats-filters"
+        class="buttons">
+        <div class="lcars-select-container sunflower">
+          <label for="account-select">Select Account</label>
+          <select
+            id="account-select"
+            [(ngModel)]="selectedAccountId"
+            (change)="onAccountChange($any($event.target).value)">
+            <option value="all">All Accounts</option>
+            @for (account of accounts; track account.id) {
+              <option [value]="account.id">{{ account.handle }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    }
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+        class="full-width-btn-link sunflower"
+        >Return to Dashboard</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+        class="full-width-btn-link sunflower"
+        >Manage Accounts</a
+      >
+    </div>
+  </div>
+</div>

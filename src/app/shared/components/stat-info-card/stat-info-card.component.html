@@ -1,0 +1,23 @@
+<div
+  class="stat-info-card"
+  [ngClass]="[color, size ? 'size-' + size : '']">
+  <div class="card-main">
+    <div class="card-info">
+      <span class="card-label">{{ label }}</span>
+      <span class="card-value lcars-number-highlight">{{ value }}</span>
+    </div>
+  </div>
+
+  <div class="card-visual">
+    <i [class]="icon"></i>
+  </div>
+
+  @if (ctaText && ctaLink) {
+    <a
+      [routerLink]="ctaLink"
+      class="card-cta">
+      <span class="cta-text">{{ ctaText }}</span>
+      <i class="fas fa-chevron-right"></i>
+    </a>
+  }
+</div>

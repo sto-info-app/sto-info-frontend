@@ -1,0 +1,241 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+.smart-chart-container {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+// ─── Main Chart Layout ───────────────────────────────────────────────────────
+
+.chart-wrapper {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(vars.$lcars-perano, 0.2);
+  border-radius: 20px;
+  overflow: hidden;
+  gap: 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+
+  @media (max-width: 850px) {
+    flex-direction: column;
+  }
+}
+
+// ─── Chart Box (Left Panel) ──────────────────────────────────────────────────
+
+.chart-box {
+  flex: 2;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem; // Reduced padding for "edge-to-edge" look
+  min-height: 400px; // Taller for larger chart
+  background: #000;
+
+  // The technical Grid Background
+  .chart-grid-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.4; // Significantly more visible as requested
+    pointer-events: none;
+    background-size: 30px 30px;
+    background-image:
+      linear-gradient(
+        to right,
+        rgba(vars.$lcars-orange, 0.5) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        rgba(vars.$lcars-orange, 0.5) 1px,
+        transparent 1px
+      );
+    z-index: 0;
+  }
+
+  .pie-chart {
+    position: relative;
+    z-index: 1;
+    width: 360px;
+    height: 360px;
+    transform: rotate(-90deg);
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.8));
+
+    .pie-segment {
+      transition:
+        filter 0.2s ease,
+        transform 0.2s ease;
+      cursor: help;
+      stroke: #000;
+      stroke-width: 0.02;
+
+      &:hover {
+        filter: brightness(1.2) contrast(1.1);
+      }
+    }
+  }
+}
+
+// ─── Legend Panel (Right Panel) ──────────────────────────────────────────────
+
+.legend-panel {
+  flex: 1;
+  background: rgba(vars.$lcars-grey-bg, 0.1);
+  border-left: 1px solid rgba(vars.$lcars-perano, 0.2);
+  display: flex;
+  flex-direction: column;
+  min-width: 280px;
+
+  @media (max-width: 850px) {
+    border-left: none;
+    border-top: 1px solid rgba(vars.$lcars-perano, 0.2);
+  }
+
+  .legend-header {
+    background: rgba(vars.$lcars-perano, 0.15);
+    padding: 0.75rem 1rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: vars.$lcars-perano;
+    border-bottom: 2px solid #000;
+  }
+
+  .legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2px; // LCARS seam gap
+    background: #000;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    background: rgba(vars.$lcars-grey-bg, 0.15);
+    padding: 0.6rem 1rem;
+    gap: 1rem;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: rgba(vars.$lcars-grey-bg, 0.25);
+    }
+
+    .status-box {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
+
+      i {
+        font-size: 0.6rem;
+        color: #000;
+      }
+    }
+
+    .item-info {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .item-name {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        color: vars.$lcars-white;
+        opacity: 0.9;
+      }
+
+      .item-value {
+        font-family: 'Courier New', monospace; // Technical readout look
+        font-size: 1rem;
+        font-weight: 800;
+        color: vars.$lcars-perano;
+      }
+    }
+  }
+}
+
+// ─── Bar Chart (Pi-Hole Bar Style) ───────────────────────────────────────────
+
+.bar-chart-wrapper {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1.5rem;
+  border-radius: 15px;
+  border: 1px solid rgba(vars.$lcars-perano, 0.1);
+
+  .breakdown-item {
+    display: grid;
+    grid-template-columns: 180px 1fr 60px;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+
+    .breakdown-name {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: vars.$lcars-white;
+      opacity: 0.8;
+    }
+
+    .bar-track {
+      background: rgba(255, 255, 255, 0.05);
+      height: 12px;
+      border-radius: 2px;
+      overflow: hidden;
+
+      .bar-fill {
+        height: 100%;
+        transition: width 0.6s ease-out;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+
+        @each $name,
+          $color
+            in (
+              'perano': vars.$lcars-perano,
+              'bluey': vars.$lcars-bluey,
+              'orange': vars.$lcars-orange,
+              'green': vars.$lcars-green,
+              'violet': vars.$lcars-violet,
+              'gold': vars.$lcars-gold,
+              'cool': vars.$lcars-cool,
+              'tangerine': vars.$lcars-tangerine,
+              'sky': vars.$lcars-sky,
+              'sunflower': vars.$lcars-sunflower
+            )
+        {
+          &.#{$name}-bar {
+            background: $color;
+          }
+        }
+      }
+    }
+
+    .breakdown-count {
+      text-align: right;
+      font-weight: 800;
+      color: vars.$lcars-perano;
+      font-family: 'Courier New', monospace;
+    }
+  }
+}
+
+.no-data-msg {
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  text-align: center;
+  font-style: italic;
+  opacity: 0.6;
+}

@@ -14,7 +14,7 @@
     with or endorsed by Cryptic Studios or Paramount.
   </p>
   @if (!isLoggedIn) {
-    <div class="buttons">
+    <div class="buttons-row">
       <a
         [routerLink]="getRouteLink(appRoutes.LOGIN)"
         class="sunflower"
@@ -27,7 +27,7 @@
       >
     </div>
   } @else {
-    <div class="buttons">
+    <div class="buttons-row">
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
         class="sunflower"
