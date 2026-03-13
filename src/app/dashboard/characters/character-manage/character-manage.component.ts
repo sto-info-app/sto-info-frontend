@@ -235,7 +235,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
                         ? new Date(fullChar.createdDate)
                             .toISOString()
                             .split('T')[0]
-                        : '',
+                        : null,
                       level: fullChar.level,
                       generalFactionId: fullChar.generalFactionId,
                       factionId: fullChar.factionId,
