@@ -11,223 +11,175 @@
           (ngSubmit)="onRegister()"
           class="form"
           novalidate>
-          <div class="form-group">
-            <label for="firstName">First Name:</label>
+          <div class="lcars-input-container cool">
+            <label for="firstName">First Name</label>
             <input
               type="text"
               id="firstName"
-              formControlName="firstName"
-              aria-label="First Name" />
+              formControlName="firstName" />
             @if (
-              (registerForm.controls['firstName'].invalid &&
-                registerForm.controls['firstName'].touched) ||
-              (isSubmitting && registerForm.controls['firstName'].errors)
+              registerForm.controls['firstName'].errors?.['required'] &&
+              (registerForm.controls['firstName'].touched || isSubmitting)
             ) {
-              <div
-                class="invalid-feedback"
-                id="firstName-invalid-feedback">
-                @if (registerForm.controls['firstName'].errors?.['required']) {
-                  <div class="helper-error-text">
-                    {{ errorTextFirstNameRequired }}
-                  </div>
-                }
-                @if (registerForm.controls['firstName'].errors?.['maxlength']) {
-                  <div class="helper-error-text">
-                    {{ errorTextNamesMaxLength }}
-                  </div>
-                }
-              </div>
+              <div class="field-error">{{ errorTextFirstNameRequired }}</div>
+            }
+            @if (
+              registerForm.controls['firstName'].errors?.['maxlength'] &&
+              (registerForm.controls['firstName'].touched || isSubmitting)
+            ) {
+              <div class="field-error">{{ errorTextNamesMaxLength }}</div>
             }
           </div>
 
-          <div class="form-group">
-            <label for="lastName">Last Name:</label>
+          <div class="lcars-input-container cool">
+            <label for="lastName">Last Name</label>
             <input
               type="text"
               id="lastName"
-              formControlName="lastName"
-              aria-label="Last Name" />
+              formControlName="lastName" />
             @if (
-              (registerForm.controls['lastName'].invalid &&
-                registerForm.controls['lastName'].touched) ||
-              (isSubmitting && registerForm.controls['lastName'].errors)
+              registerForm.controls['lastName'].errors?.['required'] &&
+              (registerForm.controls['lastName'].touched || isSubmitting)
             ) {
-              <div
-                class="invalid-feedback"
-                id="lastName-invalid-feedback">
-                @if (registerForm.controls['lastName'].errors?.['required']) {
-                  <div class="helper-error-text">
-                    {{ errorTextLastNameRequired }}
-                  </div>
-                }
-                @if (registerForm.controls['lastName'].errors?.['maxlength']) {
-                  <div class="helper-error-text">
-                    {{ errorTextNamesMaxLength }}
-                  </div>
-                }
-              </div>
+              <div class="field-error">{{ errorTextLastNameRequired }}</div>
+            }
+            @if (
+              registerForm.controls['lastName'].errors?.['maxlength'] &&
+              (registerForm.controls['lastName'].touched || isSubmitting)
+            ) {
+              <div class="field-error">{{ errorTextNamesMaxLength }}</div>
             }
           </div>
 
-          <div class="form-group">
-            <label for="username">Username:</label>
+          <div class="lcars-input-container perano">
+            <label for="username">Username</label>
             <input
               type="text"
               id="username"
-              formControlName="username"
-              aria-label="Username" />
+              formControlName="username" />
             @if (
-              (registerForm.controls['username'].invalid &&
-                registerForm.controls['username'].touched) ||
-              (isSubmitting && registerForm.controls['username'].errors)
+              registerForm.controls['username'].errors?.['required'] &&
+              (registerForm.controls['username'].touched || isSubmitting)
             ) {
-              <div
-                class="invalid-feedback"
-                id="username-invalid-feedback">
-                @if (registerForm.controls['username'].errors?.['required']) {
-                  <div class="helper-error-text">
-                    {{ errorTextUsernameRequired }}
-                  </div>
-                }
-                @if (registerForm.controls['username'].errors?.['minlength']) {
-                  <div class="helper-error-text">
-                    {{ errorTextUsernameMinLength }}
-                  </div>
-                }
-                @if (registerForm.controls['username'].errors?.['maxlength']) {
-                  <div class="helper-error-text">
-                    {{ errorTextUsernameMaxLength }}
-                  </div>
-                }
-                @if (
-                  registerForm.controls['username'].errors?.['uniqueUsername']
-                ) {
-                  <div class="helper-error-text">
-                    {{ errorTextUsernameTaken }}
-                  </div>
-                }
-                @if (registerForm.controls['username'].errors?.['pattern']) {
-                  <div class="helper-error-text">
-                    {{ errorTextUsernamePattern }}
-                  </div>
-                }
-              </div>
+              <div class="field-error">{{ errorTextUsernameRequired }}</div>
+            }
+            @if (
+              registerForm.controls['username'].errors?.['minlength'] &&
+              (registerForm.controls['username'].touched || isSubmitting)
+            ) {
+              <div class="field-error">{{ errorTextUsernameMinLength }}</div>
+            }
+            @if (
+              registerForm.controls['username'].errors?.['maxlength'] &&
+              (registerForm.controls['username'].touched || isSubmitting)
+            ) {
+              <div class="field-error">{{ errorTextUsernameMaxLength }}</div>
+            }
+            @if (
+              registerForm.controls['username'].errors?.['uniqueUsername'] &&
+              (registerForm.controls['username'].touched || isSubmitting)
+            ) {
+              <div class="field-error">{{ errorTextUsernameTaken }}</div>
+            }
+            @if (
+              registerForm.controls['username'].errors?.['pattern'] &&
+              (registerForm.controls['username'].touched || isSubmitting)
+            ) {
+              <div class="field-error">{{ errorTextUsernamePattern }}</div>
             }
           </div>
 
-          <div class="form-group">
-            <label for="email">Email:</label>
+          <div class="lcars-input-container sky">
+            <label for="email">Email</label>
             <input
               type="email"
               id="email"
-              formControlName="email"
-              aria-label="Email" />
+              formControlName="email" />
             @if (
-              (registerForm.controls['email'].invalid &&
-                registerForm.controls['email'].touched) ||
-              (isSubmitting && registerForm.controls['email'].errors)
+              registerForm.controls['email'].errors?.['required'] &&
+              (registerForm.controls['email'].touched || isSubmitting)
             ) {
-              <div
-                class="invalid-feedback"
-                id="email-invalid-feedback">
-                @if (registerForm.controls['email'].errors?.['required']) {
-                  <div class="helper-error-text">
-                    {{ errorTextEmailRequired }}
-                  </div>
-                }
-                @if (registerForm.controls['email'].errors?.['pattern']) {
-                  <div class="helper-error-text">
-                    {{ errorTextEmailInvalidFormat }}
-                  </div>
-                }
-                @if (registerForm.controls['email'].errors?.['uniqueEmail']) {
-                  <div class="helper-error-text">
-                    {{ errorTextEmailAlreadyRegistered }}
-                  </div>
-                }
-                @if (registerForm.controls['email'].errors?.['maxlength']) {
-                  <div class="helper-error-text">
-                    {{ errorTextEmailAlreadyRegistered }}
-                  </div>
-                }
+              <div class="field-error">{{ errorTextEmailRequired }}</div>
+            }
+            @if (
+              registerForm.controls['email'].errors?.['pattern'] &&
+              (registerForm.controls['email'].touched || isSubmitting)
+            ) {
+              <div class="field-error">{{ errorTextEmailInvalidFormat }}</div>
+            }
+            @if (
+              registerForm.controls['email'].errors?.['uniqueEmail'] &&
+              (registerForm.controls['email'].touched || isSubmitting)
+            ) {
+              <div class="field-error">
+                {{ errorTextEmailAlreadyRegistered }}
+              </div>
+            }
+            @if (
+              registerForm.controls['email'].errors?.['maxlength'] &&
+              (registerForm.controls['email'].touched || isSubmitting)
+            ) {
+              <div class="field-error">
+                {{ errorTextEmailAlreadyRegistered }}
               </div>
             }
           </div>
 
           <div
-            class="form-group"
+            class="lcars-input-container violet"
             data-private>
-            <label for="password">Password:</label>
+            <label for="password">Password</label>
             <input
               type="password"
               id="password"
-              formControlName="password"
-              aria-label="Password" />
-
+              formControlName="password" />
             @if (
-              (registerForm.controls['password'].invalid &&
-                registerForm.controls['password'].touched) ||
-              (isSubmitting && registerForm.controls['password'].errors)
+              registerForm.controls['password'].errors?.['required'] &&
+              (registerForm.controls['password'].touched || isSubmitting)
             ) {
-              <div
-                class="invalid-feedback"
-                id="password-invalid-feedback">
-                @if (registerForm.controls['password'].errors?.['required']) {
-                  <div class="helper-error-text">
-                    {{ errorTextPasswordRequired }}
-                  </div>
-                }
-                @if (registerForm.controls['password'].errors?.['minlength']) {
-                  <div class="helper-error-text">
-                    {{ errorTextPasswordMinLength }}
-                  </div>
-                }
-                @if (registerForm.controls['password'].errors?.['maxlength']) {
-                  <div class="helper-error-text">
-                    {{ errorTextPasswordMaxLength }}
-                  </div>
-                }
-                @if (registerForm.controls['password'].errors?.['pattern']) {
-                  <div class="helper-error-text">
-                    {{ errorTextPasswordComplexity }}
-                  </div>
-                }
-              </div>
+              <div class="field-error">{{ errorTextPasswordRequired }}</div>
+            }
+            @if (
+              registerForm.controls['password'].errors?.['minlength'] &&
+              (registerForm.controls['password'].touched || isSubmitting)
+            ) {
+              <div class="field-error">{{ errorTextPasswordMinLength }}</div>
+            }
+            @if (
+              registerForm.controls['password'].errors?.['maxlength'] &&
+              (registerForm.controls['password'].touched || isSubmitting)
+            ) {
+              <div class="field-error">{{ errorTextPasswordMaxLength }}</div>
+            }
+            @if (
+              registerForm.controls['password'].errors?.['pattern'] &&
+              (registerForm.controls['password'].touched || isSubmitting)
+            ) {
+              <div class="field-error">{{ errorTextPasswordComplexity }}</div>
             }
           </div>
 
           <div
-            class="form-group"
+            class="lcars-input-container violet"
             data-private>
-            <label for="confirmPassword">Confirm Password:</label>
+            <label for="confirmPassword">Confirm Password</label>
             <input
               type="password"
               id="confirmPassword"
-              formControlName="confirmPassword"
-              aria-label="Confirm Password" />
+              formControlName="confirmPassword" />
             @if (
-              (registerForm.controls['confirmPassword'].invalid &&
-                registerForm.controls['confirmPassword'].touched) ||
-              (isSubmitting && registerForm.controls['confirmPassword'].errors)
+              registerForm.controls['confirmPassword'].errors?.['required'] &&
+              (registerForm.controls['confirmPassword'].touched || isSubmitting)
             ) {
-              <div
-                class="invalid-feedback"
-                id="confirmPassword-invalid-feedback">
-                @if (
-                  registerForm.controls['confirmPassword'].errors?.['required']
-                ) {
-                  <div class="helper-error-text">
-                    {{ errorTextConfirmationPasswordRequired }}
-                  </div>
-                }
-                @if (
-                  registerForm.controls['confirmPassword'].errors?.['mustMatch']
-                ) {
-                  <div class="helper-error-text">
-                    {{ errorTextPasswordsDoNotMatch }}
-                  </div>
-                }
+              <div class="field-error">
+                {{ errorTextConfirmationPasswordRequired }}
               </div>
+            }
+            @if (
+              registerForm.controls['confirmPassword'].errors?.['mustMatch'] &&
+              (registerForm.controls['confirmPassword'].touched || isSubmitting)
+            ) {
+              <div class="field-error">{{ errorTextPasswordsDoNotMatch }}</div>
             }
           </div>
 

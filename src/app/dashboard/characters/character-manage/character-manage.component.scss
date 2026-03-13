@@ -36,11 +36,14 @@
   gap: 1rem;
   flex-wrap: wrap;
 
-  mat-form-field {
+  .lcars-select-container,
+  .lcars-input-container {
     flex: 1;
     min-width: 200px;
+    margin-bottom: 0;
   }
 }
+
 
 .error-message {
   background-color: rgba(vars.$lcars-red, 0.1);

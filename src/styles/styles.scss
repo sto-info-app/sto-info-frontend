@@ -249,6 +249,7 @@ button.lcars-btn,
     font-size: 0.9rem;
     font-weight: 800;
     color: #000;
+    -webkit-text-fill-color: #000;
     cursor: pointer;
     outline: none;
     appearance: none;
@@ -259,13 +260,29 @@ button.lcars-btn,
     background-repeat: no-repeat;
     background-position: right 0.2rem center;
     background-size: 8px 5px;
-    height: 1.2rem;
-    line-height: 1.2rem;
+    height: auto;
+    line-height: 1.4;
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
 
     option {
       background: #222;
       color: #fff;
+      -webkit-text-fill-color: #fff;
     }
+  }
+
+  .field-error {
+    padding: 0.2rem 1rem 0.25rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #ffaaaa;
+    background: rgba(10, 0, 0, 0.75);
+    border-top: 1px solid rgba(255, 80, 80, 0.3);
+    border-radius: 0 0 15px 15px;
+    margin-top: 0.1rem;
   }
 
   // Color Variants
@@ -278,11 +295,172 @@ button.lcars-btn,
   &.bluey {
     background-color: vars.$lcars-bluey;
   }
-  &.tangerine {
-    background-color: vars.$lcars-tangerine;
+  &.orange {
+    background-color: vars.$lcars-orange;
+  }
+  &.green {
+    background-color: vars.$lcars-green;
+  }
+  &.violet {
+    background-color: vars.$lcars-violet;
+  }
+  &.cardinal {
+    background-color: vars.$lcars-cardinal;
+  }
+  &.cool {
+    background-color: vars.$lcars-cool;
   }
   &.gold {
     background-color: vars.$lcars-gold;
+  }
+  &.tangerine {
+    background-color: vars.$lcars-tangerine;
+  }
+  &.red {
+    background-color: vars.$lcars-red;
+  }
+  &.sky {
+    background-color: vars.$lcars-sky;
+  }
+}
+
+// ─── LCARS Input Container ───────────────────────────────────────────────────
+
+.lcars-input-container {
+  --lci-color: #555; // fallback, overridden by variant classes
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 1px 1px 0 rgba(255, 255, 255, 0.12);
+  margin-bottom: 0.75rem;
+  background: transparent !important;
+  border-bottom: 2px solid var(--lci-color);
+
+  label {
+    display: block;
+    width: 75%;
+    align-self: flex-start;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #000;
+    margin-bottom: 0;
+    border-radius: 15px 12px 0 0;
+    background-color: var(--lci-color);
+  }
+
+  input,
+  textarea {
+    display: block;
+    background: #1c1c1c;
+    color: vars.$lcars-white;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.5rem 1rem;
+    font-family: vars.$font-antonio;
+    font-size: 0.9rem;
+    font-weight: 600;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    margin: 0;
+    border-radius: 0;
+
+    &:last-child {
+      border-radius: 0 10px 0 0;
+      box-shadow: 1px 0 0 0 rgba(255, 255, 255, 0.12);
+    }
+
+    &::placeholder {
+      color: #555;
+    }
+
+    &:focus {
+      background: #222;
+      box-shadow: none;
+      border-color: transparent;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  .field-error {
+    padding: 0.2rem 1rem 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #ffaaaa;
+    background: rgba(10, 0, 0, 0.75);
+    border-top: 1px solid rgba(255, 80, 80, 0.3);
+    border-radius: 0;
+
+    &:last-child {
+      border-radius: 0 0 10px 10px;
+    }
+  }
+
+  // Remove number input spinners
+  input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+
+  // Style native date picker
+  input[type='date'] {
+    color-scheme: dark;
+    accent-color: vars.$lcars-gold;
+  }
+
+  // Color variants — set the CSS variable; label + bottom border pick it up
+  &.sunflower {
+    --lci-color: #{vars.$lcars-sunflower};
+  }
+  &.perano {
+    --lci-color: #{vars.$lcars-perano};
+  }
+  &.bluey {
+    --lci-color: #{vars.$lcars-bluey};
+  }
+  &.orange {
+    --lci-color: #{vars.$lcars-orange};
+  }
+  &.green {
+    --lci-color: #{vars.$lcars-green};
+  }
+  &.violet {
+    --lci-color: #{vars.$lcars-violet};
+  }
+  &.cardinal {
+    --lci-color: #{vars.$lcars-cardinal};
+  }
+  &.cool {
+    --lci-color: #{vars.$lcars-cool};
+  }
+  &.gold {
+    --lci-color: #{vars.$lcars-gold};
+  }
+  &.tangerine {
+    --lci-color: #{vars.$lcars-tangerine};
+  }
+  &.red {
+    --lci-color: #{vars.$lcars-red};
+  }
+  &.sky {
+    --lci-color: #{vars.$lcars-sky};
   }
 }
 
@@ -334,8 +512,8 @@ button.lcars-btn,
   }
 
   .filter-select {
-    appearance: none;
     -webkit-appearance: none;
+    appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%23b3b3b3'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.6rem center;

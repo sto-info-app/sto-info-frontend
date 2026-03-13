@@ -17,84 +17,89 @@
   <form
     [formGroup]="accountForm"
     class="account-form">
-    <mat-form-field appearance="fill">
-      <mat-label>Handle</mat-label>
+    <div class="lcars-input-container perano">
+      <label for="handle">Handle</label>
       <input
-        matInput
+        type="text"
+        id="handle"
         formControlName="handle"
-        title="Handle"
-        aria-label="Handle"
         placeholder="e.g. Username#1234" />
-      @if (accountForm.get('handle')?.hasError('required')) {
-        <mat-error>Handle is required</mat-error>
+      @if (
+        accountForm.get('handle')?.hasError('required') &&
+        accountForm.get('handle')?.touched
+      ) {
+        <div class="field-error">Handle is required</div>
       }
-    </mat-form-field>
-
-    <mat-form-field appearance="fill">
-      <mat-label>Username (Optional)</mat-label>
-      <input
-        matInput
-        formControlName="username"
-        title="Username"
-        aria-label="Username" />
-    </mat-form-field>
-
-    <mat-form-field appearance="fill">
-      <mat-label>Email (Optional)</mat-label>
-      <input
-        matInput
-        formControlName="email"
-        title="Email"
-        aria-label="Email"
-        type="email" />
-      @if (accountForm.get('email')?.hasError('email')) {
-        <mat-error>Invalid email format</mat-error>
+      @if (
+        accountForm.get('handle')?.hasError('pattern') &&
+        accountForm.get('handle')?.touched
+      ) {
+        <div class="field-error">
+          Handle must be in the format Username#1234
+        </div>
       }
-    </mat-form-field>
+    </div>
 
-    <mat-form-field appearance="fill">
-      <mat-label>Account Created Date</mat-label>
+    <div class="lcars-input-container bluey">
+      <label for="username">Username (Optional)</label>
       <input
-        matInput
-        formControlName="accountCreatedDate"
-        title="Account Created Date"
-        aria-label="Account Created Date"
-        type="date" />
-    </mat-form-field>
+        type="text"
+        id="username"
+        formControlName="username" />
+    </div>
 
-    <mat-form-field appearance="fill">
-      <mat-label>Platform</mat-label>
-      <mat-select
-        formControlName="platformId"
-        title="Platform"
-        aria-label="Platform">
+    <div class="lcars-input-container sunflower">
+      <label for="email">Email (Optional)</label>
+      <input
+        type="email"
+        id="email"
+        formControlName="email" />
+      @if (
+        accountForm.get('email')?.hasError('email') &&
+        accountForm.get('email')?.touched
+      ) {
+        <div class="field-error">Invalid email format</div>
+      }
+    </div>
+
+    <div class="lcars-input-container gold">
+      <label for="accountCreatedDate">Account Created Date</label>
+      <input
+        type="date"
+        id="accountCreatedDate"
+        formControlName="accountCreatedDate" />
+    </div>
+
+    <div class="lcars-select-container tangerine">
+      <label for="platformId">Platform</label>
+      <select
+        id="platformId"
+        formControlName="platformId">
+        <option value="">Select a platform</option>
         @for (platform of platforms; track platform.id) {
-          <mat-option [value]="platform.id">{{ platform.name }}</mat-option>
+          <option [value]="platform.id">{{ platform.name }}</option>
         }
-      </mat-select>
-    </mat-form-field>
+      </select>
+    </div>
 
-    <mat-form-field appearance="fill">
-      <mat-label>Launcher (Optional)</mat-label>
-      <mat-select
-        formControlName="launcherId"
-        title="Launcher"
-        aria-label="Launcher">
-        <mat-option [value]="''">None</mat-option>
+    <div class="lcars-select-container bluey">
+      <label for="launcherId">Launcher (Optional)</label>
+      <select
+        id="launcherId"
+        formControlName="launcherId">
+        <option value="">None</option>
         @for (launcher of filteredLaunchers; track launcher.id) {
-          <mat-option [value]="launcher.id">{{ launcher.name }}</mat-option>
+          <option [value]="launcher.id">{{ launcher.name }}</option>
         }
-      </mat-select>
-    </mat-form-field>
+      </select>
+    </div>
 
-    <mat-form-field appearance="fill">
-      <mat-label>Notes</mat-label>
+    <div class="lcars-input-container perano">
+      <label for="notes">Notes</label>
       <textarea
-        matInput
-        formControlName="notes"
-        title="Notes"
-        aria-label="Notes"></textarea>
-    </mat-form-field>
+        id="notes"
+        formControlName="notes"></textarea>
+    </div>
 
     <div class="toggle-container">
       <mat-slide-toggle
