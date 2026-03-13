@@ -117,8 +117,12 @@ export class StatsComponent extends StatsBaseComponent implements OnInit {
    * used as the CTA link on the Characters stat card.
    */
   getCharacterCtaLink(): string | undefined {
-    if (this.selectedAccountId === 'all') return undefined;
-    const account = this.accounts.find(a => a.id === this.selectedAccountId);
+    let account;
+    if (this.selectedAccountId !== 'all') {
+      account = this.accounts.find(a => a.id === this.selectedAccountId);
+    } else if (this.accounts.length === 1) {
+      account = this.accounts[0];
+    }
     if (!account) return undefined;
     return this.routingService.getLink(
       APP_ROUTES.STO_ACCOUNT_DETAIL.replace(':handle', account.handle),

@@ -30,7 +30,9 @@
               icon="fas fa-user"
               color="perano"
               [ctaText]="
-                selectedAccountId !== 'all' ? 'Manage Characters' : undefined
+                selectedAccountId !== 'all' || accounts.length === 1
+                  ? 'Manage Characters'
+                  : undefined
               "
               [ctaLink]="getCharacterCtaLink()">
             </app-stat-info-card>
