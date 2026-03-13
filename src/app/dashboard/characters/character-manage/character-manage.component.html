@@ -23,44 +23,34 @@
         </div>
 
         <div class="form-row">
-          <mat-form-field
-            appearance="fill"
-            class="full-width">
-            <mat-label>Captain Name</mat-label>
+          <div class="lcars-input-container perano">
+            <label for="handle-input">Captain Name</label>
             <input
-              matInput
+              id="handle-input"
               formControlName="handle"
-              title="Captain Name"
-              aria-label="Captain Name"
               placeholder="e.g. Jean-Luc Picard" />
-          </mat-form-field>
+          </div>
         </div>
 
         <div class="form-row">
-          <mat-form-field appearance="fill">
-            <mat-label>First Name</mat-label>
+          <div class="lcars-input-container bluey">
+            <label for="first-name-input">First Name</label>
             <input
-              matInput
-              formControlName="firstName"
-              title="First Name"
-              aria-label="First Name" />
-          </mat-form-field>
-          <mat-form-field appearance="fill">
-            <mat-label>Middle Name</mat-label>
+              id="first-name-input"
+              formControlName="firstName" />
+          </div>
+          <div class="lcars-input-container bluey">
+            <label for="middle-name-input">Middle Name</label>
             <input
-              matInput
-              formControlName="middleName"
-              title="Middle Name"
-              aria-label="Middle Name" />
-          </mat-form-field>
-          <mat-form-field appearance="fill">
-            <mat-label>Last Name</mat-label>
+              id="middle-name-input"
+              formControlName="middleName" />
+          </div>
+          <div class="lcars-input-container bluey">
+            <label for="last-name-input">Last Name</label>
             <input
-              matInput
-              formControlName="lastName"
-              title="Last Name"
-              aria-label="Last Name" />
-          </mat-form-field>
+              id="last-name-input"
+              formControlName="lastName" />
+          </div>
         </div>
 
         <!-- Section: Service History -->
@@ -69,112 +59,95 @@
         </div>
 
         <div class="form-row">
-          <mat-form-field appearance="fill">
-            <mat-label>Level</mat-label>
+          <div class="lcars-input-container tangerine">
+            <label for="level-input">Level</label>
             <input
-              matInput
+              id="level-input"
               type="number"
               formControlName="level"
-              title="Level"
-              aria-label="Level"
               min="0"
               max="65" />
-          </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="fill">
-            <mat-label>Created Date</mat-label>
+          <div class="lcars-input-container gold">
+            <label for="created-date-input">Created Date</label>
             <input
-              matInput
-              [matDatepicker]="picker"
-              formControlName="createdDate"
-              title="Created Date"
-              aria-label="Created Date" />
-            <mat-datepicker-toggle
-              matIconSuffix
-              [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
+              id="created-date-input"
+              type="date"
+              formControlName="createdDate" />
+          </div>
         </div>
 
         <div class="form-row">
-          <mat-form-field appearance="fill">
-            <mat-label>General Allegiance</mat-label>
-            <mat-select
-              formControlName="generalFactionId"
-              title="General Allegiance"
-              aria-label="General Allegiance">
-              @for (gf of generalFactions; track gf.id) {
-                <mat-option [value]="gf.id">{{ gf.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="fill">
-            <mat-label>Starting Faction</mat-label>
-            <mat-select
-              formControlName="factionId"
-              title="Starting Faction"
-              aria-label="Starting Faction">
+          <div class="lcars-select-container sunflower">
+            <label for="faction-select">Starting Faction</label>
+            <select
+              id="faction-select"
+              formControlName="factionId">
               @for (f of factions; track f.id) {
-                <mat-option [value]="f.id">{{ f.name }}</mat-option>
+                <option [value]="f.id">{{ f.name }}</option>
               }
-            </mat-select>
-          </mat-form-field>
+            </select>
+          </div>
+
+          <div class="lcars-select-container perano">
+            <label for="general-faction-select">General Allegiance</label>
+            <select
+              id="general-faction-select"
+              formControlName="generalFactionId">
+              @for (gf of generalFactions; track gf.id) {
+                <option [value]="gf.id">{{ gf.name }}</option>
+              }
+            </select>
+          </div>
         </div>
 
         <div class="form-row">
-          <mat-form-field appearance="fill">
-            <mat-label>Recruit Type</mat-label>
-            <mat-select
-              formControlName="recruitTypeId"
-              title="Recruit Type"
-              aria-label="Recruit Type">
+          <div class="lcars-select-container tangerine">
+            <label for="recruit-type-select">Recruit Type</label>
+            <select
+              id="recruit-type-select"
+              formControlName="recruitTypeId">
               @for (rt of recruitTypes; track rt.id) {
-                <mat-option [value]="rt.id">{{ rt.name }}</mat-option>
+                <option [value]="rt.id">{{ rt.name }}</option>
               }
-            </mat-select>
-          </mat-form-field>
+            </select>
+          </div>
 
-          <mat-form-field appearance="fill">
-            <mat-label>Career Path (Class)</mat-label>
-            <mat-select
-              formControlName="classId"
-              title="Career Path (Class)"
-              aria-label="Career Path (Class)">
+          <div class="lcars-select-container bluey">
+            <label for="class-select">Career Path (Class)</label>
+            <select
+              id="class-select"
+              formControlName="classId">
               @for (c of classes; track c.id) {
-                <mat-option [value]="c.id">{{ c.name }}</mat-option>
+                <option [value]="c.id">{{ c.name }}</option>
               }
-            </mat-select>
-          </mat-form-field>
+            </select>
+          </div>
         </div>
 
         <div class="form-row">
-          <mat-form-field
-            appearance="fill"
-            class="full-width">
-            <mat-label>Species</mat-label>
-            <mat-select
-              formControlName="speciesId"
-              title="Species"
-              aria-label="Species"
-              [disabled]="!characterForm.get('factionId')?.value">
+          <div class="lcars-select-container gold">
+            <label for="species-select">Species</label>
+            <select
+              id="species-select"
+              formControlName="speciesId">
               @for (s of speciesList; track s.id) {
-                <mat-option [value]="s.id">{{ s.name }}</mat-option>
+                <option [value]="s.id">{{ s.name }}</option>
               }
-            </mat-select>
-          </mat-form-field>
+            </select>
+          </div>
 
-          <mat-form-field appearance="fill">
-            <mat-label>Sex</mat-label>
-            <mat-select
-              formControlName="sexId"
-              title="Sex"
-              aria-label="Sex">
+          <div class="lcars-select-container perano">
+            <label for="sex-select">Sex</label>
+            <select
+              id="sex-select"
+              formControlName="sexId">
               @for (sex of sexes; track sex.id) {
-                <mat-option [value]="sex.id">{{ sex.name }}</mat-option>
+                <option [value]="sex.id">{{ sex.name }}</option>
               }
-            </mat-select>
-          </mat-form-field>
+            </select>
+          </div>
         </div>
 
         <!-- Section: Biography & Notes -->
@@ -182,29 +155,21 @@
           <span>Personal Data</span>
         </div>
 
-        <mat-form-field
-          appearance="fill"
-          class="full-width">
-          <mat-label>Biography</mat-label>
+        <div class="lcars-input-container perano">
+          <label for="biography-input">Biography</label>
           <textarea
-            matInput
+            id="biography-input"
             formControlName="biography"
-            title="Biography"
-            aria-label="Biography"
             rows="5"></textarea>
-        </mat-form-field>
+        </div>
 
-        <mat-form-field
-          appearance="fill"
-          class="full-width">
-          <mat-label>Notes</mat-label>
+        <div class="lcars-input-container gold">
+          <label for="notes-input">Notes</label>
           <textarea
-            matInput
+            id="notes-input"
             formControlName="notes"
-            title="Notes"
-            aria-label="Notes"
             rows="3"></textarea>
-        </mat-form-field>
+        </div>
 
         <div class="form-actions">
           <button
