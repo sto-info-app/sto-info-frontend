@@ -24,11 +24,27 @@
                       type="text"
                       id="firstName"
                       formControlName="firstName" />
-                    @if (editPersonalDetailsForm.controls['firstName'].errors?.['required'] && (editPersonalDetailsForm.controls['firstName'].touched || isSubmitting)) {
-                      <div class="field-error">{{ errorTextFirstNameRequired }}</div>
+                    @if (
+                      editPersonalDetailsForm.controls['firstName'].errors?.[
+                        'required'
+                      ] &&
+                      (editPersonalDetailsForm.controls['firstName'].touched ||
+                        isSubmitting)
+                    ) {
+                      <div class="field-error">
+                        {{ errorTextFirstNameRequired }}
+                      </div>
                     }
-                    @if (editPersonalDetailsForm.controls['firstName'].errors?.['maxlength'] && (editPersonalDetailsForm.controls['firstName'].touched || isSubmitting)) {
-                      <div class="field-error">{{ errorTextNamesMaxLength }}</div>
+                    @if (
+                      editPersonalDetailsForm.controls['firstName'].errors?.[
+                        'maxlength'
+                      ] &&
+                      (editPersonalDetailsForm.controls['firstName'].touched ||
+                        isSubmitting)
+                    ) {
+                      <div class="field-error">
+                        {{ errorTextNamesMaxLength }}
+                      </div>
                     }
                   </div>
 
@@ -38,11 +54,27 @@
                       type="text"
                       id="lastName"
                       formControlName="lastName" />
-                    @if (editPersonalDetailsForm.controls['lastName'].errors?.['required'] && (editPersonalDetailsForm.controls['lastName'].touched || isSubmitting)) {
-                      <div class="field-error">{{ errorTextLastNameRequired }}</div>
+                    @if (
+                      editPersonalDetailsForm.controls['lastName'].errors?.[
+                        'required'
+                      ] &&
+                      (editPersonalDetailsForm.controls['lastName'].touched ||
+                        isSubmitting)
+                    ) {
+                      <div class="field-error">
+                        {{ errorTextLastNameRequired }}
+                      </div>
                     }
-                    @if (editPersonalDetailsForm.controls['lastName'].errors?.['maxlength'] && (editPersonalDetailsForm.controls['lastName'].touched || isSubmitting)) {
-                      <div class="field-error">{{ errorTextNamesMaxLength }}</div>
+                    @if (
+                      editPersonalDetailsForm.controls['lastName'].errors?.[
+                        'maxlength'
+                      ] &&
+                      (editPersonalDetailsForm.controls['lastName'].touched ||
+                        isSubmitting)
+                    ) {
+                      <div class="field-error">
+                        {{ errorTextNamesMaxLength }}
+                      </div>
                     }
                   </div>
 
@@ -52,20 +84,60 @@
                       type="text"
                       id="username"
                       formControlName="username" />
-                    @if (editPersonalDetailsForm.controls['username'].errors?.['required'] && (editPersonalDetailsForm.controls['username'].touched || isSubmitting)) {
-                      <div class="field-error">{{ errorTextUsernameRequired }}</div>
+                    @if (
+                      editPersonalDetailsForm.controls['username'].errors?.[
+                        'required'
+                      ] &&
+                      (editPersonalDetailsForm.controls['username'].touched ||
+                        isSubmitting)
+                    ) {
+                      <div class="field-error">
+                        {{ errorTextUsernameRequired }}
+                      </div>
                     }
-                    @if (editPersonalDetailsForm.controls['username'].errors?.['minlength'] && (editPersonalDetailsForm.controls['username'].touched || isSubmitting)) {
-                      <div class="field-error">{{ errorTextUsernameMinLength }}</div>
+                    @if (
+                      editPersonalDetailsForm.controls['username'].errors?.[
+                        'minlength'
+                      ] &&
+                      (editPersonalDetailsForm.controls['username'].touched ||
+                        isSubmitting)
+                    ) {
+                      <div class="field-error">
+                        {{ errorTextUsernameMinLength }}
+                      </div>
                     }
-                    @if (editPersonalDetailsForm.controls['username'].errors?.['maxlength'] && (editPersonalDetailsForm.controls['username'].touched || isSubmitting)) {
-                      <div class="field-error">{{ errorTextUsernameMaxLength }}</div>
+                    @if (
+                      editPersonalDetailsForm.controls['username'].errors?.[
+                        'maxlength'
+                      ] &&
+                      (editPersonalDetailsForm.controls['username'].touched ||
+                        isSubmitting)
+                    ) {
+                      <div class="field-error">
+                        {{ errorTextUsernameMaxLength }}
+                      </div>
                     }
-                    @if (editPersonalDetailsForm.controls['username'].errors?.['uniqueUsername'] && (editPersonalDetailsForm.controls['username'].touched || isSubmitting)) {
-                      <div class="field-error">{{ errorTextUsernameTaken }}</div>
+                    @if (
+                      editPersonalDetailsForm.controls['username'].errors?.[
+                        'uniqueUsername'
+                      ] &&
+                      (editPersonalDetailsForm.controls['username'].touched ||
+                        isSubmitting)
+                    ) {
+                      <div class="field-error">
+                        {{ errorTextUsernameTaken }}
+                      </div>
                     }
-                    @if (editPersonalDetailsForm.controls['username'].errors?.['pattern'] && (editPersonalDetailsForm.controls['username'].touched || isSubmitting)) {
-                      <div class="field-error">{{ errorTextUsernamePattern }}</div>
+                    @if (
+                      editPersonalDetailsForm.controls['username'].errors?.[
+                        'pattern'
+                      ] &&
+                      (editPersonalDetailsForm.controls['username'].touched ||
+                        isSubmitting)
+                    ) {
+                      <div class="field-error">
+                        {{ errorTextUsernamePattern }}
+                      </div>
                     }
                   </div>
                 </div>

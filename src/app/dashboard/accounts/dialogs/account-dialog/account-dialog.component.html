@@ -24,11 +24,19 @@
         id="handle"
         formControlName="handle"
         placeholder="e.g. Username#1234" />
-      @if (accountForm.get('handle')?.hasError('required') && accountForm.get('handle')?.touched) {
+      @if (
+        accountForm.get('handle')?.hasError('required') &&
+        accountForm.get('handle')?.touched
+      ) {
         <div class="field-error">Handle is required</div>
       }
-      @if (accountForm.get('handle')?.hasError('pattern') && accountForm.get('handle')?.touched) {
-        <div class="field-error">Handle must be in the format Username#1234</div>
+      @if (
+        accountForm.get('handle')?.hasError('pattern') &&
+        accountForm.get('handle')?.touched
+      ) {
+        <div class="field-error">
+          Handle must be in the format Username#1234
+        </div>
       }
     </div>
 
@@ -46,7 +54,10 @@
         type="email"
         id="email"
         formControlName="email" />
-      @if (accountForm.get('email')?.hasError('email') && accountForm.get('email')?.touched) {
+      @if (
+        accountForm.get('email')?.hasError('email') &&
+        accountForm.get('email')?.touched
+      ) {
         <div class="field-error">Invalid email format</div>
       }
     </div>
@@ -61,7 +72,9 @@
 
     <div class="lcars-select-container tangerine">
       <label for="platformId">Platform</label>
-      <select id="platformId" formControlName="platformId">
+      <select
+        id="platformId"
+        formControlName="platformId">
         <option value="">Select a platform</option>
         @for (platform of platforms; track platform.id) {
           <option [value]="platform.id">{{ platform.name }}</option>
@@ -71,7 +84,9 @@
 
     <div class="lcars-select-container bluey">
       <label for="launcherId">Launcher (Optional)</label>
-      <select id="launcherId" formControlName="launcherId">
+      <select
+        id="launcherId"
+        formControlName="launcherId">
         <option value="">None</option>
         @for (launcher of filteredLaunchers; track launcher.id) {
           <option [value]="launcher.id">{{ launcher.name }}</option>
