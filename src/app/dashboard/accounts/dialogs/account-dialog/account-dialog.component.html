@@ -71,9 +71,10 @@
     </div>
 
     <div class="lcars-select-container tangerine">
-      <label for="platformId">Platform</label>
+      <span class="select-label">Platform</span>
       <select
         id="platformId"
+        title="Platform"
         formControlName="platformId">
         <option value="">Select a platform</option>
         @for (platform of platforms; track platform.id) {
@@ -83,9 +84,10 @@
     </div>
 
     <div class="lcars-select-container bluey">
-      <label for="launcherId">Launcher (Optional)</label>
+      <span class="select-label">Launcher (Optional)</span>
       <select
         id="launcherId"
+        title="Launcher (Optional)"
         formControlName="launcherId">
         <option value="">None</option>
         @for (launcher of filteredLaunchers; track launcher.id) {
