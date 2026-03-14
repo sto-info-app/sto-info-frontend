@@ -280,6 +280,21 @@ describe('CharacterManageComponent', () => {
       expect(component.characterForm.get('recruitTypeId')?.value).toBe('');
     }));
 
+    it('should reset generalFactionId if not valid for selected faction', fakeAsync(() => {
+      mockLookupService.getGeneralFactions.mockReturnValue(
+        of([
+          { id: 'fed', name: 'Federation' },
+          { id: 'kdf', name: 'Klingon' },
+        ]),
+      );
+
+      component.characterForm.patchValue({ generalFactionId: 'rom' });
+      component.characterForm.get('factionId')?.setValue('fed');
+      tick();
+
+      expect(component.characterForm.get('generalFactionId')?.value).toBe('');
+    }));
+
     it('should reset speciesList if factionId is empty', fakeAsync(() => {
       component.speciesList = [{ id: 'human', name: 'Human' } as Species];
       component.characterForm.get('factionId')?.setValue('');
@@ -306,6 +321,41 @@ describe('CharacterManageComponent', () => {
       tick();
 
       expect(component.characterForm.get('createdDate')?.value).toBeNull();
+    }));
+
+    it('should use empty recruit types when full character has no factionId', fakeAsync(() => {
+      const charWithNoFaction = {
+        ...mockCharacter,
+        factionId: '',
+      };
+      mockCharacterService.getCharacter.mockReturnValue(of(charWithNoFaction));
+
+      fixture.detectChanges();
+      routeParamsSubject.next({
+        handle: encodeStoHandle('TestAccount'),
+        characterHandle: 'TestChar',
+      });
+      tick();
+
+      expect(component.recruitTypes).toEqual([]);
+    }));
+
+    it('should handle error loading character options', fakeAsync(() => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      mockLookupService.getSpecies.mockReturnValue(
+        throwError(() => new Error('Options Error')),
+      );
+
+      fixture.detectChanges();
+      routeParamsSubject.next({
+        handle: encodeStoHandle('TestAccount'),
+        characterHandle: 'TestChar',
+      });
+      tick();
+
+      expect(component.errorMessage).toBe('Failed to load character options');
+      expect(component.isLoading).toBe(false);
+      spy.mockRestore();
     }));
   });
 

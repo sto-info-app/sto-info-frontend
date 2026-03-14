@@ -35,11 +35,16 @@ SonarCloud performs deep code analysis, focusing on Security Hotspots and vulner
 
 The `npm audit` command is used to catch known vulnerabilities in third-party dependencies.
 
-- **Action**: Fails the build if "High" or "Critical" vulnerabilities are found in production dependencies (`--omit=dev`).
+- **Action**: Fails the build if vulnerabilities are found in production dependencies (`--omit=dev`).
 - **Execution**:
   - On Pull Requests that modify `package.json` or `package-lock.json`.
   - On a weekly schedule to detect newly reported vulnerabilities in existing deps.
 - **Ruleset**: This is typically a **Required** check for merging.
+
+Current policy notes:
+
+- `npm audit --omit=dev` is the merge gate for application/runtime risk.
+- Full `npm audit` output is still reviewed, but dev-only toolchain findings are treated as non-blocking unless a safe, non-breaking remediation is available.
 
 ## CodeQL Static Analysis
 
