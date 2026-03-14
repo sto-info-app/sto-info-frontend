@@ -27,73 +27,53 @@
       class="form"
       [formGroup]="contactForm"
       (ngSubmit)="onSubmit()">
-      <div class="form-group">
+      <div class="lcars-input-container cool">
         <label for="contactName">Name</label>
         <input
           id="contactName"
           type="text"
-          formControlName="name"
-          aria-label="Name"
-          [class.errored]="
-            formControls.name.touched && formControls.name.invalid
-          " />
+          formControlName="name" />
         @if (
           formControls.name.touched && formControls.name.hasError('required')
         ) {
-          <div class="helper-error-text">
-            {{ errorTextNameRequired }}
-          </div>
+          <div class="field-error">{{ errorTextNameRequired }}</div>
         }
         @if (
           formControls.name.touched && formControls.name.hasError('maxlength')
         ) {
-          <div class="helper-error-text">
-            {{ errorTextNameMaxLength }}
-          </div>
+          <div class="field-error">{{ errorTextNameMaxLength }}</div>
         }
       </div>
 
-      <div class="form-group">
+      <div class="lcars-input-container cool">
         <label for="contactEmail">Email</label>
         <input
           id="contactEmail"
           type="email"
-          formControlName="email"
-          aria-label="Email"
-          [class.errored]="
-            formControls.email.touched && formControls.email.invalid
-          " />
+          formControlName="email" />
         @if (
           formControls.email.touched && formControls.email.hasError('required')
         ) {
-          <div class="helper-error-text">
-            {{ errorTextEmailRequired }}
-          </div>
+          <div class="field-error">{{ errorTextEmailRequired }}</div>
         }
         @if (
           formControls.email.touched && formControls.email.hasError('pattern')
         ) {
-          <div class="helper-error-text">
-            {{ errorTextEmailInvalidFormat }}
-          </div>
+          <div class="field-error">{{ errorTextEmailInvalidFormat }}</div>
         }
         @if (
           formControls.email.touched && formControls.email.hasError('maxlength')
         ) {
-          <div class="helper-error-text">
-            {{ errorTextEmailMaxLength }}
-          </div>
+          <div class="field-error">{{ errorTextEmailMaxLength }}</div>
         }
       </div>
 
-      <div class="form-group">
-        <label for="contactTopic">Topic</label>
+      <div class="lcars-select-container cool">
+        <span class="select-label">Topic</span>
         <select
           id="contactTopic"
-          formControlName="topic"
-          [class.errored]="
-            formControls.topic.touched && formControls.topic.invalid
-          ">
+          title="Topic"
+          formControlName="topic">
           <option
             value=""
             disabled>
@@ -106,36 +86,26 @@
         @if (
           formControls.topic.touched && formControls.topic.hasError('required')
         ) {
-          <div class="helper-error-text">
-            {{ errorTextTopicRequired }}
-          </div>
+          <div class="field-error">{{ errorTextTopicRequired }}</div>
         }
       </div>
 
-      <div class="form-group">
+      <div class="lcars-input-container cool">
         <label for="contactMessage">Message</label>
         <textarea
           id="contactMessage"
-          formControlName="message"
-          aria-label="Message"
-          [class.errored]="
-            formControls.message.touched && formControls.message.invalid
-          "></textarea>
+          formControlName="message"></textarea>
         @if (
           formControls.message.touched &&
           formControls.message.hasError('required')
         ) {
-          <div class="helper-error-text">
-            {{ errorTextMessageRequired }}
-          </div>
+          <div class="field-error">{{ errorTextMessageRequired }}</div>
         }
         @if (
           formControls.message.touched &&
           formControls.message.hasError('maxlength')
         ) {
-          <div class="helper-error-text">
-            {{ errorTextMessageMaxLength }}
-          </div>
+          <div class="field-error">{{ errorTextMessageMaxLength }}</div>
         }
       </div>
 

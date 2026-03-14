@@ -49,6 +49,20 @@ describe('CharacterLookupService', () => {
     req.flush(dummy);
   });
 
+  it('should getGeneralFactions with factionId', () => {
+    const dummy = [{ id: '1' }];
+    service.getGeneralFactions('fed').subscribe((res: GeneralFaction[]) => {
+      expect(res).toEqual(dummy);
+    });
+    const req = httpMock.expectOne(
+      req =>
+        req.url === API_URLS.CHARACTER_LOOKUP_GENERAL_FACTIONS &&
+        req.params.get('factionId') === 'fed',
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(dummy);
+  });
+
   it('should getFactions', () => {
     const dummy = [{ id: '1' }];
     service.getFactions().subscribe((res: Faction[]) => {

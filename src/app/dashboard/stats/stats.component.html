@@ -30,7 +30,9 @@
               icon="fas fa-user"
               color="perano"
               [ctaText]="
-                selectedAccountId !== 'all' ? 'Manage Characters' : undefined
+                selectedAccountId !== 'all' || accounts.length === 1
+                  ? 'Manage Characters'
+                  : undefined
               "
               [ctaLink]="getCharacterCtaLink()">
             </app-stat-info-card>
@@ -85,9 +87,10 @@
         id="stats-filters"
         class="buttons">
         <div class="lcars-select-container sunflower">
-          <label for="account-select">Select Account</label>
+          <span class="select-label">Select Account</span>
           <select
             id="account-select"
+            title="Select Account"
             [(ngModel)]="selectedAccountId"
             (change)="onAccountChange($any($event.target).value)">
             <option value="all">All Accounts</option>

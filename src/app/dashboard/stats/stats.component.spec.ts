@@ -4,9 +4,9 @@ import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
+import { StatsData } from 'src/app/dashboard/stats/stats.models';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { StatsService } from '../services/stats.service';
-import { StatsData } from 'src/app/dashboard/stats/stats.models';
 import { StatsComponent } from './stats.component';
 
 describe('StatsComponent', () => {
@@ -150,6 +150,19 @@ describe('StatsComponent', () => {
     it('should return undefined when selectedAccountId is "all"', () => {
       component.selectedAccountId = 'all';
       expect(component.getCharacterCtaLink()).toBeUndefined();
+    });
+
+    it('should return routing link when "all" is selected and exactly one account exists', () => {
+      component.selectedAccountId = 'all';
+      component.accounts = [mockAccount];
+      routingServiceSpy.getLink.mockReturnValue(
+        '/dashboard/accounts/Test%231234',
+      );
+
+      const link = component.getCharacterCtaLink();
+
+      expect(link).toBe('/dashboard/accounts/Test%231234');
+      expect(routingServiceSpy.getLink).toHaveBeenCalled();
     });
 
     it('should return undefined when selected account is not found', () => {

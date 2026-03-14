@@ -69,9 +69,10 @@
     <div class="buttons filter-buttons">
       @if (accounts.length > 1) {
         <div class="lcars-select-container sunflower">
-          <label for="account-select">Select Account</label>
+          <span class="select-label">Select Account</span>
           <select
             id="account-select"
+            title="Select Account"
             [(ngModel)]="selectedAccountId"
             (change)="onAccountChange($any($event.target).value)">
             <option value="all">All Accounts</option>

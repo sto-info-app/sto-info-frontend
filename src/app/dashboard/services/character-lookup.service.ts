@@ -17,9 +17,14 @@ import {
 export class CharacterLookupService {
   private readonly http = inject(HttpClient);
 
-  getGeneralFactions(): Observable<GeneralFaction[]> {
+  getGeneralFactions(factionId?: string): Observable<GeneralFaction[]> {
+    let params = new HttpParams();
+    if (factionId) {
+      params = params.set('factionId', factionId);
+    }
     return this.http.get<GeneralFaction[]>(
       API_URLS.CHARACTER_LOOKUP_GENERAL_FACTIONS,
+      { params },
     );
   }
 

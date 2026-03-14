@@ -7,13 +7,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, Subject, forkJoin, takeUntil } from 'rxjs';
+import { Observable, Subject, forkJoin, of, takeUntil } from 'rxjs';
 import {
   CharacterClass,
   Faction,
@@ -42,12 +37,7 @@ import {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
     MatButtonModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
@@ -132,6 +122,26 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
                 this.characterForm.patchValue({ recruitTypeId: '' });
               }
             });
+
+          this.lookupService
+            .getGeneralFactions(factionId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(generalFactions => {
+              this.generalFactions = generalFactions;
+              const currentGeneralFactionId =
+                this.characterForm.get('generalFactionId')?.value;
+              if (
+                currentGeneralFactionId &&
+                !generalFactions.some(gf => gf.id === currentGeneralFactionId)
+              ) {
+                this.characterForm.patchValue({ generalFactionId: '' });
+              }
+              if (generalFactions.length === 1) {
+                this.characterForm.patchValue({
+                  generalFactionId: generalFactions[0].id,
+                });
+              }
+            });
         }
       });
 
@@ -170,7 +180,9 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
           this.factions = res.factions;
           this.sexes = res.sexes;
           this.classes = res.classes;
-          this.recruitTypes = res.recruitTypes;
+          if (this.mode === 'add') {
+            this.recruitTypes = res.recruitTypes;
+          }
 
           const account = res.accounts.find(
             (a: StoAccount) => a.handle === this.accountHandle,
@@ -211,26 +223,51 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
               .pipe(takeUntil(this.destroy$))
               .subscribe({
                 next: fullChar => {
-                  this.characterForm.patchValue({
-                    handle: fullChar.handle,
-                    firstName: fullChar.firstName,
-                    middleName: fullChar.middleName,
-                    lastName: fullChar.lastName,
-                    biography: fullChar.biography,
-                    notes: fullChar.notes,
-                    createdDate: fullChar.createdDate
-                      ? new Date(fullChar.createdDate)
-                      : null,
-                    level: fullChar.level,
-                    generalFactionId: fullChar.generalFactionId,
-                    factionId: fullChar.factionId,
-                    sexId: fullChar.sexId,
-                    classId: fullChar.classId,
-                    recruitTypeId: fullChar.recruitTypeId,
-                    speciesId: fullChar.speciesId,
-                  });
-                  this.updateSpecies();
-                  this.isLoading = false;
+                  this.characterForm.patchValue(
+                    {
+                      handle: fullChar.handle,
+                      firstName: fullChar.firstName,
+                      middleName: fullChar.middleName,
+                      lastName: fullChar.lastName,
+                      biography: fullChar.biography,
+                      notes: fullChar.notes,
+                      createdDate: fullChar.createdDate
+                        ? new Date(fullChar.createdDate)
+                            .toISOString()
+                            .split('T')[0]
+                        : null,
+                      level: fullChar.level,
+                      generalFactionId: fullChar.generalFactionId,
+                      factionId: fullChar.factionId,
+                      sexId: fullChar.sexId,
+                      classId: fullChar.classId,
+                      recruitTypeId: fullChar.recruitTypeId,
+                      speciesId: fullChar.speciesId,
+                    },
+                    { emitEvent: false },
+                  );
+                  forkJoin({
+                    recruitTypes: fullChar.factionId
+                      ? this.lookupService.getRecruitTypes(fullChar.factionId)
+                      : of([] as RecruitType[]),
+                    species: this.lookupService.getSpecies(
+                      fullChar.factionId,
+                      fullChar.recruitTypeId,
+                    ),
+                  })
+                    .pipe(takeUntil(this.destroy$))
+                    .subscribe({
+                      next: ({ recruitTypes, species }) => {
+                        this.recruitTypes = recruitTypes;
+                        this.speciesList = species;
+                        this.isLoading = false;
+                      },
+                      error: err => {
+                        this.errorMessage = 'Failed to load character options';
+                        this.isLoading = false;
+                        console.error(err);
+                      },
+                    });
                 },
                 error: err => {
                   this.errorMessage = 'Failed to load character details';
@@ -289,7 +326,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
       ...this.characterForm.value,
       accountId: this.accountId,
       createdDate: this.characterForm.value.createdDate
-        ? this.characterForm.value.createdDate.toISOString()
+        ? new Date(this.characterForm.value.createdDate).toISOString()
         : undefined,
     };
 
