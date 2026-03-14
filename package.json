@@ -138,14 +138,9 @@
   },
   "overrides": {
     "eslint": "9.37.0",
-    "ajv@^8.0.0": "8.18.0",
     "minimatch@<3.1.4": "3.1.5",
-    "minimatch@>=10.0.0 <10.2.3": "10.2.4",
-    "@stryker-mutator/core": {
-      "minimatch": "10.2.4"
-    },
     "tmp": "0.2.5",
-    "express-rate-limit": "^8.2.2",
-    "underscore": "^1.13.8"
+    "undici": "7.24.2",
+    "flatted": "3.4.1"
   }
 }
