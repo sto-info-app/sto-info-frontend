@@ -219,27 +219,33 @@ button.lcars-btn,
 .lcars-select-container {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
-  padding: 0.5rem 1rem;
+  position: relative;
+  padding: 0;
   border-radius: 15px;
+  overflow: hidden;
   background: vars.$lcars-grey-bg; // Default
   color: #000;
   transition: filter 0.2s ease;
   margin-bottom: 0.5rem;
   width: 100%;
   box-sizing: border-box;
+  cursor: pointer;
 
   &:hover {
     filter: brightness(1.1);
   }
 
-  label {
+  span.select-label {
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
     font-size: 0.6rem;
     text-transform: uppercase;
     font-weight: 800;
     letter-spacing: 0.5px;
     opacity: 0.8;
-    margin-bottom: 0;
+    pointer-events: none;
+    z-index: 1;
   }
 
   select {
@@ -254,16 +260,17 @@ button.lcars-btn,
     outline: none;
     appearance: none;
     width: 100%;
-    margin-top: -0.1rem;
-    padding-right: 1.5rem; // Space for custom arrow
+    // top: push text below label (container-top-pad + label-height + gap)
+    // right: arrow space + container-right-pad
+    // bottom/left: mirror container padding
+    padding: 1.5rem 2.5rem 0.5rem 1rem;
+    // Custom arrow using data URI SVG (black triangle, 8x5px)
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23000'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0.2rem center;
+    background-position: right 1.2rem center;
     background-size: 8px 5px;
     height: auto;
     line-height: 1.4;
-    padding-top: 0.1rem;
-    padding-bottom: 0.1rem;
 
     option {
       background: #222;

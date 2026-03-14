@@ -196,9 +196,10 @@
             [(ngModel)]="searchText" />
 
           <div class="lcars-select-container perano">
-            <label for="rank-select">Level Range</label>
+            <span class="select-label">Level Range</span>
             <select
               id="rank-select"
+              title="Level Range"
               [(ngModel)]="filterRank">
               <option value="">All Levels</option>
               @for (rank of uniqueRanks; track rank) {
@@ -208,9 +209,10 @@
           </div>
 
           <div class="lcars-select-container bluey">
-            <label for="species-select">Species</label>
+            <span class="select-label">Species</span>
             <select
               id="species-select"
+              title="Species"
               [(ngModel)]="filterSpecies">
               <option value="">All Species</option>
               @for (species of uniqueSpecies; track species) {
@@ -220,9 +222,10 @@
           </div>
 
           <div class="lcars-select-container tangerine">
-            <label for="allegiance-select">Allegiance</label>
+            <span class="select-label">Allegiance</span>
             <select
               id="allegiance-select"
+              title="Allegiance"
               [(ngModel)]="filterGeneralFaction">
               <option value="">All Allegiances</option>
               @for (gf of uniqueGeneralFactions; track gf) {
@@ -232,9 +235,10 @@
           </div>
 
           <div class="lcars-select-container gold">
-            <label for="faction-select">Faction</label>
+            <span class="select-label">Faction</span>
             <select
               id="faction-select"
+              title="Faction"
               [(ngModel)]="filterFaction">
               <option value="">All Factions</option>
               @for (faction of uniqueFactions; track faction) {
@@ -244,9 +248,10 @@
           </div>
 
           <div class="lcars-select-container perano">
-            <label for="class-select">Class</label>
+            <span class="select-label">Class</span>
             <select
               id="class-select"
+              title="Class"
               [(ngModel)]="filterClass">
               <option value="">All Classes</option>
               @for (cls of uniqueClasses; track cls) {
@@ -256,9 +261,10 @@
           </div>
 
           <div class="lcars-select-container bluey">
-            <label for="sex-select">Sex</label>
+            <span class="select-label">Sex</span>
             <select
               id="sex-select"
+              title="Sex"
               [(ngModel)]="filterSex">
               <option value="">All Sexes</option>
               @for (sex of uniqueSexes; track sex) {
@@ -268,9 +274,10 @@
           </div>
 
           <div class="lcars-select-container tangerine">
-            <label for="recruit-select">Recruit Type</label>
+            <span class="select-label">Recruit Type</span>
             <select
               id="recruit-select"
+              title="Recruit Type"
               [(ngModel)]="filterRecruitType">
               <option value="">All Recruit Types</option>
               @for (rt of uniqueRecruitTypes; track rt) {

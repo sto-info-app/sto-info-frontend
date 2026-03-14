@@ -80,9 +80,10 @@
 
         <div class="form-row">
           <div class="lcars-select-container sunflower">
-            <label for="faction-select">Starting Faction</label>
+            <span class="select-label">Starting Faction</span>
             <select
               id="faction-select"
+              title="Starting Faction"
               formControlName="factionId">
               @for (f of factions; track f.id) {
                 <option [value]="f.id">{{ f.name }}</option>
@@ -91,9 +92,10 @@
           </div>
 
           <div class="lcars-select-container perano">
-            <label for="general-faction-select">General Allegiance</label>
+            <span class="select-label">General Allegiance</span>
             <select
               id="general-faction-select"
+              title="General Allegiance"
               formControlName="generalFactionId">
               @for (gf of generalFactions; track gf.id) {
                 <option [value]="gf.id">{{ gf.name }}</option>
@@ -104,9 +106,10 @@
 
         <div class="form-row">
           <div class="lcars-select-container tangerine">
-            <label for="recruit-type-select">Recruit Type</label>
+            <span class="select-label">Recruit Type</span>
             <select
               id="recruit-type-select"
+              title="Recruit Type"
               formControlName="recruitTypeId">
               @for (rt of recruitTypes; track rt.id) {
                 <option [value]="rt.id">{{ rt.name }}</option>
@@ -115,9 +118,10 @@
           </div>
 
           <div class="lcars-select-container bluey">
-            <label for="class-select">Career Path (Class)</label>
+            <span class="select-label">Career Path (Class)</span>
             <select
               id="class-select"
+              title="Career Path (Class)"
               formControlName="classId">
               @for (c of classes; track c.id) {
                 <option [value]="c.id">{{ c.name }}</option>
@@ -128,9 +132,10 @@
 
         <div class="form-row">
           <div class="lcars-select-container gold">
-            <label for="species-select">Species</label>
+            <span class="select-label">Species</span>
             <select
               id="species-select"
+              title="Species"
               formControlName="speciesId">
               @for (s of speciesList; track s.id) {
                 <option [value]="s.id">{{ s.name }}</option>
@@ -139,9 +144,10 @@
           </div>
 
           <div class="lcars-select-container perano">
-            <label for="sex-select">Sex</label>
+            <span class="select-label">Sex</span>
             <select
               id="sex-select"
+              title="Sex"
               formControlName="sexId">
               @for (sex of sexes; track sex.id) {
                 <option [value]="sex.id">{{ sex.name }}</option>
