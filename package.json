@@ -88,7 +88,7 @@
     "@typescript-eslint/eslint-plugin": "^8.57.1",
     "@typescript-eslint/parser": "^8.57.1",
     "cross-env": "^10.1.0",
-    "eslint": "9.37.0",
+    "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "fast-check": "^4.6.0",
@@ -137,8 +137,6 @@
     "usePathForSuiteName": "true"
   },
   "overrides": {
-    "eslint": "9.37.0",
-    "minimatch@<3.1.4": "3.1.5",
     "tmp": "0.2.5",
     "undici": "7.24.2",
     "flatted": "3.4.1"
