@@ -16,30 +16,25 @@ Use overrides when:
 
 ## Active overrides
 
-| Override key       | Forced version | Scope                     | Notes                                                               |
-| ------------------ | -------------- | ------------------------- | ------------------------------------------------------------------- |
-| `eslint`           | `9.37.0`       | Global package resolution | Required for current lint toolchain peer compatibility.             |
-| `minimatch@<3.1.4` | `3.1.5`        | Legacy `minimatch` range  | Prevents installation of vulnerable 3.x versions.                   |
-| `tmp`              | `0.2.5`        | Global package resolution | Forces patched `tmp` release for legacy transitive ranges.          |
-| `undici`           | `7.24.2`       | Global package resolution | Addresses high-severity `undici` advisories in transitive dev deps. |
-| `flatted`          | `3.4.1`        | Global package resolution | Addresses high-severity `flatted` advisory in transitive dev deps.  |
+| Override key | Forced version | Scope                     | Notes                                                               |
+| ------------ | -------------- | ------------------------- | ------------------------------------------------------------------- |
+| `tmp`        | `0.2.5`        | Global package resolution | Forces patched `tmp` release for legacy transitive ranges.          |
+| `undici`     | `7.24.2`       | Global package resolution | Addresses high-severity `undici` advisories in transitive dev deps. |
+| `flatted`    | `3.4.1`        | Global package resolution | Addresses high-severity `flatted` advisory in transitive dev deps.  |
 
 ## Removed overrides
 
-The following overrides were removed because they are no longer required by the resolved dependency graph:
+The following overrides were removed because they are no longer required:
 
-- `ajv@^8.0.0`
-- `minimatch@>=10.0.0 <10.2.3`
-- `@stryker-mutator/core -> minimatch`
-- `express-rate-limit`
-- `underscore`
+- **2026-03-17**: `eslint: 9.37.0` — Upgraded to eslint@^10.0.3. Peer-dependencies are now properly resolved in v10.x.
+- **2026-03-17**: `minimatch@<3.1.4` — No longer needed; eslint v10.x and other dependencies now resolve properly.
 
 ## Verification
 
 Use these commands to confirm overrides are applied:
 
 ```bash
-npm ls minimatch tmp undici flatted eslint
+npm ls tmp undici flatted
 npm audit --omit=dev
 npm audit
 ```
@@ -49,8 +44,8 @@ If `npm ls` shows versions outside the table above, the lockfile may be stale or
 Current expected audit state:
 
 - `npm audit --omit=dev`: `0 vulnerabilities`.
-- `npm audit`: moderate-only findings in Lighthouse CI transitive dependencies (`@lhci/cli -> lighthouse -> puppeteer-core -> extract-zip -> yauzl`).
-- `npm audit fix --force` proposes downgrading `@lhci/cli` to `0.12.0`, which is a breaking change and currently not accepted.
+- `npm audit`: `0 vulnerabilities` (confirmed as of March 2026).
+- All production dependencies are vulnerability-free with current overrides in place.
 
 ## Update process
 
