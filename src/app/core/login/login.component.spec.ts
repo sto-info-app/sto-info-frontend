@@ -99,7 +99,7 @@ describe('LoginComponent', () => {
 
     it('should be valid with correct email and password', () => {
       component.email = 'test@example.com';
-      component.password = 'password123';
+      component.password = 'password123'; // NOSONAR - Testing valid email and password format
       component.validateInputs();
       expect(component.inputsValid).toBe(true);
     });
@@ -108,11 +108,11 @@ describe('LoginComponent', () => {
     const invalidInputs = [
       {
         email: 'invalid-email',
-        password: 'password123',
+        password: 'password123', // NOSONAR - Testing invalid email format
         desc: 'invalid email format',
       },
-      { email: 'test@example.com', password: '', desc: 'empty password' },
-      { email: '', password: 'password123', desc: 'empty email' },
+      { email: 'test@example.com', password: '', desc: 'empty password' }, // NOSONAR - Testing empty password validation
+      { email: '', password: 'password123', desc: 'empty email' }, // NOSONAR - Testing empty email validation
     ];
 
     test.each(invalidInputs)(
