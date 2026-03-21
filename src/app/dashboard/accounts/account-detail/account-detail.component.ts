@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -19,7 +19,10 @@ import {
   CLOUDFLARE_VARIANT_SQUARE_300PX_NAME,
   SRC_PHOTO_UNAVAILABLE_100PX,
 } from 'src/app/shared/constants/app-image-assets.constants';
-import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  APP_ROUTE_TITLES,
+  APP_ROUTES,
+} from 'src/app/shared/constants/app-routing.constants';
 import {
   decodeStoHandle,
   encodeStoHandle,
@@ -56,6 +59,7 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   public readonly appRoutes = APP_ROUTES;
+  public readonly appRouteTitles = APP_ROUTE_TITLES;
   public readonly unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_100PX;
 
   /** Filter: free-text search. */

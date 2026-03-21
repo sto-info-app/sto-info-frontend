@@ -10,7 +10,10 @@ import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { SRC_PHOTO_UNAVAILABLE_300PX } from 'src/app/shared/constants/app-image-assets.constants';
-import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  APP_ROUTES,
+  APP_ROUTE_TITLES,
+} from 'src/app/shared/constants/app-routing.constants';
 import { DatesTimeHelperService } from 'src/app/shared/services/dates-time-helper.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { User } from '../models/user.model';
@@ -26,7 +29,8 @@ import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component
   imports: [CommonModule, MatDialogModule, RouterModule, LoadingBarComponent],
 })
 export class ProfileComponent implements OnInit, OnDestroy {
-  appRoutes = APP_ROUTES;
+  readonly appRoutes = APP_ROUTES;
+  readonly appRouteTitles = APP_ROUTE_TITLES;
   unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
   user: User | undefined;

@@ -8,7 +8,10 @@ import {
   ConfirmDialogData,
 } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  APP_ROUTES,
+  APP_ROUTE_TITLES,
+} from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
@@ -27,7 +30,8 @@ import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.
 })
 export class AccountsComponent implements OnInit, OnDestroy {
   /** Application routes for navigation. */
-  appRoutes = APP_ROUTES;
+  readonly appRoutes = APP_ROUTES;
+  readonly appRouteTitles = APP_ROUTE_TITLES;
 
   /** List of STO accounts for the current user. */
   accounts: StoAccount[] = [];
