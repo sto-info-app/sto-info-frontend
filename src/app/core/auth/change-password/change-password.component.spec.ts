@@ -85,8 +85,8 @@ describe('ChangePasswordComponent', () => {
     beforeEach(() => {
       fixture.detectChanges();
       component.changePasswordForm.patchValue({
-        password: 'Password@123',
-        confirmPassword: 'Password@123',
+        password: 'Password@123', // NOSONAR - Testing valid password format
+        confirmPassword: 'Password@123', // NOSONAR - Testing password match validation
       });
     });
 
@@ -156,12 +156,12 @@ describe('ChangePasswordComponent', () => {
     it('should match passwords', () => {
       const form = component.changePasswordForm;
       form.patchValue({
-        password: 'Password@123',
-        confirmPassword: 'Different@123',
+        password: 'Password@123', // NOSONAR - Testing password match validation
+        confirmPassword: 'Different@123', // NOSONAR - Testing password mismatch validation
       });
       expect(form.controls['confirmPassword'].hasError('mustMatch')).toBe(true);
 
-      form.patchValue({ confirmPassword: 'Password@123' });
+      form.patchValue({ confirmPassword: 'Password@123' }); // NOSONAR - Testing password match validation
       expect(form.controls['confirmPassword'].hasError('mustMatch')).toBe(
         false,
       );

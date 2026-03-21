@@ -119,8 +119,8 @@ describe('RegisterComponent', () => {
         lastName: 'Doe',
         username: 'johndoe',
         email: 'john@example.com',
-        password: 'Password123!',
-        confirmPassword: 'Password123!',
+        password: 'Password123!', // NOSONAR - Testing valid form submission
+        confirmPassword: 'Password123!', // NOSONAR - Testing valid form submission
       });
       expect(component.registerForm.valid).toBe(true);
     });
@@ -133,8 +133,8 @@ describe('RegisterComponent', () => {
         lastName: 'Doe',
         username: 'johndoe',
         email: 'john@example.com',
-        password: 'Password123!',
-        confirmPassword: 'Password123!',
+        password: 'Password123!', // NOSONAR - Testing valid form submission
+        confirmPassword: 'Password123!', // NOSONAR - Testing password match validation
       });
       jest.spyOn(console, 'error').mockImplementation(() => {});
     });

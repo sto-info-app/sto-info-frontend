@@ -145,13 +145,13 @@ describe('LogRocketService', () => {
       method: 'POST',
       body: JSON.stringify({
         email: 'captain@ufp.com',
-        password: 'PicardAlpha',
+        password: 'PicardAlpha', // NOSONAR - Testing top-level password redaction
         nested: {
-          confirmPassword: 'MakeItSo',
+          confirmPassword: 'MakeItSo', // NOSONAR - Testing nested password redaction
         },
         history: [
           {
-            newPassword: 'Secret1',
+            newPassword: 'Secret1', // NOSONAR - Testing nested password redaction
           },
           {
             note: 'All good',
@@ -176,7 +176,7 @@ describe('LogRocketService', () => {
       url: 'https://example.com/api',
       headers: {},
       method: 'POST',
-      body: { password: 'hidden' } as unknown as string,
+      body: { password: 'hidden' } as unknown as string, // NOSONAR - Testing non-string body handling
     };
     expect(sanitizer(request)).toBe(request);
   });
