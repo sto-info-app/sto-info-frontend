@@ -16,16 +16,16 @@ Use overrides when:
 
 ## Active overrides
 
-| Override key | Forced version | Scope                     | Notes                                                               |
-| ------------ | -------------- | ------------------------- | ------------------------------------------------------------------- |
-| `tmp`        | `0.2.5`        | Global package resolution | Forces patched `tmp` release for legacy transitive ranges.          |
-| `undici`     | `7.24.2`       | Global package resolution | Addresses high-severity `undici` advisories in transitive dev deps. |
-| `flatted`    | `3.4.1`        | Global package resolution | Addresses high-severity `flatted` advisory in transitive dev deps.  |
+| Override key | Forced version | Scope                     | Notes                                                                                               |
+| ------------ | -------------- | ------------------------- | --------------------------------------------------------------------------------------------------- |
+| `tmp`        | `0.2.5`        | Global package resolution | Forces patched `tmp` release for legacy transitive ranges (`^0.1.0`, `^0.0.33`).                   |
+| `undici`     | `7.24.5`       | Global package resolution | `@angular/build` pins `7.22.0` exactly; override ensures latest patch is used across all consumers. |
 
 ## Removed overrides
 
 The following overrides were removed because they are no longer required:
 
+- **2026-03-21**: `flatted: 3.4.1` — Removed; the pin was itself in the vulnerable range (GHSA-rf6f-7fwh-wjgh, prototype pollution in `<=3.4.1`). `flat-cache`'s `^3.2.9` constraint now naturally resolves to `3.4.2` which contains the fix.
 - **2026-03-17**: `eslint: 9.37.0` — Upgraded to eslint@^10.0.3. Peer-dependencies are now properly resolved in v10.x.
 - **2026-03-17**: `minimatch@<3.1.4` — No longer needed; eslint v10.x and other dependencies now resolve properly.
 
@@ -34,7 +34,7 @@ The following overrides were removed because they are no longer required:
 Use these commands to confirm overrides are applied:
 
 ```bash
-npm ls tmp undici flatted
+npm ls tmp undici
 npm audit --omit=dev
 npm audit
 ```
