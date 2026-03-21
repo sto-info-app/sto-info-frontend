@@ -138,7 +138,6 @@
   },
   "overrides": {
     "tmp": "0.2.5",
-    "undici": "7.24.2",
-    "flatted": "3.4.1"
+    "undici": "7.24.5"
   }
 }
