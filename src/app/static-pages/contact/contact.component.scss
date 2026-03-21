@@ -1,8 +1,14 @@
-textarea {
-  padding: 0.5rem;
-  font-size: 1rem;
-  width: 100%;
-  box-sizing: border-box;
-  min-height: 160px;
-  resize: vertical;
+#contact-us-page {
+  textarea {
+    padding: 0.5rem;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 160px;
+    resize: vertical;
+  }
+
+  #topic-dropdown {
+    margin-bottom: 15px;
+  }
 }
