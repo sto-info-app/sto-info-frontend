@@ -9,8 +9,8 @@ export const APP_ROUTES = {
   REGISTER: 'register',
   REGISTER_COMPLETE: 'register/complete',
   VERIFY_EMAIL: 'verify-email',
-  RESET_PASSWORD: 'reset-password',
-  CHANGE_PASSWORD: 'change-password',
+  RESET_PASSWORD: 'reset-password', // NOSONAR - This is the standard route for this page
+  CHANGE_PASSWORD: 'change-password', // NOSONAR - This is the standard route for this page
 
   // Static Pages
   ABOUT: 'about',
@@ -51,8 +51,8 @@ export const APP_ROUTE_TITLES = {
   REGISTER: 'Register',
   REGISTER_COMPLETE: 'Registration Complete',
   VERIFY_EMAIL: 'Verify Email',
-  RESET_PASSWORD: 'Reset Password',
-  CHANGE_PASSWORD: 'Change Password',
+  RESET_PASSWORD: 'Reset Password', // NOSONAR - This is the standard title for this page
+  CHANGE_PASSWORD: 'Change Password', // NOSONAR - This is the standard title for this page
 
   // Static Pages
   ABOUT: 'About',
