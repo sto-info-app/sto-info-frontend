@@ -115,12 +115,13 @@
       <div class="error-container">
         <app-lcars-error-message
           [message]="errorMessage"></app-lcars-error-message>
-        <button
-          mat-raised-button
-          color="primary"
-          [routerLink]="getAccountLink()">
-          Back to Account
-        </button>
+        <div class="buttons-row">
+          <a
+            class="lcars-btn-auto sunflower"
+            [routerLink]="getAccountLink()">
+            Back to Account
+          </a>
+        </div>
       </div>
     }
   </div>
