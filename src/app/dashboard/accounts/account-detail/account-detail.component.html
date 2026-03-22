@@ -160,12 +160,13 @@
       <div class="error-container">
         <app-lcars-error-message
           [message]="errorMessage"></app-lcars-error-message>
-        <button
-          mat-raised-button
-          color="primary"
-          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)">
-          Back to Accounts
-        </button>
+        <div class="buttons-row">
+          <a
+            class="lcars-btn-auto sunflower"
+            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)">
+            Back to Accounts
+          </a>
+        </div>
       </div>
     }
   </div>
