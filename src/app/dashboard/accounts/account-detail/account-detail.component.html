@@ -111,6 +111,13 @@
                   <div
                     class="character-details"
                     [routerLink]="getCharacterLink(character)">
+                    @if (character.faction?.iconUrl) {
+                      <img
+                        [src]="character.faction!.iconUrl!"
+                        class="faction-icon-watermark"
+                        alt="{{ 'Faction: ' + character.faction!.name }}"
+                        title="{{ 'Faction: ' + character.faction!.name }}" />
+                    }
                     <div class="character-body">
                       <div class="character-rank-row">
                         @if (character.rank?.iconUrl) {
@@ -118,8 +125,8 @@
                             [src]="character.rank!.iconUrl"
                             class="rank-icon-mini"
                             height="14"
-                            alt="Rank"
-                            title="Rank" />
+                            alt="{{ 'Rank: ' + character.rank!.title }}"
+                            title="{{ 'Rank: ' + character.rank!.title }}" />
                         }
                         <span class="rank-name">{{
                           character.rank?.title || 'Unknown Rank'
