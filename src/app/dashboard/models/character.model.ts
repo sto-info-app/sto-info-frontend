@@ -64,6 +64,7 @@ export interface CharacterClass {
 export interface RecruitType {
   id: string;
   name: string;
+  iconUrl?: string | null;
 }
 
 export interface Species {
