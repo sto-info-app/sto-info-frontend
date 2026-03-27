@@ -7,7 +7,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { FORM_ERROR_INVALID_EMAIL_FORMAT } from 'src/app/shared/constants/error-messages.constants';
-import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
+import { validateEmail } from 'src/app/shared/_helpers/validate-email';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { AuthService } from '../auth.service';
 
@@ -39,11 +39,11 @@ export class ResetPasswordRequestComponent {
   private readonly routingService = inject(RoutingService);
 
   validateEmail(email: string): boolean {
-    return EMAIL_PATTERN.test(email);
+    return validateEmail(email);
   }
 
   validateInputs(): void {
-    this.inputsValid = this.validateEmail(this.email);
+    this.inputsValid = validateEmail(this.email);
   }
 
   onPasswordReset(): void {

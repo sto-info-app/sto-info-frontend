@@ -76,8 +76,22 @@ export class ProfilePicComponent {
           return;
         }
 
-        if (!file.type.includes('image')) {
+        const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        const allowedExtensions = ['.jpg', '.jpeg', '.png'];
+        const fileName = file.name.toLowerCase();
+        const hasValidExtension = allowedExtensions.some(ext =>
+          fileName.endsWith(ext),
+        );
+
+        if (file.type.includes('svg') || fileName.endsWith('.svg')) {
           this.uploadedInvalidImageType = true;
+          console.warn('SVG files are not allowed for security reasons');
+          return;
+        }
+
+        if (!allowedMimeTypes.includes(file.type) || !hasValidExtension) {
+          this.uploadedInvalidImageType = true;
+          console.warn('Invalid file type attempted:', file.type, fileName);
           return;
         }
       }
@@ -112,60 +126,29 @@ export class ProfilePicComponent {
    * Displays appropriate error messages for invalid state or server errors.
    */
   onUploadImageClick() {
-    if (!this.croppedImageBlob) {
-      console.error('No image to upload');
-      this.displayErrorMessage('Please crop an image before uploading.');
-      return;
-    }
-
-    // Check if the Blob is in PNG format
-    if (this.croppedImageBlob.type !== 'image/png') {
-      console.error('Cropped image is not in PNG format');
-      this.displayErrorMessage('The cropped image must be in PNG format.');
-      return;
-    }
-
-    // Use the Blob from the image cropper event
     try {
-      const blob = this.croppedImageBlob;
-
-      if (blob?.size > 0) {
-        const formData = new FormData();
-        formData.append('profilePicture', blob, 'profile-pic.png');
-
-        this.isSubmitting = true;
-        this.dashboardService.updateProfilePic(formData).subscribe({
-          next: () => {
-            this.dialogRef?.close({
-              stayLoggedIn: true,
-            });
-            this.isSubmitting = false;
-          },
-          error: error => {
-            let errMessage: string;
-            if (error.status === 0) {
-              console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
-              errMessage = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;
-            } else if (error.status === 400) {
-              console.error(MSG_ERROR_HTTP_STATUS_400_CONSOLE_TEXT);
-              errMessage = MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT;
-            } else {
-              console.error('Unexpected Error:', error);
-              errMessage = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;
-            }
-            this.displayErrorMessage(errMessage);
-            this.isSubmitting = false;
-          },
-          complete: () => {
-            this.isSubmitting = false;
-            this.dialogRef?.close(true);
-          },
-        });
-      } else {
-        console.error('Blob is empty');
-        this.displayErrorMessage('Failed to upload image.');
-        this.isSubmitting = false;
+      if (!this.validateCroppedImage()) {
+        return;
       }
+
+      const formData = new FormData();
+      formData.append(
+        'profilePicture',
+        this.croppedImageBlob!,
+        'profile-pic.png',
+      );
+
+      this.isSubmitting = true;
+      this.dashboardService.updateProfilePic(formData).subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this.dialogRef?.close(true);
+        },
+        error: error => {
+          this.handleHttpError(error);
+          this.isSubmitting = false;
+        },
+      });
     } catch (error) {
       console.error('Error processing image blob:', error);
       this.displayErrorMessage('Invalid image format.');
@@ -177,16 +160,57 @@ export class ProfilePicComponent {
    * Resets cropper state when the image fails to load and shows an appropriate error message.
    */
   loadImageFailed() {
-    this.cropper = null;
-    this.croppedImage = '';
-    this.croppedImageBlob = null;
-    this.imageChangedEvent = null;
+    this.resetCropperState();
 
     if (this.uploadedInvalidImageType) {
       this.displayErrorMessage('Failed to load image');
     } else {
       this.displayErrorMessage('Invalid image type. Please upload an image.');
     }
+  }
+
+  private validateCroppedImage(): boolean {
+    if (!this.croppedImageBlob) {
+      console.error('No image to upload');
+      this.displayErrorMessage('Please crop an image before uploading.');
+      return false;
+    }
+
+    if (this.croppedImageBlob.type !== 'image/png') {
+      console.error('Cropped image is not in PNG format');
+      this.displayErrorMessage('The cropped image must be in PNG format.');
+      return false;
+    }
+
+    if (this.croppedImageBlob.size === 0) {
+      console.error('Blob is empty');
+      this.displayErrorMessage('Failed to upload image.');
+      return false;
+    }
+
+    return true;
+  }
+
+  private handleHttpError(error: { status: number }): void {
+    let errMessage: string;
+    if (error.status === 0) {
+      console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
+      errMessage = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;
+    } else if (error.status === 400) {
+      console.error(MSG_ERROR_HTTP_STATUS_400_CONSOLE_TEXT);
+      errMessage = MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT;
+    } else {
+      console.error('Unexpected Error:', error);
+      errMessage = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;
+    }
+    this.displayErrorMessage(errMessage);
+  }
+
+  private resetCropperState(): void {
+    this.cropper = null;
+    this.croppedImage = '';
+    this.croppedImageBlob = null;
+    this.imageChangedEvent = null;
   }
 
   /**
