@@ -80,12 +80,26 @@ describe('ProfilePicComponent', () => {
     });
 
     it('should set uploadedInvalidImageType to true for non-image files', () => {
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
       const file = new File([''], 'test.txt', { type: 'text/plain' });
       const event = { target: { files: [file] } } as unknown as Event;
 
       component.onFileChangeEvent(event);
 
       expect(component.uploadedInvalidImageType).toBe(true);
+    });
+
+    it('should block SVG files and set uploadedInvalidImageType to true', () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const file = new File([''], 'test.svg', { type: 'image/svg+xml' });
+      const event = { target: { files: [file] } } as unknown as Event;
+
+      component.onFileChangeEvent(event);
+
+      expect(component.uploadedInvalidImageType).toBe(true);
+      expect(warnSpy).toHaveBeenCalledWith(
+        'SVG files are not allowed for security reasons',
+      );
     });
 
     it('should return early if event is null', () => {
