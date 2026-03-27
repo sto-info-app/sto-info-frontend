@@ -58,6 +58,7 @@ export class LoginComponent implements OnDestroy {
   errorMessage = '';
   inputsValid = false;
   isSubmitting = false;
+  emailTouched = false;
 
   private readonly sharedDataService = inject(SharedDataService);
   private readonly authService = inject(AuthService);

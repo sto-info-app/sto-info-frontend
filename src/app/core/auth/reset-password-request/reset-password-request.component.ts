@@ -29,6 +29,7 @@ export class ResetPasswordRequestComponent {
   errorMessage = '';
   successMessage = '';
   inputsValid = false;
+  emailTouched = false;
   appRoutes = APP_ROUTES;
 
   // Allow constants to be used in the HTML
@@ -42,13 +43,7 @@ export class ResetPasswordRequestComponent {
   }
 
   validateInputs(): void {
-    if (this.validateEmail(this.email)) {
-      this.inputsValid = true;
-      this.errorMessage = '';
-    } else {
-      this.inputsValid = false;
-      this.errorMessage = 'Invalid email format';
-    }
+    this.inputsValid = this.validateEmail(this.email);
   }
 
   onPasswordReset(): void {
