@@ -42,6 +42,7 @@ export interface Rank {
 export interface GeneralFaction {
   id: string;
   name: string;
+  iconUrl?: string | null;
 }
 
 export interface Faction {
