@@ -16,10 +16,12 @@ Use overrides when:
 
 ## Active overrides
 
-| Override key | Forced version | Scope                     | Notes                                                                                               |
-| ------------ | -------------- | ------------------------- | --------------------------------------------------------------------------------------------------- |
-| `tmp`        | `0.2.5`        | Global package resolution | Forces patched `tmp` release for legacy transitive ranges (`^0.1.0`, `^0.0.33`).                   |
-| `undici`     | `7.24.5`       | Global package resolution | `@angular/build` pins `7.22.0` exactly; override ensures latest patch is used across all consumers. |
+| Override key     | Forced version | Scope                     | Notes                                                                                                                       |
+| ---------------- | -------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `tmp`            | `0.2.5`        | Global package resolution | Forces patched `tmp` release for legacy transitive ranges (`^0.1.0`, `^0.0.33`).                                           |
+| `undici`         | `7.24.5`       | Global package resolution | `@angular/build` pins `7.24.4` exactly; override ensures latest patch is used across all consumers.                        |
+| `picomatch`      | `4.0.4`        | Global package resolution | `@angular/build`, `@angular/cli`, and related devkit packages pull in 4.0.0–4.0.3 (GHSA-c2c7-rcm5-vvqj, GHSA-3v7f-55p6-f55p); 4.0.4 contains the fix. Dev-only. |
+| `brace-expansion`| `5.0.5`        | Global package resolution | Jest, ESLint, `@lhci/cli`, and `serve` all pull in `<5.0.5` (GHSA-f886-m6hf-6m8v); 5.0.5 contains the fix. Dev-only.     |
 
 ## Removed overrides
 
@@ -44,8 +46,8 @@ If `npm ls` shows versions outside the table above, the lockfile may be stale or
 Current expected audit state:
 
 - `npm audit --omit=dev`: `0 vulnerabilities`.
-- `npm audit`: `0 vulnerabilities` (confirmed as of March 2026).
-- All production dependencies are vulnerability-free with current overrides in place.
+- `npm audit`: `0 vulnerabilities` (confirmed as of 2026-03-26).
+- All production and dev dependencies are vulnerability-free with current overrides in place.
 
 ## Update process
 
