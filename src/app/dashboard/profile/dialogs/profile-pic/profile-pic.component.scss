@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  min-width: 600px;
+}
+
 .lcars-profile-pic-container {
   align-items: center;
   width: 100%;
@@ -13,6 +18,12 @@
     .form-group {
       width: 100%;
     }
+  }
+
+  // Override global .flexbox: no wrapping or gap until an image is loaded
+  .flexbox:not(.has-image) {
+    flex-wrap: nowrap;
+    column-gap: 0;
   }
 
   .profile-pic-main-col {
@@ -67,5 +78,10 @@
       padding: 0 40px;
       text-align: left;
     }
+  }
+
+  .lcars-profile-pic-buttons {
+    margin-top: 20px;
+    padding: 0 40px;
   }
 }
