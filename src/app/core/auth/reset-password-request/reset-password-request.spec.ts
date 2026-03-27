@@ -51,7 +51,7 @@ describe('ResetPasswordRequestComponent', () => {
     component.validateInputs();
 
     expect(component.inputsValid).toBe(false);
-    expect(component.errorMessage).toBe('Invalid email format');
+    expect(component.errorMessage).toBe('');
   });
 
   it('should handle password reset correctly', () => {

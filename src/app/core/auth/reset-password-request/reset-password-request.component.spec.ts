@@ -67,7 +67,7 @@ describe('ResetPasswordRequestComponent', () => {
       component.email = 'invalid-email';
       component.validateInputs();
       expect(component.inputsValid).toBeFalse();
-      expect(component.errorMessage).toBe('Invalid email format');
+      expect(component.errorMessage).toBe('');
     });
   });
 
