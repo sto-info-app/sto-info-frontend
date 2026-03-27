@@ -31,7 +31,7 @@ export abstract class ImageCropperBaseComponent {
     this.resetErrorMessage();
     this.imageChangedEvent = event;
 
-    if (!event || !event.target) return;
+    if (!event?.target) return;
 
     const target = event.target as HTMLInputElement;
     if (!target.files) return;
@@ -55,7 +55,6 @@ export abstract class ImageCropperBaseComponent {
     if (!allowedMimeTypes.includes(file.type) || !hasValidExtension) {
       this.uploadedInvalidImageType = true;
       console.warn('Invalid file type attempted:', file.type, fileName);
-      return;
     }
   }
 
