@@ -13,6 +13,7 @@ describe('ResetPasswordRequestComponent', () => {
   beforeEach(async () => {
     const authServiceSpy: jest.Mocked<AuthService> = {
       resetPassword: jest.fn(),
+      isLoggedIn: jest.fn().mockReturnValue(false),
     } as unknown as jest.Mocked<AuthService>;
 
     await TestBed.configureTestingModule({

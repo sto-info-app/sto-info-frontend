@@ -24,6 +24,8 @@
     "watch": "ng build --watch --configuration development",
     "lint": "eslint \"src/**/*.{ts,js,html}\"",
     "lint:fix": "eslint \"src/**/*.{ts,js,html}\" --fix",
+    "lint:style": "stylelint \"src/**/*.{css,scss}\"",
+    "lint:style:fix": "stylelint \"src/**/*.{css,scss}\" --fix",
     "lint:lighthouse": "cross-env ENV_NAME=lighthouse-audit npm run build:render && lhci autorun",
     "lighthouse": "cross-env API_URL=${API_URL:-https://dev-api.startrekonline.info} npm run build:prod && lhci collect && lhci upload --target=filesystem --outputDir=reports/lighthouse && npm run summary:ci",
     "summary:ci": "node scripts/generate-ci-summary.mjs",
@@ -35,7 +37,7 @@
     "test:mutation": "stryker run --reporters clear-text --reporters html --reporters progress",
     "test:mutation:dry": "stryker run --reporters clear-text --reporters html --reporters progress --dryRunOnly",
     "test:mutation:incremental": "node ./scripts/run-incremental-mutation.mjs",
-    "verify": "npm audit --audit-level=high --omit=dev && npm run lint && npm run test:cov && npm run test:fuzz && npm run build",
+    "verify": "npm audit --audit-level=high --omit=dev && npm run lint && npm run lint:style && npm run test:cov && npm run test:fuzz && npm run build",
     "verify:full": "npm run verify && npm run lighthouse && npm run test:mutation:incremental",
     "e2e": "ng e2e",
     "prepare": "husky"
@@ -102,6 +104,8 @@
     "lint-staged": "^16.3.3",
     "prettier": "^3.7.4",
     "serve": "^14.2.6",
+    "stylelint": "^17.6.0",
+    "stylelint-config-standard-scss": "^17.0.0",
     "typescript": "~5.9.3"
   },
   "projects": {

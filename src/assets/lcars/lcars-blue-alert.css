@@ -4,21 +4,27 @@
   0% {
     color: #1e6bff;
   }
+
   25% {
     color: #1e6bff;
   }
+
   50% {
     color: #1e6bff;
   }
+
   75% {
     color: #1e6bff;
   }
+
   80% {
     color: #000;
   }
+
   90% {
     color: #000;
   }
+
   100% {
     color: #f7f7f7;
   }
@@ -28,21 +34,27 @@
   0% {
     background-color: #f7f7f7;
   }
+
   25% {
     background-color: #f7f7f7;
   }
+
   50% {
-    background-color: #0033cc;
+    background-color: #03c;
   }
+
   75% {
-    background-color: #0033cc;
+    background-color: #03c;
   }
+
   80% {
-    background-color: #0033cc;
+    background-color: #03c;
   }
+
   90% {
     background-color: #f7f7f7;
   }
+
   100% {
     background-color: #f7f7f7;
   }
@@ -50,7 +62,7 @@
 
 .panel-1 a {
   animation: alert-blue 1s infinite;
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .panel-4 {
@@ -59,7 +71,7 @@
 }
 
 .submit-button {
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .left-frame-top,
@@ -93,16 +105,17 @@
     alert-blue 1s infinite 0.5s,
     resizeGroup2 60s linear infinite alternate;
 }
+
 /* END: Animate Alert & Moving Bars */
 
 .button#top-left a {
   animation: alert-blue 1s infinite;
   animation-delay: 0.6s;
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .button#bottom-left a {
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .button#top-right a {
@@ -137,11 +150,11 @@
 }
 
 .left-frame-top {
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .left-frame {
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .data-cascade .row-1,
@@ -184,7 +197,7 @@
 }
 
 .top-corner-bg {
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .bar-1,
@@ -197,15 +210,14 @@
 .bar-8,
 .bar-9,
 .bar-10 {
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .gap {
   margin-top: 10px;
 }
 
-/* .panel-1, */
-/* .panel-2, */
+/* .panel-1, .panel-2, */
 .panel-3,
 .panel-4,
 .panel-5,
@@ -214,11 +226,11 @@
 .panel-8,
 .panel-9,
 .panel-10 {
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .corner-bg {
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 code {
@@ -226,11 +238,11 @@ code {
 }
 
 hr {
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .border {
-  border: 2px solid #0033cc;
+  border: 2px solid #03c;
 }
 
 .buttons a {
@@ -255,7 +267,7 @@ hr {
 }
 
 .sidebar-buttons a {
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .lcars-bar {
@@ -265,15 +277,15 @@ hr {
 }
 
 .lcars-bar-inner {
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .lcars-bar-slice-bottom {
-  background-color: #0033cc;
+  background-color: #03c;
 }
 
 .lcars-text-bar {
-  background-color: #0033cc;
+  background-color: #03c;
   border-right: 28px solid #1e6bff;
   border-left: 28px solid #1e6bff;
 }

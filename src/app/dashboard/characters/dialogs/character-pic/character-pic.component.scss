@@ -20,8 +20,7 @@
     width: 100%;
 
     &.has-image {
-      flex-direction: row;
-      flex-wrap: nowrap;
+      flex-flow: row nowrap;
       gap: 30px;
       align-items: flex-start;
     }
@@ -74,6 +73,7 @@
     .lcars-text-bar {
       width: 100%;
       margin: 20px 0;
+
       span {
         white-space: nowrap;
       }

@@ -36,7 +36,7 @@
             transform 0.2s ease,
             filter 0.2s ease;
           gap: 1rem;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 4px 6px rgb(0 0 0 / 20%);
 
           &:hover {
             transform: translateY(-4px);
@@ -68,16 +68,19 @@
           }
 
           &.sunflower {
-            background-color: #ffcc66;
+            background-color: #fc6;
           }
+
           &.perano {
-            background-color: #99ccff;
+            background-color: #9cf;
           }
+
           &.bahama {
-            background-color: #3366cc;
+            background-color: #36c;
           }
+
           &.atomic {
-            background-color: #ff9966;
+            background-color: #f96;
           }
         }
       }

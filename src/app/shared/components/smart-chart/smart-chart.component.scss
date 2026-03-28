@@ -10,14 +10,14 @@
 
 .chart-wrapper {
   display: flex;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgb(0 0 0 / 40%);
   border: 1px solid rgba(vars.$lcars-perano, 0.2);
   border-radius: 20px;
   overflow: hidden;
   gap: 0;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 15px rgb(0 0 0 / 50%);
 
-  @media (max-width: 850px) {
+  @media (width <= 850px) {
     flex-direction: column;
   }
 }
@@ -37,10 +37,7 @@
   // The technical Grid Background
   .chart-grid-bg {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     opacity: 0.4; // Significantly more visible as requested
     pointer-events: none;
     background-size: 30px 30px;
@@ -64,7 +61,7 @@
     width: 360px;
     height: 360px;
     transform: rotate(-90deg);
-    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.8));
+    filter: drop-shadow(0 0 10px rgb(0 0 0 / 80%));
 
     .pie-segment {
       transition:
@@ -91,7 +88,7 @@
   flex-direction: column;
   min-width: 280px;
 
-  @media (max-width: 850px) {
+  @media (width <= 850px) {
     border-left: none;
     border-top: 1px solid rgba(vars.$lcars-perano, 0.2);
   }
@@ -133,7 +130,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
+      box-shadow: inset 0 0 4px rgb(0 0 0 / 50%);
 
       i {
         font-size: 0.6rem;
@@ -169,7 +166,7 @@
 // ─── Bar Chart (Pi-Hole Bar Style) ───────────────────────────────────────────
 
 .bar-chart-wrapper {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgb(0 0 0 / 30%);
   padding: 1.5rem;
   border-radius: 15px;
   border: 1px solid rgba(vars.$lcars-perano, 0.1);
@@ -190,7 +187,7 @@
     }
 
     .bar-track {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgb(255 255 255 / 5%);
       height: 12px;
       border-radius: 2px;
       overflow: hidden;
@@ -198,7 +195,7 @@
       .bar-fill {
         height: 100%;
         transition: width 0.6s ease-out;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 10px rgb(0 0 0 / 30%);
 
         @each $name,
           $color
@@ -233,7 +230,7 @@
 
 .no-data-msg {
   padding: 2rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgb(0 0 0 / 20%);
   border-radius: 10px;
   text-align: center;
   font-style: italic;

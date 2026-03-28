@@ -32,7 +32,7 @@
         .rank-icon {
           height: 14px;
           width: auto;
-          filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+          filter: drop-shadow(0 0 5px rgb(0 0 0 / 50%));
         }
       }
 
@@ -76,10 +76,11 @@
 }
 
 .character-details-content {
-  padding: 0.5rem 2rem 2rem 2rem;
+  padding: 0.5rem 2rem 2rem;
 
   .detail-grid {
     @include mixins.lcars-info-grid;
+
     gap: 1.5rem;
 
     .detail-item {
@@ -88,10 +89,13 @@
 
       .label {
         @include mixins.lcars-label;
+
         letter-spacing: 1px;
       }
+
       .value {
         @include mixins.lcars-value;
+
         font-size: 1.3rem;
         font-family: vars.$font-antonio;
       }
