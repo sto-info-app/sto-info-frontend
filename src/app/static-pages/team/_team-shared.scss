@@ -58,7 +58,7 @@
   color: vars.$lcars-grey-light;
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .team-grid {
     grid-template-columns: 1fr;
   }

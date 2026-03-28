@@ -45,7 +45,7 @@
   }
 }
 
-@keyframes animateLine2 {
+@keyframes animate-line-2 {
   0% {
     height: 180px;
   }
@@ -59,7 +59,7 @@
   }
 }
 
-@keyframes animateLine3 {
+@keyframes animate-line-3 {
   0% {
     height: 120px;
   }
@@ -73,7 +73,7 @@
   }
 }
 
-@keyframes animateLine4 {
+@keyframes animate-line-4 {
   0% {
     height: 230px;
   }
@@ -87,7 +87,7 @@
   }
 }
 
-@keyframes animateLine5 {
+@keyframes animate-line-5 {
   0% {
     height: 60px;
   }
@@ -101,7 +101,7 @@
   }
 }
 
-@keyframes animateLine6 {
+@keyframes animate-line-6 {
   0% {
     height: 30px;
   }
@@ -115,7 +115,7 @@
   }
 }
 
-@keyframes resizeGroup1 {
+@keyframes resize-group-1 {
   0% {
     flex: 1;
   }
@@ -125,7 +125,7 @@
   }
 }
 
-@keyframes resizeGroup2 {
+@keyframes resize-group-2 {
   0% {
     flex: 3;
   }
@@ -143,8 +143,8 @@
 
 .mat-mdc-dialog-container {
   --mat-dialog-container-color: #0d0d0d;
-  --mat-dialog-subhead-color: rgba(255, 255, 255, 0.87);
-  --mat-dialog-supporting-text-color: rgba(255, 255, 255, 0.6);
+  --mat-dialog-subhead-color: rgb(255 255 255 / 87%);
+  --mat-dialog-supporting-text-color: rgb(255 255 255 / 60%);
   --mat-dialog-subhead-font:
     'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
   --mat-dialog-supporting-text-font:
@@ -158,7 +158,7 @@
 
 .mat-mdc-paginator {
   background: #0d0d0d;
-  color: rgba(255, 255, 255, 0.87);
+  color: rgb(255 255 255 / 87%);
 }
 
 .mat-mdc-unelevated-button.mat-unthemed {
@@ -180,7 +180,7 @@
 
 .mdc-data-table {
   background-color: var(--mat-theme-surface, #0d0d0d);
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgb(255 255 255 / 12%);
 }
 
 .mdc-data-table__header-cell {
@@ -204,22 +204,20 @@
 }
 
 @media (hover: none) {
-  .mat-expansion-panel:not(.mat-expanded):not([aria-disabled='true'])
+  .mat-expansion-panel:not(.mat-expanded, [aria-disabled='true'])
     .mat-expansion-panel-header:hover {
     background: #0d0d0d;
   }
 }
 
 .cdk-overlay-dark-backdrop {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgb(0 0 0 / 80%);
 }
 
 .cdk-overlay-pane {
   border: 10px solid #ccdeff;
   border-radius: 8px;
   min-width: 80%;
-  -moz-box-shadow: 2px 2px 3px #444a77;
-  -webkit-box-shadow: 2px 2px 3px #444a77;
   box-shadow: 2px 2px 3px #444a77;
 }
 
@@ -230,7 +228,7 @@
 .mat-typography .mat-headline-5,
 .mat-typography h1,
 h1 {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
+  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
   margin: 30px 0;
   font-weight: 400;
   text-transform: uppercase;
@@ -245,8 +243,8 @@ h1 {
 .mat-typography .mat-headline-6,
 .mat-typography h2,
 h2 {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
-  margin: 30px 0 10px 0;
+  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
+  margin: 30px 0 10px;
   font-weight: 400;
   text-transform: uppercase;
   line-height: 1.2;
@@ -260,8 +258,8 @@ h2 {
 .mat-typography .mat-subtitle-1,
 .mat-typography h3,
 h3 {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
-  margin: 30px 0 10px 0;
+  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
+  margin: 30px 0 10px;
   font-weight: 400;
   text-transform: uppercase;
   line-height: 1.2;
@@ -275,7 +273,7 @@ h3 {
 .mat-typography .mat-body-1,
 .mat-typography h4,
 h4 {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
+  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
   line-height: 1.2;
@@ -286,7 +284,7 @@ h4 {
 .mat-typography .mat-h5,
 .mat-typography h5,
 h5 {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
+  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
   text-decoration: underline;
@@ -298,7 +296,7 @@ h5 {
 .mat-typography .mat-h6,
 .mat-typography h6,
 h6 {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
+  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
   font-weight: 400;
   text-transform: none;
   text-decoration: underline;
@@ -312,7 +310,7 @@ h6 {
 .mat-typography .mat-body-2 p,
 .mat-typography p,
 p {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
+  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
   margin-block: 1rem;
   margin: 0 0 15px;
   line-height: 1.3;
@@ -322,14 +320,17 @@ p {
 // Theme CSS
 :root {
   font-size: 1.35rem;
+
   --section-2-color: #fba;
+
   color-scheme: dark;
+
   --sub-fonts: 0.8rem;
 }
 
 *,
-:after,
-:before {
+::after,
+::before {
   margin: 0;
   padding: 0;
   font: inherit;
@@ -361,12 +362,12 @@ body {
   padding: 5px 0;
   background-color: #0d0d0d;
   font-size: 100%;
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif;
+  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
   font-weight: 400;
   font-stretch: condensed;
   font-synthesis: none; /* Prevent synthetic bold/italic in Firefox */
   -moz-osx-font-smoothing: grayscale; /* Better rendering in Firefox */
-  text-rendering: optimizeLegibility;
+  text-rendering: optimizelegibility;
   line-height: 1.5;
   color: #79d;
 }
@@ -426,6 +427,7 @@ a:active {
   display: flex;
   min-height: 280px;
   position: relative;
+
   --frame-color: #c8f;
 }
 
@@ -564,7 +566,7 @@ a:active {
   justify-content: space-between;
   padding-top: 90px;
   background-color: #58e;
-  border-radius: 60px 0 0 0;
+  border-radius: 60px 0 0;
   height: 100%;
 }
 
@@ -595,7 +597,7 @@ a:active {
   background-color: #0d0d0d;
 }
 
-.right-frame-top:before {
+.right-frame-top::before {
   content: '';
   display: block;
   width: 60px;
@@ -607,7 +609,7 @@ a:active {
   z-index: -1;
 }
 
-.right-frame-top:after {
+.right-frame-top::after {
   content: '';
   display: block;
   width: 60px;
@@ -875,7 +877,6 @@ nav a,
   color: #0d0d0d;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
@@ -932,7 +933,7 @@ nav a:hover {
 .bar-7 {
   width: 150px;
   background-color: #8ff;
-  animation: resizeGroup1 60s linear infinite alternate;
+  animation: resize-group-1 60s linear infinite alternate;
 }
 
 .bar-3,
@@ -948,7 +949,7 @@ nav a:hover {
 
 .bar-4,
 .bar-9 {
-  animation: resizeGroup2 60s linear infinite alternate;
+  animation: resize-group-2 60s linear infinite alternate;
 }
 
 .bar-1,
@@ -1029,7 +1030,7 @@ nav a:hover {
   width: 200px;
   height: 10px;
   background-color: #0d0d0d;
-  border-radius: 0 0 10px 0;
+  border-radius: 0 0 10px;
 }
 
 .gap {
@@ -1044,7 +1045,7 @@ nav a:hover {
   position: relative;
 }
 
-.right-frame:before {
+.right-frame::before {
   content: '';
   display: block;
   width: 60px;
@@ -1056,13 +1057,13 @@ nav a:hover {
   z-index: -1;
 }
 
-.right-frame:after {
+.right-frame::after {
   content: '';
   display: block;
   width: 60px;
   height: 60px;
   background-color: #0d0d0d;
-  border-radius: 56px 0 0 0;
+  border-radius: 56px 0 0;
   position: absolute;
   left: 0;
   top: 22px;
@@ -1289,7 +1290,6 @@ button {
   color: #0d0d0d;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
-  -ms-user-select: none;
   user-select: none;
   cursor: pointer;
 }
@@ -1319,7 +1319,6 @@ button:hover {
   font-family: vars.$font-antonio;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
-  -ms-user-select: none;
   user-select: none;
   cursor: pointer;
 }
@@ -1397,7 +1396,7 @@ button:hover {
 .lcars-text-bar {
   display: flex;
   position: relative;
-  margin: 32px 0 8px 0;
+  margin: 32px 0 8px;
   overflow: visible;
   border-radius: 14px;
   height: 32px;
@@ -1640,7 +1639,7 @@ body,
 .mat-typography,
 .mat-button,
 .mat-card {
-  font-family: 'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
+  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif !important;
   line-height: 1.5;
   font-size: 1rem;
 }
@@ -1704,13 +1703,12 @@ html {
 
 .panel-1 a {
   display: block;
-  background-color: #ffaa00;
+  background-color: #fa0;
   padding: 82px 10px 15px 0;
   text-decoration: none;
   color: #0d0d0d;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
@@ -1758,7 +1756,6 @@ html {
   color: #0d0d0d;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
@@ -1882,7 +1879,7 @@ html {
   width: 160px;
   height: 50px;
   background-color: #0d0d0d;
-  border-radius: 30px 0 0 0;
+  border-radius: 30px 0 0;
 }
 
 .content {
@@ -2565,7 +2562,7 @@ button.gold {
 }
 
 // Media Queries
-@media only screen and (max-width: 1240px) {
+@media only screen and (width <= 1240px) {
   .bar-1,
   .bar-6 {
     width: 320px;
@@ -2584,12 +2581,12 @@ button.gold {
   }
 }
 
-@media only screen and (max-width: 1100px) {
-  .right-frame:after {
-    border-radius: 40px 0 0 0;
+@media only screen and (width <= 1100px) {
+  .right-frame::after {
+    border-radius: 40px 0 0;
   }
 
-  .right-frame-top:after {
+  .right-frame-top::after {
     border-radius: 0 0 0 40px;
   }
 
@@ -2615,7 +2612,7 @@ button.gold {
   }
 }
 
-@media only screen and (max-width: 1080px) {
+@media only screen and (width <= 1080px) {
   .cascade-wrapper {
     padding-left: 25px;
   }
@@ -2671,7 +2668,7 @@ button.gold {
   }
 }
 
-@media only screen and (max-width: 1020px) {
+@media only screen and (width <= 1020px) {
   .dc6,
   .dc3,
   .dc12,
@@ -2682,13 +2679,13 @@ button.gold {
   }
 }
 
-@media only screen and (max-width: 920px) {
+@media only screen and (width <= 920px) {
   .dc4 {
     display: none;
   }
 }
 
-@media only screen and (max-width: 890px) {
+@media only screen and (width <= 890px) {
   .left-frame-top,
   .left-frame {
     width: 130px;
@@ -2700,7 +2697,7 @@ button.gold {
   }
 
   .left-frame {
-    border-radius: 60px 0 0 0;
+    border-radius: 60px 0 0;
   }
 
   .scroll-top a {
@@ -2793,13 +2790,13 @@ button.gold {
   }
 }
 
-@media only screen and (max-width: 800px) {
+@media only screen and (width <= 800px) {
   .cascade-wrapper {
     display: none;
   }
 }
 
-@media only screen and (max-width: 790px) {
+@media only screen and (width <= 790px) {
   .dc5,
   .dc6,
   .grid-4 {
@@ -2807,13 +2804,13 @@ button.gold {
   }
 }
 
-@media only screen and (max-width: 760px) {
+@media only screen and (width <= 760px) {
   .cascade-wrapper {
     display: none;
   }
 }
 
-@media only screen and (max-width: 700px) {
+@media only screen and (width <= 700px) {
   .left-frame-top,
   .left-frame {
     width: 110px;
@@ -2825,7 +2822,7 @@ button.gold {
   }
 
   .left-frame {
-    border-radius: 50px 0 0 0;
+    border-radius: 50px 0 0;
   }
 
   .scroll-top a {
@@ -2897,29 +2894,29 @@ button.gold {
   .bar-9-inside {
     width: 100px;
     height: 8px;
-    border-radius: 0 0 5px 0;
+    border-radius: 0 0 5px;
   }
 }
 
-@media only screen and (max-width: 650px) {
+@media only screen and (width <= 650px) {
   :root {
     font-size: 1.3rem;
   }
 
-  .right-frame:before {
+  .right-frame::before {
     top: 16px;
   }
 
-  .right-frame:after {
-    border-radius: 30px 0 0 0;
+  .right-frame::after {
+    border-radius: 30px 0 0;
     top: 16px;
   }
 
-  .right-frame-top:before {
+  .right-frame-top::before {
     bottom: 16px;
   }
 
-  .right-frame-top:after {
+  .right-frame-top::after {
     border-radius: 0 0 0 30px;
     bottom: 16px;
   }
@@ -2947,7 +2944,7 @@ button.gold {
   }
 
   .left-frame {
-    border-radius: 60px 0 0 0;
+    border-radius: 60px 0 0;
   }
 
   .scroll-top a {
@@ -2991,7 +2988,7 @@ button.gold {
   }
 }
 
-@media only screen and (max-width: 610px) {
+@media only screen and (width <= 610px) {
   .data-cascade-button-group {
     column-gap: 0;
   }
@@ -3004,7 +3001,7 @@ button.gold {
   }
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (width <= 600px) {
   :root {
     font-size: 1.2rem;
   }
@@ -3054,7 +3051,7 @@ button.gold {
   }
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (width <= 500px) {
   body {
     padding: 0;
   }
@@ -3073,7 +3070,7 @@ button.gold {
   }
 
   .corner {
-    border-radius: 20px 0 0 0;
+    border-radius: 20px 0 0;
   }
 
   .runner {
@@ -3089,20 +3086,20 @@ button.gold {
     padding-left: 0;
   }
 
-  .right-frame:before {
+  .right-frame::before {
     top: 10px;
   }
 
-  .right-frame:after {
-    border-radius: 16px 0 0 0;
+  .right-frame::after {
+    border-radius: 16px 0 0;
     top: 10px;
   }
 
-  .right-frame-top:before {
+  .right-frame-top::before {
     bottom: 10px;
   }
 
-  .right-frame-top:after {
+  .right-frame-top::after {
     border-radius: 0 0 0 16px;
     bottom: 10px;
   }
@@ -3119,7 +3116,7 @@ button.gold {
   }
 
   .left-frame {
-    border-radius: 26px 0 0 0;
+    border-radius: 26px 0 0;
     padding-top: 50px;
   }
 
@@ -3279,14 +3276,14 @@ button.gold {
   }
 }
 
-@media only screen and (max-width: 395px) {
+@media only screen and (width <= 395px) {
   nav a {
     margin: 4px;
     width: 144px;
   }
 }
 
-@media only screen and (max-width: 388px) {
+@media only screen and (width <= 388px) {
   .bar-1,
   .bar-6 {
     width: 90px;

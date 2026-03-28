@@ -6,7 +6,7 @@
   background-color: vars.$lcars-grey-bg; // Fallback
   border-radius: 15px 15px 0 0;
   overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 30%);
   height: 100%;
   transition: transform 0.2s ease;
   min-height: 140px;
@@ -14,7 +14,7 @@
 
   .card-main {
     display: flex;
-    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    padding: 1.5rem 1.5rem 1rem;
     flex: 1;
     align-items: flex-start;
     justify-content: flex-start; // Text to the left
@@ -62,7 +62,7 @@
     grid-template-columns: 2rem 1fr 2rem;
     align-items: center;
     padding: 0.75rem 0;
-    background-color: rgba(0, 0, 0, 0.15);
+    background-color: rgb(0 0 0 / 15%);
     color: vars.$lcars-black;
     text-decoration: none;
     font-size: 0.75rem;
@@ -70,13 +70,13 @@
     font-weight: 700;
     letter-spacing: 0.5px;
     transition: background-color 0.2s ease;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    border-top: 1px solid rgb(0 0 0 / 5%);
     position: relative;
     z-index: 2;
     box-sizing: border-box;
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.25);
+      background-color: rgb(0 0 0 / 25%);
     }
 
     .cta-text {
@@ -95,40 +95,64 @@
   }
 
   // Size modifiers — cap the card width without overriding fluid grid/flex layouts
-  &.size-sm { width: 100%; max-width: 140px; }
-  &.size-md { width: 100%; max-width: 200px; }
-  &.size-lg { width: 100%; max-width: 280px; }
-  &.size-xl { width: 100%; max-width: 360px; }
+  &.size-sm {
+    width: 100%;
+    max-width: 140px;
+  }
+
+  &.size-md {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  &.size-lg {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  &.size-xl {
+    width: 100%;
+    max-width: 360px;
+  }
 
   // Theme Colors - Apply to background to match user screenshot
   &.sunflower {
     background-color: vars.$lcars-sunflower;
   }
+
   &.perano {
     background-color: vars.$lcars-perano;
   }
+
   &.bluey {
     background-color: vars.$lcars-bluey;
   }
+
   &.orange,
   &.atomic {
     background-color: vars.$lcars-orange;
   }
+
   &.green {
     background-color: vars.$lcars-green;
   }
+
   &.violet {
     background-color: vars.$lcars-violet;
   }
+
   &.gold {
     background-color: vars.$lcars-gold;
   }
+
   &.tangerine {
     background-color: vars.$lcars-tangerine;
   }
+
   &.cool {
     background-color: vars.$lcars-cool;
   }
+
   &.sky {
     background-color: vars.$lcars-sky;
   }

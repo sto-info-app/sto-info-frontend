@@ -45,6 +45,7 @@
   gap: 20px;
   cursor: pointer;
 }
+
 .account-card:hover {
   background-color: rgba(vars.$lcars-sunflower, 0.1);
 }
@@ -123,7 +124,7 @@
   background-color: vars.$lcars-sunflower;
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   #accounts-container {
     flex-direction: column;
   }

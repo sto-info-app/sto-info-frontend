@@ -17,7 +17,7 @@ ul {
 }
 
 input::placeholder {
-  color: #aaaaaa !important;
+  color: #aaa !important;
 }
 
 ul.no-bullets {
@@ -67,17 +67,17 @@ input {
   &:focus {
     outline: none;
     border-color: vars.$lcars-c48;
-    box-shadow: 0 0 5px rgba(102, 204, 255, 0.5);
+    box-shadow: 0 0 5px rgb(102 204 255 / 50%);
   }
 }
 
 input.errored {
-  border-color: #cc2233;
+  border-color: #c23;
 }
 
 .helper-error-text,
 .error-message-text {
-  color: #ff2200;
+  color: #f20;
 }
 
 .buttons-container {
@@ -123,7 +123,7 @@ button.lcars-btn,
 
   &:disabled {
     background-color: #344470 !important;
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: rgb(255 255 255 / 80%) !important;
     cursor: not-allowed;
   }
 }
@@ -135,7 +135,7 @@ button.lcars-btn,
 }
 
 .submit-button {
-  margin: 0px 8px 16px 8px;
+  margin: 0 8px 16px;
 }
 
 .buttons .full-width-btn-link,
@@ -155,8 +155,7 @@ button.lcars-btn,
 
 .buttons-row {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  flex-flow: row wrap;
   justify-content: center;
   gap: 0.75rem;
   margin-top: 5px !important;
@@ -180,7 +179,6 @@ button.lcars-btn,
     font-family: vars.$font-antonio;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
-    -ms-user-select: none;
     user-select: none;
     cursor: pointer;
 
@@ -269,10 +267,12 @@ button.lcars-btn,
     outline: none;
     appearance: none;
     width: 100%;
+
     // top: push text below label (container-top-pad + label-height + gap)
     // right: arrow space + container-right-pad
     // bottom/left: mirror container padding
     padding: 1.5rem 2.5rem 0.5rem 1rem;
+
     // Custom arrow using data URI SVG (black triangle, 8x5px)
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23000'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -294,9 +294,9 @@ button.lcars-btn,
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #ffaaaa;
-    background: rgba(10, 0, 0, 0.75);
-    border-top: 1px solid rgba(255, 80, 80, 0.3);
+    color: #faa;
+    background: rgb(10 0 0 / 75%);
+    border-top: 1px solid rgb(255 80 80 / 30%);
     border-radius: 0 0 15px 15px;
     margin-top: 0.1rem;
   }
@@ -305,36 +305,47 @@ button.lcars-btn,
   &.sunflower {
     background-color: vars.$lcars-sunflower;
   }
+
   &.perano {
     background-color: vars.$lcars-perano;
   }
+
   &.bluey {
     background-color: vars.$lcars-bluey;
   }
+
   &.orange {
     background-color: vars.$lcars-orange;
   }
+
   &.green {
     background-color: vars.$lcars-green;
   }
+
   &.violet {
     background-color: vars.$lcars-violet;
   }
+
   &.cardinal {
     background-color: vars.$lcars-cardinal;
   }
+
   &.cool {
     background-color: vars.$lcars-cool;
   }
+
   &.gold {
     background-color: vars.$lcars-gold;
   }
+
   &.tangerine {
     background-color: vars.$lcars-tangerine;
   }
+
   &.red {
     background-color: vars.$lcars-red;
   }
+
   &.sky {
     background-color: vars.$lcars-sky;
   }
@@ -344,13 +355,14 @@ button.lcars-btn,
 
 .lcars-input-container {
   --lci-color: #555; // fallback, overridden by variant classes
+
   display: flex;
   flex-direction: column;
   border-radius: 15px;
   overflow: hidden;
   width: 100%;
   box-sizing: border-box;
-  box-shadow: 0 1px 1px 0 rgba(255, 255, 255, 0.12);
+  box-shadow: 0 1px 1px 0 rgb(255 255 255 / 12%);
   margin-bottom: 0.75rem;
   background: transparent !important;
   border-bottom: 2px solid var(--lci-color);
@@ -376,7 +388,7 @@ button.lcars-btn,
     background: #1c1c1c;
     color: vars.$lcars-white;
     border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgb(255 255 255 / 8%);
     padding: 0.5rem 1rem;
     font-family: vars.$font-antonio;
     font-size: 0.9rem;
@@ -389,7 +401,7 @@ button.lcars-btn,
 
     &:last-child {
       border-radius: 0 10px 0 0;
-      box-shadow: 1px 0 0 0 rgba(255, 255, 255, 0.12);
+      box-shadow: 1px 0 0 0 rgb(255 255 255 / 12%);
     }
 
     &::placeholder {
@@ -413,9 +425,9 @@ button.lcars-btn,
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #ffaaaa;
-    background: rgba(10, 0, 0, 0.75);
-    border-top: 1px solid rgba(255, 80, 80, 0.3);
+    color: #faa;
+    background: rgb(10 0 0 / 75%);
+    border-top: 1px solid rgb(255 80 80 / 30%);
     border-radius: 0;
 
     &:last-child {
@@ -425,12 +437,11 @@ button.lcars-btn,
 
   // Remove number input spinners
   input[type='number'] {
-    -moz-appearance: textfield;
     appearance: textfield;
 
     &::-webkit-outer-spin-button,
     &::-webkit-inner-spin-button {
-      -webkit-appearance: none;
+      appearance: none;
       margin: 0;
     }
   }
@@ -445,36 +456,47 @@ button.lcars-btn,
   &.sunflower {
     --lci-color: #{vars.$lcars-sunflower};
   }
+
   &.perano {
     --lci-color: #{vars.$lcars-perano};
   }
+
   &.bluey {
     --lci-color: #{vars.$lcars-bluey};
   }
+
   &.orange {
     --lci-color: #{vars.$lcars-orange};
   }
+
   &.green {
     --lci-color: #{vars.$lcars-green};
   }
+
   &.violet {
     --lci-color: #{vars.$lcars-violet};
   }
+
   &.cardinal {
     --lci-color: #{vars.$lcars-cardinal};
   }
+
   &.cool {
     --lci-color: #{vars.$lcars-cool};
   }
+
   &.gold {
     --lci-color: #{vars.$lcars-gold};
   }
+
   &.tangerine {
     --lci-color: #{vars.$lcars-tangerine};
   }
+
   &.red {
     --lci-color: #{vars.$lcars-red};
   }
+
   &.sky {
     --lci-color: #{vars.$lcars-sky};
   }
@@ -529,7 +551,6 @@ button.lcars-btn,
   }
 
   .filter-select {
-    -webkit-appearance: none;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%23b3b3b3'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -567,7 +588,7 @@ button.lcars-btn,
 
   .lcars-text-bar {
     width: 100%;
-    margin: 32px 0 8px 0;
+    margin: 32px 0 8px;
   }
 
   .buttons {
@@ -577,9 +598,8 @@ button.lcars-btn,
 }
 
 // Processing bar on submitting button
-@keyframes progressBar {
-  0%,
-  100% {
+@keyframes progress-bar {
+  0% {
     background-position: 100% 50%;
   }
 
@@ -591,15 +611,10 @@ button.lcars-btn,
 .submitting,
 .submitting:disabled {
   position: relative;
-  background-image: linear-gradient(
-    90deg,
-    #2255ff 25%,
-    #88bbff 50%,
-    #2255ff 75%
-  );
+  background-image: linear-gradient(90deg, #25f 25%, #8bf 50%, #25f 75%);
   background-size: 400% 100%;
   background-position: 100% 50%;
-  animation: progressBar 2s linear infinite;
+  animation: progress-bar 2s linear infinite;
   transition: background 400ms ease-in-out;
 }
 
@@ -677,10 +692,12 @@ button.lcars-btn,
     background: vars.$faction-federation;
     color: #fff;
   }
+
   &.klingon {
     background: vars.$faction-klingon;
     color: #fff;
   }
+
   &.undecided {
     background: vars.$faction-undecided;
     color: #fff;
