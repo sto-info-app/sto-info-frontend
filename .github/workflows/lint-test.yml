@@ -177,6 +177,9 @@ jobs:
       - name: Run Linter
         run: npm run lint
 
+      - name: Run Style Linter
+        run: npm run lint:style
+
       - name: Run Tests (with coverage)
         run: npm run test:cov
 
