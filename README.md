@@ -35,6 +35,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![CodeFactor](https://www.codefactor.io/repository/github/sto-info-app/sto-info-frontend/badge)](https://www.codefactor.io/repository/github/sto-info-app/sto-info-frontend)
 
 ## Code metrics
 
