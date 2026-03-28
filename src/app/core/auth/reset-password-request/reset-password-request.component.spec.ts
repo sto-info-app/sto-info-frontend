@@ -132,7 +132,7 @@ describe('ResetPasswordRequestComponent', () => {
       authServiceSpy.isLoggedIn.mockReturnValue(false);
       fixture.detectChanges();
       const links = fixture.nativeElement.querySelectorAll('.buttons a');
-      const texts = Array.from(links).map((el: Element) =>
+      const texts = Array.from<Element>(links).map(el =>
         el.textContent?.trim(),
       );
       expect(texts).toContain('Login');
@@ -143,7 +143,7 @@ describe('ResetPasswordRequestComponent', () => {
       authServiceSpy.isLoggedIn.mockReturnValue(true);
       fixture.detectChanges();
       const links = fixture.nativeElement.querySelectorAll('.buttons a');
-      const texts = Array.from(links).map((el: Element) =>
+      const texts = Array.from<Element>(links).map(el =>
         el.textContent?.trim(),
       );
       expect(texts).toContain('Dashboard');
