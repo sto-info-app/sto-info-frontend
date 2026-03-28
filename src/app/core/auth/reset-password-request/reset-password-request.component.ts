@@ -35,7 +35,7 @@ export class ResetPasswordRequestComponent {
   // Allow constants to be used in the HTML
   errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
 
-  private readonly authService = inject(AuthService);
+  protected readonly authService = inject(AuthService);
   private readonly routingService = inject(RoutingService);
 
   validateEmail(email: string): boolean {
