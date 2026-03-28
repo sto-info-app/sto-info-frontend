@@ -12,6 +12,7 @@ describe('ResetPasswordRequestComponent', () => {
   let fixture: ComponentFixture<ResetPasswordRequestComponent>;
   let authServiceSpy: {
     resetPassword: jest.Mock;
+    isLoggedIn: jest.Mock;
   };
   let routingServiceSpy: {
     getLink: jest.Mock;
@@ -20,6 +21,7 @@ describe('ResetPasswordRequestComponent', () => {
   beforeEach(async () => {
     authServiceSpy = {
       resetPassword: jest.fn(),
+      isLoggedIn: jest.fn().mockReturnValue(false),
     };
     routingServiceSpy = {
       getLink: jest.fn(),
@@ -122,6 +124,30 @@ describe('ResetPasswordRequestComponent', () => {
     it('should get route link', () => {
       routingServiceSpy.getLink.mockReturnValue('/home');
       expect(component.getRouteLink('home')).toBe('/home');
+    });
+  });
+
+  describe('Auxiliary navigation', () => {
+    it('should render Login and Register links when not logged in', () => {
+      authServiceSpy.isLoggedIn.mockReturnValue(false);
+      fixture.detectChanges();
+      const links = fixture.nativeElement.querySelectorAll('.buttons a');
+      const texts = Array.from(links).map((el: Element) =>
+        el.textContent?.trim(),
+      );
+      expect(texts).toContain('Login');
+      expect(texts).toContain('Register');
+    });
+
+    it('should render Dashboard and Accounts links when logged in', () => {
+      authServiceSpy.isLoggedIn.mockReturnValue(true);
+      fixture.detectChanges();
+      const links = fixture.nativeElement.querySelectorAll('.buttons a');
+      const texts = Array.from(links).map((el: Element) =>
+        el.textContent?.trim(),
+      );
+      expect(texts).toContain('Dashboard');
+      expect(texts).toContain('Accounts');
     });
   });
 });
