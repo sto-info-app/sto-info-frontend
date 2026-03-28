@@ -10,7 +10,8 @@
       { "message": "Expected keyframe name to be kebab-case" }
     ],
     "scss/operator-no-newline-after": null,
-    "at-rule-no-deprecated": null
+    "at-rule-no-deprecated": null,
+    "property-no-vendor-prefix": [true, { "ignoreProperties": ["-webkit-user-select"] }]
   },
   "overrides": [
     {
