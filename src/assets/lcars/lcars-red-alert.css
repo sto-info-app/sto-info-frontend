@@ -4,21 +4,27 @@
   0% {
     color: #f00;
   }
+
   25% {
     color: #f00;
   }
+
   50% {
     color: #f00;
   }
+
   75% {
     color: #f00;
   }
+
   80% {
     color: #000;
   }
+
   90% {
     color: #000;
   }
+
   100% {
     color: #f7f7f7;
   }
@@ -28,21 +34,27 @@
   0% {
     background-color: #f7f7f7;
   }
+
   25% {
     background-color: #f7f7f7;
   }
+
   50% {
     background-color: #c00;
   }
+
   75% {
     background-color: #c00;
   }
+
   80% {
     background-color: #c00;
   }
+
   90% {
     background-color: #f7f7f7;
   }
+
   100% {
     background-color: #f7f7f7;
   }
@@ -93,6 +105,7 @@
     alert-red 1s infinite 0.5s,
     resizeGroup2 60s linear infinite alternate;
 }
+
 /* END: Animate Alert & Moving Bars */
 
 .button#top-left a {
@@ -204,8 +217,7 @@
   margin-top: 10px;
 }
 
-/* .panel-1, */
-/* .panel-2, */
+/* .panel-1, .panel-2, */
 .panel-3,
 .panel-4,
 .panel-5,
@@ -279,19 +291,19 @@ hr {
 }
 
 footer {
-  background: linear-gradient(#ff8866 50%, #dd4444 50%);
+  background: linear-gradient(#f86 50%, #d44 50%);
 }
 
 #footer-panel {
-  background-color: #ff5555;
+  background-color: #f55;
 }
 
 #footer-inside::before {
-  background-color: #ff8866;
+  background-color: #f86;
 }
 
 #footer-inside::after {
-  background-color: #dd4444;
+  background-color: #d44;
 }
 
 #footer-text a {
