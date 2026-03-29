@@ -44,7 +44,16 @@ export default defineConfig([
     },
 
     rules: {
-      'prettier/prettier': 'error',
+      'prettier/prettier': [
+        'error',
+        {
+          singleQuote: true,
+          trailingComma: 'all',
+          bracketSpacing: true,
+          jsxBracketSameLine: true,
+          parser: 'flow',
+        },
+      ],
     },
   },
   {
