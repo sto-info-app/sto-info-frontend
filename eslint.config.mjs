@@ -42,18 +42,6 @@ export default defineConfig([
       ecmaVersion: 'latest',
       sourceType: 'module',
     },
-
-    rules: {
-      'prettier/prettier': [
-        'error',
-        {
-          singleQuote: true,
-          trailingComma: 'all',
-          bracketSpacing: true,
-          bracketSameLine: true,
-        },
-      ],
-    },
   },
   {
     files: ['**/*.ts'],
