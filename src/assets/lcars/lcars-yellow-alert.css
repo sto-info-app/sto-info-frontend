@@ -1,4 +1,5 @@
 @charset "utf-8";
+@import './lcars-alert-shared.css';
 
 @keyframes data-cascade-colour-change {
   0% {
@@ -155,30 +156,6 @@
 
 .left-frame {
   background-color: #e6b800;
-}
-
-.data-cascade .row-1,
-.data-cascade .row-3,
-.data-cascade .row-4,
-.data-cascade .row-6,
-.data-cascade#niagara .row-1,
-.data-cascade#niagara .row-2,
-.data-cascade#niagara .row-3,
-.data-cascade#niagara .row-4,
-.data-cascade#niagara .row-5,
-.data-cascade#niagara .row-6,
-.data-cascade#orinoco .row-1,
-.data-cascade#orinoco .row-2,
-.data-cascade#orinoco .row-5,
-.data-cascade#orinoco .row-6 {
-  animation: data-cascade-colour-change 2s infinite;
-}
-
-.data-cascade .row-2,
-.data-cascade .row-5,
-.data-cascade#orinoco .row-3,
-.data-cascade#orinoco .row-4 {
-  animation: data-cascade-colour-change 3s infinite;
 }
 
 .data-cascade#frozen .row-1,
