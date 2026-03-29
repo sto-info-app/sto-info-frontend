@@ -30,9 +30,14 @@
         }
 
         .rank-icon {
-          height: 14px;
           width: auto;
-          filter: drop-shadow(0 0 5px rgb(0 0 0 / 50%));
+          background-color: rgb(255 255 255 / 15%);
+          border-radius: 10px;
+          padding: 6px 10px;
+          box-shadow:
+            inset 0 1px 0 rgb(255 255 255 / 25%),
+            inset 0 -1px 0 rgb(0 0 0 / 30%),
+            0 2px 4px rgb(0 0 0 / 40%);
         }
       }
 
