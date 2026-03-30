@@ -4,23 +4,24 @@
 #accounts-container {
   display: flex;
   flex-direction: row;
-  gap: 20px;
-  padding: 20px;
+  gap: 1rem;
+  padding: 1rem;
 }
 
 #accounts-main-column {
-  flex: 3;
+  flex: 2;
+  flex-basis: 69%;
 }
 
 #accounts-side-column {
   flex: 1;
+  flex-basis: 30%;
 }
 
 .accounts-lcars-text-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
 }
 
 .accounts-inner-content {
@@ -44,6 +45,7 @@
   gap: 20px;
   cursor: pointer;
 }
+
 .account-card:hover {
   background-color: rgba(vars.$lcars-sunflower, 0.1);
 }
@@ -122,7 +124,7 @@
   background-color: vars.$lcars-sunflower;
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   #accounts-container {
     flex-direction: column;
   }

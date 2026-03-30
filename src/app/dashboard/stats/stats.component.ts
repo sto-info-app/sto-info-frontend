@@ -3,10 +3,13 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { takeUntil } from 'rxjs';
-import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { StatInfoCardComponent } from 'src/app/shared/components/stat-info-card/stat-info-card.component';
-import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  APP_ROUTE_TITLES,
+  APP_ROUTES,
+} from 'src/app/shared/constants/app-routing.constants';
 import { StatsBaseComponent } from './stats-base.component';
 
 // Re-export for consumers that import these types from this file.
@@ -87,6 +90,7 @@ export const STAT_TILES: StatTile[] = [
 })
 export class StatsComponent extends StatsBaseComponent implements OnInit {
   appRoutes = APP_ROUTES;
+  appRouteTitles = APP_ROUTE_TITLES;
   statTiles = STAT_TILES;
 
   ngOnInit(): void {

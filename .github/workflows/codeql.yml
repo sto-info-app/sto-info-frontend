@@ -20,7 +20,7 @@ jobs:
       src_changed: ${{ steps.filter.outputs.src_changed }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: dorny/paths-filter@9d7afb8d214ad99e78fbd4247752c4caed2b6e4c # v4.0.0
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: filter
         with:
           filters: |
@@ -91,7 +91,7 @@ jobs:
       # Initialises the CodeQL tools for scanning.
       - name: Initialise CodeQL
         if: steps.codeql-default-setup.outputs.enabled != 'true'
-        uses: github/codeql-action/init@0d579ffd059c29b07949a3cce3983f0780820c98 # v4.32.6
+        uses: github/codeql-action/init@b8bb9f28b8d3f992092362369c57161b755dea45 # v4.35.0
         with:
           languages: ${{ matrix.language }}
           # If you wish to specify custom queries, you can do so here or in a config file.
@@ -103,11 +103,11 @@ jobs:
       # but this step still helps in preparing the environment).
       - name: Autobuild
         if: steps.codeql-default-setup.outputs.enabled != 'true'
-        uses: github/codeql-action/autobuild@0d579ffd059c29b07949a3cce3983f0780820c98 # v4.32.6
+        uses: github/codeql-action/autobuild@b8bb9f28b8d3f992092362369c57161b755dea45 # v4.35.0
 
       - name: Perform CodeQL Analysis
         if: steps.codeql-default-setup.outputs.enabled != 'true'
-        uses: github/codeql-action/analyze@0d579ffd059c29b07949a3cce3983f0780820c98 # v4.32.6
+        uses: github/codeql-action/analyze@b8bb9f28b8d3f992092362369c57161b755dea45 # v4.35.0
         with:
           category: '/language:${{matrix.language}}'
 

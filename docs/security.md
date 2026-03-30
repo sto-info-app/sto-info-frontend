@@ -16,30 +16,27 @@ Use overrides when:
 
 ## Active overrides
 
-| Override key       | Forced version | Scope                     | Notes                                                               |
-| ------------------ | -------------- | ------------------------- | ------------------------------------------------------------------- |
-| `eslint`           | `9.37.0`       | Global package resolution | Required for current lint toolchain peer compatibility.             |
-| `minimatch@<3.1.4` | `3.1.5`        | Legacy `minimatch` range  | Prevents installation of vulnerable 3.x versions.                   |
-| `tmp`              | `0.2.5`        | Global package resolution | Forces patched `tmp` release for legacy transitive ranges.          |
-| `undici`           | `7.24.2`       | Global package resolution | Addresses high-severity `undici` advisories in transitive dev deps. |
-| `flatted`          | `3.4.1`        | Global package resolution | Addresses high-severity `flatted` advisory in transitive dev deps.  |
+| Override key     | Forced version | Scope                     | Notes                                                                                                                       |
+| ---------------- | -------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `tmp`            | `0.2.5`        | Global package resolution | Forces patched `tmp` release for legacy transitive ranges (`^0.1.0`, `^0.0.33`).                                           |
+| `undici`         | `7.24.5`       | Global package resolution | `@angular/build` pins `7.24.4` exactly; override ensures latest patch is used across all consumers.                        |
+| `picomatch`      | `4.0.4`        | Global package resolution | `@angular/build`, `@angular/cli`, and related devkit packages pull in 4.0.0–4.0.3 (GHSA-c2c7-rcm5-vvqj, GHSA-3v7f-55p6-f55p); 4.0.4 contains the fix. Dev-only. |
+| `brace-expansion`| `5.0.5`        | Global package resolution | Jest, ESLint, `@lhci/cli`, and `serve` all pull in `<5.0.5` (GHSA-f886-m6hf-6m8v); 5.0.5 contains the fix. Dev-only.     |
 
 ## Removed overrides
 
-The following overrides were removed because they are no longer required by the resolved dependency graph:
+The following overrides were removed because they are no longer required:
 
-- `ajv@^8.0.0`
-- `minimatch@>=10.0.0 <10.2.3`
-- `@stryker-mutator/core -> minimatch`
-- `express-rate-limit`
-- `underscore`
+- **2026-03-21**: `flatted: 3.4.1` — Removed; the pin was itself in the vulnerable range (GHSA-rf6f-7fwh-wjgh, prototype pollution in `<=3.4.1`). `flat-cache`'s `^3.2.9` constraint now naturally resolves to `3.4.2` which contains the fix.
+- **2026-03-17**: `eslint: 9.37.0` — Upgraded to eslint@^10.0.3. Peer-dependencies are now properly resolved in v10.x.
+- **2026-03-17**: `minimatch@<3.1.4` — No longer needed; eslint v10.x and other dependencies now resolve properly.
 
 ## Verification
 
 Use these commands to confirm overrides are applied:
 
 ```bash
-npm ls minimatch tmp undici flatted eslint
+npm ls tmp undici
 npm audit --omit=dev
 npm audit
 ```
@@ -49,8 +46,8 @@ If `npm ls` shows versions outside the table above, the lockfile may be stale or
 Current expected audit state:
 
 - `npm audit --omit=dev`: `0 vulnerabilities`.
-- `npm audit`: moderate-only findings in Lighthouse CI transitive dependencies (`@lhci/cli -> lighthouse -> puppeteer-core -> extract-zip -> yauzl`).
-- `npm audit fix --force` proposes downgrading `@lhci/cli` to `0.12.0`, which is a breaking change and currently not accepted.
+- `npm audit`: `0 vulnerabilities` (confirmed as of 2026-03-26).
+- All production and dev dependencies are vulnerability-free with current overrides in place.
 
 ## Update process
 

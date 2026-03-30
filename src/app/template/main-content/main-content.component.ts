@@ -34,6 +34,7 @@ import { SideBarComponent } from '../side-bar/side-bar.component';
 @Component({
   selector: 'app-main-content',
   templateUrl: './main-content.component.html',
+  styleUrl: './main-content.component.scss',
   standalone: true,
   imports: [
     SideBarComponent,

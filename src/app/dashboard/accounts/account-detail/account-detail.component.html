@@ -84,14 +84,14 @@
                   <span class="character-name"
                     >{{ character.handle }} (Lvl {{ character.level }})</span
                   >
-                  @if (character.faction?.iconUrl) {
+                  @if (character.recruitType?.iconUrl) {
                     <img
-                      [src]="character.faction!.iconUrl!"
-                      class="faction-icon"
-                      alt="Faction Icon"
-                      title="Faction Icon"
-                      width="20"
-                      height="20" />
+                      [src]="character.recruitType!.iconUrl!"
+                      class="recruit-type-icon"
+                      alt="{{ character.recruitType!.name + ' Recruit' }}"
+                      title="{{ character.recruitType!.name + ' Recruit' }}"
+                      width="40"
+                      height="40" />
                   }
                 </div>
                 <div class="character-main-area">
@@ -111,15 +111,21 @@
                   <div
                     class="character-details"
                     [routerLink]="getCharacterLink(character)">
+                    @if (character.faction?.iconUrl) {
+                      <img
+                        [src]="character.faction!.iconUrl!"
+                        class="faction-icon-watermark"
+                        alt="{{ 'Faction: ' + character.faction!.name }}"
+                        title="{{ 'Faction: ' + character.faction!.name }}" />
+                    }
                     <div class="character-body">
                       <div class="character-rank-row">
                         @if (character.rank?.iconUrl) {
                           <img
                             [src]="character.rank!.iconUrl"
                             class="rank-icon-mini"
-                            height="14"
-                            alt="Rank"
-                            title="Rank" />
+                            alt="{{ 'Rank: ' + character.rank!.title }}"
+                            title="{{ 'Rank: ' + character.rank!.title }}" />
                         }
                         <span class="rank-name">{{
                           character.rank?.title || 'Unknown Rank'
@@ -160,12 +166,13 @@
       <div class="error-container">
         <app-lcars-error-message
           [message]="errorMessage"></app-lcars-error-message>
-        <button
-          mat-raised-button
-          color="primary"
-          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)">
-          Back to Accounts
-        </button>
+        <div class="buttons-row">
+          <a
+            class="lcars-btn-auto sunflower"
+            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)">
+            Back to Accounts
+          </a>
+        </div>
       </div>
     }
   </div>
@@ -305,12 +312,12 @@
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
         class="full-width-btn-link sunflower"
-        >Back to Accounts</a
+        >{{ appRouteTitles.STO_DASHBOARD_ACCOUNTS }}</a
       >
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
         class="full-width-btn-link bluey"
-        >Return to Dashboard</a
+        >{{ appRouteTitles.STO_DASHBOARD }}</a
       >
     </div>
   </div>

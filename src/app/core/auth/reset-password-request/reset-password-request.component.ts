@@ -7,7 +7,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { FORM_ERROR_INVALID_EMAIL_FORMAT } from 'src/app/shared/constants/error-messages.constants';
-import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
+import { validateEmail } from 'src/app/shared/_helpers/validate-email';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { AuthService } from '../auth.service';
 
@@ -29,26 +29,21 @@ export class ResetPasswordRequestComponent {
   errorMessage = '';
   successMessage = '';
   inputsValid = false;
+  emailTouched = false;
   appRoutes = APP_ROUTES;
 
   // Allow constants to be used in the HTML
   errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
 
-  private readonly authService = inject(AuthService);
+  protected readonly authService = inject(AuthService);
   private readonly routingService = inject(RoutingService);
 
   validateEmail(email: string): boolean {
-    return EMAIL_PATTERN.test(email);
+    return validateEmail(email);
   }
 
   validateInputs(): void {
-    if (this.validateEmail(this.email)) {
-      this.inputsValid = true;
-      this.errorMessage = '';
-    } else {
-      this.inputsValid = false;
-      this.errorMessage = 'Invalid email format';
-    }
+    this.inputsValid = validateEmail(this.email);
   }
 
   onPasswordReset(): void {

@@ -95,6 +95,11 @@ export class StatDetailComponent extends StatsBaseComponent implements OnInit {
     return this.items.some(item => item.count > 0);
   }
 
+  /** Returns whether there are any zero-count items in the results. */
+  get hasZeros(): boolean {
+    return this.items.some(item => item.count === 0);
+  }
+
   /** Toggles the visibility of items with zero counts. */
   toggleHideZeros(): void {
     this.hideZeros = !this.hideZeros;

@@ -1,24 +1,31 @@
 @charset "utf-8";
+@import './lcars-alert-shared.css';
 
 @keyframes data-cascade-colour-change {
   0% {
     color: #0f0;
   }
+
   25% {
     color: #0f0;
   }
+
   50% {
     color: #0f0;
   }
+
   75% {
     color: #0f0;
   }
+
   80% {
     color: #000;
   }
+
   90% {
     color: #000;
   }
+
   100% {
     color: #f7f7f7;
   }
@@ -28,21 +35,27 @@
   0% {
     background-color: #f7f7f7;
   }
+
   25% {
     background-color: #f7f7f7;
   }
+
   50% {
     background-color: #0c0;
   }
+
   75% {
     background-color: #0c0;
   }
+
   80% {
     background-color: #0c0;
   }
+
   90% {
     background-color: #f7f7f7;
   }
+
   100% {
     background-color: #f7f7f7;
   }
@@ -93,6 +106,7 @@
     alert-green 1s infinite 0.5s,
     resizeGroup2 60s linear infinite alternate;
 }
+
 /* END: Animate Alert & Moving Bars */
 
 .button#top-left a {
@@ -144,30 +158,6 @@
   background-color: #0c0;
 }
 
-.data-cascade .row-1,
-.data-cascade .row-3,
-.data-cascade .row-4,
-.data-cascade .row-6,
-.data-cascade#niagara .row-1,
-.data-cascade#niagara .row-2,
-.data-cascade#niagara .row-3,
-.data-cascade#niagara .row-4,
-.data-cascade#niagara .row-5,
-.data-cascade#niagara .row-6,
-.data-cascade#orinoco .row-1,
-.data-cascade#orinoco .row-2,
-.data-cascade#orinoco .row-5,
-.data-cascade#orinoco .row-6 {
-  animation: data-cascade-colour-change 2s infinite;
-}
-
-.data-cascade .row-2,
-.data-cascade .row-5,
-.data-cascade#orinoco .row-3,
-.data-cascade#orinoco .row-4 {
-  animation: data-cascade-colour-change 3s infinite;
-}
-
 .data-cascade#frozen .row-1,
 .data-cascade#frozen .row-2,
 .data-cascade#frozen .row-3,
@@ -204,8 +194,7 @@
   margin-top: 10px;
 }
 
-/* .panel-1, */
-/* .panel-2, */
+/* .panel-1, .panel-2, */
 .panel-3,
 .panel-4,
 .panel-5,
@@ -279,19 +268,19 @@ hr {
 }
 
 footer {
-  background: linear-gradient(#88ff66 50%, #44dd44 50%);
+  background: linear-gradient(#8f6 50%, #4d4 50%);
 }
 
 #footer-panel {
-  background-color: #55ff55;
+  background-color: #5f5;
 }
 
 #footer-inside::before {
-  background-color: #88ff66;
+  background-color: #8f6;
 }
 
 #footer-inside::after {
-  background-color: #44dd44;
+  background-color: #4d4;
 }
 
 #footer-text a {

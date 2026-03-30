@@ -8,7 +8,9 @@
     </div>
     @if (data.character) {
       <div class="lcars-profile-pic-message">
-        <div class="lcars-pic-layout">
+        <div
+          class="lcars-pic-layout"
+          [class.has-image]="imageChangedEvent">
           <div class="lcars-pic-main-col">
             <input
               type="file"
@@ -29,47 +31,54 @@
                 (loadImageFailed)="loadImageFailed()"></image-cropper>
             }
           </div>
-          <div class="lcars-pic-side-col">
-            @if (errorMessage) {
-              <app-lcars-error-message
-                title="Transmission Error"
-                [message]="errorMessage"></app-lcars-error-message>
-            }
-            @if (croppedImage && !errorMessage) {
-              <div class="lcars-profile-pic-preview">
-                <div class="lcars-text-bar">
-                  <span>Picture Preview</span>
+          @if (imageChangedEvent) {
+            <div class="lcars-pic-side-col">
+              @if (errorMessage) {
+                <app-lcars-error-message
+                  title="Transmission Error"
+                  [message]="errorMessage"></app-lcars-error-message>
+              }
+              @if (croppedImage && !errorMessage) {
+                <div class="lcars-profile-pic-preview">
+                  <div class="lcars-text-bar">
+                    <span>Picture Preview</span>
+                  </div>
+                  <div class="cropped-image-container">
+                    <img
+                      [src]="croppedImage"
+                      id="cropped-image-preview"
+                      alt="Your cropped selection"
+                      title="Your cropped selection" />
+                  </div>
                 </div>
-                <div class="cropped-image-container">
-                  <img
-                    [src]="croppedImage"
-                    id="cropped-image-preview"
-                    alt="Your cropped selection"
-                    title="Your cropped selection" />
-                </div>
-              </div>
-            }
-            <div class="lcars-profile-pic-buttons">
-              <div class="buttons-container">
-                <button
-                  type="submit"
-                  class="lcars-btn submit-button sunflower"
-                  mat-button
-                  [disabled]="!croppedImage || isSubmitting || errorMessage"
-                  (click)="onUploadImageClick(); $event.preventDefault()">
-                  Upload
-                </button>
-                <button
-                  type="button"
-                  class="lcars-btn red"
-                  mat-button
-                  mat-dialog-close
-                  [disabled]="isSubmitting"
-                  (click)="onCloseClick()">
-                  Close
-                </button>
-              </div>
+              }
             </div>
+          }
+        </div>
+        @if (!imageChangedEvent && errorMessage) {
+          <app-lcars-error-message
+            title="Transmission Error"
+            [message]="errorMessage"></app-lcars-error-message>
+        }
+        <div class="lcars-profile-pic-buttons">
+          <div class="buttons-container">
+            <button
+              type="submit"
+              class="lcars-btn submit-button sunflower"
+              mat-button
+              [disabled]="!croppedImage || isSubmitting || errorMessage"
+              (click)="onUploadImageClick(); $event.preventDefault()">
+              Upload
+            </button>
+            <button
+              type="button"
+              class="lcars-btn red"
+              mat-button
+              mat-dialog-close
+              [disabled]="isSubmitting"
+              (click)="onCloseClick()">
+              Close
+            </button>
           </div>
         </div>
       </div>

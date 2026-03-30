@@ -4,6 +4,7 @@
 :host {
   display: block;
   width: 100%;
+  min-width: 600px;
 }
 
 .lcars-profile-pic-container {
@@ -15,11 +16,14 @@
 
   .lcars-pic-layout {
     display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 30px;
+    flex-direction: column;
     width: 100%;
-    align-items: flex-start;
+
+    &.has-image {
+      flex-flow: row nowrap;
+      gap: 30px;
+      align-items: flex-start;
+    }
   }
 
   .lcars-pic-main-col {
@@ -69,6 +73,7 @@
     .lcars-text-bar {
       width: 100%;
       margin: 20px 0;
+
       span {
         white-space: nowrap;
       }
@@ -77,5 +82,9 @@
     .lcars-profile-pic-message {
       width: 100%;
     }
+  }
+
+  .lcars-profile-pic-buttons {
+    margin-top: 20px;
   }
 }

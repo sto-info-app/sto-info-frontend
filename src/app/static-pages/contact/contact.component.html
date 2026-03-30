@@ -2,7 +2,7 @@
   <app-loading-bar loadingText="Sending message"></app-loading-bar>
 }
 
-<div>
+<div id="contact-us-page">
   <h1>Contact us</h1>
   <p>
     Use the form below to send feedback, ask a question, or get involved with
@@ -68,7 +68,9 @@
         }
       </div>
 
-      <div class="lcars-select-container cool">
+      <div
+        id="topic-dropdown"
+        class="lcars-select-container cool">
         <span class="select-label">Topic</span>
         <select
           id="contactTopic"
@@ -109,13 +111,15 @@
         }
       </div>
 
-      <button
-        type="submit"
-        class="submit-button"
-        [disabled]="contactForm.invalid || isSubmitting"
-        [ngClass]="{ submitting: isSubmitting }">
-        Send message
-      </button>
+      <div class="buttons-container">
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="contactForm.invalid || isSubmitting"
+          [ngClass]="{ submitting: isSubmitting }">
+          Send message
+        </button>
+      </div>
     </form>
   </div>
 </div>

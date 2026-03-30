@@ -24,7 +24,7 @@ import {
   MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
   MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT,
 } from 'src/app/shared/constants/error-messages.constants';
-import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
+import { validateEmail } from 'src/app/shared/_helpers/validate-email';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
 import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -58,6 +58,7 @@ export class LoginComponent implements OnDestroy {
   errorMessage = '';
   inputsValid = false;
   isSubmitting = false;
+  emailTouched = false;
 
   private readonly sharedDataService = inject(SharedDataService);
   private readonly authService = inject(AuthService);
@@ -147,8 +148,7 @@ export class LoginComponent implements OnDestroy {
   }
 
   validateEmail(email: string): boolean {
-    const regex = new RegExp(EMAIL_PATTERN);
-    return regex.test(email);
+    return validateEmail(email);
   }
 
   private applyErrorStylesheet(httpStatus?: number) {
