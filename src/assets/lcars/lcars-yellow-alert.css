@@ -1,24 +1,31 @@
 @charset "utf-8";
+@import './lcars-alert-shared.css';
 
 @keyframes data-cascade-colour-change {
   0% {
-    color: #ffcc00;
+    color: #fc0;
   }
+
   25% {
-    color: #ffcc00;
+    color: #fc0;
   }
+
   50% {
-    color: #ffcc00;
+    color: #fc0;
   }
+
   75% {
-    color: #ffcc00;
+    color: #fc0;
   }
+
   80% {
     color: #000;
   }
+
   90% {
     color: #000;
   }
+
   100% {
     color: #f7f7f7;
   }
@@ -28,21 +35,27 @@
   0% {
     background-color: #f7f7f7;
   }
+
   25% {
     background-color: #f7f7f7;
   }
+
   50% {
     background-color: #e6b800;
   }
+
   75% {
     background-color: #e6b800;
   }
+
   80% {
     background-color: #e6b800;
   }
+
   90% {
     background-color: #f7f7f7;
   }
+
   100% {
     background-color: #f7f7f7;
   }
@@ -93,6 +106,7 @@
     alert-yellow 1s infinite 0.5s,
     resizeGroup2 60s linear infinite alternate;
 }
+
 /* END: Animate Alert & Moving Bars */
 
 .button#top-left a {
@@ -106,7 +120,7 @@
 }
 
 .button#top-right a {
-  background-color: #ffcc00;
+  background-color: #fc0;
 }
 
 .button#bottom-right a {
@@ -144,35 +158,11 @@
   background-color: #e6b800;
 }
 
-.data-cascade .row-1,
-.data-cascade .row-3,
-.data-cascade .row-4,
-.data-cascade .row-6,
-.data-cascade#niagara .row-1,
-.data-cascade#niagara .row-2,
-.data-cascade#niagara .row-3,
-.data-cascade#niagara .row-4,
-.data-cascade#niagara .row-5,
-.data-cascade#niagara .row-6,
-.data-cascade#orinoco .row-1,
-.data-cascade#orinoco .row-2,
-.data-cascade#orinoco .row-5,
-.data-cascade#orinoco .row-6 {
-  animation: data-cascade-colour-change 2s infinite;
-}
-
-.data-cascade .row-2,
-.data-cascade .row-5,
-.data-cascade#orinoco .row-3,
-.data-cascade#orinoco .row-4 {
-  animation: data-cascade-colour-change 3s infinite;
-}
-
 .data-cascade#frozen .row-1,
 .data-cascade#frozen .row-2,
 .data-cascade#frozen .row-3,
 .data-cascade#frozen .row-6 {
-  color: #ffcc00;
+  color: #fc0;
 }
 
 .data-cascade#frozen .row-4 {
@@ -204,8 +194,7 @@
   margin-top: 10px;
 }
 
-/* .panel-1, */
-/* .panel-2, */
+/* .panel-1, .panel-2, */
 .panel-3,
 .panel-4,
 .panel-5,
@@ -222,7 +211,7 @@
 }
 
 code {
-  color: #ffcc00;
+  color: #fc0;
 }
 
 hr {
@@ -234,12 +223,12 @@ hr {
 }
 
 .buttons a {
-  background-color: #ffcc00;
+  background-color: #fc0;
   color: #000;
 }
 
 .buttons a:nth-child(odd) {
-  background-color: #ffcc00;
+  background-color: #fc0;
 }
 
 .buttons a:nth-child(even) {
@@ -251,7 +240,7 @@ hr {
 }
 
 .alert-red {
-  background-color: #ffcc00 !important;
+  background-color: #fc0 !important;
 }
 
 .sidebar-buttons a {
@@ -260,8 +249,8 @@ hr {
 
 .lcars-bar {
   background-color: #000;
-  border-right: 18px solid #ffcc00;
-  border-left: 18px solid #ffcc00;
+  border-right: 18px solid #fc0;
+  border-left: 18px solid #fc0;
 }
 
 .lcars-bar-inner {
@@ -274,12 +263,12 @@ hr {
 
 .lcars-text-bar {
   background-color: #e6b800;
-  border-right: 28px solid #ffcc00;
-  border-left: 28px solid #ffcc00;
+  border-right: 28px solid #fc0;
+  border-left: 28px solid #fc0;
 }
 
 footer {
-  background: linear-gradient(#ffe066 50%, #cc9900 50%);
+  background: linear-gradient(#ffe066 50%, #c90 50%);
 }
 
 #footer-panel {
@@ -291,9 +280,9 @@ footer {
 }
 
 #footer-inside::after {
-  background-color: #cc9900;
+  background-color: #c90;
 }
 
 #footer-text a {
-  color: #ffcc00;
+  color: #fc0;
 }

@@ -42,10 +42,6 @@ export default defineConfig([
       ecmaVersion: 'latest',
       sourceType: 'module',
     },
-
-    rules: {
-      'prettier/prettier': 'error',
-    },
   },
   {
     files: ['**/*.ts'],

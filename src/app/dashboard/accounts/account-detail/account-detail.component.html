@@ -84,14 +84,14 @@
                   <span class="character-name"
                     >{{ character.handle }} (Lvl {{ character.level }})</span
                   >
-                  @if (character.faction?.iconUrl) {
+                  @if (character.recruitType?.iconUrl) {
                     <img
-                      [src]="character.faction!.iconUrl!"
-                      class="faction-icon"
-                      alt="Faction Icon"
-                      title="Faction Icon"
-                      width="20"
-                      height="20" />
+                      [src]="character.recruitType!.iconUrl!"
+                      class="recruit-type-icon"
+                      alt="{{ character.recruitType!.name + ' Recruit' }}"
+                      title="{{ character.recruitType!.name + ' Recruit' }}"
+                      width="40"
+                      height="40" />
                   }
                 </div>
                 <div class="character-main-area">
@@ -111,15 +111,21 @@
                   <div
                     class="character-details"
                     [routerLink]="getCharacterLink(character)">
+                    @if (character.faction?.iconUrl) {
+                      <img
+                        [src]="character.faction!.iconUrl!"
+                        class="faction-icon-watermark"
+                        alt="{{ 'Faction: ' + character.faction!.name }}"
+                        title="{{ 'Faction: ' + character.faction!.name }}" />
+                    }
                     <div class="character-body">
                       <div class="character-rank-row">
                         @if (character.rank?.iconUrl) {
                           <img
                             [src]="character.rank!.iconUrl"
                             class="rank-icon-mini"
-                            height="14"
-                            alt="Rank"
-                            title="Rank" />
+                            alt="{{ 'Rank: ' + character.rank!.title }}"
+                            title="{{ 'Rank: ' + character.rank!.title }}" />
                         }
                         <span class="rank-name">{{
                           character.rank?.title || 'Unknown Rank'

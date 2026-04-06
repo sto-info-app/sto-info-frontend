@@ -49,7 +49,7 @@
   gap: 1rem;
   margin-bottom: 2rem;
 
-  @media (max-width: 700px) {
+  @media (width <= 700px) {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -64,7 +64,7 @@
     color: #000;
     text-decoration: none;
     font-weight: 700;
-    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 3px 7px rgb(0 0 0 / 25%);
     transition:
       transform 0.2s ease,
       filter 0.2s ease;
@@ -89,27 +89,35 @@
     &.gold {
       background-color: vars.$lcars-gold;
     }
+
     &.perano {
       background-color: vars.$lcars-perano;
     }
+
     &.cool {
       background-color: vars.$lcars-cool;
     }
+
     &.sunflower {
       background-color: vars.$lcars-sunflower;
     }
+
     &.violet {
       background-color: vars.$lcars-violet;
     }
+
     &.green {
       background-color: vars.$lcars-green;
     }
+
     &.tangerine {
       background-color: vars.$lcars-tangerine;
     }
+
     &.sky {
       background-color: vars.$lcars-sky;
     }
+
     &.bluey {
       background-color: vars.$lcars-bluey;
     }

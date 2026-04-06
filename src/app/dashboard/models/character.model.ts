@@ -42,6 +42,7 @@ export interface Rank {
 export interface GeneralFaction {
   id: string;
   name: string;
+  iconUrl?: string | null;
 }
 
 export interface Faction {
@@ -64,6 +65,7 @@ export interface CharacterClass {
 export interface RecruitType {
   id: string;
   name: string;
+  iconUrl?: string | null;
 }
 
 export interface Species {
