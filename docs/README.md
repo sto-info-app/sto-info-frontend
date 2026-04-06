@@ -42,6 +42,20 @@ Supporting docs:
 - Node.js version compatible with [package.json](../package.json) engines (currently Node 24, support for Node 25 types)
 - npm
 
+### Toolchain compatibility notes
+
+**TypeScript 6.0 with Angular 21**
+
+This project uses TypeScript 6.0.x. Angular 21's build tooling (`@angular/build`) declares a peer dependency of `typescript@">=5.9 <6.0"` — a conservative bound that predates TypeScript 6 testing on the Angular 21 release line. Angular 21 is functionally compatible with TypeScript 6.0 in practice.
+
+Three accommodations are in place:
+
+- **[.npmrc](../.npmrc)** — `legacy-peer-deps=true` allows `npm install` to proceed despite the declared peer dep upper bound. Without this, `npm ci` / `npm install` fail with `ERESOLVE`.
+- **[tsconfig.json](../tsconfig.json)** — `"ignoreDeprecations": "6.0"` silences `TS5101`, which TypeScript 6 emits for the `baseUrl` compiler option (deprecated in favour of `paths`-based resolution; removed in TypeScript 7.0).
+- **[tsconfig.json](../tsconfig.json)** — `"skipLibCheck": true` suppresses `TS1540` from `logrocket`'s bundled type definitions, which use the `declare module Foo { }` syntax that TypeScript 6 now rejects in favour of `declare namespace Foo { }`.
+
+These accommodations can be removed once Angular adds official TypeScript 6 support (expected in Angular 22).
+
 ### Install and run
 
 - Install dependencies: `npm ci`

@@ -237,21 +237,27 @@ describe('StatDetailComponent', () => {
   });
 
   describe('hasZeros', () => {
-    it('should return true when any item has count 0', async () => {
+    it('should return true when at least one item has count 0', async () => {
       await createComponent('species');
       component.items = [
-        { name: 'Human', count: 3 },
+        { name: 'Human', count: 5 },
         { name: 'Gorn', count: 0 },
       ];
       expect(component.hasZeros).toBe(true);
     });
 
-    it('should return false when all items have count > 0', async () => {
+    it('should return false when all items have count greater than 0', async () => {
       await createComponent('species');
       component.items = [
-        { name: 'Human', count: 3 },
-        { name: 'Klingon', count: 1 },
+        { name: 'Human', count: 5 },
+        { name: 'Klingon', count: 3 },
       ];
+      expect(component.hasZeros).toBe(false);
+    });
+
+    it('should return false when items is empty', async () => {
+      await createComponent('species');
+      component.items = [];
       expect(component.hasZeros).toBe(false);
     });
   });
