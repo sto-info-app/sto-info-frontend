@@ -16,12 +16,18 @@ Use overrides when:
 
 ## Active overrides
 
-| Override key      | Forced version | Scope                     | Notes                                                                                                                                                                    |
-| ----------------- | -------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `tmp`             | `0.2.5`        | Global package resolution | Forces patched `tmp` release for legacy transitive ranges (`^0.1.0`, `^0.0.33`).                                                                                        |
-| `undici`          | `7.24.5`       | Global package resolution | `@angular/build` pins `7.24.4` exactly; override ensures latest patch is used across all consumers.                                                                     |
-| `picomatch`       | `4.0.4`        | Global package resolution | `http-proxy-middleware` → `micromatch@^4.0.8` → `picomatch@^2.3.1` which is vulnerable (GHSA-c2c7-rcm5-vvqj, GHSA-3v7f-55p6-f55p). Override forces the fixed 4.0.4 release. |
-| `brace-expansion` | `5.0.5`        | Global package resolution | Multiple packages (Jest, ESLint, `@lhci/cli`, `serve`) pull in `brace-expansion@<5.0.5` (GHSA-f886-m6hf-6m8v). 5.0.5 contains the fix.                                |
+| Override key                          | Forced version | Scope                          | Notes                                                                                                                                                                    |
+| ------------------------------------- | -------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `tmp`                                 | `0.2.5`        | Global                         | Forces patched `tmp` release for legacy transitive ranges (`^0.1.0`, `^0.0.33`).                                                                                        |
+| `undici`                              | `7.24.5`       | Global                         | `@angular/build` pins `7.24.4` exactly; override ensures latest patch is used across all consumers.                                                                     |
+| `picomatch`                           | `4.0.4`        | Global                         | `http-proxy-middleware` → `micromatch@^4.0.8` → `picomatch@^2.3.1` which is vulnerable (GHSA-c2c7-rcm5-vvqj, GHSA-3v7f-55p6-f55p). Override forces the fixed 4.0.4 release. |
+| `brace-expansion`                     | `5.0.5`        | Global                         | Multiple packages (Jest, ESLint, `@lhci/cli`, `serve`) pull in `brace-expansion@<5.0.5` (GHSA-f886-m6hf-6m8v). 5.0.5 contains the fix.                                |
+| `handlebars`                          | `4.7.9`        | Global                         | `jest-preset-angular` → `ts-jest` → `handlebars@4.7.8` which carries multiple injection and prototype pollution CVEs. 4.7.9 is the patched release.                    |
+| `lodash`                              | `4.18.1`       | Global                         | `@lhci/cli` → `inquirer` → `lodash@<=4.17.23` (GHSA-r5fr-rjxr-66jc, GHSA-f23m-r3pf-42rh). 4.18.1 is the patched release.                                             |
+| `lodash-es`                           | `4.18.1`       | Global                         | `@lhci/cli` → `lighthouse` → `lodash-es@<=4.17.23` (same CVEs as `lodash`). 4.18.1 is the patched release.                                                            |
+| `yaml`                                | `2.8.3`        | Global                         | `@angular/build` → `vite` and `lint-staged` both pull in `yaml@2.0.0–2.8.2` (GHSA-48c2-rrv3-qjmp, stack overflow). 2.8.3 is the patched release.                     |
+| `express` → `path-to-regexp`          | `0.1.13`       | Nested under `express`         | `@lhci/cli` → `express@4` → `path-to-regexp@0.1.12` (GHSA-37ch-88jc-xwx2, GHSA-j3q9-mxjg-w52f, GHSA-27v5-c462-wpq7). 0.1.13 is the patched release.                |
+| `router` → `path-to-regexp`           | `8.4.2`        | Nested under `router`          | `@angular/cli` → `@modelcontextprotocol/sdk` → `express@5` → `router` → `path-to-regexp@8.3.0` (same CVEs). 8.4.2 is the patched release.                            |
 
 ## Removed overrides
 
@@ -36,7 +42,7 @@ The following overrides were removed because they are no longer required:
 Use these commands to confirm overrides are applied:
 
 ```bash
-npm ls tmp undici picomatch brace-expansion
+npm ls tmp undici picomatch brace-expansion handlebars lodash lodash-es yaml path-to-regexp
 npm audit --omit=dev
 npm audit
 ```
@@ -48,6 +54,8 @@ Current expected audit state:
 - `npm audit --omit=dev`: `0 vulnerabilities`.
 - `npm audit`: `0 vulnerabilities` (confirmed as of 2026-04-06).
 - All production and dev dependencies are vulnerability-free with current overrides in place.
+
+Note on `path-to-regexp`: two separate major versions are in the tree. The overrides use a nested form (`express → path-to-regexp` and `router → path-to-regexp`) rather than a single global pin, because the 0.x and 8.x APIs are not interchangeable. The `serve-handler` copy at 3.x is not in a vulnerable range and is left unaffected.
 
 ## Update process
 
