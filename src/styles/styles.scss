@@ -1,4 +1,3 @@
-@use 'fonts';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 
@@ -62,7 +61,6 @@ input {
   background-color: vars.$lcars-black;
   color: vars.$a11y-white;
   border: 1px solid vars.$lcars-c47;
-  font-family: vars.$font-antonio;
 
   &:focus {
     outline: none;
@@ -96,7 +94,6 @@ button.lcars-btn,
   height: 60px !important;
   border-radius: 30px !important;
   padding: 0 25px 8px 0 !important;
-  font-family: vars.$font-antonio !important;
   font-size: 1rem !important;
   text-transform: uppercase !important;
   text-align: right !important;
@@ -176,7 +173,6 @@ button.lcars-btn,
     font-weight: 700;
     text-transform: uppercase;
     color: vars.$a11y-black;
-    font-family: vars.$font-antonio;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
@@ -206,7 +202,6 @@ button.lcars-btn,
     .filter-btn {
       background-color: vars.$lcars-perano;
       border: none;
-      font-family: inherit;
       cursor: pointer;
       outline: none;
 
@@ -261,6 +256,7 @@ button.lcars-btn,
     font-family: inherit;
     font-size: 0.9rem;
     font-weight: 800;
+    font-stretch: condensed;
     color: #000;
     -webkit-text-fill-color: #000;
     cursor: pointer;
@@ -284,7 +280,6 @@ button.lcars-btn,
     option {
       background: #222;
       color: #fff;
-      -webkit-text-fill-color: #fff;
     }
   }
 
@@ -390,7 +385,6 @@ button.lcars-btn,
     border: none;
     border-top: 1px solid rgb(255 255 255 / 8%);
     padding: 0.5rem 1rem;
-    font-family: vars.$font-antonio;
     font-size: 0.9rem;
     font-weight: 600;
     width: 100%;
@@ -534,7 +528,6 @@ button.lcars-btn,
     border-radius: 6px;
     background: vars.$lcars-grey-bg;
     color: vars.$lcars-white;
-    font-family: vars.$font-antonio;
     font-size: 0.85rem;
     outline: none;
     transition: border-color 0.2s ease;
@@ -552,6 +545,7 @@ button.lcars-btn,
 
   .filter-select {
     appearance: none;
+    font-stretch: condensed;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%23b3b3b3'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.6rem center;
@@ -567,7 +561,6 @@ button.lcars-btn,
   .clear-filters-btn {
     background-color: vars.$lcars-cardinal;
     border: none;
-    font-family: inherit;
     cursor: pointer;
     outline: none;
     margin-top: 0.25rem;
@@ -647,7 +640,6 @@ button.lcars-btn,
 .lcars-number-highlight {
   font-weight: 900;
   margin-left: 0.2rem;
-  font-family: vars.$font-antonio;
   letter-spacing: 0.5px;
   display: inline-block;
   color: vars.$lcars-sunflower; // Default for dark readouts
@@ -719,7 +711,6 @@ button.lcars-btn,
   color: vars.$a11y-black !important;
   text-align: right;
   padding: 15px 25px;
-  font-family: vars.$font-antonio;
   text-transform: uppercase;
   font-weight: bold;
   font-size: 1rem;

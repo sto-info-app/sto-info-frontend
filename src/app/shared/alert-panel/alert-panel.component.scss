@@ -35,7 +35,7 @@
 
   position: relative;
   text-align: center;
-  font-family: Impact, 'Arial Black', system-ui, sans-serif;
+  -webkit-user-select: none;
   user-select: none;
   animation: ra-pulse 1s infinite ease-in-out;
 
@@ -59,6 +59,7 @@
     .alert-panel__side--left {
       border-top-left-radius: var(--side-radius);
       border-bottom-left-radius: var(--side-radius);
+      -webkit-user-select: none;
       user-select: none;
     }
 
