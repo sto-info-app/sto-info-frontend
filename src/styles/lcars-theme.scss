@@ -145,10 +145,8 @@
   --mat-dialog-container-color: #0d0d0d;
   --mat-dialog-subhead-color: rgb(255 255 255 / 87%);
   --mat-dialog-supporting-text-color: rgb(255 255 255 / 60%);
-  --mat-dialog-subhead-font:
-    'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
-  --mat-dialog-supporting-text-font:
-    'Antonio', 'Helvetica', 'Arial Narrow', sans-serif !important;
+  --mat-dialog-subhead-font: #{vars.$font-antonio};
+  --mat-dialog-supporting-text-font: #{vars.$font-antonio};
 }
 
 .mdc-menu-surface {
@@ -228,7 +226,6 @@
 .mat-typography .mat-headline-5,
 .mat-typography h1,
 h1 {
-  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
   margin: 30px 0;
   font-weight: 400;
   text-transform: uppercase;
@@ -243,7 +240,6 @@ h1 {
 .mat-typography .mat-headline-6,
 .mat-typography h2,
 h2 {
-  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
   margin: 30px 0 10px;
   font-weight: 400;
   text-transform: uppercase;
@@ -258,7 +254,6 @@ h2 {
 .mat-typography .mat-subtitle-1,
 .mat-typography h3,
 h3 {
-  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
   margin: 30px 0 10px;
   font-weight: 400;
   text-transform: uppercase;
@@ -273,7 +268,6 @@ h3 {
 .mat-typography .mat-body-1,
 .mat-typography h4,
 h4 {
-  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
   line-height: 1.2;
@@ -284,7 +278,6 @@ h4 {
 .mat-typography .mat-h5,
 .mat-typography h5,
 h5 {
-  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
   text-decoration: underline;
@@ -296,7 +289,6 @@ h5 {
 .mat-typography .mat-h6,
 .mat-typography h6,
 h6 {
-  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
   font-weight: 400;
   text-transform: none;
   text-decoration: underline;
@@ -310,8 +302,6 @@ h6 {
 .mat-typography .mat-body-2 p,
 .mat-typography p,
 p {
-  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
-  margin-block: 1rem;
   margin: 0 0 15px;
   line-height: 1.3;
   font-size: 1rem;
@@ -358,13 +348,12 @@ body {
 
 body {
   display: block;
-  padding-block: 5px;
   padding: 5px 0;
   background-color: #0d0d0d;
   font-size: 100%;
-  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif;
-  font-weight: 400;
+  font-family: vars.$font-antonio;
   font-stretch: condensed;
+  font-weight: 400;
   font-synthesis: none; /* Prevent synthetic bold/italic in Firefox */
   -moz-osx-font-smoothing: grayscale; /* Better rendering in Firefox */
   text-rendering: optimizelegibility;
@@ -408,9 +397,6 @@ a:active {
   display: flex;
   margin: 0 auto;
   padding: 0 10px 0 5px;
-  margin-inline: auto;
-  padding-left: 5px;
-  padding-right: 10px;
   overflow: hidden;
   max-width: 1340px;
 }
@@ -623,14 +609,12 @@ a:active {
 }
 
 .banner {
-  padding: 0 0 15px 5px;
+  padding: 0 0 25px 5px;
   text-align: right;
   text-transform: uppercase;
   line-height: 1.2;
   font-size: clamp(1.2rem, 1.3rem + 2.6vw, 3.1rem);
   color: #8ff;
-  padding-bottom: 25px;
-  padding-left: 5px;
 }
 
 .banner a {
@@ -1316,7 +1300,6 @@ button:hover {
   font-weight: 700;
   text-transform: uppercase;
   color: vars.$a11y-black;
-  font-family: vars.$font-antonio;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
@@ -1364,7 +1347,6 @@ button:hover {
   border-left: 18px solid #79d;
   border-radius: 9px;
   padding: 0 5px;
-  padding-inline: 5px;
 }
 
 .lcars-bar-inner {
@@ -1422,7 +1404,6 @@ button:hover {
   padding: 0 10px;
   text-transform: uppercase;
   color: #9bf;
-  padding-inline: 10px;
   font-size: 1.2rem;
   font-weight: bold;
   line-height: 1.7rem;
@@ -1472,7 +1453,6 @@ footer {
   display: flex;
   margin: 50px auto 8px 15px;
   padding: 12px 0;
-  padding-block: 12px;
   background: linear-gradient(#58e 50%, #455580 50%);
   border-radius: 0 20px 20px 0;
   overflow: hidden;
@@ -1639,7 +1619,6 @@ body,
 .mat-typography,
 .mat-button,
 .mat-card {
-  font-family: Antonio, Helvetica, 'Arial Narrow', sans-serif !important;
   line-height: 1.5;
   font-size: 1rem;
 }
@@ -1670,6 +1649,7 @@ html {
 @supports (scrollbar-color: #2d2d2d #121212) {
   * {
     scrollbar-color: #2d2d2d #121212;
+    scrollbar-width: thin;
   }
 }
 
