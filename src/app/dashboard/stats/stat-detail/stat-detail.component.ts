@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { takeUntil } from 'rxjs';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { SmartChartComponent } from 'src/app/shared/components/smart-chart/smart-chart.component';
@@ -119,23 +118,11 @@ export class StatDetailComponent extends StatsBaseComponent implements OnInit {
   }
 
   loadStats(): void {
-    this.isLoading = true;
-    const accountId =
-      this.selectedAccountId === 'all' ? null : this.selectedAccountId;
-    this.statsService
-      .getStats(accountId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: stats => {
-          this.stats = stats;
-          if (this.config) {
-            this.items = stats[this.config.key];
-          }
-          this.isLoading = false;
-        },
-        error: () => {
-          this.isLoading = false;
-        },
-      });
+    this.fetchStats(stats => {
+      this.stats = stats;
+      if (this.config) {
+        this.items = stats[this.config.key];
+      }
+    });
   }
 }

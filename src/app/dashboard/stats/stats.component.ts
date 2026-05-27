@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { takeUntil } from 'rxjs';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { StatInfoCardComponent } from 'src/app/shared/components/stat-info-card/stat-info-card.component';
@@ -126,23 +125,9 @@ export class StatsComponent extends StatsBaseComponent implements OnInit {
   }
 
   loadStats(): void {
-    this.isLoading = true;
-    const accountId =
-      this.selectedAccountId === 'all' ? null : this.selectedAccountId;
-    this.statsService
-      .getStats(accountId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: stats => {
-          this.stats = stats;
-          this.isLoading = false;
-          this._cdr.markForCheck();
-        },
-        error: () => {
-          this.isLoading = false;
-          this._cdr.markForCheck();
-        },
-      });
+    this.fetchStats(stats => {
+      this.stats = stats;
+    });
   }
 
   /**

@@ -7,55 +7,15 @@
     feedback, testing, data entry, and content support.
   </p>
 
-  <div class="lcars-text-bar">
-    <h2><span>Active Duty</span></h2>
-  </div>
-  @if (currentMemberVms.length > 0) {
-    <div class="team-grid">
-      @for (vm of currentMemberVms; track vm.member.slug) {
-        <a
-          class="team-card"
-          [routerLink]="vm.link">
-          <img
-            [src]="vm.thumbnailUrl"
-            [alt]="vm.member.name"
-            title="Team member photo"
-            loading="lazy" />
-          <div class="team-card-details">
-            <div class="team-card-name">{{ vm.member.name }}</div>
-            <div class="team-card-title">{{ vm.member.title }}</div>
-          </div>
-        </a>
-      }
-    </div>
-  } @else {
-    <p class="empty-state">No current volunteers listed yet.</p>
-  }
+  <app-team-member-section
+    title="Active Duty"
+    [vms]="currentMemberVms"
+    emptyMessage="No current volunteers listed yet." />
 
-  <div class="lcars-text-bar">
-    <h2><span>Retired</span></h2>
-  </div>
-  @if (pastMemberVms.length > 0) {
-    <div class="team-grid">
-      @for (vm of pastMemberVms; track vm.member.slug) {
-        <a
-          class="team-card"
-          [routerLink]="vm.link">
-          <img
-            [src]="vm.thumbnailUrl"
-            [alt]="vm.member.name"
-            title="Team member photo"
-            loading="lazy" />
-          <div class="team-card-details">
-            <div class="team-card-name">{{ vm.member.name }}</div>
-            <div class="team-card-title">{{ vm.member.title }}</div>
-          </div>
-        </a>
-      }
-    </div>
-  } @else {
-    <p class="empty-state">No retired volunteers listed yet.</p>
-  }
+  <app-team-member-section
+    title="Retired"
+    [vms]="pastMemberVms"
+    emptyMessage="No retired volunteers listed yet." />
 
   <div class="lcars-text-bar">
     <h2><span>Want to Join the Crew?</span></h2>

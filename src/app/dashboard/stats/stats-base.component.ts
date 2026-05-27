@@ -56,4 +56,25 @@ export abstract class StatsBaseComponent implements OnDestroy {
         },
       });
   }
+
+  /** Calls the stats API and invokes onNext with the result, then sets isLoading false. */
+  protected fetchStats(onNext: (stats: StatsData) => void): void {
+    this.isLoading = true;
+    const accountId =
+      this.selectedAccountId === 'all' ? null : this.selectedAccountId;
+    this.statsService
+      .getStats(accountId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: stats => {
+          onNext(stats);
+          this.isLoading = false;
+          this._cdr.markForCheck();
+        },
+        error: () => {
+          this.isLoading = false;
+          this._cdr.markForCheck();
+        },
+      });
+  }
 }
