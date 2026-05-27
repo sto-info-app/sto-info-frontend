@@ -101,6 +101,7 @@ describe('ProfileComponent', () => {
     fixture.detectChanges();
     expect(mockDashboardService.getUser).toHaveBeenCalled();
     expect(component.user).toEqual(mockUser);
+    expect(component.lastLoginLabel).toBe('2 hours ago');
   });
 
   it('should logout if account is disabled', () => {
@@ -267,8 +268,8 @@ describe('ProfileComponent', () => {
 
   describe('ngOnDestroy', () => {
     it('should complete the destroy$ subject', () => {
-      const nextSpy = jest.spyOn(component['destroy$'], 'next');
-      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+      const nextSpy = jest.spyOn(component['_destroy$'], 'next');
+      const completeSpy = jest.spyOn(component['_destroy$'], 'complete');
 
       component.ngOnDestroy();
 

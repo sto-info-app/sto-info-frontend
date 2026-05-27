@@ -46,19 +46,19 @@
         <div class="personnel-record-inner-content">
           <p>
             <span class="record-title">Last logged in:</span>
-            {{ timeSinceLastLogin() }}
+            {{ lastLoginLabel }}
           </p>
           <p>
             <span class="record-title">Password last reset:</span>
-            {{ timeSinceLastPasswordReset() }}
+            {{ lastPasswordResetLabel }}
           </p>
           <p>
             <span class="record-title">Record last updated:</span>
-            {{ timeSinceLastUpdated() }}
+            {{ lastUpdatedLabel }}
           </p>
           <p>
             <span class="record-title">Commissioned:</span>
-            {{ timeSinceUserCreated() }}
+            {{ memberSinceLabel }}
           </p>
         </div>
       </div>
@@ -102,12 +102,12 @@
       </div>
       <div class="buttons">
         <a
-          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+          [routerLink]="dashboardLink"
           class="full-width-btn-link sunflower"
           >{{ appRouteTitles.STO_DASHBOARD }}</a
         >
         <a
-          [routerLink]="getRouteLink(appRoutes.RESET_PASSWORD)"
+          [routerLink]="resetPasswordLink"
           class="full-width-btn-link gold"
           >{{ appRouteTitles.RESET_PASSWORD }}</a
         >

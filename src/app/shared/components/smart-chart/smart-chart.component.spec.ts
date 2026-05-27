@@ -1,4 +1,3 @@
-import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SmartChartComponent } from './smart-chart.component';
 
@@ -21,135 +20,208 @@ describe('SmartChartComponent', () => {
   });
 
   it('should calculate maxCount correctly when data changes', () => {
-    component.data = [
+    fixture.componentRef.setInput('data', [
       { name: 'A', count: 10 },
       { name: 'B', count: 50 },
       { name: 'C', count: 30 },
-    ];
-    component.ngOnChanges({
-      data: new SimpleChange(null, component.data, true),
-    });
+    ]);
 
-    expect(component.maxCount).toBe(50);
+    expect(component.maxCount()).toBe(50);
   });
 
-  it('should not recalculate when ngOnChanges fires without data change', () => {
-    component.data = [{ name: 'A', count: 42 }];
-    component.ngOnChanges({
-      data: new SimpleChange(null, component.data, true),
-    });
-    const prevMax = component.maxCount;
+  it('should recompute maxCount when data is replaced', () => {
+    fixture.componentRef.setInput('data', [{ name: 'A', count: 42 }]);
+    expect(component.maxCount()).toBe(42);
 
-    // Call ngOnChanges with a non-data change — maxCount should not be reset
-    component.ngOnChanges({ threshold: new SimpleChange(5, 3, false) });
-
-    expect(component.maxCount).toBe(prevMax);
+    fixture.componentRef.setInput('data', [{ name: 'A', count: 10 }]);
+    expect(component.maxCount()).toBe(10);
   });
 
-  it('should not crash when calculateChartData is triggered with null data', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    component.data = null as any;
+  it('should not crash when data is null', () => {
     expect(() =>
-      component.ngOnChanges({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data: new SimpleChange([], null as any, false),
-      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      fixture.componentRef.setInput('data', null as any),
     ).not.toThrow();
+    expect(component.barRows()).toEqual([]);
+    expect(component.pieSegments()).toEqual([]);
   });
 
   it('should return correct bar width', () => {
-    component.maxCount = 100;
+    fixture.componentRef.setInput('data', [{ name: 'A', count: 100 }]);
     expect(component.getBarWidth(50)).toBe('50%');
     expect(component.getBarWidth(100)).toBe('100%');
     expect(component.getBarWidth(0)).toBe('0%');
   });
 
   it('should return 0% width if maxCount is 0', () => {
-    component.maxCount = 0;
+    // default data is [] so maxCount() === 0
     expect(component.getBarWidth(50)).toBe('0%');
   });
 
   it('should return correct bar color class', () => {
     expect(component.getBarColorClass(0)).toBe('perano-bar');
     expect(component.getBarColorClass(9)).toBe('sunflower-bar');
-    expect(component.getBarColorClass(10)).toBe('perano-bar'); // Loops back
+    expect(component.getBarColorClass(10)).toBe('perano-bar'); // loops back
+  });
+
+  it('should return false for showPie in auto mode when data is empty', () => {
+    fixture.componentRef.setInput('mode', 'auto');
+    fixture.componentRef.setInput('data', []);
+    expect(component.showPie()).toBe(false);
+  });
+
+  it('should return false for showPie in auto mode when data is null', () => {
+    // Covers the ?? [] null fallback branch on line 73 inside showPie
+    fixture.componentRef.setInput('mode', 'auto');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fixture.componentRef.setInput('data', null as any);
+    expect(component.showPie()).toBe(false);
   });
 
   it('should determine showPie correctly based on threshold', () => {
-    component.threshold = 2;
-    component.data = [{ name: 'A', count: 1 }];
-    expect(component.showPie).toBe(true);
+    fixture.componentRef.setInput('threshold', 2);
+    fixture.componentRef.setInput('data', [{ name: 'A', count: 1 }]);
+    expect(component.showPie()).toBe(true);
 
-    component.data = [
+    fixture.componentRef.setInput('data', [
       { name: 'A', count: 1 },
       { name: 'B', count: 1 },
       { name: 'C', count: 1 },
-    ];
-    expect(component.showPie).toBe(false);
+    ]);
+    expect(component.showPie()).toBe(false);
   });
 
   it('should respect mode over threshold for showPie', () => {
-    component.mode = 'pie';
-    component.threshold = 1;
-    component.data = [
+    fixture.componentRef.setInput('mode', 'pie');
+    fixture.componentRef.setInput('threshold', 1);
+    fixture.componentRef.setInput('data', [
       { name: 'A', count: 1 },
       { name: 'B', count: 1 },
-    ];
-    expect(component.showPie).toBe(true);
+    ]);
+    expect(component.showPie()).toBe(true);
 
-    component.mode = 'bar';
-    component.data = [{ name: 'A', count: 1 }];
-    expect(component.showPie).toBe(false);
+    fixture.componentRef.setInput('mode', 'bar');
+    fixture.componentRef.setInput('data', [{ name: 'A', count: 1 }]);
+    expect(component.showPie()).toBe(false);
   });
 
   it('should return 0 for totalCount when data is empty', () => {
-    component.data = [];
-    expect(component.totalCount).toBe(0);
+    expect(component.totalCount()).toBe(0);
+  });
+
+  it('should return 0 for totalCount when data is null', () => {
+    // Covers the ?? [] null fallback branch inside totalCount
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fixture.componentRef.setInput('data', null as any);
+    expect(component.totalCount()).toBe(0);
   });
 
   it('should sum all counts for totalCount', () => {
-    component.data = [
+    fixture.componentRef.setInput('data', [
       { name: 'A', count: 10 },
       { name: 'B', count: 20 },
       { name: 'C', count: 5 },
-    ];
-    expect(component.totalCount).toBe(35);
+    ]);
+    expect(component.totalCount()).toBe(35);
+  });
+
+  it('should compute barRows with precomputed width and colorClass', () => {
+    fixture.componentRef.setInput('data', [
+      { name: 'Alpha', count: 100 },
+      { name: 'Beta', count: 50 },
+    ]);
+    const rows = component.barRows();
+    expect(rows.length).toBe(2);
+    expect(rows[0]).toEqual({
+      name: 'Alpha',
+      count: 100,
+      width: '100%',
+      colorClass: 'perano-bar',
+    });
+    expect(rows[1]).toEqual({
+      name: 'Beta',
+      count: 50,
+      width: '50%',
+      colorClass: 'bluey-bar',
+    });
+  });
+
+  it('should return empty barRows when data is empty', () => {
+    expect(component.barRows()).toEqual([]);
+  });
+
+  it('should compute barRows with 0% width when all counts are zero', () => {
+    // Covers the maxCount <= 0 ? '0%' branch when items exist but all have count 0
+    fixture.componentRef.setInput('data', [{ name: 'A', count: 0 }]);
+    const rows = component.barRows();
+    expect(rows.length).toBe(1);
+    expect(rows[0].width).toBe('0%');
+  });
+
+  it('should compute pieSegments from data', () => {
+    // 3:1 split to cover both large-arc-flag branches (75% > 50% and 25% <= 50%)
+    fixture.componentRef.setInput('data', [
+      { name: 'Alpha', count: 3 },
+      { name: 'Beta', count: 1 },
+    ]);
+    const segments = component.pieSegments();
+    expect(segments.length).toBe(2);
+    expect(segments[0].name).toBe('Alpha');
+    expect(segments[0].count).toBe(3);
+    expect(segments[0].percentage).toBe(75);
+    expect(segments[0].color).toBe('#99ccff');
+    expect(segments[1].name).toBe('Beta');
+    expect(segments[1].percentage).toBe(25);
+    expect(segments[1].color).toBe('#7788ff');
+  });
+
+  it('should return empty pieSegments when data is empty', () => {
+    expect(component.pieSegments()).toEqual([]);
+  });
+
+  it('should return empty pieSegments when all counts are zero', () => {
+    // Covers the total === 0 early-return branch
+    fixture.componentRef.setInput('data', [
+      { name: 'A', count: 0 },
+      { name: 'B', count: 0 },
+    ]);
+    expect(component.pieSegments()).toEqual([]);
   });
 
   describe('isDonut', () => {
     it('should be true when mode is "donut"', () => {
-      component.mode = 'donut';
-      expect(component.isDonut).toBe(true);
+      fixture.componentRef.setInput('mode', 'donut');
+      expect(component.isDonut()).toBe(true);
     });
 
     it('should be true when mode is "auto" and showPie is true', () => {
-      component.mode = 'auto';
-      component.threshold = 5;
-      component.data = [{ name: 'A', count: 1 }];
-      expect(component.showPie).toBe(true);
-      expect(component.isDonut).toBe(true);
+      fixture.componentRef.setInput('mode', 'auto');
+      fixture.componentRef.setInput('threshold', 5);
+      fixture.componentRef.setInput('data', [{ name: 'A', count: 1 }]);
+      expect(component.showPie()).toBe(true);
+      expect(component.isDonut()).toBe(true);
     });
 
     it('should be false when mode is "auto" and showPie is false', () => {
-      component.mode = 'auto';
-      component.threshold = 1;
-      component.data = [
+      fixture.componentRef.setInput('mode', 'auto');
+      fixture.componentRef.setInput('threshold', 1);
+      fixture.componentRef.setInput('data', [
         { name: 'A', count: 1 },
         { name: 'B', count: 1 },
         { name: 'C', count: 1 },
-      ];
-      expect(component.showPie).toBe(false);
-      expect(component.isDonut).toBe(false);
+      ]);
+      expect(component.showPie()).toBe(false);
+      expect(component.isDonut()).toBe(false);
     });
 
     it('should be false when mode is "pie"', () => {
-      component.mode = 'pie';
-      expect(component.isDonut).toBe(false);
+      fixture.componentRef.setInput('mode', 'pie');
+      expect(component.isDonut()).toBe(false);
     });
 
     it('should be false when mode is "bar"', () => {
-      component.mode = 'bar';
-      expect(component.isDonut).toBe(false);
+      fixture.componentRef.setInput('mode', 'bar');
+      expect(component.isDonut()).toBe(false);
     });
   });
 });

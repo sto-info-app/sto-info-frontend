@@ -168,7 +168,7 @@ describe('AccountDetailComponent', () => {
       expect(mockCharacterService.getCharactersByAccount).toHaveBeenCalledWith(
         'acc1',
       );
-      expect(component.characters).toEqual([mockCharacter]);
+      expect(component.characters()).toEqual([mockCharacter]);
       expect(component.isLoading).toBe(false);
     });
 
@@ -470,9 +470,6 @@ describe('AccountDetailComponent', () => {
 
     it('getProfileImageUrl should return 100px variant if available', () => {
       const url = component.getProfileImageUrl(mockCharacter);
-      // logic: if starts with http, return it. else if not local, append base + variant
-      // mockCharacter.profilePicture100 = 'img1-100'
-      // It does NOT start with http/local.
       expect(url).toContain('img1-100');
       expect(url).toContain(CLOUDFLARE_VARIANT_SQUARE_100PX_NAME);
     });
@@ -517,7 +514,6 @@ describe('AccountDetailComponent', () => {
 
     it('getProfileImageUrl should handle local/ paths', () => {
       const char = { ...mockCharacter, profilePicture100: 'local/img.jpg' };
-      // logic checks for startWith local/ and prepends R2 url
       expect(component.getProfileImageUrl(char as Character)).toContain(
         'local/img.jpg',
       );
@@ -526,6 +522,13 @@ describe('AccountDetailComponent', () => {
     it('onProfileImageError should add id to failed set', () => {
       component.onProfileImageError('123');
       expect(component.failedImageIds.has('123')).toBe(true);
+    });
+
+    it('filteredVms should use unavailablePhotoSrc when image has failed', () => {
+      component.characters.set([mockCharacter]);
+      component.onProfileImageError(mockCharacter.id);
+      const vm = component.filteredVms().find(v => v.id === mockCharacter.id);
+      expect(vm?.imageUrl).toBe(SRC_PHOTO_UNAVAILABLE_100PX);
     });
   });
 
@@ -553,46 +556,46 @@ describe('AccountDetailComponent', () => {
     };
 
     beforeEach(() => {
-      component.characters = [charWithRank, charKlingon];
+      component.characters.set([charWithRank, charKlingon]);
     });
 
     describe('uniqueRanks', () => {
       it('should return sorted unique rank level ranges', () => {
-        expect(component.uniqueRanks).toEqual(['50-59', '60-65']);
+        expect(component.uniqueRanks()).toEqual(['50-59', '60-65']);
       });
 
       it('should exclude characters without rank', () => {
-        component.characters = [
+        component.characters.set([
           { ...mockCharacter, rank: undefined },
           charWithRank,
-        ];
-        expect(component.uniqueRanks).toEqual(['60-65']);
+        ]);
+        expect(component.uniqueRanks()).toEqual(['60-65']);
       });
     });
 
     describe('uniqueSpecies', () => {
       it('should return sorted unique species names', () => {
-        expect(component.uniqueSpecies).toEqual(['Human', 'Klingon']);
+        expect(component.uniqueSpecies()).toEqual(['Human', 'Klingon']);
       });
 
       it('should exclude characters without species', () => {
-        component.characters = [
+        component.characters.set([
           { ...mockCharacter, species: undefined },
           charWithRank,
-        ];
-        expect(component.uniqueSpecies).toEqual(['Human']);
+        ]);
+        expect(component.uniqueSpecies()).toEqual(['Human']);
       });
     });
 
     describe('uniqueFactions', () => {
       it('should return sorted unique faction names', () => {
-        expect(component.uniqueFactions).toEqual(['KDF', 'Starfleet']);
+        expect(component.uniqueFactions()).toEqual(['KDF', 'Starfleet']);
       });
     });
 
     describe('uniqueGeneralFactions', () => {
       it('should return sorted unique general faction names', () => {
-        expect(component.uniqueGeneralFactions).toEqual([
+        expect(component.uniqueGeneralFactions()).toEqual([
           'Federation',
           'Klingon Empire',
         ]);
@@ -601,35 +604,35 @@ describe('AccountDetailComponent', () => {
 
     describe('uniqueSexes', () => {
       it('should return sorted unique sex names', () => {
-        expect(component.uniqueSexes).toEqual(['Female', 'Male']);
+        expect(component.uniqueSexes()).toEqual(['Female', 'Male']);
       });
 
       it('should exclude characters without sex', () => {
-        component.characters = [
+        component.characters.set([
           { ...mockCharacter, sex: undefined },
           { ...charKlingon },
-        ];
-        expect(component.uniqueSexes).toEqual(['Female']);
+        ]);
+        expect(component.uniqueSexes()).toEqual(['Female']);
       });
     });
 
     describe('uniqueClasses', () => {
       it('should return sorted unique class names', () => {
-        expect(component.uniqueClasses).toEqual(['Science', 'Tactical']);
+        expect(component.uniqueClasses()).toEqual(['Science', 'Tactical']);
       });
 
       it('should exclude characters without class', () => {
-        component.characters = [
+        component.characters.set([
           { ...mockCharacter, class: undefined },
           charKlingon,
-        ];
-        expect(component.uniqueClasses).toEqual(['Science']);
+        ]);
+        expect(component.uniqueClasses()).toEqual(['Science']);
       });
     });
 
     describe('uniqueRecruitTypes', () => {
       it('should return sorted unique recruit type names', () => {
-        expect(component.uniqueRecruitTypes).toEqual([
+        expect(component.uniqueRecruitTypes()).toEqual([
           'Delta Recruit',
           'Normal',
         ]);
@@ -663,140 +666,140 @@ describe('AccountDetailComponent', () => {
     };
 
     beforeEach(() => {
-      component.characters = [charWithRank, charKlingon];
-      component.searchText = '';
-      component.filterRank = '';
-      component.filterSpecies = '';
-      component.filterFaction = '';
-      component.filterGeneralFaction = '';
-      component.filterSex = '';
-      component.filterClass = '';
-      component.filterRecruitType = '';
+      component.characters.set([charWithRank, charKlingon]);
+      component.searchText.set('');
+      component.filterRank.set('');
+      component.filterSpecies.set('');
+      component.filterFaction.set('');
+      component.filterGeneralFaction.set('');
+      component.filterSex.set('');
+      component.filterClass.set('');
+      component.filterRecruitType.set('');
     });
 
     it('should return all characters when no filters active', () => {
-      expect(component.filteredCharacters.length).toBe(2);
+      expect(component.filteredCharacters().length).toBe(2);
     });
 
     it('should filter by searchText matching handle', () => {
-      component.searchText = 'Klang';
-      expect(component.filteredCharacters).toEqual([charKlingon]);
+      component.searchText.set('Klang');
+      expect(component.filteredCharacters()).toEqual([charKlingon]);
     });
 
     it('should filter by searchText matching firstName', () => {
-      component.searchText = 'bat';
-      expect(component.filteredCharacters).toEqual([charKlingon]);
+      component.searchText.set('bat');
+      expect(component.filteredCharacters()).toEqual([charKlingon]);
     });
 
     it('should filter by searchText matching lastName', () => {
-      component.searchText = 'leth';
-      expect(component.filteredCharacters).toEqual([charKlingon]);
+      component.searchText.set('leth');
+      expect(component.filteredCharacters()).toEqual([charKlingon]);
     });
 
     it('should return empty when searchText matches nothing', () => {
-      component.searchText = 'zzznomatch';
-      expect(component.filteredCharacters).toEqual([]);
+      component.searchText.set('zzznomatch');
+      expect(component.filteredCharacters()).toEqual([]);
     });
 
     it('should filter by rank', () => {
-      component.filterRank = '60-65';
-      expect(component.filteredCharacters).toEqual([charWithRank]);
+      component.filterRank.set('60-65');
+      expect(component.filteredCharacters()).toEqual([charWithRank]);
     });
 
     it('should filter by species', () => {
-      component.filterSpecies = 'Klingon';
-      expect(component.filteredCharacters).toEqual([charKlingon]);
+      component.filterSpecies.set('Klingon');
+      expect(component.filteredCharacters()).toEqual([charKlingon]);
     });
 
     it('should filter by faction', () => {
-      component.filterFaction = 'Starfleet';
-      expect(component.filteredCharacters).toEqual([charWithRank]);
+      component.filterFaction.set('Starfleet');
+      expect(component.filteredCharacters()).toEqual([charWithRank]);
     });
 
     it('should filter by general faction', () => {
-      component.filterGeneralFaction = 'Klingon Empire';
-      expect(component.filteredCharacters).toEqual([charKlingon]);
+      component.filterGeneralFaction.set('Klingon Empire');
+      expect(component.filteredCharacters()).toEqual([charKlingon]);
     });
 
     it('should filter by sex', () => {
-      component.filterSex = 'Female';
-      expect(component.filteredCharacters).toEqual([charKlingon]);
+      component.filterSex.set('Female');
+      expect(component.filteredCharacters()).toEqual([charKlingon]);
     });
 
     it('should filter by class', () => {
-      component.filterClass = 'Science';
-      expect(component.filteredCharacters).toEqual([charKlingon]);
+      component.filterClass.set('Science');
+      expect(component.filteredCharacters()).toEqual([charKlingon]);
     });
 
     it('should filter by recruit type', () => {
-      component.filterRecruitType = 'Delta Recruit';
-      expect(component.filteredCharacters).toEqual([charKlingon]);
+      component.filterRecruitType.set('Delta Recruit');
+      expect(component.filteredCharacters()).toEqual([charKlingon]);
     });
 
     it('should combine multiple filters', () => {
-      component.filterSpecies = 'Human';
-      component.filterRank = '50-59';
-      expect(component.filteredCharacters).toEqual([]);
+      component.filterSpecies.set('Human');
+      component.filterRank.set('50-59');
+      expect(component.filteredCharacters()).toEqual([]);
     });
   });
 
   describe('activeFilterCount', () => {
     beforeEach(() => {
-      component.searchText = '';
-      component.filterRank = '';
-      component.filterSpecies = '';
-      component.filterFaction = '';
-      component.filterGeneralFaction = '';
-      component.filterSex = '';
-      component.filterClass = '';
-      component.filterRecruitType = '';
+      component.searchText.set('');
+      component.filterRank.set('');
+      component.filterSpecies.set('');
+      component.filterFaction.set('');
+      component.filterGeneralFaction.set('');
+      component.filterSex.set('');
+      component.filterClass.set('');
+      component.filterRecruitType.set('');
     });
 
     it('should return 0 when no filters active', () => {
-      expect(component.activeFilterCount).toBe(0);
+      expect(component.activeFilterCount()).toBe(0);
     });
 
     it('should count each active filter', () => {
-      component.searchText = 'x';
-      expect(component.activeFilterCount).toBe(1);
-      component.filterRank = 'x';
-      expect(component.activeFilterCount).toBe(2);
-      component.filterSpecies = 'x';
-      expect(component.activeFilterCount).toBe(3);
-      component.filterFaction = 'x';
-      expect(component.activeFilterCount).toBe(4);
-      component.filterGeneralFaction = 'x';
-      expect(component.activeFilterCount).toBe(5);
-      component.filterSex = 'x';
-      expect(component.activeFilterCount).toBe(6);
-      component.filterClass = 'x';
-      expect(component.activeFilterCount).toBe(7);
-      component.filterRecruitType = 'x';
-      expect(component.activeFilterCount).toBe(8);
+      component.searchText.set('x');
+      expect(component.activeFilterCount()).toBe(1);
+      component.filterRank.set('x');
+      expect(component.activeFilterCount()).toBe(2);
+      component.filterSpecies.set('x');
+      expect(component.activeFilterCount()).toBe(3);
+      component.filterFaction.set('x');
+      expect(component.activeFilterCount()).toBe(4);
+      component.filterGeneralFaction.set('x');
+      expect(component.activeFilterCount()).toBe(5);
+      component.filterSex.set('x');
+      expect(component.activeFilterCount()).toBe(6);
+      component.filterClass.set('x');
+      expect(component.activeFilterCount()).toBe(7);
+      component.filterRecruitType.set('x');
+      expect(component.activeFilterCount()).toBe(8);
     });
   });
 
   describe('clearFilters', () => {
-    it('should reset all filter fields to empty strings', () => {
-      component.searchText = 'something';
-      component.filterRank = 'Admiral';
-      component.filterSpecies = 'Human';
-      component.filterFaction = 'Starfleet';
-      component.filterGeneralFaction = 'Federation';
-      component.filterSex = 'Male';
-      component.filterClass = 'Tactical';
-      component.filterRecruitType = 'Normal';
+    it('should reset all filter signals to empty strings', () => {
+      component.searchText.set('something');
+      component.filterRank.set('Admiral');
+      component.filterSpecies.set('Human');
+      component.filterFaction.set('Starfleet');
+      component.filterGeneralFaction.set('Federation');
+      component.filterSex.set('Male');
+      component.filterClass.set('Tactical');
+      component.filterRecruitType.set('Normal');
 
       component.clearFilters();
 
-      expect(component.searchText).toBe('');
-      expect(component.filterRank).toBe('');
-      expect(component.filterSpecies).toBe('');
-      expect(component.filterFaction).toBe('');
-      expect(component.filterGeneralFaction).toBe('');
-      expect(component.filterSex).toBe('');
-      expect(component.filterClass).toBe('');
-      expect(component.filterRecruitType).toBe('');
+      expect(component.searchText()).toBe('');
+      expect(component.filterRank()).toBe('');
+      expect(component.filterSpecies()).toBe('');
+      expect(component.filterFaction()).toBe('');
+      expect(component.filterGeneralFaction()).toBe('');
+      expect(component.filterSex()).toBe('');
+      expect(component.filterClass()).toBe('');
+      expect(component.filterRecruitType()).toBe('');
     });
   });
 });

@@ -83,6 +83,20 @@ describe('StatsComponent', () => {
     expect(component.statTiles.length).toBe(9);
   });
 
+  it('should precompute stat tile links', () => {
+    const levelTile = component.statTiles.find(t => t.breakdownId === 'level');
+    expect(levelTile?.link).toBe('/dashboard/stats/level');
+    const speciesTile = component.statTiles.find(
+      t => t.breakdownId === 'species',
+    );
+    expect(speciesTile?.link).toBe('/dashboard/stats/species');
+  });
+
+  it('should have precomputed dashboard and accounts navigation links', () => {
+    expect(component.dashboardLink).toBe('/dashboard');
+    expect(component.accountsLink).toBe('/dashboard/accounts');
+  });
+
   it('should set isLoading false and stats null on error', () => {
     statsServiceSpy.getStats.mockReturnValue(
       throwError(() => new Error('API error')),

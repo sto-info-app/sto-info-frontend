@@ -30,7 +30,7 @@
     "!src/app/template/footer/**"
   ],
   "checkers": ["typescript"],
-  "tsconfigFile": "tsconfig.json",
+  "tsconfigFile": "tsconfig.stryker.json",
   "coverageAnalysis": "perTest",
   "concurrency": 2,
   "timeoutMS": 60000,
