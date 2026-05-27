@@ -8,7 +8,7 @@ import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
 import { StoAccountService } from '../services/sto-account.service';
-import { AccountsComponent } from './accounts.component';
+import { AccountVm, AccountsComponent } from './accounts.component';
 import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.component';
 
 describe('AccountsComponent', () => {
@@ -92,6 +92,39 @@ describe('AccountsComponent', () => {
     expect(component.launchers).toEqual(launchers);
     expect(component.accounts[0].characterCount).toBe(2);
     expect(component.isLoading).toBe(false);
+
+    expect(component.accountVms.length).toBe(1);
+    const vm: AccountVm = component.accountVms[0];
+    expect(vm.id).toBe(mockAccount.id);
+    expect(vm.account).toBe(accounts[0]);
+    expect(vm.link).toBe('/dashboard/accounts/Test~1234');
+    expect(vm.platformIcon).toBe('fab fa-windows');
+    expect(vm.platformName).toBe('Windows');
+    expect(vm.launcherIcon).toBeNull();
+    expect(vm.launcherName).toBe('Launcher');
+    expect(vm.characterCount).toBe(2);
+  });
+
+  it('should build accountVm with launcher info and fallback platform name', () => {
+    const accountWithLauncher = {
+      ...mockAccount,
+      platformId: 'missing',
+      launcherId: 'l1',
+    };
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([accountWithLauncher]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(of([]));
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(
+      of([{ id: 'l1', name: 'Steam' } as Launcher]),
+    );
+
+    component.ngOnInit();
+
+    const vm: AccountVm = component.accountVms[0];
+    expect(vm.platformIcon).toBeNull();
+    expect(vm.platformName).toBe('Platform');
+    expect(vm.launcherIcon).toBe('fab fa-steam');
+    expect(vm.launcherName).toBe('Steam');
+    expect(vm.characterCount).toBe(0);
   });
 
   it('should handle error when loading accounts', () => {

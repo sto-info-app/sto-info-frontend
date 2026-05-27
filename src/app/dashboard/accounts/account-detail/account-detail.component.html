@@ -48,9 +48,7 @@
         <div class="lcars-text-bar small-lcars-bar-gap">
           <span class="title-with-badge">
             Captain List
-            <span class="header-count-badge">{{
-              filteredCharacters.length
-            }}</span>
+            <span class="header-count-badge">{{ filteredVms().length }}</span>
           </span>
           <span
             class="cta-icon"
@@ -62,34 +60,35 @@
         </div>
 
         <div class="characters-content">
-          @if (characters.length === 0 && !isLoading) {
+          @if (characters().length === 0 && !isLoading) {
             <p class="go-center">
               No characters found for this account. Click the + icon to add one.
             </p>
           }
 
-          @if (characters.length > 0 && filteredCharacters.length === 0) {
+          @if (characters().length > 0 && filteredVms().length === 0) {
             <p class="go-center">No captains match the current filters.</p>
           }
 
           <div class="characters-grid">
-            @for (character of filteredCharacters; track character.id) {
+            @for (vm of filteredVms(); track vm.id) {
               <div
                 class="character-card"
-                [class]="getFactionClass(character)">
+                [class]="vm.factionClass">
                 <div
                   class="character-header-row"
-                  [class]="getClassCategory(character)"
-                  [routerLink]="getCharacterLink(character)">
+                  [class]="vm.classCategory"
+                  [routerLink]="vm.link">
                   <span class="character-name"
-                    >{{ character.handle }} (Lvl {{ character.level }})</span
+                    >{{ vm.character.handle }} (Lvl
+                    {{ vm.character.level }})</span
                   >
-                  @if (character.recruitType?.iconUrl) {
+                  @if (vm.character.recruitType?.iconUrl) {
                     <img
-                      [src]="character.recruitType!.iconUrl!"
+                      [src]="vm.character.recruitType!.iconUrl!"
                       class="recruit-type-icon"
-                      alt="{{ character.recruitType!.name + ' Recruit' }}"
-                      title="{{ character.recruitType!.name + ' Recruit' }}"
+                      alt="{{ vm.character.recruitType!.name + ' Recruit' }}"
+                      title="{{ vm.character.recruitType!.name + ' Recruit' }}"
                       width="40"
                       height="40" />
                   }
@@ -97,12 +96,12 @@
                 <div class="character-main-area">
                   <div
                     class="character-image-container"
-                    [routerLink]="getCharacterLink(character)">
+                    [routerLink]="vm.link">
                     <img
-                      [src]="getProfileImageUrl(character)"
-                      alt="{{ character.handle }}"
-                      title="{{ character.handle }}"
-                      (error)="onProfileImageError(character.id)"
+                      [src]="vm.imageUrl"
+                      alt="{{ vm.character.handle }}"
+                      title="{{ vm.character.handle }}"
+                      (error)="onProfileImageError(vm.id)"
                       class="character-list-image" />
                     <div class="image-fallback-icon">
                       <i class="fas fa-user"></i>
@@ -110,48 +109,48 @@
                   </div>
                   <div
                     class="character-details"
-                    [routerLink]="getCharacterLink(character)">
-                    @if (character.faction?.iconUrl) {
+                    [routerLink]="vm.link">
+                    @if (vm.character.faction?.iconUrl) {
                       <img
-                        [src]="character.faction!.iconUrl!"
+                        [src]="vm.character.faction!.iconUrl!"
                         class="faction-icon-watermark"
-                        alt="{{ 'Faction: ' + character.faction!.name }}"
-                        title="{{ 'Faction: ' + character.faction!.name }}" />
+                        alt="{{ 'Faction: ' + vm.character.faction!.name }}"
+                        title="{{
+                          'Faction: ' + vm.character.faction!.name
+                        }}" />
                     }
                     <div class="character-body">
                       <div class="character-rank-row">
-                        @if (character.rank?.iconUrl) {
+                        @if (vm.character.rank?.iconUrl) {
                           <img
-                            [src]="character.rank!.iconUrl"
+                            [src]="vm.character.rank!.iconUrl"
                             class="rank-icon-mini"
-                            alt="{{ 'Rank: ' + character.rank!.title }}"
-                            title="{{ 'Rank: ' + character.rank!.title }}" />
+                            alt="{{ 'Rank: ' + vm.character.rank!.title }}"
+                            title="{{ 'Rank: ' + vm.character.rank!.title }}" />
                         }
                         <span class="rank-name">{{
-                          character.rank?.title || 'Unknown Rank'
+                          vm.character.rank?.title || 'Unknown Rank'
                         }}</span>
                       </div>
                       <div class="character-species-row">
                         <i
-                          [class]="
-                            'fas fa-' + getSexIcon(character) + ' gender-icon'
-                          "></i>
-                        {{ character.species?.name }}
+                          [class]="'fas fa-' + vm.sexIcon + ' gender-icon'"></i>
+                        {{ vm.character.species?.name }}
                       </div>
                     </div>
                   </div>
                   <div class="character-actions">
                     <span
                       class="cta-icon"
-                      (click)="editCharacter(character)"
-                      (keypress)="editCharacter(character)"
+                      (click)="editCharacter(vm.character)"
+                      (keypress)="editCharacter(vm.character)"
                       title="Edit Character"
                       ><i class="fas fa-user-pen"></i
                     ></span>
                     <span
                       class="cta-icon delete-icon"
-                      (click)="deleteCharacter(character)"
-                      (keypress)="deleteCharacter(character)"
+                      (click)="deleteCharacter(vm.character)"
+                      (keypress)="deleteCharacter(vm.character)"
                       title="Delete Character"
                       ><i class="fas fa-trash"></i
                     ></span>
@@ -169,7 +168,7 @@
         <div class="buttons-row">
           <a
             class="lcars-btn-auto sunflower"
-            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)">
+            [routerLink]="accountsLink">
             Back to Accounts
           </a>
         </div>
@@ -180,7 +179,7 @@
   <div
     id="account-detail-side-column"
     class="col">
-    @if (characters.length > 0) {
+    @if (characters().length > 0) {
       <div class="lcars-text-bar small-lcars-bar-gap">
         <span>Filters</span>
         <span
@@ -200,16 +199,18 @@
             type="text"
             class="filter-input"
             placeholder="Search captains…"
-            [(ngModel)]="searchText" />
+            [ngModel]="searchText()"
+            (ngModelChange)="searchText.set($event)" />
 
           <div class="lcars-select-container perano">
             <span class="select-label">Level Range</span>
             <select
               id="rank-select"
               title="Level Range"
-              [(ngModel)]="filterRank">
+              [ngModel]="filterRank()"
+              (ngModelChange)="filterRank.set($event)">
               <option value="">All Levels</option>
-              @for (rank of uniqueRanks; track rank) {
+              @for (rank of uniqueRanks(); track rank) {
                 <option [value]="rank">{{ rank }}</option>
               }
             </select>
@@ -220,9 +221,10 @@
             <select
               id="species-select"
               title="Species"
-              [(ngModel)]="filterSpecies">
+              [ngModel]="filterSpecies()"
+              (ngModelChange)="filterSpecies.set($event)">
               <option value="">All Species</option>
-              @for (species of uniqueSpecies; track species) {
+              @for (species of uniqueSpecies(); track species) {
                 <option [value]="species">{{ species }}</option>
               }
             </select>
@@ -233,9 +235,10 @@
             <select
               id="allegiance-select"
               title="Allegiance"
-              [(ngModel)]="filterGeneralFaction">
+              [ngModel]="filterGeneralFaction()"
+              (ngModelChange)="filterGeneralFaction.set($event)">
               <option value="">All Allegiances</option>
-              @for (gf of uniqueGeneralFactions; track gf) {
+              @for (gf of uniqueGeneralFactions(); track gf) {
                 <option [value]="gf">{{ gf }}</option>
               }
             </select>
@@ -246,9 +249,10 @@
             <select
               id="faction-select"
               title="Faction"
-              [(ngModel)]="filterFaction">
+              [ngModel]="filterFaction()"
+              (ngModelChange)="filterFaction.set($event)">
               <option value="">All Factions</option>
-              @for (faction of uniqueFactions; track faction) {
+              @for (faction of uniqueFactions(); track faction) {
                 <option [value]="faction">{{ faction }}</option>
               }
             </select>
@@ -259,9 +263,10 @@
             <select
               id="class-select"
               title="Class"
-              [(ngModel)]="filterClass">
+              [ngModel]="filterClass()"
+              (ngModelChange)="filterClass.set($event)">
               <option value="">All Classes</option>
-              @for (cls of uniqueClasses; track cls) {
+              @for (cls of uniqueClasses(); track cls) {
                 <option [value]="cls">{{ cls }}</option>
               }
             </select>
@@ -272,9 +277,10 @@
             <select
               id="sex-select"
               title="Sex"
-              [(ngModel)]="filterSex">
+              [ngModel]="filterSex()"
+              (ngModelChange)="filterSex.set($event)">
               <option value="">All Sexes</option>
-              @for (sex of uniqueSexes; track sex) {
+              @for (sex of uniqueSexes(); track sex) {
                 <option [value]="sex">{{ sex }}</option>
               }
             </select>
@@ -285,15 +291,16 @@
             <select
               id="recruit-select"
               title="Recruit Type"
-              [(ngModel)]="filterRecruitType">
+              [ngModel]="filterRecruitType()"
+              (ngModelChange)="filterRecruitType.set($event)">
               <option value="">All Recruit Types</option>
-              @for (rt of uniqueRecruitTypes; track rt) {
+              @for (rt of uniqueRecruitTypes(); track rt) {
                 <option [value]="rt">{{ rt }}</option>
               }
             </select>
           </div>
 
-          @if (activeFilterCount > 0) {
+          @if (activeFilterCount() > 0) {
             <button
               type="button"
               class="full-width-btn-link clear-filters-btn"
@@ -310,14 +317,14 @@
     </div>
     <div class="buttons">
       <a
-        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+        [routerLink]="accountsLink"
         class="full-width-btn-link sunflower"
-        >{{ appRouteTitles.STO_DASHBOARD_ACCOUNTS }}</a
+        >Accounts</a
       >
       <a
-        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+        [routerLink]="dashboardLink"
         class="full-width-btn-link bluey"
-        >{{ appRouteTitles.STO_DASHBOARD }}</a
+        >Dashboard</a
       >
     </div>
   </div>

@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { takeUntil } from 'rxjs';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { StatInfoCardComponent } from 'src/app/shared/components/stat-info-card/stat-info-card.component';
@@ -21,53 +20,74 @@ export interface StatTile {
   breakdownId: string;
   icon: string;
   colour: string;
+  /** Precomputed router link for this tile's detail page. */
+  link: string;
 }
 
-/** All breakdown stat categories shown as tiles on the hub. */
+/** All breakdown stat categories shown as tiles on the hub, with links precomputed. */
 export const STAT_TILES: StatTile[] = [
   {
     label: 'Level',
     breakdownId: 'level',
     icon: 'fa-ranking-star',
     colour: 'gold',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'level')}`,
   },
   {
     label: 'Species',
     breakdownId: 'species',
     icon: 'fa-dna',
     colour: 'perano',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'species')}`,
   },
   {
     label: 'Allegiance',
     breakdownId: 'allegiance',
     icon: 'fa-shield-halved',
     colour: 'cool',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'allegiance')}`,
   },
-  { label: 'Faction', breakdownId: 'faction', icon: 'fa-flag', colour: 'sky' },
+  {
+    label: 'Faction',
+    breakdownId: 'faction',
+    icon: 'fa-flag',
+    colour: 'sky',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'faction')}`,
+  },
   {
     label: 'Career',
     breakdownId: 'career',
     icon: 'fa-briefcase',
     colour: 'sunflower',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'career')}`,
   },
-  { label: 'Sex', breakdownId: 'sex', icon: 'fa-venus-mars', colour: 'violet' },
+  {
+    label: 'Sex',
+    breakdownId: 'sex',
+    icon: 'fa-venus-mars',
+    colour: 'violet',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'sex')}`,
+  },
   {
     label: 'Recruitment',
     breakdownId: 'recruitment',
     icon: 'fa-user-plus',
     colour: 'green',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'recruitment')}`,
   },
   {
     label: 'Platform',
     breakdownId: 'platform',
     icon: 'fa-desktop',
     colour: 'tangerine',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'platform')}`,
   },
   {
     label: 'Launcher',
     breakdownId: 'launcher',
     icon: 'fa-rocket-launch',
     colour: 'bluey',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'launcher')}`,
   },
 ];
 
@@ -79,6 +99,7 @@ export const STAT_TILES: StatTile[] = [
   templateUrl: './stats.component.html',
   styleUrls: ['./stats.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,
@@ -89,9 +110,14 @@ export const STAT_TILES: StatTile[] = [
   ],
 })
 export class StatsComponent extends StatsBaseComponent implements OnInit {
-  appRoutes = APP_ROUTES;
-  appRouteTitles = APP_ROUTE_TITLES;
-  statTiles = STAT_TILES;
+  /** Precomputed router link to the main dashboard. */
+  readonly dashboardLink = `/${APP_ROUTES.STO_DASHBOARD}`;
+
+  /** Precomputed router link to the accounts list. */
+  readonly accountsLink = `/${APP_ROUTES.STO_DASHBOARD_ACCOUNTS}`;
+
+  readonly appRouteTitles = APP_ROUTE_TITLES;
+  readonly statTiles = STAT_TILES;
 
   ngOnInit(): void {
     this.loadAccounts();
@@ -99,21 +125,9 @@ export class StatsComponent extends StatsBaseComponent implements OnInit {
   }
 
   loadStats(): void {
-    this.isLoading = true;
-    const accountId =
-      this.selectedAccountId === 'all' ? null : this.selectedAccountId;
-    this.statsService
-      .getStats(accountId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: stats => {
-          this.stats = stats;
-          this.isLoading = false;
-        },
-        error: () => {
-          this.isLoading = false;
-        },
-      });
+    this.fetchStats(stats => {
+      this.stats = stats;
+    });
   }
 
   /**
@@ -137,6 +151,7 @@ export class StatsComponent extends StatsBaseComponent implements OnInit {
    * Constructs the specific detail page URL for a stat breakdown.
    *
    * @param id The breakdown ID (e.g., 'species', 'level').
+   * @returns A router link string for the given breakdown.
    */
   getDetailLink(id: string): string {
     return this.routingService.getLink(

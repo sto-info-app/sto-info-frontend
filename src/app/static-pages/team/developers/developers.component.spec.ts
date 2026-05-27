@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { TEST_SUPPORTERS, TEST_TEAM_MEMBERS } from '../testing/team-test-data';
 
 import { TeamDevelopersComponent } from './developers.component';
@@ -52,5 +53,21 @@ describe('TeamDevelopersComponent', () => {
   it('should get route link', () => {
     const route = 'test-route';
     expect(component.getRouteLink(route)).toContain(route);
+  });
+
+  it('should build currentMemberVms and pastMemberVms', () => {
+    expect(component.currentMemberVms.length).toBe(
+      component.currentMembers.length,
+    );
+    expect(component.pastMemberVms.length).toBe(component.pastMembers.length);
+
+    const vm = component.currentMemberVms[0];
+    expect(vm.member).toBe(component.currentMembers[0]);
+    expect(vm.link).toContain(vm.member.slug);
+    expect(vm.thumbnailUrl).toContain(vm.member.slug);
+  });
+
+  it('should have a precomputed contact link', () => {
+    expect(component.contactLink).toBe(`/${APP_ROUTES.CONTACT}`);
   });
 });

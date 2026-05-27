@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { TeamGroup } from '../models/team-group.model';
 import { TEST_SUPPORTERS, TEST_TEAM_MEMBERS } from '../testing/team-test-data';
 
@@ -116,5 +117,25 @@ describe('TeamMemberComponent', () => {
     component.onPhotoError({ target: img } as unknown as Event);
 
     expect(img.src).toContain(component.fallbackPhotoUrl);
+  });
+
+  it('should precompute groupLink, aboutLink, supportersLink and photoUrl', () => {
+    expect(component.groupLink).toContain(developersGroup);
+    expect(component.aboutLink).toBe(`/${APP_ROUTES.ABOUT}`);
+    expect(component.supportersLink).toBe(`/${APP_ROUTES.ABOUT_SUPPORTERS}`);
+    // spock has a photoUrl set in test data
+    expect(component.photoUrl).toContain('spock');
+  });
+
+  it('should precompute groupLink for volunteers group', async () => {
+    TestBed.resetTestingModule();
+    await createComponent('janeway', volunteersGroup);
+    expect(component.groupLink).toContain(volunteersGroup);
+  });
+
+  it('should use fallback photoUrl when member has no photo', async () => {
+    TestBed.resetTestingModule();
+    await createComponent('missing-slug', developersGroup);
+    expect(component.photoUrl).toBe(component.fallbackPhotoUrl);
   });
 });

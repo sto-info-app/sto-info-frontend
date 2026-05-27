@@ -125,6 +125,23 @@ describe('ResetPasswordRequestComponent', () => {
       routingServiceSpy.getLink.mockReturnValue('/home');
       expect(component.getRouteLink('home')).toBe('/home');
     });
+
+    it('should have precomputed navigation links', () => {
+      expect(component.dashboardLink).toBe('/dashboard');
+      expect(component.accountsLink).toBe('/dashboard/accounts');
+      expect(component.loginLink).toBe('/login');
+      expect(component.registerLink).toBe('/register');
+    });
+
+    it('should update isEmailValid when validateInputs is called', () => {
+      component.email = 'test@example.com';
+      component.validateInputs();
+      expect(component.isEmailValid).toBe(true);
+
+      component.email = 'not-valid';
+      component.validateInputs();
+      expect(component.isEmailValid).toBe(false);
+    });
   });
 
   describe('Auxiliary navigation', () => {
