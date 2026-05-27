@@ -19,7 +19,7 @@
               [class.errored]="errorMessage ? true : false"
               (input)="validateInputs()"
               (blur)="emailTouched = true" />
-            @if (emailTouched && email.trim() !== '' && !validateEmail(email)) {
+            @if (emailTouched && email.trim() !== '' && !isEmailValid) {
               <div class="field-error">{{ errorTextInvalidEmailFormat }}</div>
             }
           </div>
@@ -54,12 +54,12 @@
         </div>
         <div class="buttons">
           <a
-            [routerLink]="getRouteLink(appRoutes.REGISTER)"
+            [routerLink]="registerLink"
             class="full-width-btn-link gold"
             >Register</a
           >
           <a
-            [routerLink]="getRouteLink(appRoutes.RESET_PASSWORD)"
+            [routerLink]="resetPasswordLink"
             class="full-width-btn-link sunflower"
             >Reset Password</a
           >

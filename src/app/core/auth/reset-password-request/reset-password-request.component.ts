@@ -1,6 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -16,6 +21,7 @@ import { AuthService } from '../auth.service';
   templateUrl: './reset-password-request.component.html',
   styleUrls: ['./reset-password-request.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,
@@ -25,25 +31,41 @@ import { AuthService } from '../auth.service';
   ],
 })
 export class ResetPasswordRequestComponent {
+  /** Precomputed router link to the dashboard. */
+  readonly dashboardLink = `/${APP_ROUTES.STO_DASHBOARD}`;
+
+  /** Precomputed router link to the accounts list. */
+  readonly accountsLink = `/${APP_ROUTES.STO_DASHBOARD_ACCOUNTS}`;
+
+  /** Precomputed router link to the login page. */
+  readonly loginLink = `/${APP_ROUTES.LOGIN}`;
+
+  /** Precomputed router link to the registration page. */
+  readonly registerLink = `/${APP_ROUTES.REGISTER}`;
+
   email = '';
   errorMessage = '';
   successMessage = '';
   inputsValid = false;
   emailTouched = false;
-  appRoutes = APP_ROUTES;
+
+  /** Whether the current email value passes format validation. Updated by validateInputs(). */
+  isEmailValid = false;
 
   // Allow constants to be used in the HTML
   errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
 
   protected readonly authService = inject(AuthService);
-  private readonly routingService = inject(RoutingService);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   validateEmail(email: string): boolean {
     return validateEmail(email);
   }
 
   validateInputs(): void {
-    this.inputsValid = validateEmail(this.email);
+    this.isEmailValid = validateEmail(this.email);
+    this.inputsValid = this.isEmailValid;
   }
 
   onPasswordReset(): void {
@@ -55,6 +77,7 @@ export class ResetPasswordRequestComponent {
       next: () => {
         this.successMessage = `Check your email and follow the instructions to reset your password.`;
         this.errorMessage = '';
+        this._cdr.markForCheck();
       },
       error: (error: HttpErrorResponse) => {
         const message = error?.error?.message;
@@ -66,11 +89,12 @@ export class ResetPasswordRequestComponent {
           this.errorMessage =
             'An error occurred while resetting the password. Please try again.';
         }
+        this._cdr.markForCheck();
       },
     });
   }
 
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 }

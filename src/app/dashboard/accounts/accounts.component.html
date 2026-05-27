@@ -25,18 +25,15 @@
         }
 
         <div class="accounts-grid">
-          @for (account of accounts; track account.id) {
+          @for (vm of accountVms; track vm.id) {
             <div
               class="account-card"
-              [routerLink]="[
-                '/dashboard/accounts',
-                encodeHandle(account.handle),
-              ]">
+              [routerLink]="vm.link">
               <div class="account-details">
                 <p>
                   <span class="record-title">Handle:</span>
-                  {{ account.handle }}
-                  @if (account.lifetimeSubscription) {
+                  {{ vm.account.handle }}
+                  @if (vm.account.lifetimeSubscription) {
                     <i
                       class="fas fa-badge-check lifetime-icon"
                       title="Lifetime Subscription"></i>
@@ -44,46 +41,41 @@
                 </p>
                 <div class="account-icons">
                   <div class="icon-slot">
-                    @if (getPlatformIcon(account.platformId); as platformIcon) {
+                    @if (vm.platformIcon) {
                       <i
-                        [class]="platformIcon + ' platform-mini-icon'"
-                        [title]="
-                          'Platform: ' +
-                          (getPlatform(account.platformId)?.name ?? 'Platform')
-                        "></i>
+                        [class]="vm.platformIcon + ' platform-mini-icon'"
+                        [title]="'Platform: ' + vm.platformName"></i>
                     }
                   </div>
                   <div class="icon-slot">
-                    @if (getLauncher(account.launcherId); as launcher) {
-                      @if (getLauncherIcon(launcher.id); as launcherIcon) {
-                        <i
-                          [class]="launcherIcon + ' launcher-icon'"
-                          [title]="'Launcher: ' + launcher.name"></i>
-                      }
+                    @if (vm.launcherIcon) {
+                      <i
+                        [class]="vm.launcherIcon + ' launcher-icon'"
+                        [title]="'Launcher: ' + vm.launcherName"></i>
                     }
                   </div>
                   <div
                     class="character-count"
-                    [title]="
-                      'Total Captains: ' + (account.characterCount || 0)
-                    ">
+                    [title]="'Total Captains: ' + vm.characterCount">
                     <i class="fas fa-user-visor"></i>
-                    <span>{{ account.characterCount || 0 }}</span>
+                    <span>{{ vm.characterCount }}</span>
                   </div>
                 </div>
               </div>
               <div class="account-actions">
                 <span
                   class="cta-icon"
-                  (click)="$event.stopPropagation(); editAccount(account)"
-                  (keypress)="$event.stopPropagation(); editAccount(account)"
+                  (click)="$event.stopPropagation(); editAccount(vm.account)"
+                  (keypress)="$event.stopPropagation(); editAccount(vm.account)"
                   title="Edit Account"
                   ><i class="fas fa-user-pen"></i
                 ></span>
                 <span
                   class="cta-icon delete-icon"
-                  (click)="$event.stopPropagation(); deleteAccount(account)"
-                  (keypress)="$event.stopPropagation(); deleteAccount(account)"
+                  (click)="$event.stopPropagation(); deleteAccount(vm.account)"
+                  (keypress)="
+                    $event.stopPropagation(); deleteAccount(vm.account)
+                  "
                   title="Delete Account"
                   ><i class="fas fa-trash"></i
                 ></span>
@@ -103,7 +95,7 @@
     </div>
     <div class="buttons">
       <a
-        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+        [routerLink]="dashboardLink"
         class="full-width-btn-link sunflower"
         >{{ appRouteTitles.STO_DASHBOARD }}</a
       >

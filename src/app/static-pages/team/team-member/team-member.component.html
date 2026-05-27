@@ -56,7 +56,7 @@
           message="We could not find that team member."></app-lcars-error-message>
         <a
           class="full-width-btn-link peach"
-          [routerLink]="getGroupLink()">
+          [routerLink]="groupLink">
           Back to {{ groupLabel }}
         </a>
       </div>
@@ -72,7 +72,7 @@
     <div id="team-member-image">
       <div class="pics-right">
         <img
-          [src]="getMemberPhotoUrl(member?.photoUrl)"
+          [src]="photoUrl"
           [alt]="member?.name || 'Team member'"
           title="Team member photo"
           class="border"
@@ -86,17 +86,17 @@
     </div>
     <div class="buttons">
       <a
-        [routerLink]="getGroupLink()"
+        [routerLink]="groupLink"
         class="full-width-btn-link peach"
         >Back to {{ groupLabel }}</a
       >
       <a
-        [routerLink]="getRouteLink(appRoutes.ABOUT)"
+        [routerLink]="aboutLink"
         class="full-width-btn-link sunflower"
         >About the App</a
       >
       <a
-        [routerLink]="getRouteLink(appRoutes.ABOUT_SUPPORTERS)"
+        [routerLink]="supportersLink"
         class="full-width-btn-link bluey"
         >Supporters</a
       >

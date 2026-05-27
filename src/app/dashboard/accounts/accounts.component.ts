@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
@@ -19,6 +26,28 @@ import { StoAccountService } from '../services/sto-account.service';
 import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.component';
 
 /**
+ * View model for a single STO account card, with all display values precomputed at load time.
+ */
+export interface AccountVm {
+  /** Unique identifier of the account. */
+  id: string;
+  /** The underlying STO account data. */
+  account: StoAccount;
+  /** Precomputed router link path for the account detail page. */
+  link: string;
+  /** Precomputed Font Awesome icon class for the account platform, or null if unavailable. */
+  platformIcon: string | null;
+  /** Precomputed display name of the account platform. */
+  platformName: string;
+  /** Precomputed Font Awesome icon class for the account launcher, or null if unavailable. */
+  launcherIcon: string | null;
+  /** Precomputed display name of the account launcher. */
+  launcherName: string;
+  /** Precomputed character count for display. */
+  characterCount: number;
+}
+
+/**
  * Component to list and manage STO accounts.
  */
 @Component({
@@ -26,11 +55,14 @@ import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.
   templateUrl: './accounts.component.html',
   styleUrls: ['./accounts.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MatDialogModule, RouterModule, LoadingBarComponent],
 })
 export class AccountsComponent implements OnInit, OnDestroy {
-  /** Application routes for navigation. */
-  readonly appRoutes = APP_ROUTES;
+  /** Precomputed router link to the main dashboard. */
+  readonly dashboardLink = `/${APP_ROUTES.STO_DASHBOARD}`;
+
+  /** Application route titles for navigation labels. */
   readonly appRouteTitles = APP_ROUTE_TITLES;
 
   /** List of STO accounts for the current user. */
@@ -42,54 +74,60 @@ export class AccountsComponent implements OnInit, OnDestroy {
   /** List of available launchers. */
   launchers: Launcher[] = [];
 
+  /** Precomputed view-model rows for the account cards. */
+  accountVms: AccountVm[] = [];
+
   /** Flag to indicate if data is being loaded. */
   isLoading = true;
 
-  private readonly stoAccountService = inject(StoAccountService);
-  private readonly routingService = inject(RoutingService);
-  private readonly dialog = inject(MatDialog);
-  private readonly destroy$ = new Subject<void>();
+  private readonly _stoAccountService = inject(StoAccountService);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _dialog = inject(MatDialog);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _destroy$ = new Subject<void>();
 
   /**
-   * Initializes the component by fetching STO accounts.
-   *
-   * @returns void
+   * Initialises the component by fetching STO accounts.
    */
   ngOnInit(): void {
     this.loadAccounts();
   }
 
   /**
-   * Fetches the list of STO accounts from the service.
+   * Fetches the list of STO accounts, platforms, and launchers from the service,
+   * then builds the precomputed view-model rows.
    */
   loadAccounts(): void {
     this.isLoading = true;
     forkJoin({
-      accounts: this.stoAccountService.getAccounts(),
-      platforms: this.stoAccountService.getPlatforms(),
-      launchers: this.stoAccountService.getLaunchers(),
+      accounts: this._stoAccountService.getAccounts(),
+      platforms: this._stoAccountService.getPlatforms(),
+      launchers: this._stoAccountService.getLaunchers(),
     })
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: ({ accounts, platforms, launchers }) => {
           this.accounts = accounts;
           this.platforms = platforms;
           this.launchers = launchers;
+          this.accountVms = accounts.map(account =>
+            this._buildAccountVm(account),
+          );
           this.isLoading = false;
+          this._cdr.markForCheck();
         },
         error: () => {
           this.isLoading = false;
+          this._cdr.markForCheck();
         },
       });
   }
 
   /**
    * Opens the dialog to add a new STO account.
-   *
-   * @returns void
    */
   addAccount(): void {
-    const dialogRef = this.dialog.open(AccountDialogComponent, {
+    const dialogRef = this._dialog.open(AccountDialogComponent, {
       width: '500px',
       data: { mode: 'add' },
     });
@@ -105,10 +143,9 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * Opens the dialog to edit an existing STO account.
    *
    * @param account The account to edit.
-   * @returns void
    */
   editAccount(account: StoAccount): void {
-    const dialogRef = this.dialog.open(AccountDialogComponent, {
+    const dialogRef = this._dialog.open(AccountDialogComponent, {
       width: '500px',
       data: { mode: 'edit', account },
     });
@@ -124,10 +161,9 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * Deletes an STO account after user confirmation.
    *
    * @param account The account to delete.
-   * @returns void
    */
   deleteAccount(account: StoAccount): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
       width: '75%',
       data: {
         title: 'Delete STO Account',
@@ -141,13 +177,14 @@ export class AccountsComponent implements OnInit, OnDestroy {
 
     dialogRef
       .afterClosed()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe(result => {
         if (result) {
-          this.stoAccountService.deleteAccount(account.id).subscribe({
+          this._stoAccountService.deleteAccount(account.id).subscribe({
             next: () => this.loadAccounts(),
             error: err => {
               this.isLoading = false;
+              this._cdr.markForCheck();
               console.error('Failed to delete STO account:', err);
             },
           });
@@ -162,14 +199,14 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * @returns A router link string for the given route.
    */
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 
   /**
-   * Returns the Font Awesome icon for a given platform.
+   * Returns the Font Awesome icon class for a given platform.
    *
    * @param platformId The platform ID.
-   * @returns An array representing the Font Awesome icon.
+   * @returns A Font Awesome icon class string, or null if not found.
    */
   getPlatformIcon(platformId?: string): string | null {
     if (!platformId) return null;
@@ -192,7 +229,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * Returns the platform for a given platform ID.
    *
    * @param platformId The platform ID.
-   * @returns The platform object or undefined.
+   * @returns The Platform object, or undefined if not found.
    */
   getPlatform(platformId?: string): Platform | undefined {
     if (!platformId) return undefined;
@@ -200,10 +237,10 @@ export class AccountsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Returns the Font Awesome icon for a given launcher.
+   * Returns the Font Awesome icon class for a given launcher.
    *
    * @param launcherId The launcher ID.
-   * @returns An array representing the Font Awesome icon.
+   * @returns A Font Awesome icon class string, or null if not found.
    */
   getLauncherIcon(launcherId?: string): string | null {
     if (!launcherId) return null;
@@ -223,7 +260,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * Returns the launcher for a given launcher ID.
    *
    * @param launcherId The launcher ID.
-   * @returns The launcher object or undefined.
+   * @returns The Launcher object, or undefined if not found.
    */
   getLauncher(launcherId?: string): Launcher | undefined {
     if (!launcherId) return undefined;
@@ -232,6 +269,9 @@ export class AccountsComponent implements OnInit, OnDestroy {
 
   /**
    * Encodes an STO handle for URL safety.
+   *
+   * @param handle The STO handle to encode.
+   * @returns The URL-safe encoded handle.
    */
   encodeHandle(handle: string): string {
     return encodeStoHandle(handle);
@@ -239,12 +279,29 @@ export class AccountsComponent implements OnInit, OnDestroy {
 
   /**
    * Cleans up subscriptions when the component is destroyed.
-   * Completes the destroy$ subject to unsubscribe from all active subscriptions.
-   *
-   * @returns void
    */
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+
+  /**
+   * Builds a view-model for a single account card, precomputing all display values.
+   * Must be called after {@link platforms} and {@link launchers} have been set.
+   *
+   * @param account The STO account to build a view-model for.
+   * @returns A precomputed AccountVm for template binding.
+   */
+  private _buildAccountVm(account: StoAccount): AccountVm {
+    return {
+      id: account.id,
+      account,
+      link: `/${APP_ROUTES.STO_DASHBOARD_ACCOUNTS}/${this.encodeHandle(account.handle)}`,
+      platformIcon: this.getPlatformIcon(account.platformId),
+      platformName: this.getPlatform(account.platformId)?.name ?? 'Platform',
+      launcherIcon: this.getLauncherIcon(account.launcherId),
+      launcherName: this.getLauncher(account.launcherId)?.name ?? 'Launcher',
+      characterCount: account.characterCount || 0,
+    };
   }
 }

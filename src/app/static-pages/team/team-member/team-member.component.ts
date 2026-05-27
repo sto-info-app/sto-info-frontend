@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import {
   CLOUDFLARE_VARIANT_SQUARE_300PX_NAME,
@@ -17,23 +17,35 @@ import { TEAM_MEMBERS } from '../team.data';
   templateUrl: './team-member.component.html',
   styleUrls: ['./team-member.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterModule, LcarsErrorMessageComponent],
 })
 export class TeamMemberComponent {
-  appRoutes = APP_ROUTES;
-  photoVariant = CLOUDFLARE_VARIANT_SQUARE_300PX_NAME;
-  fallbackPhotoUrl = SRC_PHOTO_UNAVAILABLE_300PX;
+  readonly photoVariant = CLOUDFLARE_VARIANT_SQUARE_300PX_NAME;
+  readonly fallbackPhotoUrl = SRC_PHOTO_UNAVAILABLE_300PX;
 
   member?: TeamMember;
   groupLabel = 'Team';
   teamGroup?: TeamGroup;
 
-  private readonly route = inject(ActivatedRoute);
-  private readonly routingService = inject(RoutingService);
+  /** Precomputed router link back to the member's group list page. */
+  readonly groupLink: string;
+
+  /** Precomputed router link to the About page. */
+  readonly aboutLink = `/${APP_ROUTES.ABOUT}`;
+
+  /** Precomputed router link to the Supporters page. */
+  readonly supportersLink = `/${APP_ROUTES.ABOUT_SUPPORTERS}`;
+
+  /** Precomputed photo URL for the member, falling back to the unavailable-photo asset. */
+  readonly photoUrl: string;
+
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _routingService = inject(RoutingService);
 
   constructor() {
-    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
-    const group = this.route.snapshot.data['teamGroup'] as
+    const slug = this._route.snapshot.paramMap.get('slug') ?? '';
+    const group = this._route.snapshot.data['teamGroup'] as
       | TeamGroup
       | undefined;
 
@@ -42,6 +54,13 @@ export class TeamMemberComponent {
     );
     this.teamGroup = group;
     this.groupLabel = group === 'volunteers' ? 'Volunteers' : 'Developers';
+
+    const groupRoute =
+      group === 'volunteers'
+        ? APP_ROUTES.ABOUT_VOLUNTEERS
+        : APP_ROUTES.ABOUT_DEVELOPERS;
+    this.groupLink = this._routingService.getLink(groupRoute);
+    this.photoUrl = this.getMemberPhotoUrl(this.member?.photoUrl);
   }
 
   getGroupLink(): string {
@@ -49,11 +68,11 @@ export class TeamMemberComponent {
       this.teamGroup === 'volunteers'
         ? APP_ROUTES.ABOUT_VOLUNTEERS
         : APP_ROUTES.ABOUT_DEVELOPERS;
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 
   getMemberPhotoUrl(photoUrl?: string): string {

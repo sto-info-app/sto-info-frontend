@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnDestroy,
@@ -37,6 +39,7 @@ import { AuthService } from '../auth/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,
@@ -46,6 +49,12 @@ import { AuthService } from '../auth/auth.service';
   ],
 })
 export class LoginComponent implements OnDestroy {
+  /** Precomputed router link to the registration page. */
+  readonly registerLink = `/${APP_ROUTES.REGISTER}`;
+
+  /** Precomputed router link to the reset-password page. */
+  readonly resetPasswordLink = `/${APP_ROUTES.RESET_PASSWORD}`;
+
   // Allow environment constants to be used in the HTML
   appLoggedInHome: string = environment.appLoggedInHome;
 
@@ -60,15 +69,18 @@ export class LoginComponent implements OnDestroy {
   isSubmitting = false;
   emailTouched = false;
 
-  private readonly sharedDataService = inject(SharedDataService);
-  private readonly authService = inject(AuthService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly renderer = inject(Renderer2);
-  private readonly el = inject(ElementRef);
-  private readonly alertThemeService = inject(AlertThemeService);
-  private readonly routingService = inject(RoutingService);
-  appRoutes = APP_ROUTES;
+  /** Whether the current email value passes format validation. Updated by validateInputs(). */
+  isEmailValid = false;
+
+  private readonly _sharedDataService = inject(SharedDataService);
+  private readonly _authService = inject(AuthService);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
+  private readonly _renderer = inject(Renderer2);
+  private readonly _el = inject(ElementRef);
+  private readonly _alertThemeService = inject(AlertThemeService);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   onLogin() {
     if (!this.inputsValid) return;
@@ -79,21 +91,21 @@ export class LoginComponent implements OnDestroy {
       password: this.password,
     };
 
-    this.authService.login(credentials).subscribe({
+    this._authService.login(credentials).subscribe({
       next: (response: LoginResponse) => {
-        this.authService.saveToken(
+        this._authService.saveToken(
           response.access_token,
           response.refresh_token,
           response.expires_in,
         );
 
         // Store the user ID in the shared data service
-        this.sharedDataService.updateUserId(response.user_id);
+        this._sharedDataService.updateUserId(response.user_id);
 
         // Get the URL the user was originally trying to access
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        const returnUrl = this._route.snapshot.queryParamMap.get('returnUrl');
         // If there's a return URL, navigate to it. Otherwise, navigate to a default page.
-        this.router.navigate([returnUrl ?? this.appLoggedInHome]);
+        this._router.navigate([returnUrl ?? this.appLoggedInHome]);
       },
       error: (error: HttpErrorResponse) => {
         let errMessage: string;
@@ -118,20 +130,23 @@ export class LoginComponent implements OnDestroy {
         }
         this.displayErrorMessage(errMessage, error.status);
         this.isSubmitting = false;
+        this._cdr.markForCheck();
       },
       complete: () => {
         this.resetErrorMessage();
         this.isSubmitting = false;
+        this._cdr.markForCheck();
       },
     });
   }
 
   displayErrorMessage(message: string, httpStatus?: number) {
-    this.applyErrorStylesheet(httpStatus);
+    this._applyErrorStylesheet(httpStatus);
     this.errorMessage = message;
 
     setTimeout(() => {
       this.resetErrorMessage();
+      this._cdr.markForCheck();
     }, this.showErrorMilliseconds);
   }
 
@@ -141,38 +156,39 @@ export class LoginComponent implements OnDestroy {
 
   validateInputs() {
     // check if both inputs are non-empty and email is valid
+    this.isEmailValid = this.validateEmail(this.email);
     this.inputsValid =
       this.email.trim() !== '' &&
       this.password.trim() !== '' &&
-      this.validateEmail(this.email);
+      this.isEmailValid;
   }
 
   validateEmail(email: string): boolean {
     return validateEmail(email);
   }
 
-  private applyErrorStylesheet(httpStatus?: number) {
+  getRouteLink(route: string): string {
+    return this._routingService.getLink(route);
+  }
+
+  ngOnDestroy(): void {
+    this._alertThemeService.clearAlertStylesheet(
+      this._renderer,
+      this._el.nativeElement,
+    );
+    this._alertThemeService.clearTimers(this._el.nativeElement);
+  }
+
+  private _applyErrorStylesheet(httpStatus?: number) {
     const state =
       typeof httpStatus === 'number'
         ? alertStateFromHttpStatus(httpStatus)
         : 'red';
 
-    this.alertThemeService.applyAlertThemeThenClearAfterAShortTime(
-      this.renderer,
-      this.el.nativeElement,
+    this._alertThemeService.applyAlertThemeThenClearAfterAShortTime(
+      this._renderer,
+      this._el.nativeElement,
       state,
     );
-  }
-
-  getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
-  }
-
-  ngOnDestroy(): void {
-    this.alertThemeService.clearAlertStylesheet(
-      this.renderer,
-      this.el.nativeElement,
-    );
-    this.alertThemeService.clearTimers(this.el.nativeElement);
   }
 }

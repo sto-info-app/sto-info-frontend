@@ -1,6 +1,6 @@
 <div class="smart-chart-container">
-  @if (data.length > 0 && totalCount > 0) {
-    @if (showPie) {
+  @if (data().length > 0 && totalCount() > 0) {
+    @if (showPie()) {
       <div class="chart-wrapper">
         <!-- Left Panel: The Chart -->
         <div class="chart-box">
@@ -9,7 +9,7 @@
           <svg
             viewBox="-1.1 -1.1 2.2 2.2"
             class="pie-chart">
-            @for (segment of pieSegments; track segment.name) {
+            @for (segment of pieSegments(); track segment.name) {
               <path
                 [attr.d]="segment.path"
                 [attr.fill]="segment.color"
@@ -21,7 +21,7 @@
                 </title>
               </path>
             }
-            @if (isDonut) {
+            @if (isDonut()) {
               <circle
                 cx="0"
                 cy="0"
@@ -36,7 +36,7 @@
         <div class="legend-panel">
           <div class="legend-header sunflower">Breakdown Indices</div>
           <div class="legend-items">
-            @for (segment of pieSegments; track segment.name) {
+            @for (segment of pieSegments(); track segment.name) {
               <div class="legend-item">
                 <div
                   class="status-box"
@@ -60,17 +60,17 @@
       <!-- Bar Chart with improved technical layout -->
       <div class="bar-chart-wrapper">
         <div class="breakdown-list">
-          @for (item of data; track item.name; let i = $index) {
+          @for (row of barRows(); track row.name) {
             <div class="breakdown-item">
-              <span class="breakdown-name">{{ item.name }}</span>
+              <span class="breakdown-name">{{ row.name }}</span>
               <div class="bar-track">
                 <div
-                  class="bar-fill {{ getBarColorClass(i) }}"
-                  [style.width]="getBarWidth(item.count)"></div>
+                  class="bar-fill {{ row.colorClass }}"
+                  [style.width]="row.width"></div>
               </div>
               <span class="breakdown-count"
                 ><span class="lcars-number-highlight">{{
-                  item.count | number
+                  row.count | number
                 }}</span></span
               >
             </div>
