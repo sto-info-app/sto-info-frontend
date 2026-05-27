@@ -64,6 +64,20 @@ describe('SmartChartComponent', () => {
     expect(component.getBarColorClass(10)).toBe('perano-bar'); // loops back
   });
 
+  it('should return false for showPie in auto mode when data is empty', () => {
+    fixture.componentRef.setInput('mode', 'auto');
+    fixture.componentRef.setInput('data', []);
+    expect(component.showPie()).toBe(false);
+  });
+
+  it('should return false for showPie in auto mode when data is null', () => {
+    // Covers the ?? [] null fallback branch on line 73 inside showPie
+    fixture.componentRef.setInput('mode', 'auto');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fixture.componentRef.setInput('data', null as any);
+    expect(component.showPie()).toBe(false);
+  });
+
   it('should determine showPie correctly based on threshold', () => {
     fixture.componentRef.setInput('threshold', 2);
     fixture.componentRef.setInput('data', [{ name: 'A', count: 1 }]);
@@ -92,6 +106,13 @@ describe('SmartChartComponent', () => {
   });
 
   it('should return 0 for totalCount when data is empty', () => {
+    expect(component.totalCount()).toBe(0);
+  });
+
+  it('should return 0 for totalCount when data is null', () => {
+    // Covers the ?? [] null fallback branch inside totalCount
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fixture.componentRef.setInput('data', null as any);
     expect(component.totalCount()).toBe(0);
   });
 
@@ -129,6 +150,14 @@ describe('SmartChartComponent', () => {
     expect(component.barRows()).toEqual([]);
   });
 
+  it('should compute barRows with 0% width when all counts are zero', () => {
+    // Covers the maxCount <= 0 ? '0%' branch when items exist but all have count 0
+    fixture.componentRef.setInput('data', [{ name: 'A', count: 0 }]);
+    const rows = component.barRows();
+    expect(rows.length).toBe(1);
+    expect(rows[0].width).toBe('0%');
+  });
+
   it('should compute pieSegments from data', () => {
     // 3:1 split to cover both large-arc-flag branches (75% > 50% and 25% <= 50%)
     fixture.componentRef.setInput('data', [
@@ -147,6 +176,15 @@ describe('SmartChartComponent', () => {
   });
 
   it('should return empty pieSegments when data is empty', () => {
+    expect(component.pieSegments()).toEqual([]);
+  });
+
+  it('should return empty pieSegments when all counts are zero', () => {
+    // Covers the total === 0 early-return branch
+    fixture.componentRef.setInput('data', [
+      { name: 'A', count: 0 },
+      { name: 'B', count: 0 },
+    ]);
     expect(component.pieSegments()).toEqual([]);
   });
 

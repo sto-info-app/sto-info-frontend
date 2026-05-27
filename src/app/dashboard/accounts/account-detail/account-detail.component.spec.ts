@@ -523,6 +523,13 @@ describe('AccountDetailComponent', () => {
       component.onProfileImageError('123');
       expect(component.failedImageIds.has('123')).toBe(true);
     });
+
+    it('filteredVms should use unavailablePhotoSrc when image has failed', () => {
+      component.characters.set([mockCharacter]);
+      component.onProfileImageError(mockCharacter.id);
+      const vm = component.filteredVms().find(v => v.id === mockCharacter.id);
+      expect(vm?.imageUrl).toBe(SRC_PHOTO_UNAVAILABLE_100PX);
+    });
   });
 
   describe('Filter getters', () => {
