@@ -320,13 +320,13 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
           } else {
             this.isLoading = false;
             this.errorMessage = 'Account not found';
-            this._cdr.markForCheck();
+            this._cdr.detectChanges();
           }
         },
         error: err => {
           this.isLoading = false;
           this.errorMessage = 'Failed to load account details';
-          this._cdr.markForCheck();
+          this._cdr.detectChanges();
           console.error(err);
         },
       });
@@ -372,9 +372,11 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
           const currentHandle = this.account.handle;
           this._stoAccountService
             .getAccount(this.account.id)
+            .pipe(takeUntil(this._destroy$))
             .subscribe(updatedAccount => {
               if (updatedAccount) {
                 this.account = updatedAccount;
+                this._cdr.detectChanges();
                 if (updatedAccount.handle !== currentHandle) {
                   this._router.navigate([
                     '/dashboard/accounts',

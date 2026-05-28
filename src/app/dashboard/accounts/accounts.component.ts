@@ -114,11 +114,11 @@ export class AccountsComponent implements OnInit, OnDestroy {
             this._buildAccountVm(account),
           );
           this.isLoading = false;
-          this._cdr.markForCheck();
+          this._cdr.detectChanges();
         },
         error: () => {
           this.isLoading = false;
-          this._cdr.markForCheck();
+          this._cdr.detectChanges();
         },
       });
   }
@@ -132,11 +132,14 @@ export class AccountsComponent implements OnInit, OnDestroy {
       data: { mode: 'add' },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadAccounts();
-      }
-    });
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(result => {
+        if (result) {
+          this.loadAccounts();
+        }
+      });
   }
 
   /**
@@ -150,11 +153,14 @@ export class AccountsComponent implements OnInit, OnDestroy {
       data: { mode: 'edit', account },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadAccounts();
-      }
-    });
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(result => {
+        if (result) {
+          this.loadAccounts();
+        }
+      });
   }
 
   /**
