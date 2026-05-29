@@ -24,6 +24,7 @@ export class HomeComponent implements OnDestroy {
 
   /**
    * Initializes the component.
+   *
    * Subscribes to the authentication service to determine if the user is logged in.
    */
   constructor() {

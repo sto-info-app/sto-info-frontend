@@ -19,6 +19,9 @@ export class ServiceInterruptionComponent implements OnDestroy {
   private readonly el = inject(ElementRef);
   private readonly alertThemeService = inject(AlertThemeService);
 
+  /**
+   * Removes alert styling when the interruption page is destroyed.
+   */
   ngOnDestroy(): void {
     this.alertThemeService.clearAlertStylesheet(
       this.renderer,

@@ -57,6 +57,9 @@ export class ChangePasswordComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly routingService = inject(RoutingService);
 
+  /**
+   * Builds the change-password form.
+   */
   constructor() {
     this.changePasswordForm = this.formBuilder.nonNullable.group(
       {
@@ -83,6 +86,9 @@ export class ChangePasswordComponent implements OnInit {
     );
   }
 
+  /**
+   * Reads the password reset token from the query string.
+   */
   ngOnInit() {
     this.token = this.route.snapshot.queryParamMap.get('token') ?? '';
 
@@ -92,6 +98,9 @@ export class ChangePasswordComponent implements OnInit {
     }
   }
 
+  /**
+   * Submits the password change request.
+   */
   onSubmit() {
     if (this.changePasswordForm.valid) {
       this.authService
@@ -124,12 +133,21 @@ export class ChangePasswordComponent implements OnInit {
     }
   }
 
+  /**
+   * Clears the transient error message after a short delay.
+   */
   resetErrorMessage(): void {
     setTimeout(() => {
       this.errorMessage = ''; // Reset error message
     }, MILLISECONDS_SHOW_ERROR_MSG);
   }
 
+  /**
+   * Resolves a route key into a router link.
+   *
+   * @param route The route key.
+   * @returns The resolved link.
+   */
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
   }

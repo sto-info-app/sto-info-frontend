@@ -50,6 +50,9 @@ export class AuthService {
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
 
+  /**
+   * Restores the authenticated state from stored tokens and schedules logout timers.
+   */
   constructor() {
     // Check if there's a login token and update the BehaviorSubject
     this.isAuthenticatedSubject.next(this.isTokenValid());
@@ -58,10 +61,22 @@ export class AuthService {
     this.createAutoLogoutTimer();
   }
 
+  /**
+   * Sends the registration payload to the backend.
+   *
+   * @param user The registration form values.
+   * @returns The registration request observable.
+   */
   register(user: RegistrationFormValues) {
     return this.http.post(API_URLS.AUTH_REGISTER, user);
   }
 
+  /**
+   * Authenticates the user and stores the returned tokens.
+   *
+   * @param credentials The login credentials.
+   * @returns The login response observable.
+   */
   login(credentials: LoginCredentials): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(API_URLS.AUTH_LOGIN, credentials, {
@@ -78,6 +93,11 @@ export class AuthService {
       );
   }
 
+  /**
+   * Builds authorization headers when an access token is available.
+   *
+   * @returns The headers object, or `null` when no access token is stored.
+   */
   getHttpOptionsWithAccessToken(): { headers: HttpHeaders } | null {
     const token = localStorage.getItem('access_token');
     if (!token) {
@@ -87,6 +107,13 @@ export class AuthService {
     return { headers };
   }
 
+  /**
+   * Persists access and refresh tokens and updates expiry notifications.
+   *
+   * @param accessToken The access token.
+   * @param refreshToken The refresh token.
+   * @param expiresIn The token lifetime in seconds.
+   */
   saveToken(accessToken: string, refreshToken: string, expiresIn: number) {
     const expiresAt = this.getNewExpiresMilliseconds(expiresIn);
     const warningAt = expiresAt - this.autoLogoutWarningMilliSecs;
@@ -103,6 +130,11 @@ export class AuthService {
     this.createAutoLogoutTimer();
   }
 
+  /**
+   * Reads the stored access token if it is still valid.
+   *
+   * @returns The access token, or `null` when it is missing or expired.
+   */
   getToken(): string | null {
     const token = localStorage.getItem('access_token');
     if (!token) {
@@ -117,6 +149,9 @@ export class AuthService {
     return token;
   }
 
+  /**
+   * Clears stored tokens and notifies subscribers that the session ended.
+   */
   removeToken() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
@@ -128,6 +163,11 @@ export class AuthService {
     this.expiryAnnouncedSubject.next(0);
   }
 
+  /**
+   * Exchanges the stored refresh token for a new login session.
+   *
+   * @returns The refresh-token exchange observable.
+   */
   refreshToken(): Observable<LoginResponse> {
     const refreshToken = localStorage.getItem('refresh_token');
     if (!refreshToken) {
@@ -153,6 +193,11 @@ export class AuthService {
     );
   }
 
+  /**
+   * Checks whether the stored access token is still valid.
+   *
+   * @returns `true` when both the token and expiry are present and unexpired.
+   */
   isTokenValid(): boolean {
     const token = localStorage.getItem('access_token');
     const expiresAt = localStorage.getItem('expires_at');
@@ -164,6 +209,9 @@ export class AuthService {
     return Date.now() < Number(expiresAt);
   }
 
+  /**
+   * Logs the user out, revokes the refresh token, and returns to the login page.
+   */
   performLogout() {
     // Send a request to the backend to revoke the refresh token
     const refreshToken = localStorage.getItem('refresh_token');
@@ -209,10 +257,21 @@ export class AuthService {
     });
   }
 
+  /**
+   * Checks whether the user is currently logged in.
+   *
+   * @returns `true` when the stored access token is valid.
+   */
   isLoggedIn(): boolean {
     return this.isTokenValid();
   }
 
+  /**
+   * Requests a password reset email for the supplied address.
+   *
+   * @param email The email address to reset.
+   * @returns The reset request observable.
+   */
   resetPassword(email: string): Observable<void> {
     return this.http.post(API_URLS.AUTH_RESET_PASSWORD_REQUEST, { email }).pipe(
       map(() => {
@@ -221,6 +280,13 @@ export class AuthService {
     );
   }
 
+  /**
+   * Submits a new password for the supplied reset token.
+   *
+   * @param token The password-reset token.
+   * @param password The new password.
+   * @returns The password change observable.
+   */
   changePassword(token: string, password: string): Observable<void> {
     const data: ChangePasswordValues = {
       token: token,
@@ -234,16 +300,30 @@ export class AuthService {
     );
   }
 
+  /**
+   * Calculates how many seconds remain before the current session expires.
+   *
+   * @returns The remaining session lifetime in seconds.
+   */
   getSecondsUntilLoginSessionExpiry(): number {
     const expiresAt = Number(localStorage.getItem('expires_at'));
     const now = Date.now();
     return Math.max(0, expiresAt - now) / 1000; // Convert to seconds
   }
 
+  /**
+   * Converts a lifetime in seconds into an absolute expiry timestamp.
+   *
+   * @param seconds The number of seconds to add to the current time.
+   * @returns The absolute expiry timestamp in milliseconds.
+   */
   getNewExpiresMilliseconds(seconds: number): number {
     return Date.now() + seconds * 1000;
   }
 
+  /**
+   * Clears the pending logout timeout.
+   */
   clearLogoutTimer(): void {
     if (this.logoutTimeout) {
       clearTimeout(this.logoutTimeout);
@@ -251,6 +331,9 @@ export class AuthService {
     }
   }
 
+  /**
+   * Recomputes the warning and logout timers from stored expiry values.
+   */
   createAutoLogoutTimer(): void {
     this.clearAutoLogoutTimer();
     this.clearLogoutTimer();
@@ -288,6 +371,9 @@ export class AuthService {
     }
   }
 
+  /**
+   * Clears the pending warning timeout.
+   */
   clearAutoLogoutTimer(): void {
     if (this.warningTimeout) {
       clearTimeout(this.warningTimeout);
@@ -295,6 +381,11 @@ export class AuthService {
     }
   }
 
+  /**
+   * Determines whether the current session is close to expiring.
+   *
+   * @returns `true` when the remaining session time is below the refresh threshold.
+   */
   isTokenExpiringSoon(): boolean {
     const thresholdMins =
       environment.minsBeforeLogoutExpiryToRefreshToken || 15; // Minutes before login session expires if not set in environment settings
