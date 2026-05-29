@@ -165,6 +165,15 @@ export const routes: Routes = [
     canActivate: [AuthGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.STO_ACCOUNT_ENDEAVOURS,
+    loadComponent: () =>
+      import('./dashboard/endeavours/endeavours.component').then(
+        m => m.EndeavoursComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_ACCOUNT_ENDEAVOURS, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.STO_CHARACTER_DETAIL,
     loadComponent: () =>
       import('./dashboard/characters/character-detail/character-detail.component').then(

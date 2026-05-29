@@ -15,10 +15,13 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
+import { EndeavourSummary } from 'src/app/dashboard/models/endeavour.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
+import { EndeavourService } from 'src/app/dashboard/services/endeavour.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { EndeavourRankBadgeComponent } from 'src/app/shared/components/endeavour-rank-badge/endeavour-rank-badge.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
@@ -65,12 +68,14 @@ interface CharacterVm {
     LcarsErrorMessageComponent,
     MatButtonModule,
     MatDialogModule,
+    EndeavourRankBadgeComponent,
   ],
 })
 export class AccountDetailComponent implements OnInit, OnDestroy {
   // ── Non-signal state (changed infrequently via HTTP callbacks) ────────────
   account: StoAccount | null = null;
   isLoading = true;
+  endeavourCollapsed = false;
   errorMessage = '';
 
   // ── Signal-based state ────────────────────────────────────────────────────
@@ -105,10 +110,20 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
 
   // ── Injected services ─────────────────────────────────────────────────────
 
+  readonly endeavourSummary = signal<EndeavourSummary | null>(null);
+
+  /** Router link for the Endeavour Perks page for the current account. */
+  endeavoursLink(): string | null {
+    return this.account
+      ? `/dashboard/accounts/${encodeStoHandle(this.account.handle)}/endeavours`
+      : null;
+  }
+
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
   private readonly _stoAccountService = inject(StoAccountService);
   private readonly _characterService = inject(CharacterService);
+  private readonly _endeavourService = inject(EndeavourService);
   private readonly _dialog = inject(MatDialog);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _destroy$ = new Subject<void>();
@@ -317,6 +332,7 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
           this.account = accounts.find(a => a.handle === handle) || null;
           if (this.account) {
             this.loadCharacters(this.account.id);
+            this.loadEndeavourSummary(this.account.id);
           } else {
             this.isLoading = false;
             this.errorMessage = 'Account not found';
@@ -347,8 +363,23 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
         error: err => {
           this.isLoading = false;
           this.errorMessage = 'Failed to load characters';
-          this._cdr.markForCheck();
+          this._cdr.detectChanges();
           console.error(err);
+        },
+      });
+  }
+
+  loadEndeavourSummary(accountId: string): void {
+    this._endeavourService
+      .getSummary(accountId)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: summary => {
+          this.endeavourSummary.set(summary);
+          this._cdr.detectChanges();
+        },
+        error: () => {
+          // Non-critical — fail silently
         },
       });
   }
