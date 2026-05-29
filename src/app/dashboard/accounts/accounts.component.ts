@@ -45,6 +45,22 @@ export interface AccountVm {
   launcherName: string;
   /** Precomputed character count for display. */
   characterCount: number;
+  /** Precomputed total endeavour nodes spent for display. */
+  endeavourTotalNodes: number;
+  /** CSS class derived from the account platform, for header colour theming. */
+  platformClass: string;
+  /** Router link to the Endeavour Perks page for this account. */
+  endeavoursLink: string;
+  /** Whether a launcher is set on this account (distinct from having a mapped icon). */
+  hasLauncher: boolean;
+  /** Zero-padded 4-digit endeavour node count, e.g. "0512". */
+  endeavourTotalNodesDisplay: string;
+  /** Local asset path for the card background image. */
+  bgImagePath: string;
+  /** Whether to show the username (false when it duplicates the handle). */
+  showUsername: boolean;
+  /** CSS class for the launcher, applied alongside platformClass for per-launcher card theming. */
+  launcherClass: string;
 }
 
 /**
@@ -308,6 +324,74 @@ export class AccountsComponent implements OnInit, OnDestroy {
       launcherIcon: this.getLauncherIcon(account.launcherId),
       launcherName: this.getLauncher(account.launcherId)?.name ?? 'Launcher',
       characterCount: account.characterCount || 0,
+      endeavourTotalNodes: account.endeavourTotalNodes || 0,
+      platformClass: this.getPlatformClass(account.platformId),
+      endeavoursLink: `/${APP_ROUTES.STO_DASHBOARD_ACCOUNTS}/${this.encodeHandle(account.handle)}/endeavours`,
+      hasLauncher: !!account.launcherId,
+      endeavourTotalNodesDisplay: (account.endeavourTotalNodes || 0)
+        .toString()
+        .padStart(4, '0'),
+      bgImagePath: this._getBgImagePath(
+        this.getPlatformClass(account.platformId),
+        this.getLauncher(account.launcherId)?.name,
+      ),
+      showUsername:
+        !!account.username &&
+        account.username.toLowerCase() !== account.handle.toLowerCase(),
+      launcherClass: this._getLauncherClass(
+        this.getPlatformClass(account.platformId),
+        this.getLauncher(account.launcherId)?.name,
+      ),
     };
+  }
+
+  private _getLauncherClass(
+    platformClass: string,
+    launcherName?: string,
+  ): string {
+    if (platformClass !== 'platform-pc') return '';
+    const launcher = launcherName?.toLowerCase() ?? '';
+    if (launcher === 'arc') return 'launcher-arc';
+    if (launcher === 'epic') return 'launcher-epic';
+    if (launcher === 'steam') return 'launcher-steam';
+    return '';
+  }
+
+  private _getBgImagePath(
+    platformClass: string,
+    launcherName?: string,
+  ): string {
+    if (platformClass === 'platform-pc') {
+      const launcher = launcherName?.toLowerCase() ?? '';
+      if (launcher === 'arc')
+        return '/assets/temp/account_type_windows_arc.jpg';
+      if (launcher === 'epic')
+        return '/assets/temp/account_type_windows_epic.jpg';
+      if (launcher === 'steam')
+        return '/assets/temp/account_type_windows_steam.jpg';
+      return '/assets/temp/account_type_windows_default.jpg';
+    }
+    const map: Record<string, string> = {
+      'platform-playstation': '/assets/temp/account_type_playstation.jpg',
+      'platform-xbox': '/assets/temp/account_type_xbox.jpg',
+      'platform-arc': '/assets/temp/account_type_windows_arc.jpg',
+      'platform-epic': '/assets/temp/account_type_windows_epic.jpg',
+      'platform-steam': '/assets/temp/account_type_windows_steam.jpg',
+    };
+    return map[platformClass] ?? '/assets/temp/account_type_default.jpg';
+  }
+
+  getPlatformClass(platformId?: string): string {
+    if (!platformId) return '';
+    const platform = this.platforms.find(p => p.id === platformId);
+    if (!platform) return '';
+    const name = platform.name.toLowerCase();
+    if (name === 'playstation' || name === 'ps') return 'platform-playstation';
+    if (name === 'xbox') return 'platform-xbox';
+    if (name === 'steam') return 'platform-steam';
+    if (name === 'windows' || name === 'pc') return 'platform-pc';
+    if (name === 'arc') return 'platform-arc';
+    if (name === 'epic') return 'platform-epic';
+    return '';
   }
 }

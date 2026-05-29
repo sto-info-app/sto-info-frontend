@@ -15,6 +15,7 @@ export interface StoAccount {
   userId: string;
   characterCount?: number;
   userCharacterCount?: number;
+  endeavourTotalNodes?: number;
 }
 
 export interface Platform {

@@ -28,57 +28,105 @@
           @for (vm of accountVms; track vm.id) {
             <div
               class="account-card"
+              [class]="
+                vm.platformClass +
+                (vm.launcherClass ? ' ' + vm.launcherClass : '')
+              "
               [routerLink]="vm.link">
-              <div class="account-details">
-                <p>
-                  <span class="record-title">Handle:</span>
-                  {{ vm.account.handle }}
+              <!-- Header: handle + lifetime -->
+              <div class="account-card-header">
+                <div class="header-handle">
+                  <span class="account-handle-text">{{
+                    vm.account.handle
+                  }}</span>
                   @if (vm.account.lifetimeSubscription) {
                     <i
                       class="fas fa-badge-check lifetime-icon"
                       title="Lifetime Subscription"></i>
                   }
-                </p>
-                <div class="account-icons">
-                  <div class="icon-slot">
-                    @if (vm.platformIcon) {
-                      <i
-                        [class]="vm.platformIcon + ' platform-mini-icon'"
-                        [title]="'Platform: ' + vm.platformName"></i>
-                    }
-                  </div>
-                  <div class="icon-slot">
-                    @if (vm.launcherIcon) {
-                      <i
-                        [class]="vm.launcherIcon + ' launcher-icon'"
-                        [title]="'Launcher: ' + vm.launcherName"></i>
-                    }
-                  </div>
-                  <div
-                    class="character-count"
-                    [title]="'Total Captains: ' + vm.characterCount">
-                    <i class="fas fa-user-visor"></i>
-                    <span>{{ vm.characterCount }}</span>
-                  </div>
                 </div>
               </div>
-              <div class="account-actions">
-                <span
-                  class="cta-icon"
-                  (click)="$event.stopPropagation(); editAccount(vm.account)"
-                  (keypress)="$event.stopPropagation(); editAccount(vm.account)"
-                  title="Edit Account"
-                  ><i class="fas fa-user-pen"></i
-                ></span>
-                <span
-                  class="cta-icon delete-icon"
-                  (click)="$event.stopPropagation(); deleteAccount(vm.account)"
-                  (keypress)="
-                    $event.stopPropagation(); deleteAccount(vm.account)
-                  "
-                  title="Delete Account"
-                  ><i class="fas fa-trash"></i
-                ></span>
+
+              <!-- Body: info + stats | stacked actions -->
+              <div class="account-card-body">
+                <img
+                  class="card-bg-img"
+                  [src]="vm.bgImagePath"
+                  alt=""
+                  aria-hidden="true" />
+                <div class="account-body-main">
+                  <div class="account-body-info">
+                    <span class="sr-only">Platform: {{ vm.platformName }}</span>
+                    @if (vm.hasLauncher) {
+                      <span class="sr-only"
+                        >Launcher: {{ vm.launcherName }}</span
+                      >
+                    }
+                    @if (vm.showUsername) {
+                      <span class="account-username">
+                        <i class="fas fa-user"></i>
+                        {{ vm.account.username }}
+                      </span>
+                    }
+                    @if (vm.account.email) {
+                      <span class="account-email">
+                        <i class="fas fa-envelope"></i>
+                        {{ vm.account.email }}
+                      </span>
+                    }
+                    @if (vm.account.notes) {
+                      <span class="account-notes">
+                        <i class="fas fa-note-sticky"></i>
+                        {{ vm.account.notes }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="account-body-stats">
+                    <a
+                      [routerLink]="vm.link"
+                      (click)="$event.stopPropagation()"
+                      class="stat-badge captain-badge"
+                      [title]="'Total Captains: ' + vm.characterCount">
+                      <i class="fas fa-user-visor"></i>
+                      <span>{{ vm.characterCount }}</span>
+                      <span class="stat-label">Captains</span>
+                    </a>
+                    <a
+                      [routerLink]="vm.endeavoursLink"
+                      (click)="$event.stopPropagation()"
+                      class="stat-badge endeavour-stat-badge"
+                      title="Endeavour Rank"
+                      ><i class="fa-kit fa-sto-endeavor"></i
+                      ><span class="endeavour-count-display">{{
+                        vm.endeavourTotalNodesDisplay
+                      }}</span></a
+                    >
+                  </div>
+                </div>
+
+                <div class="account-body-actions">
+                  <span
+                    class="cta-icon"
+                    (click)="$event.stopPropagation(); editAccount(vm.account)"
+                    (keypress)="
+                      $event.stopPropagation(); editAccount(vm.account)
+                    "
+                    title="Edit Account"
+                    ><i class="fas fa-user-pen"></i
+                  ></span>
+                  <span
+                    class="cta-icon delete-icon"
+                    (click)="
+                      $event.stopPropagation(); deleteAccount(vm.account)
+                    "
+                    (keypress)="
+                      $event.stopPropagation(); deleteAccount(vm.account)
+                    "
+                    title="Delete Account"
+                    ><i class="fas fa-trash"></i
+                  ></span>
+                </div>
               </div>
             </div>
           }
