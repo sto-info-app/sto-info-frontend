@@ -304,4 +304,166 @@ describe('AccountsComponent', () => {
   it('should get route link', () => {
     expect(component.getRouteLink('home')).toBe('test-link');
   });
+
+  it('should build vm with username visibility and launcher class/background variants', () => {
+    const account = {
+      ...mockAccount,
+      username: 'DifferentUser',
+      platformId: 'pc',
+      launcherId: 'arc',
+      endeavourTotalNodes: 12,
+    } as StoAccount;
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([account]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'pc', name: 'PC' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(
+      of([{ id: 'arc', name: 'Arc' } as Launcher]),
+    );
+
+    component.ngOnInit();
+
+    const vm = component.accountVms[0];
+    expect(vm.showUsername).toBe(true);
+    expect(vm.launcherClass).toBe('launcher-arc');
+    expect(vm.bgImagePath).toBe('/assets/temp/account_type_windows_arc.jpg');
+    expect(vm.endeavourTotalNodesDisplay).toBe('0012');
+  });
+
+  it('should set launcherClass empty for non-pc platforms', () => {
+    const account = {
+      ...mockAccount,
+      platformId: 'xbox',
+      launcherId: 'steam',
+    } as StoAccount;
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([account]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'xbox', name: 'Xbox' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(
+      of([{ id: 'steam', name: 'Steam' } as Launcher]),
+    );
+
+    component.ngOnInit();
+    expect(component.accountVms[0].launcherClass).toBe('');
+    expect(component.accountVms[0].bgImagePath).toBe(
+      '/assets/temp/account_type_xbox.jpg',
+    );
+  });
+
+  it('should map platform classes for all known values and unknown', () => {
+    component.platforms = [
+      { id: 'ps', name: 'PlayStation' },
+      { id: 'x', name: 'Xbox' },
+      { id: 's', name: 'Steam' },
+      { id: 'pc', name: 'PC' },
+      { id: 'a', name: 'Arc' },
+      { id: 'e', name: 'Epic' },
+      { id: 'u', name: 'Unknown' },
+    ] as Platform[];
+
+    expect(component.getPlatformClass('ps')).toBe('platform-playstation');
+    expect(component.getPlatformClass('x')).toBe('platform-xbox');
+    expect(component.getPlatformClass('s')).toBe('platform-steam');
+    expect(component.getPlatformClass('pc')).toBe('platform-pc');
+    expect(component.getPlatformClass('a')).toBe('platform-arc');
+    expect(component.getPlatformClass('e')).toBe('platform-epic');
+    expect(component.getPlatformClass('u')).toBe('');
+    expect(component.getPlatformClass('missing')).toBe('');
+    expect(component.getPlatformClass()).toBe('');
+  });
+
+  it('should use default windows background for pc account without launcher', () => {
+    const account = {
+      ...mockAccount,
+      platformId: 'pc',
+      launcherId: undefined,
+    } as StoAccount;
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([account]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'pc', name: 'Windows' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(of([]));
+
+    component.ngOnInit();
+    expect(component.accountVms[0].bgImagePath).toBe(
+      '/assets/temp/account_type_windows_default.jpg',
+    );
+  });
+
+  it('should use epic and steam background variants for pc launcher accounts', () => {
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'pc', name: 'PC' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(
+      of([
+        { id: 'epic', name: 'Epic' } as Launcher,
+        { id: 'steam', name: 'Steam' } as Launcher,
+      ]),
+    );
+
+    stoAccountServiceSpy.getAccounts.mockReturnValue(
+      of([
+        { ...mockAccount, platformId: 'pc', launcherId: 'epic' } as StoAccount,
+      ]),
+    );
+    component.ngOnInit();
+    expect(component.accountVms[0].bgImagePath).toBe(
+      '/assets/temp/account_type_windows_epic.jpg',
+    );
+
+    stoAccountServiceSpy.getAccounts.mockReturnValue(
+      of([
+        { ...mockAccount, platformId: 'pc', launcherId: 'steam' } as StoAccount,
+      ]),
+    );
+    component.loadAccounts();
+    expect(component.accountVms[0].bgImagePath).toBe(
+      '/assets/temp/account_type_windows_steam.jpg',
+    );
+  });
+
+  it('should use default image path for unknown platform class', () => {
+    const account = {
+      ...mockAccount,
+      platformId: 'unknown',
+      launcherId: undefined,
+    } as StoAccount;
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([account]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'unknown', name: 'Handheld' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(of([]));
+
+    component.ngOnInit();
+    expect(component.accountVms[0].bgImagePath).toBe(
+      '/assets/temp/account_type_default.jpg',
+    );
+  });
+
+  it('should hide username when it matches handle case-insensitively', () => {
+    const account = {
+      ...mockAccount,
+      username: 'test#1234',
+      platformId: 'pc',
+    } as StoAccount;
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([account]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'pc', name: 'PC' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(of([]));
+
+    component.ngOnInit();
+    expect(component.accountVms[0].showUsername).toBe(false);
+  });
+
+  it('should complete destroy stream on ngOnDestroy', () => {
+    const nextSpy = jest.spyOn(component['_destroy$'], 'next');
+    const completeSpy = jest.spyOn(component['_destroy$'], 'complete');
+
+    component.ngOnDestroy();
+
+    expect(nextSpy).toHaveBeenCalled();
+    expect(completeSpy).toHaveBeenCalled();
+  });
 });

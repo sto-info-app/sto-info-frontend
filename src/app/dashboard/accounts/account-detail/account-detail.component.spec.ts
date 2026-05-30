@@ -7,6 +7,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
+import { EndeavourService } from 'src/app/dashboard/services/endeavour.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import {
   CLOUDFLARE_VARIANT_SQUARE_100PX_NAME,
@@ -27,6 +28,7 @@ describe('AccountDetailComponent', () => {
   let mockCharacterService: jest.Mocked<
     Pick<CharacterService, 'getCharactersByAccount' | 'deleteCharacter'>
   >;
+  let mockEndeavourService: jest.Mocked<Pick<EndeavourService, 'getSummary'>>;
   let mockDialog: jest.Mocked<
     Pick<MatDialog, 'open' | 'closeAll' | 'afterOpened' | 'afterAllClosed'>
   >;
@@ -86,6 +88,24 @@ describe('AccountDetailComponent', () => {
       deleteCharacter: jest.fn().mockReturnValue(of(void 0)),
     };
 
+    mockEndeavourService = {
+      getSummary: jest.fn().mockReturnValue(
+        of({
+          totalNodes: 10,
+          maxPossibleNodes: 100,
+          overallCompletionPercentage: 10,
+          maxedPerks: 1,
+          totalPerks: 5,
+          spaceNodes: 6,
+          spaceMaxNodes: 50,
+          spaceCompletionPercentage: 12,
+          groundNodes: 4,
+          groundMaxNodes: 50,
+          groundCompletionPercentage: 8,
+        }),
+      ),
+    };
+
     mockDialog = {
       open: jest.fn(),
       closeAll: jest.fn(),
@@ -101,6 +121,7 @@ describe('AccountDetailComponent', () => {
         { provide: Router, useValue: mockRouter },
         { provide: StoAccountService, useValue: mockStoAccountService },
         { provide: CharacterService, useValue: mockCharacterService },
+        { provide: EndeavourService, useValue: mockEndeavourService },
         { provide: MatDialog, useValue: mockDialog },
         {
           provide: ActivatedRoute,
@@ -181,6 +202,23 @@ describe('AccountDetailComponent', () => {
       expect(component.errorMessage).toBe('Failed to load characters');
       expect(component.isLoading).toBe(false);
       spy.mockRestore();
+    });
+  });
+
+  describe('loadEndeavourSummary', () => {
+    it('should set endeavour summary on success', () => {
+      component.loadEndeavourSummary('acc1');
+      expect(mockEndeavourService.getSummary).toHaveBeenCalledWith('acc1');
+      expect(component.endeavourSummary()).not.toBeNull();
+    });
+
+    it('should fail silently on summary load error', () => {
+      mockEndeavourService.getSummary.mockReturnValue(
+        throwError(() => new Error('summary error')),
+      );
+
+      expect(() => component.loadEndeavourSummary('acc1')).not.toThrow();
+      expect(component.endeavourSummary()).toBeNull();
     });
   });
 

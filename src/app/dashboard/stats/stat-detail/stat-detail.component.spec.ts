@@ -1,6 +1,6 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
@@ -15,6 +15,7 @@ describe('StatDetailComponent', () => {
   let statsServiceSpy: jest.Mocked<StatsService>;
   let routingServiceSpy: jest.Mocked<RoutingService>;
   let stoAccountServiceSpy: jest.Mocked<StoAccountService>;
+  let routerSpy: jest.Mocked<Router>;
 
   const mockStats: StatsData = {
     accountCount: 2,
@@ -58,12 +59,14 @@ describe('StatDetailComponent', () => {
         {
           provide: ActivatedRoute,
           useValue: {
+            paramMap: of(convertToParamMap({ breakdownId })),
             snapshot: { paramMap: convertToParamMap({ breakdownId }) },
           },
         },
         { provide: StatsService, useValue: statsServiceSpy },
         { provide: RoutingService, useValue: routingServiceSpy },
         { provide: StoAccountService, useValue: stoAccountServiceSpy },
+        { provide: Router, useValue: routerSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
@@ -78,11 +81,15 @@ describe('StatDetailComponent', () => {
       providers: [
         {
           provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: convertToParamMap({}) } },
+          useValue: {
+            paramMap: of(convertToParamMap({})),
+            snapshot: { paramMap: convertToParamMap({}) },
+          },
         },
         { provide: StatsService, useValue: statsServiceSpy },
         { provide: RoutingService, useValue: routingServiceSpy },
         { provide: StoAccountService, useValue: stoAccountServiceSpy },
+        { provide: Router, useValue: routerSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
@@ -103,6 +110,10 @@ describe('StatDetailComponent', () => {
     stoAccountServiceSpy = {
       getAccounts: jest.fn().mockReturnValue(of([mockAccount])),
     } as unknown as jest.Mocked<StoAccountService>;
+
+    routerSpy = {
+      navigateByUrl: jest.fn().mockResolvedValue(true),
+    } as unknown as jest.Mocked<Router>;
   });
 
   afterEach(() => TestBed.resetTestingModule());
@@ -327,6 +338,47 @@ describe('StatDetailComponent', () => {
       const link = component.getRouteLink('some-route');
       expect(routingServiceSpy.getLink).toHaveBeenCalledWith('some-route');
       expect(link).toBe('/dashboard/stats');
+    });
+  });
+
+  describe('section metadata and navigation', () => {
+    it('should return section title and entries for configured section', async () => {
+      await createComponent('species');
+      component.ngOnInit();
+
+      expect(component.sectionTitle).toBe('Character Breakdowns');
+      expect(component.sectionEntries.length).toBeGreaterThan(0);
+      expect(component.sectionEntries.some(e => e.id === 'species')).toBe(true);
+    });
+
+    it('should return empty section metadata when config is null', async () => {
+      await createComponent('unknown-stat');
+      component.ngOnInit();
+
+      expect(component.sectionTitle).toBe('');
+      expect(component.sectionEntries).toEqual([]);
+    });
+
+    it('should return empty section metadata for unknown section key', async () => {
+      await createComponent('species');
+      component.config = {
+        title: 'x',
+        label: 'x',
+        section: 'unknown' as 'account',
+        key: 'bySpecies',
+        showLevelCards: false,
+      };
+
+      expect(component.sectionTitle).toBe('');
+      expect(component.sectionEntries).toEqual([]);
+    });
+
+    it('should navigate to requested report id', async () => {
+      await createComponent('species');
+      component.navigateToReport('level');
+      expect(routerSpy.navigateByUrl).toHaveBeenCalledWith(
+        '/dashboard/stats/level',
+      );
     });
   });
 });
