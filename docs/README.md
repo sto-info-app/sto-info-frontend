@@ -33,6 +33,7 @@ Supporting docs:
 - [Security, rate limiting, retention](security-and-data.md)
 - [Dependency security overrides](security.md)
 - [Memory leak prevention](memory-leak-prevention-guide.md)
+- [UI Components](ui-components.md)
 - [GitHub Automation & Standards](github/README.md)
 
 ## Local development

@@ -254,6 +254,7 @@ button.lcars-btn,
   select {
     background: transparent;
     border: none;
+    display: block;
     font-family: inherit;
     font-size: 0.9rem;
     font-weight: 800;
@@ -264,6 +265,8 @@ button.lcars-btn,
     outline: none;
     appearance: none;
     width: 100%;
+    min-height: 4rem;
+    box-sizing: border-box;
 
     // top: push text below label (container-top-pad + label-height + gap)
     // right: arrow space + container-right-pad

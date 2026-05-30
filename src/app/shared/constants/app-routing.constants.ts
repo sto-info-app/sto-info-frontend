@@ -28,6 +28,8 @@ export const APP_ROUTES = {
   STO_DASHBOARD: ROOT_ROUTES.DASHBOARD,
   STO_DASHBOARD_PROFILE: ROOT_ROUTES.DASHBOARD + '/profile',
   STO_DASHBOARD_ACCOUNTS: ROOT_ROUTES.DASHBOARD + '/accounts',
+  STO_ACCOUNT_ADD: ROOT_ROUTES.DASHBOARD + '/accounts/add',
+  STO_ACCOUNT_EDIT: ROOT_ROUTES.DASHBOARD + '/accounts/:handle/edit',
   STO_ACCOUNT_DETAIL: ROOT_ROUTES.DASHBOARD + '/accounts/:handle',
   STO_ACCOUNT_ENDEAVOURS:
     ROOT_ROUTES.DASHBOARD + '/accounts/:handle/endeavours',
@@ -72,6 +74,8 @@ export const APP_ROUTE_TITLES = {
   STO_DASHBOARD: 'Dashboard',
   STO_DASHBOARD_PROFILE: 'Profile',
   STO_DASHBOARD_ACCOUNTS: 'Your Accounts',
+  STO_ACCOUNT_ADD: 'Add Account',
+  STO_ACCOUNT_EDIT: 'Edit Account',
   STO_ACCOUNT_DETAIL: 'Account Details',
   STO_ACCOUNT_ENDEAVOURS: 'Endeavour Perks',
   STO_CHARACTER_DETAIL: 'Character Details',

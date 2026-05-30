@@ -1,0 +1,128 @@
+@use 'lcars-variables' as vars;
+
+#account-manage-container {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #account-manage-main-column {
+    flex: 3;
+  }
+
+  #account-manage-side-column {
+    flex: 1;
+    min-width: 250px;
+  }
+}
+
+.account-manage-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .lcars-select-container,
+  .lcars-input-container {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 0;
+  }
+
+  .handle-input {
+    flex: 2;
+  }
+
+  .date-input {
+    flex: 1;
+    min-width: 160px;
+    max-width: 240px;
+  }
+}
+
+.lcars-select-container.is-disabled {
+  filter: grayscale(50%) brightness(0.65);
+  cursor: not-allowed;
+
+  &:hover {
+    filter: grayscale(50%) brightness(0.65);
+  }
+
+  select {
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.select-placeholder {
+  display: flex;
+  align-items: flex-end;
+  min-height: 4rem;
+  padding: 1.5rem 1rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-stretch: condensed;
+  color: #000;
+  opacity: 0.75;
+  line-height: 1.4;
+}
+
+.toggles-row {
+  align-items: center;
+}
+
+.toggle-container {
+  min-width: 220px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: flex-end;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 5px !important;
+  padding-top: 5px !important;
+}
+
+.field-error {
+  color: vars.$lcars-red;
+  font-size: 0.85rem;
+  margin-top: 0.35rem;
+}
+
+@media (width <= 768px) {
+  #account-manage-container {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  #account-manage-side-column {
+    order: -1;
+  }
+
+  .form-actions {
+    justify-content: stretch;
+
+    button {
+      flex: 1;
+    }
+  }
+}

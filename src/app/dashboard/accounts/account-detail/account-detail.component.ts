@@ -36,7 +36,6 @@ import {
   decodeStoHandle,
   encodeStoHandle,
 } from 'src/app/shared/utils/sto-handle.utils';
-import { AccountDialogComponent } from '../dialogs/account-dialog/account-dialog.component';
 
 /** Precomputed display values for a single character card. */
 interface CharacterVm {
@@ -387,37 +386,11 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
   editAccount(): void {
     if (!this.account) return;
 
-    const dialogRef = this._dialog.open(AccountDialogComponent, {
-      width: '600px',
-      data: {
-        mode: 'edit',
-        account: this.account,
-      },
-    });
-
-    dialogRef
-      .afterClosed()
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(result => {
-        if (result && this.account) {
-          const currentHandle = this.account.handle;
-          this._stoAccountService
-            .getAccount(this.account.id)
-            .pipe(takeUntil(this._destroy$))
-            .subscribe(updatedAccount => {
-              if (updatedAccount) {
-                this.account = updatedAccount;
-                this._cdr.detectChanges();
-                if (updatedAccount.handle !== currentHandle) {
-                  this._router.navigate([
-                    '/dashboard/accounts',
-                    encodeStoHandle(updatedAccount.handle),
-                  ]);
-                }
-              }
-            });
-        }
-      });
+    this._router.navigate([
+      '/dashboard/accounts',
+      encodeStoHandle(this.account.handle),
+      'edit',
+    ]);
   }
 
   addCharacter(): void {

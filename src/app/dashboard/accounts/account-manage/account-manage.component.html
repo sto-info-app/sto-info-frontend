@@ -1,0 +1,193 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Metadata"></app-loading-bar>
+}
+
+<div id="account-manage-container">
+  <div
+    id="account-manage-main-column"
+    class="col">
+    @if (!isLoading) {
+      <h1>{{ mode === 'add' ? 'Add' : 'Edit' }} STO Account</h1>
+
+      @if (errorMessage) {
+        <app-lcars-error-message
+          [message]="errorMessage"></app-lcars-error-message>
+      }
+
+      <form
+        [formGroup]="accountForm"
+        class="account-manage-form">
+        <!-- Section: Account Details -->
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Account Details</span>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container perano handle-input">
+            <label for="handle-input">Handle</label>
+            <input
+              type="text"
+              id="handle-input"
+              formControlName="handle"
+              placeholder="e.g. Username#1234" />
+            @if (
+              accountForm.get('handle')?.hasError('required') &&
+              accountForm.get('handle')?.touched
+            ) {
+              <div class="field-error">Handle is required</div>
+            }
+            @if (
+              accountForm.get('handle')?.hasError('pattern') &&
+              accountForm.get('handle')?.touched
+            ) {
+              <div class="field-error">
+                Handle must be in the format Username#1234
+              </div>
+            }
+          </div>
+
+          <div class="lcars-input-container gold date-input">
+            <label for="account-created-date-input">Account Created</label>
+            <input
+              type="date"
+              id="account-created-date-input"
+              formControlName="accountCreatedDate" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container bluey">
+            <label for="username-input">Username (Optional)</label>
+            <input
+              type="text"
+              id="username-input"
+              formControlName="username" />
+          </div>
+
+          <div class="lcars-input-container sunflower">
+            <label for="email-input">Email (Optional)</label>
+            <input
+              type="email"
+              id="email-input"
+              formControlName="email" />
+            @if (
+              accountForm.get('email')?.hasError('email') &&
+              accountForm.get('email')?.touched
+            ) {
+              <div class="field-error">Invalid email format</div>
+            }
+          </div>
+        </div>
+
+        <!-- Section: Platform -->
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Platform</span>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-select-container tangerine">
+            <span class="select-label">Platform</span>
+            <select
+              id="platform-select"
+              title="Platform"
+              formControlName="platformId">
+              <option value="">Select a platform</option>
+              @for (platform of platforms; track platform.id) {
+                <option [value]="platform.id">{{ platform.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div
+            class="lcars-select-container bluey"
+            [class.is-disabled]="isLauncherDisabled">
+            <span class="select-label">Launcher (Optional)</span>
+            @if (isLauncherDisabled) {
+              <span class="select-placeholder">{{
+                launcherPlaceholderText
+              }}</span>
+            } @else {
+              <select
+                id="launcher-select"
+                title="Launcher (Optional)"
+                formControlName="launcherId">
+                <option value="">None</option>
+                @for (launcher of filteredLaunchers; track launcher.id) {
+                  <option [value]="launcher.id">{{ launcher.name }}</option>
+                }
+              </select>
+            }
+          </div>
+        </div>
+
+        <!-- Section: Additional Info -->
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Additional Info</span>
+        </div>
+
+        <div class="lcars-input-container perano">
+          <label for="notes-input">Notes</label>
+          <textarea
+            id="notes-input"
+            formControlName="notes"
+            rows="4"></textarea>
+        </div>
+
+        <div class="form-row toggles-row">
+          <app-lcars-toggle
+            formControlName="lifetimeSubscription"
+            label="Lifetime Subscription"
+            ariaLabel="Lifetime Subscription">
+          </app-lcars-toggle>
+        </div>
+
+        <div class="form-row toggles-row">
+          <app-lcars-toggle
+            formControlName="publiclyVisible"
+            label="Publicly Visible"
+            ariaLabel="Publicly Visible">
+          </app-lcars-toggle>
+        </div>
+
+        <div class="form-actions">
+          <button
+            mat-button
+            class="lcars-btn red"
+            type="button"
+            (click)="onCancel()"
+            [disabled]="isSubmitting">
+            Cancel
+          </button>
+          <button
+            mat-button
+            class="lcars-btn green"
+            type="submit"
+            [disabled]="accountForm.invalid || isSubmitting"
+            (click)="onSave()">
+            {{ mode === 'add' ? 'Create' : 'Save' }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+
+  <div
+    id="account-manage-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        (click)="onCancel()"
+        class="full-width-btn-link sunflower"
+        >Return</a
+      >
+      <a
+        [routerLink]="accountsLink"
+        class="full-width-btn-link perano"
+        >All Accounts</a
+      >
+    </div>
+  </div>
+</div>

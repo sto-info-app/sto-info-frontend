@@ -8,12 +8,9 @@ import {
   inject,
 } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
-import {
-  ConfirmDialogComponent,
-  ConfirmDialogData,
-} from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
   APP_ROUTES,
@@ -23,7 +20,6 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
 import { StoAccountService } from '../services/sto-account.service';
-import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.component';
 
 /**
  * View model for a single STO account card, with all display values precomputed at load time.
@@ -99,6 +95,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
   private readonly _stoAccountService = inject(StoAccountService);
   private readonly _routingService = inject(RoutingService);
   private readonly _dialog = inject(MatDialog);
+  private readonly _router = inject(Router);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _destroy$ = new Subject<void>();
 
@@ -140,43 +137,23 @@ export class AccountsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Opens the dialog to add a new STO account.
+   * Navigates to the in-page account creation screen.
    */
   addAccount(): void {
-    const dialogRef = this._dialog.open(AccountDialogComponent, {
-      width: '500px',
-      data: { mode: 'add' },
-    });
-
-    dialogRef
-      .afterClosed()
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(result => {
-        if (result) {
-          this.loadAccounts();
-        }
-      });
+    this._router.navigate(['/dashboard/accounts/add']);
   }
 
   /**
-   * Opens the dialog to edit an existing STO account.
+   * Navigates to the in-page account edit screen.
    *
    * @param account The account to edit.
    */
   editAccount(account: StoAccount): void {
-    const dialogRef = this._dialog.open(AccountDialogComponent, {
-      width: '500px',
-      data: { mode: 'edit', account },
-    });
-
-    dialogRef
-      .afterClosed()
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(result => {
-        if (result) {
-          this.loadAccounts();
-        }
-      });
+    this._router.navigate([
+      '/dashboard/accounts',
+      this.encodeHandle(account.handle),
+      'edit',
+    ]);
   }
 
   /**
@@ -194,7 +171,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
           <p><strong>WARNING:</strong> Unlike the making of Tuvix, this action cannot be undone.</p>`,
         confirmText: 'Delete',
         cancelText: 'Cancel',
-      } as ConfirmDialogData,
+      },
     });
 
     dialogRef

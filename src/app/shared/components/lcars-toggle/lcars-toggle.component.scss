@@ -1,0 +1,49 @@
+@use 'lcars-variables' as vars;
+
+.lcars-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0;
+  font-family: vars.$font-antonio;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 30%);
+  transition: color 0.25s ease;
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-perano;
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  &--on {
+    color: rgb(255 255 255 / 80%);
+  }
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.35;
+  }
+}
+
+.lcars-toggle__label {
+  white-space: nowrap;
+}
+
+.lcars-toggle__delta {
+  font-size: 1.3rem;
+  color: rgb(255 255 255 / 15%);
+  transition:
+    color 0.25s ease,
+    filter 0.25s ease;
+
+  .lcars-toggle--on & {
+    color: vars.$lcars-green;
+    filter: drop-shadow(0 0 5px vars.$lcars-green);
+  }
+}

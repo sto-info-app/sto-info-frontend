@@ -156,6 +156,24 @@ export const routes: Routes = [
     canActivate: [AuthGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.STO_ACCOUNT_ADD,
+    loadComponent: () =>
+      import('./dashboard/accounts/account-manage/account-manage.component').then(
+        m => m.AccountManageComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_ACCOUNT_ADD, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_ACCOUNT_EDIT,
+    loadComponent: () =>
+      import('./dashboard/accounts/account-manage/account-manage.component').then(
+        m => m.AccountManageComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_ACCOUNT_EDIT, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.STO_ACCOUNT_DETAIL,
     loadComponent: () =>
       import('./dashboard/accounts/account-detail/account-detail.component').then(

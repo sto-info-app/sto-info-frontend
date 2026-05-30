@@ -185,80 +185,24 @@ describe('AccountDetailComponent', () => {
   });
 
   describe('editAccount', () => {
-    it('should open dialog and update account on success', () => {
+    it('should navigate to account edit page', () => {
       component.account = mockAccount;
-      const updatedAccount = { ...mockAccount, notes: 'Updated' };
-      mockDialog.open.mockReturnValue({
-        afterClosed: () => of(true),
-      } as MatDialogRef<unknown, unknown>);
-      mockStoAccountService.getAccount.mockReturnValue(of(updatedAccount));
-
-      component.editAccount();
-
-      expect(mockDialog.open).toHaveBeenCalled();
-      expect(mockStoAccountService.getAccount).toHaveBeenCalledWith(
-        mockAccount.id,
-      );
-      expect(component.account).toEqual(updatedAccount);
-    });
-
-    it('should navigate if handle changed', () => {
-      component.account = mockAccount;
-      const updatedAccount = { ...mockAccount, handle: 'New#9999' };
-      mockDialog.open.mockReturnValue({
-        afterClosed: () => of(true),
-      } as MatDialogRef<unknown, unknown>);
-      mockStoAccountService.getAccount.mockReturnValue(of(updatedAccount));
 
       component.editAccount();
 
       expect(mockRouter.navigate).toHaveBeenCalledWith([
         '/dashboard/accounts',
-        encodeStoHandle(updatedAccount.handle),
+        encodeStoHandle(mockAccount.handle),
+        'edit',
       ]);
     });
 
     it('should do nothing if account is null', () => {
       component.account = null;
-      component.editAccount();
-      expect(mockDialog.open).not.toHaveBeenCalled();
-    });
-
-    it('should handle editAccount where updated account returns null', () => {
-      component.account = mockAccount;
-      mockDialog.open.mockReturnValue({
-        afterClosed: () => of(true),
-      } as MatDialogRef<unknown, unknown>);
-      mockStoAccountService.getAccount.mockReturnValue(
-        of(null as unknown as StoAccount),
-      );
 
       component.editAccount();
 
-      expect(mockStoAccountService.getAccount).toHaveBeenCalledWith(
-        mockAccount.id,
-      );
-      // Account should not change from existing mockAccount to null
-      expect(component.account).toEqual(mockAccount);
-    });
-
-    it('should not update if account becomes null while dialog is open', () => {
-      component.account = mockAccount;
-      // Simulate dialog closing with true, but account becoming null in between
-      mockDialog.open.mockImplementation(() => {
-        return {
-          afterClosed: () => {
-            component.account = null;
-            return of(true);
-          },
-        } as unknown as MatDialogRef<unknown, unknown>;
-      });
-
-      component.editAccount();
-
-      expect(mockDialog.open).toHaveBeenCalled();
-      // Should NOT call getAccount because this.account is null
-      expect(mockStoAccountService.getAccount).not.toHaveBeenCalled();
+      expect(mockRouter.navigate).not.toHaveBeenCalled();
     });
   });
 

@@ -2,14 +2,13 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
 import { StoAccountService } from '../services/sto-account.service';
 import { AccountVm, AccountsComponent } from './accounts.component';
-import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.component';
 
 describe('AccountsComponent', () => {
   let component: AccountsComponent;
@@ -17,6 +16,7 @@ describe('AccountsComponent', () => {
   let stoAccountServiceSpy: jest.Mocked<StoAccountService>;
   let routingServiceSpy: jest.Mocked<RoutingService>;
   let dialogSpy: jest.Mocked<MatDialog>;
+  let router: Router;
 
   const mockAccount: StoAccount = {
     id: '1',
@@ -51,8 +51,6 @@ describe('AccountsComponent', () => {
       providers: [
         { provide: StoAccountService, useValue: stoAccountServiceSpy },
         { provide: RoutingService, useValue: routingServiceSpy },
-        // We still provide it here as fallback/base
-        { provide: MatDialog, useValue: dialogSpy },
         provideRouter([]),
         provideNoopAnimations(),
       ],
@@ -66,6 +64,7 @@ describe('AccountsComponent', () => {
 
     fixture = TestBed.createComponent(AccountsComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
   });
 
   it('should encode handle', () => {
@@ -135,65 +134,31 @@ describe('AccountsComponent', () => {
     expect(component.isLoading).toBe(false);
   });
 
-  it('should open add account dialog', () => {
-    const dialogRefSpy = {
-      afterClosed: jest.fn().mockReturnValue(of(true)),
-    };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
-    const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
+  it('should navigate to add account page', () => {
+    const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
 
     component.addAccount();
 
-    expect(dialogSpy.open).toHaveBeenCalledWith(AccountDialogComponent, {
-      width: '500px',
-      data: { mode: 'add' },
-    });
-    expect(loadAccountsSpy).toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalledWith(['/dashboard/accounts/add']);
   });
 
-  it('should not reload accounts if add dialog canceled', () => {
-    const dialogRefSpy = {
-      afterClosed: jest.fn().mockReturnValue(of(false)),
-    };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
-    const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
-
-    component.addAccount();
-    expect(loadAccountsSpy).not.toHaveBeenCalled();
-  });
-
-  it('should open edit account dialog', () => {
-    const dialogRefSpy = {
-      afterClosed: jest.fn().mockReturnValue(of(true)),
-    };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
-    const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
+  it('should navigate to edit account page', () => {
+    const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
 
     component.editAccount(mockAccount);
 
-    expect(dialogSpy.open).toHaveBeenCalledWith(AccountDialogComponent, {
-      width: '500px',
-      data: { mode: 'edit', account: mockAccount },
-    });
-    expect(loadAccountsSpy).toHaveBeenCalled();
-  });
-
-  it('should not reload accounts if edit dialog canceled', () => {
-    const dialogRefSpy = {
-      afterClosed: jest.fn().mockReturnValue(of(false)),
-    };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
-    const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
-
-    component.editAccount(mockAccount);
-    expect(loadAccountsSpy).not.toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalledWith([
+      '/dashboard/accounts',
+      'Test~1234',
+      'edit',
+    ]);
   });
 
   it('should delete account', () => {
     const dialogRefSpy = {
       afterClosed: jest.fn().mockReturnValue(of(true)),
     };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
+    dialogSpy.open.mockReturnValue(dialogRefSpy);
     const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
 
     component.deleteAccount(mockAccount);
@@ -212,7 +177,7 @@ describe('AccountsComponent', () => {
     const dialogRefSpy = {
       afterClosed: jest.fn().mockReturnValue(of(false)),
     };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
+    dialogSpy.open.mockReturnValue(dialogRefSpy);
 
     component.deleteAccount(mockAccount);
 
@@ -223,7 +188,7 @@ describe('AccountsComponent', () => {
     const dialogRefSpy = {
       afterClosed: jest.fn().mockReturnValue(of(true)),
     };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
+    dialogSpy.open.mockReturnValue(dialogRefSpy);
     const err = new Error('delete failed');
     stoAccountServiceSpy.deleteAccount.mockReturnValue(throwError(() => err));
     const consoleErrorSpy = jest
