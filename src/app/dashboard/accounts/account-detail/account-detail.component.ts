@@ -53,6 +53,17 @@ interface CharacterVm {
   imageUrl: string;
 }
 
+/** Aggregated, sorted filter options derived from the character list. */
+interface CharacterFilterOptionsVm {
+  ranks: string[];
+  species: string[];
+  factions: string[];
+  generalFactions: string[];
+  sexes: string[];
+  classes: string[];
+  recruitTypes: string[];
+}
+
 @Component({
   selector: 'app-account-detail',
   templateUrl: './account-detail.component.html',
@@ -139,81 +150,70 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
   // ── Computed filter-option lists (update only when characters change) ─────
 
   /** Sorted unique rank level-ranges derived from the current character list. */
-  readonly uniqueRanks = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.rank?.levelRange)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
-  );
+  readonly uniqueRanks = computed(() => this._filterOptions().ranks);
 
   /** Sorted unique species names derived from the current character list. */
-  readonly uniqueSpecies = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.species?.name)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
-  );
+  readonly uniqueSpecies = computed(() => this._filterOptions().species);
 
   /** Sorted unique faction names derived from the current character list. */
-  readonly uniqueFactions = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.faction?.name)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
-  );
+  readonly uniqueFactions = computed(() => this._filterOptions().factions);
 
   /** Sorted unique general-faction names derived from the current character list. */
-  readonly uniqueGeneralFactions = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.generalFaction?.name)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
+  readonly uniqueGeneralFactions = computed(
+    () => this._filterOptions().generalFactions,
   );
 
   /** Sorted unique sex names derived from the current character list. */
-  readonly uniqueSexes = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.sex?.name)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
-  );
+  readonly uniqueSexes = computed(() => this._filterOptions().sexes);
 
   /** Sorted unique class names derived from the current character list. */
-  readonly uniqueClasses = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.class?.name)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
-  );
+  readonly uniqueClasses = computed(() => this._filterOptions().classes);
 
   /** Sorted unique recruit-type names derived from the current character list. */
-  readonly uniqueRecruitTypes = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.recruitType?.name)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
+  readonly uniqueRecruitTypes = computed(
+    () => this._filterOptions().recruitTypes,
   );
+
+  /**
+   * Build all filter option lists in one pass to avoid repeating map/filter/sort
+   * work for each individual filter category.
+   */
+  private readonly _filterOptions = computed<CharacterFilterOptionsVm>(() => {
+    const ranks = new Set<string>();
+    const species = new Set<string>();
+    const factions = new Set<string>();
+    const generalFactions = new Set<string>();
+    const sexes = new Set<string>();
+    const classes = new Set<string>();
+    const recruitTypes = new Set<string>();
+
+    for (const character of this.characters()) {
+      if (character.rank?.levelRange) ranks.add(character.rank.levelRange);
+      if (character.species?.name) species.add(character.species.name);
+      if (character.faction?.name) factions.add(character.faction.name);
+      if (character.generalFaction?.name) {
+        generalFactions.add(character.generalFaction.name);
+      }
+      if (character.sex?.name) sexes.add(character.sex.name);
+      if (character.class?.name) classes.add(character.class.name);
+      if (character.recruitType?.name) {
+        recruitTypes.add(character.recruitType.name);
+      }
+    }
+
+    const toSortedArray = (values: Set<string>): string[] =>
+      [...values].sort((a, b) => a.localeCompare(b));
+
+    return {
+      ranks: toSortedArray(ranks),
+      species: toSortedArray(species),
+      factions: toSortedArray(factions),
+      generalFactions: toSortedArray(generalFactions),
+      sexes: toSortedArray(sexes),
+      classes: toSortedArray(classes),
+      recruitTypes: toSortedArray(recruitTypes),
+    };
+  });
 
   /** Number of currently active filters. */
   readonly activeFilterCount = computed(() => {

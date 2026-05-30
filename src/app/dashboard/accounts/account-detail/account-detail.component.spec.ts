@@ -582,6 +582,15 @@ describe('AccountDetailComponent', () => {
           'Klingon Empire',
         ]);
       });
+
+      it('should exclude characters without a general faction', () => {
+        component.characters.set([
+          { ...mockCharacter, generalFaction: undefined },
+          { ...charKlingon },
+        ]);
+
+        expect(component.uniqueGeneralFactions()).toEqual(['Klingon Empire']);
+      });
     });
 
     describe('uniqueSexes', () => {
