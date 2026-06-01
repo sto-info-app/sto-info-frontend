@@ -1,5 +1,6 @@
 export interface StoAccount {
   id: string;
+  accountTypeImageUrl?: string;
   handle: string;
   username?: string;
   email?: string;
@@ -35,8 +36,9 @@ export interface Launcher {
 }
 
 export interface PlatformLauncher {
-  platformId: string;
-  launcherId: string;
+  platformId?: string | null;
+  launcherId?: string | null;
+  backgroundImageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;

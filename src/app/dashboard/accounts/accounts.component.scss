@@ -328,29 +328,30 @@ $steam-dark: color.adjust(#4c8db5, $lightness: -18%);
 }
 
 .stat-label {
-  opacity: 0.7;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .captain-badge {
-  color: vars.$lcars-perano;
-  background: rgba(vars.$lcars-perano, 0.35);
+  color: vars.$lcars-black;
+  background: rgba(vars.$lcars-violet, 0.85);
+  text-decoration: none;
+  text-transform: uppercase;
 
   i {
-    color: vars.$lcars-sunflower;
+    color: vars.$lcars-gold;
     font-size: 0.75rem;
   }
 }
 
 a.endeavour-stat-badge {
-  color: vars.$lcars-sunflower;
-  background: rgba(vars.$lcars-sunflower, 0.35);
+  color: vars.$lcars-gold;
+  background: rgba(vars.$lcars-bluey, 0.75);
   text-decoration: none;
   cursor: pointer;
   transition: background 0.15s ease;
 
   &:hover {
-    background: rgba(vars.$lcars-sunflower, 0.55);
+    background: rgba(vars.$lcars-bluey, 0.85);
   }
 
   i {

@@ -133,9 +133,7 @@ export class AccountManageComponent implements OnInit, OnDestroy {
           if (this.mode === 'edit') {
             const handle = decodeStoHandle(this.encodedHandle);
             this.account =
-              (accounts as StoAccount[]).find(
-                account => account.handle === handle,
-              ) || null;
+              accounts.find(account => account.handle === handle) || null;
 
             if (!this.account) {
               this.errorMessage = 'Account not found.';
@@ -184,7 +182,8 @@ export class AccountManageComponent implements OnInit, OnDestroy {
     const validLauncherIds = new Set(
       this.platformLaunchers
         .filter(m => m.platformId === platformId)
-        .map(m => m.launcherId),
+        .map(m => m.launcherId)
+        .filter((launcherId): launcherId is string => !!launcherId),
     );
 
     this.filteredLaunchers = this.launchers.filter(l =>

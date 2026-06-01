@@ -51,7 +51,7 @@ export interface AccountVm {
   hasLauncher: boolean;
   /** Zero-padded 4-digit endeavour node count, e.g. "0512". */
   endeavourTotalNodesDisplay: string;
-  /** Local asset path for the card background image. */
+  /** Card background image URL, preferably supplied by the API. */
   bgImagePath: string;
   /** Whether to show the username (false when it duplicates the handle). */
   showUsername: boolean;
@@ -308,10 +308,12 @@ export class AccountsComponent implements OnInit, OnDestroy {
       endeavourTotalNodesDisplay: (account.endeavourTotalNodes || 0)
         .toString()
         .padStart(4, '0'),
-      bgImagePath: this._getBgImagePath(
-        this.getPlatformClass(account.platformId),
-        this.getLauncher(account.launcherId)?.name,
-      ),
+      bgImagePath:
+        account.accountTypeImageUrl?.trim() ||
+        this._getBgImagePath(
+          this.getPlatformClass(account.platformId),
+          this.getLauncher(account.launcherId)?.name,
+        ),
       showUsername:
         !!account.username &&
         account.username.toLowerCase() !== account.handle.toLowerCase(),
@@ -341,21 +343,24 @@ export class AccountsComponent implements OnInit, OnDestroy {
     if (platformClass === 'platform-pc') {
       const launcher = launcherName?.toLowerCase() ?? '';
       if (launcher === 'arc')
-        return '/assets/temp/account_type_windows_arc.jpg';
+        return '/assets/account-types/account_type_windows_arc.jpg';
       if (launcher === 'epic')
-        return '/assets/temp/account_type_windows_epic.jpg';
+        return '/assets/account-types/account_type_windows_epic.jpg';
       if (launcher === 'steam')
-        return '/assets/temp/account_type_windows_steam.jpg';
-      return '/assets/temp/account_type_windows_default.jpg';
+        return '/assets/account-types/account_type_windows_steam.jpg';
+      return '/assets/account-types/account_type_windows_default.jpg';
     }
     const map: Record<string, string> = {
-      'platform-playstation': '/assets/temp/account_type_playstation.jpg',
-      'platform-xbox': '/assets/temp/account_type_xbox.jpg',
-      'platform-arc': '/assets/temp/account_type_windows_arc.jpg',
-      'platform-epic': '/assets/temp/account_type_windows_epic.jpg',
-      'platform-steam': '/assets/temp/account_type_windows_steam.jpg',
+      'platform-playstation':
+        '/assets/account-types/account_type_playstation.jpg',
+      'platform-xbox': '/assets/account-types/account_type_xbox.jpg',
+      'platform-arc': '/assets/account-types/account_type_windows_arc.jpg',
+      'platform-epic': '/assets/account-types/account_type_windows_epic.jpg',
+      'platform-steam': '/assets/account-types/account_type_windows_steam.jpg',
     };
-    return map[platformClass] ?? '/assets/temp/account_type_default.jpg';
+    return (
+      map[platformClass] ?? '/assets/account-types/account_type_default.jpg'
+    );
   }
 
   getPlatformClass(platformId?: string): string {

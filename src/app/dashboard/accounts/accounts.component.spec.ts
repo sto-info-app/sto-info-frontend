@@ -326,7 +326,9 @@ describe('AccountsComponent', () => {
     const vm = component.accountVms[0];
     expect(vm.showUsername).toBe(true);
     expect(vm.launcherClass).toBe('launcher-arc');
-    expect(vm.bgImagePath).toBe('/assets/temp/account_type_windows_arc.jpg');
+    expect(vm.bgImagePath).toBe(
+      '/assets/account-types/account_type_windows_arc.jpg',
+    );
     expect(vm.endeavourTotalNodesDisplay).toBe('0012');
   });
 
@@ -347,7 +349,7 @@ describe('AccountsComponent', () => {
     component.ngOnInit();
     expect(component.accountVms[0].launcherClass).toBe('');
     expect(component.accountVms[0].bgImagePath).toBe(
-      '/assets/temp/account_type_xbox.jpg',
+      '/assets/account-types/account_type_xbox.jpg',
     );
   });
 
@@ -373,6 +375,30 @@ describe('AccountsComponent', () => {
     expect(component.getPlatformClass()).toBe('');
   });
 
+  it('should prefer API-provided accountTypeImageUrl for card background', () => {
+    const cloudflareUrl =
+      'https://cdn.startrekonline.info/cdn-cgi/imagedelivery/jQ0uSdJ3ty-KasNpXGxyuA/8ab52131-6f11-408a-d9df-3c1acaa46d00/public';
+
+    const account = {
+      ...mockAccount,
+      accountTypeImageUrl: cloudflareUrl,
+      platformId: 'pc',
+      launcherId: 'steam',
+    } as StoAccount;
+
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([account]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'pc', name: 'Windows' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(
+      of([{ id: 'steam', name: 'Steam' } as Launcher]),
+    );
+
+    component.ngOnInit();
+
+    expect(component.accountVms[0].bgImagePath).toBe(cloudflareUrl);
+  });
+
   it('should use default windows background for pc account without launcher', () => {
     const account = {
       ...mockAccount,
@@ -387,7 +413,7 @@ describe('AccountsComponent', () => {
 
     component.ngOnInit();
     expect(component.accountVms[0].bgImagePath).toBe(
-      '/assets/temp/account_type_windows_default.jpg',
+      '/assets/account-types/account_type_windows_default.jpg',
     );
   });
 
@@ -409,7 +435,7 @@ describe('AccountsComponent', () => {
     );
     component.ngOnInit();
     expect(component.accountVms[0].bgImagePath).toBe(
-      '/assets/temp/account_type_windows_epic.jpg',
+      '/assets/account-types/account_type_windows_epic.jpg',
     );
 
     stoAccountServiceSpy.getAccounts.mockReturnValue(
@@ -419,7 +445,7 @@ describe('AccountsComponent', () => {
     );
     component.loadAccounts();
     expect(component.accountVms[0].bgImagePath).toBe(
-      '/assets/temp/account_type_windows_steam.jpg',
+      '/assets/account-types/account_type_windows_steam.jpg',
     );
   });
 
@@ -437,7 +463,7 @@ describe('AccountsComponent', () => {
 
     component.ngOnInit();
     expect(component.accountVms[0].bgImagePath).toBe(
-      '/assets/temp/account_type_default.jpg',
+      '/assets/account-types/account_type_default.jpg',
     );
   });
 
