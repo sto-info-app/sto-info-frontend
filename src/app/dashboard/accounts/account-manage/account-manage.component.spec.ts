@@ -253,6 +253,20 @@ describe('AccountManageComponent', () => {
     );
   });
 
+  it('should use default create conflict message when error body is absent', () => {
+    component.mode = 'add';
+    component.accountForm.patchValue({ handle: 'Test#1234' });
+    stoAccountServiceSpy.createAccount.mockReturnValue(
+      throwError(() => ({ status: 409 })),
+    );
+
+    component.onSave();
+
+    expect(component.errorMessage).toBe(
+      'A STO account with this handle already exists.',
+    );
+  });
+
   it('should handle create generic error', () => {
     component.mode = 'add';
     component.accountForm.patchValue({ handle: 'Test#1234' });

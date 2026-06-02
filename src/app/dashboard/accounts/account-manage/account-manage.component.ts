@@ -214,18 +214,7 @@ export class AccountManageComponent implements OnInit, OnDestroy {
             encodeStoHandle(createdAccount.handle),
           ]);
         },
-        error: error => {
-          this.isSubmitting = false;
-          if (error.status === 409) {
-            this.errorMessage =
-              error.error?.message ||
-              'A STO account with this handle already exists.';
-          } else {
-            this.errorMessage =
-              'An error occurred while creating the account. Please try again.';
-          }
-          console.error('Error creating account:', error);
-        },
+        error: error => this.handleSaveError(error, 'creating'),
       });
       return;
     }
@@ -246,19 +235,27 @@ export class AccountManageComponent implements OnInit, OnDestroy {
             encodeStoHandle(targetHandle),
           ]);
         },
-        error: error => {
-          this.isSubmitting = false;
-          if (error.status === 409) {
-            this.errorMessage =
-              error.error?.message ||
-              'A STO account with this handle already exists.';
-          } else {
-            this.errorMessage =
-              'An error occurred while updating the account. Please try again.';
-          }
-          console.error('Error updating account:', error);
-        },
+        error: error => this.handleSaveError(error, 'updating'),
       });
+  }
+
+  private handleSaveError(
+    error: unknown,
+    action: 'creating' | 'updating',
+  ): void {
+    this.isSubmitting = false;
+    const httpError = error as {
+      status?: number;
+      error?: { message?: string };
+    };
+    if (httpError.status === 409) {
+      this.errorMessage =
+        httpError.error?.message ||
+        'A STO account with this handle already exists.';
+    } else {
+      this.errorMessage = `An error occurred while ${action} the account. Please try again.`;
+    }
+    console.error(`Error ${action} account:`, error);
   }
 
   onCancel(): void {
