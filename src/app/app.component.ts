@@ -82,10 +82,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.trackPageViewsOnNavigation();
     }
 
-    if (
-      environment?.env_name !== 'local' &&
-      environment?.env_name !== 'lighthouse-audit'
-    ) {
+    if (environment?.env_name !== 'lighthouse-audit') {
       this.loadFontAwesomeKit();
     }
   }
