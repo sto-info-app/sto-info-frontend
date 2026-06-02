@@ -32,6 +32,7 @@ import {
   SRC_PHOTO_UNAVAILABLE_100PX,
 } from 'src/app/shared/constants/app-image-assets.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { WHITESPACE_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import {
   decodeStoHandle,
   encodeStoHandle,
@@ -459,8 +460,9 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
   /** Returns the CSS class name derived from the character's general faction. */
   getFactionClass(character: Character): string {
     return (
-      character.generalFaction?.name?.toLowerCase().replaceAll(/\s+/g, '-') ||
-      'unknown'
+      character.generalFaction?.name
+        ?.toLowerCase()
+        .replaceAll(WHITESPACE_PATTERN, '-') || 'unknown'
     );
   }
 

@@ -200,6 +200,7 @@ describe('AppComponent', () => {
     component = fixture.componentInstance;
 
     jest.spyOn(console, 'info').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {

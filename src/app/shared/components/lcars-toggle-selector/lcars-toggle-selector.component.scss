@@ -1,6 +1,10 @@
 @use 'lcars-variables' as vars;
 
 .lcars-toggle-selector {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
   display: inline-flex;
   gap: 2px;
 
@@ -24,7 +28,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   background-color: rgb(255 255 255 / 8%);
-  color: rgb(255 255 255 / 30%);
+  color: vars.$lcars-grey-light;
   transition:
     background-color 0.2s ease,
     color 0.2s ease,

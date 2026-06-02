@@ -16,6 +16,7 @@ import { EndeavourRankBadgeComponent } from 'src/app/shared/components/endeavour
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { TRAILING_ZEROS_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import {
   decodeStoHandle,
   encodeStoHandle,
@@ -276,7 +277,7 @@ export class EndeavoursComponent implements OnInit, OnDestroy {
     if (value === 0) return '+0' + unit;
     const display = Number.isInteger(value)
       ? value.toString()
-      : value.toFixed(2).replace(/\.?0+$/, '');
+      : value.toFixed(2).replace(TRAILING_ZEROS_PATTERN, '');
     return `+${display}${unit}`;
   }
 
