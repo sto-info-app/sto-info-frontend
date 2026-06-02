@@ -32,6 +32,12 @@ describe('StatsComponent', () => {
     byLevelRange: [{ name: 'Admiral (60–65)', count: 3 }],
     byPlatform: [{ name: 'Steam', count: 2 }],
     byLauncher: [{ name: 'Steam', count: 2 }],
+    endeavourTotalNodes: 120,
+    endeavourMaxNodes: 720,
+    byEndeavourPerk: [{ name: 'Hull Capacity', count: 18 }],
+    byEndeavourPerkAvg: [{ name: 'Hull Capacity', count: 6 }],
+    byEndeavourCategory: [{ name: 'Space', count: 80 }],
+    byEndeavourCategoryPct: [{ name: 'Space', count: 67 }],
   };
 
   const mockAccount = {

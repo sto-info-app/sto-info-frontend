@@ -660,7 +660,7 @@ describe('CharacterManageComponent', () => {
         });
 
       (
-        component as CharacterManageComponent & {
+        component as unknown as {
           bindSpeciesUpdates: () => void;
         }
       ).bindSpeciesUpdates();

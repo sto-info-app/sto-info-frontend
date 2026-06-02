@@ -1,6 +1,10 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -157,7 +161,7 @@ describe('AccountsComponent', () => {
   it('should delete account', () => {
     const dialogRefSpy = {
       afterClosed: jest.fn().mockReturnValue(of(true)),
-    };
+    } as unknown as MatDialogRef<unknown>;
     dialogSpy.open.mockReturnValue(dialogRefSpy);
     const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
 
@@ -176,7 +180,7 @@ describe('AccountsComponent', () => {
   it('should not delete account if cancelled', () => {
     const dialogRefSpy = {
       afterClosed: jest.fn().mockReturnValue(of(false)),
-    };
+    } as unknown as MatDialogRef<unknown>;
     dialogSpy.open.mockReturnValue(dialogRefSpy);
 
     component.deleteAccount(mockAccount);
@@ -187,7 +191,7 @@ describe('AccountsComponent', () => {
   it('should set isLoading to false and log when delete account API fails', () => {
     const dialogRefSpy = {
       afterClosed: jest.fn().mockReturnValue(of(true)),
-    };
+    } as unknown as MatDialogRef<unknown>;
     dialogSpy.open.mockReturnValue(dialogRefSpy);
     const err = new Error('delete failed');
     stoAccountServiceSpy.deleteAccount.mockReturnValue(throwError(() => err));
