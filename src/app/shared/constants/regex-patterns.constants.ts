@@ -20,4 +20,4 @@ export const CHARACTER_NAME_PATTERN =
 export const STO_HANDLE_PATTERN = /^[a-zA-Z][a-zA-Z0-9._-]{2,15}(#\d{4,})?$/;
 
 export const WHITESPACE_PATTERN = /\s+/g;
-export const TRAILING_ZEROS_PATTERN = /\.?0+$/;
+export const TRAILING_ZEROS_PATTERN = /\.?0{1,2}$/;
