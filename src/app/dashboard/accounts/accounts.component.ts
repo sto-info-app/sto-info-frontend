@@ -11,6 +11,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router, RouterModule } from '@angular/router';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { EndeavourRankBadgeComponent } from 'src/app/shared/components/endeavour-rank-badge/endeavour-rank-badge.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
   APP_ROUTES,
@@ -68,7 +69,13 @@ export interface AccountVm {
   styleUrls: ['./accounts.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatDialogModule, RouterModule, LoadingBarComponent],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    RouterModule,
+    LoadingBarComponent,
+    EndeavourRankBadgeComponent,
+  ],
 })
 export class AccountsComponent implements OnInit, OnDestroy {
   /** Precomputed router link to the main dashboard. */

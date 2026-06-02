@@ -6,8 +6,8 @@
 
 .rank-hero {
   position: relative;
-  width: 220px;
-  min-height: 190px;
+  width: var(--hero-width, 220px);
+  min-height: var(--hero-height, 190px);
 }
 
 .rank-hero-img {
@@ -23,7 +23,7 @@
 .rank-hero-overlay {
   position: relative;
   z-index: 1;
-  height: 190px;
+  height: var(--hero-height, 190px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -32,7 +32,7 @@
 }
 
 .rank-hero-label {
-  font-size: 0.75rem;
+  font-size: var(--hero-label-size, 0.75rem);
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: vars.$lcars-sunflower;
@@ -40,7 +40,7 @@
 }
 
 .rank-hero-number {
-  font-size: 1.5rem;
+  font-size: var(--hero-number-size, 1.5rem);
   font-weight: 700;
   color: vars.$lcars-sunflower;
   font-family: Michroma, 'Courier New', Courier, monospace;
