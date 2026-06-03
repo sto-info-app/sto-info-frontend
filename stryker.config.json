@@ -6,7 +6,7 @@
   "jest": {
     "projectType": "custom",
     "configFile": "jest.config.cjs",
-    "enableFindRelatedTests": false
+    "enableFindRelatedTests": true
   },
   "mutate": [
     "src/**/*.ts",
