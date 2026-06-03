@@ -15,6 +15,12 @@ export class RegistrationCompleteComponent {
 
   private readonly routingService = inject(RoutingService);
 
+  /**
+   * Resolves a route key into a router link.
+   *
+   * @param route The route key.
+   * @returns The resolved link.
+   */
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
   }

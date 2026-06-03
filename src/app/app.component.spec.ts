@@ -200,6 +200,7 @@ describe('AppComponent', () => {
     component = fixture.componentInstance;
 
     jest.spyOn(console, 'info').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -363,6 +364,22 @@ describe('AppComponent', () => {
       'CookieYes URL not set in environment',
     );
     consoleSpy.mockRestore();
+  });
+
+  it('should not load Font Awesome Kit script in ngOnInit if lighthouse-audit env', () => {
+    const originalEnvName = environment.env_name;
+    (environment as { env_name: string }).env_name = 'lighthouse-audit';
+
+    const loadFontAwesomeKitSpy = jest.spyOn(
+      component as unknown as { loadFontAwesomeKit: () => void },
+      'loadFontAwesomeKit',
+    );
+
+    component.ngOnInit();
+
+    expect(loadFontAwesomeKitSpy).not.toHaveBeenCalled();
+
+    (environment as { env_name: string }).env_name = originalEnvName;
   });
 
   it('should not load Font Awesome Kit script if fontAwesomeKitId is missing', () => {

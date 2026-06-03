@@ -28,6 +28,9 @@ export class RefreshSessionDialogComponent implements OnInit, OnDestroy {
 
   appComponent: AppComponent | null = this.data?.appComponent ?? null;
 
+  /**
+   * Subscribes to authentication changes so the dialog closes when the user logs out.
+   */
   ngOnInit(): void {
     // Automatically close the dialog if the user is logged out elsewhere
     this.authService.isAuthenticated$
@@ -40,15 +43,24 @@ export class RefreshSessionDialogComponent implements OnInit, OnDestroy {
       });
   }
 
+  /**
+   * Cleans up dialog subscriptions.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
+  /**
+   * Keeps the current session active and closes the dialog.
+   */
   onStayConnected(): void {
     this.dialogRef.close(true);
   }
 
+  /**
+   * Logs out the user and closes the dialog.
+   */
   onLogout(): void {
     this.appComponent?.logout();
     this.dialogRef.close(false);

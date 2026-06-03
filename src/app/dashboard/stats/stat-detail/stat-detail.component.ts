@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { takeUntil } from 'rxjs';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { SmartChartComponent } from 'src/app/shared/components/smart-chart/smart-chart.component';
@@ -13,6 +14,8 @@ import { CountItem, StatsData } from '../stats.models';
 /** Configuration for a single breakdown stat page. */
 interface StatConfig {
   title: string;
+  label: string;
+  section: 'account' | 'character' | 'endeavour';
   key: keyof Pick<
     StatsData,
     | 'byLevelRange'
@@ -24,28 +27,126 @@ interface StatConfig {
     | 'byRecruitType'
     | 'byPlatform'
     | 'byLauncher'
+    | 'byEndeavourPerk'
+    | 'byEndeavourPerkAvg'
+    | 'byEndeavourCategory'
+    | 'byEndeavourCategoryPct'
   >;
   showLevelCards: boolean;
 }
 
 const STAT_CONFIG: Record<string, StatConfig> = {
-  level: { title: 'Level', key: 'byLevelRange', showLevelCards: true },
-  species: { title: 'Species', key: 'bySpecies', showLevelCards: false },
+  level: {
+    title: 'Level',
+    label: 'Level',
+    section: 'character',
+    key: 'byLevelRange',
+    showLevelCards: true,
+  },
+  species: {
+    title: 'Species',
+    label: 'Species',
+    section: 'character',
+    key: 'bySpecies',
+    showLevelCards: false,
+  },
   allegiance: {
     title: 'Allegiance',
+    label: 'Allegiance',
+    section: 'character',
     key: 'byGeneralFaction',
     showLevelCards: false,
   },
-  faction: { title: 'Faction', key: 'byFaction', showLevelCards: false },
-  career: { title: 'Career', key: 'byClass', showLevelCards: false },
-  sex: { title: 'Sex', key: 'bySex', showLevelCards: false },
+  faction: {
+    title: 'Faction',
+    label: 'Faction',
+    section: 'character',
+    key: 'byFaction',
+    showLevelCards: false,
+  },
+  career: {
+    title: 'Career',
+    label: 'Career',
+    section: 'character',
+    key: 'byClass',
+    showLevelCards: false,
+  },
+  sex: {
+    title: 'Sex',
+    label: 'Sex',
+    section: 'character',
+    key: 'bySex',
+    showLevelCards: false,
+  },
   recruitment: {
     title: 'Recruitment',
+    label: 'Recruitment',
+    section: 'character',
     key: 'byRecruitType',
     showLevelCards: false,
   },
-  platform: { title: 'Platform', key: 'byPlatform', showLevelCards: false },
-  launcher: { title: 'Launcher', key: 'byLauncher', showLevelCards: false },
+  platform: {
+    title: 'Platform',
+    label: 'Platform',
+    section: 'account',
+    key: 'byPlatform',
+    showLevelCards: false,
+  },
+  launcher: {
+    title: 'Launcher',
+    label: 'Launcher',
+    section: 'account',
+    key: 'byLauncher',
+    showLevelCards: false,
+  },
+  endeavourPerk: {
+    title: 'Endeavour Perks – Total',
+    label: 'Perks (Total)',
+    section: 'endeavour',
+    key: 'byEndeavourPerk',
+    showLevelCards: false,
+  },
+  endeavourPerkAvg: {
+    title: 'Endeavour Perks – Average per Account',
+    label: 'Perks (Average)',
+    section: 'endeavour',
+    key: 'byEndeavourPerkAvg',
+    showLevelCards: false,
+  },
+  endeavourCategory: {
+    title: 'Endeavour Category – Total',
+    label: 'Category (Total)',
+    section: 'endeavour',
+    key: 'byEndeavourCategory',
+    showLevelCards: false,
+  },
+  endeavourCategoryPct: {
+    title: 'Endeavour Category – % Complete',
+    label: 'Category (% Complete)',
+    section: 'endeavour',
+    key: 'byEndeavourCategoryPct',
+    showLevelCards: false,
+  },
+};
+
+/** All stat configs in section order, used to build the navigation dropdown. */
+const SECTION_ENTRIES: Record<string, { id: string; label: string }[]> =
+  (() => {
+    const groups: Record<string, { id: string; label: string }[]> = {};
+    for (const [id, cfg] of Object.entries(STAT_CONFIG)) {
+      if (!groups[cfg.section]) groups[cfg.section] = [];
+      groups[cfg.section].push({ id, label: cfg.label });
+    }
+    for (const entries of Object.values(groups)) {
+      entries.sort((a, b) => a.label.localeCompare(b.label));
+    }
+    return groups;
+  })();
+
+const SECTION_TITLES: Record<string, string> = {
+  account: 'Account Breakdowns',
+  character: 'Character Breakdowns',
+  endeavour: 'Endeavours',
 };
 
 /**
@@ -73,6 +174,9 @@ export class StatDetailComponent extends StatsBaseComponent implements OnInit {
   /** The derived config for this page, or null if the breakdownId is unknown. */
   config: StatConfig | null = null;
 
+  /** The active route param value. */
+  breakdownId = '';
+
   /** The breakdown items to display. */
   items: CountItem[] = [];
 
@@ -80,6 +184,17 @@ export class StatDetailComponent extends StatsBaseComponent implements OnInit {
   hideZeros = true;
 
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
+  /** Reports in the same section, sorted alphabetically, for the navigation dropdown. */
+  get sectionEntries(): { id: string; label: string }[] {
+    return this.config ? (SECTION_ENTRIES[this.config.section] ?? []) : [];
+  }
+
+  /** Human-readable section heading for the navigation dropdown. */
+  get sectionTitle(): string {
+    return this.config ? (SECTION_TITLES[this.config.section] ?? '') : '';
+  }
 
   /** The breakdown items to display (filtered or unfiltered). */
   get displayedItems(): CountItem[] {
@@ -104,17 +219,31 @@ export class StatDetailComponent extends StatsBaseComponent implements OnInit {
     this.hideZeros = !this.hideZeros;
   }
 
+  /** Navigates to a different report within the same section. */
+  navigateToReport(id: string): void {
+    void this.router.navigateByUrl(
+      `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', id)}`,
+    );
+  }
+
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('breakdownId') ?? '';
-    this.config = STAT_CONFIG[id] ?? null;
-
-    if (!this.config) {
-      this.isLoading = false;
-      return;
-    }
-
     this.loadAccounts();
-    this.loadStats();
+
+    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const id = params.get('breakdownId') ?? '';
+      this.breakdownId = id;
+      this.config = STAT_CONFIG[id] ?? null;
+      this.items = [];
+      this.hideZeros = true;
+
+      if (!this.config) {
+        this.isLoading = false;
+        this._cdr.markForCheck();
+        return;
+      }
+
+      this.loadStats();
+    });
   }
 
   loadStats(): void {

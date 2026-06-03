@@ -21,4 +21,10 @@ export interface StatsData {
   byLevelRange: CountItem[];
   byPlatform: CountItem[];
   byLauncher: CountItem[];
+  endeavourTotalNodes: number;
+  endeavourMaxNodes: number;
+  byEndeavourPerk: CountItem[];
+  byEndeavourPerkAvg: CountItem[];
+  byEndeavourCategory: CountItem[];
+  byEndeavourCategoryPct: CountItem[];
 }

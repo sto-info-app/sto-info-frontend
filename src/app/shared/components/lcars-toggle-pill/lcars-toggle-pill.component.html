@@ -1,0 +1,13 @@
+<button
+  type="button"
+  class="lcars-toggle-pill"
+  [class.lcars-toggle-pill--on]="checked"
+  [class.lcars-toggle-pill--disabled]="disabled"
+  [disabled]="disabled || null"
+  [attr.aria-label]="ariaLabel || label"
+  aria-checked="false"
+  [attr.aria-checked]="checked ? 'true' : 'false'"
+  role="switch"
+  (click)="toggle()">
+  {{ label }}
+</button>

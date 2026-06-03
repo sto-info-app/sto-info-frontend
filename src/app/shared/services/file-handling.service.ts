@@ -7,6 +7,7 @@ import { Base64 } from 'js-base64';
 export class FileHandlingService {
   /**
    * Converts a base64 data URI to a Blob
+   *
    * @param dataURI - The base64 data URI to convert
    * @returns The converted Blob
    */
@@ -52,6 +53,7 @@ export class FileHandlingService {
 
   /**
    * Clean a base64 string by removing invalid characters
+   *
    * @param str - The base64 string to clean
    * @returns The cleaned base64 string
    */
@@ -62,6 +64,7 @@ export class FileHandlingService {
 
   /**
    * Validate a base64 image string
+   *
    * @param base64 - The base64 image string to validate
    * @returns True if the string is a valid base64 image, false otherwise
    */

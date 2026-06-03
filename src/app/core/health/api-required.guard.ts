@@ -8,6 +8,11 @@ import { HealthService } from './health.service';
 export class ApiRequiredGuard implements CanActivate {
   private readonly _backendHealth: HealthService = inject(HealthService);
 
+  /**
+   * Refreshes the cached backend health state before allowing navigation.
+   *
+   * @returns An observable that always resolves to `true`.
+   */
   canActivate() {
     return this._backendHealth.checkOnce().pipe(
       take(1),

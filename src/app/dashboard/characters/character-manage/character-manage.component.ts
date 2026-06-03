@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
@@ -8,8 +9,20 @@ import {
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, Subject, forkJoin, of, takeUntil } from 'rxjs';
 import {
+  combineLatest,
+  EMPTY,
+  Observable,
+  Subject,
+  catchError,
+  forkJoin,
+  of,
+  switchMap,
+  takeUntil,
+  startWith,
+} from 'rxjs';
+import {
+  Character,
   CharacterClass,
   Faction,
   GeneralFaction,
@@ -70,6 +83,8 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
   private readonly lookupService = inject(CharacterLookupService);
   private readonly destroy$ = new Subject<void>();
 
+  private readonly dashboardAccountsRoute = '/dashboard/accounts';
+
   constructor() {
     this.characterForm = this.fb.group({
       handle: [
@@ -105,52 +120,36 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
     this.characterForm
       .get('factionId')
       ?.valueChanges.pipe(takeUntil(this.destroy$))
-      .subscribe(factionId => {
-        this.updateSpecies();
-        if (factionId) {
-          this.lookupService
-            .getRecruitTypes(factionId)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(types => {
-              this.recruitTypes = types;
-              const currentRecruitId =
-                this.characterForm.get('recruitTypeId')?.value;
-              if (
-                currentRecruitId &&
-                !types.some(t => t.id === currentRecruitId)
-              ) {
-                this.characterForm.patchValue({ recruitTypeId: '' });
-              }
+      .pipe(
+        switchMap(factionId => {
+          if (!factionId) {
+            return of({
+              recruitTypes: [] as RecruitType[],
+              generalFactions: [] as GeneralFaction[],
             });
+          }
 
-          this.lookupService
-            .getGeneralFactions(factionId)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(generalFactions => {
-              this.generalFactions = generalFactions;
-              const currentGeneralFactionId =
-                this.characterForm.get('generalFactionId')?.value;
-              if (
-                currentGeneralFactionId &&
-                !generalFactions.some(gf => gf.id === currentGeneralFactionId)
-              ) {
-                this.characterForm.patchValue({ generalFactionId: '' });
-              }
-              if (generalFactions.length === 1) {
-                this.characterForm.patchValue({
-                  generalFactionId: generalFactions[0].id,
-                });
-              }
-            });
+          return forkJoin({
+            recruitTypes: this.lookupService.getRecruitTypes(factionId),
+            generalFactions: this.lookupService.getGeneralFactions(factionId),
+          });
+        }),
+      )
+      .subscribe(({ recruitTypes, generalFactions }) => {
+        this.recruitTypes = recruitTypes;
+        this.generalFactions = generalFactions;
+
+        this.clearInvalidSelection('recruitTypeId', recruitTypes);
+        this.clearInvalidSelection('generalFactionId', generalFactions);
+
+        if (generalFactions.length === 1) {
+          this.characterForm.patchValue({
+            generalFactionId: generalFactions[0].id,
+          });
         }
       });
 
-    this.characterForm
-      .get('recruitTypeId')
-      ?.valueChanges.pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.updateSpecies();
-      });
+    this.bindSpeciesUpdates();
   }
 
   loadInitialData(): void {
@@ -211,74 +210,53 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
   loadCharacter(): void {
     this.characterService
       .getCharactersByAccount(this.accountId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: characters => {
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(characters => {
           const char = characters.find(c => c.handle === this.characterHandle);
-          if (char) {
-            this.characterId = char.id;
-            // Fetch full character data
-            this.characterService
-              .getCharacter(char.id)
-              .pipe(takeUntil(this.destroy$))
-              .subscribe({
-                next: fullChar => {
-                  this.characterForm.patchValue(
-                    {
-                      handle: fullChar.handle,
-                      firstName: fullChar.firstName,
-                      middleName: fullChar.middleName,
-                      lastName: fullChar.lastName,
-                      biography: fullChar.biography,
-                      notes: fullChar.notes,
-                      createdDate: fullChar.createdDate
-                        ? new Date(fullChar.createdDate)
-                            .toISOString()
-                            .split('T')[0]
-                        : null,
-                      level: fullChar.level,
-                      generalFactionId: fullChar.generalFactionId,
-                      factionId: fullChar.factionId,
-                      sexId: fullChar.sexId,
-                      classId: fullChar.classId,
-                      recruitTypeId: fullChar.recruitTypeId,
-                      speciesId: fullChar.speciesId,
-                    },
-                    { emitEvent: false },
-                  );
-                  forkJoin({
-                    recruitTypes: fullChar.factionId
-                      ? this.lookupService.getRecruitTypes(fullChar.factionId)
-                      : of([] as RecruitType[]),
-                    species: this.lookupService.getSpecies(
-                      fullChar.factionId,
-                      fullChar.recruitTypeId,
-                    ),
-                  })
-                    .pipe(takeUntil(this.destroy$))
-                    .subscribe({
-                      next: ({ recruitTypes, species }) => {
-                        this.recruitTypes = recruitTypes;
-                        this.speciesList = species;
-                        this.isLoading = false;
-                      },
-                      error: err => {
-                        this.errorMessage = 'Failed to load character options';
-                        this.isLoading = false;
-                        console.error(err);
-                      },
-                    });
-                },
-                error: err => {
-                  this.errorMessage = 'Failed to load character details';
-                  this.isLoading = false;
-                  console.error(err);
-                },
-              });
-          } else {
+          if (!char) {
             this.errorMessage = 'Character not found';
             this.isLoading = false;
+            return EMPTY;
           }
+
+          this.characterId = char.id;
+
+          return this.characterService.getCharacter(char.id).pipe(
+            catchError(err => {
+              this.errorMessage = 'Failed to load character details';
+              this.isLoading = false;
+              console.error(err);
+              return EMPTY;
+            }),
+          );
+        }),
+        switchMap(fullChar => {
+          this.patchCharacterForm(fullChar);
+
+          return forkJoin({
+            recruitTypes: fullChar.factionId
+              ? this.lookupService.getRecruitTypes(fullChar.factionId)
+              : of([] as RecruitType[]),
+            species: this.lookupService.getSpecies(
+              fullChar.factionId,
+              fullChar.recruitTypeId,
+            ),
+          }).pipe(
+            catchError(err => {
+              this.errorMessage = 'Failed to load character options';
+              this.isLoading = false;
+              console.error(err);
+              return EMPTY;
+            }),
+          );
+        }),
+      )
+      .subscribe({
+        next: ({ recruitTypes, species }) => {
+          this.recruitTypes = recruitTypes;
+          this.speciesList = species;
+          this.isLoading = false;
         },
         error: err => {
           this.errorMessage = 'Failed to load characters';
@@ -288,31 +266,63 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
       });
   }
 
-  updateSpecies(): void {
-    const factionId = this.characterForm.get('factionId')?.value;
-    const recruitTypeId = this.characterForm.get('recruitTypeId')?.value;
+  private patchCharacterForm(fullChar: Character): void {
+    this.characterForm.patchValue(
+      {
+        handle: fullChar.handle,
+        firstName: fullChar.firstName,
+        middleName: fullChar.middleName,
+        lastName: fullChar.lastName,
+        biography: fullChar.biography,
+        notes: fullChar.notes,
+        createdDate: fullChar.createdDate
+          ? new Date(fullChar.createdDate).toISOString().split('T')[0]
+          : null,
+        level: fullChar.level,
+        generalFactionId: fullChar.generalFactionId,
+        factionId: fullChar.factionId,
+        sexId: fullChar.sexId,
+        classId: fullChar.classId,
+        recruitTypeId: fullChar.recruitTypeId,
+        speciesId: fullChar.speciesId,
+      },
+      { emitEvent: false },
+    );
+  }
 
-    if (factionId) {
-      this.lookupService
-        .getSpecies(factionId, recruitTypeId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: species => {
-            this.speciesList = species;
-            const currentSpeciesId = this.characterForm.get('speciesId')?.value;
-            if (
-              currentSpeciesId &&
-              !species.some(s => s.id === currentSpeciesId)
-            ) {
-              this.characterForm.patchValue({ speciesId: '' });
-            }
-          },
-          error: err => console.error('Failed to load species', err),
-        });
-    } else {
-      this.speciesList = [];
-      this.characterForm.patchValue({ speciesId: '' });
+  private bindSpeciesUpdates(): void {
+    const factionControl = this.characterForm.get('factionId');
+    const recruitTypeControl = this.characterForm.get('recruitTypeId');
+
+    if (!factionControl || !recruitTypeControl) {
+      return;
     }
+
+    combineLatest([
+      factionControl.valueChanges.pipe(startWith(factionControl.value)),
+      recruitTypeControl.valueChanges.pipe(startWith(recruitTypeControl.value)),
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(([factionId, recruitTypeId]) => {
+          if (!factionId) {
+            this.speciesList = [];
+            this.characterForm.patchValue({ speciesId: '' });
+            return of([] as Species[]);
+          }
+
+          return this.lookupService.getSpecies(factionId, recruitTypeId).pipe(
+            catchError(err => {
+              console.error('Failed to load species', err);
+              return EMPTY;
+            }),
+          );
+        }),
+      )
+      .subscribe(species => {
+        this.speciesList = species;
+        this.clearInvalidSelection('speciesId', species);
+      });
   }
 
   onSave(): void {
@@ -335,17 +345,9 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
         .createCharacter(formData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: () => {
-            this.router.navigate([
-              '/dashboard/accounts',
-              encodeStoHandle(this.accountHandle),
-            ]);
-          },
+          next: () => this.navigateToAccount(),
           error: err => {
-            this.isSubmitting = false;
-            this.errorMessage =
-              err.error?.message || 'Failed to create character.';
-            console.error(err);
+            this.handleSaveError(err, 'Failed to create character.');
           },
         });
     } else {
@@ -353,18 +355,9 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
         .updateCharacter(this.characterId, formData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: () => {
-            this.router.navigate([
-              '/dashboard/accounts',
-              encodeStoHandle(this.accountHandle),
-              formData.handle,
-            ]);
-          },
+          next: () => this.navigateToCharacter(formData.handle),
           error: err => {
-            this.isSubmitting = false;
-            this.errorMessage =
-              err.error?.message || 'Failed to update character.';
-            console.error(err);
+            this.handleSaveError(err, 'Failed to update character.');
           },
         });
     }
@@ -372,17 +365,53 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
 
   onCancel(): void {
     if (this.mode === 'edit') {
-      this.router.navigate([
-        '/dashboard/accounts',
-        encodeStoHandle(this.accountHandle),
-        this.characterHandle,
-      ]);
+      this.navigateToCharacter(this.characterHandle);
     } else {
-      this.router.navigate([
-        '/dashboard/accounts',
-        encodeStoHandle(this.accountHandle),
-      ]);
+      this.navigateToAccount();
     }
+  }
+
+  private clearInvalidSelection<T extends { id: string }>(
+    controlName: string,
+    items: readonly T[],
+  ): void {
+    const currentValue = this.characterForm.get(controlName)?.value;
+    if (currentValue && !items.some(item => item.id === currentValue)) {
+      this.characterForm.patchValue({ [controlName]: '' });
+    }
+  }
+
+  private navigateToAccount(): void {
+    this.router.navigate([
+      this.dashboardAccountsRoute,
+      encodeStoHandle(this.accountHandle),
+    ]);
+  }
+
+  private navigateToCharacter(characterHandle: string): void {
+    this.router.navigate([
+      this.dashboardAccountsRoute,
+      encodeStoHandle(this.accountHandle),
+      characterHandle,
+    ]);
+  }
+
+  private handleSaveError(error: unknown, fallbackMessage: string): void {
+    this.isSubmitting = false;
+
+    if (
+      error instanceof HttpErrorResponse &&
+      typeof error.error === 'object' &&
+      error.error !== null &&
+      'message' in error.error &&
+      typeof (error.error as { message?: unknown }).message === 'string'
+    ) {
+      this.errorMessage = (error.error as { message: string }).message;
+    } else {
+      this.errorMessage = fallbackMessage;
+    }
+
+    console.error(error);
   }
 
   /**

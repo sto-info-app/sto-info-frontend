@@ -1,0 +1,16 @@
+<button
+  type="button"
+  class="lcars-toggle"
+  [class.lcars-toggle--on]="checked"
+  [class.lcars-toggle--disabled]="disabled"
+  [disabled]="disabled || null"
+  [attr.aria-label]="ariaLabel || label"
+  aria-checked="false"
+  [attr.aria-checked]="checked ? 'true' : 'false'"
+  role="switch"
+  (click)="toggle()">
+  <i
+    class="fa-kit fa-star-trek-delta lcars-toggle__delta"
+    aria-hidden="true"></i>
+  <span class="lcars-toggle__label">{{ label }}</span>
+</button>
