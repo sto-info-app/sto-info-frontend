@@ -1,0 +1,23 @@
+<fieldset
+  class="lcars-toggle-selector"
+  [class.lcars-toggle-selector--disabled]="disabled"
+  [attr.aria-label]="ariaLabel">
+  <button
+    type="button"
+    class="lcars-toggle-selector__seg lcars-toggle-selector__seg--off"
+    [class.lcars-toggle-selector__seg--active]="!checked"
+    [disabled]="disabled || null"
+    [attr.aria-pressed]="!checked ? 'true' : 'false'"
+    (click)="select(false)">
+    {{ offLabel }}
+  </button>
+  <button
+    type="button"
+    class="lcars-toggle-selector__seg lcars-toggle-selector__seg--on"
+    [class.lcars-toggle-selector__seg--active]="checked"
+    [disabled]="disabled || null"
+    [attr.aria-pressed]="checked ? 'true' : 'false'"
+    (click)="select(true)">
+    {{ onLabel }}
+  </button>
+</fieldset>

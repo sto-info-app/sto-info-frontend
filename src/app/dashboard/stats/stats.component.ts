@@ -24,35 +24,64 @@ export interface StatTile {
   link: string;
 }
 
-/** All breakdown stat categories shown as tiles on the hub, with links precomputed. */
-export const STAT_TILES: StatTile[] = [
+/** Breakdown tiles for account-level stats. */
+export const ACCOUNT_STAT_TILES: StatTile[] = [
   {
-    label: 'Level',
-    breakdownId: 'level',
-    icon: 'fa-ranking-star',
-    colour: 'gold',
-    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'level')}`,
+    label: 'Launcher',
+    breakdownId: 'launcher',
+    icon: 'fa-rocket-launch',
+    colour: 'bluey',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'launcher')}`,
   },
   {
-    label: 'Species',
-    breakdownId: 'species',
-    icon: 'fa-dna',
+    label: 'Platform',
+    breakdownId: 'platform',
+    icon: 'fa-desktop',
+    colour: 'tangerine',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'platform')}`,
+  },
+];
+
+/** Breakdown tiles for endeavour stats. */
+export const ENDEAVOUR_STAT_TILES: StatTile[] = [
+  {
+    label: 'Category (% Complete)',
+    breakdownId: 'endeavourCategoryPct',
+    icon: 'fa-layer-group',
+    colour: 'cool',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'endeavourCategoryPct')}`,
+  },
+  {
+    label: 'Category (Total)',
+    breakdownId: 'endeavourCategory',
+    icon: 'fa-layer-group',
     colour: 'perano',
-    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'species')}`,
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'endeavourCategory')}`,
   },
+  {
+    label: 'Perks (Average)',
+    breakdownId: 'endeavourPerkAvg',
+    icon: 'fa-bullseye',
+    colour: 'sunflower',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'endeavourPerkAvg')}`,
+  },
+  {
+    label: 'Perks (Total)',
+    breakdownId: 'endeavourPerk',
+    icon: 'fa-bullseye',
+    colour: 'gold',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'endeavourPerk')}`,
+  },
+];
+
+/** Breakdown tiles for character-level stats. */
+export const STAT_TILES: StatTile[] = [
   {
     label: 'Allegiance',
     breakdownId: 'allegiance',
     icon: 'fa-shield-halved',
     colour: 'cool',
     link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'allegiance')}`,
-  },
-  {
-    label: 'Faction',
-    breakdownId: 'faction',
-    icon: 'fa-flag',
-    colour: 'sky',
-    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'faction')}`,
   },
   {
     label: 'Career',
@@ -62,11 +91,18 @@ export const STAT_TILES: StatTile[] = [
     link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'career')}`,
   },
   {
-    label: 'Sex',
-    breakdownId: 'sex',
-    icon: 'fa-venus-mars',
-    colour: 'violet',
-    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'sex')}`,
+    label: 'Faction',
+    breakdownId: 'faction',
+    icon: 'fa-flag',
+    colour: 'sky',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'faction')}`,
+  },
+  {
+    label: 'Level',
+    breakdownId: 'level',
+    icon: 'fa-ranking-star',
+    colour: 'gold',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'level')}`,
   },
   {
     label: 'Recruitment',
@@ -76,18 +112,18 @@ export const STAT_TILES: StatTile[] = [
     link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'recruitment')}`,
   },
   {
-    label: 'Platform',
-    breakdownId: 'platform',
-    icon: 'fa-desktop',
-    colour: 'tangerine',
-    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'platform')}`,
+    label: 'Sex',
+    breakdownId: 'sex',
+    icon: 'fa-venus-mars',
+    colour: 'violet',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'sex')}`,
   },
   {
-    label: 'Launcher',
-    breakdownId: 'launcher',
-    icon: 'fa-rocket-launch',
-    colour: 'bluey',
-    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'launcher')}`,
+    label: 'Species',
+    breakdownId: 'species',
+    icon: 'fa-dna',
+    colour: 'perano',
+    link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'species')}`,
   },
 ];
 
@@ -117,7 +153,28 @@ export class StatsComponent extends StatsBaseComponent implements OnInit {
   readonly accountsLink = `/${APP_ROUTES.STO_DASHBOARD_ACCOUNTS}`;
 
   readonly appRouteTitles = APP_ROUTE_TITLES;
+  readonly accountStatTiles = ACCOUNT_STAT_TILES;
   readonly statTiles = STAT_TILES;
+  readonly endeavourStatTiles = ENDEAVOUR_STAT_TILES;
+
+  accountBreakdownsExpanded = true;
+  characterBreakdownsExpanded = true;
+  endeavoursExpanded = true;
+
+  toggleAccountBreakdowns(): void {
+    this.accountBreakdownsExpanded = !this.accountBreakdownsExpanded;
+    this._cdr.markForCheck();
+  }
+
+  toggleCharacterBreakdowns(): void {
+    this.characterBreakdownsExpanded = !this.characterBreakdownsExpanded;
+    this._cdr.markForCheck();
+  }
+
+  toggleEndeavours(): void {
+    this.endeavoursExpanded = !this.endeavoursExpanded;
+    this._cdr.markForCheck();
+  }
 
   ngOnInit(): void {
     this.loadAccounts();

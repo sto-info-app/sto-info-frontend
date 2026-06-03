@@ -1,0 +1,65 @@
+@use 'lcars-variables' as vars;
+
+.lcars-toggle-selector {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  display: inline-flex;
+  gap: 2px;
+
+  &--disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+}
+
+.lcars-toggle-selector__seg {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 44px;
+  padding: 0 18px 6px;
+  min-width: 90px;
+  border: none;
+  cursor: pointer;
+  font-family: vars.$font-antonio;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background-color: rgb(255 255 255 / 8%);
+  color: vars.$lcars-grey-light;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    filter 0.2s ease;
+
+  &:first-child {
+    border-radius: 22px 0 0 22px;
+    padding-left: 22px;
+  }
+
+  &:last-child {
+    border-radius: 0 22px 22px 0;
+    padding-right: 22px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-perano;
+    outline-offset: 2px;
+  }
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.2);
+  }
+
+  &--off#{&}--active {
+    background-color: vars.$lcars-cardinal;
+    color: #fff;
+  }
+
+  &--on#{&}--active {
+    background-color: vars.$lcars-green;
+    color: #000;
+  }
+}

@@ -15,10 +15,13 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
+import { EndeavourSummary } from 'src/app/dashboard/models/endeavour.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
+import { EndeavourService } from 'src/app/dashboard/services/endeavour.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { EndeavourRankBadgeComponent } from 'src/app/shared/components/endeavour-rank-badge/endeavour-rank-badge.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
@@ -29,11 +32,11 @@ import {
   SRC_PHOTO_UNAVAILABLE_100PX,
 } from 'src/app/shared/constants/app-image-assets.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { WHITESPACE_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import {
   decodeStoHandle,
   encodeStoHandle,
 } from 'src/app/shared/utils/sto-handle.utils';
-import { AccountDialogComponent } from '../dialogs/account-dialog/account-dialog.component';
 
 /** Precomputed display values for a single character card. */
 interface CharacterVm {
@@ -51,6 +54,17 @@ interface CharacterVm {
   imageUrl: string;
 }
 
+/** Aggregated, sorted filter options derived from the character list. */
+interface CharacterFilterOptionsVm {
+  ranks: string[];
+  species: string[];
+  factions: string[];
+  generalFactions: string[];
+  sexes: string[];
+  classes: string[];
+  recruitTypes: string[];
+}
+
 @Component({
   selector: 'app-account-detail',
   templateUrl: './account-detail.component.html',
@@ -65,12 +79,14 @@ interface CharacterVm {
     LcarsErrorMessageComponent,
     MatButtonModule,
     MatDialogModule,
+    EndeavourRankBadgeComponent,
   ],
 })
 export class AccountDetailComponent implements OnInit, OnDestroy {
   // ── Non-signal state (changed infrequently via HTTP callbacks) ────────────
   account: StoAccount | null = null;
   isLoading = true;
+  endeavourCollapsed = false;
   errorMessage = '';
 
   // ── Signal-based state ────────────────────────────────────────────────────
@@ -105,10 +121,20 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
 
   // ── Injected services ─────────────────────────────────────────────────────
 
+  readonly endeavourSummary = signal<EndeavourSummary | null>(null);
+
+  /** Router link for the Endeavour Perks page for the current account. */
+  endeavoursLink(): string | null {
+    return this.account
+      ? `/dashboard/accounts/${encodeStoHandle(this.account.handle)}/endeavours`
+      : null;
+  }
+
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
   private readonly _stoAccountService = inject(StoAccountService);
   private readonly _characterService = inject(CharacterService);
+  private readonly _endeavourService = inject(EndeavourService);
   private readonly _dialog = inject(MatDialog);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _destroy$ = new Subject<void>();
@@ -125,81 +151,70 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
   // ── Computed filter-option lists (update only when characters change) ─────
 
   /** Sorted unique rank level-ranges derived from the current character list. */
-  readonly uniqueRanks = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.rank?.levelRange)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
-  );
+  readonly uniqueRanks = computed(() => this._filterOptions().ranks);
 
   /** Sorted unique species names derived from the current character list. */
-  readonly uniqueSpecies = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.species?.name)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
-  );
+  readonly uniqueSpecies = computed(() => this._filterOptions().species);
 
   /** Sorted unique faction names derived from the current character list. */
-  readonly uniqueFactions = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.faction?.name)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
-  );
+  readonly uniqueFactions = computed(() => this._filterOptions().factions);
 
   /** Sorted unique general-faction names derived from the current character list. */
-  readonly uniqueGeneralFactions = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.generalFaction?.name)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
+  readonly uniqueGeneralFactions = computed(
+    () => this._filterOptions().generalFactions,
   );
 
   /** Sorted unique sex names derived from the current character list. */
-  readonly uniqueSexes = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.sex?.name)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
-  );
+  readonly uniqueSexes = computed(() => this._filterOptions().sexes);
 
   /** Sorted unique class names derived from the current character list. */
-  readonly uniqueClasses = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.class?.name)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
-  );
+  readonly uniqueClasses = computed(() => this._filterOptions().classes);
 
   /** Sorted unique recruit-type names derived from the current character list. */
-  readonly uniqueRecruitTypes = computed(() =>
-    [
-      ...new Set(
-        this.characters()
-          .map(c => c.recruitType?.name)
-          .filter(Boolean) as string[],
-      ),
-    ].sort((a, b) => a.localeCompare(b)),
+  readonly uniqueRecruitTypes = computed(
+    () => this._filterOptions().recruitTypes,
   );
+
+  /**
+   * Build all filter option lists in one pass to avoid repeating map/filter/sort
+   * work for each individual filter category.
+   */
+  private readonly _filterOptions = computed<CharacterFilterOptionsVm>(() => {
+    const ranks = new Set<string>();
+    const species = new Set<string>();
+    const factions = new Set<string>();
+    const generalFactions = new Set<string>();
+    const sexes = new Set<string>();
+    const classes = new Set<string>();
+    const recruitTypes = new Set<string>();
+
+    for (const character of this.characters()) {
+      if (character.rank?.levelRange) ranks.add(character.rank.levelRange);
+      if (character.species?.name) species.add(character.species.name);
+      if (character.faction?.name) factions.add(character.faction.name);
+      if (character.generalFaction?.name) {
+        generalFactions.add(character.generalFaction.name);
+      }
+      if (character.sex?.name) sexes.add(character.sex.name);
+      if (character.class?.name) classes.add(character.class.name);
+      if (character.recruitType?.name) {
+        recruitTypes.add(character.recruitType.name);
+      }
+    }
+
+    const toSortedArray = (values: Set<string>): string[] =>
+      [...values].sort((a, b) => a.localeCompare(b));
+
+    return {
+      ranks: toSortedArray(ranks),
+      species: toSortedArray(species),
+      factions: toSortedArray(factions),
+      generalFactions: toSortedArray(generalFactions),
+      sexes: toSortedArray(sexes),
+      classes: toSortedArray(classes),
+      recruitTypes: toSortedArray(recruitTypes),
+    };
+  });
 
   /** Number of currently active filters. */
   readonly activeFilterCount = computed(() => {
@@ -317,16 +332,17 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
           this.account = accounts.find(a => a.handle === handle) || null;
           if (this.account) {
             this.loadCharacters(this.account.id);
+            this.loadEndeavourSummary(this.account.id);
           } else {
             this.isLoading = false;
             this.errorMessage = 'Account not found';
-            this._cdr.markForCheck();
+            this._cdr.detectChanges();
           }
         },
         error: err => {
           this.isLoading = false;
           this.errorMessage = 'Failed to load account details';
-          this._cdr.markForCheck();
+          this._cdr.detectChanges();
           console.error(err);
         },
       });
@@ -347,8 +363,23 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
         error: err => {
           this.isLoading = false;
           this.errorMessage = 'Failed to load characters';
-          this._cdr.markForCheck();
+          this._cdr.detectChanges();
           console.error(err);
+        },
+      });
+  }
+
+  loadEndeavourSummary(accountId: string): void {
+    this._endeavourService
+      .getSummary(accountId)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: summary => {
+          this.endeavourSummary.set(summary);
+          this._cdr.detectChanges();
+        },
+        error: () => {
+          // Non-critical — fail silently
         },
       });
   }
@@ -356,35 +387,11 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
   editAccount(): void {
     if (!this.account) return;
 
-    const dialogRef = this._dialog.open(AccountDialogComponent, {
-      width: '600px',
-      data: {
-        mode: 'edit',
-        account: this.account,
-      },
-    });
-
-    dialogRef
-      .afterClosed()
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(result => {
-        if (result && this.account) {
-          const currentHandle = this.account.handle;
-          this._stoAccountService
-            .getAccount(this.account.id)
-            .subscribe(updatedAccount => {
-              if (updatedAccount) {
-                this.account = updatedAccount;
-                if (updatedAccount.handle !== currentHandle) {
-                  this._router.navigate([
-                    '/dashboard/accounts',
-                    encodeStoHandle(updatedAccount.handle),
-                  ]);
-                }
-              }
-            });
-        }
-      });
+    this._router.navigate([
+      '/dashboard/accounts',
+      encodeStoHandle(this.account.handle),
+      'edit',
+    ]);
   }
 
   addCharacter(): void {
@@ -453,8 +460,9 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
   /** Returns the CSS class name derived from the character's general faction. */
   getFactionClass(character: Character): string {
     return (
-      character.generalFaction?.name?.toLowerCase().replaceAll(/\s+/g, '-') ||
-      'unknown'
+      character.generalFaction?.name
+        ?.toLowerCase()
+        .replaceAll(WHITESPACE_PATTERN, '-') || 'unknown'
     );
   }
 

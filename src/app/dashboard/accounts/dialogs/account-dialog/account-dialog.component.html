@@ -103,21 +103,17 @@
         formControlName="notes"></textarea>
     </div>
 
-    <div class="toggle-container">
-      <mat-slide-toggle
-        formControlName="lifetimeSubscription"
-        aria-label="Lifetime Subscription"
-        >Lifetime Subscription</mat-slide-toggle
-      >
-    </div>
+    <app-lcars-toggle
+      formControlName="lifetimeSubscription"
+      label="Lifetime Subscription"
+      ariaLabel="Lifetime Subscription">
+    </app-lcars-toggle>
 
-    <div class="toggle-container">
-      <mat-slide-toggle
-        formControlName="publiclyVisible"
-        aria-label="Publicly Visible"
-        >Publicly Visible</mat-slide-toggle
-      >
-    </div>
+    <app-lcars-toggle
+      formControlName="publiclyVisible"
+      label="Publicly Visible"
+      ariaLabel="Publicly Visible">
+    </app-lcars-toggle>
   </form>
 </mat-dialog-content>
 

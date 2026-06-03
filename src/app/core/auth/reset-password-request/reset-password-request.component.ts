@@ -8,11 +8,11 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { validateEmail } from 'src/app/shared/_helpers/validate-email';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { FORM_ERROR_INVALID_EMAIL_FORMAT } from 'src/app/shared/constants/error-messages.constants';
-import { validateEmail } from 'src/app/shared/_helpers/validate-email';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { AuthService } from '../auth.service';
 
@@ -59,15 +59,27 @@ export class ResetPasswordRequestComponent {
   private readonly _routingService = inject(RoutingService);
   private readonly _cdr = inject(ChangeDetectorRef);
 
+  /**
+   * Validates an email address using the shared helper.
+   *
+   * @param email The email address to validate.
+   * @returns `true` when the email is valid.
+   */
   validateEmail(email: string): boolean {
     return validateEmail(email);
   }
 
+  /**
+   * Validates the current input state and updates the submit flag.
+   */
   validateInputs(): void {
     this.isEmailValid = validateEmail(this.email);
     this.inputsValid = this.isEmailValid;
   }
 
+  /**
+   * Requests a password reset email for the entered address.
+   */
   onPasswordReset(): void {
     if (!this.inputsValid) {
       return;
@@ -94,6 +106,12 @@ export class ResetPasswordRequestComponent {
     });
   }
 
+  /**
+   * Resolves a route key into a router link.
+   *
+   * @param route The route key.
+   * @returns The resolved link.
+   */
   getRouteLink(route: string): string {
     return this._routingService.getLink(route);
   }

@@ -32,6 +32,12 @@ describe('StatsComponent', () => {
     byLevelRange: [{ name: 'Admiral (60–65)', count: 3 }],
     byPlatform: [{ name: 'Steam', count: 2 }],
     byLauncher: [{ name: 'Steam', count: 2 }],
+    endeavourTotalNodes: 120,
+    endeavourMaxNodes: 720,
+    byEndeavourPerk: [{ name: 'Hull Capacity', count: 18 }],
+    byEndeavourPerkAvg: [{ name: 'Hull Capacity', count: 6 }],
+    byEndeavourCategory: [{ name: 'Space', count: 80 }],
+    byEndeavourCategoryPct: [{ name: 'Space', count: 67 }],
   };
 
   const mockAccount = {
@@ -79,8 +85,8 @@ describe('StatsComponent', () => {
     expect(component.isLoading).toBe(false);
   });
 
-  it('should expose 9 stat tiles', () => {
-    expect(component.statTiles.length).toBe(9);
+  it('should expose 7 character stat tiles', () => {
+    expect(component.statTiles.length).toBe(7);
   });
 
   it('should precompute stat tile links', () => {
@@ -196,6 +202,44 @@ describe('StatsComponent', () => {
 
       expect(routingServiceSpy.getLink).toHaveBeenCalled();
       expect(link).toBe('/dashboard/accounts/Test%231234');
+    });
+
+    it('should return routing link when all selected and a single account exists', () => {
+      component.selectedAccountId = 'all';
+      component.accounts = [mockAccount];
+      routingServiceSpy.getLink.mockReturnValue(
+        '/dashboard/accounts/Test%231234',
+      );
+
+      expect(component.getCharacterCtaLink()).toBe(
+        '/dashboard/accounts/Test%231234',
+      );
+    });
+  });
+
+  describe('section toggles', () => {
+    it('should toggle account breakdown expansion', () => {
+      expect(component.accountBreakdownsExpanded).toBe(true);
+      component.toggleAccountBreakdowns();
+      expect(component.accountBreakdownsExpanded).toBe(false);
+      component.toggleAccountBreakdowns();
+      expect(component.accountBreakdownsExpanded).toBe(true);
+    });
+
+    it('should toggle character breakdown expansion', () => {
+      expect(component.characterBreakdownsExpanded).toBe(true);
+      component.toggleCharacterBreakdowns();
+      expect(component.characterBreakdownsExpanded).toBe(false);
+      component.toggleCharacterBreakdowns();
+      expect(component.characterBreakdownsExpanded).toBe(true);
+    });
+
+    it('should toggle endeavours expansion', () => {
+      expect(component.endeavoursExpanded).toBe(true);
+      component.toggleEndeavours();
+      expect(component.endeavoursExpanded).toBe(false);
+      component.toggleEndeavours();
+      expect(component.endeavoursExpanded).toBe(true);
     });
   });
 });

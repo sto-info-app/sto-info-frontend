@@ -98,6 +98,19 @@
       <span>Navigation</span>
     </div>
     <div class="buttons">
+      @if (sectionEntries.length > 1) {
+        <div class="lcars-select-container perano">
+          <span class="select-label">{{ sectionTitle }}</span>
+          <select
+            title="Navigate to report"
+            [ngModel]="breakdownId"
+            (ngModelChange)="navigateToReport($event)">
+            @for (entry of sectionEntries; track entry.id) {
+              <option [value]="entry.id">{{ entry.label }}</option>
+            }
+          </select>
+        </div>
+      }
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)"
         class="full-width-btn-link sunflower"

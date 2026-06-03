@@ -1,0 +1,280 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+<div id="endeavours-container">
+  <div
+    id="endeavours-main-column"
+    class="col">
+    @if (!isLoading && errorMessage) {
+      <div class="error-container">
+        <app-lcars-error-message
+          [message]="errorMessage"></app-lcars-error-message>
+        <div class="buttons-row">
+          <a
+            class="lcars-btn-auto sunflower"
+            [routerLink]="accountsLink"
+            >Back to Accounts</a
+          >
+        </div>
+      </div>
+    }
+
+    @if (!isLoading && !errorMessage) {
+      <h1>Endeavour Perks</h1>
+      <p class="account-subtitle">Account: {{ accountHandle }}</p>
+
+      <!-- Rank + Stats -->
+      <div class="rank-stats-row">
+        <app-endeavour-rank-badge [totalNodes]="summary()?.totalNodes ?? 0" />
+
+        @if (summary()) {
+          <div class="endeavour-summary-bar">
+            <div class="summary-stat">
+              <span class="summary-value"
+                >{{ summary()!.totalNodes }} /
+                {{ summary()!.maxPossibleNodes }}</span
+              >
+              <span class="summary-label">Perks Earnt</span>
+            </div>
+            <div class="summary-stat">
+              <span class="summary-value"
+                >{{ summary()!.overallCompletionPercentage }}%</span
+              >
+              <span class="summary-label">Overall</span>
+            </div>
+            <div class="summary-stat">
+              <span class="summary-value"
+                >{{ summary()!.maxedPerks }} / {{ summary()!.totalPerks }}</span
+              >
+              <span class="summary-label">Maxed</span>
+            </div>
+            <div class="summary-stat space-stat">
+              <span class="summary-value"
+                >{{ summary()!.spaceCompletionPercentage }}%</span
+              >
+              <span class="summary-label">Space</span>
+            </div>
+            <div class="summary-stat ground-stat">
+              <span class="summary-value"
+                >{{ summary()!.groundCompletionPercentage }}%</span
+              >
+              <span class="summary-label">Ground</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Perk list -->
+      <div class="perk-list">
+        @for (
+          item of filteredProgress();
+          track item.endeavourPerkId;
+          let i = $index
+        ) {
+          <div
+            class="perk-row"
+            [class.space-row]="item.endeavourPerk.category === 'Space'"
+            [class.ground-row]="item.endeavourPerk.category === 'Ground'">
+            <div class="perk-row-header">
+              <span class="sr-only">{{ item.endeavourPerk.category }}</span>
+              <span class="perk-name"
+                >{{ item.endeavourPerk.name }}
+                @if (item.endeavourPerk.description) {
+                  <button
+                    type="button"
+                    class="perk-info-btn"
+                    [class.active]="
+                      expandedDescriptions().has(item.endeavourPerkId)
+                    "
+                    title="Toggle description"
+                    [attr.aria-expanded]="
+                      expandedDescriptions().has(item.endeavourPerkId)
+                    "
+                    (click)="toggleDescription(item.endeavourPerkId)">
+                    <i class="fas fa-circle-info"></i>
+                  </button>
+                }
+              </span>
+              <div class="perk-header-right">
+                <span class="perk-earned-value">{{ formatEarned(item) }}</span>
+                <span class="sr-only"
+                  >{{ item.currentNodes }} of
+                  {{ item.endeavourPerk.maxNodes }} perks</span
+                >
+              </div>
+            </div>
+            @if (
+              item.endeavourPerk.description &&
+              expandedDescriptions().has(item.endeavourPerkId)
+            ) {
+              <span class="perk-description">{{
+                item.endeavourPerk.description
+              }}</span>
+            }
+
+            <div
+              class="perk-segments"
+              [class.space-segments]="item.endeavourPerk.category === 'Space'"
+              [class.ground-segments]="
+                item.endeavourPerk.category === 'Ground'
+              ">
+              @if (savingPerkId() === item.endeavourPerkId) {
+                <span class="segments-saving">
+                  <i class="fas fa-spinner fa-spin saving-spinner"></i>
+                </span>
+              } @else {
+                @for (j of rangeArray(item.endeavourPerk.maxNodes); track j) {
+                  <button
+                    type="button"
+                    class="perk-segment"
+                    [class.filled]="j < item.currentNodes"
+                    [attr.aria-label]="
+                      j +
+                      1 +
+                      ' of ' +
+                      item.endeavourPerk.maxNodes +
+                      ' perks for ' +
+                      item.endeavourPerk.name
+                    "
+                    [title]="j + 1 + ' / ' + item.endeavourPerk.maxNodes"
+                    (click)="selectNode(item, j)">
+                    <span class="sr-only">{{ j + 1 }}</span>
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        }
+
+        @if (filteredProgress().length === 0 && !isLoading) {
+          <p class="go-center">No perks found.</p>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Side column -->
+  <div
+    id="endeavours-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Filters</span>
+      <span
+        class="cta-icon"
+        (click)="filtersCollapsed = !filtersCollapsed"
+        (keypress)="filtersCollapsed = !filtersCollapsed"
+        [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
+        <i
+          class="fas"
+          [class.fa-caret-down]="filtersCollapsed"
+          [class.fa-caret-up]="!filtersCollapsed"></i>
+      </span>
+    </div>
+    @if (!filtersCollapsed) {
+      <div class="filter-section">
+        <input
+          type="text"
+          class="filter-input"
+          placeholder="Search perks…"
+          [ngModel]="searchText()"
+          (ngModelChange)="searchText.set($event)" />
+
+        <div class="lcars-select-container perano">
+          <span class="select-label">Category</span>
+          <select
+            id="category-select"
+            title="Category"
+            [ngModel]="categoryFilter()"
+            (ngModelChange)="setCategory($event)">
+            <option value="All">All</option>
+            <option value="Space">Space</option>
+            <option value="Ground">Ground</option>
+          </select>
+        </div>
+
+        @if (completeCount() > 0) {
+          <button
+            type="button"
+            class="full-width-btn-link"
+            [class.tangerine]="!hideComplete()"
+            [class.perano]="hideComplete()"
+            (click)="hideComplete.set(!hideComplete())">
+            {{ hideComplete() ? 'Show Completed' : 'Hide Completed' }}
+          </button>
+        }
+
+        @if (activeFilterCount() > 0) {
+          <button
+            type="button"
+            class="full-width-btn-link clear-filters-btn"
+            (click)="clearFilters()">
+            Clear Filters
+          </button>
+        }
+      </div>
+    }
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Sort</span>
+      <span
+        class="cta-icon"
+        (click)="sortCollapsed = !sortCollapsed"
+        (keypress)="sortCollapsed = !sortCollapsed"
+        [title]="sortCollapsed ? 'Show Sort' : 'Hide Sort'">
+        <i
+          class="fas"
+          [class.fa-caret-down]="sortCollapsed"
+          [class.fa-caret-up]="!sortCollapsed"></i>
+      </span>
+    </div>
+    @if (!sortCollapsed) {
+      <div class="filter-section">
+        <div class="lcars-select-container tangerine">
+          <span class="select-label">Sort by</span>
+          <select
+            id="sort-by-select"
+            title="Sort by"
+            [ngModel]="sortBy()"
+            (ngModelChange)="setSortBy($event)">
+            <option value="name">Name</option>
+            <option value="nodes">Perks Earnt</option>
+          </select>
+        </div>
+        <div class="lcars-select-container gold">
+          <span class="select-label">Direction</span>
+          <select
+            id="sort-order-select"
+            title="Sort direction"
+            [ngModel]="sortOrder()"
+            (ngModelChange)="setSortOrder($event)">
+            <option value="ASC">Ascending</option>
+            <option value="DESC">Descending</option>
+          </select>
+        </div>
+        <button
+          type="button"
+          class="full-width-btn-link perano"
+          (click)="loadProgress()">
+          <i class="fas fa-rotate-right"></i> Refresh
+        </button>
+      </div>
+    }
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="accountLink()"
+        class="full-width-btn-link sunflower"
+        >Account</a
+      >
+      <a
+        [routerLink]="accountsLink"
+        class="full-width-btn-link bluey"
+        >Accounts</a
+      >
+    </div>
+  </div>
+</div>

@@ -92,7 +92,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
           this.user = user;
           this._updateActivityLabels();
-          this._cdr.markForCheck();
+          this._cdr.detectChanges();
         },
         error: err => {
           console.warn('Failed to load user (non-200 or network error)', err);

@@ -1,15 +1,18 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
 import { StoAccountService } from '../services/sto-account.service';
 import { AccountVm, AccountsComponent } from './accounts.component';
-import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.component';
 
 describe('AccountsComponent', () => {
   let component: AccountsComponent;
@@ -17,6 +20,7 @@ describe('AccountsComponent', () => {
   let stoAccountServiceSpy: jest.Mocked<StoAccountService>;
   let routingServiceSpy: jest.Mocked<RoutingService>;
   let dialogSpy: jest.Mocked<MatDialog>;
+  let router: Router;
 
   const mockAccount: StoAccount = {
     id: '1',
@@ -51,8 +55,6 @@ describe('AccountsComponent', () => {
       providers: [
         { provide: StoAccountService, useValue: stoAccountServiceSpy },
         { provide: RoutingService, useValue: routingServiceSpy },
-        // We still provide it here as fallback/base
-        { provide: MatDialog, useValue: dialogSpy },
         provideRouter([]),
         provideNoopAnimations(),
       ],
@@ -66,6 +68,7 @@ describe('AccountsComponent', () => {
 
     fixture = TestBed.createComponent(AccountsComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
   });
 
   it('should encode handle', () => {
@@ -135,65 +138,31 @@ describe('AccountsComponent', () => {
     expect(component.isLoading).toBe(false);
   });
 
-  it('should open add account dialog', () => {
-    const dialogRefSpy = {
-      afterClosed: jest.fn().mockReturnValue(of(true)),
-    };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
-    const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
+  it('should navigate to add account page', () => {
+    const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
 
     component.addAccount();
 
-    expect(dialogSpy.open).toHaveBeenCalledWith(AccountDialogComponent, {
-      width: '500px',
-      data: { mode: 'add' },
-    });
-    expect(loadAccountsSpy).toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalledWith(['/dashboard/accounts/add']);
   });
 
-  it('should not reload accounts if add dialog canceled', () => {
-    const dialogRefSpy = {
-      afterClosed: jest.fn().mockReturnValue(of(false)),
-    };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
-    const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
-
-    component.addAccount();
-    expect(loadAccountsSpy).not.toHaveBeenCalled();
-  });
-
-  it('should open edit account dialog', () => {
-    const dialogRefSpy = {
-      afterClosed: jest.fn().mockReturnValue(of(true)),
-    };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
-    const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
+  it('should navigate to edit account page', () => {
+    const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
 
     component.editAccount(mockAccount);
 
-    expect(dialogSpy.open).toHaveBeenCalledWith(AccountDialogComponent, {
-      width: '500px',
-      data: { mode: 'edit', account: mockAccount },
-    });
-    expect(loadAccountsSpy).toHaveBeenCalled();
-  });
-
-  it('should not reload accounts if edit dialog canceled', () => {
-    const dialogRefSpy = {
-      afterClosed: jest.fn().mockReturnValue(of(false)),
-    };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
-    const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
-
-    component.editAccount(mockAccount);
-    expect(loadAccountsSpy).not.toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalledWith([
+      '/dashboard/accounts',
+      'Test~1234',
+      'edit',
+    ]);
   });
 
   it('should delete account', () => {
     const dialogRefSpy = {
       afterClosed: jest.fn().mockReturnValue(of(true)),
-    };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
+    } as unknown as MatDialogRef<unknown>;
+    dialogSpy.open.mockReturnValue(dialogRefSpy);
     const loadAccountsSpy = jest.spyOn(component, 'loadAccounts');
 
     component.deleteAccount(mockAccount);
@@ -211,8 +180,8 @@ describe('AccountsComponent', () => {
   it('should not delete account if cancelled', () => {
     const dialogRefSpy = {
       afterClosed: jest.fn().mockReturnValue(of(false)),
-    };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
+    } as unknown as MatDialogRef<unknown>;
+    dialogSpy.open.mockReturnValue(dialogRefSpy);
 
     component.deleteAccount(mockAccount);
 
@@ -222,8 +191,8 @@ describe('AccountsComponent', () => {
   it('should set isLoading to false and log when delete account API fails', () => {
     const dialogRefSpy = {
       afterClosed: jest.fn().mockReturnValue(of(true)),
-    };
-    dialogSpy.open.mockReturnValue(dialogRefSpy as never);
+    } as unknown as MatDialogRef<unknown>;
+    dialogSpy.open.mockReturnValue(dialogRefSpy);
     const err = new Error('delete failed');
     stoAccountServiceSpy.deleteAccount.mockReturnValue(throwError(() => err));
     const consoleErrorSpy = jest
@@ -338,5 +307,193 @@ describe('AccountsComponent', () => {
 
   it('should get route link', () => {
     expect(component.getRouteLink('home')).toBe('test-link');
+  });
+
+  it('should build vm with username visibility and launcher class/background variants', () => {
+    const account = {
+      ...mockAccount,
+      username: 'DifferentUser',
+      platformId: 'pc',
+      launcherId: 'arc',
+      endeavourTotalNodes: 12,
+    } as StoAccount;
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([account]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'pc', name: 'PC' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(
+      of([{ id: 'arc', name: 'Arc' } as Launcher]),
+    );
+
+    component.ngOnInit();
+
+    const vm = component.accountVms[0];
+    expect(vm.showUsername).toBe(true);
+    expect(vm.launcherClass).toBe('launcher-arc');
+    expect(vm.bgImagePath).toBe(
+      '/assets/account-types/account_type_windows_arc.jpg',
+    );
+    expect(vm.endeavourTotalNodesDisplay).toBe('0012');
+  });
+
+  it('should set launcherClass empty for non-pc platforms', () => {
+    const account = {
+      ...mockAccount,
+      platformId: 'xbox',
+      launcherId: 'steam',
+    } as StoAccount;
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([account]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'xbox', name: 'Xbox' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(
+      of([{ id: 'steam', name: 'Steam' } as Launcher]),
+    );
+
+    component.ngOnInit();
+    expect(component.accountVms[0].launcherClass).toBe('');
+    expect(component.accountVms[0].bgImagePath).toBe(
+      '/assets/account-types/account_type_xbox.jpg',
+    );
+  });
+
+  it('should map platform classes for all known values and unknown', () => {
+    component.platforms = [
+      { id: 'ps', name: 'PlayStation' },
+      { id: 'x', name: 'Xbox' },
+      { id: 's', name: 'Steam' },
+      { id: 'pc', name: 'PC' },
+      { id: 'a', name: 'Arc' },
+      { id: 'e', name: 'Epic' },
+      { id: 'u', name: 'Unknown' },
+    ] as Platform[];
+
+    expect(component.getPlatformClass('ps')).toBe('platform-playstation');
+    expect(component.getPlatformClass('x')).toBe('platform-xbox');
+    expect(component.getPlatformClass('s')).toBe('platform-steam');
+    expect(component.getPlatformClass('pc')).toBe('platform-pc');
+    expect(component.getPlatformClass('a')).toBe('platform-arc');
+    expect(component.getPlatformClass('e')).toBe('platform-epic');
+    expect(component.getPlatformClass('u')).toBe('');
+    expect(component.getPlatformClass('missing')).toBe('');
+    expect(component.getPlatformClass()).toBe('');
+  });
+
+  it('should prefer API-provided accountTypeImageUrl for card background', () => {
+    const cloudflareUrl =
+      'https://cdn.startrekonline.info/cdn-cgi/imagedelivery/jQ0uSdJ3ty-KasNpXGxyuA/8ab52131-6f11-408a-d9df-3c1acaa46d00/public';
+
+    const account = {
+      ...mockAccount,
+      accountTypeImageUrl: cloudflareUrl,
+      platformId: 'pc',
+      launcherId: 'steam',
+    } as StoAccount;
+
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([account]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'pc', name: 'Windows' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(
+      of([{ id: 'steam', name: 'Steam' } as Launcher]),
+    );
+
+    component.ngOnInit();
+
+    expect(component.accountVms[0].bgImagePath).toBe(cloudflareUrl);
+  });
+
+  it('should use default windows background for pc account without launcher', () => {
+    const account = {
+      ...mockAccount,
+      platformId: 'pc',
+      launcherId: undefined,
+    } as StoAccount;
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([account]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'pc', name: 'Windows' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(of([]));
+
+    component.ngOnInit();
+    expect(component.accountVms[0].bgImagePath).toBe(
+      '/assets/account-types/account_type_windows_default.jpg',
+    );
+  });
+
+  it('should use epic and steam background variants for pc launcher accounts', () => {
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'pc', name: 'PC' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(
+      of([
+        { id: 'epic', name: 'Epic' } as Launcher,
+        { id: 'steam', name: 'Steam' } as Launcher,
+      ]),
+    );
+
+    stoAccountServiceSpy.getAccounts.mockReturnValue(
+      of([
+        { ...mockAccount, platformId: 'pc', launcherId: 'epic' } as StoAccount,
+      ]),
+    );
+    component.ngOnInit();
+    expect(component.accountVms[0].bgImagePath).toBe(
+      '/assets/account-types/account_type_windows_epic.jpg',
+    );
+
+    stoAccountServiceSpy.getAccounts.mockReturnValue(
+      of([
+        { ...mockAccount, platformId: 'pc', launcherId: 'steam' } as StoAccount,
+      ]),
+    );
+    component.loadAccounts();
+    expect(component.accountVms[0].bgImagePath).toBe(
+      '/assets/account-types/account_type_windows_steam.jpg',
+    );
+  });
+
+  it('should use default image path for unknown platform class', () => {
+    const account = {
+      ...mockAccount,
+      platformId: 'unknown',
+      launcherId: undefined,
+    } as StoAccount;
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([account]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'unknown', name: 'Handheld' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(of([]));
+
+    component.ngOnInit();
+    expect(component.accountVms[0].bgImagePath).toBe(
+      '/assets/account-types/account_type_default.jpg',
+    );
+  });
+
+  it('should hide username when it matches handle case-insensitively', () => {
+    const account = {
+      ...mockAccount,
+      username: 'test#1234',
+      platformId: 'pc',
+    } as StoAccount;
+    stoAccountServiceSpy.getAccounts.mockReturnValue(of([account]));
+    stoAccountServiceSpy.getPlatforms.mockReturnValue(
+      of([{ id: 'pc', name: 'PC' } as Platform]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(of([]));
+
+    component.ngOnInit();
+    expect(component.accountVms[0].showUsername).toBe(false);
+  });
+
+  it('should complete destroy stream on ngOnDestroy', () => {
+    const nextSpy = jest.spyOn(component['_destroy$'], 'next');
+    const completeSpy = jest.spyOn(component['_destroy$'], 'complete');
+
+    component.ngOnDestroy();
+
+    expect(nextSpy).toHaveBeenCalled();
+    expect(completeSpy).toHaveBeenCalled();
   });
 });

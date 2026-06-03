@@ -1,0 +1,299 @@
+@use 'sass:color';
+@use 'lcars-variables' as vars;
+
+#endeavours-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+#endeavours-main-column {
+  flex: 2;
+  flex-basis: 69%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+#endeavours-side-column {
+  flex: 1;
+  flex-basis: 30%;
+}
+
+.account-subtitle {
+  color: var(--lcars-text-muted, #aaa);
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+// ── Rank + Stats row ──────────────────────────────────────────────────────────
+
+.rank-stats-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+
+// ── Summary bar ──────────────────────────────────────────────────────────────
+
+.endeavour-summary-bar {
+  flex: 1;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-evenly;
+  background: var(--lcars-panel-bg, #1a1a2e);
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+}
+
+.summary-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+.summary-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: vars.$lcars-sunflower;
+}
+
+.summary-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgb(255 255 255 / 55%);
+}
+
+.space-stat .summary-value {
+  color: vars.$lcars-perano;
+}
+
+.ground-stat .summary-value {
+  color: vars.$lcars-tangerine;
+}
+
+
+// ── Perk list ─────────────────────────────────────────────────────────────────
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.perk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.perk-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.6rem 0.75rem 0.5rem;
+  border-radius: 4px;
+  background: var(--lcars-panel-bg, #1a1a2e);
+  border-left: 4px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
+
+  &.space-row {
+    border-left-color: vars.$lcars-perano;
+    background: rgba(vars.$lcars-perano, 0.07);
+  }
+
+  &.ground-row {
+    border-left-color: vars.$lcars-tangerine;
+    background: rgba(vars.$lcars-tangerine, 0.07);
+  }
+}
+
+// ── Perk header row ───────────────────────────────────────────────────────────
+
+.perk-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.perk-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--lcars-text, #eee);
+}
+
+.perk-info-btn {
+  display: inline-block;
+  width: auto;
+  height: auto;
+  margin: 0;
+  background: none;
+  border: none;
+  padding: 0 0 0 0.25rem;
+  cursor: pointer;
+  color: rgb(255 255 255 / 30%);
+  font-size: 0.9rem;
+  line-height: inherit;
+  vertical-align: top;
+  transition: color 0.15s;
+
+  &:hover,
+  &.active {
+    color: vars.$lcars-perano;
+  }
+}
+
+.perk-description {
+  font-size: 0.75rem;
+  color: var(--lcars-text-muted, #aaa);
+}
+
+.perk-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.perk-earned-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: vars.$lcars-sunflower;
+  white-space: nowrap;
+}
+
+.perk-node-count {
+  font-size: 0.7rem;
+  color: rgb(255 255 255 / 45%);
+  white-space: nowrap;
+}
+
+// ── Parallelogram segments ────────────────────────────────────────────────────
+
+.perk-segments {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+  height: 30px;
+}
+
+.segments-saving {
+  display: flex;
+  align-items: center;
+  padding: 0 0.25rem;
+}
+
+.saving-spinner {
+  color: vars.$lcars-sunflower;
+  font-size: 0.85rem;
+}
+
+// Parallelogram via clip-path — no pseudo-elements, no transform
+// polygon: top-left shifted right 15%, top-right at edge, bottom-right shifted left 15%, bottom-left at edge
+$seg-clip: polygon(30% 0%, 100% 0%, 70% 100%, 0% 100%);
+
+.perk-segment {
+  flex: 0 0 25px;
+  width: 25px;
+  height: 100%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  clip-path: $seg-clip;
+  border-radius: 0;
+  background: rgba(vars.$lcars-sunflower, 0.18);
+  transition: background 0.08s ease;
+  position: relative;
+  z-index: 1;
+
+  // Overlap adjacent segments to close the gap left by the clipped corners
+  & + & {
+    margin-left: -10px;
+  }
+
+  &.filled {
+    background: vars.$lcars-sunflower;
+    z-index: 2;
+  }
+
+  &:hover:not(:disabled) {
+    background: color.adjust(vars.$lcars-sunflower, $lightness: 18%);
+    z-index: 3;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+}
+
+.space-segments .perk-segment {
+  background: rgba(vars.$lcars-perano, 0.18);
+
+  &.filled {
+    background: vars.$lcars-perano;
+  }
+
+  &:hover:not(:disabled) {
+    background: color.adjust(vars.$lcars-perano, $lightness: 18%);
+  }
+}
+
+.ground-segments .perk-segment {
+  background: rgba(vars.$lcars-tangerine, 0.18);
+
+  &.filled {
+    background: vars.$lcars-tangerine;
+  }
+
+  &:hover:not(:disabled) {
+    background: color.adjust(vars.$lcars-tangerine, $lightness: 18%);
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (width <= 540px) {
+  .rank-stats-row {
+    flex-direction: column;
+  }
+
+  .rank-hero {
+    flex: 0 0 auto;
+    width: 220px;
+    margin: 0 auto;
+  }
+}
+
+@media (width <= 768px) {
+  #endeavours-container {
+    flex-direction: column;
+  }
+
+  #endeavours-side-column {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .perk-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .sort-controls {
+    margin-left: 0;
+  }
+}

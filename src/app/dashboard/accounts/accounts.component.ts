@@ -8,12 +8,10 @@ import {
   inject,
 } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
-import {
-  ConfirmDialogComponent,
-  ConfirmDialogData,
-} from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { EndeavourRankBadgeComponent } from 'src/app/shared/components/endeavour-rank-badge/endeavour-rank-badge.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
   APP_ROUTES,
@@ -23,7 +21,6 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
 import { StoAccountService } from '../services/sto-account.service';
-import { AccountDialogComponent } from './dialogs/account-dialog/account-dialog.component';
 
 /**
  * View model for a single STO account card, with all display values precomputed at load time.
@@ -45,6 +42,22 @@ export interface AccountVm {
   launcherName: string;
   /** Precomputed character count for display. */
   characterCount: number;
+  /** Precomputed total endeavour nodes spent for display. */
+  endeavourTotalNodes: number;
+  /** CSS class derived from the account platform, for header colour theming. */
+  platformClass: string;
+  /** Router link to the Endeavour Perks page for this account. */
+  endeavoursLink: string;
+  /** Whether a launcher is set on this account (distinct from having a mapped icon). */
+  hasLauncher: boolean;
+  /** Zero-padded 4-digit endeavour node count, e.g. "0512". */
+  endeavourTotalNodesDisplay: string;
+  /** Card background image URL, preferably supplied by the API. */
+  bgImagePath: string;
+  /** Whether to show the username (false when it duplicates the handle). */
+  showUsername: boolean;
+  /** CSS class for the launcher, applied alongside platformClass for per-launcher card theming. */
+  launcherClass: string;
 }
 
 /**
@@ -56,7 +69,13 @@ export interface AccountVm {
   styleUrls: ['./accounts.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatDialogModule, RouterModule, LoadingBarComponent],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    RouterModule,
+    LoadingBarComponent,
+    EndeavourRankBadgeComponent,
+  ],
 })
 export class AccountsComponent implements OnInit, OnDestroy {
   /** Precomputed router link to the main dashboard. */
@@ -83,6 +102,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
   private readonly _stoAccountService = inject(StoAccountService);
   private readonly _routingService = inject(RoutingService);
   private readonly _dialog = inject(MatDialog);
+  private readonly _router = inject(Router);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _destroy$ = new Subject<void>();
 
@@ -114,47 +134,33 @@ export class AccountsComponent implements OnInit, OnDestroy {
             this._buildAccountVm(account),
           );
           this.isLoading = false;
-          this._cdr.markForCheck();
+          this._cdr.detectChanges();
         },
         error: () => {
           this.isLoading = false;
-          this._cdr.markForCheck();
+          this._cdr.detectChanges();
         },
       });
   }
 
   /**
-   * Opens the dialog to add a new STO account.
+   * Navigates to the in-page account creation screen.
    */
   addAccount(): void {
-    const dialogRef = this._dialog.open(AccountDialogComponent, {
-      width: '500px',
-      data: { mode: 'add' },
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadAccounts();
-      }
-    });
+    this._router.navigate(['/dashboard/accounts/add']);
   }
 
   /**
-   * Opens the dialog to edit an existing STO account.
+   * Navigates to the in-page account edit screen.
    *
    * @param account The account to edit.
    */
   editAccount(account: StoAccount): void {
-    const dialogRef = this._dialog.open(AccountDialogComponent, {
-      width: '500px',
-      data: { mode: 'edit', account },
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadAccounts();
-      }
-    });
+    this._router.navigate([
+      '/dashboard/accounts',
+      this.encodeHandle(account.handle),
+      'edit',
+    ]);
   }
 
   /**
@@ -172,7 +178,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
           <p><strong>WARNING:</strong> Unlike the making of Tuvix, this action cannot be undone.</p>`,
         confirmText: 'Delete',
         cancelText: 'Cancel',
-      } as ConfirmDialogData,
+      },
     });
 
     dialogRef
@@ -302,6 +308,79 @@ export class AccountsComponent implements OnInit, OnDestroy {
       launcherIcon: this.getLauncherIcon(account.launcherId),
       launcherName: this.getLauncher(account.launcherId)?.name ?? 'Launcher',
       characterCount: account.characterCount || 0,
+      endeavourTotalNodes: account.endeavourTotalNodes || 0,
+      platformClass: this.getPlatformClass(account.platformId),
+      endeavoursLink: `/${APP_ROUTES.STO_DASHBOARD_ACCOUNTS}/${this.encodeHandle(account.handle)}/endeavours`,
+      hasLauncher: !!account.launcherId,
+      endeavourTotalNodesDisplay: (account.endeavourTotalNodes || 0)
+        .toString()
+        .padStart(4, '0'),
+      bgImagePath:
+        account.accountTypeImageUrl?.trim() ||
+        this._getBgImagePath(
+          this.getPlatformClass(account.platformId),
+          this.getLauncher(account.launcherId)?.name,
+        ),
+      showUsername:
+        !!account.username &&
+        account.username.toLowerCase() !== account.handle.toLowerCase(),
+      launcherClass: this._getLauncherClass(
+        this.getPlatformClass(account.platformId),
+        this.getLauncher(account.launcherId)?.name,
+      ),
     };
+  }
+
+  private _getLauncherClass(
+    platformClass: string,
+    launcherName?: string,
+  ): string {
+    if (platformClass !== 'platform-pc') return '';
+    const launcher = launcherName?.toLowerCase() ?? '';
+    if (launcher === 'arc') return 'launcher-arc';
+    if (launcher === 'epic') return 'launcher-epic';
+    if (launcher === 'steam') return 'launcher-steam';
+    return '';
+  }
+
+  private _getBgImagePath(
+    platformClass: string,
+    launcherName?: string,
+  ): string {
+    if (platformClass === 'platform-pc') {
+      const launcher = launcherName?.toLowerCase() ?? '';
+      if (launcher === 'arc')
+        return '/assets/account-types/account_type_windows_arc.jpg';
+      if (launcher === 'epic')
+        return '/assets/account-types/account_type_windows_epic.jpg';
+      if (launcher === 'steam')
+        return '/assets/account-types/account_type_windows_steam.jpg';
+      return '/assets/account-types/account_type_windows_default.jpg';
+    }
+    const map: Record<string, string> = {
+      'platform-playstation':
+        '/assets/account-types/account_type_playstation.jpg',
+      'platform-xbox': '/assets/account-types/account_type_xbox.jpg',
+      'platform-arc': '/assets/account-types/account_type_windows_arc.jpg',
+      'platform-epic': '/assets/account-types/account_type_windows_epic.jpg',
+      'platform-steam': '/assets/account-types/account_type_windows_steam.jpg',
+    };
+    return (
+      map[platformClass] ?? '/assets/account-types/account_type_default.jpg'
+    );
+  }
+
+  getPlatformClass(platformId?: string): string {
+    if (!platformId) return '';
+    const platform = this.platforms.find(p => p.id === platformId);
+    if (!platform) return '';
+    const name = platform.name.toLowerCase();
+    if (name === 'playstation' || name === 'ps') return 'platform-playstation';
+    if (name === 'xbox') return 'platform-xbox';
+    if (name === 'steam') return 'platform-steam';
+    if (name === 'windows' || name === 'pc') return 'platform-pc';
+    if (name === 'arc') return 'platform-arc';
+    if (name === 'epic') return 'platform-epic';
+    return '';
   }
 }

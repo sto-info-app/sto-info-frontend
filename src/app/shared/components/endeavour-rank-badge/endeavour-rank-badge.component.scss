@@ -1,0 +1,50 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.rank-hero {
+  position: relative;
+  width: var(--hero-width, 220px);
+  min-height: var(--hero-height, 190px);
+}
+
+.rank-hero-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.rank-hero-overlay {
+  position: relative;
+  z-index: 1;
+  height: var(--hero-height, 190px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 20%;
+}
+
+.rank-hero-label {
+  font-size: var(--hero-label-size, 0.75rem);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: vars.$lcars-sunflower;
+  text-shadow: 0 1px 6px #000, 0 0 12px #000;
+}
+
+.rank-hero-number {
+  font-size: var(--hero-number-size, 1.5rem);
+  font-weight: 700;
+  color: vars.$lcars-sunflower;
+  font-family: Michroma, 'Courier New', Courier, monospace;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-shadow: 0 2px 8px rgb(0 0 0 / 90%);
+}

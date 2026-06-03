@@ -223,7 +223,7 @@ button.lcars-btn,
   flex-direction: column;
   position: relative;
   padding: 0;
-  border-radius: 15px;
+  border-radius: 30px;
   overflow: hidden;
   background: vars.$lcars-grey-bg; // Default
   color: #000;
@@ -232,6 +232,7 @@ button.lcars-btn,
   width: 100%;
   box-sizing: border-box;
   cursor: pointer;
+  border: 2px solid rgb(255 255 255 / 35%);
 
   &:hover {
     filter: brightness(1.1);
@@ -253,6 +254,7 @@ button.lcars-btn,
   select {
     background: transparent;
     border: none;
+    display: block;
     font-family: inherit;
     font-size: 0.9rem;
     font-weight: 800;
@@ -263,6 +265,8 @@ button.lcars-btn,
     outline: none;
     appearance: none;
     width: 100%;
+    min-height: 4rem;
+    box-sizing: border-box;
 
     // top: push text below label (container-top-pad + label-height + gap)
     // right: arrow space + container-right-pad
@@ -707,6 +711,7 @@ button.lcars-btn,
 .full-width-btn-link {
   display: block;
   width: 100%;
+  margin: 0;
   text-decoration: none !important;
   color: vars.$a11y-black !important;
   text-align: right;
@@ -715,7 +720,8 @@ button.lcars-btn,
   font-weight: bold;
   font-size: 1rem;
   box-sizing: border-box;
-  border-radius: 30px; // Match lcars-btn look
+  border-radius: 30px;
+  border: 2px solid rgb(255 255 255 / 35%);
 
   &:hover {
     filter: brightness(1.2);
