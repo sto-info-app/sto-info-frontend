@@ -16,16 +16,16 @@ import { RouterModule } from '@angular/router';
 })
 export class StatInfoCardComponent {
   /** The primary label for the statistic. */
-  @Input() label: string = '';
+  @Input() label = '';
 
   /** The value to display (large text). */
   @Input() value: string | number = 0;
 
   /** The Font Awesome icon class (e.g., 'fas fa-users'). */
-  @Input() icon: string = '';
+  @Input() icon = '';
 
   /** The LCARS colour class (e.g., 'sunflower', 'perano'). */
-  @Input() color: string = 'sunflower';
+  @Input() color = 'sunflower';
 
   /** Optional size modifier: 'sm' | 'md' | 'lg' | 'xl'. Defaults to fluid width. */
   @Input() size?: 'sm' | 'md' | 'lg' | 'xl';

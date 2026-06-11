@@ -95,7 +95,7 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
   readonly characters = signal<Character[]>([]);
 
   /** Set of character IDs whose profile images failed to load. */
-  failedImageIds: Set<string> = new Set();
+  failedImageIds = new Set<string>();
   /** Signal mirror of failedImageIds — drives VM image-URL recomputation. */
   private readonly _failedImageIds = signal<ReadonlySet<string>>(new Set());
 

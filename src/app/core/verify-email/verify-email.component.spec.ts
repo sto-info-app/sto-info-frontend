@@ -13,9 +13,9 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 import { MessageType } from '../../shared/models/lcars-message-type.enum';
 import { VerifyEmailComponent } from './verify-email.component';
 
-type VerifyEmailQueryParams = {
+interface VerifyEmailQueryParams {
   token?: string;
-};
+}
 
 describe('VerifyEmailComponent', () => {
   let component: VerifyEmailComponent;

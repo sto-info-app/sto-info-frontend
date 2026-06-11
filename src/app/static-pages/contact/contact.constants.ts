@@ -1,9 +1,9 @@
 import { ContactTopic } from './models/contact-form.models';
 
-export type ContactTopicOption = {
+export interface ContactTopicOption {
   value: ContactTopic;
   label: string;
-};
+}
 
 export const CONTACT_TOPICS: ContactTopicOption[] = [
   { value: 'volunteer', label: 'Become a volunteer' },

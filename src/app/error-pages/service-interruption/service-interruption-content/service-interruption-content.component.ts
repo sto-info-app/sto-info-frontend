@@ -9,6 +9,7 @@ import { distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { alertStateFromHttpStatus } from 'src/app/shared/_helpers/alert-state-from-http-status';
 import { AlertPanelComponent } from 'src/app/shared/alert-panel';
 import {
+  API_HEALTH_STATE,
   API_HEALTH_STATE_DOWN,
   API_HEALTH_STATE_UNKNOWN,
   API_HEALTH_STATE_UP,
@@ -41,7 +42,7 @@ export class ServiceInterruptionContentComponent implements OnDestroy {
     this.subs.add(
       this._backendHealth.state$
         .pipe(
-          filter((state): state is string => state != null && state !== ''),
+          filter((state): state is API_HEALTH_STATE => state != null),
           distinctUntilChanged(),
         )
         .subscribe(state => {
