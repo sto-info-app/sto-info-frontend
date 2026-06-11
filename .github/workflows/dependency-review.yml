@@ -6,7 +6,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
 
 env:
-  NODE_VERSION: 24
+  NODE_VERSION: 24.15.0
 
 permissions: {}
 

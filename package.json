@@ -1,11 +1,11 @@
 {
   "name": "sto-info-frontend",
-  "version": "1.0.208",
+  "version": "1.0.209",
   "description": "Star Trek Online Information App",
   "author": "Steve Roberts",
   "private": true,
   "engines": {
-    "node": ">=24 <25"
+    "node": ">=24.15.0 <25"
   },
   "license": "MIT",
   "repository": {

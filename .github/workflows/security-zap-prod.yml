@@ -21,7 +21,7 @@ on:
 permissions: {}
 
 env:
-  NODE_VERSION: 24
+  NODE_VERSION: 24.15.0
   PROD_FRONTEND_BASE_URL: 'https://startrekonline.info'
   PROD_FRONTEND_VERSION_URL: 'https://startrekonline.info/version.json'
 
