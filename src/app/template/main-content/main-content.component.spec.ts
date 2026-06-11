@@ -162,9 +162,9 @@ describe('MainContentComponent', () => {
   });
 
   it('should not update backend version when response status is not 200', () => {
-    type MainContentWithTestApi = {
+    interface MainContentWithTestApi {
       updateBackendVersion(response: HttpResponse<string>): void;
-    };
+    }
 
     const componentWithApi = component as unknown as MainContentWithTestApi;
     component.backendAppVersion = '';
@@ -179,9 +179,9 @@ describe('MainContentComponent', () => {
   });
 
   it('should not update backend version when response body is not a string', () => {
-    type MainContentWithTestApi = {
+    interface MainContentWithTestApi {
       updateBackendVersion(response: HttpResponse<string>): void;
-    };
+    }
 
     const componentWithApi = component as unknown as MainContentWithTestApi;
     component.backendAppVersion = '';
