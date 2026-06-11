@@ -42,7 +42,7 @@ describe('StatInfoCardComponent', () => {
   });
 
   it('should accept all size options', () => {
-    const sizes: Array<'sm' | 'md' | 'lg' | 'xl'> = ['sm', 'md', 'lg', 'xl'];
+    const sizes: ('sm' | 'md' | 'lg' | 'xl')[] = ['sm', 'md', 'lg', 'xl'];
     for (const size of sizes) {
       component.size = size;
       expect(component.size).toBe(size);

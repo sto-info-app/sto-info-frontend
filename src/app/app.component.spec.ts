@@ -841,7 +841,7 @@ describe('AppComponent', () => {
     ).enableGoogleAnalyticsTracking();
 
     expect(
-      (globalThis as unknown as { [key: string]: boolean })[
+      (globalThis as unknown as Record<string, boolean>)[
         'ga-disable-G-TEST-MEASUREMENT'
       ],
     ).toBe(false);
@@ -863,7 +863,7 @@ describe('AppComponent', () => {
     ).disableGoogleAnalyticsTracking();
 
     expect(
-      (globalThis as unknown as { [key: string]: boolean })[
+      (globalThis as unknown as Record<string, boolean>)[
         'ga-disable-G-TEST-MEASUREMENT'
       ],
     ).toBe(true);
@@ -1039,7 +1039,7 @@ describe('AppComponent', () => {
 
     // Should not set any global flags
     expect(
-      (globalThis as unknown as { [key: string]: boolean })['ga-disable-'],
+      (globalThis as unknown as Record<string, boolean>)['ga-disable-'],
     ).toBeUndefined();
 
     (environment as { gaMeasurementId: string | undefined }).gaMeasurementId =
@@ -1056,7 +1056,7 @@ describe('AppComponent', () => {
 
     // Should not set any global flags
     expect(
-      (globalThis as unknown as { [key: string]: boolean })['ga-disable-'],
+      (globalThis as unknown as Record<string, boolean>)['ga-disable-'],
     ).toBeUndefined();
 
     (environment as { gaMeasurementId: string | undefined }).gaMeasurementId =
