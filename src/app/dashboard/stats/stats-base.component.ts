@@ -15,7 +15,7 @@ import { StatsData } from './stats.models';
 export abstract class StatsBaseComponent implements OnDestroy {
   stats: StatsData | null = null;
   accounts: StoAccount[] = [];
-  selectedAccountId: string = 'all';
+  selectedAccountId = 'all';
   isLoading = true;
 
   protected readonly statsService = inject(StatsService);

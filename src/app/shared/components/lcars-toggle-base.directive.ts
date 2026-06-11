@@ -9,7 +9,9 @@ export abstract class LcarsToggleBase implements ControlValueAccessor {
   disabled = false;
 
   protected readonly cdr = inject(ChangeDetectorRef);
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected onChange: (value: boolean) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected onTouched: () => void = () => {};
 
   toggle(): void {
