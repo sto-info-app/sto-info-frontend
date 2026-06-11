@@ -50,7 +50,7 @@
     "@angular/core": "^21.2.15",
     "@angular/forms": "^21.2.15",
     "@angular/material": "^21.2.13",
-    "@angular/platform-browser": "^21.2.15",
+    "@angular/platform-browser": "^22.0.1",
     "@angular/platform-browser-dynamic": "^21.2.15",
     "@angular/router": "^21.2.15",
     "@auth0/angular-jwt": "^5.1.2",
