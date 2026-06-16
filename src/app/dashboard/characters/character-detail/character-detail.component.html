@@ -22,15 +22,13 @@
 
       <div class="lcars-text-bar small-lcars-bar-gap">
         <span>Character Data</span>
-        <span
+        <button
+          type="button"
           class="cta-icon"
           (click)="editCharacter()"
-          (keypress)="editCharacter()"
-          role="button"
-          tabindex="0"
           title="Edit Character"
-          ><i class="fas fa-user-pen"></i
-        ></span>
+        ><i class="fas fa-user-pen"></i
+        ></button>
       </div>
 
       <div class="character-details-content">
@@ -132,15 +130,13 @@
     class="col">
     <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Photo</span>
-      <span
+      <button
+        type="button"
         class="cta-icon"
         (click)="editCharacterPhoto()"
-        (keypress)="editCharacterPhoto()"
-        role="button"
-        tabindex="0"
         title="Edit Photo"
-        ><i class="fas fa-user-pen"></i
-      ></span>
+      ><i class="fas fa-user-pen"></i
+      ></button>
     </div>
     <div id="character-image">
       <div class="pics-right">

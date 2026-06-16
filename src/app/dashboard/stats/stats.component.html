@@ -41,19 +41,17 @@
           <!-- Account breakdown tiles -->
           <div class="lcars-text-bar stats-section-bar">
             <span>Account Breakdowns</span>
-            <span
+            <button
+              type="button"
               class="cta-icon"
               (click)="toggleAccountBreakdowns()"
-              (keypress)="toggleAccountBreakdowns()"
-              role="button"
-              tabindex="0"
               [title]="accountBreakdownsExpanded ? 'Collapse' : 'Expand'">
               <i
                 class="fas"
                 [class.fa-caret-up]="accountBreakdownsExpanded"
                 [class.fa-caret-down]="!accountBreakdownsExpanded">
               </i>
-            </span>
+            </button>
           </div>
           @if (accountBreakdownsExpanded) {
             <div class="stat-category-grid">
@@ -72,19 +70,17 @@
           @if (stats.characterCount > 0) {
             <div class="lcars-text-bar stats-section-bar">
               <span>Character Breakdowns</span>
-              <span
+              <button
+                type="button"
                 class="cta-icon"
                 (click)="toggleCharacterBreakdowns()"
-                (keypress)="toggleCharacterBreakdowns()"
-                role="button"
-                tabindex="0"
                 [title]="characterBreakdownsExpanded ? 'Collapse' : 'Expand'">
                 <i
                   class="fas"
                   [class.fa-caret-up]="characterBreakdownsExpanded"
                   [class.fa-caret-down]="!characterBreakdownsExpanded">
                 </i>
-              </span>
+              </button>
             </div>
             @if (characterBreakdownsExpanded) {
               <div class="stat-category-grid">
@@ -103,19 +99,17 @@
           <!-- Endeavour breakdown tiles -->
           <div class="lcars-text-bar stats-section-bar">
             <span>Endeavours</span>
-            <span
+            <button
+              type="button"
               class="cta-icon"
               (click)="toggleEndeavours()"
-              (keypress)="toggleEndeavours()"
-              role="button"
-              tabindex="0"
               [title]="endeavoursExpanded ? 'Collapse' : 'Expand'">
               <i
                 class="fas"
                 [class.fa-caret-up]="endeavoursExpanded"
                 [class.fa-caret-down]="!endeavoursExpanded">
               </i>
-            </span>
+            </button>
           </div>
           @if (endeavoursExpanded) {
             <div class="stat-category-grid">

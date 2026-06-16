@@ -1409,13 +1409,13 @@ button:hover {
   line-height: 1.7rem;
 }
 
-.lcars-text-bar span.cta-icon {
+.lcars-text-bar .cta-icon {
   right: 1px;
   font-size: 1rem;
   padding-left: 15px;
 }
 
-.lcars-text-bar span.cta-icon:hover {
+.lcars-text-bar .cta-icon:hover {
   cursor: pointer;
   color: #fc6;
 }
