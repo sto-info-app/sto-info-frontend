@@ -183,11 +183,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.getUserData(); // Update the user data
 
         if (stayLoggedIn) {
-          this._authService.refreshToken().subscribe({
-            error: err => {
-              console.warn('Token refresh failed after profile edit', err);
-            },
-          });
+          this._authService
+            .refreshToken()
+            .pipe(takeUntil(this._destroy$))
+            .subscribe({
+              error: err => {
+                console.warn('Token refresh failed after profile edit', err);
+              },
+            });
         }
 
         // Allow opening the dialog box again
@@ -217,14 +220,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.getUserData(); // Update the user data
 
         if (stayLoggedIn) {
-          this._authService.refreshToken().subscribe({
-            error: err => {
-              console.warn(
-                'Token refresh failed after profile photo update',
-                err,
-              );
-            },
-          });
+          this._authService
+            .refreshToken()
+            .pipe(takeUntil(this._destroy$))
+            .subscribe({
+              error: err => {
+                console.warn(
+                  'Token refresh failed after profile photo update',
+                  err,
+                );
+              },
+            });
         }
 
         // Allow opening the dialog box again

@@ -186,14 +186,17 @@ export class AccountsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this._destroy$))
       .subscribe(result => {
         if (result) {
-          this._stoAccountService.deleteAccount(account.id).subscribe({
-            next: () => this.loadAccounts(),
-            error: err => {
-              this.isLoading = false;
-              this._cdr.markForCheck();
-              console.error('Failed to delete STO account:', err);
-            },
-          });
+          this._stoAccountService
+            .deleteAccount(account.id)
+            .pipe(takeUntil(this._destroy$))
+            .subscribe({
+              next: () => this.loadAccounts(),
+              error: err => {
+                this.isLoading = false;
+                this._cdr.markForCheck();
+                console.error('Failed to delete STO account:', err);
+              },
+            });
         }
       });
   }

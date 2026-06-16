@@ -375,11 +375,11 @@ $steam-dark: color.adjust(#4c8db5, $lightness: -18%);
   background: rgb(0 0 0 / 15%);
   border-left: 1px solid rgb(255 255 255 / 10%);
 
-  span.cta-icon {
+  .cta-icon {
     @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);
   }
 
-  span.delete-icon {
+  .delete-icon {
     @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-red);
   }
 }
