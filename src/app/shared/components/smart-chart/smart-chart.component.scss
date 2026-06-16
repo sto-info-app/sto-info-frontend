@@ -154,7 +154,6 @@
       }
 
       .item-value {
-        font-family: 'Courier New', monospace; // Technical readout look
         font-size: 1rem;
         font-weight: 800;
         color: vars.$lcars-perano;
@@ -223,7 +222,6 @@
       text-align: right;
       font-weight: 800;
       color: vars.$lcars-perano;
-      font-family: 'Courier New', monospace;
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Directive, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectorRef, Directive, OnDestroy, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { StoAccount } from '../models/sto-account.model';
@@ -15,12 +15,13 @@ import { StatsData } from './stats.models';
 export abstract class StatsBaseComponent implements OnDestroy {
   stats: StatsData | null = null;
   accounts: StoAccount[] = [];
-  selectedAccountId: string = 'all';
+  selectedAccountId = 'all';
   isLoading = true;
 
   protected readonly statsService = inject(StatsService);
   protected readonly stoAccountService = inject(StoAccountService);
   protected readonly routingService = inject(RoutingService);
+  protected readonly _cdr = inject(ChangeDetectorRef);
   protected readonly destroy$ = new Subject<void>();
 
   /** Fetches statistics, optionally filtered by the selected account. */
@@ -51,6 +52,28 @@ export abstract class StatsBaseComponent implements OnDestroy {
       .subscribe({
         next: accounts => {
           this.accounts = accounts;
+          this._cdr.markForCheck();
+        },
+      });
+  }
+
+  /** Calls the stats API and invokes onNext with the result, then sets isLoading false. */
+  protected fetchStats(onNext: (stats: StatsData) => void): void {
+    this.isLoading = true;
+    const accountId =
+      this.selectedAccountId === 'all' ? null : this.selectedAccountId;
+    this.statsService
+      .getStats(accountId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: stats => {
+          onNext(stats);
+          this.isLoading = false;
+          this._cdr.markForCheck();
+        },
+        error: () => {
+          this.isLoading = false;
+          this._cdr.markForCheck();
         },
       });
   }

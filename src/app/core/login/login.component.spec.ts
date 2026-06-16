@@ -266,6 +266,22 @@ describe('LoginComponent', () => {
       routingServiceSpy.getLink.mockReturnValue('/mock-link');
       expect(component.getRouteLink('some-route')).toBe('/mock-link');
     });
+
+    it('should have precomputed register and reset password links', () => {
+      expect(component.registerLink).toBe('/register');
+      expect(component.resetPasswordLink).toBe('/reset-password');
+    });
+
+    it('should update isEmailValid when validateInputs is called', () => {
+      component.email = 'test@example.com';
+      component.password = 'pass';
+      component.validateInputs();
+      expect(component.isEmailValid).toBe(true);
+
+      component.email = 'not-an-email';
+      component.validateInputs();
+      expect(component.isEmailValid).toBe(false);
+    });
   });
 
   describe('Lifecycle', () => {

@@ -70,10 +70,10 @@ export class HealthService {
   checkOnce(): Observable<API_HEALTH_STATE> {
     const url = API_URLS.HEALTH_READY;
 
-    return this.http.get(url).pipe(
+    return this.http.get<unknown>(url).pipe(
       timeout(MILLISECONDS_API_HEALTH_CHECK_TIMEOUT_INTERVAL),
-      map(() => API_HEALTH_STATE_UP),
-      catchError(() => of(API_HEALTH_STATE_DOWN)),
+      map((): API_HEALTH_STATE => API_HEALTH_STATE_UP),
+      catchError((): Observable<API_HEALTH_STATE> => of(API_HEALTH_STATE_DOWN)),
     );
   }
 

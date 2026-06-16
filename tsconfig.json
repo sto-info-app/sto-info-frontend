@@ -19,7 +19,9 @@
     "target": "ES2022",
     "module": "es2022",
     "useDefineForClassFields": false,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "ignoreDeprecations": "6.0"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

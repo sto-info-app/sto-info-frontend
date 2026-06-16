@@ -20,7 +20,7 @@
               icon="fas fa-users"
               color="sunflower"
               ctaText="Manage Accounts"
-              [ctaLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)">
+              [ctaLink]="accountsLink">
             </app-stat-info-card>
 
             <app-stat-info-card
@@ -38,26 +38,90 @@
             </app-stat-info-card>
           </div>
 
-          @if (stats.characterCount > 0) {
-            <!-- Category cards -->
-            <div class="lcars-text-bar stats-section-bar">
-              <span>Breakdown Categories</span>
-            </div>
+          <!-- Account breakdown tiles -->
+          <div class="lcars-text-bar stats-section-bar">
+            <span>Account Breakdowns</span>
+            <span
+              class="cta-icon"
+              (click)="toggleAccountBreakdowns()"
+              (keypress)="toggleAccountBreakdowns()"
+              [title]="accountBreakdownsExpanded ? 'Collapse' : 'Expand'">
+              <i
+                class="fas"
+                [class.fa-caret-up]="accountBreakdownsExpanded"
+                [class.fa-caret-down]="!accountBreakdownsExpanded">
+              </i>
+            </span>
+          </div>
+          @if (accountBreakdownsExpanded) {
             <div class="stat-category-grid">
-              @for (tile of statTiles; track tile.breakdownId) {
+              @for (tile of accountStatTiles; track tile.breakdownId) {
                 <a
                   class="stat-category-card {{ tile.colour }}"
-                  [routerLink]="getDetailLink(tile.breakdownId)">
+                  [routerLink]="tile.link">
                   <i class="fas {{ tile.icon }} card-icon"></i>
                   <span class="card-label">{{ tile.label }}</span>
                 </a>
               }
             </div>
-          } @else {
-            <app-lcars-information-message
-              title="No Data"
-              message="No telemetry data available for this sector.">
-            </app-lcars-information-message>
+          }
+
+          <!-- Character breakdown tiles -->
+          @if (stats.characterCount > 0) {
+            <div class="lcars-text-bar stats-section-bar">
+              <span>Character Breakdowns</span>
+              <span
+                class="cta-icon"
+                (click)="toggleCharacterBreakdowns()"
+                (keypress)="toggleCharacterBreakdowns()"
+                [title]="characterBreakdownsExpanded ? 'Collapse' : 'Expand'">
+                <i
+                  class="fas"
+                  [class.fa-caret-up]="characterBreakdownsExpanded"
+                  [class.fa-caret-down]="!characterBreakdownsExpanded">
+                </i>
+              </span>
+            </div>
+            @if (characterBreakdownsExpanded) {
+              <div class="stat-category-grid">
+                @for (tile of statTiles; track tile.breakdownId) {
+                  <a
+                    class="stat-category-card {{ tile.colour }}"
+                    [routerLink]="tile.link">
+                    <i class="fas {{ tile.icon }} card-icon"></i>
+                    <span class="card-label">{{ tile.label }}</span>
+                  </a>
+                }
+              </div>
+            }
+          }
+
+          <!-- Endeavour breakdown tiles -->
+          <div class="lcars-text-bar stats-section-bar">
+            <span>Endeavours</span>
+            <span
+              class="cta-icon"
+              (click)="toggleEndeavours()"
+              (keypress)="toggleEndeavours()"
+              [title]="endeavoursExpanded ? 'Collapse' : 'Expand'">
+              <i
+                class="fas"
+                [class.fa-caret-up]="endeavoursExpanded"
+                [class.fa-caret-down]="!endeavoursExpanded">
+              </i>
+            </span>
+          </div>
+          @if (endeavoursExpanded) {
+            <div class="stat-category-grid">
+              @for (tile of endeavourStatTiles; track tile.breakdownId) {
+                <a
+                  class="stat-category-card {{ tile.colour }}"
+                  [routerLink]="tile.link">
+                  <i class="fas {{ tile.icon }} card-icon"></i>
+                  <span class="card-label">{{ tile.label }}</span>
+                </a>
+              }
+            </div>
           }
         } @else {
           <app-lcars-information-message
@@ -107,12 +171,12 @@
     </div>
     <div class="buttons">
       <a
-        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+        [routerLink]="dashboardLink"
         class="full-width-btn-link sunflower"
         >{{ appRouteTitles.STO_DASHBOARD }}</a
       >
       <a
-        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+        [routerLink]="accountsLink"
         class="full-width-btn-link sunflower"
         >{{ appRouteTitles.STO_DASHBOARD_ACCOUNTS }}</a
       >

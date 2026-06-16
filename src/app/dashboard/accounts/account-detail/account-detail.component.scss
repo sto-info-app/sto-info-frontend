@@ -349,6 +349,25 @@
   }
 }
 
+#endeavour-summary-section {
+  .endeavour-hero-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem 1rem;
+  }
+
+  .endeavour-cta {
+    display: flex;
+    align-items: center;
+    margin-left: 2.5rem;
+
+    a {
+      width: 275px;
+    }
+  }
+}
+
 #characters-section {
   .lcars-text-bar {
     margin-bottom: 0;
@@ -370,7 +389,6 @@
         border-radius: 50%;
         font-size: 0.95rem;
         font-weight: 900;
-        font-family: vars.$font-antonio;
         line-height: 1;
         flex-shrink: 0;
         margin-top: 8px;

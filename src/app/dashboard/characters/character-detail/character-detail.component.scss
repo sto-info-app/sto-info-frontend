@@ -44,7 +44,6 @@
       .rank-title {
         color: vars.$lcars-perano;
         font-size: 1.5rem;
-        font-family: vars.$font-antonio;
         text-transform: uppercase;
         letter-spacing: 1px;
       }
@@ -102,7 +101,6 @@
         @include mixins.lcars-value;
 
         font-size: 1.3rem;
-        font-family: vars.$font-antonio;
       }
     }
   }

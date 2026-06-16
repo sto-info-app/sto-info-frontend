@@ -32,7 +32,6 @@
         .member-title {
           color: vars.$lcars-perano;
           font-size: 1.2rem;
-          font-family: vars.$font-antonio;
           text-transform: uppercase;
         }
       }
@@ -85,7 +84,6 @@
         @include mixins.lcars-value;
 
         font-size: 1.2rem;
-        font-family: vars.$font-antonio;
       }
     }
   }

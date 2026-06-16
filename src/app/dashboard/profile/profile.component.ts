@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import {
   MatDialog,
   MatDialogModule,
@@ -26,24 +33,41 @@ import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MatDialogModule, RouterModule, LoadingBarComponent],
 })
 export class ProfileComponent implements OnInit, OnDestroy {
-  readonly appRoutes = APP_ROUTES;
+  /** Precomputed router link to the main dashboard. */
+  readonly dashboardLink = `/${APP_ROUTES.STO_DASHBOARD}`;
+
+  /** Precomputed router link to the reset-password page. */
+  readonly resetPasswordLink = `/${APP_ROUTES.RESET_PASSWORD}`;
+
   readonly appRouteTitles = APP_ROUTE_TITLES;
   unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
   user: User | undefined;
+
+  /** Precomputed activity label, updated on each user data load. */
+  lastLoginLabel = '';
+  /** Precomputed activity label, updated on each user data load. */
+  lastPasswordResetLabel = '';
+  /** Precomputed activity label, updated on each user data load. */
+  lastUpdatedLabel = '';
+  /** Precomputed activity label, updated on each user data load. */
+  memberSinceLabel = '';
+
   private editProfileDialogRef: MatDialogRef<EditPersonalDetailsComponent> | null =
     null;
   private profilePicDialogRef: MatDialogRef<ProfilePicComponent> | null = null;
 
-  private readonly dashboardService = inject(DashboardService);
-  private readonly authService = inject(AuthService);
-  private readonly routingService = inject(RoutingService);
-  private readonly dateTimeHelper = inject(DatesTimeHelperService);
-  private readonly dialog = inject(MatDialog);
-  private readonly destroy$ = new Subject<void>();
+  private readonly _dashboardService = inject(DashboardService);
+  private readonly _authService = inject(AuthService);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _dateTimeHelper = inject(DatesTimeHelperService);
+  private readonly _dialog = inject(MatDialog);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _destroy$ = new Subject<void>();
 
   /**
    * Angular lifecycle hook that initialises the component by loading user data.
@@ -59,14 +83,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
    * @returns The most recently cached user data, if available.
    */
   getUserData(): User | undefined {
-    this.dashboardService
+    this._dashboardService
       .getUser()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: user => {
-          if (user.isAccountDisabled) this.authService.performLogout();
+          if (user.isAccountDisabled) this._authService.performLogout();
 
           this.user = user;
+          this._updateActivityLabels();
+          this._cdr.detectChanges();
         },
         error: err => {
           console.warn('Failed to load user (non-200 or network error)', err);
@@ -82,7 +108,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
    * @returns A router link string for the given route.
    */
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 
   /**
@@ -92,7 +118,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
    */
   timeSinceLastLogin(): string {
     if (!this.user?.lastLoginAt) return 'Never';
-    return this.dateTimeHelper.timeSince(this.user.lastLoginAt) || 'Just now';
+    return this._dateTimeHelper.timeSince(this.user.lastLoginAt) || 'Just now';
   }
 
   /**
@@ -103,7 +129,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   timeSinceLastPasswordReset(): string {
     if (!this.user?.lastPasswordReset) return 'Never';
     return (
-      this.dateTimeHelper.timeSince(this.user.lastPasswordReset) || 'Just now'
+      this._dateTimeHelper.timeSince(this.user.lastPasswordReset) || 'Just now'
     );
   }
 
@@ -115,7 +141,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   timeSinceLastUpdated(): string {
     if (!this.user?.profile?.updatedAt) return 'Unknown';
     return (
-      this.dateTimeHelper.timeSince(this.user.profile.updatedAt) || 'Just now'
+      this._dateTimeHelper.timeSince(this.user.profile.updatedAt) || 'Just now'
     );
   }
 
@@ -127,7 +153,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   timeSinceUserCreated(): string {
     if (!this.user?.profile?.createdAt) return 'Unknown';
     return (
-      this.dateTimeHelper.timeSince(this.user.profile.createdAt) || 'Just now'
+      this._dateTimeHelper.timeSince(this.user.profile.createdAt) || 'Just now'
     );
   }
 
@@ -137,24 +163,27 @@ export class ProfileComponent implements OnInit, OnDestroy {
    */
   editUserProfile(): void {
     // Open the edit personal details dialog
-    this.editProfileDialogRef = this.dialog.open(EditPersonalDetailsComponent, {
-      hasBackdrop: true,
-      disableClose: true,
-      width: '75%',
-      data: {
-        user: this.user,
+    this.editProfileDialogRef = this._dialog.open(
+      EditPersonalDetailsComponent,
+      {
+        hasBackdrop: true,
+        disableClose: true,
+        width: '75%',
+        data: {
+          user: this.user,
+        },
       },
-    });
+    );
 
     // Handle the result (if any action needed)
     this.editProfileDialogRef
       .afterClosed()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe(stayLoggedIn => {
         this.getUserData(); // Update the user data
 
         if (stayLoggedIn) {
-          this.authService.refreshToken().subscribe({
+          this._authService.refreshToken().subscribe({
             error: err => {
               console.warn('Token refresh failed after profile edit', err);
             },
@@ -172,7 +201,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
    */
   editUserProfilePhoto(): void {
     // Open the edit personal details dialog
-    this.profilePicDialogRef = this.dialog.open(ProfilePicComponent, {
+    this.profilePicDialogRef = this._dialog.open(ProfilePicComponent, {
       hasBackdrop: true,
       disableClose: true,
       data: {
@@ -183,12 +212,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // Handle the result (if any action needed)
     this.profilePicDialogRef
       .afterClosed()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe(stayLoggedIn => {
         this.getUserData(); // Update the user data
 
         if (stayLoggedIn) {
-          this.authService.refreshToken().subscribe({
+          this._authService.refreshToken().subscribe({
             error: err => {
               console.warn(
                 'Token refresh failed after profile photo update',
@@ -207,8 +236,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
    * Cleans up subscriptions and closes any open dialogs on component destroy.
    */
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this._destroy$.next();
+    this._destroy$.complete();
 
     // Close any open dialogs
     if (this.editProfileDialogRef) {
@@ -226,5 +255,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
    */
   onProfileImageError(event: Event): void {
     (event.target as HTMLImageElement).src = this.unavailablePhotoSrc;
+  }
+
+  /**
+   * Recomputes all activity label fields from the current user data.
+   * Called after each successful user data load to avoid live template method calls.
+   */
+  private _updateActivityLabels(): void {
+    this.lastLoginLabel = this.timeSinceLastLogin();
+    this.lastPasswordResetLabel = this.timeSinceLastPasswordReset();
+    this.lastUpdatedLabel = this.timeSinceLastUpdated();
+    this.memberSinceLabel = this.timeSinceUserCreated();
   }
 }

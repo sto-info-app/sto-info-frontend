@@ -1,4 +1,5 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ComponentFixture,
   TestBed,
@@ -471,7 +472,13 @@ describe('CharacterManageComponent', () => {
     it('should handle error on create', fakeAsync(() => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       mockCharacterService.createCharacter.mockReturnValue(
-        throwError(() => ({ error: { message: 'Fail' } })),
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: { message: 'Fail' },
+            }),
+        ),
       );
       component.mode = 'add';
       component.accountId = 'acc1';
@@ -497,7 +504,13 @@ describe('CharacterManageComponent', () => {
     it('should handle error on update', fakeAsync(() => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       mockCharacterService.updateCharacter.mockReturnValue(
-        throwError(() => ({ error: { message: 'Fail Update' } })),
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: { message: 'Fail Update' },
+            }),
+        ),
       );
       component.mode = 'edit';
       component.accountId = 'acc1';
@@ -530,7 +543,7 @@ describe('CharacterManageComponent', () => {
     it('should use default error message if error message is missing on create', fakeAsync(() => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       mockCharacterService.createCharacter.mockReturnValue(
-        throwError(() => ({ error: {} })),
+        throwError(() => new HttpErrorResponse({ status: 400, error: {} })),
       );
       component.mode = 'add';
       component.accountId = 'acc1';
@@ -555,7 +568,7 @@ describe('CharacterManageComponent', () => {
     it('should use default error message if error message is missing on update', fakeAsync(() => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       mockCharacterService.updateCharacter.mockReturnValue(
-        throwError(() => ({ error: {} })),
+        throwError(() => new HttpErrorResponse({ status: 400, error: {} })),
       );
       component.mode = 'edit';
       component.accountId = 'acc1';
@@ -575,6 +588,37 @@ describe('CharacterManageComponent', () => {
       tick();
 
       expect(component.errorMessage).toBe('Failed to update character.');
+      spy.mockRestore();
+    }));
+
+    it('should use default error message if HttpErrorResponse message is not a string', fakeAsync(() => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      mockCharacterService.createCharacter.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: { message: 1234 },
+            }),
+        ),
+      );
+      component.mode = 'add';
+      component.accountId = 'acc1';
+      component.characterForm.patchValue({
+        handle: 'NewCapt',
+        level: 65,
+        generalFactionId: 'fed',
+        factionId: 'fed',
+        sexId: 'male',
+        classId: 'tac',
+        recruitTypeId: 'std',
+        speciesId: 'human',
+      });
+
+      component.onSave();
+      tick();
+
+      expect(component.errorMessage).toBe('Failed to create character.');
       spy.mockRestore();
     }));
   });
@@ -604,6 +648,27 @@ describe('CharacterManageComponent', () => {
   });
 
   describe('Error handling in subscriptions', () => {
+    it('should no-op species binding if required controls are missing', () => {
+      const originalGet = component.characterForm.get.bind(
+        component.characterForm,
+      );
+      const getSpy = jest
+        .spyOn(component.characterForm, 'get')
+        .mockImplementation((path: string | (string | number)[]) => {
+          if (path === 'factionId') return null;
+          return originalGet(path);
+        });
+
+      (
+        component as unknown as {
+          bindSpeciesUpdates: () => void;
+        }
+      ).bindSpeciesUpdates();
+
+      expect(mockLookupService.getSpecies).not.toHaveBeenCalled();
+      getSpy.mockRestore();
+    });
+
     it('should handle error when loading species', fakeAsync(() => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       mockLookupService.getSpecies.mockReturnValue(

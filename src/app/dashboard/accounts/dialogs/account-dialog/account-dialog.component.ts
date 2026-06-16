@@ -12,7 +12,7 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
 import {
   Launcher,
@@ -47,7 +47,7 @@ interface AccountDialogData {
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
-    MatSlideToggleModule,
+    LcarsToggleComponent,
     MatButtonModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,

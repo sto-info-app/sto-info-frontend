@@ -9,11 +9,23 @@ export class GeneralThemeService {
   dataCascadeMinChars = 3;
   dataCascadeMaxChars = 6;
 
+  /**
+   * Picks a random uppercase letter.
+   *
+   * @returns A single random character.
+   */
   randomCharacter(): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     return characters.charAt(Math.floor(Math.random() * characters.length));
   }
 
+  /**
+   * Generates a random mixed alphanumeric value within the requested length range.
+   *
+   * @param minChars The minimum number of characters to generate.
+   * @param maxChars The maximum number of characters to generate.
+   * @returns A shuffled random string.
+   */
   generateRandomValue(minChars: number, maxChars: number): string {
     const numbers = '0123456789';
     const special = ' -';
@@ -50,6 +62,11 @@ export class GeneralThemeService {
     return value;
   }
 
+  /**
+   * Builds the LCARS-style data cascade markup.
+   *
+   * @returns HTML for the data cascade.
+   */
   createDynamicDataCascade(): string {
     let html = '';
 
@@ -68,6 +85,11 @@ export class GeneralThemeService {
     return html;
   }
 
+  /**
+   * Builds the side-column LCARS text markup.
+   *
+   * @returns HTML for the side-column text.
+   */
   createDynamicSideColumnText(): string {
     const value1 = this.generateRandomValue(2, 2);
     const value2 = this.generateRandomValue(6, 6);

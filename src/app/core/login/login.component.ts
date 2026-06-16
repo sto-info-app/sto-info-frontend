@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnDestroy,
@@ -14,6 +16,7 @@ import {
   LoginResponse,
 } from 'src/app/models/user-auth.models';
 import { alertStateFromHttpStatus } from 'src/app/shared/_helpers/alert-state-from-http-status';
+import { validateEmail } from 'src/app/shared/_helpers/validate-email';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -24,7 +27,6 @@ import {
   MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
   MSG_ERROR_INVALID_LOGIN_DISPLAY_TEXT,
 } from 'src/app/shared/constants/error-messages.constants';
-import { validateEmail } from 'src/app/shared/_helpers/validate-email';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
 import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -37,6 +39,7 @@ import { AuthService } from '../auth/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,
@@ -46,6 +49,12 @@ import { AuthService } from '../auth/auth.service';
   ],
 })
 export class LoginComponent implements OnDestroy {
+  /** Precomputed router link to the registration page. */
+  readonly registerLink = `/${APP_ROUTES.REGISTER}`;
+
+  /** Precomputed router link to the reset-password page. */
+  readonly resetPasswordLink = `/${APP_ROUTES.RESET_PASSWORD}`;
+
   // Allow environment constants to be used in the HTML
   appLoggedInHome: string = environment.appLoggedInHome;
 
@@ -60,16 +69,22 @@ export class LoginComponent implements OnDestroy {
   isSubmitting = false;
   emailTouched = false;
 
-  private readonly sharedDataService = inject(SharedDataService);
-  private readonly authService = inject(AuthService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly renderer = inject(Renderer2);
-  private readonly el = inject(ElementRef);
-  private readonly alertThemeService = inject(AlertThemeService);
-  private readonly routingService = inject(RoutingService);
-  appRoutes = APP_ROUTES;
+  /** Whether the current email value passes format validation. Updated by validateInputs(). */
+  isEmailValid = false;
 
+  private readonly _sharedDataService = inject(SharedDataService);
+  private readonly _authService = inject(AuthService);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
+  private readonly _renderer = inject(Renderer2);
+  private readonly _el = inject(ElementRef);
+  private readonly _alertThemeService = inject(AlertThemeService);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _cdr = inject(ChangeDetectorRef);
+
+  /**
+   * Submits the login form, stores the session tokens, and routes the user onward.
+   */
   onLogin() {
     if (!this.inputsValid) return;
     this.isSubmitting = true;
@@ -79,21 +94,21 @@ export class LoginComponent implements OnDestroy {
       password: this.password,
     };
 
-    this.authService.login(credentials).subscribe({
+    this._authService.login(credentials).subscribe({
       next: (response: LoginResponse) => {
-        this.authService.saveToken(
+        this._authService.saveToken(
           response.access_token,
           response.refresh_token,
           response.expires_in,
         );
 
         // Store the user ID in the shared data service
-        this.sharedDataService.updateUserId(response.user_id);
+        this._sharedDataService.updateUserId(response.user_id);
 
         // Get the URL the user was originally trying to access
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        const returnUrl = this._route.snapshot.queryParamMap.get('returnUrl');
         // If there's a return URL, navigate to it. Otherwise, navigate to a default page.
-        this.router.navigate([returnUrl ?? this.appLoggedInHome]);
+        this._router.navigate([returnUrl ?? this.appLoggedInHome]);
       },
       error: (error: HttpErrorResponse) => {
         let errMessage: string;
@@ -118,61 +133,97 @@ export class LoginComponent implements OnDestroy {
         }
         this.displayErrorMessage(errMessage, error.status);
         this.isSubmitting = false;
+        this._cdr.markForCheck();
       },
       complete: () => {
         this.resetErrorMessage();
         this.isSubmitting = false;
+        this._cdr.markForCheck();
       },
     });
   }
 
+  /**
+   * Displays a transient login error message and applies the alert styling.
+   *
+   * @param message The message to display.
+   * @param httpStatus The HTTP status used to derive the alert theme.
+   */
   displayErrorMessage(message: string, httpStatus?: number) {
-    this.applyErrorStylesheet(httpStatus);
+    this._applyErrorStylesheet(httpStatus);
     this.errorMessage = message;
 
     setTimeout(() => {
       this.resetErrorMessage();
+      this._cdr.markForCheck();
     }, this.showErrorMilliseconds);
   }
 
+  /**
+   * Clears the current error message.
+   */
   resetErrorMessage(): void {
     this.errorMessage = ''; // Reset error message
   }
 
+  /**
+   * Validates the login form inputs and updates the submit state.
+   */
   validateInputs() {
     // check if both inputs are non-empty and email is valid
+    this.isEmailValid = this.validateEmail(this.email);
     this.inputsValid =
       this.email.trim() !== '' &&
       this.password.trim() !== '' &&
-      this.validateEmail(this.email);
+      this.isEmailValid;
   }
 
+  /**
+   * Validates an email address using the shared helper.
+   *
+   * @param email The email address to validate.
+   * @returns `true` when the email is valid.
+   */
   validateEmail(email: string): boolean {
     return validateEmail(email);
   }
 
-  private applyErrorStylesheet(httpStatus?: number) {
+  /**
+   * Resolves a route key into a router link.
+   *
+   * @param route The route key.
+   * @returns The resolved link.
+   */
+  getRouteLink(route: string): string {
+    return this._routingService.getLink(route);
+  }
+
+  /**
+   * Removes alert styling when the component is destroyed.
+   */
+  ngOnDestroy(): void {
+    this._alertThemeService.clearAlertStylesheet(
+      this._renderer,
+      this._el.nativeElement,
+    );
+    this._alertThemeService.clearTimers(this._el.nativeElement);
+  }
+
+  /**
+   * Applies an alert stylesheet that matches the current HTTP error status.
+   *
+   * @param httpStatus The HTTP status used to determine the alert state.
+   */
+  private _applyErrorStylesheet(httpStatus?: number) {
     const state =
       typeof httpStatus === 'number'
         ? alertStateFromHttpStatus(httpStatus)
         : 'red';
 
-    this.alertThemeService.applyAlertThemeThenClearAfterAShortTime(
-      this.renderer,
-      this.el.nativeElement,
+    this._alertThemeService.applyAlertThemeThenClearAfterAShortTime(
+      this._renderer,
+      this._el.nativeElement,
       state,
     );
-  }
-
-  getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
-  }
-
-  ngOnDestroy(): void {
-    this.alertThemeService.clearAlertStylesheet(
-      this.renderer,
-      this.el.nativeElement,
-    );
-    this.alertThemeService.clearTimers(this.el.nativeElement);
   }
 }

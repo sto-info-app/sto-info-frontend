@@ -110,6 +110,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private readonly el = inject(ElementRef);
   private readonly alertThemeService = inject(AlertThemeService);
 
+  /**
+   * Builds the registration form and its validators.
+   */
   ngOnInit() {
     this.registerForm = this.formBuilder.nonNullable.group(
       {
@@ -161,6 +164,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Submits the registration form to the backend.
+   */
   onRegister() {
     this.isSubmitting = true;
 
@@ -214,10 +220,22 @@ export class RegisterComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Resolves a route key into a router link.
+   *
+   * @param route The route key.
+   * @returns The resolved link.
+   */
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
   }
 
+  /**
+   * Displays a registration error message and applies the matching alert theme.
+   *
+   * @param message The message to display.
+   * @param httpStatus The HTTP status used to derive the alert state.
+   */
   displayErrorMessage(message: string, httpStatus?: number) {
     const state =
       typeof httpStatus === 'number'
@@ -236,10 +254,16 @@ export class RegisterComponent implements OnInit, OnDestroy {
     }, this.showErrorMilliseconds);
   }
 
+  /**
+   * Clears the current error message.
+   */
   resetErrorMessage(): void {
     this.errorMessage = ''; // Reset error message
   }
 
+  /**
+   * Clears alert styling when the component is destroyed.
+   */
   ngOnDestroy(): void {
     this.alertThemeService.clearAlertStylesheet(
       this.renderer,

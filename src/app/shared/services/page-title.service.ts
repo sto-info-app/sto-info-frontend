@@ -14,6 +14,9 @@ export class PageTitleService {
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
 
+  /**
+   * Starts listening for navigation changes and updates the document title.
+   */
   init(): void {
     this.router.events
       .pipe(
@@ -38,6 +41,11 @@ export class PageTitleService {
       });
   }
 
+  /**
+   * Builds the environment-specific title suffix.
+   *
+   * @returns The configured site title with any environment tag appended.
+   */
   getTitleSuffix(): string {
     // Tags to add to titles to help identify the environment in use
     let appTitleTestTag = '';

@@ -26,6 +26,12 @@ const transform = {
 
 const presetModuleNameMapper = cjsPreset.moduleNameMapper || {};
 
+// When Stryker runs its test-runner worker, it chdir's into .stryker-tmp/sandbox-xxx/.
+// In that context we must NOT exclude the sandbox path, otherwise Jest finds 0 tests.
+// In normal runs the exclusion prevents Jest from accidentally picking up leftover
+// sandbox directories that Stryker leaves behind between local runs.
+const isStrykerSandbox = process.cwd().includes('.stryker-tmp');
+
 module.exports = {
   ...cjsPreset,
 
@@ -37,6 +43,7 @@ module.exports = {
   moduleFileExtensions: ['ts', 'html', 'js', 'json'],
 
   testRegex: String.raw`\.spec\.ts$`,
+  testPathIgnorePatterns: ['/node_modules/', ...(isStrykerSandbox ? [] : ['/.stryker-tmp/'])],
   setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
 
   moduleNameMapper: {

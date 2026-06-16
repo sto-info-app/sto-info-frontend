@@ -19,6 +19,9 @@ export class ResizeObserverDirective implements OnInit, OnDestroy {
   private observer!: ResizeObserver;
   private readonly elementRef = inject(ElementRef);
 
+  /**
+   * Starts observing element size changes and emits each resize rectangle.
+   */
   ngOnInit(): void {
     this.observer = new ResizeObserver(entries => {
       for (const entry of entries) {
@@ -29,6 +32,9 @@ export class ResizeObserverDirective implements OnInit, OnDestroy {
     this.observer.observe(this.elementRef.nativeElement);
   }
 
+  /**
+   * Disconnects the active resize observer.
+   */
   ngOnDestroy(): void {
     this.observer.disconnect();
   }

@@ -1,95 +1,90 @@
-import angularEslintTemplate from '@angular-eslint/eslint-plugin-template';
-import parser from '@angular-eslint/template-parser';
-import { FlatCompat } from '@eslint/eslintrc';
-import js from '@eslint/js';
-import typescriptEslint from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
+// @ts-check
+
+import angular from 'angular-eslint';
+import tseslint from 'typescript-eslint';
+import eslint from '@eslint/js';
 import prettier from 'eslint-plugin-prettier';
-import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
-
-export default defineConfig([
-  globalIgnores(['src/index.html']),
+export default tseslint.config(
+  // Global ignores
   {
-    extends: compat.extends(
-      'eslint:recommended',
-      'plugin:@typescript-eslint/recommended',
-      'plugin:@angular-eslint/recommended',
-      'plugin:prettier/recommended',
-    ),
-
-    plugins: {
-      '@typescript-eslint': typescriptEslint,
-      prettier,
-    },
-
+    ignores: ['src/index.html'],
+  },
+  // TypeScript configuration block
+  {
+    files: ['**/*.ts'],
+    extends: [
+      eslint.configs.recommended,
+      ...tseslint.configs.recommended,
+      ...tseslint.configs.stylistic,
+      ...angular.configs.tsRecommended,
+    ],
+    // Processor enables inline template linting
+    processor: angular.processInlineTemplates,
     languageOptions: {
       globals: {
         ...globals.browser,
       },
-
-      parser: tsParser,
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-    },
-  },
-  {
-    files: ['**/*.ts'],
-    extends: compat.extends('plugin:@typescript-eslint/recommended'),
-
-    plugins: {
-      '@typescript-eslint': typescriptEslint,
-    },
-
-    languageOptions: {
-      parser: tsParser,
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-
       parserOptions: {
         project: ['tsconfig.eslint.json'],
       },
     },
-
+    plugins: {
+      prettier,
+    },
     rules: {
+      '@angular-eslint/directive-selector': [
+        'error',
+        {
+          type: 'attribute',
+          prefix: 'app',
+          style: 'camelCase',
+        },
+      ],
+      '@angular-eslint/component-selector': [
+        'error',
+        {
+          type: 'element',
+          prefix: 'app',
+          style: 'kebab-case',
+        },
+      ],
       '@typescript-eslint/ban-ts-comment': 'off',
+      'prettier/prettier': 'warn',
     },
   },
+  // Test file configuration - less strict
+  {
+    files: ['**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-empty-function': 'off',
+    },
+  },
+  // HTML template configuration block
   {
     files: ['**/*.html'],
-    extends: compat.extends('plugin:@angular-eslint/template/recommended'),
-
-    plugins: {
-      '@angular-eslint/template': angularEslintTemplate,
-    },
-
+    extends: [
+      ...angular.configs.templateRecommended,
+    ],
     languageOptions: {
-      parser: parser,
+      globals: {
+        ...globals.browser,
+      },
     },
-
     rules: {
-      '@typescript-eslint/ban-ts-comment': 'off',
+      '@angular-eslint/template/click-events-have-key-events': 'warn',
+      '@angular-eslint/template/interactive-supports-focus': 'warn',
     },
   },
+  // Project-specific file overrides
   {
     files: ['src/environments/inject-env-vars.js'],
-
     languageOptions: {
       globals: {
         ...globals.node,
       },
     },
-
     rules: {
       '@typescript-eslint/no-var-requires': 'off',
       '@typescript-eslint/no-require-imports': 'off',
@@ -98,7 +93,6 @@ export default defineConfig([
   },
   {
     files: ['scripts/**/*.mjs', 'scripts/**/*.js'],
-
     languageOptions: {
       globals: {
         ...globals.node,
@@ -107,16 +101,14 @@ export default defineConfig([
   },
   {
     files: ['**/jest.config.cjs'],
-
     languageOptions: {
       globals: {
         ...globals.node,
       },
     },
-
     rules: {
       '@typescript-eslint/no-require-imports': 'off',
       'no-undef': 'off',
     },
   },
-]);
+);

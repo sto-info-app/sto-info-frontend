@@ -23,6 +23,9 @@ export class PageNotFoundComponent implements OnInit, OnDestroy {
   private readonly renderer = inject(Renderer2);
   private readonly el = inject(ElementRef);
 
+  /**
+   * Applies the red alert styling used by the 404 page.
+   */
   ngOnInit(): void {
     this.alertThemeService.applyAlertThemeThenApplyStaticTheme(
       this.renderer,
@@ -31,6 +34,9 @@ export class PageNotFoundComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Removes alert styling when the page is destroyed.
+   */
   ngOnDestroy(): void {
     this.alertThemeService.clearAlertStylesheet(
       this.renderer,

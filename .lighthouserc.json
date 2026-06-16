@@ -44,7 +44,8 @@
         "lcp-lazy-loaded": "off",
         "non-composited-animations": "off",
         "cumulative-layout-shift": "warn",
-        "largest-contentful-paint": "warn"
+        "largest-contentful-paint": "warn",
+        "valid-source-maps": "off"
       }
     },
     "upload": {

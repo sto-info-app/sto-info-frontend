@@ -39,6 +39,9 @@ export class VerifyEmailComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly routingService = inject(RoutingService);
 
+  /**
+   * Reads the verification token from the query string.
+   */
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       this.token = params['token'];
@@ -49,6 +52,9 @@ export class VerifyEmailComponent implements OnInit {
     });
   }
 
+  /**
+   * Submits the verification token to complete email verification.
+   */
   verifyEmail() {
     this.http
       .post(API_URLS.AUTH_VERIFICATION_EMAIL, { token: this.token })
@@ -76,6 +82,9 @@ export class VerifyEmailComponent implements OnInit {
       });
   }
 
+  /**
+   * Requests a new verification email for the current token.
+   */
   resendVerificationEmail() {
     this.http
       .post(API_URLS.AUTH_RESEND_VERIFICATION_EMAIL, {
@@ -101,6 +110,12 @@ export class VerifyEmailComponent implements OnInit {
       });
   }
 
+  /**
+   * Resolves a route key into a router link.
+   *
+   * @param route The route key.
+   * @returns The resolved link.
+   */
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
   }
