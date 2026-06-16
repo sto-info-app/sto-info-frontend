@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 import { AuthService } from '../core/auth/auth.service';
 import { RoutingService } from '../shared/services/routing.service';
 import { DashboardComponent } from './dashboard.component';
+import { StoAccount } from './models/sto-account.model';
 import { User } from './models/user.model';
 import { DashboardService } from './services/dashboard.service';
 import { StoAccountService } from './services/sto-account.service';
@@ -116,7 +117,7 @@ describe('DashboardComponent', () => {
 
     it('should set accountsCount from getAccounts response', () => {
       mockStoAccountService.getAccounts.mockReturnValue(
-        of([{ id: '1' }, { id: '2' }] as { id: string }[]),
+        of([{ id: '1' }, { id: '2' }] as unknown as StoAccount[]),
       );
 
       component.ngOnInit();
