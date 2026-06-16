@@ -1,7 +1,7 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { AuthService } from '../core/auth/auth.service';
 import { RoutingService } from '../shared/services/routing.service';
@@ -78,20 +78,62 @@ describe('DashboardComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load user data and set greeting on init', () => {
-    component.ngOnInit();
-    expect(mockDashboardService.getUser).toHaveBeenCalled();
-    expect(component.user).toEqual(mockUser);
-    expect(component.userGreeting).toContain('Picard');
-  });
+  describe('ngOnInit', () => {
+    it('should load user data and set greeting on init', () => {
+      component.ngOnInit();
 
-  it('should perform logout if account is disabled', () => {
-    const disabledUser = { ...mockUser, isAccountDisabled: true };
-    mockDashboardService.getUser.mockReturnValue(of(disabledUser));
+      expect(mockDashboardService.getUser).toHaveBeenCalled();
+      expect(component.user).toEqual(mockUser);
+      expect(component.userGreeting).toContain('Picard');
+    });
 
-    component.ngOnInit();
+    it('should perform logout if account is disabled', () => {
+      mockDashboardService.getUser.mockReturnValue(
+        of({ ...mockUser, isAccountDisabled: true }),
+      );
 
-    expect(mockAuthService.performLogout).toHaveBeenCalled();
+      component.ngOnInit();
+
+      expect(mockAuthService.performLogout).toHaveBeenCalled();
+    });
+
+    it('should warn on console and leave user undefined when getUser errors', () => {
+      const consoleWarnSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
+      const err = new Error('network error');
+      mockDashboardService.getUser.mockReturnValue(throwError(() => err));
+
+      component.ngOnInit();
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Failed to load user data',
+        err,
+      );
+      expect(component.user).toBeUndefined();
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('should set accountsCount from getAccounts response', () => {
+      mockStoAccountService.getAccounts.mockReturnValue(
+        of([{ id: '1' }, { id: '2' }] as { id: string }[]),
+      );
+
+      component.ngOnInit();
+
+      expect(component.accountsCount).toBe(2);
+    });
+
+    it('should call detectChanges when getAccounts errors', () => {
+      const cdrSpy = jest.spyOn(component['cdr'], 'detectChanges');
+      mockStoAccountService.getAccounts.mockReturnValue(
+        throwError(() => new Error('fetch failed')),
+      );
+
+      component.ngOnInit();
+
+      expect(cdrSpy).toHaveBeenCalled();
+    });
   });
 
   describe('displayWelcomeText', () => {
@@ -145,7 +187,7 @@ describe('DashboardComponent', () => {
       expect(completeSpy).toHaveBeenCalled();
     });
 
-    it('should unsubscribe from all subscriptions on destroy', () => {
+    it('should unsubscribe from active subscriptions on destroy', () => {
       component.ngOnInit();
       const completeSpy = jest.spyOn(component['destroy$'], 'complete');
 
