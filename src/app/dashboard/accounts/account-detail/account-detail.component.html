@@ -16,6 +16,7 @@
             class="cta-icon"
             (click)="editAccount()"
             (keypress)="editAccount()"
+            tabindex="0"
             title="Edit Account"
             ><i class="fas fa-user-pen"></i
           ></span>
@@ -63,6 +64,7 @@
               class="cta-icon"
               (click)="endeavourCollapsed = !endeavourCollapsed"
               (keypress)="endeavourCollapsed = !endeavourCollapsed"
+              tabindex="0"
               [title]="
                 endeavourCollapsed
                   ? 'Show Endeavour Perks'
@@ -100,6 +102,7 @@
             class="cta-icon"
             (click)="addCharacter()"
             (keypress)="addCharacter()"
+            tabindex="0"
             title="Add Character"
             ><i class="fas fa-plus"></i
           ></span>
@@ -190,6 +193,7 @@
                       class="cta-icon"
                       (click)="editCharacter(vm.character)"
                       (keypress)="editCharacter(vm.character)"
+                      tabindex="0"
                       title="Edit Character"
                       ><i class="fas fa-user-pen"></i
                     ></span>
@@ -197,6 +201,7 @@
                       class="cta-icon delete-icon"
                       (click)="deleteCharacter(vm.character)"
                       (keypress)="deleteCharacter(vm.character)"
+                      tabindex="0"
                       title="Delete Character"
                       ><i class="fas fa-trash"></i
                     ></span>
@@ -232,6 +237,7 @@
           class="cta-icon"
           (click)="filtersCollapsed = !filtersCollapsed"
           (keypress)="filtersCollapsed = !filtersCollapsed"
+          tabindex="0"
           [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
           <i
             class="fas"

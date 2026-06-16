@@ -7,6 +7,8 @@
     [ngClass]="showScrollButton ? 'show-scroll-top' : 'hide-scroll-top'">
     <a
       (click)="scrollToTop()"
+      (keypress)="scrollToTop()"
+      tabindex="0"
       id="scroll-top"
       ><span class="hop">screen</span> top</a
     >
@@ -25,6 +27,8 @@
       @if (isLoggedIn) {
         <a
           (click)="logout()"
+          (keypress)="logout()"
+          tabindex="0"
           id="header-logout-link"
           >Logout
           @if (appDebugging && autoLogoutCountdown > 0) {

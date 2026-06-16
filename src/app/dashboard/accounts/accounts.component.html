@@ -14,6 +14,7 @@
           class="cta-icon"
           (click)="addAccount()"
           (keypress)="addAccount()"
+          tabindex="0"
           title="Add STO Account"
           ><i class="fas fa-plus"></i
         ></span>
@@ -119,6 +120,7 @@
                     (keypress)="
                       $event.stopPropagation(); editAccount(vm.account)
                     "
+                    tabindex="0"
                     title="Edit Account"
                     ><i class="fas fa-user-pen"></i
                   ></span>
@@ -130,6 +132,7 @@
                     (keypress)="
                       $event.stopPropagation(); deleteAccount(vm.account)
                     "
+                    tabindex="0"
                     title="Delete Account"
                     ><i class="fas fa-trash"></i
                   ></span>

@@ -164,6 +164,7 @@
         class="cta-icon"
         (click)="filtersCollapsed = !filtersCollapsed"
         (keypress)="filtersCollapsed = !filtersCollapsed"
+        tabindex="0"
         [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
         <i
           class="fas"
@@ -221,6 +222,7 @@
         class="cta-icon"
         (click)="sortCollapsed = !sortCollapsed"
         (keypress)="sortCollapsed = !sortCollapsed"
+        tabindex="0"
         [title]="sortCollapsed ? 'Show Sort' : 'Hide Sort'">
         <i
           class="fas"
