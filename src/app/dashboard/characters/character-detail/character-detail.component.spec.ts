@@ -105,7 +105,7 @@ describe('CharacterDetailComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('ngOnInit / loadCharacterData', () => {
+  describe('ngOnInit / character loading', () => {
     it('should load character successfully', fakeAsync(() => {
       mockStoAccountService.getAccounts.mockReturnValue(of([mockAccount]));
       mockCharacterService.getCharactersByAccount.mockReturnValue(
@@ -275,9 +275,7 @@ describe('CharacterDetailComponent', () => {
           MatDialogRef<CharacterPicComponent>
         > as MatDialogRef<CharacterPicComponent>,
       );
-      const spyLoad = jest
-        .spyOn(component, 'loadCharacterData')
-        .mockImplementation(() => {});
+      mockCharacterService.getCharacter.mockReturnValue(of(mockCharacter));
 
       component.editCharacterPhoto();
       tick();
@@ -288,7 +286,7 @@ describe('CharacterDetailComponent', () => {
           data: { character: mockCharacter },
         }),
       );
-      expect(spyLoad).toHaveBeenCalledWith('TestAccount', 'TestChar');
+      expect(mockCharacterService.getCharacter).toHaveBeenCalledWith('char-1');
     }));
 
     it('should not open dialog if character is null', () => {
@@ -306,12 +304,11 @@ describe('CharacterDetailComponent', () => {
           MatDialogRef<CharacterPicComponent>
         > as MatDialogRef<CharacterPicComponent>,
       );
-      const spyLoad = jest.spyOn(component, 'loadCharacterData');
 
       component.editCharacterPhoto();
       tick();
 
-      expect(spyLoad).not.toHaveBeenCalled();
+      expect(mockCharacterService.getCharacter).not.toHaveBeenCalled();
     }));
   });
 
