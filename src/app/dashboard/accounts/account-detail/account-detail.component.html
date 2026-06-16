@@ -16,6 +16,7 @@
             class="cta-icon"
             (click)="editAccount()"
             (keypress)="editAccount()"
+            role="button"
             tabindex="0"
             title="Edit Account"
             ><i class="fas fa-user-pen"></i
@@ -64,6 +65,7 @@
               class="cta-icon"
               (click)="endeavourCollapsed = !endeavourCollapsed"
               (keypress)="endeavourCollapsed = !endeavourCollapsed"
+              role="button"
               tabindex="0"
               [title]="
                 endeavourCollapsed
@@ -102,6 +104,7 @@
             class="cta-icon"
             (click)="addCharacter()"
             (keypress)="addCharacter()"
+            role="button"
             tabindex="0"
             title="Add Character"
             ><i class="fas fa-plus"></i
@@ -193,6 +196,7 @@
                       class="cta-icon"
                       (click)="editCharacter(vm.character)"
                       (keypress)="editCharacter(vm.character)"
+                      role="button"
                       tabindex="0"
                       title="Edit Character"
                       ><i class="fas fa-user-pen"></i
@@ -201,6 +205,7 @@
                       class="cta-icon delete-icon"
                       (click)="deleteCharacter(vm.character)"
                       (keypress)="deleteCharacter(vm.character)"
+                      role="button"
                       tabindex="0"
                       title="Delete Character"
                       ><i class="fas fa-trash"></i
@@ -237,6 +242,7 @@
           class="cta-icon"
           (click)="filtersCollapsed = !filtersCollapsed"
           (keypress)="filtersCollapsed = !filtersCollapsed"
+          role="button"
           tabindex="0"
           [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
           <i
