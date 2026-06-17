@@ -676,6 +676,29 @@ button.lcars-btn,
 .cta-icon {
   @include mixins.lcars-icon-button;
 
+  &:is(button) {
+    display: inline;
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    width: auto;
+    height: auto;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    text-align: inherit;
+    text-transform: none;
+  }
+
+  &:is(button):hover,
+  &:is(button):focus,
+  &:is(button):active {
+    filter: none;
+  }
+
   &.delete-icon:hover {
     color: vars.$lcars-red;
   }

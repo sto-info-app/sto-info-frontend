@@ -71,9 +71,9 @@
           }
           @if (user.profile?.profilePicture300) {
             <img
-              [src]="user.profile?.profilePicture300"
-              alt="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
-              title="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
+              [src]="user.profile.profilePicture300"
+              alt="{{ user.profile.firstName }} {{ user.profile.lastName }}"
+              title="{{ user.profile.firstName }} {{ user.profile.lastName }}"
               class="border"
               (error)="onProfileImageError($event)"
               loading="lazy" />

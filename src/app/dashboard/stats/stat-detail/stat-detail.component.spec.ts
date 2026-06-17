@@ -1,7 +1,7 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -334,6 +334,35 @@ describe('StatDetailComponent', () => {
       component.onAccountChange('all');
 
       expect(statsServiceSpy.getStats).toHaveBeenCalledWith(null);
+    });
+  });
+
+  describe('ngOnInit branch coverage', () => {
+    it('should pass selectedAccountId (non-all) to getStats in ngOnInit', async () => {
+      await createComponent('species');
+      component.selectedAccountId = 'acc1';
+      statsServiceSpy.getStats.mockReturnValue(of(mockStats));
+
+      component.ngOnInit();
+
+      expect(statsServiceSpy.getStats).toHaveBeenCalledWith('acc1');
+    });
+
+    it('should not set items when config becomes null before stats load completes', async () => {
+      const statsSubject = new Subject<StatsData>();
+      statsServiceSpy.getStats.mockReturnValue(statsSubject.asObservable());
+
+      await createComponent('species');
+      component.ngOnInit();
+
+      // Clear config after ngOnInit has started the request but before stats arrive
+      component.config = null;
+
+      statsSubject.next(mockStats);
+      statsSubject.complete();
+
+      expect(component.items).toEqual([]);
+      expect(component.isLoading).toBe(false);
     });
   });
 

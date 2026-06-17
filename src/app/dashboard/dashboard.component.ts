@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../core/auth/auth.service';
@@ -16,6 +23,7 @@ import { StoAccountService } from './services/sto-account.service';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterModule, LoadingBarComponent],
 })
 export class DashboardComponent implements OnInit, OnDestroy {
@@ -30,33 +38,40 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly dashboardService = inject(DashboardService);
   private readonly authService = inject(AuthService);
   private readonly routingService = inject(RoutingService);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroy$ = new Subject<void>();
 
   ngOnInit() {
     this.dashboardService
       .getUser()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(user => {
-        if (user.isAccountDisabled) this.authService.performLogout();
+      .subscribe({
+        next: user => {
+          if (user.isAccountDisabled) this.authService.performLogout();
 
-        this.user = user;
-        this.userGreeting = this.displayWelcomeText();
+          this.user = user;
+          this.userGreeting = this.displayWelcomeText();
+          this.cdr.detectChanges();
+        },
+        error: err => {
+          console.warn('Failed to load user data', err);
+        },
       });
 
     this.stoAccountService
       .getAccounts()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(accounts => {
-        this.accountsCount = accounts.length;
+      .subscribe({
+        next: accounts => {
+          this.accountsCount = accounts.length;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.cdr.detectChanges();
+        },
       });
   }
 
-  /**
-   * Cleans up subscriptions when the component is destroyed.
-   * Completes the destroy$ subject to unsubscribe from all active subscriptions.
-   *
-   * @returns void
-   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

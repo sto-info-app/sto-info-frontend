@@ -429,14 +429,17 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this._destroy$))
       .subscribe(result => {
         if (result) {
-          this._characterService.deleteCharacter(character.id).subscribe({
-            next: () => {
-              if (this.account) this.loadCharacters(this.account.id);
-            },
-            error: err => {
-              console.error('Failed to delete character', err);
-            },
-          });
+          this._characterService
+            .deleteCharacter(character.id)
+            .pipe(takeUntil(this._destroy$))
+            .subscribe({
+              next: () => {
+                if (this.account) this.loadCharacters(this.account.id);
+              },
+              error: err => {
+                console.error('Failed to delete character', err);
+              },
+            });
         }
       });
   }

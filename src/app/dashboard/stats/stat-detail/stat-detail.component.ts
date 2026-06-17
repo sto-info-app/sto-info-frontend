@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { takeUntil } from 'rxjs';
+import { EMPTY, switchMap, takeUntil } from 'rxjs';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { SmartChartComponent } from 'src/app/shared/components/smart-chart/smart-chart.component';
@@ -229,21 +229,42 @@ export class StatDetailComponent extends StatsBaseComponent implements OnInit {
   ngOnInit(): void {
     this.loadAccounts();
 
-    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      const id = params.get('breakdownId') ?? '';
-      this.breakdownId = id;
-      this.config = STAT_CONFIG[id] ?? null;
-      this.items = [];
-      this.hideZeros = true;
+    this.route.paramMap
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(params => {
+          const id = params.get('breakdownId') ?? '';
+          this.breakdownId = id;
+          this.config = STAT_CONFIG[id] ?? null;
+          this.items = [];
+          this.hideZeros = true;
 
-      if (!this.config) {
-        this.isLoading = false;
-        this._cdr.markForCheck();
-        return;
-      }
+          if (!this.config) {
+            this.isLoading = false;
+            this._cdr.markForCheck();
+            return EMPTY;
+          }
 
-      this.loadStats();
-    });
+          this.isLoading = true;
+          const accountId =
+            this.selectedAccountId === 'all' ? null : this.selectedAccountId;
+          return this.statsService.getStats(accountId);
+        }),
+      )
+      .subscribe({
+        next: stats => {
+          this.stats = stats;
+          if (this.config) {
+            this.items = stats[this.config.key];
+          }
+          this.isLoading = false;
+          this._cdr.markForCheck();
+        },
+        error: () => {
+          this.isLoading = false;
+          this._cdr.markForCheck();
+        },
+      });
   }
 
   loadStats(): void {

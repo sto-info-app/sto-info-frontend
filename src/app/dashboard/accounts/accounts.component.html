@@ -10,13 +10,13 @@
     <div id="accounts-main-content">
       <div class="lcars-text-bar accounts-lcars-text-bar">
         <span>Account List</span>
-        <span
+        <button
+          type="button"
           class="cta-icon"
           (click)="addAccount()"
-          (keypress)="addAccount()"
           title="Add STO Account"
-          ><i class="fas fa-plus"></i
-        ></span>
+        ><i class="fas fa-plus"></i
+        ></button>
       </div>
 
       <div class="accounts-inner-content">
@@ -113,26 +113,20 @@
                     title="View Account"
                     ><i class="fas fa-eye"></i
                   ></a>
-                  <span
+                  <button
+                    type="button"
                     class="cta-icon"
                     (click)="$event.stopPropagation(); editAccount(vm.account)"
-                    (keypress)="
-                      $event.stopPropagation(); editAccount(vm.account)
-                    "
                     title="Edit Account"
-                    ><i class="fas fa-user-pen"></i
-                  ></span>
-                  <span
+                  ><i class="fas fa-user-pen"></i
+                  ></button>
+                  <button
+                    type="button"
                     class="cta-icon delete-icon"
-                    (click)="
-                      $event.stopPropagation(); deleteAccount(vm.account)
-                    "
-                    (keypress)="
-                      $event.stopPropagation(); deleteAccount(vm.account)
-                    "
+                    (click)="$event.stopPropagation(); deleteAccount(vm.account)"
                     title="Delete Account"
-                    ><i class="fas fa-trash"></i
-                  ></span>
+                  ><i class="fas fa-trash"></i
+                  ></button>
                 </div>
               </div>
             </div>

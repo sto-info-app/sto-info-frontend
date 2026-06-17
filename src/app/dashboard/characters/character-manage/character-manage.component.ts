@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -47,6 +54,7 @@ import {
   templateUrl: './character-manage.component.html',
   styleUrls: ['./character-manage.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -81,6 +89,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
   private readonly characterService = inject(CharacterService);
   private readonly stoAccountService = inject(StoAccountService);
   private readonly lookupService = inject(CharacterLookupService);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroy$ = new Subject<void>();
 
   private readonly dashboardAccountsRoute = '/dashboard/accounts';
@@ -147,6 +156,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
             generalFactionId: generalFactions[0].id,
           });
         }
+        this.cdr.markForCheck();
       });
 
     this.bindSpeciesUpdates();
@@ -193,15 +203,18 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
               this.loadCharacter();
             } else {
               this.isLoading = false;
+              this.cdr.markForCheck();
             }
           } else {
             this.errorMessage = 'Account not found';
             this.isLoading = false;
+            this.cdr.markForCheck();
           }
         },
         error: err => {
           this.errorMessage = 'Failed to load form data';
           this.isLoading = false;
+          this.cdr.markForCheck();
           console.error(err);
         },
       });
@@ -217,6 +230,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
           if (!char) {
             this.errorMessage = 'Character not found';
             this.isLoading = false;
+            this.cdr.markForCheck();
             return EMPTY;
           }
 
@@ -226,6 +240,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
             catchError(err => {
               this.errorMessage = 'Failed to load character details';
               this.isLoading = false;
+              this.cdr.markForCheck();
               console.error(err);
               return EMPTY;
             }),
@@ -246,6 +261,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
             catchError(err => {
               this.errorMessage = 'Failed to load character options';
               this.isLoading = false;
+              this.cdr.markForCheck();
               console.error(err);
               return EMPTY;
             }),
@@ -257,10 +273,12 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
           this.recruitTypes = recruitTypes;
           this.speciesList = species;
           this.isLoading = false;
+          this.cdr.markForCheck();
         },
         error: err => {
           this.errorMessage = 'Failed to load characters';
           this.isLoading = false;
+          this.cdr.markForCheck();
           console.error(err);
         },
       });
@@ -322,6 +340,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
       .subscribe(species => {
         this.speciesList = species;
         this.clearInvalidSelection('speciesId', species);
+        this.cdr.markForCheck();
       });
   }
 
@@ -412,6 +431,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
     }
 
     console.error(error);
+    this.cdr.markForCheck();
   }
 
   /**
