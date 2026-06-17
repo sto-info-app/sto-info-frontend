@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -31,6 +38,7 @@ import {
   templateUrl: './account-manage.component.html',
   styleUrls: ['./account-manage.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -76,6 +84,7 @@ export class AccountManageComponent implements OnInit, OnDestroy {
   private readonly stoAccountService = inject(StoAccountService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroy$ = new Subject<void>();
 
   constructor() {
@@ -138,6 +147,7 @@ export class AccountManageComponent implements OnInit, OnDestroy {
             if (!this.account) {
               this.errorMessage = 'Account not found.';
               this.isLoading = false;
+              this.cdr.markForCheck();
               return;
             }
 
@@ -162,11 +172,13 @@ export class AccountManageComponent implements OnInit, OnDestroy {
           }
 
           this.isLoading = false;
+          this.cdr.markForCheck();
         },
         error: error => {
           this.errorMessage =
             'Error loading account metadata. Please try again.';
           this.isLoading = false;
+          this.cdr.markForCheck();
           console.error('Error loading metadata:', error);
         },
       });
@@ -256,6 +268,7 @@ export class AccountManageComponent implements OnInit, OnDestroy {
       this.errorMessage = `An error occurred while ${action} the account. Please try again.`;
     }
     console.error(`Error ${action} account:`, error);
+    this.cdr.markForCheck();
   }
 
   onCancel(): void {

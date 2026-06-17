@@ -12,13 +12,13 @@
       <div id="account-info-section">
         <div class="lcars-text-bar small-lcars-bar-gap">
           <span>Account Information</span>
-          <span
+          <button
+            type="button"
             class="cta-icon"
             (click)="editAccount()"
-            (keypress)="editAccount()"
             title="Edit Account"
-            ><i class="fas fa-user-pen"></i
-          ></span>
+          ><i class="fas fa-user-pen"></i
+          ></button>
         </div>
         <div class="account-info-content">
           <div class="info-grid">
@@ -59,10 +59,10 @@
         <div id="endeavour-summary-section">
           <div class="lcars-text-bar small-lcars-bar-gap">
             <span>Endeavour Perks</span>
-            <span
+            <button
+              type="button"
               class="cta-icon"
               (click)="endeavourCollapsed = !endeavourCollapsed"
-              (keypress)="endeavourCollapsed = !endeavourCollapsed"
               [title]="
                 endeavourCollapsed
                   ? 'Show Endeavour Perks'
@@ -72,7 +72,7 @@
                 class="fas"
                 [class.fa-caret-down]="endeavourCollapsed"
                 [class.fa-caret-up]="!endeavourCollapsed"></i>
-            </span>
+            </button>
           </div>
           @if (!endeavourCollapsed) {
             <div class="endeavour-hero-row">
@@ -96,13 +96,13 @@
             Captain List
             <span class="header-count-badge">{{ filteredVms().length }}</span>
           </span>
-          <span
+          <button
+            type="button"
             class="cta-icon"
             (click)="addCharacter()"
-            (keypress)="addCharacter()"
             title="Add Character"
-            ><i class="fas fa-plus"></i
-          ></span>
+          ><i class="fas fa-plus"></i
+          ></button>
         </div>
 
         <div class="characters-content">
@@ -186,20 +186,20 @@
                     </div>
                   </div>
                   <div class="character-actions">
-                    <span
+                    <button
+                      type="button"
                       class="cta-icon"
                       (click)="editCharacter(vm.character)"
-                      (keypress)="editCharacter(vm.character)"
                       title="Edit Character"
-                      ><i class="fas fa-user-pen"></i
-                    ></span>
-                    <span
+                    ><i class="fas fa-user-pen"></i
+                    ></button>
+                    <button
+                      type="button"
                       class="cta-icon delete-icon"
                       (click)="deleteCharacter(vm.character)"
-                      (keypress)="deleteCharacter(vm.character)"
                       title="Delete Character"
-                      ><i class="fas fa-trash"></i
-                    ></span>
+                    ><i class="fas fa-trash"></i
+                    ></button>
                   </div>
                 </div>
               </div>
@@ -228,16 +228,16 @@
     @if (characters().length > 0) {
       <div class="lcars-text-bar small-lcars-bar-gap">
         <span>Filters</span>
-        <span
+        <button
+          type="button"
           class="cta-icon"
           (click)="filtersCollapsed = !filtersCollapsed"
-          (keypress)="filtersCollapsed = !filtersCollapsed"
           [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
           <i
             class="fas"
             [class.fa-caret-down]="filtersCollapsed"
             [class.fa-caret-up]="!filtersCollapsed"></i>
-        </span>
+        </button>
       </div>
       @if (!filtersCollapsed) {
         <div class="filter-section">

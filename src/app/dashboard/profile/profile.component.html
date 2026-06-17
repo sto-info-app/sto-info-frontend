@@ -11,13 +11,13 @@
       <div id="personnel-record-main-content">
         <div class="lcars-text-bar personnel-lcars-text-bar">
           <span>Personal Details</span>
-          <span
+          <button
+            type="button"
             class="cta-icon"
             (click)="editUserProfile()"
-            (keypress)="editUserProfile()"
             title="Edit Personal Details"
-            ><i class="fas fa-user-pen"></i
-          ></span>
+          ><i class="fas fa-user-pen"></i
+          ></button>
         </div>
         <div class="personnel-record-inner-content">
           <p>
@@ -68,13 +68,13 @@
       class="col">
       <div class="lcars-text-bar small-lcars-bar-gap">
         <span>Photo</span>
-        <span
+        <button
+          type="button"
           class="cta-icon"
           (click)="editUserProfilePhoto()"
-          (keypress)="editUserProfilePhoto()"
           title="Edit Photo"
-          ><i class="fas fa-user-pen"></i
-        ></span>
+        ><i class="fas fa-user-pen"></i
+        ></button>
       </div>
       <div id="personnel-image">
         <div class="pics-right">
@@ -88,9 +88,9 @@
           }
           @if (user.profile?.profilePicture300) {
             <img
-              [src]="user.profile?.profilePicture300"
-              alt="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
-              title="{{ user.profile?.firstName }} {{ user.profile?.lastName }}"
+              [src]="user.profile.profilePicture300"
+              alt="{{ user.profile.firstName }} {{ user.profile.lastName }}"
+              title="{{ user.profile.firstName }} {{ user.profile.lastName }}"
               class="border"
               (error)="onProfileImageError($event)"
               loading="lazy" />

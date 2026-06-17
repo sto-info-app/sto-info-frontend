@@ -1,9 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { EMPTY, Subject, catchError, switchMap, takeUntil } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
@@ -27,6 +34,7 @@ import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.co
   templateUrl: './character-detail.component.html',
   styleUrls: ['./character-detail.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,
@@ -47,74 +55,83 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
   private readonly characterService = inject(CharacterService);
   private readonly stoAccountService = inject(StoAccountService);
   private readonly dialog = inject(MatDialog);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroy$ = new Subject<void>();
 
   public readonly appRoutes = APP_ROUTES;
   public readonly unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
   ngOnInit(): void {
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      this.accountHandle = decodeStoHandle(params['handle']);
-      const charHandle = params['characterHandle'];
-      if (this.accountHandle && charHandle) {
-        this.loadCharacterData(this.accountHandle, charHandle);
-      }
-    });
-  }
+    this.route.params
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(params => {
+          this.accountHandle = decodeStoHandle(params['handle']);
+          const charHandle = params['characterHandle'];
 
-  loadCharacterData(accHandle: string, charHandle: string): void {
-    this.isLoading = true;
-    this.stoAccountService
-      .getAccounts()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: accounts => {
-          const account = accounts.find(a => a.handle === accHandle);
-          if (account) {
-            this.characterService
-              .getCharactersByAccount(account.id)
-              .pipe(takeUntil(this.destroy$))
-              .subscribe({
-                next: characters => {
-                  const char = characters.find(c => c.handle === charHandle);
-                  if (char) {
-                    // Now fetch full details by ID
-                    this.characterService
-                      .getCharacter(char.id)
-                      .pipe(takeUntil(this.destroy$))
-                      .subscribe({
-                        next: fullChar => {
-                          this.character = fullChar;
-                          this.isLoading = false;
-                        },
-                        error: err => {
-                          this.isLoading = false;
-                          this.errorMessage =
-                            'Failed to load character details';
-                          console.error(err);
-                        },
-                      });
-                  } else {
-                    this.isLoading = false;
-                    this.errorMessage = 'Character not found';
-                  }
-                },
-                error: err => {
-                  this.isLoading = false;
-                  this.errorMessage = 'Failed to load account characters';
-                  console.error(err);
-                },
-              });
-          } else {
-            this.isLoading = false;
-            this.errorMessage = 'Account not found';
+          if (!this.accountHandle || !charHandle) {
+            return EMPTY;
           }
-        },
-        error: err => {
-          this.isLoading = false;
-          this.errorMessage = 'Failed to load account';
-          console.error(err);
-        },
+
+          this.isLoading = true;
+          this.character = null;
+          this.errorMessage = '';
+
+          return this.stoAccountService.getAccounts().pipe(
+            catchError(err => {
+              this.isLoading = false;
+              this.errorMessage = 'Failed to load account';
+              console.error(err);
+              this.cdr.markForCheck();
+              return EMPTY;
+            }),
+            switchMap(accounts => {
+              const account = accounts.find(
+                a => a.handle === this.accountHandle,
+              );
+              if (!account) {
+                this.isLoading = false;
+                this.errorMessage = 'Account not found';
+                this.cdr.markForCheck();
+                return EMPTY;
+              }
+              return this.characterService
+                .getCharactersByAccount(account.id)
+                .pipe(
+                  catchError(err => {
+                    this.isLoading = false;
+                    this.errorMessage = 'Failed to load account characters';
+                    console.error(err);
+                    this.cdr.markForCheck();
+                    return EMPTY;
+                  }),
+                  switchMap(characters => {
+                    const char = characters.find(c => c.handle === charHandle);
+                    if (!char) {
+                      this.isLoading = false;
+                      this.errorMessage = 'Character not found';
+                      this.cdr.markForCheck();
+                      return EMPTY;
+                    }
+                    return this.characterService.getCharacter(char.id).pipe(
+                      catchError(err => {
+                        this.isLoading = false;
+                        this.errorMessage = 'Failed to load character details';
+                        console.error(err);
+                        this.cdr.markForCheck();
+                        return EMPTY;
+                      }),
+                    );
+                  }),
+                );
+            }),
+          );
+        }),
+      )
+      .subscribe(fullChar => {
+        this.character = fullChar;
+        this.isLoading = false;
+        this.cdr.markForCheck();
       });
   }
 
@@ -141,9 +158,24 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(result => {
         if (result && this.character) {
-          // Refresh character data
-          const charHandle = this.character.handle;
-          this.loadCharacterData(this.accountHandle, charHandle);
+          const characterId = this.character.id;
+          this.isLoading = true;
+          this.imageFailed = false;
+          this.characterService
+            .getCharacter(characterId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: updated => {
+                this.character = updated;
+                this.isLoading = false;
+                this.cdr.markForCheck();
+              },
+              error: err => {
+                this.isLoading = false;
+                this.cdr.markForCheck();
+                console.error(err);
+              },
+            });
         }
       });
   }
