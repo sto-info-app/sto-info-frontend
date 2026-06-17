@@ -310,6 +310,29 @@ describe('CharacterDetailComponent', () => {
 
       expect(mockCharacterService.getCharacter).not.toHaveBeenCalled();
     }));
+
+    it('should handle getCharacter error after dialog closes successfully', fakeAsync(() => {
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+      const dialogRefMock = {
+        afterClosed: jest.fn().mockReturnValue(of(true)),
+      };
+      mockDialog.open.mockReturnValue(
+        dialogRefMock as Partial<
+          MatDialogRef<CharacterPicComponent>
+        > as MatDialogRef<CharacterPicComponent>,
+      );
+      mockCharacterService.getCharacter.mockReturnValue(
+        throwError(() => new Error('Photo load error')),
+      );
+
+      component.editCharacterPhoto();
+      tick();
+
+      expect(component.isLoading).toBe(false);
+      consoleSpy.mockRestore();
+    }));
   });
 
   describe('Image Handling', () => {
