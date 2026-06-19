@@ -1,9 +1,14 @@
 export const ROOT_ROUTES = {
   ABOUT: 'about',
   DASHBOARD: 'dashboard',
+  NEWS: 'news',
+  ADMIN: 'admin',
 };
 
 export const APP_ROUTES = {
+  //Default
+  HOME: '/',
+
   // Auth
   LOGIN: 'login',
   REGISTER: 'register',
@@ -40,6 +45,21 @@ export const APP_ROUTES = {
     ROOT_ROUTES.DASHBOARD + '/accounts/:handle/:characterHandle/edit',
   STO_DASHBOARD_STATS: ROOT_ROUTES.DASHBOARD + '/stats',
   STO_DASHBOARD_STATS_DETAIL: ROOT_ROUTES.DASHBOARD + '/stats/:breakdownId',
+
+  // News
+  NEWS: ROOT_ROUTES.NEWS,
+  NEWS_DETAIL: ROOT_ROUTES.NEWS + '/:slug',
+
+  // Notifications
+  NOTIFICATIONS: 'notifications',
+
+  // Admin
+  ADMIN: ROOT_ROUTES.ADMIN,
+  ADMIN_NEWS: ROOT_ROUTES.ADMIN + '/news',
+  ADMIN_NEWS_ADD: ROOT_ROUTES.ADMIN + '/news/add',
+  ADMIN_NEWS_EDIT: ROOT_ROUTES.ADMIN + '/news/:id/edit',
+  ADMIN_BANNERS: ROOT_ROUTES.ADMIN + '/banners',
+  ADMIN_NOTIFICATIONS: ROOT_ROUTES.ADMIN + '/notifications',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'service-interruption',
@@ -83,6 +103,21 @@ export const APP_ROUTE_TITLES = {
   STO_CHARACTER_EDIT: 'Edit Character',
   STO_DASHBOARD_STATS: 'Stats',
   STO_DASHBOARD_STATS_DETAIL: 'Stat Detail',
+
+  // News
+  NEWS: 'News',
+  NEWS_DETAIL: 'News',
+
+  // Notifications
+  NOTIFICATIONS: 'Notifications',
+
+  // Admin
+  ADMIN: 'Admin',
+  ADMIN_NEWS: 'Manage News',
+  ADMIN_NEWS_ADD: 'New Post',
+  ADMIN_NEWS_EDIT: 'Edit Post',
+  ADMIN_BANNERS: 'Manage Banners',
+  ADMIN_NOTIFICATIONS: 'Send Notifications',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'Service Interruption',

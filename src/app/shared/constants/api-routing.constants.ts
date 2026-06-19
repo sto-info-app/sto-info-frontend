@@ -53,4 +53,16 @@ export const API_URLS = {
 
   // Contact
   CONTACT: apiUrl + '/contact',
+
+  // News
+  NEWS: apiUrl + '/news',
+  NEWS_ADMIN: apiUrl + '/news/admin',
+
+  // Notifications
+  NOTIFICATIONS: apiUrl + '/notifications',
+  NOTIFICATIONS_BANNERS: apiUrl + '/notifications/banners',
+  NOTIFICATIONS_UNREAD_COUNT: apiUrl + '/notifications/unread-count',
+  NOTIFICATIONS_READ_ALL: apiUrl + '/notifications/read-all',
+  NOTIFICATIONS_ADMIN: apiUrl + '/notifications/admin',
+  NOTIFICATIONS_ADMIN_BANNERS: apiUrl + '/notifications/admin/banners',
 };

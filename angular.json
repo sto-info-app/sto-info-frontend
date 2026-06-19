@@ -43,6 +43,12 @@
                 "glob": "serve.json",
                 "input": "src",
                 "output": "."
+              },
+              {
+                "glob": "**/*",
+                "input": "generated",
+                "output": ".",
+                "ignore": [".gitkeep"]
               }
             ],
             "styles": [

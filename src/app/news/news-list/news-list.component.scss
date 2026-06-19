@@ -1,0 +1,126 @@
+#news-list-page {
+  max-width: 68rem;
+  margin: 0 auto;
+}
+
+.news-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.filter-chip {
+  min-height: 42px;
+  padding: 0.55rem 1.1rem 0.4rem;
+  border: none;
+  border-radius: 999px;
+  background: #455580;
+  color: #f5f6fa;
+  cursor: pointer;
+  font: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.85;
+
+  &:nth-child(odd) {
+    background: #58e;
+    color: #0d0d0d;
+  }
+
+  &.active,
+  &:hover {
+    opacity: 1;
+    filter: brightness(1.07);
+  }
+}
+
+.news-empty {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.news-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.news-item {
+  padding: 1rem 1rem 1rem 1.25rem;
+  margin-bottom: 0.8rem;
+  border-left: 10px solid #79d;
+  border-radius: 0 24px 24px 0;
+  background: rgba(69, 85, 128, 0.2);
+
+  .news-category {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    opacity: 0.75;
+  }
+
+  .news-title {
+    margin: 0.25rem 0;
+    font-size: clamp(1.2rem, 1rem + 1.2vw, 1.6rem);
+
+    a {
+      text-decoration: none;
+      color: inherit;
+
+      &:hover {
+        color: #8ff;
+      }
+    }
+  }
+
+  .news-date {
+    display: block;
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+  }
+
+  .news-summary {
+    margin: 0.5rem 0;
+  }
+
+  .news-readmore {
+    font-weight: 600;
+    color: #8ff;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+}
+
+.news-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+
+  button {
+    min-height: 46px;
+    padding: 0.6rem 1.15rem 0.45rem;
+    border: none;
+    border-radius: 999px;
+    background: #58e;
+    color: #0d0d0d;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-weight: 700;
+    font-size: inherit;
+    font-family: inherit;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &:hover:not(:disabled) {
+      filter: brightness(1.08);
+    }
+  }
+}

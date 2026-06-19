@@ -17,10 +17,11 @@
     "start": "ng serve",
     "generate-env": "node src/environments/inject-env-vars.js",
     "generate-version": "node scripts/generate-version.mjs",
+    "generate-content": "node scripts/generate-content.mjs",
     "build": "ng build",
     "build:dev": "ng build --configuration development",
     "build:prod": "ng build --configuration production",
-    "build:render": "npm run generate-env && npm run generate-version && npm run build:prod",
+    "build:render": "npm run generate-env && npm run generate-version && npm run generate-content && npm run build:prod",
     "watch": "ng build --watch --configuration development",
     "lint": "eslint \"src/**/*.{ts,js,html}\"",
     "lint:fix": "eslint \"src/**/*.{ts,js,html}\" --fix",
@@ -82,6 +83,7 @@
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
     "@lhci/cli": "^0.15.1",
+    "@resvg/resvg-js": "^2.6.2",
     "@stryker-mutator/core": "^9.6.1",
     "@stryker-mutator/jest-runner": "^9.6.1",
     "@stryker-mutator/typescript-checker": "^9.6.1",
@@ -108,7 +110,8 @@
     "stylelint": "^17.13.0",
     "stylelint-config-standard-scss": "^17.0.0",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.61.1"
+    "typescript-eslint": "^8.61.1",
+    "wawoff2": "^2.0.1"
   },
   "projects": {
     "sto-info-frontend": {

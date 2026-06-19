@@ -1,0 +1,82 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading news"></app-loading-bar>
+}
+
+<div id="news-list-page">
+  <h1>News &amp; Release Notes</h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Transmission failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+
+  @if (!isLoading && posts.length === 0) {
+    <p class="news-empty">There are no announcements, release notes and general updates to show yet. Check back soon.</p>
+  }
+  @else {
+    <p>Project announcements, release notes and general updates.</p>
+
+    <div class="news-filters">
+      <button
+        type="button"
+        class="filter-chip"
+        [class.active]="selectedCategory === null"
+        (click)="filterByCategory(null)">
+        All
+      </button>
+      @for (category of categories; track category) {
+        <button
+          type="button"
+          class="filter-chip"
+          [class.active]="selectedCategory === category"
+          (click)="filterByCategory(category)">
+          {{ categoryLabels[category] }}
+        </button>
+      }
+    </div>
+  }
+
+  <ul class="news-items">
+    @for (post of posts; track post.id) {
+      <li class="news-item">
+        <span class="news-category">{{ categoryLabels[post.category] }}</span>
+        <h2 class="news-title">
+          <a [routerLink]="getDetailLink(post.slug)">{{ post.title }}</a>
+        </h2>
+        @if (post.publishedAt) {
+          <time class="news-date">{{
+            post.publishedAt | date: 'mediumDate'
+          }}</time>
+        }
+        @if (post.summary) {
+          <p class="news-summary">{{ post.summary }}</p>
+        }
+        <a
+          class="news-readmore"
+          [routerLink]="getDetailLink(post.slug)"
+          >Read more</a
+        >
+      </li>
+    }
+  </ul>
+
+  @if (totalPages > 1) {
+    <div class="news-pagination">
+      <button
+        type="button"
+        [disabled]="page <= 1"
+        (click)="loadPage(page - 1)">
+        Previous
+      </button>
+      <span>Page {{ page }} of {{ totalPages }}</span>
+      <button
+        type="button"
+        [disabled]="page >= totalPages"
+        (click)="loadPage(page + 1)">
+        Next
+      </button>
+    </div>
+  }
+</div>

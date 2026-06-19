@@ -1,0 +1,122 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading posts"></app-loading-bar>
+}
+
+<div
+  id="news-admin-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Manage News</h1>
+    <p class="admin-page-intro">
+      Create, publish and maintain the public news feed using the same LCARS
+      control surface used across account and character management.
+    </p>
+
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Action failed"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    <section class="admin-section">
+      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+        <span>Posts</span>
+        <div class="admin-section-actions">
+          <a
+            class="cta-icon"
+            [routerLink]="'/' + appRoutes.ADMIN_NEWS_ADD"
+            title="New post"
+            aria-label="New post"
+          ><i class="fas fa-plus"></i
+          ></a>
+        </div>
+      </div>
+
+      @if (!isLoading && posts.length === 0) {
+        <p class="records-empty">No posts yet. Create your first one.</p>
+      }
+
+      @if (posts.length > 0) {
+        <div class="admin-records">
+          @for (post of posts; track post.id) {
+            <article class="admin-record-card">
+              <div class="admin-record-header">
+                <div class="admin-record-title">
+                  <strong>{{ post.title }}</strong>
+                  <span>{{ categoryLabels[post.category] }}</span>
+                </div>
+                <div class="admin-record-meta">
+                  <span
+                    class="status-pill"
+                    [class.published]="post.status === newsStatus.PUBLISHED"
+                    [class.draft]="post.status === newsStatus.DRAFT">
+                    {{ post.status }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="admin-record-body">
+                <div class="admin-record-details">
+                  <div class="admin-record-detail">
+                    <span class="label">Updated</span>
+                    <span class="value">{{ post.updatedAt | date: 'short' }}</span>
+                  </div>
+                  <div class="admin-record-detail">
+                    <span class="label">Summary</span>
+                    <span class="value">{{ post.summary || 'No summary provided.' }}</span>
+                  </div>
+                </div>
+
+                <div class="admin-record-actions">
+                  <a
+                    class="cta-icon"
+                    [routerLink]="editLink(post)"
+                    title="Edit post"
+                    aria-label="Edit post"
+                  ><i class="fas fa-user-pen"></i
+                  ></a>
+                  @if (post.status === newsStatus.DRAFT) {
+                    <button
+                      type="button"
+                      class="cta-icon"
+                      (click)="publish(post)"
+                      title="Publish post"
+                      aria-label="Publish post"
+                    ><i class="fas fa-rocket-launch"></i
+                    ></button>
+                  }
+                  <button
+                    type="button"
+                    class="cta-icon delete-icon"
+                    (click)="remove(post)"
+                    title="Delete post"
+                    aria-label="Delete post"
+                  ><i class="fas fa-trash"></i
+                  ></button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN_NEWS_ADD"
+        >New post</a
+      >
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN"
+        >Admin home</a
+      >
+    </div>
+  </div>
+</div>

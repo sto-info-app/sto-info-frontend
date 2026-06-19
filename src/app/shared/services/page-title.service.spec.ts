@@ -155,6 +155,26 @@ describe('PageTitleService', () => {
     });
   });
 
+  it('setTitle applies the suffix to a page-specific title', () => {
+    jest.spyOn(service, 'getTitleSuffix').mockReturnValue('Test App');
+    service.setTitle('My Post');
+    expect(titleSpy.setTitle).toHaveBeenCalledWith('My Post - Test App');
+  });
+
+  it('setTitle falls back to the suffix when the page title is empty', () => {
+    jest.spyOn(service, 'getTitleSuffix').mockReturnValue('Test App');
+    service.setTitle('');
+    expect(titleSpy.setTitle).toHaveBeenCalledWith('Test App');
+  });
+
+  it('setTitle uses default site title when page title and suffix are empty', () => {
+    jest.spyOn(service, 'getTitleSuffix').mockReturnValue('');
+    service.setTitle('');
+    expect(titleSpy.setTitle).toHaveBeenCalledWith(
+      'Star Trek Online Info Portal',
+    );
+  });
+
   it('should hit default branch if pageTitle and getTitleSuffix are both empty', () => {
     // Mock data returning no title
     const activatedRouteMock = TestBed.inject(ActivatedRoute);

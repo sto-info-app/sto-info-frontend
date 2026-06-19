@@ -209,4 +209,32 @@ describe('SeoService', () => {
 
     expect(() => service.init()).not.toThrow();
   });
+
+  it('setPageMeta applies a custom title and description', () => {
+    TestBed.resetTestingModule();
+    configureSeoServiceTestBed({ titleSuffix: 'Suffix' });
+
+    service.setPageMeta('My Post', 'A custom description');
+
+    expect(mockMeta.updateTag).toHaveBeenCalledWith({
+      name: 'description',
+      content: 'A custom description',
+    });
+    expect(mockMeta.updateTag).toHaveBeenCalledWith({
+      property: 'og:title',
+      content: 'My Post - Suffix',
+    });
+  });
+
+  it('setPageMeta falls back to the default description when blank', () => {
+    TestBed.resetTestingModule();
+    configureSeoServiceTestBed({ titleSuffix: 'Suffix' });
+
+    service.setPageMeta('My Post', '   ');
+
+    const descriptionCall = mockMeta.updateTag.mock.calls.find(
+      ([tag]: [{ name?: string }]) => tag.name === 'description',
+    );
+    expect(descriptionCall?.[0].content).not.toBe('   ');
+  });
 });

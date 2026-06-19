@@ -1,0 +1,35 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading post"></app-loading-bar>
+}
+
+<div id="news-detail-page">
+  <a
+    class="news-back"
+    [routerLink]="newsListLink"
+    >&larr; Back to news</a
+  >
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Transmission failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (notFound) {
+    <h1>Post not found</h1>
+    <p>This post may have been removed or is not yet published.</p>
+  }
+
+  @if (post) {
+    <article class="news-article">
+      <span class="news-category">{{ categoryLabels[post.category] }}</span>
+      <h1 class="news-title">{{ post.title }}</h1>
+      @if (post.publishedAt) {
+        <time class="news-date">{{ post.publishedAt | date: 'longDate' }}</time>
+      }
+      <div
+        class="news-body"
+        [innerHTML]="post.body | markdown"></div>
+    </article>
+  }
+</div>

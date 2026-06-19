@@ -216,10 +216,12 @@ describe('EndeavoursComponent', () => {
     expect(component.rankDisplay()).toBe('0000');
   });
 
-  it('should not resolve account when handle route param is empty', () => {
+  it('should stop loading and show an error when handle route param is empty', () => {
     fixture.detectChanges();
     routeParams$.next({});
     expect(stoAccountServiceSpy.getAccounts).not.toHaveBeenCalled();
+    expect(component.isLoading).toBe(false);
+    expect(component.errorMessage).toBe('Invalid account link');
   });
 
   it('should compute complete count and active filter count', () => {

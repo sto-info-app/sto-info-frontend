@@ -1,0 +1,372 @@
+@use 'sass:color';
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+.admin-layout {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-content {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.admin-main-column {
+  flex: 3;
+  min-width: 0;
+}
+
+.admin-side-column {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-layout .admin-content {
+  max-width: none;
+  margin: 0;
+}
+
+.admin-page-intro {
+  margin-bottom: 1rem;
+  color: rgb(255 255 255 / 76%);
+}
+
+.admin-section {
+  margin-top: 1.5rem;
+}
+
+.admin-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-panel {
+  margin-top: 0.5rem;
+  padding: 1.25rem;
+  border-radius: 6px;
+  background: vars.$lcars-grey-bg;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .lcars-input-container,
+  .lcars-select-container,
+  .admin-toggle-card {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 0;
+  }
+}
+
+.form-row.compact .lcars-input-container,
+.form-row.compact .lcars-select-container {
+  min-width: 160px;
+}
+
+.admin-field-full {
+  width: 100%;
+}
+
+.admin-toggle-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-toggle-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 56px;
+  padding: 0.95rem 1rem;
+  border-left: 10px solid vars.$lcars-sunflower;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 6%);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &.perano {
+    border-left-color: color.adjust(vars.$lcars-perano, $lightness: -12%);
+  }
+
+  input {
+    width: 18px;
+    height: 18px;
+    accent-color: vars.$lcars-perano;
+    margin: 0;
+  }
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: vars.$lcars-perano;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+
+  &:hover {
+    color: vars.$lcars-orange;
+  }
+}
+
+.field-error {
+  color: vars.$lcars-orange;
+  font-size: 0.8rem;
+}
+
+.markdown-preview {
+  border-left: 10px solid color.adjust(vars.$lcars-perano, $lightness: -14%);
+  border-radius: 0 18px 18px 0;
+  background: rgb(255 255 255 / 6%);
+  padding: 1rem 1.25rem;
+
+  .preview-label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.admin-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+
+  .lcars-btn {
+    min-width: 10rem;
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.records-empty {
+  margin: 1rem 0 0;
+  color: rgb(255 255 255 / 74%);
+}
+
+.admin-records {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.admin-record-card {
+  border-left: 10px solid color.adjust(vars.$lcars-sunflower, $lightness: -16%);
+  border-radius: 6px;
+  overflow: hidden;
+  background: vars.$lcars-grey-bg;
+}
+
+.admin-record-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.9rem;
+  background: vars.$lcars-sunflower;
+  color: #000;
+}
+
+.admin-record-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+
+  strong {
+    font-size: 0.98rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  span {
+    color: rgb(0 0 0 / 72%);
+    font-size: 0.82rem;
+  }
+}
+
+.admin-record-meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 18%);
+  color: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &.published,
+  &.active,
+  &.success {
+    background: vars.$lcars-green;
+    color: #000;
+  }
+
+  &.draft,
+  &.inactive,
+  &.warning {
+    background: vars.$lcars-orange;
+    color: #000;
+  }
+
+  &.info {
+    background: vars.$lcars-perano;
+    color: #000;
+  }
+}
+
+.admin-record-body {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.admin-record-summary {
+  margin: 0;
+  color: rgb(255 255 255 / 82%);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.admin-record-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem 1rem;
+  min-width: 0;
+}
+
+.admin-record-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+
+  .label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgb(255 255 255 / 60%);
+  }
+
+  .value {
+    color: rgb(255 255 255 / 84%);
+    overflow-wrap: anywhere;
+  }
+}
+
+.admin-record-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding-left: 1rem;
+  border-left: 1px solid rgb(255 255 255 / 10%);
+
+  .cta-icon {
+    @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);
+  }
+
+  .delete-icon {
+    @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-red);
+  }
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 5px !important;
+  padding-top: 5px !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (width <= 768px) {
+  .admin-layout {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .admin-side-column {
+    order: -1;
+  }
+
+  .admin-record-body {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-record-actions {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding-left: 0;
+    padding-top: 1rem;
+    border-left: 0;
+    border-top: 1px solid rgb(255 255 255 / 10%);
+  }
+
+  .admin-record-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-record-meta {
+    justify-content: flex-start;
+  }
+}

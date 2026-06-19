@@ -47,6 +47,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
   user: User | undefined;
+  isUserLoading = true;
+  userLoadError = '';
 
   /** Precomputed activity label, updated on each user data load. */
   lastLoginLabel = '';
@@ -83,6 +85,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
    * @returns The most recently cached user data, if available.
    */
   getUserData(): User | undefined {
+    this.isUserLoading = true;
+    this.userLoadError = '';
+
     this._dashboardService
       .getUser()
       .pipe(takeUntil(this._destroy$))
@@ -92,9 +97,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
           this.user = user;
           this._updateActivityLabels();
-          this._cdr.detectChanges();
+          this.isUserLoading = false;
+          this.userLoadError = '';
+          this._cdr.markForCheck();
         },
         error: err => {
+          this.isUserLoading = false;
+          this.userLoadError = 'Failed to load profile data.';
+          this._cdr.markForCheck();
           console.warn('Failed to load user (non-200 or network error)', err);
         },
       });

@@ -1,0 +1,37 @@
+@if (banners.length > 0) {
+  <div
+    class="banner-stack"
+    aria-live="polite">
+    @for (banner of banners; track banner.id) {
+      <div
+        class="banner"
+        [ngClass]="severityClass(banner)"
+        role="status">
+        <div class="banner-content">
+          @if (banner.title) {
+            <strong class="banner-title">{{ banner.title }}</strong>
+          }
+          <span class="banner-message">{{ banner.message }}</span>
+          @if (banner.linkUrl) {
+            <a
+              class="banner-link"
+              [href]="banner.linkUrl"
+              rel="noopener noreferrer"
+              target="_blank"
+              >{{ banner.linkLabel || 'Learn more' }}</a
+            >
+          }
+        </div>
+        @if (banner.dismissible) {
+          <button
+            type="button"
+            class="banner-dismiss"
+            aria-label="Dismiss banner"
+            (click)="dismiss(banner)">
+            &times;
+          </button>
+        }
+      </div>
+    }
+  </div>
+}
