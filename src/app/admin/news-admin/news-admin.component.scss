@@ -160,6 +160,7 @@
 // The preview renders the Markdown body via [innerHTML], so ::ng-deep is needed
 // for these rules to reach that content; the leading .markdown-preview keeps
 // them scoped to this component.
+/* stylelint-disable selector-pseudo-element-no-unknown */
 .markdown-preview ::ng-deep {
   .md-external-icon {
     margin-left: 0.3rem;
@@ -180,6 +181,7 @@
     }
   }
 }
+/* stylelint-enable selector-pseudo-element-no-unknown */
 
 .admin-form-actions {
   display: flex;

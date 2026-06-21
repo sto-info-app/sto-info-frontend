@@ -34,7 +34,7 @@
   gap: 1.5rem;
   padding: 0.75rem 1.2rem;
   border-radius: 28px;
-  background: rgba(69, 85, 128, 0.2);
+  background: rgb(69 85 128 / 20%);
 
   .news-category,
   .news-date {
@@ -66,7 +66,7 @@
   border-left: 12px solid #79d;
   border-radius: 0 28px 28px 0;
   padding: 1rem 1.2rem;
-  background: rgba(69, 85, 128, 0.2);
+  background: rgb(69 85 128 / 20%);
 }
 
 .news-body {
@@ -77,6 +77,7 @@
 // this component's view-encapsulation attribute. ::ng-deep lets these rules
 // reach that content, while the leading .news-body keeps them scoped to this
 // component rather than leaking globally.
+/* stylelint-disable selector-pseudo-element-no-unknown */
 .news-body ::ng-deep {
   :is(h1, h2, h3, h4, h5, h6) {
     margin: 1.5rem 0 0.5rem;
@@ -121,11 +122,11 @@
     padding-left: 1rem;
     border-left: 8px solid #58e;
     opacity: 0.95;
-    background: rgba(88, 136, 238, 0.1);
+    background: rgb(88 136 238 / 10%);
   }
 
   code {
-    background: rgba(88, 136, 238, 0.22);
+    background: rgb(88 136 238 / 22%);
     padding: 0.1rem 0.3rem;
     border-radius: 8px;
   }
@@ -133,7 +134,7 @@
   .md-code {
     border-left: 8px solid #455580;
     border-radius: 0 18px 18px 0;
-    background: rgba(69, 85, 128, 0.3);
+    background: rgb(69 85 128 / 30%);
     padding: 0.75rem 1rem;
     overflow-x: auto;
 
@@ -143,3 +144,4 @@
     }
   }
 }
+/* stylelint-enable selector-pseudo-element-no-unknown */

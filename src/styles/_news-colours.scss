@@ -2,7 +2,6 @@
 @use 'lcars-variables' as vars;
 
 // Shared news category colours.
-//
 // Single source of truth for the accent colour applied to each news category.
 // Consumed by both the public news feed (news-list) and the admin "Manage
 // News" surface so the two stay visually consistent. The map keys match the
@@ -18,7 +17,6 @@ $news-category-edge-default: #555;
 
 // Applies the category-tinted treatment shared by news cards: a colour-tinted
 // left edge plus a matching header bar (background + darker bottom border).
-//
 // Include inside the card rule; pass the selector of the card's header row.
 @mixin news-category-tint($header-selector) {
   border-left: 10px solid $news-category-edge-default;

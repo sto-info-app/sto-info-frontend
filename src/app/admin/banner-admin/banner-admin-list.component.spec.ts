@@ -6,7 +6,7 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { provideRouter } from '@angular/router';
-import { NEVER, of } from 'rxjs';
+import { NEVER, of, throwError } from 'rxjs';
 import {
   Banner,
   NotificationSeverity,
@@ -113,8 +113,53 @@ describe('BannerAdminListComponent', () => {
     );
   });
 
+  it('ignores stale list timeout after a successful load', () => {
+    fixture.detectChanges();
+    expect(component.isLoading).toBe(false);
+
+    jest.advanceTimersByTime(12000);
+
+    expect(component.errorMessage).toBe('');
+    expect(component.banners).toHaveLength(1);
+  });
+
+  it('returns early in list timeout callback when loading is already cleared', () => {
+    serviceSpy.getAllBannersForAdmin.mockReturnValueOnce(NEVER);
+
+    fixture.detectChanges();
+    component.isLoading = false;
+
+    jest.advanceTimersByTime(12000);
+
+    expect(component.errorMessage).toBe('');
+    expect(component.banners).toEqual([]);
+  });
+
+  it('handles list load errors', () => {
+    serviceSpy.getAllBannersForAdmin.mockReturnValueOnce(
+      throwError(() => new Error('load failed')),
+    );
+
+    fixture.detectChanges();
+
+    expect(component.isLoading).toBe(false);
+    expect(component.errorMessage).toBe('Failed to load banners.');
+  });
+
   it('builds an edit link for a banner', () => {
     expect(component.editLink(banner)).toBe('/admin/banners/b1/edit');
+  });
+
+  it('falls back to default severity styles for unknown severity', () => {
+    const malformedBanner = {
+      ...banner,
+      severity: 'unknown' as unknown as NotificationSeverity,
+    };
+
+    expect(component.severityColourClass(malformedBanner)).toBe(
+      'severity-info',
+    );
+    expect(component.severityIcon(malformedBanner)).toBe('fa-circle-info');
   });
 
   it('deletes a banner after confirmation', () => {
@@ -144,5 +189,21 @@ describe('BannerAdminListComponent', () => {
     component.remove(banner);
 
     expect(serviceSpy.deleteBanner).not.toHaveBeenCalled();
+  });
+
+  it('handles delete errors after confirmation', () => {
+    const dialogRefSpy = {
+      afterClosed: jest.fn().mockReturnValue(of(true)),
+    } as unknown as MatDialogRef<unknown>;
+    dialogSpy.open.mockReturnValue(dialogRefSpy);
+    serviceSpy.deleteBanner.mockReturnValueOnce(
+      throwError(() => new Error('delete failed')),
+    );
+
+    fixture.detectChanges();
+    component.remove(banner);
+
+    expect(component.errorMessage).toBe('Failed to delete the banner.');
+    expect(component.banners).toHaveLength(1);
   });
 });
