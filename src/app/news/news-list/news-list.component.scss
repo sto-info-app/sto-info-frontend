@@ -1,34 +1,38 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+@use 'news-colours' as news;
+
 #news-list-page {
   max-width: 68rem;
   margin: 0 auto;
+}
+
+.news-intro {
+  margin: 0.5rem 0 0;
 }
 
 .news-filters {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin: 1rem 0 1.5rem;
+  margin: 0.75rem 0 0.5rem;
 }
 
 .filter-chip {
-  min-height: 42px;
-  padding: 0.55rem 1.1rem 0.4rem;
   border: none;
-  border-radius: 999px;
-  background: #455580;
-  color: #f5f6fa;
-  cursor: pointer;
-  font: inherit;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  opacity: 0.85;
+  font-size: 0.9rem;
+  font-weight: 700;
 
   &:nth-child(odd) {
     background: #58e;
     color: #0d0d0d;
   }
 
-  &.active,
+  &.active {
+    background-color: vars.$lcars-sunflower;
+    color: vars.$lcars-black;
+  }
+
   &:hover {
     opacity: 1;
     filter: brightness(1.07);
@@ -44,24 +48,85 @@
   list-style: none;
   margin: 0;
   padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
-.news-item {
-  padding: 1rem 1rem 1rem 1.25rem;
-  margin-bottom: 0.8rem;
-  border-left: 10px solid #79d;
-  border-radius: 0 24px 24px 0;
-  background: rgba(69, 85, 128, 0.2);
+// News-post cards reuse the notification-card anatomy (colour-tinted header
+// row + body + action column) so the two surfaces stay visually consistent.
+.news-card {
+  @include mixins.lcars-card;
+
+  // Category-tinted left edge + header bar, shared with the admin surface.
+  @include news.news-category-tint('.news-header-row');
+
+  .news-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: #333;
+    border-bottom: 2px solid rgb(255 255 255 / 10%);
+    color: vars.$lcars-black;
+  }
+
+  .news-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+
+  .news-category-icon {
+    font-size: 1.05rem;
+  }
 
   .news-category {
+    font-weight: bold;
+    font-size: 1.05rem;
     text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
-    opacity: 0.75;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .news-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgb(0 0 0 / 80%);
+
+    .news-date-icon {
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
+  }
+
+  .news-main-area {
+    display: flex;
+    align-items: stretch;
+    min-height: 72px;
+  }
+
+  .news-body-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.75rem 1rem;
+    overflow-wrap: anywhere;
   }
 
   .news-title {
-    margin: 0.25rem 0;
+    margin: 0;
     font-size: clamp(1.2rem, 1rem + 1.2vw, 1.6rem);
 
     a {
@@ -74,22 +139,46 @@
     }
   }
 
-  .news-date {
-    display: block;
-    font-size: 0.85rem;
-    opacity: 0.7;
-    margin-bottom: 0.5rem;
-  }
-
   .news-summary {
-    margin: 0.5rem 0;
+    margin: 0;
+    font-size: 0.95rem;
+    color: vars.$lcars-white;
   }
 
+  // "Read more" sits in its own column beside the title/summary text.
+  .news-readmore-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0.75rem 1rem;
+  }
+
+  // The link renders as a standard LCARS pill button (.lcars-btn-auto + colour
+  // class in the template); only sizing tweaks are needed here.
   .news-readmore {
-    font-weight: 600;
-    color: #8ff;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
+    text-decoration: none;
+    font-size: 0.85rem !important;
+  }
+
+  .news-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem;
+    background: rgb(0 0 0 / 40%);
+    border-left: 1px solid rgb(255 255 255 / 10%);
+    color: vars.$lcars-perano;
+    text-decoration: none;
+
+    .cta-icon {
+      font-size: 1.2rem;
+    }
+
+    &:hover {
+      background: rgb(0 0 0 / 55%);
+      color: #8ff;
+    }
   }
 }
 

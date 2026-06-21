@@ -1,6 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
-import { Banner } from 'src/app/models/notification.models';
+import {
+  ChangeDetectorRef,
+  Component,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import {
+  Banner,
+  NotificationSeverity,
+} from 'src/app/models/notification.models';
+import {
+  SEVERITY_META,
+  SeverityMeta,
+} from 'src/app/shared/constants/notifications.constants';
 import { NotificationService } from '../notification.service';
 
 const DISMISSED_STORAGE_KEY = 'dismissed_banners';
@@ -18,25 +34,44 @@ const DISMISSED_STORAGE_KEY = 'dismissed_banners';
   standalone: true,
   imports: [CommonModule],
 })
-export class BannerComponent implements OnInit {
+export class BannerComponent implements OnInit, OnDestroy {
   private readonly notificationService = inject(NotificationService);
+  private readonly ngZone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   banners: Banner[] = [];
+  private sub?: Subscription;
 
   /**
-   * Loads active banners and filters out any the user already dismissed.
+   * Subscribes to the shared, polled banners stream and filters out any the
+   * user already dismissed, so newly published banners appear without a reload.
+   *
+   * The stream is wrapped in `ngZone.run()` with an explicit change detection
+   * pass because async callbacks in this app do not reliably trigger change
+   * detection, which would otherwise leave loaded banners unrendered.
    */
   ngOnInit(): void {
-    this.notificationService.getActiveBanners().subscribe({
-      next: banners => {
-        const dismissed = this.getDismissedIds();
-        this.banners = banners.filter(banner => !dismissed.includes(banner.id));
-      },
-      error: () => {
-        // Banners are non-critical; fail silently.
-        this.banners = [];
-      },
-    });
+    this.sub = this.notificationService.banners$
+      .pipe(observeInZone(this.ngZone, this.cdr))
+      .subscribe({
+        next: banners => {
+          const dismissed = this.getDismissedIds();
+          this.banners = banners.filter(
+            banner => !dismissed.includes(banner.id),
+          );
+        },
+        error: () => {
+          // Banners are non-critical; fail silently.
+          this.banners = [];
+        },
+      });
+  }
+
+  /**
+   * Tears down the banners subscription.
+   */
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 
   /**
@@ -54,13 +89,36 @@ export class BannerComponent implements OnInit {
   }
 
   /**
-   * CSS modifier class for a banner severity.
+   * Returns the LCARS colour class, icon, and label for a banner's severity.
+   *
+   * Shared with the notification inbox so banners and inbox cards stay
+   * visually identical.
    *
    * @param banner - The banner.
-   * @returns The severity-specific class name.
+   * @returns The severity visual treatment.
    */
-  severityClass(banner: Banner): string {
-    return `banner--${banner.severity.toLowerCase()}`;
+  severityMeta(banner: Banner): SeverityMeta {
+    return (
+      SEVERITY_META[banner.severity] ?? SEVERITY_META[NotificationSeverity.INFO]
+    );
+  }
+
+  /**
+   * Determines whether a link points to a different origin than the app.
+   *
+   * @param url - The link URL (absolute or relative).
+   * @returns `true` when the link leaves the current origin.
+   */
+  isExternalLink(url: string | null): boolean {
+    const origin = globalThis.location?.origin;
+    if (!url || !origin) {
+      return false;
+    }
+    try {
+      return new URL(url, origin).origin !== origin;
+    } catch {
+      return false;
+    }
   }
 
   /**

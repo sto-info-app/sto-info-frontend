@@ -37,7 +37,12 @@ export interface CreateBannerRequest {
   endsAt?: string;
 }
 
-export type UpdateBannerRequest = Partial<CreateBannerRequest>;
+export type UpdateBannerRequest = Partial<
+  Omit<CreateBannerRequest, 'startsAt' | 'endsAt'>
+> & {
+  startsAt?: string | null;
+  endsAt?: string | null;
+};
 
 export interface AppNotification {
   id: string;
@@ -76,6 +81,11 @@ export interface CreateNotificationRequest {
 }
 
 export interface UnreadCountResponse {
+  unreadCount: number;
+}
+
+export interface AppState {
+  banners: Banner[];
   unreadCount: number;
 }
 

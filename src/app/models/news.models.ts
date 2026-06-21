@@ -28,6 +28,8 @@ export interface PaginatedNews {
   total: number;
   page: number;
   pageSize: number;
+  /** Number of published posts per category, independent of the active filter. */
+  categoryCounts?: Partial<Record<NewsCategory, number>>;
 }
 
 export interface NewsQuery {
@@ -51,4 +53,11 @@ export const NEWS_CATEGORY_LABELS: Record<NewsCategory, string> = {
   [NewsCategory.RELEASE_NOTES]: 'Release notes',
   [NewsCategory.ANNOUNCEMENT]: 'Announcement',
   [NewsCategory.GENERAL]: 'General',
+};
+
+/** Font Awesome icon per category, shared by the public and admin news cards. */
+export const NEWS_CATEGORY_ICONS: Record<NewsCategory, string> = {
+  [NewsCategory.RELEASE_NOTES]: 'fa-code-branch',
+  [NewsCategory.ANNOUNCEMENT]: 'fa-bullhorn',
+  [NewsCategory.GENERAL]: 'fa-newspaper',
 };

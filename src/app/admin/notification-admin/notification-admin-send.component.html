@@ -1,12 +1,8 @@
-@if (isLoading) {
-  <app-loading-bar loadingText="Loading notifications"></app-loading-bar>
-}
-
 <div
-  id="notification-admin-page"
+  id="notification-admin-send-page"
   class="admin-layout">
   <div class="admin-content admin-main-column">
-    <h1>Send Notifications</h1>
+    <h1>Send Notification</h1>
     <p class="admin-page-intro">
       Compose broadcast and user-targeted notifications with the same LCARS
       controls and action icons used on the dashboard screens.
@@ -129,67 +125,6 @@
         </button>
       </div>
     </form>
-
-    <section class="admin-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Sent Notifications</span>
-      </div>
-
-      @if (!isLoading && notifications.length === 0) {
-        <p class="records-empty">No notifications sent yet.</p>
-      }
-
-      @if (notifications.length > 0) {
-        <div class="admin-records">
-          @for (notification of notifications; track notification.id) {
-            <article class="admin-record-card">
-              <div class="admin-record-header">
-                <div class="admin-record-title">
-                  <strong>{{ notification.title }}</strong>
-                  <span>
-                    {{
-                      notification.target === notificationTarget.BROADCAST
-                        ? 'Everyone'
-                        : 'Single user'
-                    }}
-                  </span>
-                </div>
-                <div class="admin-record-meta">
-                  <span class="status-pill info">{{ severityLabels[notification.severity] }}</span>
-                </div>
-              </div>
-
-              <div class="admin-record-body">
-                <div>
-                  <p class="admin-record-summary">{{ notification.body }}</p>
-                  <div class="admin-record-details">
-                    <div class="admin-record-detail">
-                      <span class="label">Sent</span>
-                      <span class="value">{{ notification.createdAt | date: 'short' }}</span>
-                    </div>
-                    <div class="admin-record-detail">
-                      <span class="label">Link</span>
-                      <span class="value">{{ notification.linkUrl || 'No link' }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="admin-record-actions">
-                  <button
-                    type="button"
-                    class="cta-icon delete-icon"
-                    (click)="remove(notification)"
-                    title="Delete notification"
-                    aria-label="Delete notification"
-                  ><i class="fas fa-trash"></i
-                  ></button>
-                </div>
-              </div>
-            </article>
-          }
-        </div>
-      }
-    </section>
   </div>
 
   <div class="admin-side-column col">
@@ -197,6 +132,11 @@
       <span>Navigation</span>
     </div>
     <div class="buttons">
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN_NOTIFICATIONS"
+        >Sent notifications</a
+      >
       <a
         class="full-width-btn-link sunflower"
         [routerLink]="'/' + appRoutes.ADMIN"

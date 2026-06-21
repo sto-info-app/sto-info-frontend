@@ -1,7 +1,8 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { NEVER, of, throwError } from 'rxjs';
+import { EMPTY, NEVER, Subject, of, throwError } from 'rxjs';
+import type { PaginatedNews } from 'src/app/models/news.models';
 import { NewsService } from '../news.service';
 import { NewsListComponent } from './news-list.component';
 
@@ -69,7 +70,7 @@ describe('NewsListComponent', () => {
       fixture.nativeElement.querySelector<HTMLElement>('.news-empty');
     expect(emptyState).not.toBeNull();
     expect(emptyState?.textContent).toContain(
-      'There is no news to show yet. Check back soon.',
+      'There are no announcements, release notes and general updates to show yet. Check back soon.',
     );
   });
 
@@ -84,6 +85,48 @@ describe('NewsListComponent', () => {
     expect(component.errorMessage).toBe(
       'Something went wrong loading the news.',
     );
+  });
+
+  it('clears loading when the stream completes without emitting', () => {
+    // A stream that completes with no value must still drop the spinner;
+    // otherwise the loading bar hangs forever (clearing only happens in next).
+    serviceSpy.getPublishedNews.mockReturnValueOnce(EMPTY);
+
+    fixture.detectChanges();
+
+    expect(component.isLoading).toBe(false);
+    expect(component.errorMessage).toBe('');
+  });
+
+  it('cancels an in-flight request when the category changes again', () => {
+    // First load never settles; the second supersedes it.
+    const firstLoad = new Subject<PaginatedNews>();
+    serviceSpy.getPublishedNews
+      .mockReturnValueOnce(firstLoad.asObservable())
+      .mockReturnValueOnce(
+        of({ items: [], total: 0, page: 1, pageSize: 10 } as PaginatedNews),
+      );
+
+    fixture.detectChanges();
+    expect(component.isLoading).toBe(true);
+
+    // Switching category starts a fresh load that resolves immediately.
+    component.filterByCategory(null);
+    expect(component.isLoading).toBe(false);
+
+    // A late response from the cancelled first request must be ignored, so the
+    // spinner stays off and the stale timeout never fires.
+    firstLoad.next({
+      items: [{ id: 'stale' }] as unknown as PaginatedNews['items'],
+      total: 1,
+      page: 1,
+      pageSize: 10,
+    });
+    jest.advanceTimersByTime(12000);
+
+    expect(component.isLoading).toBe(false);
+    expect(component.posts).toEqual([]);
+    expect(component.errorMessage).toBe('');
   });
 
   it('clears loading when the news request hangs', () => {

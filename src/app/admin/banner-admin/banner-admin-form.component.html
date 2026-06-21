@@ -1,0 +1,150 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading banner"></app-loading-bar>
+}
+
+<div
+  id="banner-admin-form-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>{{ isEdit ? 'Edit banner' : 'New banner' }}</h1>
+    <p class="admin-page-intro">
+      Schedule and update a site-wide banner with the same structured LCARS
+      fields used throughout the rest of the site.
+    </p>
+
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Save failed"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="save()"
+      class="admin-form">
+      <section class="admin-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>{{ isEdit ? 'Edit Banner' : 'New Banner' }}</span>
+        </div>
+
+        <div class="admin-panel">
+          <div class="form-row compact">
+            <div class="lcars-select-container sunflower">
+              <span class="select-label">Severity</span>
+              <select
+                id="banner-severity-select"
+                title="Severity"
+                formControlName="severity">
+                @for (severity of severities; track severity) {
+                  <option [value]="severity">{{ severityLabels[severity] }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="lcars-input-container bluey">
+              <label for="banner-title-input">Title</label>
+              <input
+                id="banner-title-input"
+                type="text"
+                formControlName="title"
+                maxlength="120" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="lcars-input-container perano admin-field-full">
+              <label for="banner-message-input">Message</label>
+              <input
+                id="banner-message-input"
+                type="text"
+                formControlName="message"
+                [maxlength]="messageMaxLength" />
+              <div class="field-footer">
+                @if (form.controls.message.touched && form.controls.message.invalid) {
+                  <small class="field-error">A message is required.</small>
+                }
+                <small class="char-count"
+                  >{{ form.controls.message.value?.length || 0 }}/{{
+                    messageMaxLength
+                  }}</small
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row compact">
+            <div class="lcars-input-container gold">
+              <label for="banner-link-url-input">Link URL</label>
+              <input
+                id="banner-link-url-input"
+                type="url"
+                formControlName="linkUrl"
+                maxlength="2048" />
+            </div>
+
+            <div class="lcars-input-container tangerine">
+              <label for="banner-link-label-input">Link Label</label>
+              <input
+                id="banner-link-label-input"
+                type="text"
+                formControlName="linkLabel"
+                maxlength="80" />
+            </div>
+          </div>
+
+          <div class="form-row compact">
+            <div class="lcars-input-container bluey">
+              <label for="banner-starts-input">Starts At</label>
+              <input
+                id="banner-starts-input"
+                type="datetime-local"
+                formControlName="startsAt" />
+            </div>
+
+            <div class="lcars-input-container gold">
+              <label for="banner-ends-input">Ends At</label>
+              <input
+                id="banner-ends-input"
+                type="datetime-local"
+                formControlName="endsAt" />
+            </div>
+          </div>
+
+          <div class="admin-toggle-row">
+            <app-lcars-toggle
+              formControlName="active"
+              label="Active"
+              ariaLabel="Active"></app-lcars-toggle>
+
+            <app-lcars-toggle
+              formControlName="dismissible"
+              label="Dismissible"
+              ariaLabel="Dismissible"></app-lcars-toggle>
+          </div>
+        </div>
+      </section>
+
+      <div class="admin-form-actions">
+        <button
+          type="submit"
+          class="lcars-btn green"
+          [disabled]="isSaving">
+          {{ isSaving ? 'Saving…' : 'Save' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN_BANNERS"
+        >Back to banners</a
+      >
+    </div>
+  </div>
+</div>

@@ -16,24 +16,25 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
-  NEWS_CATEGORY_ICONS,
-  NEWS_CATEGORY_LABELS,
-  NewsPost,
-  NewsStatus,
-} from 'src/app/models/news.models';
-import { NewsService } from 'src/app/news/news.service';
+  Banner,
+  NOTIFICATION_SEVERITY_LABELS,
+  NotificationSeverity,
+} from 'src/app/models/notification.models';
+import { SEVERITY_META } from 'src/app/shared/constants/notifications.constants';
+import { NotificationService } from 'src/app/notifications/notification.service';
 
-const PAGE_SIZE = 20;
 const LOAD_TIMEOUT_MS = 12000;
 
 /**
- * Admin listing of all news posts (including drafts) with publish/delete
- * actions.
+ * Admin listing of all site banners with edit and delete actions.
  */
 @Component({
-  selector: 'app-news-admin-list',
-  templateUrl: './news-admin-list.component.html',
-  styleUrls: ['./news-admin.component.scss'],
+  selector: 'app-banner-admin-list',
+  templateUrl: './banner-admin-list.component.html',
+  styleUrls: [
+    '../news-admin/news-admin.component.scss',
+    './banner-admin-list.component.scss',
+  ],
   standalone: true,
   imports: [
     CommonModule,
@@ -43,31 +44,29 @@ const LOAD_TIMEOUT_MS = 12000;
     LcarsErrorMessageComponent,
   ],
 })
-export class NewsAdminListComponent implements OnInit {
-  private readonly newsService = inject(NewsService);
+export class BannerAdminListComponent implements OnInit {
+  private readonly notificationService = inject(NotificationService);
   private readonly routingService = inject(RoutingService);
   private readonly ngZone = inject(NgZone);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly dialog = inject(MatDialog);
 
   appRoutes = APP_ROUTES;
-  categoryLabels = NEWS_CATEGORY_LABELS;
-  categoryIcons = NEWS_CATEGORY_ICONS;
-  newsStatus = NewsStatus;
+  severityLabels = NOTIFICATION_SEVERITY_LABELS;
 
-  posts: NewsPost[] = [];
+  banners: Banner[] = [];
   isLoading = false;
   errorMessage = '';
 
   /**
-   * Loads all posts on init.
+   * Loads banners on init.
    */
   ngOnInit(): void {
     this.load();
   }
 
   /**
-   * Loads all posts for administration.
+   * Loads all banners.
    */
   load(): void {
     this.isLoading = true;
@@ -80,59 +79,82 @@ export class NewsAdminListComponent implements OnInit {
 
       this.ngZone.run(() => {
         this.isLoading = false;
-        this.posts = [];
+        this.banners = [];
         this.errorMessage =
-          'Loading posts is taking longer than expected. Please try again.';
+          'Loading banners is taking longer than expected. Please try again.';
         this.cdr.detectChanges();
       });
     }, LOAD_TIMEOUT_MS);
 
-    this.newsService
-      .getAllNewsForAdmin({ page: 1, pageSize: PAGE_SIZE })
+    this.notificationService
+      .getAllBannersForAdmin()
       .pipe(
         take(1),
         observeInZone(this.ngZone, this.cdr),
         finalize(() => clearTimeout(loadingTimeout)),
       )
       .subscribe({
-        next: result => {
-          this.posts = Array.isArray(result?.items) ? result.items : [];
+        next: banners => {
+          this.banners = Array.isArray(banners) ? banners : [];
           this.isLoading = false;
         },
         error: () => {
-          this.errorMessage = 'Failed to load posts.';
+          this.errorMessage = 'Failed to load banners.';
           this.isLoading = false;
         },
       });
   }
 
   /**
-   * Publishes a draft post.
+   * Returns the LCARS severity colour class for a banner, matching the
+   * public banner view so the admin list is tinted identically.
    *
-   * @param post - The post to publish.
+   * @param banner - The banner.
+   * @returns The severity colour class.
    */
-  publish(post: NewsPost): void {
-    this.newsService
-      .publishNews(post.id)
-      .pipe(observeInZone(this.ngZone, this.cdr))
-      .subscribe({
-        next: updated => this.replacePost(updated),
-        error: () => (this.errorMessage = 'Failed to publish the post.'),
-      });
+  severityColourClass(banner: Banner): string {
+    return (
+      SEVERITY_META[banner.severity] ?? SEVERITY_META[NotificationSeverity.INFO]
+    ).colourClass;
   }
 
   /**
-   * Deletes a post after confirmation.
+   * Returns the Font Awesome icon class for a banner's severity, matching the
+   * public banner view.
    *
-   * @param post - The post to delete.
+   * @param banner - The banner.
+   * @returns The Font Awesome icon class.
    */
-  remove(post: NewsPost): void {
+  severityIcon(banner: Banner): string {
+    return (
+      SEVERITY_META[banner.severity] ?? SEVERITY_META[NotificationSeverity.INFO]
+    ).icon;
+  }
+
+  /**
+   * Builds the edit route link for a banner.
+   *
+   * @param banner - The banner.
+   * @returns The edit route link.
+   */
+  editLink(banner: Banner): string {
+    return this.routingService.getLink(
+      `${APP_ROUTES.ADMIN}/banners/${banner.id}/edit`,
+    );
+  }
+
+  /**
+   * Deletes a banner after confirmation.
+   *
+   * @param banner - The banner to delete.
+   */
+  remove(banner: Banner): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '75%',
       data: {
-        title: 'Delete News Post',
+        title: 'Delete Banner',
         message: `
-          <p>Are you sure you want to delete <span class="go-bluey">${post.title}</span>?</p>
+          <p>Are you sure you want to delete this banner?</p>
           <p><strong>WARNING:</strong> This action cannot be undone.</p>`,
         confirmText: 'Delete',
         cancelText: 'Cancel',
@@ -146,36 +168,14 @@ export class NewsAdminListComponent implements OnInit {
         if (!confirmed) {
           return;
         }
-        this.newsService
-          .deleteNews(post.id)
+        this.notificationService
+          .deleteBanner(banner.id)
           .pipe(observeInZone(this.ngZone, this.cdr))
           .subscribe({
-            next: () => (this.posts = this.posts.filter(p => p.id !== post.id)),
-            error: () => (this.errorMessage = 'Failed to delete the post.'),
+            next: () =>
+              (this.banners = this.banners.filter(b => b.id !== banner.id)),
+            error: () => (this.errorMessage = 'Failed to delete the banner.'),
           });
       });
-  }
-
-  /**
-   * Builds the edit route link for a post.
-   *
-   * @param post - The post.
-   * @returns The edit route link.
-   */
-  editLink(post: NewsPost): string {
-    return this.routingService.getLink(
-      `${APP_ROUTES.ADMIN}/news/${post.id}/edit`,
-    );
-  }
-
-  /**
-   * Replaces a post in the local list with an updated version.
-   *
-   * @param updated - The updated post.
-   */
-  private replacePost(updated: NewsPost): void {
-    this.posts = this.posts.map(post =>
-      post.id === updated.id ? updated : post,
-    );
   }
 }

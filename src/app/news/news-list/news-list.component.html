@@ -11,56 +11,96 @@
       [message]="errorMessage"></app-lcars-error-message>
   }
 
-
-  @if (!isLoading && posts.length === 0) {
+  @if (!isLoading && posts.length === 0 && selectedCategory === null) {
     <p class="news-empty">There are no announcements, release notes and general updates to show yet. Check back soon.</p>
-  }
-  @else {
-    <p>Project announcements, release notes and general updates.</p>
+  } @else {
+    <p class="news-intro">Project announcements, release notes and general updates.</p>
 
-    <div class="news-filters">
-      <button
-        type="button"
-        class="filter-chip"
-        [class.active]="selectedCategory === null"
-        (click)="filterByCategory(null)">
-        All
-      </button>
-      @for (category of categories; track category) {
+    @if (visibleCategories.length > 0) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Filter by Category</span>
+      </div>
+      <div class="news-filters">
         <button
           type="button"
           class="filter-chip"
-          [class.active]="selectedCategory === category"
-          (click)="filterByCategory(category)">
-          {{ categoryLabels[category] }}
+          [class.active]="selectedCategory === null"
+          (click)="filterByCategory(null)">
+          All
         </button>
-      }
-    </div>
-  }
-
-  <ul class="news-items">
-    @for (post of posts; track post.id) {
-      <li class="news-item">
-        <span class="news-category">{{ categoryLabels[post.category] }}</span>
-        <h2 class="news-title">
-          <a [routerLink]="getDetailLink(post.slug)">{{ post.title }}</a>
-        </h2>
-        @if (post.publishedAt) {
-          <time class="news-date">{{
-            post.publishedAt | date: 'mediumDate'
-          }}</time>
+        @for (category of visibleCategories; track category) {
+          <button
+            type="button"
+            class="filter-chip"
+            [class.active]="selectedCategory === category"
+            (click)="filterByCategory(category)">
+            {{ categoryLabels[category] }}
+          </button>
         }
-        @if (post.summary) {
-          <p class="news-summary">{{ post.summary }}</p>
-        }
-        <a
-          class="news-readmore"
-          [routerLink]="getDetailLink(post.slug)"
-          >Read more</a
-        >
-      </li>
+      </div>
     }
-  </ul>
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Latest Updates</span>
+    </div>
+
+    @if (posts.length === 0) {
+      <p class="news-empty">No posts in this category yet.</p>
+    } @else {
+      <ul class="news-items">
+        @for (post of posts; track post.id) {
+          <li class="news-card" [ngClass]="'category-' + post.category">
+            <div class="news-header-row">
+              <span class="news-header-left">
+                <i
+                  class="fas {{ categoryIcons[post.category] }} news-category-icon"
+                  aria-hidden="true"></i>
+                <span class="news-category">{{
+                  categoryLabels[post.category]
+                }}</span>
+              </span>
+              @if (post.publishedAt) {
+                <time class="news-date">
+                  <i
+                    class="fas fa-calendar-day news-date-icon"
+                    aria-hidden="true"></i>
+                  {{ post.publishedAt | date: 'mediumDate' }}
+                </time>
+              }
+            </div>
+
+            <div class="news-main-area">
+              <div class="news-body-content">
+                <h2 class="news-title">
+                  <a [routerLink]="getDetailLink(post.slug)">{{
+                    post.title
+                  }}</a>
+                </h2>
+                @if (post.summary) {
+                  <p class="news-summary">{{ post.summary }}</p>
+                }
+              </div>
+
+              <div class="news-readmore-col">
+                <a
+                  class="lcars-btn lcars-btn-auto sunflower news-readmore"
+                  [routerLink]="getDetailLink(post.slug)"
+                  >Read more</a
+                >
+              </div>
+
+              <a
+                class="news-actions"
+                [routerLink]="getDetailLink(post.slug)"
+                [attr.aria-label]="'Read ' + post.title">
+                <i class="fas fa-chevron-right cta-icon" aria-hidden="true"></i>
+              </a>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  }
 
   @if (totalPages > 1) {
     <div class="news-pagination">

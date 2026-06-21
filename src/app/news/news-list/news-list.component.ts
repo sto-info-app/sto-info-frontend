@@ -4,16 +4,19 @@ import {
   ChangeDetectorRef,
   Component,
   NgZone,
+  OnDestroy,
   OnInit,
   inject,
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { finalize, take } from 'rxjs';
+import { Subscription, finalize, take } from 'rxjs';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
+  NEWS_CATEGORY_ICONS,
   NEWS_CATEGORY_LABELS,
   NewsCategory,
   NewsPost,
@@ -39,15 +42,21 @@ const LOAD_TIMEOUT_MS = 12000;
     LcarsErrorMessageComponent,
   ],
 })
-export class NewsListComponent implements OnInit {
+export class NewsListComponent implements OnInit, OnDestroy {
   private readonly newsService = inject(NewsService);
   private readonly routingService = inject(RoutingService);
   private readonly ngZone = inject(NgZone);
   private readonly cdr = inject(ChangeDetectorRef);
 
+  /** The current in-flight news request, so a new load can cancel it. */
+  private loadSubscription?: Subscription;
+
   appRoutes = APP_ROUTES;
   categoryLabels = NEWS_CATEGORY_LABELS;
   categories = Object.values(NewsCategory);
+
+  /** Font Awesome icon per category, shown in the card header. */
+  categoryIcons = NEWS_CATEGORY_ICONS;
 
   posts: NewsPost[] = [];
   isLoading = false;
@@ -57,11 +66,21 @@ export class NewsListComponent implements OnInit {
   page = 1;
   total = 0;
 
+  /** Published-post counts per category, supplied by the API. */
+  categoryCounts: Partial<Record<NewsCategory, number>> = {};
+
   /**
    * Loads the first page of news on init.
    */
   ngOnInit(): void {
     this.loadPage(1);
+  }
+
+  /**
+   * Cancels any in-flight news request when the component is torn down.
+   */
+  ngOnDestroy(): void {
+    this.loadSubscription?.unsubscribe();
   }
 
   /**
@@ -80,6 +99,10 @@ export class NewsListComponent implements OnInit {
    * @param page - The 1-based page number.
    */
   loadPage(page: number): void {
+    // Cancel any request still in flight (e.g. a rapid category switch) so its
+    // late response and stale loading timeout can't clobber this load's state.
+    this.loadSubscription?.unsubscribe();
+
     this.isLoading = true;
     this.errorMessage = '';
     this.page = page;
@@ -96,7 +119,7 @@ export class NewsListComponent implements OnInit {
       });
     }, LOAD_TIMEOUT_MS);
 
-    this.newsService
+    this.loadSubscription = this.newsService
       .getPublishedNews({
         page,
         pageSize: PAGE_SIZE,
@@ -104,32 +127,47 @@ export class NewsListComponent implements OnInit {
       })
       .pipe(
         take(1),
+        observeInZone(this.ngZone, this.cdr),
+        // Safety net: clear loading on *every* termination path. next/error
+        // below cover the happy and error paths immediately, but a stream that
+        // completes without emitting would otherwise leave the spinner stuck
+        // forever (the load timeout has already been cleared here too).
         finalize(() => {
-          this.ngZone.run(() => {
-            clearTimeout(loadingTimeout);
-            this.isLoading = false;
-            this.cdr.detectChanges();
-          });
+          clearTimeout(loadingTimeout);
+          this.isLoading = false;
         }),
       )
       .subscribe({
         next: result => {
-          this.ngZone.run(() => {
-            this.posts = result?.items ?? [];
-            this.total = result?.total ?? 0;
-            this.cdr.detectChanges();
-          });
+          this.posts = result?.items ?? [];
+          this.total = result?.total ?? 0;
+          // Counts are filter-independent, so only refresh them when the API
+          // actually returns them (keeps chips stable while filtering).
+          if (result?.categoryCounts) {
+            this.categoryCounts = result.categoryCounts;
+          }
+          this.isLoading = false;
         },
         error: (error: HttpErrorResponse) => {
-          this.ngZone.run(() => {
-            this.errorMessage =
-              error.status === 0
-                ? 'Unable to reach the server. Please try again later.'
-                : 'Something went wrong loading the news.';
-            this.cdr.detectChanges();
-          });
+          this.errorMessage =
+            error.status === 0
+              ? 'Unable to reach the server. Please try again later.'
+              : 'Something went wrong loading the news.';
+          this.isLoading = false;
         },
       });
+  }
+
+  /**
+   * Categories that currently have at least one published post, so empty
+   * categories are never offered as a filter.
+   *
+   * @returns The list of categories with posts.
+   */
+  get visibleCategories(): NewsCategory[] {
+    return this.categories.filter(
+      category => (this.categoryCounts[category] ?? 0) > 0,
+    );
   }
 
   /**

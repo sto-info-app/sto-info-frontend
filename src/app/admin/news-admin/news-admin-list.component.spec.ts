@@ -1,9 +1,15 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { provideRouter } from '@angular/router';
 import { NEVER, of } from 'rxjs';
 import { NewsCategory, NewsStatus } from 'src/app/models/news.models';
 import { NewsService } from 'src/app/news/news.service';
+import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { NewsAdminListComponent } from './news-admin-list.component';
 
 describe('NewsAdminListComponent', () => {
@@ -12,6 +18,7 @@ describe('NewsAdminListComponent', () => {
   let serviceSpy: jest.Mocked<
     Pick<NewsService, 'getAllNewsForAdmin' | 'publishNews' | 'deleteNews'>
   >;
+  let dialogSpy: jest.Mocked<MatDialog>;
 
   const post = {
     id: '1',
@@ -44,13 +51,22 @@ describe('NewsAdminListComponent', () => {
       deleteNews: jest.fn(() => of(void 0)),
     };
 
+    dialogSpy = {
+      open: jest.fn(),
+    } as unknown as jest.Mocked<MatDialog>;
+
     await TestBed.configureTestingModule({
       imports: [NewsAdminListComponent, HttpClientTestingModule],
       providers: [
         provideRouter([]),
         { provide: NewsService, useValue: serviceSpy },
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(NewsAdminListComponent, {
+        remove: { imports: [MatDialogModule] },
+        add: { providers: [{ provide: MatDialog, useValue: dialogSpy }] },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(NewsAdminListComponent);
     component = fixture.componentInstance;
@@ -106,10 +122,32 @@ describe('NewsAdminListComponent', () => {
   });
 
   it('deletes a post after confirmation', () => {
-    jest.spyOn(globalThis, 'confirm').mockReturnValue(true);
+    const dialogRefSpy = {
+      afterClosed: jest.fn().mockReturnValue(of(true)),
+    } as unknown as MatDialogRef<unknown>;
+    dialogSpy.open.mockReturnValue(dialogRefSpy);
+
     fixture.detectChanges();
     component.remove(post);
+
+    expect(dialogSpy.open).toHaveBeenCalledWith(
+      ConfirmDialogComponent,
+      expect.anything(),
+    );
     expect(serviceSpy.deleteNews).toHaveBeenCalledWith('1');
     expect(component.posts).toHaveLength(0);
+  });
+
+  it('does not delete a post when cancelled', () => {
+    const dialogRefSpy = {
+      afterClosed: jest.fn().mockReturnValue(of(false)),
+    } as unknown as MatDialogRef<unknown>;
+    dialogSpy.open.mockReturnValue(dialogRefSpy);
+
+    fixture.detectChanges();
+    component.remove(post);
+
+    expect(serviceSpy.deleteNews).not.toHaveBeenCalled();
+    expect(component.posts).toHaveLength(1);
   });
 });

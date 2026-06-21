@@ -82,7 +82,7 @@
                 title="Status"
                 formControlName="status">
                 @for (status of statuses; track status) {
-                  <option [value]="status">{{ status }}</option>
+                  <option [value]="status">{{ status  | titlecase }}</option>
                 }
               </select>
             </div>
@@ -93,12 +93,6 @@
       <section class="admin-section">
         <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
           <span>Body</span>
-          <button
-            type="button"
-            class="link-button"
-            (click)="togglePreview()">
-            {{ showPreview ? 'Hide preview' : 'Show preview' }}
-          </button>
         </div>
 
         <div class="admin-panel">
@@ -122,6 +116,13 @@
               <div [innerHTML]="bodyValue | markdown"></div>
             </div>
           }
+          
+          <button
+            type="button"
+            class="lcars-btn sunflower"
+            (click)="togglePreview()">
+            {{ showPreview ? 'Hide preview' : 'Show preview' }}
+          </button>
         </div>
       </section>
 

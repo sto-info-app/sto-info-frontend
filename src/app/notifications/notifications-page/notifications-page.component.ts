@@ -15,40 +15,14 @@ import {
 } from 'src/app/models/notification.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { NotificationService } from '../notification.service';
-
-const PAGE_SIZE = 15;
-const LOAD_TIMEOUT_MS = 12000;
-
-/** Visual treatment (LCARS colour class + Font Awesome icon) per severity. */
-interface SeverityMeta {
-  colourClass: string;
-  icon: string;
-  label: string;
-}
-
-const SEVERITY_META: Record<NotificationSeverity, SeverityMeta> = {
-  [NotificationSeverity.INFO]: {
-    colourClass: 'severity-info',
-    icon: 'fa-circle-info',
-    label: 'Info',
-  },
-  [NotificationSeverity.SUCCESS]: {
-    colourClass: 'severity-success',
-    icon: 'fa-circle-check',
-    label: 'Success',
-  },
-  [NotificationSeverity.WARNING]: {
-    colourClass: 'severity-warning',
-    icon: 'fa-triangle-exclamation',
-    label: 'Warning',
-  },
-  [NotificationSeverity.CRITICAL]: {
-    colourClass: 'severity-critical',
-    icon: 'fa-circle-exclamation',
-    label: 'Critical',
-  },
-};
+import {
+  LOAD_TIMEOUT_MS,
+  PAGE_SIZE,
+  SEVERITY_META,
+  SeverityMeta,
+} from 'src/app/shared/constants/notifications.constants';
 
 /**
  * Full-page, paginated list of the current user's inbox notifications.
@@ -111,26 +85,22 @@ export class NotificationsPageComponent implements OnInit {
       .getInbox({ page, pageSize: PAGE_SIZE })
       .pipe(
         take(1),
-        finalize(() => {
-          clearTimeout(loadingTimeout);
-          // `finalize` runs on success, error, AND unsubscribe, so the spinner
-          // can never get stuck. Data is assigned in `next`/`error` (which can
-          // never throw), and the single render happens here once the loading
-          // state has already been cleared.
-          this.stopLoading();
-        }),
+        observeInZone(this.ngZone, this.cdr),
+        finalize(() => clearTimeout(loadingTimeout)),
       )
       .subscribe({
         next: result => {
           this.notifications = result?.items ?? [];
           this.total = result?.total ?? 0;
           this.unreadCount = result?.unreadCount ?? 0;
+          this.isLoading = false;
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage =
             error.status === 0
               ? 'Unable to reach the server. Please try again later.'
               : 'Something went wrong loading your notifications.';
+          this.isLoading = false;
         },
       });
   }
@@ -177,7 +147,7 @@ export class NotificationsPageComponent implements OnInit {
       ? this.notificationService.markRead(notification.id)
       : this.notificationService.markUnread(notification.id);
 
-    request.subscribe({
+    request.pipe(observeInZone(this.ngZone, this.cdr)).subscribe({
       next: () => {
         notification.isRead = markingRead;
         this.unreadCount = Math.max(
@@ -200,33 +170,39 @@ export class NotificationsPageComponent implements OnInit {
     if (notification.isRead) {
       return;
     }
-    this.notificationService.markRead(notification.id).subscribe({
-      next: () => {
-        notification.isRead = true;
-        this.unreadCount = Math.max(0, this.unreadCount - 1);
-      },
-      error: () => {
-        // Leave as unread on failure.
-      },
-    });
+    this.notificationService
+      .markRead(notification.id)
+      .pipe(observeInZone(this.ngZone, this.cdr))
+      .subscribe({
+        next: () => {
+          notification.isRead = true;
+          this.unreadCount = Math.max(0, this.unreadCount - 1);
+        },
+        error: () => {
+          // Leave as unread on failure.
+        },
+      });
   }
 
   /**
    * Marks every loaded notification as read.
    */
   markAllRead(): void {
-    this.notificationService.markAllRead().subscribe({
-      next: () => {
-        this.notifications = this.notifications.map(notification => ({
-          ...notification,
-          isRead: true,
-        }));
-        this.unreadCount = 0;
-      },
-      error: () => {
-        // No-op on failure.
-      },
-    });
+    this.notificationService
+      .markAllRead()
+      .pipe(observeInZone(this.ngZone, this.cdr))
+      .subscribe({
+        next: () => {
+          this.notifications = this.notifications.map(notification => ({
+            ...notification,
+            isRead: true,
+          }));
+          this.unreadCount = 0;
+        },
+        error: () => {
+          // No-op on failure.
+        },
+      });
   }
 
   /**

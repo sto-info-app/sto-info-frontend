@@ -1,9 +1,20 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  EMPTY,
+  Observable,
+  Subscription,
+  catchError,
+  switchMap,
+  tap,
+  throwError,
+  timer,
+} from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   AppNotification,
+  AppState,
   Banner,
   CreateBannerRequest,
   CreateNotificationRequest,
@@ -13,6 +24,10 @@ import {
   UpdateBannerRequest,
 } from 'src/app/models/notification.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import {
+  MILLISECONDS_APP_STATE_POLLING_INTERVAL,
+  MILLISECONDS_ZERO,
+} from 'src/app/shared/constants/timings.constants';
 
 /**
  * Service for site banners and user inbox notifications, plus admin management.
@@ -30,6 +45,59 @@ export class NotificationService {
   private readonly unreadCountSubject = new BehaviorSubject<number>(0);
   /** Emits the current unread notification count. */
   public readonly unreadCount$ = this.unreadCountSubject.asObservable();
+
+  private readonly bannersSubject = new BehaviorSubject<Banner[]>([]);
+  /** Emits the currently active site banners, refreshed by app-state polling. */
+  public readonly banners$ = this.bannersSubject.asObservable();
+
+  private appStatePollSub?: Subscription;
+
+  // ----- App state (polled) -----
+
+  /**
+   * Fetches the aggregated app state (active banners plus, when authenticated,
+   * the unread count) and pushes it onto the {@link banners$} and
+   * {@link unreadCount$} streams.
+   *
+   * The access token is included when present so the server can return the
+   * caller's unread count; anonymous callers receive banners with a zero count.
+   *
+   * @returns An observable of the app state.
+   */
+  getAppState(): Observable<AppState> {
+    const httpOptions = this.authService.getHttpOptionsWithAccessToken() ?? {};
+    return this.http.get<AppState>(API_URLS.APP_STATE, httpOptions).pipe(
+      tap(state => {
+        this.bannersSubject.next(state.banners);
+        this.unreadCountSubject.next(state.unreadCount);
+      }),
+    );
+  }
+
+  /**
+   * Starts polling the app-state endpoint on a fixed interval if not already
+   * running, so banners and the unread badge stay current without each consumer
+   * polling independently. Poll failures are swallowed (the data is
+   * non-critical) and do not stop the interval.
+   */
+  startAppStatePolling(): void {
+    if (this.appStatePollSub) return;
+
+    this.appStatePollSub = timer(
+      MILLISECONDS_ZERO,
+      MILLISECONDS_APP_STATE_POLLING_INTERVAL,
+    )
+      .pipe(switchMap(() => this.getAppState().pipe(catchError(() => EMPTY))))
+      .subscribe();
+  }
+
+  /**
+   * Stops the active app-state polling subscription, if one exists.
+   */
+  stopAppStatePolling(): void {
+    this.appStatePollSub?.unsubscribe();
+    this.appStatePollSub = undefined;
+  }
 
   // ----- Banners (public) -----
 
@@ -214,6 +282,23 @@ export class NotificationService {
     }
     return this.http.get<Banner[]>(
       API_URLS.NOTIFICATIONS_ADMIN_BANNERS,
+      httpOptions,
+    );
+  }
+
+  /**
+   * Gets a single banner by ID (admin).
+   *
+   * @param id - The banner ID.
+   * @returns An observable of the banner.
+   */
+  getBannerByIdForAdmin(id: string): Observable<Banner> {
+    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+    return this.http.get<Banner>(
+      `${API_URLS.NOTIFICATIONS_ADMIN_BANNERS}/${id}`,
       httpOptions,
     );
   }

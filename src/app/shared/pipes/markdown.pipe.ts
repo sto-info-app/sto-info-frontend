@@ -20,9 +20,11 @@ import {
   MARKDOWN_ITALIC_ASTERISK_PATTERN,
   MARKDOWN_ITALIC_UNDERSCORE_PATTERN,
   MARKDOWN_LEADING_NEWLINE_PATTERN,
-  MARKDOWN_LINK_PATTERN,
+  MARKDOWN_LINK_OR_BARE_URL_PATTERN,
   MARKDOWN_ORDERED_LIST_ITEM_PATTERN,
   MARKDOWN_UNORDERED_LIST_ITEM_PATTERN,
+  URL_TRAILING_PUNCTUATION_PATTERN,
+  YOUTUBE_URL_ID_PATTERN,
 } from '../constants/regex-patterns.constants';
 
 /**
@@ -90,7 +92,8 @@ export class MarkdownPipe implements PipeTransform {
   }
 
   /**
-   * Renders a single block (paragraph, heading, list, etc.).
+   * Renders a single block (paragraph, heading, list, etc.), appending an
+   * embedded player for any YouTube links the block contains.
    *
    * @param block - The block text.
    * @returns The rendered HTML for the block.
@@ -100,10 +103,21 @@ export class MarkdownPipe implements PipeTransform {
       return '';
     }
 
+    // Leave extracted code blocks untouched; they must not be reinterpreted.
     if (MARKDOWN_CODE_PLACEHOLDER_BLOCK_PATTERN.test(block)) {
       return block;
     }
 
+    return this.renderBlockBody(block) + this.renderVideoEmbeds(block);
+  }
+
+  /**
+   * Renders the textual HTML for a block, without any trailing video embeds.
+   *
+   * @param block - The block text.
+   * @returns The rendered HTML for the block body.
+   */
+  private renderBlockBody(block: string): string {
     if (MARKDOWN_HORIZONTAL_RULE_PATTERN.test(block)) {
       return '<hr />';
     }
@@ -144,7 +158,9 @@ export class MarkdownPipe implements PipeTransform {
   }
 
   /**
-   * Renders inline Markdown (bold, italic, code, links).
+   * Renders inline Markdown (bold, italic, code, links). Both `[label](url)`
+   * links and bare http(s) URLs are turned into anchors; bare URLs are matched
+   * in the same pass so a URL already inside a Markdown link is not linked twice.
    *
    * @param text - The already HTML-escaped inline text.
    * @returns The rendered inline HTML.
@@ -156,16 +172,69 @@ export class MarkdownPipe implements PipeTransform {
       .replace(MARKDOWN_BOLD_UNDERSCORE_PATTERN, '<strong>$1</strong>')
       .replace(MARKDOWN_ITALIC_ASTERISK_PATTERN, '<em>$1</em>')
       .replace(MARKDOWN_ITALIC_UNDERSCORE_PATTERN, '<em>$1</em>')
-      .replace(MARKDOWN_LINK_PATTERN, (_match, label: string, url: string) => {
-        if (!this.isSafeUrl(url)) {
-          return label;
-        }
-        const external = HTTP_PROTOCOL_PATTERN.test(url);
-        const rel = external
-          ? ' rel="noopener noreferrer" target="_blank"'
-          : '';
-        return `<a href="${url}"${rel}>${label}</a>`;
-      });
+      .replace(
+        MARKDOWN_LINK_OR_BARE_URL_PATTERN,
+        (match, label: string, url: string, bareUrl: string) => {
+          // Bare URL: link it to itself, trimming any trailing sentence
+          // punctuation so a following full stop stays outside the link.
+          if (bareUrl !== undefined) {
+            const trailing =
+              URL_TRAILING_PUNCTUATION_PATTERN.exec(bareUrl)?.[0] ?? '';
+            const cleanUrl = bareUrl.slice(0, bareUrl.length - trailing.length);
+            if (!this.isSafeUrl(cleanUrl)) {
+              return match;
+            }
+            return this.anchor(cleanUrl, cleanUrl) + trailing;
+          }
+
+          // Markdown link.
+          if (!this.isSafeUrl(url)) {
+            return label;
+          }
+          return this.anchor(url, label);
+        },
+      );
+  }
+
+  /**
+   * Builds an anchor for a link. External (http(s)) links open in a new tab and
+   * are flagged with a Font Awesome "external link" icon so readers know they
+   * leave the site.
+   *
+   * @param url - The validated, HTML-escaped URL.
+   * @param label - The HTML for the link text.
+   * @returns The anchor HTML.
+   */
+  private anchor(url: string, label: string): string {
+    if (!HTTP_PROTOCOL_PATTERN.test(url)) {
+      return `<a href="${url}">${label}</a>`;
+    }
+    const icon =
+      '<i class="fas fa-arrow-up-right-from-square md-external-icon" aria-hidden="true"></i>';
+    return `<a href="${url}" rel="noopener noreferrer" target="_blank">${label}${icon}</a>`;
+  }
+
+  /**
+   * Builds embedded YouTube players for every unique video linked within a
+   * block. Because only an 11-character video id (validated by the regex) is
+   * interpolated into a fixed, privacy-friendly embed URL, no untrusted markup
+   * can reach the output.
+   *
+   * @param block - The block text to scan for YouTube links.
+   * @returns Concatenated embed HTML, or an empty string when none are found.
+   */
+  private renderVideoEmbeds(block: string): string {
+    const ids = new Set<string>();
+    for (const match of block.matchAll(YOUTUBE_URL_ID_PATTERN)) {
+      ids.add(match[1]);
+    }
+
+    return [...ids]
+      .map(
+        id =>
+          `<div class="md-video"><iframe src="https://www.youtube-nocookie.com/embed/${id}" title="Embedded YouTube video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`,
+      )
+      .join('');
   }
 
   /**

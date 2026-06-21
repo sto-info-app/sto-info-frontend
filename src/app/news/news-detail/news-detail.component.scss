@@ -1,19 +1,65 @@
-#news-detail-page {
-  max-width: 62rem;
-  margin: 0 auto;
+#news-detail-container {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+
+  #news-detail-main-column {
+    flex: 2;
+    flex-basis: 69%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    h1 {
+      margin: 0;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+  }
+
+  #news-detail-side-column {
+    flex: 1;
+    flex-basis: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
 }
 
-.news-back {
-  display: inline-block;
-  margin-bottom: 1rem;
-  font-weight: 600;
-  color: #8ff;
-  text-transform: uppercase;
-  text-decoration: none;
+.news-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.2rem;
+  border-radius: 28px;
+  background: rgba(69, 85, 128, 0.2);
 
-  &:hover {
-    color: #9cf;
+  .news-category,
+  .news-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
   }
+
+  .news-date {
+    opacity: 0.75;
+  }
+
+  .news-category-icon,
+  .news-date-icon {
+    color: #8ff;
+  }
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .news-article {
@@ -21,30 +67,17 @@
   border-radius: 0 28px 28px 0;
   padding: 1rem 1.2rem;
   background: rgba(69, 85, 128, 0.2);
-
-  .news-category {
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
-    opacity: 0.75;
-  }
-
-  .news-title {
-    margin: 0.25rem 0 0.6rem;
-    line-height: 1.2;
-  }
-
-  .news-date {
-    display: block;
-    font-size: 0.9rem;
-    opacity: 0.7;
-    margin-bottom: 1.5rem;
-  }
 }
 
 .news-body {
   line-height: 1.65;
+}
 
+// The Markdown body is injected via [innerHTML], so its elements never receive
+// this component's view-encapsulation attribute. ::ng-deep lets these rules
+// reach that content, while the leading .news-body keeps them scoped to this
+// component rather than leaking globally.
+.news-body ::ng-deep {
   :is(h1, h2, h3, h4, h5, h6) {
     margin: 1.5rem 0 0.5rem;
   }
@@ -62,6 +95,25 @@
   a {
     color: #8ff;
     text-decoration: underline;
+
+    .md-external-icon {
+      margin-left: 0.3rem;
+      font-size: 0.8em;
+      vertical-align: baseline;
+    }
+  }
+
+  .md-video {
+    width: 100%;
+    margin: 1rem 0;
+    aspect-ratio: 16 / 9;
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      border-radius: 0 18px 18px 0;
+    }
   }
 
   blockquote {

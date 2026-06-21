@@ -13,6 +13,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { MarkdownPipe } from 'src/app/shared/pipes/markdown.pipe';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
   CreateNewsPostRequest,
   NEWS_CATEGORY_LABELS,
@@ -121,19 +122,14 @@ export class NewsAdminFormComponent implements OnInit {
       .getNewsByIdForAdmin(id)
       .pipe(
         take(1),
-        finalize(() => {
-          this.ngZone.run(() => {
-            clearTimeout(loadingTimeout);
-            this.isLoading = false;
-            this.cdr.detectChanges();
-          });
-        }),
+        observeInZone(this.ngZone, this.cdr),
+        finalize(() => clearTimeout(loadingTimeout)),
       )
       .subscribe({
         next: post => {
+          this.isLoading = false;
           if (!post) {
             this.errorMessage = 'Failed to load the post.';
-            this.cdr.detectChanges();
             return;
           }
 
@@ -145,11 +141,10 @@ export class NewsAdminFormComponent implements OnInit {
             category: post.category,
             status: post.status,
           });
-          this.cdr.detectChanges();
         },
         error: () => {
           this.errorMessage = 'Failed to load the post.';
-          this.cdr.detectChanges();
+          this.isLoading = false;
         },
       });
   }
@@ -188,11 +183,13 @@ export class NewsAdminFormComponent implements OnInit {
         ? this.newsService.updateNews(this.postId, payload)
         : this.newsService.createNews(payload);
 
-    request$.pipe(finalize(() => (this.isSaving = false))).subscribe({
+    request$.pipe(observeInZone(this.ngZone, this.cdr)).subscribe({
       next: () => this.router.navigate(['/' + APP_ROUTES.ADMIN_NEWS]),
-      error: () =>
-        (this.errorMessage =
-          'Failed to save the post. Check the slug is unique and try again.'),
+      error: () => {
+        this.isSaving = false;
+        this.errorMessage =
+          'Failed to save the post. Check the slug is unique and try again.';
+      },
     });
   }
 }

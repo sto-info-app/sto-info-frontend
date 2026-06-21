@@ -16,6 +16,7 @@ describe('RefreshSessionDialogComponent', () => {
   let mockAppComponent: Partial<AppComponent>;
   let mockAuthService: {
     isAuthenticated$: Subject<boolean>;
+    getSecondsUntilLoginSessionExpiry: jest.Mock<number, []>;
   };
 
   beforeEach(async () => {
@@ -29,6 +30,9 @@ describe('RefreshSessionDialogComponent', () => {
 
     mockAuthService = {
       isAuthenticated$: new Subject<boolean>(),
+      getSecondsUntilLoginSessionExpiry: jest
+        .fn<number, []>()
+        .mockReturnValue(300),
     };
 
     await TestBed.configureTestingModule({
@@ -103,5 +107,65 @@ describe('RefreshSessionDialogComponent', () => {
   it('should close on logout announced by AuthService', () => {
     mockAuthService.isAuthenticated$.next(false);
     expect(mockDialogRef.close).toHaveBeenCalled();
+  });
+
+  it('should refresh the countdown and rendered time every second', () => {
+    jest.useFakeTimers();
+    try {
+      mockAuthService.getSecondsUntilLoginSessionExpiry
+        .mockReturnValueOnce(300)
+        .mockReturnValueOnce(299)
+        .mockReturnValueOnce(298);
+
+      const localFixture = TestBed.createComponent(
+        RefreshSessionDialogComponent,
+      );
+      localFixture.detectChanges(); // runs ngOnInit -> startCountdown
+
+      const text = () =>
+        (
+          localFixture.nativeElement.querySelector('.countdown-message')
+            ?.textContent ?? ''
+        )
+          .replace(/\s+/g, ' ')
+          .trim();
+
+      expect(text()).toContain('05:00');
+
+      jest.advanceTimersByTime(1000);
+      expect(localFixture.componentInstance.countdown).toBe(299);
+      expect(text()).toContain('04:59');
+
+      jest.advanceTimersByTime(1000);
+      expect(localFixture.componentInstance.countdown).toBe(298);
+      expect(text()).toContain('04:58');
+
+      localFixture.destroy();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('should stop the countdown once it reaches zero', () => {
+    jest.useFakeTimers();
+    try {
+      const clearSpy = jest.spyOn(globalThis, 'clearInterval');
+      mockAuthService.getSecondsUntilLoginSessionExpiry.mockReturnValue(0);
+
+      const localFixture = TestBed.createComponent(
+        RefreshSessionDialogComponent,
+      );
+      localFixture.detectChanges();
+
+      jest.advanceTimersByTime(1000);
+
+      expect(localFixture.componentInstance.countdown).toBe(0);
+      expect(clearSpy).toHaveBeenCalled();
+
+      localFixture.destroy();
+      clearSpy.mockRestore();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

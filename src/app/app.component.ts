@@ -9,6 +9,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
+import { NotificationService } from './notifications/notification.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
 import { CookieService } from './shared/services/cookie.service';
 import { LogRocketService } from './shared/services/log-rocket.service';
@@ -41,6 +42,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
   private readonly authService = inject(AuthService);
+  private readonly notificationService = inject(NotificationService);
   private readonly logRocketService = inject(LogRocketService);
   private readonly pageTitleService = inject(PageTitleService);
   private readonly seoService = inject(SeoService);
@@ -72,6 +74,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscribeToAuthenticationState();
     this.subscribeToWarningAnnouncements();
     this.subscribeToExpiryAnnouncements();
+
+    // Poll banners + unread count on a single cadence for the whole app.
+    this.notificationService.startAppStatePolling();
 
     if (
       environment?.env_name !== 'local' &&
@@ -212,6 +217,9 @@ export class AppComponent implements OnInit, OnDestroy {
     // Unsubscribe from the Observables when the component is destroyed
     this.destroy$.next();
     this.destroy$.complete();
+
+    // Stop app-state polling
+    this.notificationService.stopAppStatePolling();
 
     // Ensure any active countdown interval is cleared on destroy
     this.stopCountdown();

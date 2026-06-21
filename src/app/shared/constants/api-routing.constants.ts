@@ -24,6 +24,9 @@ export const API_URLS = {
   HEALTH_LIVE: rootApiHealth + '/live',
   HEALTH_READY: rootApiHealth + '/ready',
 
+  // App state (polled: banners + unread count)
+  APP_STATE: apiUrl + '/app-state',
+
   // User
   USER: apiUrl + '/user',
   UPDATE_USER_PROFILE: apiUrl + '/user/update-profile',

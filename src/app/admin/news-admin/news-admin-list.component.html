@@ -39,32 +39,40 @@
       @if (posts.length > 0) {
         <div class="admin-records">
           @for (post of posts; track post.id) {
-            <article class="admin-record-card">
+            <article
+              class="admin-record-card"
+              [ngClass]="'category-' + post.category">
               <div class="admin-record-header">
-                <div class="admin-record-title">
-                  <strong>{{ post.title }}</strong>
-                  <span>{{ categoryLabels[post.category] }}</span>
-                </div>
-                <div class="admin-record-meta">
-                  <span
-                    class="status-pill"
-                    [class.published]="post.status === newsStatus.PUBLISHED"
-                    [class.draft]="post.status === newsStatus.DRAFT">
-                    {{ post.status }}
-                  </span>
-                </div>
+                <span class="news-admin-type">
+                  <i
+                    class="fas {{ categoryIcons[post.category] }} news-admin-type-icon"
+                    aria-hidden="true"></i>
+                  <span class="news-admin-type-label">{{
+                    categoryLabels[post.category]
+                  }}</span>
+                </span>
               </div>
 
               <div class="admin-record-body">
-                <div class="admin-record-details">
-                  <div class="admin-record-detail">
-                    <span class="label">Updated</span>
-                    <span class="value">{{ post.updatedAt | date: 'short' }}</span>
+                <div class="news-admin-record-main">
+                  <div class="news-admin-meta">
+                    <time class="news-admin-timestamp">
+                      <i
+                        class="fas fa-calendar-day news-admin-timestamp-icon"
+                        aria-hidden="true"></i>
+                      {{ post.publishedAt | date: 'fullDate' }}
+                    </time>
+                    <span
+                      class="status-pill"
+                      [class.published]="post.status === newsStatus.PUBLISHED"
+                      [class.draft]="post.status === newsStatus.DRAFT">
+                      {{ post.status }}
+                    </span>
                   </div>
-                  <div class="admin-record-detail">
-                    <span class="label">Summary</span>
-                    <span class="value">{{ post.summary || 'No summary provided.' }}</span>
-                  </div>
+                  <h2 class="news-admin-title">{{ post.title }}</h2>
+                  <p class="news-admin-summary">
+                    {{ post.summary || 'No summary provided.' }}
+                  </p>
                 </div>
 
                 <div class="admin-record-actions">

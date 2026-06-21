@@ -1,7 +1,7 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { NEVER, of, throwError } from 'rxjs';
 import { NewsCategory, NewsStatus } from 'src/app/models/news.models';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
@@ -16,6 +16,14 @@ describe('NewsDetailComponent', () => {
   let fixture: ComponentFixture<NewsDetailComponent>;
   let serviceSpy: jest.Mocked<Pick<NewsService, 'getNewsBySlug'>>;
   let slug: string | null;
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 
   const buildPost = () => ({
     id: '1',
@@ -93,5 +101,21 @@ describe('NewsDetailComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     expect(component.notFound).toBe(true);
+  });
+
+  it('clears loading and surfaces an error when the request hangs', async () => {
+    slug = 'slow';
+    await configure();
+    serviceSpy.getNewsBySlug.mockReturnValueOnce(NEVER);
+
+    fixture.detectChanges();
+    expect(component.isLoading).toBe(true);
+
+    jest.advanceTimersByTime(12000);
+
+    expect(component.isLoading).toBe(false);
+    expect(component.errorMessage).toBe(
+      'Loading this post is taking longer than expected. Please try again.',
+    );
   });
 });

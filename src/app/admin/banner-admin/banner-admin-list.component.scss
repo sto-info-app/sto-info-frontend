@@ -1,0 +1,5 @@
+// Banner records carry more detail than news posts, so the action column is
+// tall. Top-align the edit/delete icons instead of centring them vertically.
+#banner-admin-page .admin-record-actions {
+  justify-content: flex-start;
+}

@@ -38,6 +38,19 @@ export const MARKDOWN_BOLD_UNDERSCORE_PATTERN = /__([^_]+)__/g;
 export const MARKDOWN_ITALIC_ASTERISK_PATTERN = /\*([^*]+)\*/g;
 export const MARKDOWN_ITALIC_UNDERSCORE_PATTERN = /_([^_]+)_/g;
 export const MARKDOWN_LINK_PATTERN = /\[([^\]]+)\]\(([^)\s]+)\)/g;
+// Matches a Markdown link OR a bare http(s) URL in a single pass. The link
+// alternative is listed first so a URL already inside `[label](url)` is consumed
+// as part of the link rather than being re-matched as a bare URL.
+export const MARKDOWN_LINK_OR_BARE_URL_PATTERN =
+  /\[([^\]]+)\]\(([^)\s]+)\)|(https?:\/\/[^\s<]+)/gi;
+// Trailing sentence punctuation to trim from an auto-linked bare URL so the
+// link does not swallow a following full stop, comma, etc.
+export const URL_TRAILING_PUNCTUATION_PATTERN = /[.,;:!?]+$/;
+// Captures the 11-character video id from the common YouTube URL shapes
+// (youtu.be/ID, watch?v=ID, embed/ID, shorts/ID). Global so all videos in a
+// block can be collected with `matchAll`.
+export const YOUTUBE_URL_ID_PATTERN =
+  /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/gi;
 export const HTTP_PROTOCOL_PATTERN = /^https?:/i;
 export const HTTP_OR_HTTPS_URL_PATTERN = /^https?:\/\//i;
 export const AMPERSAND_PATTERN = /&/g;

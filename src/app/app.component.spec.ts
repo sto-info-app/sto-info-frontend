@@ -5,6 +5,7 @@ import { Observable, Subject, of } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { AuthService } from './core/auth/auth.service';
+import { NotificationService } from './notifications/notification.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
 import { CookieService } from './shared/services/cookie.service';
 import { LogRocketService } from './shared/services/log-rocket.service';
@@ -57,6 +58,10 @@ describe('AppComponent', () => {
   let mockLogRocketService: {
     init: jest.Mock<void, []>;
     shutdown: jest.Mock<void, []>;
+  };
+  let mockNotificationService: {
+    startAppStatePolling: jest.Mock<void, []>;
+    stopAppStatePolling: jest.Mock<void, []>;
   };
   let mockPageTitleService: { init: jest.Mock<void, []> };
   let mockSeoService: { init: jest.Mock<void, []> };
@@ -150,6 +155,11 @@ describe('AppComponent', () => {
       shutdown: jest.fn(),
     };
 
+    mockNotificationService = {
+      startAppStatePolling: jest.fn(),
+      stopAppStatePolling: jest.fn(),
+    };
+
     mockPageTitleService = {
       init: jest.fn(),
     };
@@ -180,6 +190,7 @@ describe('AppComponent', () => {
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: AuthService, useValue: mockAuthService },
+        { provide: NotificationService, useValue: mockNotificationService },
         { provide: CookieService, useValue: mockCookieService },
         { provide: LogRocketService, useValue: mockLogRocketService },
         { provide: PageTitleService, useValue: mockPageTitleService },

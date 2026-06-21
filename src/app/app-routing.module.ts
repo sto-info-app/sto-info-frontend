@@ -208,19 +208,49 @@ export const routes: Routes = [
   {
     path: APP_ROUTES.ADMIN_BANNERS,
     loadComponent: () =>
-      import('./admin/banner-admin/banner-admin.component').then(
-        m => m.BannerAdminComponent,
+      import('./admin/banner-admin/banner-admin-list.component').then(
+        m => m.BannerAdminListComponent,
       ),
     data: { title: APP_ROUTE_TITLES.ADMIN_BANNERS, requiresApi: true },
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.ADMIN_BANNERS_ADD,
+    loadComponent: () =>
+      import('./admin/banner-admin/banner-admin-form.component').then(
+        m => m.BannerAdminFormComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_BANNERS_ADD, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_BANNERS_EDIT,
+    loadComponent: () =>
+      import('./admin/banner-admin/banner-admin-form.component').then(
+        m => m.BannerAdminFormComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_BANNERS_EDIT, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.ADMIN_NOTIFICATIONS,
     loadComponent: () =>
-      import('./admin/notification-admin/notification-admin.component').then(
-        m => m.NotificationAdminComponent,
+      import('./admin/notification-admin/notification-admin-list.component').then(
+        m => m.NotificationAdminListComponent,
       ),
     data: { title: APP_ROUTE_TITLES.ADMIN_NOTIFICATIONS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_NOTIFICATIONS_SEND,
+    loadComponent: () =>
+      import('./admin/notification-admin/notification-admin-send.component').then(
+        m => m.NotificationAdminSendComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.ADMIN_NOTIFICATIONS_SEND,
+      requiresApi: true,
+    },
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
 

@@ -96,9 +96,12 @@
                 }
               }
               @if (notification.createdAt) {
-                <time class="notification-date">{{
-                  notification.createdAt | date: 'medium'
-                }}</time>
+                <time class="notification-date">
+                  <i
+                    class="fas fa-calendar-day notification-date-icon"
+                    aria-hidden="true"></i>
+                  {{ notification.createdAt | date: 'full' }}
+                </time>
               }
             </div>
 
