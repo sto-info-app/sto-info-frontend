@@ -42,7 +42,7 @@ export const MARKDOWN_LINK_PATTERN = /\[([^\]]+)\]\(([^)\s]+)\)/g;
 // alternative is listed first so a URL already inside `[label](url)` is consumed
 // as part of the link rather than being re-matched as a bare URL.
 export const MARKDOWN_LINK_OR_BARE_URL_PATTERN =
-  /\[([^\]]+)\]\(([^)\s]+)\)|https?:\/\/[^\s<]+/gi;
+  /\[([^\]]+)\]\(([^)\s]+)\)|(https?:\/\/[^\s<]+)/gi;
 // Trailing sentence punctuation to trim from an auto-linked bare URL so the
 // link does not swallow a following full stop, comma, etc.
 export const URL_TRAILING_PUNCTUATION_PATTERN = /[.,;:!?]+$/;
