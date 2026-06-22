@@ -40,7 +40,9 @@ describe('NewsDetailComponent', () => {
   });
 
   const configure = async () => {
-    serviceSpy = { getNewsBySlug: jest.fn(() => of(buildPost())) };
+    serviceSpy = {
+      getNewsBySlug: jest.fn(() => of(buildPost())),
+    };
     await TestBed.configureTestingModule({
       imports: [NewsDetailComponent, HttpClientTestingModule],
       providers: [

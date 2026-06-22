@@ -66,8 +66,8 @@ describe('NewsListComponent', () => {
   it('renders the empty-state message when there are no posts', () => {
     fixture.detectChanges();
 
-    const emptyState =
-      fixture.nativeElement.querySelector<HTMLElement>('.news-empty');
+    const host = fixture.nativeElement as HTMLElement;
+    const emptyState = host.querySelector('.news-empty') as HTMLElement | null;
     expect(emptyState).not.toBeNull();
     expect(emptyState?.textContent).toContain(
       'There are no announcements, release notes and general updates to show yet. Check back soon.',

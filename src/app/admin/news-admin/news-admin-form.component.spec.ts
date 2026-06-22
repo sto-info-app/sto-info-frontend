@@ -2,6 +2,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { NEVER, of } from 'rxjs';
+import { NewsCategory, NewsPost, NewsStatus } from 'src/app/models/news.models';
 import { NewsService } from 'src/app/news/news.service';
 import { NewsAdminFormComponent } from './news-admin-form.component';
 
@@ -22,24 +23,24 @@ describe('NewsAdminFormComponent', () => {
   });
 
   const configure = async () => {
+    const post: NewsPost = {
+      id: '1',
+      slug: 's',
+      title: 'T',
+      summary: null,
+      body: 'b',
+      category: NewsCategory.GENERAL,
+      status: NewsStatus.DRAFT,
+      publishedAt: null,
+      authorId: null,
+      createdAt: '',
+      updatedAt: '',
+    };
+
     serviceSpy = {
-      getNewsByIdForAdmin: jest.fn(() =>
-        of({
-          id: '1',
-          slug: 's',
-          title: 'T',
-          summary: null,
-          body: 'b',
-          category: 'GENERAL',
-          status: 'DRAFT',
-          publishedAt: null,
-          authorId: null,
-          createdAt: '',
-          updatedAt: '',
-        } as never),
-      ),
-      createNews: jest.fn(() => of({ id: '1' } as never)),
-      updateNews: jest.fn(() => of({ id: '1' } as never)),
+      getNewsByIdForAdmin: jest.fn(() => of(post)),
+      createNews: jest.fn(() => of(post)),
+      updateNews: jest.fn(() => of(post)),
     };
 
     await TestBed.configureTestingModule({
@@ -91,7 +92,9 @@ describe('NewsAdminFormComponent', () => {
   it('handles malformed edit payloads without hanging loading', async () => {
     routeId = '1';
     await configure();
-    serviceSpy.getNewsByIdForAdmin.mockReturnValueOnce(of(null as never));
+    serviceSpy.getNewsByIdForAdmin.mockReturnValueOnce(
+      of(null as unknown as NewsPost),
+    );
 
     fixture.detectChanges();
 
