@@ -536,4 +536,77 @@ describe('AuthService', () => {
       expect(clearTimeoutSpy).not.toHaveBeenCalled();
     });
   });
+
+  describe('Decoded Token Helpers', () => {
+    const makeToken = (payload: Record<string, unknown>): string => {
+      const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' }));
+      const body = btoa(JSON.stringify(payload))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/g, '');
+      return `${header}.${body}.sig`;
+    };
+
+    it('returns null when no token exists for decode helper', () => {
+      expect(service.getDecodedToken()).toBeNull();
+    });
+
+    it('returns null when token does not contain payload segment', () => {
+      localStorage.setItem('access_token', 'malformed');
+      localStorage.setItem('expires_at', (Date.now() + 10000).toString());
+
+      expect(service.getDecodedToken()).toBeNull();
+    });
+
+    it('returns null when payload segment is invalid base64/json', () => {
+      localStorage.setItem('access_token', 'a.invalid_payload.b');
+      localStorage.setItem('expires_at', (Date.now() + 10000).toString());
+
+      expect(service.getDecodedToken()).toBeNull();
+    });
+
+    it('decodes token payload and exposes user id and role', () => {
+      const token = makeToken({
+        sub: 'user-123',
+        email: 'captain@sto.info',
+        role: 'ADMIN',
+      });
+
+      localStorage.setItem('access_token', token);
+      localStorage.setItem('expires_at', (Date.now() + 10000).toString());
+
+      expect(service.getDecodedToken()).toEqual(
+        expect.objectContaining({ sub: 'user-123', role: 'ADMIN' }),
+      );
+      expect(service.getUserId()).toBe('user-123');
+      expect(service.getUserRole()).toBe('ADMIN');
+      expect(service.isAdmin()).toBe(true);
+    });
+
+    it('returns null/false from user helpers when role is absent', () => {
+      const token = makeToken({ sub: 'user-123' });
+      localStorage.setItem('access_token', token);
+      localStorage.setItem('expires_at', (Date.now() + 10000).toString());
+
+      expect(service.getUserRole()).toBeNull();
+      expect(service.isAdmin()).toBe(false);
+    });
+
+    it('returns null for getUserId when token payload has no sub', () => {
+      const token = makeToken({ role: 'USER' });
+      localStorage.setItem('access_token', token);
+      localStorage.setItem('expires_at', (Date.now() + 10000).toString());
+
+      expect(service.getUserId()).toBeNull();
+    });
+
+    it('isLoggedInAsAdmin requires both logged-in and admin role', () => {
+      jest.spyOn(service, 'isLoggedIn').mockReturnValue(true);
+      jest.spyOn(service, 'isAdmin').mockReturnValue(true);
+      expect(service.isLoggedInAsAdmin()).toBe(true);
+
+      jest.spyOn(service, 'isAdmin').mockReturnValue(false);
+      expect(service.isLoggedInAsAdmin()).toBe(false);
+    });
+  });
 });

@@ -142,4 +142,52 @@ describe('NewsListComponent', () => {
       'Loading news is taking longer than expected. Please try again.',
     );
   });
+
+  it('displays network error message when status is 0', () => {
+    serviceSpy.getPublishedNews.mockReturnValueOnce(
+      throwError(() => ({ status: 0 })),
+    );
+
+    fixture.detectChanges();
+
+    expect(component.isLoading).toBe(false);
+    expect(component.errorMessage).toBe(
+      'Unable to reach the server. Please try again later.',
+    );
+  });
+
+  it('builds detail link for a post', () => {
+    fixture.detectChanges();
+    const link = component.getDetailLink('test-slug');
+    expect(link).toContain('test-slug');
+  });
+
+  it('updates category counts when API returns categoryCounts', () => {
+    serviceSpy.getPublishedNews.mockReturnValueOnce(
+      of({
+        items: [],
+        total: 0,
+        page: 1,
+        pageSize: 10,
+        categoryCounts: {
+          RELEASE_NOTES: 2,
+        },
+      } as unknown as PaginatedNews),
+    );
+
+    fixture.detectChanges();
+
+    expect(component.categoryCounts.RELEASE_NOTES).toBe(2);
+    expect(component.visibleCategories).toContain('RELEASE_NOTES');
+  });
+
+  it('returns early from timeout callback when loading already stopped', () => {
+    serviceSpy.getPublishedNews.mockReturnValueOnce(NEVER);
+
+    component.loadPage(1);
+    component.isLoading = false;
+    jest.advanceTimersByTime(12000);
+
+    expect(component.errorMessage).toBe('');
+  });
 });

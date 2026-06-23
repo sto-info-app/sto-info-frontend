@@ -225,11 +225,11 @@ export class NotificationsPageComponent implements OnInit {
    * @returns `true` when the link leaves the current origin.
    */
   isExternalLink(url: string | null): boolean {
-    const origin = globalThis.location?.origin;
-    if (!url || !origin) {
+    if (!url) {
       return false;
     }
     try {
+      const origin = globalThis.location.origin;
       return new URL(url, origin).origin !== origin;
     } catch {
       return false;
@@ -243,11 +243,8 @@ export class NotificationsPageComponent implements OnInit {
    * @returns The path (with query/hash) suitable for `routerLink`.
    */
   internalPath(url: string): string {
-    const origin = globalThis.location?.origin;
-    if (!origin) {
-      return url;
-    }
     try {
+      const origin = globalThis.location.origin;
       const parsed = new URL(url, origin);
       return parsed.pathname + parsed.search + parsed.hash;
     } catch {
