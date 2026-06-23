@@ -92,22 +92,6 @@ module.exports = {
     '!src/**/generated/**', // if you have any
     '!src/**/migrations/**', // if applicable
     '!src/environments/inject-env-vars.js', // Build script
-
-    // Exclude legacy feature areas pending dedicated branch-complete tests
-    '!src/app/admin/banner-admin/banner-admin.component.ts',
-    '!src/app/admin/news-admin/news-admin-form.component.ts',
-    '!src/app/admin/news-admin/news-admin-list.component.ts',
-    '!src/app/admin/notification-admin/notification-admin.component.ts',
-    '!src/app/core/auth/auth.service.ts',
-    '!src/app/news/news.service.ts',
-    '!src/app/news/news-detail/news-detail.component.ts',
-    '!src/app/news/news-list/news-list.component.ts',
-    '!src/app/notifications/notification.service.ts',
-    '!src/app/notifications/banner/banner.component.ts',
-    '!src/app/notifications/notifications-page/notifications-page.component.ts',
-    '!src/app/shared/pipes/markdown.pipe.ts',
-    '!src/app/shared/services/script-loader.service.ts',
-    '!src/app/template/header/header.component.ts',
   ],
   coveragePathIgnorePatterns: [
     '/node_modules/',

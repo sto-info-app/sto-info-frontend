@@ -1,31 +1,17 @@
 import { TestBed } from '@angular/core/testing';
-import { DomSanitizer } from '@angular/platform-browser';
 import { MarkdownPipe } from './markdown.pipe';
 
 describe('MarkdownPipe', () => {
   let pipe: MarkdownPipe;
-  let lastHtml = '';
 
   beforeEach(() => {
-    const sanitizerStub: Partial<DomSanitizer> = {
-      bypassSecurityTrustHtml: (html: string) => {
-        lastHtml = html;
-        return html;
-      },
-    };
     TestBed.configureTestingModule({
-      providers: [
-        MarkdownPipe,
-        { provide: DomSanitizer, useValue: sanitizerStub },
-      ],
+      providers: [MarkdownPipe],
     });
     pipe = TestBed.inject(MarkdownPipe);
   });
 
-  const render = (input: string): string => {
-    pipe.transform(input);
-    return lastHtml;
-  };
+  const render = (input: string): string => pipe.transform(input);
 
   it('renders headings', () => {
     expect(render('# Hello')).toContain('<h1>Hello</h1>');
@@ -132,5 +118,54 @@ describe('MarkdownPipe', () => {
 
   it('handles null input', () => {
     expect(render(null as unknown as string)).toBe('');
+  });
+
+  it('handles multiple trailing punctuation marks', () => {
+    const html = render('See https://example.com...');
+    expect(html).toContain('<a href="https://example.com"');
+    expect(html).toContain('</a>...');
+  });
+
+  it('handles empty input', () => {
+    expect(render('')).toBe('');
+  });
+
+  it('renders horizontal rules', () => {
+    expect(render('---')).toContain('<hr');
+    expect(render('***')).toContain('<hr');
+  });
+
+  it('handles inline code with backticks', () => {
+    const html = render('Use `const x = 1;` to declare');
+    expect(html).toContain('<code>const x = 1;</code>');
+  });
+
+  it('handles bold with underscore', () => {
+    expect(render('__bold__')).toContain('<strong>bold</strong>');
+  });
+
+  it('handles italic with underscore', () => {
+    expect(render('_italic_')).toContain('<em>italic</em>');
+  });
+
+  it('keeps a bare URL unchanged when URL safety check fails', () => {
+    const safeSpy = jest
+      .spyOn(
+        pipe as unknown as {
+          isSafeUrl: (url: string) => boolean;
+        },
+        'isSafeUrl',
+      )
+      .mockReturnValue(false);
+
+    const html = render('Visit https://example.com now');
+
+    expect(html).toContain('https://example.com');
+    expect(html).not.toContain('<a href="https://example.com"');
+    safeSpy.mockRestore();
+  });
+
+  it('replaces unknown CODE placeholders with an empty string', () => {
+    expect(render('CODE999')).toBe('');
   });
 });

@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
+import { AuthService } from 'src/app/core/auth/auth.service';
+import { NotificationService } from 'src/app/notifications/notification.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { HeaderComponent } from './header.component';
 
@@ -8,11 +10,27 @@ describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
   let routingServiceSpy: jest.Mocked<RoutingService>;
+  let authServiceSpy: jest.Mocked<Pick<AuthService, 'isLoggedInAsAdmin'>> & {
+    isLoggedIn$: BehaviorSubject<boolean>;
+  };
+  let notificationServiceSpy: jest.Mocked<
+    Pick<NotificationService, 'refreshUnreadCount'>
+  > & { unreadCount$: BehaviorSubject<number> };
 
   beforeEach(() => {
     routingServiceSpy = {
       getLink: jest.fn().mockReturnValue('/test'),
     } as unknown as jest.Mocked<RoutingService>;
+
+    authServiceSpy = {
+      isLoggedInAsAdmin: jest.fn(() => false),
+      isLoggedIn$: new BehaviorSubject<boolean>(false),
+    };
+
+    notificationServiceSpy = {
+      refreshUnreadCount: jest.fn(() => of({ unreadCount: 0 })),
+      unreadCount$: new BehaviorSubject<number>(0),
+    };
 
     TestBed.configureTestingModule({
       imports: [HeaderComponent],
@@ -25,6 +43,8 @@ describe('HeaderComponent', () => {
           },
         },
         { provide: RoutingService, useValue: routingServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: NotificationService, useValue: notificationServiceSpy },
       ],
     });
     fixture = TestBed.createComponent(HeaderComponent);
@@ -116,5 +136,27 @@ describe('HeaderComponent', () => {
   it('should get route link', () => {
     expect(component.getRouteLink('test')).toBe('/test');
     expect(routingServiceSpy.getLink).toHaveBeenCalledWith('test');
+  });
+
+  it('should check admin status', () => {
+    const authService = TestBed.inject(AuthService);
+    const isAdminSpy = jest
+      .spyOn(authService, 'isLoggedInAsAdmin')
+      .mockReturnValue(true);
+
+    const isAdmin = component.isAdmin;
+    expect(isAdmin).toBe(true);
+    expect(isAdminSpy).toHaveBeenCalled();
+  });
+
+  it('should swallow refresh unread errors on login state changes', () => {
+    notificationServiceSpy.refreshUnreadCount.mockReturnValueOnce(
+      throwError(() => new Error('unread failed')),
+    );
+
+    component.ngOnInit();
+    authServiceSpy.isLoggedIn$.next(true);
+
+    expect(notificationServiceSpy.refreshUnreadCount).toHaveBeenCalled();
   });
 });

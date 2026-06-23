@@ -19,7 +19,12 @@ describe('observeInZone', () => {
   it('passes values through unchanged', () => {
     const received: number[] = [];
     of(1, 2, 3)
-      .pipe(observeInZone(ngZone as NgZone, cdr as ChangeDetectorRef))
+      .pipe(
+        observeInZone(
+          ngZone as unknown as NgZone,
+          cdr as unknown as ChangeDetectorRef,
+        ),
+      )
       .subscribe(value => received.push(value));
 
     expect(received).toEqual([1, 2, 3]);
@@ -27,7 +32,12 @@ describe('observeInZone', () => {
 
   it('delivers each next inside the zone and forces change detection', () => {
     of('a')
-      .pipe(observeInZone(ngZone as NgZone, cdr as ChangeDetectorRef))
+      .pipe(
+        observeInZone(
+          ngZone as unknown as NgZone,
+          cdr as unknown as ChangeDetectorRef,
+        ),
+      )
       .subscribe();
 
     // One run for next, one for complete.
@@ -44,7 +54,12 @@ describe('observeInZone', () => {
     cdr.detectChanges.mockImplementation(() => order.push('detect'));
 
     of('a')
-      .pipe(observeInZone(ngZone as NgZone, cdr as ChangeDetectorRef))
+      .pipe(
+        observeInZone(
+          ngZone as unknown as NgZone,
+          cdr as unknown as ChangeDetectorRef,
+        ),
+      )
       .subscribe(() => order.push('next'));
 
     expect(order).toEqual([
@@ -61,7 +76,12 @@ describe('observeInZone', () => {
     const onError = jest.fn();
 
     throwError(() => new Error('boom'))
-      .pipe(observeInZone(ngZone as NgZone, cdr as ChangeDetectorRef))
+      .pipe(
+        observeInZone(
+          ngZone as unknown as NgZone,
+          cdr as unknown as ChangeDetectorRef,
+        ),
+      )
       .subscribe({ error: onError });
 
     expect(onError).toHaveBeenCalledWith(new Error('boom'));
@@ -74,7 +94,12 @@ describe('observeInZone', () => {
     const subject = new Subject<number>();
 
     subject
-      .pipe(observeInZone(ngZone as NgZone, cdr as ChangeDetectorRef))
+      .pipe(
+        observeInZone(
+          ngZone as unknown as NgZone,
+          cdr as unknown as ChangeDetectorRef,
+        ),
+      )
       .subscribe({ complete: onComplete });
 
     cdr.detectChanges.mockClear();
@@ -95,7 +120,12 @@ describe('observeInZone', () => {
 
     expect(() => {
       of('a')
-        .pipe(observeInZone(ngZone as NgZone, cdr as ChangeDetectorRef))
+        .pipe(
+          observeInZone(
+            ngZone as unknown as NgZone,
+            cdr as unknown as ChangeDetectorRef,
+          ),
+        )
         .subscribe(value => received.push(value));
     }).not.toThrow();
 

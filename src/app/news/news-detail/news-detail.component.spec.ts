@@ -3,7 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { NEVER, of, throwError } from 'rxjs';
 import { NewsCategory, NewsStatus } from 'src/app/models/news.models';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
+import { RoutingService } from 'src/app/shared/services/routing.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
 import { NewsService } from '../news.service';
 import { NewsDetailComponent } from './news-detail.component';
@@ -15,6 +17,7 @@ describe('NewsDetailComponent', () => {
   let component: NewsDetailComponent;
   let fixture: ComponentFixture<NewsDetailComponent>;
   let serviceSpy: jest.Mocked<Pick<NewsService, 'getNewsBySlug'>>;
+  let routingServiceSpy: jest.Mocked<Pick<RoutingService, 'getLink'>>;
   let slug: string | null;
 
   beforeEach(() => {
@@ -40,12 +43,18 @@ describe('NewsDetailComponent', () => {
   });
 
   const configure = async () => {
-    serviceSpy = { getNewsBySlug: jest.fn(() => of(buildPost())) };
+    serviceSpy = {
+      getNewsBySlug: jest.fn(() => of(buildPost())),
+    };
+    routingServiceSpy = {
+      getLink: jest.fn((route: string) => `/${route}`),
+    };
     await TestBed.configureTestingModule({
       imports: [NewsDetailComponent, HttpClientTestingModule],
       providers: [
         provideRouter([]),
         { provide: NewsService, useValue: serviceSpy },
+        { provide: RoutingService, useValue: routingServiceSpy },
         { provide: SeoService, useValue: seoStub },
         { provide: PageTitleService, useValue: pageTitleStub },
         {
@@ -117,5 +126,54 @@ describe('NewsDetailComponent', () => {
     expect(component.errorMessage).toBe(
       'Loading this post is taking longer than expected. Please try again.',
     );
+  });
+
+  it('surfaces an error message for non-404 errors', async () => {
+    slug = 'error';
+    serviceSpy = {
+      getNewsBySlug: jest.fn(() => throwError(() => ({ status: 500 }))),
+    };
+    await TestBed.configureTestingModule({
+      imports: [NewsDetailComponent, HttpClientTestingModule],
+      providers: [
+        provideRouter([]),
+        { provide: NewsService, useValue: serviceSpy },
+        { provide: RoutingService, useValue: routingServiceSpy },
+        { provide: SeoService, useValue: seoStub },
+        { provide: PageTitleService, useValue: pageTitleStub },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: { get: () => slug } } },
+        },
+      ],
+    }).compileComponents();
+    fixture = TestBed.createComponent(NewsDetailComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    expect(component.errorMessage).toBe(
+      'Something went wrong loading this post.',
+    );
+  });
+
+  it('returns early from timeout callback when loading already stopped', async () => {
+    slug = 'slow';
+    await configure();
+    serviceSpy.getNewsBySlug.mockReturnValueOnce(NEVER);
+
+    fixture.detectChanges();
+    component.isLoading = false;
+    jest.advanceTimersByTime(12000);
+
+    expect(component.errorMessage).toBe('');
+  });
+
+  it('returns the news list link from routing service', async () => {
+    slug = 'my-slug';
+    await configure();
+
+    const link = component.newsListLink;
+
+    expect(routingServiceSpy.getLink).toHaveBeenCalledWith(APP_ROUTES.NEWS);
+    expect(link).toBe(`/${APP_ROUTES.NEWS}`);
   });
 });

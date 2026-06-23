@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import {
+  AppNotification,
   NotificationSeverity,
   NotificationTarget,
 } from 'src/app/models/notification.models';
@@ -15,8 +16,21 @@ describe('NotificationAdminSendComponent', () => {
   let serviceSpy: jest.Mocked<Pick<NotificationService, 'createNotification'>>;
 
   beforeEach(async () => {
+    const createdNotification: AppNotification = {
+      id: '1',
+      target: NotificationTarget.BROADCAST,
+      userId: null,
+      severity: NotificationSeverity.INFO,
+      title: 'Title',
+      body: 'Body',
+      linkUrl: null,
+      createdAt: '',
+      isRead: false,
+      readAt: null,
+    };
+
     serviceSpy = {
-      createNotification: jest.fn(() => of({ id: '1' } as never)),
+      createNotification: jest.fn(() => of(createdNotification)),
     };
 
     await TestBed.configureTestingModule({

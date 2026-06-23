@@ -881,7 +881,7 @@ describe('AppComponent', () => {
     expect(gtagMock).toHaveBeenCalledWith('consent', 'update', {
       analytics_storage: 'denied',
     });
-    expect(dataLayer.length).toBe(1);
+    expect(dataLayer).toHaveLength(1);
   });
 
   it('should warn and skip loading Google Analytics when measurement ID is missing', () => {

@@ -51,11 +51,11 @@
               }
               <i
                 class="fas {{ severityMeta(notification).icon }} notification-type-icon"
-                role="img"
                 [title]="severityMeta(notification).label"
-                [attr.aria-label]="
-                  severityMeta(notification).label + ' notification'
-                "></i>
+                aria-hidden="true"></i>
+              <span class="sr-only"
+                >{{ severityMeta(notification).label }} notification</span
+              >
             </span>
           </div>
 
@@ -73,7 +73,7 @@
                     <i
                       class="fas fa-link notification-link-icon"
                       aria-hidden="true"></i>
-                    <span class="notification-link-url">{{
+                    <span class="notification-link-url">External: {{
                       notification.linkUrl
                     }}</span>
                     <i
@@ -89,7 +89,7 @@
                     <i
                       class="fas fa-link notification-link-icon"
                       aria-hidden="true"></i>
-                    <span class="notification-link-url">{{
+                    <span class="notification-link-url">Internal: {{
                       notification.linkUrl
                     }}</span>
                   </a>

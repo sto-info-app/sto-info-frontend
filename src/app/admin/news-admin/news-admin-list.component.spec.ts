@@ -6,7 +6,7 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { provideRouter } from '@angular/router';
-import { NEVER, of } from 'rxjs';
+import { NEVER, of, throwError } from 'rxjs';
 import { NewsCategory, NewsStatus } from 'src/app/models/news.models';
 import { NewsService } from 'src/app/news/news.service';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
@@ -149,5 +149,74 @@ describe('NewsAdminListComponent', () => {
 
     expect(serviceSpy.deleteNews).not.toHaveBeenCalled();
     expect(component.posts).toHaveLength(1);
+  });
+
+  it('returns early from timeout callback when loading already stopped', () => {
+    serviceSpy.getAllNewsForAdmin.mockReturnValueOnce(NEVER);
+
+    component.load();
+    component.isLoading = false;
+    jest.advanceTimersByTime(12000);
+
+    expect(component.errorMessage).toBe('');
+  });
+
+  it('handles load failure', () => {
+    serviceSpy.getAllNewsForAdmin.mockReturnValueOnce(
+      throwError(() => new Error('load failed')),
+    );
+
+    fixture.detectChanges();
+
+    expect(component.errorMessage).toBe('Failed to load posts.');
+    expect(component.isLoading).toBe(false);
+  });
+
+  it('handles publish failure', () => {
+    serviceSpy.publishNews.mockReturnValueOnce(
+      throwError(() => new Error('publish failed')),
+    );
+
+    fixture.detectChanges();
+    component.publish(post);
+
+    expect(component.errorMessage).toBe('Failed to publish the post.');
+  });
+
+  it('handles delete failure after confirmation', () => {
+    const dialogRefSpy = {
+      afterClosed: jest.fn().mockReturnValue(of(true)),
+    } as unknown as MatDialogRef<unknown>;
+    dialogSpy.open.mockReturnValue(dialogRefSpy);
+    serviceSpy.deleteNews.mockReturnValueOnce(
+      throwError(() => new Error('delete failed')),
+    );
+
+    fixture.detectChanges();
+    component.remove(post);
+
+    expect(component.errorMessage).toBe('Failed to delete the post.');
+  });
+
+  it('builds edit link via routing service', () => {
+    fixture.detectChanges();
+    const link = component.editLink(post);
+    expect(link).toContain('/admin/news/1/edit');
+  });
+
+  it('keeps non-matching posts unchanged when publishing one post', () => {
+    fixture.detectChanges();
+    component.posts = [
+      post,
+      {
+        ...post,
+        id: '2',
+        title: 'Second',
+      },
+    ];
+
+    component.publish(post);
+
+    expect(component.posts.find(item => item.id === '2')?.title).toBe('Second');
   });
 });

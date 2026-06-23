@@ -277,7 +277,7 @@ export class AuthService {
       return null;
     }
     try {
-      const normalised = segments[1].replace(/-/g, '+').replace(/_/g, '/');
+      const normalised = segments[1].replaceAll('-', '+').replaceAll('_', '/');
       const json = atob(normalised);
       return JSON.parse(json);
     } catch {
