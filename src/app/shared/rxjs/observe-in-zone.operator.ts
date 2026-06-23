@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, NgZone } from '@angular/core';
-import { MonoTypeOperatorFunction, Observable } from 'rxjs';
+import { MonoTypeOperatorFunction, Observable, Subscriber } from 'rxjs';
 
 /**
  * Re-delivers an observable's notifications inside the Angular zone and forces a
@@ -51,24 +51,33 @@ export function observeInZone<T>(
     }
   };
 
+  const runInZoneAndDetect = (notify: () => void): void => {
+    ngZone.run(() => {
+      notify();
+      detect();
+    });
+  };
+
+  const emitNext = (subscriber: Subscriber<T>, value: T): void => {
+    runInZoneAndDetect(() => subscriber.next(value));
+  };
+
+  const emitError = (subscriber: Subscriber<T>, error: unknown): void => {
+    runInZoneAndDetect(() => subscriber.error(error));
+  };
+
+  const emitComplete = (subscriber: Subscriber<T>): void => {
+    runInZoneAndDetect(() => subscriber.complete());
+  };
+
   return (source: Observable<T>) =>
-    new Observable<T>(subscriber =>
-      source.subscribe({
-        next: value =>
-          ngZone.run(() => {
-            subscriber.next(value);
-            detect();
-          }),
-        error: error =>
-          ngZone.run(() => {
-            subscriber.error(error);
-            detect();
-          }),
-        complete: () =>
-          ngZone.run(() => {
-            subscriber.complete();
-            detect();
-          }),
-      }),
-    );
+    new Observable<T>(subscriber => {
+      const subscription = source.subscribe({
+        next: value => emitNext(subscriber, value),
+        error: error => emitError(subscriber, error),
+        complete: () => emitComplete(subscriber),
+      });
+
+      return () => subscription.unsubscribe();
+    });
 }

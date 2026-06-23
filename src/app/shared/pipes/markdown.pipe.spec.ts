@@ -1,31 +1,17 @@
 import { TestBed } from '@angular/core/testing';
-import { DomSanitizer } from '@angular/platform-browser';
 import { MarkdownPipe } from './markdown.pipe';
 
 describe('MarkdownPipe', () => {
   let pipe: MarkdownPipe;
-  let lastHtml = '';
 
   beforeEach(() => {
-    const sanitizerStub: Partial<DomSanitizer> = {
-      bypassSecurityTrustHtml: (html: string) => {
-        lastHtml = html;
-        return html;
-      },
-    };
     TestBed.configureTestingModule({
-      providers: [
-        MarkdownPipe,
-        { provide: DomSanitizer, useValue: sanitizerStub },
-      ],
+      providers: [MarkdownPipe],
     });
     pipe = TestBed.inject(MarkdownPipe);
   });
 
-  const render = (input: string): string => {
-    pipe.transform(input);
-    return lastHtml;
-  };
+  const render = (input: string): string => pipe.transform(input);
 
   it('renders headings', () => {
     expect(render('# Hello')).toContain('<h1>Hello</h1>');

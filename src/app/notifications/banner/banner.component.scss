@@ -33,8 +33,8 @@
     padding: 0;
     border: none;
     border-radius: 50%;
-    background: rgb(0 0 0 / 25%);
-    color: rgb(0 0 0 / 80%);
+    background: rgb(0 0 0 / 62%);
+    color: #fff;
     font-size: 0.95rem;
     line-height: 1;
     cursor: pointer;
@@ -43,7 +43,7 @@
       transform 0.1s;
 
     &:hover {
-      background: rgb(0 0 0 / 40%);
+      background: rgb(0 0 0 / 78%);
       transform: scale(1.1);
     }
   }

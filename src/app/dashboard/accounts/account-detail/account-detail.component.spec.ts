@@ -671,7 +671,7 @@ describe('AccountDetailComponent', () => {
     });
 
     it('should return all characters when no filters active', () => {
-      expect(component.filteredCharacters().length).toBe(2);
+      expect(component.filteredCharacters()).toHaveLength(2);
     });
 
     it('should filter by searchText matching handle', () => {
