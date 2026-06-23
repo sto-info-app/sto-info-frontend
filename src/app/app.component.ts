@@ -76,7 +76,10 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscribeToExpiryAnnouncements();
 
     // Poll banners + unread count on a single cadence for the whole app.
-    this.notificationService.startAppStatePolling();
+    // Skip in lighthouse-audit mode to avoid non-critical network noise.
+    if (environment?.env_name !== 'lighthouse-audit') {
+      this.notificationService.startAppStatePolling();
+    }
 
     if (
       environment?.env_name !== 'local' &&
