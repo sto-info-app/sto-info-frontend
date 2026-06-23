@@ -28,7 +28,9 @@ export const MARKDOWN_BLOCK_SPLIT_PATTERN = /\n{2,}/;
 export const MARKDOWN_CODE_PLACEHOLDER_PATTERN = /CODE(\d+)/g;
 export const MARKDOWN_CODE_PLACEHOLDER_BLOCK_PATTERN = /^CODE\d+$/;
 export const MARKDOWN_HORIZONTAL_RULE_PATTERN = /^(-{3,}|\*{3,}|_{3,})$/;
-export const MARKDOWN_HEADING_PATTERN = /^(#{1,6})[ \t]+([^\n]*)$/;
+// Bound whitespace/title spans to avoid super-linear backtracking on
+// pathological long input while preserving supported Markdown heading shapes.
+export const MARKDOWN_HEADING_PATTERN = /^(#{1,6})[ \t]{1,64}([^\n]{0,4096})$/;
 export const MARKDOWN_UNORDERED_LIST_ITEM_PATTERN = /^\s*[-*]\s+/;
 export const MARKDOWN_ORDERED_LIST_ITEM_PATTERN = /^\s*\d+\.\s+/;
 export const MARKDOWN_BLOCKQUOTE_LINE_PATTERN = /^\s*&gt;\s?/;
