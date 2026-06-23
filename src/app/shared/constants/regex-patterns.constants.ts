@@ -22,7 +22,7 @@ export const STO_HANDLE_PATTERN = /^[a-zA-Z][a-zA-Z0-9._-]{2,15}(#\d{4,})?$/;
 export const WHITESPACE_PATTERN = /\s+/g;
 export const TRAILING_ZEROS_PATTERN = /\.?0{1,2}$/;
 
-export const MARKDOWN_FENCED_CODE_BLOCK_PATTERN = /```(.*?)```/gs;
+export const MARKDOWN_FENCED_CODE_BLOCK_PATTERN = /```((?:(?!```)[\s\S])*)```/g;
 export const MARKDOWN_LEADING_NEWLINE_PATTERN = /^\n/;
 export const MARKDOWN_BLOCK_SPLIT_PATTERN = /\n{2,}/;
 export const MARKDOWN_CODE_PLACEHOLDER_PATTERN = /CODE(\d+)/g;

@@ -90,7 +90,7 @@ describe('NewsService', () => {
     req.flush({ id: '1' });
   });
 
-  it('creates a post with the auth header', () => {
+  it('creates a post with the auth header (duplicate coverage case)', () => {
     service
       .createNews({ title: 'T', body: 'B', status: NewsStatus.DRAFT })
       .subscribe();
