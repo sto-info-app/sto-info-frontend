@@ -18,13 +18,14 @@
  * @module
  */
 import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildJsonFeed, buildRssFeed, buildSitemap } from './lib/feeds.mjs';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(SCRIPT_DIR, '..');
 const OUTPUT_DIR = join(PROJECT_ROOT, 'generated');
+const OUTPUT_DIR_RESOLVED = resolve(OUTPUT_DIR);
 
 const PAGE_SIZE = 50;
 const MAX_PAGES = 500;
@@ -78,9 +79,34 @@ export async function fetchAllPublishedPosts(apiUrl = API_URL) {
  * @returns {Promise<void>}
  */
 async function writeOutput(relativePath, contents) {
-  const fullPath = join(OUTPUT_DIR, relativePath);
+  const fullPath = resolve(OUTPUT_DIR, String(relativePath ?? ''));
+  const outputPrefix = `${OUTPUT_DIR_RESOLVED}${sep}`;
+  if (fullPath !== OUTPUT_DIR_RESOLVED && !fullPath.startsWith(outputPrefix)) {
+    throw new Error('Refusing to write outside generated output directory');
+  }
   await mkdir(dirname(fullPath), { recursive: true });
   await writeFile(fullPath, contents);
+}
+
+/**
+ * Converts a potentially untrusted slug into a safe filename segment.
+ *
+ * @param {unknown} rawSlug - Raw slug value.
+ * @param {number} index - Fallback index for empty/invalid slugs.
+ * @returns {string} A filesystem-safe slug.
+ */
+function toSafeSlug(rawSlug, index) {
+  const source =
+    typeof rawSlug === 'string' || typeof rawSlug === 'number'
+      ? String(rawSlug)
+      : '';
+  const normalized = source
+    .normalize('NFKD')
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  return normalized || `post-${index + 1}`;
 }
 
 /**
@@ -102,18 +128,19 @@ async function generateOgImages(posts) {
   }
 
   let written = 0;
-  for (const post of posts) {
+  for (const [index, post] of posts.entries()) {
+    const safeSlug = toSafeSlug(post.slug, index);
     try {
       const png = await createOgImage({
         title: post.title,
         category: post.category,
         siteTitle: APP_TITLE,
       });
-      await writeOutput(join('og', 'news', `${post.slug}.png`), png);
+      await writeOutput(join('og', 'news', `${safeSlug}.png`), png);
       written += 1;
     } catch (error) {
       console.warn(
-        `[generate-content] OG image failed for "${post.slug}": ${error.message}`,
+        `[generate-content] OG image failed for "${safeSlug}": ${error.message}`,
       );
     }
   }
