@@ -110,7 +110,12 @@ export class EndeavoursComponent implements OnInit, OnDestroy {
       if (handle) {
         this.accountHandle = handle;
         this.resolveAccountAndLoad(handle);
+        return;
       }
+
+      this.isLoading = false;
+      this.errorMessage = 'Invalid account link';
+      this._cdr.detectChanges();
     });
   }
 

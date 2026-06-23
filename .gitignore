@@ -10,6 +10,10 @@ src/environments/environment.prod.ts
 /dist
 /tmp
 /out-tsc
+
+# Build-time generated content (sitemap, feeds, OG images)
+/generated/*
+!/generated/.gitkeep
 /bazel-out
 *.swp
 /.stryker-tmp/

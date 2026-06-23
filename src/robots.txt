@@ -1,2 +1,14 @@
 User-agent: *
 Allow: /
+
+# Private / authenticated areas — keep these out of search results
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+Disallow: /verify-email
+Disallow: /reset-password
+Disallow: /change-password
+Disallow: /service-interruption
+
+Sitemap: https://startrekonline.info/sitemap.xml

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { SideBarComponent } from './side-bar.component';
 
@@ -8,11 +9,16 @@ describe('SideBarComponent', () => {
   let component: SideBarComponent;
   let fixture: ComponentFixture<SideBarComponent>;
   let routingServiceSpy: jest.Mocked<RoutingService>;
+  let authServiceSpy: Pick<AuthService, 'isLoggedInAsAdmin'>;
 
   beforeEach(() => {
     routingServiceSpy = {
       getLink: jest.fn().mockReturnValue('/test'),
     } as unknown as jest.Mocked<RoutingService>;
+
+    authServiceSpy = {
+      isLoggedInAsAdmin: jest.fn().mockReturnValue(false),
+    };
 
     TestBed.configureTestingModule({
       imports: [SideBarComponent],
@@ -25,6 +31,7 @@ describe('SideBarComponent', () => {
           },
         },
         { provide: RoutingService, useValue: routingServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy },
       ],
     });
     fixture = TestBed.createComponent(SideBarComponent);
@@ -43,6 +50,13 @@ describe('SideBarComponent', () => {
   it('should get route link', () => {
     expect(component.getRouteLink('test')).toBe('/test');
     expect(routingServiceSpy.getLink).toHaveBeenCalledWith('test');
+  });
+
+  it('should return admin status from auth service', () => {
+    expect(component.isAdmin).toBe(false);
+
+    (authServiceSpy.isLoggedInAsAdmin as jest.Mock).mockReturnValue(true);
+    expect(component.isAdmin).toBe(true);
   });
 
   describe('onResize', () => {

@@ -1,7 +1,67 @@
+@use 'lcars-variables' as vars;
+
 .show-scroll-top {
   display: block;
 }
 
 .hide-scroll-top {
   display: none;
+}
+
+// "Incoming transmission" alert that commandeers the data-cascade area
+// whenever the logged-in user has unread notifications: a sunflower heading
+// above an LCARS button carrying the unread count.
+.comms-alert {
+  flex: 1;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  padding-right: 10px;
+}
+
+.comms-alert-heading {
+  color: vars.$lcars-orange;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+
+  // Fluid size: large on desktop, scales down (and wraps) on narrow viewports
+  // so the heading never clips or overflows the header strip.
+  font-size: clamp(1.15rem, 0.55rem + 2.9vw, 2.85rem);
+  line-height: 1.02;
+  text-align: center;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  animation: comms-alert-pulse 1.6s ease-in-out infinite;
+}
+
+// Size the shared LCARS button down to fit the header strip; it grows to fill
+// the available width up to a sensible cap so it stays tappable on all devices.
+.comms-alert-button {
+  width: 100%;
+  max-width: 16rem;
+  height: auto;
+  padding: 0.5rem 1.1rem 0.4rem !important;
+  font-size: clamp(0.78rem, 0.5rem + 0.8vw, 1rem);
+  line-height: 1.1;
+}
+
+@keyframes comms-alert-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comms-alert-heading {
+    animation: none;
+  }
 }

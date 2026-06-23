@@ -139,7 +139,7 @@ describe('EndeavoursComponent', () => {
       sortBy: 'nodes',
       sortOrder: 'DESC',
     });
-    expect(component.progress().length).toBe(2);
+    expect(component.progress()).toHaveLength(2);
     expect(component.summary()).toEqual(mockSummary);
     expect(component.isLoading).toBe(false);
   });
@@ -187,7 +187,7 @@ describe('EndeavoursComponent', () => {
       sortBy: 'name',
       sortOrder: 'ASC',
     });
-    expect(component.progress().length).toBe(2);
+    expect(component.progress()).toHaveLength(2);
 
     endeavourServiceSpy.getProgress.mockReturnValue(
       throwError(() => new Error('progress fail')),
@@ -200,15 +200,15 @@ describe('EndeavoursComponent', () => {
     component.progress.set(mockProgress);
 
     component.setCategory('Space');
-    expect(component.filteredProgress().length).toBe(1);
+    expect(component.filteredProgress()).toHaveLength(1);
 
     component.setCategory('All');
     component.hideComplete.set(true);
-    expect(component.filteredProgress().length).toBe(1);
+    expect(component.filteredProgress()).toHaveLength(1);
 
     component.hideComplete.set(false);
     component.searchText.set('ground');
-    expect(component.filteredProgress().length).toBe(1);
+    expect(component.filteredProgress()).toHaveLength(1);
   });
 
   it('should keep default rank display when summary is null', () => {
@@ -216,10 +216,12 @@ describe('EndeavoursComponent', () => {
     expect(component.rankDisplay()).toBe('0000');
   });
 
-  it('should not resolve account when handle route param is empty', () => {
+  it('should stop loading and show an error when handle route param is empty', () => {
     fixture.detectChanges();
     routeParams$.next({});
     expect(stoAccountServiceSpy.getAccounts).not.toHaveBeenCalled();
+    expect(component.isLoading).toBe(false);
+    expect(component.errorMessage).toBe('Invalid account link');
   });
 
   it('should compute complete count and active filter count', () => {

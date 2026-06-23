@@ -1,0 +1,62 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading post"></app-loading-bar>
+}
+
+<div id="news-detail-container">
+  <div
+    id="news-detail-main-column"
+    class="col">
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    @if (notFound) {
+      <h1>Post not found</h1>
+      <p>This post may have been removed or is not yet published.</p>
+    }
+
+    @if (post) {
+      <h1>{{ post.title }}</h1>
+
+      <div class="news-meta">
+        <span class="news-category">
+          <i
+            class="fas {{ categoryIcons[post.category] }} news-category-icon"
+            aria-hidden="true"></i>
+          {{ categoryLabels[post.category] }}
+        </span>
+        @if (post.publishedAt) {
+          <time class="news-date">
+            <i
+              class="fas fa-calendar-day news-date-icon"
+              aria-hidden="true"></i>
+            {{ post.publishedAt | date: 'longDate' }}
+          </time>
+        }
+      </div>
+
+      <article class="news-article">
+        <div
+          class="news-body"
+          [innerHTML]="post.body | markdown"></div>
+      </article>
+    }
+  </div>
+
+  <div
+    id="news-detail-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="newsListLink"
+        class="full-width-btn-link sunflower"
+        >Back to News</a
+      >
+    </div>
+  </div>
+</div>

@@ -1,0 +1,34 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+@use 'notification-card';
+
+// Sent notifications reuse the user-facing card formatting, laid out in the
+// admin main column.
+.admin-notifications-items {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notification-card {
+  .notification-header-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+  }
+
+  .notification-audience {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgb(0 0 0 / 70%);
+  }
+
+  .notification-actions .delete-icon {
+    @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-red);
+  }
+}

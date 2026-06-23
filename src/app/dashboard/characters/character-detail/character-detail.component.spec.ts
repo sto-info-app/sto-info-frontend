@@ -106,6 +106,16 @@ describe('CharacterDetailComponent', () => {
   });
 
   describe('ngOnInit / character loading', () => {
+    it('should stop loading and show an error when route params are missing', fakeAsync(() => {
+      fixture.detectChanges();
+      routeParamsSubject.next({});
+      tick();
+
+      expect(mockStoAccountService.getAccounts).not.toHaveBeenCalled();
+      expect(component.isLoading).toBe(false);
+      expect(component.errorMessage).toBe('Invalid character link');
+    }));
+
     it('should load character successfully', fakeAsync(() => {
       mockStoAccountService.getAccounts.mockReturnValue(of([mockAccount]));
       mockCharacterService.getCharactersByAccount.mockReturnValue(

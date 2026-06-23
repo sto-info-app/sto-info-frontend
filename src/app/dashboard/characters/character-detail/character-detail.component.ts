@@ -70,6 +70,9 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
           const charHandle = params['characterHandle'];
 
           if (!this.accountHandle || !charHandle) {
+            this.isLoading = false;
+            this.errorMessage = 'Invalid character link';
+            this.cdr.markForCheck();
             return EMPTY;
           }
 

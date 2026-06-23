@@ -1,0 +1,50 @@
+@use 'notification-card';
+
+.banner-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+// Banners reuse the shared notification-card anatomy (severity-tinted header
+// bar, body area, link styling). The only banner-specific addition is the
+// dismiss control which lives in the header bar instead of a side actions
+// column.
+.banner-card {
+  // Banners are non-interactive containers; suppress the card hover lift.
+  &:hover {
+    transform: none;
+  }
+
+  .notification-type-icon {
+    color: rgb(0 0 0 / 80%);
+  }
+
+  // Dismiss "×" sits inside the coloured header bar, so it inherits the dark
+  // LCARS-on-colour treatment used by the header title.
+  .banner-dismiss {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 62%);
+    color: #fff;
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background 0.2s,
+      transform 0.1s;
+
+    &:hover {
+      background: rgb(0 0 0 / 78%);
+      transform: scale(1.1);
+    }
+  }
+}

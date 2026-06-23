@@ -28,6 +28,7 @@ export class AuthService {
     new BehaviorSubject<boolean>(false);
   public isAuthenticated$: Observable<boolean> =
     this.isAuthenticatedSubject.asObservable();
+  public isLoggedIn$: Observable<boolean> = this.isAuthenticated$;
 
   private readonly expiryAnnouncedSubject: ReplaySubject<number> =
     new ReplaySubject<number>(1); // Will replay the last 1 values to new subscribers
@@ -255,6 +256,72 @@ export class AuthService {
     this.router.navigate(['/login'], {
       queryParams: currentUrl ? { returnUrl: currentUrl } : {},
     });
+  }
+
+  /**
+   * Decodes the payload of the stored, still-valid access token.
+   *
+   * @returns The decoded payload, or `null` when there is no valid token.
+   */
+  getDecodedToken(): {
+    sub?: string;
+    email?: string;
+    role?: string;
+  } | null {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+    const segments = token.split('.');
+    if (segments.length < 2) {
+      return null;
+    }
+    try {
+      const normalised = segments[1].replaceAll('-', '+').replaceAll('_', '/');
+      const json = atob(normalised);
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Returns the current user's ID from the access token, if available.
+   *
+   * @returns The user ID, or `null`.
+   */
+  getUserId(): string | null {
+    return this.getDecodedToken()?.sub ?? null;
+  }
+
+  /**
+   * Returns the current user's role from the access token, if available.
+   *
+   * @returns The role string, or `null`.
+   */
+  getUserRole(): string | null {
+    return this.getDecodedToken()?.role ?? null;
+  }
+
+  /**
+   * Checks whether the current user is an administrator.
+   *
+   * Note: this only governs UI affordances; the API independently enforces
+   * authorization on every admin endpoint.
+   *
+   * @returns `true` when the access token carries the ADMIN role.
+   */
+  isAdmin(): boolean {
+    return this.getUserRole() === 'ADMIN';
+  }
+
+  /**
+   * Checks whether the current user is authenticated and has admin role.
+   *
+   * @returns `true` when a valid session exists for an admin user.
+   */
+  isLoggedInAsAdmin(): boolean {
+    return this.isLoggedIn() && this.isAdmin();
   }
 
   /**

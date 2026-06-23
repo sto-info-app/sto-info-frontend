@@ -1,4 +1,11 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -20,6 +27,8 @@ import { LcarsWarningMessageComponent } from '../lcars-warning-message/lcars-war
 export class RefreshSessionDialogComponent implements OnInit, OnDestroy {
   public dialogRef = inject(MatDialogRef<RefreshSessionDialogComponent>);
   private readonly authService = inject(AuthService);
+  private readonly zone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroy$ = new Subject<void>();
   private readonly data = inject<{ appComponent: AppComponent } | null>(
     MAT_DIALOG_DATA,
@@ -29,7 +38,18 @@ export class RefreshSessionDialogComponent implements OnInit, OnDestroy {
   appComponent: AppComponent | null = this.data?.appComponent ?? null;
 
   /**
-   * Subscribes to authentication changes so the dialog closes when the user logs out.
+   * Remaining seconds before automatic logout, displayed in the countdown.
+   *
+   * @remarks Owned by the dialog so it refreshes even though the surrounding
+   * CDK overlay (`MatDialogContainer`) uses OnPush change detection.
+   */
+  countdown = this.authService.getSecondsUntilLoginSessionExpiry();
+
+  private intervalId: ReturnType<typeof setInterval> | null = null;
+
+  /**
+   * Subscribes to authentication changes so the dialog closes when the user logs out,
+   * and starts the countdown that drives the auto-logout timer display.
    */
   ngOnInit(): void {
     // Automatically close the dialog if the user is logged out elsewhere
@@ -41,14 +61,47 @@ export class RefreshSessionDialogComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.dialogRef.close();
       });
+
+    this.startCountdown();
   }
 
   /**
-   * Cleans up dialog subscriptions.
+   * Cleans up dialog subscriptions and the countdown timer.
    */
   ngOnDestroy(): void {
+    this.stopCountdown();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /**
+   * Ticks the auto-logout countdown once per second and re-renders the dialog.
+   *
+   * @remarks The value is recomputed from the stored session expiry rather than
+   * decremented, so it stays accurate even if the tab is throttled. Each tick
+   * triggers change detection explicitly because the dialog is rendered inside
+   * an OnPush CDK overlay that the parent's change detection does not reach.
+   */
+  private startCountdown(): void {
+    this.intervalId = globalThis.setInterval(() => {
+      this.zone.run(() => {
+        this.countdown = this.authService.getSecondsUntilLoginSessionExpiry();
+        if (this.countdown <= 0) {
+          this.stopCountdown();
+        }
+        this.cdr.detectChanges();
+      });
+    }, 1000);
+  }
+
+  /**
+   * Stops the auto-logout countdown timer.
+   */
+  private stopCountdown(): void {
+    if (this.intervalId !== null) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
   }
 
   /**

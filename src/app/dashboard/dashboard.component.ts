@@ -31,6 +31,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
   user: User | undefined;
+  isUserLoading = true;
+  userLoadError = '';
   userGreeting = '';
   accountsCount = 0;
 
@@ -42,6 +44,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   ngOnInit() {
+    this.isUserLoading = true;
+    this.userLoadError = '';
+
     this.dashboardService
       .getUser()
       .pipe(takeUntil(this.destroy$))
@@ -50,10 +55,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
           if (user.isAccountDisabled) this.authService.performLogout();
 
           this.user = user;
+          this.isUserLoading = false;
+          this.userLoadError = '';
           this.userGreeting = this.displayWelcomeText();
           this.cdr.detectChanges();
         },
         error: err => {
+          this.isUserLoading = false;
+          this.userLoadError = 'Failed to load dashboard data.';
+          this.cdr.detectChanges();
           console.warn('Failed to load user data', err);
         },
       });

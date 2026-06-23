@@ -6,6 +6,7 @@
   <div class="right-frame">
     <app-main-content-bar-panel></app-main-content-bar-panel>
     <main>
+      <app-banner></app-banner>
       @if (
         (!hasActiveRoute && isServiceInterruptionRoute) ||
         (showBackendWarning$ | async)

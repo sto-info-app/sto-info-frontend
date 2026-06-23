@@ -156,10 +156,12 @@ describe('AccountDetailComponent', () => {
       expect(component.account).toEqual(mockAccount);
     });
 
-    it('should not load account data if handle param is missing', () => {
+    it('should stop loading and show an error if handle param is missing', () => {
       fixture.detectChanges();
       routeParamsSubject.next({});
       expect(mockStoAccountService.getAccounts).not.toHaveBeenCalled();
+      expect(component.isLoading).toBe(false);
+      expect(component.errorMessage).toBe('Invalid account link');
     });
   });
 
@@ -669,7 +671,7 @@ describe('AccountDetailComponent', () => {
     });
 
     it('should return all characters when no filters active', () => {
-      expect(component.filteredCharacters().length).toBe(2);
+      expect(component.filteredCharacters()).toHaveLength(2);
     });
 
     it('should filter by searchText matching handle', () => {

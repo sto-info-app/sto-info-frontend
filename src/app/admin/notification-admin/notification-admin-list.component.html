@@ -1,0 +1,132 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading notifications"></app-loading-bar>
+}
+
+<div
+  id="notification-admin-list-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Sent Notifications</h1>
+    <p class="admin-page-intro">
+      Review broadcast and user-targeted notifications already sent, using the
+      same card formatting as the user-facing notifications inbox.
+    </p>
+
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Action failed"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    <section class="admin-section">
+      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+        <span>Sent Notifications</span>
+        <div class="admin-section-actions">
+          <a
+            class="cta-icon"
+            [routerLink]="'/' + appRoutes.ADMIN_NOTIFICATIONS_SEND"
+            title="Send notification"
+            aria-label="Send notification"
+          ><i class="fas fa-plus"></i
+          ></a>
+        </div>
+      </div>
+
+      @if (!isLoading && notifications.length === 0) {
+        <p class="records-empty">No notifications sent yet.</p>
+      }
+
+      @if (notifications.length > 0) {
+        <ul class="admin-notifications-items">
+          @for (notification of notifications; track notification.id) {
+            <li
+              class="notification-card"
+              [ngClass]="severityMeta(notification).colourClass">
+              <div class="notification-header-row">
+                <span class="notification-header-left">
+                  <span class="notification-title">{{ notification.title }}</span>
+                  <span class="notification-audience">
+                    {{
+                      notification.target === notificationTarget.BROADCAST
+                        ? 'Everyone'
+                        : 'Single user'
+                    }}
+                  </span>
+                </span>
+                <span class="notification-status">
+                  <i
+                    class="fas {{ severityMeta(notification).icon }} notification-type-icon"
+                    [title]="severityMeta(notification).label"
+                    [attr.aria-label]="
+                      severityMeta(notification).label + ' notification'
+                    "></i>
+                </span>
+              </div>
+
+              <div class="notification-main-area">
+                <div class="notification-body-content">
+                  <p class="notification-body">{{ notification.body }}</p>
+                  @if (notification.linkUrl) {
+                    <a
+                      class="notification-link"
+                      [href]="notification.linkUrl"
+                      target="_blank"
+                      rel="noopener">
+                      <i
+                        class="fas fa-link notification-link-icon"
+                        aria-hidden="true"></i>
+                      <span class="notification-link-url">{{
+                        notification.linkUrl
+                      }}</span>
+                      <i
+                        class="fas fa-arrow-up-right-from-square notification-link-external"
+                        title="Opens in a new tab"
+                        aria-hidden="true"></i>
+                    </a>
+                  }
+                  @if (notification.createdAt) {
+                    <time class="notification-date">
+                      <i
+                        class="fas fa-calendar-day notification-date-icon"
+                        aria-hidden="true"></i>
+                      {{ notification.createdAt | date: 'full' }}
+                    </time>
+                  }
+                </div>
+
+                <div class="notification-actions">
+                  <button
+                    type="button"
+                    class="cta-icon delete-icon"
+                    (click)="remove(notification)"
+                    title="Delete notification"
+                    aria-label="Delete notification"
+                  ><i class="fas fa-trash"></i
+                  ></button>
+                </div>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN_NOTIFICATIONS_SEND"
+        >Send notification</a
+      >
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN"
+        >Admin home</a
+      >
+    </div>
+  </div>
+</div>
