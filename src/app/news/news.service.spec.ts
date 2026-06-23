@@ -6,7 +6,11 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
-import { NewsStatus, PaginatedNews } from 'src/app/models/news.models';
+import {
+  NewsCategory,
+  NewsStatus,
+  PaginatedNews,
+} from 'src/app/models/news.models';
 import { NewsService } from './news.service';
 
 describe('NewsService', () => {
@@ -57,12 +61,13 @@ describe('NewsService', () => {
 
   it('fetches published news with category filter', () => {
     service
-      .getPublishedNews({ category: 'patch-notes' })
+      .getPublishedNews({ category: NewsCategory.RELEASE_NOTES })
       .subscribe(result => expect(result).toEqual(emptyPage));
 
     const req = httpMock.expectOne(
       r =>
-        r.url === API_URLS.NEWS && r.params.get('category') === 'patch-notes',
+        r.url === API_URLS.NEWS &&
+        r.params.get('category') === NewsCategory.RELEASE_NOTES,
     );
     expect(req.request.method).toBe('GET');
     req.flush(emptyPage);
@@ -104,14 +109,18 @@ describe('NewsService', () => {
 
   it('fetches all news for admin with query params', () => {
     service
-      .getAllNewsForAdmin({ page: 1, pageSize: 20, category: 'events' })
+      .getAllNewsForAdmin({
+        page: 1,
+        pageSize: 20,
+        category: NewsCategory.GENERAL,
+      })
       .subscribe(result => expect(result).toEqual(emptyPage));
 
     const req = httpMock.expectOne(
       r =>
         r.url === API_URLS.NEWS_ADMIN &&
         r.params.get('page') === '1' &&
-        r.params.get('category') === 'events',
+        r.params.get('category') === NewsCategory.GENERAL,
     );
     expect(req.request.method).toBe('GET');
     req.flush(emptyPage);

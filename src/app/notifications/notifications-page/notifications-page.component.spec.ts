@@ -45,8 +45,14 @@ describe('NotificationsPageComponent', () => {
           unreadCount: 1,
         }),
       ),
-      markRead: jest.fn(() => of(void 0)),
-      markUnread: jest.fn(() => of(void 0)),
+      markRead: jest.fn<
+        ReturnType<NotificationService['markRead']>,
+        Parameters<NotificationService['markRead']>
+      >(() => of(void 0)),
+      markUnread: jest.fn<
+        ReturnType<NotificationService['markUnread']>,
+        Parameters<NotificationService['markUnread']>
+      >(() => of(void 0)),
       markAllRead: jest.fn(() => of({ marked: 1 })),
     };
 
@@ -133,7 +139,7 @@ describe('NotificationsPageComponent', () => {
   it('returns severity meta for known severity', () => {
     const notificationWithSeverity = {
       ...notification,
-      severity: NotificationSeverity.ERROR,
+      severity: NotificationSeverity.CRITICAL,
     };
     const meta = component.severityMeta(notificationWithSeverity);
     expect(meta).toBeDefined();
@@ -189,6 +195,8 @@ describe('NotificationsPageComponent', () => {
         null as unknown as {
           items: AppNotification[];
           total: number;
+          page: number;
+          pageSize: number;
           unreadCount: number;
         },
       ),

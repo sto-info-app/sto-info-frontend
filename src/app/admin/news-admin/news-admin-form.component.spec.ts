@@ -38,9 +38,18 @@ describe('NewsAdminFormComponent', () => {
     };
 
     serviceSpy = {
-      getNewsByIdForAdmin: jest.fn(() => of(post)),
-      createNews: jest.fn(() => of(post)),
-      updateNews: jest.fn(() => of(post)),
+      getNewsByIdForAdmin: jest.fn<
+        ReturnType<NewsService['getNewsByIdForAdmin']>,
+        Parameters<NewsService['getNewsByIdForAdmin']>
+      >(() => of(post)),
+      createNews: jest.fn<
+        ReturnType<NewsService['createNews']>,
+        Parameters<NewsService['createNews']>
+      >(() => of(post)),
+      updateNews: jest.fn<
+        ReturnType<NewsService['updateNews']>,
+        Parameters<NewsService['updateNews']>
+      >(() => of(post)),
     };
 
     await TestBed.configureTestingModule({

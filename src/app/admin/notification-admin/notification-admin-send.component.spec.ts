@@ -30,7 +30,10 @@ describe('NotificationAdminSendComponent', () => {
     };
 
     serviceSpy = {
-      createNotification: jest.fn(() => of(createdNotification)),
+      createNotification: jest.fn<
+        ReturnType<NotificationService['createNotification']>,
+        Parameters<NotificationService['createNotification']>
+      >(() => of(createdNotification)),
     };
 
     await TestBed.configureTestingModule({

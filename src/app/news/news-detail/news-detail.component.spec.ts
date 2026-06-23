@@ -44,7 +44,10 @@ describe('NewsDetailComponent', () => {
 
   const configure = async () => {
     serviceSpy = {
-      getNewsBySlug: jest.fn(() => of(buildPost())),
+      getNewsBySlug: jest.fn<
+        ReturnType<NewsService['getNewsBySlug']>,
+        Parameters<NewsService['getNewsBySlug']>
+      >(() => of(buildPost())),
     };
     routingServiceSpy = {
       getLink: jest.fn((route: string) => `/${route}`),
@@ -91,7 +94,10 @@ describe('NewsDetailComponent', () => {
   it('flags not found on a 404 response', async () => {
     slug = 'missing';
     serviceSpy = {
-      getNewsBySlug: jest.fn(() => throwError(() => ({ status: 404 }))),
+      getNewsBySlug: jest.fn<
+        ReturnType<NewsService['getNewsBySlug']>,
+        Parameters<NewsService['getNewsBySlug']>
+      >(() => throwError(() => ({ status: 404 }))),
     };
     await TestBed.configureTestingModule({
       imports: [NewsDetailComponent, HttpClientTestingModule],
@@ -131,7 +137,10 @@ describe('NewsDetailComponent', () => {
   it('surfaces an error message for non-404 errors', async () => {
     slug = 'error';
     serviceSpy = {
-      getNewsBySlug: jest.fn(() => throwError(() => ({ status: 500 }))),
+      getNewsBySlug: jest.fn<
+        ReturnType<NewsService['getNewsBySlug']>,
+        Parameters<NewsService['getNewsBySlug']>
+      >(() => throwError(() => ({ status: 500 }))),
     };
     await TestBed.configureTestingModule({
       imports: [NewsDetailComponent, HttpClientTestingModule],

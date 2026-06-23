@@ -45,9 +45,18 @@ describe('BannerAdminFormComponent', () => {
 
   const configure = async () => {
     serviceSpy = {
-      getBannerByIdForAdmin: jest.fn(() => of(banner)),
-      createBanner: jest.fn(() => of(banner)),
-      updateBanner: jest.fn(() => of(banner)),
+      getBannerByIdForAdmin: jest.fn<
+        ReturnType<NotificationService['getBannerByIdForAdmin']>,
+        Parameters<NotificationService['getBannerByIdForAdmin']>
+      >(() => of(banner)),
+      createBanner: jest.fn<
+        ReturnType<NotificationService['createBanner']>,
+        Parameters<NotificationService['createBanner']>
+      >(() => of(banner)),
+      updateBanner: jest.fn<
+        ReturnType<NotificationService['updateBanner']>,
+        Parameters<NotificationService['updateBanner']>
+      >(() => of(banner)),
     };
 
     await TestBed.configureTestingModule({

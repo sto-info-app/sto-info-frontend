@@ -47,8 +47,14 @@ describe('NewsAdminListComponent', () => {
       getAllNewsForAdmin: jest.fn(() =>
         of({ items: [post], total: 1, page: 1, pageSize: 20 }),
       ),
-      publishNews: jest.fn(() => of({ ...post, status: NewsStatus.PUBLISHED })),
-      deleteNews: jest.fn(() => of(void 0)),
+      publishNews: jest.fn<
+        ReturnType<NewsService['publishNews']>,
+        Parameters<NewsService['publishNews']>
+      >(() => of({ ...post, status: NewsStatus.PUBLISHED })),
+      deleteNews: jest.fn<
+        ReturnType<NewsService['deleteNews']>,
+        Parameters<NewsService['deleteNews']>
+      >(() => of(void 0)),
     };
 
     dialogSpy = {

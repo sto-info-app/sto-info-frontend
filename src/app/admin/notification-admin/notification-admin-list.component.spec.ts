@@ -40,7 +40,10 @@ describe('NotificationAdminListComponent', () => {
   beforeEach(async () => {
     serviceSpy = {
       getAllNotificationsForAdmin: jest.fn(() => of([])),
-      deleteNotification: jest.fn(() => of(void 0)),
+      deleteNotification: jest.fn<
+        ReturnType<NotificationService['deleteNotification']>,
+        Parameters<NotificationService['deleteNotification']>
+      >(() => of(void 0)),
     };
 
     dialogSpy = {

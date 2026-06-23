@@ -49,7 +49,10 @@ describe('BannerAdminListComponent', () => {
   beforeEach(async () => {
     serviceSpy = {
       getAllBannersForAdmin: jest.fn(() => of([banner])),
-      deleteBanner: jest.fn(() => of(void 0)),
+      deleteBanner: jest.fn<
+        ReturnType<NotificationService['deleteBanner']>,
+        Parameters<NotificationService['deleteBanner']>
+      >(() => of(void 0)),
     };
 
     dialogSpy = {
