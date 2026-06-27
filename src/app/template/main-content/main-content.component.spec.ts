@@ -37,6 +37,19 @@ describe('MainContentComponent', () => {
     subs: { unsubscribe: () => void };
   }
 
+  const flushStartupRequests = (version = 'backend-version') => {
+    const versionReq = httpTestingController.expectOne(API_URLS.VERSION);
+    expect(versionReq.request.method).toBe('GET');
+    versionReq.flush(version, { status: 200, statusText: 'OK' });
+
+    const bannerRequests = httpTestingController.match(
+      API_URLS.NOTIFICATIONS_BANNERS,
+    );
+    for (const req of bannerRequests) {
+      req.flush([]);
+    }
+  };
+
   beforeEach(() => {
     mockRoutingService = {
       getLink: jest.fn().mockReturnValue('/mock-link'),
@@ -88,10 +101,7 @@ describe('MainContentComponent', () => {
     fixture = TestBed.createComponent(MainContentComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-
-    const req = httpTestingController.expectOne(API_URLS.VERSION);
-    expect(req.request.method).toBe('GET');
-    req.flush('backend-version', { status: 200, statusText: 'OK' });
+    flushStartupRequests();
   });
 
   afterEach(() => {
@@ -131,9 +141,8 @@ describe('MainContentComponent', () => {
     // Let's create a new instance for this specific test.
     const newFixture = TestBed.createComponent(MainContentComponent);
     const newComponent = newFixture.componentInstance;
-
-    const req = httpTestingController.expectOne(API_URLS.VERSION);
-    req.flush('', { status: 200, statusText: 'OK' });
+    newFixture.detectChanges();
+    flushStartupRequests('');
 
     expect(newComponent.frontendAppVersion).toBe('');
   });
@@ -146,12 +155,20 @@ describe('MainContentComponent', () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const errorFixture = TestBed.createComponent(MainContentComponent);
     const errorComponent = errorFixture.componentInstance;
+    errorFixture.detectChanges();
 
     const req = httpTestingController.expectOne(API_URLS.VERSION);
     req.flush('Server Error', {
       status: 500,
       statusText: 'Internal Server Error',
     });
+
+    const bannerRequests = httpTestingController.match(
+      API_URLS.NOTIFICATIONS_BANNERS,
+    );
+    for (const bannerReq of bannerRequests) {
+      bannerReq.flush([]);
+    }
 
     expect(errorComponent.backendAppVersion).toBe('');
     expect(warnSpy).toHaveBeenCalledWith(
@@ -405,9 +422,9 @@ describe('MainContentComponent', () => {
     (environment as unknown as { version: string | undefined }).version =
       undefined;
     const localFixture = TestBed.createComponent(MainContentComponent);
+    localFixture.detectChanges();
 
-    const req = httpTestingController.expectOne(API_URLS.VERSION);
-    req.flush('1.0.0');
+    flushStartupRequests('1.0.0');
 
     expect(localFixture.componentInstance.frontendAppVersion).toBe('');
     (environment as unknown as { version: string | undefined }).version =

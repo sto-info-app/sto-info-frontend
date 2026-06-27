@@ -1,0 +1,155 @@
+<div
+  id="notification-admin-send-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Send Notification</h1>
+    <p class="admin-page-intro">
+      Compose broadcast and user-targeted notifications with the same LCARS
+      controls and action icons used on the dashboard screens.
+    </p>
+
+    @if (successMessage) {
+      <app-lcars-success-message
+        title="Sent"
+        [message]="successMessage"></app-lcars-success-message>
+    }
+
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Action failed"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="send()"
+      class="admin-form">
+      <section class="admin-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Compose Notification</span>
+        </div>
+
+        <div class="admin-panel">
+          <div class="form-row compact">
+            <div class="lcars-select-container sunflower">
+              <label
+                class="select-label"
+                for="notification-target-select"
+                >Audience</label
+              >
+              <select
+                id="notification-target-select"
+                title="Audience"
+                formControlName="target">
+                @for (target of targets; track target) {
+                  <option [value]="target">
+                    {{
+                      target === notificationTarget.BROADCAST
+                        ? 'Everyone'
+                        : 'Single user'
+                    }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            @if (isUserTarget) {
+              <div class="lcars-input-container bluey">
+                <label for="notification-user-input">Recipient User ID</label>
+                <input
+                  id="notification-user-input"
+                  type="text"
+                  formControlName="userId" />
+                @if (form.controls.userId.touched && form.controls.userId.invalid) {
+                  <small class="field-error">A valid user ID is required.</small>
+                }
+              </div>
+            }
+
+            <div class="lcars-select-container tangerine">
+              <label
+                class="select-label"
+                for="notification-severity-select"
+                >Severity</label
+              >
+              <select
+                id="notification-severity-select"
+                title="Severity"
+                formControlName="severity">
+                @for (severity of severities; track severity) {
+                  <option [value]="severity">{{ severityLabels[severity] }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="lcars-input-container perano admin-field-full">
+              <label for="notification-title-input">Title</label>
+              <input
+                id="notification-title-input"
+                type="text"
+                formControlName="title"
+                maxlength="160" />
+              @if (form.controls.title.touched && form.controls.title.invalid) {
+                <small class="field-error">A title is required.</small>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="lcars-input-container gold admin-field-full">
+              <label for="notification-body-input">Body</label>
+              <textarea
+                id="notification-body-input"
+                formControlName="body"
+                rows="4"
+                maxlength="2000"></textarea>
+              @if (form.controls.body.touched && form.controls.body.invalid) {
+                <small class="field-error">A body is required.</small>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="lcars-input-container bluey admin-field-full">
+              <label for="notification-link-input">Link URL</label>
+              <input
+                id="notification-link-input"
+                type="url"
+                formControlName="linkUrl"
+                maxlength="2048" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="admin-form-actions">
+        <button
+          type="submit"
+          class="lcars-btn green"
+          [disabled]="isSaving">
+          {{ isSaving ? 'Sending…' : 'Send' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN_NOTIFICATIONS"
+        >Sent notifications</a
+      >
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN"
+        >Admin home</a
+      >
+    </div>
+  </div>
+</div>

@@ -24,6 +24,9 @@ export const API_URLS = {
   HEALTH_LIVE: rootApiHealth + '/live',
   HEALTH_READY: rootApiHealth + '/ready',
 
+  // App state (polled: banners + unread count)
+  APP_STATE: apiUrl + '/app-state',
+
   // User
   USER: apiUrl + '/user',
   UPDATE_USER_PROFILE: apiUrl + '/user/update-profile',
@@ -53,4 +56,16 @@ export const API_URLS = {
 
   // Contact
   CONTACT: apiUrl + '/contact',
+
+  // News
+  NEWS: apiUrl + '/news',
+  NEWS_ADMIN: apiUrl + '/news/admin',
+
+  // Notifications
+  NOTIFICATIONS: apiUrl + '/notifications',
+  NOTIFICATIONS_BANNERS: apiUrl + '/notifications/banners',
+  NOTIFICATIONS_UNREAD_COUNT: apiUrl + '/notifications/unread-count',
+  NOTIFICATIONS_READ_ALL: apiUrl + '/notifications/read-all',
+  NOTIFICATIONS_ADMIN: apiUrl + '/notifications/admin',
+  NOTIFICATIONS_ADMIN_BANNERS: apiUrl + '/notifications/admin/banners',
 };

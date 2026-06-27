@@ -44,41 +44,57 @@
   <div class="right-frame-top">
     <div class="banner">{{ appTitle }}</div>
     <div class="data-cascade-button-group">
-      <div class="cascade-wrapper">
+      @if (isLoggedIn ? (unreadCount$ | async) : 0; as unreadCount) {
         <div
-          class="data-cascade"
-          id="default">
-          <div [innerHTML]="dataCascade"></div>
+          class="comms-alert"
+          id="header-comms-alert"
+          aria-live="polite">
+          <span class="comms-alert-heading">Incoming Transmission</span>
+          <a
+            class="full-width-btn-link sunflower comms-alert-button"
+            [routerLink]="getRouteLink(appRoutes.NOTIFICATIONS)"
+            [attr.aria-label]="
+              unreadCount + ' unread notifications. Open notifications.'
+            ">
+            {{ unreadCount > 99 ? '99+' : unreadCount }} Unread
+          </a>
         </div>
-      </div>
+      } @else {
+        <div class="cascade-wrapper">
+          <div
+            class="data-cascade"
+            id="default">
+            <div [innerHTML]="dataCascade"></div>
+          </div>
+        </div>
+      }
       <nav id="nav-standard">
         <a
-          [routerLink]="getRouteLink('HOME')"
+          [routerLink]="getRouteLink(appRoutes.HOME)"
           [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="almond-creme"
           id="b-one"
-          >Home</a
+          >{{ appRouteTitles.HOME }}</a
         >
         <a
           [routerLink]="getRouteLink(appRoutes.ABOUT)"
           [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="almond-creme"
           id="b-two"
-          >About</a
+          >{{ appRouteTitles.ABOUT }}</a
         >
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
           [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="almond-creme"
           id="b-three"
-          >Dashboard</a
+          >{{ appRouteTitles.STO_DASHBOARD }}</a
         >
         <a
-          [routerLink]="getRouteLink(appRoutes.CONTACT)"
-          [routerLinkActiveOptions]="{ exact: true }"
+          [routerLink]="getRouteLink(appRoutes.NEWS)"
           routerLinkActive="almond-creme"
           id="b-four"
-          >Contact</a
+          >{{ appRouteTitles.NEWS }}</a
         >
       </nav>
     </div>

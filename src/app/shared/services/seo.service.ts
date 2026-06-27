@@ -54,6 +54,31 @@ export class SeoService {
   }
 
   /**
+   * Updates SEO meta tags for a dynamic, content-driven page (e.g. a news
+   * post) once its data has loaded after navigation.
+   *
+   * @param pageTitle The page-specific title.
+   * @param description Optional page-specific description; falls back to the
+   *   site default when omitted or empty.
+   * @param imageUrl Optional absolute Open Graph/Twitter image URL; falls back
+   *   to the site default when omitted or empty.
+   */
+  setPageMeta(
+    pageTitle: string,
+    description?: string,
+    imageUrl?: string,
+  ): void {
+    const fullTitle = this.buildFullTitle(pageTitle);
+    const customImage = imageUrl?.trim();
+    this.updateStandardTags(
+      fullTitle,
+      description?.trim() || SEO_DESCRIPTION,
+      customImage || SEO_OG_IMAGE_URL,
+      customImage || SEO_TWITTER_IMAGE_URL,
+    );
+  }
+
+  /**
    * Builds the full page title including the global suffix.
    *
    * @param pageTitle Optional page-specific title.
@@ -74,14 +99,22 @@ export class SeoService {
    * Also ensures the canonical link tag is present and up to date.
    *
    * @param title The full page title to apply to meta tags.
+   * @param description The description to apply; defaults to the site default.
+   * @param ogImageUrl The Open Graph image URL; defaults to the site default.
+   * @param twitterImageUrl The Twitter image URL; defaults to the site default.
    */
-  private updateStandardTags(title: string): void {
+  private updateStandardTags(
+    title: string,
+    description: string = SEO_DESCRIPTION,
+    ogImageUrl: string = SEO_OG_IMAGE_URL,
+    twitterImageUrl: string = SEO_TWITTER_IMAGE_URL,
+  ): void {
     const canonicalUrl = this.getCanonicalUrl();
 
     // Generic meta tags
     this.meta.updateTag({
       name: 'description',
-      content: SEO_DESCRIPTION,
+      content: description,
     });
     this.meta.updateTag({ name: 'application-name', content: SEO_APP_TITLE });
     this.meta.updateTag({ name: 'author', content: SEO_AUTHOR });
@@ -92,12 +125,12 @@ export class SeoService {
     this.meta.updateTag({ property: 'og:title', content: title });
     this.meta.updateTag({
       property: 'og:description',
-      content: SEO_DESCRIPTION,
+      content: description,
     });
     this.meta.updateTag({ property: 'og:url', content: canonicalUrl });
     this.meta.updateTag({
       property: 'og:image',
-      content: SEO_OG_IMAGE_URL,
+      content: ogImageUrl,
     });
 
     // Twitter Card tags
@@ -108,11 +141,11 @@ export class SeoService {
     this.meta.updateTag({ name: 'twitter:title', content: title });
     this.meta.updateTag({
       name: 'twitter:description',
-      content: SEO_DESCRIPTION,
+      content: description,
     });
     this.meta.updateTag({
       name: 'twitter:image',
-      content: SEO_TWITTER_IMAGE_URL,
+      content: twitterImageUrl,
     });
     this.meta.updateTag({
       name: 'twitter:site',

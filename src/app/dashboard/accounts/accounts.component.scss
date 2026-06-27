@@ -28,9 +28,7 @@ $steam-dark: color.adjust(#4c8db5, $lightness: -18%);
 }
 
 .accounts-lcars-text-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  position: relative;
 }
 
 .accounts-inner-content {

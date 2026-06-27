@@ -1,5 +1,9 @@
-@if (!user) {
+@if (isUserLoading) {
   <app-loading-bar></app-loading-bar>
+}
+
+@if (!isUserLoading && !user && userLoadError) {
+  <p class="go-red">{{ userLoadError }}</p>
 }
 
 @if (user) {

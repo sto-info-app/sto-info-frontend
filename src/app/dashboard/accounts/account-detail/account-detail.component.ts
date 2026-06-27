@@ -317,7 +317,12 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
       const handle = decodeStoHandle(params['handle']);
       if (handle) {
         this.loadAccountData(handle);
+        return;
       }
+
+      this.isLoading = false;
+      this.errorMessage = 'Invalid account link';
+      this._cdr.markForCheck();
     });
   }
 
@@ -357,8 +362,7 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
         next: characters => {
           this.characters.set(characters);
           this.isLoading = false;
-          // The signal cascade from characters.set() triggers re-render,
-          // which also picks up the updated isLoading value.
+          this._cdr.markForCheck();
         },
         error: err => {
           this.isLoading = false;

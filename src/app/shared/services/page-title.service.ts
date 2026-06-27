@@ -42,6 +42,23 @@ export class PageTitleService {
   }
 
   /**
+   * Sets the document title for a specific page, applying the standard suffix.
+   *
+   * Use this for dynamic, content-driven pages (e.g. a news post) whose title
+   * is not known from static route data at navigation time.
+   *
+   * @param pageTitle The page-specific title.
+   */
+  setTitle(pageTitle: string): void {
+    const titleSuffix = this.getTitleSuffix();
+    if (pageTitle) {
+      this.title.setTitle(`${pageTitle} - ${titleSuffix}`);
+    } else {
+      this.title.setTitle(titleSuffix || this.defaultSiteTitle);
+    }
+  }
+
+  /**
    * Builds the environment-specific title suffix.
    *
    * @returns The configured site title with any environment tag appended.

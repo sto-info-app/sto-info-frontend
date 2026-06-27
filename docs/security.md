@@ -18,12 +18,16 @@ Use overrides when:
 
 | Override key                 | Forced version | Scope                  | Notes                                                                                                                                                                       |
 | ---------------------------- | -------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@babel/core`                | `7.29.7`       | Global                 | `@angular/build` and test toolchain consumers resolved `@babel/core@7.29.0` (GHSA-4x5r-pxfx-6jf8). Override forces patched release.                                      |
 | `basic-ftp`                  | `5.3.1`        | Global                 | `@lhci/cli` → `get-uri` → `basic-ftp@<=5.3.0` (GHSA-rpmf-866q-6p89). 5.3.1 is the patched release.                                                                          |
+| `esbuild`                    | `0.28.1`       | Global                 | `vite` in the Angular build chain could resolve `0.27.x` on Windows (GHSA-g7r4-m6w7-qqqr). Override keeps all consumers on the patched release.                          |
+| `js-yaml`                    | `4.2.0`        | Global                 | Multiple tooling chains (`@lhci/utils`, lint/reporting deps) previously resolved `<=4.1.1` (GHSA-h67p-54hq-rp68). Override forces patched release.                        |
+| `piscina`                    | `5.2.0`        | Global                 | `@angular/build` pinned `piscina@5.1.4` (GHSA-x9g3-xrwr-cwfg). Override forces the patched non-vulnerable release.                                                        |
 | `qs`                         | `6.15.2`       | Global                 | `@lhci/cli` → `express` / `body-parser` → `qs@6.15.1` (GHSA-q8mj-m7cp-5q26). 6.15.2 is the patched release.                                                                 |
 | `tmp`                        | `0.2.7`        | Global                 | `@lhci/cli` (via `inquirer` / `external-editor`) resolves `tmp` through legacy ranges; override keeps the tree on the current patched release.                            |
-| `undici`                     | `7.24.6`       | Global                 | `@angular/build` pins `7.24.4` exactly; override ensures the latest patch is used across all consumers.                                                                     |
+| `undici`                     | `7.28.0`       | Global                 | `jsdom` and other consumers previously resolved versions in the vulnerable `7.0.0 - 7.27.x` range. Override forces the patched release family.                             |
 | `uuid`                       | `14.0.0`       | Global                 | `@lhci/cli` uses `uuid@^8.3.1`, while `jest-junit` already requests `^14.0.0`; override standardizes the tree on the patched major release.                                 |
-| `ws`                         | `8.20.1`       | Global                 | `jest-environment-jsdom` → `ws@^8.18.0` and `puppeteer-core` → `ws@^8.19.0`; 8.20.1 fixes the memory disclosure issue.                                                      |
+| `ws`                         | `8.21.0`       | Global                 | `lighthouse`, `puppeteer-core`, and jsdom-related chains resolved `8.20.1` (GHSA-96hv-2xvq-fx4p). Override forces patched `8.21.0`.                                        |
 | `picomatch`                  | `4.0.4`        | Global                 | Multiple consumers (`@angular/build`, Jest internals, `http-proxy-middleware`) resolve through `picomatch`; override keeps all v4-branch consumers on `4.0.4`.            |
 | `brace-expansion`            | `5.0.6`        | Global                 | Multiple packages (Jest, ESLint, `@lhci/cli`, `serve`) pull in `brace-expansion@<5.0.6` (GHSA-jxxr-4gwj-5jf2). 5.0.6 contains the fix.                                      |
 | `express` → `path-to-regexp` | `0.1.13`       | Nested under `express` | `@lhci/cli` → `express@4` → `path-to-regexp@0.1.12` (GHSA-37ch-88jc-xwx2, GHSA-j3q9-mxjg-w52f, GHSA-27v5-c462-wpq7). 0.1.13 is the patched release.                         |
@@ -43,7 +47,7 @@ The following overrides were removed because they are no longer required:
 Use these commands to confirm overrides are applied:
 
 ```bash
-npm ls tmp undici picomatch brace-expansion path-to-regexp
+npm ls @babel/core esbuild js-yaml piscina tmp undici ws picomatch brace-expansion path-to-regexp
 npm audit --omit=dev
 npm audit
 ```

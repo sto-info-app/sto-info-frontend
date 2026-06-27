@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AdminGuard } from './core/auth/admin.guard';
 import { AuthGuard } from './core/auth/auth.guard';
 import { ChangePasswordComponent } from './core/auth/change-password/change-password.component';
 import { ResetPasswordRequestComponent } from './core/auth/reset-password-request/reset-password-request.component';
@@ -133,6 +134,124 @@ export const routes: Routes = [
     path: APP_ROUTES.PRIVACY_POLICY,
     component: PrivacyPolicyComponent,
     data: { title: APP_ROUTE_TITLES.PRIVACY_POLICY },
+  },
+
+  // *****************************************
+  // * News
+  {
+    path: APP_ROUTES.NEWS,
+    loadComponent: () =>
+      import('./news/news-list/news-list.component').then(
+        m => m.NewsListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.NEWS, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.NEWS_DETAIL,
+    loadComponent: () =>
+      import('./news/news-detail/news-detail.component').then(
+        m => m.NewsDetailComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.NEWS_DETAIL, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
+  },
+
+  // *****************************************
+  // * Notifications (authenticated)
+  {
+    path: APP_ROUTES.NOTIFICATIONS,
+    loadComponent: () =>
+      import('./notifications/notifications-page/notifications-page.component').then(
+        m => m.NotificationsPageComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.NOTIFICATIONS, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+
+  // *****************************************
+  // * Admin (admin role required)
+  {
+    path: APP_ROUTES.ADMIN,
+    loadComponent: () =>
+      import('./admin/admin.component').then(m => m.AdminComponent),
+    data: { title: APP_ROUTE_TITLES.ADMIN, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_NEWS,
+    loadComponent: () =>
+      import('./admin/news-admin/news-admin-list.component').then(
+        m => m.NewsAdminListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_NEWS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_NEWS_ADD,
+    loadComponent: () =>
+      import('./admin/news-admin/news-admin-form.component').then(
+        m => m.NewsAdminFormComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_NEWS_ADD, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_NEWS_EDIT,
+    loadComponent: () =>
+      import('./admin/news-admin/news-admin-form.component').then(
+        m => m.NewsAdminFormComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_NEWS_EDIT, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_BANNERS,
+    loadComponent: () =>
+      import('./admin/banner-admin/banner-admin-list.component').then(
+        m => m.BannerAdminListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_BANNERS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_BANNERS_ADD,
+    loadComponent: () =>
+      import('./admin/banner-admin/banner-admin-form.component').then(
+        m => m.BannerAdminFormComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_BANNERS_ADD, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_BANNERS_EDIT,
+    loadComponent: () =>
+      import('./admin/banner-admin/banner-admin-form.component').then(
+        m => m.BannerAdminFormComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_BANNERS_EDIT, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_NOTIFICATIONS,
+    loadComponent: () =>
+      import('./admin/notification-admin/notification-admin-list.component').then(
+        m => m.NotificationAdminListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_NOTIFICATIONS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_NOTIFICATIONS_SEND,
+    loadComponent: () =>
+      import('./admin/notification-admin/notification-admin-send.component').then(
+        m => m.NotificationAdminSendComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.ADMIN_NOTIFICATIONS_SEND,
+      requiresApi: true,
+    },
+    canActivate: [AdminGuard, ApiRequiredGuard],
   },
 
   // *****************************************

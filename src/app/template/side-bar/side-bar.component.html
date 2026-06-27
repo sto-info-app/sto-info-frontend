@@ -33,6 +33,14 @@
           routerLinkActive="peach"
           >{{ appRouteTitles.STO_DASHBOARD_STATS }}</a
         >
+        @if (isAdmin) {
+          <a
+            [routerLink]="getRouteLink(appRoutes.ADMIN)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="peach"
+          >{{ appRouteTitles.ADMIN }}</a
+          >
+        }
       }
     </div>
     <div class="panel panel-4"></div>

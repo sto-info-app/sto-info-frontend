@@ -1,0 +1,64 @@
+@if (banners.length > 0) {
+  <div
+    class="banner-stack"
+    aria-live="polite">
+    @for (banner of banners; track banner.id) {
+      <div
+        class="notification-card banner-card"
+        [ngClass]="severityMeta(banner).colourClass"
+        aria-live="polite"
+        aria-atomic="true">
+        <div class="notification-header-row">
+          <span class="notification-header-left">
+            <i
+              class="fas {{ severityMeta(banner).icon }} notification-type-icon"
+              aria-hidden="true"></i>
+            <span class="sr-only"
+              >{{ severityMeta(banner).label }} banner</span
+            >
+            <span class="notification-title">{{
+              banner.title || severityMeta(banner).label
+            }}</span>
+          </span>
+          @if (banner.dismissible) {
+            <button
+              type="button"
+              class="banner-dismiss"
+              aria-label="Dismiss banner"
+              (click)="dismiss(banner)">
+              <i
+                class="fas fa-xmark"
+                aria-hidden="true"></i>
+            </button>
+          }
+        </div>
+
+        <div class="notification-main-area">
+          <div class="notification-body-content">
+            <p class="notification-body">{{ banner.message }}</p>
+            @if (banner.linkUrl) {
+              <a
+                class="notification-link"
+                [href]="banner.linkUrl"
+                rel="noopener noreferrer"
+                target="_blank">
+                <i
+                  class="fas fa-link notification-link-icon"
+                  aria-hidden="true"></i>
+                <span class="notification-link-url">{{
+                  banner.linkLabel || 'Learn more'
+                }}</span>
+                @if (isExternalLink(banner.linkUrl)) {
+                  <i
+                    class="fas fa-arrow-up-right-from-square notification-link-external"
+                    title="Opens in a new tab"
+                    aria-hidden="true"></i>
+                }
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}

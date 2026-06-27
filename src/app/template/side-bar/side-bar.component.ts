@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   APP_ROUTE_TITLES,
   APP_ROUTES,
@@ -28,6 +29,7 @@ export class SideBarComponent {
 
   private readonly routingService = inject(RoutingService);
   private readonly generalThemeService = inject(GeneralThemeService);
+  private readonly authService = inject(AuthService);
 
   constructor() {
     this.themePanel6RandomText =
@@ -36,6 +38,15 @@ export class SideBarComponent {
 
   getRouteLink(route: string): string {
     return this.routingService.getLink(route);
+  }
+
+  /**
+   * Whether the current user is an administrator.
+   *
+   * @returns `true` when logged in as an admin user.
+   */
+  get isAdmin(): boolean {
+    return this.authService.isLoggedInAsAdmin();
   }
 
   onResize(event: Event): void {
