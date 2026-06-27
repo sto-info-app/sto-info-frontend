@@ -1410,9 +1410,17 @@ button:hover {
 }
 
 .lcars-text-bar .cta-icon {
+  position: absolute;
   right: 1px;
+  top: -4px;
+  height: 40px;
+  background-color: #0d0d0d;
   font-size: 1rem;
-  padding-left: 15px;
+  padding: 0 15px;
+  color: #9bf;
+  line-height: 1.7rem;
+  border: none;
+  cursor: pointer;
 }
 
 .lcars-text-bar .cta-icon:hover {
@@ -2392,6 +2400,13 @@ button.gold {
     padding: 0 5px;
     padding-inline: 5px;
     line-height: 32px;
+  }
+
+  .lcars-text-bar .cta-icon {
+    top: -6px;
+    height: 30px;
+    line-height: 32px;
+    padding: 0 10px;
   }
 
   .lcars-text-bar::before,
