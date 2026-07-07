@@ -57,7 +57,7 @@
     "@auth0/angular-jwt": "^5.1.2",
     "@eslint/config-array": "^0.23.5",
     "@eslint/object-schema": "^3.0.1",
-    "@sentry/angular": "^10.63.0",
+    "@sentry/angular": "^10.64.0",
     "glob": "^13.0.6",
     "http-proxy-middleware": "^4.2.0",
     "js-base64": "^3.8.0",
@@ -89,8 +89,8 @@
     "@stryker-mutator/typescript-checker": "^9.6.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.1.0",
-    "@typescript-eslint/eslint-plugin": "^8.62.1",
-    "@typescript-eslint/parser": "^8.62.1",
+    "@typescript-eslint/eslint-plugin": "^8.63.0",
+    "@typescript-eslint/parser": "^8.63.0",
     "angular-eslint": "^22.0.0",
     "cross-env": "^10.1.0",
     "eslint": "^10.6.0",
@@ -110,7 +110,7 @@
     "stylelint": "^17.14.0",
     "stylelint-config-standard-scss": "^17.0.0",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.62.1",
+    "typescript-eslint": "^8.63.0",
     "wawoff2": "^2.0.1"
   },
   "projects": {
