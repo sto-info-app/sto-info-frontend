@@ -19,6 +19,7 @@ export const APP_ROUTES = {
 
   // Static Pages
   ABOUT: 'about',
+  ROADMAP: 'roadmap',
   CONTACT: 'contact',
   TERMS_OF_USE: 'terms-of-use',
   CREDITS: 'credits',
@@ -83,6 +84,7 @@ export const APP_ROUTE_TITLES = {
 
   // Static Pages
   ABOUT: 'About',
+  ROADMAP: 'Roadmap',
   CONTACT: 'Contact us',
   TERMS_OF_USE: 'Terms of Use',
   CREDITS: 'Credits',

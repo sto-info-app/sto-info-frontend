@@ -56,6 +56,14 @@
             >{{ appRouteTitles.CONTACT }}</a
           >
         </li>
+        <li>
+          <a
+            [routerLink]="getRouteLink(appRoutes.ROADMAP)"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="active"
+            >{{ appRouteTitles.ROADMAP }}</a
+          >
+        </li>
       </ul>
     </div>
     <div class="col footer-list-col">

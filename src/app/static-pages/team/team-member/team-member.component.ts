@@ -46,8 +46,7 @@ export class TeamMemberComponent {
   constructor() {
     const slug = this._route.snapshot.paramMap.get('slug') ?? '';
     const group = this._route.snapshot.data['teamGroup'] as
-      | TeamGroup
-      | undefined;
+      TeamGroup | undefined;
 
     this.member = TEAM_MEMBERS.find(
       member => member.slug === slug && member.group === group,
