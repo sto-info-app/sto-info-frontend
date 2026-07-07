@@ -23,6 +23,7 @@ import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { CreditsComponent } from './static-pages/credits/credits.component';
 import { PrivacyPolicyComponent } from './static-pages/privacy-policy/privacy-policy.component';
+import { RoadmapComponent } from './static-pages/roadmap/roadmap.component';
 import { TeamDevelopersComponent } from './static-pages/team/developers/developers.component';
 import { TeamSupportersComponent } from './static-pages/team/supporters/supporters.component';
 import { TeamMemberComponent } from './static-pages/team/team-member/team-member.component';
@@ -83,6 +84,11 @@ export const routes: Routes = [
     path: APP_ROUTES.ABOUT,
     component: AboutComponent,
     data: { title: APP_ROUTE_TITLES.ABOUT },
+  },
+  {
+    path: APP_ROUTES.ROADMAP,
+    component: RoadmapComponent,
+    data: { title: APP_ROUTE_TITLES.ROADMAP },
   },
   {
     path: APP_ROUTES.ABOUT_DEVELOPERS,
