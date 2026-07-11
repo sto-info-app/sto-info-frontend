@@ -8,6 +8,7 @@ import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { DatesTimeHelperService } from 'src/app/shared/services/dates-time-helper.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { User } from '../models/user.model';
@@ -48,6 +49,7 @@ describe('ProfileComponent', () => {
   beforeEach(async () => {
     mockDashboardService = {
       getUser: jest.fn().mockReturnValue(of(mockUser)),
+      closeAccount: jest.fn().mockReturnValue(of({ success: true })),
     } as unknown as jest.Mocked<DashboardService>;
 
     mockAuthService = {
@@ -264,6 +266,63 @@ describe('ProfileComponent', () => {
     expect((event.target as HTMLImageElement).src).toBe(
       component.unavailablePhotoSrc,
     );
+  });
+
+  describe('closeAccount', () => {
+    it('should open confirmation dialog and close account when confirmed', () => {
+      const dialogRefSpy = {
+        afterClosed: jest.fn().mockReturnValue(of(true)),
+      } as unknown as MatDialogRef<unknown>;
+      mockDialog.open.mockReturnValue(dialogRefSpy);
+
+      component.closeAccount();
+
+      expect(mockDialog.open).toHaveBeenCalledWith(
+        ConfirmDialogComponent,
+        expect.objectContaining({
+          width: '75%',
+          data: expect.objectContaining({
+            title: 'Close Account',
+            confirmText: 'Close Account',
+            cancelText: 'Cancel',
+          }),
+        }),
+      );
+      expect(mockDashboardService.closeAccount).toHaveBeenCalled();
+      expect(mockAuthService.performLogout).toHaveBeenCalled();
+    });
+
+    it('should not call service when user cancels confirmation dialog', () => {
+      const dialogRefSpy = {
+        afterClosed: jest.fn().mockReturnValue(of(false)),
+      } as unknown as MatDialogRef<unknown>;
+      mockDialog.open.mockReturnValue(dialogRefSpy);
+
+      component.closeAccount();
+
+      expect(mockDashboardService.closeAccount).not.toHaveBeenCalled();
+    });
+
+    it('should warn when close account request fails', () => {
+      const dialogRefSpy = {
+        afterClosed: jest.fn().mockReturnValue(of(true)),
+      } as unknown as MatDialogRef<unknown>;
+      mockDialog.open.mockReturnValue(dialogRefSpy);
+      const err = new Error('close failed');
+      mockDashboardService.closeAccount.mockReturnValue(throwError(() => err));
+      const consoleWarnSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
+
+      component.closeAccount();
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Failed to close account',
+        err,
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
   });
 
   describe('ngOnDestroy', () => {

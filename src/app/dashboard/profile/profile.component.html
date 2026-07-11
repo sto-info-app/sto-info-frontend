@@ -115,6 +115,13 @@
           class="full-width-btn-link gold"
           >{{ appRouteTitles.RESET_PASSWORD }}</a
         >
+        <a
+          href="#"
+          class="full-width-btn-link red"
+          (click)="$event.preventDefault(); closeAccount()"
+          title="Close account"
+          >Close Account</a
+        >
       </div>
     </div>
   </div>
