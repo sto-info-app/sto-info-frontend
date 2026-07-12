@@ -133,9 +133,150 @@ describe('ChangePasswordComponent', () => {
       expect(component.seriousErrorMessage).toContain('expired');
     });
 
+    it('should handle invalid token error (404)', () => {
+      mockAuthService.changePassword.mockReturnValue(
+        throwError(() => ({
+          statusCode: 404,
+          message: 'Invalid token',
+          error: 'Not Found',
+        })),
+      );
+
+      component.onSubmit();
+
+      expect(component.seriousErrorMessage).toContain('invalid or has expired');
+      expect(component.successMessage).toBe('');
+    });
+
+    it('should handle invalid token error when message is an array', () => {
+      mockAuthService.changePassword.mockReturnValue(
+        throwError(() => ({
+          statusCode: 404,
+          message: ['Invalid', 'token'],
+          error: 'Not Found',
+        })),
+      );
+
+      component.onSubmit();
+
+      expect(component.seriousErrorMessage).toContain('invalid or has expired');
+      expect(component.errorMessage).toBe('');
+    });
+
+    it('should derive status code from nested error payload', () => {
+      mockAuthService.changePassword.mockReturnValue(
+        throwError(() => ({
+          error: {
+            statusCode: 404,
+            message: 'Invalid token',
+          },
+        })),
+      );
+
+      component.onSubmit();
+
+      expect(component.seriousErrorMessage).toContain('invalid or has expired');
+      expect(component.errorMessage).toBe('');
+    });
+
+    it('should normalize nested array error messages', () => {
+      mockAuthService.changePassword.mockReturnValue(
+        throwError(() => ({
+          error: {
+            statusCode: 404,
+            message: ['Token', 'expired'],
+          },
+        })),
+      );
+
+      component.onSubmit();
+
+      expect(component.seriousErrorMessage).toContain('invalid or has expired');
+      expect(component.successMessage).toBe('');
+    });
+
+    it('should handle stringified invalid token payload from http layer', () => {
+      mockAuthService.changePassword.mockReturnValue(
+        throwError(() => ({
+          status: 404,
+          error:
+            '{"message":"Invalid token","error":"Not Found","statusCode":404}',
+          message: 'Http failure response',
+        })),
+      );
+
+      component.onSubmit();
+
+      expect(component.seriousErrorMessage).toContain('invalid or has expired');
+      expect(component.successMessage).toBe('');
+    });
+
     it('should handle generic error', fakeAsync(() => {
       mockAuthService.changePassword.mockReturnValue(
         throwError(() => ({ status: 500 })),
+      );
+
+      component.onSubmit();
+
+      expect(component.errorMessage).toContain('There was an error');
+
+      tick(MILLISECONDS_SHOW_ERROR_MSG);
+      expect(component.errorMessage).toBe('');
+    }));
+
+    it('should handle generic error when status fields are missing', fakeAsync(() => {
+      mockAuthService.changePassword.mockReturnValue(
+        throwError(() => ({ message: ['unexpected', 'failure'] })),
+      );
+
+      component.onSubmit();
+
+      expect(component.errorMessage).toContain('There was an error');
+
+      tick(MILLISECONDS_SHOW_ERROR_MSG);
+      expect(component.errorMessage).toBe('');
+    }));
+
+    it('should fallback to a plain string error body when message is missing', fakeAsync(() => {
+      mockAuthService.changePassword.mockReturnValue(
+        throwError(() => ({
+          status: 500,
+          error: 'backend failure',
+        })),
+      );
+
+      component.onSubmit();
+
+      expect(component.errorMessage).toContain('There was an error');
+
+      tick(MILLISECONDS_SHOW_ERROR_MSG);
+      expect(component.errorMessage).toBe('');
+    }));
+
+    it('should normalize top-level array messages when no nested message is present', () => {
+      mockAuthService.changePassword.mockReturnValue(
+        throwError(() => ({
+          message: ['Token', 'expired'],
+          error: {
+            detail: 'missing nested message',
+          },
+        })),
+      );
+
+      component.onSubmit();
+
+      expect(component.seriousErrorMessage).toContain('invalid or has expired');
+      expect(component.errorMessage).toBe('');
+    });
+
+    it('should fallback when message is neither string nor array', fakeAsync(() => {
+      mockAuthService.changePassword.mockReturnValue(
+        throwError(() => ({
+          status: 500,
+          error: {
+            message: { text: 'complex' },
+          },
+        })),
       );
 
       component.onSubmit();
@@ -150,6 +291,18 @@ describe('ChangePasswordComponent', () => {
       component.changePasswordForm.patchValue({ password: '' });
       component.onSubmit();
       expect(mockAuthService.changePassword).not.toHaveBeenCalled();
+    });
+
+    it('should clear stale success state before a new submit', () => {
+      component.successMessage = 'stale success';
+      mockAuthService.changePassword.mockReturnValue(
+        throwError(() => ({ status: 500 })),
+      );
+
+      component.onSubmit();
+
+      expect(component.successMessage).toBe('');
+      expect(component.errorMessage).toContain('There was an error');
     });
   });
 
