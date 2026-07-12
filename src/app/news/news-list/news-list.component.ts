@@ -43,10 +43,10 @@ const LOAD_TIMEOUT_MS = 12000;
   ],
 })
 export class NewsListComponent implements OnInit, OnDestroy {
-  private readonly newsService = inject(NewsService);
-  private readonly routingService = inject(RoutingService);
-  private readonly ngZone = inject(NgZone);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly _newsService = inject(NewsService);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /** The current in-flight news request, so a new load can cancel it. */
   private loadSubscription?: Subscription;
@@ -111,15 +111,15 @@ export class NewsListComponent implements OnInit, OnDestroy {
       if (!this.isLoading) {
         return;
       }
-      this.ngZone.run(() => {
+      this._ngZone.run(() => {
         this.isLoading = false;
         this.errorMessage =
           'Loading news is taking longer than expected. Please try again.';
-        this.cdr.detectChanges();
+        this._cdr.detectChanges();
       });
     }, LOAD_TIMEOUT_MS);
 
-    this.loadSubscription = this.newsService
+    this.loadSubscription = this._newsService
       .getPublishedNews({
         page,
         pageSize: PAGE_SIZE,
@@ -127,7 +127,7 @@ export class NewsListComponent implements OnInit, OnDestroy {
       })
       .pipe(
         take(1),
-        observeInZone(this.ngZone, this.cdr),
+        observeInZone(this._ngZone, this._cdr),
         // Safety net: clear loading on *every* termination path. next/error
         // below cover the happy and error paths immediately, but a stream that
         // completes without emitting would otherwise leave the spinner stuck
@@ -186,6 +186,6 @@ export class NewsListComponent implements OnInit, OnDestroy {
    * @returns The absolute route link.
    */
   getDetailLink(slug: string): string {
-    return this.routingService.getLink(`${APP_ROUTES.NEWS}/${slug}`);
+    return this._routingService.getLink(`${APP_ROUTES.NEWS}/${slug}`);
   }
 }

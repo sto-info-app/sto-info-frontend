@@ -9,8 +9,8 @@ import { StatsData } from '../stats/stats.models';
   providedIn: 'root',
 })
 export class StatsService {
-  private readonly http = inject(HttpClient);
-  private readonly authService = inject(AuthService);
+  private readonly _http = inject(HttpClient);
+  private readonly _authService = inject(AuthService);
 
   /**
    * Fetches pre-computed statistics for the current user.
@@ -18,7 +18,7 @@ export class StatsService {
    * @returns An observable of StatsData.
    */
   getStats(accountId?: string | null): Observable<StatsData> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
@@ -28,6 +28,6 @@ export class StatsService {
       url += `?accountId=${accountId}`;
     }
 
-    return this.http.get<StatsData>(url, httpOptions);
+    return this._http.get<StatsData>(url, httpOptions);
   }
 }

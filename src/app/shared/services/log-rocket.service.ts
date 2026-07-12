@@ -8,15 +8,15 @@ import { SharedDataService } from './shared-data.service';
   providedIn: 'root',
 })
 export class LogRocketService implements OnDestroy {
-  private static readonly REDACTED_VALUE = '[REDACTED]';
+  private static readonly _REDACTED_VALUE = '[REDACTED]';
 
   destroy$ = new Subject<void>();
   userIdSubscription: Subscription | undefined;
 
-  private readonly logRocketAppId = environment.logRocketAppId ?? null;
+  private readonly _logRocketAppId = environment.logRocketAppId ?? null;
   private initialised = false;
 
-  private readonly sharedDataService = inject(SharedDataService);
+  private readonly _sharedDataService = inject(SharedDataService);
 
   /**
    * Unsubscribe from the Observables when the component is destroyed
@@ -32,12 +32,12 @@ export class LogRocketService implements OnDestroy {
    * @return void
    */
   public init(): void {
-    if (this.logRocketAppId) {
-      LogRocket.init(this.logRocketAppId, this.getInitOptions());
+    if (this._logRocketAppId) {
+      LogRocket.init(this._logRocketAppId, this.getInitOptions());
       this.initialised = true;
 
       // Check the user ID when it changes
-      this.userIdSubscription = this.sharedDataService.userId
+      this.userIdSubscription = this._sharedDataService.userId
         .pipe(takeUntil(this.destroy$))
         .subscribe(userId => {
           // Identify the user in LogRocket
@@ -158,7 +158,7 @@ export class LogRocketService implements OnDestroy {
       ([key, value]) => {
         if (this.isSensitiveKey(key) && typeof value === 'string') {
           (target as Record<string, unknown>)[key] =
-            LogRocketService.REDACTED_VALUE;
+            LogRocketService._REDACTED_VALUE;
           wasUpdated = true;
           return;
         }

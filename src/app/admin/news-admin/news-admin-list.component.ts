@@ -44,11 +44,11 @@ const LOAD_TIMEOUT_MS = 12000;
   ],
 })
 export class NewsAdminListComponent implements OnInit {
-  private readonly newsService = inject(NewsService);
-  private readonly routingService = inject(RoutingService);
-  private readonly ngZone = inject(NgZone);
-  private readonly cdr = inject(ChangeDetectorRef);
-  private readonly dialog = inject(MatDialog);
+  private readonly _newsService = inject(NewsService);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _dialog = inject(MatDialog);
 
   appRoutes = APP_ROUTES;
   categoryLabels = NEWS_CATEGORY_LABELS;
@@ -78,20 +78,20 @@ export class NewsAdminListComponent implements OnInit {
         return;
       }
 
-      this.ngZone.run(() => {
+      this._ngZone.run(() => {
         this.isLoading = false;
         this.posts = [];
         this.errorMessage =
           'Loading posts is taking longer than expected. Please try again.';
-        this.cdr.detectChanges();
+        this._cdr.detectChanges();
       });
     }, LOAD_TIMEOUT_MS);
 
-    this.newsService
+    this._newsService
       .getAllNewsForAdmin({ page: 1, pageSize: PAGE_SIZE })
       .pipe(
         take(1),
-        observeInZone(this.ngZone, this.cdr),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => clearTimeout(loadingTimeout)),
       )
       .subscribe({
@@ -112,9 +112,9 @@ export class NewsAdminListComponent implements OnInit {
    * @param post - The post to publish.
    */
   publish(post: NewsPost): void {
-    this.newsService
+    this._newsService
       .publishNews(post.id)
-      .pipe(observeInZone(this.ngZone, this.cdr))
+      .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe({
         next: updated => this.replacePost(updated),
         error: () => (this.errorMessage = 'Failed to publish the post.'),
@@ -127,7 +127,7 @@ export class NewsAdminListComponent implements OnInit {
    * @param post - The post to delete.
    */
   remove(post: NewsPost): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
       width: '75%',
       data: {
         title: 'Delete News Post',
@@ -141,14 +141,14 @@ export class NewsAdminListComponent implements OnInit {
 
     dialogRef
       .afterClosed()
-      .pipe(take(1), observeInZone(this.ngZone, this.cdr))
+      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
       .subscribe(confirmed => {
         if (!confirmed) {
           return;
         }
-        this.newsService
+        this._newsService
           .deleteNews(post.id)
-          .pipe(observeInZone(this.ngZone, this.cdr))
+          .pipe(observeInZone(this._ngZone, this._cdr))
           .subscribe({
             next: () => (this.posts = this.posts.filter(p => p.id !== post.id)),
             error: () => (this.errorMessage = 'Failed to delete the post.'),
@@ -163,7 +163,7 @@ export class NewsAdminListComponent implements OnInit {
    * @returns The edit route link.
    */
   editLink(post: NewsPost): string {
-    return this.routingService.getLink(
+    return this._routingService.getLink(
       `${APP_ROUTES.ADMIN}/news/${post.id}/edit`,
     );
   }

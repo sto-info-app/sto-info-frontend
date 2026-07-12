@@ -58,8 +58,8 @@ describe('HomeComponent', () => {
 
   describe('ngOnDestroy', () => {
     it('should complete the destroy$ subject', () => {
-      const nextSpy = jest.spyOn(component['destroy$'], 'next');
-      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+      const nextSpy = jest.spyOn(component['_destroy$'], 'next');
+      const completeSpy = jest.spyOn(component['_destroy$'], 'complete');
 
       component.ngOnDestroy();
 
@@ -68,7 +68,7 @@ describe('HomeComponent', () => {
     });
 
     it('should unsubscribe from authentication state on destroy', () => {
-      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+      const completeSpy = jest.spyOn(component['_destroy$'], 'complete');
 
       component.ngOnDestroy();
 

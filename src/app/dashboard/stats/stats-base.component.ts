@@ -18,11 +18,11 @@ export abstract class StatsBaseComponent implements OnDestroy {
   selectedAccountId = 'all';
   isLoading = true;
 
-  protected readonly statsService = inject(StatsService);
-  protected readonly stoAccountService = inject(StoAccountService);
-  protected readonly routingService = inject(RoutingService);
+  protected readonly _statsService = inject(StatsService);
+  protected readonly _stoAccountService = inject(StoAccountService);
+  protected readonly _routingService = inject(RoutingService);
   protected readonly _cdr = inject(ChangeDetectorRef);
-  protected readonly destroy$ = new Subject<void>();
+  protected readonly _destroy$ = new Subject<void>();
 
   /** Fetches statistics, optionally filtered by the selected account. */
   abstract loadStats(): void;
@@ -35,20 +35,20 @@ export abstract class StatsBaseComponent implements OnDestroy {
 
   /** Cleans up subscriptions. */
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 
   /** Returns the full URL for a route constant. */
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 
   /** Fetches the user's accounts. */
   protected loadAccounts(): void {
-    this.stoAccountService
+    this._stoAccountService
       .getAccounts()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: accounts => {
           this.accounts = accounts;
@@ -62,9 +62,9 @@ export abstract class StatsBaseComponent implements OnDestroy {
     this.isLoading = true;
     const accountId =
       this.selectedAccountId === 'all' ? null : this.selectedAccountId;
-    this.statsService
+    this._statsService
       .getStats(accountId)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: stats => {
           onNext(stats);

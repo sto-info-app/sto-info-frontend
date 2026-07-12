@@ -14,9 +14,9 @@ export class CreditsComponent {
   appTitle = environment.appTitle;
   appRoutes = APP_ROUTES;
 
-  private readonly routingService = inject(RoutingService);
+  private readonly _routingService = inject(RoutingService);
 
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 }

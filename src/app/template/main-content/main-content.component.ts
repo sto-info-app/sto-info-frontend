@@ -56,19 +56,19 @@ export class MainContentComponent implements OnDestroy {
   appRoutes = APP_ROUTES;
   themePanel6RandomText: string;
   hasActiveRoute = false;
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
-  private readonly subs = new Subscription();
-  private readonly routingService = inject(RoutingService);
-  private readonly generalThemeService = inject(GeneralThemeService);
-  private readonly http = inject(HttpClient);
-  private readonly backendHealth = inject(HealthService);
+  private readonly _router = inject(Router);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _subs = new Subscription();
+  private readonly _routingService = inject(RoutingService);
+  private readonly _generalThemeService = inject(GeneralThemeService);
+  private readonly _http = inject(HttpClient);
+  private readonly _backendHealth = inject(HealthService);
 
   // True only when the currently activated deepest route has data.requiresApi === true
-  readonly requiresApi$ = this.router.events.pipe(
+  readonly requiresApi$ = this._router.events.pipe(
     filter(e => e instanceof NavigationEnd),
     startWith(null),
-    map(() => this.getDeepestRouteRequiresApi(this.route)),
+    map(() => this.getDeepestRouteRequiresApi(this._route)),
     distinctUntilChanged(),
   );
 
@@ -77,7 +77,7 @@ export class MainContentComponent implements OnDestroy {
   //NOTE: - API is DOWN
   readonly showBackendWarning$ = combineLatest([
     this.requiresApi$,
-    this.backendHealth.state$,
+    this._backendHealth.state$,
   ]).pipe(
     map(
       ([requiresApi, state]) => requiresApi && state === API_HEALTH_STATE_DOWN,
@@ -92,9 +92,9 @@ export class MainContentComponent implements OnDestroy {
    */
   constructor() {
     this.themePanel6RandomText =
-      this.generalThemeService.createDynamicSideColumnText();
+      this._generalThemeService.createDynamicSideColumnText();
 
-    this.http
+    this._http
       .get(API_URLS.VERSION, {
         observe: 'response',
         responseType: HTTP_RESPONSE_TYPE_TEXT,
@@ -110,12 +110,12 @@ export class MainContentComponent implements OnDestroy {
       });
 
     // Start/stop polling only while on API-required routes
-    this.subs.add(
+    this._subs.add(
       this.requiresApi$.subscribe(requiresApi => {
         if (requiresApi) {
-          this.backendHealth.startPolling();
+          this._backendHealth.startPolling();
         } else {
-          this.backendHealth.stopPolling();
+          this._backendHealth.stopPolling();
         }
       }),
     );
@@ -127,14 +127,14 @@ export class MainContentComponent implements OnDestroy {
    * @returns True if the current route is the service interruption route, false otherwise.
    */
   get isServiceInterruptionRoute(): boolean {
-    return this.router.url === this.appRoutes.SERVICE_INTERRUPTION;
+    return this._router.url === this.appRoutes.SERVICE_INTERRUPTION;
   }
 
   /**
    * Recursively traverses the activated route tree to find the deepest
    */
   ngOnDestroy(): void {
-    this.subs.unsubscribe();
+    this._subs.unsubscribe();
   }
 
   /**
@@ -174,7 +174,7 @@ export class MainContentComponent implements OnDestroy {
    * @returns A normalized link string suitable for routerLink.
    */
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 
   /**

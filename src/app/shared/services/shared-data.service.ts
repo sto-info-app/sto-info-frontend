@@ -5,8 +5,8 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root',
 })
 export class SharedDataService {
-  private readonly userIdSubject = new BehaviorSubject<string>('');
-  userId = this.userIdSubject.asObservable();
+  private readonly _userIdSubject = new BehaviorSubject<string>('');
+  userId = this._userIdSubject.asObservable();
 
   /**
    * Updates the shared user identifier stream.
@@ -14,6 +14,6 @@ export class SharedDataService {
    * @param userId The new user identifier.
    */
   updateUserId(userId: string): void {
-    this.userIdSubject.next(userId);
+    this._userIdSubject.next(userId);
   }
 }

@@ -12,11 +12,11 @@ jest.mock('logrocket', () => ({
 }));
 
 class MockSharedDataService {
-  private readonly userIdSubject = new Subject<string>();
-  userId = this.userIdSubject.asObservable();
+  private readonly _userIdSubject = new Subject<string>();
+  userId = this._userIdSubject.asObservable();
 
   emitUserId(id: string) {
-    this.userIdSubject.next(id);
+    this._userIdSubject.next(id);
   }
 }
 

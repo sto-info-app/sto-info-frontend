@@ -102,19 +102,19 @@ export class RegisterComponent implements OnInit, OnDestroy {
   errorTextConfirmationPasswordRequired: string =
     FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED;
 
-  private readonly formBuilder = inject(FormBuilder);
-  private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
-  private readonly routingService = inject(RoutingService);
-  private readonly renderer = inject(Renderer2);
-  private readonly el = inject(ElementRef);
-  private readonly alertThemeService = inject(AlertThemeService);
+  private readonly _formBuilder = inject(FormBuilder);
+  private readonly _router = inject(Router);
+  private readonly _authService = inject(AuthService);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _renderer = inject(Renderer2);
+  private readonly _el = inject(ElementRef);
+  private readonly _alertThemeService = inject(AlertThemeService);
 
   /**
    * Builds the registration form and its validators.
    */
   ngOnInit() {
-    this.registerForm = this.formBuilder.nonNullable.group(
+    this.registerForm = this._formBuilder.nonNullable.group(
       {
         firstName: [
           '',
@@ -184,9 +184,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
     const registrationFormValues: RegistrationFormValues =
       this.registerForm.value;
 
-    this.authService.register(registrationFormValues).subscribe({
+    this._authService.register(registrationFormValues).subscribe({
       next: () => {
-        this.router.navigate(['/register/complete']);
+        this._router.navigate(['/register/complete']);
         this.isSubmitting = false;
       },
       error: error => {
@@ -227,7 +227,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
    * @returns The resolved link.
    */
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 
   /**
@@ -242,9 +242,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
         ? alertStateFromHttpStatus(httpStatus)
         : 'red';
 
-    this.alertThemeService.applyAlertThemeThenApplyStaticTheme(
-      this.renderer,
-      this.el.nativeElement,
+    this._alertThemeService.applyAlertThemeThenApplyStaticTheme(
+      this._renderer,
+      this._el.nativeElement,
       state,
     );
     this.errorMessage = message;
@@ -265,10 +265,10 @@ export class RegisterComponent implements OnInit, OnDestroy {
    * Clears alert styling when the component is destroyed.
    */
   ngOnDestroy(): void {
-    this.alertThemeService.clearAlertStylesheet(
-      this.renderer,
-      this.el.nativeElement,
+    this._alertThemeService.clearAlertStylesheet(
+      this._renderer,
+      this._el.nativeElement,
     );
-    this.alertThemeService.clearTimers(this.el.nativeElement);
+    this._alertThemeService.clearTimers(this._el.nativeElement);
   }
 }

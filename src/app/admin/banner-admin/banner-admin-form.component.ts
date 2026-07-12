@@ -43,14 +43,14 @@ export const BANNER_MESSAGE_MAX_LENGTH = 2000;
   ],
 })
 export class BannerAdminFormComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
-  private readonly notificationService = inject(NotificationService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly ngZone = inject(NgZone);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly _fb = inject(FormBuilder);
+  private readonly _notificationService = inject(NotificationService);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
-  private static readonly LOAD_TIMEOUT_MS = 12000;
+  private static readonly _LOAD_TIMEOUT_MS = 12000;
 
   appRoutes = APP_ROUTES;
   severities = Object.values(NotificationSeverity);
@@ -62,7 +62,7 @@ export class BannerAdminFormComponent implements OnInit {
   isSaving = false;
   errorMessage = '';
 
-  form = this.fb.group({
+  form = this._fb.group({
     severity: [NotificationSeverity.INFO],
     title: ['', [Validators.maxLength(120)]],
     message: [
@@ -81,7 +81,7 @@ export class BannerAdminFormComponent implements OnInit {
    * Loads the banner for editing when an `id` route parameter is present.
    */
   ngOnInit(): void {
-    this.bannerId = this.route.snapshot.paramMap.get('id');
+    this.bannerId = this._route.snapshot.paramMap.get('id');
     if (this.bannerId) {
       this.loadBanner(this.bannerId);
     }
@@ -109,19 +109,19 @@ export class BannerAdminFormComponent implements OnInit {
         return;
       }
 
-      this.ngZone.run(() => {
+      this._ngZone.run(() => {
         this.isLoading = false;
         this.errorMessage =
           'Loading banner is taking longer than expected. Please try again.';
-        this.cdr.detectChanges();
+        this._cdr.detectChanges();
       });
-    }, BannerAdminFormComponent.LOAD_TIMEOUT_MS);
+    }, BannerAdminFormComponent._LOAD_TIMEOUT_MS);
 
-    this.notificationService
+    this._notificationService
       .getBannerByIdForAdmin(id)
       .pipe(
         take(1),
-        observeInZone(this.ngZone, this.cdr),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => clearTimeout(loadingTimeout)),
       )
       .subscribe({
@@ -165,14 +165,14 @@ export class BannerAdminFormComponent implements OnInit {
 
     const request$ =
       this.isEdit && this.bannerId
-        ? this.notificationService.updateBanner(
+        ? this._notificationService.updateBanner(
             this.bannerId,
             this.buildUpdatePayload(),
           )
-        : this.notificationService.createBanner(this.buildCreatePayload());
+        : this._notificationService.createBanner(this.buildCreatePayload());
 
-    request$.pipe(observeInZone(this.ngZone, this.cdr)).subscribe({
-      next: () => this.router.navigate(['/' + APP_ROUTES.ADMIN_BANNERS]),
+    request$.pipe(observeInZone(this._ngZone, this._cdr)).subscribe({
+      next: () => this._router.navigate(['/' + APP_ROUTES.ADMIN_BANNERS]),
       error: () => {
         this.isSaving = false;
         this.errorMessage = 'Failed to save the banner.';

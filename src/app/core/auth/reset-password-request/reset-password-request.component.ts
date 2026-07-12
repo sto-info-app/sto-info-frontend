@@ -55,7 +55,7 @@ export class ResetPasswordRequestComponent {
   // Allow constants to be used in the HTML
   errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
 
-  protected readonly authService = inject(AuthService);
+  protected readonly _authService = inject(AuthService);
   private readonly _routingService = inject(RoutingService);
   private readonly _cdr = inject(ChangeDetectorRef);
 
@@ -85,7 +85,7 @@ export class ResetPasswordRequestComponent {
       return;
     }
 
-    this.authService.resetPassword(this.email).subscribe({
+    this._authService.resetPassword(this.email).subscribe({
       next: () => {
         this.successMessage = `Check your email and follow the instructions to reset your password.`;
         this.errorMessage = '';

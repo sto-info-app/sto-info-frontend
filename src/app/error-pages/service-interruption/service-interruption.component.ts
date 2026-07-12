@@ -15,18 +15,18 @@ import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
   imports: [ServiceInterruptionContentComponent],
 })
 export class ServiceInterruptionComponent implements OnDestroy {
-  private readonly renderer = inject(Renderer2);
-  private readonly el = inject(ElementRef);
-  private readonly alertThemeService = inject(AlertThemeService);
+  private readonly _renderer = inject(Renderer2);
+  private readonly _el = inject(ElementRef);
+  private readonly _alertThemeService = inject(AlertThemeService);
 
   /**
    * Removes alert styling when the interruption page is destroyed.
    */
   ngOnDestroy(): void {
-    this.alertThemeService.clearAlertStylesheet(
-      this.renderer,
-      this.el.nativeElement,
+    this._alertThemeService.clearAlertStylesheet(
+      this._renderer,
+      this._el.nativeElement,
     );
-    this.alertThemeService.clearTimers(this.el.nativeElement);
+    this._alertThemeService.clearTimers(this._el.nativeElement);
   }
 }

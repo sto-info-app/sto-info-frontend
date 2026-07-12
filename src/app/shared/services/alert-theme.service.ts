@@ -10,10 +10,10 @@ import {
   providedIn: 'root',
 })
 export class AlertThemeService implements OnDestroy {
-  private static readonly ANIMATED_LINK_ID = 'alert-theme-style-link';
-  private static readonly STATIC_LINK_ID = 'alert-theme-style-link-static';
+  private static readonly _ANIMATED_LINK_ID = 'alert-theme-style-link';
+  private static readonly _STATIC_LINK_ID = 'alert-theme-style-link-static';
 
-  private readonly timersByHost = new Map<Element, Subscription>();
+  private readonly _timersByHost = new Map<Element, Subscription>();
 
   /**
    * Lifecycle hook invoked when Angular destroys this service.
@@ -24,7 +24,7 @@ export class AlertThemeService implements OnDestroy {
    */
   ngOnDestroy(): void {
     this.clearTimers();
-    this.timersByHost?.clear();
+    this._timersByHost?.clear();
   }
 
   /**
@@ -33,10 +33,10 @@ export class AlertThemeService implements OnDestroy {
    * @param host Element used as the timer ownership key.
    */
   private clearTimerForHost(host: Element): void {
-    const existing = this.timersByHost.get(host);
+    const existing = this._timersByHost.get(host);
     if (existing) {
       existing.unsubscribe();
-      this.timersByHost.delete(host);
+      this._timersByHost.delete(host);
     }
   }
 
@@ -55,7 +55,7 @@ export class AlertThemeService implements OnDestroy {
       renderer,
       el,
       this.getAnimatedCssUri(color),
-      AlertThemeService.ANIMATED_LINK_ID,
+      AlertThemeService._ANIMATED_LINK_ID,
     );
   }
 
@@ -79,7 +79,7 @@ export class AlertThemeService implements OnDestroy {
       renderer,
       el,
       this.getStaticCssUri(color),
-      AlertThemeService.STATIC_LINK_ID,
+      AlertThemeService._STATIC_LINK_ID,
     );
   }
 
@@ -181,7 +181,7 @@ export class AlertThemeService implements OnDestroy {
       this.clearAlertStylesheet(renderer, el);
       this.clearTimerForHost(el);
     });
-    this.timersByHost.set(el, sub);
+    this._timersByHost.set(el, sub);
   }
 
   /**
@@ -209,7 +209,7 @@ export class AlertThemeService implements OnDestroy {
         this.clearTimerForHost(el);
       },
     );
-    this.timersByHost.set(el, sub);
+    this._timersByHost.set(el, sub);
   }
 
   /**
@@ -224,8 +224,8 @@ export class AlertThemeService implements OnDestroy {
       return;
     }
 
-    this.timersByHost.forEach(sub => sub.unsubscribe());
-    this.timersByHost.clear();
+    this._timersByHost.forEach(sub => sub.unsubscribe());
+    this._timersByHost.clear();
   }
 
   /**
@@ -237,7 +237,7 @@ export class AlertThemeService implements OnDestroy {
   clearAlertStylesheet(renderer: Renderer2, el: Element): void {
     const head = el.ownerDocument.head;
     const styleLinks = head.querySelectorAll(
-      `#${AlertThemeService.ANIMATED_LINK_ID}, #${AlertThemeService.STATIC_LINK_ID}`,
+      `#${AlertThemeService._ANIMATED_LINK_ID}, #${AlertThemeService._STATIC_LINK_ID}`,
     );
 
     styleLinks.forEach(styleLink => {

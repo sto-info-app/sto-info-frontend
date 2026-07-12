@@ -52,16 +52,16 @@ export class ChangePasswordComponent implements OnInit {
     FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED;
   errorTextPasswordsDoNotMatch: string = FORM_ERROR_PASSWORDS_DO_NOT_MATCH;
 
-  private readonly formBuilder = inject(FormBuilder);
-  private readonly route = inject(ActivatedRoute);
-  private readonly authService = inject(AuthService);
-  private readonly routingService = inject(RoutingService);
+  private readonly _formBuilder = inject(FormBuilder);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _authService = inject(AuthService);
+  private readonly _routingService = inject(RoutingService);
 
   /**
    * Builds the change-password form.
    */
   constructor() {
-    this.changePasswordForm = this.formBuilder.nonNullable.group(
+    this.changePasswordForm = this._formBuilder.nonNullable.group(
       {
         password: [
           '',
@@ -90,7 +90,7 @@ export class ChangePasswordComponent implements OnInit {
    * Reads the password reset token from the query string.
    */
   ngOnInit() {
-    this.token = this.route.snapshot.queryParamMap.get('token') ?? '';
+    this.token = this._route.snapshot.queryParamMap.get('token') ?? '';
 
     if (!this.token) {
       this.seriousErrorMessage =
@@ -103,14 +103,14 @@ export class ChangePasswordComponent implements OnInit {
    */
   onSubmit() {
     if (this.changePasswordForm.valid) {
-      this.authService
+      this._authService
         .changePassword(this.token, this.changePasswordForm.value.password)
         .subscribe({
           next: () => {
             this.successMessage = 'Your password has been changed.';
-            if (this.authService.isLoggedIn()) {
+            if (this._authService.isLoggedIn()) {
               // Logout the user after successfully changing the password
-              this.authService.performLogout();
+              this._authService.performLogout();
               this.successMessage += ' You will need to login again.';
             }
           },
@@ -149,6 +149,6 @@ export class ChangePasswordComponent implements OnInit {
    * @returns The resolved link.
    */
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 }

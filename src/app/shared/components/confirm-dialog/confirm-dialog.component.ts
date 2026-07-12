@@ -30,19 +30,19 @@ export interface ConfirmDialogData {
 export class ConfirmDialogComponent {
   /** The data injected into the dialog. */
   public readonly data: ConfirmDialogData = inject(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject(MatDialogRef<ConfirmDialogComponent>);
+  private readonly _dialogRef = inject(MatDialogRef<ConfirmDialogComponent>);
 
   /**
    * Closes the dialog with a true result.
    */
   onConfirm(): void {
-    this.dialogRef.close(true);
+    this._dialogRef.close(true);
   }
 
   /**
    * Closes the dialog with a false result.
    */
   onCancel(): void {
-    this.dialogRef.close(false);
+    this._dialogRef.close(false);
   }
 }

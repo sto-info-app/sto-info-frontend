@@ -11,9 +11,9 @@ import {
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
 
 export abstract class ImageCropperBaseComponent {
-  protected abstract readonly dialogRef: MatDialogRef<unknown>;
+  protected abstract readonly _dialogRef: MatDialogRef<unknown>;
 
-  protected readonly sanitizer = inject(DomSanitizer);
+  protected readonly _sanitizer = inject(DomSanitizer);
 
   errorMessage = '';
   isSubmitting = false;
@@ -74,7 +74,7 @@ export abstract class ImageCropperBaseComponent {
       //INFO: 2. Input files are strictly validated (only JPEG/PNG, no SVG)
       //INFO: 3. The data URL is only used in an <img> tag which prevents script execution
       //INFO: 4. The blob is created client-side from validated user input, not from external sources
-      this.croppedImage = this.sanitizer.bypassSecurityTrustUrl(
+      this.croppedImage = this._sanitizer.bypassSecurityTrustUrl(
         reader.result as string,
       );
     };
@@ -91,7 +91,7 @@ export abstract class ImageCropperBaseComponent {
   }
 
   onCloseClick(): void {
-    this.dialogRef?.close();
+    this._dialogRef?.close();
   }
 
   displayErrorMessage(message: string): void {

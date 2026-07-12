@@ -35,13 +35,13 @@ export class RoadmapComponent {
 
   readonly futureIdeas = ROADMAP_FUTURE_IDEAS;
 
-  private readonly routingService = inject(RoutingService);
+  private readonly _routingService = inject(RoutingService);
 
   toggleSection(section: RoadmapSectionKey): void {
     this.sectionExpanded[section] = !this.sectionExpanded[section];
   }
 
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 }

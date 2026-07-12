@@ -25,14 +25,14 @@ import { EditPersonalDetailsComponent } from '../edit-personal-details/edit-pers
   ],
 })
 export class ProfilePicComponent extends ImageCropperBaseComponent {
-  protected override readonly dialogRef = inject(
+  protected override readonly _dialogRef = inject(
     MatDialogRef<EditPersonalDetailsComponent>,
   );
   public data = inject(MAT_DIALOG_DATA, { optional: true }) as {
     user: User;
   } | null;
 
-  private readonly dashboardService = inject(DashboardService);
+  private readonly _dashboardService = inject(DashboardService);
 
   onUploadImageClick(): void {
     try {
@@ -46,10 +46,10 @@ export class ProfilePicComponent extends ImageCropperBaseComponent {
       );
 
       this.isSubmitting = true;
-      this.dashboardService.updateProfilePic(formData).subscribe({
+      this._dashboardService.updateProfilePic(formData).subscribe({
         next: () => {
           this.isSubmitting = false;
-          this.dialogRef?.close(true);
+          this._dialogRef?.close(true);
         },
         error: error => {
           this.handleHttpError(error);

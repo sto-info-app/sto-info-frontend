@@ -35,15 +35,15 @@ export class VerifyEmailComponent implements OnInit {
   showResendVerificationEmailButton = false;
   appRoutes = APP_ROUTES;
 
-  private readonly route = inject(ActivatedRoute);
-  private readonly http = inject(HttpClient);
-  private readonly routingService = inject(RoutingService);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _http = inject(HttpClient);
+  private readonly _routingService = inject(RoutingService);
 
   /**
    * Reads the verification token from the query string.
    */
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
+    this._route.queryParams.subscribe(params => {
       this.token = params['token'];
       if (!this.token) {
         this.message = 'Invalid token!';
@@ -56,7 +56,7 @@ export class VerifyEmailComponent implements OnInit {
    * Submits the verification token to complete email verification.
    */
   verifyEmail() {
-    this.http
+    this._http
       .post(API_URLS.AUTH_VERIFICATION_EMAIL, { token: this.token })
       .subscribe({
         next: () => {
@@ -86,7 +86,7 @@ export class VerifyEmailComponent implements OnInit {
    * Requests a new verification email for the current token.
    */
   resendVerificationEmail() {
-    this.http
+    this._http
       .post(API_URLS.AUTH_RESEND_VERIFICATION_EMAIL, {
         token: this.token,
       })
@@ -117,6 +117,6 @@ export class VerifyEmailComponent implements OnInit {
    * @returns The resolved link.
    */
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 }

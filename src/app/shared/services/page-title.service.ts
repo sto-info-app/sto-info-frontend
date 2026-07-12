@@ -8,20 +8,20 @@ import { environment } from '../../../../src/environments/environment';
   providedIn: 'root',
 })
 export class PageTitleService {
-  private readonly defaultSiteTitle = 'Star Trek Online Info Portal';
+  private readonly _defaultSiteTitle = 'Star Trek Online Info Portal';
 
-  private readonly title = inject(Title);
-  private readonly router = inject(Router);
-  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly _title = inject(Title);
+  private readonly _router = inject(Router);
+  private readonly _activatedRoute = inject(ActivatedRoute);
 
   /**
    * Starts listening for navigation changes and updates the document title.
    */
   init(): void {
-    this.router.events
+    this._router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
-        map(() => this.activatedRoute),
+        map(() => this._activatedRoute),
         map(route => {
           while (route.firstChild) route = route.firstChild;
           return route;
@@ -32,11 +32,11 @@ export class PageTitleService {
         const pageTitle = event['title'];
         const titleSuffix = this.getTitleSuffix();
         if (pageTitle) {
-          this.title.setTitle(`${pageTitle} - ${titleSuffix}`);
+          this._title.setTitle(`${pageTitle} - ${titleSuffix}`);
         } else if (titleSuffix) {
-          this.title.setTitle(titleSuffix);
+          this._title.setTitle(titleSuffix);
         } else {
-          this.title.setTitle(this.defaultSiteTitle);
+          this._title.setTitle(this._defaultSiteTitle);
         }
       });
   }
@@ -52,9 +52,9 @@ export class PageTitleService {
   setTitle(pageTitle: string): void {
     const titleSuffix = this.getTitleSuffix();
     if (pageTitle) {
-      this.title.setTitle(`${pageTitle} - ${titleSuffix}`);
+      this._title.setTitle(`${pageTitle} - ${titleSuffix}`);
     } else {
-      this.title.setTitle(titleSuffix || this.defaultSiteTitle);
+      this._title.setTitle(titleSuffix || this._defaultSiteTitle);
     }
   }
 

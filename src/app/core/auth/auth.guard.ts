@@ -12,8 +12,8 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
+  private readonly _authService = inject(AuthService);
+  private readonly _router = inject(Router);
 
   // NOTE: If we use 'route' in the canActivate, we can remove the eslint comment above it
   canActivate(
@@ -21,14 +21,14 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot,
   ): Promise<boolean> {
     return new Promise<boolean>(resolve => {
-      if (this.authService.isTokenValid()) {
-        if (this.authService.isTokenExpiringSoon()) {
-          this.authService
+      if (this._authService.isTokenValid()) {
+        if (this._authService.isTokenExpiringSoon()) {
+          this._authService
             .refreshToken()
             .pipe(
               map(() => true),
               catchError(() => {
-                this.router.navigate(['/login'], {
+                this._router.navigate(['/login'], {
                   queryParams: { returnUrl: state.url },
                 });
                 resolve(false);
@@ -40,7 +40,7 @@ export class AuthGuard implements CanActivate {
           resolve(true);
         }
       } else {
-        this.router.navigate(['/login'], {
+        this._router.navigate(['/login'], {
           queryParams: { returnUrl: state.url },
         });
         resolve(false);

@@ -136,9 +136,9 @@ describe('CookieService', () => {
       const nextSpy = jest.spyOn(
         (
           service as unknown as {
-            cookieStatusSubject: BehaviorSubject<boolean>;
+            _cookieStatusSubject: BehaviorSubject<boolean>;
           }
-        ).cookieStatusSubject,
+        )._cookieStatusSubject,
         'next',
       );
       mockDocument.cookie = 'my_status=true';

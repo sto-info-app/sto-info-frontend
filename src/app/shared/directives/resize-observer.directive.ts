@@ -17,7 +17,7 @@ export class ResizeObserverDirective implements OnInit, OnDestroy {
   appResizeObserver = new EventEmitter<DOMRectReadOnly>();
 
   private observer!: ResizeObserver;
-  private readonly elementRef = inject(ElementRef);
+  private readonly _elementRef = inject(ElementRef);
 
   /**
    * Starts observing element size changes and emits each resize rectangle.
@@ -29,7 +29,7 @@ export class ResizeObserverDirective implements OnInit, OnDestroy {
       }
     });
 
-    this.observer.observe(this.elementRef.nativeElement);
+    this.observer.observe(this._elementRef.nativeElement);
   }
 
   /**

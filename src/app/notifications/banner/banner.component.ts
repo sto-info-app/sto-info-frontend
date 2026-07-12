@@ -35,9 +35,9 @@ const DISMISSED_STORAGE_KEY = 'dismissed_banners';
   imports: [CommonModule],
 })
 export class BannerComponent implements OnInit, OnDestroy {
-  private readonly notificationService = inject(NotificationService);
-  private readonly ngZone = inject(NgZone);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly _notificationService = inject(NotificationService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   banners: Banner[] = [];
   private sub?: Subscription;
@@ -51,8 +51,8 @@ export class BannerComponent implements OnInit, OnDestroy {
    * detection, which would otherwise leave loaded banners unrendered.
    */
   ngOnInit(): void {
-    this.sub = this.notificationService.banners$
-      .pipe(observeInZone(this.ngZone, this.cdr))
+    this.sub = this._notificationService.banners$
+      .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe({
         next: banners => {
           const dismissed = this.getDismissedIds();

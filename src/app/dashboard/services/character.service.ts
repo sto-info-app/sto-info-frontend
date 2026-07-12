@@ -13,19 +13,19 @@ import {
   providedIn: 'root',
 })
 export class CharacterService {
-  private readonly http = inject(HttpClient);
-  private readonly authService = inject(AuthService);
+  private readonly _http = inject(HttpClient);
+  private readonly _authService = inject(AuthService);
 
   /**
    * Fetches all characters for the current user.
    * @returns An observable of character array.
    */
   getCharacters(): Observable<Character[]> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.get<Character[]>(API_URLS.CHARACTER, httpOptions);
+    return this._http.get<Character[]>(API_URLS.CHARACTER, httpOptions);
   }
 
   /**
@@ -34,12 +34,12 @@ export class CharacterService {
    * @returns An observable of character array.
    */
   getCharactersByAccount(accountId: string): Observable<Character[]> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
     const params = new HttpParams().set('accountId', accountId);
-    return this.http.get<Character[]>(API_URLS.CHARACTER, {
+    return this._http.get<Character[]>(API_URLS.CHARACTER, {
       ...httpOptions,
       params,
     });
@@ -51,11 +51,14 @@ export class CharacterService {
    * @returns An observable of the character.
    */
   getCharacter(id: string): Observable<Character> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.get<Character>(`${API_URLS.CHARACTER}/${id}`, httpOptions);
+    return this._http.get<Character>(
+      `${API_URLS.CHARACTER}/${id}`,
+      httpOptions,
+    );
   }
 
   /**
@@ -64,11 +67,11 @@ export class CharacterService {
    * @returns An observable of the created character.
    */
   createCharacter(character: CreateCharacterRequest): Observable<Character> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.post<Character>(
+    return this._http.post<Character>(
       API_URLS.CHARACTER,
       character,
       httpOptions,
@@ -85,11 +88,11 @@ export class CharacterService {
     id: string,
     character: UpdateCharacterRequest,
   ): Observable<Character> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.put<Character>(
+    return this._http.put<Character>(
       `${API_URLS.CHARACTER}/${id}`,
       character,
       httpOptions,
@@ -106,7 +109,7 @@ export class CharacterService {
     characterId: string,
     profilePicForm: FormData,
   ): Observable<Character> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
 
     // Remove the Content-Type header if it exists
     if (httpOptions?.headers.has('Content-Type')) {
@@ -117,7 +120,7 @@ export class CharacterService {
       return throwError(() => new Error('No token found'));
     }
 
-    return this.http.post<Character>(
+    return this._http.post<Character>(
       `${API_URLS.CHARACTER}/${characterId}/profile-image`,
       profilePicForm,
       httpOptions,
@@ -130,10 +133,10 @@ export class CharacterService {
    * @returns An observable of the deletion result.
    */
   deleteCharacter(id: string): Observable<void> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.delete<void>(`${API_URLS.CHARACTER}/${id}`, httpOptions);
+    return this._http.delete<void>(`${API_URLS.CHARACTER}/${id}`, httpOptions);
   }
 }
