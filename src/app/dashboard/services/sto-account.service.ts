@@ -22,8 +22,8 @@ import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
   providedIn: 'root',
 })
 export class StoAccountService {
-  private readonly http = inject(HttpClient);
-  private readonly authService = inject(AuthService);
+  private readonly _http = inject(HttpClient);
+  private readonly _authService = inject(AuthService);
 
   private platforms$?: Observable<Platform[]>;
   private launchers$?: Observable<Launcher[]>;
@@ -34,11 +34,11 @@ export class StoAccountService {
    * @returns An observable of STO account array.
    */
   getAccounts(): Observable<StoAccount[]> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.get<StoAccount[]>(API_URLS.STO_ACCOUNT, httpOptions);
+    return this._http.get<StoAccount[]>(API_URLS.STO_ACCOUNT, httpOptions);
   }
 
   /**
@@ -47,11 +47,11 @@ export class StoAccountService {
    * @returns An observable of the STO account.
    */
   getAccount(id: string): Observable<StoAccount> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.get<StoAccount>(
+    return this._http.get<StoAccount>(
       `${API_URLS.STO_ACCOUNT}/${id}`,
       httpOptions,
     );
@@ -63,11 +63,11 @@ export class StoAccountService {
    * @returns An observable of the created STO account.
    */
   createAccount(account: CreateStoAccountRequest): Observable<StoAccount> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.post<StoAccount>(
+    return this._http.post<StoAccount>(
       API_URLS.STO_ACCOUNT,
       account,
       httpOptions,
@@ -84,11 +84,11 @@ export class StoAccountService {
     id: string,
     account: UpdateStoAccountRequest,
   ): Observable<StoAccount> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.put<StoAccount>(
+    return this._http.put<StoAccount>(
       `${API_URLS.STO_ACCOUNT}/${id}`,
       account,
       httpOptions,
@@ -101,11 +101,14 @@ export class StoAccountService {
    * @returns An observable of the deletion result.
    */
   deleteAccount(id: string): Observable<void> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.delete<void>(`${API_URLS.STO_ACCOUNT}/${id}`, httpOptions);
+    return this._http.delete<void>(
+      `${API_URLS.STO_ACCOUNT}/${id}`,
+      httpOptions,
+    );
   }
 
   /**
@@ -113,7 +116,7 @@ export class StoAccountService {
    * @returns An observable of platform array.
    */
   getPlatforms(): Observable<Platform[]> {
-    this.platforms$ ??= this.http.get<Platform[]>(API_URLS.STO_PLATFORM).pipe(
+    this.platforms$ ??= this._http.get<Platform[]>(API_URLS.STO_PLATFORM).pipe(
       shareReplay(1),
       catchError(error => {
         this.platforms$ = undefined;
@@ -129,7 +132,7 @@ export class StoAccountService {
    * @returns An observable of launcher array.
    */
   getLaunchers(): Observable<Launcher[]> {
-    this.launchers$ ??= this.http.get<Launcher[]>(API_URLS.STO_LAUNCHER).pipe(
+    this.launchers$ ??= this._http.get<Launcher[]>(API_URLS.STO_LAUNCHER).pipe(
       shareReplay(1),
       catchError(error => {
         this.launchers$ = undefined;
@@ -145,7 +148,7 @@ export class StoAccountService {
    * @returns An observable of platform-launcher mapping array.
    */
   getPlatformLaunchers(): Observable<PlatformLauncher[]> {
-    this.platformLaunchers$ ??= this.http
+    this.platformLaunchers$ ??= this._http
       .get<PlatformLauncher[]>(API_URLS.STO_PLATFORM_LAUNCHER)
       .pipe(
         shareReplay(1),

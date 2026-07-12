@@ -13,20 +13,20 @@ import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
   providedIn: 'root',
 })
 export class DashboardService {
-  private readonly http = inject(HttpClient);
-  private readonly authService = inject(AuthService);
+  private readonly _http = inject(HttpClient);
+  private readonly _authService = inject(AuthService);
 
   getUser(): Observable<User> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       // Handle the case when there is no token (e.g., user is not logged in)
       return throwError(() => new Error('No token found'));
     }
-    return this.http.get<User>(API_URLS.USER, httpOptions);
+    return this._http.get<User>(API_URLS.USER, httpOptions);
   }
 
   updatePersonalDetails(userPersonalDetails: EditPersonalDetailsFormValues) {
-    return this.http
+    return this._http
       .post(API_URLS.UPDATE_USER_PROFILE, userPersonalDetails)
       .pipe(
         catchError(error => {
@@ -37,7 +37,7 @@ export class DashboardService {
   }
 
   updateProfilePic(profilePicForm: FormData) {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
 
     // Remove the Content-Type header if it exists
     if (httpOptions?.headers.has('Content-Type')) {
@@ -48,7 +48,7 @@ export class DashboardService {
       return throwError(() => new Error('No token found'));
     }
 
-    return this.http
+    return this._http
       .post(API_URLS.UPDATE_USER_PROFILE_PIC, profilePicForm, httpOptions)
       .pipe(
         catchError(error => {
@@ -59,12 +59,12 @@ export class DashboardService {
   }
 
   closeAccount() {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
 
-    return this.http.delete<{ success: boolean }>(
+    return this._http.delete<{ success: boolean }>(
       API_URLS.CLOSE_ACCOUNT,
       httpOptions,
     );

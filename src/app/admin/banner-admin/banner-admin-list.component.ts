@@ -45,11 +45,11 @@ const LOAD_TIMEOUT_MS = 12000;
   ],
 })
 export class BannerAdminListComponent implements OnInit {
-  private readonly notificationService = inject(NotificationService);
-  private readonly routingService = inject(RoutingService);
-  private readonly ngZone = inject(NgZone);
-  private readonly cdr = inject(ChangeDetectorRef);
-  private readonly dialog = inject(MatDialog);
+  private readonly _notificationService = inject(NotificationService);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _dialog = inject(MatDialog);
 
   appRoutes = APP_ROUTES;
   severityLabels = NOTIFICATION_SEVERITY_LABELS;
@@ -77,20 +77,20 @@ export class BannerAdminListComponent implements OnInit {
         return;
       }
 
-      this.ngZone.run(() => {
+      this._ngZone.run(() => {
         this.isLoading = false;
         this.banners = [];
         this.errorMessage =
           'Loading banners is taking longer than expected. Please try again.';
-        this.cdr.detectChanges();
+        this._cdr.detectChanges();
       });
     }, LOAD_TIMEOUT_MS);
 
-    this.notificationService
+    this._notificationService
       .getAllBannersForAdmin()
       .pipe(
         take(1),
-        observeInZone(this.ngZone, this.cdr),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => clearTimeout(loadingTimeout)),
       )
       .subscribe({
@@ -138,7 +138,7 @@ export class BannerAdminListComponent implements OnInit {
    * @returns The edit route link.
    */
   editLink(banner: Banner): string {
-    return this.routingService.getLink(
+    return this._routingService.getLink(
       `${APP_ROUTES.ADMIN}/banners/${banner.id}/edit`,
     );
   }
@@ -149,7 +149,7 @@ export class BannerAdminListComponent implements OnInit {
    * @param banner - The banner to delete.
    */
   remove(banner: Banner): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
       width: '75%',
       data: {
         title: 'Delete Banner',
@@ -163,14 +163,14 @@ export class BannerAdminListComponent implements OnInit {
 
     dialogRef
       .afterClosed()
-      .pipe(take(1), observeInZone(this.ngZone, this.cdr))
+      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
       .subscribe(confirmed => {
         if (!confirmed) {
           return;
         }
-        this.notificationService
+        this._notificationService
           .deleteBanner(banner.id)
-          .pipe(observeInZone(this.ngZone, this.cdr))
+          .pipe(observeInZone(this._ngZone, this._cdr))
           .subscribe({
             next: () =>
               (this.banners = this.banners.filter(b => b.id !== banner.id)),

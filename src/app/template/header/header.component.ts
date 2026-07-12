@@ -40,38 +40,38 @@ export class HeaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('scrollTopButton')
   scrollTopButton!: ElementRef;
 
-  private readonly zone = inject(NgZone);
-  private readonly routingService = inject(RoutingService);
-  private readonly generalThemeService = inject(GeneralThemeService);
-  private readonly debuggingService = inject(DebuggingService);
-  private readonly authService = inject(AuthService);
-  private readonly notificationService = inject(NotificationService);
+  private readonly _zone = inject(NgZone);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _generalThemeService = inject(GeneralThemeService);
+  private readonly _debuggingService = inject(DebuggingService);
+  private readonly _authService = inject(AuthService);
+  private readonly _notificationService = inject(NotificationService);
 
   appTitle = environment.appTitle;
   appRoutes = APP_ROUTES;
   appRouteTitles = APP_ROUTE_TITLES;
 
   // Check debugging mode
-  appDebugging = this.debuggingService.allowDebugging();
+  appDebugging = this._debuggingService.allowDebugging();
 
   /** Unread notification count driving the header "incoming transmission" alert. */
-  readonly unreadCount$ = this.notificationService.unreadCount$;
-  private readonly subs = new Subscription();
+  readonly unreadCount$ = this._notificationService.unreadCount$;
+  private readonly _subs = new Subscription();
 
   dataCascade: string;
   themePanel2RandomText: string;
 
   scrollCallbackFunction = (): void => {
-    this.zone.run(() => {
+    this._zone.run(() => {
       this.toggleScrollTopButton();
     });
   };
   showScrollTop = false;
 
   constructor() {
-    this.dataCascade = this.generalThemeService.createDynamicDataCascade();
+    this.dataCascade = this._generalThemeService.createDynamicDataCascade();
     this.themePanel2RandomText =
-      this.generalThemeService.createDynamicSideColumnText();
+      this._generalThemeService.createDynamicSideColumnText();
   }
 
   /**
@@ -86,12 +86,12 @@ export class HeaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * and the single subscription is torn down in {@link ngOnDestroy}.
    */
   ngOnInit() {
-    this.subs.add(
-      this.authService.isLoggedIn$
+    this._subs.add(
+      this._authService.isLoggedIn$
         .pipe(
           filter(loggedIn => loggedIn),
           switchMap(() =>
-            this.notificationService.refreshUnreadCount().pipe(
+            this._notificationService.refreshUnreadCount().pipe(
               catchError(() => EMPTY), // Non-critical; the alert stays hidden.
             ),
           ),
@@ -106,7 +106,7 @@ export class HeaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     // Unsubscribe from the Observables when the component is destroyed
-    this.subs.unsubscribe();
+    this._subs.unsubscribe();
     globalThis.removeEventListener?.('scroll', this.scrollCallbackFunction);
   }
 
@@ -123,7 +123,7 @@ export class HeaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 
   /**
@@ -132,6 +132,6 @@ export class HeaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @returns `true` when logged in as an admin.
    */
   get isAdmin(): boolean {
-    return this.authService.isLoggedInAsAdmin();
+    return this._authService.isLoggedInAsAdmin();
   }
 }

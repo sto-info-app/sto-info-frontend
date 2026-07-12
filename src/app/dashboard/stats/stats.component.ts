@@ -199,7 +199,7 @@ export class StatsComponent extends StatsBaseComponent implements OnInit {
       account = this.accounts[0];
     }
     if (!account) return undefined;
-    return this.routingService.getLink(
+    return this._routingService.getLink(
       APP_ROUTES.STO_ACCOUNT_DETAIL.replace(':handle', account.handle),
     );
   }
@@ -211,7 +211,7 @@ export class StatsComponent extends StatsBaseComponent implements OnInit {
    * @returns A router link string for the given breakdown.
    */
   getDetailLink(id: string): string {
-    return this.routingService.getLink(
+    return this._routingService.getLink(
       APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', id),
     );
   }

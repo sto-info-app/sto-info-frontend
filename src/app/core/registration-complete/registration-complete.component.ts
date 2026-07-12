@@ -13,7 +13,7 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 export class RegistrationCompleteComponent {
   appRoutes = APP_ROUTES;
 
-  private readonly routingService = inject(RoutingService);
+  private readonly _routingService = inject(RoutingService);
 
   /**
    * Resolves a route key into a router link.
@@ -22,6 +22,6 @@ export class RegistrationCompleteComponent {
    * @returns The resolved link.
    */
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 }

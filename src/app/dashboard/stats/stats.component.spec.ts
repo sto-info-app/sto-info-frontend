@@ -127,8 +127,8 @@ describe('StatsComponent', () => {
 
   describe('ngOnDestroy', () => {
     it('should complete the destroy$ subject', () => {
-      const nextSpy = jest.spyOn(component['destroy$'], 'next');
-      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+      const nextSpy = jest.spyOn(component['_destroy$'], 'next');
+      const completeSpy = jest.spyOn(component['_destroy$'], 'complete');
 
       component.ngOnDestroy();
 

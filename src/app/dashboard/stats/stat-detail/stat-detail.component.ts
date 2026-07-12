@@ -183,8 +183,8 @@ export class StatDetailComponent extends StatsBaseComponent implements OnInit {
   /** Whether to hide items with 0 count. */
   hideZeros = true;
 
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
 
   /** Reports in the same section, sorted alphabetically, for the navigation dropdown. */
   get sectionEntries(): { id: string; label: string }[] {
@@ -221,7 +221,7 @@ export class StatDetailComponent extends StatsBaseComponent implements OnInit {
 
   /** Navigates to a different report within the same section. */
   navigateToReport(id: string): void {
-    void this.router.navigateByUrl(
+    void this._router.navigateByUrl(
       `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', id)}`,
     );
   }
@@ -229,9 +229,9 @@ export class StatDetailComponent extends StatsBaseComponent implements OnInit {
   ngOnInit(): void {
     this.loadAccounts();
 
-    this.route.paramMap
+    this._route.paramMap
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntil(this._destroy$),
         switchMap(params => {
           const id = params.get('breakdownId') ?? '';
           this.breakdownId = id;
@@ -248,7 +248,7 @@ export class StatDetailComponent extends StatsBaseComponent implements OnInit {
           this.isLoading = true;
           const accountId =
             this.selectedAccountId === 'all' ? null : this.selectedAccountId;
-          return this.statsService.getStats(accountId);
+          return this._statsService.getStats(accountId);
         }),
       )
       .subscribe({

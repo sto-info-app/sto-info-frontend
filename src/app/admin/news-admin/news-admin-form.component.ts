@@ -40,14 +40,14 @@ import { NewsService } from 'src/app/news/news.service';
   ],
 })
 export class NewsAdminFormComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
-  private readonly newsService = inject(NewsService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly ngZone = inject(NgZone);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly _fb = inject(FormBuilder);
+  private readonly _newsService = inject(NewsService);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
-  private static readonly LOAD_TIMEOUT_MS = 12000;
+  private static readonly _LOAD_TIMEOUT_MS = 12000;
 
   appRoutes = APP_ROUTES;
   categoryLabels = NEWS_CATEGORY_LABELS;
@@ -60,7 +60,7 @@ export class NewsAdminFormComponent implements OnInit {
   errorMessage = '';
   showPreview = false;
 
-  form = this.fb.group({
+  form = this._fb.group({
     title: ['', [Validators.required, Validators.maxLength(200)]],
     slug: ['', [Validators.maxLength(280)]],
     summary: ['', [Validators.maxLength(500)]],
@@ -73,7 +73,7 @@ export class NewsAdminFormComponent implements OnInit {
    * Loads the post for editing when an `id` route parameter is present.
    */
   ngOnInit(): void {
-    this.postId = this.route.snapshot.paramMap.get('id');
+    this.postId = this._route.snapshot.paramMap.get('id');
     if (this.postId) {
       this.loadPost(this.postId);
     }
@@ -110,19 +110,19 @@ export class NewsAdminFormComponent implements OnInit {
         return;
       }
 
-      this.ngZone.run(() => {
+      this._ngZone.run(() => {
         this.isLoading = false;
         this.errorMessage =
           'Loading post is taking longer than expected. Please try again.';
-        this.cdr.detectChanges();
+        this._cdr.detectChanges();
       });
-    }, NewsAdminFormComponent.LOAD_TIMEOUT_MS);
+    }, NewsAdminFormComponent._LOAD_TIMEOUT_MS);
 
-    this.newsService
+    this._newsService
       .getNewsByIdForAdmin(id)
       .pipe(
         take(1),
-        observeInZone(this.ngZone, this.cdr),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => clearTimeout(loadingTimeout)),
       )
       .subscribe({
@@ -180,11 +180,11 @@ export class NewsAdminFormComponent implements OnInit {
 
     const request$ =
       this.isEdit && this.postId
-        ? this.newsService.updateNews(this.postId, payload)
-        : this.newsService.createNews(payload);
+        ? this._newsService.updateNews(this.postId, payload)
+        : this._newsService.createNews(payload);
 
-    request$.pipe(observeInZone(this.ngZone, this.cdr)).subscribe({
-      next: () => this.router.navigate(['/' + APP_ROUTES.ADMIN_NEWS]),
+    request$.pipe(observeInZone(this._ngZone, this._cdr)).subscribe({
+      next: () => this._router.navigate(['/' + APP_ROUTES.ADMIN_NEWS]),
       error: () => {
         this.isSaving = false;
         this.errorMessage =

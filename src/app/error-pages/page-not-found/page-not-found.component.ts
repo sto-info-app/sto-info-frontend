@@ -19,17 +19,17 @@ import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
   imports: [],
 })
 export class PageNotFoundComponent implements OnInit, OnDestroy {
-  private readonly alertThemeService = inject(AlertThemeService);
-  private readonly renderer = inject(Renderer2);
-  private readonly el = inject(ElementRef);
+  private readonly _alertThemeService = inject(AlertThemeService);
+  private readonly _renderer = inject(Renderer2);
+  private readonly _el = inject(ElementRef);
 
   /**
    * Applies the red alert styling used by the 404 page.
    */
   ngOnInit(): void {
-    this.alertThemeService.applyAlertThemeThenApplyStaticTheme(
-      this.renderer,
-      this.el.nativeElement,
+    this._alertThemeService.applyAlertThemeThenApplyStaticTheme(
+      this._renderer,
+      this._el.nativeElement,
       'red',
     );
   }
@@ -38,10 +38,10 @@ export class PageNotFoundComponent implements OnInit, OnDestroy {
    * Removes alert styling when the page is destroyed.
    */
   ngOnDestroy(): void {
-    this.alertThemeService.clearAlertStylesheet(
-      this.renderer,
-      this.el.nativeElement,
+    this._alertThemeService.clearAlertStylesheet(
+      this._renderer,
+      this._el.nativeElement,
     );
-    this.alertThemeService.clearTimers(this.el.nativeElement);
+    this._alertThemeService.clearTimers(this._el.nativeElement);
   }
 }

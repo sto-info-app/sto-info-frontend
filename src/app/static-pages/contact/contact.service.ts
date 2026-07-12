@@ -11,11 +11,14 @@ import {
   providedIn: 'root',
 })
 export class ContactService {
-  private readonly http = inject(HttpClient);
+  private readonly _http = inject(HttpClient);
 
   submitContactForm(
     payload: ContactSubmissionRequest,
   ): Observable<ContactSubmissionResponse> {
-    return this.http.post<ContactSubmissionResponse>(API_URLS.CONTACT, payload);
+    return this._http.post<ContactSubmissionResponse>(
+      API_URLS.CONTACT,
+      payload,
+    );
   }
 }

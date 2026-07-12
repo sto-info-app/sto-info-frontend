@@ -34,7 +34,7 @@ describe('MainContentComponent', () => {
   interface MainContentComponentInternals {
     getDeepestRouteRequiresApi(route: ActivatedRoute): boolean;
     updateBackendVersion(response: HttpResponse<string>): void;
-    subs: { unsubscribe: () => void };
+    _subs: { unsubscribe: () => void };
   }
 
   const flushStartupRequests = (version = 'backend-version') => {
@@ -359,7 +359,7 @@ describe('MainContentComponent', () => {
 
   it('should unsubscribe on destroy', () => {
     const unsubscribeSpy = jest.spyOn(
-      (component as unknown as MainContentComponentInternals).subs,
+      (component as unknown as MainContentComponentInternals)._subs,
       'unsubscribe',
     );
     component.ngOnDestroy();

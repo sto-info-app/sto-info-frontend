@@ -8,7 +8,7 @@ export abstract class LcarsToggleBase implements ControlValueAccessor {
   checked = false;
   disabled = false;
 
-  protected readonly cdr = inject(ChangeDetectorRef);
+  protected readonly _cdr = inject(ChangeDetectorRef);
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected onChange: (value: boolean) => void = () => {};
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -23,7 +23,7 @@ export abstract class LcarsToggleBase implements ControlValueAccessor {
 
   writeValue(value: boolean): void {
     this.checked = !!value;
-    this.cdr.markForCheck();
+    this._cdr.markForCheck();
   }
 
   registerOnChange(fn: (value: boolean) => void): void {
@@ -36,6 +36,6 @@ export abstract class LcarsToggleBase implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
-    this.cdr.markForCheck();
+    this._cdr.markForCheck();
   }
 }

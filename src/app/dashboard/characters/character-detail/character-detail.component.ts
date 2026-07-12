@@ -50,21 +50,21 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
   errorMessage = '';
   imageFailed = false;
 
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly characterService = inject(CharacterService);
-  private readonly stoAccountService = inject(StoAccountService);
-  private readonly dialog = inject(MatDialog);
-  private readonly cdr = inject(ChangeDetectorRef);
-  private readonly destroy$ = new Subject<void>();
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
+  private readonly _characterService = inject(CharacterService);
+  private readonly _stoAccountService = inject(StoAccountService);
+  private readonly _dialog = inject(MatDialog);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _destroy$ = new Subject<void>();
 
   public readonly appRoutes = APP_ROUTES;
   public readonly unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
   ngOnInit(): void {
-    this.route.params
+    this._route.params
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntil(this._destroy$),
         switchMap(params => {
           this.accountHandle = decodeStoHandle(params['handle']);
           const charHandle = params['characterHandle'];
@@ -72,7 +72,7 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
           if (!this.accountHandle || !charHandle) {
             this.isLoading = false;
             this.errorMessage = 'Invalid character link';
-            this.cdr.markForCheck();
+            this._cdr.markForCheck();
             return EMPTY;
           }
 
@@ -80,12 +80,12 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
           this.character = null;
           this.errorMessage = '';
 
-          return this.stoAccountService.getAccounts().pipe(
+          return this._stoAccountService.getAccounts().pipe(
             catchError(err => {
               this.isLoading = false;
               this.errorMessage = 'Failed to load account';
               console.error(err);
-              this.cdr.markForCheck();
+              this._cdr.markForCheck();
               return EMPTY;
             }),
             switchMap(accounts => {
@@ -95,17 +95,17 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
               if (!account) {
                 this.isLoading = false;
                 this.errorMessage = 'Account not found';
-                this.cdr.markForCheck();
+                this._cdr.markForCheck();
                 return EMPTY;
               }
-              return this.characterService
+              return this._characterService
                 .getCharactersByAccount(account.id)
                 .pipe(
                   catchError(err => {
                     this.isLoading = false;
                     this.errorMessage = 'Failed to load account characters';
                     console.error(err);
-                    this.cdr.markForCheck();
+                    this._cdr.markForCheck();
                     return EMPTY;
                   }),
                   switchMap(characters => {
@@ -113,15 +113,15 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
                     if (!char) {
                       this.isLoading = false;
                       this.errorMessage = 'Character not found';
-                      this.cdr.markForCheck();
+                      this._cdr.markForCheck();
                       return EMPTY;
                     }
-                    return this.characterService.getCharacter(char.id).pipe(
+                    return this._characterService.getCharacter(char.id).pipe(
                       catchError(err => {
                         this.isLoading = false;
                         this.errorMessage = 'Failed to load character details';
                         console.error(err);
-                        this.cdr.markForCheck();
+                        this._cdr.markForCheck();
                         return EMPTY;
                       }),
                     );
@@ -134,13 +134,13 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
       .subscribe(fullChar => {
         this.character = fullChar;
         this.isLoading = false;
-        this.cdr.markForCheck();
+        this._cdr.markForCheck();
       });
   }
 
   editCharacter(): void {
     if (!this.character) return;
-    this.router.navigate([
+    this._router.navigate([
       '/dashboard/accounts',
       encodeStoHandle(this.accountHandle),
       this.character.handle,
@@ -150,7 +150,7 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
 
   editCharacterPhoto(): void {
     if (!this.character) return;
-    const dialogRef = this.dialog.open(CharacterPicComponent, {
+    const dialogRef = this._dialog.open(CharacterPicComponent, {
       hasBackdrop: true,
       disableClose: true,
       data: { character: this.character },
@@ -158,24 +158,24 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
 
     dialogRef
       .afterClosed()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe(result => {
         if (result && this.character) {
           const characterId = this.character.id;
           this.isLoading = true;
           this.imageFailed = false;
-          this.characterService
+          this._characterService
             .getCharacter(characterId)
-            .pipe(takeUntil(this.destroy$))
+            .pipe(takeUntil(this._destroy$))
             .subscribe({
               next: updated => {
                 this.character = updated;
                 this.isLoading = false;
-                this.cdr.markForCheck();
+                this._cdr.markForCheck();
               },
               error: err => {
                 this.isLoading = false;
-                this.cdr.markForCheck();
+                this._cdr.markForCheck();
                 console.error(err);
               },
             });
@@ -230,7 +230,7 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
    * @returns void
    */
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 }

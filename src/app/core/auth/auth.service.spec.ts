@@ -21,8 +21,8 @@ describe('AuthService', () => {
   let routerSpy: jest.Mocked<Omit<Router, 'url'>> & { url: string };
 
   interface AuthServiceInternals {
-    http: HttpClient;
-    router: Router;
+    _http: HttpClient;
+    _router: Router;
     warningTimeout: ReturnType<typeof setTimeout> | null;
     logoutTimeout: ReturnType<typeof setTimeout> | null;
   }
@@ -355,7 +355,7 @@ describe('AuthService', () => {
       localStorage.removeItem('refresh_token');
 
       const postSpy = jest.spyOn(
-        (service as unknown as AuthServiceInternals).http,
+        (service as unknown as AuthServiceInternals)._http,
         'post',
       );
       service.performLogout();

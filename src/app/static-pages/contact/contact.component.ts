@@ -62,10 +62,10 @@ export class ContactComponent {
   errorTextMessageRequired: string = FORM_ERROR_MESSAGE_REQUIRED;
   errorTextMessageMaxLength: string = FORM_ERROR_MESSAGE_MAX_LENGTH;
 
-  private readonly formBuilder = inject(FormBuilder);
-  private readonly contactService = inject(ContactService);
+  private readonly _formBuilder = inject(FormBuilder);
+  private readonly _contactService = inject(ContactService);
 
-  contactForm = this.formBuilder.nonNullable.group({
+  contactForm = this._formBuilder.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(MAX_CHARS_NAMES)]],
     email: [
       '',
@@ -103,7 +103,7 @@ export class ContactComponent {
       message: this.formControls.message.value,
     };
 
-    this.contactService
+    this._contactService
       .submitContactForm(payload)
       .pipe(
         finalize(() => {

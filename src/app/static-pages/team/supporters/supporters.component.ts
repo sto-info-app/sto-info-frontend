@@ -28,9 +28,9 @@ export class TeamSupportersComponent {
   );
   pastSupporters = SUPPORTERS.filter(supporter => supporter.status === 'past');
 
-  private readonly routingService = inject(RoutingService);
+  private readonly _routingService = inject(RoutingService);
 
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 }

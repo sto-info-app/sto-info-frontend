@@ -14,8 +14,8 @@ import {
   providedIn: 'root',
 })
 export class EndeavourService {
-  private readonly http = inject(HttpClient);
-  private readonly authService = inject(AuthService);
+  private readonly _http = inject(HttpClient);
+  private readonly _authService = inject(AuthService);
 
   getProgress(
     accountId: string,
@@ -25,7 +25,7 @@ export class EndeavourService {
       sortOrder?: 'ASC' | 'DESC';
     },
   ): Observable<EndeavourProgress[]> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
@@ -35,18 +35,18 @@ export class EndeavourService {
     if (options?.sortBy) params = params.set('sortBy', options.sortBy);
     if (options?.sortOrder) params = params.set('sortOrder', options.sortOrder);
 
-    return this.http.get<EndeavourProgress[]>(
+    return this._http.get<EndeavourProgress[]>(
       `${API_URLS.ENDEAVOUR}/account/${accountId}`,
       { ...httpOptions, params },
     );
   }
 
   getSummary(accountId: string): Observable<EndeavourSummary> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.get<EndeavourSummary>(
+    return this._http.get<EndeavourSummary>(
       `${API_URLS.ENDEAVOUR}/account/${accountId}/summary`,
       httpOptions,
     );
@@ -57,11 +57,11 @@ export class EndeavourService {
     perkId: string,
     currentNodes: number,
   ): Observable<EndeavourProgress> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.put<EndeavourProgress>(
+    return this._http.put<EndeavourProgress>(
       `${API_URLS.ENDEAVOUR}/account/${accountId}/perk/${perkId}`,
       { currentNodes },
       httpOptions,

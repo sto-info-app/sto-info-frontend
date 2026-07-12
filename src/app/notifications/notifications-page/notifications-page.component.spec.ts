@@ -240,7 +240,7 @@ describe('NotificationsPageComponent', () => {
   it('swallows detectChanges errors in stopLoading', () => {
     const detectChangesSpy = jest
       .spyOn(
-        (component as unknown as { cdr: { detectChanges: () => void } }).cdr,
+        (component as unknown as { _cdr: { detectChanges: () => void } })._cdr,
         'detectChanges',
       )
       .mockImplementation(() => {

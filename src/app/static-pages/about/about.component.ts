@@ -20,9 +20,9 @@ export class AboutComponent {
   socialMediaRoutes = SOCIAL_MEDIA_ROUTES;
   patreonUrl = PATREON_URL;
 
-  private readonly routingService = inject(RoutingService);
+  private readonly _routingService = inject(RoutingService);
 
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 }

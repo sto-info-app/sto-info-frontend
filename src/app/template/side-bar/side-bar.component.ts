@@ -27,17 +27,17 @@ export class SideBarComponent {
   isPanel8Hidden = false;
   isPanel10Hidden = false;
 
-  private readonly routingService = inject(RoutingService);
-  private readonly generalThemeService = inject(GeneralThemeService);
-  private readonly authService = inject(AuthService);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _generalThemeService = inject(GeneralThemeService);
+  private readonly _authService = inject(AuthService);
 
   constructor() {
     this.themePanel6RandomText =
-      this.generalThemeService.createDynamicSideColumnText();
+      this._generalThemeService.createDynamicSideColumnText();
   }
 
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 
   /**
@@ -46,7 +46,7 @@ export class SideBarComponent {
    * @returns `true` when logged in as an admin user.
    */
   get isAdmin(): boolean {
-    return this.authService.isLoggedInAsAdmin();
+    return this._authService.isLoggedInAsAdmin();
   }
 
   onResize(event: Event): void {

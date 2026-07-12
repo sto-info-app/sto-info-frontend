@@ -18,8 +18,8 @@ import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
   providedIn: 'root',
 })
 export class NewsService {
-  private readonly http = inject(HttpClient);
-  private readonly authService = inject(AuthService);
+  private readonly _http = inject(HttpClient);
+  private readonly _authService = inject(AuthService);
 
   /**
    * Lists published news posts.
@@ -28,7 +28,7 @@ export class NewsService {
    * @returns An observable of the paginated published posts.
    */
   getPublishedNews(query: NewsQuery = {}): Observable<PaginatedNews> {
-    return this.http.get<PaginatedNews>(API_URLS.NEWS, {
+    return this._http.get<PaginatedNews>(API_URLS.NEWS, {
       params: this.buildQueryParams(query),
     });
   }
@@ -40,7 +40,7 @@ export class NewsService {
    * @returns An observable of the post.
    */
   getNewsBySlug(slug: string): Observable<NewsPost> {
-    return this.http.get<NewsPost>(`${API_URLS.NEWS}/${slug}`);
+    return this._http.get<NewsPost>(`${API_URLS.NEWS}/${slug}`);
   }
 
   // ----- Admin -----
@@ -52,11 +52,11 @@ export class NewsService {
    * @returns An observable of the paginated posts.
    */
   getAllNewsForAdmin(query: NewsQuery = {}): Observable<PaginatedNews> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.get<PaginatedNews>(API_URLS.NEWS_ADMIN, {
+    return this._http.get<PaginatedNews>(API_URLS.NEWS_ADMIN, {
       ...httpOptions,
       params: this.buildQueryParams(query),
     });
@@ -69,11 +69,14 @@ export class NewsService {
    * @returns An observable of the post.
    */
   getNewsByIdForAdmin(id: string): Observable<NewsPost> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.get<NewsPost>(`${API_URLS.NEWS_ADMIN}/${id}`, httpOptions);
+    return this._http.get<NewsPost>(
+      `${API_URLS.NEWS_ADMIN}/${id}`,
+      httpOptions,
+    );
   }
 
   /**
@@ -83,11 +86,11 @@ export class NewsService {
    * @returns An observable of the created post.
    */
   createNews(payload: CreateNewsPostRequest): Observable<NewsPost> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.post<NewsPost>(API_URLS.NEWS, payload, httpOptions);
+    return this._http.post<NewsPost>(API_URLS.NEWS, payload, httpOptions);
   }
 
   /**
@@ -98,11 +101,11 @@ export class NewsService {
    * @returns An observable of the updated post.
    */
   updateNews(id: string, payload: UpdateNewsPostRequest): Observable<NewsPost> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.patch<NewsPost>(
+    return this._http.patch<NewsPost>(
       `${API_URLS.NEWS}/${id}`,
       payload,
       httpOptions,
@@ -116,11 +119,11 @@ export class NewsService {
    * @returns An observable of the published post.
    */
   publishNews(id: string): Observable<NewsPost> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.post<NewsPost>(
+    return this._http.post<NewsPost>(
       `${API_URLS.NEWS}/${id}/publish`,
       {},
       httpOptions,
@@ -134,11 +137,11 @@ export class NewsService {
    * @returns An observable that completes when deleted.
    */
   deleteNews(id: string): Observable<void> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.delete<void>(`${API_URLS.NEWS}/${id}`, httpOptions);
+    return this._http.delete<void>(`${API_URLS.NEWS}/${id}`, httpOptions);
   }
 
   /**

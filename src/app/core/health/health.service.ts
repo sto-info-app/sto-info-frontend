@@ -26,11 +26,11 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class HealthService {
-  private readonly http = inject(HttpClient);
-  private readonly stateSubject = new BehaviorSubject<API_HEALTH_STATE>(
+  private readonly _http = inject(HttpClient);
+  private readonly _stateSubject = new BehaviorSubject<API_HEALTH_STATE>(
     DEFAULT_API_HEALTH_STATE,
   );
-  readonly state$ = this.stateSubject.asObservable();
+  readonly state$ = this._stateSubject.asObservable();
   private pollSub?: Subscription;
 
   /**
@@ -46,7 +46,7 @@ export class HealthService {
       MILLISECONDS_API_HEALTH_CHECK_POLLING_INTERVAL,
     )
       .pipe(switchMap(() => this.checkOnce()))
-      .subscribe(state => this.stateSubject.next(state));
+      .subscribe(state => this._stateSubject.next(state));
   }
 
   /**
@@ -70,7 +70,7 @@ export class HealthService {
   checkOnce(): Observable<API_HEALTH_STATE> {
     const url = API_URLS.HEALTH_READY;
 
-    return this.http.get<unknown>(url).pipe(
+    return this._http.get<unknown>(url).pipe(
       timeout(MILLISECONDS_API_HEALTH_CHECK_TIMEOUT_INTERVAL),
       map((): API_HEALTH_STATE => API_HEALTH_STATE_UP),
       catchError((): Observable<API_HEALTH_STATE> => of(API_HEALTH_STATE_DOWN)),
@@ -83,8 +83,8 @@ export class HealthService {
    * Does not emit if the state is already DOWN.
    */
   markDown(): void {
-    if (this.stateSubject.value !== API_HEALTH_STATE_DOWN)
-      this.stateSubject.next(API_HEALTH_STATE_DOWN);
+    if (this._stateSubject.value !== API_HEALTH_STATE_DOWN)
+      this._stateSubject.next(API_HEALTH_STATE_DOWN);
   }
 
   /**
@@ -93,8 +93,8 @@ export class HealthService {
    * Does not emit if the state is already UP.
    */
   markUp(): void {
-    if (this.stateSubject.value !== API_HEALTH_STATE_UP)
-      this.stateSubject.next(API_HEALTH_STATE_UP);
+    if (this._stateSubject.value !== API_HEALTH_STATE_UP)
+      this._stateSubject.next(API_HEALTH_STATE_UP);
   }
 
   /**
@@ -103,6 +103,6 @@ export class HealthService {
    * @returns Current API health state.
    */
   snapshot(): API_HEALTH_STATE {
-    return this.stateSubject.value;
+    return this._stateSubject.value;
   }
 }

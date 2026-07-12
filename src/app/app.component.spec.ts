@@ -24,7 +24,7 @@ describe('AppComponent', () => {
     warningTimeout: ReturnType<typeof setTimeout> | null;
     dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null;
     dialog: MatDialog;
-    router: Router;
+    _router: Router;
     googleAnalyticsLoaded: boolean;
     openRefreshSessionDialog(): void;
     loadCookieYesScript(): void;
@@ -457,8 +457,8 @@ describe('AppComponent', () => {
       component as unknown as AppComponentInternals,
       'sendPageView',
     );
-    const routerEvents$ = (component as unknown as AppComponentInternals).router
-      .events as Subject<unknown>;
+    const routerEvents$ = (component as unknown as AppComponentInternals)
+      ._router.events as Subject<unknown>;
     routerEvents$.next({ id: 1, url: '/test' });
     expect(sendPageViewSpy).not.toHaveBeenCalled();
   });

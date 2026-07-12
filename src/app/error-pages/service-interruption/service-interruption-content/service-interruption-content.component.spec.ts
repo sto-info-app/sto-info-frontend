@@ -20,7 +20,7 @@ describe('ServiceInterruptionContentComponent', () => {
 
   interface ComponentInternals {
     applyAlertStylesheet(color?: string): void;
-    subs: { unsubscribe: () => void };
+    _subs: { unsubscribe: () => void };
   }
 
   beforeEach(async () => {
@@ -124,7 +124,7 @@ describe('ServiceInterruptionContentComponent', () => {
   it('should cleanup on destroy', () => {
     fixture.detectChanges();
     const unsubscribeSpy = jest.spyOn(
-      (component as unknown as ComponentInternals).subs,
+      (component as unknown as ComponentInternals)._subs,
       'unsubscribe',
     );
 

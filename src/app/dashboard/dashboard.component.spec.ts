@@ -126,7 +126,7 @@ describe('DashboardComponent', () => {
     });
 
     it('should call detectChanges when getAccounts errors', () => {
-      const cdrSpy = jest.spyOn(component['cdr'], 'detectChanges');
+      const cdrSpy = jest.spyOn(component['_cdr'], 'detectChanges');
       mockStoAccountService.getAccounts.mockReturnValue(
         throwError(() => new Error('fetch failed')),
       );
@@ -179,8 +179,8 @@ describe('DashboardComponent', () => {
 
   describe('ngOnDestroy', () => {
     it('should complete the destroy$ subject', () => {
-      const nextSpy = jest.spyOn(component['destroy$'], 'next');
-      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+      const nextSpy = jest.spyOn(component['_destroy$'], 'next');
+      const completeSpy = jest.spyOn(component['_destroy$'], 'complete');
 
       component.ngOnDestroy();
 
@@ -190,7 +190,7 @@ describe('DashboardComponent', () => {
 
     it('should unsubscribe from active subscriptions on destroy', () => {
       component.ngOnInit();
-      const completeSpy = jest.spyOn(component['destroy$'], 'complete');
+      const completeSpy = jest.spyOn(component['_destroy$'], 'complete');
 
       component.ngOnDestroy();
 

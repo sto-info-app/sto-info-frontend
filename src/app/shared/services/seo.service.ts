@@ -17,11 +17,11 @@ import { PageTitleService } from './page-title.service';
 
 @Injectable({ providedIn: 'root' })
 export class SeoService {
-  private readonly meta = inject(Meta);
-  private readonly router = inject(Router);
-  private readonly activatedRoute = inject(ActivatedRoute);
-  private readonly pageTitleService = inject(PageTitleService);
-  private readonly document = inject(DOCUMENT);
+  private readonly _meta = inject(Meta);
+  private readonly _router = inject(Router);
+  private readonly _activatedRoute = inject(ActivatedRoute);
+  private readonly _pageTitleService = inject(PageTitleService);
+  private readonly _document = inject(DOCUMENT);
 
   /**
    * Initializes SEO handling for the application.
@@ -33,10 +33,10 @@ export class SeoService {
     this.updateStandardTags(this.buildFullTitle());
 
     // Update on every navigation end based on route data title
-    this.router.events
+    this._router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
-        map(() => this.activatedRoute),
+        map(() => this._activatedRoute),
         map(route => {
           while (route.firstChild) {
             route = route.firstChild;
@@ -85,7 +85,7 @@ export class SeoService {
    * @returns The composed title used for meta and document title.
    */
   private buildFullTitle(pageTitle?: string): string {
-    const titleSuffix = this.pageTitleService.getTitleSuffix();
+    const titleSuffix = this._pageTitleService.getTitleSuffix();
 
     if (pageTitle) {
       return `${pageTitle} - ${titleSuffix}`;
@@ -112,46 +112,46 @@ export class SeoService {
     const canonicalUrl = this.getCanonicalUrl();
 
     // Generic meta tags
-    this.meta.updateTag({
+    this._meta.updateTag({
       name: 'description',
       content: description,
     });
-    this.meta.updateTag({ name: 'application-name', content: SEO_APP_TITLE });
-    this.meta.updateTag({ name: 'author', content: SEO_AUTHOR });
+    this._meta.updateTag({ name: 'application-name', content: SEO_APP_TITLE });
+    this._meta.updateTag({ name: 'author', content: SEO_AUTHOR });
 
     // Open Graph tags
-    this.meta.updateTag({ property: 'og:type', content: 'website' });
-    this.meta.updateTag({ property: 'og:site_name', content: title });
-    this.meta.updateTag({ property: 'og:title', content: title });
-    this.meta.updateTag({
+    this._meta.updateTag({ property: 'og:type', content: 'website' });
+    this._meta.updateTag({ property: 'og:site_name', content: title });
+    this._meta.updateTag({ property: 'og:title', content: title });
+    this._meta.updateTag({
       property: 'og:description',
       content: description,
     });
-    this.meta.updateTag({ property: 'og:url', content: canonicalUrl });
-    this.meta.updateTag({
+    this._meta.updateTag({ property: 'og:url', content: canonicalUrl });
+    this._meta.updateTag({
       property: 'og:image',
       content: ogImageUrl,
     });
 
     // Twitter Card tags
-    this.meta.updateTag({
+    this._meta.updateTag({
       name: 'twitter:card',
       content: 'summary_large_image',
     });
-    this.meta.updateTag({ name: 'twitter:title', content: title });
-    this.meta.updateTag({
+    this._meta.updateTag({ name: 'twitter:title', content: title });
+    this._meta.updateTag({
       name: 'twitter:description',
       content: description,
     });
-    this.meta.updateTag({
+    this._meta.updateTag({
       name: 'twitter:image',
       content: twitterImageUrl,
     });
-    this.meta.updateTag({
+    this._meta.updateTag({
       name: 'twitter:site',
       content: SEO_TWITTER_HANDLE,
     });
-    this.meta.updateTag({
+    this._meta.updateTag({
       name: 'twitter:creator',
       content: SEO_TWITTER_HANDLE,
     });
@@ -167,7 +167,7 @@ export class SeoService {
    */
   private getCanonicalUrl(): string {
     try {
-      const currentPath = this.router.url || '/';
+      const currentPath = this._router.url || '/';
       /* istanbul ignore next */
       const origin = globalThis.location?.origin || SEO_SITE_URL;
       return new URL(currentPath, origin).toString();
@@ -182,7 +182,7 @@ export class SeoService {
    * @param canonicalUrl The canonical URL to set on the link element.
    */
   private updateCanonicalLink(canonicalUrl: string): void {
-    const head = this.document.head;
+    const head = this._document.head;
     if (!head) {
       return;
     }
@@ -190,7 +190,7 @@ export class SeoService {
     let linkEl = head.querySelector<HTMLLinkElement>("link[rel='canonical']");
 
     if (!linkEl) {
-      linkEl = this.document.createElement('link');
+      linkEl = this._document.createElement('link');
       linkEl.setAttribute('rel', 'canonical');
       head.appendChild(linkEl);
     }

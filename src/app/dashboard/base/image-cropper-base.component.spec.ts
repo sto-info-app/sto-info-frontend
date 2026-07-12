@@ -22,7 +22,7 @@ import { ImageCropperBaseComponent } from './image-cropper-base.component';
   standalone: true,
 })
 class TestImageCropperComponent extends ImageCropperBaseComponent {
-  protected override readonly dialogRef = inject(
+  protected override readonly _dialogRef = inject(
     MatDialogRef<TestImageCropperComponent>,
   );
 
