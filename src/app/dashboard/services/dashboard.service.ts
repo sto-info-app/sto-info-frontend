@@ -57,4 +57,16 @@ export class DashboardService {
         }),
       );
   }
+
+  closeAccount() {
+    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+
+    return this.http.delete<{ success: boolean }>(
+      API_URLS.CLOSE_ACCOUNT,
+      httpOptions,
+    );
+  }
 }

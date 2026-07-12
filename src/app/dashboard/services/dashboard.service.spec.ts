@@ -200,4 +200,38 @@ describe('DashboardService', () => {
       consoleSpy.mockRestore();
     });
   });
+
+  describe('closeAccount', () => {
+    it('should close account successfully', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue({
+        headers: new HttpHeaders().set('Authorization', 'Bearer fake-token'),
+      });
+
+      service.closeAccount().subscribe(res => {
+        expect(res).toEqual({ success: true });
+      });
+
+      const req = httpMock.expectOne(API_URLS.CLOSE_ACCOUNT);
+      expect(req.request.method).toBe('DELETE');
+      expect(req.request.headers.get('Authorization')).toBe(
+        'Bearer fake-token',
+      );
+      req.flush({ success: true });
+    });
+
+    it('should return error if no token found', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      service.closeAccount().subscribe({
+        next: () => {
+          throw new Error('should have failed');
+        },
+        error: error => {
+          expect(error.message).toBe('No token found');
+        },
+      });
+
+      httpMock.expectNone(API_URLS.CLOSE_ACCOUNT);
+    });
+  });
 });
