@@ -10,6 +10,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { MustMatch } from 'src/app/shared/_helpers/must-match.validator';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
+import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   FORM_ERROR_CONFIRMATION_PASSWORD_REQUIRED,
@@ -34,6 +35,7 @@ import { AuthService } from '../auth.service';
     RouterModule,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,
+    LcarsSuccessMessageComponent,
   ],
 })
 export class ChangePasswordComponent implements OnInit {
@@ -56,6 +58,7 @@ export class ChangePasswordComponent implements OnInit {
   private readonly _route = inject(ActivatedRoute);
   private readonly _authService = inject(AuthService);
   private readonly _routingService = inject(RoutingService);
+  private readonly _logoutAfterSuccessDelayMs = 3000;
 
   /**
    * Builds the change-password form.
@@ -107,11 +110,16 @@ export class ChangePasswordComponent implements OnInit {
         .changePassword(this.token, this.changePasswordForm.value.password)
         .subscribe({
           next: () => {
-            this.successMessage = 'Your password has been changed.';
+            this.successMessage =
+              'Your password has been changed successfully.';
             if (this._authService.isLoggedIn()) {
-              // Logout the user after successfully changing the password
-              this._authService.performLogout();
-              this.successMessage += ' You will need to login again.';
+              this.successMessage +=
+                ' For security, you will be redirected to login.';
+
+              // Give the user time to read the confirmation before redirecting.
+              setTimeout(() => {
+                this._authService.performLogout();
+              }, this._logoutAfterSuccessDelayMs);
             }
           },
           error: error => {

@@ -100,20 +100,25 @@ describe('ChangePasswordComponent', () => {
         'mock-token',
         'Password@123',
       );
-      expect(component.successMessage).toBe('Your password has been changed.');
+      expect(component.successMessage).toBe(
+        'Your password has been changed successfully.',
+      );
     });
 
-    it('should logout and show additional message if logged in after success', () => {
+    it('should logout after a short delay and show additional message if logged in after success', fakeAsync(() => {
       mockAuthService.changePassword.mockReturnValue(of(undefined));
       mockAuthService.isLoggedIn.mockReturnValue(true);
 
       component.onSubmit();
 
-      expect(mockAuthService.performLogout).toHaveBeenCalled();
       expect(component.successMessage).toContain(
-        'You will need to login again.',
+        'For security, you will be redirected to login.',
       );
-    });
+      expect(mockAuthService.performLogout).not.toHaveBeenCalled();
+
+      tick(3000);
+      expect(mockAuthService.performLogout).toHaveBeenCalled();
+    }));
 
     it('should handle token expired error (400)', () => {
       mockAuthService.changePassword.mockReturnValue(
