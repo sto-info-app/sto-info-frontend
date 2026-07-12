@@ -362,10 +362,109 @@ export class AuthService {
       password: password,
     };
 
-    return this._http.post(API_URLS.AUTH_RESET_PASSWORD, data).pipe(
-      map(() => {
-        return;
-      }),
+    return this._http
+      .post(API_URLS.AUTH_RESET_PASSWORD, data, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        map(response => {
+          const body = response.body;
+          if (!body) {
+            return;
+          }
+
+          const parsedBody = this.tryParseJson(body);
+          if (this.isApiErrorPayload(parsedBody)) {
+            throw parsedBody;
+          }
+
+          return;
+        }),
+        catchError(error => {
+          const parsedError = this.extractApiErrorPayload(error);
+          if (!parsedError) {
+            return throwError(() => error);
+          }
+
+          return throwError(() => ({
+            ...error,
+            statusCode:
+              typeof parsedError.statusCode === 'number'
+                ? parsedError.statusCode
+                : error?.status,
+            message: parsedError.message,
+            error: parsedError,
+          }));
+        }),
+      );
+  }
+
+  /**
+   * Attempts to parse a JSON string and returns the original value on failure.
+   */
+  private tryParseJson(payload: string): unknown {
+    try {
+      return JSON.parse(payload);
+    } catch {
+      return payload;
+    }
+  }
+
+  /**
+   * Extracts a backend-style error payload from an HTTP error object.
+   */
+  private extractApiErrorPayload(error: unknown): {
+    statusCode?: number;
+    message?: string | string[];
+    error?: string;
+  } | null {
+    const rawPayload =
+      typeof error === 'object' && error !== null
+        ? (error as { error?: unknown }).error
+        : undefined;
+
+    if (typeof rawPayload === 'string') {
+      const parsed = this.tryParseJson(rawPayload);
+      return this.isApiErrorPayload(parsed)
+        ? parsed
+        : {
+            message: rawPayload,
+            statusCode:
+              typeof (error as { status?: unknown })?.status === 'number'
+                ? ((error as { status: number }).status as number)
+                : undefined,
+          };
+    }
+
+    if (this.isApiErrorPayload(rawPayload)) {
+      return rawPayload;
+    }
+
+    if (this.isApiErrorPayload(error)) {
+      return error;
+    }
+
+    return null;
+  }
+
+  /**
+   * Detects backend-style error payloads that may arrive with a 2xx HTTP status.
+   */
+  private isApiErrorPayload(payload: unknown): payload is {
+    statusCode: number;
+    message?: string | string[];
+    error?: string;
+  } {
+    if (!payload || typeof payload !== 'object') {
+      return false;
+    }
+
+    const maybeStatusCode = (payload as { statusCode?: unknown }).statusCode;
+    return (
+      typeof maybeStatusCode === 'number' &&
+      Number.isFinite(maybeStatusCode) &&
+      maybeStatusCode >= 400
     );
   }
 

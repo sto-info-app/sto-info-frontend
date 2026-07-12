@@ -309,11 +309,84 @@ describe('AuthService', () => {
       service.changePassword('token123', 'newpass').subscribe();
       const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
       expect(req.request.method).toBe('POST');
+      expect(req.request.responseType).toBe('text');
       expect(req.request.body).toEqual({
         token: 'token123',
         password: 'newpass', // NOSONAR - Test fixture password
       });
-      req.flush({});
+      req.flush('');
+    });
+
+    it('should surface backend error payloads returned with 200 status', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: () => {
+          throw new Error('Expected an error, but request succeeded');
+        },
+        error: err => {
+          expect(err).toEqual(
+            expect.objectContaining({
+              statusCode: 404,
+              message: 'Invalid token',
+            }),
+          );
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush(
+        JSON.stringify({
+          message: 'Invalid token',
+          error: 'Not Found',
+          statusCode: 404,
+        }),
+      );
+    });
+
+    it('should normalize stringified http error payloads', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: () => {
+          throw new Error('Expected an error, but request succeeded');
+        },
+        error: err => {
+          expect(err).toEqual(
+            expect.objectContaining({
+              statusCode: 404,
+              message: 'Invalid token',
+            }),
+          );
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush(
+        '{"message":"Invalid token","error":"Not Found","statusCode":404}',
+        {
+          status: 404,
+          statusText: 'Not Found',
+        },
+      );
+    });
+
+    it('should treat null response as successful password change', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: value => {
+          expect(value).toBeUndefined();
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush('');
+    });
+
+    it('should treat plain text response as successful password change', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: value => {
+          expect(value).toBeUndefined();
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush('Password updated');
     });
   });
 
