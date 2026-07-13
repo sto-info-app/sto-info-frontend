@@ -10,6 +10,8 @@
         "http://localhost:4201/about/team/volunteers",
         "http://localhost:4201/about/team/supporters",
         "http://localhost:4201/contact",
+        "http://localhost:4201/resources",
+        "http://localhost:4201/roadmap",
         "http://localhost:4201/credits",
         "http://localhost:4201/privacy-policy",
         "http://localhost:4201/terms-of-use"
