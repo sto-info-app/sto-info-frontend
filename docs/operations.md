@@ -9,6 +9,26 @@ This is the day-2 guide for debugging and operating the system.
 - Run coverage: `npm run test:cov`
 - Run lint: `npm run lint`
 - Production build (Render-like): `npm run build:render`
+- Run Lighthouse CI profile: `npm run lint:lighthouse`
+
+## Lighthouse CI profile and triage
+
+The Lighthouse CI profile is tuned to keep CI stable while still surfacing actionable regressions.
+
+- The four category scores (`performance`, `accessibility`, `best-practices`, `seo`) remain `error` level and can fail CI.
+- Some noisy audits are warning-only so they do not fail PRs, but are still visible during review.
+- A few audits remain `off` because they are currently high-noise for this project footprint.
+
+Audit-mode behavior:
+
+- `ENV_NAME=lighthouse-audit` is used by `npm run lint:lighthouse`.
+- In that mode, non-critical runtime calls that frequently create external-network console noise are skipped.
+
+If Lighthouse fails unexpectedly:
+
+- Check `reports/lighthouse` and locate the latest `.report.json` files.
+- Identify whether the failure is category score related or a single audit assertion.
+- Prefer semantic/accessibility fixes first (headings, landmarks, labels) before relaxing assertions.
 
 ## Common incidents and how to debug them
 

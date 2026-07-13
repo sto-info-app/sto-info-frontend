@@ -94,20 +94,22 @@ export class MainContentComponent implements OnDestroy {
     this.themePanel6RandomText =
       this._generalThemeService.createDynamicSideColumnText();
 
-    this._http
-      .get(API_URLS.VERSION, {
-        observe: 'response',
-        responseType: HTTP_RESPONSE_TYPE_TEXT,
-      })
-      .subscribe({
-        next: response => this.updateBackendVersion(response),
-        error: err => {
-          console.warn(
-            'Backend version endpoint failed or returned non-200',
-            err,
-          );
-        },
-      });
+    if (environment.env_name !== 'lighthouse-audit') {
+      this._http
+        .get(API_URLS.VERSION, {
+          observe: 'response',
+          responseType: HTTP_RESPONSE_TYPE_TEXT,
+        })
+        .subscribe({
+          next: response => this.updateBackendVersion(response),
+          error: err => {
+            console.warn(
+              'Backend version endpoint failed or returned non-200',
+              err,
+            );
+          },
+        });
+    }
 
     // Start/stop polling only while on API-required routes
     this._subs.add(
