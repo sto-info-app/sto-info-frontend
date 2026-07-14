@@ -30,6 +30,7 @@ describe('MainContentComponent', () => {
   let healthServiceSpy: jest.Mocked<HealthService>;
   let router: Router;
   let routerEventsSubject: Subject<unknown>;
+  let originalEnvName: string;
 
   interface MainContentComponentInternals {
     getDeepestRouteRequiresApi(route: ActivatedRoute): boolean;
@@ -37,10 +38,17 @@ describe('MainContentComponent', () => {
     _subs: { unsubscribe: () => void };
   }
 
-  const flushStartupRequests = (version = 'backend-version') => {
-    const versionReq = httpTestingController.expectOne(API_URLS.VERSION);
-    expect(versionReq.request.method).toBe('GET');
-    versionReq.flush(version, { status: 200, statusText: 'OK' });
+  const flushStartupRequests = (
+    version = 'backend-version',
+    shouldRequestVersion = true,
+  ) => {
+    if (shouldRequestVersion) {
+      const versionReq = httpTestingController.expectOne(API_URLS.VERSION);
+      expect(versionReq.request.method).toBe('GET');
+      versionReq.flush(version, { status: 200, statusText: 'OK' });
+    } else {
+      httpTestingController.expectNone(API_URLS.VERSION);
+    }
 
     const bannerRequests = httpTestingController.match(
       API_URLS.NOTIFICATIONS_BANNERS,
@@ -51,6 +59,9 @@ describe('MainContentComponent', () => {
   };
 
   beforeEach(() => {
+    originalEnvName = environment.env_name;
+    (environment as unknown as { env_name: string }).env_name = 'test';
+
     mockRoutingService = {
       getLink: jest.fn().mockReturnValue('/mock-link'),
     };
@@ -105,6 +116,7 @@ describe('MainContentComponent', () => {
   });
 
   afterEach(() => {
+    (environment as unknown as { env_name: string }).env_name = originalEnvName;
     httpTestingController.verify();
   });
 
@@ -149,6 +161,19 @@ describe('MainContentComponent', () => {
 
   it('should fetch and expose the backend app version from the API', () => {
     expect(component.backendAppVersion).toBe('backend-version');
+  });
+
+  it('should skip backend version request in lighthouse-audit mode', () => {
+    const previousEnvName = environment.env_name;
+    (environment as unknown as { env_name: string }).env_name =
+      'lighthouse-audit';
+
+    const localFixture = TestBed.createComponent(MainContentComponent);
+    localFixture.detectChanges();
+    flushStartupRequests('', false);
+
+    expect(localFixture.componentInstance.backendAppVersion).toBe('');
+    (environment as unknown as { env_name: string }).env_name = previousEnvName;
   });
 
   it('should handle version API error and leave backend version empty', () => {
