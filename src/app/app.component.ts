@@ -32,7 +32,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   isLoggedIn = false;
   autoLogoutCountdown = 0;
-  showScrollButton = false;
 
   destroy$ = new Subject<void>();
 
