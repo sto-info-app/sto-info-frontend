@@ -1,0 +1,36 @@
+<div>
+  <h1>Star Trek Online Resources</h1>
+  <p>
+    A curated collection of helpful links for the Star Trek Online community — from
+    downloading the game and reading official patch notes to finding the best build
+    guides, wikis and fan productions.
+  </p>
+  <p>
+    These are external community and official resources. STO Info is not affiliated
+    with or responsible for the content of third-party sites.
+  </p>
+
+  @for (section of resourceLinks; track section.heading) {
+    <div class="lcars-text-bar">
+      <h2><span>{{ section.heading }}</span></h2>
+    </div>
+    <ul class="lcars-list">
+      @for (link of section.links; track link.url) {
+        <li>
+          <a
+            [href]="link.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            >{{ link.label
+            }}<i
+              class="fas fa-external-link ext-link"
+              title="(*external link)"></i
+          ></a>
+          @if (link.description) {
+            <span class="resource-description"> — {{ link.description }}</span>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

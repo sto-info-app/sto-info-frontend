@@ -28,6 +28,14 @@
             >{{ appRouteTitles.STO_DASHBOARD_STATS }}</a
           >
         </li>
+        <li>
+          <a
+            [routerLink]="getRouteLink(appRoutes.RESOURCES)"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="active"
+            >{{ appRouteTitles.RESOURCES }}</a
+          >
+        </li>
       </ul>
     </div>
     <div class="col footer-list-col">
