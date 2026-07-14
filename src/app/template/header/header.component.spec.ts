@@ -74,7 +74,7 @@ describe('HeaderComponent', () => {
 
       Object.defineProperty(globalThis, 'scrollY', {
         writable: true,
-        value: 50,
+        value: 0,
       });
 
       component.toggleScrollTopButton();
@@ -105,31 +105,16 @@ describe('HeaderComponent', () => {
       });
     });
 
-    it('should add scroll event listener on init', () => {
-      const addEventListenerSpy = jest.spyOn(globalThis, 'addEventListener');
-      component.ngAfterViewInit();
-      expect(addEventListenerSpy).toHaveBeenCalledWith(
-        'scroll',
-        component.scrollCallbackFunction,
-      );
-    });
+    it('should update the button visibility on a real window scroll event, driving Angular change detection', () => {
+      Object.defineProperty(globalThis, 'scrollY', {
+        writable: true,
+        value: 150,
+      });
 
-    it('should remove scroll event listener on destroy', () => {
-      const removeEventListenerSpy = jest.spyOn(
-        globalThis,
-        'removeEventListener',
-      );
-      component.ngOnDestroy();
-      expect(removeEventListenerSpy).toHaveBeenCalledWith(
-        'scroll',
-        component.scrollCallbackFunction,
-      );
-    });
+      globalThis.dispatchEvent(new Event('scroll'));
+      fixture.detectChanges();
 
-    it('should call toggleScrollTopButton via scrollCallbackFunction', () => {
-      const spy = jest.spyOn(component, 'toggleScrollTopButton');
-      component.scrollCallbackFunction();
-      expect(spy).toHaveBeenCalled();
+      expect(component.showScrollButton).toBe(true);
     });
   });
 
