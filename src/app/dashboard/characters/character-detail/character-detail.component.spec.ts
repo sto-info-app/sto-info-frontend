@@ -265,6 +265,26 @@ describe('CharacterDetailComponent', () => {
       ]);
     });
 
+    it('should get reputations link', () => {
+      expect(component.getReputationsLink()).toEqual([
+        '/dashboard/accounts',
+        encodeStoHandle('TestAccount'),
+        'TestChar',
+        'reputations',
+      ]);
+    });
+
+    it('should get reputations link with a missing character', () => {
+      component.character = null;
+
+      expect(component.getReputationsLink()).toEqual([
+        '/dashboard/accounts',
+        encodeStoHandle('TestAccount'),
+        '',
+        'reputations',
+      ]);
+    });
+
     it('should get route link', () => {
       expect(component.getRouteLink('test')).toBe('/test');
     });

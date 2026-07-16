@@ -45,6 +45,8 @@ export const APP_ROUTES = {
   STO_CHARACTER_ADD: ROOT_ROUTES.DASHBOARD + '/accounts/:handle/characters/add',
   STO_CHARACTER_EDIT:
     ROOT_ROUTES.DASHBOARD + '/accounts/:handle/:characterHandle/edit',
+  STO_CHARACTER_REPUTATIONS:
+    ROOT_ROUTES.DASHBOARD + '/accounts/:handle/:characterHandle/reputations',
   STO_DASHBOARD_STATS: ROOT_ROUTES.DASHBOARD + '/stats',
   STO_DASHBOARD_STATS_DETAIL: ROOT_ROUTES.DASHBOARD + '/stats/:breakdownId',
 
@@ -108,6 +110,7 @@ export const APP_ROUTE_TITLES = {
   STO_CHARACTER_DETAIL: 'Character Details',
   STO_CHARACTER_ADD: 'Add Character',
   STO_CHARACTER_EDIT: 'Edit Character',
+  STO_CHARACTER_REPUTATIONS: 'Reputations',
   STO_DASHBOARD_STATS: 'Stats',
   STO_DASHBOARD_STATS_DETAIL: 'Stat Detail',
 

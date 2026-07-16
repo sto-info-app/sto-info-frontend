@@ -219,6 +219,15 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
     return ['/dashboard/accounts', encodeStoHandle(this.accountHandle)];
   }
 
+  getReputationsLink(): string[] {
+    return [
+      '/dashboard/accounts',
+      encodeStoHandle(this.accountHandle),
+      this.character?.handle ?? '',
+      'reputations',
+    ];
+  }
+
   getRouteLink(route: string): string {
     return `/${route}`;
   }

@@ -350,6 +350,18 @@ export const routes: Routes = [
     canActivate: [AuthGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.STO_CHARACTER_REPUTATIONS,
+    loadComponent: () =>
+      import('./dashboard/character-reputations/character-reputations.component').then(
+        m => m.CharacterReputationsComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.STO_CHARACTER_REPUTATIONS,
+      requiresApi: true,
+    },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.STO_DASHBOARD_STATS,
     loadComponent: () =>
       import('./dashboard/stats/stats.component').then(m => m.StatsComponent),

@@ -154,6 +154,13 @@
       <span>Navigation</span>
     </div>
     <div class="buttons">
+      @if (character) {
+        <a
+          [routerLink]="getReputationsLink()"
+          class="full-width-btn-link gold"
+          >Reputations</a
+        >
+      }
       <a
         [routerLink]="getAccountLink()"
         [fragment]="'characters-section'"
