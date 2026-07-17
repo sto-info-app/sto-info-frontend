@@ -59,14 +59,20 @@ export const ROADMAP_COMPLETE: RoadmapEntry[] = [
       'Release notes and announcements are now available in-app.',
     ],
   },
+  {
+    title: 'Reputation Tracking',
+    details: [
+      'Character reputation tracking was added for all thirteen reputations.',
+      'Tier progress (up to Tier 6) can be tracked per character.',
+      'A reputation summary shows overall completion at a glance.',
+    ],
+  },
 ];
 
 export const ROADMAP_IN_PROGRESS: string[] = [
-  'Add character reputation tracking.',
   'Add character R&D tracking.',
   'Add character specialization tracking.',
   'Add character fleet tracking.',
-  'Add character reputation tracking.',
 ];
 
 export const ROADMAP_PLANNED: string[] = [

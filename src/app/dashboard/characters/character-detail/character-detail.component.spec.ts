@@ -7,7 +7,13 @@ import {
 } from '@angular/core/testing';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { ActivatedRoute, Router, Event as RouterEvent } from '@angular/router';
+import {
+  ActivatedRoute,
+  Router,
+  Event as RouterEvent,
+  ParamMap,
+  convertToParamMap,
+} from '@angular/router';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
@@ -32,6 +38,7 @@ describe('CharacterDetailComponent', () => {
   let mockRouter: Partial<Router>;
   let mockDialog: jest.Mocked<MatDialog>;
   let routeParamsSubject: BehaviorSubject<Record<string, string>>;
+  let routeQueryParamsSubject: BehaviorSubject<ParamMap>;
 
   const mockAccount: StoAccount = {
     id: 'acc-1',
@@ -79,6 +86,9 @@ describe('CharacterDetailComponent', () => {
     } as unknown as jest.Mocked<MatDialog>;
 
     routeParamsSubject = new BehaviorSubject<Record<string, string>>({});
+    routeQueryParamsSubject = new BehaviorSubject<ParamMap>(
+      convertToParamMap({}),
+    );
 
     await TestBed.configureTestingModule({
       imports: [CharacterDetailComponent, MatButtonModule, LoadingBarComponent],
@@ -89,7 +99,10 @@ describe('CharacterDetailComponent', () => {
         { provide: MatDialog, useValue: mockDialog },
         {
           provide: ActivatedRoute,
-          useValue: { params: routeParamsSubject.asObservable() },
+          useValue: {
+            params: routeParamsSubject.asObservable(),
+            queryParamMap: routeQueryParamsSubject.asObservable(),
+          },
         },
       ],
       schemas: [NO_ERRORS_SCHEMA],
@@ -268,6 +281,63 @@ describe('CharacterDetailComponent', () => {
     it('should get route link', () => {
       expect(component.getRouteLink('test')).toBe('/test');
     });
+  });
+
+  describe('Tabs', () => {
+    it('should default to the overview tab', () => {
+      expect(component.activeTab()).toBe('overview');
+      expect(component.reputationsOpened()).toBe(false);
+    });
+
+    it('should switch to the reputations tab and mark it opened', () => {
+      component.selectTab('reputations');
+
+      expect(component.activeTab()).toBe('reputations');
+      expect(component.reputationsOpened()).toBe(true);
+    });
+
+    it('should reflect the reputations tab in the URL query params', () => {
+      component.selectTab('reputations');
+
+      expect(mockRouter.navigate).toHaveBeenCalledWith(
+        [],
+        expect.objectContaining({ queryParams: { tab: 'reputations' } }),
+      );
+    });
+
+    it('should clear the tab query param when returning to overview', () => {
+      component.selectTab('overview');
+
+      expect(mockRouter.navigate).toHaveBeenCalledWith(
+        [],
+        expect.objectContaining({ queryParams: { tab: null } }),
+      );
+    });
+
+    it('should keep the reputations tab mounted after switching back', () => {
+      component.selectTab('reputations');
+      component.selectTab('overview');
+
+      expect(component.activeTab()).toBe('overview');
+      expect(component.reputationsOpened()).toBe(true);
+    });
+
+    it('should activate the tab named in the URL on load (deep link)', fakeAsync(() => {
+      fixture.detectChanges();
+      routeQueryParamsSubject.next(convertToParamMap({ tab: 'reputations' }));
+      tick();
+
+      expect(component.activeTab()).toBe('reputations');
+      expect(component.reputationsOpened()).toBe(true);
+    }));
+
+    it('should fall back to overview for an unknown tab query param', fakeAsync(() => {
+      fixture.detectChanges();
+      routeQueryParamsSubject.next(convertToParamMap({ tab: 'bogus' }));
+      tick();
+
+      expect(component.activeTab()).toBe('overview');
+    }));
   });
 
   describe('Photo Dialog', () => {

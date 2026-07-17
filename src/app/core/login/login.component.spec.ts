@@ -54,6 +54,7 @@ describe('LoginComponent', () => {
 
     routerSpy = {
       navigate: jest.fn(),
+      navigateByUrl: jest.fn(),
       events: new Subject<Event>(),
       // Add other properties/methods if needed
     };
@@ -153,7 +154,32 @@ describe('LoginComponent', () => {
         3600,
       );
       expect(sharedDataServiceSpy.updateUserId).toHaveBeenCalledWith('user123');
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/dashboard']);
+      expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/dashboard');
+    });
+
+    it('should preserve query params on the return URL after login', () => {
+      const returnUrlWithQuery =
+        '/dashboard/accounts/MidNiteShadow7/MidNite?tab=reputations';
+      (
+        TestBed.inject(ActivatedRoute).snapshot.queryParamMap.get as jest.Mock
+      ).mockReturnValue(returnUrlWithQuery);
+
+      const mockResponse: LoginResponse = {
+        access_token: 'access123',
+        refresh_token: 'refresh123',
+        expires_in: 3600,
+        user_id: 'user123',
+      };
+      authServiceSpy.login.mockReturnValue(of(mockResponse));
+      component.inputsValid = true;
+      component.email = 'test@example.com';
+      component.password = 'pass';
+
+      component.onLogin();
+
+      // navigateByUrl receives the raw string so the ?tab= query param is
+      // parsed as a query, not encoded into the character-handle path segment.
+      expect(routerSpy.navigateByUrl).toHaveBeenCalledWith(returnUrlWithQuery);
     });
   });
 
@@ -250,7 +276,7 @@ describe('LoginComponent', () => {
       authServiceSpy.login.mockReturnValue(of(mockResponse));
       component.onLogin();
 
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/dashboard']);
+      expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/dashboard');
     });
 
     it('should apply red state if httpStatus is not provided to displayErrorMessage', () => {
