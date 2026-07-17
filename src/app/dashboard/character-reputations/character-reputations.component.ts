@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  Input,
   computed,
   inject,
   OnDestroy,
@@ -44,6 +45,13 @@ import { StoAccountService } from '../services/sto-account.service';
   ],
 })
 export class CharacterReputationsComponent implements OnInit, OnDestroy {
+  /**
+   * When true the component is rendered inside the character-detail tabbed
+   * interface. The redundant page heading, character subtitle and secondary
+   * navigation are suppressed since the host shell already provides them.
+   */
+  @Input() embedded = false;
+
   isLoading = true;
   errorMessage = '';
   accountHandle = '';

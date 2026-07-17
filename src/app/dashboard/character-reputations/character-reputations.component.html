@@ -21,10 +21,12 @@
     }
 
     @if (!isLoading && !errorMessage) {
-      <h1>Reputations</h1>
-      <p class="character-subtitle">
-        Character: {{ characterHandle }}&#64;{{ accountHandle }}
-      </p>
+      @if (!embedded) {
+        <h1>Reputations</h1>
+        <p class="character-subtitle">
+          Character: {{ characterHandle }}&#64;{{ accountHandle }}
+        </p>
+      }
 
       <!-- Summary -->
       @if (summary()) {
@@ -196,25 +198,33 @@
       </div>
     }
 
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      <a
-        [routerLink]="characterLink()"
-        class="full-width-btn-link peach"
-        >Character</a
-      >
-      <a
-        [routerLink]="accountLink()"
-        class="full-width-btn-link sunflower"
-        >Account</a
-      >
-      <a
-        [routerLink]="accountsLink"
-        class="full-width-btn-link bluey"
-        >Accounts</a
-      >
-    </div>
+    <!-- Host-projected content (e.g. character photo) shown below the filters. -->
+    <ng-content select="[repAsidePhoto]"></ng-content>
+
+    <!-- Host-projected navigation shown below the photo. -->
+    <ng-content select="[repAsideNav]"></ng-content>
+
+    @if (!embedded) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Navigation</span>
+      </div>
+      <div class="buttons">
+        <a
+          [routerLink]="characterLink()"
+          class="full-width-btn-link peach"
+          >Character</a
+        >
+        <a
+          [routerLink]="accountLink()"
+          class="full-width-btn-link sunflower"
+          >Account</a
+        >
+        <a
+          [routerLink]="accountsLink"
+          class="full-width-btn-link bluey"
+          >Accounts</a
+        >
+      </div>
+    }
   </div>
 </div>
