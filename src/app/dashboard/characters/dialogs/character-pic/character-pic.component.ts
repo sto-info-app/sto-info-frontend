@@ -24,14 +24,14 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
   ],
 })
 export class CharacterPicComponent extends ImageCropperBaseComponent {
-  protected override readonly dialogRef = inject(
+  protected override readonly _dialogRef = inject(
     MatDialogRef<CharacterPicComponent>,
   );
   public data = inject(MAT_DIALOG_DATA) as {
     character: Character;
   };
 
-  private readonly characterService = inject(CharacterService);
+  private readonly _characterService = inject(CharacterService);
 
   onUploadImageClick(): void {
     try {
@@ -45,12 +45,12 @@ export class CharacterPicComponent extends ImageCropperBaseComponent {
       );
 
       this.isSubmitting = true;
-      this.characterService
+      this._characterService
         .updateCharacterProfilePic(this.data.character.id, formData)
         .subscribe({
           next: () => {
             this.isSubmitting = false;
-            this.dialogRef?.close(true);
+            this._dialogRef?.close(true);
           },
           error: error => {
             this.handleHttpError(error);

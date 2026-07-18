@@ -48,10 +48,10 @@ import {
   ],
 })
 export class NotificationAdminListComponent implements OnInit {
-  private readonly notificationService = inject(NotificationService);
-  private readonly ngZone = inject(NgZone);
-  private readonly cdr = inject(ChangeDetectorRef);
-  private readonly dialog = inject(MatDialog);
+  private readonly _notificationService = inject(NotificationService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _dialog = inject(MatDialog);
 
   appRoutes = APP_ROUTES;
   severityLabels = NOTIFICATION_SEVERITY_LABELS;
@@ -80,20 +80,20 @@ export class NotificationAdminListComponent implements OnInit {
         return;
       }
 
-      this.ngZone.run(() => {
+      this._ngZone.run(() => {
         this.isLoading = false;
         this.notifications = [];
         this.errorMessage =
           'Loading notifications is taking longer than expected. Please try again.';
-        this.cdr.detectChanges();
+        this._cdr.detectChanges();
       });
     }, LOAD_TIMEOUT_MS);
 
-    this.notificationService
+    this._notificationService
       .getAllNotificationsForAdmin()
       .pipe(
         take(1),
-        observeInZone(this.ngZone, this.cdr),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => clearTimeout(loadingTimeout)),
       )
       .subscribe({
@@ -116,7 +116,7 @@ export class NotificationAdminListComponent implements OnInit {
    * @param notification - The notification to delete.
    */
   remove(notification: AppNotification): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
       width: '75%',
       data: {
         title: 'Delete Notification',
@@ -130,14 +130,14 @@ export class NotificationAdminListComponent implements OnInit {
 
     dialogRef
       .afterClosed()
-      .pipe(take(1), observeInZone(this.ngZone, this.cdr))
+      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
       .subscribe(confirmed => {
         if (!confirmed) {
           return;
         }
-        this.notificationService
+        this._notificationService
           .deleteNotification(notification.id)
-          .pipe(observeInZone(this.ngZone, this.cdr))
+          .pipe(observeInZone(this._ngZone, this._cdr))
           .subscribe({
             next: () =>
               (this.notifications = this.notifications.filter(

@@ -26,10 +26,10 @@ import { HealthService } from '../../../core/health/health.service';
   standalone: true,
 })
 export class ServiceInterruptionContentComponent implements OnDestroy {
-  private readonly renderer = inject(Renderer2);
-  private readonly el = inject(ElementRef);
-  private readonly alertThemeService = inject(AlertThemeService);
-  private readonly subs = new Subscription();
+  private readonly _renderer = inject(Renderer2);
+  private readonly _el = inject(ElementRef);
+  private readonly _alertThemeService = inject(AlertThemeService);
+  private readonly _subs = new Subscription();
   readonly _backendHealth = inject(HealthService);
   errorCode = 400;
   errorTitle = 'Service Unavailable';
@@ -39,7 +39,7 @@ export class ServiceInterruptionContentComponent implements OnDestroy {
   alertSubtitle = 'Condition: Yellow';
 
   constructor() {
-    this.subs.add(
+    this._subs.add(
       this._backendHealth.state$
         .pipe(
           filter((state): state is API_HEALTH_STATE => state != null),
@@ -81,19 +81,19 @@ export class ServiceInterruptionContentComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subs?.unsubscribe();
+    this._subs?.unsubscribe();
 
-    this.alertThemeService.clearAlertStylesheet(
-      this.renderer,
-      this.el.nativeElement,
+    this._alertThemeService.clearAlertStylesheet(
+      this._renderer,
+      this._el.nativeElement,
     );
-    this.alertThemeService.clearTimers(this.el.nativeElement);
+    this._alertThemeService.clearTimers(this._el.nativeElement);
   }
 
   private applyAlertStylesheet(colour: AlertState = 'yellow') {
-    this.alertThemeService.applyAlertThemeThenApplyStaticTheme(
-      this.renderer,
-      this.el.nativeElement,
+    this._alertThemeService.applyAlertThemeThenApplyStaticTheme(
+      this._renderer,
+      this._el.nativeElement,
       colour,
     );
   }

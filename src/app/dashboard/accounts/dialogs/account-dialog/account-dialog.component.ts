@@ -65,16 +65,16 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
 
   public data: AccountDialogData = inject(MAT_DIALOG_DATA);
 
-  private readonly fb = inject(FormBuilder);
-  private readonly stoAccountService = inject(StoAccountService);
-  private readonly dialogRef = inject(MatDialogRef<AccountDialogComponent>);
-  private readonly destroy$ = new Subject<void>();
+  private readonly _fb = inject(FormBuilder);
+  private readonly _stoAccountService = inject(StoAccountService);
+  private readonly _dialogRef = inject(MatDialogRef<AccountDialogComponent>);
+  private readonly _destroy$ = new Subject<void>();
 
   /**
    * Initializes the dialog component formulas.
    */
   constructor() {
-    this.accountForm = this.fb.group({
+    this.accountForm = this._fb.group({
       handle: [
         '',
         [Validators.required, Validators.pattern(STO_HANDLE_PATTERN)],
@@ -96,7 +96,7 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.accountForm
       .get('platformId')
-      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      ?.valueChanges.pipe(takeUntil(this._destroy$))
       .subscribe((platformId: string | null) => {
         if (platformId) {
           this.filterLaunchers(platformId);
@@ -113,11 +113,11 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
     this.isLoadingMetadata = true;
     this.isSubmitting = true;
     forkJoin({
-      platforms: this.stoAccountService.getPlatforms(),
-      launchers: this.stoAccountService.getLaunchers(),
-      mappings: this.stoAccountService.getPlatformLaunchers(),
+      platforms: this._stoAccountService.getPlatforms(),
+      launchers: this._stoAccountService.getLaunchers(),
+      mappings: this._stoAccountService.getPlatformLaunchers(),
     })
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: ({ platforms, launchers, mappings }) => {
           this.platforms = platforms;
@@ -188,10 +188,10 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
     const accountData = this.accountForm.value;
 
     if (this.data.mode === 'add') {
-      this.stoAccountService.createAccount(accountData).subscribe({
+      this._stoAccountService.createAccount(accountData).subscribe({
         next: () => {
           this.isSubmitting = false;
-          this.dialogRef.close(true);
+          this._dialogRef.close(true);
         },
         error: error => {
           this.isSubmitting = false;
@@ -207,12 +207,12 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
         },
       });
     } else if (this.data.mode === 'edit' && this.data.account) {
-      this.stoAccountService
+      this._stoAccountService
         .updateAccount(this.data.account.id, accountData)
         .subscribe({
           next: () => {
             this.isSubmitting = false;
-            this.dialogRef.close(true);
+            this._dialogRef.close(true);
           },
           error: error => {
             this.isSubmitting = false;
@@ -234,7 +234,7 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
    * Closes the dialog without saving.
    */
   onCancelClick(): void {
-    this.dialogRef.close(false);
+    this._dialogRef.close(false);
   }
 
   /**
@@ -244,7 +244,7 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
    * @returns void
    */
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 }

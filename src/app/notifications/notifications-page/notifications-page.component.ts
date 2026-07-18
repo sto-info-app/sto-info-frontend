@@ -43,9 +43,9 @@ import {
   ],
 })
 export class NotificationsPageComponent implements OnInit {
-  private readonly notificationService = inject(NotificationService);
-  private readonly ngZone = inject(NgZone);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly _notificationService = inject(NotificationService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   notifications: AppNotification[] = [];
   isLoading = false;
@@ -81,11 +81,11 @@ export class NotificationsPageComponent implements OnInit {
       this.stopLoading();
     }, LOAD_TIMEOUT_MS);
 
-    this.notificationService
+    this._notificationService
       .getInbox({ page, pageSize: PAGE_SIZE })
       .pipe(
         take(1),
-        observeInZone(this.ngZone, this.cdr),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => clearTimeout(loadingTimeout)),
       )
       .subscribe({
@@ -114,9 +114,9 @@ export class NotificationsPageComponent implements OnInit {
    */
   private stopLoading(): void {
     this.isLoading = false;
-    this.ngZone.run(() => {
+    this._ngZone.run(() => {
       try {
-        this.cdr.detectChanges();
+        this._cdr.detectChanges();
       } catch {
         // The spinner is bound to `isLoading` (already false) and is evaluated
         // before the list, so it is removed even if a later binding throws.
@@ -144,10 +144,10 @@ export class NotificationsPageComponent implements OnInit {
     event.stopPropagation();
     const markingRead = !notification.isRead;
     const request = markingRead
-      ? this.notificationService.markRead(notification.id)
-      : this.notificationService.markUnread(notification.id);
+      ? this._notificationService.markRead(notification.id)
+      : this._notificationService.markUnread(notification.id);
 
-    request.pipe(observeInZone(this.ngZone, this.cdr)).subscribe({
+    request.pipe(observeInZone(this._ngZone, this._cdr)).subscribe({
       next: () => {
         notification.isRead = markingRead;
         this.unreadCount = Math.max(
@@ -170,9 +170,9 @@ export class NotificationsPageComponent implements OnInit {
     if (notification.isRead) {
       return;
     }
-    this.notificationService
+    this._notificationService
       .markRead(notification.id)
-      .pipe(observeInZone(this.ngZone, this.cdr))
+      .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe({
         next: () => {
           notification.isRead = true;
@@ -188,9 +188,9 @@ export class NotificationsPageComponent implements OnInit {
    * Marks every loaded notification as read.
    */
   markAllRead(): void {
-    this.notificationService
+    this._notificationService
       .markAllRead()
-      .pipe(observeInZone(this.ngZone, this.cdr))
+      .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe({
         next: () => {
           this.notifications = this.notifications.map(notification => ({

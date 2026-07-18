@@ -28,6 +28,14 @@
             >{{ appRouteTitles.STO_DASHBOARD_STATS }}</a
           >
         </li>
+        <li>
+          <a
+            [routerLink]="getRouteLink(appRoutes.RESOURCES)"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="active"
+            >{{ appRouteTitles.RESOURCES }}</a
+          >
+        </li>
       </ul>
     </div>
     <div class="col footer-list-col">
@@ -54,6 +62,14 @@
             [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="active"
             >{{ appRouteTitles.CONTACT }}</a
+          >
+        </li>
+        <li>
+          <a
+            [routerLink]="getRouteLink(appRoutes.ROADMAP)"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="active"
+            >{{ appRouteTitles.ROADMAP }}</a
           >
         </li>
       </ul>

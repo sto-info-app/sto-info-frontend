@@ -80,15 +80,15 @@ export class AccountManageComponent implements OnInit, OnDestroy {
     return 'Select a platform first';
   }
 
-  private readonly fb = inject(FormBuilder);
-  private readonly stoAccountService = inject(StoAccountService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly cdr = inject(ChangeDetectorRef);
-  private readonly destroy$ = new Subject<void>();
+  private readonly _fb = inject(FormBuilder);
+  private readonly _stoAccountService = inject(StoAccountService);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _destroy$ = new Subject<void>();
 
   constructor() {
-    this.accountForm = this.fb.group({
+    this.accountForm = this._fb.group({
       handle: [
         '',
         [Validators.required, Validators.pattern(STO_HANDLE_PATTERN)],
@@ -107,12 +107,12 @@ export class AccountManageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.accountForm
       .get('platformId')
-      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      ?.valueChanges.pipe(takeUntil(this._destroy$))
       .subscribe((platformId: string | null) => {
         this.filterLaunchers(platformId || '');
       });
 
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
+    this._route.params.pipe(takeUntil(this._destroy$)).subscribe(params => {
       this.encodedHandle = params['handle'] || '';
       this.mode = this.encodedHandle ? 'edit' : 'add';
       this.loadMetadata();
@@ -124,15 +124,15 @@ export class AccountManageComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
 
     forkJoin({
-      platforms: this.stoAccountService.getPlatforms(),
-      launchers: this.stoAccountService.getLaunchers(),
-      mappings: this.stoAccountService.getPlatformLaunchers(),
+      platforms: this._stoAccountService.getPlatforms(),
+      launchers: this._stoAccountService.getLaunchers(),
+      mappings: this._stoAccountService.getPlatformLaunchers(),
       accounts:
         this.mode === 'edit'
-          ? this.stoAccountService.getAccounts()
+          ? this._stoAccountService.getAccounts()
           : of([] as StoAccount[]),
     })
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: ({ platforms, launchers, mappings, accounts }) => {
           this.platforms = platforms;
@@ -147,7 +147,7 @@ export class AccountManageComponent implements OnInit, OnDestroy {
             if (!this.account) {
               this.errorMessage = 'Account not found.';
               this.isLoading = false;
-              this.cdr.markForCheck();
+              this._cdr.markForCheck();
               return;
             }
 
@@ -172,13 +172,13 @@ export class AccountManageComponent implements OnInit, OnDestroy {
           }
 
           this.isLoading = false;
-          this.cdr.markForCheck();
+          this._cdr.markForCheck();
         },
         error: error => {
           this.errorMessage =
             'Error loading account metadata. Please try again.';
           this.isLoading = false;
-          this.cdr.markForCheck();
+          this._cdr.markForCheck();
           console.error('Error loading metadata:', error);
         },
       });
@@ -218,10 +218,10 @@ export class AccountManageComponent implements OnInit, OnDestroy {
     const accountData = this.accountForm.value;
 
     if (this.mode === 'add') {
-      this.stoAccountService.createAccount(accountData).subscribe({
+      this._stoAccountService.createAccount(accountData).subscribe({
         next: createdAccount => {
           this.isSubmitting = false;
-          this.router.navigate([
+          this._router.navigate([
             '/dashboard/accounts',
             encodeStoHandle(createdAccount.handle),
           ]);
@@ -236,13 +236,13 @@ export class AccountManageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.stoAccountService
+    this._stoAccountService
       .updateAccount(this.account.id, accountData)
       .subscribe({
         next: updatedAccount => {
           this.isSubmitting = false;
           const targetHandle = updatedAccount?.handle || accountData.handle;
-          this.router.navigate([
+          this._router.navigate([
             '/dashboard/accounts',
             encodeStoHandle(targetHandle),
           ]);
@@ -268,22 +268,22 @@ export class AccountManageComponent implements OnInit, OnDestroy {
       this.errorMessage = `An error occurred while ${action} the account. Please try again.`;
     }
     console.error(`Error ${action} account:`, error);
-    this.cdr.markForCheck();
+    this._cdr.markForCheck();
   }
 
   onCancel(): void {
     if (this.mode === 'edit' && this.account) {
-      this.router.navigate([
+      this._router.navigate([
         '/dashboard/accounts',
         encodeStoHandle(this.account.handle),
       ]);
       return;
     }
-    this.router.navigate(['/dashboard/accounts']);
+    this._router.navigate(['/dashboard/accounts']);
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 }

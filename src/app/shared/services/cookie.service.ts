@@ -33,14 +33,14 @@ export class CookieService {
   /**
    * Emits the current cookie status.
    */
-  private readonly cookieStatusSubject: BehaviorSubject<boolean> =
+  private readonly _cookieStatusSubject: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
 
   /**
    * Emits cookie status changes for consumers.
    */
   public cookieStatus$: Observable<boolean> =
-    this.cookieStatusSubject.asObservable();
+    this._cookieStatusSubject.asObservable();
 
   /**
    * Updates the current cookie status.
@@ -48,7 +48,7 @@ export class CookieService {
    * @param status The new cookie status.
    */
   setCookieStatus(status: boolean): void {
-    this.cookieStatusSubject.next(status);
+    this._cookieStatusSubject.next(status);
   }
 
   /**
@@ -57,7 +57,7 @@ export class CookieService {
    * @returns The latest emitted cookie status.
    */
   getCookieStatus(): boolean {
-    return this.cookieStatusSubject.getValue();
+    return this._cookieStatusSubject.getValue();
   }
 
   /**
@@ -76,8 +76,8 @@ export class CookieService {
     const cookieValue = targetCookie ? targetCookie.split('=')[1] : 'false';
     const status = cookieValue === 'true';
 
-    if (this.cookieStatusSubject.getValue() !== status) {
-      this.cookieStatusSubject.next(status);
+    if (this._cookieStatusSubject.getValue() !== status) {
+      this._cookieStatusSubject.next(status);
     }
   }
 

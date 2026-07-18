@@ -68,10 +68,10 @@ export class EditPersonalDetailsComponent implements OnInit {
   errorTextUsernameTaken: string = FORM_ERROR_USERNAME_TAKEN;
   errorTextUsernamePattern: string = FORM_ERROR_USERNAME_PATTERN;
 
-  private readonly formBuilder = inject(FormBuilder);
-  private readonly routingService = inject(RoutingService);
-  private readonly dashboardService = inject(DashboardService);
-  private readonly dialogRef = inject(
+  private readonly _formBuilder = inject(FormBuilder);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _dashboardService = inject(DashboardService);
+  private readonly _dialogRef = inject(
     MatDialogRef<EditPersonalDetailsComponent>,
   );
   public data = inject(MAT_DIALOG_DATA, { optional: true }) as {
@@ -82,7 +82,7 @@ export class EditPersonalDetailsComponent implements OnInit {
    * Angular lifecycle hook that initialises the form with the current user details.
    */
   ngOnInit() {
-    this.editPersonalDetailsForm = this.formBuilder.nonNullable.group({
+    this.editPersonalDetailsForm = this._formBuilder.nonNullable.group({
       firstName: [
         this.data?.user?.profile?.firstName ?? '',
         [Validators.required, Validators.maxLength(MAX_CHARS_NAMES)],
@@ -113,11 +113,11 @@ export class EditPersonalDetailsComponent implements OnInit {
     const editPersonalDetailsFormValues: EditPersonalDetailsFormValues =
       this.editPersonalDetailsForm.value;
 
-    this.dashboardService
+    this._dashboardService
       .updatePersonalDetails(editPersonalDetailsFormValues)
       .subscribe({
         next: () => {
-          this.dialogRef?.close({
+          this._dialogRef?.close({
             stayLoggedIn: true,
           });
           this.isSubmitting = false;
@@ -146,7 +146,7 @@ export class EditPersonalDetailsComponent implements OnInit {
         },
         complete: () => {
           this.isSubmitting = false;
-          this.dialogRef?.close(true);
+          this._dialogRef?.close(true);
         },
       });
   }
@@ -158,7 +158,7 @@ export class EditPersonalDetailsComponent implements OnInit {
    * @returns Router link string for the given route.
    */
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 
   /**
@@ -185,6 +185,6 @@ export class EditPersonalDetailsComponent implements OnInit {
    * Closes the dialog without returning any specific result.
    */
   onCloseClick(): void {
-    this.dialogRef?.close();
+    this._dialogRef?.close();
   }
 }

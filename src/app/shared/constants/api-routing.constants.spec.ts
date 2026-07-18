@@ -22,6 +22,7 @@ describe('api-routing.constants', () => {
 
   it('should build user and STO account URLs', () => {
     expect(API_URLS.USER).toBe('https://api.test/user');
+    expect(API_URLS.CLOSE_ACCOUNT).toBe('https://api.test/user/close-account');
     expect(API_URLS.STO_ACCOUNT).toBe('https://api.test/account');
     expect(API_URLS.CHARACTER).toBe('https://api.test/character');
   });

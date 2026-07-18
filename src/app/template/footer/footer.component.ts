@@ -19,13 +19,13 @@ export class FooterComponent {
   appRoutes = APP_ROUTES;
   appRouteTitles = APP_ROUTE_TITLES;
 
-  private readonly routingService = inject(RoutingService);
+  private readonly _routingService = inject(RoutingService);
 
   constructor() {
     this.currentYear = new Date().getFullYear();
   }
 
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 }

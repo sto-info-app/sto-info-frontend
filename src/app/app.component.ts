@@ -26,13 +26,12 @@ import { MainContentComponent } from './template/main-content/main-content.compo
   imports: [HeaderComponent, MainContentComponent, MatDialogModule],
 })
 export class AppComponent implements OnInit, OnDestroy {
-  private readonly cookieYesScriptId = 'cookieyes';
-  private readonly cookieYesCookieName = 'cookieyes-consent';
+  private readonly _cookieYesScriptId = 'cookieyes';
+  private readonly _cookieYesCookieName = 'cookieyes-consent';
   private googleAnalyticsLoaded = false;
 
   isLoggedIn = false;
   autoLogoutCountdown = 0;
-  showScrollButton = false;
 
   destroy$ = new Subject<void>();
 
@@ -41,15 +40,15 @@ export class AppComponent implements OnInit, OnDestroy {
   private cookieConsentUpdateHandler?: (event: Event) => void;
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
-  private readonly authService = inject(AuthService);
-  private readonly notificationService = inject(NotificationService);
-  private readonly logRocketService = inject(LogRocketService);
-  private readonly pageTitleService = inject(PageTitleService);
-  private readonly seoService = inject(SeoService);
-  private readonly cookieService = inject(CookieService);
-  private readonly zone = inject(NgZone);
-  private readonly router = inject(Router);
-  private readonly scriptLoader = inject(ScriptLoaderService);
+  private readonly _authService = inject(AuthService);
+  private readonly _notificationService = inject(NotificationService);
+  private readonly _logRocketService = inject(LogRocketService);
+  private readonly _pageTitleService = inject(PageTitleService);
+  private readonly _seoService = inject(SeoService);
+  private readonly _cookieService = inject(CookieService);
+  private readonly _zone = inject(NgZone);
+  private readonly _router = inject(Router);
+  private readonly _scriptLoader = inject(ScriptLoaderService);
   public readonly dialog = inject(MatDialog);
 
   /**
@@ -58,8 +57,8 @@ export class AppComponent implements OnInit, OnDestroy {
    * @returns void
    */
   constructor() {
-    this.pageTitleService.init();
-    this.seoService.init();
+    this._pageTitleService.init();
+    this._seoService.init();
     this.resetScrollPositionOnNavigationEnd();
     this.logout = this.logout.bind(this);
   }
@@ -78,7 +77,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // Poll banners + unread count on a single cadence for the whole app.
     // Skip in lighthouse-audit mode to avoid non-critical network noise.
     if (environment?.env_name !== 'lighthouse-audit') {
-      this.notificationService.startAppStatePolling();
+      this._notificationService.startAppStatePolling();
     }
 
     if (
@@ -102,7 +101,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * @remarks Subscribe to the expiryAnnounced$ Observable to handle auto-logout when the session expires.
    */
   private subscribeToExpiryAnnouncements() {
-    this.authService.expiryAnnounced$
+    this._authService.expiryAnnounced$
       .pipe(takeUntil(this.destroy$))
       .subscribe(expiryTime => {
         if (this.isLoggedIn) {
@@ -111,7 +110,7 @@ export class AppComponent implements OnInit, OnDestroy {
             (expiryTime !== 0 && Date.now() >= expiryTime)
           ) {
             this.dialog.closeAll(); // Close all dialogs before logout
-            this.authService.performLogout();
+            this._authService.performLogout();
           } else if (
             expiryTime !== 0 &&
             Date.now() < expiryTime &&
@@ -130,7 +129,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * @remarks Subscribe to the warningAnnounced$ Observable to handle display of auto-logout warning message.
    */
   private subscribeToWarningAnnouncements() {
-    this.authService.warningAnnounced$
+    this._authService.warningAnnounced$
       .pipe(takeUntil(this.destroy$))
       .subscribe((warningTime: number) => {
         // Clear any existing warning timeout
@@ -143,12 +142,12 @@ export class AppComponent implements OnInit, OnDestroy {
           const delay = warningTime - Date.now();
           // If warningTime is 0 or delay <= 0, open dialog immediately
           if (warningTime === 0 || delay <= 0) {
-            this.zone.run(() => {
+            this._zone.run(() => {
               this.openRefreshSessionDialog();
             });
           } else {
             this.warningTimeout = setTimeout(() => {
-              this.zone.run(() => {
+              this._zone.run(() => {
                 this.openRefreshSessionDialog();
                 this.warningTimeout = null;
               });
@@ -165,7 +164,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * @remarks Subscribes to the isAuthenticated$ Observable to start/stop the countdown timer based on login state.
    */
   private subscribeToAuthenticationState() {
-    this.authService.isAuthenticated$
+    this._authService.isAuthenticated$
       .pipe(takeUntil(this.destroy$))
       .subscribe(loggedIn => {
         this.isLoggedIn = loggedIn;
@@ -175,7 +174,7 @@ export class AppComponent implements OnInit, OnDestroy {
           }
         } else {
           // Clean up on logout
-          this.zone.run(() => {
+          this._zone.run(() => {
             if (this.intervalId !== null) {
               this.stopCountdown();
             }
@@ -200,7 +199,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * @remarks Subscribes to the Router's navigation end events and sends page view events to Google Analytics.
    */
   private trackPageViewsOnNavigation() {
-    this.router.events
+    this._router.events
       .pipe(takeUntil(this.destroy$))
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
@@ -222,7 +221,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
 
     // Stop app-state polling
-    this.notificationService.stopAppStatePolling();
+    this._notificationService.stopAppStatePolling();
 
     // Ensure any active countdown interval is cleared on destroy
     this.stopCountdown();
@@ -254,7 +253,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.warningTimeout = null;
     }
     this.dialog.closeAll(); // Close all open dialogs before logout
-    this.authService.performLogout();
+    this._authService.performLogout();
   }
 
   /**
@@ -280,7 +279,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((stayLoggedIn = false) => {
         if (stayLoggedIn) {
-          this.authService
+          this._authService
             .refreshToken()
             .pipe(takeUntil(this.destroy$))
             .subscribe();
@@ -307,9 +306,9 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     this.intervalId = globalThis.setInterval(() => {
-      this.zone.run(() => {
+      this._zone.run(() => {
         this.autoLogoutCountdown =
-          this.authService.getSecondsUntilLoginSessionExpiry();
+          this._authService.getSecondsUntilLoginSessionExpiry();
         if (this.autoLogoutCountdown <= 0) {
           this.stopCountdown();
 
@@ -352,7 +351,8 @@ export class AppComponent implements OnInit, OnDestroy {
    */
   private loadCookieYesScript(): void {
     const consentCookieValues =
-      this.cookieService.readCookie(this.cookieYesCookieName)?.split(',') || [];
+      this._cookieService.readCookie(this._cookieYesCookieName)?.split(',') ||
+      [];
     this.extractAcceptedConsentCookieCategories(consentCookieValues);
 
     if (!environment?.cookieYesUrl) {
@@ -360,8 +360,8 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.scriptLoader.loadScript({
-      id: this.cookieYesScriptId,
+    this._scriptLoader.loadScript({
+      id: this._cookieYesScriptId,
       src: environment?.cookieYesUrl,
       async: true,
       onLoad: () => {
@@ -372,7 +372,7 @@ export class AppComponent implements OnInit, OnDestroy {
         // Store handler reference for cleanup
         this.cookieConsentUpdateHandler = (eventData: Event) => {
           const data = (eventData as CustomEvent).detail;
-          this.cookieService.setUserAcceptedCookieCategories(data.accepted);
+          this._cookieService.setUserAcceptedCookieCategories(data.accepted);
           this.checkCookieConsentState();
         };
 
@@ -400,7 +400,7 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.scriptLoader.loadScript({
+    this._scriptLoader.loadScript({
       id: 'font-awesome-kit',
       src: `https://kit.fontawesome.com/${environment.fontAwesomeKitId}.js`,
       attributes: {
@@ -420,7 +420,7 @@ export class AppComponent implements OnInit, OnDestroy {
    */
   private checkCookieConsentState(): void {
     if (
-      !this.scriptLoader.shouldDisableAnalytics() &&
+      !this._scriptLoader.shouldDisableAnalytics() &&
       this.hasUserConsentedToAnalytics()
     ) {
       this.consentGiven();
@@ -435,7 +435,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * @returns boolean - true if consented, false otherwise
    */
   private hasUserConsentedToAnalytics(): boolean {
-    return this.cookieService.isCookieCategoryAccepted('analytics');
+    return this._cookieService.isCookieCategoryAccepted('analytics');
   }
 
   /**
@@ -543,7 +543,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.googleAnalyticsLoaded = true;
 
-    this.scriptLoader.loadScript({
+    this._scriptLoader.loadScript({
       id: 'ga-script',
       src: `https://www.googletagmanager.com/gtag/js?id=${environment?.gaMeasurementId}`,
       async: true,
@@ -656,7 +656,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     if (acceptedCategories.length) {
-      this.cookieService.setUserAcceptedCookieCategories(acceptedCategories);
+      this._cookieService.setUserAcceptedCookieCategories(acceptedCategories);
     }
   }
 
@@ -666,7 +666,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * @returns void
    */
   private loadLogRocket(): void {
-    this.logRocketService.init();
+    this._logRocketService.init();
   }
 
   /**
@@ -674,7 +674,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * @returns void
    */
   private disableLogRocket(): void {
-    this.logRocketService.shutdown();
+    this._logRocketService.shutdown();
   }
 
   /**
@@ -687,7 +687,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * This fix was added to scroll to top on route change to avoid retaining scroll position from previous route.
    */
   private resetScrollPositionOnNavigationEnd() {
-    this.router.events
+    this._router.events
       .pipe(
         filter(e => e instanceof NavigationEnd),
         takeUntil(this.destroy$),

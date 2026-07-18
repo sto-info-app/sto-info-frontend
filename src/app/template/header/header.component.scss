@@ -1,11 +1,11 @@
 @use 'lcars-variables' as vars;
 
 .show-scroll-top {
-  display: block;
+  display: block !important;
 }
 
 .hide-scroll-top {
-  display: none;
+  display: none !important;
 }
 
 // "Incoming transmission" alert that commandeers the data-cascade area

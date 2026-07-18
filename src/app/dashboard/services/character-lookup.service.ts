@@ -15,29 +15,29 @@ import {
   providedIn: 'root',
 })
 export class CharacterLookupService {
-  private readonly http = inject(HttpClient);
+  private readonly _http = inject(HttpClient);
 
   getGeneralFactions(factionId?: string): Observable<GeneralFaction[]> {
     let params = new HttpParams();
     if (factionId) {
       params = params.set('factionId', factionId);
     }
-    return this.http.get<GeneralFaction[]>(
+    return this._http.get<GeneralFaction[]>(
       API_URLS.CHARACTER_LOOKUP_GENERAL_FACTIONS,
       { params },
     );
   }
 
   getFactions(): Observable<Faction[]> {
-    return this.http.get<Faction[]>(API_URLS.CHARACTER_LOOKUP_FACTIONS);
+    return this._http.get<Faction[]>(API_URLS.CHARACTER_LOOKUP_FACTIONS);
   }
 
   getSexes(): Observable<Sex[]> {
-    return this.http.get<Sex[]>(API_URLS.CHARACTER_LOOKUP_SEXES);
+    return this._http.get<Sex[]>(API_URLS.CHARACTER_LOOKUP_SEXES);
   }
 
   getClasses(): Observable<CharacterClass[]> {
-    return this.http.get<CharacterClass[]>(API_URLS.CHARACTER_LOOKUP_CLASSES);
+    return this._http.get<CharacterClass[]>(API_URLS.CHARACTER_LOOKUP_CLASSES);
   }
 
   getRecruitTypes(factionId?: string): Observable<RecruitType[]> {
@@ -45,7 +45,7 @@ export class CharacterLookupService {
     if (factionId) {
       params = params.set('factionId', factionId);
     }
-    return this.http.get<RecruitType[]>(
+    return this._http.get<RecruitType[]>(
       API_URLS.CHARACTER_LOOKUP_RECRUIT_TYPES,
       { params },
     );
@@ -62,7 +62,7 @@ export class CharacterLookupService {
     if (recruitTypeId) {
       params = params.set('recruitTypeId', recruitTypeId);
     }
-    return this.http.get<Species[]>(API_URLS.CHARACTER_LOOKUP_SPECIES, {
+    return this._http.get<Species[]>(API_URLS.CHARACTER_LOOKUP_SPECIES, {
       params,
     });
   }

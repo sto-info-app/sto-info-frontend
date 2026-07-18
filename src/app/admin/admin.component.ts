@@ -15,7 +15,7 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
   imports: [RouterModule],
 })
 export class AdminComponent {
-  private readonly routingService = inject(RoutingService);
+  private readonly _routingService = inject(RoutingService);
 
   appRoutes = APP_ROUTES;
 
@@ -26,6 +26,6 @@ export class AdminComponent {
    * @returns The absolute link.
    */
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 }

@@ -29,6 +29,7 @@ export const API_URLS = {
 
   // User
   USER: apiUrl + '/user',
+  CLOSE_ACCOUNT: apiUrl + '/user/close-account',
   UPDATE_USER_PROFILE: apiUrl + '/user/update-profile',
   UPDATE_USER_PROFILE_PIC: apiUrl + '/user/update-profile-pic',
 
@@ -50,6 +51,9 @@ export const API_URLS = {
 
   // Endeavours
   ENDEAVOUR: apiUrl + '/endeavour',
+
+  // Reputations
+  REPUTATION: apiUrl + '/reputation',
 
   // Stats
   STATS: apiUrl + '/stats',

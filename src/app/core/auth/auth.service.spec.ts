@@ -21,8 +21,8 @@ describe('AuthService', () => {
   let routerSpy: jest.Mocked<Omit<Router, 'url'>> & { url: string };
 
   interface AuthServiceInternals {
-    http: HttpClient;
-    router: Router;
+    _http: HttpClient;
+    _router: Router;
     warningTimeout: ReturnType<typeof setTimeout> | null;
     logoutTimeout: ReturnType<typeof setTimeout> | null;
   }
@@ -309,11 +309,269 @@ describe('AuthService', () => {
       service.changePassword('token123', 'newpass').subscribe();
       const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
       expect(req.request.method).toBe('POST');
+      expect(req.request.responseType).toBe('text');
       expect(req.request.body).toEqual({
         token: 'token123',
         password: 'newpass', // NOSONAR - Test fixture password
       });
-      req.flush({});
+      req.flush('');
+    });
+
+    it('should surface backend error payloads returned with 200 status', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: () => {
+          throw new Error('Expected an error, but request succeeded');
+        },
+        error: err => {
+          expect(err).toEqual(
+            expect.objectContaining({
+              statusCode: 404,
+              message: 'Invalid token',
+            }),
+          );
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush(
+        JSON.stringify({
+          message: 'Invalid token',
+          error: 'Not Found',
+          statusCode: 404,
+        }),
+      );
+    });
+
+    it('should normalize stringified http error payloads', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: () => {
+          throw new Error('Expected an error, but request succeeded');
+        },
+        error: err => {
+          expect(err).toEqual(
+            expect.objectContaining({
+              statusCode: 404,
+              message: 'Invalid token',
+            }),
+          );
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush(
+        '{"message":"Invalid token","error":"Not Found","statusCode":404}',
+        {
+          status: 404,
+          statusText: 'Not Found',
+        },
+      );
+    });
+
+    it('should normalize object http error payloads', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: () => {
+          throw new Error('Expected an error, but request succeeded');
+        },
+        error: err => {
+          expect(err).toEqual(
+            expect.objectContaining({
+              statusCode: 404,
+              message: 'Invalid token',
+            }),
+          );
+          expect(err.error).toEqual(
+            expect.objectContaining({
+              statusCode: 404,
+              message: 'Invalid token',
+            }),
+          );
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush(
+        {
+          message: 'Invalid token',
+          error: 'Not Found',
+          statusCode: 404,
+        },
+        {
+          status: 404,
+          statusText: 'Not Found',
+        },
+      );
+    });
+
+    it('should prefer nested api error payload when top-level payload contains nested error object', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: () => {
+          throw new Error('Expected an error, but request succeeded');
+        },
+        error: err => {
+          expect(err).toEqual(
+            expect.objectContaining({
+              statusCode: 404,
+              message: 'Invalid token',
+            }),
+          );
+          expect(err.error).toEqual(
+            expect.objectContaining({
+              statusCode: 404,
+              message: 'Invalid token',
+            }),
+          );
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush(
+        JSON.stringify({
+          statusCode: 404,
+          message: 'Top-level message',
+          error: {
+            statusCode: 404,
+            message: 'Invalid token',
+          },
+        }),
+      );
+    });
+
+    it('should surface top-level api payload errors without nested error property', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: () => {
+          throw new Error('Expected an error, but request succeeded');
+        },
+        error: err => {
+          expect(err).toEqual(
+            expect.objectContaining({
+              statusCode: 404,
+              message: 'Invalid token',
+            }),
+          );
+          expect(err.error).toEqual(
+            expect.objectContaining({
+              statusCode: 404,
+              message: 'Invalid token',
+            }),
+          );
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush(
+        JSON.stringify({
+          message: 'Invalid token',
+          statusCode: 404,
+        }),
+      );
+    });
+
+    it('should rethrow original error when no api-style payload is present', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: () => {
+          throw new Error('Expected an error, but request succeeded');
+        },
+        error: err => {
+          expect(err.status).toBe(500);
+          expect(err.error).toEqual({ reason: 'unexpected' });
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush(
+        { reason: 'unexpected' },
+        {
+          status: 500,
+          statusText: 'Server Error',
+        },
+      );
+    });
+
+    it('should normalize top-level api payload when nested error is not api-shaped', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: () => {
+          throw new Error('Expected an error, but request succeeded');
+        },
+        error: err => {
+          expect(err).toEqual(
+            expect.objectContaining({
+              statusCode: 404,
+              message: 'Invalid token',
+            }),
+          );
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush(
+        JSON.stringify({
+          statusCode: 404,
+          message: 'Invalid token',
+          error: {
+            reason: 'not-api-shaped',
+          },
+        }),
+      );
+    });
+
+    it('should return null from api payload extractor for non-object values', () => {
+      const result = (
+        service as unknown as {
+          extractApiErrorPayload: (error: unknown) => unknown;
+        }
+      ).extractApiErrorPayload('plain error');
+
+      expect(result).toBeNull();
+    });
+
+    it('should rethrow original error when extractor returns null', () => {
+      const extractSpy = jest
+        .spyOn(
+          service as unknown as {
+            extractApiErrorPayload: (error: unknown) => unknown;
+          },
+          'extractApiErrorPayload',
+        )
+        .mockReturnValue(null);
+
+      service.changePassword('token123', 'newpass').subscribe({
+        next: () => {
+          throw new Error('Expected an error, but request succeeded');
+        },
+        error: err => {
+          expect(err.status).toBe(500);
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush('boom', {
+        status: 500,
+        statusText: 'Server Error',
+      });
+
+      extractSpy.mockRestore();
+    });
+
+    it('should treat null response as successful password change', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: value => {
+          expect(value).toBeUndefined();
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush('');
+    });
+
+    it('should treat plain text response as successful password change', () => {
+      service.changePassword('token123', 'newpass').subscribe({
+        next: value => {
+          expect(value).toBeUndefined();
+        },
+      });
+
+      const req = httpMock.expectOne(API_URLS.AUTH_RESET_PASSWORD);
+      req.flush('Password updated');
     });
   });
 
@@ -355,7 +613,7 @@ describe('AuthService', () => {
       localStorage.removeItem('refresh_token');
 
       const postSpy = jest.spyOn(
-        (service as unknown as AuthServiceInternals).http,
+        (service as unknown as AuthServiceInternals)._http,
         'post',
       );
       service.performLogout();

@@ -26,16 +26,16 @@ import { LcarsWarningMessageComponent } from '../lcars-warning-message/lcars-war
 })
 export class RefreshSessionDialogComponent implements OnInit, OnDestroy {
   public dialogRef = inject(MatDialogRef<RefreshSessionDialogComponent>);
-  private readonly authService = inject(AuthService);
-  private readonly zone = inject(NgZone);
-  private readonly cdr = inject(ChangeDetectorRef);
-  private readonly destroy$ = new Subject<void>();
-  private readonly data = inject<{ appComponent: AppComponent } | null>(
+  private readonly _authService = inject(AuthService);
+  private readonly _zone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _destroy$ = new Subject<void>();
+  private readonly _data = inject<{ appComponent: AppComponent } | null>(
     MAT_DIALOG_DATA,
     { optional: true },
   );
 
-  appComponent: AppComponent | null = this.data?.appComponent ?? null;
+  appComponent: AppComponent | null = this._data?.appComponent ?? null;
 
   /**
    * Remaining seconds before automatic logout, displayed in the countdown.
@@ -43,7 +43,7 @@ export class RefreshSessionDialogComponent implements OnInit, OnDestroy {
    * @remarks Owned by the dialog so it refreshes even though the surrounding
    * CDK overlay (`MatDialogContainer`) uses OnPush change detection.
    */
-  countdown = this.authService.getSecondsUntilLoginSessionExpiry();
+  countdown = this._authService.getSecondsUntilLoginSessionExpiry();
 
   private intervalId: ReturnType<typeof setInterval> | null = null;
 
@@ -53,10 +53,10 @@ export class RefreshSessionDialogComponent implements OnInit, OnDestroy {
    */
   ngOnInit(): void {
     // Automatically close the dialog if the user is logged out elsewhere
-    this.authService.isAuthenticated$
+    this._authService.isAuthenticated$
       .pipe(
         filter(isLoggedIn => !isLoggedIn),
-        takeUntil(this.destroy$),
+        takeUntil(this._destroy$),
       )
       .subscribe(() => {
         this.dialogRef.close();
@@ -70,8 +70,8 @@ export class RefreshSessionDialogComponent implements OnInit, OnDestroy {
    */
   ngOnDestroy(): void {
     this.stopCountdown();
-    this.destroy$.next();
-    this.destroy$.complete();
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 
   /**
@@ -84,12 +84,12 @@ export class RefreshSessionDialogComponent implements OnInit, OnDestroy {
    */
   private startCountdown(): void {
     this.intervalId = globalThis.setInterval(() => {
-      this.zone.run(() => {
-        this.countdown = this.authService.getSecondsUntilLoginSessionExpiry();
+      this._zone.run(() => {
+        this.countdown = this._authService.getSecondsUntilLoginSessionExpiry();
         if (this.countdown <= 0) {
           this.stopCountdown();
         }
-        this.cdr.detectChanges();
+        this._cdr.detectChanges();
       });
     }, 1000);
   }

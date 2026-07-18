@@ -45,13 +45,13 @@ const LOAD_TIMEOUT_MS = 12000;
   ],
 })
 export class NewsDetailComponent implements OnInit {
-  private readonly newsService = inject(NewsService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly routingService = inject(RoutingService);
-  private readonly seoService = inject(SeoService);
-  private readonly pageTitleService = inject(PageTitleService);
-  private readonly ngZone = inject(NgZone);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly _newsService = inject(NewsService);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _seoService = inject(SeoService);
+  private readonly _pageTitleService = inject(PageTitleService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   categoryLabels = NEWS_CATEGORY_LABELS;
 
@@ -71,7 +71,7 @@ export class NewsDetailComponent implements OnInit {
    * Loads the post identified by the `slug` route parameter.
    */
   ngOnInit(): void {
-    const slug = this.route.snapshot.paramMap.get('slug');
+    const slug = this._route.snapshot.paramMap.get('slug');
     if (!slug) {
       this.notFound = true;
       return;
@@ -94,19 +94,19 @@ export class NewsDetailComponent implements OnInit {
       if (!this.isLoading) {
         return;
       }
-      this.ngZone.run(() => {
+      this._ngZone.run(() => {
         this.isLoading = false;
         this.errorMessage =
           'Loading this post is taking longer than expected. Please try again.';
-        this.cdr.detectChanges();
+        this._cdr.detectChanges();
       });
     }, LOAD_TIMEOUT_MS);
 
-    this.newsService
+    this._newsService
       .getNewsBySlug(slug)
       .pipe(
         take(1),
-        observeInZone(this.ngZone, this.cdr),
+        observeInZone(this._ngZone, this._cdr),
         // Safety net: clear loading on *every* termination path. next/error
         // below cover the happy and error paths immediately, but a stream that
         // completes without emitting would otherwise leave the spinner stuck
@@ -141,9 +141,9 @@ export class NewsDetailComponent implements OnInit {
    * @param post - The loaded post.
    */
   private applyPostMeta(post: NewsPost): void {
-    this.pageTitleService.setTitle(post.title);
+    this._pageTitleService.setTitle(post.title);
     const ogImageUrl = `${SEO_SITE_URL}og/news/${post.slug}.png`;
-    this.seoService.setPageMeta(
+    this._seoService.setPageMeta(
       post.title,
       post.summary ?? undefined,
       ogImageUrl,
@@ -156,6 +156,6 @@ export class NewsDetailComponent implements OnInit {
    * @returns The news list route link.
    */
   get newsListLink(): string {
-    return this.routingService.getLink(APP_ROUTES.NEWS);
+    return this._routingService.getLink(APP_ROUTES.NEWS);
   }
 }

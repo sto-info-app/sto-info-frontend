@@ -18,9 +18,9 @@ export class HomeComponent implements OnDestroy {
   isLoggedIn = false;
   appRoutes = APP_ROUTES;
 
-  private readonly authService = inject(AuthService);
-  private readonly routingService = inject(RoutingService);
-  private readonly destroy$ = new Subject<void>();
+  private readonly _authService = inject(AuthService);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _destroy$ = new Subject<void>();
 
   /**
    * Initializes the component.
@@ -28,8 +28,8 @@ export class HomeComponent implements OnDestroy {
    * Subscribes to the authentication service to determine if the user is logged in.
    */
   constructor() {
-    this.authService.isAuthenticated$
-      .pipe(takeUntil(this.destroy$))
+    this._authService.isAuthenticated$
+      .pipe(takeUntil(this._destroy$))
       .subscribe(loggedIn => {
         this.isLoggedIn = loggedIn;
       });
@@ -42,8 +42,8 @@ export class HomeComponent implements OnDestroy {
    * @returns void
    */
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 
   /**
@@ -53,6 +53,6 @@ export class HomeComponent implements OnDestroy {
    * @returns The link for the given route.
    */
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 }

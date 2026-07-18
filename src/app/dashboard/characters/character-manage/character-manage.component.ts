@@ -83,19 +83,19 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
   recruitTypes: RecruitType[] = [];
   speciesList: Species[] = [];
 
-  private readonly fb = inject(FormBuilder);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly characterService = inject(CharacterService);
-  private readonly stoAccountService = inject(StoAccountService);
-  private readonly lookupService = inject(CharacterLookupService);
-  private readonly cdr = inject(ChangeDetectorRef);
-  private readonly destroy$ = new Subject<void>();
+  private readonly _fb = inject(FormBuilder);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
+  private readonly _characterService = inject(CharacterService);
+  private readonly _stoAccountService = inject(StoAccountService);
+  private readonly _lookupService = inject(CharacterLookupService);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _destroy$ = new Subject<void>();
 
-  private readonly dashboardAccountsRoute = '/dashboard/accounts';
+  private readonly _dashboardAccountsRoute = '/dashboard/accounts';
 
   constructor() {
-    this.characterForm = this.fb.group({
+    this.characterForm = this._fb.group({
       handle: [
         '',
         [Validators.required, Validators.pattern(CHARACTER_NAME_PATTERN)],
@@ -117,7 +117,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
+    this._route.params.pipe(takeUntil(this._destroy$)).subscribe(params => {
       this.accountHandle = decodeStoHandle(params['handle']);
       this.characterHandle = params['characterHandle'];
       this.mode = this.characterHandle ? 'edit' : 'add';
@@ -128,7 +128,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
     // Setup dynamic filtering
     this.characterForm
       .get('factionId')
-      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      ?.valueChanges.pipe(takeUntil(this._destroy$))
       .pipe(
         switchMap(factionId => {
           if (!factionId) {
@@ -139,8 +139,8 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
           }
 
           return forkJoin({
-            recruitTypes: this.lookupService.getRecruitTypes(factionId),
-            generalFactions: this.lookupService.getGeneralFactions(factionId),
+            recruitTypes: this._lookupService.getRecruitTypes(factionId),
+            generalFactions: this._lookupService.getGeneralFactions(factionId),
           });
         }),
       )
@@ -156,7 +156,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
             generalFactionId: generalFactions[0].id,
           });
         }
-        this.cdr.markForCheck();
+        this._cdr.markForCheck();
       });
 
     this.bindSpeciesUpdates();
@@ -173,16 +173,16 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
       recruitTypes: Observable<RecruitType[]>;
       accounts: Observable<StoAccount[]>;
     } = {
-      generalFactions: this.lookupService.getGeneralFactions(),
-      factions: this.lookupService.getFactions(),
-      sexes: this.lookupService.getSexes(),
-      classes: this.lookupService.getClasses(),
-      recruitTypes: this.lookupService.getRecruitTypes(),
-      accounts: this.stoAccountService.getAccounts(),
+      generalFactions: this._lookupService.getGeneralFactions(),
+      factions: this._lookupService.getFactions(),
+      sexes: this._lookupService.getSexes(),
+      classes: this._lookupService.getClasses(),
+      recruitTypes: this._lookupService.getRecruitTypes(),
+      accounts: this._stoAccountService.getAccounts(),
     };
 
     forkJoin(observables)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: res => {
           this.generalFactions = res.generalFactions;
@@ -203,44 +203,44 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
               this.loadCharacter();
             } else {
               this.isLoading = false;
-              this.cdr.markForCheck();
+              this._cdr.markForCheck();
             }
           } else {
             this.errorMessage = 'Account not found';
             this.isLoading = false;
-            this.cdr.markForCheck();
+            this._cdr.markForCheck();
           }
         },
         error: err => {
           this.errorMessage = 'Failed to load form data';
           this.isLoading = false;
-          this.cdr.markForCheck();
+          this._cdr.markForCheck();
           console.error(err);
         },
       });
   }
 
   loadCharacter(): void {
-    this.characterService
+    this._characterService
       .getCharactersByAccount(this.accountId)
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntil(this._destroy$),
         switchMap(characters => {
           const char = characters.find(c => c.handle === this.characterHandle);
           if (!char) {
             this.errorMessage = 'Character not found';
             this.isLoading = false;
-            this.cdr.markForCheck();
+            this._cdr.markForCheck();
             return EMPTY;
           }
 
           this.characterId = char.id;
 
-          return this.characterService.getCharacter(char.id).pipe(
+          return this._characterService.getCharacter(char.id).pipe(
             catchError(err => {
               this.errorMessage = 'Failed to load character details';
               this.isLoading = false;
-              this.cdr.markForCheck();
+              this._cdr.markForCheck();
               console.error(err);
               return EMPTY;
             }),
@@ -251,9 +251,9 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
 
           return forkJoin({
             recruitTypes: fullChar.factionId
-              ? this.lookupService.getRecruitTypes(fullChar.factionId)
+              ? this._lookupService.getRecruitTypes(fullChar.factionId)
               : of([] as RecruitType[]),
-            species: this.lookupService.getSpecies(
+            species: this._lookupService.getSpecies(
               fullChar.factionId,
               fullChar.recruitTypeId,
             ),
@@ -261,7 +261,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
             catchError(err => {
               this.errorMessage = 'Failed to load character options';
               this.isLoading = false;
-              this.cdr.markForCheck();
+              this._cdr.markForCheck();
               console.error(err);
               return EMPTY;
             }),
@@ -273,12 +273,12 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
           this.recruitTypes = recruitTypes;
           this.speciesList = species;
           this.isLoading = false;
-          this.cdr.markForCheck();
+          this._cdr.markForCheck();
         },
         error: err => {
           this.errorMessage = 'Failed to load characters';
           this.isLoading = false;
-          this.cdr.markForCheck();
+          this._cdr.markForCheck();
           console.error(err);
         },
       });
@@ -321,7 +321,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
       recruitTypeControl.valueChanges.pipe(startWith(recruitTypeControl.value)),
     ])
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntil(this._destroy$),
         switchMap(([factionId, recruitTypeId]) => {
           if (!factionId) {
             this.speciesList = [];
@@ -329,7 +329,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
             return of([] as Species[]);
           }
 
-          return this.lookupService.getSpecies(factionId, recruitTypeId).pipe(
+          return this._lookupService.getSpecies(factionId, recruitTypeId).pipe(
             catchError(err => {
               console.error('Failed to load species', err);
               return EMPTY;
@@ -340,7 +340,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
       .subscribe(species => {
         this.speciesList = species;
         this.clearInvalidSelection('speciesId', species);
-        this.cdr.markForCheck();
+        this._cdr.markForCheck();
       });
   }
 
@@ -360,9 +360,9 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
     };
 
     if (this.mode === 'add') {
-      this.characterService
+      this._characterService
         .createCharacter(formData)
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntil(this._destroy$))
         .subscribe({
           next: () => this.navigateToAccount(),
           error: err => {
@@ -370,9 +370,9 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
           },
         });
     } else {
-      this.characterService
+      this._characterService
         .updateCharacter(this.characterId, formData)
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntil(this._destroy$))
         .subscribe({
           next: () => this.navigateToCharacter(formData.handle),
           error: err => {
@@ -401,15 +401,15 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
   }
 
   private navigateToAccount(): void {
-    this.router.navigate([
-      this.dashboardAccountsRoute,
+    this._router.navigate([
+      this._dashboardAccountsRoute,
       encodeStoHandle(this.accountHandle),
     ]);
   }
 
   private navigateToCharacter(characterHandle: string): void {
-    this.router.navigate([
-      this.dashboardAccountsRoute,
+    this._router.navigate([
+      this._dashboardAccountsRoute,
       encodeStoHandle(this.accountHandle),
       characterHandle,
     ]);
@@ -431,7 +431,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
     }
 
     console.error(error);
-    this.cdr.markForCheck();
+    this._cdr.markForCheck();
   }
 
   /**
@@ -442,7 +442,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
    * @returns void
    */
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 }

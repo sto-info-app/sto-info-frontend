@@ -5,8 +5,8 @@ import { HealthService } from './health.service';
 
 @Injectable({ providedIn: 'root' })
 export class ApiUpGuard implements CanActivate {
-  private readonly health = inject(HealthService);
-  private readonly router = inject(Router);
+  private readonly _health = inject(HealthService);
+  private readonly _router = inject(Router);
 
   /**
    * Allows access only when the API is reported as healthy.
@@ -14,10 +14,10 @@ export class ApiUpGuard implements CanActivate {
    * @returns `true` when the API is up, otherwise a redirect tree to the service interruption page.
    */
   canActivate(): boolean | UrlTree {
-    const state = this.health.snapshot();
+    const state = this._health.snapshot();
 
     if (state === API_HEALTH_STATE_DOWN) {
-      return this.router.parseUrl('/service-interruption');
+      return this._router.parseUrl('/service-interruption');
     }
     return true;
   }

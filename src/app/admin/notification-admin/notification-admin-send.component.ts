@@ -36,11 +36,11 @@ import { NotificationService } from 'src/app/notifications/notification.service'
   ],
 })
 export class NotificationAdminSendComponent {
-  private readonly fb = inject(FormBuilder);
-  private readonly notificationService = inject(NotificationService);
-  private readonly router = inject(Router);
-  private readonly ngZone = inject(NgZone);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly _fb = inject(FormBuilder);
+  private readonly _notificationService = inject(NotificationService);
+  private readonly _router = inject(Router);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   appRoutes = APP_ROUTES;
   severities = Object.values(NotificationSeverity);
@@ -52,7 +52,7 @@ export class NotificationAdminSendComponent {
   errorMessage = '';
   successMessage = '';
 
-  form = this.fb.group({
+  form = this._fb.group({
     target: [NotificationTarget.BROADCAST],
     userId: [''],
     severity: [NotificationSeverity.INFO],
@@ -102,15 +102,15 @@ export class NotificationAdminSendComponent {
       linkUrl: value.linkUrl?.trim() ? value.linkUrl.trim() : undefined,
     };
 
-    this.notificationService
+    this._notificationService
       .createNotification(payload)
       .pipe(
-        observeInZone(this.ngZone, this.cdr),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => (this.isSaving = false)),
       )
       .subscribe({
         next: () =>
-          this.router.navigate(['/' + APP_ROUTES.ADMIN_NOTIFICATIONS]),
+          this._router.navigate(['/' + APP_ROUTES.ADMIN_NOTIFICATIONS]),
         error: () => (this.errorMessage = 'Failed to send the notification.'),
       });
   }

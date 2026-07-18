@@ -24,21 +24,21 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly isAuthenticatedSubject: BehaviorSubject<boolean> =
+  private readonly _isAuthenticatedSubject: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
   public isAuthenticated$: Observable<boolean> =
-    this.isAuthenticatedSubject.asObservable();
+    this._isAuthenticatedSubject.asObservable();
   public isLoggedIn$: Observable<boolean> = this.isAuthenticated$;
 
-  private readonly expiryAnnouncedSubject: ReplaySubject<number> =
+  private readonly _expiryAnnouncedSubject: ReplaySubject<number> =
     new ReplaySubject<number>(1); // Will replay the last 1 values to new subscribers
   public expiryAnnounced$: Observable<number> =
-    this.expiryAnnouncedSubject.asObservable();
+    this._expiryAnnouncedSubject.asObservable();
 
-  private readonly warningAnnouncedSubject: ReplaySubject<number> =
+  private readonly _warningAnnouncedSubject: ReplaySubject<number> =
     new ReplaySubject<number>(1); // Will replay the last 1 values to new subscribers
   public warningAnnounced$: Observable<number> =
-    this.warningAnnouncedSubject.asObservable();
+    this._warningAnnouncedSubject.asObservable();
 
   public autoLogoutWarningMins =
     environment.minsBeforeLogoutExpiryToShowWarning || 5; // 5 minutes before expiration if not set in environment settings
@@ -47,16 +47,16 @@ export class AuthService {
   private warningTimeout: ReturnType<typeof setTimeout> | null = null;
   private logoutTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  private readonly http = inject(HttpClient);
-  private readonly router = inject(Router);
-  private readonly zone = inject(NgZone);
+  private readonly _http = inject(HttpClient);
+  private readonly _router = inject(Router);
+  private readonly _zone = inject(NgZone);
 
   /**
    * Restores the authenticated state from stored tokens and schedules logout timers.
    */
   constructor() {
     // Check if there's a login token and update the BehaviorSubject
-    this.isAuthenticatedSubject.next(this.isTokenValid());
+    this._isAuthenticatedSubject.next(this.isTokenValid());
 
     // Load any valid token expiry from localStorage and create a timer
     this.createAutoLogoutTimer();
@@ -69,7 +69,7 @@ export class AuthService {
    * @returns The registration request observable.
    */
   register(user: RegistrationFormValues) {
-    return this.http.post(API_URLS.AUTH_REGISTER, user);
+    return this._http.post(API_URLS.AUTH_REGISTER, user);
   }
 
   /**
@@ -79,7 +79,7 @@ export class AuthService {
    * @returns The login response observable.
    */
   login(credentials: LoginCredentials): Observable<LoginResponse> {
-    return this.http
+    return this._http
       .post<LoginResponse>(API_URLS.AUTH_LOGIN, credentials, {
         withCredentials: true,
       })
@@ -124,8 +124,8 @@ export class AuthService {
     localStorage.setItem('expires_at', expiresAt.toString());
     localStorage.setItem('warning_at', warningAt.toString());
 
-    this.isAuthenticatedSubject.next(true);
-    this.expiryAnnouncedSubject.next(expiresAt);
+    this._isAuthenticatedSubject.next(true);
+    this._expiryAnnouncedSubject.next(expiresAt);
     // Don't announce warning here - let the timer announce it when it fires
 
     this.createAutoLogoutTimer();
@@ -158,10 +158,10 @@ export class AuthService {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('expires_at');
     localStorage.removeItem('warning_at');
-    this.isAuthenticatedSubject.next(false);
+    this._isAuthenticatedSubject.next(false);
 
     // Notify subscribers that the token has expired
-    this.expiryAnnouncedSubject.next(0);
+    this._expiryAnnouncedSubject.next(0);
   }
 
   /**
@@ -176,7 +176,7 @@ export class AuthService {
       return throwError(() => new Error('No token found'));
     }
     const body = { refresh_token: refreshToken };
-    return this.http.post<LoginResponse>(API_URLS.AUTH_REFRESH, body).pipe(
+    return this._http.post<LoginResponse>(API_URLS.AUTH_REFRESH, body).pipe(
       tap(response => {
         this.saveToken(
           response.access_token,
@@ -185,10 +185,10 @@ export class AuthService {
         );
 
         const expiresAt = this.getNewExpiresMilliseconds(response.expires_in);
-        this.expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time
+        this._expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time
       }),
       catchError(error => {
-        this.router.navigate([APP_ROUTES.LOGIN]);
+        this._router.navigate([APP_ROUTES.LOGIN]);
         return throwError(() => error);
       }),
     );
@@ -217,7 +217,7 @@ export class AuthService {
     // Send a request to the backend to revoke the refresh token
     const refreshToken = localStorage.getItem('refresh_token');
     if (refreshToken) {
-      this.http
+      this._http
         .post(API_URLS.AUTH_LOGOUT, { tokenId: refreshToken })
         .subscribe({
           error: err => {
@@ -234,15 +234,15 @@ export class AuthService {
     this.removeToken();
 
     // Signal expiry to trigger cleanup in app component
-    this.expiryAnnouncedSubject.next(0);
+    this._expiryAnnouncedSubject.next(0);
 
     // Get the current URL
-    let currentUrl = this.router.url;
+    let currentUrl = this._router.url;
 
     // If we're already on the login page, don't capture it as the returnUrl
     if (currentUrl.includes('/login')) {
       // Try to extract an existing returnUrl if possible
-      const urlTree = this.router.parseUrl(currentUrl);
+      const urlTree = this._router.parseUrl(currentUrl);
       const existingReturnUrl = urlTree.queryParams['returnUrl'];
       if (existingReturnUrl) {
         currentUrl = existingReturnUrl;
@@ -253,7 +253,7 @@ export class AuthService {
     }
 
     // Navigate to login page with return URL using Angular Router (no page reload)
-    this.router.navigate(['/login'], {
+    this._router.navigate(['/login'], {
       queryParams: currentUrl ? { returnUrl: currentUrl } : {},
     });
   }
@@ -340,11 +340,13 @@ export class AuthService {
    * @returns The reset request observable.
    */
   resetPassword(email: string): Observable<void> {
-    return this.http.post(API_URLS.AUTH_RESET_PASSWORD_REQUEST, { email }).pipe(
-      map(() => {
-        return;
-      }),
-    );
+    return this._http
+      .post(API_URLS.AUTH_RESET_PASSWORD_REQUEST, { email })
+      .pipe(
+        map(() => {
+          return;
+        }),
+      );
   }
 
   /**
@@ -360,10 +362,109 @@ export class AuthService {
       password: password,
     };
 
-    return this.http.post(API_URLS.AUTH_RESET_PASSWORD, data).pipe(
-      map(() => {
-        return;
-      }),
+    return this._http
+      .post(API_URLS.AUTH_RESET_PASSWORD, data, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        map(response => {
+          const body = response.body;
+          if (!body) {
+            return;
+          }
+
+          const parsedBody = this.tryParseJson(body);
+          if (this.isApiErrorPayload(parsedBody)) {
+            throw parsedBody;
+          }
+
+          return;
+        }),
+        catchError(error => {
+          const parsedError = this.extractApiErrorPayload(error);
+          if (!parsedError) {
+            return throwError(() => error);
+          }
+
+          return throwError(() => ({
+            ...error,
+            statusCode:
+              typeof parsedError.statusCode === 'number'
+                ? parsedError.statusCode
+                : error?.status,
+            message: parsedError.message,
+            error: parsedError,
+          }));
+        }),
+      );
+  }
+
+  /**
+   * Attempts to parse a JSON string and returns the original value on failure.
+   */
+  private tryParseJson(payload: string): unknown {
+    try {
+      return JSON.parse(payload);
+    } catch {
+      return payload;
+    }
+  }
+
+  /**
+   * Extracts a backend-style error payload from an HTTP error object.
+   */
+  private extractApiErrorPayload(error: unknown): {
+    statusCode?: number;
+    message?: string | string[];
+    error?: string;
+  } | null {
+    const rawPayload =
+      typeof error === 'object' && error !== null
+        ? (error as { error?: unknown }).error
+        : undefined;
+
+    if (typeof rawPayload === 'string') {
+      const parsed = this.tryParseJson(rawPayload);
+      return this.isApiErrorPayload(parsed)
+        ? parsed
+        : {
+            message: rawPayload,
+            statusCode:
+              typeof (error as { status?: unknown })?.status === 'number'
+                ? ((error as { status: number }).status as number)
+                : undefined,
+          };
+    }
+
+    if (this.isApiErrorPayload(rawPayload)) {
+      return rawPayload;
+    }
+
+    if (this.isApiErrorPayload(error)) {
+      return error;
+    }
+
+    return null;
+  }
+
+  /**
+   * Detects backend-style error payloads that may arrive with a 2xx HTTP status.
+   */
+  private isApiErrorPayload(payload: unknown): payload is {
+    statusCode: number;
+    message?: string | string[];
+    error?: string;
+  } {
+    if (!payload || typeof payload !== 'object') {
+      return false;
+    }
+
+    const maybeStatusCode = (payload as { statusCode?: unknown }).statusCode;
+    return (
+      typeof maybeStatusCode === 'number' &&
+      Number.isFinite(maybeStatusCode) &&
+      maybeStatusCode >= 400
     );
   }
 
@@ -410,7 +511,7 @@ export class AuthService {
 
     // If token is already expired, logout immediately
     if (expiresAt && Date.now() >= expiresAt) {
-      this.zone.run(() => {
+      this._zone.run(() => {
         this.performLogout();
       });
       return;
@@ -420,9 +521,9 @@ export class AuthService {
     if (warningAt && Date.now() < warningAt) {
       const delay = warningAt - Date.now();
       this.warningTimeout = setTimeout(() => {
-        this.zone.run(() => {
+        this._zone.run(() => {
           // Send 0 to signal that the dialog should open immediately
-          this.warningAnnouncedSubject.next(0);
+          this._warningAnnouncedSubject.next(0);
         });
       }, delay);
     }
@@ -431,7 +532,7 @@ export class AuthService {
     if (expiresAt && Date.now() < expiresAt) {
       const delay = expiresAt - Date.now();
       this.logoutTimeout = setTimeout(() => {
-        this.zone.run(() => {
+        this._zone.run(() => {
           this.performLogout();
         });
       }, delay);

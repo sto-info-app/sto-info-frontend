@@ -36,55 +36,55 @@ export class DashboardComponent implements OnInit, OnDestroy {
   userGreeting = '';
   accountsCount = 0;
 
-  private readonly stoAccountService = inject(StoAccountService);
-  private readonly dashboardService = inject(DashboardService);
-  private readonly authService = inject(AuthService);
-  private readonly routingService = inject(RoutingService);
-  private readonly cdr = inject(ChangeDetectorRef);
-  private readonly destroy$ = new Subject<void>();
+  private readonly _stoAccountService = inject(StoAccountService);
+  private readonly _dashboardService = inject(DashboardService);
+  private readonly _authService = inject(AuthService);
+  private readonly _routingService = inject(RoutingService);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _destroy$ = new Subject<void>();
 
   ngOnInit() {
     this.isUserLoading = true;
     this.userLoadError = '';
 
-    this.dashboardService
+    this._dashboardService
       .getUser()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: user => {
-          if (user.isAccountDisabled) this.authService.performLogout();
+          if (user.isAccountDisabled) this._authService.performLogout();
 
           this.user = user;
           this.isUserLoading = false;
           this.userLoadError = '';
           this.userGreeting = this.displayWelcomeText();
-          this.cdr.detectChanges();
+          this._cdr.detectChanges();
         },
         error: err => {
           this.isUserLoading = false;
           this.userLoadError = 'Failed to load dashboard data.';
-          this.cdr.detectChanges();
+          this._cdr.detectChanges();
           console.warn('Failed to load user data', err);
         },
       });
 
-    this.stoAccountService
+    this._stoAccountService
       .getAccounts()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: accounts => {
           this.accountsCount = accounts.length;
-          this.cdr.detectChanges();
+          this._cdr.detectChanges();
         },
         error: () => {
-          this.cdr.detectChanges();
+          this._cdr.detectChanges();
         },
       });
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 
   displayWelcomeText(): string {
@@ -106,7 +106,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   getRouteLink(route: string): string {
-    return this.routingService.getLink(route);
+    return this._routingService.getLink(route);
   }
 
   onProfileImageError(event: Event): void {

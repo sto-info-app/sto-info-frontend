@@ -17,8 +17,8 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class AdminGuard implements CanActivate {
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
+  private readonly _authService = inject(AuthService);
+  private readonly _router = inject(Router);
 
   /**
    * Determines whether the route can be activated.
@@ -31,15 +31,15 @@ export class AdminGuard implements CanActivate {
     _route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
   ): boolean {
-    if (!this.authService.isTokenValid()) {
-      this.router.navigate(['/login'], {
+    if (!this._authService.isTokenValid()) {
+      this._router.navigate(['/login'], {
         queryParams: { returnUrl: state.url },
       });
       return false;
     }
 
-    if (!this.authService.isAdmin()) {
-      this.router.navigate(['/']);
+    if (!this._authService.isAdmin()) {
+      this._router.navigate(['/']);
       return false;
     }
 

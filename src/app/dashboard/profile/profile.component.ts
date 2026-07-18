@@ -15,6 +15,7 @@ import {
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { SRC_PHOTO_UNAVAILABLE_300PX } from 'src/app/shared/constants/app-image-assets.constants';
 import {
@@ -245,6 +246,43 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
         // Allow opening the dialog box again
         this.profilePicDialogRef = null;
+      });
+  }
+
+  /**
+   * Requests account closure for the authenticated user.
+   */
+  closeAccount(): void {
+    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
+      width: '75%',
+      data: {
+        title: 'Close Account',
+        message:
+          '<p>Are you sure you want to close your account?<br/>&nbsp;<br/>You will be signed out, and your profile and STO data will be marked as deleted and removed permanently after the retention period.</p>',
+        confirmText: 'Close Account',
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(result => {
+        if (!result) {
+          return;
+        }
+
+        this._dashboardService
+          .closeAccount()
+          .pipe(takeUntil(this._destroy$))
+          .subscribe({
+            next: () => {
+              this._authService.performLogout();
+            },
+            error: err => {
+              console.warn('Failed to close account', err);
+            },
+          });
       });
   }
 

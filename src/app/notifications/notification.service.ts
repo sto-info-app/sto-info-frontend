@@ -39,16 +39,16 @@ import {
   providedIn: 'root',
 })
 export class NotificationService {
-  private readonly http = inject(HttpClient);
-  private readonly authService = inject(AuthService);
+  private readonly _http = inject(HttpClient);
+  private readonly _authService = inject(AuthService);
 
-  private readonly unreadCountSubject = new BehaviorSubject<number>(0);
+  private readonly _unreadCountSubject = new BehaviorSubject<number>(0);
   /** Emits the current unread notification count. */
-  public readonly unreadCount$ = this.unreadCountSubject.asObservable();
+  public readonly unreadCount$ = this._unreadCountSubject.asObservable();
 
-  private readonly bannersSubject = new BehaviorSubject<Banner[]>([]);
+  private readonly _bannersSubject = new BehaviorSubject<Banner[]>([]);
   /** Emits the currently active site banners, refreshed by app-state polling. */
-  public readonly banners$ = this.bannersSubject.asObservable();
+  public readonly banners$ = this._bannersSubject.asObservable();
 
   private appStatePollSub?: Subscription;
 
@@ -65,11 +65,11 @@ export class NotificationService {
    * @returns An observable of the app state.
    */
   getAppState(): Observable<AppState> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken() ?? {};
-    return this.http.get<AppState>(API_URLS.APP_STATE, httpOptions).pipe(
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken() ?? {};
+    return this._http.get<AppState>(API_URLS.APP_STATE, httpOptions).pipe(
       tap(state => {
-        this.bannersSubject.next(state.banners);
-        this.unreadCountSubject.next(state.unreadCount);
+        this._bannersSubject.next(state.banners);
+        this._unreadCountSubject.next(state.unreadCount);
       }),
     );
   }
@@ -107,7 +107,7 @@ export class NotificationService {
    * @returns An observable of the active banners.
    */
   getActiveBanners(): Observable<Banner[]> {
-    return this.http.get<Banner[]>(API_URLS.NOTIFICATIONS_BANNERS);
+    return this._http.get<Banner[]>(API_URLS.NOTIFICATIONS_BANNERS);
   }
 
   // ----- Inbox (authenticated) -----
@@ -119,7 +119,7 @@ export class NotificationService {
    * @returns An observable of the paginated inbox.
    */
   getInbox(query: InboxQuery = {}): Observable<PaginatedInbox> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
@@ -133,9 +133,9 @@ export class NotificationService {
     if (query.pageSize) {
       params = params.set('pageSize', String(query.pageSize));
     }
-    return this.http
+    return this._http
       .get<PaginatedInbox>(API_URLS.NOTIFICATIONS, { ...httpOptions, params })
-      .pipe(tap(result => this.unreadCountSubject.next(result.unreadCount)));
+      .pipe(tap(result => this._unreadCountSubject.next(result.unreadCount)));
   }
 
   /**
@@ -144,16 +144,16 @@ export class NotificationService {
    * @returns An observable of the unread-count response.
    */
   refreshUnreadCount(): Observable<UnreadCountResponse> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http
+    return this._http
       .get<UnreadCountResponse>(
         API_URLS.NOTIFICATIONS_UNREAD_COUNT,
         httpOptions,
       )
-      .pipe(tap(result => this.unreadCountSubject.next(result.unreadCount)));
+      .pipe(tap(result => this._unreadCountSubject.next(result.unreadCount)));
   }
 
   /**
@@ -163,16 +163,16 @@ export class NotificationService {
    * @returns An observable that completes when marked.
    */
   markRead(id: string): Observable<void> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http
+    return this._http
       .post<void>(`${API_URLS.NOTIFICATIONS}/${id}/read`, {}, httpOptions)
       .pipe(
         tap(() =>
-          this.unreadCountSubject.next(
-            Math.max(0, this.unreadCountSubject.value - 1),
+          this._unreadCountSubject.next(
+            Math.max(0, this._unreadCountSubject.value - 1),
           ),
         ),
       );
@@ -185,15 +185,15 @@ export class NotificationService {
    * @returns An observable that completes when marked.
    */
   markUnread(id: string): Observable<void> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http
+    return this._http
       .delete<void>(`${API_URLS.NOTIFICATIONS}/${id}/read`, httpOptions)
       .pipe(
         tap(() =>
-          this.unreadCountSubject.next(this.unreadCountSubject.value + 1),
+          this._unreadCountSubject.next(this._unreadCountSubject.value + 1),
         ),
       );
   }
@@ -204,15 +204,15 @@ export class NotificationService {
    * @returns An observable of the number marked.
    */
   markAllRead(): Observable<{ marked: number }> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http
+    return this._http
       .post<{
         marked: number;
       }>(API_URLS.NOTIFICATIONS_READ_ALL, {}, httpOptions)
-      .pipe(tap(() => this.unreadCountSubject.next(0)));
+      .pipe(tap(() => this._unreadCountSubject.next(0)));
   }
 
   // ----- Admin -----
@@ -223,11 +223,11 @@ export class NotificationService {
    * @returns An observable of all notifications.
    */
   getAllNotificationsForAdmin(): Observable<AppNotification[]> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.get<AppNotification[]>(
+    return this._http.get<AppNotification[]>(
       API_URLS.NOTIFICATIONS_ADMIN,
       httpOptions,
     );
@@ -242,11 +242,11 @@ export class NotificationService {
   createNotification(
     payload: CreateNotificationRequest,
   ): Observable<AppNotification> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.post<AppNotification>(
+    return this._http.post<AppNotification>(
       API_URLS.NOTIFICATIONS_ADMIN,
       payload,
       httpOptions,
@@ -260,11 +260,11 @@ export class NotificationService {
    * @returns An observable that completes when deleted.
    */
   deleteNotification(id: string): Observable<void> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.delete<void>(
+    return this._http.delete<void>(
       `${API_URLS.NOTIFICATIONS_ADMIN}/${id}`,
       httpOptions,
     );
@@ -276,11 +276,11 @@ export class NotificationService {
    * @returns An observable of all banners.
    */
   getAllBannersForAdmin(): Observable<Banner[]> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.get<Banner[]>(
+    return this._http.get<Banner[]>(
       API_URLS.NOTIFICATIONS_ADMIN_BANNERS,
       httpOptions,
     );
@@ -293,11 +293,11 @@ export class NotificationService {
    * @returns An observable of the banner.
    */
   getBannerByIdForAdmin(id: string): Observable<Banner> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.get<Banner>(
+    return this._http.get<Banner>(
       `${API_URLS.NOTIFICATIONS_ADMIN_BANNERS}/${id}`,
       httpOptions,
     );
@@ -310,11 +310,11 @@ export class NotificationService {
    * @returns An observable of the created banner.
    */
   createBanner(payload: CreateBannerRequest): Observable<Banner> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.post<Banner>(
+    return this._http.post<Banner>(
       API_URLS.NOTIFICATIONS_ADMIN_BANNERS,
       payload,
       httpOptions,
@@ -329,11 +329,11 @@ export class NotificationService {
    * @returns An observable of the updated banner.
    */
   updateBanner(id: string, payload: UpdateBannerRequest): Observable<Banner> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.patch<Banner>(
+    return this._http.patch<Banner>(
       `${API_URLS.NOTIFICATIONS_ADMIN_BANNERS}/${id}`,
       payload,
       httpOptions,
@@ -347,11 +347,11 @@ export class NotificationService {
    * @returns An observable that completes when deleted.
    */
   deleteBanner(id: string): Observable<void> {
-    const httpOptions = this.authService.getHttpOptionsWithAccessToken();
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this.http.delete<void>(
+    return this._http.delete<void>(
       `${API_URLS.NOTIFICATIONS_ADMIN_BANNERS}/${id}`,
       httpOptions,
     );
