@@ -26,9 +26,8 @@ import {
   CharacterReputationProgress,
   CharacterReputationSummary,
 } from '../models/character-reputation.model';
-import { CharacterService } from '../services/character.service';
 import { CharacterReputationService } from '../services/character-reputation.service';
-import { StoAccountService } from '../services/sto-account.service';
+import { HandleResolverService } from '../services/handle-resolver.service';
 
 @Component({
   selector: 'app-character-reputations',
@@ -98,8 +97,7 @@ export class CharacterReputationsComponent implements OnInit, OnDestroy {
   });
 
   private readonly _route = inject(ActivatedRoute);
-  private readonly _stoAccountService = inject(StoAccountService);
-  private readonly _characterService = inject(CharacterService);
+  private readonly _handleResolver = inject(HandleResolverService);
   private readonly _reputationService = inject(CharacterReputationService);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _destroy$ = new Subject<void>();
@@ -133,48 +131,17 @@ export class CharacterReputationsComponent implements OnInit, OnDestroy {
     handle: string,
     characterHandle: string,
   ): void {
-    this._stoAccountService
-      .getAccounts()
+    this._handleResolver
+      .resolveCharacter(handle, characterHandle)
       .pipe(takeUntil(this._destroy$))
       .subscribe({
-        next: accounts => {
-          const account = accounts.find(a => a.handle === handle) || null;
-          if (!account) {
-            this.isLoading = false;
-            this.errorMessage = 'Account not found';
-            this._cdr.detectChanges();
-            return;
-          }
-          this.resolveCharacter(account.id, characterHandle);
-        },
-        error: () => {
-          this.isLoading = false;
-          this.errorMessage = 'Failed to load account details';
-          this._cdr.detectChanges();
-        },
-      });
-  }
-
-  private resolveCharacter(accountId: string, characterHandle: string): void {
-    this._characterService
-      .getCharactersByAccount(accountId)
-      .pipe(takeUntil(this._destroy$))
-      .subscribe({
-        next: characters => {
-          const character =
-            characters.find(c => c.handle === characterHandle) || null;
-          if (!character) {
-            this.isLoading = false;
-            this.errorMessage = 'Character not found';
-            this._cdr.detectChanges();
-            return;
-          }
+        next: character => {
           this.characterId = character.id;
           this.initialLoad();
         },
-        error: () => {
+        error: (err: Error) => {
           this.isLoading = false;
-          this.errorMessage = 'Failed to load account characters';
+          this.errorMessage = err.message;
           this._cdr.detectChanges();
         },
       });

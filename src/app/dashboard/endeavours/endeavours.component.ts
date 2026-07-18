@@ -27,8 +27,8 @@ import {
   EndeavourSortBy,
   EndeavourSummary,
 } from '../models/endeavour.model';
-import { StoAccountService } from '../services/sto-account.service';
 import { EndeavourService } from '../services/endeavour.service';
+import { HandleResolverService } from '../services/handle-resolver.service';
 
 @Component({
   selector: 'app-endeavours',
@@ -99,7 +99,7 @@ export class EndeavoursComponent implements OnInit, OnDestroy {
   });
 
   private readonly _route = inject(ActivatedRoute);
-  private readonly _stoAccountService = inject(StoAccountService);
+  private readonly _handleResolver = inject(HandleResolverService);
   private readonly _endeavourService = inject(EndeavourService);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _destroy$ = new Subject<void>();
@@ -120,24 +120,17 @@ export class EndeavoursComponent implements OnInit, OnDestroy {
   }
 
   private resolveAccountAndLoad(handle: string): void {
-    this._stoAccountService
-      .getAccounts()
+    this._handleResolver
+      .resolveAccount(handle)
       .pipe(takeUntil(this._destroy$))
       .subscribe({
-        next: accounts => {
-          const account = accounts.find(a => a.handle === handle) || null;
-          if (!account) {
-            this.isLoading = false;
-            this.errorMessage = 'Account not found';
-            this._cdr.detectChanges();
-            return;
-          }
+        next: account => {
           this.accountId = account.id;
           this.initialLoad();
         },
-        error: () => {
+        error: (err: Error) => {
           this.isLoading = false;
-          this.errorMessage = 'Failed to load account details';
+          this.errorMessage = err.message;
           this._cdr.detectChanges();
         },
       });
