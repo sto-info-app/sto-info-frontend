@@ -52,6 +52,9 @@ export const API_URLS = {
   // Endeavours
   ENDEAVOUR: apiUrl + '/endeavour',
 
+  // Reputations
+  REPUTATION: apiUrl + '/reputation',
+
   // Stats
   STATS: apiUrl + '/stats',
 

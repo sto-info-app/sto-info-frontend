@@ -6,11 +6,13 @@ import {
   OnDestroy,
   OnInit,
   inject,
+  signal,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EMPTY, Subject, catchError, switchMap, takeUntil } from 'rxjs';
+import { CharacterReputationsComponent } from 'src/app/dashboard/character-reputations/character-reputations.component';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
@@ -29,6 +31,9 @@ import {
 } from 'src/app/shared/utils/sto-handle.utils';
 import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.component';
 
+/** Identifiers for the tabs available on the character detail page. */
+export type CharacterTab = 'overview' | 'reputations';
+
 @Component({
   selector: 'app-character-detail',
   templateUrl: './character-detail.component.html',
@@ -41,6 +46,7 @@ import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.co
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     MatButtonModule,
+    CharacterReputationsComponent,
   ],
 })
 export class CharacterDetailComponent implements OnInit, OnDestroy {
@@ -49,6 +55,22 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
   isLoading = true;
   errorMessage = '';
   imageFailed = false;
+
+  /** Tabs shown in the LCARS tab strip. Add new tracking tabs here. */
+  readonly tabs: readonly { id: CharacterTab; label: string }[] = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'reputations', label: 'Reputations' },
+  ];
+
+  /** Currently selected tab. */
+  readonly activeTab = signal<CharacterTab>('overview');
+
+  /**
+   * Whether the reputations tab has been opened at least once. Used to lazily
+   * mount the reputations component and then keep it alive (hidden) so its data
+   * is only fetched once rather than on every tab switch.
+   */
+  readonly reputationsOpened = signal(false);
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
@@ -62,6 +84,12 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
   public readonly unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
   ngOnInit(): void {
+    // Keep the active tab in sync with the ?tab= query parameter so tabs are
+    // bookmarkable and the browser back/forward buttons work as expected.
+    this._route.queryParamMap
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(queryParams => this.applyTabFromUrl(queryParams.get('tab')));
+
     this._route.params
       .pipe(
         takeUntil(this._destroy$),
@@ -217,6 +245,50 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
 
   getAccountLink(): string[] {
     return ['/dashboard/accounts', encodeStoHandle(this.accountHandle)];
+  }
+
+  /**
+   * Switches the active tab and reflects it in the URL via the ?tab= query
+   * parameter so the section can be bookmarked and returned to directly. The
+   * default (overview) tab drops the parameter to keep the URL clean.
+   *
+   * @param tab - The tab to activate.
+   * @returns void
+   */
+  selectTab(tab: CharacterTab): void {
+    this.setActiveTab(tab);
+    this._router.navigate([], {
+      relativeTo: this._route,
+      queryParams: { tab: tab === 'overview' ? null : tab },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  /**
+   * Applies the tab indicated by the URL, falling back to overview when the
+   * value is missing or unrecognised.
+   *
+   * @param tab - The raw ?tab= value from the URL.
+   * @returns void
+   */
+  private applyTabFromUrl(tab: string | null): void {
+    const isKnown = this.tabs.some(t => t.id === tab);
+    this.setActiveTab(isKnown ? (tab as CharacterTab) : 'overview');
+  }
+
+  /**
+   * Updates the active tab signal, lazily marking the reputations tab as opened
+   * so it is mounted once and then kept alive.
+   *
+   * @param tab - The tab to activate.
+   * @returns void
+   */
+  private setActiveTab(tab: CharacterTab): void {
+    if (tab === 'reputations') {
+      this.reputationsOpened.set(true);
+    }
+    this.activeTab.set(tab);
+    this._cdr.markForCheck();
   }
 
   getRouteLink(route: string): string {

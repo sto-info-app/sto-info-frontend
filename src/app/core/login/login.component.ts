@@ -107,8 +107,11 @@ export class LoginComponent implements OnDestroy {
 
         // Get the URL the user was originally trying to access
         const returnUrl = this._route.snapshot.queryParamMap.get('returnUrl');
-        // If there's a return URL, navigate to it. Otherwise, navigate to a default page.
-        this._router.navigate([returnUrl ?? this.appLoggedInHome]);
+        // Navigate to the return URL if present, otherwise the default page.
+        // navigateByUrl parses the full URL string so any query params or
+        // fragment on the return URL are preserved rather than being encoded
+        // into a single path segment (as router.navigate([...]) would do).
+        this._router.navigateByUrl(returnUrl ?? this.appLoggedInHome);
       },
       error: (error: HttpErrorResponse) => {
         let errMessage: string;
