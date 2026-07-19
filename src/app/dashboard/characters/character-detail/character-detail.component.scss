@@ -131,22 +131,35 @@
     display: flex;
     flex-direction: column;
     gap: 0;
+  }
+}
 
-    #character-image {
-      display: flex;
+#character-image {
+  display: flex;
 
-      .pics-right {
-        margin: 10px 30px;
-        width: 100%;
+  .pics-right {
+    // Override legacy global float layout to keep photo/nav stacked reliably.
+    float: none;
+    margin: 10px 30px;
+    width: 100%;
 
-        img {
-          min-width: 100%;
-          max-width: 100%;
-          height: auto;
-        }
-      }
+    img {
+      display: block;
+      min-width: 100%;
+      max-width: 100%;
+      height: auto;
     }
   }
+}
+
+[repAsidePhoto],
+[repAsideNav] {
+  display: block;
+  width: 100%;
+}
+
+[repAsideNav] {
+  clear: both;
 }
 
 .character-details-content {
