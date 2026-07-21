@@ -252,6 +252,52 @@
           </app-character-reputations>
         </section>
       }
+
+      <!-- Research & Development (lazily mounted, then kept alive) -->
+      @if (rdOpened()) {
+        <section
+          class="tab-panel"
+          role="tabpanel"
+          aria-label="Research and Development"
+          [hidden]="activeTab() !== 'rd'">
+          <app-character-rd [embedded]="true">
+            <div rdAsidePhoto>
+              <ng-container
+                [ngTemplateOutlet]="photoPanel"
+                [ngTemplateOutletContext]="{ editable: false }"></ng-container>
+            </div>
+            <div rdAsideNav>
+              <div class="lcars-text-bar small-lcars-bar-gap">
+                <span>Navigation</span>
+              </div>
+              <div class="buttons">
+                <button
+                  type="button"
+                  class="full-width-btn-link gold"
+                  (click)="selectTab('overview')">
+                  Overview
+                </button>
+                <a
+                  [routerLink]="getAccountLink()"
+                  [fragment]="'characters-section'"
+                  class="full-width-btn-link peach"
+                  >Captain List</a
+                >
+                <a
+                  [routerLink]="getAccountLink()"
+                  class="full-width-btn-link sunflower"
+                  >Account Profile</a
+                >
+                <a
+                  [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+                  class="full-width-btn-link bluey"
+                  >All Accounts</a
+                >
+              </div>
+            </div>
+          </app-character-rd>
+        </section>
+      }
     </div>
   </div>
 } @else if (!isLoading && errorMessage) {

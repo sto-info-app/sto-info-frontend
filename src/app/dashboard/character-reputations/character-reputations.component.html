@@ -110,7 +110,7 @@
             }
 
             <div class="reputation-segments">
-              @if (savingReputationId() === item.reputationId) {
+              @if (savingItemId() === item.reputationId) {
                 <span class="segments-saving">
                   <i class="fas fa-spinner fa-spin saving-spinner"></i>
                 </span>
@@ -162,7 +162,13 @@
     </div>
     @if (!filtersCollapsed) {
       <div class="filter-section">
+        <label
+          class="sr-only"
+          for="reputation-search"
+          >Search reputations</label
+        >
         <input
+          id="reputation-search"
           type="text"
           class="filter-input"
           placeholder="Search reputations…"
