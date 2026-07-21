@@ -438,6 +438,18 @@ describe('CharacterRdComponent', () => {
     );
   });
 
+  it('should fall back to transparent for malformed accent colours', () => {
+    const withAccent = (accentColor: string): CharacterRdProgress => ({
+      ...mockProgress[0],
+      school: { ...mockProgress[0].school, accentColor },
+    });
+
+    // Wrong length (neither 3 nor 6 hex digits)
+    expect(component.accentTint(withAccent('#ff00'))).toBe('transparent');
+    // Correct length but not parseable as hex
+    expect(component.accentTint(withAccent('#zzzzzz'))).toBe('transparent');
+  });
+
   it('should track icon load failures and gate icon display', () => {
     expect(component.showIcon(mockProgress[0])).toBe(true);
     // school2 has no iconUrl

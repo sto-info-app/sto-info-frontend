@@ -3,14 +3,14 @@
 // Star Trek Online item-rarity colours, exposed for reuse across modules and
 // components (R&D schools, equipment, inventory, drop tables, …). Colours are
 // sourced from the single palette in `_lcars-variables.scss`.
-//
+
 // Usage:
 //   * Add `.rarity-<slug>` to an element to expose the rarity colour as the
 //     `--sto-rarity-color` custom property for that element and its descendants,
 //     then consume it in component SCSS, e.g. `border-color: var(--sto-rarity-color);`.
 //   * Or use the `.go-rarity-<slug>` helper to colour text directly, matching
 //     the `.go-*` LCARS colour convention.
-//
+
 // Slugs: common, uncommon, rare, very-rare, ultra-rare, epic.
 
 $sto-rarities: (
