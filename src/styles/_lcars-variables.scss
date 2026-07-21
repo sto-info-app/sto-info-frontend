@@ -37,5 +37,18 @@ $faction-federation: #005a9c;
 $faction-klingon: #8b0000;
 $faction-undecided: #555;
 
+// STO Item Rarity Colors
+// Single source of truth for the Star Trek Online item-rarity palette. Exposed
+// globally as CSS custom properties and utility classes by
+// `sto-rarity-colours.scss`, and available to any component that tints by
+// rarity (R&D schools, equipment, inventory, drop tables, …).
+// Values match the STO wiki rarity classes: https://stowiki.net/wiki/Quality
+$rarity-common: #ffffff;
+$rarity-uncommon: #00cc00;
+$rarity-rare: #0099ff;
+$rarity-very-rare: #a245b9;
+$rarity-ultra-rare: #6d65bc;
+$rarity-epic: #ffd700;
+
 // Font Variables
 $font-antonio: 'Antonio', 'Arial Narrow', sans-serif;

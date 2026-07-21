@@ -1,0 +1,275 @@
+@use 'lcars-variables' as vars;
+
+#rd-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+#rd-main-column {
+  flex: 2;
+  flex-basis: 69%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+#rd-side-column {
+  flex: 1;
+  flex-basis: 30%;
+}
+
+.character-subtitle {
+  color: var(--lcars-text-muted, #aaa);
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+// -- Summary bar --------------------------------------------------------------
+
+.rd-summary-bar {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-evenly;
+  background: var(--lcars-panel-bg, #1a1a2e);
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.summary-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+.summary-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: vars.$lcars-sunflower;
+}
+
+.summary-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgb(255 255 255 / 55%);
+}
+
+// -- School list --------------------------------------------------------------
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.rd-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rd-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem 0.75rem 0.55rem;
+  border-radius: 4px;
+
+  // border-left colour and background tint are bound inline per school
+  border-left: 4px solid vars.$lcars-gold;
+  background: rgba(vars.$lcars-gold, 0.07);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+// -- School header row --------------------------------------------------------
+
+.rd-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.rd-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--lcars-text, #eee);
+}
+
+.rd-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  vertical-align: middle;
+}
+
+.rd-icon-fa {
+  width: 24px;
+  text-align: center;
+  font-size: 1rem;
+  flex: 0 0 auto;
+}
+
+.rd-info-btn {
+  display: inline-block;
+  width: auto;
+  height: auto;
+  margin: 0;
+  background: none;
+  border: none;
+  padding: 0 0 0 0.25rem;
+  cursor: pointer;
+  color: rgb(255 255 255 / 30%);
+  font-size: 0.9rem;
+  line-height: inherit;
+  vertical-align: top;
+  transition: color 0.15s;
+
+  &:hover,
+  &.active {
+    color: vars.$lcars-perano;
+  }
+}
+
+.rd-description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--lcars-text-muted, #aaa);
+}
+
+.rd-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.rd-quality {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--sto-rarity-color, vars.$lcars-gold);
+  border-radius: 999px;
+
+  // colour comes from the core `.rarity-<slug>` class applied in the template
+  color: var(--sto-rarity-color, vars.$lcars-gold);
+}
+
+.rd-level-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: vars.$lcars-sunflower;
+}
+
+// -- Level bar (click / keyboard slider) --------------------------------------
+
+.rd-progress-track {
+  position: relative;
+  height: 18px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 12%);
+  overflow: visible;
+  cursor: pointer;
+  transition: filter 0.12s ease, box-shadow 0.12s ease;
+
+  &:hover {
+    filter: brightness(1.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-perano;
+    outline-offset: 2px;
+  }
+
+  &.saving {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+}
+
+.rd-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.2s ease;
+  pointer-events: none;
+
+  // Semi-transparent so the rarity milestone circles sitting on top of the
+  // filled portion stay clearly visible against it.
+  // background-color is bound inline from the school accent.
+  opacity: 0.5;
+}
+
+// Thin ticks marking each individual level's click position.
+.rd-level-tick {
+  position: absolute;
+  top: 50%;
+  width: 1px;
+  height: 55%;
+  background: rgb(255 255 255 / 30%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+
+  &.reached {
+    background: rgb(255 255 255 / 55%);
+  }
+}
+
+// Distinct round markers for the rarity milestone levels (5/10/15/20). The
+// rarity colour comes from the core `.rarity-<slug>` class applied per marker:
+// the border is always the rarity colour; the fill and glow switch on once that
+// milestone level is reached.
+.rd-milestone {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--lcars-panel-bg, #1a1a2e);
+  border: 2px solid var(--sto-rarity-color, rgb(255 255 255 / 55%));
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+
+  &.reached {
+    background: var(--sto-rarity-color, #fff);
+    box-shadow: 0 0 5px var(--sto-rarity-color, rgb(255 255 255 / 60%));
+  }
+}
+
+.saving-spinner {
+  color: vars.$lcars-sunflower;
+  font-size: 0.85rem;
+}
+
+// -- Responsive ----------------------------------------------------------------
+
+@media (width <= 768px) {
+  #rd-container {
+    flex-direction: column;
+  }
+
+  #rd-side-column {
+    flex-basis: auto;
+    width: 100%;
+  }
+}
