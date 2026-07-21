@@ -245,7 +245,7 @@ describe('CharacterRdComponent', () => {
       'school1',
       15,
     );
-    expect(component.savingSchoolId()).toBeNull();
+    expect(component.savingItemId()).toBeNull();
   });
 
   it('should clamp level to the valid range and skip no-op updates', () => {
@@ -274,82 +274,16 @@ describe('CharacterRdComponent', () => {
     );
   });
 
-  it('should increment and decrement levels', () => {
+  it('should set the level from the native range input', () => {
     component.characterId = 'char1';
     const setSpy = jest.spyOn(component, 'setLevel');
 
-    component.incrementLevel(mockProgress[0]);
-    expect(setSpy).toHaveBeenCalledWith(mockProgress[0], 13);
+    const input = { value: '15' } as HTMLInputElement;
+    component.onRangeChange(mockProgress[0], {
+      target: input,
+    } as unknown as Event);
 
-    component.decrementLevel(mockProgress[0]);
-    expect(setSpy).toHaveBeenCalledWith(mockProgress[0], 11);
-  });
-
-  it('should set the level from a click position on the bar', () => {
-    component.characterId = 'char1';
-    const setSpy = jest.spyOn(component, 'setLevel');
-
-    const track = {
-      getBoundingClientRect: () => ({ left: 100, width: 200 }),
-    } as unknown as HTMLElement;
-
-    // Click at 75% along the bar -> 0.75 * 20 = 15
-    component.onTrackClick(mockProgress[0], {
-      currentTarget: track,
-      clientX: 250,
-    } as unknown as MouseEvent);
     expect(setSpy).toHaveBeenCalledWith(mockProgress[0], 15);
-  });
-
-  it('should ignore clicks when the bar has no measurable width', () => {
-    component.characterId = 'char1';
-    const setSpy = jest.spyOn(component, 'setLevel');
-
-    const track = {
-      getBoundingClientRect: () => ({ left: 0, width: 0 }),
-    } as unknown as HTMLElement;
-
-    component.onTrackClick(mockProgress[0], {
-      currentTarget: track,
-      clientX: 50,
-    } as unknown as MouseEvent);
-    expect(setSpy).not.toHaveBeenCalled();
-  });
-
-  it('should control the level from the keyboard', () => {
-    component.characterId = 'char1';
-    const setSpy = jest.spyOn(component, 'setLevel');
-    const makeEvent = (key: string) => {
-      const preventDefault = jest.fn();
-      return {
-        event: { key, preventDefault } as unknown as KeyboardEvent,
-        preventDefault,
-      };
-    };
-
-    const right = makeEvent('ArrowRight');
-    component.onTrackKeydown(mockProgress[0], right.event);
-    expect(setSpy).toHaveBeenCalledWith(mockProgress[0], 13);
-    expect(right.preventDefault).toHaveBeenCalled();
-
-    const left = makeEvent('ArrowLeft');
-    component.onTrackKeydown(mockProgress[0], left.event);
-    expect(setSpy).toHaveBeenCalledWith(mockProgress[0], 11);
-
-    const home = makeEvent('Home');
-    component.onTrackKeydown(mockProgress[0], home.event);
-    expect(setSpy).toHaveBeenCalledWith(mockProgress[0], 0);
-
-    const end = makeEvent('End');
-    component.onTrackKeydown(mockProgress[0], end.event);
-    expect(setSpy).toHaveBeenCalledWith(mockProgress[0], 20);
-
-    // An unrelated key is ignored and not prevented
-    setSpy.mockClear();
-    const other = makeEvent('Enter');
-    component.onTrackKeydown(mockProgress[0], other.event);
-    expect(setSpy).not.toHaveBeenCalled();
-    expect(other.preventDefault).not.toHaveBeenCalled();
   });
 
   it('should expose intermediate level ticks excluding rarity milestones', () => {
@@ -421,7 +355,7 @@ describe('CharacterRdComponent', () => {
 
     component.setLevel(mockProgress[0], 5);
 
-    expect(component.savingSchoolId()).toBeNull();
+    expect(component.savingItemId()).toBeNull();
   });
 
   it('should resolve accent colour and fall back when absent', () => {

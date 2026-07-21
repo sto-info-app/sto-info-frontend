@@ -271,7 +271,7 @@ describe('CharacterReputationsComponent', () => {
       'rep1',
       5,
     );
-    expect(component.savingReputationId()).toBeNull();
+    expect(component.savingItemId()).toBeNull();
   });
 
   it('should tolerate summary refresh errors', () => {
@@ -292,7 +292,7 @@ describe('CharacterReputationsComponent', () => {
 
     component.updateTier(mockProgress[0], 5);
 
-    expect(component.savingReputationId()).toBeNull();
+    expect(component.savingItemId()).toBeNull();
   });
 
   it('should support rangeArray/selectTier helper logic', () => {

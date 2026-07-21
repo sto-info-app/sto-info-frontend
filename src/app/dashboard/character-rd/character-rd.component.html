@@ -101,7 +101,7 @@
                 <span class="rd-level-value"
                   >Level {{ item.currentLevel }} / {{ maxLevel }}</span
                 >
-                @if (savingSchoolId() === item.schoolId) {
+                @if (savingItemId() === item.schoolId) {
                   <i
                     class="fas fa-spinner fa-spin saving-spinner"
                     aria-hidden="true"></i>
@@ -117,31 +117,21 @@
               </span>
             }
 
-            <!-- Level bar: click or use arrow keys to set the level -->
+            <!-- Level bar: a native range input drives clicks, drags and arrow keys -->
             <div
               class="rd-progress-track"
-              role="slider"
-              tabindex="0"
-              [class.saving]="savingSchoolId() === item.schoolId"
-              [attr.aria-label]="item.school.name + ' level'"
-              [attr.aria-valuemin]="0"
-              [attr.aria-valuemax]="maxLevel"
-              [attr.aria-valuenow]="item.currentLevel"
-              [attr.aria-valuetext]="
-                'Level ' + item.currentLevel + ' of ' + maxLevel
-              "
-              (click)="onTrackClick(item, $event)"
-              (keydown)="onTrackKeydown(item, $event)">
+              [class.saving]="savingItemId() === item.schoolId">
               <div
                 class="rd-progress-fill"
                 [style.width.%]="item.completionPercentage"
-                [style.background-color]="accent(item)"></div>
+                [style.background-color]="accent(item)"
+                aria-hidden="true"></div>
               @for (level of levelTicks; track level) {
                 <span
                   class="rd-level-tick"
                   [class.reached]="item.currentLevel >= level"
                   [style.left.%]="(level / maxLevel) * 100"
-                  [title]="'Level ' + level"></span>
+                  aria-hidden="true"></span>
               }
               @for (milestone of qualityMilestones; track milestone.level) {
                 <span
@@ -149,10 +139,26 @@
                   [ngClass]="rarityClass(milestone.rarity)"
                   [class.reached]="item.currentLevel >= milestone.level"
                   [style.left.%]="(milestone.level / maxLevel) * 100"
-                  [title]="
-                    milestone.quality + ' at level ' + milestone.level
-                  "></span>
+                  aria-hidden="true"></span>
               }
+              <label
+                class="sr-only"
+                [for]="'rd-level-' + item.schoolId"
+                >{{ item.school.name }} level</label
+              >
+              <input
+                type="range"
+                class="rd-range-input"
+                [id]="'rd-level-' + item.schoolId"
+                min="0"
+                [max]="maxLevel"
+                step="1"
+                [value]="item.currentLevel"
+                [attr.aria-valuetext]="
+                  'Level ' + item.currentLevel + ' of ' + maxLevel
+                "
+                [title]="'Level ' + item.currentLevel + ' of ' + maxLevel"
+                (change)="onRangeChange(item, $event)" />
             </div>
           </div>
         }
@@ -183,7 +189,13 @@
     </div>
     @if (!filtersCollapsed) {
       <div class="filter-section">
+        <label
+          class="sr-only"
+          for="rd-school-search"
+          >Search schools</label
+        >
         <input
+          id="rd-school-search"
           type="text"
           class="filter-input"
           placeholder="Search schools…"
