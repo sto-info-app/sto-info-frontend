@@ -33,7 +33,7 @@ describe('LcarsLevelLockComponent', () => {
 
     expect(title.nativeElement.textContent).toContain('Reputations Locked');
     expect(message.nativeElement.textContent).toContain(
-      'Reputations unlocks at level 50',
+      'Reputations becomes available at level 50',
     );
     expect(message.nativeElement.textContent).toContain(
       'Seven is currently level 32',
