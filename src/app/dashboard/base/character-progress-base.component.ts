@@ -170,12 +170,18 @@ export abstract class CharacterProgressBaseComponent<
         next: character => {
           this.characterId = character.id;
           this.characterLevel.set(character.level ?? null);
+          this.errorMessage = '';
           // Below the unlock level there is nothing to show or track, so the
           // catalog and progress requests are skipped entirely.
           if (this.isLevelLocked()) {
+            this.progress.set([]);
+            this.summary.set(null);
             this.isLoading = false;
             this._cdr.detectChanges();
             return;
+          }
+          this.initialLoad();
+        }
           }
           this.initialLoad();
         },
