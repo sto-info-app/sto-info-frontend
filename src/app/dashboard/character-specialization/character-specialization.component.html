@@ -5,17 +5,18 @@
 <div id="spec-container">
   <div
     id="spec-main-column"
-    class="col">
+    class="col"
+  >
     @if (!isLoading && errorMessage) {
       <div class="error-container">
         <app-lcars-error-message
-          [message]="errorMessage"></app-lcars-error-message>
+          [message]="errorMessage"
+        ></app-lcars-error-message>
         <div class="buttons-row">
           <a
             class="lcars-btn-auto sunflower"
             [routerLink]="accountsLink"
-            >Back to Accounts</a
-          >
+          >Back to Accounts</a>
         </div>
       </div>
     }
@@ -35,7 +36,8 @@
         [requiredLevel]="unlockLevel"
         [currentLevel]="characterLevel()"
         [characterHandle]="characterHandle"
-        [editLink]="characterEditLink()"></app-lcars-level-lock>
+        [editLink]="characterEditLink()"
+      ></app-lcars-level-lock>
     }
 
     @if (!isLoading && !errorMessage && !isLevelLocked()) {
@@ -50,23 +52,21 @@
       @if (summary()) {
         <div class="spec-summary-bar">
           <div class="summary-stat">
-            <span class="summary-value"
-              >{{ summary()!.totalPoints }} /
-              {{ summary()!.maxPossiblePoints }}</span
-            >
+            <span class="summary-value">{{ summary()!.totalPoints }} /
+              {{ summary()!.maxPossiblePoints }}</span>
             <span class="summary-label">Points Spent</span>
           </div>
           <div class="summary-stat">
-            <span class="summary-value"
-              >{{ summary()!.overallCompletionPercentage }}%</span
-            >
+            <span class="summary-value">{{
+                summary()!.overallCompletionPercentage
+              }}%</span>
             <span class="summary-label">Overall</span>
           </div>
           <div class="summary-stat">
-            <span class="summary-value"
-              >{{ summary()!.completedSpecializations }} /
-              {{ summary()!.totalSpecializations }}</span
-            >
+            <span class="summary-value">{{
+                summary()!.completedSpecializations
+              }} /
+              {{ summary()!.totalSpecializations }}</span>
             <span class="summary-label">Completed</span>
           </div>
         </div>
@@ -78,14 +78,14 @@
           <label
             class="active-slot-label"
             for="spec-slot-primary"
-            >Primary</label
-          >
+          >Primary</label>
           <select
             id="spec-slot-primary"
             class="active-slot-select"
-            [disabled]="savingSlot() === 'primary'"
+            [disabled]='savingSlot() === "primary"'
             [ngModel]="primarySelectionId()"
-            (ngModelChange)="setSlot('primary', $event)">
+            (ngModelChange)='setSlot("primary", $event)'
+          >
             <option value="">None active</option>
             @for (option of primaryOptions(); track option.specializationId) {
               <option [value]="option.specializationId">
@@ -93,24 +93,25 @@
               </option>
             }
           </select>
-          @if (savingSlot() === 'primary') {
+          @if (savingSlot() === "primary") {
             <i
               class="fas fa-spinner fa-spin saving-spinner"
-              aria-hidden="true"></i>
+              aria-hidden="true"
+            ></i>
           }
         </div>
         <div class="active-slot secondary">
           <label
             class="active-slot-label"
             for="spec-slot-secondary"
-            >Secondary</label
-          >
+          >Secondary</label>
           <select
             id="spec-slot-secondary"
             class="active-slot-select"
-            [disabled]="savingSlot() === 'secondary'"
+            [disabled]='savingSlot() === "secondary"'
             [ngModel]="secondarySelectionId()"
-            (ngModelChange)="setSlot('secondary', $event)">
+            (ngModelChange)='setSlot("secondary", $event)'
+          >
             <option value="">None active</option>
             @for (option of secondaryOptions(); track option.specializationId) {
               <option [value]="option.specializationId">
@@ -118,10 +119,11 @@
               </option>
             }
           </select>
-          @if (savingSlot() === 'secondary') {
+          @if (savingSlot() === "secondary") {
             <i
               class="fas fa-spinner fa-spin saving-spinner"
-              aria-hidden="true"></i>
+              aria-hidden="true"
+            ></i>
           }
         </div>
       </div>
@@ -135,15 +137,15 @@
             class="cta-icon"
             (click)="toggleGroup(group.type)"
             [attr.aria-expanded]="!isGroupCollapsed(group.type)"
-            [title]="
-              isGroupCollapsed(group.type)
-                ? 'Show ' + group.title
-                : 'Hide ' + group.title
-            ">
+            [title]='isGroupCollapsed(group.type)
+  ? "Show " + group.title
+  : "Hide " + group.title'
+          >
             <i
               class="fas"
               [class.fa-caret-down]="isGroupCollapsed(group.type)"
-              [class.fa-caret-up]="!isGroupCollapsed(group.type)"></i>
+              [class.fa-caret-up]="!isGroupCollapsed(group.type)"
+            ></i>
           </button>
         </div>
 
@@ -154,43 +156,43 @@
                 class="spec-row"
                 [class.active-slot-row]="!!item.slot"
                 [style.border-left-color]="accent(item)"
-                [style.background]="accentTint(item)">
+                [style.background]="accentTint(item)"
+              >
                 <div class="spec-row-header">
                   <span class="spec-name">
                     @if (showIcon(item)) {
                       <img
                         class="spec-icon"
                         [src]="item.specialization.iconUrl"
-                        [alt]="item.specialization.name + ' icon'"
-                        (error)="onIconError(item.specializationId)" />
+                        [alt]='item.specialization.name + " icon"'
+                        (error)="onIconError(item.specializationId)"
+                      />
                     } @else {
                       <i
                         class="fas spec-icon-fa"
                         [ngClass]="specializationIcon(item)"
                         [style.color]="accent(item)"
-                        aria-hidden="true"></i>
+                        aria-hidden="true"
+                      ></i>
                     }
                     {{ item.specialization.name }}
                     @if (slotLabel(item)) {
                       <span
                         class="spec-slot-badge"
-                        [class.primary]="item.slot === 'primary'"
-                        [class.secondary]="item.slot === 'secondary'"
-                        >{{ slotLabel(item) }}</span
-                      >
+                        [class.primary]='item.slot === "primary"'
+                        [class.secondary]='item.slot === "secondary"'
+                      >{{ slotLabel(item) }}</span>
                     }
                     @if (item.specialization.description) {
                       <button
                         type="button"
                         class="spec-info-btn"
-                        [class.active]="
-                          expandedDescriptions().has(item.specializationId)
-                        "
+                        [class.active]="expandedDescriptions().has(item.specializationId)"
                         title="Toggle description"
-                        [attr.aria-expanded]="
-                          expandedDescriptions().has(item.specializationId)
-                        "
-                        (click)="toggleDescription(item.specializationId)">
+                        [attr.aria-label]='"Toggle description for " + item.specialization.name'
+                        [attr.aria-expanded]="expandedDescriptions().has(item.specializationId)"
+                        (click)="toggleDescription(item.specializationId)"
+                      >
                         <i class="fas fa-circle-info"></i>
                       </button>
                     }
@@ -199,21 +201,19 @@
                     @if (item.qualificationUnlocked) {
                       <span
                         class="spec-qualification"
-                        [title]="
-                          'Specialization Qualification unlocked at ' +
-                          qualificationPoints +
-                          ' points — this specialization can be trained on bridge officers'
-                        "
-                        ><i class="fas fa-graduation-cap"></i> Qualified</span
-                      >
+                        [title]='"Specialization Qualification unlocked at "
+  + qualificationPoints
+  + " points — this specialization can be trained on bridge officers"'
+                      ><i class="fas fa-graduation-cap"></i> Qualified</span>
                     }
-                    <span class="spec-points-value"
-                      >{{ item.pointsSpent }} / {{ maxPoints(item) }} pts</span
-                    >
+                    <span class="spec-points-value">{{ item.pointsSpent }} / {{
+                        maxPoints(item)
+                      }} pts</span>
                     @if (savingItemId() === item.specializationId) {
                       <i
                         class="fas fa-spinner fa-spin saving-spinner"
-                        aria-hidden="true"></i>
+                        aria-hidden="true"
+                      ></i>
                     }
                   </div>
                 </div>
@@ -227,46 +227,47 @@
                 <!-- Points bar: a native range input drives clicks, drags and arrow keys -->
                 <div
                   class="spec-progress-track"
-                  [class.saving]="savingItemId() === item.specializationId">
+                  [class.saving]="savingItemId() === item.specializationId"
+                >
                   <div
                     class="spec-progress-fill"
                     [style.width.%]="item.completionPercentage"
                     [style.background-color]="accent(item)"
-                    aria-hidden="true"></div>
+                    aria-hidden="true"
+                  >
+                  </div>
                   @for (point of pointTicks(item); track point) {
                     <span
                       class="spec-point-tick"
                       [class.reached]="item.pointsSpent >= point"
                       [style.left.%]="(point / maxPoints(item)) * 100"
-                      aria-hidden="true"></span>
+                      aria-hidden="true"
+                    ></span>
                   }
                   @if (qualificationMilestone(item); as milestone) {
                     <span
                       class="spec-milestone"
                       [class.reached]="item.pointsSpent >= milestone"
                       [style.left.%]="(milestone / maxPoints(item)) * 100"
-                      aria-hidden="true"></span>
+                      aria-hidden="true"
+                    ></span>
                   }
                   <label
                     class="sr-only"
-                    [for]="'spec-points-' + item.specializationId"
-                    >{{ item.specialization.name }} specialization points</label
-                  >
+                    [for]='"spec-points-" + item.specializationId'
+                  >{{ item.specialization.name }} specialization points</label>
                   <input
                     type="range"
                     class="spec-range-input"
-                    [id]="'spec-points-' + item.specializationId"
+                    [id]='"spec-points-" + item.specializationId'
                     min="0"
                     [max]="maxPoints(item)"
                     step="1"
                     [value]="item.pointsSpent"
-                    [attr.aria-valuetext]="
-                      item.pointsSpent + ' of ' + maxPoints(item) + ' points'
-                    "
-                    [title]="
-                      item.pointsSpent + ' of ' + maxPoints(item) + ' points'
-                    "
-                    (change)="onRangeChange(item, $event)" />
+                    [attr.aria-valuetext]='item.pointsSpent + " of " + maxPoints(item) + " points"'
+                    [title]='item.pointsSpent + " of " + maxPoints(item) + " points"'
+                    (change)="onRangeChange(item, $event)"
+                  />
                 </div>
               </div>
             }
@@ -283,7 +284,8 @@
   <!-- Side column -->
   <div
     id="spec-side-column"
-    class="col">
+    class="col"
+  >
     <!-- Filters are pointless while the tracker is level-locked. -->
     @if (!isLevelLocked()) {
       <div class="lcars-text-bar small-lcars-bar-gap">
@@ -292,11 +294,13 @@
           type="button"
           class="cta-icon"
           (click)="filtersCollapsed = !filtersCollapsed"
-          [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
+          [title]='filtersCollapsed ? "Show Filters" : "Hide Filters"'
+        >
           <i
             class="fas"
             [class.fa-caret-down]="filtersCollapsed"
-            [class.fa-caret-up]="!filtersCollapsed"></i>
+            [class.fa-caret-up]="!filtersCollapsed"
+          ></i>
         </button>
       </div>
       @if (!filtersCollapsed) {
@@ -304,15 +308,15 @@
           <label
             class="sr-only"
             for="spec-search"
-            >Search specializations</label
-          >
+          >Search specializations</label>
           <input
             id="spec-search"
             type="text"
             class="filter-input"
             placeholder="Search specializations…"
             [ngModel]="searchText()"
-            (ngModelChange)="searchText.set($event)" />
+            (ngModelChange)="searchText.set($event)"
+          />
 
           @if (completeCount() > 0) {
             <button
@@ -320,8 +324,9 @@
               class="full-width-btn-link"
               [class.tangerine]="!hideComplete()"
               [class.perano]="hideComplete()"
-              (click)="hideComplete.set(!hideComplete())">
-              {{ hideComplete() ? 'Show Completed' : 'Hide Completed' }}
+              (click)="hideComplete.set(!hideComplete())"
+            >
+              {{ hideComplete() ? "Show Completed" : "Hide Completed" }}
             </button>
           }
 
@@ -329,7 +334,8 @@
             <button
               type="button"
               class="full-width-btn-link clear-filters-btn"
-              (click)="clearFilters()">
+              (click)="clearFilters()"
+            >
               Clear Filters
             </button>
           }
@@ -337,7 +343,8 @@
           <button
             type="button"
             class="full-width-btn-link perano"
-            (click)="loadProgress()">
+            (click)="loadProgress()"
+          >
             <i class="fas fa-rotate-right"></i> Refresh
           </button>
         </div>
@@ -351,11 +358,13 @@
         class="cta-icon"
         (click)="toggleBriefing()"
         [attr.aria-expanded]="!briefingCollapsed()"
-        [title]="briefingCollapsed() ? 'Show Briefing' : 'Hide Briefing'">
+        [title]='briefingCollapsed() ? "Show Briefing" : "Hide Briefing"'
+      >
         <i
           class="fas"
           [class.fa-caret-down]="briefingCollapsed()"
-          [class.fa-caret-up]="!briefingCollapsed()"></i>
+          [class.fa-caret-up]="!briefingCollapsed()"
+        ></i>
       </button>
     </div>
     @if (!briefingCollapsed()) {
@@ -395,18 +404,15 @@
         <a
           [routerLink]="characterLink()"
           class="full-width-btn-link peach"
-          >Character</a
-        >
+        >Character</a>
         <a
           [routerLink]="accountLink()"
           class="full-width-btn-link sunflower"
-          >Account</a
-        >
+        >Account</a>
         <a
           [routerLink]="accountsLink"
           class="full-width-btn-link bluey"
-          >Accounts</a
-        >
+        >Accounts</a>
       </div>
     }
   </div>
