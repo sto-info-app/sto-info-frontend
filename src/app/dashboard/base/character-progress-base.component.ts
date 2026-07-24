@@ -1,9 +1,9 @@
 import {
   ChangeDetectorRef,
-  Directive,
-  Input,
   computed,
+  Directive,
   inject,
+  Input,
   OnDestroy,
   OnInit,
   signal,
@@ -179,9 +179,6 @@ export abstract class CharacterProgressBaseComponent<
             this.isLoading = false;
             this._cdr.detectChanges();
             return;
-          }
-          this.initialLoad();
-        }
           }
           this.initialLoad();
         },
