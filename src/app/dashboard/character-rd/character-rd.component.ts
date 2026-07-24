@@ -4,12 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsLevelLockComponent } from 'src/app/shared/components/lcars-level-lock/lcars-level-lock.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { CharacterProgressBaseComponent } from '../base/character-progress-base.component';
 import {
   RD_BASE_RARITY,
   RD_MAX_LEVEL,
   RD_QUALITY_MILESTONES,
+  RD_UNLOCK_LEVEL,
   CharacterRdProgress,
   CharacterRdSummary,
   StoRarity,
@@ -28,6 +30,7 @@ import { CharacterRdService } from '../services/character-rd.service';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsLevelLockComponent,
   ],
 })
 export class CharacterRdComponent extends CharacterProgressBaseComponent<
@@ -36,6 +39,8 @@ export class CharacterRdComponent extends CharacterProgressBaseComponent<
 > {
   readonly maxLevel = RD_MAX_LEVEL;
   readonly qualityMilestones = RD_QUALITY_MILESTONES;
+  readonly unlockLevel = RD_UNLOCK_LEVEL;
+  readonly featureName = 'Research & Development';
 
   /**
    * Every intermediate level (1..max-1) that is not a rarity milestone. Rendered

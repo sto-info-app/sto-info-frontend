@@ -1,0 +1,32 @@
+<div class="lcars-level-lock-container">
+  <div class="lcars-text-bar">
+    <span class="go-october-sunset">{{ featureName }} Locked</span>
+  </div>
+
+  <div class="lcars-level-lock-body">
+    <i
+      class="fas fa-lock lock-icon"
+      aria-hidden="true"
+    ></i>
+    <p class="lock-message">
+      {{ featureName }} unlocks at level {{ requiredLevel }}.
+      @if (currentLevel !== null) {
+        <br />{{ captainLabel }} is currently level {{ currentLevel }}.
+      }
+    </p>
+    <p class="lock-hint">
+      Already unlocked in game?<br />
+      Update the captain's level and this section will open up.
+    </p>
+    <div class="buttons-row">
+      <a
+        class="lcars-btn-auto sunflower"
+        [routerLink]="editLink"
+      >Edit Captain</a>
+    </div>
+  </div>
+
+  <div class="lcars-bar">
+    <div class="lcars-bar-inner"></div>
+  </div>
+</div>

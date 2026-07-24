@@ -4,6 +4,7 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import {
+  RD_UNLOCK_LEVEL,
   CharacterRdProgress,
   CharacterRdSummary,
 } from 'src/app/dashboard/models/character-rd.model';
@@ -140,6 +141,45 @@ describe('CharacterRdComponent', () => {
     expect(component.progress()).toHaveLength(2);
     expect(component.summary()).toEqual(mockSummary);
     expect(component.isLoading).toBe(false);
+  });
+
+  it('should lock the tracker and skip loading below the unlock level', () => {
+    characterServiceSpy.getCharactersByAccount.mockReturnValue(
+      of([{ ...mockCharacter, level: RD_UNLOCK_LEVEL - 1 } as Character]),
+    );
+
+    fixture.detectChanges();
+    routeParams$.next({ handle: 'Test~1234', characterHandle: 'Seven' });
+
+    expect(component.characterLevel()).toBe(RD_UNLOCK_LEVEL - 1);
+    expect(component.isLevelLocked()).toBe(true);
+    expect(rdServiceSpy.getProgress).not.toHaveBeenCalled();
+    expect(rdServiceSpy.getSummary).not.toHaveBeenCalled();
+    expect(component.isLoading).toBe(false);
+  });
+
+  it('should load normally once the unlock level is reached', () => {
+    characterServiceSpy.getCharactersByAccount.mockReturnValue(
+      of([{ ...mockCharacter, level: RD_UNLOCK_LEVEL } as Character]),
+    );
+
+    fixture.detectChanges();
+    routeParams$.next({ handle: 'Test~1234', characterHandle: 'Seven' });
+
+    expect(component.isLevelLocked()).toBe(false);
+    expect(rdServiceSpy.getProgress).toHaveBeenCalledWith('char1');
+  });
+
+  it('should link to the captain edit form for the level CTA', () => {
+    fixture.detectChanges();
+    routeParams$.next({ handle: 'Test~1234', characterHandle: 'Seven' });
+
+    expect(component.characterEditLink()).toEqual([
+      '/dashboard/accounts',
+      'Test~1234',
+      'Seven',
+      'edit',
+    ]);
   });
 
   it('should handle account-not-found', () => {
