@@ -32,9 +32,7 @@ describe('LcarsLevelLockComponent', () => {
     const message = fixture.debugElement.query(By.css('.lock-message'));
 
     expect(title.nativeElement.textContent).toContain('Reputations Locked');
-    expect(message.nativeElement.textContent).toContain(
-      'Reputations becomes available at level 50',
-    );
+    expect(message.nativeElement.textContent).toContain('Unlocked at level 50');
     expect(message.nativeElement.textContent).toContain(
       'Seven is currently level 32',
     );
