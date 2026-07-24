@@ -58,6 +58,9 @@ export const API_URLS = {
   // Research & Development
   RD: apiUrl + '/rd',
 
+  // Captain specializations
+  SPECIALIZATION: apiUrl + '/specialization',
+
   // Stats
   STATS: apiUrl + '/stats',
 

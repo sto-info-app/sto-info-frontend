@@ -1,0 +1,413 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+<div id="spec-container">
+  <div
+    id="spec-main-column"
+    class="col">
+    @if (!isLoading && errorMessage) {
+      <div class="error-container">
+        <app-lcars-error-message
+          [message]="errorMessage"></app-lcars-error-message>
+        <div class="buttons-row">
+          <a
+            class="lcars-btn-auto sunflower"
+            [routerLink]="accountsLink"
+            >Back to Accounts</a
+          >
+        </div>
+      </div>
+    }
+
+    <!-- Below the unlock level there is nothing to track yet, so the tracker is
+         replaced by a notice pointing at the captain's level. -->
+    @if (!isLoading && !errorMessage && isLevelLocked()) {
+      @if (!embedded) {
+        <h1>Captain Specializations</h1>
+        <p class="character-subtitle">
+          Character: {{ characterHandle }}&#64;{{ accountHandle }}
+        </p>
+      }
+
+      <app-lcars-level-lock
+        [featureName]="featureName"
+        [requiredLevel]="unlockLevel"
+        [currentLevel]="characterLevel()"
+        [characterHandle]="characterHandle"
+        [editLink]="characterEditLink()"></app-lcars-level-lock>
+    }
+
+    @if (!isLoading && !errorMessage && !isLevelLocked()) {
+      @if (!embedded) {
+        <h1>Captain Specializations</h1>
+        <p class="character-subtitle">
+          Character: {{ characterHandle }}&#64;{{ accountHandle }}
+        </p>
+      }
+
+      <!-- Summary -->
+      @if (summary()) {
+        <div class="spec-summary-bar">
+          <div class="summary-stat">
+            <span class="summary-value"
+              >{{ summary()!.totalPoints }} /
+              {{ summary()!.maxPossiblePoints }}</span
+            >
+            <span class="summary-label">Points Spent</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-value"
+              >{{ summary()!.overallCompletionPercentage }}%</span
+            >
+            <span class="summary-label">Overall</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-value"
+              >{{ summary()!.completedSpecializations }} /
+              {{ summary()!.totalSpecializations }}</span
+            >
+            <span class="summary-label">Completed</span>
+          </div>
+        </div>
+      }
+
+      <!-- Active loadout: one Primary and one Secondary may be active at once -->
+      <div class="spec-active-bar">
+        <div class="active-slot primary">
+          <label
+            class="active-slot-label"
+            for="spec-slot-primary"
+            >Primary</label
+          >
+          <select
+            id="spec-slot-primary"
+            class="active-slot-select"
+            [disabled]="savingSlot() === 'primary'"
+            [ngModel]="primarySelectionId()"
+            (ngModelChange)="setSlot('primary', $event)">
+            <option value="">None active</option>
+            @for (option of primaryOptions(); track option.specializationId) {
+              <option [value]="option.specializationId">
+                {{ option.specialization.name }}
+              </option>
+            }
+          </select>
+          @if (savingSlot() === 'primary') {
+            <i
+              class="fas fa-spinner fa-spin saving-spinner"
+              aria-hidden="true"></i>
+          }
+        </div>
+        <div class="active-slot secondary">
+          <label
+            class="active-slot-label"
+            for="spec-slot-secondary"
+            >Secondary</label
+          >
+          <select
+            id="spec-slot-secondary"
+            class="active-slot-select"
+            [disabled]="savingSlot() === 'secondary'"
+            [ngModel]="secondarySelectionId()"
+            (ngModelChange)="setSlot('secondary', $event)">
+            <option value="">None active</option>
+            @for (option of secondaryOptions(); track option.specializationId) {
+              <option [value]="option.specializationId">
+                {{ option.specialization.name }}
+              </option>
+            }
+          </select>
+          @if (savingSlot() === 'secondary') {
+            <i
+              class="fas fa-spinner fa-spin saving-spinner"
+              aria-hidden="true"></i>
+          }
+        </div>
+      </div>
+
+      <!-- Specialization list, grouped by Primary / Secondary availability -->
+      @for (group of groupedProgress(); track group.type) {
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>{{ group.title }}</span>
+          <button
+            type="button"
+            class="cta-icon"
+            (click)="toggleGroup(group.type)"
+            [attr.aria-expanded]="!isGroupCollapsed(group.type)"
+            [title]="
+              isGroupCollapsed(group.type)
+                ? 'Show ' + group.title
+                : 'Hide ' + group.title
+            ">
+            <i
+              class="fas"
+              [class.fa-caret-down]="isGroupCollapsed(group.type)"
+              [class.fa-caret-up]="!isGroupCollapsed(group.type)"></i>
+          </button>
+        </div>
+
+        @if (!isGroupCollapsed(group.type)) {
+          <div class="spec-list">
+            @for (item of group.items; track item.specializationId) {
+              <div
+                class="spec-row"
+                [class.active-slot-row]="!!item.slot"
+                [style.border-left-color]="accent(item)"
+                [style.background]="accentTint(item)">
+                <div class="spec-row-header">
+                  <span class="spec-name">
+                    @if (showIcon(item)) {
+                      <img
+                        class="spec-icon"
+                        [src]="item.specialization.iconUrl"
+                        [alt]="item.specialization.name + ' icon'"
+                        (error)="onIconError(item.specializationId)" />
+                    } @else {
+                      <i
+                        class="fas spec-icon-fa"
+                        [class]="specializationIcon(item)"
+                        [style.color]="accent(item)"
+                        aria-hidden="true"></i>
+                    }
+                    {{ item.specialization.name }}
+                    @if (slotLabel(item)) {
+                      <span
+                        class="spec-slot-badge"
+                        [class.primary]="item.slot === 'primary'"
+                        [class.secondary]="item.slot === 'secondary'"
+                        >{{ slotLabel(item) }}</span
+                      >
+                    }
+                    @if (item.specialization.description) {
+                      <button
+                        type="button"
+                        class="spec-info-btn"
+                        [class.active]="
+                          expandedDescriptions().has(item.specializationId)
+                        "
+                        title="Toggle description"
+                        [attr.aria-expanded]="
+                          expandedDescriptions().has(item.specializationId)
+                        "
+                        (click)="toggleDescription(item.specializationId)">
+                        <i class="fas fa-circle-info"></i>
+                      </button>
+                    }
+                  </span>
+                  <div class="spec-header-right">
+                    @if (item.qualificationUnlocked) {
+                      <span
+                        class="spec-qualification"
+                        [title]="
+                          'Specialization Qualification unlocked at ' +
+                          qualificationPoints +
+                          ' points — this specialization can be trained on bridge officers'
+                        "
+                        ><i class="fas fa-graduation-cap"></i> Qualified</span
+                      >
+                    }
+                    <span class="spec-points-value"
+                      >{{ item.pointsSpent }} / {{ maxPoints(item) }} pts</span
+                    >
+                    @if (savingItemId() === item.specializationId) {
+                      <i
+                        class="fas fa-spinner fa-spin saving-spinner"
+                        aria-hidden="true"></i>
+                    }
+                  </div>
+                </div>
+
+                @if (expandedDescriptions().has(item.specializationId)) {
+                  <span class="spec-description">
+                    {{ item.specialization.description }}
+                  </span>
+                }
+
+                <!-- Points bar: a native range input drives clicks, drags and arrow keys -->
+                <div
+                  class="spec-progress-track"
+                  [class.saving]="savingItemId() === item.specializationId">
+                  <div
+                    class="spec-progress-fill"
+                    [style.width.%]="item.completionPercentage"
+                    [style.background-color]="accent(item)"
+                    aria-hidden="true"></div>
+                  @for (point of pointTicks(item); track point) {
+                    <span
+                      class="spec-point-tick"
+                      [class.reached]="item.pointsSpent >= point"
+                      [style.left.%]="(point / maxPoints(item)) * 100"
+                      aria-hidden="true"></span>
+                  }
+                  @if (qualificationMilestone(item); as milestone) {
+                    <span
+                      class="spec-milestone"
+                      [class.reached]="item.pointsSpent >= milestone"
+                      [style.left.%]="(milestone / maxPoints(item)) * 100"
+                      aria-hidden="true"></span>
+                  }
+                  <label
+                    class="sr-only"
+                    [for]="'spec-points-' + item.specializationId"
+                    >{{ item.specialization.name }} specialization points</label
+                  >
+                  <input
+                    type="range"
+                    class="spec-range-input"
+                    [id]="'spec-points-' + item.specializationId"
+                    min="0"
+                    [max]="maxPoints(item)"
+                    step="1"
+                    [value]="item.pointsSpent"
+                    [attr.aria-valuetext]="
+                      item.pointsSpent + ' of ' + maxPoints(item) + ' points'
+                    "
+                    [title]="
+                      item.pointsSpent + ' of ' + maxPoints(item) + ' points'
+                    "
+                    (change)="onRangeChange(item, $event)" />
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
+
+      @if (filteredProgress().length === 0 && !isLoading) {
+        <p class="go-center">No specializations found.</p>
+      }
+    }
+  </div>
+
+  <!-- Side column -->
+  <div
+    id="spec-side-column"
+    class="col">
+    <!-- Filters are pointless while the tracker is level-locked. -->
+    @if (!isLevelLocked()) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Filters</span>
+        <button
+          type="button"
+          class="cta-icon"
+          (click)="filtersCollapsed = !filtersCollapsed"
+          [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
+          <i
+            class="fas"
+            [class.fa-caret-down]="filtersCollapsed"
+            [class.fa-caret-up]="!filtersCollapsed"></i>
+        </button>
+      </div>
+      @if (!filtersCollapsed) {
+        <div class="filter-section">
+          <label
+            class="sr-only"
+            for="spec-search"
+            >Search specializations</label
+          >
+          <input
+            id="spec-search"
+            type="text"
+            class="filter-input"
+            placeholder="Search specializations…"
+            [ngModel]="searchText()"
+            (ngModelChange)="searchText.set($event)" />
+
+          @if (completeCount() > 0) {
+            <button
+              type="button"
+              class="full-width-btn-link"
+              [class.tangerine]="!hideComplete()"
+              [class.perano]="hideComplete()"
+              (click)="hideComplete.set(!hideComplete())">
+              {{ hideComplete() ? 'Show Completed' : 'Hide Completed' }}
+            </button>
+          }
+
+          @if (activeFilterCount() > 0) {
+            <button
+              type="button"
+              class="full-width-btn-link clear-filters-btn"
+              (click)="clearFilters()">
+              Clear Filters
+            </button>
+          }
+
+          <button
+            type="button"
+            class="full-width-btn-link perano"
+            (click)="loadProgress()">
+            <i class="fas fa-rotate-right"></i> Refresh
+          </button>
+        </div>
+      }
+    }
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Briefing</span>
+      <button
+        type="button"
+        class="cta-icon"
+        (click)="toggleBriefing()"
+        [attr.aria-expanded]="!briefingCollapsed()"
+        [title]="briefingCollapsed() ? 'Show Briefing' : 'Hide Briefing'">
+        <i
+          class="fas"
+          [class.fa-caret-down]="briefingCollapsed()"
+          [class.fa-caret-up]="!briefingCollapsed()"></i>
+      </button>
+    </div>
+    @if (!briefingCollapsed()) {
+      <div class="spec-briefing">
+        <p>
+          Specializations open at level {{ unlockLevel }}. Each level-up awards
+          one specialization point, and points keep accruing after the level
+          cap.
+        </p>
+        <p>
+          Primary specializations can be slotted as Primary or Secondary.
+          Secondary specializations can only be slotted as Secondary.
+        </p>
+        <p>
+          One Primary and one Secondary specialization may be active at a time.
+          Inactive specializations keep their unlocks but grant no passive bonus
+          or abilities.
+        </p>
+        <p>
+          Spending {{ qualificationPoints }} points in a Primary specialization
+          unlocks its Specialization Qualification for training bridge officers.
+        </p>
+      </div>
+    }
+
+    <!-- Host-projected content (e.g. character photo) shown below the briefing. -->
+    <ng-content select="[specAsidePhoto]"></ng-content>
+
+    <!-- Host-projected navigation shown below the photo. -->
+    <ng-content select="[specAsideNav]"></ng-content>
+
+    @if (!embedded) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Navigation</span>
+      </div>
+      <div class="buttons">
+        <a
+          [routerLink]="characterLink()"
+          class="full-width-btn-link peach"
+          >Character</a
+        >
+        <a
+          [routerLink]="accountLink()"
+          class="full-width-btn-link sunflower"
+          >Account</a
+        >
+        <a
+          [routerLink]="accountsLink"
+          class="full-width-btn-link bluey"
+          >Accounts</a
+        >
+      </div>
+    }
+  </div>
+</div>

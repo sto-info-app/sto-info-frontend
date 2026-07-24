@@ -14,6 +14,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EMPTY, Subject, catchError, switchMap, takeUntil } from 'rxjs';
 import { CharacterRdComponent } from 'src/app/dashboard/character-rd/character-rd.component';
 import { CharacterReputationsComponent } from 'src/app/dashboard/character-reputations/character-reputations.component';
+import { CharacterSpecializationComponent } from 'src/app/dashboard/character-specialization/character-specialization.component';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
@@ -33,7 +34,8 @@ import {
 import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.component';
 
 /** Identifiers for the tabs available on the character detail page. */
-export type CharacterTab = 'overview' | 'reputations' | 'rd';
+export type CharacterTab =
+  'overview' | 'reputations' | 'rd' | 'specializations';
 
 @Component({
   selector: 'app-character-detail',
@@ -49,6 +51,7 @@ export type CharacterTab = 'overview' | 'reputations' | 'rd';
     MatButtonModule,
     CharacterReputationsComponent,
     CharacterRdComponent,
+    CharacterSpecializationComponent,
   ],
 })
 export class CharacterDetailComponent implements OnInit, OnDestroy {
@@ -63,6 +66,7 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
     { id: 'overview', label: 'Overview' },
     { id: 'reputations', label: 'Reputations' },
     { id: 'rd', label: 'R&D' },
+    { id: 'specializations', label: 'Specializations' },
   ];
 
   /** Currently selected tab. */
@@ -81,6 +85,13 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
    * once rather than on every tab switch.
    */
   readonly rdOpened = signal(false);
+
+  /**
+   * Whether the specializations tab has been opened at least once. Used to
+   * lazily mount the specialization component and then keep it alive (hidden)
+   * so its data is only fetched once rather than on every tab switch.
+   */
+  readonly specializationsOpened = signal(false);
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
@@ -287,8 +298,8 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Updates the active tab signal, lazily marking the reputations tab as opened
-   * so it is mounted once and then kept alive.
+   * Updates the active tab signal, lazily marking a tracker tab as opened so it
+   * is mounted once and then kept alive.
    *
    * @param tab - The tab to activate.
    * @returns void
@@ -299,6 +310,9 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
     }
     if (tab === 'rd') {
       this.rdOpened.set(true);
+    }
+    if (tab === 'specializations') {
+      this.specializationsOpened.set(true);
     }
     this.activeTab.set(tab);
     this._cdr.markForCheck();
