@@ -138,68 +138,20 @@
   >
     <!-- Filters are pointless while the tracker is level-locked. -->
     @if (!isLevelLocked()) {
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Filters</span>
-        <button
-          type="button"
-          class="cta-icon"
-          (click)="filtersCollapsed = !filtersCollapsed"
-          [attr.aria-label]='filtersCollapsed ? "Show Filters" : "Hide Filters"'
-          [title]='filtersCollapsed ? "Show Filters" : "Hide Filters"'
-        >
-          <i
-            class="fas"
-            [class.fa-caret-down]="filtersCollapsed"
-            [class.fa-caret-up]="!filtersCollapsed"
-          ></i>
-        </button>
-      </div>
-      @if (!filtersCollapsed) {
-        <div class="filter-section">
-          <label
-            class="sr-only"
-            for="reputation-search"
-          >Search reputations</label>
-          <input
-            id="reputation-search"
-            type="text"
-            class="filter-input"
-            placeholder="Search reputations…"
-            [ngModel]="searchText()"
-            (ngModelChange)="searchText.set($event)"
-          />
-
-          @if (completeCount() > 0) {
-            <button
-              type="button"
-              class="full-width-btn-link"
-              [class.tangerine]="!hideComplete()"
-              [class.perano]="hideComplete()"
-              (click)="hideComplete.set(!hideComplete())"
-            >
-              {{ hideComplete() ? "Show Completed" : "Hide Completed" }}
-            </button>
-          }
-
-          @if (activeFilterCount() > 0) {
-            <button
-              type="button"
-              class="full-width-btn-link clear-filters-btn"
-              (click)="clearFilters()"
-            >
-              Clear Filters
-            </button>
-          }
-
-          <button
-            type="button"
-            class="full-width-btn-link perano"
-            (click)="loadProgress()"
-          >
-            <i class="fas fa-rotate-right"></i> Refresh
-          </button>
-        </div>
-      }
+      <app-character-progress-filters
+        searchId="reputation-search"
+        searchLabel="Search reputations"
+        [filtersCollapsed]="filtersCollapsed"
+        [searchText]="searchText()"
+        [hideComplete]="hideComplete()"
+        [completeCount]="completeCount()"
+        [activeFilterCount]="activeFilterCount()"
+        (filtersCollapsedChange)="filtersCollapsed = $event"
+        (searchTextChange)="searchText.set($event)"
+        (hideCompleteChange)="hideComplete.set($event)"
+        (clearFilters)="clearFilters()"
+        (refresh)="loadProgress()"
+      ></app-character-progress-filters>
     }
 
     <!-- Host-projected content (e.g. character photo) shown below the filters. -->

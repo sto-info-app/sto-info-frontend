@@ -15,6 +15,7 @@ import {
   RippleGlobalOptions,
 } from '@angular/material/core';
 import { bootstrapApplication } from '@angular/platform-browser';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Router, RouterModule, provideRouter } from '@angular/router';
 import { JwtModule } from '@auth0/angular-jwt';
 
@@ -71,6 +72,7 @@ if (
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideAnimationsAsync(),
     provideZoneChangeDetection(),
     provideRouter(routes),
     importProvidersFrom(

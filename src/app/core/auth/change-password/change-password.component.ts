@@ -68,7 +68,9 @@ export class ChangePasswordComponent implements OnInit {
       error.statusCode,
       nestedError['statusCode'],
     ];
-    return candidates.find(value => typeof value === 'number') as number;
+    return candidates.find(
+      (value): value is number => typeof value === 'number',
+    );
   }
 
   private normalizeMessage(rawMessage: unknown): string {

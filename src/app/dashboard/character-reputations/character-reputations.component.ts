@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { CharacterProgressBaseComponent } from '../base/character-progress-base.component';
+import { CharacterProgressFiltersComponent } from '../base/character-progress-filters.component';
 import { CharacterProgressStateComponent } from '../base/character-progress-state.component';
 import {
   CharacterReputationProgress,
@@ -26,6 +27,7 @@ import { CharacterReputationService } from '../services/character-reputation.ser
     FormsModule,
     RouterModule,
     LoadingBarComponent,
+    CharacterProgressFiltersComponent,
     CharacterProgressStateComponent,
   ],
 })

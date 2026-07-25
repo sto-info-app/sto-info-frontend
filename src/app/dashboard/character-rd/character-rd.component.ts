@@ -7,6 +7,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LcarsLevelLockComponent } from 'src/app/shared/components/lcars-level-lock/lcars-level-lock.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { CharacterProgressBaseComponent } from '../base/character-progress-base.component';
+import { CharacterProgressFiltersComponent } from '../base/character-progress-filters.component';
 import {
   RD_BASE_RARITY,
   RD_MAX_LEVEL,
@@ -29,6 +30,7 @@ import { CharacterRdService } from '../services/character-rd.service';
     FormsModule,
     RouterModule,
     LoadingBarComponent,
+    CharacterProgressFiltersComponent,
     LcarsErrorMessageComponent,
     LcarsLevelLockComponent,
   ],

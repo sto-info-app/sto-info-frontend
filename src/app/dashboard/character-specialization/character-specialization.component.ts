@@ -11,6 +11,7 @@ import { RouterModule } from '@angular/router';
 import { Observable, takeUntil } from 'rxjs';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { CharacterProgressBaseComponent } from '../base/character-progress-base.component';
+import { CharacterProgressFiltersComponent } from '../base/character-progress-filters.component';
 import { CharacterProgressStateComponent } from '../base/character-progress-state.component';
 import {
   CharacterSpecializationProgress,
@@ -40,6 +41,7 @@ export interface SpecializationGroup {
     FormsModule,
     RouterModule,
     LoadingBarComponent,
+    CharacterProgressFiltersComponent,
     CharacterProgressStateComponent,
   ],
 })
