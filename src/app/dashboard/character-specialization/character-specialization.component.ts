@@ -9,10 +9,9 @@ import {
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Observable, takeUntil } from 'rxjs';
-import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
-import { LcarsLevelLockComponent } from 'src/app/shared/components/lcars-level-lock/lcars-level-lock.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { CharacterProgressBaseComponent } from '../base/character-progress-base.component';
+import { CharacterProgressStateComponent } from '../base/character-progress-state.component';
 import {
   CharacterSpecializationProgress,
   CharacterSpecializationSummary,
@@ -41,8 +40,7 @@ export interface SpecializationGroup {
     FormsModule,
     RouterModule,
     LoadingBarComponent,
-    LcarsErrorMessageComponent,
-    LcarsLevelLockComponent,
+    CharacterProgressStateComponent,
   ],
 })
 export class CharacterSpecializationComponent extends CharacterProgressBaseComponent<

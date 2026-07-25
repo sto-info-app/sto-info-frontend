@@ -7,47 +7,22 @@
     id="reputations-main-column"
     class="col"
   >
-    @if (!isLoading && errorMessage) {
-      <div class="error-container">
-        <app-lcars-error-message
-          [message]="errorMessage"
-        ></app-lcars-error-message>
-        <div class="buttons-row">
-          <a
-            class="lcars-btn-auto sunflower"
-            [routerLink]="accountsLink"
-          >Back to Accounts</a>
-        </div>
-      </div>
-    }
-
-    <!-- Below the unlock level there is nothing to track yet, so the tracker is
-         replaced by a notice pointing at the captain's level. -->
-    @if (!isLoading && !errorMessage && isLevelLocked()) {
-      @if (!embedded) {
-        <h1>Reputations</h1>
-        <p class="character-subtitle">
-          Character: {{ characterHandle }}&#64;{{ accountHandle }}
-        </p>
-      }
-
-      <app-lcars-level-lock
-        [featureName]="featureName"
-        [requiredLevel]="unlockLevel"
-        [currentLevel]="characterLevel()"
-        [characterHandle]="characterHandle"
-        [editLink]="characterEditLink()"
-      ></app-lcars-level-lock>
-    }
+    <app-character-progress-state
+      [isLoading]="isLoading"
+      [errorMessage]="errorMessage"
+      [accountsLink]="accountsLink"
+      [embedded]="embedded"
+      title="Reputations"
+      [characterHandle]="characterHandle"
+      [accountHandle]="accountHandle"
+      [levelLocked]="isLevelLocked()"
+      [featureName]="featureName"
+      [unlockLevel]="unlockLevel"
+      [characterLevel]="characterLevel()"
+      [characterEditLink]="characterEditLink()"
+    ></app-character-progress-state>
 
     @if (!isLoading && !errorMessage && !isLevelLocked()) {
-      @if (!embedded) {
-        <h1>Reputations</h1>
-        <p class="character-subtitle">
-          Character: {{ characterHandle }}&#64;{{ accountHandle }}
-        </p>
-      }
-
       <!-- Summary -->
       @if (summary()) {
         <div class="reputation-summary-bar">

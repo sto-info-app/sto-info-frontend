@@ -3,16 +3,15 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
-import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
-import { LcarsLevelLockComponent } from 'src/app/shared/components/lcars-level-lock/lcars-level-lock.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { CharacterProgressBaseComponent } from '../base/character-progress-base.component';
+import { CharacterProgressStateComponent } from '../base/character-progress-state.component';
 import {
+  CharacterReputationProgress,
+  CharacterReputationSummary,
   REPUTATION_MAX_TIER,
   REPUTATION_TIER_XP,
   REPUTATION_UNLOCK_LEVEL,
-  CharacterReputationProgress,
-  CharacterReputationSummary,
 } from '../models/character-reputation.model';
 import { CharacterReputationService } from '../services/character-reputation.service';
 
@@ -27,8 +26,7 @@ import { CharacterReputationService } from '../services/character-reputation.ser
     FormsModule,
     RouterModule,
     LoadingBarComponent,
-    LcarsErrorMessageComponent,
-    LcarsLevelLockComponent,
+    CharacterProgressStateComponent,
   ],
 })
 export class CharacterReputationsComponent extends CharacterProgressBaseComponent<
