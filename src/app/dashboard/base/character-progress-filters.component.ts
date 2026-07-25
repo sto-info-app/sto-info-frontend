@@ -13,6 +13,21 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule],
+  styles: [
+    `
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+      }
+    `,
+  ],
 })
 export class CharacterProgressFiltersComponent {
   @Input({ required: true }) searchId!: string;
