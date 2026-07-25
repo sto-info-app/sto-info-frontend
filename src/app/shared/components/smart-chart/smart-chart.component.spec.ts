@@ -131,7 +131,7 @@ describe('SmartChartComponent', () => {
       { name: 'Beta', count: 50 },
     ]);
     const rows = component.barRows();
-    expect(rows.length).toBe(2);
+    expect(rows).toHaveLength(2);
     expect(rows[0]).toEqual({
       name: 'Alpha',
       count: 100,
@@ -154,7 +154,7 @@ describe('SmartChartComponent', () => {
     // Covers the maxCount <= 0 ? '0%' branch when items exist but all have count 0
     fixture.componentRef.setInput('data', [{ name: 'A', count: 0 }]);
     const rows = component.barRows();
-    expect(rows.length).toBe(1);
+    expect(rows).toHaveLength(1);
     expect(rows[0].width).toBe('0%');
   });
 
@@ -165,7 +165,7 @@ describe('SmartChartComponent', () => {
       { name: 'Beta', count: 1 },
     ]);
     const segments = component.pieSegments();
-    expect(segments.length).toBe(2);
+    expect(segments).toHaveLength(2);
     expect(segments[0].name).toBe('Alpha');
     expect(segments[0].count).toBe(3);
     expect(segments[0].percentage).toBe(75);

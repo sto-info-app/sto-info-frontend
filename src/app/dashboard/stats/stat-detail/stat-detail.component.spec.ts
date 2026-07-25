@@ -197,7 +197,7 @@ describe('StatDetailComponent', () => {
       await createComponent('species');
       component.ngOnInit();
       const nonZeros = mockStats.bySpecies.filter(i => i.count > 0).length;
-      expect(component.displayedItems.length).toBe(nonZeros);
+      expect(component.displayedItems).toHaveLength(nonZeros);
     });
 
     it('should filter items with 0 count when hideZeros is true', async () => {
@@ -210,7 +210,7 @@ describe('StatDetailComponent', () => {
       ];
 
       component.hideZeros = true;
-      expect(component.displayedItems.length).toBe(2);
+      expect(component.displayedItems).toHaveLength(2);
       expect(component.displayedItems).not.toContainEqual(
         expect.objectContaining({ name: 'Gorn' }),
       );
@@ -246,7 +246,7 @@ describe('StatDetailComponent', () => {
         { name: 'Klingon', count: 3 },
       ];
       component.hideZeros = false;
-      expect(component.displayedItems.length).toBe(3);
+      expect(component.displayedItems).toHaveLength(3);
       expect(component.displayedItems).toContainEqual(
         expect.objectContaining({ name: 'Gorn' }),
       );

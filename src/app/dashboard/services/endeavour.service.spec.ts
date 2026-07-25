@@ -58,7 +58,7 @@ describe('EndeavourService', () => {
 
     const req = httpMock.expectOne(`${API_URLS.ENDEAVOUR}/account/acc1`);
     expect(req.request.method).toBe('GET');
-    expect(req.request.params.keys().length).toBe(0);
+    expect(req.request.params.keys()).toHaveLength(0);
     req.flush([]);
   });
 

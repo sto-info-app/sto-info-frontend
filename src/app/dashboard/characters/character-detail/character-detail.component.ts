@@ -11,7 +11,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { EMPTY, Subject, catchError, switchMap, takeUntil } from 'rxjs';
+import { EMPTY, Subject, catchError, map, switchMap, takeUntil } from 'rxjs';
 import { CharacterRdComponent } from 'src/app/dashboard/character-rd/character-rd.component';
 import { CharacterReputationsComponent } from 'src/app/dashboard/character-reputations/character-reputations.component';
 import { CharacterSpecializationComponent } from 'src/app/dashboard/character-specialization/character-specialization.component';
@@ -130,6 +130,7 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
           this.errorMessage = '';
 
           return this._stoAccountService.getAccounts().pipe(
+            map(accounts => ({ accounts, charHandle })),
             catchError(err => {
               this.isLoading = false;
               this.errorMessage = 'Failed to load account';
@@ -137,45 +138,42 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
               this._cdr.markForCheck();
               return EMPTY;
             }),
-            switchMap(accounts => {
-              const account = accounts.find(
-                a => a.handle === this.accountHandle,
-              );
-              if (!account) {
-                this.isLoading = false;
-                this.errorMessage = 'Account not found';
-                this._cdr.markForCheck();
-                return EMPTY;
-              }
-              return this._characterService
-                .getCharactersByAccount(account.id)
-                .pipe(
-                  catchError(err => {
-                    this.isLoading = false;
-                    this.errorMessage = 'Failed to load account characters';
-                    console.error(err);
-                    this._cdr.markForCheck();
-                    return EMPTY;
-                  }),
-                  switchMap(characters => {
-                    const char = characters.find(c => c.handle === charHandle);
-                    if (!char) {
-                      this.isLoading = false;
-                      this.errorMessage = 'Character not found';
-                      this._cdr.markForCheck();
-                      return EMPTY;
-                    }
-                    return this._characterService.getCharacter(char.id).pipe(
-                      catchError(err => {
-                        this.isLoading = false;
-                        this.errorMessage = 'Failed to load character details';
-                        console.error(err);
-                        this._cdr.markForCheck();
-                        return EMPTY;
-                      }),
-                    );
-                  }),
-                );
+          );
+        }),
+        switchMap(({ accounts, charHandle }) => {
+          const account = accounts.find(a => a.handle === this.accountHandle);
+          if (!account) {
+            this.isLoading = false;
+            this.errorMessage = 'Account not found';
+            this._cdr.markForCheck();
+            return EMPTY;
+          }
+          return this._characterService.getCharactersByAccount(account.id).pipe(
+            map(characters => ({ characters, charHandle })),
+            catchError(err => {
+              this.isLoading = false;
+              this.errorMessage = 'Failed to load account characters';
+              console.error(err);
+              this._cdr.markForCheck();
+              return EMPTY;
+            }),
+          );
+        }),
+        switchMap(({ characters, charHandle }) => {
+          const char = characters.find(c => c.handle === charHandle);
+          if (!char) {
+            this.isLoading = false;
+            this.errorMessage = 'Character not found';
+            this._cdr.markForCheck();
+            return EMPTY;
+          }
+          return this._characterService.getCharacter(char.id).pipe(
+            catchError(err => {
+              this.isLoading = false;
+              this.errorMessage = 'Failed to load character details';
+              console.error(err);
+              this._cdr.markForCheck();
+              return EMPTY;
             }),
           );
         }),

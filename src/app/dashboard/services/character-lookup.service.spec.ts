@@ -101,7 +101,7 @@ describe('CharacterLookupService', () => {
       });
       const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_RECRUIT_TYPES);
       expect(req.request.method).toBe('GET');
-      expect(req.request.params.keys().length).toBe(0);
+      expect(req.request.params.keys()).toHaveLength(0);
       req.flush(dummy);
     });
 
@@ -128,7 +128,7 @@ describe('CharacterLookupService', () => {
       });
       const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_SPECIES);
       expect(req.request.method).toBe('GET');
-      expect(req.request.params.keys().length).toBe(0);
+      expect(req.request.params.keys()).toHaveLength(0);
       req.flush(dummy);
     });
 

@@ -141,7 +141,7 @@ describe('AlertThemeService', () => {
     });
 
     it('should handle clearTimers without element', () => {
-      service.clearTimers();
+      expect(() => service.clearTimers()).not.toThrow();
     });
 
     it('should use default red color in applyAlertThemeThenClearAfterAShortTime', () => {

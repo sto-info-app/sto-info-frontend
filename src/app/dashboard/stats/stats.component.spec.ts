@@ -86,7 +86,7 @@ describe('StatsComponent', () => {
   });
 
   it('should expose 7 character stat tiles', () => {
-    expect(component.statTiles.length).toBe(7);
+    expect(component.statTiles).toHaveLength(7);
   });
 
   it('should precompute stat tile links', () => {

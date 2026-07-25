@@ -59,6 +59,25 @@ export class ChangePasswordComponent implements OnInit {
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _logoutAfterSuccessDelayMs = 3000;
 
+  private getStatusCode(
+    error: { status?: unknown; statusCode?: unknown },
+    nestedError: Record<string, unknown>,
+  ): number | undefined {
+    const candidates = [
+      error.status,
+      error.statusCode,
+      nestedError['statusCode'],
+    ];
+    return candidates.find(value => typeof value === 'number') as number;
+  }
+
+  private normalizeMessage(rawMessage: unknown): string {
+    if (typeof rawMessage === 'string') {
+      return rawMessage;
+    }
+    return Array.isArray(rawMessage) ? rawMessage.join(' ') : '';
+  }
+
   /**
    * Builds the change-password form.
    */
@@ -136,25 +155,13 @@ export class ChangePasswordComponent implements OnInit {
                 ? error.error
                 : {};
 
-            const statusCode: number | undefined =
-              typeof error?.status === 'number'
-                ? error.status
-                : typeof error?.statusCode === 'number'
-                  ? error.statusCode
-                  : typeof nestedError?.['statusCode'] === 'number'
-                    ? (nestedError['statusCode'] as number)
-                    : undefined;
+            const statusCode = this.getStatusCode(error, nestedError);
 
             const rawMessage =
               nestedError?.['message'] ??
               error?.message ??
               (typeof error?.error === 'string' ? error.error : '');
-            const normalizedMessage =
-              typeof rawMessage === 'string'
-                ? rawMessage
-                : Array.isArray(rawMessage)
-                  ? rawMessage.join(' ')
-                  : '';
+            const normalizedMessage = this.normalizeMessage(rawMessage);
 
             const normalizedMessageLower = normalizedMessage.toLowerCase();
 

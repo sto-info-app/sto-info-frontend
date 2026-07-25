@@ -122,7 +122,7 @@ describe('AccountDialogComponent', () => {
   it('should filter launchers if platformId is already set when mappings load', () => {
     component.accountForm.patchValue({ platformId: 'p1' });
     fixture.detectChanges();
-    expect(component.filteredLaunchers.length).toBe(2);
+    expect(component.filteredLaunchers).toHaveLength(2);
   });
 
   it('should patch form in edit mode', () => {
@@ -146,10 +146,10 @@ describe('AccountDialogComponent', () => {
   it('should filter launchers based on platformId', () => {
     fixture.detectChanges();
     component.accountForm.patchValue({ platformId: 'p1' });
-    expect(component.filteredLaunchers.length).toBe(2);
+    expect(component.filteredLaunchers).toHaveLength(2);
 
     component.accountForm.patchValue({ platformId: 'p2' });
-    expect(component.filteredLaunchers.length).toBe(0);
+    expect(component.filteredLaunchers).toHaveLength(0);
   });
 
   it('should not filter launchers if platformId is set to null', () => {
