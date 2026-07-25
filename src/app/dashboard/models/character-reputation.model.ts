@@ -4,6 +4,9 @@ export type CharacterReputationStatus =
 /** The maximum reputation tier a character can attain. */
 export const REPUTATION_MAX_TIER = 6;
 
+/** The captain level at which the reputation system unlocks. */
+export const REPUTATION_UNLOCK_LEVEL = 50;
+
 /** Cumulative XP required to reach each reputation tier (1-6). */
 export const REPUTATION_TIER_XP: Record<number, number> = {
   1: 2500,

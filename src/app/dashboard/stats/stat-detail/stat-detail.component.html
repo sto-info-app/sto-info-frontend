@@ -5,7 +5,8 @@
 <div id="stat-detail-container">
   <div
     id="stat-detail-main"
-    class="col">
+    class="col"
+  >
     @if (config) {
       <h1>{{ config.title }}</h1>
 
@@ -21,21 +22,24 @@
               label="Min"
               [value]="stats.minLevel"
               icon="fas fa-circle-chevron-down"
-              color="tangerine">
+              color="tangerine"
+            >
             </app-stat-info-card>
 
             <app-stat-info-card
               label="Avg"
               [value]="stats.avgLevel"
               icon="fas fa-sigma"
-              color="sunflower">
+              color="sunflower"
+            >
             </app-stat-info-card>
 
             <app-stat-info-card
               label="Max"
               [value]="stats.maxLevel"
               icon="fas fa-circle-chevron-up"
-              color="green">
+              color="green"
+            >
             </app-stat-info-card>
           </div>
         }
@@ -47,14 +51,16 @@
       @if (!isLoading && !stats) {
         <app-lcars-information-message
           title="Data Error"
-          message="Unable to load statistics. Please try again later.">
+          message="Unable to load statistics. Please try again later."
+        >
         </app-lcars-information-message>
       }
     } @else {
       <h1>Unknown Stat</h1>
       <app-lcars-information-message
         title="Category Error"
-        message="No telemetry data available for this sector.">
+        message="No telemetry data available for this sector."
+      >
       </app-lcars-information-message>
     }
   </div>
@@ -62,19 +68,24 @@
   <!-- Side navigation -->
   <div
     id="stat-detail-side"
-    class="col">
+    class="col"
+  >
     <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Filters</span>
     </div>
     <div class="buttons filter-buttons">
       @if (accounts.length > 1) {
         <div class="lcars-select-container sunflower">
-          <span class="select-label">Select Account</span>
+          <label
+            class="select-label"
+            for="account-select"
+          >Select Account</label>
           <select
             id="account-select"
             title="Select Account"
             [(ngModel)]="selectedAccountId"
-            (change)="onAccountChange($any($event.target).value)">
+            (change)="onAccountChange($any($event.target).value)"
+          >
             <option value="all">All Accounts</option>
             @for (account of accounts; track account.id) {
               <option [value]="account.id">{{ account.handle }}</option>
@@ -88,8 +99,9 @@
           type="button"
           class="full-width-btn-link filter-btn"
           [class.active]="!hideZeros"
-          (click)="toggleHideZeros()">
-          {{ hideZeros ? 'Show Zero Stats' : 'Hide Zero Stats' }}
+          (click)="toggleHideZeros()"
+        >
+          {{ hideZeros ? "Show Zero Stats" : "Hide Zero Stats" }}
         </button>
       }
     </div>
@@ -100,11 +112,16 @@
     <div class="buttons">
       @if (sectionEntries.length > 1) {
         <div class="lcars-select-container perano">
-          <span class="select-label">{{ sectionTitle }}</span>
+          <label
+            class="select-label"
+            for="report-navigation-select"
+          >{{ sectionTitle }}</label>
           <select
+            id="report-navigation-select"
             title="Navigate to report"
             [ngModel]="breakdownId"
-            (ngModelChange)="navigateToReport($event)">
+            (ngModelChange)="navigateToReport($event)"
+          >
             @for (entry of sectionEntries; track entry.id) {
               <option [value]="entry.id">{{ entry.label }}</option>
             }
@@ -114,13 +131,11 @@
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)"
         class="full-width-btn-link sunflower"
-        >Back to Stats</a
-      >
+      >Back to Stats</a>
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
         class="full-width-btn-link sunflower"
-        >Dashboard</a
-      >
+      >Dashboard</a>
     </div>
   </div>
 </div>

@@ -5,18 +5,21 @@
 <div id="account-manage-container">
   <div
     id="account-manage-main-column"
-    class="col">
+    class="col"
+  >
     @if (!isLoading) {
-      <h1>{{ mode === 'add' ? 'Add' : 'Edit' }} STO Account</h1>
+      <h1>{{ mode === "add" ? "Add" : "Edit" }} STO Account</h1>
 
       @if (errorMessage) {
         <app-lcars-error-message
-          [message]="errorMessage"></app-lcars-error-message>
+          [message]="errorMessage"
+        ></app-lcars-error-message>
       }
 
       <form
         [formGroup]="accountForm"
-        class="account-manage-form">
+        class="account-manage-form"
+      >
         <!-- Section: Account Details -->
         <div class="lcars-text-bar small-lcars-bar-gap">
           <span>Account Details</span>
@@ -29,17 +32,14 @@
               type="text"
               id="handle-input"
               formControlName="handle"
-              placeholder="e.g. Username#1234" />
-            @if (
-              accountForm.get('handle')?.hasError('required') &&
-              accountForm.get('handle')?.touched
-            ) {
+              placeholder="e.g. Username#1234"
+            />
+            @if (accountForm.get("handle")?.hasError("required")
+  && accountForm.get("handle")?.touched) {
               <div class="field-error">Handle is required</div>
             }
-            @if (
-              accountForm.get('handle')?.hasError('pattern') &&
-              accountForm.get('handle')?.touched
-            ) {
+            @if (accountForm.get("handle")?.hasError("pattern")
+  && accountForm.get("handle")?.touched) {
               <div class="field-error">
                 Handle must be in the format Username#1234
               </div>
@@ -51,7 +51,8 @@
             <input
               type="date"
               id="account-created-date-input"
-              formControlName="accountCreatedDate" />
+              formControlName="accountCreatedDate"
+            />
           </div>
         </div>
 
@@ -61,7 +62,8 @@
             <input
               type="text"
               id="username-input"
-              formControlName="username" />
+              formControlName="username"
+            />
           </div>
 
           <div class="lcars-input-container sunflower">
@@ -69,11 +71,10 @@
             <input
               type="email"
               id="email-input"
-              formControlName="email" />
-            @if (
-              accountForm.get('email')?.hasError('email') &&
-              accountForm.get('email')?.touched
-            ) {
+              formControlName="email"
+            />
+            @if (accountForm.get("email")?.hasError("email")
+  && accountForm.get("email")?.touched) {
               <div class="field-error">Invalid email format</div>
             }
           </div>
@@ -86,11 +87,15 @@
 
         <div class="form-row">
           <div class="lcars-select-container tangerine">
-            <span class="select-label">Platform</span>
+            <label
+              class="select-label"
+              for="platform-select"
+            >Platform</label>
             <select
               id="platform-select"
               title="Platform"
-              formControlName="platformId">
+              formControlName="platformId"
+            >
               <option value="">Select a platform</option>
               @for (platform of platforms; track platform.id) {
                 <option [value]="platform.id">{{ platform.name }}</option>
@@ -100,17 +105,22 @@
 
           <div
             class="lcars-select-container bluey"
-            [class.is-disabled]="isLauncherDisabled">
-            <span class="select-label">Launcher (Optional)</span>
+            [class.is-disabled]="isLauncherDisabled"
+          >
+            <label
+              class="select-label"
+              for="launcher-select"
+            >Launcher (Optional)</label>
             @if (isLauncherDisabled) {
               <span class="select-placeholder">{{
-                launcherPlaceholderText
-              }}</span>
+                  launcherPlaceholderText
+                }}</span>
             } @else {
               <select
                 id="launcher-select"
                 title="Launcher (Optional)"
-                formControlName="launcherId">
+                formControlName="launcherId"
+              >
                 <option value="">None</option>
                 @for (launcher of filteredLaunchers; track launcher.id) {
                   <option [value]="launcher.id">{{ launcher.name }}</option>
@@ -130,14 +140,16 @@
           <textarea
             id="notes-input"
             formControlName="notes"
-            rows="4"></textarea>
+            rows="4"
+          ></textarea>
         </div>
 
         <div class="form-row toggles-row">
           <app-lcars-toggle
             formControlName="lifetimeSubscription"
             label="Lifetime Subscription"
-            ariaLabel="Lifetime Subscription">
+            ariaLabel="Lifetime Subscription"
+          >
           </app-lcars-toggle>
         </div>
 
@@ -145,7 +157,8 @@
           <app-lcars-toggle
             formControlName="publiclyVisible"
             label="Publicly Visible"
-            ariaLabel="Publicly Visible">
+            ariaLabel="Publicly Visible"
+          >
           </app-lcars-toggle>
         </div>
 
@@ -155,7 +168,8 @@
             class="lcars-btn red"
             type="button"
             (click)="onCancel()"
-            [disabled]="isSubmitting">
+            [disabled]="isSubmitting"
+          >
             Cancel
           </button>
           <button
@@ -163,8 +177,9 @@
             class="lcars-btn green"
             type="submit"
             [disabled]="accountForm.invalid || isSubmitting"
-            (click)="onSave()">
-            {{ mode === 'add' ? 'Create' : 'Save' }}
+            (click)="onSave()"
+          >
+            {{ mode === "add" ? "Create" : "Save" }}
           </button>
         </div>
       </form>
@@ -173,7 +188,8 @@
 
   <div
     id="account-manage-side-column"
-    class="col">
+    class="col"
+  >
     <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Navigation</span>
     </div>
@@ -183,13 +199,11 @@
         (keypress)="onCancel()"
         tabindex="0"
         class="full-width-btn-link sunflower"
-        >Return</a
-      >
+      >Return</a>
       <a
         [routerLink]="accountsLink"
         class="full-width-btn-link perano"
-        >All Accounts</a
-      >
+      >All Accounts</a>
     </div>
   </div>
 </div>

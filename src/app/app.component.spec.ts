@@ -370,7 +370,9 @@ describe('AppComponent', () => {
     (environment as { cookieYesUrl: string | undefined }).cookieYesUrl =
       undefined;
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-    (component as unknown as AppComponentInternals).loadCookieYesScript();
+    expect(() =>
+      (component as unknown as AppComponentInternals).loadCookieYesScript(),
+    ).not.toThrow();
     expect(consoleSpy).toHaveBeenCalledWith(
       'CookieYes URL not set in environment',
     );
@@ -479,9 +481,11 @@ describe('AppComponent', () => {
     mockScriptLoaderService.loadScript.mockImplementation(options => {
       options.onLoad?.();
     });
-    (
-      component as unknown as AppComponentInternals
-    ).loadGoogleAnalyticsWithTrackingDisabled();
+    expect(() =>
+      (
+        component as unknown as AppComponentInternals
+      ).loadGoogleAnalyticsWithTrackingDisabled(),
+    ).not.toThrow();
 
     // Now trigger gtag
     const globalWithGtag = globalThis as unknown as {

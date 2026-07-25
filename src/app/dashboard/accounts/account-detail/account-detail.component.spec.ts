@@ -674,18 +674,12 @@ describe('AccountDetailComponent', () => {
       expect(component.filteredCharacters()).toHaveLength(2);
     });
 
-    it('should filter by searchText matching handle', () => {
-      component.searchText.set('Klang');
-      expect(component.filteredCharacters()).toEqual([charKlingon]);
-    });
-
-    it('should filter by searchText matching firstName', () => {
-      component.searchText.set('bat');
-      expect(component.filteredCharacters()).toEqual([charKlingon]);
-    });
-
-    it('should filter by searchText matching lastName', () => {
-      component.searchText.set('leth');
+    it.each([
+      ['handle', 'Klang'],
+      ['first name', 'bat'],
+      ['last name', 'leth'],
+    ])('should filter by searchText matching %s', (_field, searchText) => {
+      component.searchText.set(searchText);
       expect(component.filteredCharacters()).toEqual([charKlingon]);
     });
 

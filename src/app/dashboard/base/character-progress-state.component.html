@@ -1,0 +1,34 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+@if (!isLoading && errorMessage) {
+  <div class="error-container">
+    <app-lcars-error-message [message]="errorMessage"></app-lcars-error-message>
+    <div class="buttons-row">
+      <a
+        class="lcars-btn-auto sunflower"
+        [routerLink]="accountsLink"
+      >Back to Accounts</a>
+    </div>
+  </div>
+}
+
+@if (!isLoading && !errorMessage) {
+  @if (!embedded) {
+    <h1>{{ title }}</h1>
+    <p class="character-subtitle">
+      Character: {{ characterHandle }}&#64;{{ accountHandle }}
+    </p>
+  }
+
+  @if (levelLocked) {
+    <app-lcars-level-lock
+      [featureName]="featureName"
+      [requiredLevel]="unlockLevel"
+      [currentLevel]="characterLevel"
+      [characterHandle]="characterHandle"
+      [editLink]="characterEditLink"
+    ></app-lcars-level-lock>
+  }
+}

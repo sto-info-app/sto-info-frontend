@@ -1,9 +1,9 @@
 import {
   ChangeDetectorRef,
-  Directive,
-  Input,
   computed,
+  Directive,
   inject,
+  Input,
   OnDestroy,
   OnInit,
   signal,
@@ -49,6 +49,8 @@ export abstract class CharacterProgressBaseComponent<
 
   readonly progress = signal<TProgress[]>([]);
   readonly summary = signal<TSummary | null>(null);
+  /** The captain's recorded level, or null until the character resolves. */
+  readonly characterLevel = signal<number | null>(null);
   readonly savingItemId = signal<string | null>(null);
   readonly searchText = signal('');
   readonly hideComplete = signal(false);
@@ -57,6 +59,16 @@ export abstract class CharacterProgressBaseComponent<
 
   /** Fallback accent when an item has no colour defined. */
   protected readonly _fallbackAccent = '#fa0';
+
+  /**
+   * Whether the captain is below the level that unlocks this tracker in game.
+   * A level that has not resolved yet (or was never recorded) is never treated
+   * as locked, so the tracker is only withheld on a known-too-low level.
+   */
+  readonly isLevelLocked = computed(() => {
+    const level = this.characterLevel();
+    return typeof level === 'number' && level < this.unlockLevel;
+  });
 
   readonly accountLink = computed(
     () =>
@@ -92,6 +104,11 @@ export abstract class CharacterProgressBaseComponent<
   protected abstract readonly _loadDataErrorMessage: string;
   /** Message shown when a progress-only refresh fails. */
   protected abstract readonly _loadProgressErrorMessage: string;
+
+  /** The in-game level at which this tracker's feature unlocks. */
+  abstract readonly unlockLevel: number;
+  /** Display name of the gated feature, used by the level-lock notice. */
+  abstract readonly featureName: string;
 
   /** The catalog item id a progress row belongs to. */
   abstract itemId(item: TProgress): string;
@@ -137,6 +154,11 @@ export abstract class CharacterProgressBaseComponent<
     ];
   }
 
+  /** Link to the captain edit form, where the recorded level can be changed. */
+  characterEditLink(): string[] {
+    return [...this.characterLink(), 'edit'];
+  }
+
   private resolveCharacterAndLoad(
     handle: string,
     characterHandle: string,
@@ -147,6 +169,17 @@ export abstract class CharacterProgressBaseComponent<
       .subscribe({
         next: character => {
           this.characterId = character.id;
+          this.characterLevel.set(character.level ?? null);
+          this.errorMessage = '';
+          // Below the unlock level there is nothing to show or track, so the
+          // catalog and progress requests are skipped entirely.
+          if (this.isLevelLocked()) {
+            this.progress.set([]);
+            this.summary.set(null);
+            this.isLoading = false;
+            this._cdr.detectChanges();
+            return;
+          }
           this.initialLoad();
         },
         error: (err: Error) => {

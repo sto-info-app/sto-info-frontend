@@ -3,6 +3,9 @@ export type CharacterRdStatus = 'not_started' | 'in_progress' | 'complete';
 /** The maximum level a character can attain in an R&D school. */
 export const RD_MAX_LEVEL = 20;
 
+/** The captain level at which the Research & Development system unlocks. */
+export const RD_UNLOCK_LEVEL = 15;
+
 /**
  * STO item-rarity slugs. Match the `.rarity-<slug>` / `--sto-rarity-<slug>`
  * utilities defined in the core `sto-rarity-colours.scss` stylesheet.

@@ -5,22 +5,42 @@
 <div id="rd-container">
   <div
     id="rd-main-column"
-    class="col">
+    class="col"
+  >
     @if (!isLoading && errorMessage) {
       <div class="error-container">
         <app-lcars-error-message
-          [message]="errorMessage"></app-lcars-error-message>
+          [message]="errorMessage"
+        ></app-lcars-error-message>
         <div class="buttons-row">
           <a
             class="lcars-btn-auto sunflower"
             [routerLink]="accountsLink"
-            >Back to Accounts</a
-          >
+          >Back to Accounts</a>
         </div>
       </div>
     }
 
-    @if (!isLoading && !errorMessage) {
+    <!-- Below the unlock level there is nothing to track yet, so the tracker is
+         replaced by a notice pointing at the captain's level. -->
+    @if (!isLoading && !errorMessage && isLevelLocked()) {
+      @if (!embedded) {
+        <h1>Research &amp; Development</h1>
+        <p class="character-subtitle">
+          Character: {{ characterHandle }}&#64;{{ accountHandle }}
+        </p>
+      }
+
+      <app-lcars-level-lock
+        [featureName]="featureName"
+        [requiredLevel]="unlockLevel"
+        [currentLevel]="characterLevel()"
+        [characterHandle]="characterHandle"
+        [editLink]="characterEditLink()"
+      ></app-lcars-level-lock>
+    }
+
+    @if (!isLoading && !errorMessage && !isLevelLocked()) {
       @if (!embedded) {
         <h1>Research &amp; Development</h1>
         <p class="character-subtitle">
@@ -32,23 +52,19 @@
       @if (summary()) {
         <div class="rd-summary-bar">
           <div class="summary-stat">
-            <span class="summary-value"
-              >{{ summary()!.totalLevels }} /
-              {{ summary()!.maxPossibleLevels }}</span
-            >
+            <span class="summary-value">{{ summary()!.totalLevels }} /
+              {{ summary()!.maxPossibleLevels }}</span>
             <span class="summary-label">Levels Earnt</span>
           </div>
           <div class="summary-stat">
-            <span class="summary-value"
-              >{{ summary()!.overallCompletionPercentage }}%</span
-            >
+            <span class="summary-value">{{
+                summary()!.overallCompletionPercentage
+              }}%</span>
             <span class="summary-label">Overall</span>
           </div>
           <div class="summary-stat">
-            <span class="summary-value"
-              >{{ summary()!.completedSchools }} /
-              {{ summary()!.totalSchools }}</span
-            >
+            <span class="summary-value">{{ summary()!.completedSchools }} /
+              {{ summary()!.totalSchools }}</span>
             <span class="summary-label">Maxed</span>
           </div>
         </div>
@@ -60,21 +76,24 @@
           <div
             class="rd-row"
             [style.border-left-color]="accent(item)"
-            [style.background]="accentTint(item)">
+            [style.background]="accentTint(item)"
+          >
             <div class="rd-row-header">
               <span class="rd-name">
                 @if (showIcon(item)) {
                   <img
                     class="rd-icon"
                     [src]="item.school.iconUrl"
-                    [alt]="item.school.name + ' icon'"
-                    (error)="onIconError(item.schoolId)" />
+                    [alt]='item.school.name + " icon"'
+                    (error)="onIconError(item.schoolId)"
+                  />
                 } @else {
                   <i
                     class="fas rd-icon-fa"
                     [class]="schoolIcon(item)"
                     [style.color]="accent(item)"
-                    aria-hidden="true"></i>
+                    aria-hidden="true"
+                  ></i>
                 }
                 {{ item.school.name }}
                 @if (item.school.description) {
@@ -83,10 +102,9 @@
                     class="rd-info-btn"
                     [class.active]="expandedDescriptions().has(item.schoolId)"
                     title="Toggle description"
-                    [attr.aria-expanded]="
-                      expandedDescriptions().has(item.schoolId)
-                    "
-                    (click)="toggleDescription(item.schoolId)">
+                    [attr.aria-expanded]="expandedDescriptions().has(item.schoolId)"
+                    (click)="toggleDescription(item.schoolId)"
+                  >
                     <i class="fas fa-circle-info"></i>
                   </button>
                 }
@@ -95,16 +113,16 @@
                 <span
                   class="rd-quality"
                   [ngClass]="currentRarityClass(item)"
-                  [title]="'Can craft up to ' + currentQuality(item)"
-                  >{{ currentQuality(item) }}</span
-                >
-                <span class="rd-level-value"
-                  >Level {{ item.currentLevel }} / {{ maxLevel }}</span
-                >
+                  [title]='"Can craft up to " + currentQuality(item)'
+                >{{ currentQuality(item) }}</span>
+                <span class="rd-level-value">Level {{ item.currentLevel }} / {{
+                    maxLevel
+                  }}</span>
                 @if (savingItemId() === item.schoolId) {
                   <i
                     class="fas fa-spinner fa-spin saving-spinner"
-                    aria-hidden="true"></i>
+                    aria-hidden="true"
+                  ></i>
                 }
               </div>
             </div>
@@ -120,18 +138,22 @@
             <!-- Level bar: a native range input drives clicks, drags and arrow keys -->
             <div
               class="rd-progress-track"
-              [class.saving]="savingItemId() === item.schoolId">
+              [class.saving]="savingItemId() === item.schoolId"
+            >
               <div
                 class="rd-progress-fill"
                 [style.width.%]="item.completionPercentage"
                 [style.background-color]="accent(item)"
-                aria-hidden="true"></div>
+                aria-hidden="true"
+              >
+              </div>
               @for (level of levelTicks; track level) {
                 <span
                   class="rd-level-tick"
                   [class.reached]="item.currentLevel >= level"
                   [style.left.%]="(level / maxLevel) * 100"
-                  aria-hidden="true"></span>
+                  aria-hidden="true"
+                ></span>
               }
               @for (milestone of qualityMilestones; track milestone.level) {
                 <span
@@ -139,26 +161,25 @@
                   [ngClass]="rarityClass(milestone.rarity)"
                   [class.reached]="item.currentLevel >= milestone.level"
                   [style.left.%]="(milestone.level / maxLevel) * 100"
-                  aria-hidden="true"></span>
+                  aria-hidden="true"
+                ></span>
               }
               <label
                 class="sr-only"
-                [for]="'rd-level-' + item.schoolId"
-                >{{ item.school.name }} level</label
-              >
+                [for]='"rd-level-" + item.schoolId'
+              >{{ item.school.name }} level</label>
               <input
                 type="range"
                 class="rd-range-input"
-                [id]="'rd-level-' + item.schoolId"
+                [id]='"rd-level-" + item.schoolId'
                 min="0"
                 [max]="maxLevel"
                 step="1"
                 [value]="item.currentLevel"
-                [attr.aria-valuetext]="
-                  'Level ' + item.currentLevel + ' of ' + maxLevel
-                "
-                [title]="'Level ' + item.currentLevel + ' of ' + maxLevel"
-                (change)="onRangeChange(item, $event)" />
+                [attr.aria-valuetext]='"Level " + item.currentLevel + " of " + maxLevel'
+                [title]='"Level " + item.currentLevel + " of " + maxLevel'
+                (change)="onRangeChange(item, $event)"
+              />
             </div>
           </div>
         }
@@ -173,62 +194,26 @@
   <!-- Side column -->
   <div
     id="rd-side-column"
-    class="col">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Filters</span>
-      <button
-        type="button"
-        class="cta-icon"
-        (click)="filtersCollapsed = !filtersCollapsed"
-        [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
-        <i
-          class="fas"
-          [class.fa-caret-down]="filtersCollapsed"
-          [class.fa-caret-up]="!filtersCollapsed"></i>
-      </button>
-    </div>
-    @if (!filtersCollapsed) {
-      <div class="filter-section">
-        <label
-          class="sr-only"
-          for="rd-school-search"
-          >Search schools</label
-        >
-        <input
-          id="rd-school-search"
-          type="text"
-          class="filter-input"
-          placeholder="Search schools…"
-          [ngModel]="searchText()"
-          (ngModelChange)="searchText.set($event)" />
-
-        @if (completeCount() > 0) {
-          <button
-            type="button"
-            class="full-width-btn-link"
-            [class.tangerine]="!hideComplete()"
-            [class.perano]="hideComplete()"
-            (click)="hideComplete.set(!hideComplete())">
-            {{ hideComplete() ? 'Show Maxed' : 'Hide Maxed' }}
-          </button>
-        }
-
-        @if (activeFilterCount() > 0) {
-          <button
-            type="button"
-            class="full-width-btn-link clear-filters-btn"
-            (click)="clearFilters()">
-            Clear Filters
-          </button>
-        }
-
-        <button
-          type="button"
-          class="full-width-btn-link perano"
-          (click)="loadProgress()">
-          <i class="fas fa-rotate-right"></i> Refresh
-        </button>
-      </div>
+    class="col"
+  >
+    <!-- Filters are pointless while the tracker is level-locked. -->
+    @if (!isLevelLocked()) {
+      <app-character-progress-filters
+        searchId="rd-school-search"
+        searchLabel="Search schools"
+        hideCompleteLabel="Hide Maxed"
+        showCompleteLabel="Show Maxed"
+        [filtersCollapsed]="filtersCollapsed"
+        [searchText]="searchText()"
+        [hideComplete]="hideComplete()"
+        [completeCount]="completeCount()"
+        [activeFilterCount]="activeFilterCount()"
+        (filtersCollapsedChange)="filtersCollapsed = $event"
+        (searchTextChange)="searchText.set($event)"
+        (hideCompleteChange)="hideComplete.set($event)"
+        (clearFilters)="clearFilters()"
+        (refresh)="loadProgress()"
+      ></app-character-progress-filters>
     }
 
     <!-- Host-projected content (e.g. character photo) shown below the filters. -->
@@ -245,18 +230,15 @@
         <a
           [routerLink]="characterLink()"
           class="full-width-btn-link peach"
-          >Character</a
-        >
+        >Character</a>
         <a
           [routerLink]="accountLink()"
           class="full-width-btn-link sunflower"
-          >Account</a
-        >
+        >Account</a>
         <a
           [routerLink]="accountsLink"
           class="full-width-btn-link bluey"
-          >Accounts</a
-        >
+        >Accounts</a>
       </div>
     }
   </div>

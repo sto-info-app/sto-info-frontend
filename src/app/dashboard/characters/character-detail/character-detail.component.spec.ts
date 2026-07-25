@@ -355,6 +355,41 @@ describe('CharacterDetailComponent', () => {
       expect(component.rdOpened()).toBe(true);
     }));
 
+    it('should switch to the specializations tab and mark it opened', () => {
+      component.selectTab('specializations');
+
+      expect(component.activeTab()).toBe('specializations');
+      expect(component.specializationsOpened()).toBe(true);
+    });
+
+    it('should reflect the specializations tab in the URL query params', () => {
+      component.selectTab('specializations');
+
+      expect(mockRouter.navigate).toHaveBeenCalledWith(
+        [],
+        expect.objectContaining({ queryParams: { tab: 'specializations' } }),
+      );
+    });
+
+    it('should keep the specializations tab mounted after switching back', () => {
+      component.selectTab('specializations');
+      component.selectTab('overview');
+
+      expect(component.activeTab()).toBe('overview');
+      expect(component.specializationsOpened()).toBe(true);
+    });
+
+    it('should activate the specializations tab named in the URL on load (deep link)', fakeAsync(() => {
+      fixture.detectChanges();
+      routeQueryParamsSubject.next(
+        convertToParamMap({ tab: 'specializations' }),
+      );
+      tick();
+
+      expect(component.activeTab()).toBe('specializations');
+      expect(component.specializationsOpened()).toBe(true);
+    }));
+
     it('should activate the tab named in the URL on load (deep link)', fakeAsync(() => {
       fixture.detectChanges();
       routeQueryParamsSubject.next(convertToParamMap({ tab: 'reputations' }));

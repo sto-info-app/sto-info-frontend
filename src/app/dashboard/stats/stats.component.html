@@ -5,7 +5,8 @@
 <div id="stats-container">
   <div
     id="stats-main-column"
-    class="col">
+    class="col"
+  >
     <h1>Statistics</h1>
 
     @if (stats) {
@@ -20,7 +21,8 @@
               icon="fas fa-users"
               color="sunflower"
               ctaText="Manage Accounts"
-              [ctaLink]="accountsLink">
+              [ctaLink]="accountsLink"
+            >
             </app-stat-info-card>
 
             <app-stat-info-card
@@ -29,12 +31,11 @@
               [value]="stats.characterCount"
               icon="fas fa-user"
               color="perano"
-              [ctaText]="
-                selectedAccountId !== 'all' || accounts.length === 1
-                  ? 'Manage Characters'
-                  : undefined
-              "
-              [ctaLink]="getCharacterCtaLink()">
+              [ctaText]='selectedAccountId !== "all" || accounts.length === 1
+  ? "Manage Characters"
+  : undefined'
+              [ctaLink]="getCharacterCtaLink()"
+            >
             </app-stat-info-card>
           </div>
 
@@ -45,11 +46,13 @@
               type="button"
               class="cta-icon"
               (click)="toggleAccountBreakdowns()"
-              [title]="accountBreakdownsExpanded ? 'Collapse' : 'Expand'">
+              [title]='accountBreakdownsExpanded ? "Collapse" : "Expand"'
+            >
               <i
                 class="fas"
                 [class.fa-caret-up]="accountBreakdownsExpanded"
-                [class.fa-caret-down]="!accountBreakdownsExpanded">
+                [class.fa-caret-down]="!accountBreakdownsExpanded"
+              >
               </i>
             </button>
           </div>
@@ -58,7 +61,8 @@
               @for (tile of accountStatTiles; track tile.breakdownId) {
                 <a
                   class="stat-category-card {{ tile.colour }}"
-                  [routerLink]="tile.link">
+                  [routerLink]="tile.link"
+                >
                   <i class="fas {{ tile.icon }} card-icon"></i>
                   <span class="card-label">{{ tile.label }}</span>
                 </a>
@@ -74,11 +78,13 @@
                 type="button"
                 class="cta-icon"
                 (click)="toggleCharacterBreakdowns()"
-                [title]="characterBreakdownsExpanded ? 'Collapse' : 'Expand'">
+                [title]='characterBreakdownsExpanded ? "Collapse" : "Expand"'
+              >
                 <i
                   class="fas"
                   [class.fa-caret-up]="characterBreakdownsExpanded"
-                  [class.fa-caret-down]="!characterBreakdownsExpanded">
+                  [class.fa-caret-down]="!characterBreakdownsExpanded"
+                >
                 </i>
               </button>
             </div>
@@ -87,7 +93,8 @@
                 @for (tile of statTiles; track tile.breakdownId) {
                   <a
                     class="stat-category-card {{ tile.colour }}"
-                    [routerLink]="tile.link">
+                    [routerLink]="tile.link"
+                  >
                     <i class="fas {{ tile.icon }} card-icon"></i>
                     <span class="card-label">{{ tile.label }}</span>
                   </a>
@@ -103,11 +110,13 @@
               type="button"
               class="cta-icon"
               (click)="toggleEndeavours()"
-              [title]="endeavoursExpanded ? 'Collapse' : 'Expand'">
+              [title]='endeavoursExpanded ? "Collapse" : "Expand"'
+            >
               <i
                 class="fas"
                 [class.fa-caret-up]="endeavoursExpanded"
-                [class.fa-caret-down]="!endeavoursExpanded">
+                [class.fa-caret-down]="!endeavoursExpanded"
+              >
               </i>
             </button>
           </div>
@@ -116,7 +125,8 @@
               @for (tile of endeavourStatTiles; track tile.breakdownId) {
                 <a
                   class="stat-category-card {{ tile.colour }}"
-                  [routerLink]="tile.link">
+                  [routerLink]="tile.link"
+                >
                   <i class="fas {{ tile.icon }} card-icon"></i>
                   <span class="card-label">{{ tile.label }}</span>
                 </a>
@@ -126,7 +136,8 @@
         } @else {
           <app-lcars-information-message
             title="No Data"
-            message="No telemetry data available for this sector.">
+            message="No telemetry data available for this sector."
+          >
           </app-lcars-information-message>
         }
       </div>
@@ -142,21 +153,27 @@
   <!-- Side navigation column -->
   <div
     id="stats-side-column"
-    class="col">
+    class="col"
+  >
     @if (accounts.length > 1) {
       <div class="lcars-text-bar small-lcars-bar-gap">
         <span>Filters</span>
       </div>
       <div
         id="stats-filters"
-        class="buttons">
+        class="buttons"
+      >
         <div class="lcars-select-container sunflower">
-          <span class="select-label">Select Account</span>
+          <label
+            class="select-label"
+            for="account-select"
+          >Select Account</label>
           <select
             id="account-select"
             title="Select Account"
             [(ngModel)]="selectedAccountId"
-            (change)="onAccountChange($any($event.target).value)">
+            (change)="onAccountChange($any($event.target).value)"
+          >
             <option value="all">All Accounts</option>
             @for (account of accounts; track account.id) {
               <option [value]="account.id">{{ account.handle }}</option>
@@ -173,13 +190,11 @@
       <a
         [routerLink]="dashboardLink"
         class="full-width-btn-link sunflower"
-        >{{ appRouteTitles.STO_DASHBOARD }}</a
-      >
+      >{{ appRouteTitles.STO_DASHBOARD }}</a>
       <a
         [routerLink]="accountsLink"
         class="full-width-btn-link sunflower"
-        >{{ appRouteTitles.STO_DASHBOARD_ACCOUNTS }}</a
-      >
+      >{{ appRouteTitles.STO_DASHBOARD_ACCOUNTS }}</a>
     </div>
   </div>
 </div>

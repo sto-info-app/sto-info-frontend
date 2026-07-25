@@ -378,8 +378,6 @@ export class AuthService {
           if (this.isApiErrorPayload(parsedBody)) {
             throw parsedBody;
           }
-
-          return;
         }),
         catchError(error => {
           const parsedError = this.extractApiErrorPayload(error);
