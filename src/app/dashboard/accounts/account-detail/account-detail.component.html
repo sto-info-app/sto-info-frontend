@@ -123,11 +123,11 @@
             @for (vm of filteredVms(); track vm.id) {
               <div
                 class="character-card"
-                [class]="vm.factionClass"
+                [ngClass]="vm.factionClass"
               >
                 <div
                   class="character-header-row"
-                  [class]="vm.classCategory"
+                  [ngClass]="vm.classCategory"
                   [routerLink]="vm.link"
                 >
                   <span class="character-name">{{ vm.character.handle }} (Lvl
