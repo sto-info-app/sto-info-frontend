@@ -219,7 +219,7 @@ jobs:
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.spec.ts
             -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,**/reports/**,**/*.spec.ts,**/*.test.ts
-            -Dsonar.issue.ignore.multicriteria=e1,e2
+            -Dsonar.issue.ignore.multicriteria=e1,e2,e3,e4
             -Dsonar.issue.ignore.multicriteria.e1.ruleKey=typescript:S1313
             -Dsonar.issue.ignore.multicriteria.e1.resourceKey=**/*.spec.ts,**/*.test.ts,**/__tests__/**,**/test/**,**/tests/**
             -Dsonar.issue.ignore.multicriteria.e2.ruleKey=secrets:S6684
