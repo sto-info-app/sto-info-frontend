@@ -56,10 +56,10 @@ describe('TeamVolunteersComponent', () => {
   });
 
   it('should build currentMemberVms and pastMemberVms', () => {
-    expect(component.currentMemberVms.length).toBe(
+    expect(component.currentMemberVms).toHaveLength(
       component.currentMembers.length,
     );
-    expect(component.pastMemberVms.length).toBe(component.pastMembers.length);
+    expect(component.pastMemberVms).toHaveLength(component.pastMembers.length);
 
     const vm = component.currentMemberVms[0];
     expect(vm.member).toBe(component.currentMembers[0]);

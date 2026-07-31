@@ -1,39 +1,36 @@
-<h2 mat-dialog-title>{{ data.mode === 'add' ? 'Add' : 'Edit' }} STO Account</h2>
+<h2 mat-dialog-title>{{ data.mode === "add" ? "Add" : "Edit" }} STO Account</h2>
 
 <mat-dialog-content>
   @if (isSubmitting) {
     <app-loading-bar
-      [loadingText]="
-        isLoadingMetadata
-          ? 'Loading Metadata'
-          : data.mode === 'add'
-            ? 'Creating Account'
-            : 'Updating Account'
-      "></app-loading-bar>
+      [loadingText]='isLoadingMetadata
+  ? "Loading Metadata"
+  : data.mode === "add"
+  ? "Creating Account"
+  : "Updating Account"'
+    ></app-loading-bar>
   }
   @if (errorMessage) {
     <app-lcars-error-message [message]="errorMessage"></app-lcars-error-message>
   }
   <form
     [formGroup]="accountForm"
-    class="account-form">
+    class="account-form"
+  >
     <div class="lcars-input-container perano">
       <label for="handle">Handle</label>
       <input
         type="text"
         id="handle"
         formControlName="handle"
-        placeholder="e.g. Username#1234" />
-      @if (
-        accountForm.get('handle')?.hasError('required') &&
-        accountForm.get('handle')?.touched
-      ) {
+        placeholder="e.g. Username#1234"
+      />
+      @if (accountForm.get("handle")?.hasError("required")
+  && accountForm.get("handle")?.touched) {
         <div class="field-error">Handle is required</div>
       }
-      @if (
-        accountForm.get('handle')?.hasError('pattern') &&
-        accountForm.get('handle')?.touched
-      ) {
+      @if (accountForm.get("handle")?.hasError("pattern")
+  && accountForm.get("handle")?.touched) {
         <div class="field-error">
           Handle must be in the format Username#1234
         </div>
@@ -45,7 +42,8 @@
       <input
         type="text"
         id="username"
-        formControlName="username" />
+        formControlName="username"
+      />
     </div>
 
     <div class="lcars-input-container sunflower">
@@ -53,11 +51,10 @@
       <input
         type="email"
         id="email"
-        formControlName="email" />
-      @if (
-        accountForm.get('email')?.hasError('email') &&
-        accountForm.get('email')?.touched
-      ) {
+        formControlName="email"
+      />
+      @if (accountForm.get("email")?.hasError("email")
+  && accountForm.get("email")?.touched) {
         <div class="field-error">Invalid email format</div>
       }
     </div>
@@ -67,15 +64,20 @@
       <input
         type="date"
         id="accountCreatedDate"
-        formControlName="accountCreatedDate" />
+        formControlName="accountCreatedDate"
+      />
     </div>
 
     <div class="lcars-select-container tangerine">
-      <span class="select-label">Platform</span>
+      <label
+        class="select-label"
+        for="platformId"
+      >Platform</label>
       <select
         id="platformId"
         title="Platform"
-        formControlName="platformId">
+        formControlName="platformId"
+      >
         <option value="">Select a platform</option>
         @for (platform of platforms; track platform.id) {
           <option [value]="platform.id">{{ platform.name }}</option>
@@ -84,11 +86,15 @@
     </div>
 
     <div class="lcars-select-container bluey">
-      <span class="select-label">Launcher (Optional)</span>
+      <label
+        class="select-label"
+        for="launcherId"
+      >Launcher (Optional)</label>
       <select
         id="launcherId"
         title="Launcher (Optional)"
-        formControlName="launcherId">
+        formControlName="launcherId"
+      >
         <option value="">None</option>
         @for (launcher of filteredLaunchers; track launcher.id) {
           <option [value]="launcher.id">{{ launcher.name }}</option>
@@ -100,19 +106,22 @@
       <label for="notes">Notes</label>
       <textarea
         id="notes"
-        formControlName="notes"></textarea>
+        formControlName="notes"
+      ></textarea>
     </div>
 
     <app-lcars-toggle
       formControlName="lifetimeSubscription"
       label="Lifetime Subscription"
-      ariaLabel="Lifetime Subscription">
+      ariaLabel="Lifetime Subscription"
+    >
     </app-lcars-toggle>
 
     <app-lcars-toggle
       formControlName="publiclyVisible"
       label="Publicly Visible"
-      ariaLabel="Publicly Visible">
+      ariaLabel="Publicly Visible"
+    >
     </app-lcars-toggle>
   </form>
 </mat-dialog-content>
@@ -123,7 +132,8 @@
       type="button"
       class="lcars-btn red"
       mat-button
-      (click)="onCancelClick()">
+      (click)="onCancelClick()"
+    >
       Cancel
     </button>
     <button
@@ -132,8 +142,9 @@
       mat-button
       [disabled]="!accountForm.valid || isSubmitting"
       [ngClass]="{ submitting: isSubmitting }"
-      (click)="onSaveClick()">
-      {{ data.mode === 'add' ? 'Add' : 'Save' }}
+      (click)="onSaveClick()"
+    >
+      {{ data.mode === "add" ? "Add" : "Save" }}
     </button>
   </div>
 </mat-dialog-actions>

@@ -199,7 +199,7 @@ describe('HealthService', () => {
     expect(secondSnapshot).toBe(API_HEALTH_STATE_DOWN);
 
     const downStates = states.filter(state => state === API_HEALTH_STATE_DOWN);
-    expect(downStates.length).toBe(1);
+    expect(downStates).toHaveLength(1);
 
     subscription.unsubscribe();
   });
@@ -219,7 +219,7 @@ describe('HealthService', () => {
     expect(secondSnapshot).toBe(API_HEALTH_STATE_UP);
 
     const upStates = states.filter(state => state === API_HEALTH_STATE_UP);
-    expect(upStates.length).toBe(1);
+    expect(upStates).toHaveLength(1);
 
     subscription.unsubscribe();
   });

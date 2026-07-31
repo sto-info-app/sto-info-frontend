@@ -12,7 +12,7 @@ import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
 import { StoAccountService } from '../services/sto-account.service';
-import { AccountVm, AccountsComponent } from './accounts.component';
+import { AccountsComponent, AccountVm } from './accounts.component';
 
 describe('AccountsComponent', () => {
   let component: AccountsComponent;
@@ -96,7 +96,7 @@ describe('AccountsComponent', () => {
     expect(component.accounts[0].characterCount).toBe(2);
     expect(component.isLoading).toBe(false);
 
-    expect(component.accountVms.length).toBe(1);
+    expect(component.accountVms).toHaveLength(1);
     const vm: AccountVm = component.accountVms[0];
     expect(vm.id).toBe(mockAccount.id);
     expect(vm.account).toBe(accounts[0]);

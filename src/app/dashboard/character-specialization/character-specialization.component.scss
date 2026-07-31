@@ -1,0 +1,396 @@
+@use 'lcars-variables' as vars;
+
+#spec-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+#spec-main-column {
+  flex: 2;
+  flex-basis: 69%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+#spec-side-column {
+  flex: 1;
+  flex-basis: 30%;
+}
+
+// -- Summary bar --------------------------------------------------------------
+
+.spec-summary-bar {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-evenly;
+  background: var(--lcars-panel-bg, #1a1a2e);
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.summary-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+.summary-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: vars.$lcars-sunflower;
+}
+
+.summary-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgb(255 255 255 / 55%);
+}
+
+// -- Active loadout -----------------------------------------------------------
+
+.spec-active-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.active-slot {
+  display: flex;
+  flex: 1 1 240px;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  background: var(--lcars-panel-bg, #1a1a2e);
+  border-left: 6px solid vars.$lcars-gold;
+  min-width: 0;
+
+  &.primary {
+    border-left-color: vars.$lcars-sunflower;
+  }
+
+  &.secondary {
+    border-left-color: vars.$lcars-perano;
+  }
+}
+
+.active-slot-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgb(255 255 255 / 55%);
+  flex: 0 0 auto;
+}
+
+// Mirrors the core `.filter-select` treatment (which is scoped to
+// `.filter-section`) so the slot pickers read as the same control.
+.active-slot-select {
+  flex: 1 1 auto;
+  min-width: 0;
+  appearance: none;
+  padding: 0.35rem 1.8rem 0.35rem 0.6rem;
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 6px;
+  background: vars.$lcars-grey-bg;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%23b3b3b3'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  color: vars.$lcars-white;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-stretch: condensed;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    border-color: vars.$lcars-perano;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  option {
+    background: #1a1a2e;
+    color: vars.$lcars-white;
+    font-weight: 400;
+  }
+}
+
+// -- Specialization list ------------------------------------------------------
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.spec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.spec-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem 0.75rem 0.55rem;
+  border-radius: 4px;
+
+  // border-left colour and background tint are bound inline per specialization
+  border-left: 4px solid vars.$lcars-gold;
+  background: rgba(vars.$lcars-gold, 0.07);
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    box-shadow 0.15s;
+
+  // Rows holding an active captain slot are ringed so the loadout stands out.
+  &.active-slot-row {
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 25%);
+  }
+}
+
+// -- Specialization header row ------------------------------------------------
+
+.spec-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.spec-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--lcars-text, #eee);
+}
+
+.spec-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  vertical-align: middle;
+}
+
+.spec-icon-fa {
+  width: 24px;
+  text-align: center;
+  font-size: 1rem;
+  flex: 0 0 auto;
+}
+
+.spec-slot-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  color: vars.$lcars-black;
+  background: vars.$lcars-gold;
+
+  &.primary {
+    background: vars.$lcars-sunflower;
+  }
+
+  &.secondary {
+    background: vars.$lcars-perano;
+  }
+}
+
+.spec-info-btn {
+  display: inline-block;
+  width: auto;
+  height: auto;
+  margin: 0;
+  background: none;
+  border: none;
+  padding: 0 0 0 0.25rem;
+  cursor: pointer;
+  color: rgb(255 255 255 / 30%);
+  font-size: 0.9rem;
+  line-height: inherit;
+  vertical-align: top;
+  transition: color 0.15s;
+
+  &:hover,
+  &.active {
+    color: vars.$lcars-perano;
+  }
+}
+
+.spec-description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--lcars-text-muted, #aaa);
+}
+
+.spec-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.spec-qualification {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid vars.$lcars-green;
+  border-radius: 999px;
+  color: vars.$lcars-green;
+}
+
+.spec-points-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: vars.$lcars-sunflower;
+}
+
+// -- Points bar (click / keyboard slider) -------------------------------------
+
+.spec-progress-track {
+  position: relative;
+  height: 18px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 12%);
+  overflow: visible;
+  cursor: pointer;
+  transition:
+    filter 0.12s ease,
+    box-shadow 0.12s ease;
+
+  &:hover {
+    filter: brightness(1.15);
+  }
+
+  // Focus ring for the invisible native range input overlaying the track.
+  &:focus-within {
+    outline: 2px solid vars.$lcars-perano;
+    outline-offset: 2px;
+  }
+
+  &.saving {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+}
+
+// Invisible native range input stretched over the track. It supplies the
+// accessible slider semantics plus native click, drag, touch and keyboard
+// handling; the styled track and markers underneath stay purely visual.
+.spec-range-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.spec-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.2s ease;
+  pointer-events: none;
+
+  // Semi-transparent so the qualification marker sitting on top of the filled
+  // portion stays clearly visible against it.
+  // background-color is bound inline from the specialization accent.
+  opacity: 0.5;
+}
+
+// Thin ticks marking each individual point's click position.
+.spec-point-tick {
+  position: absolute;
+  top: 50%;
+  width: 1px;
+  height: 55%;
+  background: rgb(255 255 255 / 30%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+
+  &.reached {
+    background: rgb(255 255 255 / 55%);
+  }
+}
+
+// Distinct round marker for the Specialization Qualification milestone. The
+// border is always drawn; the fill and glow switch on once it is reached.
+.spec-milestone {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--lcars-panel-bg, #1a1a2e);
+  border: 2px solid vars.$lcars-green;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+
+  &.reached {
+    background: vars.$lcars-green;
+    box-shadow: 0 0 5px vars.$lcars-green;
+  }
+}
+
+.saving-spinner {
+  color: vars.$lcars-sunflower;
+  font-size: 0.85rem;
+}
+
+// -- Side column briefing -----------------------------------------------------
+
+.spec-briefing {
+  padding: 0 1rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--lcars-text-muted, #aaa);
+
+  p {
+    margin: 0 0 0.6rem;
+  }
+}
+
+// -- Responsive ----------------------------------------------------------------
+
+@media (width <= 768px) {
+  #spec-container {
+    flex-direction: column;
+  }
+
+  #spec-side-column {
+    flex-basis: auto;
+    width: 100%;
+  }
+}

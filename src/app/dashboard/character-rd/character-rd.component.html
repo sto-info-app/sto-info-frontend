@@ -1,0 +1,245 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+<div id="rd-container">
+  <div
+    id="rd-main-column"
+    class="col"
+  >
+    @if (!isLoading && errorMessage) {
+      <div class="error-container">
+        <app-lcars-error-message
+          [message]="errorMessage"
+        ></app-lcars-error-message>
+        <div class="buttons-row">
+          <a
+            class="lcars-btn-auto sunflower"
+            [routerLink]="accountsLink"
+          >Back to Accounts</a>
+        </div>
+      </div>
+    }
+
+    <!-- Below the unlock level there is nothing to track yet, so the tracker is
+         replaced by a notice pointing at the captain's level. -->
+    @if (!isLoading && !errorMessage && isLevelLocked()) {
+      @if (!embedded) {
+        <h1>Research &amp; Development</h1>
+        <p class="character-subtitle">
+          Character: {{ characterHandle }}&#64;{{ accountHandle }}
+        </p>
+      }
+
+      <app-lcars-level-lock
+        [featureName]="featureName"
+        [requiredLevel]="unlockLevel"
+        [currentLevel]="characterLevel()"
+        [characterHandle]="characterHandle"
+        [editLink]="characterEditLink()"
+      ></app-lcars-level-lock>
+    }
+
+    @if (!isLoading && !errorMessage && !isLevelLocked()) {
+      @if (!embedded) {
+        <h1>Research &amp; Development</h1>
+        <p class="character-subtitle">
+          Character: {{ characterHandle }}&#64;{{ accountHandle }}
+        </p>
+      }
+
+      <!-- Summary -->
+      @if (summary()) {
+        <div class="rd-summary-bar">
+          <div class="summary-stat">
+            <span class="summary-value">{{ summary()!.totalLevels }} /
+              {{ summary()!.maxPossibleLevels }}</span>
+            <span class="summary-label">Levels Earnt</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-value">{{
+                summary()!.overallCompletionPercentage
+              }}%</span>
+            <span class="summary-label">Overall</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-value">{{ summary()!.completedSchools }} /
+              {{ summary()!.totalSchools }}</span>
+            <span class="summary-label">Maxed</span>
+          </div>
+        </div>
+      }
+
+      <!-- School list -->
+      <div class="rd-list">
+        @for (item of filteredProgress(); track item.schoolId) {
+          <div
+            class="rd-row"
+            [style.border-left-color]="accent(item)"
+            [style.background]="accentTint(item)"
+          >
+            <div class="rd-row-header">
+              <span class="rd-name">
+                @if (showIcon(item)) {
+                  <img
+                    class="rd-icon"
+                    [src]="item.school.iconUrl"
+                    [alt]='item.school.name + " icon"'
+                    (error)="onIconError(item.schoolId)"
+                  />
+                } @else {
+                  <i
+                    class="fas rd-icon-fa"
+                    [class]="schoolIcon(item)"
+                    [style.color]="accent(item)"
+                    aria-hidden="true"
+                  ></i>
+                }
+                {{ item.school.name }}
+                @if (item.school.description) {
+                  <button
+                    type="button"
+                    class="rd-info-btn"
+                    [class.active]="expandedDescriptions().has(item.schoolId)"
+                    title="Toggle description"
+                    [attr.aria-expanded]="expandedDescriptions().has(item.schoolId)"
+                    (click)="toggleDescription(item.schoolId)"
+                  >
+                    <i class="fas fa-circle-info"></i>
+                  </button>
+                }
+              </span>
+              <div class="rd-header-right">
+                <span
+                  class="rd-quality"
+                  [ngClass]="currentRarityClass(item)"
+                  [title]='"Can craft up to " + currentQuality(item)'
+                >{{ currentQuality(item) }}</span>
+                <span class="rd-level-value">Level {{ item.currentLevel }} / {{
+                    maxLevel
+                  }}</span>
+                @if (savingItemId() === item.schoolId) {
+                  <i
+                    class="fas fa-spinner fa-spin saving-spinner"
+                    aria-hidden="true"
+                  ></i>
+                }
+              </div>
+            </div>
+
+            @if (expandedDescriptions().has(item.schoolId)) {
+              <span class="rd-description">
+                @if (item.school.description) {
+                  {{ item.school.description }}
+                }
+              </span>
+            }
+
+            <!-- Level bar: a native range input drives clicks, drags and arrow keys -->
+            <div
+              class="rd-progress-track"
+              [class.saving]="savingItemId() === item.schoolId"
+            >
+              <div
+                class="rd-progress-fill"
+                [style.width.%]="item.completionPercentage"
+                [style.background-color]="accent(item)"
+                aria-hidden="true"
+              >
+              </div>
+              @for (level of levelTicks; track level) {
+                <span
+                  class="rd-level-tick"
+                  [class.reached]="item.currentLevel >= level"
+                  [style.left.%]="(level / maxLevel) * 100"
+                  aria-hidden="true"
+                ></span>
+              }
+              @for (milestone of qualityMilestones; track milestone.level) {
+                <span
+                  class="rd-milestone"
+                  [ngClass]="rarityClass(milestone.rarity)"
+                  [class.reached]="item.currentLevel >= milestone.level"
+                  [style.left.%]="(milestone.level / maxLevel) * 100"
+                  aria-hidden="true"
+                ></span>
+              }
+              <label
+                class="sr-only"
+                [for]='"rd-level-" + item.schoolId'
+              >{{ item.school.name }} level</label>
+              <input
+                type="range"
+                class="rd-range-input"
+                [id]='"rd-level-" + item.schoolId'
+                min="0"
+                [max]="maxLevel"
+                step="1"
+                [value]="item.currentLevel"
+                [attr.aria-valuetext]='"Level " + item.currentLevel + " of " + maxLevel'
+                [title]='"Level " + item.currentLevel + " of " + maxLevel'
+                (change)="onRangeChange(item, $event)"
+              />
+            </div>
+          </div>
+        }
+
+        @if (filteredProgress().length === 0 && !isLoading) {
+          <p class="go-center">No R&D schools found.</p>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Side column -->
+  <div
+    id="rd-side-column"
+    class="col"
+  >
+    <!-- Filters are pointless while the tracker is level-locked. -->
+    @if (!isLevelLocked()) {
+      <app-character-progress-filters
+        searchId="rd-school-search"
+        searchLabel="Search schools"
+        hideCompleteLabel="Hide Maxed"
+        showCompleteLabel="Show Maxed"
+        [filtersCollapsed]="filtersCollapsed"
+        [searchText]="searchText()"
+        [hideComplete]="hideComplete()"
+        [completeCount]="completeCount()"
+        [activeFilterCount]="activeFilterCount()"
+        (filtersCollapsedChange)="filtersCollapsed = $event"
+        (searchTextChange)="searchText.set($event)"
+        (hideCompleteChange)="hideComplete.set($event)"
+        (clearFilters)="clearFilters()"
+        (refresh)="loadProgress()"
+      ></app-character-progress-filters>
+    }
+
+    <!-- Host-projected content (e.g. character photo) shown below the filters. -->
+    <ng-content select="[rdAsidePhoto]"></ng-content>
+
+    <!-- Host-projected navigation shown below the photo. -->
+    <ng-content select="[rdAsideNav]"></ng-content>
+
+    @if (!embedded) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Navigation</span>
+      </div>
+      <div class="buttons">
+        <a
+          [routerLink]="characterLink()"
+          class="full-width-btn-link peach"
+        >Character</a>
+        <a
+          [routerLink]="accountLink()"
+          class="full-width-btn-link sunflower"
+        >Account</a>
+        <a
+          [routerLink]="accountsLink"
+          class="full-width-btn-link bluey"
+        >Accounts</a>
+      </div>
+    }
+  </div>
+</div>

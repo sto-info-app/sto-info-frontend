@@ -72,9 +72,9 @@ if (
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideAnimationsAsync(),
     provideZoneChangeDetection(),
     provideRouter(routes),
-    provideAnimationsAsync(),
     importProvidersFrom(
       RouterModule,
       JwtModule.forRoot({

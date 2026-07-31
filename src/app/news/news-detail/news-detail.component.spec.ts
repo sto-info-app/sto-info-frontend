@@ -84,6 +84,27 @@ describe('NewsDetailComponent', () => {
     );
   });
 
+  it('renders YouTube embeds while escaping raw HTML', async () => {
+    slug = 'my-slug';
+    await configure();
+    serviceSpy.getNewsBySlug.mockReturnValueOnce(
+      of({
+        ...buildPost(),
+        body: 'Watch https://youtu.be/UG0aHIOLbV4\n\n<script>alert(1)</script>',
+      }),
+    );
+
+    fixture.detectChanges();
+
+    const body = fixture.nativeElement.querySelector('.news-body');
+    const iframe = body.querySelector('iframe');
+    expect(iframe?.getAttribute('src')).toBe(
+      'https://www.youtube-nocookie.com/embed/UG0aHIOLbV4',
+    );
+    expect(body.querySelector('script')).toBeNull();
+    expect(body.textContent).toContain('<script>alert(1)</script>');
+  });
+
   it('flags not found when there is no slug', async () => {
     slug = null;
     await configure();

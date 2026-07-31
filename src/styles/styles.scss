@@ -1,6 +1,10 @@
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 
+// Emits the global STO item-rarity custom properties and `.rarity-*` /
+// `.go-rarity-*` utility classes for reuse across modules and components.
+@use 'sto-rarity-colours';
+
 /* You can add global styles to this file, and also import other style files */
 
 html {
@@ -238,7 +242,7 @@ button.lcars-btn,
     filter: brightness(1.1);
   }
 
-  span.select-label {
+  .select-label {
     position: absolute;
     top: 0.5rem;
     left: 1rem;

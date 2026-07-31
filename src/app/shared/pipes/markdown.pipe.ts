@@ -1,4 +1,5 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
   AMPERSAND_PATTERN,
   DOUBLE_QUOTE_PATTERN,
@@ -42,15 +43,19 @@ import {
   standalone: true,
 })
 export class MarkdownPipe implements PipeTransform {
+  private readonly _sanitizer = inject(DomSanitizer);
+
   /**
    * Transforms Markdown source into sanitized HTML.
    *
    * @param value - The Markdown source.
-   * @returns The rendered HTML string. Angular will sanitize it when bound via
-   * `[innerHTML]`.
+   * @returns Trusted HTML generated from escaped Markdown input.
    */
-  transform(value: string | null | undefined): string {
-    return this.render(value ?? '');
+  transform(value: string | null | undefined): string | SafeHtml {
+    const html = this.render(value ?? '');
+    return html.includes('<iframe')
+      ? this._sanitizer.bypassSecurityTrustHtml(html) // NOSONAR
+      : html;
   }
 
   /**

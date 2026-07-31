@@ -34,7 +34,7 @@ describe('Environment validator fuzz tests', () => {
               expect(missingKeys.length).toBeGreaterThan(0);
             } else {
               // All keys present - validator should not throw
-              expect(missingKeys.length).toBe(0);
+              expect(missingKeys).toHaveLength(0);
             }
           }).not.toThrow();
         },

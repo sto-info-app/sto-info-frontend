@@ -4,6 +4,7 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import {
+  REPUTATION_UNLOCK_LEVEL,
   CharacterReputationProgress,
   CharacterReputationSummary,
 } from 'src/app/dashboard/models/character-reputation.model';
@@ -131,6 +132,35 @@ describe('CharacterReputationsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should lock the tracker and skip loading below the unlock level', () => {
+    characterServiceSpy.getCharactersByAccount.mockReturnValue(
+      of([
+        { ...mockCharacter, level: REPUTATION_UNLOCK_LEVEL - 1 } as Character,
+      ]),
+    );
+
+    fixture.detectChanges();
+    routeParams$.next({ handle: 'Test~1234', characterHandle: 'Seven' });
+
+    expect(component.characterLevel()).toBe(REPUTATION_UNLOCK_LEVEL - 1);
+    expect(component.isLevelLocked()).toBe(true);
+    expect(reputationServiceSpy.getProgress).not.toHaveBeenCalled();
+    expect(reputationServiceSpy.getSummary).not.toHaveBeenCalled();
+    expect(component.isLoading).toBe(false);
+  });
+
+  it('should load normally once the unlock level is reached', () => {
+    characterServiceSpy.getCharactersByAccount.mockReturnValue(
+      of([{ ...mockCharacter, level: REPUTATION_UNLOCK_LEVEL } as Character]),
+    );
+
+    fixture.detectChanges();
+    routeParams$.next({ handle: 'Test~1234', characterHandle: 'Seven' });
+
+    expect(component.isLevelLocked()).toBe(false);
+    expect(reputationServiceSpy.getProgress).toHaveBeenCalledWith('char1');
   });
 
   it('should load character and reputation data on init', () => {
@@ -271,7 +301,7 @@ describe('CharacterReputationsComponent', () => {
       'rep1',
       5,
     );
-    expect(component.savingReputationId()).toBeNull();
+    expect(component.savingItemId()).toBeNull();
   });
 
   it('should tolerate summary refresh errors', () => {
@@ -292,7 +322,7 @@ describe('CharacterReputationsComponent', () => {
 
     component.updateTier(mockProgress[0], 5);
 
-    expect(component.savingReputationId()).toBeNull();
+    expect(component.savingItemId()).toBeNull();
   });
 
   it('should support rangeArray/selectTier helper logic', () => {

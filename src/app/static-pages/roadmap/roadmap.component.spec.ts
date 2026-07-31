@@ -40,7 +40,7 @@ describe('RoadmapComponent', () => {
   });
 
   it('should define side navigation anchors for each section', () => {
-    expect(component.sectionMeta.length).toBe(4);
+    expect(component.sectionMeta).toHaveLength(4);
     component.sectionMeta.forEach(section => {
       expect(section.anchorId.length).toBeGreaterThan(0);
     });

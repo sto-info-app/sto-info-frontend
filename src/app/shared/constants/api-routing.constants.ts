@@ -55,6 +55,12 @@ export const API_URLS = {
   // Reputations
   REPUTATION: apiUrl + '/reputation',
 
+  // Research & Development
+  RD: apiUrl + '/rd',
+
+  // Captain specializations
+  SPECIALIZATION: apiUrl + '/specialization',
+
   // Stats
   STATS: apiUrl + '/stats',
 

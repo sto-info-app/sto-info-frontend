@@ -5,18 +5,21 @@
 <div id="character-manage-container">
   <div
     id="character-manage-main-column"
-    class="col">
+    class="col"
+  >
     @if (!isLoading) {
-      <h1>{{ mode === 'add' ? 'Add' : 'Edit' }} Captain</h1>
+      <h1>{{ mode === "add" ? "Add" : "Edit" }} Captain</h1>
 
       @if (errorMessage) {
         <app-lcars-error-message
-          [message]="errorMessage"></app-lcars-error-message>
+          [message]="errorMessage"
+        ></app-lcars-error-message>
       }
 
       <form
         [formGroup]="characterForm"
-        class="character-manage-form">
+        class="character-manage-form"
+      >
         <!-- Section: Basic Identification -->
         <div class="lcars-text-bar small-lcars-bar-gap">
           <span>Identification</span>
@@ -28,7 +31,8 @@
             <input
               id="handle-input"
               formControlName="handle"
-              placeholder="e.g. Jean-Luc Picard" />
+              placeholder="e.g. Jean-Luc Picard"
+            />
           </div>
         </div>
 
@@ -37,19 +41,22 @@
             <label for="first-name-input">First Name</label>
             <input
               id="first-name-input"
-              formControlName="firstName" />
+              formControlName="firstName"
+            />
           </div>
           <div class="lcars-input-container bluey">
             <label for="middle-name-input">Middle Name</label>
             <input
               id="middle-name-input"
-              formControlName="middleName" />
+              formControlName="middleName"
+            />
           </div>
           <div class="lcars-input-container bluey">
             <label for="last-name-input">Last Name</label>
             <input
               id="last-name-input"
-              formControlName="lastName" />
+              formControlName="lastName"
+            />
           </div>
         </div>
 
@@ -66,7 +73,8 @@
               type="number"
               formControlName="level"
               min="0"
-              max="65" />
+              max="65"
+            />
           </div>
 
           <div class="lcars-input-container gold">
@@ -74,17 +82,22 @@
             <input
               id="created-date-input"
               type="date"
-              formControlName="createdDate" />
+              formControlName="createdDate"
+            />
           </div>
         </div>
 
         <div class="form-row">
           <div class="lcars-select-container sunflower">
-            <span class="select-label">Starting Faction</span>
+            <label
+              class="select-label"
+              for="faction-select"
+            >Starting Faction</label>
             <select
               id="faction-select"
               title="Starting Faction"
-              formControlName="factionId">
+              formControlName="factionId"
+            >
               @for (f of factions; track f.id) {
                 <option [value]="f.id">{{ f.name }}</option>
               }
@@ -92,11 +105,15 @@
           </div>
 
           <div class="lcars-select-container perano">
-            <span class="select-label">General Allegiance</span>
+            <label
+              class="select-label"
+              for="general-faction-select"
+            >General Allegiance</label>
             <select
               id="general-faction-select"
               title="General Allegiance"
-              formControlName="generalFactionId">
+              formControlName="generalFactionId"
+            >
               @for (gf of generalFactions; track gf.id) {
                 <option [value]="gf.id">{{ gf.name }}</option>
               }
@@ -106,11 +123,15 @@
 
         <div class="form-row">
           <div class="lcars-select-container tangerine">
-            <span class="select-label">Recruit Type</span>
+            <label
+              class="select-label"
+              for="recruit-type-select"
+            >Recruit Type</label>
             <select
               id="recruit-type-select"
               title="Recruit Type"
-              formControlName="recruitTypeId">
+              formControlName="recruitTypeId"
+            >
               @for (rt of recruitTypes; track rt.id) {
                 <option [value]="rt.id">{{ rt.name }}</option>
               }
@@ -118,11 +139,15 @@
           </div>
 
           <div class="lcars-select-container bluey">
-            <span class="select-label">Career Path (Class)</span>
+            <label
+              class="select-label"
+              for="class-select"
+            >Career Path (Class)</label>
             <select
               id="class-select"
               title="Career Path (Class)"
-              formControlName="classId">
+              formControlName="classId"
+            >
               @for (c of classes; track c.id) {
                 <option [value]="c.id">{{ c.name }}</option>
               }
@@ -132,11 +157,15 @@
 
         <div class="form-row">
           <div class="lcars-select-container gold">
-            <span class="select-label">Species</span>
+            <label
+              class="select-label"
+              for="species-select"
+            >Species</label>
             <select
               id="species-select"
               title="Species"
-              formControlName="speciesId">
+              formControlName="speciesId"
+            >
               @for (s of speciesList; track s.id) {
                 <option [value]="s.id">{{ s.name }}</option>
               }
@@ -144,11 +173,15 @@
           </div>
 
           <div class="lcars-select-container perano">
-            <span class="select-label">Sex</span>
+            <label
+              class="select-label"
+              for="sex-select"
+            >Sex</label>
             <select
               id="sex-select"
               title="Sex"
-              formControlName="sexId">
+              formControlName="sexId"
+            >
               @for (sex of sexes; track sex.id) {
                 <option [value]="sex.id">{{ sex.name }}</option>
               }
@@ -166,7 +199,8 @@
           <textarea
             id="biography-input"
             formControlName="biography"
-            rows="5"></textarea>
+            rows="5"
+          ></textarea>
         </div>
 
         <div class="lcars-input-container gold">
@@ -174,7 +208,8 @@
           <textarea
             id="notes-input"
             formControlName="notes"
-            rows="3"></textarea>
+            rows="3"
+          ></textarea>
         </div>
 
         <div class="form-actions">
@@ -182,7 +217,8 @@
             mat-button
             class="lcars-btn red"
             type="button"
-            (click)="onCancel()">
+            (click)="onCancel()"
+          >
             Cancel
           </button>
           <button
@@ -190,8 +226,9 @@
             class="lcars-btn green"
             type="submit"
             [disabled]="characterForm.invalid || isSubmitting"
-            (click)="onSave()">
-            {{ mode === 'add' ? 'Create' : 'Save' }}
+            (click)="onSave()"
+          >
+            {{ mode === "add" ? "Create" : "Save" }}
           </button>
         </div>
       </form>
@@ -200,7 +237,8 @@
 
   <div
     id="character-manage-side-column"
-    class="col">
+    class="col"
+  >
     <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Navigation</span>
     </div>
@@ -210,8 +248,7 @@
         (keypress)="onCancel()"
         tabindex="0"
         class="full-width-btn-link sunflower"
-        >Return</a
-      >
+      >Return</a>
     </div>
   </div>
 </div>

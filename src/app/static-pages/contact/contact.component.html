@@ -13,34 +13,34 @@
   @if (successMessage) {
     <app-lcars-success-message
       title="Message received"
-      [message]="successMessage"></app-lcars-success-message>
+      [message]="successMessage"
+    ></app-lcars-success-message>
   }
 
   @if (errorMessage) {
     <app-lcars-error-message
       title="Transmission failed"
-      [message]="errorMessage"></app-lcars-error-message>
+      [message]="errorMessage"
+    ></app-lcars-error-message>
   }
 
   <div class="form-container">
     <form
       class="form"
       [formGroup]="contactForm"
-      (ngSubmit)="onSubmit()">
+      (ngSubmit)="onSubmit()"
+    >
       <div class="lcars-input-container cool">
         <label for="contactName">Name</label>
         <input
           id="contactName"
           type="text"
-          formControlName="name" />
-        @if (
-          formControls.name.touched && formControls.name.hasError('required')
-        ) {
+          formControlName="name"
+        />
+        @if (formControls.name.touched && formControls.name.hasError("required")) {
           <div class="field-error">{{ errorTextNameRequired }}</div>
         }
-        @if (
-          formControls.name.touched && formControls.name.hasError('maxlength')
-        ) {
+        @if (formControls.name.touched && formControls.name.hasError("maxlength")) {
           <div class="field-error">{{ errorTextNameMaxLength }}</div>
         }
       </div>
@@ -50,44 +50,43 @@
         <input
           id="contactEmail"
           type="email"
-          formControlName="email" />
-        @if (
-          formControls.email.touched && formControls.email.hasError('required')
-        ) {
+          formControlName="email"
+        />
+        @if (formControls.email.touched && formControls.email.hasError("required")) {
           <div class="field-error">{{ errorTextEmailRequired }}</div>
         }
-        @if (
-          formControls.email.touched && formControls.email.hasError('pattern')
-        ) {
+        @if (formControls.email.touched && formControls.email.hasError("pattern")) {
           <div class="field-error">{{ errorTextEmailInvalidFormat }}</div>
         }
-        @if (
-          formControls.email.touched && formControls.email.hasError('maxlength')
-        ) {
+        @if (formControls.email.touched && formControls.email.hasError("maxlength")) {
           <div class="field-error">{{ errorTextEmailMaxLength }}</div>
         }
       </div>
 
       <div
         id="topic-dropdown"
-        class="lcars-select-container cool">
-        <span class="select-label">Topic</span>
+        class="lcars-select-container cool"
+      >
+        <label
+          class="select-label"
+          for="contactTopic"
+        >Topic</label>
         <select
           id="contactTopic"
           title="Topic"
-          formControlName="topic">
+          formControlName="topic"
+        >
           <option
             value=""
-            disabled>
+            disabled
+          >
             Select a topic
           </option>
           @for (topic of topics; track topic.value) {
             <option [value]="topic.value">{{ topic.label }}</option>
           }
         </select>
-        @if (
-          formControls.topic.touched && formControls.topic.hasError('required')
-        ) {
+        @if (formControls.topic.touched && formControls.topic.hasError("required")) {
           <div class="field-error">{{ errorTextTopicRequired }}</div>
         }
       </div>
@@ -96,17 +95,14 @@
         <label for="contactMessage">Message</label>
         <textarea
           id="contactMessage"
-          formControlName="message"></textarea>
-        @if (
-          formControls.message.touched &&
-          formControls.message.hasError('required')
-        ) {
+          formControlName="message"
+        ></textarea>
+        @if (formControls.message.touched
+  && formControls.message.hasError("required")) {
           <div class="field-error">{{ errorTextMessageRequired }}</div>
         }
-        @if (
-          formControls.message.touched &&
-          formControls.message.hasError('maxlength')
-        ) {
+        @if (formControls.message.touched
+  && formControls.message.hasError("maxlength")) {
           <div class="field-error">{{ errorTextMessageMaxLength }}</div>
         }
       </div>
@@ -116,7 +112,8 @@
           type="submit"
           class="submit-button"
           [disabled]="contactForm.invalid || isSubmitting"
-          [ngClass]="{ submitting: isSubmitting }">
+          [ngClass]="{ submitting: isSubmitting }"
+        >
           Send message
         </button>
       </div>

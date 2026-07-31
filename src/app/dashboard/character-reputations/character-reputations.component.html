@@ -5,50 +5,41 @@
 <div id="reputations-container">
   <div
     id="reputations-main-column"
-    class="col">
-    @if (!isLoading && errorMessage) {
-      <div class="error-container">
-        <app-lcars-error-message
-          [message]="errorMessage"></app-lcars-error-message>
-        <div class="buttons-row">
-          <a
-            class="lcars-btn-auto sunflower"
-            [routerLink]="accountsLink"
-            >Back to Accounts</a
-          >
-        </div>
-      </div>
-    }
+    class="col"
+  >
+    <app-character-progress-state
+      [isLoading]="isLoading"
+      [errorMessage]="errorMessage"
+      [accountsLink]="accountsLink"
+      [embedded]="embedded"
+      title="Reputations"
+      [characterHandle]="characterHandle"
+      [accountHandle]="accountHandle"
+      [levelLocked]="isLevelLocked()"
+      [featureName]="featureName"
+      [unlockLevel]="unlockLevel"
+      [characterLevel]="characterLevel()"
+      [characterEditLink]="characterEditLink()"
+    ></app-character-progress-state>
 
-    @if (!isLoading && !errorMessage) {
-      @if (!embedded) {
-        <h1>Reputations</h1>
-        <p class="character-subtitle">
-          Character: {{ characterHandle }}&#64;{{ accountHandle }}
-        </p>
-      }
-
+    @if (!isLoading && !errorMessage && !isLevelLocked()) {
       <!-- Summary -->
       @if (summary()) {
         <div class="reputation-summary-bar">
           <div class="summary-stat">
-            <span class="summary-value"
-              >{{ summary()!.totalTiers }} /
-              {{ summary()!.maxPossibleTiers }}</span
-            >
+            <span class="summary-value">{{ summary()!.totalTiers }} /
+              {{ summary()!.maxPossibleTiers }}</span>
             <span class="summary-label">Tiers Earnt</span>
           </div>
           <div class="summary-stat">
-            <span class="summary-value"
-              >{{ summary()!.overallCompletionPercentage }}%</span
-            >
+            <span class="summary-value">{{
+                summary()!.overallCompletionPercentage
+              }}%</span>
             <span class="summary-label">Overall</span>
           </div>
           <div class="summary-stat">
-            <span class="summary-value"
-              >{{ summary()!.completedReputations }} /
-              {{ summary()!.totalReputations }}</span
-            >
+            <span class="summary-value">{{ summary()!.completedReputations }} /
+              {{ summary()!.totalReputations }}</span>
             <span class="summary-label">Completed</span>
           </div>
         </div>
@@ -60,40 +51,38 @@
           <div
             class="reputation-row"
             [style.border-left-color]="accent(item)"
-            [style.background]="accentTint(item)">
+            [style.background]="accentTint(item)"
+          >
             <div class="reputation-row-header">
               <span class="reputation-name">
                 @if (showIcon(item)) {
                   <img
                     class="reputation-icon"
                     [src]="item.reputation.iconUrl"
-                    [alt]="item.reputation.name + ' icon'"
-                    (error)="onIconError(item.reputationId)" />
+                    [alt]='item.reputation.name + " icon"'
+                    (error)="onIconError(item.reputationId)"
+                  />
                 }
                 {{ item.reputation.name }}
                 @if (item.reputation.description) {
                   <button
                     type="button"
                     class="reputation-info-btn"
-                    [class.active]="
-                      expandedDescriptions().has(item.reputationId)
-                    "
+                    [class.active]="expandedDescriptions().has(item.reputationId)"
                     title="Toggle description"
-                    [attr.aria-expanded]="
-                      expandedDescriptions().has(item.reputationId)
-                    "
-                    (click)="toggleDescription(item.reputationId)">
+                    [attr.aria-expanded]="expandedDescriptions().has(item.reputationId)"
+                    (click)="toggleDescription(item.reputationId)"
+                  >
                     <i class="fas fa-circle-info"></i>
                   </button>
                 }
               </span>
               <div class="reputation-header-right">
                 <span class="reputation-tier-value">{{
-                  formatTier(item)
-                }}</span>
-                <span class="sr-only"
-                  >{{ item.currentTier }} of {{ maxTier }} tiers</span
-                >
+                    formatTier(item)
+                  }}</span>
+                <span class="sr-only">{{ item.currentTier }} of {{ maxTier }}
+                  tiers</span>
               </div>
             </div>
             @if (expandedDescriptions().has(item.reputationId)) {
@@ -102,15 +91,15 @@
                   {{ item.reputation.description }}
                 }
                 @if (item.reputation.releasedWith) {
-                  <span class="reputation-released"
-                    >Released with {{ item.reputation.releasedWith }}</span
-                  >
+                  <span class="reputation-released">Released with {{
+                      item.reputation.releasedWith
+                    }}</span>
                 }
               </span>
             }
 
             <div class="reputation-segments">
-              @if (savingReputationId() === item.reputationId) {
+              @if (savingItemId() === item.reputationId) {
                 <span class="segments-saving">
                   <i class="fas fa-spinner fa-spin saving-spinner"></i>
                 </span>
@@ -120,14 +109,13 @@
                     type="button"
                     class="reputation-segment"
                     [class.filled]="j < item.currentTier"
-                    [style.background-color]="
-                      j < item.currentTier ? accent(item) : accentTint(item, 0.2)
-                    "
-                    [attr.aria-label]="
-                      tierTitle(j) + ' for ' + item.reputation.name
-                    "
+                    [style.background-color]="j < item.currentTier
+  ? accent(item)
+  : accentTint(item, 0.2)"
+                    [attr.aria-label]='tierTitle(j) + " for " + item.reputation.name'
                     [title]="tierTitle(j)"
-                    (click)="selectTier(item, j)">
+                    (click)="selectTier(item, j)"
+                  >
                     <span class="sr-only">{{ j + 1 }}</span>
                   </button>
                 }
@@ -146,56 +134,24 @@
   <!-- Side column -->
   <div
     id="reputations-side-column"
-    class="col">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Filters</span>
-      <button
-        type="button"
-        class="cta-icon"
-        (click)="filtersCollapsed = !filtersCollapsed"
-        [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
-        <i
-          class="fas"
-          [class.fa-caret-down]="filtersCollapsed"
-          [class.fa-caret-up]="!filtersCollapsed"></i>
-      </button>
-    </div>
-    @if (!filtersCollapsed) {
-      <div class="filter-section">
-        <input
-          type="text"
-          class="filter-input"
-          placeholder="Search reputations…"
-          [ngModel]="searchText()"
-          (ngModelChange)="searchText.set($event)" />
-
-        @if (completeCount() > 0) {
-          <button
-            type="button"
-            class="full-width-btn-link"
-            [class.tangerine]="!hideComplete()"
-            [class.perano]="hideComplete()"
-            (click)="hideComplete.set(!hideComplete())">
-            {{ hideComplete() ? 'Show Completed' : 'Hide Completed' }}
-          </button>
-        }
-
-        @if (activeFilterCount() > 0) {
-          <button
-            type="button"
-            class="full-width-btn-link clear-filters-btn"
-            (click)="clearFilters()">
-            Clear Filters
-          </button>
-        }
-
-        <button
-          type="button"
-          class="full-width-btn-link perano"
-          (click)="loadProgress()">
-          <i class="fas fa-rotate-right"></i> Refresh
-        </button>
-      </div>
+    class="col"
+  >
+    <!-- Filters are pointless while the tracker is level-locked. -->
+    @if (!isLevelLocked()) {
+      <app-character-progress-filters
+        searchId="reputation-search"
+        searchLabel="Search reputations"
+        [filtersCollapsed]="filtersCollapsed"
+        [searchText]="searchText()"
+        [hideComplete]="hideComplete()"
+        [completeCount]="completeCount()"
+        [activeFilterCount]="activeFilterCount()"
+        (filtersCollapsedChange)="filtersCollapsed = $event"
+        (searchTextChange)="searchText.set($event)"
+        (hideCompleteChange)="hideComplete.set($event)"
+        (clearFilters)="clearFilters()"
+        (refresh)="loadProgress()"
+      ></app-character-progress-filters>
     }
 
     <!-- Host-projected content (e.g. character photo) shown below the filters. -->
@@ -212,18 +168,15 @@
         <a
           [routerLink]="characterLink()"
           class="full-width-btn-link peach"
-          >Character</a
-        >
+        >Character</a>
         <a
           [routerLink]="accountLink()"
           class="full-width-btn-link sunflower"
-          >Account</a
-        >
+        >Account</a>
         <a
           [routerLink]="accountsLink"
           class="full-width-btn-link bluey"
-          >Accounts</a
-        >
+        >Accounts</a>
       </div>
     }
   </div>
