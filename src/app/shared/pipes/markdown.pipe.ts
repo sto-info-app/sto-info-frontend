@@ -51,10 +51,11 @@ export class MarkdownPipe implements PipeTransform {
    * @param value - The Markdown source.
    * @returns Trusted HTML generated from escaped Markdown input.
    */
-  transform(value: string | null | undefined): SafeHtml {
-    // render() escapes all source text and only emits allowlisted markup; trust
-    // its output so Angular does not remove the fixed, ID-validated iframe.
-    return this._sanitizer.bypassSecurityTrustHtml(this.render(value ?? '')); // NOSONAR
+  transform(value: string | null | undefined): string | SafeHtml {
+    const html = this.render(value ?? '');
+    return html.includes('<iframe')
+      ? this._sanitizer.bypassSecurityTrustHtml(html) // NOSONAR
+      : html;
   }
 
   /**
