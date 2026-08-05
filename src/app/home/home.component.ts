@@ -29,7 +29,6 @@ import { RoutingService } from '../shared/services/routing.service';
     LcarsInformationMessageComponent,
     NewsCardComponent,
   ],
-  providers: [RoutingService],
 })
 export class HomeComponent implements OnDestroy {
   appTitle: string = environment.appTitle;

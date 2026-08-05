@@ -156,7 +156,7 @@ describe('NewsListComponent', () => {
     );
   });
 
-  it('builds detail link for a post', () => {
+  it('renders a news card for each post', () => {
     serviceSpy.getPublishedNews.mockReturnValueOnce(
       of({
         items: [
