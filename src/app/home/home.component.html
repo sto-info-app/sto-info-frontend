@@ -72,11 +72,11 @@
     } @else if (recentNews.length === 0) {
       <p class="news-empty">No news posts yet.</p>
     } @else {
-      <ul class="news-items">
+      <div class="news-items">
         @for (post of recentNews; track post.id) {
           <app-news-card [post]="post"></app-news-card>
         }
-      </ul>
+      </div>
     }
   </section>
 </div>
