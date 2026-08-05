@@ -157,9 +157,31 @@ describe('NewsListComponent', () => {
   });
 
   it('builds detail link for a post', () => {
+    serviceSpy.getPublishedNews.mockReturnValueOnce(
+      of({
+        items: [
+          {
+            id: 'post-1',
+            title: 'Test Post',
+            slug: 'test-slug',
+            category: 'ANNOUNCEMENT',
+            excerpt: 'Excerpt',
+            content: 'Content',
+            publishedAt: '2026-01-01T00:00:00.000Z',
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 10,
+      } as unknown as PaginatedNews),
+    );
+
     fixture.detectChanges();
-    const link = component.getDetailLink('test-slug');
-    expect(link).toContain('test-slug');
+
+    const cards = fixture.nativeElement.querySelectorAll('app-news-card');
+    expect(cards).toHaveLength(1);
   });
 
   it('updates category counts when API returns categoryCounts', () => {

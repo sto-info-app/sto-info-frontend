@@ -1,0 +1,42 @@
+<li class="news-card" [ngClass]="'category-' + post.category">
+  <div class="news-header-row">
+    <span class="news-header-left">
+      <i
+        class="fas {{ categoryIcons[post.category] }} news-category-icon"
+        aria-hidden="true"></i>
+      <span class="news-category">{{ categoryLabels[post.category] }}</span>
+    </span>
+    @if (post.publishedAt) {
+      <time class="news-date">
+        <i class="fas fa-calendar-day news-date-icon" aria-hidden="true"></i>
+        {{ post.publishedAt | date: 'mediumDate' }}
+      </time>
+    }
+  </div>
+
+  <div class="news-main-area">
+    <div class="news-body-content">
+      <h2 class="news-title">
+        <a [routerLink]="getDetailLink(post.slug)">{{ post.title }}</a>
+      </h2>
+      @if (post.summary) {
+        <p class="news-summary">{{ post.summary }}</p>
+      }
+    </div>
+
+    <div class="news-readmore-col">
+      <a
+        class="lcars-btn lcars-btn-auto sunflower news-readmore"
+        [routerLink]="getDetailLink(post.slug)"
+        >Read more</a
+      >
+    </div>
+
+    <a
+      class="news-actions"
+      [routerLink]="getDetailLink(post.slug)"
+      [attr.aria-label]="'Read ' + post.title">
+      <i class="fas fa-chevron-right cta-icon" aria-hidden="true"></i>
+    </a>
+  </div>
+</li>

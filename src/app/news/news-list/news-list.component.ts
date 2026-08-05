@@ -12,11 +12,9 @@ import { RouterModule } from '@angular/router';
 import { Subscription, finalize, take } from 'rxjs';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
-import { RoutingService } from 'src/app/shared/services/routing.service';
+import { NewsCardComponent } from 'src/app/shared/components/news-card/news-card.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
-  NEWS_CATEGORY_ICONS,
   NEWS_CATEGORY_LABELS,
   NewsCategory,
   NewsPost,
@@ -40,23 +38,19 @@ const LOAD_TIMEOUT_MS = 12000;
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    NewsCardComponent,
   ],
 })
 export class NewsListComponent implements OnInit, OnDestroy {
   private readonly _newsService = inject(NewsService);
-  private readonly _routingService = inject(RoutingService);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
 
   /** The current in-flight news request, so a new load can cancel it. */
   private loadSubscription?: Subscription;
 
-  appRoutes = APP_ROUTES;
   categoryLabels = NEWS_CATEGORY_LABELS;
   categories = Object.values(NewsCategory);
-
-  /** Font Awesome icon per category, shown in the card header. */
-  categoryIcons = NEWS_CATEGORY_ICONS;
 
   posts: NewsPost[] = [];
   isLoading = false;
@@ -177,15 +171,5 @@ export class NewsListComponent implements OnInit, OnDestroy {
    */
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.total / PAGE_SIZE));
-  }
-
-  /**
-   * Builds the router link for a post detail page.
-   *
-   * @param slug - The post slug.
-   * @returns The absolute route link.
-   */
-  getDetailLink(slug: string): string {
-    return this._routingService.getLink(`${APP_ROUTES.NEWS}/${slug}`);
   }
 }
