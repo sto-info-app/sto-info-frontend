@@ -37,6 +37,19 @@ Automated security testing is performed on every pull request and on a regular s
   - Weekly on a schedule to catch newly discovered vulnerabilities.
 - **Action**: Fails the build if "High" or "Critical" vulnerabilities are found in production dependencies.
 
+## Known Dependency Advisory Follow-up
+
+Both the full dependency audit (`npm audit`) and the production audit gate (`npm audit --audit-level=high --omit=dev`) currently pass with **zero advisories at any severity** (last verified 2026-08-05).
+
+Active overrides are intentionally limited to advisories that still require forced transitive versions:
+
+- `@hono/node-server` for GHSA-frvp-7c67-39w9.
+- `qs` for GHSA-q8mj-m7cp-5q26.
+- `tmp` for GHSA-ph9p-34f9-6g65 and the related tmp symlink advisory.
+- `uuid` for GHSA-w5hq-g745-h8pq.
+
+The current override inventory, rationale, and removal criteria are documented in `docs/security.md`.
+
 ### Property-based fuzz testing with fast-check
 
 **What it does:**
