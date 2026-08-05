@@ -1,43 +1,81 @@
 <div>
   <h1>Welcome to the {{ appTitle }}!</h1>
-  <p>
-    A community-driven companion for Star Trek Online players.<br />
-    Track your accounts, characters, and soon stats and managing your fleet data
-    — all in one place.
-  </p>
-  <p>
-    This is a work in progress, features will be added regularly.
-    <i class="fas fa-hand-spock go-sunflower"></i>
-  </p>
-  <p>
-    The Star Trek Online Info portal is a fan-made project and is not affiliated
-    with or endorsed by Cryptic Studios or Paramount.
-  </p>
   @if (!isLoggedIn) {
+    <p>
+      The {{ appTitle }} is a free, community-built companion for Star Trek
+      Online players. Whether you play casually or manage dozens of characters
+      across multiple accounts, STO Info can help you keep everything organised
+      in one place.
+    </p>
     <div class="buttons-row">
       <a
         [routerLink]="getRouteLink(appRoutes.LOGIN)"
         class="sunflower"
-        >Login</a
-      >
+      >Login</a>
       <a
         [routerLink]="getRouteLink(appRoutes.REGISTER)"
         class="almond"
-        >Register</a
-      >
+      >Register</a>
     </div>
+
+    <app-lcars-information-message
+      [title]='"Important Information"'
+      [message]='"The Star Trek Online Info portal is a fan-made project and is not affiliated with or endorsed by Cryptic Studios or Paramount. There is no connection of data between this site and the official Star Trek Online game servers. All data is provided by yourself and is for informational purposes only."'
+    ></app-lcars-information-message>
   } @else {
-    <div class="buttons-row">
+    <p>Welcome back, Captain.</p>
+    <div class="home-dashboard-tiles">
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
-        class="sunflower"
-        >Accounts</a
+        class="dashboard-tile sunflower"
       >
+        <div class="tile-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="tile-content">
+          <span class="tile-stat">Accounts</span>
+        </div>
+      </a>
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_PROFILE)"
-        class="almond"
-        >Profile</a
+        class="dashboard-tile perano"
       >
+        <div class="tile-icon">
+          <i class="fas fa-id-card"></i>
+        </div>
+        <div class="tile-content">
+          <span class="tile-stat">Profile</span>
+        </div>
+      </a>
+      <a
+        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)"
+        class="dashboard-tile atomic"
+      >
+        <div class="tile-icon">
+          <i class="fa-solid fa-chart-bar"></i>
+        </div>
+        <div class="tile-content">
+          <span class="tile-stat">Stats</span>
+        </div>
+      </a>
     </div>
   }
+
+  <section class="news-section">
+    <h2>Recent News</h2>
+
+    @if (newsLoading) {
+      <p class="news-loading">Loading news&hellip;</p>
+    } @else if (newsError) {
+      <p class="news-error">Unable to load news at this time.</p>
+    } @else if (recentNews.length === 0) {
+      <p class="news-empty">No news posts yet.</p>
+    } @else {
+      <div class="news-items">
+        @for (post of recentNews; track post.id) {
+          <app-news-card [post]="post"></app-news-card>
+        }
+      </div>
+    }
+  </section>
 </div>
