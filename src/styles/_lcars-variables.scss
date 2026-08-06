@@ -5,6 +5,13 @@ $lcars-grey-bg: rgb(255 255 255 / 5%);
 $lcars-grey-border: rgb(255 255 255 / 10%);
 $lcars-grey-light: #b3b3b3;
 
+// Raised surfaces (member cards, list rows) sitting on the near-black page
+// background. `$lcars-grey-bg` is too faint to read as a distinct panel once a
+// card carries its own controls, so these are deliberately stronger.
+$lcars-card-surface: rgb(255 255 255 / 10%);
+$lcars-card-surface-hover: rgb(255 255 255 / 14%);
+$lcars-card-border: rgb(255 255 255 / 22%);
+
 // LCARS Palette
 $lcars-sunflower: #fc6;
 $lcars-perano: #9cf;

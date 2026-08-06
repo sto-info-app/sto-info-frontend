@@ -14,6 +14,18 @@
         [message]="errorMessage"></app-lcars-error-message>
     }
 
+    @if (actionError) {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="actionError"></app-lcars-error-message>
+    }
+
+    @if (actionMessage) {
+      <app-lcars-success-message
+        title="Acknowledged"
+        [message]="actionMessage"></app-lcars-success-message>
+    }
+
     <div id="registry-list-main-content">
       @if (mode === 'search') {
         <div class="lcars-text-bar">
@@ -24,32 +36,35 @@
           <form
             class="registry-search"
             (ngSubmit)="search()">
-            <label
-              class="sr-only"
-              for="registry-search-input">
-              Search by username
-            </label>
-            <input
-              id="registry-search-input"
-              type="search"
-              name="searchTerm"
-              placeholder="Username"
-              autocomplete="off"
-              maxlength="50"
-              [(ngModel)]="searchTerm" />
-            <button
-              type="submit"
-              class="lcars-btn sunflower">
-              Search
-            </button>
-            @if (searchTerm) {
+            <div class="form-row">
+              <div class="lcars-input-container perano">
+                <label for="registry-search-input">Username</label>
+                <input
+                  id="registry-search-input"
+                  type="search"
+                  name="searchTerm"
+                  placeholder="e.g. captain.picard"
+                  autocomplete="off"
+                  maxlength="50"
+                  [(ngModel)]="searchTerm" />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              @if (searchTerm) {
+                <button
+                  type="button"
+                  class="lcars-btn red"
+                  (click)="clearSearch()">
+                  Clear
+                </button>
+              }
               <button
-                type="button"
-                class="lcars-btn"
-                (click)="clearSearch()">
-                Clear
+                type="submit"
+                class="lcars-btn green">
+                Search
               </button>
-            }
+            </div>
           </form>
         </div>
       }
@@ -72,7 +87,14 @@
 
         <div class="registry-profile-grid">
           @for (profile of profiles; track profile.username) {
-            <app-registry-profile-card [profile]="profile" />
+            <app-registry-profile-card
+              [profile]="profile"
+              [canAct]="canAct"
+              [isActing]="isActing"
+              (addFriend)="addFriend($event)"
+              (acceptRequest)="acceptRequest($event)"
+              (unfriend)="unfriend($event)"
+              (blockMember)="blockMember($event)" />
           }
         </div>
 
@@ -104,33 +126,52 @@
       <span>Registry</span>
     </div>
     <div class="buttons">
+      <!--
+        The active link is highlighted by binding `sunflower` off the
+        directive rather than letting `routerLinkActive` add the class: every
+        LCARS colour utility is `!important`, so a second colour class on the
+        same element would be resolved by stylesheet order and would quietly
+        beat the active highlight.
+      -->
       <a
         [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_SEARCH)"
-        routerLinkActive="sunflower"
+        routerLinkActive
+        #searchActive="routerLinkActive"
         class="full-width-btn-link"
+        [class.sunflower]="searchActive.isActive"
+        [class.cool]="!searchActive.isActive"
         >{{ appRouteTitles.COMMUNITY_REGISTRY_SEARCH }}</a
       >
       <a
         [routerLink]="
           getRouteLink(appRoutes.COMMUNITY_REGISTRY_RECENTLY_JOINED)
         "
-        routerLinkActive="sunflower"
+        routerLinkActive
+        #joinedActive="routerLinkActive"
         class="full-width-btn-link"
+        [class.sunflower]="joinedActive.isActive"
+        [class.sky]="!joinedActive.isActive"
         >{{ appRouteTitles.COMMUNITY_REGISTRY_RECENTLY_JOINED }}</a
       >
       <a
         [routerLink]="
           getRouteLink(appRoutes.COMMUNITY_REGISTRY_RECENTLY_ACTIVE)
         "
-        routerLinkActive="sunflower"
+        routerLinkActive
+        #activeActive="routerLinkActive"
         class="full-width-btn-link"
+        [class.sunflower]="activeActive.isActive"
+        [class.cool]="!activeActive.isActive"
         >{{ appRouteTitles.COMMUNITY_REGISTRY_RECENTLY_ACTIVE }}</a
       >
       <a
         [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_PROFILES)"
         [routerLinkActiveOptions]="{ exact: true }"
-        routerLinkActive="sunflower"
+        routerLinkActive
+        #profilesActive="routerLinkActive"
         class="full-width-btn-link"
+        [class.sunflower]="profilesActive.isActive"
+        [class.sky]="!profilesActive.isActive"
         >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
       >
     </div>
@@ -141,7 +182,7 @@
     <div class="buttons">
       <a
         [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
-        class="full-width-btn-link"
+        class="full-width-btn-link cool"
         >{{ appRouteTitles.COMMUNITY }}</a
       >
     </div>

@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import {
   PaginatedRegistryProfiles,
@@ -13,14 +14,18 @@ import {
 /**
  * Reads the public Galactic Personnel Registry.
  *
- * Every endpoint here is public, so no access token is attached — unlike the
- * dashboard services, which authenticate each call.
+ * Every endpoint here works anonymously, so unlike the dashboard services a
+ * missing token is not an error. The token is still attached when the viewer
+ * happens to be signed in: the server uses it to hide members they have
+ * blocked or been blocked by, and to report how they relate to the member
+ * they are viewing.
  */
 @Injectable({
   providedIn: 'root',
 })
 export class RegistryService {
   private readonly _http = inject(HttpClient);
+  private readonly _authService = inject(AuthService);
 
   /**
    * Lists publicly visible registry members.
@@ -33,7 +38,7 @@ export class RegistryService {
   ): Observable<PaginatedRegistryProfiles> {
     return this._http.get<PaginatedRegistryProfiles>(
       API_URLS.REGISTRY_PROFILES,
-      { params: this.buildQueryParams(query) },
+      { ...this.viewerOptions(), params: this.buildQueryParams(query) },
     );
   }
 
@@ -46,6 +51,7 @@ export class RegistryService {
   getProfile(username: string): Observable<RegistryProfile> {
     return this._http.get<RegistryProfile>(
       `${API_URLS.REGISTRY_PROFILES}/${encodeURIComponent(username)}`,
+      this.viewerOptions(),
     );
   }
 
@@ -64,6 +70,7 @@ export class RegistryService {
       `${API_URLS.REGISTRY_PROFILES}/${encodeURIComponent(
         username,
       )}/${encodeURIComponent(accountSlug)}`,
+      this.viewerOptions(),
     );
   }
 
@@ -86,7 +93,17 @@ export class RegistryService {
       )}/${encodeURIComponent(accountSlug)}/${encodeURIComponent(
         characterSlug,
       )}`,
+      this.viewerOptions(),
     );
+  }
+
+  /**
+   * The request options carrying the viewer's access token, if they have one.
+   *
+   * @returns The auth headers when signed in, otherwise an empty options bag.
+   */
+  private viewerOptions(): Record<string, unknown> {
+    return this._authService.getHttpOptionsWithAccessToken() ?? {};
   }
 
   /**

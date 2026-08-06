@@ -12,6 +12,18 @@
         [message]="errorMessage"></app-lcars-error-message>
     }
 
+    @if (actionError) {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="actionError"></app-lcars-error-message>
+    }
+
+    @if (actionMessage) {
+      <app-lcars-success-message
+        title="Acknowledged"
+        [message]="actionMessage"></app-lcars-success-message>
+    }
+
     @if (notFound) {
       <h1>Record not found</h1>
       <p class="lcars-empty-state">
@@ -93,23 +105,113 @@
   <div
     id="registry-profile-side-column"
     class="col">
+    @if (profile && isLoggedIn && relationship !== relationshipStatus.SELF) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Officer Actions</span>
+      </div>
+      <div class="buttons">
+        @switch (relationship) {
+          @case (relationshipStatus.FRIENDS) {
+            <p class="registry-relationship-state">
+              {{ profile.username }} is on your friends list.
+            </p>
+            <button
+              type="button"
+              class="full-width-btn-link african-violet"
+              [disabled]="isActing"
+              (click)="removeFriend()">
+              Unfriend
+            </button>
+          }
+          @case (relationshipStatus.REQUEST_SENT) {
+            <p class="registry-relationship-state">
+              Your friend request is awaiting a reply.
+            </p>
+            <button
+              type="button"
+              class="full-width-btn-link gold"
+              [disabled]="isActing"
+              (click)="cancelRequest()">
+              Withdraw Request
+            </button>
+          }
+          @case (relationshipStatus.REQUEST_RECEIVED) {
+            <p class="registry-relationship-state">
+              {{ profile.username }} would like to add you as a friend.
+            </p>
+            <button
+              type="button"
+              class="full-width-btn-link green"
+              [disabled]="isActing"
+              (click)="acceptRequest()">
+              Accept Request
+            </button>
+            <button
+              type="button"
+              class="full-width-btn-link red"
+              [disabled]="isActing"
+              (click)="declineRequest()">
+              Decline Request
+            </button>
+          }
+          @case (relationshipStatus.BLOCKED) {
+            <p class="registry-relationship-state">
+              You have blocked {{ profile.username }}.
+            </p>
+            <button
+              type="button"
+              class="full-width-btn-link green"
+              [disabled]="isActing"
+              (click)="unblockMember()">
+              Unblock
+            </button>
+          }
+          @default {
+            <button
+              type="button"
+              class="full-width-btn-link sunflower"
+              [disabled]="isActing"
+              (click)="addFriend()">
+              Add Friend
+            </button>
+          }
+        }
+
+        @if (relationship !== relationshipStatus.BLOCKED) {
+          <button
+            type="button"
+            class="full-width-btn-link cardinal"
+            [disabled]="isActing"
+            (click)="blockMember()">
+            Block
+          </button>
+        }
+
+        <a
+          [routerLink]="getRouteLink(appRoutes.COMMUNITY_FRIENDS)"
+          class="full-width-btn-link cool"
+          >{{ appRouteTitles.COMMUNITY_FRIENDS }}</a
+        >
+      </div>
+    }
+
     <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Navigation</span>
     </div>
     <div class="buttons">
       <a
         [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_PROFILES)"
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link sky"
         >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
       >
       <a
         [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_SEARCH)"
-        class="full-width-btn-link"
+        class="full-width-btn-link cool"
         >{{ appRouteTitles.COMMUNITY_REGISTRY_SEARCH }}</a
       >
       <a
         [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
-        class="full-width-btn-link"
+        class="full-width-btn-link sky"
         >{{ appRouteTitles.COMMUNITY }}</a
       >
     </div>

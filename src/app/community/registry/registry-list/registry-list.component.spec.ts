@@ -1,11 +1,16 @@
 import { provideRouter, Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { EMPTY, NEVER, of, throwError } from 'rxjs';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
+import { CommunityService } from '../../community.service';
+import { RelationshipStatus } from '../../models/community.models';
 import {
   PaginatedRegistryProfiles,
   RegistryListMode,
+  RegistryProfileSummary,
 } from '../../models/registry.models';
 import {
   buildProfilePage,
@@ -14,10 +19,34 @@ import {
 import { RegistryService } from '../registry.service';
 import { RegistryListComponent } from './registry-list.component';
 
+/**
+ * Builds a member summary carrying a given relationship.
+ *
+ * @param status - The relationship the API reported.
+ * @param friendshipId - The friendship row backing it, if any.
+ * @returns A member summary.
+ */
+function withRelationship(
+  status: RelationshipStatus,
+  friendshipId: string | null = 'friendship-1',
+): RegistryProfileSummary {
+  return buildProfileSummary({
+    relationship: { status, friendshipId, blockId: null },
+  });
+}
+
 describe('RegistryListComponent', () => {
   let fixture: ComponentFixture<RegistryListComponent>;
   let component: RegistryListComponent;
   let registryServiceSpy: { getProfiles: jest.Mock };
+  let communityServiceSpy: {
+    sendFriendRequest: jest.Mock;
+    acceptFriendRequest: jest.Mock;
+    removeFriend: jest.Mock;
+    blockMember: jest.Mock;
+  };
+  let authServiceSpy: { isLoggedIn: jest.Mock };
+  let dialogSpy: { open: jest.Mock };
   let routerNavigateSpy: jest.SpyInstance;
 
   /**
@@ -33,12 +62,23 @@ describe('RegistryListComponent', () => {
     registryServiceSpy = {
       getProfiles: jest.fn(() => of(buildProfilePage())),
     };
+    communityServiceSpy = {
+      sendFriendRequest: jest.fn(() => of({})),
+      acceptFriendRequest: jest.fn(() => of({})),
+      removeFriend: jest.fn(() => of(undefined)),
+      blockMember: jest.fn(() => of({})),
+    };
+    authServiceSpy = { isLoggedIn: jest.fn(() => false) };
+    dialogSpy = { open: jest.fn(() => ({ afterClosed: () => of(true) })) };
 
     await TestBed.configureTestingModule({
       imports: [RegistryListComponent],
       providers: [
         provideRouter([]),
         { provide: RegistryService, useValue: registryServiceSpy },
+        { provide: CommunityService, useValue: communityServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: MatDialog, useValue: dialogSpy },
         {
           provide: RoutingService,
           useValue: { getLink: jest.fn((route: string) => `/${route}`) },
@@ -60,6 +100,27 @@ describe('RegistryListComponent', () => {
 
     const router = TestBed.inject(Router);
     routerNavigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
+  }
+
+  /**
+   * Signs the viewer in and renders the listing with a single member in a
+   * given relationship.
+   *
+   * @param status - The relationship the API reported.
+   * @param friendshipId - The friendship row backing it, if any.
+   * @returns The rendered member.
+   */
+  function renderSignedIn(
+    status: RelationshipStatus,
+    friendshipId: string | null = 'friendship-1',
+  ): RegistryProfileSummary {
+    const profile = withRelationship(status, friendshipId);
+    authServiceSpy.isLoggedIn.mockReturnValue(true);
+    registryServiceSpy.getProfiles.mockReturnValue(
+      of(buildProfilePage({ items: [profile] })),
+    );
+    fixture.detectChanges();
+    return profile;
   }
 
   beforeEach(() => {
@@ -416,6 +477,257 @@ describe('RegistryListComponent', () => {
       expect(component.getRouteLink('community/registry/search')).toBe(
         '/community/registry/search',
       );
+    });
+  });
+
+  describe('friend and block calls to action', () => {
+    it('should not offer actions to an anonymous visitor', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      expect(component.canAct).toBe(false);
+      expect(
+        fixture.nativeElement.querySelectorAll(
+          '.registry-profile-card__actions button',
+        ),
+      ).toHaveLength(0);
+    });
+
+    it('should render the indicators and actions the relationship implies', async () => {
+      await setup();
+      renderSignedIn(RelationshipStatus.NONE);
+
+      expect(component.canAct).toBe(true);
+      expect(
+        fixture.nativeElement.querySelectorAll(
+          '.registry-profile-card__actions button',
+        ),
+      ).toHaveLength(2);
+    });
+
+    it('should flag a friend in the listing', async () => {
+      await setup();
+      renderSignedIn(RelationshipStatus.FRIENDS);
+
+      expect(
+        fixture.nativeElement
+          .querySelector('.registry-profile-card__badge')
+          .textContent.trim(),
+      ).toBe('Friend');
+    });
+
+    it('should send a friend request and reload the page', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.NONE);
+      registryServiceSpy.getProfiles.mockClear();
+
+      component.addFriend(profile);
+
+      expect(communityServiceSpy.sendFriendRequest).toHaveBeenCalledWith({
+        username: 'captain.picard',
+      });
+      expect(component.actionMessage).toContain('Friend request sent');
+      expect(component.isActing).toBe(false);
+      expect(registryServiceSpy.getProfiles).toHaveBeenCalled();
+    });
+
+    it('should accept a received request', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.REQUEST_RECEIVED);
+
+      component.acceptRequest(profile);
+
+      expect(communityServiceSpy.acceptFriendRequest).toHaveBeenCalledWith(
+        'friendship-1',
+      );
+      expect(component.actionMessage).toContain('are now friends');
+    });
+
+    it('should ignore an accept when the API sent no friendship ID', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.REQUEST_RECEIVED, null);
+
+      component.acceptRequest(profile);
+
+      expect(communityServiceSpy.acceptFriendRequest).not.toHaveBeenCalled();
+    });
+
+    it('should offer Unfriend beside Block for an existing friend', async () => {
+      await setup();
+      renderSignedIn(RelationshipStatus.FRIENDS);
+
+      const labels = [
+        ...fixture.nativeElement.querySelectorAll(
+          '.registry-profile-card__actions button',
+        ),
+      ].map((button: HTMLButtonElement) => button.textContent?.trim());
+
+      expect(labels).toEqual(['Unfriend', 'Block']);
+    });
+
+    it('should confirm before unfriending, and say it is not a block', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.FRIENDS);
+
+      component.unfriend(profile);
+
+      expect(dialogSpy.open).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          data: expect.objectContaining({
+            confirmText: 'Unfriend',
+            message: expect.stringContaining('stay visible in the registry'),
+          }),
+        }),
+      );
+      expect(communityServiceSpy.removeFriend).toHaveBeenCalledWith(
+        'friendship-1',
+      );
+      expect(communityServiceSpy.blockMember).not.toHaveBeenCalled();
+      expect(component.actionMessage).toContain('removed from your friends');
+    });
+
+    it('should ignore an unfriend when the API sent no friendship ID', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.FRIENDS, null);
+
+      component.unfriend(profile);
+
+      expect(communityServiceSpy.removeFriend).not.toHaveBeenCalled();
+    });
+
+    it('should do nothing when the unfriend confirmation is dismissed', async () => {
+      await setup();
+      dialogSpy.open.mockReturnValue({ afterClosed: () => of(false) });
+      const profile = renderSignedIn(RelationshipStatus.FRIENDS);
+
+      component.unfriend(profile);
+
+      expect(communityServiceSpy.removeFriend).not.toHaveBeenCalled();
+    });
+
+    it('should report a failed unfriend', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.FRIENDS);
+      communityServiceSpy.removeFriend.mockReturnValue(
+        throwError(() => ({ status: 404 })),
+      );
+
+      component.unfriend(profile);
+
+      expect(component.actionError).toBe(
+        'Something went wrong removing that friend.',
+      );
+    });
+
+    it('should confirm before blocking, spelling out the consequences', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.NONE);
+
+      component.blockMember(profile);
+
+      expect(dialogSpy.open).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          data: expect.objectContaining({
+            message: expect.stringContaining('They are not told'),
+          }),
+        }),
+      );
+      expect(communityServiceSpy.blockMember).toHaveBeenCalledWith({
+        username: 'captain.picard',
+      });
+    });
+
+    it('should reload after a block so the member drops out of the listing', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.NONE);
+      registryServiceSpy.getProfiles.mockClear();
+
+      component.blockMember(profile);
+
+      expect(registryServiceSpy.getProfiles).toHaveBeenCalled();
+    });
+
+    it('should do nothing when the block confirmation is dismissed', async () => {
+      await setup();
+      dialogSpy.open.mockReturnValue({ afterClosed: () => of(false) });
+      const profile = renderSignedIn(RelationshipStatus.NONE);
+
+      component.blockMember(profile);
+
+      expect(communityServiceSpy.blockMember).not.toHaveBeenCalled();
+    });
+
+    it('should stay on the same page of results after an action', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.NONE);
+      component.loadPage(3);
+      registryServiceSpy.getProfiles.mockClear();
+
+      component.addFriend(profile);
+
+      expect(registryServiceSpy.getProfiles).toHaveBeenCalledWith(
+        expect.objectContaining({ page: 3 }),
+      );
+    });
+
+    it('should report a failed action without reloading', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.NONE);
+      communityServiceSpy.sendFriendRequest.mockReturnValue(
+        throwError(() => ({ status: 403 })),
+      );
+      registryServiceSpy.getProfiles.mockClear();
+
+      component.addFriend(profile);
+      fixture.detectChanges();
+
+      expect(component.actionError).toBe(
+        'Something went wrong sending that friend request.',
+      );
+      expect(component.isActing).toBe(false);
+      expect(registryServiceSpy.getProfiles).not.toHaveBeenCalled();
+    });
+
+    it('should report a failed accept', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.REQUEST_RECEIVED);
+      communityServiceSpy.acceptFriendRequest.mockReturnValue(
+        throwError(() => ({ status: 404 })),
+      );
+
+      component.acceptRequest(profile);
+
+      expect(component.actionError).toBe(
+        'Something went wrong accepting that request.',
+      );
+    });
+
+    it('should report a failed block', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.NONE);
+      communityServiceSpy.blockMember.mockReturnValue(
+        throwError(() => ({ status: 500 })),
+      );
+
+      component.blockMember(profile);
+
+      expect(component.actionError).toBe(
+        'Something went wrong blocking that member.',
+      );
+    });
+
+    it('should show a success banner once an action lands', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.NONE);
+
+      component.addFriend(profile);
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector('app-lcars-success-message'),
+      ).toBeTruthy();
     });
   });
 });

@@ -67,8 +67,14 @@ export const API_URLS = {
   // Contact
   CONTACT: apiUrl + '/contact',
 
-  // Galactic Personnel Registry (public)
+  // Galactic Personnel Registry (public, enriched when authenticated)
   REGISTRY_PROFILES: apiUrl + '/registry/profiles',
+
+  // Community (friends and blocking, authenticated)
+  COMMUNITY_SUMMARY: apiUrl + '/community/summary',
+  COMMUNITY_FRIENDS: apiUrl + '/community/friends',
+  COMMUNITY_FRIEND_REQUESTS: apiUrl + '/community/friend-requests',
+  COMMUNITY_BLOCKS: apiUrl + '/community/blocks',
 
   // News
   NEWS: apiUrl + '/news',

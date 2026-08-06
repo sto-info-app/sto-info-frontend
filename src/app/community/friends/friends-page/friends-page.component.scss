@@ -1,0 +1,128 @@
+@use 'lcars-variables' as vars;
+@use 'registry-layout' as registry;
+@include registry.registry-two-column(
+  'friends-container',
+  'friends-main-column',
+  'friends-side-column'
+);
+
+.friends-inner-content {
+  padding: 20px;
+}
+
+.friends-search {
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .lcars-input-container {
+      flex: 1;
+      min-width: 200px;
+      margin-bottom: 0;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+  }
+}
+
+// The tab counts reuse the badge from the content headings, but that rule is
+// scoped to `.lcars-text-bar`, so inside a side-menu button the count renders
+// as bare text tacked onto the label. Restate it as a pill that reads on both
+// the active (sunflower) and inactive (bluey) button backgrounds.
+#friends-side-column .header-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  margin-left: 0.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: vars.$lcars-black;
+  color: vars.$lcars-white;
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.member-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.member-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+
+  // Floor set by the 60px action button plus the row padding, so a member with
+  // less meta than their neighbours still occupies the same height.
+  min-height: 5.5rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid vars.$lcars-card-border;
+  border-radius: 1rem;
+  background: vars.$lcars-card-surface;
+
+  &:hover {
+    background: vars.$lcars-card-surface-hover;
+  }
+
+  &__identity {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+
+    a {
+      font-weight: 700;
+      font-size: 1.05rem;
+      overflow-wrap: anywhere;
+      text-decoration: none;
+      color: inherit;
+
+      &:hover {
+        color: vars.$lcars-sunflower;
+      }
+    }
+  }
+
+  &__name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
+  }
+
+  &__meta {
+    font-size: 0.8rem;
+    opacity: 0.75;
+    overflow-wrap: anywhere;
+  }
+
+  // A blocker's private note is free text and would otherwise wrap this row
+  // taller than every other one. The full note stays available as a tooltip.
+  &__meta--clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}

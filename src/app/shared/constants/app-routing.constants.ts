@@ -64,6 +64,9 @@ export const APP_ROUTES = {
   COMMUNITY_REGISTRY_CHARACTER:
     REGISTRY_PROFILES + '/:username/:accountSlug/:characterSlug',
 
+  // Community - Friends and blocking (authenticated)
+  COMMUNITY_FRIENDS: ROOT_ROUTES.COMMUNITY + '/friends',
+
   // News
   NEWS: ROOT_ROUTES.NEWS,
   NEWS_DETAIL: ROOT_ROUTES.NEWS + '/:slug',
@@ -137,6 +140,9 @@ export const APP_ROUTE_TITLES = {
   COMMUNITY_REGISTRY_PROFILE: 'Member Profile',
   COMMUNITY_REGISTRY_ACCOUNT: 'Member Account',
   COMMUNITY_REGISTRY_CHARACTER: 'Member Captain',
+
+  // Community - Friends and blocking (authenticated)
+  COMMUNITY_FRIENDS: 'Friends',
 
   // News
   NEWS: 'News',

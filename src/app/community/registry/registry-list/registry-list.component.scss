@@ -1,4 +1,3 @@
-@use 'lcars-variables' as vars;
 @use 'registry-layout' as registry;
 @include registry.registry-two-column(
   'registry-list-container',
@@ -15,26 +14,33 @@
 }
 
 .registry-search {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
 
-  input {
-    flex: 1 1 16rem;
-    min-height: 46px;
-    padding: 0.5rem 0.9rem;
-    border: 2px solid vars.$lcars-sunflower;
-    border-radius: 999px;
-    background: #0d0d0d;
-    color: inherit;
-    font-family: inherit;
-    font-size: inherit;
+    .lcars-input-container {
+      flex: 1;
+      min-width: 200px;
+      margin-bottom: 0;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
   }
 }
 
 .registry-profile-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+
+  // Every card fills its track, so a row of cards is uniform height whatever
+  // mix of badges, meta lines and actions each one carries.
+  align-items: stretch;
   gap: 1rem;
   margin: 0;
   padding: 0;

@@ -1,8 +1,10 @@
+import { HttpHeaders } from '@angular/common/http';
 import {
   HttpClientTestingModule,
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import {
   PaginatedRegistryProfiles,
@@ -16,6 +18,7 @@ import { RegistryService } from './registry.service';
 describe('RegistryService', () => {
   let service: RegistryService;
   let httpMock: HttpTestingController;
+  let authService: { getHttpOptionsWithAccessToken: jest.Mock };
 
   const emptyPage: PaginatedRegistryProfiles = {
     items: [],
@@ -25,13 +28,27 @@ describe('RegistryService', () => {
   };
 
   beforeEach(() => {
+    authService = { getHttpOptionsWithAccessToken: jest.fn(() => null) };
+
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [RegistryService],
+      providers: [
+        RegistryService,
+        { provide: AuthService, useValue: authService },
+      ],
     });
     service = TestBed.inject(RegistryService);
     httpMock = TestBed.inject(HttpTestingController);
   });
+
+  /**
+   * Puts the viewer in a signed-in state for the next request.
+   */
+  function signIn(): void {
+    authService.getHttpOptionsWithAccessToken.mockReturnValue({
+      headers: new HttpHeaders({ Authorization: 'Bearer token-1' }),
+    });
+  }
 
   afterEach(() => httpMock.verify());
 
@@ -84,11 +101,35 @@ describe('RegistryService', () => {
       req.flush(emptyPage);
     });
 
-    it('should not attach an authorization header', () => {
+    it('should not attach an authorization header when signed out', () => {
       service.getProfiles().subscribe();
 
       const req = httpMock.expectOne(API_URLS.REGISTRY_PROFILES);
       expect(req.request.headers.has('Authorization')).toBe(false);
+      req.flush(emptyPage);
+    });
+
+    it('should attach the access token when signed in, so blocks are applied', () => {
+      signIn();
+
+      service.getProfiles().subscribe();
+
+      const req = httpMock.expectOne(API_URLS.REGISTRY_PROFILES);
+      expect(req.request.headers.get('Authorization')).toBe('Bearer token-1');
+      req.flush(emptyPage);
+    });
+
+    it('should keep the query params alongside the access token', () => {
+      signIn();
+
+      service.getProfiles({ search: 'picard' }).subscribe();
+
+      const req = httpMock.expectOne(
+        r =>
+          r.url === API_URLS.REGISTRY_PROFILES &&
+          r.params.get('search') === 'picard',
+      );
+      expect(req.request.headers.get('Authorization')).toBe('Bearer token-1');
       req.flush(emptyPage);
     });
   });
@@ -108,6 +149,18 @@ describe('RegistryService', () => {
       service.getProfile('a b/c').subscribe();
 
       const req = httpMock.expectOne(`${API_URLS.REGISTRY_PROFILES}/a%20b%2Fc`);
+      req.flush({} as RegistryProfile);
+    });
+
+    it('should attach the access token so the relationship comes back', () => {
+      signIn();
+
+      service.getProfile('captain.picard').subscribe();
+
+      const req = httpMock.expectOne(
+        `${API_URLS.REGISTRY_PROFILES}/captain.picard`,
+      );
+      expect(req.request.headers.get('Authorization')).toBe('Bearer token-1');
       req.flush({} as RegistryProfile);
     });
   });
@@ -131,6 +184,18 @@ describe('RegistryService', () => {
       );
       req.flush({} as RegistryAccount);
     });
+
+    it('should attach the access token so blocks are applied', () => {
+      signIn();
+
+      service.getAccount('captain.picard', 'SteveX~1234').subscribe();
+
+      const req = httpMock.expectOne(
+        `${API_URLS.REGISTRY_PROFILES}/captain.picard/SteveX~1234`,
+      );
+      expect(req.request.headers.get('Authorization')).toBe('Bearer token-1');
+      req.flush({} as RegistryAccount);
+    });
   });
 
   describe('getCharacter', () => {
@@ -152,6 +217,20 @@ describe('RegistryService', () => {
       const req = httpMock.expectOne(
         `${API_URLS.REGISTRY_PROFILES}/a%20b/c%2Fd/e%23f`,
       );
+      req.flush({} as RegistryCharacter);
+    });
+
+    it('should attach the access token so blocks are applied', () => {
+      signIn();
+
+      service
+        .getCharacter('captain.picard', 'SteveX~1234', 'Rex@SteveX~1234')
+        .subscribe();
+
+      const req = httpMock.expectOne(
+        `${API_URLS.REGISTRY_PROFILES}/captain.picard/SteveX~1234/Rex%40SteveX~1234`,
+      );
+      expect(req.request.headers.get('Authorization')).toBe('Bearer token-1');
       req.flush({} as RegistryCharacter);
     });
   });

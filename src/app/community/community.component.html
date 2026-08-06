@@ -20,6 +20,23 @@
           name, email address and private notes are never shown.
         </p>
       </div>
+
+      <div class="lcars-text-bar">
+        <span>Friends</span>
+      </div>
+
+      <div class="community-inner-content">
+        <p>
+          Add officers you meet in the registry as friends, and keep them all in
+          one place. A request has to be accepted before it becomes a
+          friendship, so nobody joins your list uninvited.
+        </p>
+        <p>
+          You can also block an officer. Blocking ends any friendship between
+          you, stops either of you sending the other a request, and hides your
+          records from each other. The other officer is never told.
+        </p>
+      </div>
     </div>
   </div>
 
@@ -55,5 +72,18 @@
         >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
       >
     </div>
+
+    @if (isLoggedIn) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Crew</span>
+      </div>
+      <div class="buttons">
+        <a
+          [routerLink]="getRouteLink(appRoutes.COMMUNITY_FRIENDS)"
+          class="full-width-btn-link cool"
+          >{{ appRouteTitles.COMMUNITY_FRIENDS }}</a
+        >
+      </div>
+    }
   </div>
 </div>

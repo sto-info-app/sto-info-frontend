@@ -25,6 +25,7 @@ export function buildProfileSummary(
     lastActiveAt: '2026-08-01T12:00:00.000Z',
     publicAccountCount: 2,
     publicCharacterCount: 11,
+    relationship: null,
     ...overrides,
   };
 }

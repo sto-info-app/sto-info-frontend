@@ -1,3 +1,5 @@
+import { Relationship } from './community.models';
+
 /**
  * Ordering options supported by the registry profile listing. Values match the
  * `sort` query parameter accepted by the API.
@@ -102,6 +104,12 @@ export interface RegistryProfileSummary {
   lastActiveAt: string | null;
   publicAccountCount: number;
   publicCharacterCount: number;
+  /**
+   * How the signed-in viewer relates to this member, or null when the request
+   * was anonymous. Members on either end of a block never appear at all, so
+   * this is never `BLOCKED` in a listing.
+   */
+  relationship: Relationship | null;
 }
 
 /**

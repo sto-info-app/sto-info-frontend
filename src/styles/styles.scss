@@ -152,6 +152,16 @@ button.lcars-btn,
   text-align: right;
 }
 
+// A side menu mixes links (navigation) with buttons (actions), and both carry
+// `.full-width-btn-link`. `.buttons a` is more specific than that class, so an
+// anchor picks up a bottom margin and font size that a button does not —
+// leaving visibly different gaps and text sizes between one heading's stack and
+// the next. Restate just those two values so the element type stops mattering.
+.buttons button.full-width-btn-link {
+  margin-bottom: 16px;
+  font-size: 22px;
+}
+
 // ─── Inline Row Buttons ───────────────────────────────────────────────────────
 
 .buttons-row {

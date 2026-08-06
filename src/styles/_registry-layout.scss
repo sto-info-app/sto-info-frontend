@@ -60,6 +60,13 @@
       letter-spacing: 0.05em;
       white-space: nowrap;
       opacity: 0.75;
+
+      // Separates the label from the value sitting in the next grid column.
+      // Added in CSS rather than the markup so the `dt` text stays a clean
+      // label wherever else it is read from.
+      &::after {
+        content: ':';
+      }
     }
 
     dd {

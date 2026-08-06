@@ -334,6 +334,13 @@ $steam-dark: color.adjust(#4c8db5, $lightness: -18%);
   white-space: nowrap;
   opacity: 0.7;
   color: #fff;
+
+  // Separates the label from the value in the next grid column, matching the
+  // registry detail grids. The screen-reader-only variant of this label in the
+  // template already carries its own colon.
+  &::after {
+    content: ':';
+  }
 }
 
 .account-detail-value {

@@ -162,6 +162,18 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: APP_ROUTES.COMMUNITY_FRIENDS,
+    loadComponent: () =>
+      import('./community/friends/friends-page/friends-page.component').then(
+        m => m.FriendsPageComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.COMMUNITY_FRIENDS,
+      requiresApi: true,
+    },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.COMMUNITY_REGISTRY_SEARCH,
     loadComponent: () =>
       import('./community/registry/registry-list/registry-list.component').then(

@@ -1,14 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Observable, take } from 'rxjs';
+import { AuthService } from 'src/app/core/auth/auth.service';
+import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
   APP_ROUTES,
   APP_ROUTE_TITLES,
 } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { RoutingService } from 'src/app/shared/services/routing.service';
+import { CommunityService } from '../../community.service';
 import {
   RegistryListMode,
   RegistryProfileSummary,
@@ -69,6 +76,7 @@ const MODE_CONFIG: Record<
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsSuccessMessageComponent,
     RegistryProfileCardComponent,
   ],
 })
@@ -77,6 +85,9 @@ export class RegistryListComponent
   implements OnInit
 {
   private readonly _registryService = inject(RegistryService);
+  private readonly _communityService = inject(CommunityService);
+  private readonly _authService = inject(AuthService);
+  private readonly _dialog = inject(MatDialog);
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
   private readonly _routingService = inject(RoutingService);
@@ -90,6 +101,15 @@ export class RegistryListComponent
   profiles: RegistryProfileSummary[] = [];
   page = 1;
   total = 0;
+
+  /** Copy shown after a friend or block action succeeds. */
+  actionMessage = '';
+
+  /** Copy shown when a friend or block action fails. */
+  actionError = '';
+
+  /** Set while an action is in flight, so every card's buttons disable. */
+  isActing = false;
 
   /**
    * Reads the list mode from route data, seeds the search box from the URL and
@@ -151,6 +171,161 @@ export class RegistryListComponent
   clearSearch(): void {
     this.searchTerm = '';
     this.search();
+  }
+
+  // ----- Friend and block actions -----
+
+  /**
+   * Whether the viewer is signed in, and so can act on the listed members.
+   *
+   * @returns True when signed in.
+   */
+  get canAct(): boolean {
+    return this._authService.isLoggedIn();
+  }
+
+  /**
+   * Sends a friend request to a listed member.
+   *
+   * @param profile - The member to add.
+   */
+  addFriend(profile: RegistryProfileSummary): void {
+    this.runAction(
+      this._communityService.sendFriendRequest({
+        username: profile.username,
+      }),
+      `Friend request sent to ${profile.username}.`,
+      'Something went wrong sending that friend request.',
+    );
+  }
+
+  /**
+   * Accepts the request a listed member sent the viewer.
+   *
+   * @param profile - The member whose request to accept.
+   */
+  acceptRequest(profile: RegistryProfileSummary): void {
+    const friendshipId = profile.relationship?.friendshipId;
+    if (!friendshipId) {
+      return;
+    }
+
+    this.runAction(
+      this._communityService.acceptFriendRequest(friendshipId),
+      `You and ${profile.username} are now friends.`,
+      'Something went wrong accepting that request.',
+    );
+  }
+
+  /**
+   * Ends the friendship with a listed member, after confirmation.
+   *
+   * @param profile - The friend to remove.
+   */
+  unfriend(profile: RegistryProfileSummary): void {
+    const friendshipId = profile.relationship?.friendshipId;
+    if (!friendshipId) {
+      return;
+    }
+
+    this.confirm(
+      {
+        title: 'Unfriend Member',
+        message: `
+          <p>Remove <strong>${profile.username}</strong> from your
+          friends?</p>
+          <p>They are not told, they stay visible in the registry, and either
+          of you may ask again later.</p>`,
+        confirmText: 'Unfriend',
+      },
+      () =>
+        this.runAction(
+          this._communityService.removeFriend(friendshipId),
+          `${profile.username} was removed from your friends.`,
+          'Something went wrong removing that friend.',
+        ),
+    );
+  }
+
+  /**
+   * Blocks a listed member, after confirmation.
+   *
+   * @param profile - The member to block.
+   */
+  blockMember(profile: RegistryProfileSummary): void {
+    this.confirm(
+      {
+        title: 'Block Member',
+        message: `
+          <p>Block <strong>${profile.username}</strong>?</p>
+          <p>Any friendship or pending request between you ends, neither of
+          you can send the other a request, and you disappear from each
+          other's registry records. They are not told.</p>`,
+        confirmText: 'Block',
+      },
+      () =>
+        this.runAction(
+          this._communityService.blockMember({ username: profile.username }),
+          `${profile.username} was blocked.`,
+          'Something went wrong blocking that member.',
+        ),
+    );
+  }
+
+  /**
+   * Opens the LCARS confirmation dialog and runs the action if confirmed.
+   *
+   * @param data - The dialog copy.
+   * @param onConfirm - Invoked when the viewer confirms.
+   */
+  private confirm(
+    data: { title: string; message: string; confirmText: string },
+    onConfirm: () => void,
+  ): void {
+    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
+      width: '75%',
+      data: { ...data, cancelText: 'Cancel' },
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+      .subscribe(confirmed => {
+        if (confirmed) {
+          onConfirm();
+        }
+      });
+  }
+
+  /**
+   * Runs an action, then reloads the page so the indicators and buttons match
+   * the new relationship — and so a member the viewer just blocked drops out
+   * of the listing.
+   *
+   * @param source - The action to run.
+   * @param successMessage - Copy shown when it succeeds.
+   * @param failureMessage - Copy shown when it fails.
+   */
+  private runAction(
+    source: Observable<unknown>,
+    successMessage: string,
+    failureMessage: string,
+  ): void {
+    this.isActing = true;
+    this.actionMessage = '';
+    this.actionError = '';
+
+    source.pipe(take(1), observeInZone(this._ngZone, this._cdr)).subscribe({
+      next: () => {
+        this.isActing = false;
+        this.actionMessage = successMessage;
+        this.loadPage(this.page);
+      },
+      error: () => {
+        this.isActing = false;
+        this.actionError = failureMessage;
+      },
+    });
   }
 
   /**
