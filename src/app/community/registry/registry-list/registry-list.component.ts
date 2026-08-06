@@ -2,30 +2,46 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, take } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import {
-  APP_ROUTES,
-  APP_ROUTE_TITLES,
-} from 'src/app/shared/constants/app-routing.constants';
+import { MemberCardComponent } from 'src/app/shared/components/member-card/member-card.component';
+import { MemberCardVm } from 'src/app/shared/components/member-card/member-card.model';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
-import { RoutingService } from 'src/app/shared/services/routing.service';
 import { CommunityService } from '../../community.service';
+import { CommunityTabsComponent } from '../../community-tabs/community-tabs.component';
+import {
+  MEMBER_CARD_ACCEPT_REQUEST,
+  MEMBER_CARD_ADD_FRIEND,
+  MEMBER_CARD_BLOCK,
+  MEMBER_CARD_UNFRIEND,
+  buildRegistryMemberCard,
+} from '../../member-card.builders';
 import {
   RegistryListMode,
   RegistryProfileSummary,
   RegistrySort,
 } from '../../models/registry.models';
-import { RegistryProfileCardComponent } from '../registry-profile-card/registry-profile-card.component';
 import { RegistryPageBaseDirective } from '../registry-page-base.directive';
 import { RegistryService } from '../registry.service';
 
 const PAGE_SIZE = 12;
+
+/**
+ * A listed member alongside the card built for them.
+ */
+export interface RegistryProfileVm {
+  /** Stable identity for list tracking. */
+  id: string;
+  /** The member the card represents. */
+  profile: RegistryProfileSummary;
+  /** Presentation model handed to the shared member card. */
+  card: MemberCardVm;
+}
 
 /**
  * Copy and sort order for each list mode.
@@ -73,11 +89,11 @@ const MODE_CONFIG: Record<
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
-    RegistryProfileCardComponent,
+    MemberCardComponent,
+    CommunityTabsComponent,
   ],
 })
 export class RegistryListComponent
@@ -90,15 +106,15 @@ export class RegistryListComponent
   private readonly _dialog = inject(MatDialog);
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
-  private readonly _routingService = inject(RoutingService);
-
-  appRoutes = APP_ROUTES;
-  appRouteTitles = APP_ROUTE_TITLES;
 
   mode: RegistryListMode = 'all';
   searchTerm = '';
 
   profiles: RegistryProfileSummary[] = [];
+
+  /** Precomputed card rows for the listed members. */
+  profileVms: RegistryProfileVm[] = [];
+
   page = 1;
   total = 0;
 
@@ -144,6 +160,11 @@ export class RegistryListComponent
       result => {
         this.profiles = result?.items ?? [];
         this.total = result?.total ?? 0;
+        this.profileVms = this.profiles.map(profile => ({
+          id: profile.username,
+          profile,
+          card: buildRegistryMemberCard(profile, this.canAct),
+        }));
       },
       'Something went wrong loading the registry.',
     );
@@ -182,6 +203,31 @@ export class RegistryListComponent
    */
   get canAct(): boolean {
     return this._authService.isLoggedIn();
+  }
+
+  /**
+   * Routes a member card action to the matching handler.
+   *
+   * @param profile - The member the card represents.
+   * @param actionKey - The key emitted by the card.
+   */
+  onMemberCardAction(profile: RegistryProfileSummary, actionKey: string): void {
+    switch (actionKey) {
+      case MEMBER_CARD_ADD_FRIEND:
+        this.addFriend(profile);
+        return;
+
+      case MEMBER_CARD_ACCEPT_REQUEST:
+        this.acceptRequest(profile);
+        return;
+
+      case MEMBER_CARD_UNFRIEND:
+        this.unfriend(profile);
+        return;
+
+      case MEMBER_CARD_BLOCK:
+        this.blockMember(profile);
+    }
   }
 
   /**
@@ -375,15 +421,5 @@ export class RegistryListComponent
    */
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.total / PAGE_SIZE));
-  }
-
-  /**
-   * Builds a router link for a route constant.
-   *
-   * @param route - The route constant.
-   * @returns The path string.
-   */
-  getRouteLink(route: string): string {
-    return this._routingService.getLink(route);
   }
 }

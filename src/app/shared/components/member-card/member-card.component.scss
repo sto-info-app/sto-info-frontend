@@ -1,6 +1,6 @@
 @use 'lcars-variables' as vars;
 
-.registry-profile-card {
+.member-card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,19 +14,20 @@
   border-radius: 1rem;
   background: vars.$lcars-card-surface;
   text-align: center;
-  list-style: none;
 
-  a {
+  &__identity {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+    min-width: 0;
     text-decoration: none;
     color: inherit;
+  }
 
-    &:hover .registry-profile-card__name {
-      color: vars.$lcars-sunflower;
-    }
+  // Only a member whose record can still be opened gets the hover cue.
+  a.member-card__identity:hover .member-card__name {
+    color: vars.$lcars-sunflower;
   }
 
   &__name {

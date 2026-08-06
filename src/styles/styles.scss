@@ -813,6 +813,19 @@ button.lcars-btn,
   padding: 1rem 0;
 }
 
+// Responsive card grid (registry members and friends).
+.member-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+
+  // Every card fills its track, so a row of cards is uniform height whatever
+  // mix of badges, meta lines and actions each one carries.
+  align-items: stretch;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
 // Section header label that carries a count pill, e.g. "Captain List (3)".
 .lcars-text-bar .title-with-badge {
   display: flex;

@@ -1,0 +1,38 @@
+@use 'lcars-tabs' as tabs;
+
+// A narrower minimum than the default: the community strip carries up to six
+// tabs, so they are sized by their labels rather than padded out to match.
+@include tabs.lcars-tab-strip($min-width: 0);
+
+// Labels stay on one line whatever the width: the strip scrolls sideways when
+// it runs out of room rather than growing to two rows.
+.lcars-tab {
+  white-space: nowrap;
+}
+
+:host {
+  display: block;
+
+  // Matches the horizontal padding of the page shell the strip sits above.
+  padding: 1rem 1rem 0;
+}
+
+// Below the point where six tabs stop fitting, the strip scrolls sideways
+// rather than shrinking the labels to nothing or wrapping to a second row,
+// which would leave the LCARS end cap stranded mid-strip.
+@media (width <= 900px) {
+  .lcars-tabs {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .lcars-tab {
+    flex: 0 0 auto;
+    padding: 0 14px;
+    font-size: 1rem;
+  }
+
+  .lcars-tabs-filler {
+    display: none;
+  }
+}

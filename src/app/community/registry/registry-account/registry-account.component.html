@@ -2,6 +2,8 @@
   <app-loading-bar loadingText="Retrieving account record"></app-loading-bar>
 }
 
+<app-community-tabs />
+
 <div id="registry-account-container">
   <div
     id="registry-account-main-column"
@@ -98,16 +100,6 @@
         [routerLink]="profileLink"
         class="full-width-btn-link sunflower"
         >Back to Officer</a
-      >
-      <a
-        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_PROFILES)"
-        class="full-width-btn-link"
-        >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
-      >
-      <a
-        [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
-        class="full-width-btn-link"
-        >{{ appRouteTitles.COMMUNITY }}</a
       >
     </div>
   </div>

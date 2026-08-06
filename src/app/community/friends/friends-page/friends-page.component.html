@@ -2,6 +2,8 @@
   <app-loading-bar loadingText="Retrieving crew manifest"></app-loading-bar>
 }
 
+<app-community-tabs />
+
 <div id="friends-container">
   <div
     id="friends-main-column"
@@ -79,40 +81,13 @@
 
         <!-- Friends -->
         @if (tab === 'friends') {
-          <ul class="member-list">
-            @for (friend of friends; track friend.id) {
-              <li class="member-row">
-                <div class="member-row__identity">
-                  @if (friend.member.publiclyVisible) {
-                    <a [routerLink]="profileLink(friend.member)">
-                      {{ friend.member.username }}
-                    </a>
-                  } @else {
-                    <span
-                      class="member-row__name"
-                      title="This officer has made their record private.">
-                      {{ friend.member.username }}
-                    </span>
-                  }
-                  @if (friend.friendsSince) {
-                    <span class="member-row__meta">
-                      Friends since
-                      {{ friend.friendsSince | date: 'longDate' }}
-                    </span>
-                  }
-                </div>
-
-                <div class="member-row__actions">
-                  <button
-                    type="button"
-                    class="lcars-btn african-violet"
-                    (click)="removeFriend(friend)">
-                    Unfriend
-                  </button>
-                </div>
-              </li>
+          <div class="member-card-grid">
+            @for (vm of friendVms; track vm.id) {
+              <app-member-card
+                [vm]="vm.card"
+                (action)="onMemberCardAction(vm.friend, $event)" />
             }
-          </ul>
+          </div>
 
           @if (totalPages > 1) {
             <div class="lcars-pagination">
@@ -273,27 +248,6 @@
           <span class="header-count-badge">{{ summary.blockedCount }}</span>
         }
       </button>
-    </div>
-
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      <a
-        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_SEARCH)"
-        class="full-width-btn-link cool"
-        >{{ appRouteTitles.COMMUNITY_REGISTRY_SEARCH }}</a
-      >
-      <a
-        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_PROFILES)"
-        class="full-width-btn-link sky"
-        >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
-      >
-      <a
-        [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
-        class="full-width-btn-link cool"
-        >{{ appRouteTitles.COMMUNITY }}</a
-      >
     </div>
   </div>
 </div>

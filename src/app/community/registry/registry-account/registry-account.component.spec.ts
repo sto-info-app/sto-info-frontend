@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
@@ -41,6 +42,7 @@ describe('RegistryAccountComponent', () => {
           provide: RoutingService,
           useValue: { getLink: jest.fn((route: string) => `/${route}`) },
         },
+        { provide: AuthService, useValue: { isLoggedIn: () => false } },
         {
           provide: ActivatedRoute,
           useValue: {

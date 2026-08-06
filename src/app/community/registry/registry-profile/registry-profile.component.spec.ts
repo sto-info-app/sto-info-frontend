@@ -285,15 +285,6 @@ describe('RegistryProfileComponent', () => {
     ]);
   });
 
-  it('should delegate route links to the routing service', async () => {
-    await setup();
-    fixture.detectChanges();
-
-    expect(component.getRouteLink('community/registry/profiles')).toBe(
-      '/community/registry/profiles',
-    );
-  });
-
   describe('officer actions panel', () => {
     it('should not offer any action to an anonymous visitor', async () => {
       await setup();

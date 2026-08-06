@@ -2,6 +2,8 @@
   <app-loading-bar loadingText="Scanning personnel records"></app-loading-bar>
 }
 
+<app-community-tabs />
+
 <div id="registry-list-container">
   <div
     id="registry-list-main-column"
@@ -85,16 +87,12 @@
           <p class="lcars-empty-state">{{ emptyMessage }}</p>
         }
 
-        <div class="registry-profile-grid">
-          @for (profile of profiles; track profile.username) {
-            <app-registry-profile-card
-              [profile]="profile"
-              [canAct]="canAct"
+        <div class="member-card-grid">
+          @for (vm of profileVms; track vm.id) {
+            <app-member-card
+              [vm]="vm.card"
               [isActing]="isActing"
-              (addFriend)="addFriend($event)"
-              (acceptRequest)="acceptRequest($event)"
-              (unfriend)="unfriend($event)"
-              (blockMember)="blockMember($event)" />
+              (action)="onMemberCardAction(vm.profile, $event)" />
           }
         </div>
 
@@ -116,75 +114,6 @@
           </div>
         }
       </div>
-    </div>
-  </div>
-
-  <div
-    id="registry-list-side-column"
-    class="col">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Registry</span>
-    </div>
-    <div class="buttons">
-      <!--
-        The active link is highlighted by binding `sunflower` off the
-        directive rather than letting `routerLinkActive` add the class: every
-        LCARS colour utility is `!important`, so a second colour class on the
-        same element would be resolved by stylesheet order and would quietly
-        beat the active highlight.
-      -->
-      <a
-        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_SEARCH)"
-        routerLinkActive
-        #searchActive="routerLinkActive"
-        class="full-width-btn-link"
-        [class.sunflower]="searchActive.isActive"
-        [class.cool]="!searchActive.isActive"
-        >{{ appRouteTitles.COMMUNITY_REGISTRY_SEARCH }}</a
-      >
-      <a
-        [routerLink]="
-          getRouteLink(appRoutes.COMMUNITY_REGISTRY_RECENTLY_JOINED)
-        "
-        routerLinkActive
-        #joinedActive="routerLinkActive"
-        class="full-width-btn-link"
-        [class.sunflower]="joinedActive.isActive"
-        [class.sky]="!joinedActive.isActive"
-        >{{ appRouteTitles.COMMUNITY_REGISTRY_RECENTLY_JOINED }}</a
-      >
-      <a
-        [routerLink]="
-          getRouteLink(appRoutes.COMMUNITY_REGISTRY_RECENTLY_ACTIVE)
-        "
-        routerLinkActive
-        #activeActive="routerLinkActive"
-        class="full-width-btn-link"
-        [class.sunflower]="activeActive.isActive"
-        [class.cool]="!activeActive.isActive"
-        >{{ appRouteTitles.COMMUNITY_REGISTRY_RECENTLY_ACTIVE }}</a
-      >
-      <a
-        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_PROFILES)"
-        [routerLinkActiveOptions]="{ exact: true }"
-        routerLinkActive
-        #profilesActive="routerLinkActive"
-        class="full-width-btn-link"
-        [class.sunflower]="profilesActive.isActive"
-        [class.sky]="!profilesActive.isActive"
-        >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
-      >
-    </div>
-
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      <a
-        [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
-        class="full-width-btn-link cool"
-        >{{ appRouteTitles.COMMUNITY }}</a
-      >
     </div>
   </div>
 </div>

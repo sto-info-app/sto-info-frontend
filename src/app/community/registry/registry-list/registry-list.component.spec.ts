@@ -408,9 +408,7 @@ describe('RegistryListComponent', () => {
       await setup();
       fixture.detectChanges();
 
-      const cards = fixture.nativeElement.querySelectorAll(
-        'app-registry-profile-card',
-      );
+      const cards = fixture.nativeElement.querySelectorAll('app-member-card');
       expect(cards).toHaveLength(1);
     });
 
@@ -469,17 +467,6 @@ describe('RegistryListComponent', () => {
     });
   });
 
-  describe('getRouteLink', () => {
-    it('should delegate to the routing service', async () => {
-      await setup();
-      fixture.detectChanges();
-
-      expect(component.getRouteLink('community/registry/search')).toBe(
-        '/community/registry/search',
-      );
-    });
-  });
-
   describe('friend and block calls to action', () => {
     it('should not offer actions to an anonymous visitor', async () => {
       await setup();
@@ -487,9 +474,7 @@ describe('RegistryListComponent', () => {
 
       expect(component.canAct).toBe(false);
       expect(
-        fixture.nativeElement.querySelectorAll(
-          '.registry-profile-card__actions button',
-        ),
+        fixture.nativeElement.querySelectorAll('.member-card__actions button'),
       ).toHaveLength(0);
     });
 
@@ -499,9 +484,7 @@ describe('RegistryListComponent', () => {
 
       expect(component.canAct).toBe(true);
       expect(
-        fixture.nativeElement.querySelectorAll(
-          '.registry-profile-card__actions button',
-        ),
+        fixture.nativeElement.querySelectorAll('.member-card__actions button'),
       ).toHaveLength(2);
     });
 
@@ -511,7 +494,7 @@ describe('RegistryListComponent', () => {
 
       expect(
         fixture.nativeElement
-          .querySelector('.registry-profile-card__badge')
+          .querySelector('.member-card__badge')
           .textContent.trim(),
       ).toBe('Friend');
     });
@@ -558,7 +541,7 @@ describe('RegistryListComponent', () => {
 
       const labels = [
         ...fixture.nativeElement.querySelectorAll(
-          '.registry-profile-card__actions button',
+          '.member-card__actions button',
         ),
       ].map((button: HTMLButtonElement) => button.textContent?.trim());
 
@@ -716,6 +699,46 @@ describe('RegistryListComponent', () => {
       expect(component.actionError).toBe(
         'Something went wrong blocking that member.',
       );
+    });
+
+    it('should route each card action to its handler', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.NONE);
+
+      component.onMemberCardAction(profile, 'add-friend');
+      expect(communityServiceSpy.sendFriendRequest).toHaveBeenCalled();
+
+      component.onMemberCardAction(profile, 'block');
+      expect(communityServiceSpy.blockMember).toHaveBeenCalled();
+
+      component.onMemberCardAction(profile, 'accept-request');
+      expect(communityServiceSpy.acceptFriendRequest).toHaveBeenCalled();
+
+      component.onMemberCardAction(profile, 'unfriend');
+      expect(communityServiceSpy.removeFriend).toHaveBeenCalled();
+    });
+
+    it('should ignore a card action it does not recognise', async () => {
+      await setup();
+      const profile = renderSignedIn(RelationshipStatus.NONE);
+
+      component.onMemberCardAction(profile, 'nonsense');
+
+      expect(communityServiceSpy.sendFriendRequest).not.toHaveBeenCalled();
+      expect(communityServiceSpy.blockMember).not.toHaveBeenCalled();
+    });
+
+    it('should press the card button the relationship offers', async () => {
+      await setup();
+      renderSignedIn(RelationshipStatus.NONE);
+
+      fixture.nativeElement
+        .querySelectorAll('.member-card__actions button')[0]
+        .click();
+
+      expect(communityServiceSpy.sendFriendRequest).toHaveBeenCalledWith({
+        username: 'captain.picard',
+      });
     });
 
     it('should show a success banner once an action lands', async () => {

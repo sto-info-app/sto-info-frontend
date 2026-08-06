@@ -1,5 +1,6 @@
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
+@use 'lcars-tabs' as tabs;
 
 #character-detail-shell {
   display: flex;
@@ -39,66 +40,7 @@
 
 // ─── LCARS Tab Strip ─────────────────────────────────────────────────────────
 
-.lcars-tabs {
-  display: flex;
-  align-items: stretch;
-  gap: 6px;
-  margin: 0.5rem 0 0.1rem;
-  height: 40px;
-}
-
-.lcars-tab {
-  appearance: none;
-  border: none;
-
-  // Global `button` styles add 8px side / 16px bottom margins; zero them so
-  // the tab strip's flex gap is the single source of spacing.
-  margin: 0;
-  cursor: pointer;
-  height: 100%;
-  min-width: 140px;
-  padding: 0 24px;
-  border-radius: 6px 6px 0 0;
-  background-color: #455580;
-  color: vars.$lcars-perano;
-  font-family: vars.$font-antonio;
-  font-size: 1.15rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  line-height: 1;
-  transition:
-    background-color 0.15s,
-    color 0.15s,
-    filter 0.15s;
-
-  &:first-child {
-    border-top-left-radius: 20px;
-  }
-
-  &:hover:not(.active) {
-    filter: brightness(1.2);
-    color: vars.$lcars-white;
-  }
-
-  &.active {
-    background-color: vars.$lcars-sunflower;
-    color: vars.$a11y-black;
-  }
-
-  &:focus-visible {
-    outline: 2px solid vars.$lcars-sunflower;
-    outline-offset: 2px;
-  }
-}
-
-.lcars-tabs-filler {
-  flex: 1 1 auto;
-  align-self: stretch;
-  min-width: 40px;
-  border-radius: 6px 20px 0 0;
-  background-color: #455580;
-}
+@include tabs.lcars-tab-strip;
 
 // ─── Tab Panels ──────────────────────────────────────────────────────────────
 
@@ -226,12 +168,5 @@
 @media (width <= 768px) {
   #character-detail-container {
     flex-direction: column;
-  }
-
-  .lcars-tab {
-    min-width: 0;
-    flex: 1 1 auto;
-    padding: 0 12px;
-    font-size: 1rem;
   }
 }

@@ -2,6 +2,8 @@
   <app-loading-bar loadingText="Retrieving personnel record"></app-loading-bar>
 }
 
+<app-community-tabs />
+
 <div id="registry-profile-container">
   <div
     id="registry-profile-main-column"
@@ -102,10 +104,13 @@
     }
   </div>
 
-  <div
-    id="registry-profile-side-column"
-    class="col">
-    @if (profile && isLoggedIn && relationship !== relationshipStatus.SELF) {
+  <!-- Rendered only when there is an action to offer: with the section's
+       navigation now in the tab strip, an officer with no available action
+       would otherwise leave an empty column beside the record. -->
+  @if (profile && isLoggedIn && relationship !== relationshipStatus.SELF) {
+    <div
+      id="registry-profile-side-column"
+      class="col">
       <div class="lcars-text-bar small-lcars-bar-gap">
         <span>Officer Actions</span>
       </div>
@@ -186,34 +191,7 @@
             Block
           </button>
         }
-
-        <a
-          [routerLink]="getRouteLink(appRoutes.COMMUNITY_FRIENDS)"
-          class="full-width-btn-link cool"
-          >{{ appRouteTitles.COMMUNITY_FRIENDS }}</a
-        >
       </div>
-    }
-
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
     </div>
-    <div class="buttons">
-      <a
-        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_PROFILES)"
-        class="full-width-btn-link sky"
-        >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
-      >
-      <a
-        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_SEARCH)"
-        class="full-width-btn-link cool"
-        >{{ appRouteTitles.COMMUNITY_REGISTRY_SEARCH }}</a
-      >
-      <a
-        [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
-        class="full-width-btn-link sky"
-        >{{ appRouteTitles.COMMUNITY }}</a
-      >
-    </div>
-  </div>
+  }
 </div>

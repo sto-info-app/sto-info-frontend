@@ -2,6 +2,8 @@
   <app-loading-bar loadingText="Retrieving service record"></app-loading-bar>
 }
 
+<app-community-tabs />
+
 <div id="registry-character-container">
   <div
     id="registry-character-main-column"
@@ -138,11 +140,6 @@
         [routerLink]="profileLink"
         class="full-width-btn-link"
         >Back to Officer</a
-      >
-      <a
-        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_PROFILES)"
-        class="full-width-btn-link"
-        >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
       >
     </div>
   </div>

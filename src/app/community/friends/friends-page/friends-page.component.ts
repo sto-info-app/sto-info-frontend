@@ -15,13 +15,15 @@ import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import {
-  APP_ROUTES,
-  APP_ROUTE_TITLES,
-} from 'src/app/shared/constants/app-routing.constants';
+import { MemberCardComponent } from 'src/app/shared/components/member-card/member-card.component';
+import { MemberCardVm } from 'src/app/shared/components/member-card/member-card.model';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
-import { RoutingService } from 'src/app/shared/services/routing.service';
 import { CommunityService } from '../../community.service';
+import { CommunityTabsComponent } from '../../community-tabs/community-tabs.component';
+import {
+  MEMBER_CARD_UNFRIEND,
+  buildFriendMemberCard,
+} from '../../member-card.builders';
 import {
   BlockedMember,
   CommunityMember,
@@ -34,6 +36,18 @@ import {
 import { buildRegistryProfileLink } from '../../registry/registry-card.builders';
 
 const PAGE_SIZE = 12;
+
+/**
+ * A friend alongside the card built for them.
+ */
+export interface FriendVm {
+  /** Stable identity for list tracking. */
+  id: string;
+  /** The friendship the card represents. */
+  friend: Friend;
+  /** Presentation model handed to the shared member card. */
+  card: MemberCardVm;
+}
 
 /**
  * Heading and empty-state copy for each tab.
@@ -76,19 +90,17 @@ const TAB_CONFIG: Record<FriendsTab, { heading: string; empty: string }> = {
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
+    MemberCardComponent,
+    CommunityTabsComponent,
   ],
 })
 export class FriendsPageComponent implements OnInit {
   private readonly _communityService = inject(CommunityService);
-  private readonly _routingService = inject(RoutingService);
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
   private readonly _dialog = inject(MatDialog);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
-
-  appRoutes = APP_ROUTES;
-  appRouteTitles = APP_ROUTE_TITLES;
 
   tab: FriendsTab = 'friends';
   isLoading = false;
@@ -96,6 +108,10 @@ export class FriendsPageComponent implements OnInit {
   successMessage = '';
 
   friends: Friend[] = [];
+
+  /** Precomputed card rows for the friend list. */
+  friendVms: FriendVm[] = [];
+
   requests: FriendRequest[] = [];
   blocked: BlockedMember[] = [];
 
@@ -206,6 +222,11 @@ export class FriendsPageComponent implements OnInit {
       result => {
         this.friends = result?.items ?? [];
         this.total = result?.total ?? 0;
+        this.friendVms = this.friends.map(friend => ({
+          id: friend.id,
+          friend,
+          card: buildFriendMemberCard(friend),
+        }));
       },
       'Something went wrong loading your friends.',
     );
@@ -260,6 +281,18 @@ export class FriendsPageComponent implements OnInit {
   }
 
   // ----- Actions -----
+
+  /**
+   * Routes a member card action to the matching handler.
+   *
+   * @param friend - The friendship the card represents.
+   * @param actionKey - The key emitted by the card.
+   */
+  onMemberCardAction(friend: Friend, actionKey: string): void {
+    if (actionKey === MEMBER_CARD_UNFRIEND) {
+      this.removeFriend(friend);
+    }
+  }
 
   /**
    * Accepts a request addressed to the viewer.
@@ -406,16 +439,6 @@ export class FriendsPageComponent implements OnInit {
    */
   profileLink(member: CommunityMember): string[] {
     return buildRegistryProfileLink(member.username);
-  }
-
-  /**
-   * Builds a router link for a route constant.
-   *
-   * @param route - The route constant.
-   * @returns The path string.
-   */
-  getRouteLink(route: string): string {
-    return this._routingService.getLink(route);
   }
 
   // ----- Helpers -----

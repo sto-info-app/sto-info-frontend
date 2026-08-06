@@ -6,7 +6,6 @@ import { CommunityComponent } from './community.component';
 
 describe('CommunityComponent', () => {
   let fixture: ComponentFixture<CommunityComponent>;
-  let component: CommunityComponent;
   let authServiceSpy: { isLoggedIn: jest.Mock };
 
   beforeEach(async () => {
@@ -25,7 +24,6 @@ describe('CommunityComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(CommunityComponent);
-    component = fixture.componentInstance;
   });
 
   /**
@@ -40,29 +38,26 @@ describe('CommunityComponent', () => {
     fixture.detectChanges();
   }
 
-  it('should render the registry links in the side column', () => {
+  it('should navigate the section from the community tab strip', () => {
     render();
 
-    const links = fixture.nativeElement.querySelectorAll(
-      '#community-side-column .buttons a',
+    const tabs = fixture.nativeElement.querySelectorAll(
+      'app-community-tabs .lcars-tab',
     );
 
-    expect(links).toHaveLength(4);
-    expect(fixture.nativeElement.textContent).toContain('Search the Registry');
+    expect(tabs).toHaveLength(5);
     expect(fixture.nativeElement.textContent).toContain('Recently Joined');
     expect(fixture.nativeElement.textContent).toContain('Recently Active');
-    expect(fixture.nativeElement.textContent).toContain('Profiles');
   });
 
-  it('should use the two-column page shell', () => {
+  it('should mark itself as the About tab', () => {
     render();
 
-    expect(
-      fixture.nativeElement.querySelector('#community-main-column'),
-    ).toBeTruthy();
-    expect(
-      fixture.nativeElement.querySelector('#community-side-column'),
-    ).toBeTruthy();
+    const about = fixture.nativeElement.querySelector(
+      'app-community-tabs .lcars-tab',
+    );
+
+    expect(about.textContent.trim()).toBe('About');
   });
 
   it('should state that the registry is opt-in', () => {
@@ -102,32 +97,26 @@ describe('CommunityComponent', () => {
     expect(text).not.toContain('Events');
   });
 
-  it('should hide the friends link from a signed-out visitor', () => {
+  it('should hide the friends tab from a signed-out visitor', () => {
     render();
 
-    expect(component.isLoggedIn).toBe(false);
-    expect(
-      fixture.nativeElement.querySelectorAll(
-        '#community-side-column .buttons a',
-      ),
-    ).toHaveLength(4);
+    // Checked against the tab labels rather than the page text: the About copy
+    // describes the friends list whether or not the visitor is signed in.
+    const labels = Array.from(
+      fixture.nativeElement.querySelectorAll('app-community-tabs .lcars-tab'),
+    ).map(tab => (tab as HTMLElement).textContent?.trim());
+
+    expect(labels).not.toContain('Friends');
   });
 
-  it('should show the friends link to a signed-in officer', () => {
+  it('should show the friends tab to a signed-in officer', () => {
     render(true);
 
-    const links = fixture.nativeElement.querySelectorAll(
-      '#community-side-column .buttons a',
+    const tabs = fixture.nativeElement.querySelectorAll(
+      'app-community-tabs .lcars-tab',
     );
-    expect(links).toHaveLength(5);
-    expect(fixture.nativeElement.textContent).toContain('Friends');
-  });
 
-  it('should delegate route links to the routing service', () => {
-    render();
-
-    expect(component.getRouteLink('community/registry/search')).toBe(
-      '/community/registry/search',
-    );
+    expect(tabs).toHaveLength(6);
+    expect(tabs[5].textContent.trim()).toBe('Friends');
   });
 });

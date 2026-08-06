@@ -1,0 +1,72 @@
+<div class="member-card">
+  @if (vm.link) {
+    <a
+      class="member-card__identity"
+      [routerLink]="vm.link">
+      <ng-container [ngTemplateOutlet]="identity"></ng-container>
+    </a>
+  } @else {
+    <div
+      class="member-card__identity"
+      [title]="vm.unlinkedTitle">
+      <ng-container [ngTemplateOutlet]="identity"></ng-container>
+    </div>
+  }
+
+  @if (vm.reserveBadgeSlot) {
+    <span class="member-card__badge-slot">
+      @if (vm.badge) {
+        <span
+          class="member-card__badge"
+          [class]="'member-card__badge--' + vm.badge.modifier">
+          {{ vm.badge.label }}
+        </span>
+      }
+    </span>
+  }
+
+  @if (vm.stats.length > 0) {
+    <dl class="member-card__stats">
+      @for (stat of vm.stats; track stat.label) {
+        <div>
+          <dt>{{ stat.label }}</dt>
+          <dd>{{ stat.value }}</dd>
+        </div>
+      }
+    </dl>
+  }
+
+  @for (line of vm.meta; track $index) {
+    <p class="member-card__meta">{{ line }}</p>
+  }
+
+  @if (vm.actions.length > 0) {
+    <div class="member-card__actions">
+      @for (cardAction of vm.actions; track cardAction.key) {
+        <button
+          type="button"
+          class="lcars-btn"
+          [ngClass]="cardAction.colourClass"
+          [disabled]="isActing"
+          [attr.aria-label]="cardAction.ariaLabel"
+          (click)="action.emit(cardAction.key)">
+          {{ cardAction.label }}
+        </button>
+      }
+    </div>
+  }
+</div>
+
+<!--
+  The avatar and username are the same whether or not the member's record can
+  be opened; only the element wrapping them changes, so they are declared once
+  here rather than repeated in both branches.
+-->
+<ng-template #identity>
+  <app-entity-avatar
+    [src]="vm.imageUrl"
+    [alt]="vm.username"
+    [size]="100"></app-entity-avatar>
+
+  <span class="member-card__name">{{ vm.username }}</span>
+</ng-template>

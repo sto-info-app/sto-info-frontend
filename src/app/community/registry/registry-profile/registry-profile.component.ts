@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Observable, take } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { AccountCardComponent } from 'src/app/shared/components/account-card/account-card.component';
@@ -11,15 +11,11 @@ import { EntityAvatarComponent } from 'src/app/shared/components/entity-avatar/e
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import {
-  APP_ROUTES,
-  APP_ROUTE_TITLES,
-} from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
-import { RoutingService } from 'src/app/shared/services/routing.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
 import { CommunityService } from '../../community.service';
+import { CommunityTabsComponent } from '../../community-tabs/community-tabs.component';
 import { RelationshipStatus } from '../../models/community.models';
 import {
   RegistryAccountSummary,
@@ -41,12 +37,12 @@ import { RegistryService } from '../registry.service';
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
     EntityAvatarComponent,
     AccountCardComponent,
+    CommunityTabsComponent,
   ],
 })
 export class RegistryProfileComponent
@@ -58,12 +54,9 @@ export class RegistryProfileComponent
   private readonly _authService = inject(AuthService);
   private readonly _dialog = inject(MatDialog);
   private readonly _route = inject(ActivatedRoute);
-  private readonly _routingService = inject(RoutingService);
   private readonly _seoService = inject(SeoService);
   private readonly _pageTitleService = inject(PageTitleService);
 
-  appRoutes = APP_ROUTES;
-  appRouteTitles = APP_ROUTE_TITLES;
   relationshipStatus = RelationshipStatus;
 
   username = '';
@@ -360,15 +353,5 @@ export class RegistryProfileComponent
         `${profile.publicCharacterCount} captain(s).`,
       profile.profilePicture300 ?? undefined,
     );
-  }
-
-  /**
-   * Builds a router link for a route constant.
-   *
-   * @param route - The route constant.
-   * @returns The path string.
-   */
-  getRouteLink(route: string): string {
-    return this._routingService.getLink(route);
   }
 }

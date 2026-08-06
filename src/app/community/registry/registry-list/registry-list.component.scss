@@ -1,9 +1,16 @@
-@use 'registry-layout' as registry;
-@include registry.registry-two-column(
-  'registry-list-container',
-  'registry-list-main-column',
-  'registry-list-side-column'
-);
+// Single column: the section is navigated from the community tab strip, so the
+// listing gets the full width for its card grid.
+#registry-list-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+#registry-list-main-column {
+  flex: 1;
+  min-width: 0;
+}
 
 .registry-list-inner-content {
   padding: 20px;
@@ -32,17 +39,4 @@
     margin-top: 1rem;
     justify-content: flex-end;
   }
-}
-
-.registry-profile-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-
-  // Every card fills its track, so a row of cards is uniform height whatever
-  // mix of badges, meta lines and actions each one carries.
-  align-items: stretch;
-  gap: 1rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }

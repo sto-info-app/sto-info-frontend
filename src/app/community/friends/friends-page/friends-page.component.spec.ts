@@ -1,8 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
+import {
+  ActivatedRoute,
+  Router,
+  convertToParamMap,
+  provideRouter,
+} from '@angular/router';
 import { BehaviorSubject, of, throwError } from 'rxjs';
-import { RoutingService } from 'src/app/shared/services/routing.service';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { CommunityService } from '../../community.service';
 import {
   BlockedMember,
@@ -124,7 +129,7 @@ describe('FriendsPageComponent', () => {
     unblockMember: jest.Mock;
   };
   let dialogSpy: { open: jest.Mock };
-  let routerSpy: { navigate: jest.Mock };
+  let routerNavigateSpy: jest.SpyInstance;
   let queryParams: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
 
   /**
@@ -147,18 +152,14 @@ describe('FriendsPageComponent', () => {
       unblockMember: jest.fn(() => of(undefined)),
     };
     dialogSpy = { open: jest.fn(() => ({ afterClosed: () => of(true) })) };
-    routerSpy = { navigate: jest.fn(() => Promise.resolve(true)) };
 
     await TestBed.configureTestingModule({
       imports: [FriendsPageComponent],
       providers: [
+        provideRouter([]),
         { provide: CommunityService, useValue: communityServiceSpy },
         { provide: MatDialog, useValue: dialogSpy },
-        { provide: Router, useValue: routerSpy },
-        {
-          provide: RoutingService,
-          useValue: { getLink: jest.fn((route: string) => `/${route}`) },
-        },
+        { provide: AuthService, useValue: { isLoggedIn: () => true } },
         {
           provide: ActivatedRoute,
           useValue: { queryParamMap: queryParams.asObservable() },
@@ -168,6 +169,9 @@ describe('FriendsPageComponent', () => {
 
     fixture = TestBed.createComponent(FriendsPageComponent);
     component = fixture.componentInstance;
+
+    const router = TestBed.inject(Router);
+    routerNavigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
   }
 
   describe('tab selection', () => {
@@ -221,7 +225,7 @@ describe('FriendsPageComponent', () => {
 
       component.selectTab('incoming');
 
-      expect(routerSpy.navigate).toHaveBeenCalledWith(
+      expect(routerNavigateSpy).toHaveBeenCalledWith(
         [],
         expect.objectContaining({ queryParams: { tab: 'incoming' } }),
       );
@@ -233,7 +237,7 @@ describe('FriendsPageComponent', () => {
 
       component.selectTab('friends');
 
-      expect(routerSpy.navigate).toHaveBeenCalledWith(
+      expect(routerNavigateSpy).toHaveBeenCalledWith(
         [],
         expect.objectContaining({ queryParams: {} }),
       );
@@ -275,7 +279,7 @@ describe('FriendsPageComponent', () => {
       await setup();
       fixture.detectChanges();
 
-      const link = fixture.nativeElement.querySelector('.member-row a');
+      const link = fixture.nativeElement.querySelector('.member-card a');
       expect(link).toBeTruthy();
       expect(component.profileLink(buildMember())).toEqual([
         '/community/registry/profiles',
@@ -297,7 +301,7 @@ describe('FriendsPageComponent', () => {
       queryParams.next(convertToParamMap({}));
       fixture.detectChanges();
 
-      expect(fixture.nativeElement.querySelector('.member-row a')).toBeNull();
+      expect(fixture.nativeElement.querySelector('.member-card a')).toBeNull();
       expect(fixture.nativeElement.textContent).toContain('captain.picard');
     });
 
@@ -310,6 +314,53 @@ describe('FriendsPageComponent', () => {
       fixture.detectChanges();
 
       expect(fixture.nativeElement.textContent).not.toContain('Friends since');
+    });
+
+    it('should render each friend as a card, as the registry listing does', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      const cards = fixture.nativeElement.querySelectorAll('app-member-card');
+      expect(cards).toHaveLength(1);
+      expect(fixture.nativeElement.textContent).toContain('Accounts');
+      expect(fixture.nativeElement.textContent).toContain('Captains');
+    });
+
+    // Every card in this list is a friend, so the registry's pill would say the
+    // same thing on every one of them.
+    it('should not badge a friend as a friend', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector('.member-card__badge-slot'),
+      ).toBeNull();
+      expect(
+        fixture.nativeElement.querySelector('.member-card__badge'),
+      ).toBeNull();
+    });
+
+    it('should unfriend from the card button', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      fixture.nativeElement
+        .querySelector('.member-card__actions button')
+        .click();
+
+      expect(dialogSpy.open).toHaveBeenCalled();
+      expect(communityServiceSpy.removeFriend).toHaveBeenCalledWith(
+        'friendship-1',
+      );
+    });
+
+    it('should ignore a card action it does not recognise', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      component.onMemberCardAction(buildFriend(), 'nonsense');
+
+      expect(communityServiceSpy.removeFriend).not.toHaveBeenCalled();
     });
 
     it('should show the empty state when the viewer has no friends', async () => {
@@ -370,7 +421,7 @@ describe('FriendsPageComponent', () => {
 
       component.search();
 
-      expect(routerSpy.navigate).toHaveBeenCalledWith(
+      expect(routerNavigateSpy).toHaveBeenCalledWith(
         [],
         expect.objectContaining({ queryParams: { q: 'picard' } }),
       );
@@ -383,7 +434,7 @@ describe('FriendsPageComponent', () => {
       component.clearSearch();
 
       expect(component.searchTerm).toBe('');
-      expect(routerSpy.navigate).toHaveBeenCalledWith(
+      expect(routerNavigateSpy).toHaveBeenCalledWith(
         [],
         expect.objectContaining({ queryParams: {} }),
       );
@@ -625,12 +676,5 @@ describe('FriendsPageComponent', () => {
       );
       expect(badges).toHaveLength(0);
     });
-  });
-
-  it('should delegate route links to the routing service', async () => {
-    await setup();
-    fixture.detectChanges();
-
-    expect(component.getRouteLink('community')).toBe('/community');
   });
 });
