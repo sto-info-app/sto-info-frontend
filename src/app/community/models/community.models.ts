@@ -33,6 +33,11 @@ export interface CommunityMember {
   profilePicture300: string | null;
   joinedAt: string;
   lastActiveAt: string | null;
+  /**
+   * When the member started playing STO, taken from the oldest of their public
+   * accounts. Null when none of them records a date.
+   */
+  playingSince: string | null;
   publicAccountCount: number;
   publicCharacterCount: number;
   /**

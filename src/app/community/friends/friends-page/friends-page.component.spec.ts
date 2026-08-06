@@ -35,6 +35,7 @@ function buildMember(
     profilePicture300: null,
     joinedAt: '2026-01-14T09:21:00.000Z',
     lastActiveAt: null,
+    playingSince: null,
     publicAccountCount: 2,
     publicCharacterCount: 11,
     publiclyVisible: true,

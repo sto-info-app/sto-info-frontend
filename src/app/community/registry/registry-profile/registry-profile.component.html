@@ -64,6 +64,12 @@
                   }}
                 </dd>
               </div>
+              @if (profile.playingSince) {
+                <div>
+                  <dt>Playing Since</dt>
+                  <dd>{{ profile.playingSince | date: 'longDate' }}</dd>
+                </div>
+              }
               <div>
                 <dt>Accounts</dt>
                 <dd>{{ profile.publicAccountCount }}</dd>

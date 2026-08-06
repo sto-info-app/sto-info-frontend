@@ -271,6 +271,31 @@ describe('RegistryProfileComponent', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Last seen');
   });
 
+  it('should show the date the member has been playing since', async () => {
+    await setup();
+    fixture.detectChanges();
+
+    // Scoped to the officer's own detail list: the account cards below carry a
+    // Playing Since row of their own.
+    const details = fixture.nativeElement.querySelector(
+      '.registry-detail-grid',
+    ).textContent;
+    expect(details).toContain('Playing Since');
+    expect(details).toContain('March 4, 2015');
+  });
+
+  it('should hide the playing-since line when no account records a date', async () => {
+    await setup();
+    registryServiceSpy.getProfile.mockReturnValue(
+      of(buildProfile({ playingSince: null })),
+    );
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('.registry-detail-grid').textContent,
+    ).not.toContain('Playing Since');
+  });
+
   it('should leave account link segments raw for routerLink to encode', async () => {
     await setup('a b');
     registryServiceSpy.getProfile.mockReturnValue(

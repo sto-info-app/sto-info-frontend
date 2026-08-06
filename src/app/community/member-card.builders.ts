@@ -28,6 +28,7 @@ type MemberCardSource = Pick<
   | 'profilePicture100'
   | 'joinedAt'
   | 'lastActiveAt'
+  | 'playingSince'
   | 'publicAccountCount'
   | 'publicCharacterCount'
 >;
@@ -136,7 +137,8 @@ function buildMemberCardBase(
 }
 
 /**
- * Builds the joined and last-seen lines shown on every member card.
+ * Builds the joined, last-seen and playing-since lines shown on every member
+ * card.
  *
  * @param member - The member the card represents.
  * @returns The meta lines.
@@ -146,6 +148,10 @@ function buildActivityMeta(member: MemberCardSource): string[] {
 
   if (member.lastActiveAt) {
     meta.push(`Last seen ${formatMemberDate(member.lastActiveAt)}`);
+  }
+
+  if (member.playingSince) {
+    meta.push(`Playing since ${formatMemberDate(member.playingSince)}`);
   }
 
   return meta;

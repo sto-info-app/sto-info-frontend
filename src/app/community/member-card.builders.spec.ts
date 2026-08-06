@@ -41,6 +41,7 @@ function buildMember(
     profilePicture300: 'https://cdn.example.com/pic/square300',
     joinedAt: '2026-01-14T09:21:00.000Z',
     lastActiveAt: '2026-08-01T12:00:00.000Z',
+    playingSince: '2015-03-04T00:00:00.000Z',
     publicAccountCount: 2,
     publicCharacterCount: 11,
     publiclyVisible: true,
@@ -101,12 +102,13 @@ describe('memberCardBuilders', () => {
       expect(card.link).toEqual(['/community/registry/profiles', 'a b/c']);
     });
 
-    it('should show when the member joined and was last seen', () => {
+    it('should show when the member joined, was last seen and started playing', () => {
       const card = buildRegistryMemberCard(buildProfileSummary(), false);
 
       expect(card.meta).toEqual([
         'Joined January 14, 2026',
         'Last seen August 1, 2026',
+        'Playing since March 4, 2015',
       ]);
     });
 
@@ -116,7 +118,22 @@ describe('memberCardBuilders', () => {
         false,
       );
 
-      expect(card.meta).toEqual(['Joined January 14, 2026']);
+      expect(card.meta).toEqual([
+        'Joined January 14, 2026',
+        'Playing since March 4, 2015',
+      ]);
+    });
+
+    it('should omit the playing since line when no account records a date', () => {
+      const card = buildRegistryMemberCard(
+        buildProfileSummary({ playingSince: null }),
+        false,
+      );
+
+      expect(card.meta).toEqual([
+        'Joined January 14, 2026',
+        'Last seen August 1, 2026',
+      ]);
     });
 
     describe('relationship indicator', () => {
@@ -324,6 +341,7 @@ describe('memberCardBuilders', () => {
       expect(card.meta).toEqual([
         'Joined January 14, 2026',
         'Last seen August 1, 2026',
+        'Playing since March 4, 2015',
         'Friends since August 2, 2026',
       ]);
     });
@@ -332,7 +350,7 @@ describe('memberCardBuilders', () => {
       const card = buildFriendMemberCard(buildFriend({ friendsSince: null }));
 
       expect(card.meta).not.toContain(expect.stringContaining('Friends since'));
-      expect(card.meta).toHaveLength(2);
+      expect(card.meta).toHaveLength(3);
     });
 
     it('should not link a friend who has made their record private', () => {

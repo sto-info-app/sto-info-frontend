@@ -23,6 +23,7 @@ export function buildProfileSummary(
     profilePicture300: 'https://cdn.example.com/pic/square300',
     joinedAt: '2026-01-14T09:21:00.000Z',
     lastActiveAt: '2026-08-01T12:00:00.000Z',
+    playingSince: '2015-03-04T00:00:00.000Z',
     publicAccountCount: 2,
     publicCharacterCount: 11,
     relationship: null,

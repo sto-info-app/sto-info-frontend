@@ -17,6 +17,16 @@
   padding: 1rem 1rem 0;
 }
 
+// Closes the strip with the rule the character detail tabs carry, where it
+// comes from the panel container sitting directly below them. Each community
+// tab is its own route, so there is no such container here and the strip draws
+// the rule itself — inside the host padding, so it spans exactly the strip.
+:host::after {
+  content: '';
+  display: block;
+  border-top: 3px solid #455580;
+}
+
 // Below the point where six tabs stop fitting, the strip scrolls sideways
 // rather than shrinking the labels to nothing or wrapping to a second row,
 // which would leave the LCARS end cap stranded mid-strip.
