@@ -67,6 +67,9 @@ export const API_URLS = {
   // Contact
   CONTACT: apiUrl + '/contact',
 
+  // Galactic Personnel Registry (public)
+  REGISTRY_PROFILES: apiUrl + '/registry/profiles',
+
   // News
   NEWS: apiUrl + '/news',
   NEWS_ADMIN: apiUrl + '/news/admin',

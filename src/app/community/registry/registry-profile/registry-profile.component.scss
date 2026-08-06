@@ -1,0 +1,27 @@
+@use 'registry-layout' as registry;
+@include registry.registry-two-column(
+  'registry-profile-container',
+  'registry-profile-main-column',
+  'registry-profile-side-column'
+);
+@include registry.registry-detail-grid;
+
+.registry-profile-inner-content {
+  padding: 20px;
+}
+
+.registry-profile-identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+
+  app-entity-avatar {
+    flex: 0 0 auto;
+    width: 9rem;
+  }
+
+  .registry-detail-grid {
+    flex: 1 1 18rem;
+  }
+}

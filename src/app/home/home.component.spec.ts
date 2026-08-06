@@ -64,9 +64,22 @@ describe('HomeComponent', () => {
     createComponent();
     const cards = fixture.nativeElement.querySelectorAll('a.dashboard-tile');
 
-    expect(cards).toHaveLength(3);
+    expect(cards).toHaveLength(4);
     expect(cards[0].textContent).toContain('Accounts');
     expect(cards[0].classList.contains('sunflower')).toBe(true);
+  });
+
+  it('should offer a Community tile to logged-in users', () => {
+    createComponent();
+    const cards: HTMLAnchorElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('a.dashboard-tile'),
+    );
+
+    const community = cards.find(card =>
+      card.textContent?.includes('Community'),
+    );
+    expect(community).toBeTruthy();
+    expect(routingServiceMock.getLink).toHaveBeenCalledWith('community');
   });
 
   it('should delegate route link generation to routing service', () => {

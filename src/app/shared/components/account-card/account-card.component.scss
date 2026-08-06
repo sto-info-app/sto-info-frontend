@@ -1,0 +1,396 @@
+@use 'sass:color';
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// Darker shades used for left border and header bottom border
+$ps-color: #0070cc;
+$ps-dark: color.adjust(#0070cc, $lightness: -18%);
+$xbox-color: #107c10;
+$xbox-dark: color.adjust(#107c10, $lightness: -10%);
+$steam-color: #4c8db5;
+$steam-dark: color.adjust(#4c8db5, $lightness: -18%);
+
+// ── Account Card ─────────────────────────────────────────────────────────────
+
+.account-card {
+  border-left: 8px solid color.adjust(vars.$lcars-sunflower, $lightness: -18%);
+  border-radius: 5px;
+  overflow: hidden;
+  cursor: pointer;
+  background: vars.$lcars-grey-bg;
+
+  &:hover {
+    background: color.adjust(vars.$lcars-grey-bg, $lightness: 5%);
+
+    .account-card-header {
+      filter: brightness(1.25);
+    }
+  }
+
+  &.platform-playstation {
+    border-left-color: $ps-dark;
+
+    .account-card-header {
+      background: vars.$lcars-bluey;
+      border-bottom-color: color.adjust(vars.$lcars-bluey, $lightness: -18%);
+      color: #000;
+    }
+
+    .lifetime-icon {
+      color: vars.$lcars-gold;
+    }
+  }
+
+  &.platform-xbox {
+    border-left-color: $xbox-dark;
+
+    .account-card-header {
+      background: vars.$lcars-green;
+      border-bottom-color: color.adjust(vars.$lcars-green, $lightness: -18%);
+      color: #000;
+    }
+
+    .lifetime-icon {
+      color: vars.$lcars-gold;
+    }
+  }
+
+  &.platform-steam {
+    border-left-color: $steam-dark;
+
+    .account-card-header {
+      background: vars.$lcars-c47;
+      border-bottom-color: color.adjust(vars.$lcars-c47, $lightness: -18%);
+      color: #000;
+    }
+
+    .lifetime-icon {
+      color: vars.$lcars-gold;
+    }
+  }
+
+  &.platform-pc {
+    border-left-color: color.adjust(vars.$lcars-perano, $lightness: -20%);
+
+    .account-card-header {
+      background: vars.$lcars-perano;
+      border-bottom-color: color.adjust(vars.$lcars-perano, $lightness: -20%);
+      color: #000;
+    }
+
+    .lifetime-icon {
+      color: vars.$lcars-gold;
+    }
+
+    &.launcher-arc {
+      border-left-color: color.adjust(vars.$lcars-sunflower, $lightness: -20%);
+
+      .account-card-header {
+        background: vars.$lcars-sunflower;
+        border-bottom-color: color.adjust(
+          vars.$lcars-sunflower,
+          $lightness: -20%
+        );
+        color: #000;
+      }
+
+      .lifetime-icon {
+        color: vars.$lcars-cardinal;
+      }
+    }
+
+    &.launcher-epic {
+      border-left-color: color.adjust(vars.$lcars-violet, $lightness: -18%);
+
+      .account-card-header {
+        background: vars.$lcars-violet;
+        border-bottom-color: color.adjust(vars.$lcars-violet, $lightness: -18%);
+        color: #000;
+      }
+
+      .lifetime-icon {
+        color: vars.$lcars-gold;
+      }
+    }
+
+    &.launcher-steam {
+      border-left-color: color.adjust(vars.$lcars-c47, $lightness: -20%);
+
+      .account-card-header {
+        background: vars.$lcars-c47;
+        border-bottom-color: color.adjust(vars.$lcars-c47, $lightness: -20%);
+        color: #000;
+      }
+
+      .lifetime-icon {
+        color: vars.$lcars-gold;
+      }
+    }
+  }
+
+  &.platform-arc {
+    border-left-color: color.adjust(vars.$lcars-orange, $lightness: -18%);
+
+    .account-card-header {
+      background: vars.$lcars-sunflower;
+      border-bottom-color: color.adjust(
+        vars.$lcars-sunflower,
+        $lightness: -18%
+      );
+      color: #000;
+    }
+
+    // cardinal already set as default — no override needed
+  }
+
+  &.platform-epic {
+    border-left-color: color.adjust(vars.$lcars-violet, $lightness: -15%);
+
+    .account-card-header {
+      background: vars.$lcars-bluey;
+      border-bottom-color: color.adjust(vars.$lcars-bluey, $lightness: -15%);
+      color: #000;
+    }
+
+    .lifetime-icon {
+      color: vars.$lcars-gold;
+    }
+  }
+}
+
+// ── Header: platform icon | handle + lifetime | launcher icon ─────────────────
+
+.account-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  background: vars.$lcars-sunflower;
+  color: #000;
+  border-bottom: 3px solid color.adjust(vars.$lcars-sunflower, $lightness: -18%);
+  transition: filter 0.15s ease;
+}
+
+.header-handle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.header-captain-count {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  text-decoration: none;
+  color: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.header-captain-number {
+  min-width: 2ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.account-handle-text {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lifetime-icon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  color: vars.$lcars-cardinal;
+  filter: drop-shadow(0 0 3px rgb(0 0 0 / 55%));
+}
+
+// ── Body: main content | stacked actions ─────────────────────────────────────
+
+// Grid: col 1 (endeavour badge, auto) | col 2 (info, 1fr) | col 3 (actions, auto)
+// The img spans all columns via position: absolute so width: 100% = full card width
+.account-card-body {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto;
+  position: relative;
+  overflow: hidden;
+  min-height: 170px;
+  max-height: 270px;
+}
+
+.card-bg-img {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: auto;
+  max-width: none;
+  display: block;
+  transform: translateY(-50%);
+  z-index: 0;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+// Dark overlay above image but below content — keeps text readable
+// without crushing the darker parts of the image
+.account-card-body::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgb(0 5 15 / 75%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.account-body-main {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  min-width: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.account-body-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  overflow: hidden;
+
+  // Labelled rows (the public registry) become a two-column grid so every
+  // value lines up, no matter how long its label is. `display: contents` on the
+  // row lets its label and value sit directly in that grid.
+  &--labelled {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 0.35rem 0.9rem;
+    align-items: baseline;
+
+    .account-detail-row {
+      display: contents;
+    }
+  }
+}
+
+.account-detail-row {
+  min-width: 0;
+  font-size: 0.85rem;
+  color: vars.$lcars-perano;
+
+  i {
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+
+  &--secondary {
+    font-size: 0.8rem;
+    color: rgb(255 255 255 / 78%);
+
+    i {
+      font-size: 0.72rem;
+    }
+  }
+
+  // Long free text (e.g. notes) is clamped so one card cannot dominate the list
+  &--muted {
+    font-size: 0.75rem;
+    color: rgb(255 255 255 / 68%);
+
+    .account-detail-value {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    i {
+      font-size: 0.72rem;
+    }
+  }
+}
+
+.account-detail-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  opacity: 0.7;
+  color: #fff;
+}
+
+.account-detail-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+// ── Endeavour badge column ────────────────────────────────────────────────────
+
+.account-body-stats {
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.6rem 0.4rem 1rem;
+}
+
+.endeavour-badge-link {
+  display: block;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.82;
+  }
+}
+
+// ── Stacked actions column ────────────────────────────────────────────────────
+
+.account-body-actions {
+  grid-column: 3;
+  grid-row: 1;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0.6rem 0.8rem;
+  gap: 0.5rem;
+  background: rgb(0 0 0 / 15%);
+  border-left: 1px solid rgb(255 255 255 / 10%);
+
+  .cta-icon {
+    @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);
+  }
+
+  .delete-icon {
+    @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-red);
+  }
+}
+
+@media (width <= 768px) {
+  .account-card-body {
+    flex-wrap: wrap;
+  }
+}

@@ -1,0 +1,149 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Retrieving service record"></app-loading-bar>
+}
+
+<div id="registry-character-container">
+  <div
+    id="registry-character-main-column"
+    class="col">
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    @if (notFound) {
+      <h1>Captain not found</h1>
+      <p class="lcars-empty-state">
+        No public service record exists at this address. It may have been made
+        private, or the link may be out of date.
+      </p>
+    }
+
+    @if (character) {
+      <h1>Captain: {{ character.handle }}</h1>
+
+      <div id="registry-character-main-content">
+        <div class="lcars-text-bar">
+          <span>Captain</span>
+        </div>
+
+        <div class="registry-character-inner-content">
+          <header class="registry-character-header">
+            <app-entity-avatar
+              [src]="character.profilePicture300"
+              [alt]="character.handle"
+              [size]="300"></app-entity-avatar>
+
+            <div>
+              @if (character.rank) {
+                <p class="registry-character-header__rank">
+                  {{ character.rank.title }}
+                  <span class="registry-character-header__range">
+                    ({{ character.rank.levelRange }})
+                  </span>
+                </p>
+              }
+              @if (fullName) {
+                <p class="registry-character-header__meta">{{ fullName }}</p>
+              }
+            </div>
+          </header>
+        </div>
+
+        <div class="lcars-text-bar">
+          <span>Service Record</span>
+        </div>
+
+        <div class="registry-character-inner-content">
+          <dl class="registry-detail-grid">
+            @if (character.level !== null) {
+              <div>
+                <dt>Level</dt>
+                <dd>{{ character.level }}</dd>
+              </div>
+            }
+            @if (character.sex) {
+              <div>
+                <dt>Sex</dt>
+                <dd>{{ character.sex.name }}</dd>
+              </div>
+            }
+            @if (character.class) {
+              <div>
+                <dt>Class</dt>
+                <dd>{{ character.class.name }}</dd>
+              </div>
+            }
+            @if (character.species) {
+              <div>
+                <dt>Species</dt>
+                <dd>{{ character.species.name }}</dd>
+              </div>
+            }
+            @if (character.faction) {
+              <div>
+                <dt>Starting Faction</dt>
+                <dd>{{ character.faction.name }}</dd>
+              </div>
+            }
+            @if (character.generalFaction) {
+              <div>
+                <dt>Allegiance</dt>
+                <dd>{{ character.generalFaction.name }}</dd>
+              </div>
+            }
+            @if (character.recruitType) {
+              <div>
+                <dt>Recruit Type</dt>
+                <dd>{{ character.recruitType.name }}</dd>
+              </div>
+            }
+            @if (character.createdDate) {
+              <div>
+                <dt>Commissioned</dt>
+                <dd>{{ character.createdDate | date: 'longDate' }}</dd>
+              </div>
+            }
+          </dl>
+        </div>
+
+        @if (character.biography) {
+          <div class="lcars-text-bar">
+            <span>Biography</span>
+          </div>
+          <div class="registry-character-inner-content">
+            <p class="registry-character-biography">
+              {{ character.biography }}
+            </p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div
+    id="registry-character-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="accountLink"
+        class="full-width-btn-link sunflower"
+        >Back to Account</a
+      >
+      <a
+        [routerLink]="profileLink"
+        class="full-width-btn-link"
+        >Back to Officer</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_PROFILES)"
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
+      >
+    </div>
+  </div>
+</div>

@@ -29,4 +29,14 @@ describe('FooterComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should link to Community from the first link column', () => {
+    const columns = fixture.nativeElement.querySelectorAll('.footer-list-col');
+    const firstColumnLinks: string[] = Array.from(
+      columns[0].querySelectorAll('a'),
+      (link: HTMLAnchorElement) => link.textContent?.trim() ?? '',
+    );
+
+    expect(firstColumnLinks).toContain('Community');
+  });
 });

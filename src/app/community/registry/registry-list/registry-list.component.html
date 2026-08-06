@@ -1,0 +1,149 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Scanning personnel records"></app-loading-bar>
+}
+
+<div id="registry-list-container">
+  <div
+    id="registry-list-main-column"
+    class="col">
+    <h1>{{ heading }}</h1>
+
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    <div id="registry-list-main-content">
+      @if (mode === 'search') {
+        <div class="lcars-text-bar">
+          <span>Personnel Search</span>
+        </div>
+
+        <div class="registry-list-inner-content">
+          <form
+            class="registry-search"
+            (ngSubmit)="search()">
+            <label
+              class="sr-only"
+              for="registry-search-input">
+              Search by username
+            </label>
+            <input
+              id="registry-search-input"
+              type="search"
+              name="searchTerm"
+              placeholder="Username"
+              autocomplete="off"
+              maxlength="50"
+              [(ngModel)]="searchTerm" />
+            <button
+              type="submit"
+              class="lcars-btn sunflower">
+              Search
+            </button>
+            @if (searchTerm) {
+              <button
+                type="button"
+                class="lcars-btn"
+                (click)="clearSearch()">
+                Clear
+              </button>
+            }
+          </form>
+        </div>
+      }
+
+      <div class="lcars-text-bar">
+        <span class="title-with-badge">
+          {{ heading }}
+          @if (total > 0) {
+            <span class="header-count-badge">{{ total }}</span>
+          }
+        </span>
+      </div>
+
+      <div class="registry-list-inner-content">
+        <p class="registry-intro">{{ intro }}</p>
+
+        @if (!isLoading && profiles.length === 0) {
+          <p class="lcars-empty-state">{{ emptyMessage }}</p>
+        }
+
+        <div class="registry-profile-grid">
+          @for (profile of profiles; track profile.username) {
+            <app-registry-profile-card [profile]="profile" />
+          }
+        </div>
+
+        @if (totalPages > 1) {
+          <div class="lcars-pagination">
+            <button
+              type="button"
+              [disabled]="page <= 1"
+              (click)="loadPage(page - 1)">
+              Previous
+            </button>
+            <span>Page {{ page }} of {{ totalPages }}</span>
+            <button
+              type="button"
+              [disabled]="page >= totalPages"
+              (click)="loadPage(page + 1)">
+              Next
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="registry-list-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Registry</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_SEARCH)"
+        routerLinkActive="sunflower"
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY_REGISTRY_SEARCH }}</a
+      >
+      <a
+        [routerLink]="
+          getRouteLink(appRoutes.COMMUNITY_REGISTRY_RECENTLY_JOINED)
+        "
+        routerLinkActive="sunflower"
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY_REGISTRY_RECENTLY_JOINED }}</a
+      >
+      <a
+        [routerLink]="
+          getRouteLink(appRoutes.COMMUNITY_REGISTRY_RECENTLY_ACTIVE)
+        "
+        routerLinkActive="sunflower"
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY_REGISTRY_RECENTLY_ACTIVE }}</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_PROFILES)"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="sunflower"
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
+      >
+    </div>
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY }}</a
+      >
+    </div>
+  </div>
+</div>

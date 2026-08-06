@@ -1,0 +1,103 @@
+<div
+  class="account-card"
+  [class]="vm.themeClass"
+  [routerLink]="vm.link">
+  <!-- Header: handle + lifetime | captain count -->
+  <div class="account-card-header">
+    <div class="header-handle">
+      <span class="account-handle-text">{{ vm.handle }}</span>
+      @if (vm.lifetimeSubscription) {
+        <i
+          class="fas fa-badge-check lifetime-icon"
+          title="Lifetime Subscription"></i>
+      }
+    </div>
+    <a
+      [routerLink]="vm.link"
+      (click)="onNestedLinkClick($event)"
+      class="header-captain-count"
+      [title]="'Total Captains: ' + vm.characterCount">
+      <i class="fas fa-user-visor"></i>
+      <span class="header-captain-number">{{ vm.characterCount }}</span>
+    </a>
+  </div>
+
+  <!-- Body: info | endeavour badge | stacked actions -->
+  <div class="account-card-body">
+    <img
+      class="card-bg-img"
+      [src]="vm.bgImagePath"
+      alt=""
+      aria-hidden="true" />
+    <div class="account-body-main">
+      <div
+        class="account-body-info"
+        [class.account-body-info--labelled]="hasVisibleLabels">
+        @if (vm.platformName) {
+          <span class="sr-only">Platform: {{ vm.platformName }}</span>
+        }
+        @if (vm.launcherName) {
+          <span class="sr-only">Launcher: {{ vm.launcherName }}</span>
+        }
+        @for (detail of vm.details; track detail.icon + detail.text) {
+          <span
+            class="account-detail-row"
+            [class.account-detail-row--secondary]="
+              detail.variant === 'secondary'
+            "
+            [class.account-detail-row--muted]="detail.variant === 'muted'">
+            @if (detail.label) {
+              @if (detail.showLabel) {
+                <span class="account-detail-label">{{ detail.label }}</span>
+              } @else {
+                <span class="sr-only">{{ detail.label }}:</span>
+              }
+            }
+            <span class="account-detail-value">
+              @if (!detail.showLabel) {
+                <i [class]="detail.icon"></i>
+              }
+              {{ detail.text }}
+            </span>
+          </span>
+        }
+      </div>
+    </div>
+
+    @if (vm.endeavour) {
+      <div class="account-body-stats">
+        <a
+          [routerLink]="vm.endeavour.link"
+          (click)="onNestedLinkClick($event)"
+          class="endeavour-badge-link"
+          title="Endeavour Rank">
+          <app-endeavour-rank-badge
+            size="small"
+            [totalNodes]="vm.endeavour.totalNodes" />
+        </a>
+      </div>
+    }
+
+    @if (vm.actions.length > 0) {
+      <div class="account-body-actions">
+        <a
+          class="cta-icon"
+          [routerLink]="vm.link"
+          (click)="onNestedLinkClick($event)"
+          title="View Account"
+          ><i class="fas fa-eye"></i
+        ></a>
+        @for (cardAction of vm.actions; track cardAction.key) {
+          <button
+            type="button"
+            class="cta-icon"
+            [class.delete-icon]="cardAction.destructive"
+            (click)="onAction(cardAction.key, $event)"
+            [title]="cardAction.title">
+            <i [class]="cardAction.icon"></i>
+          </button>
+        }
+      </div>
+    }
+  </div>
+</div>

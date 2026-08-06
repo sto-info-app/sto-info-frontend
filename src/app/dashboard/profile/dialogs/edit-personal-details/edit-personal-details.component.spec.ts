@@ -80,7 +80,34 @@ describe('EditPersonalDetailsComponent', () => {
       firstName: 'Jean-Luc',
       lastName: 'Picard',
       username: 'jpicard',
+      publiclyVisible: false,
     });
+  });
+
+  it('should seed the registry opt-in from the stored profile flag', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [EditPersonalDetailsComponent, ReactiveFormsModule],
+      providers: [
+        { provide: DashboardService, useValue: mockDashboardService },
+        { provide: RoutingService, useValue: mockRoutingService },
+        { provide: MatDialogRef, useValue: mockDialogRef },
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: { user: { profile: { publiclyVisible: true } } },
+        },
+      ],
+    }).compileComponents();
+
+    const optedInFixture = TestBed.createComponent(
+      EditPersonalDetailsComponent,
+    );
+    optedInFixture.detectChanges();
+
+    expect(
+      optedInFixture.componentInstance.editPersonalDetailsForm.value
+        .publiclyVisible,
+    ).toBe(true);
   });
 
   describe('onSaveClick', () => {
@@ -191,6 +218,7 @@ describe('EditPersonalDetailsComponent', () => {
       firstName: '',
       lastName: '',
       username: '',
+      publiclyVisible: false,
     });
   });
 

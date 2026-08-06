@@ -15,6 +15,7 @@ import { User } from 'src/app/dashboard/models/user.model';
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
   FORM_ERROR_FIRSTNAME_REQUIRED,
@@ -50,6 +51,7 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
     MatDialogModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsToggleComponent,
   ],
 })
 export class EditPersonalDetailsComponent implements OnInit {
@@ -100,6 +102,7 @@ export class EditPersonalDetailsComponent implements OnInit {
           Validators.pattern(USERNAME_PATTERN),
         ],
       ],
+      publiclyVisible: [this.data?.user?.profile?.publiclyVisible ?? false],
     });
   }
 

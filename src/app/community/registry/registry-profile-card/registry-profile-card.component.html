@@ -1,0 +1,30 @@
+<li class="registry-profile-card">
+  <a [routerLink]="profileLink">
+    <app-entity-avatar
+      [src]="profile.profilePicture100"
+      [alt]="profile.username"
+      [size]="100"></app-entity-avatar>
+
+    <span class="registry-profile-card__name">{{ profile.username }}</span>
+  </a>
+
+  <dl class="registry-profile-card__stats">
+    <div>
+      <dt>Accounts</dt>
+      <dd>{{ profile.publicAccountCount }}</dd>
+    </div>
+    <div>
+      <dt>Captains</dt>
+      <dd>{{ profile.publicCharacterCount }}</dd>
+    </div>
+  </dl>
+
+  <p class="registry-profile-card__meta">
+    Joined {{ profile.joinedAt | date: 'longDate' }}
+  </p>
+  @if (profile.lastActiveAt) {
+    <p class="registry-profile-card__meta">
+      Last seen {{ profile.lastActiveAt | date: 'longDate' }}
+    </p>
+  }
+</li>

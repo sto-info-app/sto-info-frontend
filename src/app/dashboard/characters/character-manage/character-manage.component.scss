@@ -79,3 +79,14 @@
     order: -1;
   }
 }
+
+.registry-visibility {
+  flex-direction: column;
+  align-items: flex-start;
+
+  &__hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    opacity: 0.8;
+  }
+}

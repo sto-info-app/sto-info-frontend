@@ -1,0 +1,64 @@
+@use 'lcars-variables' as vars;
+
+.registry-profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 4%);
+  text-align: center;
+  list-style: none;
+
+  a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+
+    &:hover .registry-profile-card__name {
+      color: vars.$lcars-sunflower;
+    }
+  }
+
+  &__name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
+  }
+
+  &__stats {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0.25rem 0 0;
+
+    div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    dt {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.75;
+    }
+
+    dd {
+      margin: 0;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: vars.$lcars-tangerine;
+    }
+  }
+
+  &__meta {
+    margin: 0;
+    font-size: 0.8rem;
+    opacity: 0.75;
+  }
+}

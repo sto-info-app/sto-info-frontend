@@ -42,6 +42,7 @@ import { CharacterLookupService } from 'src/app/dashboard/services/character-loo
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { CHARACTER_NAME_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import {
@@ -62,6 +63,7 @@ import {
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsToggleComponent,
   ],
 })
 export class CharacterManageComponent implements OnInit, OnDestroy {
@@ -105,6 +107,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
       lastName: [''],
       biography: [''],
       notes: [''],
+      publiclyVisible: [true],
       createdDate: [null],
       level: [0, [Validators.required, Validators.min(0), Validators.max(65)]],
       generalFactionId: ['', Validators.required],
@@ -293,6 +296,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
         lastName: fullChar.lastName,
         biography: fullChar.biography,
         notes: fullChar.notes,
+        publiclyVisible: fullChar.publiclyVisible ?? true,
         createdDate: fullChar.createdDate
           ? new Date(fullChar.createdDate).toISOString().split('T')[0]
           : null,

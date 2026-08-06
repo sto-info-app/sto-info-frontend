@@ -10,14 +10,23 @@ import {
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router, RouterModule } from '@angular/router';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
+import { AccountCardComponent } from 'src/app/shared/components/account-card/account-card.component';
+import {
+  AccountCardDetail,
+  AccountCardVm,
+} from 'src/app/shared/components/account-card/account-card.model';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
-import { EndeavourRankBadgeComponent } from 'src/app/shared/components/endeavour-rank-badge/endeavour-rank-badge.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
   APP_ROUTES,
   APP_ROUTE_TITLES,
 } from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
+import {
+  getAccountBgImagePath,
+  getLauncherClass,
+  getPlatformClass,
+} from 'src/app/shared/utils/card-theme.utils';
 import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
 import { StoAccountService } from '../services/sto-account.service';
@@ -30,35 +39,17 @@ export interface AccountVm {
   id: string;
   /** The underlying STO account data. */
   account: StoAccount;
-  /** Precomputed router link path for the account detail page. */
-  link: string;
   /** Precomputed Font Awesome icon class for the account platform, or null if unavailable. */
   platformIcon: string | null;
-  /** Precomputed display name of the account platform. */
-  platformName: string;
   /** Precomputed Font Awesome icon class for the account launcher, or null if unavailable. */
   launcherIcon: string | null;
-  /** Precomputed display name of the account launcher. */
-  launcherName: string;
-  /** Precomputed character count for display. */
-  characterCount: number;
-  /** Precomputed total endeavour nodes spent for display. */
-  endeavourTotalNodes: number;
-  /** CSS class derived from the account platform, for header colour theming. */
-  platformClass: string;
-  /** Router link to the Endeavour Perks page for this account. */
-  endeavoursLink: string;
-  /** Whether a launcher is set on this account (distinct from having a mapped icon). */
-  hasLauncher: boolean;
-  /** Zero-padded 4-digit endeavour node count, e.g. "0512". */
-  endeavourTotalNodesDisplay: string;
-  /** Card background image URL, preferably supplied by the API. */
-  bgImagePath: string;
-  /** Whether to show the username (false when it duplicates the handle). */
-  showUsername: boolean;
-  /** CSS class for the launcher, applied alongside platformClass for per-launcher card theming. */
-  launcherClass: string;
+  /** Presentation model handed to the shared account card. */
+  card: AccountCardVm;
 }
+
+/** Action keys emitted by the account cards on this page. */
+export const ACCOUNT_CARD_EDIT = 'edit';
+export const ACCOUNT_CARD_DELETE = 'delete';
 
 /**
  * Component to list and manage STO accounts.
@@ -74,7 +65,7 @@ export interface AccountVm {
     MatDialogModule,
     RouterModule,
     LoadingBarComponent,
-    EndeavourRankBadgeComponent,
+    AccountCardComponent,
   ],
 })
 export class AccountsComponent implements OnInit, OnDestroy {
@@ -302,88 +293,122 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * @returns A precomputed AccountVm for template binding.
    */
   private _buildAccountVm(account: StoAccount): AccountVm {
+    const handleSegment = this.encodeHandle(account.handle);
+    const accountLink = `/${APP_ROUTES.STO_DASHBOARD_ACCOUNTS}/${handleSegment}`;
+    const platformClass = this.getPlatformClass(account.platformId);
+    const launcherName = this.getLauncher(account.launcherId)?.name;
+
     return {
       id: account.id,
       account,
-      link: `/${APP_ROUTES.STO_DASHBOARD_ACCOUNTS}/${this.encodeHandle(account.handle)}`,
       platformIcon: this.getPlatformIcon(account.platformId),
-      platformName: this.getPlatform(account.platformId)?.name ?? 'Platform',
       launcherIcon: this.getLauncherIcon(account.launcherId),
-      launcherName: this.getLauncher(account.launcherId)?.name ?? 'Launcher',
-      characterCount: account.characterCount || 0,
-      endeavourTotalNodes: account.endeavourTotalNodes || 0,
-      platformClass: this.getPlatformClass(account.platformId),
-      endeavoursLink: `/${APP_ROUTES.STO_DASHBOARD_ACCOUNTS}/${this.encodeHandle(account.handle)}/endeavours`,
-      hasLauncher: !!account.launcherId,
-      endeavourTotalNodesDisplay: (account.endeavourTotalNodes || 0)
-        .toString()
-        .padStart(4, '0'),
-      bgImagePath:
-        account.accountTypeImageUrl?.trim() ||
-        this._getBgImagePath(
-          this.getPlatformClass(account.platformId),
-          this.getLauncher(account.launcherId)?.name,
-        ),
-      showUsername:
-        !!account.username &&
-        account.username.toLowerCase() !== account.handle.toLowerCase(),
-      launcherClass: this._getLauncherClass(
-        this.getPlatformClass(account.platformId),
-        this.getLauncher(account.launcherId)?.name,
-      ),
+      card: {
+        id: account.id,
+        handle: account.handle,
+        link: accountLink,
+        themeClass: [
+          platformClass,
+          getLauncherClass(platformClass, launcherName),
+        ]
+          .filter(Boolean)
+          .join(' '),
+        bgImagePath:
+          account.accountTypeImageUrl?.trim() ||
+          getAccountBgImagePath(platformClass, launcherName),
+        lifetimeSubscription: !!account.lifetimeSubscription,
+        characterCount: account.characterCount || 0,
+        platformName: this.getPlatform(account.platformId)?.name ?? 'Platform',
+        launcherName: account.launcherId ? (launcherName ?? 'Launcher') : null,
+        details: this._buildAccountDetails(account),
+        endeavour: {
+          totalNodes: account.endeavourTotalNodes || 0,
+          link: `${accountLink}/endeavours`,
+        },
+        actions: [
+          {
+            key: ACCOUNT_CARD_EDIT,
+            icon: 'fas fa-user-pen',
+            title: 'Edit Account',
+          },
+          {
+            key: ACCOUNT_CARD_DELETE,
+            icon: 'fas fa-trash',
+            title: 'Delete Account',
+            destructive: true,
+          },
+        ],
+      },
     };
   }
 
-  private _getLauncherClass(
-    platformClass: string,
-    launcherName?: string,
-  ): string {
-    if (platformClass !== 'platform-pc') return '';
-    const launcher = launcherName?.toLowerCase() ?? '';
-    if (launcher === 'arc') return 'launcher-arc';
-    if (launcher === 'epic') return 'launcher-epic';
-    if (launcher === 'steam') return 'launcher-steam';
-    return '';
-  }
+  /**
+   * Builds the owner-facing detail rows shown in an account card's body.
+   *
+   * The username is omitted when it merely repeats the handle.
+   *
+   * @param account The STO account to describe.
+   * @returns The detail rows for the card.
+   */
+  private _buildAccountDetails(account: StoAccount): AccountCardDetail[] {
+    const details: AccountCardDetail[] = [];
 
-  private _getBgImagePath(
-    platformClass: string,
-    launcherName?: string,
-  ): string {
-    if (platformClass === 'platform-pc') {
-      const launcher = launcherName?.toLowerCase() ?? '';
-      if (launcher === 'arc')
-        return '/assets/account-types/account_type_windows_arc.jpg';
-      if (launcher === 'epic')
-        return '/assets/account-types/account_type_windows_epic.jpg';
-      if (launcher === 'steam')
-        return '/assets/account-types/account_type_windows_steam.jpg';
-      return '/assets/account-types/account_type_windows_default.jpg';
+    const showUsername =
+      !!account.username &&
+      account.username.toLowerCase() !== account.handle.toLowerCase();
+    if (showUsername && account.username) {
+      details.push({
+        icon: 'fas fa-user',
+        text: account.username,
+        label: 'Username',
+      });
     }
-    const map: Record<string, string> = {
-      'platform-playstation':
-        '/assets/account-types/account_type_playstation.jpg',
-      'platform-xbox': '/assets/account-types/account_type_xbox.jpg',
-      'platform-arc': '/assets/account-types/account_type_windows_arc.jpg',
-      'platform-epic': '/assets/account-types/account_type_windows_epic.jpg',
-      'platform-steam': '/assets/account-types/account_type_windows_steam.jpg',
-    };
-    return (
-      map[platformClass] ?? '/assets/account-types/account_type_default.jpg'
-    );
+
+    if (account.email) {
+      details.push({
+        icon: 'fas fa-envelope',
+        text: account.email,
+        label: 'Email',
+        variant: 'secondary',
+      });
+    }
+
+    if (account.notes) {
+      details.push({
+        icon: 'fas fa-note-sticky',
+        text: account.notes,
+        label: 'Notes',
+        variant: 'muted',
+      });
+    }
+
+    return details;
   }
 
+  /**
+   * Routes an account card action to the matching handler.
+   *
+   * @param account The account the card represents.
+   * @param actionKey The key emitted by the card.
+   */
+  onAccountCardAction(account: StoAccount, actionKey: string): void {
+    if (actionKey === ACCOUNT_CARD_EDIT) {
+      this.editAccount(account);
+      return;
+    }
+
+    if (actionKey === ACCOUNT_CARD_DELETE) {
+      this.deleteAccount(account);
+    }
+  }
+
+  /**
+   * Resolves the account-card theme class for a platform.
+   *
+   * @param platformId The platform ID.
+   * @returns The theme class, or an empty string when unrecognised.
+   */
   getPlatformClass(platformId?: string): string {
-    if (!platformId) return '';
-    const platform = this.platforms.find(p => p.id === platformId);
-    if (!platform) return '';
-    const name = platform.name.toLowerCase();
-    if (name === 'playstation' || name === 'ps') return 'platform-playstation';
-    if (name === 'xbox') return 'platform-xbox';
-    if (name === 'steam') return 'platform-steam';
-    if (name === 'windows' || name === 'pc') return 'platform-pc';
-    if (name === 'arc') return 'platform-arc';
-    if (name === 'epic') return 'platform-epic';
-    return '';
+    return getPlatformClass(this.getPlatform(platformId)?.name);
   }
 }

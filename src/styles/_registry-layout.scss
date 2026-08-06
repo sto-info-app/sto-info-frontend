@@ -1,0 +1,73 @@
+@use 'lcars-variables' as vars;
+
+/// Emits the two-column page shell shared by every Galactic Personnel Registry
+/// page, matching the dashboard's account pages.
+///
+/// @param {String} $container - The container element id, without the `#`.
+/// @param {String} $main - The main column element id, without the `#`.
+/// @param {String} $side - The side column element id, without the `#`.
+@mixin registry-two-column($container, $main, $side) {
+  ##{$container} {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  ##{$main} {
+    flex: 2;
+    flex-basis: 69%;
+    min-width: 0;
+  }
+
+  ##{$side} {
+    flex: 1;
+    flex-basis: 30%;
+  }
+
+  @media (width <= 768px) {
+    ##{$container} {
+      flex-direction: column;
+    }
+  }
+}
+
+/// Emits the label/value grid used for registry detail panels.
+///
+/// Each label sits on the same line as its value, with all labels and all
+/// values sharing a column edge — matching the account cards. `display:
+/// contents` on the wrapping `div` lets each `dt`/`dd` pair sit directly in the
+/// grid so that alignment holds across every row.
+///
+/// Deliberately a single pair per row: these panels sit in columns of very
+/// different widths (the officer panel shares its row with an avatar), so a
+/// viewport-width breakpoint for a two-pair layout wraps the values.
+@mixin registry-detail-grid {
+  .registry-detail-grid {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 0.5rem 1.25rem;
+    align-items: baseline;
+    margin: 0;
+
+    div {
+      display: contents;
+    }
+
+    dt {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      opacity: 0.75;
+    }
+
+    dd {
+      margin: 0;
+      min-width: 0;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+      color: vars.$lcars-perano;
+    }
+  }
+}

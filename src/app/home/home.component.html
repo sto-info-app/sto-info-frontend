@@ -11,24 +11,29 @@
       <a
         [routerLink]="getRouteLink(appRoutes.LOGIN)"
         class="sunflower"
-      >Login</a>
+        >Login</a
+      >
       <a
         [routerLink]="getRouteLink(appRoutes.REGISTER)"
         class="almond"
-      >Register</a>
+        >Register</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
+        class="perano"
+        >{{ appRouteTitles.COMMUNITY }}</a
+      >
     </div>
 
     <app-lcars-information-message
-      [title]='"Important Information"'
-      [message]='"The Star Trek Online Info portal is a fan-made project and is not affiliated with or endorsed by Cryptic Studios or Paramount. There is no connection of data between this site and the official Star Trek Online game servers. All data is provided by yourself and is for informational purposes only."'
-    ></app-lcars-information-message>
+      [title]="'Important Information'"
+      [message]="'The Star Trek Online Info portal is a fan-made project and is not affiliated with or endorsed by Cryptic Studios or Paramount. There is no connection of data between this site and the official Star Trek Online game servers. All data is provided by yourself and is for informational purposes only.'"></app-lcars-information-message>
   } @else {
     <p>Welcome back, Captain.</p>
     <div class="home-dashboard-tiles">
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
-        class="dashboard-tile sunflower"
-      >
+        class="dashboard-tile sunflower">
         <div class="tile-icon">
           <i class="fas fa-users"></i>
         </div>
@@ -38,8 +43,7 @@
       </a>
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_PROFILE)"
-        class="dashboard-tile perano"
-      >
+        class="dashboard-tile perano">
         <div class="tile-icon">
           <i class="fas fa-id-card"></i>
         </div>
@@ -49,13 +53,22 @@
       </a>
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)"
-        class="dashboard-tile atomic"
-      >
+        class="dashboard-tile atomic">
         <div class="tile-icon">
           <i class="fa-solid fa-chart-bar"></i>
         </div>
         <div class="tile-content">
           <span class="tile-stat">Stats</span>
+        </div>
+      </a>
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
+        class="dashboard-tile perano">
+        <div class="tile-icon">
+          <i class="fas fa-users-viewfinder"></i>
+        </div>
+        <div class="tile-content">
+          <span class="tile-stat">{{ appRouteTitles.COMMUNITY }}</span>
         </div>
       </a>
     </div>

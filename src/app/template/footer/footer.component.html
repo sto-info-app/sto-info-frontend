@@ -30,6 +30,13 @@
         </li>
         <li>
           <a
+            [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
+            routerLinkActive="active"
+            >{{ appRouteTitles.COMMUNITY }}</a
+          >
+        </li>
+        <li>
+          <a
             [routerLink]="getRouteLink(appRoutes.RESOURCES)"
             [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="active"

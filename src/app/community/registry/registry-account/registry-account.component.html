@@ -1,0 +1,114 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Retrieving account record"></app-loading-bar>
+}
+
+<div id="registry-account-container">
+  <div
+    id="registry-account-main-column"
+    class="col">
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    @if (notFound) {
+      <h1>Account not found</h1>
+      <p class="lcars-empty-state">
+        No public account exists at this address. It may have been made private,
+        or the link may be out of date.
+      </p>
+    }
+
+    @if (account) {
+      <h1>Account: {{ account.handle }}</h1>
+
+      <div id="registry-account-main-content">
+        <div class="lcars-text-bar">
+          <span>Account Information</span>
+        </div>
+
+        <div class="registry-account-inner-content">
+          <dl class="registry-detail-grid">
+            <div>
+              <dt>Handle</dt>
+              <dd>{{ account.handle }}</dd>
+            </div>
+            @if (account.platformName) {
+              <div>
+                <dt>Platform</dt>
+                <dd>{{ account.platformName }}</dd>
+              </div>
+            }
+            @if (account.launcherName) {
+              <div>
+                <dt>Launcher</dt>
+                <dd>{{ account.launcherName }}</dd>
+              </div>
+            }
+            @if (account.accountCreatedDate) {
+              <div>
+                <dt>Playing Since</dt>
+                <dd>{{ account.accountCreatedDate | date: 'longDate' }}</dd>
+              </div>
+            }
+            <div>
+              <dt>Lifetime Subscription</dt>
+              <dd>{{ account.lifetimeSubscription ? 'Yes' : 'No' }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="lcars-text-bar">
+          <span class="title-with-badge">
+            Captain List
+            @if (account.publicCharacterCount > 0) {
+              <span class="header-count-badge">
+                {{ account.publicCharacterCount }}
+              </span>
+            }
+          </span>
+        </div>
+
+        <div class="registry-account-inner-content">
+          @if (account.characters.length === 0) {
+            <p class="lcars-empty-state">
+              This officer has not made any captains on this account public.
+            </p>
+          }
+
+          <div class="characters-grid">
+            @for (card of characterCards; track card.id) {
+              <app-character-card [vm]="card" />
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div
+    id="registry-account-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="profileLink"
+        class="full-width-btn-link sunflower"
+        >Back to Officer</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_PROFILES)"
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY }}</a
+      >
+    </div>
+  </div>
+</div>

@@ -1,0 +1,59 @@
+<div id="community-container">
+  <div
+    id="community-main-column"
+    class="col">
+    <h1>Community</h1>
+
+    <div id="community-main-content">
+      <div class="lcars-text-bar">
+        <span>Galactic Personnel Registry</span>
+      </div>
+
+      <div class="community-inner-content">
+        <p>
+          A directory of officers who have chosen to make their record public.
+          Find other officers, see the captains they command, and share your own
+          record with the fleet.
+        </p>
+        <p>
+          Nothing appears here until you opt in from your profile, and your real
+          name, email address and private notes are never shown.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="community-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Registry</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_SEARCH)"
+        class="full-width-btn-link sunflower"
+        >{{ appRouteTitles.COMMUNITY_REGISTRY_SEARCH }}</a
+      >
+      <a
+        [routerLink]="
+          getRouteLink(appRoutes.COMMUNITY_REGISTRY_RECENTLY_JOINED)
+        "
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY_REGISTRY_RECENTLY_JOINED }}</a
+      >
+      <a
+        [routerLink]="
+          getRouteLink(appRoutes.COMMUNITY_REGISTRY_RECENTLY_ACTIVE)
+        "
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY_REGISTRY_RECENTLY_ACTIVE }}</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_PROFILES)"
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
+      >
+    </div>
+  </div>
+</div>

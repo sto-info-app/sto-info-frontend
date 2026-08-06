@@ -14,9 +14,9 @@
           type="button"
           class="cta-icon"
           (click)="addAccount()"
-          title="Add STO Account"
-        ><i class="fas fa-plus"></i
-        ></button>
+          title="Add STO Account">
+          <i class="fas fa-plus"></i>
+        </button>
       </div>
 
       <div class="accounts-inner-content">
@@ -26,110 +26,9 @@
 
         <div class="accounts-grid">
           @for (vm of accountVms; track vm.id) {
-            <div
-              class="account-card"
-              [class]="
-                vm.platformClass +
-                (vm.launcherClass ? ' ' + vm.launcherClass : '')
-              "
-              [routerLink]="vm.link">
-              <!-- Header: handle + lifetime | captain count -->
-              <div class="account-card-header">
-                <div class="header-handle">
-                  <span class="account-handle-text">{{
-                    vm.account.handle
-                  }}</span>
-                  @if (vm.account.lifetimeSubscription) {
-                    <i
-                      class="fas fa-badge-check lifetime-icon"
-                      title="Lifetime Subscription"></i>
-                  }
-                </div>
-                <a
-                  [routerLink]="vm.link"
-                  (click)="$event.stopPropagation()"
-                  class="header-captain-count"
-                  [title]="'Total Captains: ' + vm.characterCount">
-                  <i class="fas fa-user-visor"></i>
-                  <span class="header-captain-number">{{
-                    vm.characterCount
-                  }}</span>
-                </a>
-              </div>
-
-              <!-- Body: info | endeavour badge | stacked actions -->
-              <div class="account-card-body">
-                <img
-                  class="card-bg-img"
-                  [src]="vm.bgImagePath"
-                  alt=""
-                  aria-hidden="true" />
-                <div class="account-body-main">
-                  <div class="account-body-info">
-                    <span class="sr-only">Platform: {{ vm.platformName }}</span>
-                    @if (vm.hasLauncher) {
-                      <span class="sr-only"
-                        >Launcher: {{ vm.launcherName }}</span
-                      >
-                    }
-                    @if (vm.showUsername) {
-                      <span class="account-username">
-                        <i class="fas fa-user"></i>
-                        {{ vm.account.username }}
-                      </span>
-                    }
-                    @if (vm.account.email) {
-                      <span class="account-email">
-                        <i class="fas fa-envelope"></i>
-                        {{ vm.account.email }}
-                      </span>
-                    }
-                    @if (vm.account.notes) {
-                      <span class="account-notes">
-                        <i class="fas fa-note-sticky"></i>
-                        {{ vm.account.notes }}
-                      </span>
-                    }
-                  </div>
-                </div>
-
-                <div class="account-body-stats">
-                  <a
-                    [routerLink]="vm.endeavoursLink"
-                    (click)="$event.stopPropagation()"
-                    class="endeavour-badge-link"
-                    title="Endeavour Rank">
-                    <app-endeavour-rank-badge
-                      size="small"
-                      [totalNodes]="vm.endeavourTotalNodes" />
-                  </a>
-                </div>
-
-                <div class="account-body-actions">
-                  <a
-                    class="cta-icon"
-                    [routerLink]="vm.link"
-                    (click)="$event.stopPropagation()"
-                    title="View Account"
-                    ><i class="fas fa-eye"></i
-                  ></a>
-                  <button
-                    type="button"
-                    class="cta-icon"
-                    (click)="$event.stopPropagation(); editAccount(vm.account)"
-                    title="Edit Account"
-                  ><i class="fas fa-user-pen"></i
-                  ></button>
-                  <button
-                    type="button"
-                    class="cta-icon delete-icon"
-                    (click)="$event.stopPropagation(); deleteAccount(vm.account)"
-                    title="Delete Account"
-                  ><i class="fas fa-trash"></i
-                  ></button>
-                </div>
-              </div>
-            </div>
+            <app-account-card
+              [vm]="vm.card"
+              (action)="onAccountCardAction(vm.account, $event)" />
           }
         </div>
       </div>

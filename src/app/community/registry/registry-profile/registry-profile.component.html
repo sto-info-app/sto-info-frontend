@@ -1,0 +1,117 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Retrieving personnel record"></app-loading-bar>
+}
+
+<div id="registry-profile-container">
+  <div
+    id="registry-profile-main-column"
+    class="col">
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    @if (notFound) {
+      <h1>Record not found</h1>
+      <p class="lcars-empty-state">
+        No public record exists for this officer. They may have closed their
+        record, or the link may be out of date.
+      </p>
+    }
+
+    @if (profile) {
+      <h1>{{ profile.username }}</h1>
+
+      <div id="registry-profile-main-content">
+        <div class="lcars-text-bar">
+          <span>Officer</span>
+        </div>
+
+        <div class="registry-profile-inner-content">
+          <div class="registry-profile-identity">
+            <app-entity-avatar
+              [src]="profile.profilePicture300"
+              [alt]="profile.username"
+              [size]="300"></app-entity-avatar>
+
+            <dl class="registry-detail-grid">
+              <div>
+                <dt>Joined</dt>
+                <dd>{{ profile.joinedAt | date: 'longDate' }}</dd>
+              </div>
+              <div>
+                <dt>Last Seen</dt>
+                <dd>
+                  {{
+                    profile.lastActiveAt
+                      ? (profile.lastActiveAt | date: 'longDate')
+                      : 'Never'
+                  }}
+                </dd>
+              </div>
+              <div>
+                <dt>Accounts</dt>
+                <dd>{{ profile.publicAccountCount }}</dd>
+              </div>
+              <div>
+                <dt>Captains</dt>
+                <dd>{{ profile.publicCharacterCount }}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        <div class="lcars-text-bar">
+          <span class="title-with-badge">
+            Account List
+            @if (profile.accounts.length > 0) {
+              <span class="header-count-badge">
+                {{ profile.accounts.length }}
+              </span>
+            }
+          </span>
+        </div>
+
+        <div class="registry-profile-inner-content">
+          @if (profile.accounts.length === 0) {
+            <p class="lcars-empty-state">
+              This officer has not made any accounts public.
+            </p>
+          }
+
+          <div class="accounts-grid">
+            @for (card of accountCards; track card.id) {
+              <app-account-card [vm]="card" />
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div
+    id="registry-profile-side-column"
+    class="col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_PROFILES)"
+        class="full-width-btn-link sunflower"
+        >{{ appRouteTitles.COMMUNITY_REGISTRY_PROFILES }}</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY_REGISTRY_SEARCH)"
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY_REGISTRY_SEARCH }}</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
+        class="full-width-btn-link"
+        >{{ appRouteTitles.COMMUNITY }}</a
+      >
+    </div>
+  </div>
+</div>

@@ -1,0 +1,10 @@
+@use 'registry-layout' as registry;
+@include registry.registry-two-column(
+  'community-container',
+  'community-main-column',
+  'community-side-column'
+);
+
+.community-inner-content {
+  padding: 20px;
+}

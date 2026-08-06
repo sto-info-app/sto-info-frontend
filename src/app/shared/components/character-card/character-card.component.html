@@ -1,0 +1,75 @@
+<div
+  class="character-card"
+  [ngClass]="vm.factionClass">
+  <div
+    class="character-header-row"
+    [ngClass]="vm.classCategory"
+    [routerLink]="vm.link">
+    <span class="character-name">{{ headerLabel }}</span>
+    @if (vm.recruitTypeIconUrl) {
+      <img
+        [src]="vm.recruitTypeIconUrl"
+        class="recruit-type-icon"
+        [alt]="vm.recruitTypeName + ' Recruit'"
+        [title]="vm.recruitTypeName + ' Recruit'"
+        width="40"
+        height="40" />
+    }
+  </div>
+  <div class="character-main-area">
+    <div
+      class="character-image-container"
+      [routerLink]="vm.link">
+      <img
+        [src]="imageSrc"
+        [alt]="vm.handle"
+        [title]="vm.handle"
+        (error)="onImageError()"
+        class="character-list-image" />
+      <div class="image-fallback-icon">
+        <i class="fas fa-user"></i>
+      </div>
+    </div>
+    <div
+      class="character-details"
+      [routerLink]="vm.link">
+      @if (vm.factionIconUrl) {
+        <img
+          [src]="vm.factionIconUrl"
+          class="faction-icon-watermark"
+          [alt]="'Faction: ' + vm.factionName"
+          [title]="'Faction: ' + vm.factionName" />
+      }
+      <div class="character-body">
+        <div class="character-rank-row">
+          @if (vm.rankIconUrl) {
+            <img
+              [src]="vm.rankIconUrl"
+              class="rank-icon-mini"
+              [alt]="'Rank: ' + vm.rankTitle"
+              [title]="'Rank: ' + vm.rankTitle" />
+          }
+          <span class="rank-name">{{ vm.rankTitle || 'Unknown Rank' }}</span>
+        </div>
+        <div class="character-species-row">
+          <i [class]="'fas fa-' + vm.sexIcon + ' gender-icon'"></i>
+          {{ vm.speciesName }}
+        </div>
+      </div>
+    </div>
+    @if (vm.actions.length > 0) {
+      <div class="character-actions">
+        @for (cardAction of vm.actions; track cardAction.key) {
+          <button
+            type="button"
+            class="cta-icon"
+            [class.delete-icon]="cardAction.destructive"
+            (click)="onAction(cardAction.key, $event)"
+            [title]="cardAction.title">
+            <i [class]="cardAction.icon"></i>
+          </button>
+        }
+      </div>
+    }
+  </div>
+</div>
