@@ -139,6 +139,11 @@ describe('ModerationService', () => {
           r.params.get('page') === '2' &&
           r.params.get('pageSize') === '10',
       );
+      expect(req.request.params.get('status')).toBe('OPEN');
+      expect(req.request.params.get('reason')).toBe('SPAM');
+      expect(req.request.params.get('search')).toBe('picard');
+      expect(req.request.params.get('page')).toBe('2');
+      expect(req.request.params.get('pageSize')).toBe('10');
       req.flush(emptyReportPage);
     });
 
@@ -150,6 +155,7 @@ describe('ModerationService', () => {
           r.url === API_URLS.MODERATION_ADMIN_REPORTS &&
           r.params.keys().length === 0,
       );
+      expect(req.request.params.keys()).toHaveLength(0);
       req.flush(emptyReportPage);
     });
 
@@ -241,6 +247,10 @@ describe('ModerationService', () => {
           r.params.get('page') === '2' &&
           r.params.get('pageSize') === '10',
       );
+      expect(req.request.params.get('search')).toBe('picard');
+      expect(req.request.params.get('disabled')).toBe('true');
+      expect(req.request.params.get('page')).toBe('2');
+      expect(req.request.params.get('pageSize')).toBe('10');
       req.flush(emptyUserPage);
     });
 
@@ -252,6 +262,7 @@ describe('ModerationService', () => {
           r.url === API_URLS.MODERATION_ADMIN_USERS &&
           r.params.get('disabled') === 'false',
       );
+      expect(req.request.params.get('disabled')).toBe('false');
       req.flush(emptyUserPage);
     });
 
@@ -263,6 +274,7 @@ describe('ModerationService', () => {
           r.url === API_URLS.MODERATION_ADMIN_USERS &&
           r.params.keys().length === 0,
       );
+      expect(req.request.params.keys()).toHaveLength(0);
       req.flush(emptyUserPage);
     });
 

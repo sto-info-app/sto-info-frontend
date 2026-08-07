@@ -59,6 +59,23 @@ describe('EntityAvatarComponent', () => {
     expect(component.displaySrc).toBe(SRC_PHOTO_UNAVAILABLE_100PX);
   });
 
+  it('should reset the failure flag when the src input changes', () => {
+    component.src = 'https://cdn.example.com/broken';
+    fixture.detectChanges();
+
+    const img: HTMLImageElement =
+      fixture.nativeElement.querySelector('.entity-avatar');
+    img.dispatchEvent(new Event('error'));
+    fixture.detectChanges();
+    expect(component.hasFailed).toBe(true);
+
+    component.src = 'https://cdn.example.com/pic/recovered';
+    fixture.detectChanges();
+
+    expect(component.hasFailed).toBe(false);
+    expect(component.displaySrc).toBe('https://cdn.example.com/pic/recovered');
+  });
+
   it('should render the size as the width and height attributes', () => {
     component.size = 300;
     fixture.detectChanges();

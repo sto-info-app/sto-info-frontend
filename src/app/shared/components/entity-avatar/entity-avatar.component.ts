@@ -22,8 +22,18 @@ export type EntityAvatarSize = 100 | 300;
   imports: [CommonModule],
 })
 export class EntityAvatarComponent {
+  private _src: string | null = null;
+
   /** The resolved image URL, or null to show the placeholder immediately. */
-  @Input() src: string | null = null;
+  @Input()
+  set src(value: string | null) {
+    this._src = value;
+    this.hasFailed = false;
+  }
+
+  get src(): string | null {
+    return this._src;
+  }
 
   /** Accessible description of the image. */
   @Input({ required: true }) alt!: string;
@@ -47,8 +57,8 @@ export class EntityAvatarComponent {
    * @returns The image URL to display.
    */
   get displaySrc(): string {
-    if (this.src && !this.hasFailed) {
-      return this.src;
+    if (this._src && !this.hasFailed) {
+      return this._src;
     }
 
     return this.size === 300

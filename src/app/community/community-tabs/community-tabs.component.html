@@ -1,11 +1,5 @@
-<!--
-  A `div` with the navigation role rather than a `nav` element: the global LCARS
-  theme styles `nav` and `nav a` as the site's main pill navigation — a 660px
-  wrapping strip of 210px pills — which would otherwise reshape the tabs.
--->
-<div
+<nav
   class="lcars-tabs"
-  role="navigation"
   aria-label="Community sections">
   @for (tab of tabs; track tab.link) {
     <a
@@ -21,4 +15,4 @@
   <span
     class="lcars-tabs-filler"
     aria-hidden="true"></span>
-</div>
+</nav>

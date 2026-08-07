@@ -143,6 +143,9 @@ describe('CommunityService', () => {
           r.params.get('page') === '2' &&
           r.params.get('pageSize') === '24',
       );
+      expect(req.request.params.get('search')).toBe('picard');
+      expect(req.request.params.get('page')).toBe('2');
+      expect(req.request.params.get('pageSize')).toBe('24');
       req.flush(emptyPage);
     });
 
@@ -153,6 +156,7 @@ describe('CommunityService', () => {
         r =>
           r.url === API_URLS.COMMUNITY_FRIENDS && r.params.keys().length === 0,
       );
+      expect(req.request.params.keys()).toHaveLength(0);
       req.flush(emptyPage);
     });
 

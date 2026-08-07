@@ -18,7 +18,7 @@
       @if (vm.badge) {
         <span
           class="member-card__badge"
-          [class]="'member-card__badge--' + vm.badge.modifier">
+          [ngClass]="'member-card__badge--' + vm.badge.modifier">
           {{ vm.badge.label }}
         </span>
       }
@@ -28,10 +28,8 @@
   @if (vm.stats.length > 0) {
     <dl class="member-card__stats">
       @for (stat of vm.stats; track stat.label) {
-        <div>
-          <dt>{{ stat.label }}</dt>
-          <dd>{{ stat.value }}</dd>
-        </div>
+        <dt>{{ stat.label }}</dt>
+        <dd>{{ stat.value }}</dd>
       }
     </dl>
   }

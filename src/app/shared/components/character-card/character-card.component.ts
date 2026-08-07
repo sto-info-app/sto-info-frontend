@@ -22,7 +22,17 @@ import { CharacterCardVm } from './character-card.model';
   imports: [CommonModule, RouterModule],
 })
 export class CharacterCardComponent {
-  @Input({ required: true }) vm!: CharacterCardVm;
+  private _vm!: CharacterCardVm;
+
+  @Input({ required: true })
+  set vm(value: CharacterCardVm) {
+    this._vm = value;
+    this.hasImageFailed = false;
+  }
+
+  get vm(): CharacterCardVm {
+    return this._vm;
+  }
 
   /** Emits the `key` of the action button the user activated. */
   @Output() readonly action = new EventEmitter<string>();

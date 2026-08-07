@@ -32,32 +32,22 @@
 
         <div class="registry-account-inner-content">
           <dl class="registry-detail-grid">
-            <div>
-              <dt>Handle</dt>
-              <dd>{{ account.handle }}</dd>
-            </div>
+            <dt>Handle</dt>
+            <dd>{{ account.handle }}</dd>
             @if (account.platformName) {
-              <div>
-                <dt>Platform</dt>
-                <dd>{{ account.platformName }}</dd>
-              </div>
+              <dt>Platform</dt>
+              <dd>{{ account.platformName }}</dd>
             }
             @if (account.launcherName) {
-              <div>
-                <dt>Launcher</dt>
-                <dd>{{ account.launcherName }}</dd>
-              </div>
+              <dt>Launcher</dt>
+              <dd>{{ account.launcherName }}</dd>
             }
             @if (account.accountCreatedDate) {
-              <div>
-                <dt>Playing Since</dt>
-                <dd>{{ account.accountCreatedDate | date: 'longDate' }}</dd>
-              </div>
+              <dt>Playing Since</dt>
+              <dd>{{ account.accountCreatedDate | date: 'longDate' }}</dd>
             }
-            <div>
-              <dt>Lifetime Subscription</dt>
-              <dd>{{ account.lifetimeSubscription ? 'Yes' : 'No' }}</dd>
-            </div>
+            <dt>Lifetime Subscription</dt>
+            <dd>{{ account.lifetimeSubscription ? 'Yes' : 'No' }}</dd>
           </dl>
         </div>
 

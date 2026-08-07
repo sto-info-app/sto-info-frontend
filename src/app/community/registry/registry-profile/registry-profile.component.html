@@ -50,34 +50,24 @@
               [size]="300"></app-entity-avatar>
 
             <dl class="registry-detail-grid">
-              <div>
-                <dt>Joined</dt>
-                <dd>{{ profile.joinedAt | date: 'longDate' }}</dd>
-              </div>
-              <div>
-                <dt>Last Seen</dt>
-                <dd>
-                  {{
-                    profile.lastActiveAt
-                      ? (profile.lastActiveAt | date: 'longDate')
-                      : 'Never'
-                  }}
-                </dd>
-              </div>
+              <dt>Joined</dt>
+              <dd>{{ profile.joinedAt | date: 'longDate' }}</dd>
+              <dt>Last Seen</dt>
+              <dd>
+                {{
+                  profile.lastActiveAt
+                    ? (profile.lastActiveAt | date: 'longDate')
+                    : 'Never'
+                }}
+              </dd>
               @if (profile.playingSince) {
-                <div>
-                  <dt>Playing Since</dt>
-                  <dd>{{ profile.playingSince | date: 'longDate' }}</dd>
-                </div>
+                <dt>Playing Since</dt>
+                <dd>{{ profile.playingSince | date: 'longDate' }}</dd>
               }
-              <div>
-                <dt>Accounts</dt>
-                <dd>{{ profile.publicAccountCount }}</dd>
-              </div>
-              <div>
-                <dt>Captains</dt>
-                <dd>{{ profile.publicCharacterCount }}</dd>
-              </div>
+              <dt>Accounts</dt>
+              <dd>{{ profile.publicAccountCount }}</dd>
+              <dt>Captains</dt>
+              <dd>{{ profile.publicCharacterCount }}</dd>
             </dl>
           </div>
         </div>

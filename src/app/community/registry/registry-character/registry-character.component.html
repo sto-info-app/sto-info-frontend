@@ -60,52 +60,36 @@
         <div class="registry-character-inner-content">
           <dl class="registry-detail-grid">
             @if (character.level !== null) {
-              <div>
-                <dt>Level</dt>
-                <dd>{{ character.level }}</dd>
-              </div>
+              <dt>Level</dt>
+              <dd>{{ character.level }}</dd>
             }
             @if (character.sex) {
-              <div>
-                <dt>Sex</dt>
-                <dd>{{ character.sex.name }}</dd>
-              </div>
+              <dt>Sex</dt>
+              <dd>{{ character.sex.name }}</dd>
             }
             @if (character.class) {
-              <div>
-                <dt>Class</dt>
-                <dd>{{ character.class.name }}</dd>
-              </div>
+              <dt>Class</dt>
+              <dd>{{ character.class.name }}</dd>
             }
             @if (character.species) {
-              <div>
-                <dt>Species</dt>
-                <dd>{{ character.species.name }}</dd>
-              </div>
+              <dt>Species</dt>
+              <dd>{{ character.species.name }}</dd>
             }
             @if (character.faction) {
-              <div>
-                <dt>Starting Faction</dt>
-                <dd>{{ character.faction.name }}</dd>
-              </div>
+              <dt>Starting Faction</dt>
+              <dd>{{ character.faction.name }}</dd>
             }
             @if (character.generalFaction) {
-              <div>
-                <dt>Allegiance</dt>
-                <dd>{{ character.generalFaction.name }}</dd>
-              </div>
+              <dt>Allegiance</dt>
+              <dd>{{ character.generalFaction.name }}</dd>
             }
             @if (character.recruitType) {
-              <div>
-                <dt>Recruit Type</dt>
-                <dd>{{ character.recruitType.name }}</dd>
-              </div>
+              <dt>Recruit Type</dt>
+              <dd>{{ character.recruitType.name }}</dd>
             }
             @if (character.createdDate) {
-              <div>
-                <dt>Commissioned</dt>
-                <dd>{{ character.createdDate | date: 'longDate' }}</dd>
-              </div>
+              <dt>Commissioned</dt>
+              <dd>{{ character.createdDate | date: 'longDate' }}</dd>
             }
           </dl>
         </div>

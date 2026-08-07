@@ -88,6 +88,10 @@ describe('RegistryService', () => {
           r.params.get('page') === '2' &&
           r.params.get('pageSize') === '24',
       );
+      expect(req.request.params.get('search')).toBe('picard');
+      expect(req.request.params.get('sort')).toBe('recently-active');
+      expect(req.request.params.get('page')).toBe('2');
+      expect(req.request.params.get('pageSize')).toBe('24');
       req.flush(emptyPage);
     });
 
@@ -98,6 +102,7 @@ describe('RegistryService', () => {
         r =>
           r.url === API_URLS.REGISTRY_PROFILES && r.params.keys().length === 0,
       );
+      expect(req.request.params.keys()).toHaveLength(0);
       req.flush(emptyPage);
     });
 
@@ -149,6 +154,7 @@ describe('RegistryService', () => {
       service.getProfile('a b/c').subscribe();
 
       const req = httpMock.expectOne(`${API_URLS.REGISTRY_PROFILES}/a%20b%2Fc`);
+      expect(req.request.method).toBe('GET');
       req.flush({} as RegistryProfile);
     });
 
@@ -182,6 +188,7 @@ describe('RegistryService', () => {
       const req = httpMock.expectOne(
         `${API_URLS.REGISTRY_PROFILES}/a%20b/c%2Fd`,
       );
+      expect(req.request.method).toBe('GET');
       req.flush({} as RegistryAccount);
     });
 
@@ -217,6 +224,7 @@ describe('RegistryService', () => {
       const req = httpMock.expectOne(
         `${API_URLS.REGISTRY_PROFILES}/a%20b/c%2Fd/e%23f`,
       );
+      expect(req.request.method).toBe('GET');
       req.flush({} as RegistryCharacter);
     });
 

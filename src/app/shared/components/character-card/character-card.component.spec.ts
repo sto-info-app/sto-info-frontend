@@ -155,6 +155,25 @@ describe('CharacterCardComponent', () => {
     expect(component.imageSrc).toBe(SRC_PHOTO_UNAVAILABLE_300PX);
   });
 
+  it('should reset the failed-image state when vm changes', () => {
+    render(buildVm());
+
+    fixture.nativeElement
+      .querySelector('.character-list-image')
+      .dispatchEvent(new Event('error'));
+    fixture.detectChanges();
+    expect(component.hasImageFailed).toBe(true);
+
+    fixture.componentRef.setInput(
+      'vm',
+      buildVm({ imageUrl: 'https://cdn.example.com/char/recovered' }),
+    );
+    fixture.detectChanges();
+
+    expect(component.hasImageFailed).toBe(false);
+    expect(component.imageSrc).toBe('https://cdn.example.com/char/recovered');
+  });
+
   it('should omit the action column when there are no actions', () => {
     render(buildVm({ actions: [] }));
 

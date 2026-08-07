@@ -63,6 +63,7 @@ export abstract class RegistryPageBaseDirective implements OnDestroy {
     // completion without emission, and unsubscribe — so if this callback runs
     // at all, the request genuinely never settled.
     const loadingTimeout = setTimeout(() => {
+      this._loadSubscription?.unsubscribe();
       this._ngZone.run(() => {
         this.isLoading = false;
         this.errorMessage =
