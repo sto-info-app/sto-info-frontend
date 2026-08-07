@@ -67,16 +67,31 @@ export const ROADMAP_COMPLETE: RoadmapEntry[] = [
       'A reputation summary shows overall completion at a glance.',
     ],
   },
+  {
+    title: 'Character Progression',
+    details: [
+      'Research & Development tracking.',
+      'Captain Specialization tracking.',
+      'Other character progress improvements.',
+    ],
+  },
+  {
+    title: 'Community Info Sharing',
+    details: [
+      'The Galactic Personnel Registry is now available for public community profile sharing.',
+      'Friendships and user blocking were added across the platform.',
+      'Member reporting and admin moderation tools for the community area.',
+    ],
+  },
 ];
 
 export const ROADMAP_IN_PROGRESS: string[] = [
-  'Add character R&D tracking.',
-  'Add character specialization tracking.',
-  'Add character fleet tracking.',
+  'STO Storytime: publish, discover, and track community-created Star Trek Online stories, chapters, characters, and arcs (an out-of-game Foundry).',
+  'Custom account and character tracking options.',
 ];
 
 export const ROADMAP_PLANNED: string[] = [
-  'Public-facing sharing of account and character data.',
+  'Character fleet tracking.',
   'Fleet-focused tracking and management capabilities.',
   'Expanded account and character insight views.',
   'More quality-of-life improvements across management workflows.',
@@ -84,7 +99,6 @@ export const ROADMAP_PLANNED: string[] = [
 
 export const ROADMAP_FUTURE_IDEAS: string[] = [
   'Space and Ground builds.',
-  'Custom account and character tracking options.',
   'Fleet rosters, news and notifications.',
 ];
 
