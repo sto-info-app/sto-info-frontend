@@ -1,0 +1,18 @@
+<nav
+  class="lcars-tabs"
+  aria-label="Community sections">
+  @for (tab of tabs; track tab.link) {
+    <a
+      class="lcars-tab"
+      [routerLink]="tab.link"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: tab.exact }"
+      #tabActive="routerLinkActive"
+      [attr.aria-current]="tabActive.isActive ? 'page' : null"
+      >{{ tab.label }}</a
+    >
+  }
+  <span
+    class="lcars-tabs-filler"
+    aria-hidden="true"></span>
+</nav>

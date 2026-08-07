@@ -212,6 +212,20 @@
           ></textarea>
         </div>
 
+        <div class="form-row toggles-row registry-visibility">
+          <app-lcars-toggle
+            formControlName="publiclyVisible"
+            label="Publicly Visible"
+            ariaLabel="Publicly Visible"
+          >
+          </app-lcars-toggle>
+          <p class="registry-visibility__hint">
+            When on, this captain appears in the Galactic Personnel Registry —
+            but only if both your profile and this STO account are also publicly
+            visible. Your notes are never shown.
+          </p>
+        </div>
+
         <div class="form-actions">
           <button
             mat-button

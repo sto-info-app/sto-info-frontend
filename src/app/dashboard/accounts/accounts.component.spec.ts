@@ -100,12 +100,12 @@ describe('AccountsComponent', () => {
     const vm: AccountVm = component.accountVms[0];
     expect(vm.id).toBe(mockAccount.id);
     expect(vm.account).toBe(accounts[0]);
-    expect(vm.link).toBe('/dashboard/accounts/Test~1234');
+    expect(vm.card.link).toBe('/dashboard/accounts/Test~1234');
     expect(vm.platformIcon).toBe('fab fa-windows');
-    expect(vm.platformName).toBe('Windows');
+    expect(vm.card.platformName).toBe('Windows');
     expect(vm.launcherIcon).toBeNull();
-    expect(vm.launcherName).toBe('Launcher');
-    expect(vm.characterCount).toBe(2);
+    expect(vm.card.launcherName).toBeNull();
+    expect(vm.card.characterCount).toBe(2);
   });
 
   it('should build accountVm with launcher info and fallback platform name', () => {
@@ -124,10 +124,10 @@ describe('AccountsComponent', () => {
 
     const vm: AccountVm = component.accountVms[0];
     expect(vm.platformIcon).toBeNull();
-    expect(vm.platformName).toBe('Platform');
+    expect(vm.card.platformName).toBe('Platform');
     expect(vm.launcherIcon).toBe('fab fa-steam');
-    expect(vm.launcherName).toBe('Steam');
-    expect(vm.characterCount).toBe(0);
+    expect(vm.card.launcherName).toBe('Steam');
+    expect(vm.card.characterCount).toBe(0);
   });
 
   it('should handle error when loading accounts', () => {
@@ -144,6 +144,81 @@ describe('AccountsComponent', () => {
     component.addAccount();
 
     expect(navigateSpy).toHaveBeenCalledWith(['/dashboard/accounts/add']);
+  });
+
+  it('should build email and notes detail rows when present', () => {
+    stoAccountServiceSpy.getAccounts.mockReturnValue(
+      of([
+        {
+          ...mockAccount,
+          email: 'captain@example.com',
+          notes: 'Primary account.',
+        } as StoAccount,
+      ]),
+    );
+
+    component.ngOnInit();
+
+    const details = component.accountVms[0].card.details;
+    expect(details).toEqual([
+      expect.objectContaining({
+        label: 'Email',
+        text: 'captain@example.com',
+        variant: 'secondary',
+      }),
+      expect.objectContaining({
+        label: 'Notes',
+        text: 'Primary account.',
+        variant: 'muted',
+      }),
+    ]);
+  });
+
+  it('should label an unresolved launcher generically', () => {
+    stoAccountServiceSpy.getAccounts.mockReturnValue(
+      of([{ ...mockAccount, launcherId: 'missing' } as StoAccount]),
+    );
+    stoAccountServiceSpy.getLaunchers.mockReturnValue(of([]));
+
+    component.ngOnInit();
+
+    expect(component.accountVms[0].card.launcherName).toBe('Launcher');
+  });
+
+  describe('onAccountCardAction', () => {
+    it('should open the edit page for the edit action', () => {
+      const editSpy = jest
+        .spyOn(component, 'editAccount')
+        .mockImplementation(() => undefined);
+
+      component.onAccountCardAction(mockAccount, 'edit');
+
+      expect(editSpy).toHaveBeenCalledWith(mockAccount);
+    });
+
+    it('should start deletion for the delete action', () => {
+      const deleteSpy = jest
+        .spyOn(component, 'deleteAccount')
+        .mockImplementation(() => undefined);
+
+      component.onAccountCardAction(mockAccount, 'delete');
+
+      expect(deleteSpy).toHaveBeenCalledWith(mockAccount);
+    });
+
+    it('should ignore an unknown action', () => {
+      const editSpy = jest
+        .spyOn(component, 'editAccount')
+        .mockImplementation(() => undefined);
+      const deleteSpy = jest
+        .spyOn(component, 'deleteAccount')
+        .mockImplementation(() => undefined);
+
+      component.onAccountCardAction(mockAccount, 'archive');
+
+      expect(editSpy).not.toHaveBeenCalled();
+      expect(deleteSpy).not.toHaveBeenCalled();
+    });
   });
 
   it('should navigate to edit account page', () => {
@@ -328,15 +403,17 @@ describe('AccountsComponent', () => {
     component.ngOnInit();
 
     const vm = component.accountVms[0];
-    expect(vm.showUsername).toBe(true);
-    expect(vm.launcherClass).toBe('launcher-arc');
-    expect(vm.bgImagePath).toBe(
+    expect(vm.card.details.some(detail => detail.label === 'Username')).toBe(
+      true,
+    );
+    expect(vm.card.themeClass).toBe('platform-pc launcher-arc');
+    expect(vm.card.bgImagePath).toBe(
       '/assets/account-types/account_type_windows_arc.jpg',
     );
-    expect(vm.endeavourTotalNodesDisplay).toBe('0012');
+    expect(vm.card.endeavour?.totalNodes).toBe(12);
   });
 
-  it('should set launcherClass empty for non-pc platforms', () => {
+  it('should omit the launcher theme class for non-pc platforms', () => {
     const account = {
       ...mockAccount,
       platformId: 'xbox',
@@ -351,8 +428,8 @@ describe('AccountsComponent', () => {
     );
 
     component.ngOnInit();
-    expect(component.accountVms[0].launcherClass).toBe('');
-    expect(component.accountVms[0].bgImagePath).toBe(
+    expect(component.accountVms[0].card.themeClass).toBe('platform-xbox');
+    expect(component.accountVms[0].card.bgImagePath).toBe(
       '/assets/account-types/account_type_xbox.jpg',
     );
   });
@@ -400,7 +477,7 @@ describe('AccountsComponent', () => {
 
     component.ngOnInit();
 
-    expect(component.accountVms[0].bgImagePath).toBe(cloudflareUrl);
+    expect(component.accountVms[0].card.bgImagePath).toBe(cloudflareUrl);
   });
 
   it('should use default windows background for pc account without launcher', () => {
@@ -416,7 +493,7 @@ describe('AccountsComponent', () => {
     stoAccountServiceSpy.getLaunchers.mockReturnValue(of([]));
 
     component.ngOnInit();
-    expect(component.accountVms[0].bgImagePath).toBe(
+    expect(component.accountVms[0].card.bgImagePath).toBe(
       '/assets/account-types/account_type_windows_default.jpg',
     );
   });
@@ -438,7 +515,7 @@ describe('AccountsComponent', () => {
       ]),
     );
     component.ngOnInit();
-    expect(component.accountVms[0].bgImagePath).toBe(
+    expect(component.accountVms[0].card.bgImagePath).toBe(
       '/assets/account-types/account_type_windows_epic.jpg',
     );
 
@@ -448,7 +525,7 @@ describe('AccountsComponent', () => {
       ]),
     );
     component.loadAccounts();
-    expect(component.accountVms[0].bgImagePath).toBe(
+    expect(component.accountVms[0].card.bgImagePath).toBe(
       '/assets/account-types/account_type_windows_steam.jpg',
     );
   });
@@ -466,7 +543,7 @@ describe('AccountsComponent', () => {
     stoAccountServiceSpy.getLaunchers.mockReturnValue(of([]));
 
     component.ngOnInit();
-    expect(component.accountVms[0].bgImagePath).toBe(
+    expect(component.accountVms[0].card.bgImagePath).toBe(
       '/assets/account-types/account_type_default.jpg',
     );
   });
@@ -484,7 +561,11 @@ describe('AccountsComponent', () => {
     stoAccountServiceSpy.getLaunchers.mockReturnValue(of([]));
 
     component.ngOnInit();
-    expect(component.accountVms[0].showUsername).toBe(false);
+    expect(
+      component.accountVms[0].card.details.some(
+        detail => detail.label === 'Username',
+      ),
+    ).toBe(false);
   });
 
   it('should complete destroy stream on ngOnDestroy', () => {

@@ -20,6 +20,8 @@ import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { EndeavourService } from 'src/app/dashboard/services/endeavour.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
+import { CharacterCardComponent } from 'src/app/shared/components/character-card/character-card.component';
+import { CharacterCardVm } from 'src/app/shared/components/character-card/character-card.model';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { EndeavourRankBadgeComponent } from 'src/app/shared/components/endeavour-rank-badge/endeavour-rank-badge.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -32,7 +34,11 @@ import {
   SRC_PHOTO_UNAVAILABLE_100PX,
 } from 'src/app/shared/constants/app-image-assets.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
-import { WHITESPACE_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
+import {
+  getClassCategory,
+  getFactionClass,
+  getSexIcon,
+} from 'src/app/shared/utils/card-theme.utils';
 import {
   decodeStoHandle,
   encodeStoHandle,
@@ -42,17 +48,13 @@ import {
 interface CharacterVm {
   id: string;
   character: Character;
-  /** Router link segments for navigating to this character. */
-  link: string[];
-  /** CSS class derived from the character's general faction. */
-  factionClass: string;
-  /** CSS class derived from the character's career class. */
-  classCategory: string;
-  /** Font Awesome icon name for the character's sex. */
-  sexIcon: string;
-  /** Resolved profile image URL (or fallback when unavailable). */
-  imageUrl: string;
+  /** Presentation model handed to the shared captain card. */
+  card: CharacterCardVm;
 }
+
+/** Action keys emitted by the captain cards on this page. */
+const CHARACTER_CARD_EDIT = 'edit';
+const CHARACTER_CARD_DELETE = 'delete';
 
 /** Aggregated, sorted filter options derived from the character list. */
 interface CharacterFilterOptionsVm {
@@ -80,6 +82,7 @@ interface CharacterFilterOptionsVm {
     MatButtonModule,
     MatDialogModule,
     EndeavourRankBadgeComponent,
+    CharacterCardComponent,
   ],
 })
 export class AccountDetailComponent implements OnInit, OnDestroy {
@@ -95,10 +98,6 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
   readonly characters = signal<Character[]>([]);
 
   /** Set of character IDs whose profile images failed to load. */
-  failedImageIds = new Set<string>();
-  /** Signal mirror of failedImageIds — drives VM image-URL recomputation. */
-  private readonly _failedImageIds = signal<ReadonlySet<string>>(new Set());
-
   /** Whether the filter panel is collapsed. */
   filtersCollapsed = false;
 
@@ -238,20 +237,59 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
    */
   private readonly _characterVms = computed<CharacterVm[]>(() => {
     const chars = this.characters();
-    const failedIds = this._failedImageIds();
     const accountHandle = this.account?.handle ?? '';
     return chars.map(c => ({
       id: c.id,
       character: c,
-      link: ['/dashboard/accounts', encodeStoHandle(accountHandle), c.handle],
-      factionClass: this.getFactionClass(c),
-      classCategory: this.getClassCategory(c),
-      sexIcon: this.getSexIcon(c),
-      imageUrl: failedIds.has(c.id)
-        ? this.unavailablePhotoSrc
-        : this.getProfileImageUrl(c),
+      card: {
+        id: c.id,
+        handle: c.handle,
+        level: c.level ?? null,
+        link: ['/dashboard/accounts', encodeStoHandle(accountHandle), c.handle],
+        factionClass: getFactionClass(c.generalFaction?.name),
+        classCategory: getClassCategory(c.class?.name),
+        sexIcon: getSexIcon(c.sex?.name),
+        imageUrl: this.getProfileImageUrl(c),
+        speciesName: c.species?.name ?? null,
+        rankTitle: c.rank?.title ?? null,
+        rankIconUrl: c.rank?.iconUrl ?? null,
+        factionName: c.faction?.name ?? null,
+        factionIconUrl: c.faction?.iconUrl ?? null,
+        recruitTypeName: c.recruitType?.name ?? null,
+        recruitTypeIconUrl: c.recruitType?.iconUrl ?? null,
+        actions: [
+          {
+            key: CHARACTER_CARD_EDIT,
+            icon: 'fas fa-user-pen',
+            title: 'Edit Character',
+          },
+          {
+            key: CHARACTER_CARD_DELETE,
+            icon: 'fas fa-trash',
+            title: 'Delete Character',
+            destructive: true,
+          },
+        ],
+      },
     }));
   });
+
+  /**
+   * Routes a captain card action to the matching handler.
+   *
+   * @param character - The captain the card represents.
+   * @param actionKey - The key emitted by the card.
+   */
+  onCharacterCardAction(character: Character, actionKey: string): void {
+    if (actionKey === CHARACTER_CARD_EDIT) {
+      this.editCharacter(character);
+      return;
+    }
+
+    if (actionKey === CHARACTER_CARD_DELETE) {
+      this.deleteCharacter(character);
+    }
+  }
 
   /**
    * Filtered character view-models based on all active filter signals.
@@ -464,55 +502,15 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
     return `/${route}`;
   }
 
-  /** Returns the CSS class name derived from the character's general faction. */
-  getFactionClass(character: Character): string {
-    return (
-      character.generalFaction?.name
-        ?.toLowerCase()
-        .replaceAll(WHITESPACE_PATTERN, '-') || 'unknown'
-    );
-  }
-
-  /** Returns the career-class category string for CSS styling. */
-  getClassCategory(character: Character): string {
-    const className = character.class?.name?.toLowerCase() || '';
-    if (className.includes('tactical')) return 'tactical';
-    if (className.includes('engineering')) return 'engineering';
-    if (className.includes('science')) return 'science';
-    return 'unknown';
-  }
-
-  /** Returns the Font Awesome icon name representing the character's sex. */
-  getSexIcon(character: Character): string {
-    const sex = character.sex?.name?.toLowerCase() || '';
-    if (sex === 'male') return 'mars';
-    if (sex === 'female') return 'venus';
-    return 'circle-question';
-  }
-
-  /**
-   * Records that a character's profile image failed to load, updates the
-   * reactive signal so the VM recomputes with the fallback URL, and keeps
-   * the public Set in sync for test compatibility.
-   */
-  onProfileImageError(characterId: string): void {
-    this.failedImageIds.add(characterId);
-    this._failedImageIds.update(ids => {
-      const next = new Set(ids);
-      next.add(characterId);
-      return next;
-    });
-  }
-
   /**
    * Returns the resolved profile image URL for a character.
-   * Kept public for test compatibility; the template uses precomputed VM imageUrl.
+   *
+   * Broken images are handled by the shared captain card itself.
+   *
+   * @param character - The character to resolve an image for.
+   * @returns The best available image URL.
    */
   getProfileImageUrl(character: Character): string {
-    if (this.failedImageIds.has(character.id)) {
-      return this.unavailablePhotoSrc;
-    }
-
     if (character.profilePicture100) {
       return this._formatImageUrl(
         character.profilePicture100,

@@ -1,0 +1,115 @@
+@use 'lcars-variables' as vars;
+
+.member-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+
+  // Fills the grid track so every card in a row is the same height, and the
+  // actions row below can bottom-align across them.
+  height: 100%;
+  padding: 1rem;
+  border: 1px solid vars.$lcars-card-border;
+  border-radius: 1rem;
+  background: vars.$lcars-card-surface;
+  text-align: center;
+
+  &__identity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  // Only a member whose record can still be opened gets the hover cue.
+  a.member-card__identity:hover .member-card__name {
+    color: vars.$lcars-sunflower;
+  }
+
+  &__name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
+  }
+
+  // Always rendered, badge or not, so the rows below it line up from card to
+  // card instead of shifting up on members with no relationship.
+  &__badge-slot {
+    display: flex;
+    align-items: center;
+    min-height: 1.5rem;
+  }
+
+  &__badge {
+    padding: 0.1rem 0.7rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: vars.$a11y-black;
+    background: vars.$lcars-perano;
+
+    &--friend {
+      background: vars.$lcars-green;
+    }
+
+    &--pending {
+      background: vars.$lcars-gold;
+    }
+  }
+
+  &__stats {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0.25rem 0 0;
+
+    div {
+      display: flex;
+      gap: 0.35rem;
+      align-items: baseline;
+    }
+
+    dt {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.75;
+
+      // Separates the label from the count beside it, matching the detail
+      // grids on the registry's other pages.
+      &::after {
+        content: ':';
+      }
+    }
+
+    dd {
+      margin: 0;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: vars.$lcars-tangerine;
+    }
+  }
+
+  &__meta {
+    margin: 0;
+    font-size: 0.8rem;
+    opacity: 0.75;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+
+    // Sits against the bottom of the card so the buttons line up across the
+    // row however much meta each member has.
+    margin-top: auto;
+    padding-top: 0.6rem;
+  }
+}

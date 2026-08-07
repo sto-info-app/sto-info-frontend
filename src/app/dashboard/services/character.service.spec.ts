@@ -29,22 +29,27 @@ describe('CharacterService', () => {
 
   const createMockCharacter = (
     overrides: Partial<Character> = {},
-  ): Character => ({
-    id: '1',
-    accountId: 'acc1',
-    handle: 'TestHandle',
-    generalFactionId: 'gf1',
-    factionId: 'f1',
-    sexId: 's1',
-    classId: 'c1',
-    recruitTypeId: 'r1',
-    speciesId: 'sp1',
-    level: 65,
-    userId: 'u1',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-    ...overrides,
-  });
+  ): Character => {
+    const { publiclyVisible, ...otherOverrides } = overrides;
+
+    return {
+      id: '1',
+      accountId: 'acc1',
+      handle: 'TestHandle',
+      generalFactionId: 'gf1',
+      factionId: 'f1',
+      sexId: 's1',
+      classId: 'c1',
+      recruitTypeId: 'r1',
+      speciesId: 'sp1',
+      level: 65,
+      userId: 'u1',
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+      ...otherOverrides,
+      publiclyVisible: publiclyVisible ?? true,
+    };
+  };
 
   beforeEach(() => {
     mockAuthService = {

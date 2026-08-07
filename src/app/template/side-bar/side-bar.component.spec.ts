@@ -52,6 +52,25 @@ describe('SideBarComponent', () => {
     expect(routingServiceSpy.getLink).toHaveBeenCalledWith('test');
   });
 
+  it('should offer the Community link in both signed-in states', () => {
+    const linkTextsWhenSignedOut: string[] = Array.from(
+      fixture.nativeElement.querySelectorAll('.sidebar-buttons a'),
+      (link: HTMLAnchorElement) => link.textContent?.trim() ?? '',
+    );
+    expect(linkTextsWhenSignedOut).toContain('Register');
+    expect(linkTextsWhenSignedOut).toContain('Community');
+
+    fixture.componentRef.setInput('isLoggedIn', true);
+    fixture.detectChanges();
+
+    const linkTextsWhenSignedIn: string[] = Array.from(
+      fixture.nativeElement.querySelectorAll('.sidebar-buttons a'),
+      (link: HTMLAnchorElement) => link.textContent?.trim() ?? '',
+    );
+    expect(linkTextsWhenSignedIn).not.toContain('Register');
+    expect(linkTextsWhenSignedIn).toContain('Community');
+  });
+
   it('should return admin status from auth service', () => {
     expect(component.isAdmin).toBe(false);
 

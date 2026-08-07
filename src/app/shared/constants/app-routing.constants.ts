@@ -1,9 +1,13 @@
 export const ROOT_ROUTES = {
   ABOUT: 'about',
+  COMMUNITY: 'community',
   DASHBOARD: 'dashboard',
   NEWS: 'news',
   ADMIN: 'admin',
 };
+
+const REGISTRY_ROOT = ROOT_ROUTES.COMMUNITY + '/registry';
+const REGISTRY_PROFILES = REGISTRY_ROOT + '/profiles';
 
 export const APP_ROUTES = {
   //Default
@@ -48,6 +52,21 @@ export const APP_ROUTES = {
   STO_DASHBOARD_STATS: ROOT_ROUTES.DASHBOARD + '/stats',
   STO_DASHBOARD_STATS_DETAIL: ROOT_ROUTES.DASHBOARD + '/stats/:breakdownId',
 
+  // Community - Galactic Personnel Registry
+  COMMUNITY: ROOT_ROUTES.COMMUNITY,
+  COMMUNITY_REGISTRY: REGISTRY_ROOT,
+  COMMUNITY_REGISTRY_SEARCH: REGISTRY_ROOT + '/search',
+  COMMUNITY_REGISTRY_RECENTLY_JOINED: REGISTRY_ROOT + '/recently-joined',
+  COMMUNITY_REGISTRY_RECENTLY_ACTIVE: REGISTRY_ROOT + '/recently-active',
+  COMMUNITY_REGISTRY_PROFILES: REGISTRY_PROFILES,
+  COMMUNITY_REGISTRY_PROFILE: REGISTRY_PROFILES + '/:username',
+  COMMUNITY_REGISTRY_ACCOUNT: REGISTRY_PROFILES + '/:username/:accountSlug',
+  COMMUNITY_REGISTRY_CHARACTER:
+    REGISTRY_PROFILES + '/:username/:accountSlug/:characterSlug',
+
+  // Community - Friends and blocking (authenticated)
+  COMMUNITY_FRIENDS: ROOT_ROUTES.COMMUNITY + '/friends',
+
   // News
   NEWS: ROOT_ROUTES.NEWS,
   NEWS_DETAIL: ROOT_ROUTES.NEWS + '/:slug',
@@ -65,6 +84,8 @@ export const APP_ROUTES = {
   ADMIN_BANNERS_EDIT: ROOT_ROUTES.ADMIN + '/banners/:id/edit',
   ADMIN_NOTIFICATIONS: ROOT_ROUTES.ADMIN + '/notifications',
   ADMIN_NOTIFICATIONS_SEND: ROOT_ROUTES.ADMIN + '/notifications/send',
+  ADMIN_REPORTS: ROOT_ROUTES.ADMIN + '/reports',
+  ADMIN_USERS: ROOT_ROUTES.ADMIN + '/users',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'service-interruption',
@@ -111,6 +132,20 @@ export const APP_ROUTE_TITLES = {
   STO_DASHBOARD_STATS: 'Stats',
   STO_DASHBOARD_STATS_DETAIL: 'Stat Detail',
 
+  // Community - Galactic Personnel Registry
+  COMMUNITY: 'Community',
+  COMMUNITY_REGISTRY: 'Galactic Personnel Registry',
+  COMMUNITY_REGISTRY_SEARCH: 'Search the Registry',
+  COMMUNITY_REGISTRY_RECENTLY_JOINED: 'Recently Joined',
+  COMMUNITY_REGISTRY_RECENTLY_ACTIVE: 'Recently Active',
+  COMMUNITY_REGISTRY_PROFILES: 'Profiles',
+  COMMUNITY_REGISTRY_PROFILE: 'Member Profile',
+  COMMUNITY_REGISTRY_ACCOUNT: 'Member Account',
+  COMMUNITY_REGISTRY_CHARACTER: 'Member Captain',
+
+  // Community - Friends and blocking (authenticated)
+  COMMUNITY_FRIENDS: 'Friends',
+
   // News
   NEWS: 'News',
   NEWS_DETAIL: 'News',
@@ -128,6 +163,8 @@ export const APP_ROUTE_TITLES = {
   ADMIN_BANNERS_EDIT: 'Edit Banner',
   ADMIN_NOTIFICATIONS: 'Sent Notifications',
   ADMIN_NOTIFICATIONS_SEND: 'Send Notification',
+  ADMIN_REPORTS: 'Reported Officers',
+  ADMIN_USERS: 'Manage Members',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'Service Interruption',

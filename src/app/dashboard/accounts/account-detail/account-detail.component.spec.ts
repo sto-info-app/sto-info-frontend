@@ -53,6 +53,7 @@ describe('AccountDetailComponent', () => {
     userId: 'user1',
     accountId: 'acc1',
     handle: 'Char1',
+    publiclyVisible: true,
     sexId: 'male',
     sex: { id: 'male', name: 'Male' },
     classId: 'tac',
@@ -370,88 +371,9 @@ describe('AccountDetailComponent', () => {
     it('getRouteLink should prepend slash', () => {
       expect(component.getRouteLink('test')).toBe('/test');
     });
-
-    it('getFactionClass should return formatted faction name', () => {
-      expect(component.getFactionClass(mockCharacter)).toBe('federation');
-      expect(
-        component.getFactionClass({
-          ...mockCharacter,
-          generalFaction: { id: 'x', name: 'Alien Domain' },
-        } as Character),
-      ).toBe('alien-domain');
-      expect(
-        component.getFactionClass({
-          ...mockCharacter,
-          generalFaction: undefined,
-        } as Character),
-      ).toBe('unknown');
-      expect(
-        component.getFactionClass({
-          ...mockCharacter,
-          generalFaction: { id: 'x', name: undefined },
-        } as unknown as Character),
-      ).toBe('unknown');
-    });
-
-    it('getClassCategory should return correct class category', () => {
-      expect(component.getClassCategory(mockCharacter)).toBe('tactical');
-      expect(
-        component.getClassCategory({
-          ...mockCharacter,
-          class: { id: 'eng', name: 'Engineering' },
-        } as Character),
-      ).toBe('engineering');
-      expect(
-        component.getClassCategory({
-          ...mockCharacter,
-          class: { id: 'sci', name: 'Science' },
-        } as Character),
-      ).toBe('science');
-      expect(
-        component.getClassCategory({
-          ...mockCharacter,
-          class: { id: 'unk', name: 'Unknown' },
-        } as Character),
-      ).toBe('unknown');
-      expect(
-        component.getClassCategory({
-          ...mockCharacter,
-          class: undefined,
-        } as Character),
-      ).toBe('unknown');
-    });
-
-    it('getSexIcon should return correct icon name', () => {
-      expect(component.getSexIcon(mockCharacter)).toBe('mars'); // male
-      expect(
-        component.getSexIcon({
-          ...mockCharacter,
-          sex: { id: 'f', name: 'Female' },
-        } as Character),
-      ).toBe('venus');
-      expect(
-        component.getSexIcon({
-          ...mockCharacter,
-          sex: { id: 'u', name: 'Unknown' },
-        } as Character),
-      ).toBe('circle-question');
-      expect(
-        component.getSexIcon({
-          ...mockCharacter,
-          sex: undefined,
-        } as Character),
-      ).toBe('circle-question');
-    });
   });
 
   describe('Image Handling', () => {
-    it('getProfileImageUrl should return failed src if id is in failed set', () => {
-      component.failedImageIds.add(mockCharacter.id);
-      expect(component.getProfileImageUrl(mockCharacter)).toBe(
-        SRC_PHOTO_UNAVAILABLE_100PX,
-      );
-    });
-
     it('getProfileImageUrl should return 100px variant if available', () => {
       const url = component.getProfileImageUrl(mockCharacter);
       expect(url).toContain('img1-100');
@@ -503,16 +425,18 @@ describe('AccountDetailComponent', () => {
       );
     });
 
-    it('onProfileImageError should add id to failed set', () => {
-      component.onProfileImageError('123');
-      expect(component.failedImageIds.has('123')).toBe(true);
+    it('filteredVms should report a null level when none is recorded', () => {
+      component.characters.set([
+        { ...mockCharacter, level: undefined } as unknown as Character,
+      ]);
+      const vm = component.filteredVms().find(v => v.id === mockCharacter.id);
+      expect(vm?.card.level).toBeNull();
     });
 
-    it('filteredVms should use unavailablePhotoSrc when image has failed', () => {
+    it('filteredVms should carry the resolved image onto the card model', () => {
       component.characters.set([mockCharacter]);
-      component.onProfileImageError(mockCharacter.id);
       const vm = component.filteredVms().find(v => v.id === mockCharacter.id);
-      expect(vm?.imageUrl).toBe(SRC_PHOTO_UNAVAILABLE_100PX);
+      expect(vm?.card.imageUrl).toContain('img1-100');
     });
   });
 
@@ -787,6 +711,42 @@ describe('AccountDetailComponent', () => {
       expect(component.filterSex()).toBe('');
       expect(component.filterClass()).toBe('');
       expect(component.filterRecruitType()).toBe('');
+    });
+  });
+
+  describe('onCharacterCardAction', () => {
+    it('should open the edit page for the edit action', () => {
+      const editSpy = jest
+        .spyOn(component, 'editCharacter')
+        .mockImplementation(() => undefined);
+
+      component.onCharacterCardAction(mockCharacter, 'edit');
+
+      expect(editSpy).toHaveBeenCalledWith(mockCharacter);
+    });
+
+    it('should start deletion for the delete action', () => {
+      const deleteSpy = jest
+        .spyOn(component, 'deleteCharacter')
+        .mockImplementation(() => undefined);
+
+      component.onCharacterCardAction(mockCharacter, 'delete');
+
+      expect(deleteSpy).toHaveBeenCalledWith(mockCharacter);
+    });
+
+    it('should ignore an unknown action', () => {
+      const editSpy = jest
+        .spyOn(component, 'editCharacter')
+        .mockImplementation(() => undefined);
+      const deleteSpy = jest
+        .spyOn(component, 'deleteCharacter')
+        .mockImplementation(() => undefined);
+
+      component.onCharacterCardAction(mockCharacter, 'archive');
+
+      expect(editSpy).not.toHaveBeenCalled();
+      expect(deleteSpy).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,0 +1,196 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading members"></app-loading-bar>
+}
+
+<div
+  id="user-admin-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Manage Members</h1>
+    <p class="admin-page-intro">
+      Find an account and disable or restore it. Disabling signs the member out
+      immediately, keeps them from signing in again and closes every open report
+      about them.
+    </p>
+
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Action failed"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    @if (successMessage) {
+      <app-lcars-success-message
+        title="Acknowledged"
+        [message]="successMessage"></app-lcars-success-message>
+    }
+
+    <section class="admin-section">
+      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+        <span class="title-with-badge">
+          Members
+          @if (total > 0) {
+            <span class="header-count-badge">{{ total }}</span>
+          }
+        </span>
+      </div>
+
+      <div class="admin-panel">
+        <div class="form-row compact">
+          <div class="lcars-select-container sunflower">
+            <label
+              class="select-label"
+              for="user-disabled-filter"
+              >Account state</label
+            >
+            <select
+              id="user-disabled-filter"
+              title="Account state"
+              [(ngModel)]="disabledFilter"
+              (ngModelChange)="applyFilters()">
+              @for (filter of disabledFilters; track filter) {
+                <option [value]="filter">
+                  {{ disabledFilterLabels[filter] }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="lcars-input-container bluey">
+            <label for="user-search-input">Search by email or username</label>
+            <input
+              id="user-search-input"
+              type="search"
+              maxlength="255"
+              [(ngModel)]="search"
+              (keyup.enter)="applyFilters()" />
+          </div>
+        </div>
+
+        <div class="admin-form-actions">
+          <button
+            type="button"
+            class="lcars-btn green"
+            [disabled]="isLoading"
+            (click)="applyFilters()">
+            Apply
+          </button>
+        </div>
+      </div>
+
+      @if (!isLoading && users.length === 0) {
+        <p class="records-empty">No members match this search.</p>
+      }
+
+      @if (users.length > 0) {
+        <div class="admin-records">
+          @for (user of users; track user.id) {
+            <article class="admin-record-card">
+              <header class="admin-record-header">
+                <div class="admin-record-title">
+                  <strong>{{ displayName(user) }}</strong>
+                  <span>{{ user.email }}</span>
+                </div>
+                <div class="admin-record-meta">
+                  @if (user.openReportCount > 0) {
+                    <span class="status-pill warning">
+                      {{ user.openReportCount }} open report{{
+                        user.openReportCount === 1 ? '' : 's'
+                      }}
+                    </span>
+                  }
+                  <span
+                    class="status-pill"
+                    [ngClass]="user.isAccountDisabled ? 'draft' : 'success'">
+                    {{ user.isAccountDisabled ? 'Disabled' : 'Active' }}
+                  </span>
+                </div>
+              </header>
+
+              <div class="admin-record-body">
+                <div class="moderation-record-main">
+                  <dl class="admin-record-details">
+                    <div class="admin-record-detail">
+                      <span class="label">Role</span>
+                      <span class="value">{{ user.role }}</span>
+                    </div>
+                    <div class="admin-record-detail">
+                      <span class="label">Registered</span>
+                      <span class="value">
+                        {{ user.createdAt | date: 'mediumDate' }}
+                      </span>
+                    </div>
+                    <div class="admin-record-detail">
+                      <span class="label">Last signed in</span>
+                      <span class="value">
+                        {{
+                          user.lastLoginAt
+                            ? (user.lastLoginAt | date: 'medium')
+                            : 'Never'
+                        }}
+                      </span>
+                    </div>
+                    @if (user.isAccountDisabled) {
+                      <div class="admin-record-detail">
+                        <span class="label">Disabled</span>
+                        <span class="value">
+                          {{ user.disabledAt | date: 'medium' }}
+                        </span>
+                      </div>
+                      <div class="admin-record-detail">
+                        <span class="label">Reason</span>
+                        <span class="value">
+                          {{ user.disabledReason ?? 'None recorded' }}
+                        </span>
+                      </div>
+                    }
+                  </dl>
+                </div>
+
+                <div class="admin-record-actions moderation-record-actions">
+                  @if (user.isAccountDisabled) {
+                    <button
+                      type="button"
+                      class="cta-icon"
+                      (click)="enable(user)"
+                      title="Restore this account"
+                      aria-label="Restore this account"
+                    ><i class="fas fa-unlock"></i
+                    ></button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="cta-icon delete-icon"
+                      (click)="disable(user)"
+                      title="Disable this account"
+                      aria-label="Disable this account"
+                    ><i class="fas fa-user-slash"></i
+                    ></button>
+                  }
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN_REPORTS"
+        >Reported officers</a
+      >
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN"
+        >Admin home</a
+      >
+    </div>
+  </div>
+</div>

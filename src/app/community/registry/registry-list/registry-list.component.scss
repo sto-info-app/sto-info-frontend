@@ -1,0 +1,42 @@
+// Single column: the section is navigated from the community tab strip, so the
+// listing gets the full width for its card grid.
+#registry-list-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+#registry-list-main-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.registry-list-inner-content {
+  padding: 20px;
+}
+
+.registry-intro {
+  margin: 0 0 1rem;
+}
+
+.registry-search {
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .lcars-input-container {
+      flex: 1;
+      min-width: 200px;
+      margin-bottom: 0;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+  }
+}

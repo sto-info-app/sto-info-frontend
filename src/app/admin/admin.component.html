@@ -1,6 +1,9 @@
 <div id="admin-page">
   <h1>Admin</h1>
-  <p>Manage public news, site banners and user notifications.</p>
+  <p>
+    Manage public news, site banners and user notifications, and moderate the
+    community.
+  </p>
 
   <div class="admin-cards">
     <a
@@ -20,6 +23,18 @@
       [routerLink]="getRouteLink(appRoutes.ADMIN_NOTIFICATIONS)">
       <h2>Notifications</h2>
       <p>Review sent notifications and compose new broadcasts or per-user messages.</p>
+    </a>
+    <a
+      class="admin-card"
+      [routerLink]="getRouteLink(appRoutes.ADMIN_REPORTS)">
+      <h2>Reported Officers</h2>
+      <p>Work through reports members have raised about other members.</p>
+    </a>
+    <a
+      class="admin-card"
+      [routerLink]="getRouteLink(appRoutes.ADMIN_USERS)">
+      <h2>Manage Members</h2>
+      <p>Find an account and disable or restore access to it.</p>
     </a>
   </div>
 </div>

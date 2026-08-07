@@ -14,7 +14,10 @@ import { AuthService } from '../core/auth/auth.service';
 import { NewsPost } from '../models/news.models';
 import { NewsService } from '../news/news.service';
 import { NewsCardComponent } from '../shared/components/news-card/news-card.component';
-import { APP_ROUTES } from '../shared/constants/app-routing.constants';
+import {
+  APP_ROUTES,
+  APP_ROUTE_TITLES,
+} from '../shared/constants/app-routing.constants';
 import { observeInZone } from '../shared/rxjs/observe-in-zone.operator';
 import { RoutingService } from '../shared/services/routing.service';
 
@@ -34,6 +37,7 @@ export class HomeComponent implements OnDestroy {
   appTitle: string = environment.appTitle;
   isLoggedIn = false;
   appRoutes = APP_ROUTES;
+  appRouteTitles = APP_ROUTE_TITLES;
   recentNews: NewsPost[] = [];
   newsLoading = true;
   newsError = false;

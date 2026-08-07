@@ -1,0 +1,223 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading reports"></app-loading-bar>
+}
+
+<div
+  id="report-admin-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Reported Officers</h1>
+    <p class="admin-page-intro">
+      Reports members have raised about other members, longest-waiting first.
+      Neither the reporter nor the reported member is told what happens here.
+    </p>
+
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Action failed"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    @if (successMessage) {
+      <app-lcars-success-message
+        title="Acknowledged"
+        [message]="successMessage"></app-lcars-success-message>
+    }
+
+    <section class="admin-section">
+      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+        <span class="title-with-badge">
+          Moderation Queue
+          @if (openCount > 0) {
+            <span class="header-count-badge">{{ openCount }}</span>
+          }
+        </span>
+      </div>
+
+      <div class="admin-panel">
+        <div class="form-row compact">
+          <div class="lcars-select-container sunflower">
+            <label
+              class="select-label"
+              for="report-status-filter"
+              >Status</label
+            >
+            <select
+              id="report-status-filter"
+              title="Status"
+              [(ngModel)]="statusFilter"
+              (ngModelChange)="applyFilters()">
+              @for (filter of statusFilters; track filter) {
+                <option [value]="filter">{{ filterLabel(filter) }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="lcars-input-container bluey">
+            <label for="report-search-input">Search by username</label>
+            <input
+              id="report-search-input"
+              type="search"
+              maxlength="50"
+              [(ngModel)]="search"
+              (keyup.enter)="applyFilters()" />
+          </div>
+        </div>
+
+        <div class="admin-form-actions">
+          <button
+            type="button"
+            class="lcars-btn green"
+            [disabled]="isLoading"
+            (click)="applyFilters()">
+            Apply
+          </button>
+        </div>
+      </div>
+
+      @if (!isLoading && reports.length === 0) {
+        <p class="records-empty">No reports match this filter.</p>
+      }
+
+      @if (reports.length > 0) {
+        <div class="admin-records">
+          @for (report of reports; track report.id) {
+            <article class="admin-record-card">
+              <header class="admin-record-header">
+                <div class="admin-record-title">
+                  <strong>{{ reportedName(report) }}</strong>
+                  <span>{{ reasonLabels[report.reason] }}</span>
+                </div>
+                <div class="admin-record-meta">
+                  @if (report.reported.isAccountDisabled) {
+                    <span class="status-pill draft">Disabled</span>
+                  }
+                  <span
+                    class="status-pill"
+                    [ngClass]="statusPillClasses[report.status]">
+                    {{ statusLabels[report.status] }}
+                  </span>
+                </div>
+              </header>
+
+              <div class="admin-record-body">
+                <div class="moderation-record-main">
+                  @if (report.details) {
+                    <p class="admin-record-summary">{{ report.details }}</p>
+                  } @else {
+                    <p class="admin-record-summary moderation-no-details">
+                      The reporter left no further detail.
+                    </p>
+                  }
+
+                  <dl class="admin-record-details">
+                    <div class="admin-record-detail">
+                      <span class="label">Reported by</span>
+                      <span class="value">{{ reporterName(report) }}</span>
+                    </div>
+                    <div class="admin-record-detail">
+                      <span class="label">Raised</span>
+                      <span class="value">
+                        {{ report.createdAt | date: 'medium' }}
+                      </span>
+                    </div>
+                    @if (report.reviewedBy) {
+                      <div class="admin-record-detail">
+                        <span class="label">Last reviewed by</span>
+                        <span class="value">
+                          {{ report.reviewedBy }}
+                          @if (report.reviewedAt) {
+                            — {{ report.reviewedAt | date: 'medium' }}
+                          }
+                        </span>
+                      </div>
+                    }
+                    @if (report.moderatorNotes) {
+                      <div class="admin-record-detail">
+                        <span class="label">Notes</span>
+                        <span class="value">{{ report.moderatorNotes }}</span>
+                      </div>
+                    }
+                  </dl>
+                </div>
+
+                <div class="admin-record-actions moderation-record-actions">
+                  @if (report.status === reportStatus.OPEN) {
+                    <button
+                      type="button"
+                      class="cta-icon"
+                      (click)="claim(report)"
+                      title="Mark as under review"
+                      aria-label="Mark as under review"
+                    ><i class="fas fa-eye"></i
+                    ></button>
+                  }
+
+                  @if (
+                    report.status === reportStatus.OPEN ||
+                    report.status === reportStatus.UNDER_REVIEW
+                  ) {
+                    <button
+                      type="button"
+                      class="cta-icon"
+                      (click)="markActioned(report)"
+                      title="Close as actioned"
+                      aria-label="Close as actioned"
+                    ><i class="fas fa-check"></i
+                    ></button>
+                    <button
+                      type="button"
+                      class="cta-icon"
+                      (click)="dismiss(report)"
+                      title="Dismiss report"
+                      aria-label="Dismiss report"
+                    ><i class="fas fa-xmark"></i
+                    ></button>
+                  }
+
+                  @if (report.reported.isAccountDisabled) {
+                    <button
+                      type="button"
+                      class="cta-icon"
+                      (click)="enableReported(report)"
+                      title="Restore this account"
+                      aria-label="Restore this account"
+                    ><i class="fas fa-unlock"></i
+                    ></button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="cta-icon delete-icon"
+                      (click)="disableReported(report)"
+                      title="Disable this account"
+                      aria-label="Disable this account"
+                    ><i class="fas fa-user-slash"></i
+                    ></button>
+                  }
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN_USERS"
+        >Manage members</a
+      >
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN"
+        >Admin home</a
+      >
+    </div>
+  </div>
+</div>

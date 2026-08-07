@@ -7,6 +7,8 @@ export interface Character {
   lastName?: string;
   biography?: string;
   notes?: string;
+  /** Whether this captain appears in the public Galactic Personnel Registry. */
+  publiclyVisible: boolean;
   createdDate?: string;
   generalFactionId: string;
   factionId: string;
@@ -81,6 +83,8 @@ export interface CreateCharacterRequest {
   lastName?: string;
   biography?: string;
   notes?: string;
+  /** Whether this captain appears in the public Galactic Personnel Registry. */
+  publiclyVisible?: boolean;
   createdDate?: string;
   generalFactionId: string;
   factionId: string;

@@ -1,0 +1,15 @@
+#community-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+#community-main-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.community-inner-content {
+  padding: 20px;
+}

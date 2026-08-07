@@ -1,0 +1,11 @@
+@use 'registry-layout' as registry;
+@include registry.registry-two-column(
+  'registry-account-container',
+  'registry-account-main-column',
+  'registry-account-side-column'
+);
+@include registry.registry-detail-grid;
+
+.registry-account-inner-content {
+  padding: 20px;
+}
