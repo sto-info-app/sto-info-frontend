@@ -84,6 +84,8 @@ export const APP_ROUTES = {
   ADMIN_BANNERS_EDIT: ROOT_ROUTES.ADMIN + '/banners/:id/edit',
   ADMIN_NOTIFICATIONS: ROOT_ROUTES.ADMIN + '/notifications',
   ADMIN_NOTIFICATIONS_SEND: ROOT_ROUTES.ADMIN + '/notifications/send',
+  ADMIN_REPORTS: ROOT_ROUTES.ADMIN + '/reports',
+  ADMIN_USERS: ROOT_ROUTES.ADMIN + '/users',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'service-interruption',
@@ -161,6 +163,8 @@ export const APP_ROUTE_TITLES = {
   ADMIN_BANNERS_EDIT: 'Edit Banner',
   ADMIN_NOTIFICATIONS: 'Sent Notifications',
   ADMIN_NOTIFICATIONS_SEND: 'Send Notification',
+  ADMIN_REPORTS: 'Reported Officers',
+  ADMIN_USERS: 'Manage Members',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'Service Interruption',

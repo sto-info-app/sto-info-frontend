@@ -38,6 +38,16 @@
     background: #8ff;
   }
 
+  // The two moderation cards sit in a warmer band so the community-facing
+  // actions read apart from the content-management ones above them.
+  &:nth-child(4) {
+    background: #fc9;
+  }
+
+  &:nth-child(5) {
+    background: #f96;
+  }
+
   &:hover {
     filter: brightness(1.08);
   }

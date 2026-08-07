@@ -1,0 +1,33 @@
+@use 'lcars-variables' as vars;
+
+#report-member-dialog-container {
+  padding: 10px;
+
+  .mat-mdc-dialog-actions {
+    gap: 1rem;
+    padding: 1rem 3rem;
+  }
+}
+
+.report-dialog-intro {
+  margin: 1rem 0;
+  color: rgb(255 255 255 / 84%);
+  line-height: 1.5;
+}
+
+.report-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.report-dialog-note {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  color: rgb(255 255 255 / 66%);
+}
+
+.field-error {
+  color: vars.$lcars-orange;
+  font-size: 0.8rem;
+}

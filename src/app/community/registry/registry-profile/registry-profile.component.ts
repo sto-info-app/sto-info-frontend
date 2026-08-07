@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
@@ -12,11 +13,16 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { ModerationService } from 'src/app/shared/services/moderation.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
 import { CommunityService } from '../../community.service';
 import { CommunityTabsComponent } from '../../community-tabs/community-tabs.component';
 import { RelationshipStatus } from '../../models/community.models';
+import {
+  ReportMemberDialogComponent,
+  ReportMemberDialogResult,
+} from '../../report-member-dialog/report-member-dialog.component';
 import {
   RegistryAccountSummary,
   RegistryProfile,
@@ -51,6 +57,7 @@ export class RegistryProfileComponent
 {
   private readonly _registryService = inject(RegistryService);
   private readonly _communityService = inject(CommunityService);
+  private readonly _moderationService = inject(ModerationService);
   private readonly _authService = inject(AuthService);
   private readonly _dialog = inject(MatDialog);
   private readonly _route = inject(ActivatedRoute);
@@ -272,6 +279,50 @@ export class RegistryProfileComponent
     );
   }
 
+  // ----- Reporting -----
+
+  /**
+   * Reports this member to the site's administrators.
+   *
+   * Unlike the friend and block actions this asks for a reason first: an
+   * administrator who was not there needs the reporter's account of what
+   * happened to act on it.
+   */
+  reportMember(): void {
+    const dialogRef = this._dialog.open<
+      ReportMemberDialogComponent,
+      { username: string },
+      ReportMemberDialogResult
+    >(ReportMemberDialogComponent, {
+      width: '75%',
+      data: { username: this.username },
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+      .subscribe(result => {
+        if (!result) {
+          return;
+        }
+
+        this.runAction(
+          this._moderationService.reportMember({
+            username: this.username,
+            reason: result.reason,
+            details: result.details,
+          }),
+          'Your report has been sent to the administrators. Thank you.',
+          'Something went wrong sending that report.',
+          {
+            [HttpStatusCode.Conflict]:
+              'You have already reported this officer. That report is still ' +
+              'awaiting review.',
+          },
+        );
+      });
+  }
+
   // ----- Helpers -----
 
   /**
@@ -281,11 +332,14 @@ export class RegistryProfileComponent
    * @param source - The action to run.
    * @param successMessage - Copy shown when it succeeds.
    * @param failureMessage - Copy shown when it fails.
+   * @param failureByStatus - Copy for particular response statuses, used where
+   *   the reason for the failure is worth telling the viewer.
    */
   private runAction(
     source: Observable<unknown>,
     successMessage: string,
     failureMessage: string,
+    failureByStatus: Record<number, string> = {},
   ): void {
     this.isActing = true;
     this.actionMessage = '';
@@ -297,9 +351,12 @@ export class RegistryProfileComponent
         this.actionMessage = successMessage;
         this.loadProfile();
       },
-      error: () => {
+      error: (error: unknown) => {
         this.isActing = false;
-        this.actionError = failureMessage;
+        this.actionError =
+          (error instanceof HttpErrorResponse
+            ? failureByStatus[error.status]
+            : undefined) ?? failureMessage;
       },
     });
   }

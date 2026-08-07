@@ -197,6 +197,17 @@
             Block
           </button>
         }
+
+        <!-- Offered even to a viewer who has already blocked this officer:
+             blocking is a private preference, reporting asks an administrator
+             to look, and someone worth blocking is often worth reporting. -->
+        <button
+          type="button"
+          class="full-width-btn-link red"
+          [disabled]="isActing"
+          (click)="reportMember()">
+          Report
+        </button>
       </div>
     </div>
   }

@@ -1,8 +1,11 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { ReportReason } from 'src/app/models/moderation.models';
+import { ModerationService } from 'src/app/shared/services/moderation.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
@@ -47,6 +50,7 @@ describe('RegistryProfileComponent', () => {
     blockMember: jest.Mock;
     unblockMember: jest.Mock;
   };
+  let moderationServiceSpy: { reportMember: jest.Mock };
   let authServiceSpy: { isLoggedIn: jest.Mock };
   let dialogSpy: { open: jest.Mock };
   let seoSpy: { setPageMeta: jest.Mock };
@@ -68,6 +72,7 @@ describe('RegistryProfileComponent', () => {
       blockMember: jest.fn(() => of({})),
       unblockMember: jest.fn(() => of(undefined)),
     };
+    moderationServiceSpy = { reportMember: jest.fn(() => of(undefined)) };
     authServiceSpy = { isLoggedIn: jest.fn(() => false) };
     dialogSpy = { open: jest.fn(() => ({ afterClosed: () => of(true) })) };
     seoSpy = { setPageMeta: jest.fn() };
@@ -79,6 +84,7 @@ describe('RegistryProfileComponent', () => {
         provideRouter([]),
         { provide: RegistryService, useValue: registryServiceSpy },
         { provide: CommunityService, useValue: communityServiceSpy },
+        { provide: ModerationService, useValue: moderationServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },
         { provide: MatDialog, useValue: dialogSpy },
         { provide: SeoService, useValue: seoSpy },
@@ -505,6 +511,92 @@ describe('RegistryProfileComponent', () => {
       component.unblockMember();
 
       expect(communityServiceSpy.unblockMember).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('report actions', () => {
+    /**
+     * Stubs the report dialog to close with the given result.
+     *
+     * @param result - What the reporter submitted, or undefined if they
+     *   cancelled.
+     */
+    function stubReportDialog(result: unknown): void {
+      dialogSpy.open.mockReturnValue({ afterClosed: () => of(result) });
+    }
+
+    it('should offer Report alongside the other actions', async () => {
+      await setup();
+      signedInWith(RelationshipStatus.NONE);
+
+      expect(fixture.nativeElement.textContent).toContain('Report');
+    });
+
+    it('should still offer Report for a member the viewer has blocked', async () => {
+      await setup();
+      signedInWith(RelationshipStatus.BLOCKED);
+
+      const text = fixture.nativeElement.textContent;
+      expect(text).toContain('Report');
+      expect(text).not.toContain('Block\n');
+    });
+
+    it('should send the reason and details the dialog collected', async () => {
+      await setup();
+      signedInWith(RelationshipStatus.NONE);
+      stubReportDialog({
+        reason: ReportReason.HARASSMENT,
+        details: 'Repeated abusive messages.',
+      });
+
+      component.reportMember();
+
+      expect(moderationServiceSpy.reportMember).toHaveBeenCalledWith({
+        username: 'captain.picard',
+        reason: ReportReason.HARASSMENT,
+        details: 'Repeated abusive messages.',
+      });
+      expect(component.actionMessage).toContain('sent to the administrators');
+    });
+
+    it('should send nothing when the reporter cancels', async () => {
+      await setup();
+      signedInWith(RelationshipStatus.NONE);
+      stubReportDialog(undefined);
+
+      component.reportMember();
+
+      expect(moderationServiceSpy.reportMember).not.toHaveBeenCalled();
+    });
+
+    it('should explain a duplicate report rather than blaming the network', async () => {
+      await setup();
+      signedInWith(RelationshipStatus.NONE);
+      stubReportDialog({ reason: ReportReason.SPAM });
+      moderationServiceSpy.reportMember.mockReturnValue(
+        throwError(
+          () => new HttpErrorResponse({ status: 409, statusText: 'Conflict' }),
+        ),
+      );
+
+      component.reportMember();
+
+      expect(component.actionError).toContain('already reported');
+    });
+
+    it('should fall back to the generic failure for any other error', async () => {
+      await setup();
+      signedInWith(RelationshipStatus.NONE);
+      stubReportDialog({ reason: ReportReason.SPAM });
+      moderationServiceSpy.reportMember.mockReturnValue(
+        throwError(() => new Error('offline')),
+      );
+
+      component.reportMember();
+
+      expect(component.actionError).toBe(
+        'Something went wrong sending that report.',
+      );
     });
   });
 

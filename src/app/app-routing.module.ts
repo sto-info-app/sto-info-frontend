@@ -379,6 +379,24 @@ export const routes: Routes = [
     },
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
+  {
+    path: APP_ROUTES.ADMIN_REPORTS,
+    loadComponent: () =>
+      import('./admin/moderation-admin/report-admin-list.component').then(
+        m => m.ReportAdminListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_REPORTS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_USERS,
+    loadComponent: () =>
+      import('./admin/moderation-admin/user-admin-list.component').then(
+        m => m.UserAdminListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_USERS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
 
   // *****************************************
   // * STO App routes
