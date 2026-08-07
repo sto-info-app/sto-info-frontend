@@ -38,6 +38,17 @@ describe('EntityAvatarComponent', () => {
     expect(component.displaySrc).toBe(SRC_PHOTO_UNAVAILABLE_100PX);
   });
 
+  it('should expose the assigned src value and set failed state on image error', () => {
+    component.src = 'https://cdn.example.com/pic/square100';
+
+    expect(component.src).toBe('https://cdn.example.com/pic/square100');
+    expect(component.hasFailed).toBe(false);
+
+    component.onImageError();
+
+    expect(component.hasFailed).toBe(true);
+  });
+
   it('should use the 300px placeholder at the larger size', () => {
     component.src = null;
     component.size = 300;

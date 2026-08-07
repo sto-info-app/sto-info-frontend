@@ -201,7 +201,7 @@ describe('RegistryCharacterComponent', () => {
       fixture.detectChanges();
 
       const rows = fixture.nativeElement.querySelectorAll(
-        '.registry-detail-grid div',
+        '.registry-detail-grid dt, .registry-detail-grid dd',
       );
       expect(rows.length).toBeGreaterThan(0);
 
@@ -259,7 +259,7 @@ describe('RegistryCharacterComponent', () => {
       fixture.detectChanges();
 
       const rows = fixture.nativeElement.querySelectorAll(
-        '.registry-detail-grid div',
+        '.registry-detail-grid dt, .registry-detail-grid dd',
       );
       expect(rows).toHaveLength(0);
     });
