@@ -72,8 +72,18 @@ describe('UserAdminListComponent', () => {
   beforeEach(async () => {
     serviceSpy = {
       getUsers: jest.fn(() => of(buildPage([]))),
-      disableUser: jest.fn(() => of(buildUser({ isAccountDisabled: true }))),
-      enableUser: jest.fn(() => of(buildUser())),
+      disableUser: jest
+        .fn<
+          ReturnType<ModerationService['disableUser']>,
+          Parameters<ModerationService['disableUser']>
+        >()
+        .mockReturnValue(of(buildUser({ isAccountDisabled: true }))),
+      enableUser: jest
+        .fn<
+          ReturnType<ModerationService['enableUser']>,
+          Parameters<ModerationService['enableUser']>
+        >()
+        .mockReturnValue(of(buildUser())),
     };
 
     dialogSpy = { open: jest.fn() } as unknown as jest.Mocked<MatDialog>;

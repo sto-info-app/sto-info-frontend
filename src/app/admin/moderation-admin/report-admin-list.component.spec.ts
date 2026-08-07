@@ -91,9 +91,24 @@ describe('ReportAdminListComponent', () => {
   beforeEach(async () => {
     serviceSpy = {
       getReports: jest.fn(() => of(buildPage([]))),
-      updateReport: jest.fn(() => of(buildReport())),
-      disableUser: jest.fn(() => of({ id: REPORTED_ID } as ModeratedUser)),
-      enableUser: jest.fn(() => of({ id: REPORTED_ID } as ModeratedUser)),
+      updateReport: jest
+        .fn<
+          ReturnType<ModerationService['updateReport']>,
+          Parameters<ModerationService['updateReport']>
+        >()
+        .mockReturnValue(of(buildReport())),
+      disableUser: jest
+        .fn<
+          ReturnType<ModerationService['disableUser']>,
+          Parameters<ModerationService['disableUser']>
+        >()
+        .mockReturnValue(of({ id: REPORTED_ID } as ModeratedUser)),
+      enableUser: jest
+        .fn<
+          ReturnType<ModerationService['enableUser']>,
+          Parameters<ModerationService['enableUser']>
+        >()
+        .mockReturnValue(of({ id: REPORTED_ID } as ModeratedUser)),
     };
 
     dialogSpy = { open: jest.fn() } as unknown as jest.Mocked<MatDialog>;

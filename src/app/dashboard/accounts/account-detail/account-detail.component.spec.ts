@@ -53,6 +53,7 @@ describe('AccountDetailComponent', () => {
     userId: 'user1',
     accountId: 'acc1',
     handle: 'Char1',
+    publiclyVisible: true,
     sexId: 'male',
     sex: { id: 'male', name: 'Male' },
     classId: 'tac',
