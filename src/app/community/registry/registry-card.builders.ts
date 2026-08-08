@@ -175,7 +175,9 @@ export function buildRegistryCharacterCard(
     id: character.slug,
     handle: character.handle,
     level: character.level,
-    link: buildRegistryCharacterLink(username, accountSlug, character.slug),
+    // Character pages route by captain handle only; account slug is already
+    // present in the parent segment.
+    link: buildRegistryCharacterLink(username, accountSlug, character.handle),
     factionClass: getFactionClass(character.generalFaction?.name),
     classCategory: getClassCategory(character.class?.name),
     sexIcon: getSexIcon(character.sex?.name),

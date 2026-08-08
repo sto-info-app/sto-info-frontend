@@ -180,7 +180,7 @@ describe('registryCardBuilders', () => {
         '/community/registry/profiles',
         'captain.picard',
         'SteveX~1234',
-        'Rex@SteveX~1234',
+        'Rex',
       ]);
       expect(card.factionClass).toBe('federation');
       expect(card.classCategory).toBe('tactical');

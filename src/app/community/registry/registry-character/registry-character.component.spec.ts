@@ -19,7 +19,7 @@ describe('RegistryCharacterComponent', () => {
   const defaultParams = {
     username: 'captain.picard',
     accountSlug: 'SteveX~1234',
-    characterSlug: 'Rex@SteveX~1234',
+    characterSlug: 'Rex',
   };
 
   /**
