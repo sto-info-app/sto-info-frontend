@@ -23,11 +23,11 @@
     }
 
     @if (character) {
-      <h1>Captain: {{ character.handle }}</h1>
+      <h1>{{ character.handle }}</h1>
 
       <div id="registry-character-main-content">
         <div class="lcars-text-bar">
-          <span>Captain</span>
+          <span>Captain Details</span>
         </div>
 
         <div class="registry-character-inner-content">
@@ -41,9 +41,11 @@
               @if (character.rank) {
                 <p class="registry-character-header__rank">
                   {{ character.rank.title }}
-                  <span class="registry-character-header__range">
-                    ({{ character.rank.levelRange }})
-                  </span>
+                </p>
+              }
+              @if (captainHandleWithAccount) {
+                <p class="registry-character-header__meta">
+                  {{ captainHandleWithAccount }}
                 </p>
               }
               @if (fullName) {

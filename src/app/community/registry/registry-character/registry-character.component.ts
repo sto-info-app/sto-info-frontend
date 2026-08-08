@@ -6,6 +6,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
+import { decodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { CommunityTabsComponent } from '../../community-tabs/community-tabs.component';
 import { RegistryCharacter } from '../../models/registry.models';
 import {
@@ -155,6 +156,22 @@ export class RegistryCharacterComponent
     ].filter(Boolean);
 
     return parts.length > 0 ? parts.join(' ') : null;
+  }
+
+  /**
+   * The captain handle annotated with its owning account handle.
+   *
+   * @returns `handle@account`, or null before the captain has loaded.
+   */
+  get captainHandleWithAccount(): string | null {
+    if (!this.character) {
+      return null;
+    }
+
+    const accountHandle = decodeStoHandle(this.accountSlug);
+    return accountHandle
+      ? `${this.character.handle}@${accountHandle}`
+      : this.character.handle;
   }
 
   /**

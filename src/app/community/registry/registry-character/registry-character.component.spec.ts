@@ -226,6 +226,25 @@ describe('RegistryCharacterComponent', () => {
     });
   });
 
+  describe('captainHandleWithAccount', () => {
+    it('should be null before the captain has loaded', async () => {
+      await setup();
+
+      expect(component.captainHandleWithAccount).toBeNull();
+    });
+
+    it('should fall back to captain handle when account slug is missing', async () => {
+      await setup({
+        username: 'captain.picard',
+        accountSlug: '',
+        characterSlug: 'Rex',
+      });
+      fixture.detectChanges();
+
+      expect(component.captainHandleWithAccount).toBe('Rex');
+    });
+  });
+
   describe('template', () => {
     it('should render the service record fields', async () => {
       await setup();
@@ -243,6 +262,15 @@ describe('RegistryCharacterComponent', () => {
       expect(text).toContain('Federation');
       expect(text).toContain('Standard');
       expect(text).toContain('Commissioned');
+    });
+
+    it('should show captain handle with account and hide rank level range', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      const text = fixture.nativeElement.textContent;
+      expect(text).toContain('Rex@SteveX#1234');
+      expect(text).not.toContain('(Level 65)');
     });
 
     it('should render the biography section', async () => {
