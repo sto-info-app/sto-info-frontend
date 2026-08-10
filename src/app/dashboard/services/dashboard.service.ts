@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 
 import { catchError, Observable, throwError } from 'rxjs';
 
-import { User } from '../models/user.model';
+import { User, UserProfileUpdateResult } from '../models/user.model';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
@@ -25,9 +25,14 @@ export class DashboardService {
     return this._http.get<User>(API_URLS.USER, httpOptions);
   }
 
-  updatePersonalDetails(userPersonalDetails: EditPersonalDetailsFormValues) {
+  updatePersonalDetails(
+    userPersonalDetails: EditPersonalDetailsFormValues,
+  ): Observable<UserProfileUpdateResult> {
     return this._http
-      .post(API_URLS.UPDATE_USER_PROFILE, userPersonalDetails)
+      .post<UserProfileUpdateResult>(
+        API_URLS.UPDATE_USER_PROFILE,
+        userPersonalDetails,
+      )
       .pipe(
         catchError(error => {
           console.error('Error updating personal details:', error);
@@ -36,7 +41,9 @@ export class DashboardService {
       );
   }
 
-  updateProfilePic(profilePicForm: FormData) {
+  updateProfilePic(
+    profilePicForm: FormData,
+  ): Observable<UserProfileUpdateResult> {
     const httpOptions = this._authService.getHttpOptionsWithAccessToken();
 
     // Remove the Content-Type header if it exists
@@ -49,7 +56,11 @@ export class DashboardService {
     }
 
     return this._http
-      .post(API_URLS.UPDATE_USER_PROFILE_PIC, profilePicForm, httpOptions)
+      .post<UserProfileUpdateResult>(
+        API_URLS.UPDATE_USER_PROFILE_PIC,
+        profilePicForm,
+        httpOptions,
+      )
       .pipe(
         catchError(error => {
           console.error('Error updating profile image:', error);
