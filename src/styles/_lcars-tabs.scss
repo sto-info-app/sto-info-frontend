@@ -13,6 +13,14 @@
 @mixin lcars-tab-strip($min-width: 140px) {
   .lcars-tabs {
     display: flex;
+
+    // The global `nav` styles target the header's button pad, but a strip of
+    // `a` tabs is a `nav` too and picks them up: they wrap it onto a second
+    // row, cap it at 660px and push it to the right. Undo all three so the
+    // strip is laid out by the rules below whatever element carries it.
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    max-width: none;
     align-items: stretch;
     gap: 6px;
     margin: 0.5rem 0 0.1rem;
@@ -31,6 +39,10 @@
     align-items: center;
     justify-content: center;
     height: 100%;
+
+    // The same global `nav` styles give every anchor a fixed 210px width; tabs
+    // are sized by their label plus the padding below instead.
+    width: auto;
     min-width: $min-width;
     padding: 0 24px;
     border-radius: 6px 6px 0 0;

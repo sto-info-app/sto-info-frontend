@@ -37,19 +37,20 @@ describe('registryCardBuilders', () => {
     });
 
     // Regression: pre-encoding here made routerLink encode a second time, so a
-    // captain's `Name@Account` slug reached the URL as `%2540` and 404'd.
+    // captain handle with special characters reached the URL as `%2523` and
+    // 404'd.
     it('should leave segments raw for routerLink to encode exactly once', () => {
       expect(
         buildRegistryCharacterLink(
           'captain.picard',
           'SteveX~1234',
-          'Rex@SteveX~1234',
+          'Rex#Prime',
         ),
       ).toEqual([
         '/community/registry/profiles',
         'captain.picard',
         'SteveX~1234',
-        'Rex@SteveX~1234',
+        'Rex#Prime',
       ]);
     });
   });
@@ -180,7 +181,7 @@ describe('registryCardBuilders', () => {
         '/community/registry/profiles',
         'captain.picard',
         'SteveX~1234',
-        'Rex@SteveX~1234',
+        'Rex',
       ]);
       expect(card.factionClass).toBe('federation');
       expect(card.classCategory).toBe('tactical');

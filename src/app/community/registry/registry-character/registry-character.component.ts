@@ -6,6 +6,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
+import { decodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { CommunityTabsComponent } from '../../community-tabs/community-tabs.component';
 import { RegistryCharacter } from '../../models/registry.models';
 import {
@@ -57,13 +58,15 @@ export class RegistryCharacterComponent
     const params = this._route.snapshot.paramMap;
     this.username = params.get('username') ?? '';
     this.accountSlug = params.get('accountSlug') ?? '';
-    this.characterSlug = params.get('characterSlug') ?? '';
+    this.characterSlug = this.normalizeCharacterSlug(
+      params.get('characterSlug') ?? '',
+    );
 
     this.runLoad(
       this._registryService.getCharacter(
         this.username,
         this.accountSlug,
-        this.characterSlug,
+        this.buildCharacterLookupSlug(),
       ),
       character => {
         this.character = character;
@@ -71,6 +74,36 @@ export class RegistryCharacterComponent
       },
       'Something went wrong loading this captain.',
     );
+  }
+
+  /**
+   * Accepts legacy `handle@account` links and converts them to handle-only.
+   *
+   * @param routeValue - The raw route segment.
+   * @returns The handle-only route value.
+   */
+  private normalizeCharacterSlug(routeValue: string): string {
+    const suffix = `@${this.accountSlug}`;
+
+    return routeValue.endsWith(suffix)
+      ? routeValue.slice(0, -suffix.length)
+      : routeValue;
+  }
+
+  /**
+   * Builds the backend lookup slug for this captain.
+   *
+   * Routes now carry only the captain handle, while the API currently resolves
+   * captains by `handle@account` under the owning account path.
+   *
+   * @returns The captain slug expected by the API.
+   */
+  private buildCharacterLookupSlug(): string {
+    if (!this.characterSlug || !this.accountSlug) {
+      return this.characterSlug;
+    }
+
+    return `${this.characterSlug}@${this.accountSlug}`;
   }
 
   /**
@@ -123,6 +156,22 @@ export class RegistryCharacterComponent
     ].filter(Boolean);
 
     return parts.length > 0 ? parts.join(' ') : null;
+  }
+
+  /**
+   * The captain handle annotated with its owning account handle.
+   *
+   * @returns `handle@account`, or null before the captain has loaded.
+   */
+  get captainHandleWithAccount(): string | null {
+    if (!this.character) {
+      return null;
+    }
+
+    const accountHandle = decodeStoHandle(this.accountSlug);
+    return accountHandle
+      ? `${this.character.handle}@${accountHandle}`
+      : this.character.handle;
   }
 
   /**

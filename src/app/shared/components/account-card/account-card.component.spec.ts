@@ -1,7 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { AccountCardComponent } from './account-card.component';
 import { AccountCardVm } from './account-card.model';
+
+@Component({
+  standalone: true,
+  template: '',
+})
+class DummyRouteComponent {}
 
 /**
  * Builds an account card model with sensible owner-facing defaults.
@@ -42,7 +49,18 @@ describe('AccountCardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AccountCardComponent],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([
+          {
+            path: 'dashboard/accounts/:handle',
+            component: DummyRouteComponent,
+          },
+          {
+            path: 'dashboard/accounts/:handle/endeavours',
+            component: DummyRouteComponent,
+          },
+        ]),
+      ],
     }).compileComponents();
   });
 

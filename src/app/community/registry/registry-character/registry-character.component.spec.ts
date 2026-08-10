@@ -19,7 +19,7 @@ describe('RegistryCharacterComponent', () => {
   const defaultParams = {
     username: 'captain.picard',
     accountSlug: 'SteveX~1234',
-    characterSlug: 'Rex@SteveX~1234',
+    characterSlug: 'Rex',
   };
 
   /**
@@ -74,6 +74,22 @@ describe('RegistryCharacterComponent', () => {
     expect(component.character).not.toBeNull();
   });
 
+  it('should normalize legacy handle-at-account captain slugs', async () => {
+    await setup({
+      username: 'captain.picard',
+      accountSlug: 'SteveX~1234',
+      characterSlug: 'Rex@SteveX~1234',
+    });
+    fixture.detectChanges();
+
+    expect(component.characterSlug).toBe('Rex');
+    expect(registryServiceSpy.getCharacter).toHaveBeenCalledWith(
+      'captain.picard',
+      'SteveX~1234',
+      'Rex@SteveX~1234',
+    );
+  });
+
   it('should fall back to empty slugs when the route has none', async () => {
     await setup({});
     fixture.detectChanges();
@@ -81,6 +97,21 @@ describe('RegistryCharacterComponent', () => {
     expect(component.username).toBe('');
     expect(component.accountSlug).toBe('');
     expect(component.characterSlug).toBe('');
+  });
+
+  it('should request by handle only when account slug is missing', async () => {
+    await setup({
+      username: 'captain.picard',
+      accountSlug: '',
+      characterSlug: 'Rex',
+    });
+    fixture.detectChanges();
+
+    expect(registryServiceSpy.getCharacter).toHaveBeenCalledWith(
+      'captain.picard',
+      '',
+      'Rex',
+    );
   });
 
   it('should use the biography as the social description', async () => {
@@ -195,6 +226,25 @@ describe('RegistryCharacterComponent', () => {
     });
   });
 
+  describe('captainHandleWithAccount', () => {
+    it('should be null before the captain has loaded', async () => {
+      await setup();
+
+      expect(component.captainHandleWithAccount).toBeNull();
+    });
+
+    it('should fall back to captain handle when account slug is missing', async () => {
+      await setup({
+        username: 'captain.picard',
+        accountSlug: '',
+        characterSlug: 'Rex',
+      });
+      fixture.detectChanges();
+
+      expect(component.captainHandleWithAccount).toBe('Rex');
+    });
+  });
+
   describe('template', () => {
     it('should render the service record fields', async () => {
       await setup();
@@ -212,6 +262,15 @@ describe('RegistryCharacterComponent', () => {
       expect(text).toContain('Federation');
       expect(text).toContain('Standard');
       expect(text).toContain('Commissioned');
+    });
+
+    it('should show captain handle with account and hide rank level range', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      const text = fixture.nativeElement.textContent;
+      expect(text).toContain('Rex@SteveX#1234');
+      expect(text).not.toContain('(Level 65)');
     });
 
     it('should render the biography section', async () => {
