@@ -106,6 +106,41 @@ describe('ProfileComponent', () => {
     expect(component.lastLoginLabel).toBe('2 hours ago');
   });
 
+  it('should show the Galactic Personnel Registry status on the profile page', () => {
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain(
+      'Galactic Personnel Registry:',
+    );
+    expect(fixture.nativeElement.textContent).toContain('Listed publicly');
+    const registryHelpTrigger = fixture.nativeElement.querySelector(
+      '.registry-help-trigger',
+    );
+    expect(registryHelpTrigger).toBeTruthy();
+    expect(registryHelpTrigger.getAttribute('aria-label')).toBe(
+      'Registry visibility details',
+    );
+  });
+
+  it('should show private registry status and hidden-details message when not publicly visible', () => {
+    mockDashboardService.getUser.mockReturnValue(
+      of({
+        ...mockUser,
+        profile: {
+          ...mockUser.profile!,
+          publiclyVisible: false,
+        },
+      }),
+    );
+
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Not listed publicly');
+    expect(fixture.nativeElement.textContent).toContain(
+      'Everything in your profile is hidden from the Galactic Personnel Registry.',
+    );
+  });
+
   it('should logout if account is disabled', () => {
     mockDashboardService.getUser.mockReturnValue(
       of({ ...mockUser, isAccountDisabled: true }),
@@ -223,6 +258,25 @@ describe('ProfileComponent', () => {
       mockDialogRef.afterClosed.mockReturnValue(of(false));
       component.editUserProfilePhoto();
       expect(mockAuthService.refreshToken).not.toHaveBeenCalled();
+    });
+
+    it('should apply updated profile data from dialog result before reloading', () => {
+      mockDialogRef.afterClosed.mockReturnValue(
+        of({
+          stayLoggedIn: false,
+          updatedProfile: {
+            firstName: 'Will',
+            lastName: 'Riker',
+            publiclyVisible: false,
+          },
+        }),
+      );
+
+      component.editUserProfile();
+
+      expect(component.user?.profile?.firstName).toBe('Will');
+      expect(component.user?.profile?.lastName).toBe('Riker');
+      expect(component.user?.profile?.publiclyVisible).toBe(false);
     });
 
     it('should log warning when refresh token fails after profile edit', () => {

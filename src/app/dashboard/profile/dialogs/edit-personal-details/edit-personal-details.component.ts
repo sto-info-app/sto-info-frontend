@@ -70,6 +70,8 @@ export class EditPersonalDetailsComponent implements OnInit {
   errorTextUsernameTaken: string = FORM_ERROR_USERNAME_TAKEN;
   errorTextUsernamePattern: string = FORM_ERROR_USERNAME_PATTERN;
 
+  private static readonly _STAY_LOGGED_IN = true;
+
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _routingService = inject(RoutingService);
   private readonly _dashboardService = inject(DashboardService);
@@ -119,9 +121,10 @@ export class EditPersonalDetailsComponent implements OnInit {
     this._dashboardService
       .updatePersonalDetails(editPersonalDetailsFormValues)
       .subscribe({
-        next: () => {
+        next: response => {
           this._dialogRef?.close({
-            stayLoggedIn: true,
+            stayLoggedIn: EditPersonalDetailsComponent._STAY_LOGGED_IN,
+            updatedProfile: response?.userProfileData ?? undefined,
           });
           this.isSubmitting = false;
         },
@@ -146,10 +149,6 @@ export class EditPersonalDetailsComponent implements OnInit {
           }
           this.displayErrorMessage(errMessage);
           this.isSubmitting = false;
-        },
-        complete: () => {
-          this.isSubmitting = false;
-          this._dialogRef?.close(true);
         },
       });
   }
