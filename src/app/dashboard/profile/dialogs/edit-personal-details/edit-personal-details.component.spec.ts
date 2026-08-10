@@ -112,7 +112,9 @@ describe('EditPersonalDetailsComponent', () => {
 
   describe('onSaveClick', () => {
     it('should call updatePersonalDetails and close dialog on success', () => {
-      mockDashboardService.updatePersonalDetails.mockReturnValue(of({}));
+      mockDashboardService.updatePersonalDetails.mockReturnValue(
+        of({ affected: 1, userProfileData: null }),
+      );
 
       component.onSaveClick();
 
