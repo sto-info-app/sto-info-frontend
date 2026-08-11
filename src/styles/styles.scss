@@ -152,6 +152,16 @@ button.lcars-btn,
   text-align: right;
 }
 
+// A side menu mixes links (navigation) with buttons (actions), and both carry
+// `.full-width-btn-link`. `.buttons a` is more specific than that class, so an
+// anchor picks up a bottom margin and font size that a button does not —
+// leaving visibly different gaps and text sizes between one heading's stack and
+// the next. Restate just those two values so the element type stops mattering.
+.buttons button.full-width-btn-link {
+  margin-bottom: 16px;
+  font-size: 22px;
+}
+
 // ─── Inline Row Buttons ───────────────────────────────────────────────────────
 
 .buttons-row {
@@ -753,4 +763,141 @@ button.lcars-btn,
   &:hover {
     filter: brightness(1.2);
   }
+}
+
+.news-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+// Home page recent news
+.news-section {
+  margin-top: 2rem;
+
+  h2 {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    color: vars.$lcars-sunflower;
+  }
+}
+
+.news-loading,
+.news-error,
+.news-empty {
+  color: vars.$lcars-grey-light;
+  font-style: italic;
+}
+
+// ── Shared list-page patterns ────────────────────────────────────────────────
+// Used by the dashboard account/captain lists and the Galactic Personnel
+// Registry so both render identically. Defined globally rather than per
+// component to keep a single source of truth.
+
+// Vertical card list (STO accounts).
+.accounts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// Single-column card grid (captains).
+.characters-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+// Responsive card grid (registry members and friends).
+.member-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+
+  // Every card fills its track, so a row of cards is uniform height whatever
+  // mix of badges, meta lines and actions each one carries.
+  align-items: stretch;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+// Section header label that carries a count pill, e.g. "Captain List (3)".
+.lcars-text-bar .title-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.lcars-text-bar .header-count-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: vars.$lcars-tangerine;
+  color: #000;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 8px;
+}
+
+// Empty-state copy shown when a list has no rows.
+.lcars-empty-state {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+// Previous / next pager beneath a list.
+.lcars-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+
+  button {
+    min-height: 46px;
+    padding: 0.6rem 1.15rem 0.45rem;
+    border: none;
+    border-radius: 999px;
+    background: vars.$lcars-bluey;
+    color: #0d0d0d;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-weight: 700;
+    font-size: inherit;
+    font-family: inherit;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &:hover:not(:disabled) {
+      filter: brightness(1.08);
+    }
+  }
+}
+
+// Visually hidden but available to screen readers.
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }

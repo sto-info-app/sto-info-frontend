@@ -183,7 +183,9 @@ describe('ProfilePicComponent', () => {
 
     it('should upload image successfully', () => {
       component.croppedImageBlob = new Blob(['test'], { type: 'image/png' });
-      mockDashboardService.updateProfilePic.mockReturnValue(of({}));
+      mockDashboardService.updateProfilePic.mockReturnValue(
+        of({ affected: 1, userProfileData: null }),
+      );
 
       component.onUploadImageClick();
 

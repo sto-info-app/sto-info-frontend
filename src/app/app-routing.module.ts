@@ -149,6 +149,120 @@ export const routes: Routes = [
   },
 
   // *****************************************
+  // * Community - Galactic Personnel Registry (public)
+  {
+    path: APP_ROUTES.COMMUNITY,
+    loadComponent: () =>
+      import('./community/community.component').then(m => m.CommunityComponent),
+    data: { title: APP_ROUTE_TITLES.COMMUNITY },
+  },
+  {
+    path: APP_ROUTES.COMMUNITY_REGISTRY,
+    redirectTo: APP_ROUTES.COMMUNITY_REGISTRY_PROFILES,
+    pathMatch: 'full',
+  },
+  {
+    path: APP_ROUTES.COMMUNITY_FRIENDS,
+    loadComponent: () =>
+      import('./community/friends/friends-page/friends-page.component').then(
+        m => m.FriendsPageComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.COMMUNITY_FRIENDS,
+      requiresApi: true,
+    },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.COMMUNITY_REGISTRY_SEARCH,
+    loadComponent: () =>
+      import('./community/registry/registry-list/registry-list.component').then(
+        m => m.RegistryListComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.COMMUNITY_REGISTRY_SEARCH,
+      mode: 'search',
+      requiresApi: true,
+    },
+    canActivate: [ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.COMMUNITY_REGISTRY_RECENTLY_JOINED,
+    loadComponent: () =>
+      import('./community/registry/registry-list/registry-list.component').then(
+        m => m.RegistryListComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.COMMUNITY_REGISTRY_RECENTLY_JOINED,
+      mode: 'recently-joined',
+      requiresApi: true,
+    },
+    canActivate: [ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.COMMUNITY_REGISTRY_RECENTLY_ACTIVE,
+    loadComponent: () =>
+      import('./community/registry/registry-list/registry-list.component').then(
+        m => m.RegistryListComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.COMMUNITY_REGISTRY_RECENTLY_ACTIVE,
+      mode: 'recently-active',
+      requiresApi: true,
+    },
+    canActivate: [ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.COMMUNITY_REGISTRY_PROFILES,
+    loadComponent: () =>
+      import('./community/registry/registry-list/registry-list.component').then(
+        m => m.RegistryListComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.COMMUNITY_REGISTRY_PROFILES,
+      mode: 'all',
+      requiresApi: true,
+    },
+    canActivate: [ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.COMMUNITY_REGISTRY_PROFILE,
+    loadComponent: () =>
+      import('./community/registry/registry-profile/registry-profile.component').then(
+        m => m.RegistryProfileComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.COMMUNITY_REGISTRY_PROFILE,
+      requiresApi: true,
+    },
+    canActivate: [ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.COMMUNITY_REGISTRY_ACCOUNT,
+    loadComponent: () =>
+      import('./community/registry/registry-account/registry-account.component').then(
+        m => m.RegistryAccountComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.COMMUNITY_REGISTRY_ACCOUNT,
+      requiresApi: true,
+    },
+    canActivate: [ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.COMMUNITY_REGISTRY_CHARACTER,
+    loadComponent: () =>
+      import('./community/registry/registry-character/registry-character.component').then(
+        m => m.RegistryCharacterComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.COMMUNITY_REGISTRY_CHARACTER,
+      requiresApi: true,
+    },
+    canActivate: [ApiRequiredGuard],
+  },
+
+  // *****************************************
   // * News
   {
     path: APP_ROUTES.NEWS,
@@ -263,6 +377,24 @@ export const routes: Routes = [
       title: APP_ROUTE_TITLES.ADMIN_NOTIFICATIONS_SEND,
       requiresApi: true,
     },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_REPORTS,
+    loadComponent: () =>
+      import('./admin/moderation-admin/report-admin-list.component').then(
+        m => m.ReportAdminListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_REPORTS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_USERS,
+    loadComponent: () =>
+      import('./admin/moderation-admin/user-admin-list.component').then(
+        m => m.UserAdminListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_USERS, requiresApi: true },
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
 

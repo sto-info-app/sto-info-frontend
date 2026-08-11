@@ -50,6 +50,7 @@ describe('CharacterDetailComponent', () => {
     id: 'char-1',
     handle: 'TestChar',
     accountId: 'acc-1',
+    publiclyVisible: true,
     profilePicture: 'img-123',
     profilePicture300: 'img-123-300',
     generalFactionId: 'general-fed',

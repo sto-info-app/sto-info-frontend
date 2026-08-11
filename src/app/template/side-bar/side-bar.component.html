@@ -14,6 +14,11 @@
           >{{ appRouteTitles.REGISTER }}</a
         >
       }
+      <a
+        [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
+        routerLinkActive="peach"
+        >{{ appRouteTitles.COMMUNITY }}</a
+      >
       @if (isLoggedIn) {
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
@@ -36,9 +41,9 @@
         @if (isAdmin) {
           <a
             [routerLink]="getRouteLink(appRoutes.ADMIN)"
-          [routerLinkActiveOptions]="{ exact: true }"
-          routerLinkActive="peach"
-          >{{ appRouteTitles.ADMIN }}</a
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="peach"
+            >{{ appRouteTitles.ADMIN }}</a
           >
         }
       }

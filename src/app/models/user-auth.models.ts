@@ -28,4 +28,6 @@ export interface EditPersonalDetailsFormValues {
   firstName: string;
   lastName: string;
   username: string;
+  /** Opt-in to appearing in the public Galactic Personnel Registry. */
+  publiclyVisible: boolean;
 }

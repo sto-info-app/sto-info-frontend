@@ -13,7 +13,7 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { finalize, Subject, takeUntil } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -28,6 +28,11 @@ import { User } from '../models/user.model';
 import { DashboardService } from '../services/dashboard.service';
 import { EditPersonalDetailsComponent } from './dialogs/edit-personal-details/edit-personal-details.component';
 import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component';
+
+interface ProfileEditDialogResult {
+  stayLoggedIn?: boolean;
+  updatedProfile?: Partial<NonNullable<User['profile']>>;
+}
 
 @Component({
   selector: 'app-profile',
@@ -190,18 +195,43 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.editProfileDialogRef
       .afterClosed()
       .pipe(takeUntil(this._destroy$))
-      .subscribe(stayLoggedIn => {
-        this.getUserData(); // Update the user data
+      .subscribe((result: boolean | ProfileEditDialogResult | undefined) => {
+        const isSaved = !!result;
+        if (!isSaved) {
+          this.editProfileDialogRef = null;
+          return;
+        }
+
+        const stayLoggedIn =
+          typeof result === 'object' ? !!result.stayLoggedIn : result;
+        const hasUpdatedProfile =
+          typeof result === 'object' && !!result.updatedProfile;
+        const canApplyOptimisticUpdate =
+          hasUpdatedProfile && !!this.user?.profile;
+
+        // Optimistically apply updated profile fields so the UI reflects edits immediately.
+        if (canApplyOptimisticUpdate) {
+          Object.assign(this.user!.profile!, result.updatedProfile!);
+          this._updateActivityLabels();
+          this._cdr.markForCheck();
+        }
 
         if (stayLoggedIn) {
           this._authService
             .refreshToken()
-            .pipe(takeUntil(this._destroy$))
+            .pipe(
+              takeUntil(this._destroy$),
+              finalize(() => {
+                this.getUserData();
+              }),
+            )
             .subscribe({
               error: err => {
                 console.warn('Token refresh failed after profile edit', err);
               },
             });
+        } else {
+          this.getUserData();
         }
 
         // Allow opening the dialog box again

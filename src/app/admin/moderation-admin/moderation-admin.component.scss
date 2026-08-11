@@ -1,0 +1,57 @@
+@use 'sass:color';
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// The moderation screens reuse the shared admin record styles, with a
+// red-tinted header so a queue of complaints does not read as the same routine
+// content list as news or banners.
+#report-admin-page,
+#user-admin-page {
+  .admin-record-card {
+    border-left-color: color.adjust(vars.$lcars-cardinal, $lightness: -10%);
+  }
+
+  .admin-record-header {
+    background: vars.$lcars-cardinal;
+    color: vars.$lcars-white;
+  }
+
+  .admin-record-title span {
+    color: rgb(255 255 255 / 78%);
+  }
+
+  .status-pill {
+    background: rgb(0 0 0 / 28%);
+    color: vars.$lcars-white;
+  }
+
+  // The report body stacks a free-text account above the detail grid, so the
+  // grid must not also try to sit beside it.
+  .moderation-record-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    min-width: 0;
+  }
+
+  .moderation-no-details {
+    font-style: italic;
+    color: rgb(255 255 255 / 60%);
+  }
+
+  // Disable and restore are the consequential actions on these pages, so they
+  // get the destructive treatment rather than the neutral one.
+  .moderation-record-actions {
+    .cta-icon {
+      @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);
+    }
+
+    .delete-icon {
+      @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-red);
+    }
+  }
+
+  .admin-form-actions {
+    margin-top: 1rem;
+  }
+}

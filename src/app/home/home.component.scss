@@ -1,0 +1,64 @@
+.home-dashboard-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 2rem;
+
+  .dashboard-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    border-radius: 20px;
+    min-width: 140px;
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      transform 0.2s ease,
+      filter 0.2s ease;
+    gap: 0.75rem;
+    box-shadow: 0 4px 6px rgb(0 0 0 / 20%);
+
+    &:hover {
+      transform: translateY(-4px);
+      filter: brightness(1.1);
+    }
+
+    .tile-icon {
+      font-size: 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.9;
+    }
+
+    .tile-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+
+      .tile-stat {
+        font-size: 1rem;
+        font-weight: 800;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    &.sunflower {
+      background-color: #fc6;
+    }
+
+    &.perano {
+      background-color: #9cf;
+    }
+
+    &.atomic {
+      background-color: #f96;
+    }
+  }
+}

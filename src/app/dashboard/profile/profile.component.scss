@@ -19,6 +19,86 @@
           text-transform: uppercase;
         }
 
+        .registry-status {
+          font-weight: 600;
+        }
+
+        .registry-status-public,
+        .registry-title-public {
+          color: #6fff8f;
+        }
+
+        .registry-status-private,
+        .registry-title-private {
+          color: #ff7b7b;
+        }
+
+        .registry-help {
+          display: inline-flex;
+          vertical-align: middle;
+          position: relative;
+          margin-left: 8px;
+
+          &[open] {
+            .registry-help-trigger {
+              background-color: rgb(111 255 143 / 20%);
+              color: #6fff8f;
+            }
+          }
+
+          .registry-help-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            color: #6cf;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            font-weight: 700;
+            list-style: none;
+            -webkit-user-select: none;
+            user-select: none;
+            transition: background-color 120ms ease;
+
+            &:hover {
+              background-color: rgb(102 204 255 / 12%);
+            }
+
+            &:focus-visible {
+              outline: 2px solid #6cf;
+              outline-offset: 2px;
+            }
+          }
+
+          .registry-help-trigger::-webkit-details-marker {
+            display: none;
+          }
+
+          .registry-help-popup {
+            position: absolute;
+            top: 26px;
+            right: 0;
+            z-index: 10;
+            width: min(360px, calc(100vw - 80px));
+            padding: 10px 12px;
+            border: 1px solid #9de0ff;
+            border-radius: 8px;
+            background: #1d2d3e;
+            color: #f2f8ff;
+            box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
+
+            p {
+              margin: 0 0 8px;
+            }
+
+            p:last-child {
+              margin-bottom: 0;
+            }
+          }
+        }
+
         .restricted-icon {
           font-size: small;
           vertical-align: top;

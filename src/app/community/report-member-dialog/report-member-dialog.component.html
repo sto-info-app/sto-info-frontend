@@ -1,0 +1,80 @@
+<div id="report-member-dialog-container">
+  <div mat-dialog-content>
+    <div class="lcars-text-bar">
+      <span class="go-october-sunset">Report Officer</span>
+    </div>
+
+    <p class="report-dialog-intro">
+      Tell the site administrators what
+      <strong>{{ data.username }}</strong> has done. They see your report and
+      your username; {{ data.username }} is never told a report exists, or who
+      raised it.
+    </p>
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      class="report-dialog-form">
+      <div class="lcars-select-container sunflower">
+        <label
+          class="select-label"
+          for="report-reason-select"
+          >Reason</label
+        >
+        <select
+          id="report-reason-select"
+          title="Reason"
+          formControlName="reason">
+          @for (reason of reasons; track reason) {
+            <option [value]="reason">{{ reasonLabels[reason] }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="lcars-input-container perano">
+        <label for="report-details-input">
+          What happened{{ requiresDetails ? '' : ' (optional)' }}
+        </label>
+        <textarea
+          id="report-details-input"
+          formControlName="details"
+          rows="4"
+          maxlength="1000"
+          placeholder="Dates, what was said or done, and where you saw it."></textarea>
+        @if (form.controls.details.touched && form.controls.details.invalid) {
+          <small class="field-error">
+            Please describe what happened so an administrator can act on this.
+          </small>
+        }
+      </div>
+    </form>
+
+    <p class="report-dialog-note">
+      Reporting does not block this officer. If you would rather not see them at
+      all, use Block as well.
+    </p>
+
+    <div class="lcars-bar">
+      <div class="lcars-bar-inner"></div>
+    </div>
+  </div>
+
+  <div
+    class="buttons-container lcars-flex-right"
+    mat-dialog-actions>
+    <button
+      type="button"
+      class="lcars-btn red"
+      mat-button
+      (click)="onCancel()">
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="lcars-btn green"
+      mat-button
+      (click)="onSubmit()">
+      Send Report
+    </button>
+  </div>
+</div>

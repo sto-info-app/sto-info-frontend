@@ -141,6 +141,20 @@
                     }
                   </div>
                 </div>
+
+                <div class="input-container registry-opt-in">
+                  <app-lcars-toggle
+                    formControlName="publiclyVisible"
+                    label="Show me in the Galactic Personnel Registry"
+                    ariaLabel="Show me in the Galactic Personnel Registry">
+                  </app-lcars-toggle>
+                  <p class="registry-opt-in__hint">
+                    When on, your username, profile picture, join date and last
+                    sign-in date become public, along with any STO accounts and
+                    captains you have also marked as publicly visible. Your real
+                    name, email address and private notes are never shown.
+                  </p>
+                </div>
               </div>
               <div class="col edit-personal-details-side-col">
                 <div class="lcars-edit-personal-details-buttons">
@@ -163,7 +177,6 @@
                       type="button"
                       class="lcars-btn red"
                       mat-button
-                      mat-dialog-close
                       (click)="onCloseClick()">
                       Close
                     </button>
@@ -190,7 +203,6 @@
             type="button"
             class="sky"
             mat-button
-            mat-dialog-close
             (click)="onCloseClick()">
             Close
           </button>

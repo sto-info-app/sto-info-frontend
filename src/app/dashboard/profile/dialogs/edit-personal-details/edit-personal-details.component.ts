@@ -15,6 +15,7 @@ import { User } from 'src/app/dashboard/models/user.model';
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
   FORM_ERROR_FIRSTNAME_REQUIRED,
@@ -50,6 +51,7 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
     MatDialogModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsToggleComponent,
   ],
 })
 export class EditPersonalDetailsComponent implements OnInit {
@@ -67,6 +69,8 @@ export class EditPersonalDetailsComponent implements OnInit {
   errorTextUsernameMaxLength: string = FORM_ERROR_USERNAME_MAX_LENGTH;
   errorTextUsernameTaken: string = FORM_ERROR_USERNAME_TAKEN;
   errorTextUsernamePattern: string = FORM_ERROR_USERNAME_PATTERN;
+
+  private static readonly _STAY_LOGGED_IN = true;
 
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _routingService = inject(RoutingService);
@@ -100,6 +104,7 @@ export class EditPersonalDetailsComponent implements OnInit {
           Validators.pattern(USERNAME_PATTERN),
         ],
       ],
+      publiclyVisible: [this.data?.user?.profile?.publiclyVisible ?? false],
     });
   }
 
@@ -116,9 +121,10 @@ export class EditPersonalDetailsComponent implements OnInit {
     this._dashboardService
       .updatePersonalDetails(editPersonalDetailsFormValues)
       .subscribe({
-        next: () => {
+        next: response => {
           this._dialogRef?.close({
-            stayLoggedIn: true,
+            stayLoggedIn: EditPersonalDetailsComponent._STAY_LOGGED_IN,
+            updatedProfile: response?.userProfileData ?? undefined,
           });
           this.isSubmitting = false;
         },
@@ -143,10 +149,6 @@ export class EditPersonalDetailsComponent implements OnInit {
           }
           this.displayErrorMessage(errMessage);
           this.isSubmitting = false;
-        },
-        complete: () => {
-          this.isSubmitting = false;
-          this._dialogRef?.close(true);
         },
       });
   }

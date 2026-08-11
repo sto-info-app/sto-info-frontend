@@ -144,4 +144,13 @@ describe('HeaderComponent', () => {
 
     expect(notificationServiceSpy.refreshUnreadCount).toHaveBeenCalled();
   });
+
+  it('should not carry the Community link in the top nav', () => {
+    const navTexts: string[] = Array.from(
+      fixture.nativeElement.querySelectorAll('#nav-standard a'),
+      (link: HTMLAnchorElement) => link.textContent?.trim() ?? '',
+    );
+
+    expect(navTexts).toEqual(['Home', 'About', 'Dashboard', 'News']);
+  });
 });

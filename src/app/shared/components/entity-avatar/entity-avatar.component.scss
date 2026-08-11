@@ -1,0 +1,11 @@
+@use 'lcars-variables' as vars;
+
+.entity-avatar {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 50%;
+  border: 2px solid vars.$lcars-sunflower;
+  object-fit: cover;
+  background: #0d0d0d;
+}

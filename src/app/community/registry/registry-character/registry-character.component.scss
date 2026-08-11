@@ -1,0 +1,42 @@
+@use 'lcars-variables' as vars;
+@use 'registry-layout' as registry;
+@include registry.registry-two-column(
+  'registry-character-container',
+  'registry-character-main-column',
+  'registry-character-side-column'
+);
+@include registry.registry-detail-grid;
+
+.registry-character-inner-content {
+  padding: 20px;
+}
+
+.registry-character-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+
+  app-entity-avatar {
+    flex: 0 0 auto;
+    width: 9rem;
+  }
+
+  &__rank {
+    margin: 0;
+    font-weight: 700;
+    color: vars.$lcars-tangerine;
+  }
+
+  &__meta {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+}
+
+.registry-character-biography {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
