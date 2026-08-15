@@ -84,6 +84,10 @@ export const API_URLS = {
   // Access control (what the signed-in user is permitted to do)
   ACCESS_CONTROL_ME: apiUrl + '/access-control/me',
 
+  // Storytime
+  STORYTIME_CONFIGURATION: apiUrl + '/storytime/configuration',
+  STORYTIME_ADMIN_CONFIGURATION: apiUrl + '/admin/storytime/configuration',
+
   // News
   NEWS: apiUrl + '/news',
   NEWS_ADMIN: apiUrl + '/news/admin',
