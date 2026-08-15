@@ -502,6 +502,16 @@ export const routes: Routes = [
   },
 
   // *****************************************
+  // * Storytime
+  {
+    path: APP_ROUTES.STORYTIME,
+    loadChildren: () =>
+      import('./storytime/storytime.routes').then(m => m.STORYTIME_ROUTES),
+    data: { title: APP_ROUTE_TITLES.STORYTIME, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
+  },
+
+  // *****************************************
   // * Errors
   {
     path: APP_ROUTES.SERVICE_INTERRUPTION,

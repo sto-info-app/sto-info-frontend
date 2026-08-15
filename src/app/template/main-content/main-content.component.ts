@@ -50,6 +50,15 @@ import { SideBarComponent } from '../side-bar/side-bar.component';
 export class MainContentComponent implements OnDestroy {
   @Input() isLoggedIn!: boolean;
 
+  /**
+   * Whether Storytime should be offered in the navigation.
+   *
+   * Passed straight through to the sidebar. Resolved once at the application
+   * root rather than here, so the feature state is fetched a single time
+   * however often this component is rendered in tests.
+   */
+  @Input() isStorytimeEnabled = false;
+
   appTitle = environment.appTitle;
   frontendAppVersion = environment.version || '';
   backendAppVersion = '';

@@ -11,6 +11,15 @@ describe('SideBarComponent', () => {
   let routingServiceSpy: jest.Mocked<RoutingService>;
   let authServiceSpy: Pick<AuthService, 'isLoggedInAsAdmin'>;
 
+  /**
+   * Builds the component with the current provider stubs.
+   */
+  const createComponent = (): void => {
+    fixture = TestBed.createComponent(SideBarComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  };
+
   beforeEach(() => {
     routingServiceSpy = {
       getLink: jest.fn().mockReturnValue('/test'),
@@ -34,9 +43,7 @@ describe('SideBarComponent', () => {
         { provide: AuthService, useValue: authServiceSpy },
       ],
     });
-    fixture = TestBed.createComponent(SideBarComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    createComponent();
   });
 
   it('should create', () => {
@@ -76,6 +83,34 @@ describe('SideBarComponent', () => {
 
     (authServiceSpy.isLoggedInAsAdmin as jest.Mock).mockReturnValue(true);
     expect(component.isAdmin).toBe(true);
+  });
+
+  describe('Storytime link', () => {
+    /**
+     * Reads the sidebar's link labels.
+     *
+     * @returns The text of every sidebar link.
+     */
+    const linkLabels = (): string[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.sidebar-buttons a',
+        ),
+      ).map(link => link.textContent?.trim() ?? '');
+
+    // A link that appears and then disappears is worse than one that arrives
+    // a moment late, so the default has to be hidden.
+    it('should default to hidden before the feature state is known', () => {
+      expect(component.isStorytimeEnabled).toBe(false);
+      expect(linkLabels()).not.toContain('Storytime');
+    });
+
+    it('should offer Storytime once the feature is switched on', () => {
+      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.detectChanges();
+
+      expect(linkLabels()).toContain('Storytime');
+    });
   });
 
   describe('onResize', () => {

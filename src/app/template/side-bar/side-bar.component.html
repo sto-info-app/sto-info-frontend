@@ -19,6 +19,13 @@
         routerLinkActive="peach"
         >{{ appRouteTitles.COMMUNITY }}</a
       >
+      @if (isStorytimeEnabled) {
+        <a
+          [routerLink]="getRouteLink(appRoutes.STORYTIME)"
+          routerLinkActive="peach"
+          >{{ appRouteTitles.STORYTIME }}</a
+        >
+      }
       @if (isLoggedIn) {
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"

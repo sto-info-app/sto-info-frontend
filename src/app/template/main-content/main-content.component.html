@@ -1,7 +1,9 @@
 <div
   class="wrap gap"
   id="lcars-body-container">
-  <app-side-bar [isLoggedIn]="isLoggedIn"></app-side-bar>
+  <app-side-bar
+    [isLoggedIn]="isLoggedIn"
+    [isStorytimeEnabled]="isStorytimeEnabled"></app-side-bar>
 
   <div class="right-frame">
     <app-main-content-bar-panel></app-main-content-bar-panel>

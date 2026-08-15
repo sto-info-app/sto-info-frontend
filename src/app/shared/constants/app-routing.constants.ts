@@ -4,6 +4,7 @@ export const ROOT_ROUTES = {
   DASHBOARD: 'dashboard',
   NEWS: 'news',
   ADMIN: 'admin',
+  STORYTIME: 'storytime',
 };
 
 const REGISTRY_ROOT = ROOT_ROUTES.COMMUNITY + '/registry';
@@ -87,8 +88,14 @@ export const APP_ROUTES = {
   ADMIN_REPORTS: ROOT_ROUTES.ADMIN + '/reports',
   ADMIN_USERS: ROOT_ROUTES.ADMIN + '/users',
 
+  // Storytime
+  STORYTIME: ROOT_ROUTES.STORYTIME,
+
   // Error Pages
   SERVICE_INTERRUPTION: 'service-interruption',
+  // Matches no route, so the wildcard renders the not-found page. Used when
+  // code needs to send a visitor there deliberately.
+  PAGE_NOT_FOUND: 'page-not-found',
 };
 
 export const APP_ROUTE_TITLES = {
@@ -165,6 +172,9 @@ export const APP_ROUTE_TITLES = {
   ADMIN_NOTIFICATIONS_SEND: 'Send Notification',
   ADMIN_REPORTS: 'Reported Officers',
   ADMIN_USERS: 'Manage Members',
+
+  // Storytime
+  STORYTIME: 'Storytime',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'Service Interruption',
