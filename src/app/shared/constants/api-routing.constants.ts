@@ -81,6 +81,9 @@ export const API_URLS = {
   MODERATION_ADMIN_REPORTS: apiUrl + '/admin/moderation/reports',
   MODERATION_ADMIN_USERS: apiUrl + '/admin/moderation/users',
 
+  // Access control (what the signed-in user is permitted to do)
+  ACCESS_CONTROL_ME: apiUrl + '/access-control/me',
+
   // News
   NEWS: apiUrl + '/news',
   NEWS_ADMIN: apiUrl + '/news/admin',
