@@ -81,3 +81,123 @@ export const STORYTIME_DISABLED_STATE: StorytimeFeatureState = {
   youTubeEnabled: false,
   spotlightEnabled: false,
 };
+
+/**
+ * How finished a creator considers a whole Story.
+ */
+export enum CompletionState {
+  ONGOING = 'ONGOING',
+  COMPLETED = 'COMPLETED',
+  HIATUS = 'HIATUS',
+  CANCELLED = 'CANCELLED',
+}
+
+/**
+ * Where a creator has got to with a Story.
+ */
+export enum StoryStatus {
+  DRAFT = 'DRAFT',
+  IN_REVIEW = 'IN_REVIEW',
+  SCHEDULED = 'SCHEDULED',
+  PUBLISHED = 'PUBLISHED',
+  UNPUBLISHED = 'UNPUBLISHED',
+  ARCHIVED = 'ARCHIVED',
+}
+
+/**
+ * Who may reach a Story once it is published.
+ */
+export enum StorytimeVisibility {
+  PUBLIC = 'PUBLIC',
+  UNLISTED = 'UNLISTED',
+  PRIVATE = 'PRIVATE',
+}
+
+/**
+ * Whether an administrator has removed a Story.
+ */
+export enum StorytimeModerationStatus {
+  ACTIVE = 'ACTIVE',
+  REMOVED = 'REMOVED',
+}
+
+/**
+ * A Story as readers see it.
+ */
+export interface Story {
+  id: string;
+  slug: string;
+  title: string;
+  ownerUserId: string;
+  shortDescription: string | null;
+  descriptionHtml: string | null;
+  completionState: CompletionState;
+  contentRating: ContentRating;
+  languageCode: string;
+  bannerImageUrl: string | null;
+  bannerImageMobileUrl: string | null;
+  bannerImageAlt: string | null;
+  profileImageUrl: string | null;
+  profileImageThumbnailUrl: string | null;
+  profileImageAlt: string | null;
+  publishedChapterCount: number;
+  rating: number;
+  publishedAt: string | null;
+  lastContentUpdateAt: string | null;
+}
+
+/**
+ * A Story as its owner manages it.
+ */
+export interface ManagedStory extends Story {
+  status: StoryStatus;
+  visibility: StorytimeVisibility;
+  ownerOrderIndex: number;
+  description: string | null;
+  version: number;
+  moderationStatus: StorytimeModerationStatus;
+  moderationMessage: string | null;
+  contentPolicyAcceptedAt: string | null;
+}
+
+/**
+ * A page of publicly readable Stories.
+ */
+export interface PaginatedStories {
+  items: Story[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+/**
+ * Filters for the public Story listing.
+ */
+export interface StoryQuery {
+  page?: number;
+  pageSize?: number;
+  contentRating?: ContentRating;
+  languageCode?: string;
+  completionState?: CompletionState;
+  ownerUserId?: string;
+}
+
+/**
+ * The fields a creator may send when creating or editing a Story.
+ */
+export interface StoryRequest {
+  title?: string;
+  slug?: string;
+  shortDescription?: string;
+  description?: string;
+  visibility?: StorytimeVisibility;
+  completionState?: CompletionState;
+  contentRating?: ContentRating;
+  languageCode?: string;
+  bannerImageId?: string;
+  bannerImageAlt?: string;
+  profileImageId?: string;
+  profileImageAlt?: string;
+  /** Sent on update so a stale edit is rejected rather than overwriting. */
+  version?: number;
+}

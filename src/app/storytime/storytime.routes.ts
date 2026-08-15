@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from 'src/app/core/auth/auth.guard';
+import { PermissionGuard } from 'src/app/core/auth/permission.guard';
+import { PERMISSIONS } from 'src/app/models/access-control.models';
 import { APP_ROUTE_TITLES } from 'src/app/shared/constants/app-routing.constants';
 import { StorytimeLandingComponent } from './landing/storytime-landing.component';
 import { StorytimeEnabledGuard } from './storytime-enabled.guard';
@@ -6,13 +9,14 @@ import { StorytimeEnabledGuard } from './storytime-enabled.guard';
 /**
  * Storytime's routes, loaded on demand.
  *
- * Lazy-loaded rather than declared in the root routing module, which is how the
- * rest of the application works today. Storytime brings a large number of
- * components and an editor, and loading those for every visitor — including the
- * majority who never open it — would cost the whole site's first paint.
+ * Lazy-loaded because Storytime brings a large number of components and an
+ * editor, and loading those for every visitor — including the majority who
+ * never open it — would cost the whole site's first paint.
  *
  * Every route sits behind {@link StorytimeEnabledGuard} at the parent level, so
- * a route added later cannot accidentally escape the feature switch.
+ * a route added later cannot accidentally escape the feature switch. Creator
+ * routes add authentication and a permission on top, and each component is
+ * loaded only when its route is reached.
  */
 export const STORYTIME_ROUTES: Routes = [
   {
@@ -23,6 +27,62 @@ export const STORYTIME_ROUTES: Routes = [
         path: '',
         component: StorytimeLandingComponent,
         data: { title: APP_ROUTE_TITLES.STORYTIME },
+      },
+
+      // Creator routes are declared before the public `stories/:storySlug`
+      // route so that `stories/new` is never mistaken for a Story slug.
+      {
+        path: 'manage/stories',
+        loadComponent: () =>
+          import('./creator/story-dashboard/story-dashboard.component').then(
+            m => m.StoryDashboardComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_MANAGE,
+          permission: PERMISSIONS.STORYTIME_STORY_EDIT_OWN,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+      {
+        path: 'manage/stories/new',
+        loadComponent: () =>
+          import('./creator/story-editor/story-editor.component').then(
+            m => m.StoryEditorComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_STORY_NEW,
+          permission: PERMISSIONS.STORYTIME_STORY_CREATE,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+      {
+        path: 'manage/stories/:storyId',
+        loadComponent: () =>
+          import('./creator/story-editor/story-editor.component').then(
+            m => m.StoryEditorComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_STORY_EDIT,
+          permission: PERMISSIONS.STORYTIME_STORY_EDIT_OWN,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+
+      {
+        path: 'stories',
+        loadComponent: () =>
+          import('./public/story-list/story-list.component').then(
+            m => m.StoryListComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_STORIES },
+      },
+      {
+        path: 'stories/:storySlug',
+        loadComponent: () =>
+          import('./public/story-detail/story-detail.component').then(
+            m => m.StoryDetailComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_STORY },
       },
     ],
   },

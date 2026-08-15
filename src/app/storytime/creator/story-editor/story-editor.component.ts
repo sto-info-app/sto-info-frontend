@@ -1,0 +1,231 @@
+import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Observable } from 'rxjs';
+import {
+  CompletionState,
+  ContentRating,
+  CONTENT_RATING_LABELS,
+  ManagedStory,
+  StorytimeLanguage,
+  StorytimeVisibility,
+} from 'src/app/models/storytime.models';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  COMPLETION_STATE_LABELS,
+  VISIBILITY_DESCRIPTIONS,
+  VISIBILITY_LABELS,
+} from '../../storytime.constants';
+import { StorytimeService } from '../../storytime.service';
+import { StoryService } from '../../story.service';
+
+/**
+ * Creating and editing a Story's metadata.
+ *
+ * The same form serves both, because the fields are identical and keeping two
+ * would guarantee they drift.
+ */
+@Component({
+  selector: 'app-story-editor',
+  templateUrl: './story-editor.component.html',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    LoadingBarComponent,
+    LcarsErrorMessageComponent,
+  ],
+})
+export class StoryEditorComponent implements OnInit {
+  /** The form backing the editor. */
+  form!: FormGroup;
+
+  /** The Story being edited, or null when creating a new one. */
+  story: ManagedStory | null = null;
+
+  /** Whether the editor is still loading an existing Story. */
+  isLoading = false;
+
+  /** Whether a save is in flight. */
+  isSaving = false;
+
+  /** A message to show when saving failed. */
+  errorMessage = '';
+
+  /** Languages the server will accept. */
+  languages: StorytimeLanguage[] = [];
+
+  /** Ratings, with their labels. */
+  readonly ratings = Object.values(ContentRating);
+
+  /** Rating labels. */
+  readonly ratingLabels = CONTENT_RATING_LABELS;
+
+  /** Completion states. */
+  readonly completionStates = Object.values(CompletionState);
+
+  /** Completion labels. */
+  readonly completionLabels = COMPLETION_STATE_LABELS;
+
+  /** Visibility options. */
+  readonly visibilities = Object.values(StorytimeVisibility);
+
+  /** Visibility labels. */
+  readonly visibilityLabels = VISIBILITY_LABELS;
+
+  /** Explanations of what each visibility actually means. */
+  readonly visibilityDescriptions = VISIBILITY_DESCRIPTIONS;
+
+  /** Route constants. */
+  readonly appRoutes = APP_ROUTES;
+
+  private readonly _formBuilder = inject(FormBuilder);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
+  private readonly _storyService = inject(StoryService);
+  private readonly _storytimeService = inject(StorytimeService);
+  private readonly _destroyRef = inject(DestroyRef);
+
+  /**
+   * Builds the form and loads the Story when editing an existing one.
+   */
+  ngOnInit(): void {
+    this.form = this._formBuilder.group({
+      title: ['', [Validators.required, Validators.maxLength(200)]],
+      slug: ['', Validators.maxLength(220)],
+      shortDescription: ['', Validators.maxLength(500)],
+      description: [''],
+      contentRating: [ContentRating.GENERAL],
+      completionState: [CompletionState.ONGOING],
+      visibility: [StorytimeVisibility.PRIVATE],
+      languageCode: ['en'],
+    });
+
+    this._storytimeService
+      .getLanguages()
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(languages => {
+        this.languages = languages;
+      });
+
+    const storyId = this._route.snapshot.paramMap.get('storyId');
+
+    if (storyId) {
+      this.loadStory(storyId);
+    }
+  }
+
+  /**
+   * Whether the editor is creating a new Story rather than editing one.
+   *
+   * @returns True when there is no Story loaded.
+   */
+  get isNew(): boolean {
+    return this.story === null;
+  }
+
+  /**
+   * Explains what the currently selected visibility actually means.
+   *
+   * Resolved here rather than in the template because a form control's value is
+   * untyped, and indexing the description map with it does not compile.
+   *
+   * @returns The explanation for the selected visibility.
+   */
+  get visibilityDescription(): string {
+    const selected = this.form.controls['visibility']
+      .value as StorytimeVisibility;
+
+    return this.visibilityDescriptions[selected];
+  }
+
+  /**
+   * Saves the Story, creating it when new and updating it otherwise.
+   */
+  save(): void {
+    if (this.form.invalid || this.isSaving) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.isSaving = true;
+    this.errorMessage = '';
+
+    const payload = { ...this.form.value } as Record<string, unknown>;
+
+    // The version goes with the update so a stale edit is refused rather than
+    // silently overwriting a change made elsewhere.
+    if (this.story) {
+      payload['version'] = this.story.version;
+    }
+
+    const request: Observable<ManagedStory> = this.story
+      ? this._storyService.updateStory(this.story.id, payload)
+      : this._storyService.createStory(payload);
+
+    request.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
+      next: saved => {
+        this.isSaving = false;
+        void this._router.navigate([
+          '/',
+          this.appRoutes.STORYTIME,
+          'manage',
+          'stories',
+          saved.id,
+        ]);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.isSaving = false;
+        // The server's message names the specific problem, which is more
+        // use to a creator than a generic failure would be.
+        this.errorMessage =
+          (error.error as { message?: string } | undefined)?.message ??
+          'This Story could not be saved. Please try again shortly.';
+      },
+    });
+  }
+
+  /**
+   * Loads an existing Story into the form.
+   *
+   * @param storyId - The Story to load.
+   */
+  private loadStory(storyId: string): void {
+    this.isLoading = true;
+
+    this._storyService
+      .getMyStory(storyId)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: story => {
+          this.story = story;
+          this.form.patchValue({
+            title: story.title,
+            slug: story.slug,
+            shortDescription: story.shortDescription ?? '',
+            description: story.description ?? '',
+            contentRating: story.contentRating,
+            completionState: story.completionState,
+            visibility: story.visibility,
+            languageCode: story.languageCode,
+          });
+          this.isLoading = false;
+        },
+        error: () => {
+          this.errorMessage = 'That Story could not be loaded.';
+          this.isLoading = false;
+        },
+      });
+  }
+}

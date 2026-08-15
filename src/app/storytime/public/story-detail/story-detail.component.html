@@ -1,0 +1,64 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Story"></app-loading-bar>
+}
+
+@if (errorMessage) {
+  <app-lcars-error-message
+    title="Story unavailable"
+    [message]="errorMessage"></app-lcars-error-message>
+}
+
+@if (story) {
+  <article
+    id="storytime-story-detail-page"
+    [attr.lang]="story.languageCode">
+    @if (story.bannerImageUrl) {
+      <img
+        class="storytime-story__banner"
+        [src]="story.bannerImageUrl"
+        [alt]="story.bannerImageAlt ?? ''" />
+    }
+
+    <h1>{{ story.title }}</h1>
+
+    @if (needsRatingWarning) {
+      <app-lcars-warning-message
+        [title]="ratingLabels[story.contentRating]"
+        [message]="ratingDescriptions[story.contentRating]">
+      </app-lcars-warning-message>
+    }
+
+    <ul class="storytime-story__meta">
+      <li>
+        <span class="visually-hidden">Status: </span>
+        {{ completionLabels[story.completionState] }}
+      </li>
+      <li>
+        {{ story.publishedChapterCount }}
+        {{ story.publishedChapterCount === 1 ? 'Chapter' : 'Chapters' }}
+      </li>
+      <li>
+        <span class="visually-hidden">Rating: </span>
+        {{ story.rating }}
+      </li>
+    </ul>
+
+    @if (story.shortDescription) {
+      <p class="storytime-story__summary">{{ story.shortDescription }}</p>
+    }
+
+    @if (descriptionHtml) {
+      <div
+        class="storytime-story__description"
+        [innerHTML]="descriptionHtml"></div>
+    }
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Chapters</span>
+    </div>
+
+    <p class="storytime-empty">
+      Chapters for this Story will appear here once they are published.
+    </p>
+  </article>
+}

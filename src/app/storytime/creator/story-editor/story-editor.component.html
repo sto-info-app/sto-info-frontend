@@ -1,0 +1,106 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Story"></app-loading-bar>
+}
+
+<div id="storytime-story-editor-page">
+  <h1>{{ isNew ? 'Create a Story' : 'Edit Story' }}</h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Could not save"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="save()">
+    <label for="story-title">Title</label>
+    <input
+      id="story-title"
+      type="text"
+      formControlName="title"
+      maxlength="200"
+      required />
+    @if (form.controls['title'].touched && form.controls['title'].invalid) {
+      <p class="field-error">A title is required.</p>
+    }
+
+    <label for="story-slug">URL slug</label>
+    <input
+      id="story-slug"
+      type="text"
+      formControlName="slug"
+      maxlength="220" />
+    <p class="field-hint">
+      Leave blank to build one from the title. Changing it keeps the old address
+      working.
+    </p>
+
+    <label for="story-short-description">Short description</label>
+    <input
+      id="story-short-description"
+      type="text"
+      formControlName="shortDescription"
+      maxlength="500" />
+    <p class="field-hint">Shown in listings. Required before publishing.</p>
+
+    <label for="story-description">Description</label>
+    <textarea
+      id="story-description"
+      formControlName="description"
+      rows="8"></textarea>
+    <p class="field-hint">
+      Markdown is supported. Links to other sites are not shown.
+    </p>
+
+    <label for="story-rating">Content rating</label>
+    <select
+      id="story-rating"
+      formControlName="contentRating">
+      @for (rating of ratings; track rating) {
+        <option [value]="rating">{{ ratingLabels[rating] }}</option>
+      }
+    </select>
+
+    <label for="story-completion">Status</label>
+    <select
+      id="story-completion"
+      formControlName="completionState">
+      @for (state of completionStates; track state) {
+        <option [value]="state">{{ completionLabels[state] }}</option>
+      }
+    </select>
+
+    <label for="story-visibility">Visibility</label>
+    <select
+      id="story-visibility"
+      formControlName="visibility">
+      @for (visibility of visibilities; track visibility) {
+        <option [value]="visibility">{{ visibilityLabels[visibility] }}</option>
+      }
+    </select>
+    <p class="field-hint">
+      {{ visibilityDescription }}
+    </p>
+
+    <label for="story-language">Language</label>
+    <select
+      id="story-language"
+      formControlName="languageCode">
+      @for (language of languages; track language.code) {
+        <option [value]="language.code">{{ language.name }}</option>
+      }
+    </select>
+
+    <div class="storytime-editor__actions">
+      <button
+        type="submit"
+        [disabled]="isSaving">
+        {{ isSaving ? 'Saving…' : 'Save' }}
+      </button>
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories']"
+        >Cancel</a
+      >
+    </div>
+  </form>
+</div>

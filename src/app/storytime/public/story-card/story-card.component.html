@@ -1,0 +1,35 @@
+<article class="storytime-story-card">
+  <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]">
+    @if (story.profileImageThumbnailUrl) {
+      <img
+        class="storytime-story-card__image"
+        [src]="story.profileImageThumbnailUrl"
+        [alt]="story.profileImageAlt ?? ''"
+        loading="lazy" />
+    }
+
+    <h2 class="storytime-story-card__title">{{ story.title }}</h2>
+  </a>
+
+  @if (story.shortDescription) {
+    <p class="storytime-story-card__summary">{{ story.shortDescription }}</p>
+  }
+
+  <ul class="storytime-story-card__meta">
+    <li>
+      <span class="visually-hidden">Content rating: </span>
+      @if (needsRatingWarning) {
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+      }
+      {{ ratingLabels[story.contentRating] }}
+    </li>
+    <li>
+      <span class="visually-hidden">Status: </span>
+      {{ completionLabels[story.completionState] }}
+    </li>
+    <li>
+      {{ story.publishedChapterCount }}
+      {{ story.publishedChapterCount === 1 ? 'Chapter' : 'Chapters' }}
+    </li>
+  </ul>
+</article>

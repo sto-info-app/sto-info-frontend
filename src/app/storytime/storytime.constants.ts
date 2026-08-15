@@ -55,3 +55,32 @@ export const PUBLICATION_STATUS_LABELS = {
   UNPUBLISHED: 'Unpublished',
   ARCHIVED: 'Archived',
 } as const;
+
+/**
+ * How each completion state is described to readers.
+ */
+export const COMPLETION_STATE_LABELS = {
+  ONGOING: 'Ongoing',
+  COMPLETED: 'Complete',
+  HIATUS: 'On hiatus',
+  CANCELLED: 'Cancelled',
+} as const;
+
+/**
+ * How each visibility option is described to creators.
+ */
+export const VISIBILITY_LABELS = {
+  PUBLIC: 'Public',
+  UNLISTED: 'Unlisted',
+  PRIVATE: 'Private',
+} as const;
+
+/**
+ * What each visibility option actually means, shown alongside the choice so a
+ * creator is not left guessing how far their Story travels.
+ */
+export const VISIBILITY_DESCRIPTIONS = {
+  PUBLIC: 'Listed in the archive and readable by anyone.',
+  UNLISTED: 'Readable by anyone with the link, but not listed in the archive.',
+  PRIVATE: 'Readable only by you.',
+} as const;

@@ -1,0 +1,86 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading your Stories"></app-loading-bar>
+}
+
+<div id="storytime-dashboard-page">
+  <h1>Your Stories</h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Action failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <a
+    class="storytime-dashboard__new"
+    [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', 'new']">
+    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+    Create a Story
+  </a>
+
+  @if (!isLoading && stories.length === 0) {
+    <p class="storytime-empty">
+      You have not written a Story yet. Create one to get started.
+    </p>
+  }
+
+  @for (story of stories; track story.id) {
+    <article class="storytime-dashboard__story">
+      <h2>
+        <a
+          [routerLink]="[
+            '/',
+            appRoutes.STORYTIME,
+            'manage',
+            'stories',
+            story.id,
+          ]"
+          >{{ story.title }}</a
+        >
+      </h2>
+
+      @if (story.moderationStatus === 'REMOVED') {
+        <p class="storytime-dashboard__removed">
+          <i class="fa-solid fa-ban" aria-hidden="true"></i>
+          This Story has been removed by an administrator.
+          @if (story.moderationMessage) {
+            <span class="storytime-dashboard__removed-reason">{{
+              story.moderationMessage
+            }}</span>
+          }
+        </p>
+      }
+
+      <ul class="storytime-dashboard__meta">
+        <li>
+          <span class="visually-hidden">Status: </span>
+          {{ statusLabels[story.status] }}
+        </li>
+        <li>
+          <span class="visually-hidden">Visibility: </span>
+          {{ visibilityLabels[story.visibility] }}
+        </li>
+        <li>
+          {{ story.publishedChapterCount }}
+          {{ story.publishedChapterCount === 1 ? 'Chapter' : 'Chapters' }}
+        </li>
+      </ul>
+
+      <div class="storytime-dashboard__actions">
+        @if (canPublish(story)) {
+          <button
+            type="button"
+            (click)="publish(story)">
+            Publish
+          </button>
+        } @else {
+          <button
+            type="button"
+            (click)="unpublish(story)">
+            Unpublish
+          </button>
+        }
+      </div>
+    </article>
+  }
+</div>

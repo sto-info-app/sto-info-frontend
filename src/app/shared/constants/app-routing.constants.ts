@@ -90,6 +90,11 @@ export const APP_ROUTES = {
 
   // Storytime
   STORYTIME: ROOT_ROUTES.STORYTIME,
+  STORYTIME_STORIES: ROOT_ROUTES.STORYTIME + '/stories',
+  STORYTIME_STORY: ROOT_ROUTES.STORYTIME + '/stories/:storySlug',
+  STORYTIME_MANAGE: ROOT_ROUTES.STORYTIME + '/manage/stories',
+  STORYTIME_STORY_NEW: ROOT_ROUTES.STORYTIME + '/manage/stories/new',
+  STORYTIME_STORY_EDIT: ROOT_ROUTES.STORYTIME + '/manage/stories/:storyId',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'service-interruption',
@@ -175,6 +180,11 @@ export const APP_ROUTE_TITLES = {
 
   // Storytime
   STORYTIME: 'Storytime',
+  STORYTIME_STORIES: 'Stories',
+  STORYTIME_STORY: 'Story',
+  STORYTIME_MANAGE: 'Your Stories',
+  STORYTIME_STORY_NEW: 'Create a Story',
+  STORYTIME_STORY_EDIT: 'Edit Story',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'Service Interruption',
