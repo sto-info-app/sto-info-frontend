@@ -27,7 +27,8 @@
         aria-live="polite">
         <div id="footer-text">
           @defer (on viewport) {
-            <app-footer></app-footer>
+            <app-footer
+              [isStorytimeEnabled]="isStorytimeEnabled"></app-footer>
           } @placeholder {
             <span class="footer-placeholder">Loading footer…</span>
           }

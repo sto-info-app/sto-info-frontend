@@ -35,6 +35,15 @@
             >{{ appRouteTitles.COMMUNITY }}</a
           >
         </li>
+        @if (isStorytimeEnabled) {
+          <li>
+            <a
+              [routerLink]="getRouteLink(appRoutes.STORYTIME)"
+              routerLinkActive="active"
+              >{{ appRouteTitles.STORYTIME }}</a
+            >
+          </li>
+        }
         <li>
           <a
             [routerLink]="getRouteLink(appRoutes.RESOURCES)"

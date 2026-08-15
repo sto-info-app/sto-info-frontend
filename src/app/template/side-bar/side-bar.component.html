@@ -45,6 +45,14 @@
           routerLinkActive="peach"
           >{{ appRouteTitles.STO_DASHBOARD_STATS }}</a
         >
+        @if (isStorytimeEnabled) {
+          <a
+            [routerLink]="getRouteLink(appRoutes.STORYTIME_MANAGE)"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="peach"
+            >{{ appRouteTitles.STORYTIME_MANAGE }}</a
+          >
+        }
         @if (isAdmin) {
           <a
             [routerLink]="getRouteLink(appRoutes.ADMIN)"
