@@ -21,6 +21,17 @@ export const STORYTIME_COPY = {
 } as const;
 
 /**
+ * How long to wait after a reader stops scrolling before recording where they
+ * are.
+ *
+ * A scroll fires continuously, so without a pause a reader moving down a long
+ * Chapter would send a request per frame. Long enough to collapse a scroll
+ * into one write, short enough that closing the tab shortly after reading does
+ * not lose the position.
+ */
+export const PROGRESS_WRITE_DEBOUNCE_MS = 5000;
+
+/**
  * How each reader-facing Story status is labelled.
  *
  * The single authoritative mapping, so a status never reads one way in a

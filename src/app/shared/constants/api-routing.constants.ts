@@ -90,6 +90,7 @@ export const API_URLS = {
   STORYTIME_STORIES: apiUrl + '/storytime/stories',
   STORYTIME_MANAGE_STORIES: apiUrl + '/storytime/manage/stories',
   STORYTIME_MANAGE_CHAPTERS: apiUrl + '/storytime/manage/chapters',
+  STORYTIME_PROGRESS: apiUrl + '/storytime/progress',
 
   // News
   NEWS: apiUrl + '/news',

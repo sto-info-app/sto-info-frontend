@@ -278,6 +278,98 @@ export interface ChapterWithNavigation {
 }
 
 /**
+ * Where a reader has got to with a Story.
+ *
+ * On hold and abandoned are deliberate choices. The server derives the others
+ * from what has been read, and never overwrites a deliberate one.
+ */
+export enum ReaderStoryStatus {
+  NOT_STARTED = 'NOT_STARTED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  ON_HOLD = 'ON_HOLD',
+  ABANDONED = 'ABANDONED',
+}
+
+/**
+ * The statuses a reader may choose for themselves.
+ *
+ * Deliberately excludes the derived ones: a reader marks a Story finished
+ * through the complete action, and starts it by reading it.
+ */
+export const DELIBERATE_READER_STATUSES: readonly ReaderStoryStatus[] = [
+  ReaderStoryStatus.ON_HOLD,
+  ReaderStoryStatus.ABANDONED,
+];
+
+/**
+ * A reader's progress through one Story.
+ */
+export interface StoryProgress {
+  storyId: string;
+  status: ReaderStoryStatus;
+  totalChapters: number;
+  readChapters: number;
+  percentComplete: number;
+  /** Chapters published since the reader was last up to date. */
+  newChapterCount: number;
+  /** The first Chapter they have not finished, or null when there is none. */
+  continueChapterId: string | null;
+  lastReadChapterId: string | null;
+  lastReadAt: string | null;
+  completedAt: string | null;
+}
+
+/**
+ * One Story in a reader's library, with the progress that put it there.
+ *
+ * The Story may be absent: one made private, removed or deleted since the
+ * reader started it still belongs in their library as something they read,
+ * rather than vanishing from their own history.
+ */
+export interface LibraryEntry {
+  progress: StoryProgress;
+  story: Story | null;
+}
+
+/**
+ * Where a reader has got to with a Chapter.
+ */
+export enum ReaderChapterStatus {
+  UNREAD = 'UNREAD',
+  IN_PROGRESS = 'IN_PROGRESS',
+  READ = 'READ',
+}
+
+/**
+ * A reader's progress through one Chapter.
+ *
+ * A reader who has never opened the Chapter gets one of these too, with
+ * nothing recorded: having no progress is an ordinary state rather than a
+ * missing resource.
+ */
+export interface ChapterProgress {
+  chapterId: string;
+  status: ReaderChapterStatus;
+  progressPercent: number | null;
+  /** The block anchor to resume at, such as `b12`. */
+  blockId: string | null;
+  lastReadAt: string | null;
+}
+
+/**
+ * A reported reading position.
+ *
+ * Both fields are optional so a reader page that tracks only the anchor, or
+ * only the percentage, may send just that.
+ */
+export interface ChapterProgressUpdate {
+  progressPercent?: number;
+  /** A block anchor as stamped on the rendered content, such as `b12`. */
+  blockId?: string;
+}
+
+/**
  * The fields a creator may send when creating or editing a Chapter.
  */
 export interface ChapterRequest {
