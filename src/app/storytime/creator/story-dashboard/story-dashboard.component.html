@@ -70,6 +70,31 @@
         </li>
       </ul>
 
+      <nav class="storytime-dashboard__links">
+        <a
+          [routerLink]="[
+            '/',
+            appRoutes.STORYTIME,
+            'manage',
+            'stories',
+            story.id,
+            'chapters',
+          ]"
+          >Chapters</a
+        >
+        <a
+          [routerLink]="[
+            '/',
+            appRoutes.STORYTIME,
+            'manage',
+            'stories',
+            story.id,
+            'characters',
+          ]"
+          >Cast</a
+        >
+      </nav>
+
       <div class="storytime-dashboard__actions">
         @if (canPublish(story)) {
           <button

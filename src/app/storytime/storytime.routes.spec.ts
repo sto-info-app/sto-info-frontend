@@ -68,6 +68,18 @@ describe('STORYTIME_ROUTES', () => {
     expect(library?.data?.['title']).toBe(APP_ROUTE_TITLES.STORYTIME_LIBRARY);
   });
 
+  // A Character's page is reached through its Story, exactly as a Chapter is,
+  // and needs no account: the Story being readable is the only gate.
+  it('reads a Character through its Story, without sign-in', () => {
+    const character = childAt('stories/:storySlug/characters/:characterSlug');
+
+    expect(character).toBeDefined();
+    expect(character?.canActivate).toBeUndefined();
+    expect(character?.data?.['title']).toBe(
+      APP_ROUTE_TITLES.STORYTIME_CHARACTER,
+    );
+  });
+
   describe('creator routes', () => {
     const creatorPaths = [
       'manage/stories',
@@ -76,6 +88,9 @@ describe('STORYTIME_ROUTES', () => {
       'manage/stories/:storyId/chapters',
       'manage/stories/:storyId/chapters/new',
       'manage/chapters/:chapterId',
+      'manage/stories/:storyId/characters',
+      'manage/stories/:storyId/characters/new',
+      'manage/characters/:characterId',
     ];
 
     it.each(creatorPaths)('requires sign-in and a permission for %s', path => {

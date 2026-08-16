@@ -93,6 +93,43 @@ export const STORYTIME_ROUTES: Routes = [
         canActivate: [AuthGuard, PermissionGuard],
       },
       {
+        path: 'manage/stories/:storyId/characters',
+        loadComponent: () =>
+          import('./creator/character-list/character-list.component').then(
+            m => m.CharacterListComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_MANAGE_CHARACTERS,
+          permission: PERMISSIONS.STORYTIME_STORY_EDIT_OWN,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+      {
+        path: 'manage/stories/:storyId/characters/new',
+        loadComponent: () =>
+          import('./creator/character-editor/character-editor.component').then(
+            m => m.CharacterEditorComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_CHARACTER_NEW,
+          permission: PERMISSIONS.STORYTIME_STORY_EDIT_OWN,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+      {
+        path: 'manage/characters/:characterId',
+        loadComponent: () =>
+          import('./creator/character-editor/character-editor.component').then(
+            m => m.CharacterEditorComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_CHARACTER_EDIT,
+          permission: PERMISSIONS.STORYTIME_STORY_EDIT_OWN,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+
+      {
         path: 'manage/chapters/:chapterId',
         loadComponent: () =>
           import('./creator/chapter-editor/chapter-editor.component').then(
@@ -130,6 +167,14 @@ export const STORYTIME_ROUTES: Routes = [
             m => m.StoryDetailComponent,
           ),
         data: { title: APP_ROUTE_TITLES.STORYTIME_STORY },
+      },
+      {
+        path: 'stories/:storySlug/characters/:characterSlug',
+        loadComponent: () =>
+          import('./public/character-detail/storytime-character-detail.component').then(
+            m => m.StorytimeCharacterDetailComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_CHARACTER },
       },
       {
         path: 'stories/:storySlug/chapters/:chapterSlug',

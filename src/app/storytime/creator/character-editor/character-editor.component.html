@@ -1,0 +1,164 @@
+<section id="storytime-character-editor-page">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>{{ isCreating ? 'Add a Character' : 'Edit Character' }}</span>
+  </div>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Character unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading Character"></app-loading-bar>
+  } @else {
+    <form
+      [formGroup]="form"
+      (ngSubmit)="save()">
+      <label for="character-name">Name</label>
+      <input
+        id="character-name"
+        type="text"
+        formControlName="name"
+        maxlength="200" />
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <p class="form-error">A Character needs a name.</p>
+      }
+
+      <label for="character-slug">URL slug</label>
+      <input
+        id="character-slug"
+        type="text"
+        formControlName="slug"
+        maxlength="220"
+        placeholder="Generated from the name when left blank" />
+
+      <label for="character-short-bio">One-line description</label>
+      <input
+        id="character-short-bio"
+        type="text"
+        formControlName="shortBio"
+        maxlength="500" />
+
+      <label for="character-biography">Biography</label>
+      <textarea
+        id="character-biography"
+        rows="10"
+        formControlName="biographySource"></textarea>
+
+      <label for="character-species">Species</label>
+      <input
+        id="character-species"
+        type="text"
+        formControlName="species"
+        maxlength="100" />
+
+      <label for="character-faction">Faction</label>
+      <input
+        id="character-faction"
+        type="text"
+        formControlName="faction"
+        maxlength="100" />
+
+      <label for="character-rank">Rank</label>
+      <input
+        id="character-rank"
+        type="text"
+        formControlName="rank"
+        maxlength="100" />
+
+      <label for="character-occupation">Occupation</label>
+      <input
+        id="character-occupation"
+        type="text"
+        formControlName="occupation"
+        maxlength="150" />
+
+      <label for="character-affiliation">Affiliation</label>
+      <input
+        id="character-affiliation"
+        type="text"
+        formControlName="affiliation"
+        maxlength="200" />
+
+      <label for="character-ship">Ship or posting</label>
+      <input
+        id="character-ship"
+        type="text"
+        formControlName="shipAssignment"
+        maxlength="200" />
+
+      <label for="character-portrait">Portrait image ID</label>
+      <input
+        id="character-portrait"
+        type="text"
+        formControlName="portraitImageId"
+        maxlength="100" />
+
+      <label for="character-portrait-alt">Portrait description</label>
+      <input
+        id="character-portrait-alt"
+        type="text"
+        formControlName="portraitImageAlt"
+        maxlength="300"
+        placeholder="Required when a portrait is set" />
+
+      <fieldset class="storytime-character-editor__traits">
+        <legend>Traits</legend>
+
+        @for (trait of traits.controls; track $index; let index = $index) {
+          <div class="storytime-character-editor__trait">
+            <label
+              class="visually-hidden"
+              [attr.for]="'character-trait-' + index"
+              >Trait {{ index + 1 }}</label
+            >
+            <input
+              [id]="'character-trait-' + index"
+              type="text"
+              maxlength="60"
+              [formControl]="trait" />
+            <button
+              type="button"
+              (click)="removeTrait(index)">
+              Remove
+            </button>
+          </div>
+        }
+
+        <button
+          type="button"
+          [disabled]="traits.length >= maxTraits"
+          (click)="addTrait()">
+          Add a trait
+        </button>
+      </fieldset>
+
+      <label class="storytime-character-editor__primary">
+        <input
+          type="checkbox"
+          formControlName="isPrimary" />
+        One of the Story’s main Characters
+      </label>
+
+      <div class="storytime-character-editor__actions">
+        <button
+          type="submit"
+          [disabled]="isSaving">
+          {{ isSaving ? 'Saving…' : 'Save' }}
+        </button>
+        <a
+          [routerLink]="[
+            '/',
+            appRoutes.STORYTIME,
+            'manage',
+            'stories',
+            storyId,
+            'characters',
+          ]">
+          Cancel
+        </a>
+      </div>
+    </form>
+  }
+</section>

@@ -2,8 +2,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { ManagedChapter } from 'src/app/models/storytime.models';
+import {
+  ChapterAppearance,
+  ManagedChapter,
+  ManagedCharacter,
+} from 'src/app/models/storytime.models';
 import { ChapterService } from '../../chapter.service';
+import { CharacterService } from '../../character.service';
 import { StorytimeService } from '../../storytime.service';
 import { ChapterEditorComponent } from './chapter-editor.component';
 
@@ -13,6 +18,11 @@ describe('ChapterEditorComponent', () => {
     getMyChapter: jest.Mock;
     createChapter: jest.Mock;
     updateChapter: jest.Mock;
+  };
+  let characterService: {
+    getMyCharacters: jest.Mock;
+    getAppearances: jest.Mock;
+    setAppearances: jest.Mock;
   };
   let storytimeService: { getLanguages: jest.Mock };
   let router: { navigate: jest.Mock };
@@ -45,6 +55,16 @@ describe('ChapterEditorComponent', () => {
       createChapter: jest.fn().mockReturnValue(of({ id: 'new-chapter' })),
       updateChapter: jest.fn().mockReturnValue(of(existingChapter)),
     };
+    characterService = {
+      getMyCharacters: jest.fn().mockReturnValue(
+        of([
+          { id: 'character-1', name: 'Shran' },
+          { id: 'character-2', name: 'T’Pol' },
+        ] as ManagedCharacter[]),
+      ),
+      getAppearances: jest.fn().mockReturnValue(of([])),
+      setAppearances: jest.fn().mockReturnValue(of([])),
+    };
     storytimeService = {
       getLanguages: jest
         .fn()
@@ -57,6 +77,7 @@ describe('ChapterEditorComponent', () => {
       providers: [
         provideRouter([]),
         { provide: ChapterService, useValue: chapterService },
+        { provide: CharacterService, useValue: characterService },
         { provide: StorytimeService, useValue: storytimeService },
         { provide: Router, useValue: router },
         {
@@ -235,6 +256,148 @@ describe('ChapterEditorComponent', () => {
       expect(fixture.componentInstance.errorMessage).toContain(
         'could not be saved',
       );
+    });
+  });
+
+  describe('who appears in the Chapter', () => {
+    /**
+     * Renders the editor for an existing Chapter, where a cast can exist.
+     */
+    const renderExisting = (): void => {
+      routeParams.set('chapterId', 'chapter-1');
+      render();
+    };
+
+    it('offers the Story’s whole cast to choose from', () => {
+      renderExisting();
+
+      expect(fixture.componentInstance.cast).toHaveLength(2);
+      expect(characterService.getMyCharacters).toHaveBeenCalledWith('story-1');
+    });
+
+    it('ticks the Characters already appearing', () => {
+      characterService.getAppearances.mockReturnValue(
+        of([{ character: { id: 'character-1' } }] as ChapterAppearance[]),
+      );
+
+      renderExisting();
+
+      expect(fixture.componentInstance.isAppearing('character-1')).toBe(true);
+      expect(fixture.componentInstance.isAppearing('character-2')).toBe(false);
+    });
+
+    // An appearance whose Character has been deleted has nothing to tick.
+    it('ignores an appearance with no Character behind it', () => {
+      characterService.getAppearances.mockReturnValue(
+        of([{ character: null }] as ChapterAppearance[]),
+      );
+
+      renderExisting();
+
+      expect(fixture.componentInstance.appearingCharacterIds.size).toBe(0);
+    });
+
+    it('ticks and unticks a Character', () => {
+      renderExisting();
+
+      fixture.componentInstance.toggleAppearance('character-1');
+      expect(fixture.componentInstance.isAppearing('character-1')).toBe(true);
+
+      fixture.componentInstance.toggleAppearance('character-1');
+      expect(fixture.componentInstance.isAppearing('character-1')).toBe(false);
+    });
+
+    // Sent in cast order rather than tick order, so a Chapter's cast reads the
+    // same way round as the Story's.
+    it('saves the cast in the Story’s order', () => {
+      renderExisting();
+      fixture.componentInstance.toggleAppearance('character-2');
+      fixture.componentInstance.toggleAppearance('character-1');
+
+      fixture.componentInstance.saveCast();
+
+      expect(characterService.setAppearances).toHaveBeenCalledWith(
+        'chapter-1',
+        [{ characterId: 'character-1' }, { characterId: 'character-2' }],
+      );
+    });
+
+    it('saves an empty cast', () => {
+      renderExisting();
+
+      fixture.componentInstance.saveCast();
+
+      expect(characterService.setAppearances).toHaveBeenCalledWith(
+        'chapter-1',
+        [],
+      );
+    });
+
+    // A Chapter has to exist before anybody can appear in it.
+    it('does nothing for a Chapter that has not been saved yet', () => {
+      render();
+
+      fixture.componentInstance.saveCast();
+
+      expect(characterService.setAppearances).not.toHaveBeenCalled();
+    });
+
+    it('does not save twice at once', () => {
+      renderExisting();
+
+      fixture.componentInstance.isSavingCast = true;
+      fixture.componentInstance.saveCast();
+
+      expect(characterService.setAppearances).not.toHaveBeenCalled();
+    });
+
+    it('explains a cast that could not be saved', () => {
+      characterService.setAppearances.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+      renderExisting();
+
+      fixture.componentInstance.saveCast();
+
+      expect(fixture.componentInstance.castErrorMessage).toContain(
+        'could not be saved',
+      );
+      expect(fixture.componentInstance.isSavingCast).toBe(false);
+    });
+
+    // Not every Story has a cast, and a failure here must leave the Chapter
+    // editable rather than blocking the writing.
+    it('leaves the Chapter editable when the cast cannot be loaded', () => {
+      characterService.getMyCharacters.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      renderExisting();
+
+      expect(fixture.componentInstance.cast).toEqual([]);
+      expect(fixture.componentInstance.errorMessage).toBe('');
+    });
+
+    it('carries on when the existing cast cannot be loaded', () => {
+      characterService.getAppearances.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      renderExisting();
+
+      expect(fixture.componentInstance.appearingCharacterIds.size).toBe(0);
+    });
+
+    it('asks for no cast before the Story is known', () => {
+      routeParams.clear();
+      routeParams.set('chapterId', 'chapter-1');
+      chapterService.getMyChapter.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 })),
+      );
+
+      render();
+
+      expect(characterService.getMyCharacters).not.toHaveBeenCalled();
     });
   });
 });

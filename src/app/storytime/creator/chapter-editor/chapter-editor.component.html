@@ -87,4 +87,39 @@
       >
     </div>
   </form>
+
+  @if (!isNew && cast.length > 0) {
+    <section class="storytime-editor__cast">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Who appears</span>
+      </div>
+
+      @if (castErrorMessage) {
+        <app-lcars-error-message
+          title="Cast unavailable"
+          [message]="castErrorMessage"></app-lcars-error-message>
+      }
+
+      <ul class="storytime-editor__cast-list">
+        @for (character of cast; track character.id) {
+          <li>
+            <label>
+              <input
+                type="checkbox"
+                [checked]="isAppearing(character.id)"
+                (change)="toggleAppearance(character.id)" />
+              {{ character.name }}
+            </label>
+          </li>
+        }
+      </ul>
+
+      <button
+        type="button"
+        [disabled]="isSavingCast"
+        (click)="saveCast()">
+        {{ isSavingCast ? 'Saving…' : 'Save who appears' }}
+      </button>
+    </section>
+  }
 </div>
