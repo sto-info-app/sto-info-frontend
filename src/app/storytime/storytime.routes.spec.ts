@@ -58,6 +58,16 @@ describe('STORYTIME_ROUTES', () => {
     }
   });
 
+  // The library is a reader's own progress, so it needs sign-in — but not a
+  // creator permission, which would shut out every reader who does not write.
+  it('requires sign-in for the reader library, and nothing more', () => {
+    const library = childAt('library');
+
+    expect(library?.canActivate).toEqual([AuthGuard]);
+    expect(library?.data?.['permission']).toBeUndefined();
+    expect(library?.data?.['title']).toBe(APP_ROUTE_TITLES.STORYTIME_LIBRARY);
+  });
+
   describe('creator routes', () => {
     const creatorPaths = [
       'manage/stories',

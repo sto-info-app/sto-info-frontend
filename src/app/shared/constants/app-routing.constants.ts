@@ -91,6 +91,7 @@ export const APP_ROUTES = {
   // Storytime
   STORYTIME: ROOT_ROUTES.STORYTIME,
   STORYTIME_STORIES: ROOT_ROUTES.STORYTIME + '/stories',
+  STORYTIME_LIBRARY: ROOT_ROUTES.STORYTIME + '/library',
   STORYTIME_STORY: ROOT_ROUTES.STORYTIME + '/stories/:storySlug',
   STORYTIME_MANAGE: ROOT_ROUTES.STORYTIME + '/manage/stories',
   STORYTIME_STORY_NEW: ROOT_ROUTES.STORYTIME + '/manage/stories/new',
@@ -188,6 +189,7 @@ export const APP_ROUTE_TITLES = {
   // Storytime
   STORYTIME: 'Storytime',
   STORYTIME_STORIES: 'Stories',
+  STORYTIME_LIBRARY: 'Your Library',
   STORYTIME_STORY: 'Story',
   STORYTIME_MANAGE: 'Your Stories',
   STORYTIME_STORY_NEW: 'Create a Story',

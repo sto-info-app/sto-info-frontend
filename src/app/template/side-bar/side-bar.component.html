@@ -47,6 +47,12 @@
         >
         @if (isStorytimeEnabled) {
           <a
+            [routerLink]="getRouteLink(appRoutes.STORYTIME_LIBRARY)"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="peach"
+            >{{ appRouteTitles.STORYTIME_LIBRARY }}</a
+          >
+          <a
             [routerLink]="getRouteLink(appRoutes.STORYTIME_MANAGE)"
             [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="peach"

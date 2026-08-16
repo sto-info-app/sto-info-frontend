@@ -106,6 +106,16 @@ export const STORYTIME_ROUTES: Routes = [
       },
 
       {
+        path: 'library',
+        loadComponent: () =>
+          import('./public/reader-library/reader-library.component').then(
+            m => m.ReaderLibraryComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_LIBRARY },
+        canActivate: [AuthGuard],
+      },
+
+      {
         path: 'stories',
         loadComponent: () =>
           import('./public/story-list/story-list.component').then(
