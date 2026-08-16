@@ -45,12 +45,51 @@
       <li>{{ chapter.wordCount }} words</li>
     </ul>
 
+    @if (resumeBlockId) {
+      <p class="storytime-chapter__resume">
+        <button
+          type="button"
+          class="storytime-chapter__resume-button"
+          (click)="resume()">
+          <i
+            class="fa-solid fa-bookmark"
+            aria-hidden="true"></i>
+          Pick up where you left off
+        </button>
+      </p>
+    }
+
     @if (contentHtml) {
       <div
+        #chapterBody
         class="storytime-chapter__body"
         [innerHTML]="contentHtml"></div>
     } @else {
       <p class="storytime-empty">This Chapter has no content yet.</p>
+    }
+
+    @if (isTrackingProgress) {
+      <div class="storytime-chapter__progress">
+        <button
+          type="button"
+          class="storytime-chapter__read-toggle"
+          [attr.aria-pressed]="isRead"
+          (click)="setRead(!isRead)">
+          <i
+            class="fa-solid"
+            [class.fa-circle-check]="isRead"
+            [class.fa-circle]="!isRead"
+            aria-hidden="true"></i>
+          {{ isRead ? 'Read' : 'Mark as read' }}
+        </button>
+
+        @if (storyProgress) {
+          <p class="storytime-chapter__story-progress">
+            {{ storyProgress.readChapters }} of
+            {{ storyProgress.totalChapters }} Chapters read
+          </p>
+        }
+      </div>
     }
 
     <nav
