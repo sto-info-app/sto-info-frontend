@@ -14,7 +14,9 @@
   <a
     class="storytime-dashboard__new"
     [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', 'new']">
-    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+    <i
+      class="fa-solid fa-plus"
+      aria-hidden="true"></i>
     Create a Story
   </a>
 
@@ -41,7 +43,9 @@
 
       @if (story.moderationStatus === 'REMOVED') {
         <p class="storytime-dashboard__removed">
-          <i class="fa-solid fa-ban" aria-hidden="true"></i>
+          <i
+            class="fa-solid fa-ban"
+            aria-hidden="true"></i>
           This Story has been removed by an administrator.
           @if (story.moderationMessage) {
             <span class="storytime-dashboard__removed-reason">{{
