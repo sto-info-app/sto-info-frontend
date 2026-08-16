@@ -2,8 +2,16 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { ContentRating, Story } from 'src/app/models/storytime.models';
+import { AuthService } from 'src/app/core/auth/auth.service';
+import {
+  ChapterSummary,
+  ContentRating,
+  ReaderStoryStatus,
+  Story,
+  StoryProgress,
+} from 'src/app/models/storytime.models';
 import { ChapterService } from '../../chapter.service';
+import { ProgressService } from '../../progress.service';
 import { StoryService } from '../../story.service';
 import { StoryDetailComponent } from './story-detail.component';
 
@@ -11,6 +19,47 @@ describe('StoryDetailComponent', () => {
   let fixture: ComponentFixture<StoryDetailComponent>;
   let storyService: { getStory: jest.Mock };
   let chapterService: { getChapters: jest.Mock };
+  let progressService: {
+    getStoryProgress: jest.Mock;
+    setStoryStatus: jest.Mock;
+    completeStory: jest.Mock;
+    resetStory: jest.Mock;
+  };
+  let authService: { isLoggedIn: jest.Mock };
+
+  /**
+   * Builds the readable Chapters of the Story.
+   *
+   * @returns Two Chapters, in reading order.
+   */
+  const buildChapters = (): ChapterSummary[] =>
+    [
+      { id: 'chapter-1', slug: 'chapter-one', title: 'Chapter One' },
+      { id: 'chapter-2', slug: 'chapter-two', title: 'Chapter Two' },
+    ] as ChapterSummary[];
+
+  /**
+   * Builds the reader's progress.
+   *
+   * @param overrides - Fields to change.
+   * @returns The progress.
+   */
+  const buildProgress = (
+    overrides: Partial<StoryProgress> = {},
+  ): StoryProgress =>
+    ({
+      storyId: 'story-1',
+      status: ReaderStoryStatus.IN_PROGRESS,
+      totalChapters: 2,
+      readChapters: 1,
+      percentComplete: 50,
+      newChapterCount: 0,
+      continueChapterId: 'chapter-2',
+      lastReadChapterId: 'chapter-1',
+      lastReadAt: null,
+      completedAt: null,
+      ...overrides,
+    }) as StoryProgress;
 
   /**
    * Builds a Story for the page.
@@ -49,6 +98,13 @@ describe('StoryDetailComponent', () => {
   beforeEach(() => {
     storyService = { getStory: jest.fn().mockReturnValue(of(buildStory())) };
     chapterService = { getChapters: jest.fn().mockReturnValue(of([])) };
+    progressService = {
+      getStoryProgress: jest.fn().mockReturnValue(of(buildProgress())),
+      setStoryStatus: jest.fn().mockReturnValue(of(buildProgress())),
+      completeStory: jest.fn().mockReturnValue(of(buildProgress())),
+      resetStory: jest.fn().mockReturnValue(of(buildProgress())),
+    };
+    authService = { isLoggedIn: jest.fn().mockReturnValue(true) };
 
     TestBed.configureTestingModule({
       imports: [StoryDetailComponent],
@@ -56,6 +112,8 @@ describe('StoryDetailComponent', () => {
         provideRouter([]),
         { provide: StoryService, useValue: storyService },
         { provide: ChapterService, useValue: chapterService },
+        { provide: ProgressService, useValue: progressService },
+        { provide: AuthService, useValue: authService },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -231,5 +289,209 @@ describe('StoryDetailComponent', () => {
     expect(fixture.componentInstance.errorMessage).toContain(
       'could not be read',
     );
+  });
+
+  describe("the reader's own progress", () => {
+    beforeEach(() => {
+      chapterService.getChapters.mockReturnValue(of(buildChapters()));
+    });
+
+    it('shows how far the reader has got', () => {
+      const element = render();
+
+      expect(element.textContent).toContain('1 of 2 Chapters read');
+      expect(element.textContent).toContain('In progress');
+    });
+
+    it('sends Continue Reading to the first unfinished Chapter', () => {
+      const element = render();
+      const link = element.querySelector('.storytime-story__continue');
+
+      expect(link?.textContent).toContain('Chapter Two');
+      expect(link?.getAttribute('href')).toContain('chapter-two');
+    });
+
+    // A reader who has not started should be invited in, not asked to
+    // "continue" something they have not begun.
+    it('invites a new reader to start', () => {
+      progressService.getStoryProgress.mockReturnValue(
+        of(
+          buildProgress({
+            status: ReaderStoryStatus.NOT_STARTED,
+            readChapters: 0,
+            percentComplete: 0,
+            continueChapterId: 'chapter-1',
+          }),
+        ),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('Start reading');
+      expect(element.textContent).not.toContain('Continue reading');
+    });
+
+    it('offers nothing to continue to once the Story is finished', () => {
+      progressService.getStoryProgress.mockReturnValue(
+        of(
+          buildProgress({
+            status: ReaderStoryStatus.COMPLETED,
+            readChapters: 2,
+            percentComplete: 100,
+            continueChapterId: null,
+          }),
+        ),
+      );
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-story__continue')).toBeNull();
+    });
+
+    // The Chapter list and the progress are loaded separately, so the link has
+    // to survive a progress row that names a Chapter the list does not hold.
+    it('offers nothing to continue to for an unknown Chapter', () => {
+      progressService.getStoryProgress.mockReturnValue(
+        of(buildProgress({ continueChapterId: 'chapter-nine' })),
+      );
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-story__continue')).toBeNull();
+    });
+
+    it('says when there is new content since the reader last read', () => {
+      progressService.getStoryProgress.mockReturnValue(
+        of(buildProgress({ newChapterCount: 1 })),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('1 new Chapter since');
+    });
+
+    it('counts several new Chapters', () => {
+      progressService.getStoryProgress.mockReturnValue(
+        of(buildProgress({ newChapterCount: 3 })),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('3 new Chapters since');
+    });
+
+    it('sets a status the reader chose', () => {
+      render();
+
+      fixture.componentInstance.setStatus(ReaderStoryStatus.ON_HOLD);
+
+      expect(progressService.setStoryStatus).toHaveBeenCalledWith(
+        'story-1',
+        ReaderStoryStatus.ON_HOLD,
+      );
+    });
+
+    // Offering a reader the status they already have would do nothing.
+    it('does not offer the status the Story already has', () => {
+      progressService.getStoryProgress.mockReturnValue(
+        of(buildProgress({ status: ReaderStoryStatus.ON_HOLD })),
+      );
+
+      const element = render();
+      const buttons = Array.from(element.querySelectorAll('button')).map(
+        button => button.textContent?.trim(),
+      );
+
+      expect(buttons).not.toContain('On hold');
+      expect(buttons).toContain('Abandoned');
+    });
+
+    it('marks the whole Story read', () => {
+      render();
+
+      fixture.componentInstance.completeStory();
+
+      expect(progressService.completeStory).toHaveBeenCalledWith('story-1');
+    });
+
+    it('offers no shortcut to finishing an already finished Story', () => {
+      progressService.getStoryProgress.mockReturnValue(
+        of(buildProgress({ readChapters: 2, percentComplete: 100 })),
+      );
+
+      const element = render();
+      const buttons = Array.from(element.querySelectorAll('button')).map(
+        button => button.textContent?.trim(),
+      );
+
+      expect(buttons).not.toContain('Mark whole Story read');
+    });
+
+    it('starts the Story again', () => {
+      render();
+
+      fixture.componentInstance.resetStory();
+
+      expect(progressService.resetStory).toHaveBeenCalledWith('story-1');
+    });
+
+    it('keeps what comes back from a change', () => {
+      progressService.setStoryStatus.mockReturnValue(
+        of(buildProgress({ status: ReaderStoryStatus.ABANDONED })),
+      );
+      render();
+
+      fixture.componentInstance.setStatus(ReaderStoryStatus.ABANDONED);
+
+      expect(fixture.componentInstance.progress?.status).toBe(
+        ReaderStoryStatus.ABANDONED,
+      );
+    });
+
+    // Progress is bookkeeping. A failure to load or change it must leave the
+    // Story readable rather than taking the page down.
+    it('leaves the Story readable when progress cannot be loaded', () => {
+      progressService.getStoryProgress.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('A Story');
+      expect(fixture.componentInstance.progress).toBeNull();
+    });
+
+    it('keeps the previous progress when a change fails', () => {
+      progressService.setStoryStatus.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+      render();
+
+      fixture.componentInstance.setStatus(ReaderStoryStatus.ON_HOLD);
+
+      expect(fixture.componentInstance.progress?.status).toBe(
+        ReaderStoryStatus.IN_PROGRESS,
+      );
+    });
+
+    // Progress is personal; there is none for a reader the server cannot
+    // identify.
+    describe('for a signed-out reader', () => {
+      beforeEach(() => {
+        authService.isLoggedIn.mockReturnValue(false);
+      });
+
+      it('asks for no progress', () => {
+        render();
+
+        expect(progressService.getStoryProgress).not.toHaveBeenCalled();
+      });
+
+      it('shows no progress controls', () => {
+        const element = render();
+
+        expect(element.querySelector('.storytime-story__progress')).toBeNull();
+      });
+    });
   });
 });

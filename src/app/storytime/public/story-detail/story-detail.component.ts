@@ -4,20 +4,29 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { finalize, switchMap } from 'rxjs';
+import { finalize, of, switchMap } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   ChapterSummary,
   CONTENT_RATING_DESCRIPTIONS,
   CONTENT_RATING_LABELS,
   ContentRating,
+  DELIBERATE_READER_STATUSES,
+  ReaderStoryStatus,
   Story,
+  StoryProgress,
 } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { ChapterService } from '../../chapter.service';
-import { COMPLETION_STATE_LABELS } from '../../storytime.constants';
+import { ProgressService } from '../../progress.service';
+import {
+  COMPLETION_STATE_LABELS,
+  READER_STORY_STATUS_LABELS,
+} from '../../storytime.constants';
 import { StoryService } from '../../story.service';
 
 /**
@@ -72,12 +81,23 @@ export class StoryDetailComponent implements OnInit {
   /** Completion labels. */
   readonly completionLabels = COMPLETION_STATE_LABELS;
 
+  /** The reader's own progress, once known. */
+  progress: StoryProgress | null = null;
+
+  /** Reader status labels, so a raw enum value is never shown. */
+  readonly readerStatusLabels = READER_STORY_STATUS_LABELS;
+
+  /** The statuses a reader may set for themselves. */
+  readonly deliberateStatuses = DELIBERATE_READER_STATUSES;
+
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _storyService = inject(StoryService);
   private readonly _chapterService = inject(ChapterService);
+  private readonly _progressService = inject(ProgressService);
+  private readonly _authService = inject(AuthService);
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _destroyRef = inject(DestroyRef);
 
@@ -105,6 +125,7 @@ export class StoryDetailComponent implements OnInit {
             : null;
           this.isLoading = false;
           this.loadChapters();
+          this.loadProgress();
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage =
@@ -146,5 +167,98 @@ export class StoryDetailComponent implements OnInit {
     return (
       this.story !== null && this.story.contentRating !== ContentRating.GENERAL
     );
+  }
+
+  /**
+   * Whether the reader has progress worth showing.
+   *
+   * @returns True when a signed-in reader has started this Story.
+   */
+  get hasProgress(): boolean {
+    return (
+      this.progress !== null &&
+      this.progress.status !== ReaderStoryStatus.NOT_STARTED
+    );
+  }
+
+  /**
+   * The Chapter Continue Reading should open, if any.
+   *
+   * @returns The Chapter, or null when there is nothing to continue to.
+   */
+  get continueChapter(): ChapterSummary | null {
+    const chapterId = this.progress?.continueChapterId;
+
+    return chapterId
+      ? (this.chapters.find(chapter => chapter.id === chapterId) ?? null)
+      : null;
+  }
+
+  /**
+   * Whether the reader is signed in, and so has progress at all.
+   *
+   * @returns True when progress applies.
+   */
+  get isTrackingProgress(): boolean {
+    return this._authService.isLoggedIn();
+  }
+
+  /**
+   * Sets the reader's own status for this Story.
+   *
+   * @param status - The chosen status.
+   */
+  setStatus(status: ReaderStoryStatus): void {
+    this.withStory(storyId =>
+      this._progressService.setStoryStatus(storyId, status),
+    );
+  }
+
+  /**
+   * Marks the whole Story as read.
+   */
+  completeStory(): void {
+    this.withStory(storyId => this._progressService.completeStory(storyId));
+  }
+
+  /**
+   * Discards the reader's progress and starts the Story again.
+   */
+  resetStory(): void {
+    this.withStory(storyId => this._progressService.resetStory(storyId));
+  }
+
+  /**
+   * Loads the reader's progress through this Story.
+   *
+   * Best effort throughout: a failure here leaves the Story readable without
+   * progress rather than taking the page down over bookkeeping.
+   */
+  private loadProgress(): void {
+    this.withStory(storyId => this._progressService.getStoryProgress(storyId));
+  }
+
+  /**
+   * Runs a progress request for the loaded Story and keeps what comes back.
+   *
+   * @param request - Builds the request from the Story identifier.
+   */
+  private withStory(
+    request: (storyId: string) => ReturnType<ProgressService['resetStory']>,
+  ): void {
+    if (!this.isTrackingProgress || !this.story) {
+      return;
+    }
+
+    request(this.story.id)
+      .pipe(
+        catchError(() => of(null)),
+        takeUntilDestroyed(this._destroyRef),
+      )
+      .subscribe(progress => {
+        if (progress) {
+          this.progress = progress;
+        }
+      });
   }
 }

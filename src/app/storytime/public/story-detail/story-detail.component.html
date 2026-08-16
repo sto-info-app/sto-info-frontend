@@ -53,6 +53,90 @@
         [innerHTML]="descriptionHtml"></div>
     }
 
+    @if (isTrackingProgress && progress) {
+      <section
+        class="storytime-story__progress"
+        aria-label="Your progress">
+        @if (hasProgress) {
+          <p class="storytime-story__progress-summary">
+            <span class="storytime-story__progress-status">{{
+              readerStatusLabels[progress.status]
+            }}</span>
+            — {{ progress.readChapters }} of
+            {{ progress.totalChapters }} Chapters read ({{
+              progress.percentComplete
+            }}%)
+          </p>
+
+          <div
+            class="storytime-story__progress-bar"
+            role="progressbar"
+            aria-label="Chapters read"
+            [attr.aria-valuenow]="progress.percentComplete"
+            aria-valuemin="0"
+            aria-valuemax="100">
+            <span [style.width.%]="progress.percentComplete"></span>
+          </div>
+        }
+
+        @if (progress.newChapterCount > 0) {
+          <p class="storytime-story__new-chapters">
+            {{ progress.newChapterCount }} new
+            {{ progress.newChapterCount === 1 ? 'Chapter' : 'Chapters' }} since
+            you last read.
+          </p>
+        }
+
+        <div class="storytime-story__progress-actions">
+          @if (continueChapter) {
+            <a
+              class="storytime-story__continue"
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'stories',
+                storySlug,
+                'chapters',
+                continueChapter.slug,
+              ]">
+              <i
+                class="fa-solid fa-book-open"
+                aria-hidden="true"></i>
+              {{ hasProgress ? 'Continue reading' : 'Start reading' }}:
+              {{ continueChapter.title }}
+            </a>
+          }
+
+          @for (status of deliberateStatuses; track status) {
+            @if (progress.status !== status) {
+              <button
+                type="button"
+                (click)="setStatus(status)">
+                {{ readerStatusLabels[status] }}
+              </button>
+            }
+          }
+
+          @if (progress.readChapters < progress.totalChapters) {
+            <button
+              type="button"
+              (click)="completeStory()">
+              Mark whole Story read
+            </button>
+          }
+
+          @if (hasProgress) {
+            <button
+              type="button"
+              class="storytime-story__reset"
+              (click)="resetStory()">
+              Start again
+            </button>
+          }
+        </div>
+      </section>
+    }
+
     <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Chapters</span>
     </div>
