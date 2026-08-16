@@ -88,6 +88,56 @@
     </div>
   </form>
 
+  @if (!isNew) {
+    <section class="storytime-editor__media">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Videos</span>
+      </div>
+
+      @if (mediaErrorMessage) {
+        <app-lcars-error-message
+          title="Video unavailable"
+          [message]="mediaErrorMessage"></app-lcars-error-message>
+      }
+
+      <label for="chapter-media-url">Paste a YouTube link</label>
+      <input
+        id="chapter-media-url"
+        type="url"
+        [(ngModel)]="mediaUrl"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="https://www.youtube.com/watch?v=..." />
+      <p class="field-hint">
+        Only the video is saved, never the link. Readers see a still image until
+        they press play, so nothing loads from YouTube before then.
+      </p>
+      <button
+        type="button"
+        (click)="addMedia()">
+        Add video
+      </button>
+
+      @if (media.length > 0) {
+        <ul class="storytime-editor__media-list">
+          @for (video of media; track video.id) {
+            <li>
+              <img
+                class="storytime-editor__media-thumbnail"
+                [src]="video.thumbnailUrl"
+                alt="" />
+              <span>{{ video.title ?? video.externalId }}</span>
+              <button
+                type="button"
+                (click)="removeMedia(video)">
+                Remove
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+
   @if (!isNew && cast.length > 0) {
     <section class="storytime-editor__cast">
       <div class="lcars-text-bar small-lcars-bar-gap">

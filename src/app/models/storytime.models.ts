@@ -278,6 +278,47 @@ export interface ChapterWithNavigation {
 }
 
 /**
+ * Where an embedded video lives.
+ */
+export enum MediaProvider {
+  YOUTUBE = 'YOUTUBE',
+}
+
+/**
+ * A video embedded in a Chapter.
+ *
+ * The embed URL and thumbnail are built by the server from stored identifiers,
+ * so nothing a creator typed is ever loaded as a URL. The reader page shows
+ * the still and only loads the embed when somebody asks for it.
+ */
+export interface ChapterMedia {
+  id: string;
+  chapterId: string;
+  provider: MediaProvider;
+  externalId: string;
+  embedUrl: string;
+  thumbnailUrl: string;
+  title: string | null;
+  caption: string | null;
+  startSeconds: number | null;
+  endSeconds: number | null;
+  isPrimary: boolean;
+  orderIndex: number;
+}
+
+/**
+ * The fields a creator may send when adding a video.
+ */
+export interface AddChapterMediaRequest {
+  url: string;
+  startSeconds?: number;
+  endSeconds?: number;
+  title?: string;
+  caption?: string;
+  isPrimary?: boolean;
+}
+
+/**
  * Where a collaboration invitation has got to.
  *
  * Only `ACCEPTED` grants anything: an invitation nobody has answered lets its

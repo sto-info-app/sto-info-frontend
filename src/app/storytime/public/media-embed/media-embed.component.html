@@ -1,0 +1,52 @@
+<figure class="storytime-media">
+  @if (isPlaying) {
+    <iframe
+      class="storytime-media__player"
+      [src]="embedSource"
+      [title]="label"
+      allow="
+        accelerometer;
+        autoplay;
+        clipboard-write;
+        encrypted-media;
+        gyroscope;
+        picture-in-picture;
+      "
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen></iframe>
+  } @else {
+    <button
+      type="button"
+      class="storytime-media__poster"
+      (click)="play()">
+      <img
+        class="storytime-media__thumbnail"
+        [src]="media.thumbnailUrl"
+        alt=""
+        loading="lazy" />
+      <span
+        class="storytime-media__play"
+        aria-hidden="true">
+        <i class="fa-solid fa-play"></i>
+      </span>
+      <span class="visually-hidden">Play {{ label }}</span>
+    </button>
+  }
+
+  @if (media.title || media.caption) {
+    <figcaption class="storytime-media__caption">
+      @if (media.title) {
+        <span class="storytime-media__title">{{ media.title }}</span>
+      }
+      @if (media.caption) {
+        <span class="storytime-media__notes">{{ media.caption }}</span>
+      }
+    </figcaption>
+  }
+
+  @if (!isPlaying) {
+    <p class="storytime-media__privacy">
+      Nothing is loaded from YouTube until you press play.
+    </p>
+  }
+</figure>

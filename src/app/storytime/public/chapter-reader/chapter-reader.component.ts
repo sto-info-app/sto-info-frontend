@@ -18,6 +18,7 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   Chapter,
   ChapterLink,
+  ChapterMedia,
   ChapterProgressUpdate,
   ReaderChapterStatus,
   StoryProgress,
@@ -26,7 +27,9 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { ChapterService } from '../../chapter.service';
+import { MediaService } from '../../media.service';
 import { ProgressService } from '../../progress.service';
+import { MediaEmbedComponent } from '../media-embed/media-embed.component';
 import { PROGRESS_WRITE_DEBOUNCE_MS } from '../../storytime.constants';
 import { resolveReadingPosition } from '../../reading-position.utility';
 
@@ -51,6 +54,7 @@ import { resolveReadingPosition } from '../../reading-position.utility';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    MediaEmbedComponent,
   ],
 })
 export class ChapterReaderComponent implements OnInit {
@@ -84,6 +88,9 @@ export class ChapterReaderComponent implements OnInit {
   /** Where the reader left off, offered rather than jumped to. */
   resumeBlockId: string | null = null;
 
+  /** The videos embedded in this Chapter, in order. */
+  media: ChapterMedia[] = [];
+
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
 
@@ -93,6 +100,7 @@ export class ChapterReaderComponent implements OnInit {
   private readonly _route = inject(ActivatedRoute);
   private readonly _chapterService = inject(ChapterService);
   private readonly _progressService = inject(ProgressService);
+  private readonly _mediaService = inject(MediaService);
   private readonly _authService = inject(AuthService);
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _destroyRef = inject(DestroyRef);
@@ -155,6 +163,9 @@ export class ChapterReaderComponent implements OnInit {
             : null;
           this.isLoading = false;
           this.loadProgress();
+          // Taken from the Chapter rather than the route, so a request that
+          // arrived by a retired slug still asks for the right videos.
+          this.loadMedia(result.chapter.slug);
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage =
@@ -283,10 +294,32 @@ export class ChapterReaderComponent implements OnInit {
   }
 
   /**
+   * Loads the videos embedded in this Chapter.
+   *
+   * Silently: most Chapters have no video at all, and a failure here must
+   * leave the writing readable rather than taking the page down. The server
+   * already returns nothing when embedding is switched off.
+   *
+   * @param chapterSlug - The Chapter slug from the route.
+   */
+  private loadMedia(chapterSlug: string): void {
+    this._mediaService
+      .getChapterMedia(this.storySlug, chapterSlug)
+      .pipe(
+        catchError(() => of([] as ChapterMedia[])),
+        takeUntilDestroyed(this._destroyRef),
+      )
+      .subscribe(media => {
+        this.media = media;
+      });
+  }
+
+  /**
    * Forgets the previous Chapter's progress before another one loads.
    */
   private resetProgress(): void {
     this.isRead = false;
     this.resumeBlockId = null;
+    this.media = [];
   }
 }

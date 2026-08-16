@@ -4,11 +4,13 @@ import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import {
   ChapterAppearance,
+  ChapterMedia,
   ManagedChapter,
   ManagedCharacter,
 } from 'src/app/models/storytime.models';
 import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
+import { MediaService } from '../../media.service';
 import { StorytimeService } from '../../storytime.service';
 import { ChapterEditorComponent } from './chapter-editor.component';
 
@@ -23,6 +25,11 @@ describe('ChapterEditorComponent', () => {
     getMyCharacters: jest.Mock;
     getAppearances: jest.Mock;
     setAppearances: jest.Mock;
+  };
+  let mediaService: {
+    getMyChapterMedia: jest.Mock;
+    addMedia: jest.Mock;
+    removeMedia: jest.Mock;
   };
   let storytimeService: { getLanguages: jest.Mock };
   let router: { navigate: jest.Mock };
@@ -55,6 +62,11 @@ describe('ChapterEditorComponent', () => {
       createChapter: jest.fn().mockReturnValue(of({ id: 'new-chapter' })),
       updateChapter: jest.fn().mockReturnValue(of(existingChapter)),
     };
+    mediaService = {
+      getMyChapterMedia: jest.fn().mockReturnValue(of([])),
+      addMedia: jest.fn().mockReturnValue(of({ id: 'media-1' })),
+      removeMedia: jest.fn().mockReturnValue(of(undefined)),
+    };
     characterService = {
       getMyCharacters: jest.fn().mockReturnValue(
         of([
@@ -78,6 +90,7 @@ describe('ChapterEditorComponent', () => {
         provideRouter([]),
         { provide: ChapterService, useValue: chapterService },
         { provide: CharacterService, useValue: characterService },
+        { provide: MediaService, useValue: mediaService },
         { provide: StorytimeService, useValue: storytimeService },
         { provide: Router, useValue: router },
         {
@@ -256,6 +269,163 @@ describe('ChapterEditorComponent', () => {
       expect(fixture.componentInstance.errorMessage).toContain(
         'could not be saved',
       );
+    });
+  });
+
+  describe('videos', () => {
+    /**
+     * Renders the editor for an existing Chapter, where videos can exist.
+     */
+    const renderExisting = (): void => {
+      routeParams.set('chapterId', 'chapter-1');
+      render();
+    };
+
+    /**
+     * Builds a saved video.
+     *
+     * @param id - The video identifier.
+     * @returns The video.
+     */
+    const buildMedia = (id = 'media-1') =>
+      ({
+        id,
+        chapterId: 'chapter-1',
+        externalId: 'dQw4w9WgXcQ',
+        thumbnailUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+        title: 'The escape',
+      }) as ChapterMedia;
+
+    it('lists the videos already on the Chapter', () => {
+      mediaService.getMyChapterMedia.mockReturnValue(of([buildMedia()]));
+
+      renderExisting();
+
+      expect(fixture.componentInstance.media).toHaveLength(1);
+      expect(mediaService.getMyChapterMedia).toHaveBeenCalledWith('chapter-1');
+    });
+
+    // The URL is sent whole and parsed on the server, so the client never has
+    // to guess at what a valid YouTube link looks like.
+    it('sends the pasted link as it stands', () => {
+      renderExisting();
+      fixture.componentInstance.mediaUrl = '  https://youtu.be/dQw4w9WgXcQ  ';
+
+      fixture.componentInstance.addMedia();
+
+      expect(mediaService.addMedia).toHaveBeenCalledWith('chapter-1', {
+        url: 'https://youtu.be/dQw4w9WgXcQ',
+      });
+    });
+
+    it('clears the box once the video is added', () => {
+      renderExisting();
+      fixture.componentInstance.mediaUrl = 'https://youtu.be/dQw4w9WgXcQ';
+
+      fixture.componentInstance.addMedia();
+
+      expect(fixture.componentInstance.mediaUrl).toBe('');
+      expect(fixture.componentInstance.media).toHaveLength(1);
+    });
+
+    it('does nothing with an empty box', () => {
+      renderExisting();
+
+      fixture.componentInstance.addMedia();
+
+      expect(mediaService.addMedia).not.toHaveBeenCalled();
+    });
+
+    // A Chapter has to exist before a video can hang off it.
+    it('does nothing for a Chapter that has not been saved yet', () => {
+      render();
+      fixture.componentInstance.mediaUrl = 'https://youtu.be/dQw4w9WgXcQ';
+
+      fixture.componentInstance.addMedia();
+
+      expect(mediaService.addMedia).not.toHaveBeenCalled();
+    });
+
+    // The server explains what was wrong with the link, and repeating that
+    // beats a generic apology.
+    it('shows the reason the server gave', () => {
+      mediaService.addMedia.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: { message: 'That does not look like a YouTube link.' },
+            }),
+        ),
+      );
+      renderExisting();
+      fixture.componentInstance.mediaUrl = 'https://example.test/nope';
+
+      fixture.componentInstance.addMedia();
+
+      expect(fixture.componentInstance.mediaErrorMessage).toBe(
+        'That does not look like a YouTube link.',
+      );
+    });
+
+    it('falls back to a plain message when the server gave no reason', () => {
+      mediaService.addMedia.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+      renderExisting();
+      fixture.componentInstance.mediaUrl = 'https://youtu.be/dQw4w9WgXcQ';
+
+      fixture.componentInstance.addMedia();
+
+      expect(fixture.componentInstance.mediaErrorMessage).toContain(
+        'could not be added',
+      );
+    });
+
+    it('removes a video', () => {
+      mediaService.getMyChapterMedia.mockReturnValue(of([buildMedia()]));
+      renderExisting();
+
+      fixture.componentInstance.removeMedia(buildMedia());
+
+      expect(mediaService.removeMedia).toHaveBeenCalledWith('media-1');
+      expect(fixture.componentInstance.media).toEqual([]);
+    });
+
+    it('keeps the other videos when removing one', () => {
+      mediaService.getMyChapterMedia.mockReturnValue(
+        of([buildMedia('media-1'), buildMedia('media-2')]),
+      );
+      renderExisting();
+
+      fixture.componentInstance.removeMedia(buildMedia('media-1'));
+
+      expect(fixture.componentInstance.media).toHaveLength(1);
+    });
+
+    it('explains a video that could not be removed', () => {
+      mediaService.removeMedia.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+      renderExisting();
+
+      fixture.componentInstance.removeMedia(buildMedia());
+
+      expect(fixture.componentInstance.mediaErrorMessage).toContain(
+        'could not be removed',
+      );
+    });
+
+    // A Chapter with no video at all is the normal case.
+    it('leaves the writing editable when the videos cannot be loaded', () => {
+      mediaService.getMyChapterMedia.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      renderExisting();
+
+      expect(fixture.componentInstance.media).toEqual([]);
+      expect(fixture.componentInstance.errorMessage).toBe('');
     });
   });
 

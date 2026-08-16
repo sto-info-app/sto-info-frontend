@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   FormGroup,
+  FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
@@ -13,6 +14,7 @@ import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import {
   ChapterAppearance,
+  ChapterMedia,
   ManagedChapter,
   ManagedCharacter,
   StorytimeLanguage,
@@ -22,6 +24,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
+import { MediaService } from '../../media.service';
 import { StorytimeService } from '../../storytime.service';
 
 /**
@@ -36,6 +39,7 @@ import { StorytimeService } from '../../storytime.service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     RouterModule,
     LoadingBarComponent,
@@ -76,6 +80,15 @@ export class ChapterEditorComponent implements OnInit {
   /** A message to show when the cast could not be saved. */
   castErrorMessage = '';
 
+  /** The videos embedded in this Chapter, in order. */
+  media: ChapterMedia[] = [];
+
+  /** The share URL a creator has pasted but not yet added. */
+  mediaUrl = '';
+
+  /** A message to show when a video could not be added. */
+  mediaErrorMessage = '';
+
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
 
@@ -84,6 +97,7 @@ export class ChapterEditorComponent implements OnInit {
   private readonly _router = inject(Router);
   private readonly _chapterService = inject(ChapterService);
   private readonly _characterService = inject(CharacterService);
+  private readonly _mediaService = inject(MediaService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _destroyRef = inject(DestroyRef);
 
@@ -112,6 +126,7 @@ export class ChapterEditorComponent implements OnInit {
     if (chapterId) {
       this.loadChapter(chapterId);
       this.loadAppearances(chapterId);
+      this.loadMedia(chapterId);
     }
 
     this.loadCast();
@@ -176,6 +191,79 @@ export class ChapterEditorComponent implements OnInit {
             'The cast could not be saved. Please try again shortly.';
           this.isSavingCast = false;
         },
+      });
+  }
+
+  /**
+   * Adds the pasted video to this Chapter.
+   *
+   * The URL is sent whole and parsed on the server, so a creator can paste
+   * whatever the Share button gave them and the client never has to guess at
+   * what a valid YouTube link looks like.
+   */
+  addMedia(): void {
+    const chapterId = this.chapter?.id;
+    const url = this.mediaUrl.trim();
+
+    if (!chapterId || url.length === 0) {
+      return;
+    }
+
+    this.mediaErrorMessage = '';
+
+    this._mediaService
+      .addMedia(chapterId, { url })
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: media => {
+          this.media = [...this.media, media];
+          this.mediaUrl = '';
+        },
+        error: (error: HttpErrorResponse) => {
+          this.mediaErrorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'That video could not be added. Please try again shortly.';
+        },
+      });
+  }
+
+  /**
+   * Removes a video from this Chapter.
+   *
+   * @param media - The video to remove.
+   */
+  removeMedia(media: ChapterMedia): void {
+    this._mediaService
+      .removeMedia(media.id)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: () => {
+          this.media = this.media.filter(entry => entry.id !== media.id);
+        },
+        error: () => {
+          this.mediaErrorMessage =
+            'That video could not be removed. Please try again shortly.';
+        },
+      });
+  }
+
+  /**
+   * Loads the videos already on this Chapter.
+   *
+   * Silently: a Chapter with no videos is the normal case, and a failure here
+   * must leave the writing editable.
+   *
+   * @param chapterId - The Chapter.
+   */
+  private loadMedia(chapterId: string): void {
+    this._mediaService
+      .getMyChapterMedia(chapterId)
+      .pipe(
+        catchError(() => of([] as ChapterMedia[])),
+        takeUntilDestroyed(this._destroyRef),
+      )
+      .subscribe(media => {
+        this.media = media;
       });
   }
 

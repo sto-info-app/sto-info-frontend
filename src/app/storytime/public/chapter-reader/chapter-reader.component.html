@@ -68,6 +68,16 @@
       <p class="storytime-empty">This Chapter has no content yet.</p>
     }
 
+    @if (media.length > 0) {
+      <section
+        class="storytime-chapter__media"
+        aria-label="Videos">
+        @for (video of media; track video.id) {
+          <app-media-embed [media]="video"></app-media-embed>
+        }
+      </section>
+    }
+
     @if (isTrackingProgress) {
       <div class="storytime-chapter__progress">
         <button

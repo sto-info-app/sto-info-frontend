@@ -15,6 +15,7 @@ import {
   StoryProgress,
 } from 'src/app/models/storytime.models';
 import { ChapterService } from '../../chapter.service';
+import { MediaService } from '../../media.service';
 import { ProgressService } from '../../progress.service';
 import { PROGRESS_WRITE_DEBOUNCE_MS } from '../../storytime.constants';
 import { ChapterReaderComponent } from './chapter-reader.component';
@@ -28,6 +29,7 @@ describe('ChapterReaderComponent', () => {
     setChapterRead: jest.Mock;
   };
   let authService: { isLoggedIn: jest.Mock };
+  let mediaService: { getChapterMedia: jest.Mock };
   let params: BehaviorSubject<Map<string, string>>;
 
   /**
@@ -143,6 +145,7 @@ describe('ChapterReaderComponent', () => {
       setChapterRead: jest.fn().mockReturnValue(of(buildStoryProgress())),
     };
     authService = { isLoggedIn: jest.fn().mockReturnValue(true) };
+    mediaService = { getChapterMedia: jest.fn().mockReturnValue(of([])) };
 
     TestBed.configureTestingModule({
       imports: [ChapterReaderComponent],
@@ -151,6 +154,7 @@ describe('ChapterReaderComponent', () => {
         { provide: ChapterService, useValue: chapterService },
         { provide: ProgressService, useValue: progressService },
         { provide: AuthService, useValue: authService },
+        { provide: MediaService, useValue: mediaService },
         {
           provide: ActivatedRoute,
           useValue: { paramMap: params, snapshot: { paramMap: new Map() } },
@@ -295,6 +299,83 @@ describe('ChapterReaderComponent', () => {
     expect(fixture.componentInstance.errorMessage).toContain(
       'could not be read',
     );
+  });
+
+  describe('embedded videos', () => {
+    /**
+     * Builds a video on this Chapter.
+     *
+     * @returns The video.
+     */
+    const buildMedia = () =>
+      ({
+        id: 'media-1',
+        chapterId: 'chapter-1',
+        embedUrl: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
+        thumbnailUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+        title: 'The escape',
+        caption: null,
+      }) as never;
+
+    it('shows the videos on the Chapter', () => {
+      mediaService.getChapterMedia.mockReturnValue(of([buildMedia()]));
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-chapter__media')).not.toBeNull();
+      expect(element.textContent).toContain('The escape');
+    });
+
+    // Nothing is loaded from YouTube until the reader asks for it.
+    it('loads no iframe until the reader presses play', () => {
+      mediaService.getChapterMedia.mockReturnValue(of([buildMedia()]));
+
+      const element = render();
+
+      expect(element.querySelector('iframe')).toBeNull();
+    });
+
+    it('asks for the Chapter’s videos by its slugs', () => {
+      render();
+
+      expect(mediaService.getChapterMedia).toHaveBeenCalledWith(
+        'a-story',
+        'chapter-one',
+      );
+    });
+
+    // Most Chapters have no video at all.
+    it('shows no media section when there are none', () => {
+      const element = render();
+
+      expect(element.querySelector('.storytime-chapter__media')).toBeNull();
+    });
+
+    it('leaves the writing readable when the videos cannot be loaded', () => {
+      mediaService.getChapterMedia.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('The Enterprise went to warp.');
+      expect(fixture.componentInstance.media).toEqual([]);
+    });
+
+    it('forgets the previous Chapter’s videos when moving on', () => {
+      mediaService.getChapterMedia.mockReturnValueOnce(of([buildMedia()]));
+      render();
+
+      mediaService.getChapterMedia.mockReturnValue(of([]));
+      params.next(
+        new Map([
+          ['storySlug', 'a-story'],
+          ['chapterSlug', 'chapter-two'],
+        ]),
+      );
+
+      expect(fixture.componentInstance.media).toEqual([]);
+    });
   });
 
   describe('recording where the reader is', () => {
