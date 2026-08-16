@@ -57,8 +57,42 @@
       <span>Chapters</span>
     </div>
 
-    <p class="storytime-empty">
-      Chapters for this Story will appear here once they are published.
-    </p>
+    @if (chapterErrorMessage) {
+      <app-lcars-error-message
+        title="Chapters unavailable"
+        [message]="chapterErrorMessage"></app-lcars-error-message>
+    } @else if (chapters.length === 0) {
+      <p class="storytime-empty">
+        No Chapters have been published for this Story yet.
+      </p>
+    } @else {
+      <ol class="storytime-chapter-list">
+        @for (chapter of chapters; track chapter.id) {
+          <li>
+            <a
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'stories',
+                storySlug,
+                'chapters',
+                chapter.slug,
+              ]">
+              {{ chapter.title }}
+            </a>
+            @if (chapter.synopsis) {
+              <p class="storytime-chapter-list__synopsis">
+                {{ chapter.synopsis }}
+              </p>
+            }
+            @if (chapter.estimatedReadingMinutes) {
+              <span class="storytime-chapter-list__meta">
+                {{ chapter.estimatedReadingMinutes }} min read
+              </span>
+            }
+          </li>
+        }
+      </ol>
+    }
   </article>
 }

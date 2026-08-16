@@ -69,6 +69,43 @@ export const STORYTIME_ROUTES: Routes = [
       },
 
       {
+        path: 'manage/stories/:storyId/chapters',
+        loadComponent: () =>
+          import('./creator/chapter-list/chapter-list.component').then(
+            m => m.ChapterListComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_MANAGE_CHAPTERS,
+          permission: PERMISSIONS.STORYTIME_STORY_EDIT_OWN,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+      {
+        path: 'manage/stories/:storyId/chapters/new',
+        loadComponent: () =>
+          import('./creator/chapter-editor/chapter-editor.component').then(
+            m => m.ChapterEditorComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_CHAPTER_NEW,
+          permission: PERMISSIONS.STORYTIME_STORY_EDIT_OWN,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+      {
+        path: 'manage/chapters/:chapterId',
+        loadComponent: () =>
+          import('./creator/chapter-editor/chapter-editor.component').then(
+            m => m.ChapterEditorComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_CHAPTER_EDIT,
+          permission: PERMISSIONS.STORYTIME_STORY_EDIT_OWN,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+
+      {
         path: 'stories',
         loadComponent: () =>
           import('./public/story-list/story-list.component').then(
@@ -83,6 +120,14 @@ export const STORYTIME_ROUTES: Routes = [
             m => m.StoryDetailComponent,
           ),
         data: { title: APP_ROUTE_TITLES.STORYTIME_STORY },
+      },
+      {
+        path: 'stories/:storySlug/chapters/:chapterSlug',
+        loadComponent: () =>
+          import('./public/chapter-reader/chapter-reader.component').then(
+            m => m.ChapterReaderComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_CHAPTER },
       },
     ],
   },

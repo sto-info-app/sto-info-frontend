@@ -89,6 +89,7 @@ export const API_URLS = {
   STORYTIME_ADMIN_CONFIGURATION: apiUrl + '/admin/storytime/configuration',
   STORYTIME_STORIES: apiUrl + '/storytime/stories',
   STORYTIME_MANAGE_STORIES: apiUrl + '/storytime/manage/stories',
+  STORYTIME_MANAGE_CHAPTERS: apiUrl + '/storytime/manage/chapters',
 
   // News
   NEWS: apiUrl + '/news',

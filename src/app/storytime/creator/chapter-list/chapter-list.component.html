@@ -1,0 +1,106 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Chapters"></app-loading-bar>
+}
+
+<div id="storytime-chapter-list-page">
+  <h1>Chapters</h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Action failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <div class="storytime-chapter-list__actions">
+    <a
+      [routerLink]="[
+        '/',
+        appRoutes.STORYTIME,
+        'manage',
+        'stories',
+        storyId,
+        'chapters',
+        'new',
+      ]">
+      <i
+        class="fa-solid fa-plus"
+        aria-hidden="true"></i>
+      Add a Chapter
+    </a>
+    <a
+      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', storyId]"
+      >Back to the Story</a
+    >
+  </div>
+
+  @if (!isLoading && chapters.length === 0) {
+    <p class="storytime-empty">
+      This Story has no Chapters yet. A Story needs at least one published
+      Chapter before it can be published itself.
+    </p>
+  }
+
+  <ol class="storytime-chapter-list">
+    @for (chapter of chapters; track chapter.id) {
+      <li class="storytime-chapter-list__item">
+        <h2>
+          <a
+            [routerLink]="[
+              '/',
+              appRoutes.STORYTIME,
+              'manage',
+              'chapters',
+              chapter.id,
+            ]"
+            >{{ chapter.title }}</a
+          >
+        </h2>
+
+        @if (chapter.moderationStatus === 'REMOVED') {
+          <p class="storytime-chapter-list__removed">
+            <i
+              class="fa-solid fa-ban"
+              aria-hidden="true"></i>
+            This Chapter has been removed by an administrator.
+            @if (chapter.moderationMessage) {
+              <span>{{ chapter.moderationMessage }}</span>
+            }
+          </p>
+        }
+
+        <ul class="storytime-chapter-list__meta">
+          <li>
+            <span class="visually-hidden">Status: </span>
+            {{ statusLabels[chapter.status] }}
+          </li>
+          <li>{{ chapter.wordCount }} words</li>
+          @if (chapter.scheduledPublishAt) {
+            <li>
+              <i
+                class="fa-solid fa-clock"
+                aria-hidden="true"></i>
+              Scheduled for
+              {{ chapter.scheduledPublishAt | date: 'medium' }} (UTC)
+            </li>
+          }
+        </ul>
+
+        <div class="storytime-chapter-list__item-actions">
+          @if (canPublish(chapter)) {
+            <button
+              type="button"
+              (click)="publish(chapter)">
+              Publish
+            </button>
+          } @else {
+            <button
+              type="button"
+              (click)="unpublish(chapter)">
+              Unpublish
+            </button>
+          }
+        </div>
+      </li>
+    }
+  </ol>
+</div>

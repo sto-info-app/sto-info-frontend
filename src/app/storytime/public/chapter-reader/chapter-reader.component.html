@@ -1,0 +1,97 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Chapter"></app-loading-bar>
+}
+
+@if (errorMessage) {
+  <app-lcars-error-message
+    title="Chapter unavailable"
+    [message]="errorMessage"></app-lcars-error-message>
+}
+
+@if (chapter) {
+  <article
+    id="storytime-chapter-reader-page"
+    [attr.lang]="chapter.languageCode">
+    <nav
+      class="storytime-chapter__breadcrumb"
+      aria-label="Breadcrumb">
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', storySlug]"
+        >Back to the Story</a
+      >
+    </nav>
+
+    @if (chapter.coverImageUrl) {
+      <img
+        class="storytime-chapter__cover"
+        [src]="chapter.coverImageUrl"
+        [alt]="chapter.coverImageAlt ?? ''" />
+    }
+
+    <h1>{{ chapter.title }}</h1>
+
+    @if (chapter.synopsis) {
+      <p class="storytime-chapter__synopsis">{{ chapter.synopsis }}</p>
+    }
+
+    <ul class="storytime-chapter__meta">
+      @if (chapter.estimatedReadingMinutes) {
+        <li>
+          <i
+            class="fa-solid fa-clock"
+            aria-hidden="true"></i>
+          {{ chapter.estimatedReadingMinutes }} min read
+        </li>
+      }
+      <li>{{ chapter.wordCount }} words</li>
+    </ul>
+
+    @if (contentHtml) {
+      <div
+        class="storytime-chapter__body"
+        [innerHTML]="contentHtml"></div>
+    } @else {
+      <p class="storytime-empty">This Chapter has no content yet.</p>
+    }
+
+    <nav
+      class="storytime-chapter__navigation"
+      aria-label="Chapter navigation">
+      @if (previous) {
+        <a
+          class="storytime-chapter__previous"
+          [routerLink]="[
+            '/',
+            appRoutes.STORYTIME,
+            'stories',
+            storySlug,
+            'chapters',
+            previous.slug,
+          ]">
+          <i
+            class="fa-solid fa-chevron-left"
+            aria-hidden="true"></i>
+          <span class="visually-hidden">Previous Chapter: </span>
+          {{ previous.title }}
+        </a>
+      }
+      @if (next) {
+        <a
+          class="storytime-chapter__next"
+          [routerLink]="[
+            '/',
+            appRoutes.STORYTIME,
+            'stories',
+            storySlug,
+            'chapters',
+            next.slug,
+          ]">
+          <span class="visually-hidden">Next Chapter: </span>
+          {{ next.title }}
+          <i
+            class="fa-solid fa-chevron-right"
+            aria-hidden="true"></i>
+        </a>
+      }
+    </nav>
+  </article>
+}

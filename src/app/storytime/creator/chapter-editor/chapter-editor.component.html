@@ -1,0 +1,90 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Chapter"></app-loading-bar>
+}
+
+<div id="storytime-chapter-editor-page">
+  <h1>{{ isNew ? 'Write a Chapter' : 'Edit Chapter' }}</h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Could not save"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="save()">
+    <label for="chapter-title">Title</label>
+    <input
+      id="chapter-title"
+      type="text"
+      formControlName="title"
+      maxlength="200"
+      required />
+    @if (form.controls['title'].touched && form.controls['title'].invalid) {
+      <p class="field-error">A title is required.</p>
+    }
+
+    <label for="chapter-slug">URL slug</label>
+    <input
+      id="chapter-slug"
+      type="text"
+      formControlName="slug"
+      maxlength="220" />
+    <p class="field-hint">
+      Leave blank to build one from the title. Changing it keeps the old address
+      working.
+    </p>
+
+    <label for="chapter-synopsis">Synopsis</label>
+    <textarea
+      id="chapter-synopsis"
+      formControlName="synopsis"
+      rows="3"
+      maxlength="1000"></textarea>
+    <p class="field-hint">Shown in the Chapter list.</p>
+
+    <label for="chapter-content">Chapter</label>
+    <textarea
+      id="chapter-content"
+      formControlName="contentSource"
+      rows="24"></textarea>
+    <p class="field-hint">
+      Markdown is supported. Links to other sites are not shown, and a Chapter
+      needs some content before it can be published.
+    </p>
+
+    <label for="chapter-language">Language</label>
+    <select
+      id="chapter-language"
+      formControlName="languageCode">
+      <option value="">Same as the Story</option>
+      @for (language of languages; track language.code) {
+        <option [value]="language.code">{{ language.name }}</option>
+      }
+    </select>
+    <p class="field-hint">
+      Only set this when the Chapter is written in a different language from the
+      rest of the Story.
+    </p>
+
+    <div class="storytime-editor__actions">
+      <button
+        type="submit"
+        [disabled]="isSaving">
+        {{ isSaving ? 'Saving…' : 'Save' }}
+      </button>
+      <a
+        [routerLink]="[
+          '/',
+          appRoutes.STORYTIME,
+          'manage',
+          'stories',
+          storyId,
+          'chapters',
+        ]"
+        >Cancel</a
+      >
+    </div>
+  </form>
+</div>

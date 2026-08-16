@@ -201,3 +201,93 @@ export interface StoryRequest {
   /** Sent on update so a stale edit is rejected rather than overwriting. */
   version?: number;
 }
+
+/**
+ * Where a creator has got to with a Chapter.
+ */
+export enum ChapterStatus {
+  DRAFT = 'DRAFT',
+  IN_REVIEW = 'IN_REVIEW',
+  SCHEDULED = 'SCHEDULED',
+  PUBLISHED = 'PUBLISHED',
+  UNPUBLISHED = 'UNPUBLISHED',
+  ARCHIVED = 'ARCHIVED',
+}
+
+/**
+ * A Chapter summarised for a list.
+ */
+export interface ChapterSummary {
+  id: string;
+  slug: string;
+  title: string;
+  synopsis: string | null;
+  orderIndex: number;
+  wordCount: number;
+  estimatedReadingMinutes: number | null;
+  coverImageThumbnailUrl: string | null;
+  coverImageAlt: string | null;
+  publishedAt: string | null;
+}
+
+/**
+ * A Chapter as a reader sees it, with its body.
+ */
+export interface Chapter extends ChapterSummary {
+  storyId: string;
+  contentHtml: string | null;
+  /** Resolved from the Chapter or its Story, ready for a lang attribute. */
+  languageCode: string;
+  coverImageUrl: string | null;
+  rating: number;
+}
+
+/**
+ * A Chapter as its creator manages it.
+ */
+export interface ManagedChapter extends Chapter {
+  status: ChapterStatus;
+  contentSource: string;
+  /**
+   * The language the creator set on this Chapter, or null when it follows the
+   * Story. Distinct from languageCode, which is the resolved value a reader
+   * sees — binding an editor to that would silently pin an inherited language.
+   */
+  ownLanguageCode: string | null;
+  scheduledPublishAt: string | null;
+  version: number;
+  moderationStatus: StorytimeModerationStatus;
+  moderationMessage: string | null;
+}
+
+/**
+ * A neighbouring Chapter, for previous/next navigation.
+ */
+export interface ChapterLink {
+  slug: string;
+  title: string;
+}
+
+/**
+ * A Chapter with the links either side of it.
+ */
+export interface ChapterWithNavigation {
+  chapter: Chapter;
+  previous: ChapterLink | null;
+  next: ChapterLink | null;
+}
+
+/**
+ * The fields a creator may send when creating or editing a Chapter.
+ */
+export interface ChapterRequest {
+  title?: string;
+  slug?: string;
+  synopsis?: string;
+  contentSource?: string;
+  languageCode?: string;
+  coverImageId?: string;
+  coverImageAlt?: string;
+  /** Sent on update so a stale edit is refused rather than overwriting. */
+  version?: number;
+}

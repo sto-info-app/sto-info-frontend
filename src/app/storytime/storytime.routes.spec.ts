@@ -63,6 +63,9 @@ describe('STORYTIME_ROUTES', () => {
       'manage/stories',
       'manage/stories/new',
       'manage/stories/:storyId',
+      'manage/stories/:storyId/chapters',
+      'manage/stories/:storyId/chapters/new',
+      'manage/chapters/:chapterId',
     ];
 
     it.each(creatorPaths)('requires sign-in and a permission for %s', path => {
@@ -82,6 +85,18 @@ describe('STORYTIME_ROUTES', () => {
       expect(childAt('manage/stories/:storyId')?.data?.['permission']).toBe(
         PERMISSIONS.STORYTIME_STORY_EDIT_OWN,
       );
+    });
+
+    // A new Chapter must not be read as an existing Chapter id.
+    it('declares the new-Chapter route before the Chapter editor', () => {
+      const newPosition = children.findIndex(
+        child => child.path === 'manage/stories/:storyId/chapters/new',
+      );
+      const editPosition = children.findIndex(
+        child => child.path === 'manage/chapters/:chapterId',
+      );
+
+      expect(newPosition).toBeLessThan(editPosition);
     });
 
     // Declaring the creator routes first is what stops `stories/new` being
@@ -105,6 +120,12 @@ describe('STORYTIME_ROUTES', () => {
 
     it('reads a Story without requiring sign-in', () => {
       expect(childAt('stories/:storySlug')?.canActivate).toBeUndefined();
+    });
+
+    it('reads a Chapter without requiring sign-in', () => {
+      expect(
+        childAt('stories/:storySlug/chapters/:chapterSlug')?.canActivate,
+      ).toBeUndefined();
     });
   });
 });

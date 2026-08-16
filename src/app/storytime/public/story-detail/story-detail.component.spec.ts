@@ -3,12 +3,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ContentRating, Story } from 'src/app/models/storytime.models';
+import { ChapterService } from '../../chapter.service';
 import { StoryService } from '../../story.service';
 import { StoryDetailComponent } from './story-detail.component';
 
 describe('StoryDetailComponent', () => {
   let fixture: ComponentFixture<StoryDetailComponent>;
   let storyService: { getStory: jest.Mock };
+  let chapterService: { getChapters: jest.Mock };
 
   /**
    * Builds a Story for the page.
@@ -46,12 +48,14 @@ describe('StoryDetailComponent', () => {
 
   beforeEach(() => {
     storyService = { getStory: jest.fn().mockReturnValue(of(buildStory())) };
+    chapterService = { getChapters: jest.fn().mockReturnValue(of([])) };
 
     TestBed.configureTestingModule({
       imports: [StoryDetailComponent],
       providers: [
         provideRouter([]),
         { provide: StoryService, useValue: storyService },
+        { provide: ChapterService, useValue: chapterService },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -148,6 +152,7 @@ describe('StoryDetailComponent', () => {
       providers: [
         provideRouter([]),
         { provide: StoryService, useValue: storyService },
+        { provide: ChapterService, useValue: chapterService },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -161,6 +166,47 @@ describe('StoryDetailComponent', () => {
     render();
 
     expect(storyService.getStory).toHaveBeenCalledWith('');
+  });
+
+  describe('Chapter list', () => {
+    it('lists the published Chapters', () => {
+      chapterService.getChapters.mockReturnValue(
+        of([
+          {
+            id: 'chapter-1',
+            slug: 'chapter-one',
+            title: 'Chapter One',
+            synopsis: 'A summary',
+            estimatedReadingMinutes: 3,
+          },
+        ]),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('Chapter One');
+      expect(element.textContent).toContain('3 min read');
+    });
+
+    it('explains when a Story has no Chapters yet', () => {
+      expect(render().textContent).toContain('No Chapters have been published');
+    });
+
+    // The Chapters are fetched separately so a failure there leaves the Story
+    // itself readable.
+    it('keeps the Story readable when the Chapter list fails', () => {
+      chapterService.getChapters.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('A Story');
+      expect(fixture.componentInstance.chapterErrorMessage).toContain(
+        'could not be loaded',
+      );
+      expect(fixture.componentInstance.errorMessage).toBe('');
+    });
   });
 
   it('explains a missing Story', () => {
