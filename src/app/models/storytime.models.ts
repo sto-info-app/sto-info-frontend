@@ -278,6 +278,110 @@ export interface ChapterWithNavigation {
 }
 
 /**
+ * A Character as readers see them.
+ */
+export interface Character {
+  id: string;
+  storyId: string;
+  slug: string;
+  name: string;
+  shortBio: string | null;
+  biographyHtml: string | null;
+  portraitImageUrl: string | null;
+  portraitImageThumbnailUrl: string | null;
+  portraitImageAlt: string | null;
+  species: string | null;
+  faction: string | null;
+  rank: string | null;
+  occupation: string | null;
+  affiliation: string | null;
+  shipAssignment: string | null;
+  traits: string[] | null;
+  isPrimary: boolean;
+  displayOrder: number;
+}
+
+/**
+ * A Character as their creator manages them.
+ */
+export interface ManagedCharacter extends Character {
+  biographySource: string;
+  portraitImageId: string | null;
+  version: number;
+  moderationStatus: StorytimeModerationStatus;
+  moderationMessage: string | null;
+}
+
+/**
+ * The fields a creator may send when creating or editing a Character.
+ */
+export interface CharacterRequest {
+  name?: string;
+  slug?: string;
+  shortBio?: string;
+  biographySource?: string;
+  portraitImageId?: string;
+  portraitImageAlt?: string;
+  species?: string;
+  faction?: string;
+  rank?: string;
+  occupation?: string;
+  affiliation?: string;
+  shipAssignment?: string;
+  traits?: string[];
+  isPrimary?: boolean;
+  /** Sent on update so a stale edit is refused rather than overwriting. */
+  version?: number;
+}
+
+/**
+ * A Chapter a Character appears in, as a reader can reach it.
+ */
+export interface CharacterAppearanceLink {
+  chapterId: string;
+  chapterSlug: string;
+  chapterTitle: string;
+  isPrimary: boolean;
+}
+
+/**
+ * A Character and the Chapters a reader can find them in.
+ *
+ * Only readable Chapters are listed, so a Character whose appearances are all
+ * in unpublished Chapters shows an empty list rather than titles nobody can
+ * open yet.
+ */
+export interface CharacterWithAppearances {
+  character: Character;
+  appearsIn: CharacterAppearanceLink[];
+}
+
+/**
+ * One Character appearing in a Chapter, as their creator records it.
+ */
+export interface ChapterAppearance {
+  chapterId: string;
+  appearanceOrder: number;
+  isPrimary: boolean;
+  appearanceNotes: string | null;
+  /** Null when the row refers to a Character that has since been deleted. */
+  character: Character | null;
+}
+
+/**
+ * The cast a creator is assigning to a Chapter.
+ *
+ * The whole list is sent rather than individual additions and removals: the
+ * editor shows the cast as a set of ticks, so what saving means is "these, and
+ * only these". An empty list is a valid answer, and clears it.
+ */
+export interface AppearanceRequest {
+  characterId: string;
+  appearanceNotes?: string;
+  isPrimary?: boolean;
+}
+
+/**
  * Where a reader has got to with a Story.
  *
  * On hold and abandoned are deliberate choices. The server derives the others
