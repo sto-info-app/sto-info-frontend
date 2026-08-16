@@ -25,6 +25,12 @@
           routerLinkActive="peach"
           >{{ appRouteTitles.STORYTIME }}</a
         >
+        <a
+          [routerLink]="getRouteLink(appRoutes.STORYTIME_ARCS)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="peach"
+          >{{ appRouteTitles.STORYTIME_ARCS }}</a
+        >
       }
       @if (isLoggedIn) {
         <a

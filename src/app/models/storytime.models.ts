@@ -278,6 +278,107 @@ export interface ChapterWithNavigation {
 }
 
 /**
+ * Publication lifecycle of an Arc.
+ */
+export enum ArcStatus {
+  DRAFT = 'DRAFT',
+  IN_REVIEW = 'IN_REVIEW',
+  PUBLISHED = 'PUBLISHED',
+  UNPUBLISHED = 'UNPUBLISHED',
+  ARCHIVED = 'ARCHIVED',
+}
+
+/**
+ * Where a Story sits in an Arc's inclusion workflow.
+ *
+ * Only `APPROVED` counts. Which of `INVITED` and `REQUESTED` a row holds says
+ * who still has to agree: an invitation waits on the Story's owner, a request
+ * waits on the Arc's curator.
+ */
+export enum ArcMembershipStatus {
+  REQUESTED = 'REQUESTED',
+  INVITED = 'INVITED',
+  APPROVED = 'APPROVED',
+  DECLINED = 'DECLINED',
+  REMOVED = 'REMOVED',
+  WITHDRAWN = 'WITHDRAWN',
+}
+
+/**
+ * An Arc as readers see it.
+ */
+export interface Arc {
+  id: string;
+  slug: string;
+  title: string;
+  ownerUserId: string;
+  shortDescription: string | null;
+  descriptionHtml: string | null;
+  languageCode: string;
+  bannerImageUrl: string | null;
+  bannerImageAlt: string | null;
+  profileImageUrl: string | null;
+  profileImageAlt: string | null;
+  rating: number;
+  publishedAt: string | null;
+}
+
+/**
+ * An Arc as its curator manages it.
+ */
+export interface ManagedArc extends Arc {
+  status: ArcStatus;
+  visibility: StorytimeVisibility;
+  description: string | null;
+  bannerImageId: string | null;
+  profileImageId: string | null;
+  version: number;
+}
+
+/**
+ * A Story's place in an Arc.
+ *
+ * The Story may be absent: a membership can name one that is not published
+ * yet, or one since made private, and dropping the row would leave a curator
+ * unable to see or undo what they agreed to.
+ */
+export interface ArcMembership {
+  id: string;
+  arcId: string;
+  storyId: string;
+  orderIndex: number;
+  membershipStatus: ArcMembershipStatus;
+  introductoryNote: string | null;
+  story: Story | null;
+}
+
+/**
+ * An Arc and the Stories a reader can follow through it.
+ */
+export interface ArcWithStories {
+  arc: Arc;
+  stories: ArcMembership[];
+}
+
+/**
+ * The fields a curator may send when creating or editing an Arc.
+ */
+export interface ArcRequest {
+  title?: string;
+  slug?: string;
+  shortDescription?: string;
+  description?: string;
+  visibility?: StorytimeVisibility;
+  languageCode?: string;
+  bannerImageId?: string;
+  bannerImageAlt?: string;
+  profileImageId?: string;
+  profileImageAlt?: string;
+  /** Sent on update so a stale edit is refused rather than overwriting. */
+  version?: number;
+}
+
+/**
  * Where an embedded video lives.
  */
 export enum MediaProvider {

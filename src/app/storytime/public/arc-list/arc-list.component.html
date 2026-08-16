@@ -1,0 +1,45 @@
+<section id="storytime-arc-list-page">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Arcs</span>
+  </div>
+
+  <p class="storytime-arc-list__intro">
+    Reading orders assembled across several Stories, each with the agreement of
+    the people who wrote them.
+  </p>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Arcs unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading Arcs"></app-loading-bar>
+  } @else if (arcs.length === 0) {
+    <p class="storytime-empty">
+      There are no published Arcs yet. Check back soon, or curate the first one.
+    </p>
+  } @else {
+    <ul class="storytime-arc-list">
+      @for (arc of arcs; track arc.id) {
+        <li class="storytime-arc-list__entry">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]">
+            @if (arc.profileImageUrl) {
+              <img
+                class="storytime-arc-list__image"
+                [src]="arc.profileImageUrl"
+                [alt]="arc.profileImageAlt ?? ''" />
+            }
+            <span class="storytime-arc-list__title">{{ arc.title }}</span>
+          </a>
+          @if (arc.shortDescription) {
+            <p class="storytime-arc-list__summary">
+              {{ arc.shortDescription }}
+            </p>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

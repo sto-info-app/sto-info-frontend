@@ -177,6 +177,23 @@ export const STORYTIME_ROUTES: Routes = [
       },
 
       {
+        path: 'arcs',
+        loadComponent: () =>
+          import('./public/arc-list/arc-list.component').then(
+            m => m.ArcListComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_ARCS },
+      },
+      {
+        path: 'arcs/:arcSlug',
+        loadComponent: () =>
+          import('./public/arc-detail/arc-detail.component').then(
+            m => m.ArcDetailComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_ARC },
+      },
+
+      {
         path: 'stories',
         loadComponent: () =>
           import('./public/story-list/story-list.component').then(
