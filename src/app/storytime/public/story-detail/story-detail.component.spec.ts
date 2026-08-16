@@ -4,6 +4,7 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
+  Character,
   ChapterSummary,
   ContentRating,
   ReaderStoryStatus,
@@ -11,6 +12,7 @@ import {
   StoryProgress,
 } from 'src/app/models/storytime.models';
 import { ChapterService } from '../../chapter.service';
+import { CharacterService } from '../../character.service';
 import { ProgressService } from '../../progress.service';
 import { StoryService } from '../../story.service';
 import { StoryDetailComponent } from './story-detail.component';
@@ -19,6 +21,7 @@ describe('StoryDetailComponent', () => {
   let fixture: ComponentFixture<StoryDetailComponent>;
   let storyService: { getStory: jest.Mock };
   let chapterService: { getChapters: jest.Mock };
+  let characterService: { getCharacters: jest.Mock };
   let progressService: {
     getStoryProgress: jest.Mock;
     setStoryStatus: jest.Mock;
@@ -98,6 +101,7 @@ describe('StoryDetailComponent', () => {
   beforeEach(() => {
     storyService = { getStory: jest.fn().mockReturnValue(of(buildStory())) };
     chapterService = { getChapters: jest.fn().mockReturnValue(of([])) };
+    characterService = { getCharacters: jest.fn().mockReturnValue(of([])) };
     progressService = {
       getStoryProgress: jest.fn().mockReturnValue(of(buildProgress())),
       setStoryStatus: jest.fn().mockReturnValue(of(buildProgress())),
@@ -112,6 +116,7 @@ describe('StoryDetailComponent', () => {
         provideRouter([]),
         { provide: StoryService, useValue: storyService },
         { provide: ChapterService, useValue: chapterService },
+        { provide: CharacterService, useValue: characterService },
         { provide: ProgressService, useValue: progressService },
         { provide: AuthService, useValue: authService },
         {
@@ -289,6 +294,64 @@ describe('StoryDetailComponent', () => {
     expect(fixture.componentInstance.errorMessage).toContain(
       'could not be read',
     );
+  });
+
+  describe('the cast', () => {
+    it('lists the Story’s Characters', () => {
+      characterService.getCharacters.mockReturnValue(
+        of([
+          {
+            id: 'character-1',
+            slug: 'captain-shran',
+            name: 'Captain Shran',
+            shortBio: 'An Andorian officer.',
+            portraitImageThumbnailUrl: null,
+            portraitImageAlt: null,
+          },
+        ] as Character[]),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('Captain Shran');
+      expect(element.textContent).toContain('An Andorian officer.');
+    });
+
+    it('links each Character to their page', () => {
+      characterService.getCharacters.mockReturnValue(
+        of([
+          { id: 'character-1', slug: 'captain-shran', name: 'Shran' },
+        ] as Character[]),
+      );
+
+      const element = render();
+
+      expect(
+        element
+          .querySelector('.storytime-cast__member a')
+          ?.getAttribute('href'),
+      ).toContain('captain-shran');
+    });
+
+    // Not every Story has a cast, and an empty heading over nothing is worse
+    // than no section at all.
+    it('shows no cast section when there are no Characters', () => {
+      const element = render();
+
+      expect(element.querySelector('.storytime-cast')).toBeNull();
+      expect(element.textContent).not.toContain('Cast');
+    });
+
+    it('leaves the Story readable when the cast cannot be loaded', () => {
+      characterService.getCharacters.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('A Story');
+      expect(fixture.componentInstance.characters).toEqual([]);
+    });
   });
 
   describe("the reader's own progress", () => {

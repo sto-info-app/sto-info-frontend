@@ -137,6 +137,39 @@
       </section>
     }
 
+    @if (characters.length > 0) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Cast</span>
+      </div>
+
+      <ul class="storytime-cast">
+        @for (cast of characters; track cast.id) {
+          <li class="storytime-cast__member">
+            <a
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'stories',
+                storySlug,
+                'characters',
+                cast.slug,
+              ]">
+              @if (cast.portraitImageThumbnailUrl) {
+                <img
+                  class="storytime-cast__portrait"
+                  [src]="cast.portraitImageThumbnailUrl"
+                  [alt]="cast.portraitImageAlt ?? ''" />
+              }
+              <span class="storytime-cast__name">{{ cast.name }}</span>
+            </a>
+            @if (cast.shortBio) {
+              <p class="storytime-cast__bio">{{ cast.shortBio }}</p>
+            }
+          </li>
+        }
+      </ul>
+    }
+
     <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Chapters</span>
     </div>

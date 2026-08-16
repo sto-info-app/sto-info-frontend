@@ -8,6 +8,7 @@ import { finalize, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
+  Character,
   ChapterSummary,
   CONTENT_RATING_DESCRIPTIONS,
   CONTENT_RATING_LABELS,
@@ -22,6 +23,7 @@ import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-wa
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { ChapterService } from '../../chapter.service';
+import { CharacterService } from '../../character.service';
 import { ProgressService } from '../../progress.service';
 import {
   COMPLETION_STATE_LABELS,
@@ -81,6 +83,9 @@ export class StoryDetailComponent implements OnInit {
   /** Completion labels. */
   readonly completionLabels = COMPLETION_STATE_LABELS;
 
+  /** The Story's cast, in display order. */
+  characters: Character[] = [];
+
   /** The reader's own progress, once known. */
   progress: StoryProgress | null = null;
 
@@ -96,6 +101,7 @@ export class StoryDetailComponent implements OnInit {
   private readonly _route = inject(ActivatedRoute);
   private readonly _storyService = inject(StoryService);
   private readonly _chapterService = inject(ChapterService);
+  private readonly _characterService = inject(CharacterService);
   private readonly _progressService = inject(ProgressService);
   private readonly _authService = inject(AuthService);
   private readonly _sanitizer = inject(DomSanitizer);
@@ -125,6 +131,7 @@ export class StoryDetailComponent implements OnInit {
             : null;
           this.isLoading = false;
           this.loadChapters();
+          this.loadCharacters();
           this.loadProgress();
         },
         error: (error: HttpErrorResponse) => {
@@ -155,6 +162,25 @@ export class StoryDetailComponent implements OnInit {
           this.chapterErrorMessage =
             'The Chapter list could not be loaded. Please try again shortly.';
         },
+      });
+  }
+
+  /**
+   * Loads the Story's cast.
+   *
+   * Fetched separately, and silently: not every Story has a cast, and a
+   * failure to list one must leave the Story readable rather than taking the
+   * page down over a section that may well be empty anyway.
+   */
+  private loadCharacters(): void {
+    this._characterService
+      .getCharacters(this.storySlug)
+      .pipe(
+        catchError(() => of([] as Character[])),
+        takeUntilDestroyed(this._destroyRef),
+      )
+      .subscribe(characters => {
+        this.characters = characters;
       });
   }
 
