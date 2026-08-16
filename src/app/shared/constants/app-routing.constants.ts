@@ -106,6 +106,9 @@ export const APP_ROUTES = {
     ROOT_ROUTES.STORYTIME + '/manage/stories/:storyId/characters/new',
   STORYTIME_CHARACTER_EDIT:
     ROOT_ROUTES.STORYTIME + '/manage/characters/:characterId',
+  STORYTIME_COLLABORATORS:
+    ROOT_ROUTES.STORYTIME + '/manage/stories/:storyId/collaborators',
+  STORYTIME_INVITATIONS: ROOT_ROUTES.STORYTIME + '/manage/invitations',
   STORYTIME_MANAGE_CHAPTERS:
     ROOT_ROUTES.STORYTIME + '/manage/stories/:storyId/chapters',
   STORYTIME_CHAPTER_NEW:
@@ -207,6 +210,8 @@ export const APP_ROUTE_TITLES = {
   STORYTIME_MANAGE_CHARACTERS: 'Cast',
   STORYTIME_CHARACTER_NEW: 'Add a Character',
   STORYTIME_CHARACTER_EDIT: 'Edit Character',
+  STORYTIME_COLLABORATORS: 'Collaborators',
+  STORYTIME_INVITATIONS: 'Invitations',
   STORYTIME_MANAGE_CHAPTERS: 'Chapters',
   STORYTIME_CHAPTER_NEW: 'Write a Chapter',
   STORYTIME_CHAPTER_EDIT: 'Edit Chapter',

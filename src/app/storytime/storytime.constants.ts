@@ -47,6 +47,30 @@ export const READER_STORY_STATUS_LABELS = {
 } as const;
 
 /**
+ * How each collaboration invitation status is labelled.
+ */
+export const COLLABORATION_STATUS_LABELS = {
+  INVITED: 'Invited',
+  ACCEPTED: 'Collaborating',
+  DECLINED: 'Declined',
+  REVOKED: 'No longer collaborating',
+} as const;
+
+/**
+ * The capabilities an invitation may grant, and how each is described.
+ *
+ * Publishing is deliberately absent: only the owner may publish, so offering a
+ * switch that could never be turned on would be worse than saying nothing.
+ */
+export const COLLABORATOR_CAPABILITIES = [
+  { key: 'canEditStory', label: 'Edit the Story’s details' },
+  { key: 'canManageChapters', label: 'Write and edit Chapters' },
+  { key: 'canManageCharacters', label: 'Manage the cast' },
+  { key: 'canManageCrew', label: 'Manage the credits' },
+  { key: 'canManageCollaborators', label: 'Invite other collaborators' },
+] as const;
+
+/**
  * How each reader-facing Chapter status is labelled.
  */
 export const READER_CHAPTER_STATUS_LABELS = {

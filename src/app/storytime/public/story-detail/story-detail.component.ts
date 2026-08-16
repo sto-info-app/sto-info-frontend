@@ -10,6 +10,7 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   Character,
   ChapterSummary,
+  CrewCredit,
   CONTENT_RATING_DESCRIPTIONS,
   CONTENT_RATING_LABELS,
   ContentRating,
@@ -24,6 +25,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
+import { CrewService } from '../../crew.service';
 import { ProgressService } from '../../progress.service';
 import {
   COMPLETION_STATE_LABELS,
@@ -86,6 +88,9 @@ export class StoryDetailComponent implements OnInit {
   /** The Story's cast, in display order. */
   characters: Character[] = [];
 
+  /** The Story's credits, in credits-roll order. */
+  credits: CrewCredit[] = [];
+
   /** The reader's own progress, once known. */
   progress: StoryProgress | null = null;
 
@@ -102,6 +107,7 @@ export class StoryDetailComponent implements OnInit {
   private readonly _storyService = inject(StoryService);
   private readonly _chapterService = inject(ChapterService);
   private readonly _characterService = inject(CharacterService);
+  private readonly _crewService = inject(CrewService);
   private readonly _progressService = inject(ProgressService);
   private readonly _authService = inject(AuthService);
   private readonly _sanitizer = inject(DomSanitizer);
@@ -132,6 +138,7 @@ export class StoryDetailComponent implements OnInit {
           this.isLoading = false;
           this.loadChapters();
           this.loadCharacters();
+          this.loadCredits();
           this.loadProgress();
         },
         error: (error: HttpErrorResponse) => {
@@ -181,6 +188,25 @@ export class StoryDetailComponent implements OnInit {
       )
       .subscribe(characters => {
         this.characters = characters;
+      });
+  }
+
+  /**
+   * Loads the Story's credits.
+   *
+   * Silently, for the same reason as the cast: most Stories are written by one
+   * person and have no credits roll at all, and a failure here must not take
+   * the Story down with it.
+   */
+  private loadCredits(): void {
+    this._crewService
+      .getCredits(this.storySlug)
+      .pipe(
+        catchError(() => of([] as CrewCredit[])),
+        takeUntilDestroyed(this._destroyRef),
+      )
+      .subscribe(credits => {
+        this.credits = credits;
       });
   }
 

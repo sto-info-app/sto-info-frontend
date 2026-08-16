@@ -91,6 +91,10 @@ export const API_URLS = {
   STORYTIME_MANAGE_STORIES: apiUrl + '/storytime/manage/stories',
   STORYTIME_MANAGE_CHAPTERS: apiUrl + '/storytime/manage/chapters',
   STORYTIME_MANAGE_CHARACTERS: apiUrl + '/storytime/manage/characters',
+  STORYTIME_MANAGE_COLLABORATORS: apiUrl + '/storytime/manage/collaborators',
+  STORYTIME_MANAGE_COLLABORATIONS: apiUrl + '/storytime/manage/collaborations',
+  STORYTIME_MANAGE_CREDITS: apiUrl + '/storytime/manage/credits',
+  STORYTIME_CREW_ROLES: apiUrl + '/storytime/crew-roles',
   STORYTIME_PROGRESS: apiUrl + '/storytime/progress',
 
   // News

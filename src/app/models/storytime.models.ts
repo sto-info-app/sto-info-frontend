@@ -278,6 +278,112 @@ export interface ChapterWithNavigation {
 }
 
 /**
+ * Where a collaboration invitation has got to.
+ *
+ * Only `ACCEPTED` grants anything: an invitation nobody has answered lets its
+ * holder do nothing at all.
+ */
+export enum CollaborationInvitationStatus {
+  INVITED = 'INVITED',
+  ACCEPTED = 'ACCEPTED',
+  DECLINED = 'DECLINED',
+  REVOKED = 'REVOKED',
+}
+
+/**
+ * Somebody helping write a Story.
+ *
+ * There is no `canPublish`. Only the owner may publish, so there is nothing to
+ * show and nothing to offer.
+ */
+export interface Collaborator {
+  id: string;
+  storyId: string;
+  userId: string;
+  collaborationRole: string | null;
+  canEditStory: boolean;
+  canManageChapters: boolean;
+  canManageCharacters: boolean;
+  canManageCrew: boolean;
+  canManageCollaborators: boolean;
+  invitationStatus: CollaborationInvitationStatus;
+  invitedByUserId: string;
+  invitedAt: string;
+  acceptedAt: string | null;
+}
+
+/**
+ * The capabilities an invitation may grant.
+ *
+ * Named centrally so the editor, the list and the request all agree on what
+ * there is to grant.
+ */
+export interface CollaboratorCapabilities {
+  canEditStory?: boolean;
+  canManageChapters?: boolean;
+  canManageCharacters?: boolean;
+  canManageCrew?: boolean;
+  canManageCollaborators?: boolean;
+}
+
+/**
+ * An invitation to collaborate on a Story.
+ */
+export interface InviteCollaboratorRequest extends CollaboratorCapabilities {
+  userId: string;
+  collaborationRole?: string;
+}
+
+/**
+ * A role somebody may be credited in.
+ */
+export interface CrewRole {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  displayOrder: number;
+}
+
+/**
+ * What a credit attaches to.
+ */
+export enum CrewCreditScope {
+  STORY = 'STORY',
+  CHAPTER = 'CHAPTER',
+  CHARACTER = 'CHARACTER',
+}
+
+/**
+ * A credit as it appears in a credits roll.
+ */
+export interface CrewCredit {
+  id: string;
+  storyId: string;
+  chapterId: string | null;
+  characterId: string | null;
+  userId: string;
+  scope: CrewCreditScope;
+  role: CrewRole | null;
+  /** How the credit reads — its own wording, or the role name. */
+  displayLabel: string;
+  notes: string | null;
+  orderIndex: number;
+}
+
+/**
+ * The fields a creator may send when adding a credit.
+ */
+export interface CrewCreditRequest {
+  userId: string;
+  roleId: string;
+  chapterId?: string;
+  characterId?: string;
+  creditLabel?: string;
+  notes?: string;
+}
+
+/**
  * A Character as readers see them.
  */
 export interface Character {

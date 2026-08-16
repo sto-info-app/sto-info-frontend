@@ -170,6 +170,25 @@
       </ul>
     }
 
+    @if (credits.length > 0) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Credits</span>
+      </div>
+
+      <ul class="storytime-credits">
+        @for (credit of credits; track credit.id) {
+          <li class="storytime-credits__entry">
+            <span class="storytime-credits__role">{{
+              credit.displayLabel
+            }}</span>
+            @if (credit.notes) {
+              <span class="storytime-credits__notes">{{ credit.notes }}</span>
+            }
+          </li>
+        }
+      </ul>
+    }
+
     <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Chapters</span>
     </div>

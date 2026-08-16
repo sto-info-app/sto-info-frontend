@@ -58,6 +58,12 @@
             routerLinkActive="peach"
             >{{ appRouteTitles.STORYTIME_MANAGE }}</a
           >
+          <a
+            [routerLink]="getRouteLink(appRoutes.STORYTIME_INVITATIONS)"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="peach"
+            >{{ appRouteTitles.STORYTIME_INVITATIONS }}</a
+          >
         }
         @if (isAdmin) {
           <a

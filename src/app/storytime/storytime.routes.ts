@@ -130,6 +130,30 @@ export const STORYTIME_ROUTES: Routes = [
       },
 
       {
+        path: 'manage/stories/:storyId/collaborators',
+        loadComponent: () =>
+          import('./creator/collaborator-list/collaborator-list.component').then(
+            m => m.CollaboratorListComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_COLLABORATORS,
+          permission: PERMISSIONS.STORYTIME_STORY_EDIT_OWN,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+      // Answering an invitation deliberately needs no creator permission: it
+      // is how somebody who does not write becomes able to.
+      {
+        path: 'manage/invitations',
+        loadComponent: () =>
+          import('./creator/invitations/invitations.component').then(
+            m => m.InvitationsComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_INVITATIONS },
+        canActivate: [AuthGuard],
+      },
+
+      {
         path: 'manage/chapters/:chapterId',
         loadComponent: () =>
           import('./creator/chapter-editor/chapter-editor.component').then(

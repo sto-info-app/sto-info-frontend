@@ -80,6 +80,16 @@ describe('STORYTIME_ROUTES', () => {
     );
   });
 
+  // Answering an invitation is how somebody who does not yet write becomes
+  // able to, so requiring a creator permission would lock them out of the one
+  // page that would grant it.
+  it('needs sign-in but no creator permission to answer an invitation', () => {
+    const invitations = childAt('manage/invitations');
+
+    expect(invitations?.canActivate).toEqual([AuthGuard]);
+    expect(invitations?.data?.['permission']).toBeUndefined();
+  });
+
   describe('creator routes', () => {
     const creatorPaths = [
       'manage/stories',
@@ -91,6 +101,7 @@ describe('STORYTIME_ROUTES', () => {
       'manage/stories/:storyId/characters',
       'manage/stories/:storyId/characters/new',
       'manage/characters/:characterId',
+      'manage/stories/:storyId/collaborators',
     ];
 
     it.each(creatorPaths)('requires sign-in and a permission for %s', path => {

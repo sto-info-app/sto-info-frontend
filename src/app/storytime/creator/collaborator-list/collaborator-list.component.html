@@ -1,0 +1,181 @@
+<section id="storytime-collaborator-list-page">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Collaborators</span>
+  </div>
+
+  <nav class="storytime-collaborators__actions">
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', storyId]">
+      Back to the Story
+    </a>
+  </nav>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Collaborators unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <p class="storytime-collaborators__note">
+    Collaborators can change the Story. Crediting somebody is separate, and
+    gives them no access at all. Only you can publish.
+  </p>
+
+  <form
+    class="storytime-collaborators__invite"
+    [formGroup]="form"
+    (ngSubmit)="invite()">
+    <label for="collaborator-user">Member ID</label>
+    <input
+      id="collaborator-user"
+      type="text"
+      formControlName="userId" />
+    @if (form.controls.userId.touched && form.controls.userId.invalid) {
+      <p class="form-error">Name the member you want to invite.</p>
+    }
+
+    <label for="collaborator-role">What you call them</label>
+    <input
+      id="collaborator-role"
+      type="text"
+      formControlName="collaborationRole"
+      maxlength="100" />
+
+    <fieldset>
+      <legend>What they may do</legend>
+      <label>
+        <input
+          type="checkbox"
+          formControlName="canEditStory" />
+        Edit the Story’s details
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          formControlName="canManageChapters" />
+        Write and edit Chapters
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          formControlName="canManageCharacters" />
+        Manage the cast
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          formControlName="canManageCrew" />
+        Manage the credits
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          formControlName="canManageCollaborators" />
+        Invite other collaborators
+      </label>
+    </fieldset>
+
+    <button type="submit">Send invitation</button>
+  </form>
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading collaborators"></app-loading-bar>
+  } @else if (collaborators.length === 0) {
+    <p class="storytime-empty">Nobody else is working on this Story yet.</p>
+  } @else {
+    <ul class="storytime-collaborators">
+      @for (collaborator of collaborators; track collaborator.id) {
+        <li class="storytime-collaborators__entry">
+          <p class="storytime-collaborators__identity">
+            <span class="storytime-collaborators__member">{{
+              collaborator.collaborationRole ?? collaborator.userId
+            }}</span>
+            <span class="storytime-collaborators__status">{{
+              statusLabels[collaborator.invitationStatus]
+            }}</span>
+          </p>
+
+          @if (isPending(collaborator)) {
+            <p class="storytime-collaborators__pending">
+              They have not answered yet, so they cannot change anything.
+            </p>
+          }
+
+          <div class="storytime-collaborators__capabilities">
+            <label>
+              <input
+                type="checkbox"
+                [checked]="collaborator.canEditStory"
+                (change)="
+                  setCapability(
+                    collaborator,
+                    'canEditStory',
+                    !collaborator.canEditStory
+                  )
+                " />
+              Edit the Story’s details
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                [checked]="collaborator.canManageChapters"
+                (change)="
+                  setCapability(
+                    collaborator,
+                    'canManageChapters',
+                    !collaborator.canManageChapters
+                  )
+                " />
+              Write and edit Chapters
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                [checked]="collaborator.canManageCharacters"
+                (change)="
+                  setCapability(
+                    collaborator,
+                    'canManageCharacters',
+                    !collaborator.canManageCharacters
+                  )
+                " />
+              Manage the cast
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                [checked]="collaborator.canManageCrew"
+                (change)="
+                  setCapability(
+                    collaborator,
+                    'canManageCrew',
+                    !collaborator.canManageCrew
+                  )
+                " />
+              Manage the credits
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                [checked]="collaborator.canManageCollaborators"
+                (change)="
+                  setCapability(
+                    collaborator,
+                    'canManageCollaborators',
+                    !collaborator.canManageCollaborators
+                  )
+                " />
+              Invite other collaborators
+            </label>
+          </div>
+
+          <button
+            type="button"
+            class="storytime-collaborators__revoke"
+            (click)="revoke(collaborator)">
+            {{ isPending(collaborator) ? 'Withdraw invitation' : 'Remove' }}
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</section>

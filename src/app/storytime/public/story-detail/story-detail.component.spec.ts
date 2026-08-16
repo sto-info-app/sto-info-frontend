@@ -7,12 +7,14 @@ import {
   Character,
   ChapterSummary,
   ContentRating,
+  CrewCredit,
   ReaderStoryStatus,
   Story,
   StoryProgress,
 } from 'src/app/models/storytime.models';
 import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
+import { CrewService } from '../../crew.service';
 import { ProgressService } from '../../progress.service';
 import { StoryService } from '../../story.service';
 import { StoryDetailComponent } from './story-detail.component';
@@ -22,6 +24,7 @@ describe('StoryDetailComponent', () => {
   let storyService: { getStory: jest.Mock };
   let chapterService: { getChapters: jest.Mock };
   let characterService: { getCharacters: jest.Mock };
+  let crewService: { getCredits: jest.Mock };
   let progressService: {
     getStoryProgress: jest.Mock;
     setStoryStatus: jest.Mock;
@@ -102,6 +105,7 @@ describe('StoryDetailComponent', () => {
     storyService = { getStory: jest.fn().mockReturnValue(of(buildStory())) };
     chapterService = { getChapters: jest.fn().mockReturnValue(of([])) };
     characterService = { getCharacters: jest.fn().mockReturnValue(of([])) };
+    crewService = { getCredits: jest.fn().mockReturnValue(of([])) };
     progressService = {
       getStoryProgress: jest.fn().mockReturnValue(of(buildProgress())),
       setStoryStatus: jest.fn().mockReturnValue(of(buildProgress())),
@@ -117,6 +121,7 @@ describe('StoryDetailComponent', () => {
         { provide: StoryService, useValue: storyService },
         { provide: ChapterService, useValue: chapterService },
         { provide: CharacterService, useValue: characterService },
+        { provide: CrewService, useValue: crewService },
         { provide: ProgressService, useValue: progressService },
         { provide: AuthService, useValue: authService },
         {
@@ -351,6 +356,44 @@ describe('StoryDetailComponent', () => {
 
       expect(element.textContent).toContain('A Story');
       expect(fixture.componentInstance.characters).toEqual([]);
+    });
+  });
+
+  describe('the credits', () => {
+    it('lists them as they should read', () => {
+      crewService.getCredits.mockReturnValue(
+        of([
+          {
+            id: 'credit-1',
+            displayLabel: 'Narrator',
+            notes: 'Chapters 1–4',
+          },
+        ] as CrewCredit[]),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('Narrator');
+      expect(element.textContent).toContain('Chapters 1–4');
+    });
+
+    // Most Stories are written by one person and have no credits roll at all.
+    it('shows no credits section when there are none', () => {
+      const element = render();
+
+      expect(element.querySelector('.storytime-credits')).toBeNull();
+      expect(element.textContent).not.toContain('Credits');
+    });
+
+    it('leaves the Story readable when the credits cannot be loaded', () => {
+      crewService.getCredits.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('A Story');
+      expect(fixture.componentInstance.credits).toEqual([]);
     });
   });
 
