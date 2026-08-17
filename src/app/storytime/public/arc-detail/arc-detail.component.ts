@@ -5,7 +5,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { switchMap } from 'rxjs';
-import { Arc, ArcMembership } from 'src/app/models/storytime.models';
+import { AuthService } from 'src/app/core/auth/auth.service';
+import {
+  Arc,
+  ArcMembership,
+  ArcProgress,
+} from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -39,6 +44,9 @@ export class ArcDetailComponent implements OnInit {
   /** The rendered description, ready to insert. */
   descriptionHtml: SafeHtml | null = null;
 
+  /** How far the signed-in reader has got, or null when there is nobody. */
+  progress: ArcProgress | null = null;
+
   /** Whether the Arc is still loading. */
   isLoading = true;
 
@@ -50,6 +58,7 @@ export class ArcDetailComponent implements OnInit {
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _arcService = inject(ArcService);
+  private readonly _authService = inject(AuthService);
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _destroyRef = inject(DestroyRef);
 
@@ -78,6 +87,7 @@ export class ArcDetailComponent implements OnInit {
               )
             : null;
           this.isLoading = false;
+          this.loadProgress(result.arc.slug);
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage =
@@ -85,6 +95,82 @@ export class ArcDetailComponent implements OnInit {
               ? 'That Arc could not be found. It may have been removed or made private.'
               : 'This Arc could not be read. Please try again shortly.';
           this.isLoading = false;
+        },
+      });
+  }
+
+  /**
+   * Whether the reader has started this Arc.
+   *
+   * @returns True when there is progress worth showing.
+   */
+  get hasProgress(): boolean {
+    return this.progress !== null && this.progress.totalStories > 0;
+  }
+
+  /**
+   * The Story "continue reading" should open, if any.
+   *
+   * Resolved against the Stories on the page rather than trusted on its own,
+   * so a Story the reader cannot open never becomes a link that goes nowhere.
+   *
+   * @returns The membership to continue from, or null when there is none.
+   */
+  get continueStory(): ArcMembership | null {
+    const storyId = this.progress?.continueStoryId;
+
+    return storyId
+      ? (this.stories.find(membership => membership.storyId === storyId) ??
+          null)
+      : null;
+  }
+
+  /**
+   * Whether a Story in the Arc has already been read.
+   *
+   * Everything before where the reader is up to counts as read: an Arc is
+   * followed in order, so the Story they are on is the boundary.
+   *
+   * @param membership - The Story's place in the Arc.
+   * @returns True when it sits before the one they are on.
+   */
+  isRead(membership: ArcMembership): boolean {
+    if (!this.progress) {
+      return false;
+    }
+
+    const position = this.stories.indexOf(membership);
+    const current = this.continueStory
+      ? this.stories.indexOf(this.continueStory)
+      : this.stories.length;
+
+    return position < current;
+  }
+
+  /**
+   * Loads how far the reader has got through the Arc.
+   *
+   * Only for a signed-in reader, and best effort even then: a failure leaves
+   * the Arc readable without progress rather than taking the page down over
+   * bookkeeping.
+   *
+   * @param arcSlug - The Arc to ask about.
+   */
+  private loadProgress(arcSlug: string): void {
+    if (!this._authService.isLoggedIn()) {
+      this.progress = null;
+      return;
+    }
+
+    this._arcService
+      .getArcProgress(arcSlug)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: progress => {
+          this.progress = progress;
+        },
+        error: () => {
+          this.progress = null;
         },
       });
   }

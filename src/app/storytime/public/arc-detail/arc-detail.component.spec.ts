@@ -2,10 +2,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { BehaviorSubject, of, throwError } from 'rxjs';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   Arc,
   ArcMembership,
   ArcMembershipStatus,
+  ArcProgress,
   ArcWithStories,
 } from 'src/app/models/storytime.models';
 import { ArcService } from '../../arc.service';
@@ -13,8 +15,27 @@ import { ArcDetailComponent } from './arc-detail.component';
 
 describe('ArcDetailComponent', () => {
   let fixture: ComponentFixture<ArcDetailComponent>;
-  let arcService: { getArc: jest.Mock };
+  let arcService: { getArc: jest.Mock; getArcProgress: jest.Mock };
+  let authService: { isLoggedIn: jest.Mock };
   let params: BehaviorSubject<Map<string, string>>;
+
+  /**
+   * Builds a reader's progress through the Arc.
+   *
+   * @param overrides - Fields to change.
+   * @returns The progress.
+   */
+  const buildProgress = (
+    overrides: Partial<ArcProgress> = {},
+  ): ArcProgress => ({
+    arcId: 'arc-1',
+    totalStories: 2,
+    completedStories: 1,
+    percentComplete: 50,
+    continueStoryId: 'story-2',
+    continueChapterId: null,
+    ...overrides,
+  });
 
   /**
    * Builds an Arc.
@@ -91,13 +112,18 @@ describe('ArcDetailComponent', () => {
 
   beforeEach(() => {
     params = new BehaviorSubject(new Map([['arcSlug', 'the-long-war']]));
-    arcService = { getArc: jest.fn().mockReturnValue(of(buildResponse())) };
+    arcService = {
+      getArc: jest.fn().mockReturnValue(of(buildResponse())),
+      getArcProgress: jest.fn().mockReturnValue(of(buildProgress())),
+    };
+    authService = { isLoggedIn: jest.fn().mockReturnValue(false) };
 
     TestBed.configureTestingModule({
       imports: [ArcDetailComponent],
       providers: [
         provideRouter([]),
         { provide: ArcService, useValue: arcService },
+        { provide: AuthService, useValue: authService },
         {
           provide: ActivatedRoute,
           useValue: { paramMap: params, snapshot: { paramMap: new Map() } },
@@ -245,5 +271,152 @@ describe('ArcDetailComponent', () => {
     expect(
       element.querySelector('.storytime-arc__banner')?.getAttribute('alt'),
     ).toBe('A fleet');
+  });
+
+  describe('progress through the Arc', () => {
+    /**
+     * Builds a response with two Stories, so progress has somewhere to point.
+     *
+     * @returns The response.
+     */
+    const buildTwoStoryResponse = (): ArcWithStories =>
+      buildResponse({
+        stories: [
+          buildMembership(),
+          buildMembership({
+            id: 'membership-2',
+            storyId: 'story-2',
+            story: { slug: 'a-sequel', title: 'A Sequel' } as never,
+          }),
+        ],
+      });
+
+    beforeEach(() => {
+      authService.isLoggedIn.mockReturnValue(true);
+      arcService.getArc.mockReturnValue(of(buildTwoStoryResponse()));
+    });
+
+    it('tells the reader how far they have got', () => {
+      const element = render();
+
+      expect(element.textContent).toContain('read 1 of 2 Stories');
+      expect(arcService.getArcProgress).toHaveBeenCalledWith('the-long-war');
+    });
+
+    it('offers to continue from where they left off', () => {
+      const element = render();
+      const link = element.querySelector('.storytime-arc__continue');
+
+      expect(link?.textContent).toContain('A Sequel');
+      expect(link?.getAttribute('href')).toContain('a-sequel');
+    });
+
+    // Everything before where they are up to has been read, and marking it
+    // says at a glance what is left.
+    it('marks the Stories already behind them', () => {
+      const element = render();
+      const read = element.querySelectorAll('.storytime-arc__story--read');
+
+      expect(read).toHaveLength(1);
+      expect(read[0].textContent).toContain('A Story');
+    });
+
+    // Nothing is behind a reader who has not started.
+    it('marks nothing as read for a reader who has not started', () => {
+      arcService.getArcProgress.mockReturnValue(
+        of(
+          buildProgress({
+            completedStories: 0,
+            percentComplete: 0,
+            continueStoryId: 'story-1',
+          }),
+        ),
+      );
+
+      const element = render();
+
+      expect(
+        element.querySelectorAll('.storytime-arc__story--read'),
+      ).toHaveLength(0);
+    });
+
+    // Nothing left to continue to means the whole Arc is behind them.
+    it('marks every Story as read once the Arc is finished', () => {
+      arcService.getArcProgress.mockReturnValue(
+        of(
+          buildProgress({
+            completedStories: 2,
+            percentComplete: 100,
+            continueStoryId: null,
+          }),
+        ),
+      );
+
+      const element = render();
+
+      expect(
+        element.querySelectorAll('.storytime-arc__story--read'),
+      ).toHaveLength(2);
+      expect(element.querySelector('.storytime-arc__continue')).toBeNull();
+    });
+
+    // A Story the reader cannot open is not on the page, so there is nothing
+    // to link to.
+    it('offers nothing to continue to when the Story is not shown', () => {
+      arcService.getArcProgress.mockReturnValue(
+        of(buildProgress({ continueStoryId: 'story-99' })),
+      );
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-arc__continue')).toBeNull();
+    });
+
+    it('shows how far through the Arc the reader is', () => {
+      const element = render();
+      const bar = element.querySelector('.storytime-arc__progress-bar');
+
+      expect(bar?.getAttribute('aria-valuenow')).toBe('50');
+    });
+
+    // An Arc with nothing in it cannot be part-read.
+    it('shows no progress for an empty Arc', () => {
+      arcService.getArc.mockReturnValue(of(buildResponse({ stories: [] })));
+      arcService.getArcProgress.mockReturnValue(
+        of(
+          buildProgress({
+            totalStories: 0,
+            completedStories: 0,
+            percentComplete: 0,
+            continueStoryId: null,
+          }),
+        ),
+      );
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-arc__progress')).toBeNull();
+    });
+
+    // Progress is bookkeeping: losing it must not cost the reader the Arc.
+    it('still shows the Arc when progress cannot be read', () => {
+      arcService.getArcProgress.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('The Long War');
+      expect(fixture.componentInstance.progress).toBeNull();
+      expect(fixture.componentInstance.errorMessage).toBe('');
+    });
+  });
+
+  // There is nobody to have progress, so asking would only be a 401.
+  it('asks for no progress when nobody is signed in', () => {
+    render();
+
+    expect(arcService.getArcProgress).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.hasProgress).toBe(false);
   });
 });

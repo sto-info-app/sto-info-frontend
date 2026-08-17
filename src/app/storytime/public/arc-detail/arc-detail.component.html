@@ -31,6 +31,38 @@
         [innerHTML]="descriptionHtml"></div>
     }
 
+    @if (hasProgress && progress) {
+      <section class="storytime-arc__progress">
+        <p class="storytime-arc__progress-summary">
+          You have read {{ progress.completedStories }} of
+          {{ progress.totalStories }}
+          {{ progress.totalStories === 1 ? 'Story' : 'Stories' }} in this Arc.
+        </p>
+        <div
+          class="storytime-arc__progress-bar"
+          role="progressbar"
+          [attr.aria-valuenow]="progress.percentComplete"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-label]="'Progress through ' + arc.title">
+          <span [style.width.%]="progress.percentComplete"></span>
+        </div>
+
+        @if (continueStory && continueStory.story) {
+          <a
+            class="storytime-arc__continue"
+            [routerLink]="[
+              '/',
+              appRoutes.STORYTIME,
+              'stories',
+              continueStory.story.slug,
+            ]">
+            Continue with {{ continueStory.story.title }}
+          </a>
+        }
+      </section>
+    }
+
     <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Reading Order</span>
     </div>
@@ -42,7 +74,9 @@
     } @else {
       <ol class="storytime-arc__stories">
         @for (membership of stories; track membership.id) {
-          <li class="storytime-arc__story">
+          <li
+            class="storytime-arc__story"
+            [class.storytime-arc__story--read]="isRead(membership)">
             <a
               [routerLink]="[
                 '/',
@@ -58,7 +92,7 @@
               </p>
             } @else if (membership.story?.shortDescription) {
               <p class="storytime-arc__story-summary">
-                {{ membership.story?.shortDescription }}
+                {{ membership.story.shortDescription }}
               </p>
             }
           </li>
