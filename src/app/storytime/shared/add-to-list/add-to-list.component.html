@@ -1,0 +1,51 @@
+@if (isVisible) {
+  <div class="storytime-add-to-list">
+    <button
+      type="button"
+      class="storytime-add-to-list__toggle"
+      [attr.aria-expanded]="isOpen"
+      (click)="toggle()">
+      Add to a reading list
+    </button>
+
+    @if (isOpen) {
+      @if (errorMessage) {
+        <p
+          class="storytime-add-to-list__error"
+          role="alert">
+          {{ errorMessage }}
+        </p>
+      }
+
+      @if (statusMessage) {
+        <p
+          class="storytime-add-to-list__status"
+          role="status">
+          {{ statusMessage }}
+        </p>
+      }
+
+      @if (lists.length === 0) {
+        <p class="storytime-add-to-list__empty">
+          You have no reading lists yet. Make one on your reading lists page.
+        </p>
+      } @else {
+        <ul class="storytime-add-to-list__lists">
+          @for (list of lists; track list.id) {
+            <li class="storytime-add-to-list__list">
+              <button
+                type="button"
+                [disabled]="isSaving || isHolding(list)"
+                (click)="add(list)">
+                {{ list.name }}
+              </button>
+              @if (isHolding(list)) {
+                <span class="storytime-add-to-list__already">Already on it</span>
+              }
+            </li>
+          }
+        </ul>
+      }
+    }
+  </div>
+}
