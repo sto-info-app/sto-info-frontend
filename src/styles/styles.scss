@@ -5,6 +5,11 @@
 // `.go-rarity-*` utility classes for reuse across modules and components.
 @use 'sto-rarity-colours';
 
+// Emits the styles for every STO Storytime page. Held in one partial rather
+// than per component because the feature's pages are built from the same
+// handful of shapes, and that is what keeps them recognisably one thing.
+@use 'storytime';
+
 /* You can add global styles to this file, and also import other style files */
 
 html {

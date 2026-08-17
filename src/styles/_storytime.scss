@@ -1,0 +1,1986 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// STO Storytime.
+// One partial for the whole feature rather than a stylesheet per component:
+// every page is built from the same handful of shapes — a panel, a list of
+// works, a row of controls, a form — and holding them together is what keeps a
+// Story page and an Arc page recognisably the same site.
+// Everything here is scoped by the `storytime-` prefix its templates use, so
+// nothing leaks into the rest of the application.
+
+// The panel every Storytime block sits in.
+@mixin storytime-panel {
+  background: vars.$lcars-grey-bg;
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+// A row in any of the feature's lists.
+@mixin storytime-row {
+  @include mixins.lcars-card;
+
+  list-style: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+// A heading that names a work, wherever one appears.
+@mixin storytime-work-title {
+  font-family: vars.$font-antonio;
+  font-size: 1.15rem;
+  color: vars.$lcars-sunflower;
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    color: vars.$lcars-gold;
+    text-decoration: underline;
+  }
+}
+
+// The small print under a title: word counts, dates, ratings.
+@mixin storytime-meta {
+  font-size: 0.8rem;
+  color: vars.$lcars-grey-light;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// A button that acts on something rather than navigating.
+@mixin storytime-button {
+  font-family: vars.$font-antonio;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: vars.$lcars-black;
+  background: vars.$lcars-perano;
+  border: none;
+  border-radius: 14px;
+  padding: 0.35rem 1rem;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    background: vars.$lcars-sunflower;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    background: vars.$lcars-grey-border;
+    color: vars.$lcars-grey-light;
+    cursor: not-allowed;
+  }
+}
+
+// A text box or select, matching the buttons beside it.
+@mixin storytime-input {
+  width: 100%;
+  background: rgb(0 0 0 / 40%);
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 6px;
+  color: vars.$lcars-white;
+  padding: 0.5rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+
+  &:focus {
+    outline: 2px solid vars.$lcars-perano;
+    outline-offset: 1px;
+  }
+}
+
+// The label on a field or a group of them.
+@mixin storytime-label-colour {
+  color: vars.$lcars-perano;
+  font-family: vars.$font-antonio;
+  text-transform: uppercase;
+}
+
+// Anything the reader is told: an error, a status, a note.
+@mixin storytime-message($colour) {
+  font-size: 0.9rem;
+  color: $colour;
+  margin: 0.5rem 0;
+}
+
+// Shared building blocks
+// -----------------------------------------------------------------------------
+
+.storytime-intro,
+.storytime-landing__summary,
+.storytime-arc-list__intro,
+.storytime-reading-lists__intro,
+.storytime-feed__intro,
+.storytime-policy__intro,
+.storytime-report__intro {
+  color: vars.$lcars-grey-light;
+  max-width: 60ch;
+  margin-bottom: 1rem;
+}
+
+// Every "there is nothing here" line in the feature. One rule, because an
+// empty Story list and an empty reading list should not look like different
+// kinds of absence.
+.storytime-empty {
+  @include storytime-panel;
+
+  color: vars.$lcars-grey-light;
+  font-style: italic;
+}
+
+.storytime-fan-notice,
+.storytime-arcs__note,
+.storytime-invitations__note,
+.storytime-collaborators__note,
+.storytime-tag-admin__note,
+.storytime-moderation__note {
+  font-size: 0.8rem;
+  color: vars.$lcars-grey-light;
+  line-height: 1.5;
+}
+
+// Stories and Arcs
+// -----------------------------------------------------------------------------
+
+.storytime-story-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  padding: 0;
+  margin: 0 0 1rem;
+  list-style: none;
+}
+
+.storytime-story-card {
+  @include mixins.lcars-card;
+
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+
+  &__image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  &__title {
+    @include storytime-work-title;
+
+    display: block;
+    padding: 0.75rem 1rem 0;
+  }
+
+  &__summary {
+    padding: 0.25rem 1rem;
+    color: vars.$lcars-white;
+    font-size: 0.9rem;
+    flex: 1;
+  }
+
+  &__meta {
+    @include storytime-meta;
+
+    padding: 0 1rem 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}
+
+.storytime-story {
+  &__banner,
+  &__description,
+  &__summary {
+    margin-bottom: 1rem;
+  }
+
+  &__banner {
+    width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  &__summary {
+    font-size: 1.05rem;
+    color: vars.$lcars-white;
+  }
+
+  &__meta {
+    @include storytime-meta;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  &__progress {
+    @include storytime-panel;
+  }
+
+  &__progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: vars.$lcars-grey-border;
+    overflow: hidden;
+
+    > * {
+      display: block;
+      height: 100%;
+      background: vars.$lcars-green;
+    }
+  }
+
+  &__progress-summary,
+  &__progress-status {
+    @include storytime-meta;
+
+    margin: 0.5rem 0;
+  }
+
+  &__progress-actions,
+  &__social {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1rem 0;
+
+    button {
+      @include storytime-button;
+    }
+  }
+
+  &__continue {
+    @include storytime-button;
+
+    display: inline-block;
+    text-decoration: none;
+    background: vars.$lcars-green;
+  }
+
+  &__new-chapters {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-orange;
+    color: vars.$lcars-black;
+  }
+
+  &__reset {
+    background: vars.$lcars-grey-border;
+    color: vars.$lcars-white;
+  }
+
+  &__report {
+    margin-top: 1.5rem;
+
+    button {
+      @include storytime-button;
+
+      background: transparent;
+      color: vars.$lcars-grey-light;
+      border: 1px solid vars.$lcars-grey-border;
+
+      &:hover {
+        background: vars.$lcars-cardinal;
+        color: vars.$lcars-white;
+      }
+    }
+  }
+
+  &__report-message {
+    @include storytime-message(vars.$lcars-green);
+  }
+}
+
+.storytime-arc {
+  &__banner {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+
+  &__summary,
+  &__description {
+    color: vars.$lcars-white;
+    margin-bottom: 1rem;
+  }
+
+  &__progress {
+    @include storytime-panel;
+  }
+
+  &__progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: vars.$lcars-grey-border;
+    overflow: hidden;
+
+    > * {
+      display: block;
+      height: 100%;
+      background: vars.$lcars-green;
+    }
+  }
+
+  &__progress-summary {
+    @include storytime-meta;
+  }
+
+  &__continue {
+    @include storytime-button;
+
+    display: inline-block;
+    text-decoration: none;
+    background: vars.$lcars-green;
+  }
+
+  &__social {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1rem 0;
+  }
+
+  &__stories {
+    padding: 0;
+    margin: 0;
+    counter-reset: storytime-arc-order;
+  }
+
+  &__story {
+    @include storytime-row;
+
+    counter-increment: storytime-arc-order;
+
+    a {
+      @include storytime-work-title;
+    }
+
+    &::before {
+      content: counter(storytime-arc-order) '.';
+      color: vars.$lcars-perano;
+      font-family: vars.$font-antonio;
+      margin-right: 0.5rem;
+    }
+  }
+
+  &__note,
+  &__story-summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+}
+
+.storytime-arc-list {
+  padding: 0;
+  margin: 0;
+
+  &__entry {
+    @include storytime-row;
+
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  &__image {
+    width: 120px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  &__title {
+    @include storytime-work-title;
+  }
+
+  &__summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+}
+
+// Chapters
+// -----------------------------------------------------------------------------
+
+.storytime-chapter-list {
+  padding: 0;
+  margin: 0;
+
+  &__item {
+    @include storytime-row;
+
+    a {
+      @include storytime-work-title;
+    }
+  }
+
+  &__synopsis {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+
+  &__meta {
+    @include storytime-meta;
+  }
+
+  &__removed {
+    color: vars.$lcars-cardinal;
+    font-size: 0.85rem;
+  }
+
+  &__actions,
+  &__item-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+
+    button,
+    a {
+      @include storytime-button;
+
+      display: inline-block;
+      text-decoration: none;
+    }
+  }
+}
+
+.storytime-chapter {
+  &__breadcrumb {
+    @include storytime-meta;
+
+    margin-bottom: 0.5rem;
+
+    a {
+      color: vars.$lcars-perano;
+    }
+  }
+
+  &__cover {
+    width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+
+  &__synopsis {
+    color: vars.$lcars-grey-light;
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
+
+  &__meta {
+    @include storytime-meta;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  // The Chapter itself. Wider line height and a capped measure, because this
+  // is the one part of Storytime somebody reads for half an hour at a time.
+  &__body {
+    color: vars.$lcars-white;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 70ch;
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    h2,
+    h3 {
+      font-family: vars.$font-antonio;
+      color: vars.$lcars-sunflower;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    blockquote {
+      border-left: 3px solid vars.$lcars-perano;
+      padding-left: 1rem;
+      color: vars.$lcars-grey-light;
+      margin: 1rem 0;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+  }
+
+  &__navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 2rem 0 1rem;
+
+    a {
+      @include storytime-work-title;
+
+      font-size: 1rem;
+    }
+  }
+
+  &__progress,
+  &__story-progress {
+    @include storytime-meta;
+
+    margin: 1rem 0;
+  }
+
+  &__read-toggle,
+  &__resume-button {
+    @include storytime-button;
+  }
+
+  &__resume {
+    @include storytime-panel;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__social {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+  }
+
+  &__media {
+    margin: 1rem 0;
+  }
+}
+
+// Characters and Crew
+// -----------------------------------------------------------------------------
+
+.storytime-cast {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 0;
+  margin: 0 0 1rem;
+  list-style: none;
+
+  &__member {
+    @include mixins.lcars-card;
+
+    padding: 0.75rem;
+  }
+
+  &__portrait {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  &__name {
+    @include storytime-work-title;
+
+    display: block;
+    margin-top: 0.5rem;
+  }
+
+  &__bio {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+  }
+}
+
+.storytime-character {
+  &__header,
+  &__identity,
+  &__profile-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  &__portrait {
+    width: 180px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  &__breadcrumb {
+    @include storytime-meta;
+
+    a {
+      color: vars.$lcars-perano;
+    }
+  }
+
+  &__summary,
+  &__biography {
+    color: vars.$lcars-white;
+    max-width: 70ch;
+  }
+
+  &__profile {
+    @include storytime-panel;
+  }
+
+  &__traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+
+    li {
+      @include mixins.lcars-badge;
+
+      background: vars.$lcars-bluey;
+      color: vars.$lcars-black;
+    }
+  }
+
+  &__billing,
+  &__appearance-billing {
+    @include storytime-meta;
+  }
+
+  &__appearances {
+    padding: 0;
+    margin: 0;
+
+    li {
+      @include storytime-row;
+    }
+  }
+}
+
+.storytime-character-list,
+.storytime-collaborators,
+.storytime-credits,
+.storytime-invitations,
+.storytime-arc-stories,
+.storytime-spotlight-admin {
+  padding: 0;
+  margin: 0;
+}
+
+.storytime-character-list {
+  &__entry {
+    @include storytime-row;
+
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  &__portrait {
+    width: 72px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  &__identity {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__bio {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+  }
+
+  &__billing {
+    @include storytime-meta;
+  }
+
+  &__actions,
+  &__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    button,
+    a {
+      @include storytime-button;
+
+      text-decoration: none;
+    }
+  }
+
+  &__delete {
+    background: vars.$lcars-cardinal;
+    color: vars.$lcars-white;
+  }
+}
+
+.storytime-credits {
+  &__entry {
+    @include storytime-row;
+  }
+
+  &__role {
+    @include storytime-label-colour;
+  }
+
+  &__notes {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+  }
+}
+
+// Collaboration
+// -----------------------------------------------------------------------------
+
+.storytime-collaborators,
+.storytime-invitations,
+.storytime-arc-stories {
+  &__entry {
+    @include storytime-row;
+  }
+
+  &__identity,
+  &__member,
+  &__title,
+  &__summary,
+  &__role {
+    color: vars.$lcars-white;
+  }
+
+  &__status,
+  &__pending,
+  &__grants-label,
+  &__order {
+    @include storytime-meta;
+  }
+
+  &__capabilities,
+  &__grants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+
+    li {
+      @include mixins.lcars-badge;
+
+      background: vars.$lcars-bluey;
+      color: vars.$lcars-black;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+
+    button {
+      @include storytime-button;
+    }
+  }
+
+  &__revoke {
+    background: vars.$lcars-cardinal;
+    color: vars.$lcars-white;
+  }
+
+  &__invite,
+  &__mine {
+    @include storytime-panel;
+
+    input,
+    select,
+    textarea {
+      @include storytime-input;
+
+      margin-bottom: 0.5rem;
+    }
+
+    button {
+      @include storytime-button;
+    }
+  }
+
+  &__note {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+  }
+}
+
+// Creator dashboard and editors
+// -----------------------------------------------------------------------------
+
+.storytime-dashboard {
+  &__story,
+  &__arc {
+    @include storytime-row;
+  }
+
+  &__meta {
+    @include storytime-meta;
+  }
+
+  &__links,
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+
+    a,
+    button {
+      @include storytime-button;
+
+      display: inline-block;
+      text-decoration: none;
+    }
+  }
+
+  &__new {
+    @include storytime-button;
+
+    display: inline-block;
+    text-decoration: none;
+    background: vars.$lcars-green;
+    margin-bottom: 1rem;
+  }
+
+  &__removed {
+    border-color: vars.$lcars-cardinal;
+  }
+
+  &__removed-reason,
+  &__appeal-message {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+
+  &__appeal,
+  &__appeal-open {
+    @include storytime-panel;
+
+    textarea {
+      @include storytime-input;
+    }
+
+    button {
+      @include storytime-button;
+    }
+  }
+
+  &__policy {
+    @include storytime-panel;
+  }
+}
+
+.storytime-editor {
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+
+    button {
+      @include storytime-button;
+    }
+  }
+
+  &__cast,
+  &__media {
+    @include storytime-panel;
+  }
+
+  &__cast-list,
+  &__media-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__media-thumbnail {
+    width: 120px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+}
+
+.storytime-character-editor {
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+
+    button {
+      @include storytime-button;
+    }
+  }
+
+  &__primary {
+    @include storytime-panel;
+  }
+
+  &__traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__trait {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-bluey;
+    color: vars.$lcars-black;
+  }
+}
+
+// Reading: library, search, landing, Spotlight
+// -----------------------------------------------------------------------------
+
+.storytime-library {
+  padding: 0;
+  margin: 0;
+
+  &__entry {
+    @include storytime-row;
+  }
+
+  &__title {
+    @include storytime-work-title;
+  }
+
+  &__status {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-perano;
+    color: vars.$lcars-black;
+  }
+
+  &__bar {
+    height: 8px;
+    border-radius: 4px;
+    background: vars.$lcars-grey-border;
+    overflow: hidden;
+    margin: 0.5rem 0;
+
+    > * {
+      display: block;
+      height: 100%;
+      background: vars.$lcars-green;
+    }
+  }
+
+  &__new {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-orange;
+    color: vars.$lcars-black;
+  }
+
+  // A Story that has gone private or been removed still belongs in a reader's
+  // history, so it is dimmed rather than dropped.
+  &__gone {
+    color: vars.$lcars-grey-light;
+    font-style: italic;
+  }
+
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    button {
+      @include storytime-button;
+    }
+  }
+}
+
+.storytime-landing {
+  &__search {
+    @include storytime-panel;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    input {
+      @include storytime-input;
+
+      flex: 1;
+      min-width: 200px;
+    }
+
+    button {
+      @include storytime-button;
+    }
+  }
+
+  &__stories {
+    margin-bottom: 1.5rem;
+  }
+
+  // The reader's own corner of the feature: their feed, their lists, their
+  // library. Only shown to somebody signed in, so it is a shortcut rather
+  // than an advertisement.
+  &__yours {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    list-style: none;
+
+    a {
+      @include storytime-work-title;
+
+      font-size: 1rem;
+    }
+  }
+
+  &__unread {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-orange;
+    color: vars.$lcars-black;
+    margin-left: 0.5rem;
+  }
+}
+
+.storytime-search {
+  &__form {
+    @include storytime-panel;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+
+    input {
+      @include storytime-input;
+
+      flex: 1;
+      min-width: 200px;
+    }
+
+    button {
+      @include storytime-button;
+    }
+  }
+
+  &__kinds {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__kind {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-bluey;
+    color: vars.$lcars-black;
+  }
+
+  &__results {
+    padding: 0;
+    margin: 0;
+  }
+
+  &__result {
+    @include storytime-row;
+
+    a {
+      @include storytime-work-title;
+    }
+  }
+
+  &__summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+  }
+
+  &__count,
+  &__prompt {
+    @include storytime-meta;
+  }
+}
+
+.storytime-spotlight {
+  @include storytime-panel;
+
+  &__headline {
+    font-family: vars.$font-antonio;
+    font-size: 1.4rem;
+    color: vars.$lcars-sunflower;
+  }
+
+  &__image {
+    width: 100%;
+    max-height: 260px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  &__work {
+    @include storytime-work-title;
+  }
+
+  &__reason,
+  &__summary {
+    color: vars.$lcars-white;
+  }
+
+  &__dates {
+    @include storytime-meta;
+  }
+
+  &__archive {
+    padding: 0;
+    margin: 0;
+  }
+
+  &__entry {
+    @include storytime-row;
+  }
+
+  // A past selection is history rather than news, and reads as such.
+  &--past {
+    opacity: 0.75;
+  }
+}
+
+.storytime-spotlight-admin {
+  &__entry {
+    @include storytime-row;
+  }
+
+  &__meta {
+    @include storytime-meta;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    a,
+    button {
+      @include storytime-button;
+
+      display: inline-block;
+      text-decoration: none;
+    }
+  }
+}
+
+// Moderation and policy
+// -----------------------------------------------------------------------------
+
+.storytime-policy {
+  &__rule {
+    @include storytime-panel;
+
+    h2,
+    h3 {
+      font-family: vars.$font-antonio;
+      color: vars.$lcars-sunflower;
+    }
+  }
+}
+
+.storytime-report {
+  &__policy {
+    @include storytime-panel;
+  }
+}
+
+.storytime-removed {
+  &__summary {
+    color: vars.$lcars-grey-light;
+    max-width: 60ch;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+
+    a,
+    button {
+      @include storytime-button;
+
+      display: inline-block;
+      text-decoration: none;
+    }
+  }
+}
+
+.storytime-moderation {
+  &__reports,
+  &__appeals {
+    padding: 0;
+    margin: 0;
+  }
+
+  &__report,
+  &__appeal {
+    @include storytime-row;
+  }
+
+  &__what {
+    @include storytime-work-title;
+
+    font-size: 1rem;
+  }
+
+  &__meta {
+    @include storytime-meta;
+  }
+
+  &__description {
+    color: vars.$lcars-white;
+    font-size: 0.9rem;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+
+    button {
+      @include storytime-button;
+    }
+
+    textarea,
+    select {
+      @include storytime-input;
+    }
+  }
+}
+
+// Tags
+// -----------------------------------------------------------------------------
+
+.storytime-tag-picker {
+  @include storytime-panel;
+
+  &__group {
+    border: 1px solid vars.$lcars-grey-border;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+
+    legend {
+      @include storytime-label-colour;
+
+      font-size: 0.85rem;
+      padding: 0 0.5rem;
+    }
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0.25rem 0.5rem 0.25rem 0;
+    color: vars.$lcars-white;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    button {
+      @include storytime-button;
+    }
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+
+  &__saved {
+    @include storytime-message(vars.$lcars-green);
+  }
+
+  &__loading {
+    @include storytime-meta;
+  }
+}
+
+.storytime-tag-admin {
+  &__form {
+    @include storytime-panel;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-end;
+
+    input,
+    select {
+      @include storytime-input;
+
+      flex: 1;
+      min-width: 160px;
+    }
+
+    button {
+      @include storytime-button;
+    }
+  }
+
+  &__group {
+    margin-bottom: 1rem;
+  }
+
+  &__tags {
+    padding: 0;
+    margin: 0;
+
+    li {
+      @include storytime-row;
+
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+  }
+
+  &__name {
+    color: vars.$lcars-white;
+    font-family: vars.$font-antonio;
+  }
+
+  &__slug {
+    @include storytime-meta;
+  }
+
+  &__description {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+    flex-basis: 100%;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+
+    button {
+      @include storytime-button;
+    }
+  }
+}
+
+// Media
+// -----------------------------------------------------------------------------
+
+.storytime-media {
+  @include storytime-panel;
+
+  &__thumbnail,
+  &__poster {
+    width: 100%;
+    max-width: 480px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  &__player {
+    width: 100%;
+    max-width: 720px;
+    aspect-ratio: 16 / 9;
+    border: none;
+    border-radius: 6px;
+  }
+
+  &__play {
+    @include storytime-button;
+  }
+
+  &__title {
+    @include storytime-work-title;
+
+    font-size: 1rem;
+  }
+
+  &__caption,
+  &__notes {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+  }
+
+  // Says that nothing is loaded from the provider until the reader asks. It
+  // has to be legible, because it is a promise about their privacy.
+  &__privacy {
+    @include storytime-meta;
+
+    color: vars.$lcars-perano;
+  }
+}
+
+// Ratings, follows and comments
+// ----------------------------------------------------------------------------
+
+.storytime-reactions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: 1px solid vars.$lcars-grey-border;
+    border-radius: 14px;
+    padding: 0.25rem 0.75rem;
+    color: vars.$lcars-grey-light;
+    cursor: pointer;
+    transition:
+      color 0.2s,
+      border-color 0.2s;
+
+    &:hover:not(:disabled) {
+      color: vars.$lcars-sunflower;
+      border-color: vars.$lcars-sunflower;
+    }
+
+    // What this reader chose, which has to be obvious at a glance or the
+    // button cannot be read as a toggle.
+    &--chosen {
+      color: vars.$lcars-black;
+      background: vars.$lcars-sunflower;
+      border-color: vars.$lcars-sunflower;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  &__label {
+    @include storytime-meta;
+
+    color: inherit;
+  }
+
+  &__count {
+    font-family: vars.$font-antonio;
+  }
+
+  &__rating {
+    font-family: vars.$font-antonio;
+    font-size: 1.2rem;
+    color: vars.$lcars-white;
+    min-width: 2ch;
+    text-align: center;
+  }
+
+  &__note {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+.storytime-follow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &__button {
+    @include storytime-button;
+
+    background: transparent;
+    color: vars.$lcars-perano;
+    border: 1px solid vars.$lcars-perano;
+
+    &:hover:not(:disabled) {
+      background: vars.$lcars-perano;
+      color: vars.$lcars-black;
+    }
+
+    // Already following, so the button offers to stop rather than to start.
+    &--following {
+      background: vars.$lcars-perano;
+      color: vars.$lcars-black;
+    }
+  }
+
+  &__count {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+.storytime-comments {
+  margin-top: 2rem;
+
+  h2 {
+    font-family: vars.$font-antonio;
+    color: vars.$lcars-sunflower;
+  }
+
+  &__list,
+  &__replies {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__comment {
+    @include storytime-row;
+  }
+
+  // Replies are indented once and never again: the thread is one level deep,
+  // and the rule says so.
+  &__replies {
+    margin: 0.75rem 0 0 1.5rem;
+    border-left: 2px solid vars.$lcars-grey-border;
+    padding-left: 0.75rem;
+  }
+
+  &__reply {
+    list-style: none;
+    padding: 0.5rem 0;
+  }
+
+  &__text {
+    color: vars.$lcars-white;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    margin: 0;
+  }
+
+  // A comment that has lost its words keeps its place in the thread, and says
+  // so plainly rather than pretending to be missing.
+  &__silenced {
+    color: vars.$lcars-grey-light;
+    font-style: italic;
+    margin: 0;
+  }
+
+  &__edited {
+    @include storytime-meta;
+
+    margin: 0.25rem 0 0;
+  }
+
+  &__controls,
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+
+    button {
+      @include storytime-button;
+
+      font-size: 0.8rem;
+      padding: 0.2rem 0.75rem;
+    }
+  }
+
+  &__reply-button {
+    @include storytime-button;
+
+    font-size: 0.8rem;
+    padding: 0.2rem 0.75rem;
+    background: transparent;
+    color: vars.$lcars-perano;
+    border: 1px solid vars.$lcars-perano;
+  }
+
+  &__form {
+    margin-top: 0.75rem;
+  }
+
+  &__label {
+    @include storytime-label-colour;
+
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+  }
+
+  &__input {
+    @include storytime-input;
+
+    resize: vertical;
+  }
+
+  &__note,
+  &__loading {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+// The feed and reading lists
+// -----------------------------------------------------------------------------
+
+.storytime-feed {
+  &__list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__entry {
+    @include storytime-row;
+  }
+
+  &__what {
+    @include storytime-meta;
+
+    margin: 0;
+  }
+
+  &__link {
+    @include storytime-work-title;
+  }
+
+  &__when {
+    @include storytime-meta;
+
+    display: block;
+    margin-top: 0.25rem;
+  }
+
+  &__more {
+    @include storytime-button;
+
+    display: block;
+    margin: 1rem auto;
+  }
+
+  &__loading {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+.storytime-reading-lists {
+  &__form {
+    @include storytime-panel;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  &__label {
+    @include storytime-label-colour;
+
+    font-size: 0.8rem;
+  }
+
+  &__input {
+    @include storytime-input;
+
+    flex: 1;
+    min-width: 200px;
+  }
+
+  &__checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: vars.$lcars-white;
+    font-size: 0.9rem;
+  }
+
+  &__form button {
+    @include storytime-button;
+  }
+
+  &__list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__item {
+    @include storytime-row;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+
+    button {
+      @include storytime-button;
+
+      margin-left: auto;
+      background: vars.$lcars-cardinal;
+      color: vars.$lcars-white;
+    }
+  }
+
+  &__name {
+    @include storytime-work-title;
+  }
+
+  &__count,
+  &__visibility {
+    @include storytime-meta;
+  }
+
+  &__loading {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+.storytime-reading-list {
+  &__description {
+    color: vars.$lcars-white;
+    max-width: 70ch;
+  }
+
+  &__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    button {
+      @include storytime-button;
+    }
+  }
+
+  &__visibility,
+  &__kind {
+    @include storytime-meta;
+  }
+
+  &__items {
+    padding: 0;
+    margin: 0;
+    counter-reset: storytime-list-order;
+  }
+
+  &__item {
+    @include storytime-row;
+
+    counter-increment: storytime-list-order;
+
+    &::before {
+      content: counter(storytime-list-order) '.';
+      color: vars.$lcars-perano;
+      font-family: vars.$font-antonio;
+      margin-right: 0.5rem;
+    }
+  }
+
+  &__title {
+    @include storytime-work-title;
+  }
+
+  &__summary,
+  &__note {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+
+  &__note {
+    font-style: italic;
+  }
+
+  &__item-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+
+    button {
+      @include storytime-button;
+
+      font-size: 0.8rem;
+      padding: 0.2rem 0.75rem;
+    }
+  }
+
+  &__loading {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+.storytime-add-to-list {
+  display: inline-block;
+  position: relative;
+
+  &__toggle {
+    @include storytime-button;
+
+    background: transparent;
+    color: vars.$lcars-perano;
+    border: 1px solid vars.$lcars-perano;
+  }
+
+  &__lists {
+    padding: 0;
+    margin: 0.5rem 0 0;
+    list-style: none;
+  }
+
+  &__list {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+
+    button {
+      @include storytime-button;
+
+      font-size: 0.85rem;
+    }
+  }
+
+  &__already {
+    @include storytime-meta;
+  }
+
+  &__empty {
+    @include storytime-meta;
+
+    max-width: 30ch;
+  }
+
+  &__status {
+    @include storytime-message(vars.$lcars-green);
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+// The creator page
+// -----------------------------------------------------------------------------
+
+.storytime-creator {
+  &__stories,
+  &__arcs,
+  &__lists {
+    padding: 0;
+    margin: 0 0 1.5rem;
+    list-style: none;
+
+    li {
+      @include storytime-row;
+    }
+
+    a {
+      @include storytime-work-title;
+    }
+  }
+
+  &__summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+
+  &__list-count {
+    @include storytime-meta;
+
+    margin-left: 0.5rem;
+  }
+}
+
+// Narrow screens
+// -----------------------------------------------------------------------------
+
+@media (width <= 768px) {
+  .storytime-arc-list__entry,
+  .storytime-character-list__entry,
+  .storytime-character__header,
+  .storytime-character__identity {
+    flex-direction: column;
+  }
+
+  .storytime-arc-list__image,
+  .storytime-character-list__portrait,
+  .storytime-character__portrait {
+    width: 100%;
+    max-width: 240px;
+  }
+
+  .storytime-chapter__navigation {
+    flex-direction: column;
+  }
+
+  .storytime-reading-lists__item button {
+    margin-left: 0;
+  }
+
+  .storytime-tag-admin__actions {
+    margin-left: 0;
+  }
+}
