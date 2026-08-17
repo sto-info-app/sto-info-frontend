@@ -265,6 +265,18 @@ describe('STORYTIME_ROUTES', () => {
   });
 
   describe('public routes', () => {
+    // Finding something to read, and looking at what somebody has written, are
+    // the least private things anybody does here.
+    it.each(['search', 'creators/:userId'])(
+      'reads %s without sign-in',
+      path => {
+        const route = childAt(path);
+
+        expect(route?.canActivate).toBeUndefined();
+        expect(route?.data?.['title']).toBeDefined();
+      },
+    );
+
     it('lists Stories without requiring sign-in', () => {
       expect(childAt('stories')?.canActivate).toBeUndefined();
     });

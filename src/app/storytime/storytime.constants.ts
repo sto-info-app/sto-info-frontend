@@ -123,6 +123,21 @@ export const REPORT_REASONS = [
 ];
 
 /**
+ * The kinds of content a reader may search, and how each is named.
+ *
+ * The empty code means "everything", which is the default and the first tab: a
+ * reader searching for a name rarely knows whether it belongs to a Story, a
+ * Chapter or a Character.
+ */
+export const SEARCHABLE_KINDS = [
+  { code: '', label: 'Everything' },
+  { code: 'STORY', label: 'Stories' },
+  { code: 'CHAPTER', label: 'Chapters' },
+  { code: 'CHARACTER', label: 'Characters' },
+  { code: 'ARC', label: 'Arcs' },
+] as const;
+
+/**
  * How long to wait after a reader stops scrolling before recording where they
  * are.
  *

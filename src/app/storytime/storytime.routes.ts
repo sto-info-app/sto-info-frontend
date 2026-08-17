@@ -282,6 +282,25 @@ export const STORYTIME_ROUTES: Routes = [
         data: { title: APP_ROUTE_TITLES.STORYTIME_REMOVED },
       },
 
+      // Search and creator pages need no account: finding something to read is
+      // the least private thing anybody does here.
+      {
+        path: 'search',
+        loadComponent: () =>
+          import('./public/storytime-search/storytime-search.component').then(
+            m => m.StorytimeSearchComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_SEARCH },
+      },
+      {
+        path: 'creators/:userId',
+        loadComponent: () =>
+          import('./public/creator-page/creator-page.component').then(
+            m => m.CreatorPageComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_CREATOR },
+      },
+
       // Reading the Spotlight needs no account at all.
       {
         path: 'spotlight',

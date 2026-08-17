@@ -180,6 +180,7 @@ export interface StoryQuery {
   languageCode?: string;
   completionState?: CompletionState;
   ownerUserId?: string;
+  sort?: StorySort;
 }
 
 /**
@@ -508,6 +509,51 @@ export interface CreateAppealRequest {
   targetType: StorytimeTargetType;
   targetId: string;
   body: string;
+}
+
+/**
+ * How a listing of Stories is ordered.
+ *
+ * Two different questions: a reader looking for something new wants what was
+ * published last, and a reader following work in progress wants what was
+ * written in last.
+ */
+export enum StorySort {
+  RECENTLY_PUBLISHED = 'RECENTLY_PUBLISHED',
+  RECENTLY_UPDATED = 'RECENTLY_UPDATED',
+}
+
+/**
+ * One thing search found, whatever kind of thing it is.
+ */
+export interface SearchHit {
+  targetType: StorytimeTargetType;
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  /** The Story it belongs to, for a Chapter or a Character. */
+  storySlug: string | null;
+}
+
+/**
+ * A page of search results.
+ */
+export interface SearchResults {
+  items: SearchHit[];
+  total: number;
+  page: number;
+  pageSize: number;
+  /** How many of each kind matched, so the filters can show counts. */
+  countsByType: Record<string, number>;
+}
+
+/**
+ * Everything one member has published.
+ */
+export interface CreatorWork {
+  stories: Story[];
+  arcs: Arc[];
 }
 
 /**
