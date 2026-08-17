@@ -51,6 +51,27 @@
     <a [routerLink]="['/', appRoutes.STORYTIME, 'search']">Search Storytime</a>
   </p>
 
+  @if (isSignedIn) {
+    <ul class="storytime-landing__yours">
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'feed']">
+          Your feed
+          @if (unreadCount > 0) {
+            <span class="storytime-landing__unread">{{ unreadCount }} new</span>
+          }
+        </a>
+      </li>
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'reading-lists']">
+          Your reading lists
+        </a>
+      </li>
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'library']">Your library</a>
+      </li>
+    </ul>
+  }
+
   <div class="lcars-text-bar small-lcars-bar-gap">
     <span>New Stories</span>
   </div>

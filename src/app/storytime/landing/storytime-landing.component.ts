@@ -5,6 +5,8 @@ import { RouterModule } from '@angular/router';
 import { forkJoin, switchMap, of } from 'rxjs';
 import { Spotlight, Story, StorySort } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { AuthService } from 'src/app/core/auth/auth.service';
+import { FollowService } from '../follow.service';
 import { SpotlightService } from '../spotlight.service';
 import { StoryService } from '../story.service';
 import { STORYTIME_COPY } from '../storytime.constants';
@@ -49,10 +51,15 @@ export class StorytimeLandingComponent implements OnInit {
   /** User-facing copy, held centrally so wording stays consistent. */
   readonly copy = STORYTIME_COPY;
 
+  /** How much of the reader's feed is new, once it has been counted. */
+  unreadCount = 0;
+
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
 
   private readonly _spotlightService = inject(SpotlightService);
+  private readonly _followService = inject(FollowService);
+  private readonly _authService = inject(AuthService);
   private readonly _storyService = inject(StoryService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _destroyRef = inject(DestroyRef);
@@ -62,6 +69,7 @@ export class StorytimeLandingComponent implements OnInit {
    */
   ngOnInit(): void {
     this.loadStories();
+    this.countUnread();
     this._storytimeService
       .getFeatureState()
       .pipe(
@@ -82,6 +90,36 @@ export class StorytimeLandingComponent implements OnInit {
         error: () => {
           this.spotlight = [];
         },
+      });
+  }
+
+  /**
+   * Whether the reader has a feed and lists of their own at all.
+   *
+   * @returns True when somebody is signed in.
+   */
+  get isSignedIn(): boolean {
+    return this._authService.isLoggedIn();
+  }
+
+  /**
+   * Counts what is new in the reader's feed.
+   *
+   * Best effort, and silent when it fails: an unread badge is a convenience,
+   * and a landing page that apologises for not having one is worse than a
+   * landing page without one.
+   */
+  private countUnread(): void {
+    if (!this.isSignedIn) {
+      return;
+    }
+
+    this._followService
+      .getUnreadCount()
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: ({ unread }) => (this.unreadCount = unread),
+        error: () => (this.unreadCount = 0),
       });
   }
 

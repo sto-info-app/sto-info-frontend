@@ -7,6 +7,8 @@ import {
   StorySort,
   STORYTIME_DISABLED_STATE,
 } from 'src/app/models/storytime.models';
+import { AuthService } from 'src/app/core/auth/auth.service';
+import { FollowService } from '../follow.service';
 import { SpotlightService } from '../spotlight.service';
 import { StoryService } from '../story.service';
 import { STORYTIME_COPY } from '../storytime.constants';
@@ -18,6 +20,8 @@ describe('StorytimeLandingComponent', () => {
   let spotlightService: { getSpotlight: jest.Mock };
   let storytimeService: { getFeatureState: jest.Mock };
   let storyService: { getStories: jest.Mock };
+  let followService: { getUnreadCount: jest.Mock };
+  let authService: { isLoggedIn: jest.Mock };
 
   /**
    * Builds a Spotlight selection.
@@ -74,6 +78,13 @@ describe('StorytimeLandingComponent', () => {
       ),
     };
 
+    // Signed in by default, so the reader's own corner of the page is there
+    // to be asserted about; the signed-out case is its own test.
+    authService = { isLoggedIn: jest.fn().mockReturnValue(true) };
+    followService = {
+      getUnreadCount: jest.fn().mockReturnValue(of({ unread: 3 })),
+    };
+
     storyService = {
       getStories: jest.fn().mockReturnValue(
         of({
@@ -99,6 +110,8 @@ describe('StorytimeLandingComponent', () => {
         { provide: SpotlightService, useValue: spotlightService },
         { provide: StoryService, useValue: storyService },
         { provide: StorytimeService, useValue: storytimeService },
+        { provide: FollowService, useValue: followService },
+        { provide: AuthService, useValue: authService },
       ],
     });
   });
@@ -316,6 +329,60 @@ describe('StorytimeLandingComponent', () => {
       expect(element.textContent).toContain(STORYTIME_COPY.LANDING_TITLE);
       expect(fixture.componentInstance.newest).toEqual([]);
       expect(fixture.componentInstance.updated).toEqual([]);
+    });
+  });
+
+  describe('the reader’s own corner of the page', () => {
+    it('links to the feed, the reading lists and the library', () => {
+      const element = render();
+      const links = [
+        ...element.querySelectorAll('.storytime-landing__yours a'),
+      ].map(a => a.getAttribute('href'));
+
+      expect(links).toEqual([
+        '/storytime/feed',
+        '/storytime/reading-lists',
+        '/storytime/library',
+      ]);
+    });
+
+    it('says how much of the feed is new', () => {
+      const element = render();
+
+      expect(
+        element.querySelector('.storytime-landing__unread')?.textContent,
+      ).toContain('3 new');
+    });
+
+    it('says nothing when the feed holds nothing new', () => {
+      followService.getUnreadCount.mockReturnValue(of({ unread: 0 }));
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-landing__unread')).toBeNull();
+    });
+
+    // An unread badge is a convenience, and a landing page that apologises for
+    // not having one is worse than a landing page without one.
+    it('shows the page even when the count cannot be read', () => {
+      followService.getUnreadCount.mockReturnValue(
+        throwError(() => new Error('nope')),
+      );
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-landing__unread')).toBeNull();
+      expect(element.querySelector('.storytime-landing__yours')).not.toBeNull();
+    });
+
+    // A feed and a reading list only exist for somebody with an account.
+    it('shows nothing of the kind to a signed-out reader', () => {
+      authService.isLoggedIn.mockReturnValue(false);
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-landing__yours')).toBeNull();
+      expect(followService.getUnreadCount).not.toHaveBeenCalled();
     });
   });
 });

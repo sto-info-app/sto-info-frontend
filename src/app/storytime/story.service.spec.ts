@@ -166,11 +166,18 @@ describe('StoryService', () => {
       ['publishStory', 'publish'],
       ['unpublishStory', 'unpublish'],
       ['archiveStory', 'archive'],
+      // Publishing is refused until this has been sent, so it travels with
+      // the other actions rather than being tested apart from them.
+      ['acceptContentPolicy', 'content-policy'],
     ])('performs the %s action', async (method, path) => {
       const call =
-        service[method as 'publishStory' | 'unpublishStory' | 'archiveStory'](
-          STORY_ID,
-        );
+        service[
+          method as
+            | 'publishStory'
+            | 'unpublishStory'
+            | 'archiveStory'
+            | 'acceptContentPolicy'
+        ](STORY_ID);
       const result = firstValueFrom(call);
 
       const request = httpMock.expectOne(
