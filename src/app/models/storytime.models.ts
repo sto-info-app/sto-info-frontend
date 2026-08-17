@@ -361,6 +361,156 @@ export interface ArcWithStories {
 }
 
 /**
+ * The kinds of Storytime content that can be reported or moderated.
+ */
+export enum StorytimeTargetType {
+  STORY = 'STORY',
+  CHAPTER = 'CHAPTER',
+  CHARACTER = 'CHARACTER',
+  ARC = 'ARC',
+  MEDIA = 'MEDIA',
+  CREW_CREDIT = 'CREW_CREDIT',
+  COMMENT = 'COMMENT',
+  SPOTLIGHT = 'SPOTLIGHT',
+}
+
+/**
+ * Why somebody reported a piece of content.
+ *
+ * The content policy's own categories: a reporter picks from the same list an
+ * administrator cites back to the creator.
+ */
+export enum StorytimeReportReason {
+  HARASSMENT = 'HARASSMENT',
+  HATE_CONTENT = 'HATE_CONTENT',
+  EXPLICIT_CONTENT = 'EXPLICIT_CONTENT',
+  GRAPHIC_VIOLENCE = 'GRAPHIC_VIOLENCE',
+  PLAGIARISM = 'PLAGIARISM',
+  IMPERSONATION = 'IMPERSONATION',
+  PERSONAL_INFORMATION = 'PERSONAL_INFORMATION',
+  COPYRIGHT = 'COPYRIGHT',
+  SPAM = 'SPAM',
+  MALICIOUS_LINK = 'MALICIOUS_LINK',
+  DECEPTIVE_MEDIA = 'DECEPTIVE_MEDIA',
+  OTHER = 'OTHER',
+}
+
+/**
+ * Where a Storytime report sits in the moderation queue.
+ */
+export enum StorytimeReportStatus {
+  OPEN = 'OPEN',
+  UNDER_REVIEW = 'UNDER_REVIEW',
+  ACTIONED = 'ACTIONED',
+  DISMISSED = 'DISMISSED',
+}
+
+/**
+ * What an administrator did to a piece of content.
+ */
+export enum StorytimeModerationAction {
+  REMOVED = 'REMOVED',
+  RESTORED = 'RESTORED',
+  REPORT_RESOLVED = 'REPORT_RESOLVED',
+  APPEAL_UPHELD = 'APPEAL_UPHELD',
+  APPEAL_REJECTED = 'APPEAL_REJECTED',
+}
+
+/**
+ * Where a creator's appeal against a removal has got to.
+ */
+export enum AppealStatus {
+  SUBMITTED = 'SUBMITTED',
+  UPHELD = 'UPHELD',
+  REJECTED = 'REJECTED',
+  WITHDRAWN = 'WITHDRAWN',
+}
+
+/**
+ * What a reporter is told back.
+ *
+ * Deliberately thin: what was decided about somebody else's work is the
+ * moderation queue's business, not the reporter's.
+ */
+export interface StorytimeReportReceipt {
+  id: string;
+  targetType: StorytimeTargetType;
+  targetId: string;
+  status: StorytimeReportStatus;
+  createdAt: string;
+}
+
+/**
+ * A report as the moderation queue shows it.
+ */
+export interface StorytimeReport extends StorytimeReportReceipt {
+  reporterUserId: string;
+  reasonCode: StorytimeReportReason;
+  description: string | null;
+  assignedToUserId: string | null;
+  resolution: string | null;
+  resolvedAt: string | null;
+}
+
+/**
+ * One entry in a piece of content's moderation history.
+ */
+export interface ModerationActionEntry {
+  id: string;
+  targetType: StorytimeTargetType;
+  targetId: string;
+  action: StorytimeModerationAction;
+  actorUserId: string;
+  reasonCode: string | null;
+  message: string | null;
+  createdAt: string;
+}
+
+/**
+ * A creator's appeal against a removal.
+ */
+export interface ModerationAppeal {
+  id: string;
+  targetType: StorytimeTargetType;
+  targetId: string;
+  appellantUserId: string;
+  body: string;
+  status: AppealStatus;
+  reviewNotes: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+}
+
+/**
+ * Reports a piece of content.
+ */
+export interface CreateReportRequest {
+  targetType: StorytimeTargetType;
+  targetId: string;
+  reasonCode: StorytimeReportReason;
+  description?: string;
+}
+
+/**
+ * Removes or restores a piece of content.
+ */
+export interface ModerateContentRequest {
+  targetType: StorytimeTargetType;
+  targetId: string;
+  reasonCode?: StorytimeReportReason | null;
+  message: string;
+}
+
+/**
+ * Appeals against a removal.
+ */
+export interface CreateAppealRequest {
+  targetType: StorytimeTargetType;
+  targetId: string;
+  body: string;
+}
+
+/**
  * What a Spotlight entry features.
  */
 export enum SpotlightEntityType {
