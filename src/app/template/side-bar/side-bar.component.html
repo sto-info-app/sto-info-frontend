@@ -65,6 +65,12 @@
             >{{ appRouteTitles.STORYTIME_MANAGE }}</a
           >
           <a
+            [routerLink]="getRouteLink(appRoutes.STORYTIME_MANAGE_ARCS)"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="peach"
+            >{{ appRouteTitles.STORYTIME_MANAGE_ARCS }}</a
+          >
+          <a
             [routerLink]="getRouteLink(appRoutes.STORYTIME_INVITATIONS)"
             [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="peach"

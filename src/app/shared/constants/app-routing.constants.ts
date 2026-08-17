@@ -116,6 +116,12 @@ export const APP_ROUTES = {
   STORYTIME_CHAPTER_NEW:
     ROOT_ROUTES.STORYTIME + '/manage/stories/:storyId/chapters/new',
   STORYTIME_CHAPTER_EDIT: ROOT_ROUTES.STORYTIME + '/manage/chapters/:chapterId',
+  STORYTIME_MANAGE_ARCS: ROOT_ROUTES.STORYTIME + '/manage/arcs',
+  STORYTIME_ARC_NEW: ROOT_ROUTES.STORYTIME + '/manage/arcs/new',
+  STORYTIME_ARC_EDIT: ROOT_ROUTES.STORYTIME + '/manage/arcs/:arcId',
+  STORYTIME_ARC_STORIES: ROOT_ROUTES.STORYTIME + '/manage/arcs/:arcId/stories',
+  STORYTIME_ARC_COLLABORATORS:
+    ROOT_ROUTES.STORYTIME + '/manage/arcs/:arcId/collaborators',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'service-interruption',
@@ -219,6 +225,11 @@ export const APP_ROUTE_TITLES = {
   STORYTIME_MANAGE_CHAPTERS: 'Chapters',
   STORYTIME_CHAPTER_NEW: 'Write a Chapter',
   STORYTIME_CHAPTER_EDIT: 'Edit Chapter',
+  STORYTIME_MANAGE_ARCS: 'Your Arcs',
+  STORYTIME_ARC_NEW: 'Create an Arc',
+  STORYTIME_ARC_EDIT: 'Edit Arc',
+  STORYTIME_ARC_STORIES: 'Arc Stories',
+  STORYTIME_ARC_COLLABORATORS: 'Arc Collaborators',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'Service Interruption',

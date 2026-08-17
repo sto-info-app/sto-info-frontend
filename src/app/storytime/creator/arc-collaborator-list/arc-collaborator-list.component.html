@@ -1,0 +1,154 @@
+<section id="storytime-arc-collaborator-list-page">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Arc collaborators</span>
+  </div>
+
+  <nav class="storytime-collaborators__actions">
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', arcId]">
+      Back to the Arc
+    </a>
+    <a
+      [routerLink]="[
+        '/',
+        appRoutes.STORYTIME,
+        'manage',
+        'arcs',
+        arcId,
+        'stories',
+      ]">
+      Stories
+    </a>
+  </nav>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Collaborators unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <p class="storytime-collaborators__note">
+    Collaborators can help assemble the Arc. They gain nothing over the Stories
+    in it, and only you can publish it.
+  </p>
+
+  <form
+    class="storytime-collaborators__invite"
+    [formGroup]="form"
+    (ngSubmit)="invite()">
+    <label for="arc-collaborator-user">Member ID</label>
+    <input
+      id="arc-collaborator-user"
+      type="text"
+      formControlName="userId" />
+    @if (form.controls.userId.touched && form.controls.userId.invalid) {
+      <p class="form-error">Name the member you want to invite.</p>
+    }
+
+    <label for="arc-collaborator-role">What you call them</label>
+    <input
+      id="arc-collaborator-role"
+      type="text"
+      formControlName="collaborationRole"
+      maxlength="100" />
+
+    <fieldset>
+      <legend>What they may do</legend>
+      <label>
+        <input
+          type="checkbox"
+          formControlName="canEditArc" />
+        Edit the Arc’s details
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          formControlName="canManageStories" />
+        Choose which Stories are in it
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          formControlName="canManageCollaborators" />
+        Invite other collaborators
+      </label>
+    </fieldset>
+
+    <button type="submit">Send invitation</button>
+  </form>
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading collaborators"></app-loading-bar>
+  } @else if (collaborators.length === 0) {
+    <p class="storytime-empty">Nobody else is helping with this Arc yet.</p>
+  } @else {
+    <ul class="storytime-collaborators">
+      @for (collaborator of collaborators; track collaborator.id) {
+        <li class="storytime-collaborators__entry">
+          <p class="storytime-collaborators__identity">
+            <span class="storytime-collaborators__member">{{
+              collaborator.collaborationRole ?? collaborator.userId
+            }}</span>
+            <span class="storytime-collaborators__status">{{
+              statusLabels[collaborator.invitationStatus]
+            }}</span>
+          </p>
+
+          @if (isPending(collaborator)) {
+            <p class="storytime-collaborators__pending">
+              They have not answered yet, so they cannot change anything.
+            </p>
+          }
+
+          <div class="storytime-collaborators__capabilities">
+            <label>
+              <input
+                type="checkbox"
+                [checked]="collaborator.canEditArc"
+                (change)="
+                  setCapability(
+                    collaborator,
+                    'canEditArc',
+                    !collaborator.canEditArc
+                  )
+                " />
+              Edit the Arc’s details
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                [checked]="collaborator.canManageStories"
+                (change)="
+                  setCapability(
+                    collaborator,
+                    'canManageStories',
+                    !collaborator.canManageStories
+                  )
+                " />
+              Choose which Stories are in it
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                [checked]="collaborator.canManageCollaborators"
+                (change)="
+                  setCapability(
+                    collaborator,
+                    'canManageCollaborators',
+                    !collaborator.canManageCollaborators
+                  )
+                " />
+              Invite other collaborators
+            </label>
+          </div>
+
+          <button
+            type="button"
+            class="storytime-collaborators__revoke"
+            (click)="revoke(collaborator)">
+            {{ isPending(collaborator) ? 'Withdraw invitation' : 'Remove' }}
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</section>

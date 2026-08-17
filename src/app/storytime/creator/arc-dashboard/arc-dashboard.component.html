@@ -1,0 +1,103 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading your Arcs"></app-loading-bar>
+}
+
+<div id="storytime-arc-dashboard-page">
+  <h1>Your Arcs</h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Action failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <p class="storytime-arcs__note">
+    An Arc is a reading order across several Stories. The Stories stay with
+    whoever wrote them: anything you did not write joins only once its author
+    agrees.
+  </p>
+
+  <a
+    class="storytime-dashboard__new"
+    [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', 'new']">
+    <i
+      class="fa-solid fa-plus"
+      aria-hidden="true"></i>
+    Create an Arc
+  </a>
+
+  @if (!isLoading && arcs.length === 0) {
+    <p class="storytime-empty">
+      You are not curating an Arc yet. Create one to gather Stories into a
+      reading order.
+    </p>
+  }
+
+  @for (arc of arcs; track arc.id) {
+    <article class="storytime-dashboard__arc">
+      <h2>
+        <a
+          [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', arc.id]"
+          >{{ arc.title }}</a
+        >
+      </h2>
+
+      <ul class="storytime-dashboard__meta">
+        <li>
+          <span class="visually-hidden">Status: </span>
+          {{ statusLabels[arc.status] }}
+        </li>
+        <li>
+          <span class="visually-hidden">Visibility: </span>
+          {{ visibilityLabels[arc.visibility] }}
+        </li>
+      </ul>
+
+      <nav class="storytime-dashboard__links">
+        <a
+          [routerLink]="[
+            '/',
+            appRoutes.STORYTIME,
+            'manage',
+            'arcs',
+            arc.id,
+            'stories',
+          ]"
+          >Stories</a
+        >
+        <a
+          [routerLink]="[
+            '/',
+            appRoutes.STORYTIME,
+            'manage',
+            'arcs',
+            arc.id,
+            'collaborators',
+          ]"
+          >Collaborators</a
+        >
+        @if (arc.publishedAt) {
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]"
+            >View as a reader</a
+          >
+        }
+      </nav>
+
+      <div class="storytime-dashboard__actions">
+        @if (canPublish(arc)) {
+          <button
+            type="button"
+            (click)="publish(arc)">
+            Publish
+          </button>
+        } @else {
+          <button
+            type="button"
+            (click)="unpublish(arc)">
+            Unpublish
+          </button>
+        }
+      </div>
+    </article>
+  }
+</div>

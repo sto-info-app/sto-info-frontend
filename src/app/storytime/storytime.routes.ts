@@ -153,6 +153,57 @@ export const STORYTIME_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
 
+      // Curating an Arc needs sign-in but no creator permission: an Arc is a
+      // reading order over other people's Stories, not a claim on any of them,
+      // so a reader who never writes may still assemble one. Declared before
+      // the public `arcs/:arcSlug` route so `manage/arcs` cannot be read as a
+      // slug.
+      {
+        path: 'manage/arcs',
+        loadComponent: () =>
+          import('./creator/arc-dashboard/arc-dashboard.component').then(
+            m => m.ArcDashboardComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_MANAGE_ARCS },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'manage/arcs/new',
+        loadComponent: () =>
+          import('./creator/arc-editor/arc-editor.component').then(
+            m => m.ArcEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_ARC_NEW },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'manage/arcs/:arcId',
+        loadComponent: () =>
+          import('./creator/arc-editor/arc-editor.component').then(
+            m => m.ArcEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_ARC_EDIT },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'manage/arcs/:arcId/stories',
+        loadComponent: () =>
+          import('./creator/arc-story-list/arc-story-list.component').then(
+            m => m.ArcStoryListComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_ARC_STORIES },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'manage/arcs/:arcId/collaborators',
+        loadComponent: () =>
+          import('./creator/arc-collaborator-list/arc-collaborator-list.component').then(
+            m => m.ArcCollaboratorListComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_ARC_COLLABORATORS },
+        canActivate: [AuthGuard],
+      },
+
       {
         path: 'manage/chapters/:chapterId',
         loadComponent: () =>

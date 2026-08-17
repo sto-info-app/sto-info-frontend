@@ -149,6 +149,56 @@ describe('STORYTIME_ROUTES', () => {
     });
   });
 
+  // An Arc is a reading order over other people's Stories, not a claim on any
+  // of them, so a reader who never writes may still curate one.
+  describe('curator routes', () => {
+    const curatorPaths = [
+      'manage/arcs',
+      'manage/arcs/new',
+      'manage/arcs/:arcId',
+      'manage/arcs/:arcId/stories',
+      'manage/arcs/:arcId/collaborators',
+    ];
+
+    it.each(curatorPaths)(
+      'requires sign-in but no creator permission for %s',
+      path => {
+        const route = childAt(path);
+
+        expect(route?.canActivate).toEqual([AuthGuard]);
+        expect(route?.data?.['permission']).toBeUndefined();
+      },
+    );
+
+    it.each(curatorPaths)('names %s in the browser title', path => {
+      expect(childAt(path)?.data?.['title']).toBeDefined();
+    });
+
+    // `manage/arcs` must not be read as an Arc slug.
+    it('declares the curator routes before the public Arc route', () => {
+      const managePosition = children.findIndex(
+        child => child.path === 'manage/arcs',
+      );
+      const arcPosition = children.findIndex(
+        child => child.path === 'arcs/:arcSlug',
+      );
+
+      expect(managePosition).toBeLessThan(arcPosition);
+    });
+
+    // A new Arc must not be read as an existing Arc id.
+    it('declares the new-Arc route before the Arc editor', () => {
+      const newPosition = children.findIndex(
+        child => child.path === 'manage/arcs/new',
+      );
+      const editPosition = children.findIndex(
+        child => child.path === 'manage/arcs/:arcId',
+      );
+
+      expect(newPosition).toBeLessThan(editPosition);
+    });
+  });
+
   describe('public routes', () => {
     it('lists Stories without requiring sign-in', () => {
       expect(childAt('stories')?.canActivate).toBeUndefined();
