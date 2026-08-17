@@ -112,6 +112,11 @@ export const API_URLS = {
   STORYTIME_ARC_COLLABORATION_INVITATIONS:
     apiUrl + '/storytime/manage/arc-collaborations/invitations',
   STORYTIME_PROGRESS: apiUrl + '/storytime/progress',
+  STORYTIME_REACTIONS: apiUrl + '/storytime/reactions',
+  STORYTIME_COMMENTS: apiUrl + '/storytime/comments',
+  STORYTIME_FOLLOWS: apiUrl + '/storytime/follows',
+  STORYTIME_FEED: apiUrl + '/storytime/feed',
+  STORYTIME_READING_LISTS: apiUrl + '/storytime/reading-lists',
 
   // News
   NEWS: apiUrl + '/news',

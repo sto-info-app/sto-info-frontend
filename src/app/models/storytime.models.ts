@@ -1099,3 +1099,170 @@ export interface ChapterRequest {
   /** Sent on update so a stale edit is refused rather than overwriting. */
   version?: number;
 }
+
+/**
+ * What a reader may leave on Storytime content.
+ *
+ * A reader holds at most one reaction per thing. The number shown is the
+ * thumbs up minus the thumbs down.
+ */
+export enum StorytimeReaction {
+  THUMBS_UP = 'THUMBS_UP',
+  THUMBS_DOWN = 'THUMBS_DOWN',
+}
+
+/**
+ * How a thing stands, and what this reader chose.
+ *
+ * `mine` is always null for a signed-out reader: the server takes the reader
+ * from the token, and there is nothing to remember without one.
+ */
+export interface ReactionSummary {
+  targetId: string;
+  upVotes: number;
+  downVotes: number;
+  /** Up minus down, which is the number shown. */
+  rating: number;
+  mine: StorytimeReaction | null;
+}
+
+/**
+ * Whether a comment is shown, and who stopped it being shown.
+ *
+ * Who silenced a comment matters: an author who thought better of it, an owner
+ * tidying their own Story, and an administrator enforcing the content policy
+ * are three different events, and only the last is a moderation record.
+ */
+export enum StorytimeCommentStatus {
+  VISIBLE = 'VISIBLE',
+  DELETED_BY_AUTHOR = 'DELETED_BY_AUTHOR',
+  HIDDEN_BY_OWNER = 'HIDDEN_BY_OWNER',
+  REMOVED_BY_ADMIN = 'REMOVED_BY_ADMIN',
+}
+
+/**
+ * A comment as a reader sees it.
+ *
+ * A silenced comment keeps its place in the thread but not its words: `body`
+ * is null unless the comment is visible or the reader wrote it.
+ */
+export interface StorytimeComment {
+  id: string;
+  authorUserId: string;
+  parentCommentId: string | null;
+  body: string | null;
+  status: StorytimeCommentStatus;
+  editedAt: string | null;
+  createdAt: string;
+}
+
+/**
+ * What a reader sends to post a comment or a reply.
+ */
+export interface CommentRequest {
+  targetType: StorytimeTargetType;
+  targetId: string;
+  body: string;
+  /** The comment being replied to. Replies go one level deep. */
+  parentCommentId?: string;
+}
+
+/**
+ * What somebody may follow.
+ */
+export enum FollowTargetKind {
+  CREATOR = 'CREATOR',
+  STORY = 'STORY',
+  ARC = 'ARC',
+}
+
+/**
+ * Whether the reader follows a thing, and how many others do.
+ */
+export interface FollowState {
+  isFollowing: boolean;
+  followerCount: number;
+}
+
+/**
+ * The things that can appear in a reader's feed.
+ */
+export enum StorytimeActivityType {
+  STORY_PUBLISHED = 'STORY_PUBLISHED',
+  CHAPTER_PUBLISHED = 'CHAPTER_PUBLISHED',
+  STORY_UPDATED = 'STORY_UPDATED',
+  STORY_STATUS_CHANGED = 'STORY_STATUS_CHANGED',
+  ARC_UPDATED = 'ARC_UPDATED',
+  ARC_STORY_ADDED = 'ARC_STORY_ADDED',
+  ARC_STORY_REMOVED = 'ARC_STORY_REMOVED',
+  SPOTLIGHT_SELECTED = 'SPOTLIGHT_SELECTED',
+}
+
+/**
+ * One thing that happened, as a feed shows it.
+ *
+ * Carries addresses rather than identifiers, because a feed entry is only
+ * useful as a link. Nothing here is stored: the server resolves it from the
+ * content when the feed is read, which is what lets a Story taken down since
+ * disappear rather than linger.
+ */
+export interface FeedEntry {
+  id: string;
+  activityType: StorytimeActivityType;
+  actorUserId: string;
+  storyTitle: string | null;
+  storySlug: string | null;
+  chapterTitle: string | null;
+  chapterSlug: string | null;
+  arcTitle: string | null;
+  arcSlug: string | null;
+  occurredAt: string;
+}
+
+/**
+ * A reading list, without what is on it.
+ */
+export interface ReadingList {
+  id: string;
+  ownerUserId: string;
+  name: string;
+  /** Its address, unique within its owner rather than site-wide. */
+  slug: string;
+  description: string | null;
+  isPublic: boolean;
+  itemCount: number;
+  updatedAt: string;
+}
+
+/**
+ * One thing on a reading list.
+ *
+ * Flattened to the title and address of whatever it points at, so that nothing
+ * here has to learn the difference between a Story and an Arc.
+ */
+export interface ReadingListItem {
+  id: string;
+  targetType: StorytimeTargetType;
+  targetId: string;
+  title: string;
+  slug: string;
+  shortDescription: string | null;
+  note: string | null;
+  orderIndex: number;
+}
+
+/**
+ * A reading list and what is on it.
+ */
+export interface ReadingListDetail extends ReadingList {
+  items: ReadingListItem[];
+}
+
+/**
+ * What a reader sends to make or change a reading list.
+ */
+export interface ReadingListRequest {
+  name?: string;
+  description?: string;
+  isPublic?: boolean;
+}
