@@ -92,6 +92,11 @@
           >
         }
       }
+      <a
+        [routerLink]="getRouteLink(appRoutes.HELP)"
+        routerLinkActive="peach"
+        >{{ appRouteTitles.HELP }}</a
+      >
     </div>
     <div class="panel panel-4"></div>
     @if (isPanel5Hidden) {

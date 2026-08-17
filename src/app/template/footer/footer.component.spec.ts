@@ -56,6 +56,22 @@ describe('FooterComponent', () => {
     });
   });
 
+  // The footer is the one part of the page a lost visitor is always looking
+  // at, so help has to be reachable from it whatever else is switched on.
+  it('should link to Help whether or not Storytime is switched on', () => {
+    const linkLabels = (): string[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll('a'),
+      ).map(link => link.textContent?.trim() ?? '');
+
+    expect(linkLabels()).toContain('Help');
+
+    fixture.componentRef.setInput('isStorytimeEnabled', true);
+    fixture.detectChanges();
+
+    expect(linkLabels()).toContain('Help');
+  });
+
   it('should link to Community from the first link column', () => {
     const columns = fixture.nativeElement.querySelectorAll('.footer-list-col');
     const firstColumnLinks: string[] = Array.from(

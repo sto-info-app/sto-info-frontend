@@ -74,6 +74,13 @@
         </li>
         <li>
           <a
+            [routerLink]="getRouteLink(appRoutes.HELP)"
+            routerLinkActive="active"
+            >{{ appRouteTitles.HELP }}</a
+          >
+        </li>
+        <li>
+          <a
             [routerLink]="getRouteLink(appRoutes.CONTACT)"
             [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="active"

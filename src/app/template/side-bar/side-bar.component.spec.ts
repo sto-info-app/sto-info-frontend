@@ -78,6 +78,24 @@ describe('SideBarComponent', () => {
     expect(linkTextsWhenSignedIn).toContain('Community');
   });
 
+  // Help is for the whole application rather than any one feature, so it is
+  // offered to everybody, signed in or not.
+  it('should offer the Help link in both signed-in states', () => {
+    const linkLabels = (): string[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.sidebar-buttons a',
+        ),
+      ).map(link => link.textContent?.trim() ?? '');
+
+    expect(linkLabels()).toContain('Help');
+
+    fixture.componentRef.setInput('isLoggedIn', true);
+    fixture.detectChanges();
+
+    expect(linkLabels()).toContain('Help');
+  });
+
   it('should return admin status from auth service', () => {
     expect(component.isAdmin).toBe(false);
 
