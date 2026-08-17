@@ -1,0 +1,69 @@
+@if (guide) {
+  <article id="help-guide-page">
+    <p class="help-guide__breadcrumb">
+      <a [routerLink]="getRouteLink(appRoutes.HELP)">Help</a>
+      <span aria-hidden="true">&rsaquo;</span>
+      <span>{{ topicTitle }}</span>
+    </p>
+
+    <h1>{{ guide.title }}</h1>
+
+    <p class="help-guide__summary">{{ guide.summary }}</p>
+
+    @for (section of guide.sections; track section.heading) {
+      <app-help-section [heading]="section.heading">
+        @for (paragraph of section.paragraphs; track paragraph) {
+          <p>{{ paragraph }}</p>
+        }
+
+        @if (section.points) {
+          <ul class="lcars-list">
+            @for (point of section.points; track point) {
+              <li>{{ point }}</li>
+            }
+          </ul>
+        }
+      </app-help-section>
+    }
+
+    @if (guide.relatedLinks) {
+      <div class="buttons-row">
+        @for (link of guide.relatedLinks; track link.route) {
+          <a
+            [routerLink]="getRouteLink(link.route)"
+            class="sky"
+            >{{ link.label }}</a
+          >
+        }
+      </div>
+    }
+
+    @if (otherGuides.length > 0) {
+      <app-help-section [heading]="'More ' + topicTitle + ' guides'">
+        <ul class="lcars-list">
+          @for (other of otherGuides; track other.slug) {
+            <li>
+              <a [routerLink]="getGuideLink(other.slug)">{{ other.title }}</a>
+              <span class="help-guide__other-summary">
+                — {{ other.summary }}</span
+              >
+            </li>
+          }
+        </ul>
+      </app-help-section>
+    }
+
+    <div class="buttons-row">
+      <a
+        [routerLink]="getRouteLink(appRoutes.HELP)"
+        class="violet"
+        >All guides</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.CONTACT)"
+        class="ice"
+        >Contact us</a
+      >
+    </div>
+  </article>
+}

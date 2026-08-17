@@ -2,6 +2,7 @@ export const ROOT_ROUTES = {
   ABOUT: 'about',
   COMMUNITY: 'community',
   DASHBOARD: 'dashboard',
+  HELP: 'help',
   NEWS: 'news',
   ADMIN: 'admin',
   STORYTIME: 'storytime',
@@ -26,6 +27,8 @@ export const APP_ROUTES = {
   ABOUT: 'about',
   ROADMAP: 'roadmap',
   RESOURCES: 'resources',
+  HELP: ROOT_ROUTES.HELP,
+  HELP_GUIDE: ROOT_ROUTES.HELP + '/:guideSlug',
   CONTACT: 'contact',
   TERMS_OF_USE: 'terms-of-use',
   CREDITS: 'credits',
@@ -163,6 +166,10 @@ export const APP_ROUTE_TITLES = {
   ABOUT: 'About',
   ROADMAP: 'Roadmap',
   RESOURCES: 'STO Resources',
+  HELP: 'Help',
+  // Replaced once the guide loads: one route serves every guide, so the
+  // address is the only thing that says which one is being read.
+  HELP_GUIDE: 'Help',
   CONTACT: 'Contact us',
   TERMS_OF_USE: 'Terms of Use',
   CREDITS: 'Credits',
