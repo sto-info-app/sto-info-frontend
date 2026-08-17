@@ -11,54 +11,136 @@
 
   @if (isLoading) {
     <app-loading-bar loadingText="Loading invitations"></app-loading-bar>
-  } @else if (invitations.length === 0) {
+  } @else if (isEmpty) {
     <p class="storytime-empty">
-      You have no invitations waiting. Anyone who invites you to help write a
-      Story will appear here.
+      You have nothing waiting. Invitations to help write a Story, to help
+      curate an Arc, or to add a Story to one will appear here.
     </p>
   } @else {
-    <ul class="storytime-invitations">
-      @for (invitation of invitations; track invitation.id) {
-        <li class="storytime-invitations__entry">
-          <p class="storytime-invitations__summary">
-            You have been invited to help write a Story.
-            @if (invitation.collaborationRole) {
-              <span class="storytime-invitations__role"
-                >As {{ invitation.collaborationRole }}.</span
-              >
-            }
-          </p>
-
-          @if (grants(invitation).length > 0) {
-            <p class="storytime-invitations__grants-label">
-              Accepting would let you:
-            </p>
-            <ul class="storytime-invitations__grants">
-              @for (grant of grants(invitation); track grant) {
-                <li>{{ grant }}</li>
+    @if (invitations.length > 0) {
+      <h2>Stories</h2>
+      <ul class="storytime-invitations">
+        @for (invitation of invitations; track invitation.id) {
+          <li class="storytime-invitations__entry">
+            <p class="storytime-invitations__summary">
+              You have been invited to help write a Story.
+              @if (invitation.collaborationRole) {
+                <span class="storytime-invitations__role"
+                  >As {{ invitation.collaborationRole }}.</span
+                >
               }
-            </ul>
-          } @else {
-            <p class="storytime-invitations__grants-label">
-              This invitation does not let you change anything — you would be
-              able to see the Story as it is written.
             </p>
-          }
 
-          <div class="storytime-invitations__actions">
-            <button
-              type="button"
-              (click)="accept(invitation)">
-              Accept
-            </button>
-            <button
-              type="button"
-              (click)="decline(invitation)">
-              Decline
-            </button>
-          </div>
-        </li>
-      }
-    </ul>
+            @if (grants(invitation).length > 0) {
+              <p class="storytime-invitations__grants-label">
+                Accepting would let you:
+              </p>
+              <ul class="storytime-invitations__grants">
+                @for (grant of grants(invitation); track grant) {
+                  <li>{{ grant }}</li>
+                }
+              </ul>
+            } @else {
+              <p class="storytime-invitations__grants-label">
+                This invitation does not let you change anything — you would be
+                able to see the Story as it is written.
+              </p>
+            }
+
+            <div class="storytime-invitations__actions">
+              <button
+                type="button"
+                (click)="accept(invitation)">
+                Accept
+              </button>
+              <button
+                type="button"
+                (click)="decline(invitation)">
+                Decline
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (arcInvitations.length > 0) {
+      <h2>Arcs</h2>
+      <ul class="storytime-invitations">
+        @for (invitation of arcInvitations; track invitation.id) {
+          <li class="storytime-invitations__entry">
+            <p class="storytime-invitations__summary">
+              You have been invited to help curate an Arc.
+              @if (invitation.collaborationRole) {
+                <span class="storytime-invitations__role"
+                  >As {{ invitation.collaborationRole }}.</span
+                >
+              }
+            </p>
+
+            @if (arcGrants(invitation).length > 0) {
+              <p class="storytime-invitations__grants-label">
+                Accepting would let you:
+              </p>
+              <ul class="storytime-invitations__grants">
+                @for (grant of arcGrants(invitation); track grant) {
+                  <li>{{ grant }}</li>
+                }
+              </ul>
+            } @else {
+              <p class="storytime-invitations__grants-label">
+                This invitation does not let you change anything — you would be
+                able to see the Arc as it is put together.
+              </p>
+            }
+
+            <div class="storytime-invitations__actions">
+              <button
+                type="button"
+                (click)="acceptArc(invitation)">
+                Accept
+              </button>
+              <button
+                type="button"
+                (click)="declineArc(invitation)">
+                Decline
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (arcMemberships.length > 0) {
+      <h2>Stories in Arcs</h2>
+      <ul class="storytime-invitations">
+        @for (membership of arcMemberships; track membership.id) {
+          <li class="storytime-invitations__entry">
+            <p class="storytime-invitations__summary">
+              {{ describeMembership(membership) }}
+            </p>
+
+            @if (membership.introductoryNote) {
+              <p class="storytime-invitations__note">
+                {{ membership.introductoryNote }}
+              </p>
+            }
+
+            <div class="storytime-invitations__actions">
+              <button
+                type="button"
+                (click)="approveMembership(membership)">
+                Accept
+              </button>
+              <button
+                type="button"
+                (click)="declineMembership(membership)">
+                Decline
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
   }
 </section>

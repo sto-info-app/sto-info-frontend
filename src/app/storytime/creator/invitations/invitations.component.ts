@@ -2,20 +2,34 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { Observable, finalize } from 'rxjs';
-import { Collaborator } from 'src/app/models/storytime.models';
+import { Observable, finalize, forkJoin } from 'rxjs';
+import {
+  ArcCollaborator,
+  ArcMembership,
+  ArcMembershipStatus,
+  Collaborator,
+} from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { ArcService } from '../../arc.service';
 import { CrewService } from '../../crew.service';
-import { COLLABORATOR_CAPABILITIES } from '../../storytime.constants';
+import {
+  ARC_COLLABORATOR_CAPABILITIES,
+  COLLABORATOR_CAPABILITIES,
+} from '../../storytime.constants';
 
 /**
- * The collaboration invitations waiting on the signed-in member.
+ * Everything waiting on the signed-in member to answer.
  *
  * Access is something you accept: an invitation sits here doing nothing until
  * its holder answers it, which is why this page exists at all rather than
- * owners simply adding people to their Stories.
+ * owners simply adding people to their work.
+ *
+ * Story collaborations, Arc collaborations and Arc memberships are gathered
+ * into one page because they are the same thing to the person answering — a
+ * decision somebody is waiting on — and three places to check would mean each
+ * gets checked less often.
  */
 @Component({
   selector: 'app-storytime-invitations',
@@ -29,10 +43,16 @@ import { COLLABORATOR_CAPABILITIES } from '../../storytime.constants';
   ],
 })
 export class InvitationsComponent implements OnInit {
-  /** The unanswered invitations. */
+  /** The unanswered Story collaboration invitations. */
   invitations: Collaborator[] = [];
 
-  /** Whether the list is still loading. */
+  /** The unanswered Arc collaboration invitations. */
+  arcInvitations: ArcCollaborator[] = [];
+
+  /** The Arc memberships waiting on the caller, from either side. */
+  arcMemberships: ArcMembership[] = [];
+
+  /** Whether the lists are still loading. */
   isLoading = true;
 
   /** A message to show when something failed. */
@@ -42,17 +62,31 @@ export class InvitationsComponent implements OnInit {
   readonly appRoutes = APP_ROUTES;
 
   private readonly _crewService = inject(CrewService);
+  private readonly _arcService = inject(ArcService);
   private readonly _destroyRef = inject(DestroyRef);
 
   /**
-   * Loads the invitations waiting on the caller.
+   * Loads everything waiting on the caller.
    */
   ngOnInit(): void {
     this.load();
   }
 
   /**
-   * Lists what an invitation would let its holder do.
+   * Whether there is nothing at all to answer.
+   *
+   * @returns True when every list is empty.
+   */
+  get isEmpty(): boolean {
+    return (
+      this.invitations.length === 0 &&
+      this.arcInvitations.length === 0 &&
+      this.arcMemberships.length === 0
+    );
+  }
+
+  /**
+   * Lists what a Story invitation would let its holder do.
    *
    * Shown before they answer, because agreeing to something without being told
    * what it is would make the acceptance meaningless.
@@ -67,7 +101,36 @@ export class InvitationsComponent implements OnInit {
   }
 
   /**
-   * Accepts an invitation.
+   * Lists what an Arc invitation would let its holder do.
+   *
+   * @param invitation - The invitation.
+   * @returns The capabilities it grants, in plain words.
+   */
+  arcGrants(invitation: ArcCollaborator): string[] {
+    return ARC_COLLABORATOR_CAPABILITIES.filter(
+      capability => invitation[capability.key],
+    ).map(capability => capability.label);
+  }
+
+  /**
+   * Describes an Arc membership from the point of view of whoever must answer.
+   *
+   * Which status a membership holds says which side is waiting: an invitation
+   * waits on the Story's writer, a request waits on the Arc's curator.
+   *
+   * @param membership - The membership.
+   * @returns What the caller is being asked.
+   */
+  describeMembership(membership: ArcMembership): string {
+    const title = membership.story?.title ?? 'A Story';
+
+    return membership.membershipStatus === ArcMembershipStatus.REQUESTED
+      ? `${title} has asked to join one of your Arcs.`
+      : `${title} has been invited into somebody’s Arc.`;
+  }
+
+  /**
+   * Accepts a Story collaboration invitation.
    *
    * @param invitation - The invitation.
    */
@@ -76,7 +139,7 @@ export class InvitationsComponent implements OnInit {
   }
 
   /**
-   * Declines an invitation.
+   * Declines a Story collaboration invitation.
    *
    * @param invitation - The invitation.
    */
@@ -85,7 +148,43 @@ export class InvitationsComponent implements OnInit {
   }
 
   /**
-   * Runs an action, then reloads so the list reflects what the server did.
+   * Accepts an invitation to help curate an Arc.
+   *
+   * @param invitation - The invitation.
+   */
+  acceptArc(invitation: ArcCollaborator): void {
+    this.runAction(this._arcService.acceptArcCollaboration(invitation.id));
+  }
+
+  /**
+   * Declines an invitation to help curate an Arc.
+   *
+   * @param invitation - The invitation.
+   */
+  declineArc(invitation: ArcCollaborator): void {
+    this.runAction(this._arcService.declineArcCollaboration(invitation.id));
+  }
+
+  /**
+   * Agrees to an Arc membership.
+   *
+   * @param membership - The membership.
+   */
+  approveMembership(membership: ArcMembership): void {
+    this.runAction(this._arcService.approveMembership(membership.id));
+  }
+
+  /**
+   * Turns down an Arc membership.
+   *
+   * @param membership - The membership.
+   */
+  declineMembership(membership: ArcMembership): void {
+    this.runAction(this._arcService.declineMembership(membership.id));
+  }
+
+  /**
+   * Runs an action, then reloads so the lists reflect what the server did.
    *
    * @param action - The action to run.
    */
@@ -104,13 +203,19 @@ export class InvitationsComponent implements OnInit {
   }
 
   /**
-   * Loads the invitations.
+   * Loads everything waiting on the caller.
+   *
+   * The three lists are fetched together so the page settles once rather than
+   * rearranging itself as each arrives.
    */
   private load(): void {
     this.isLoading = true;
 
-    this._crewService
-      .getMyInvitations()
+    forkJoin({
+      invitations: this._crewService.getMyInvitations(),
+      arcInvitations: this._arcService.getMyArcInvitations(),
+      arcMemberships: this._arcService.getPendingMemberships(),
+    })
       .pipe(
         takeUntilDestroyed(this._destroyRef),
         finalize(() => {
@@ -118,8 +223,10 @@ export class InvitationsComponent implements OnInit {
         }),
       )
       .subscribe({
-        next: invitations => {
-          this.invitations = invitations;
+        next: waiting => {
+          this.invitations = waiting.invitations;
+          this.arcInvitations = waiting.arcInvitations;
+          this.arcMemberships = waiting.arcMemberships;
         },
         error: () => {
           this.errorMessage =
