@@ -1,0 +1,85 @@
+<section id="storytime-spotlight-admin-page">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Spotlight</span>
+  </div>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Action failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <a
+    class="storytime-dashboard__new"
+    [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'spotlight', 'new']">
+    <i
+      class="fa-solid fa-plus"
+      aria-hidden="true"></i>
+    Draft a selection
+  </a>
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading Spotlight entries"></app-loading-bar>
+  } @else if (entries.length === 0) {
+    <p class="storytime-empty">
+      Nothing has been chosen for the Spotlight yet.
+    </p>
+  } @else {
+    <ul class="storytime-spotlight-admin">
+      @for (entry of entries; track entry.id) {
+        <li class="storytime-spotlight-admin__entry">
+          <h2>
+            <a
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'manage',
+                'spotlight',
+                entry.id,
+              ]"
+              >{{ entry.headline }}</a
+            >
+          </h2>
+
+          <ul class="storytime-spotlight-admin__meta">
+            <li>
+              <span class="visually-hidden">State: </span>
+              {{ stateOf(entry) }}
+            </li>
+            <li>{{ titleFor(entry) }}</li>
+            <li>
+              {{ entry.startsAt | date: 'longDate' }}
+              @if (entry.endsAt) {
+                – {{ entry.endsAt | date: 'longDate' }}
+              } @else {
+                onwards
+              }
+            </li>
+            <li>Priority {{ entry.displayPriority }}</li>
+          </ul>
+
+          <div class="storytime-spotlight-admin__actions">
+            @if (entry.isPublished) {
+              <button
+                type="button"
+                (click)="unpublish(entry)">
+                Withdraw
+              </button>
+            } @else {
+              <button
+                type="button"
+                (click)="publish(entry)">
+                Publish
+              </button>
+            }
+            <button
+              type="button"
+              (click)="remove(entry)">
+              Delete
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

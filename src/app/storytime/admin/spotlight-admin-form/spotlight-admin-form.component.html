@@ -1,0 +1,149 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading selection"></app-loading-bar>
+}
+
+<div id="storytime-spotlight-form-page">
+  <h1>
+    {{ isNew ? 'Draft a Spotlight selection' : 'Edit Spotlight selection' }}
+  </h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Could not save"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="save()">
+    <label for="spotlight-entity-type">Featuring</label>
+    <select
+      id="spotlight-entity-type"
+      formControlName="entityType">
+      @for (entityType of entityTypes; track entityType) {
+        <option [value]="entityType">
+          {{ entityType === 'ARC' ? 'An Arc' : 'A Story' }}
+        </option>
+      }
+    </select>
+
+    <label for="spotlight-target">{{ targetLabel }}</label>
+    <input
+      id="spotlight-target"
+      type="text"
+      formControlName="targetId" />
+    @if (isNew) {
+      <p class="field-hint">
+        The work must be published and public. What a selection features cannot
+        be changed once it exists.
+      </p>
+    } @else {
+      <p class="field-hint">
+        What this selection features cannot be changed. Draft another one to
+        feature something else.
+      </p>
+    }
+    @if (
+      form.controls['targetId'].touched && form.controls['targetId'].invalid
+    ) {
+      <p class="field-error">Name the work you want to feature.</p>
+    }
+
+    <label for="spotlight-headline">Headline</label>
+    <input
+      id="spotlight-headline"
+      type="text"
+      formControlName="headline"
+      maxlength="200"
+      required />
+    @if (
+      form.controls['headline'].touched && form.controls['headline'].invalid
+    ) {
+      <p class="field-error">A headline is required.</p>
+    }
+
+    <label for="spotlight-summary">Summary</label>
+    <textarea
+      id="spotlight-summary"
+      formControlName="summary"
+      rows="5"
+      required></textarea>
+    @if (form.controls['summary'].touched && form.controls['summary'].invalid) {
+      <p class="field-error">A summary is required.</p>
+    }
+
+    <label for="spotlight-reason">Why it was chosen</label>
+    <textarea
+      id="spotlight-reason"
+      formControlName="selectionReason"
+      rows="3"></textarea>
+    <p class="field-hint">Shown to readers alongside the selection.</p>
+
+    <label for="spotlight-slug">URL slug</label>
+    <input
+      id="spotlight-slug"
+      type="text"
+      formControlName="slug"
+      maxlength="220" />
+    <p class="field-hint">
+      Leave blank to build one from the headline. Changing it keeps the old
+      address working.
+    </p>
+
+    <label for="spotlight-image">Override image ID</label>
+    <input
+      id="spotlight-image"
+      type="text"
+      formControlName="overrideImageId" />
+    <p class="field-hint">Leave blank to use the work’s own banner.</p>
+
+    <label for="spotlight-image-alt">Override image description</label>
+    <input
+      id="spotlight-image-alt"
+      type="text"
+      formControlName="overrideImageAlt"
+      maxlength="300" />
+
+    <label for="spotlight-priority">Display priority</label>
+    <input
+      id="spotlight-priority"
+      type="number"
+      min="0"
+      formControlName="displayPriority" />
+    <p class="field-hint">
+      Higher selections show first while several overlap.
+    </p>
+
+    <label for="spotlight-starts">Starts showing</label>
+    <input
+      id="spotlight-starts"
+      type="datetime-local"
+      formControlName="startsAt"
+      required />
+    @if (
+      form.controls['startsAt'].touched && form.controls['startsAt'].invalid
+    ) {
+      <p class="field-error">Say when the selection starts.</p>
+    }
+
+    <label for="spotlight-ends">Stops showing</label>
+    <input
+      id="spotlight-ends"
+      type="datetime-local"
+      formControlName="endsAt" />
+    <p class="field-hint">
+      Leave blank to keep it showing until it is withdrawn.
+    </p>
+
+    <div class="storytime-editor__actions">
+      <button
+        type="submit"
+        [disabled]="isSaving">
+        {{ isSaving ? 'Saving…' : 'Save' }}
+      </button>
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'spotlight']"
+        >Cancel</a
+      >
+    </div>
+  </form>
+</div>

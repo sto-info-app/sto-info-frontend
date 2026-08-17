@@ -204,6 +204,48 @@ export const STORYTIME_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
 
+      // Editorial routes. Gated by the Spotlight permission rather than by the
+      // ADMIN role, because choosing what the site features is a job somebody
+      // can be given without being handed the rest of the site with it.
+      // Declared before `spotlight` so `manage/spotlight` cannot be read as a
+      // selection slug.
+      {
+        path: 'manage/spotlight',
+        loadComponent: () =>
+          import('./admin/spotlight-admin-list/spotlight-admin-list.component').then(
+            m => m.SpotlightAdminListComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_MANAGE_SPOTLIGHT,
+          permission: PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+      {
+        path: 'manage/spotlight/new',
+        loadComponent: () =>
+          import('./admin/spotlight-admin-form/spotlight-admin-form.component').then(
+            m => m.SpotlightAdminFormComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_SPOTLIGHT_NEW,
+          permission: PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+      {
+        path: 'manage/spotlight/:spotlightId',
+        loadComponent: () =>
+          import('./admin/spotlight-admin-form/spotlight-admin-form.component').then(
+            m => m.SpotlightAdminFormComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_SPOTLIGHT_EDIT,
+          permission: PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+
       // Reading the Spotlight needs no account at all.
       {
         path: 'spotlight',

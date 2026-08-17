@@ -123,6 +123,10 @@ export const APP_ROUTES = {
   STORYTIME_ARC_COLLABORATORS:
     ROOT_ROUTES.STORYTIME + '/manage/arcs/:arcId/collaborators',
   STORYTIME_SPOTLIGHT: ROOT_ROUTES.STORYTIME + '/spotlight',
+  STORYTIME_MANAGE_SPOTLIGHT: ROOT_ROUTES.STORYTIME + '/manage/spotlight',
+  STORYTIME_SPOTLIGHT_NEW: ROOT_ROUTES.STORYTIME + '/manage/spotlight/new',
+  STORYTIME_SPOTLIGHT_EDIT:
+    ROOT_ROUTES.STORYTIME + '/manage/spotlight/:spotlightId',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'service-interruption',
@@ -232,6 +236,9 @@ export const APP_ROUTE_TITLES = {
   STORYTIME_ARC_STORIES: 'Arc Stories',
   STORYTIME_ARC_COLLABORATORS: 'Arc Collaborators',
   STORYTIME_SPOTLIGHT: 'Spotlight',
+  STORYTIME_MANAGE_SPOTLIGHT: 'Manage Spotlight',
+  STORYTIME_SPOTLIGHT_NEW: 'Draft a Selection',
+  STORYTIME_SPOTLIGHT_EDIT: 'Edit Selection',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'Service Interruption',

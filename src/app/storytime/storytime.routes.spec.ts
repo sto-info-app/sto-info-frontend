@@ -199,6 +199,51 @@ describe('STORYTIME_ROUTES', () => {
     });
   });
 
+  // Choosing what the site features is a job somebody can be given without
+  // being handed the rest of the site with it, so these sit behind the
+  // Spotlight permission rather than the ADMIN role.
+  describe('editorial routes', () => {
+    const editorialPaths = [
+      'manage/spotlight',
+      'manage/spotlight/new',
+      'manage/spotlight/:spotlightId',
+    ];
+
+    it.each(editorialPaths)(
+      'requires sign-in and the Spotlight permission for %s',
+      path => {
+        const route = childAt(path);
+
+        expect(route?.canActivate).toEqual([AuthGuard, PermissionGuard]);
+        expect(route?.data?.['permission']).toBe(
+          PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE,
+        );
+      },
+    );
+
+    // `manage/spotlight` must not be read as a selection slug, and `new` must
+    // not be read as an existing entry.
+    it.each([
+      ['manage/spotlight', 'spotlight'],
+      ['manage/spotlight/new', 'manage/spotlight/:spotlightId'],
+    ])('declares %s before %s', (first, second) => {
+      expect(children.findIndex(child => child.path === first)).toBeLessThan(
+        children.findIndex(child => child.path === second),
+      );
+    });
+
+    // The Spotlight is the site's shop window; requiring an account to see it
+    // would defeat the point of having one.
+    it('reads the Spotlight without sign-in', () => {
+      const spotlight = childAt('spotlight');
+
+      expect(spotlight?.canActivate).toBeUndefined();
+      expect(spotlight?.data?.['title']).toBe(
+        APP_ROUTE_TITLES.STORYTIME_SPOTLIGHT,
+      );
+    });
+  });
+
   describe('public routes', () => {
     it('lists Stories without requiring sign-in', () => {
       expect(childAt('stories')?.canActivate).toBeUndefined();
