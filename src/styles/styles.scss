@@ -10,6 +10,9 @@
 // handful of shapes, and that is what keeps them recognisably one thing.
 @use 'storytime';
 
+// Emits the styles for the help section's index and guide pages.
+@use 'help';
+
 /* You can add global styles to this file, and also import other style files */
 
 html {

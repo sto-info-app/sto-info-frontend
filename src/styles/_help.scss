@@ -1,0 +1,78 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// The help section.
+// Two pages — the index and a guide — that are mostly text, so there is very
+// little here: enough to make a list of guides read as a list of cards, and
+// enough to keep a wall of prose comfortable to read. Everything is scoped by
+// the `help-` prefix its templates use.
+
+// A collapsible heading bar and its content, on both help pages.
+.help-section {
+  margin-bottom: 1.75rem;
+
+  .help-section__title {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+  }
+
+  .help-section__content {
+    min-width: 0;
+    margin-top: 0.35rem;
+  }
+}
+
+#help-page {
+  .help-topic__intro {
+    margin-bottom: 1rem;
+  }
+
+  .help-guide-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .help-guide-list__item {
+    @include mixins.lcars-card;
+
+    padding: 1rem;
+  }
+
+  .help-guide-list__title {
+    margin: 0 0 0.5rem;
+    font-family: vars.$font-antonio;
+    font-size: 1.15rem;
+  }
+
+  .help-guide-list__summary {
+    margin: 0;
+  }
+}
+
+#help-guide-page {
+  .help-guide__breadcrumb {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .help-guide__summary {
+    margin-bottom: 1.5rem;
+    color: vars.$lcars-sunflower;
+  }
+
+  .help-section__content {
+    max-width: 70ch;
+  }
+
+  .help-guide__other-summary {
+    font-size: 0.9rem;
+  }
+}
