@@ -204,6 +204,16 @@ export const STORYTIME_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
 
+      // Reading the Spotlight needs no account at all.
+      {
+        path: 'spotlight',
+        loadComponent: () =>
+          import('./public/spotlight-archive/spotlight-archive.component').then(
+            m => m.SpotlightArchiveComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_SPOTLIGHT },
+      },
+
       {
         path: 'manage/chapters/:chapterId',
         loadComponent: () =>

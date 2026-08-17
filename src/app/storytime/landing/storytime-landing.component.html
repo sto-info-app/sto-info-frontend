@@ -3,6 +3,50 @@
 
   <p class="storytime-intro">{{ copy.LANDING_INTRO }}</p>
 
+  @if (spotlight.length > 0) {
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Spotlight</span>
+    </div>
+
+    <ul class="storytime-spotlight">
+      @for (entry of spotlight; track entry.id) {
+        <li class="storytime-spotlight__entry">
+          @if (imageFor(entry)) {
+            <img
+              class="storytime-spotlight__image"
+              [src]="imageFor(entry)"
+              [alt]="imageAltFor(entry)" />
+          }
+
+          <h2 class="storytime-spotlight__headline">
+            <a [routerLink]="linkFor(entry)">{{ entry.headline }}</a>
+          </h2>
+
+          <p class="storytime-spotlight__work">
+            <i
+              class="fa-solid fa-star"
+              aria-hidden="true"></i>
+            {{ entry.story ? entry.story.title : entry.arc?.title }}
+          </p>
+
+          <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
+
+          @if (entry.selectionReason) {
+            <p class="storytime-spotlight__reason">
+              {{ entry.selectionReason }}
+            </p>
+          }
+        </li>
+      }
+    </ul>
+
+    <p class="storytime-spotlight__archive">
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']"
+        >Past Spotlight selections</a
+      >
+    </p>
+  }
+
   <div class="lcars-text-bar small-lcars-bar-gap">
     <span>Stories</span>
   </div>
