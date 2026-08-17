@@ -100,6 +100,8 @@ export const API_URLS = {
   STORYTIME_MANAGE_ARCS: apiUrl + '/storytime/manage/arcs',
   STORYTIME_ARC_MEMBERSHIPS: apiUrl + '/storytime/manage/arc-memberships',
   STORYTIME_ARC_COLLABORATORS: apiUrl + '/storytime/manage/arc-collaborators',
+  STORYTIME_SPOTLIGHT: apiUrl + '/storytime/spotlight',
+  STORYTIME_ADMIN_SPOTLIGHT: apiUrl + '/admin/storytime/spotlight',
   STORYTIME_ARC_COLLABORATION_INVITATIONS:
     apiUrl + '/storytime/manage/arc-collaborations/invitations',
   STORYTIME_PROGRESS: apiUrl + '/storytime/progress',

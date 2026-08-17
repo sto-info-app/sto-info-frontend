@@ -361,6 +361,81 @@ export interface ArcWithStories {
 }
 
 /**
+ * What a Spotlight entry features.
+ */
+export enum SpotlightEntityType {
+  STORY = 'STORY',
+  ARC = 'ARC',
+}
+
+/**
+ * An editorial selection highlighting a Story or an Arc.
+ *
+ * The featured work travels with the entry and may be either a Story or an
+ * Arc, never both. It is resolved by the server at read time, so an entry only
+ * ever arrives with work that is still there to read.
+ */
+export interface Spotlight {
+  id: string;
+  slug: string;
+  entityType: SpotlightEntityType;
+  headline: string;
+  summary: string;
+  selectionReason: string | null;
+  overrideImageUrl: string | null;
+  overrideImageMobileUrl: string | null;
+  overrideImageAlt: string | null;
+  startsAt: string;
+  endsAt: string | null;
+  story: Story | null;
+  arc: Arc | null;
+}
+
+/**
+ * A Spotlight entry as an editor manages it.
+ */
+export interface ManagedSpotlight extends Spotlight {
+  storyId: string | null;
+  arcId: string | null;
+  overrideImageId: string | null;
+  displayPriority: number;
+  isPublished: boolean;
+  createdByUserId: string;
+  updatedByUserId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * The fields an editor may send when creating a Spotlight entry.
+ */
+export interface CreateSpotlightRequest {
+  entityType: SpotlightEntityType;
+  storyId?: string;
+  arcId?: string;
+  headline: string;
+  summary: string;
+  slug?: string;
+  /** Null and absent both mean "there is none": the server accepts either. */
+  selectionReason?: string | null;
+  overrideImageId?: string | null;
+  overrideImageAlt?: string | null;
+  displayPriority?: number;
+  startsAt: string;
+  endsAt?: string | null;
+}
+
+/**
+ * The fields an editor may change on a Spotlight entry.
+ *
+ * The entity type is absent deliberately: repointing a live entry from a Story
+ * to an Arc would change what readers are looking at without saying so.
+ */
+export type UpdateSpotlightRequest = Partial<
+  Omit<CreateSpotlightRequest, 'entityType'>
+> & { isPublished?: boolean };
+
+/**
  * Somebody helping curate an Arc.
  *
  * There is no `canPublish`. Only the curator may publish an Arc, so there is
