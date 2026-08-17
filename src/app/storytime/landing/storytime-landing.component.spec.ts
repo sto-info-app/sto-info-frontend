@@ -4,9 +4,11 @@ import { of, throwError } from 'rxjs';
 import {
   Spotlight,
   SpotlightEntityType,
+  StorySort,
   STORYTIME_DISABLED_STATE,
 } from 'src/app/models/storytime.models';
 import { SpotlightService } from '../spotlight.service';
+import { StoryService } from '../story.service';
 import { STORYTIME_COPY } from '../storytime.constants';
 import { StorytimeService } from '../storytime.service';
 import { StorytimeLandingComponent } from './storytime-landing.component';
@@ -15,6 +17,7 @@ describe('StorytimeLandingComponent', () => {
   let fixture: ComponentFixture<StorytimeLandingComponent>;
   let spotlightService: { getSpotlight: jest.Mock };
   let storytimeService: { getFeatureState: jest.Mock };
+  let storyService: { getStories: jest.Mock };
 
   /**
    * Builds a Spotlight selection.
@@ -71,11 +74,30 @@ describe('StorytimeLandingComponent', () => {
       ),
     };
 
+    storyService = {
+      getStories: jest.fn().mockReturnValue(
+        of({
+          items: [
+            {
+              id: 'story-1',
+              slug: 'a-story',
+              title: 'A Story',
+              shortDescription: 'Where it begins.',
+            },
+          ],
+          total: 1,
+          page: 1,
+          pageSize: 6,
+        }),
+      ),
+    };
+
     TestBed.configureTestingModule({
       imports: [StorytimeLandingComponent],
       providers: [
         provideRouter([]),
         { provide: SpotlightService, useValue: spotlightService },
+        { provide: StoryService, useValue: storyService },
         { provide: StorytimeService, useValue: storytimeService },
       ],
     });
@@ -234,6 +256,66 @@ describe('StorytimeLandingComponent', () => {
 
       expect(text).toContain(STORYTIME_COPY.LANDING_TITLE);
       expect(fixture.componentInstance.spotlight).toEqual([]);
+    });
+  });
+
+  // Two different questions: what is new to read, and what is being written
+  // now. One "recent" list would serve neither reader.
+  describe('the Story lists', () => {
+    it('asks for both orderings', () => {
+      render();
+
+      expect(storyService.getStories).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: StorySort.RECENTLY_PUBLISHED }),
+      );
+      expect(storyService.getStories).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: StorySort.RECENTLY_UPDATED }),
+      );
+    });
+
+    it('shows what has just been published', () => {
+      const element = render();
+
+      expect(element.textContent).toContain('New Stories');
+      expect(element.textContent).toContain('A Story');
+      expect(element.textContent).toContain('Where it begins.');
+    });
+
+    it('shows what has just been updated', () => {
+      const element = render();
+
+      expect(element.textContent).toContain('Recently Updated');
+    });
+
+    it('offers search', () => {
+      const element = render();
+
+      expect(element.textContent).toContain('Search Storytime');
+    });
+
+    it('falls back to the empty message when nothing is published', () => {
+      storyService.getStories.mockReturnValue(
+        of({ items: [], total: 0, page: 1, pageSize: 6 }),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain(STORYTIME_COPY.LANDING_EMPTY);
+      expect(element.textContent).not.toContain('Recently Updated');
+    });
+
+    // A landing page missing a list is a smaller failure than one replaced by
+    // an apology.
+    it('still shows the page when the lists cannot be loaded', () => {
+      storyService.getStories.mockReturnValue(
+        throwError(() => new Error('unavailable')),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain(STORYTIME_COPY.LANDING_TITLE);
+      expect(fixture.componentInstance.newest).toEqual([]);
+      expect(fixture.componentInstance.updated).toEqual([]);
     });
   });
 });

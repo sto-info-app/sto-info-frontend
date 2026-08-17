@@ -47,11 +47,48 @@
     </p>
   }
 
+  <p class="storytime-landing__search">
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'search']">Search Storytime</a>
+  </p>
+
   <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>Stories</span>
+    <span>New Stories</span>
   </div>
 
-  <p class="storytime-empty">{{ copy.LANDING_EMPTY }}</p>
+  @if (newest.length === 0) {
+    <p class="storytime-empty">{{ copy.LANDING_EMPTY }}</p>
+  } @else {
+    <ul class="storytime-landing__stories">
+      @for (story of newest; track story.id) {
+        <li>
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]">{{
+            story.title
+          }}</a>
+          @if (story.shortDescription) {
+            <p class="storytime-landing__summary">
+              {{ story.shortDescription }}
+            </p>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  @if (updated.length > 0) {
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Recently Updated</span>
+    </div>
+
+    <ul class="storytime-landing__stories storytime-landing__stories--updated">
+      @for (story of updated; track story.id) {
+        <li>
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]">{{
+            story.title
+          }}</a>
+        </li>
+      }
+    </ul>
+  }
 
   <p class="storytime-fan-notice">{{ copy.FAN_CONTENT_NOTICE }}</p>
 </div>

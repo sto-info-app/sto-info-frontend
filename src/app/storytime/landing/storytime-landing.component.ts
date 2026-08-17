@@ -2,12 +2,16 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { switchMap, of } from 'rxjs';
-import { Spotlight } from 'src/app/models/storytime.models';
+import { forkJoin, switchMap, of } from 'rxjs';
+import { Spotlight, Story, StorySort } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { SpotlightService } from '../spotlight.service';
+import { StoryService } from '../story.service';
 import { STORYTIME_COPY } from '../storytime.constants';
 import { StorytimeService } from '../storytime.service';
+
+/** How many Stories each landing list shows. */
+const LANDING_STORY_COUNT = 6;
 
 /**
  * The Storytime landing page.
@@ -15,6 +19,11 @@ import { StorytimeService } from '../storytime.service';
  * The Spotlight leads, because a landing page that opens with a list is asking
  * a visitor to choose before they know anything; opening with one thing
  * somebody chose and said why is an introduction.
+ *
+ * Underneath it, two lists that answer two different questions: what is new to
+ * read, and what is being written now. A reader looking for something finished
+ * and a reader following work in progress are not the same person, and one
+ * "recent" list would serve neither.
  *
  * It does not check the master switch itself: the route guard has already
  * refused the visitor if Storytime is off, so re-checking here would duplicate
@@ -31,6 +40,12 @@ export class StorytimeLandingComponent implements OnInit {
   /** The selections showing now, best first. */
   spotlight: Spotlight[] = [];
 
+  /** The most recently published Stories. */
+  newest: Story[] = [];
+
+  /** The Stories written in most recently, which surfaces new Chapters. */
+  updated: Story[] = [];
+
   /** User-facing copy, held centrally so wording stays consistent. */
   readonly copy = STORYTIME_COPY;
 
@@ -38,13 +53,15 @@ export class StorytimeLandingComponent implements OnInit {
   readonly appRoutes = APP_ROUTES;
 
   private readonly _spotlightService = inject(SpotlightService);
+  private readonly _storyService = inject(StoryService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _destroyRef = inject(DestroyRef);
 
   /**
-   * Loads the Spotlight, when there is one to load.
+   * Loads the Spotlight and the two Story lists.
    */
   ngOnInit(): void {
+    this.loadStories();
     this._storytimeService
       .getFeatureState()
       .pipe(
@@ -64,6 +81,37 @@ export class StorytimeLandingComponent implements OnInit {
         // replacing the entry point with an apology.
         error: () => {
           this.spotlight = [];
+        },
+      });
+  }
+
+  /**
+   * Loads the two Story lists.
+   *
+   * Both are best effort. A landing page missing a list is a smaller failure
+   * than a landing page replaced by an apology, and the Stories archive is one
+   * click away either way.
+   */
+  private loadStories(): void {
+    forkJoin({
+      newest: this._storyService.getStories({
+        pageSize: LANDING_STORY_COUNT,
+        sort: StorySort.RECENTLY_PUBLISHED,
+      }),
+      updated: this._storyService.getStories({
+        pageSize: LANDING_STORY_COUNT,
+        sort: StorySort.RECENTLY_UPDATED,
+      }),
+    })
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: lists => {
+          this.newest = lists.newest.items;
+          this.updated = lists.updated.items;
+        },
+        error: () => {
+          this.newest = [];
+          this.updated = [];
         },
       });
   }
