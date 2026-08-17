@@ -8,6 +8,10 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { finalize, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { AddToListComponent } from '../../shared/add-to-list/add-to-list.component';
+import { CommentThreadComponent } from '../../shared/comment-thread/comment-thread.component';
+import { FollowButtonComponent } from '../../shared/follow-button/follow-button.component';
+import { ReactionControlComponent } from '../../shared/reaction-control/reaction-control.component';
 import {
   Character,
   ChapterSummary,
@@ -16,6 +20,7 @@ import {
   CONTENT_RATING_LABELS,
   ContentRating,
   DELIBERATE_READER_STATUSES,
+  FollowTargetKind,
   ReaderStoryStatus,
   Story,
   StoryProgress,
@@ -59,6 +64,10 @@ import {
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsWarningMessageComponent,
+    ReactionControlComponent,
+    FollowButtonComponent,
+    AddToListComponent,
+    CommentThreadComponent,
   ],
 })
 export class StoryDetailComponent implements OnInit {
@@ -266,6 +275,31 @@ export class StoryDetailComponent implements OnInit {
   get isTrackingProgress(): boolean {
     return this._authService.isLoggedIn();
   }
+
+  /**
+   * Whether the reader owns this Story.
+   *
+   * Decides whether the comment thread offers its hide control. The server
+   * decides whether it works.
+   *
+   * @returns True when the Story is theirs.
+   */
+  get isOwner(): boolean {
+    return (
+      this.story !== null &&
+      this.story.ownerUserId === this._authService.getUserId()
+    );
+  }
+
+  /**
+   * The kinds of thing the social controls act on.
+   */
+  readonly targetTypes = StorytimeTargetType;
+
+  /**
+   * The kinds of thing that may be followed.
+   */
+  readonly followKinds = FollowTargetKind;
 
   /**
    * Opens the report dialog, and sends whatever the reader chose.

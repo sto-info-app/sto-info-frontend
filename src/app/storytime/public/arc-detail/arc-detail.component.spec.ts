@@ -3,6 +3,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { CommentService } from '../../comment.service';
+import { FollowService } from '../../follow.service';
+import { ReactionService } from '../../reaction.service';
+import { ReadingListService } from '../../reading-list.service';
 import {
   Arc,
   ArcMembership,
@@ -16,7 +20,16 @@ import { ArcDetailComponent } from './arc-detail.component';
 describe('ArcDetailComponent', () => {
   let fixture: ComponentFixture<ArcDetailComponent>;
   let arcService: { getArc: jest.Mock; getArcProgress: jest.Mock };
-  let authService: { isLoggedIn: jest.Mock };
+  let authService: {
+    isLoggedIn: jest.Mock;
+    isLoggedInAsAdmin: jest.Mock;
+    getUserId: jest.Mock;
+    getHttpOptionsWithAccessToken: jest.Mock;
+  };
+  let reactionService: { getSummary: jest.Mock };
+  let commentService: { getComments: jest.Mock };
+  let followService: { getFollowState: jest.Mock };
+  let readingListService: { getMyLists: jest.Mock; getListsHolding: jest.Mock };
   let params: BehaviorSubject<Map<string, string>>;
 
   /**
@@ -116,7 +129,36 @@ describe('ArcDetailComponent', () => {
       getArc: jest.fn().mockReturnValue(of(buildResponse())),
       getArcProgress: jest.fn().mockReturnValue(of(buildProgress())),
     };
-    authService = { isLoggedIn: jest.fn().mockReturnValue(false) };
+    // The page carries the social controls, which read their own services.
+    // Stubbing them keeps this spec about the Arc rather than about what
+    // readers do with it.
+    authService = {
+      isLoggedIn: jest.fn().mockReturnValue(false),
+      isLoggedInAsAdmin: jest.fn().mockReturnValue(false),
+      getUserId: jest.fn().mockReturnValue('reader-1'),
+      getHttpOptionsWithAccessToken: jest.fn().mockReturnValue(null),
+    };
+    reactionService = {
+      getSummary: jest.fn().mockReturnValue(
+        of({
+          targetId: 'arc-1',
+          upVotes: 0,
+          downVotes: 0,
+          rating: 0,
+          mine: null,
+        }),
+      ),
+    };
+    commentService = { getComments: jest.fn().mockReturnValue(of([])) };
+    followService = {
+      getFollowState: jest
+        .fn()
+        .mockReturnValue(of({ isFollowing: false, followerCount: 0 })),
+    };
+    readingListService = {
+      getMyLists: jest.fn().mockReturnValue(of([])),
+      getListsHolding: jest.fn().mockReturnValue(of([])),
+    };
 
     TestBed.configureTestingModule({
       imports: [ArcDetailComponent],
@@ -124,6 +166,10 @@ describe('ArcDetailComponent', () => {
         provideRouter([]),
         { provide: ArcService, useValue: arcService },
         { provide: AuthService, useValue: authService },
+        { provide: ReactionService, useValue: reactionService },
+        { provide: CommentService, useValue: commentService },
+        { provide: FollowService, useValue: followService },
+        { provide: ReadingListService, useValue: readingListService },
         {
           provide: ActivatedRoute,
           useValue: { paramMap: params, snapshot: { paramMap: new Map() } },

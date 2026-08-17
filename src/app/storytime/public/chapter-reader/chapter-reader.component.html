@@ -142,5 +142,17 @@
         </a>
       }
     </nav>
+
+    @if (chapter) {
+      <div class="storytime-chapter__social">
+        <app-reaction-control
+          [targetType]="targetTypes.CHAPTER"
+          [targetId]="chapter.id" />
+      </div>
+
+      <app-comment-thread
+        [targetType]="targetTypes.CHAPTER"
+        [targetId]="chapter.id" />
+    }
   </article>
 }

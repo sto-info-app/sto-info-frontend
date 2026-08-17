@@ -231,6 +231,21 @@
       </ol>
     }
 
+    @if (story) {
+      <div class="storytime-story__social">
+        <app-reaction-control
+          [targetType]="targetTypes.STORY"
+          [targetId]="story.id" />
+        <app-follow-button
+          [kind]="followKinds.STORY"
+          [targetId]="story.id"
+          label="this Story" />
+        <app-add-to-list
+          [targetType]="targetTypes.STORY"
+          [targetId]="story.id" />
+      </div>
+    }
+
     @if (isTrackingProgress) {
       <div class="storytime-story__report">
         <button
@@ -249,6 +264,12 @@
           </p>
         }
       </div>
+    }
+    @if (story) {
+      <app-comment-thread
+        [targetType]="targetTypes.STORY"
+        [targetId]="story.id"
+        [isOwner]="isOwner" />
     }
   </article>
 }

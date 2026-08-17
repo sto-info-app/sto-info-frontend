@@ -99,5 +99,24 @@
         }
       </ol>
     }
+    @if (arc) {
+      <div class="storytime-arc__social">
+        <app-reaction-control
+          [targetType]="targetTypes.ARC"
+          [targetId]="arc.id" />
+        <app-follow-button
+          [kind]="followKinds.ARC"
+          [targetId]="arc.id"
+          label="this Arc" />
+        <app-add-to-list
+          [targetType]="targetTypes.ARC"
+          [targetId]="arc.id" />
+      </div>
+
+      <app-comment-thread
+        [targetType]="targetTypes.ARC"
+        [targetId]="arc.id"
+        [isOwner]="isOwner" />
+    }
   </article>
 }

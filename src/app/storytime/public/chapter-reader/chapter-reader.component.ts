@@ -22,6 +22,7 @@ import {
   ChapterProgressUpdate,
   ReaderChapterStatus,
   StoryProgress,
+  StorytimeTargetType,
 } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -29,6 +30,8 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { ChapterService } from '../../chapter.service';
 import { MediaService } from '../../media.service';
 import { ProgressService } from '../../progress.service';
+import { CommentThreadComponent } from '../../shared/comment-thread/comment-thread.component';
+import { ReactionControlComponent } from '../../shared/reaction-control/reaction-control.component';
 import { MediaEmbedComponent } from '../media-embed/media-embed.component';
 import { PROGRESS_WRITE_DEBOUNCE_MS } from '../../storytime.constants';
 import { resolveReadingPosition } from '../../reading-position.utility';
@@ -55,9 +58,14 @@ import { resolveReadingPosition } from '../../reading-position.utility';
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     MediaEmbedComponent,
+    ReactionControlComponent,
+    CommentThreadComponent,
   ],
 })
 export class ChapterReaderComponent implements OnInit {
+  /** The kinds of thing the social controls act on. */
+  readonly targetTypes = StorytimeTargetType;
+
   /** The Chapter being read. */
   chapter: Chapter | null = null;
 

@@ -8,6 +8,8 @@ import {
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { CommentService } from '../../comment.service';
+import { ReactionService } from '../../reaction.service';
 import {
   ChapterProgress,
   ChapterWithNavigation,
@@ -28,7 +30,14 @@ describe('ChapterReaderComponent', () => {
     updateChapterProgress: jest.Mock;
     setChapterRead: jest.Mock;
   };
-  let authService: { isLoggedIn: jest.Mock };
+  let authService: {
+    isLoggedIn: jest.Mock;
+    isLoggedInAsAdmin: jest.Mock;
+    getUserId: jest.Mock;
+    getHttpOptionsWithAccessToken: jest.Mock;
+  };
+  let reactionService: { getSummary: jest.Mock };
+  let commentService: { getComments: jest.Mock };
   let mediaService: { getChapterMedia: jest.Mock };
   let params: BehaviorSubject<Map<string, string>>;
 
@@ -144,7 +153,26 @@ describe('ChapterReaderComponent', () => {
         .mockReturnValue(of(buildStoryProgress())),
       setChapterRead: jest.fn().mockReturnValue(of(buildStoryProgress())),
     };
-    authService = { isLoggedIn: jest.fn().mockReturnValue(true) };
+    // The page carries the rating buttons and the comment thread, which read
+    // their own services. Stubbing them keeps this spec about reading.
+    authService = {
+      isLoggedIn: jest.fn().mockReturnValue(true),
+      isLoggedInAsAdmin: jest.fn().mockReturnValue(false),
+      getUserId: jest.fn().mockReturnValue('reader-1'),
+      getHttpOptionsWithAccessToken: jest.fn().mockReturnValue({}),
+    };
+    reactionService = {
+      getSummary: jest.fn().mockReturnValue(
+        of({
+          targetId: 'chapter-1',
+          upVotes: 0,
+          downVotes: 0,
+          rating: 0,
+          mine: null,
+        }),
+      ),
+    };
+    commentService = { getComments: jest.fn().mockReturnValue(of([])) };
     mediaService = { getChapterMedia: jest.fn().mockReturnValue(of([])) };
 
     TestBed.configureTestingModule({
@@ -154,6 +182,8 @@ describe('ChapterReaderComponent', () => {
         { provide: ChapterService, useValue: chapterService },
         { provide: ProgressService, useValue: progressService },
         { provide: AuthService, useValue: authService },
+        { provide: ReactionService, useValue: reactionService },
+        { provide: CommentService, useValue: commentService },
         { provide: MediaService, useValue: mediaService },
         {
           provide: ActivatedRoute,

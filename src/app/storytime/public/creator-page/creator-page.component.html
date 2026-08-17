@@ -3,6 +3,11 @@
     <span>Storytime</span>
   </div>
 
+  <app-follow-button
+    [kind]="followKinds.CREATOR"
+    [targetId]="userId"
+    label="this writer" />
+
   @if (errorMessage) {
     <app-lcars-error-message
       title="Creator unavailable"
@@ -48,6 +53,32 @@
                 {{ arc.shortDescription }}
               </p>
             }
+          </li>
+        }
+      </ul>
+    }
+    @if (readingLists.length > 0) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Reading lists</span>
+      </div>
+
+      <ul class="storytime-creator__lists">
+        @for (list of readingLists; track list.id) {
+          <li class="storytime-creator__list">
+            <a
+              [routerLink]="[
+                '/storytime',
+                'creators',
+                userId,
+                'reading-lists',
+                list.slug,
+              ]">
+              {{ list.name }}
+            </a>
+            <span class="storytime-creator__list-count">
+              {{ list.itemCount }}
+              {{ list.itemCount === 1 ? 'thing' : 'things' }}
+            </span>
           </li>
         }
       </ul>

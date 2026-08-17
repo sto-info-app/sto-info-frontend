@@ -10,11 +10,17 @@ import {
   Arc,
   ArcMembership,
   ArcProgress,
+  FollowTargetKind,
+  StorytimeTargetType,
 } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { ArcService } from '../../arc.service';
+import { AddToListComponent } from '../../shared/add-to-list/add-to-list.component';
+import { CommentThreadComponent } from '../../shared/comment-thread/comment-thread.component';
+import { FollowButtonComponent } from '../../shared/follow-button/follow-button.component';
+import { ReactionControlComponent } from '../../shared/reaction-control/reaction-control.component';
 
 /**
  * An Arc's own page: a reading order somebody has curated.
@@ -32,9 +38,19 @@ import { ArcService } from '../../arc.service';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    ReactionControlComponent,
+    FollowButtonComponent,
+    AddToListComponent,
+    CommentThreadComponent,
   ],
 })
 export class ArcDetailComponent implements OnInit {
+  /** The kinds of thing the social controls act on. */
+  readonly targetTypes = StorytimeTargetType;
+
+  /** The kinds of thing that may be followed. */
+  readonly followKinds = FollowTargetKind;
+
   /** The Arc being read. */
   arc: Arc | null = null;
 
@@ -59,6 +75,21 @@ export class ArcDetailComponent implements OnInit {
   private readonly _route = inject(ActivatedRoute);
   private readonly _arcService = inject(ArcService);
   private readonly _authService = inject(AuthService);
+
+  /**
+   * Whether the reader curates this Arc.
+   *
+   * Decides whether the comment thread offers its hide control. The server
+   * decides whether it works.
+   *
+   * @returns True when the Arc is theirs.
+   */
+  get isOwner(): boolean {
+    return (
+      this.arc !== null &&
+      this.arc.ownerUserId === this._authService.getUserId()
+    );
+  }
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _destroyRef = inject(DestroyRef);
 
