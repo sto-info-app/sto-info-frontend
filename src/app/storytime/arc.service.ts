@@ -4,9 +4,13 @@ import { Observable, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   Arc,
+  ArcCollaborator,
+  ArcCollaboratorCapabilities,
   ArcMembership,
+  ArcProgress,
   ArcRequest,
   ArcWithStories,
+  InviteArcCollaboratorRequest,
   ManagedArc,
 } from 'src/app/models/storytime.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
@@ -252,6 +256,124 @@ export class ArcService {
     return this.membershipAction(membershipId, 'leave');
   }
 
+  // ----- Collaboration -----
+
+  /**
+   * Lists who is helping curate an Arc.
+   *
+   * @param arcId - The Arc.
+   * @returns An observable of the collaborators, invitations included.
+   */
+  getArcCollaborators(arcId: string): Observable<ArcCollaborator[]> {
+    return this.authenticated(options =>
+      this._http.get<ArcCollaborator[]>(
+        `${this.manageUrl(arcId)}/collaborators`,
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Lists the Arc collaboration invitations waiting on the caller.
+   *
+   * @returns An observable of the unanswered invitations.
+   */
+  getMyArcInvitations(): Observable<ArcCollaborator[]> {
+    return this.authenticated(options =>
+      this._http.get<ArcCollaborator[]>(
+        API_URLS.STORYTIME_ARC_COLLABORATION_INVITATIONS,
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Invites somebody to help curate an Arc.
+   *
+   * @param arcId - The Arc.
+   * @param payload - Who to invite, and what they may do once they accept.
+   * @returns An observable of the invitation.
+   */
+  inviteArcCollaborator(
+    arcId: string,
+    payload: InviteArcCollaboratorRequest,
+  ): Observable<ArcCollaborator> {
+    return this.authenticated(options =>
+      this._http.post<ArcCollaborator>(
+        `${this.manageUrl(arcId)}/collaborators`,
+        payload,
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Changes what a collaborator may do.
+   *
+   * @param collaboratorId - The collaboration.
+   * @param capabilities - The capabilities to change.
+   * @returns An observable of the updated collaboration.
+   */
+  updateArcCollaborator(
+    collaboratorId: string,
+    capabilities: ArcCollaboratorCapabilities,
+  ): Observable<ArcCollaborator> {
+    return this.authenticated(options =>
+      this._http.patch<ArcCollaborator>(
+        `${API_URLS.STORYTIME_ARC_COLLABORATORS}/${collaboratorId}`,
+        capabilities,
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Accepts an invitation to help curate an Arc.
+   *
+   * @param collaboratorId - The invitation.
+   * @returns An observable of the accepted collaboration.
+   */
+  acceptArcCollaboration(collaboratorId: string): Observable<ArcCollaborator> {
+    return this.collaboratorAction(collaboratorId, 'accept');
+  }
+
+  /**
+   * Declines an invitation to help curate an Arc.
+   *
+   * @param collaboratorId - The invitation.
+   * @returns An observable of the declined collaboration.
+   */
+  declineArcCollaboration(collaboratorId: string): Observable<ArcCollaborator> {
+    return this.collaboratorAction(collaboratorId, 'decline');
+  }
+
+  /**
+   * Withdraws an invitation, removes a collaborator, or steps down.
+   *
+   * @param collaboratorId - The collaboration.
+   * @returns An observable of the revoked collaboration.
+   */
+  revokeArcCollaboration(collaboratorId: string): Observable<ArcCollaborator> {
+    return this.collaboratorAction(collaboratorId, 'revoke');
+  }
+
+  // ----- Progress -----
+
+  /**
+   * Reads how far the caller has got through an Arc.
+   *
+   * @param arcSlug - The Arc slug.
+   * @returns An observable of their progress through it.
+   */
+  getArcProgress(arcSlug: string): Observable<ArcProgress> {
+    return this.authenticated(options =>
+      this._http.get<ArcProgress>(
+        `${API_URLS.STORYTIME_ARCS}/${encodeURIComponent(arcSlug)}/progress`,
+        options,
+      ),
+    );
+  }
+
   /**
    * Builds the curator URL for an Arc.
    *
@@ -273,6 +395,26 @@ export class ArcService {
     return this.authenticated(options =>
       this._http.post<ManagedArc>(
         `${this.manageUrl(arcId)}/${action}`,
+        {},
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Performs a state-changing action on an Arc collaboration.
+   *
+   * @param collaboratorId - The collaboration.
+   * @param action - The action path segment.
+   * @returns An observable of the resulting collaboration.
+   */
+  private collaboratorAction(
+    collaboratorId: string,
+    action: string,
+  ): Observable<ArcCollaborator> {
+    return this.authenticated(options =>
+      this._http.post<ArcCollaborator>(
+        `${API_URLS.STORYTIME_ARC_COLLABORATORS}/${collaboratorId}/${action}`,
         {},
         options,
       ),

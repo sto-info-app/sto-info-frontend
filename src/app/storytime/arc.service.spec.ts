@@ -13,6 +13,7 @@ const AUTH_HEADER = 'Bearer token-1';
 const ARC_ID = 'arc-1';
 const STORY_ID = 'story-1';
 const MEMBERSHIP_ID = 'membership-1';
+const COLLABORATOR_ID = 'collaborator-1';
 
 describe('ArcService', () => {
   let service: ArcService;
@@ -225,6 +226,104 @@ describe('ArcService', () => {
     });
   });
 
+  describe('collaboration', () => {
+    it('lists who is helping curate an Arc', async () => {
+      const result = firstValueFrom(service.getArcCollaborators(ARC_ID));
+
+      const request = httpMock.expectOne(
+        `${API_URLS.STORYTIME_MANAGE_ARCS}/${ARC_ID}/collaborators`,
+      );
+      expect(request.request.headers.get('Authorization')).toBe(AUTH_HEADER);
+      request.flush([]);
+
+      await expect(result).resolves.toEqual([]);
+    });
+
+    it('lists the Arc invitations waiting on the caller', async () => {
+      const result = firstValueFrom(service.getMyArcInvitations());
+
+      httpMock
+        .expectOne(API_URLS.STORYTIME_ARC_COLLABORATION_INVITATIONS)
+        .flush([]);
+
+      await expect(result).resolves.toEqual([]);
+    });
+
+    it('invites somebody to help', async () => {
+      const result = firstValueFrom(
+        service.inviteArcCollaborator(ARC_ID, {
+          userId: 'member-1',
+          canManageStories: true,
+        }),
+      );
+
+      const request = httpMock.expectOne(
+        `${API_URLS.STORYTIME_MANAGE_ARCS}/${ARC_ID}/collaborators`,
+      );
+      expect(request.request.body).toEqual({
+        userId: 'member-1',
+        canManageStories: true,
+      });
+      request.flush({ id: COLLABORATOR_ID });
+
+      await expect(result).resolves.toEqual({ id: COLLABORATOR_ID });
+    });
+
+    it('changes what a collaborator may do', async () => {
+      const result = firstValueFrom(
+        service.updateArcCollaborator(COLLABORATOR_ID, { canEditArc: true }),
+      );
+
+      const request = httpMock.expectOne(
+        `${API_URLS.STORYTIME_ARC_COLLABORATORS}/${COLLABORATOR_ID}`,
+      );
+      expect(request.request.method).toBe('PATCH');
+      request.flush({ id: COLLABORATOR_ID });
+
+      await expect(result).resolves.toBeDefined();
+    });
+
+    it.each([
+      ['accept', () => service.acceptArcCollaboration(COLLABORATOR_ID)],
+      ['decline', () => service.declineArcCollaboration(COLLABORATOR_ID)],
+      ['revoke', () => service.revokeArcCollaboration(COLLABORATOR_ID)],
+    ])('%ss a collaboration', async (action, act) => {
+      const result = firstValueFrom(act());
+
+      const request = httpMock.expectOne(
+        `${API_URLS.STORYTIME_ARC_COLLABORATORS}/${COLLABORATOR_ID}/${action}`,
+      );
+      expect(request.request.method).toBe('POST');
+      request.flush({ id: COLLABORATOR_ID });
+
+      await expect(result).resolves.toBeDefined();
+    });
+  });
+
+  describe('progress', () => {
+    it('reads how far the caller has got', async () => {
+      const result = firstValueFrom(service.getArcProgress('the-long-war'));
+
+      const request = httpMock.expectOne(
+        `${API_URLS.STORYTIME_ARCS}/the-long-war/progress`,
+      );
+      expect(request.request.headers.get('Authorization')).toBe(AUTH_HEADER);
+      request.flush({ arcId: ARC_ID });
+
+      await expect(result).resolves.toEqual({ arcId: ARC_ID });
+    });
+
+    it('encodes an awkward slug', async () => {
+      const result = firstValueFrom(service.getArcProgress('a b'));
+
+      httpMock
+        .expectOne(`${API_URLS.STORYTIME_ARCS}/a%20b/progress`)
+        .flush({ arcId: ARC_ID });
+
+      await expect(result).resolves.toBeDefined();
+    });
+  });
+
   describe('without a token', () => {
     beforeEach(() => {
       authService.getHttpOptionsWithAccessToken.mockReturnValue(null);
@@ -246,6 +345,30 @@ describe('ArcService', () => {
       ['approveMembership', () => service.approveMembership(MEMBERSHIP_ID)],
       ['declineMembership', () => service.declineMembership(MEMBERSHIP_ID)],
       ['leaveArc', () => service.leaveArc(MEMBERSHIP_ID)],
+      ['getArcCollaborators', () => service.getArcCollaborators(ARC_ID)],
+      ['getMyArcInvitations', () => service.getMyArcInvitations()],
+      [
+        'inviteArcCollaborator',
+        () => service.inviteArcCollaborator(ARC_ID, { userId: 'member-1' }),
+      ],
+      [
+        'updateArcCollaborator',
+        () => service.updateArcCollaborator(COLLABORATOR_ID, {}),
+      ],
+      [
+        'acceptArcCollaboration',
+        () => service.acceptArcCollaboration(COLLABORATOR_ID),
+      ],
+      [
+        'declineArcCollaboration',
+        () => service.declineArcCollaboration(COLLABORATOR_ID),
+      ],
+      [
+        'revokeArcCollaboration',
+        () => service.revokeArcCollaboration(COLLABORATOR_ID),
+      ],
+      // Progress belongs to a reader, so there is nobody to ask about.
+      ['getArcProgress', () => service.getArcProgress('the-long-war')],
     ])('refuses %s', async (_name, act) => {
       await expect(firstValueFrom(act())).rejects.toThrow('No token found');
       httpMock.expectNone(() => true);

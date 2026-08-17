@@ -71,6 +71,34 @@ export const COLLABORATOR_CAPABILITIES = [
 ] as const;
 
 /**
+ * The capabilities an Arc invitation may grant, and how each is described.
+ *
+ * Publishing is absent for the same reason it is absent from a Story
+ * invitation: deciding an Arc is ready to show the world stays with the
+ * curator, so there is no switch to offer.
+ */
+export const ARC_COLLABORATOR_CAPABILITIES = [
+  { key: 'canEditArc', label: 'Edit the Arc’s details' },
+  { key: 'canManageStories', label: 'Choose which Stories are in it' },
+  { key: 'canManageCollaborators', label: 'Invite other collaborators' },
+] as const;
+
+/**
+ * How each Arc membership status is labelled.
+ *
+ * `INVITED` and `REQUESTED` are worded from the curator's side, because that
+ * is where the list they appear in lives.
+ */
+export const ARC_MEMBERSHIP_STATUS_LABELS = {
+  REQUESTED: 'Asked to join',
+  INVITED: 'Invited',
+  APPROVED: 'In the Arc',
+  DECLINED: 'Declined',
+  REMOVED: 'Removed',
+  WITHDRAWN: 'Withdrawn',
+} as const;
+
+/**
  * How each reader-facing Chapter status is labelled.
  */
 export const READER_CHAPTER_STATUS_LABELS = {

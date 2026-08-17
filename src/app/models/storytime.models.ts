@@ -361,6 +361,58 @@ export interface ArcWithStories {
 }
 
 /**
+ * Somebody helping curate an Arc.
+ *
+ * There is no `canPublish`. Only the curator may publish an Arc, so there is
+ * nothing to show and nothing to offer.
+ */
+export interface ArcCollaborator {
+  id: string;
+  arcId: string;
+  userId: string;
+  collaborationRole: string | null;
+  canEditArc: boolean;
+  canManageStories: boolean;
+  canManageCollaborators: boolean;
+  invitationStatus: CollaborationInvitationStatus;
+  invitedByUserId: string;
+  invitedAt: string;
+  acceptedAt: string | null;
+}
+
+/**
+ * The capabilities an Arc invitation may grant.
+ */
+export interface ArcCollaboratorCapabilities {
+  canEditArc?: boolean;
+  canManageStories?: boolean;
+  canManageCollaborators?: boolean;
+}
+
+/**
+ * An invitation to help curate an Arc.
+ */
+export interface InviteArcCollaboratorRequest extends ArcCollaboratorCapabilities {
+  userId: string;
+  collaborationRole?: string;
+}
+
+/**
+ * How far a reader has got through an Arc.
+ *
+ * Derived from the reader's progress through the Stories in it, so it is only
+ * ever as current as the Arc itself — reordering or adding a Story changes it.
+ */
+export interface ArcProgress {
+  arcId: string;
+  totalStories: number;
+  completedStories: number;
+  percentComplete: number;
+  continueStoryId: string | null;
+  continueChapterId: string | null;
+}
+
+/**
  * The fields a curator may send when creating or editing an Arc.
  */
 export interface ArcRequest {

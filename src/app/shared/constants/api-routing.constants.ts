@@ -99,6 +99,9 @@ export const API_URLS = {
   STORYTIME_ARCS: apiUrl + '/storytime/arcs',
   STORYTIME_MANAGE_ARCS: apiUrl + '/storytime/manage/arcs',
   STORYTIME_ARC_MEMBERSHIPS: apiUrl + '/storytime/manage/arc-memberships',
+  STORYTIME_ARC_COLLABORATORS: apiUrl + '/storytime/manage/arc-collaborators',
+  STORYTIME_ARC_COLLABORATION_INVITATIONS:
+    apiUrl + '/storytime/manage/arc-collaborations/invitations',
   STORYTIME_PROGRESS: apiUrl + '/storytime/progress',
 
   // News
