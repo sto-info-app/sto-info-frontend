@@ -68,6 +68,32 @@ describe('STORYTIME_ROUTES', () => {
     expect(library?.data?.['title']).toBe(APP_ROUTE_TITLES.STORYTIME_LIBRARY);
   });
 
+  // A feed and a reader's own lists are one person's, in the same way the
+  // library is: sign-in, and no creator permission that would shut out readers.
+  it.each([
+    ['feed', APP_ROUTE_TITLES.STORYTIME_FEED],
+    ['reading-lists', APP_ROUTE_TITLES.STORYTIME_READING_LISTS],
+    ['reading-lists/:listId', APP_ROUTE_TITLES.STORYTIME_READING_LIST],
+  ])('requires sign-in for %s, and nothing more', (path, title) => {
+    const route = childAt(path);
+
+    expect(route?.canActivate).toEqual([AuthGuard]);
+    expect(route?.data?.['permission']).toBeUndefined();
+    expect(route?.data?.['title']).toBe(title);
+  });
+
+  // A public reading list is worth sharing only if somebody without an account
+  // can open it, exactly like the creator page it hangs off.
+  it('reads somebody’s public reading list without sign-in', () => {
+    const list = childAt('creators/:userId/reading-lists/:slug');
+
+    expect(list).toBeDefined();
+    expect(list?.canActivate).toBeUndefined();
+    expect(list?.data?.['title']).toBe(
+      APP_ROUTE_TITLES.STORYTIME_PUBLIC_READING_LIST,
+    );
+  });
+
   // A Character's page is reached through its Story, exactly as a Chapter is,
   // and needs no account: the Story being readable is the only gate.
   it('reads a Character through its Story, without sign-in', () => {

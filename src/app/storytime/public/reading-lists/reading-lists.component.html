@@ -1,0 +1,81 @@
+<section class="storytime-reading-lists">
+  <h1>Your reading lists</h1>
+  <p class="storytime-reading-lists__intro">
+    Stories and Arcs you have gathered, in the order you mean them. A list is
+    private until you say otherwise.
+  </p>
+
+  @if (errorMessage) {
+    <p
+      class="storytime-reading-lists__error"
+      role="alert">
+      {{ errorMessage }}
+    </p>
+  }
+
+  <form
+    class="storytime-reading-lists__form"
+    (ngSubmit)="create()">
+    <label
+      class="storytime-reading-lists__label"
+      for="new-list-name">
+      New list
+    </label>
+    <input
+      id="new-list-name"
+      class="storytime-reading-lists__input"
+      type="text"
+      maxlength="120"
+      placeholder="Klingon favourites"
+      [(ngModel)]="newName"
+      name="newName" />
+
+    <label class="storytime-reading-lists__checkbox">
+      <input
+        type="checkbox"
+        [(ngModel)]="newIsPublic"
+        name="newIsPublic" />
+      Anybody may read it
+    </label>
+
+    <button
+      type="submit"
+      [disabled]="isSaving || !newName.trim()">
+      {{ isSaving ? 'Saving…' : 'Make list' }}
+    </button>
+  </form>
+
+  @if (isLoading) {
+    <p class="storytime-reading-lists__loading">Loading your lists…</p>
+  } @else if (lists.length === 0) {
+    <p class="storytime-empty">
+      You have no reading lists yet. Make one above, then add Stories to it as
+      you find them.
+    </p>
+  } @else {
+    <ul class="storytime-reading-lists__list">
+      @for (list of lists; track list.id) {
+        <li class="storytime-reading-lists__item">
+          <a
+            class="storytime-reading-lists__name"
+            [routerLink]="['/storytime', 'reading-lists', list.id]">
+            {{ list.name }}
+          </a>
+          <span class="storytime-reading-lists__count">
+            {{ list.itemCount }}
+            {{ list.itemCount === 1 ? 'thing' : 'things' }}
+          </span>
+          <span class="storytime-reading-lists__visibility">
+            {{ list.isPublic ? 'Public' : 'Private' }}
+          </span>
+          <button
+            type="button"
+            [disabled]="isSaving"
+            (click)="remove(list)">
+            Delete
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</section>

@@ -315,6 +315,14 @@ export const STORYTIME_ROUTES: Routes = [
           ),
         data: { title: APP_ROUTE_TITLES.STORYTIME_CREATOR },
       },
+      {
+        path: 'creators/:userId/reading-lists/:slug',
+        loadComponent: () =>
+          import('./public/reading-list-detail/reading-list-detail.component').then(
+            m => m.ReadingListDetailComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_PUBLIC_READING_LIST },
+      },
 
       // Reading the Spotlight needs no account at all.
       {
@@ -337,6 +345,36 @@ export const STORYTIME_ROUTES: Routes = [
           permission: PERMISSIONS.STORYTIME_STORY_EDIT_OWN,
         },
         canActivate: [AuthGuard, PermissionGuard],
+      },
+
+      // A feed and a reader's own lists are one person's, so both need an
+      // account in the same way the library does.
+      {
+        path: 'feed',
+        loadComponent: () =>
+          import('./public/activity-feed/activity-feed.component').then(
+            m => m.ActivityFeedComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_FEED },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'reading-lists',
+        loadComponent: () =>
+          import('./public/reading-lists/reading-lists.component').then(
+            m => m.ReadingListsComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_READING_LISTS },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'reading-lists/:listId',
+        loadComponent: () =>
+          import('./public/reading-list-detail/reading-list-detail.component').then(
+            m => m.ReadingListDetailComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_READING_LIST },
+        canActivate: [AuthGuard],
       },
 
       {
