@@ -1,0 +1,126 @@
+<section id="storytime-moderation-queue-page">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Storytime Moderation</span>
+  </div>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Action failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading the queue"></app-loading-bar>
+  } @else {
+    <form
+      class="storytime-moderation__note"
+      [formGroup]="form">
+      <label for="moderation-message">What the creator is told</label>
+      <textarea
+        id="moderation-message"
+        formControlName="message"
+        rows="3"
+        maxlength="1000"></textarea>
+      <p class="field-hint">
+        Shown to them word for word, and the thing they will answer if they
+        appeal. Required before removing anything.
+      </p>
+
+      <label for="moderation-resolution">Note for the record</label>
+      <input
+        id="moderation-resolution"
+        type="text"
+        formControlName="resolution"
+        maxlength="1000" />
+      <p class="field-hint">
+        Kept with the report. The reporter never sees it.
+      </p>
+    </form>
+
+    <h2>Reports</h2>
+
+    @if (reports.length === 0) {
+      <p class="storytime-empty">Nothing has been reported.</p>
+    } @else {
+      <ul class="storytime-moderation__reports">
+        @for (report of reports; track report.id) {
+          <li class="storytime-moderation__report">
+            <p class="storytime-moderation__what">
+              {{ reasonLabels[report.reasonCode] }} —
+              {{ report.targetType | lowercase }}
+            </p>
+
+            @if (report.description) {
+              <p class="storytime-moderation__description">
+                {{ report.description }}
+              </p>
+            }
+
+            <ul class="storytime-moderation__meta">
+              <li>{{ report.status }}</li>
+              <li>{{ report.createdAt | date: 'short' }}</li>
+              @if (report.resolution) {
+                <li>{{ report.resolution }}</li>
+              }
+            </ul>
+
+            @if (isLive(report)) {
+              <div class="storytime-moderation__actions">
+                @if (report.status === reportStatus.OPEN) {
+                  <button
+                    type="button"
+                    (click)="claim(report)">
+                    Claim
+                  </button>
+                }
+                <button
+                  type="button"
+                  (click)="removeContent(report)">
+                  Remove the content
+                </button>
+                <button
+                  type="button"
+                  (click)="dismiss(report)">
+                  Dismiss
+                </button>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    <h2>Appeals</h2>
+
+    @if (appeals.length === 0) {
+      <p class="storytime-empty">Nobody is waiting on an appeal.</p>
+    } @else {
+      <ul class="storytime-moderation__appeals">
+        @for (appeal of appeals; track appeal.id) {
+          <li class="storytime-moderation__appeal">
+            <p class="storytime-moderation__what">
+              Appeal against a removed {{ appeal.targetType | lowercase }}
+            </p>
+            <p class="storytime-moderation__description">{{ appeal.body }}</p>
+            <p class="storytime-moderation__meta">
+              {{ appeal.createdAt | date: 'short' }}
+            </p>
+
+            <div class="storytime-moderation__actions">
+              <button
+                type="button"
+                (click)="uphold(appeal)">
+                Uphold and restore
+              </button>
+              <button
+                type="button"
+                (click)="reject(appeal)">
+                Reject
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

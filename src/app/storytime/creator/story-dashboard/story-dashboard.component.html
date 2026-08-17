@@ -41,7 +41,7 @@
         >
       </h2>
 
-      @if (story.moderationStatus === 'REMOVED') {
+      @if (isRemoved(story)) {
         <p class="storytime-dashboard__removed">
           <i
             class="fa-solid fa-ban"
@@ -53,6 +53,39 @@
             }}</span>
           }
         </p>
+
+        @if (appealingStoryId === story.id) {
+          <form
+            class="storytime-dashboard__appeal"
+            [formGroup]="appealForm"
+            (ngSubmit)="sendAppeal()">
+            <label [attr.for]="'appeal-' + story.id">Your appeal</label>
+            <textarea
+              [id]="'appeal-' + story.id"
+              formControlName="body"
+              rows="4"
+              maxlength="2000"></textarea>
+            <p class="field-hint">
+              You may appeal once. Say why you think this should come back.
+            </p>
+            <button type="submit">Send appeal</button>
+          </form>
+        } @else {
+          <button
+            type="button"
+            class="storytime-dashboard__appeal-open"
+            (click)="startAppeal(story)">
+            Appeal this removal
+          </button>
+        }
+
+        @if (appealMessage && appealingStoryId !== story.id) {
+          <p
+            class="storytime-dashboard__appeal-message"
+            role="status">
+            {{ appealMessage }}
+          </p>
+        }
       }
 
       <ul class="storytime-dashboard__meta">
@@ -105,6 +138,22 @@
           >Collaborators</a
         >
       </nav>
+
+      @if (needsContentPolicy(story)) {
+        <div class="storytime-dashboard__policy">
+          <p>
+            Before publishing, confirm this Story meets the
+            <a [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']"
+              >content policy</a
+            >.
+          </p>
+          <button
+            type="button"
+            (click)="acceptContentPolicy(story)">
+            It does
+          </button>
+        </div>
+      }
 
       <div class="storytime-dashboard__actions">
         @if (canPublish(story)) {

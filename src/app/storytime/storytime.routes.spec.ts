@@ -244,7 +244,16 @@ describe('STORYTIME_ROUTES', () => {
     });
   });
 
-  describe('the rules, readable by anybody', () => {
+  describe('moderation routes', () => {
+    // Moderating Storytime is a job somebody can be given without the rest of
+    // the site coming with it.
+    it('requires sign-in and the moderation permission for the queue', () => {
+      const queue = childAt('manage/moderation');
+
+      expect(queue?.canActivate).toEqual([AuthGuard, PermissionGuard]);
+      expect(queue?.data?.['permission']).toBe(PERMISSIONS.STORYTIME_MODERATE);
+    });
+
     // A reader deciding whether to report something, and a creator deciding
     // whether to publish, both need the rules before they have an account.
     it.each(['content-policy', 'removed'])('reads %s without sign-in', path => {

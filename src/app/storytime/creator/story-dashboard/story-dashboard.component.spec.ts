@@ -2,7 +2,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { ManagedStory, StoryStatus } from 'src/app/models/storytime.models';
+import {
+  ManagedStory,
+  StorytimeModerationStatus,
+  StorytimeTargetType,
+  StoryStatus,
+} from 'src/app/models/storytime.models';
+import { StorytimeModerationService } from '../../storytime-moderation.service';
 import { StoryService } from '../../story.service';
 import { StoryDashboardComponent } from './story-dashboard.component';
 
@@ -12,7 +18,9 @@ describe('StoryDashboardComponent', () => {
     getMyStories: jest.Mock;
     publishStory: jest.Mock;
     unpublishStory: jest.Mock;
+    acceptContentPolicy: jest.Mock;
   };
+  let moderationService: { appeal: jest.Mock };
 
   /**
    * Builds a managed Story.
@@ -48,6 +56,10 @@ describe('StoryDashboardComponent', () => {
       getMyStories: jest.fn().mockReturnValue(of([buildStory()])),
       publishStory: jest.fn().mockReturnValue(of(buildStory())),
       unpublishStory: jest.fn().mockReturnValue(of(buildStory())),
+      acceptContentPolicy: jest.fn().mockReturnValue(of(buildStory())),
+    };
+    moderationService = {
+      appeal: jest.fn().mockReturnValue(of({ id: 'appeal-1' })),
     };
 
     TestBed.configureTestingModule({
@@ -55,6 +67,7 @@ describe('StoryDashboardComponent', () => {
       providers: [
         provideRouter([]),
         { provide: StoryService, useValue: storyService },
+        { provide: StorytimeModerationService, useValue: moderationService },
       ],
     });
   });
@@ -172,5 +185,150 @@ describe('StoryDashboardComponent', () => {
 
     expect(element.textContent).toContain('removed by an administrator');
     expect(element.textContent).toContain('Breached the content policy');
+  });
+
+  describe('the content policy', () => {
+    // Publishing is the moment a creator says their work meets the rules
+    // everybody else's is held to, and the server refuses until they have.
+    it('asks for confirmation before a Story can be published', () => {
+      storyService.getMyStories.mockReturnValue(
+        of([buildStory({ contentPolicyAcceptedAt: null })]),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('confirm this Story meets');
+    });
+
+    it('says nothing once it has been confirmed', () => {
+      storyService.getMyStories.mockReturnValue(
+        of([buildStory({ contentPolicyAcceptedAt: '2026-06-01T00:00:00Z' })]),
+      );
+
+      const element = render();
+
+      expect(element.textContent).not.toContain('confirm this Story meets');
+    });
+
+    it('records the confirmation and reloads', () => {
+      render();
+      fixture.componentInstance.acceptContentPolicy(buildStory());
+
+      expect(storyService.acceptContentPolicy).toHaveBeenCalledWith('story-1');
+      expect(storyService.getMyStories).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('appealing a removal', () => {
+    /**
+     * Builds a removed Story.
+     *
+     * @returns The Story, as an administrator left it.
+     */
+    const buildRemoved = (): ManagedStory =>
+      buildStory({
+        moderationStatus: StorytimeModerationStatus.REMOVED,
+        moderationMessage: 'This breaches the harassment policy.',
+      });
+
+    beforeEach(() => {
+      storyService.getMyStories.mockReturnValue(of([buildRemoved()]));
+    });
+
+    // Somebody who cannot see what was said cannot answer it.
+    it('shows the administrator’s words to the creator', () => {
+      const element = render();
+
+      expect(element.textContent).toContain('harassment policy');
+      expect(element.textContent).toContain('Appeal this removal');
+    });
+
+    it('opens the appeal box', () => {
+      const element = render();
+
+      element
+        .querySelector<HTMLButtonElement>('.storytime-dashboard__appeal-open')
+        ?.click();
+      fixture.detectChanges();
+
+      expect(
+        element.querySelector('.storytime-dashboard__appeal'),
+      ).not.toBeNull();
+    });
+
+    it('sends the appeal', () => {
+      render();
+      fixture.componentInstance.startAppeal(buildRemoved());
+      fixture.componentInstance.appealForm.patchValue({
+        body: '  The passage quoted is my own writing.  ',
+      });
+      fixture.componentInstance.sendAppeal();
+
+      expect(moderationService.appeal).toHaveBeenCalledWith({
+        targetType: StorytimeTargetType.STORY,
+        targetId: 'story-1',
+        body: 'The passage quoted is my own writing.',
+      });
+      expect(fixture.componentInstance.appealingStoryId).toBeNull();
+    });
+
+    it('refuses to send an empty appeal', () => {
+      render();
+      fixture.componentInstance.startAppeal(buildRemoved());
+      fixture.componentInstance.sendAppeal();
+
+      expect(moderationService.appeal).not.toHaveBeenCalled();
+      expect(fixture.componentInstance.appealMessage).toContain('Say why');
+    });
+
+    it('sends nothing when no Story is being appealed', () => {
+      render();
+      fixture.componentInstance.appealForm.patchValue({ body: 'Something.' });
+      fixture.componentInstance.sendAppeal();
+
+      expect(moderationService.appeal).not.toHaveBeenCalled();
+    });
+
+    it('explains an appeal the server refused', () => {
+      moderationService.appeal.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: { message: 'This has already been appealed.' },
+            }),
+        ),
+      );
+
+      render();
+      fixture.componentInstance.startAppeal(buildRemoved());
+      fixture.componentInstance.appealForm.patchValue({ body: 'Please.' });
+      fixture.componentInstance.sendAppeal();
+
+      expect(fixture.componentInstance.appealMessage).toContain(
+        'already been appealed',
+      );
+    });
+
+    it('falls back to a generic message when the server gives none', () => {
+      moderationService.appeal.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      render();
+      fixture.componentInstance.startAppeal(buildRemoved());
+      fixture.componentInstance.appealForm.patchValue({ body: 'Please.' });
+      fixture.componentInstance.sendAppeal();
+
+      expect(fixture.componentInstance.appealMessage).toContain(
+        'could not be sent',
+      );
+    });
+
+    it('knows a Story that has not been removed', () => {
+      render();
+
+      expect(fixture.componentInstance.isRemoved(buildStory())).toBe(false);
+    });
   });
 });

@@ -118,6 +118,20 @@ export class StoryService {
   }
 
   /**
+   * Records that the caller accepts the content policy for a Story.
+   *
+   * A Story cannot be published until this has been done, because publishing
+   * is the moment the creator says their work meets the rules everybody else's
+   * is held to.
+   *
+   * @param storyId - The Story.
+   * @returns An observable of the Story, with its acceptance recorded.
+   */
+  acceptContentPolicy(storyId: string): Observable<ManagedStory> {
+    return this.action(storyId, 'content-policy');
+  }
+
+  /**
    * Publishes a Story the caller owns.
    *
    * @param storyId - The Story to publish.

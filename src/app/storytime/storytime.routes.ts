@@ -246,6 +246,22 @@ export const STORYTIME_ROUTES: Routes = [
         canActivate: [AuthGuard, PermissionGuard],
       },
 
+      // The moderation queue. Behind the moderation permission rather than the
+      // ADMIN role, because moderating Storytime is a job somebody can be
+      // given without the rest of the site coming with it.
+      {
+        path: 'manage/moderation',
+        loadComponent: () =>
+          import('./admin/moderation-queue/moderation-queue.component').then(
+            m => m.ModerationQueueComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_MODERATION,
+          permission: PERMISSIONS.STORYTIME_MODERATE,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+
       // The content policy is the one Storytime page that must be readable by
       // anybody: a reader deciding whether to report something, and a creator
       // deciding whether to publish, both need it before they have an account.
