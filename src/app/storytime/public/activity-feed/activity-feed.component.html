@@ -1,0 +1,51 @@
+<section class="storytime-feed">
+  <h1>Your Storytime feed</h1>
+  <p class="storytime-feed__intro">
+    What the writers, Stories and Arcs you follow have been doing.
+  </p>
+
+  @if (errorMessage) {
+    <p
+      class="storytime-feed__error"
+      role="alert">
+      {{ errorMessage }}
+    </p>
+  }
+
+  @if (isLoading && entries.length === 0) {
+    <p class="storytime-feed__loading">Loading your feed…</p>
+  } @else if (entries.length === 0) {
+    <p class="storytime-empty">
+      Nothing here yet. Follow a writer, a Story or an Arc and their news will
+      appear here.
+    </p>
+  } @else {
+    <ol class="storytime-feed__list">
+      @for (entry of entries; track entry.id) {
+        <li class="storytime-feed__entry">
+          <p class="storytime-feed__what">{{ wordingFor(entry) }}</p>
+          <a
+            class="storytime-feed__link"
+            [routerLink]="linkFor(entry)">
+            {{ titleFor(entry) }}
+          </a>
+          <time
+            class="storytime-feed__when"
+            [attr.datetime]="entry.occurredAt">
+            {{ entry.occurredAt | date: 'medium' }}
+          </time>
+        </li>
+      }
+    </ol>
+
+    @if (hasMore) {
+      <button
+        type="button"
+        class="storytime-feed__more"
+        [disabled]="isLoading"
+        (click)="loadMore()">
+        {{ isLoading ? 'Loading…' : 'Show more' }}
+      </button>
+    }
+  }
+</section>

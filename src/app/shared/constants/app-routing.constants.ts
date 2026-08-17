@@ -133,6 +133,11 @@ export const APP_ROUTES = {
   STORYTIME_SPOTLIGHT_NEW: ROOT_ROUTES.STORYTIME + '/manage/spotlight/new',
   STORYTIME_SPOTLIGHT_EDIT:
     ROOT_ROUTES.STORYTIME + '/manage/spotlight/:spotlightId',
+  STORYTIME_FEED: ROOT_ROUTES.STORYTIME + '/feed',
+  STORYTIME_READING_LISTS: ROOT_ROUTES.STORYTIME + '/reading-lists',
+  STORYTIME_READING_LIST: ROOT_ROUTES.STORYTIME + '/reading-lists/:listId',
+  STORYTIME_PUBLIC_READING_LIST:
+    ROOT_ROUTES.STORYTIME + '/creators/:userId/reading-lists/:slug',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'service-interruption',
@@ -251,6 +256,10 @@ export const APP_ROUTE_TITLES = {
   STORYTIME_MANAGE_SPOTLIGHT: 'Manage Spotlight',
   STORYTIME_SPOTLIGHT_NEW: 'Draft a Selection',
   STORYTIME_SPOTLIGHT_EDIT: 'Edit Selection',
+  STORYTIME_FEED: 'Your Feed',
+  STORYTIME_READING_LISTS: 'Your Reading Lists',
+  STORYTIME_READING_LIST: 'Reading List',
+  STORYTIME_PUBLIC_READING_LIST: 'Reading List',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'Service Interruption',
