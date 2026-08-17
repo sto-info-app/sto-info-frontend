@@ -1,0 +1,113 @@
+<section id="storytime-tag-admin-page">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Storytime Tags</span>
+  </div>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Action failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <p class="storytime-tag-admin__note">
+    Creators choose from this list. Keeping it short and unambiguous is what
+    makes a tag filter find anything.
+  </p>
+
+  <form
+    class="storytime-tag-admin__form"
+    [formGroup]="form"
+    (ngSubmit)="save()">
+    <label for="tag-name">Name</label>
+    <input
+      id="tag-name"
+      type="text"
+      formControlName="name"
+      maxlength="100" />
+    @if (form.controls.name.touched && form.controls.name.invalid) {
+      <p class="field-error">A tag needs a name.</p>
+    }
+
+    <label for="tag-category">Category</label>
+    <select
+      id="tag-category"
+      formControlName="category">
+      @for (category of categories; track category) {
+        <option [value]="category">{{ categoryLabels[category] }}</option>
+      }
+    </select>
+
+    <label for="tag-slug">URL slug</label>
+    <input
+      id="tag-slug"
+      type="text"
+      formControlName="slug"
+      maxlength="120" />
+    <p class="field-hint">
+      Leave blank to build one from the name. Changing it breaks filter links
+      already shared.
+    </p>
+
+    <label for="tag-description">What it means</label>
+    <input
+      id="tag-description"
+      type="text"
+      formControlName="description"
+      maxlength="500" />
+
+    <label for="tag-order">Order within its category</label>
+    <input
+      id="tag-order"
+      type="number"
+      min="0"
+      formControlName="displayOrder" />
+
+    <div class="storytime-tag-admin__actions">
+      <button type="submit">
+        {{ editingTagId ? 'Save changes' : 'Add tag' }}
+      </button>
+      @if (editingTagId) {
+        <button
+          type="button"
+          (click)="cancelEdit()">
+          Cancel
+        </button>
+      }
+    </div>
+  </form>
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading tags"></app-loading-bar>
+  } @else if (groups.length === 0) {
+    <p class="storytime-empty">There are no tags yet.</p>
+  } @else {
+    @for (group of groups; track group.category) {
+      <div class="storytime-tag-admin__group">
+        <h2>{{ group.label }}</h2>
+        <ul class="storytime-tag-admin__tags">
+          @for (tag of group.tags; track tag.id) {
+            <li>
+              <span class="storytime-tag-admin__name">{{ tag.name }}</span>
+              <span class="storytime-tag-admin__slug">{{ tag.slug }}</span>
+              @if (tag.description) {
+                <span class="storytime-tag-admin__description">{{
+                  tag.description
+                }}</span>
+              }
+              <button
+                type="button"
+                (click)="edit(tag)">
+                Edit
+              </button>
+              <button
+                type="button"
+                (click)="remove(tag)">
+                Remove
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  }
+</section>

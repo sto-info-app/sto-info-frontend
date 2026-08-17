@@ -87,4 +87,11 @@
       <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']">Cancel</a>
     </div>
   </form>
+
+  @if (arc) {
+    <!-- Tagging needs something to tag, so it appears once the Arc exists. -->
+    <app-tag-picker
+      targetType="ARC"
+      [targetId]="arc.id"></app-tag-picker>
+  }
 </div>

@@ -262,6 +262,21 @@ export const STORYTIME_ROUTES: Routes = [
         canActivate: [AuthGuard, PermissionGuard],
       },
 
+      // The tag vocabulary. Behind the configure permission: a tag is a shared
+      // classification rather than one creator's label.
+      {
+        path: 'manage/tags',
+        loadComponent: () =>
+          import('./admin/tag-admin/tag-admin.component').then(
+            m => m.TagAdminComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_MANAGE_TAGS,
+          permission: PERMISSIONS.STORYTIME_CONFIGURE,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+
       // The content policy is the one Storytime page that must be readable by
       // anybody: a reader deciding whether to report something, and a creator
       // deciding whether to publish, both need it before they have an account.

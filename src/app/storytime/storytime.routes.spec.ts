@@ -264,6 +264,15 @@ describe('STORYTIME_ROUTES', () => {
     });
   });
 
+  // A tag is a shared classification rather than one creator's label, so
+  // changing the vocabulary is a configure job.
+  it('requires the configure permission to manage tags', () => {
+    const tags = childAt('manage/tags');
+
+    expect(tags?.canActivate).toEqual([AuthGuard, PermissionGuard]);
+    expect(tags?.data?.['permission']).toBe(PERMISSIONS.STORYTIME_CONFIGURE);
+  });
+
   describe('public routes', () => {
     // Finding something to read, and looking at what somebody has written, are
     // the least private things anybody does here.

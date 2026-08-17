@@ -123,6 +123,24 @@ export const REPORT_REASONS = [
 ];
 
 /**
+ * How each tag category is named to a reader.
+ *
+ * The categories are fixed in the database; these are the words shown for
+ * them, held here so a picker, a filter and a Story page agree.
+ */
+export const TAG_CATEGORY_LABELS: Record<string, string> = {
+  FACTION: 'Faction',
+  ERA: 'Era',
+  GENRE: 'Genre',
+  TONE: 'Tone',
+  THEME: 'Theme',
+  SPECIES: 'Species',
+  CONTENT_WARNING: 'Content warning',
+  FORMAT: 'Format',
+  CONTINUITY: 'Continuity',
+};
+
+/**
  * The kinds of content a reader may search, and how each is named.
  *
  * The empty code means "everything", which is the default and the first tab: a

@@ -512,6 +512,47 @@ export interface CreateAppealRequest {
 }
 
 /**
+ * The shelf a tag belongs on.
+ */
+export enum StorytimeTagCategory {
+  FACTION = 'FACTION',
+  ERA = 'ERA',
+  GENRE = 'GENRE',
+  TONE = 'TONE',
+  THEME = 'THEME',
+  SPECIES = 'SPECIES',
+  CONTENT_WARNING = 'CONTENT_WARNING',
+  FORMAT = 'FORMAT',
+  CONTINUITY = 'CONTINUITY',
+}
+
+/**
+ * One tag in the Storytime vocabulary.
+ *
+ * Administrator-managed: creators pick from the list rather than inventing
+ * terms, which is what makes a tag filter worth offering.
+ */
+export interface StorytimeTag {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  category: StorytimeTagCategory;
+  displayOrder: number;
+}
+
+/**
+ * The fields an administrator may send when adding or changing a tag.
+ */
+export interface TagRequest {
+  name?: string;
+  category?: StorytimeTagCategory;
+  slug?: string;
+  description?: string | null;
+  displayOrder?: number;
+}
+
+/**
  * How a listing of Stories is ordered.
  *
  * Two different questions: a reader looking for something new wants what was

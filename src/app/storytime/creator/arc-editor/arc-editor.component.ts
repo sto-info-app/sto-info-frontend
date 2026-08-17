@@ -19,6 +19,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { ArcService } from '../../arc.service';
+import { TagPickerComponent } from '../../shared/tag-picker/tag-picker.component';
 import {
   VISIBILITY_DESCRIPTIONS,
   VISIBILITY_LABELS,
@@ -41,6 +42,7 @@ import { StorytimeService } from '../../storytime.service';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    TagPickerComponent,
   ],
 })
 export class ArcEditorComponent implements OnInit {

@@ -26,6 +26,7 @@ import {
   VISIBILITY_DESCRIPTIONS,
   VISIBILITY_LABELS,
 } from '../../storytime.constants';
+import { TagPickerComponent } from '../../shared/tag-picker/tag-picker.component';
 import { StorytimeService } from '../../storytime.service';
 import { StoryService } from '../../story.service';
 
@@ -45,6 +46,7 @@ import { StoryService } from '../../story.service';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    TagPickerComponent,
   ],
 })
 export class StoryEditorComponent implements OnInit {
