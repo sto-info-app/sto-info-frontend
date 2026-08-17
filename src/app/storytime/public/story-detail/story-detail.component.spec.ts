@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -11,11 +12,14 @@ import {
   ReaderStoryStatus,
   Story,
   StoryProgress,
+  StorytimeReportReason,
+  StorytimeTargetType,
 } from 'src/app/models/storytime.models';
 import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
 import { CrewService } from '../../crew.service';
 import { ProgressService } from '../../progress.service';
+import { StorytimeModerationService } from '../../storytime-moderation.service';
 import { StoryService } from '../../story.service';
 import { StoryDetailComponent } from './story-detail.component';
 
@@ -32,6 +36,8 @@ describe('StoryDetailComponent', () => {
     resetStory: jest.Mock;
   };
   let authService: { isLoggedIn: jest.Mock };
+  let moderationService: { report: jest.Mock };
+  let dialog: { open: jest.Mock };
 
   /**
    * Builds the readable Chapters of the Story.
@@ -113,6 +119,12 @@ describe('StoryDetailComponent', () => {
       resetStory: jest.fn().mockReturnValue(of(buildProgress())),
     };
     authService = { isLoggedIn: jest.fn().mockReturnValue(true) };
+    moderationService = {
+      report: jest.fn().mockReturnValue(of({ id: 'report-1' })),
+    };
+    dialog = {
+      open: jest.fn().mockReturnValue({ afterClosed: () => of(null) }),
+    };
 
     TestBed.configureTestingModule({
       imports: [StoryDetailComponent],
@@ -124,6 +136,8 @@ describe('StoryDetailComponent', () => {
         { provide: CrewService, useValue: crewService },
         { provide: ProgressService, useValue: progressService },
         { provide: AuthService, useValue: authService },
+        { provide: StorytimeModerationService, useValue: moderationService },
+        { provide: MatDialog, useValue: dialog },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -598,6 +612,113 @@ describe('StoryDetailComponent', () => {
 
         expect(element.querySelector('.storytime-story__progress')).toBeNull();
       });
+    });
+  });
+
+  describe('reporting the Story', () => {
+    it('offers the action to a signed-in reader', () => {
+      const element = render();
+
+      expect(element.textContent).toContain('Report this Story');
+    });
+
+    // An anonymous report cannot be followed up or answered.
+    it('offers nothing to a signed-out reader', () => {
+      authService.isLoggedIn.mockReturnValue(false);
+
+      const element = render();
+
+      expect(element.textContent).not.toContain('Report this Story');
+    });
+
+    it('sends what the reader chose in the dialog', () => {
+      dialog.open.mockReturnValue({
+        afterClosed: () =>
+          of({
+            reasonCode: StorytimeReportReason.PLAGIARISM,
+            description: 'Copied from elsewhere.',
+          }),
+      });
+
+      render();
+      fixture.componentInstance.report();
+
+      expect(moderationService.report).toHaveBeenCalledWith({
+        targetType: StorytimeTargetType.STORY,
+        targetId: 'story-1',
+        reasonCode: StorytimeReportReason.PLAGIARISM,
+        description: 'Copied from elsewhere.',
+      });
+    });
+
+    // A reporter is told their report arrived, and nothing else: what an
+    // administrator decides about somebody else's Story is not theirs to read.
+    it('says only that the report arrived', () => {
+      dialog.open.mockReturnValue({
+        afterClosed: () => of({ reasonCode: StorytimeReportReason.HARASSMENT }),
+      });
+
+      render();
+      fixture.componentInstance.report();
+
+      expect(fixture.componentInstance.reportMessage).toContain('Thank you');
+    });
+
+    it('sends nothing when the reader closes the dialog', () => {
+      render();
+      fixture.componentInstance.report();
+
+      expect(moderationService.report).not.toHaveBeenCalled();
+    });
+
+    it('explains a report the server refused', () => {
+      dialog.open.mockReturnValue({
+        afterClosed: () => of({ reasonCode: StorytimeReportReason.HARASSMENT }),
+      });
+      moderationService.report.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: { message: 'You have already reported this.' },
+            }),
+        ),
+      );
+
+      render();
+      fixture.componentInstance.report();
+
+      expect(fixture.componentInstance.reportMessage).toContain(
+        'already reported',
+      );
+    });
+
+    it('falls back to a generic message when the server gives none', () => {
+      dialog.open.mockReturnValue({
+        afterClosed: () => of({ reasonCode: StorytimeReportReason.HARASSMENT }),
+      });
+      moderationService.report.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      render();
+      fixture.componentInstance.report();
+
+      expect(fixture.componentInstance.reportMessage).toContain(
+        'could not be sent',
+      );
+    });
+
+    // The Story is loaded before anything can be reported about it.
+    it('does nothing when there is no Story', () => {
+      storyService.getStory.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 })),
+      );
+
+      render();
+      fixture.componentInstance.report();
+
+      expect(dialog.open).not.toHaveBeenCalled();
     });
   });
 });

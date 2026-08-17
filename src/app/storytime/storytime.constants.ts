@@ -21,6 +21,108 @@ export const STORYTIME_COPY = {
 } as const;
 
 /**
+ * What the Storytime content policy covers.
+ *
+ * The categories are the ones the feature actually enforces: a reporter picks
+ * from this list and an administrator cites it when removing something, so the
+ * three surfaces cannot describe the rules differently.
+ *
+ * The wording is placeholder pending the final copy. The `code` values are
+ * not — they match the reasons the server accepts, and changing one changes
+ * what the API is told.
+ */
+export const CONTENT_POLICY_RULES = [
+  {
+    code: 'HARASSMENT',
+    title: 'Harassment',
+    summary:
+      'Nothing that targets, threatens or persistently pursues a real person.',
+  },
+  {
+    code: 'HATE_CONTENT',
+    title: 'Hate content',
+    summary:
+      'Nothing that demeans people for who they are. Star Trek is the wrong place for it.',
+  },
+  {
+    code: 'EXPLICIT_CONTENT',
+    title: 'Explicit sexual content',
+    summary:
+      'Sexual content must stay within what your Story’s rating declares, and never involve minors.',
+  },
+  {
+    code: 'GRAPHIC_VIOLENCE',
+    title: 'Graphic violence',
+    summary:
+      'Violence must stay within what your Story’s rating declares. Rate honestly and readers can choose.',
+  },
+  {
+    code: 'PLAGIARISM',
+    title: 'Plagiarism',
+    summary: 'Post your own writing. Credit anything you have borrowed.',
+  },
+  {
+    code: 'IMPERSONATION',
+    title: 'Impersonation',
+    summary: 'Do not write as another member, a developer, or the site itself.',
+  },
+  {
+    code: 'PERSONAL_INFORMATION',
+    title: 'Personal information',
+    summary:
+      'Nobody’s real-world details without their agreement — including your own, for your sake.',
+  },
+  {
+    code: 'COPYRIGHT',
+    title: 'Copyright',
+    summary:
+      'Fan work is welcome. Wholesale copying of somebody’s published work is not.',
+  },
+  {
+    code: 'SPAM',
+    title: 'Spam',
+    summary: 'No advertising, scams or repetition dressed up as a Story.',
+  },
+  {
+    code: 'MALICIOUS_LINK',
+    title: 'Malicious links',
+    summary: 'No links that lead somewhere harmful.',
+  },
+  {
+    code: 'DECEPTIVE_MEDIA',
+    title: 'Deceptive media',
+    summary: 'Do not present media as something it is not.',
+  },
+] as const;
+
+/**
+ * How each report reason reads in the moderation queue.
+ *
+ * Built from the policy so the queue can never describe a category one way
+ * while the policy page describes it another.
+ */
+export const REPORT_REASON_LABELS: Record<string, string> = {
+  ...Object.fromEntries(
+    CONTENT_POLICY_RULES.map(rule => [rule.code, rule.title]),
+  ),
+  OTHER: 'Something else',
+};
+
+/**
+ * The reasons somebody may pick when reporting content.
+ *
+ * The policy categories plus "something else", which exists because a list
+ * that covers everything is a list nobody reads to the end of.
+ */
+export const REPORT_REASONS = [
+  ...CONTENT_POLICY_RULES.map(rule => ({
+    code: rule.code,
+    label: rule.title,
+  })),
+  { code: 'OTHER', label: 'Something else' },
+];
+
+/**
  * How long to wait after a reader stops scrolling before recording where they
  * are.
  *

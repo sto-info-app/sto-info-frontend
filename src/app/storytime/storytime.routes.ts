@@ -246,6 +246,26 @@ export const STORYTIME_ROUTES: Routes = [
         canActivate: [AuthGuard, PermissionGuard],
       },
 
+      // The content policy is the one Storytime page that must be readable by
+      // anybody: a reader deciding whether to report something, and a creator
+      // deciding whether to publish, both need it before they have an account.
+      {
+        path: 'content-policy',
+        loadComponent: () =>
+          import('./public/content-policy/content-policy.component').then(
+            m => m.ContentPolicyComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_CONTENT_POLICY },
+      },
+      {
+        path: 'removed',
+        loadComponent: () =>
+          import('./public/removed-content/removed-content.component').then(
+            m => m.RemovedContentComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_REMOVED },
+      },
+
       // Reading the Spotlight needs no account at all.
       {
         path: 'spotlight',

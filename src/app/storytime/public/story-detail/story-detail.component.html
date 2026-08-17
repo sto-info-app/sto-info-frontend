@@ -230,5 +230,25 @@
         }
       </ol>
     }
+
+    @if (isTrackingProgress) {
+      <div class="storytime-story__report">
+        <button
+          type="button"
+          (click)="report()">
+          <i
+            class="fa-solid fa-flag"
+            aria-hidden="true"></i>
+          Report this Story
+        </button>
+        @if (reportMessage) {
+          <p
+            class="storytime-story__report-message"
+            role="status">
+            {{ reportMessage }}
+          </p>
+        }
+      </div>
+    }
   </article>
 }

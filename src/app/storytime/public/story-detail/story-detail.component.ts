@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { finalize, of, switchMap } from 'rxjs';
@@ -18,6 +19,7 @@ import {
   ReaderStoryStatus,
   Story,
   StoryProgress,
+  StorytimeTargetType,
 } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
@@ -31,7 +33,12 @@ import {
   COMPLETION_STATE_LABELS,
   READER_STORY_STATUS_LABELS,
 } from '../../storytime.constants';
+import { StorytimeModerationService } from '../../storytime-moderation.service';
 import { StoryService } from '../../story.service';
+import {
+  ReportContentDialogComponent,
+  ReportContentDialogResult,
+} from '../report-content-dialog/report-content-dialog.component';
 
 /**
  * A published Story's own page.
@@ -76,6 +83,9 @@ export class StoryDetailComponent implements OnInit {
   /** A message to show when the Chapter list could not be loaded. */
   chapterErrorMessage = '';
 
+  /** What to say after a reader reports the Story. */
+  reportMessage = '';
+
   /** Rating labels, so a raw enum value is never shown. */
   readonly ratingLabels = CONTENT_RATING_LABELS;
 
@@ -110,6 +120,8 @@ export class StoryDetailComponent implements OnInit {
   private readonly _crewService = inject(CrewService);
   private readonly _progressService = inject(ProgressService);
   private readonly _authService = inject(AuthService);
+  private readonly _moderationService = inject(StorytimeModerationService);
+  private readonly _dialog = inject(MatDialog);
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _destroyRef = inject(DestroyRef);
 
@@ -253,6 +265,59 @@ export class StoryDetailComponent implements OnInit {
    */
   get isTrackingProgress(): boolean {
     return this._authService.isLoggedIn();
+  }
+
+  /**
+   * Opens the report dialog, and sends whatever the reader chose.
+   *
+   * Only offered to a signed-in reader, because an anonymous report cannot be
+   * followed up or answered.
+   *
+   * The outcome is deliberately quiet: a reporter is told their report
+   * arrived, and nothing else. What an administrator decides about somebody
+   * else's Story is not theirs to read, and a failure is not worth taking the
+   * Story off the screen for.
+   */
+  report(): void {
+    if (!this.story) {
+      return;
+    }
+
+    this._dialog
+      .open(ReportContentDialogComponent, {
+        data: {
+          targetType: StorytimeTargetType.STORY,
+          targetId: this.story.id,
+          label: 'Story',
+        },
+      })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((result?: ReportContentDialogResult) => {
+        if (!result || !this.story) {
+          return;
+        }
+
+        this._moderationService
+          .report({
+            targetType: StorytimeTargetType.STORY,
+            targetId: this.story.id,
+            reasonCode: result.reasonCode,
+            description: result.description,
+          })
+          .pipe(takeUntilDestroyed(this._destroyRef))
+          .subscribe({
+            next: () => {
+              this.reportMessage =
+                'Thank you. An administrator will look at this.';
+            },
+            error: (error: HttpErrorResponse) => {
+              this.reportMessage =
+                (error.error as { message?: string } | undefined)?.message ??
+                'That report could not be sent. Please try again shortly.';
+            },
+          });
+      });
   }
 
   /**

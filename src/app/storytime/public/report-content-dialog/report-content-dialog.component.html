@@ -1,0 +1,51 @@
+<h2 mat-dialog-title>Report this {{ data.label }}</h2>
+
+<mat-dialog-content>
+  <p class="storytime-report__intro">
+    Reports go to the site’s administrators. Nothing is removed automatically —
+    somebody reads it and decides. The person you are reporting is never told
+    who reported them.
+  </p>
+
+  <form [formGroup]="form">
+    <label for="report-reason">What is the problem?</label>
+    <select
+      id="report-reason"
+      formControlName="reasonCode">
+      @for (reason of reasons; track reason.code) {
+        <option [value]="reason.code">{{ reason.label }}</option>
+      }
+    </select>
+
+    <label for="report-description">Anything you want to add</label>
+    <textarea
+      id="report-description"
+      formControlName="description"
+      rows="4"
+      maxlength="2000"></textarea>
+    <p class="field-hint">
+      Optional, but it helps to say where in the Story the problem is.
+    </p>
+  </form>
+
+  <p class="storytime-report__policy">
+    <a
+      [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']"
+      mat-dialog-close
+      >Read the content policy</a
+    >
+  </p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    type="button"
+    (click)="cancel()">
+    Cancel
+  </button>
+  <button
+    type="button"
+    (click)="submit()">
+    Send report
+  </button>
+</mat-dialog-actions>

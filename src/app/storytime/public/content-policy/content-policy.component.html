@@ -1,0 +1,42 @@
+<section id="storytime-content-policy-page">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Content Policy</span>
+  </div>
+
+  <h1>The Storytime content policy</h1>
+
+  <p class="storytime-policy__intro">
+    Storytime is a place for Star Trek Online fan fiction written by the
+    community. These are the rules everything published here has to meet. You
+    are asked to confirm your Story meets them before you publish it, and
+    anybody reading can report something they believe does not.
+  </p>
+
+  <dl class="storytime-policy">
+    @for (rule of rules; track rule.code) {
+      <div class="storytime-policy__rule">
+        <dt>{{ rule.title }}</dt>
+        <dd>{{ rule.summary }}</dd>
+      </div>
+    }
+  </dl>
+
+  <h2>If something breaks these rules</h2>
+
+  <p>
+    Report it. A report goes to the site’s administrators and never removes
+    anything by itself — somebody reads it and decides. You are not told what
+    was decided about somebody else’s work, and the person you reported is never
+    told who reported them.
+  </p>
+
+  <h2>If your work is removed</h2>
+
+  <p>
+    You keep it. Removed work stays in your own pages, flagged with the reason
+    an administrator gave, so you can see exactly what was said. You may appeal
+    once, and if the appeal is upheld the work goes back as it was.
+  </p>
+
+  <p class="storytime-fan-notice">{{ copy.FAN_CONTENT_NOTICE }}</p>
+</section>

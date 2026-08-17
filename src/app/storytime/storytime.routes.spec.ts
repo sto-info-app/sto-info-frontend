@@ -244,6 +244,17 @@ describe('STORYTIME_ROUTES', () => {
     });
   });
 
+  describe('the rules, readable by anybody', () => {
+    // A reader deciding whether to report something, and a creator deciding
+    // whether to publish, both need the rules before they have an account.
+    it.each(['content-policy', 'removed'])('reads %s without sign-in', path => {
+      const route = childAt(path);
+
+      expect(route?.canActivate).toBeUndefined();
+      expect(route?.data?.['title']).toBeDefined();
+    });
+  });
+
   describe('public routes', () => {
     it('lists Stories without requiring sign-in', () => {
       expect(childAt('stories')?.canActivate).toBeUndefined();
