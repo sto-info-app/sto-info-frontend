@@ -1,9 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, Input, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  Input,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
   ReactionSummary,
   StorytimeReaction,
@@ -49,6 +58,8 @@ export class ReactionControlComponent implements OnInit {
   private readonly _reactionService = inject(ReactionService);
   private readonly _authService = inject(AuthService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Whether the reader may react at all.
@@ -96,17 +107,22 @@ export class ReactionControlComponent implements OnInit {
       ? this._reactionService.removeReaction(this.targetType, this.targetId)
       : this._reactionService.react(this.targetType, this.targetId, reaction);
 
-    change.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: summary => {
-        this.summary = summary;
-        this.isSaving = false;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          error.error?.message ?? 'That could not be recorded. Try again.';
-        this.isSaving = false;
-      },
-    });
+    change
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: summary => {
+          this.summary = summary;
+          this.isSaving = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage =
+            error.error?.message ?? 'That could not be recorded. Try again.';
+          this.isSaving = false;
+        },
+      });
   }
 
   /**
@@ -115,7 +131,10 @@ export class ReactionControlComponent implements OnInit {
   private load(): void {
     this._reactionService
       .getSummary(this.targetType, this.targetId)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: summary => (this.summary = summary),
         error: () => (this.summary = null),

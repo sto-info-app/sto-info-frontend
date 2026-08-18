@@ -1,9 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, Input, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  Input,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { StorytimeTag } from 'src/app/models/storytime.models';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { TagService } from '../../tag.service';
 import { TAG_CATEGORY_LABELS } from '../../storytime.constants';
 
@@ -50,6 +59,8 @@ export class TagPickerComponent implements OnInit {
 
   private readonly _tagService = inject(TagService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Loads the vocabulary and whatever is already chosen.
@@ -57,7 +68,10 @@ export class TagPickerComponent implements OnInit {
   ngOnInit(): void {
     this._tagService
       .getTags()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: tags => {
           this.groups = this.groupByCategory(tags);
@@ -115,21 +129,26 @@ export class TagPickerComponent implements OnInit {
         ? this._tagService.setArcTags(this.targetId, tagIds)
         : this._tagService.setStoryTags(this.targetId, tagIds);
 
-    request.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: tags => {
-        this.chosen = new Set(tags.map(tag => tag.id));
-        this.isSaving = false;
-        this.isSaved = true;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.isSaving = false;
-        // The server explains what went wrong — usually a tag deleted since
-        // the picker loaded — which is more use than a generic failure.
-        this.errorMessage =
-          (error.error as { message?: string } | undefined)?.message ??
-          'Those tags could not be saved. Please try again shortly.';
-      },
-    });
+    request
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: tags => {
+          this.chosen = new Set(tags.map(tag => tag.id));
+          this.isSaving = false;
+          this.isSaved = true;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.isSaving = false;
+          // The server explains what went wrong — usually a tag deleted since
+          // the picker loaded — which is more use than a generic failure.
+          this.errorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'Those tags could not be saved. Please try again shortly.';
+        },
+      });
   }
 
   /**
@@ -141,17 +160,22 @@ export class TagPickerComponent implements OnInit {
         ? this._tagService.getArcTags(this.targetId)
         : this._tagService.getStoryTags(this.targetId);
 
-    request.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: tags => {
-        this.chosen = new Set(tags.map(tag => tag.id));
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-        this.errorMessage =
-          'The tags on this could not be loaded. Please try again shortly.';
-      },
-    });
+    request
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: tags => {
+          this.chosen = new Set(tags.map(tag => tag.id));
+          this.isLoading = false;
+        },
+        error: () => {
+          this.isLoading = false;
+          this.errorMessage =
+            'The tags on this could not be loaded. Please try again shortly.';
+        },
+      });
   }
 
   /**

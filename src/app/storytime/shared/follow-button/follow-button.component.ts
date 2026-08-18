@@ -1,9 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, Input, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  Input,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { FollowState, FollowTargetKind } from 'src/app/models/storytime.models';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { FollowService } from '../../follow.service';
 
 /**
@@ -42,6 +51,8 @@ export class FollowButtonComponent implements OnInit {
   private readonly _followService = inject(FollowService);
   private readonly _authService = inject(AuthService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Whether there is anything to show at all.
@@ -62,7 +73,10 @@ export class FollowButtonComponent implements OnInit {
 
     this._followService
       .getFollowState(this.kind, this.targetId)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: state => (this.state = state),
         error: () => (this.state = null),
@@ -84,16 +98,21 @@ export class FollowButtonComponent implements OnInit {
       ? this._followService.unfollow(this.kind, this.targetId)
       : this._followService.follow(this.kind, this.targetId);
 
-    change.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: state => {
-        this.state = state;
-        this.isSaving = false;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          error.error?.message ?? 'That could not be saved. Try again.';
-        this.isSaving = false;
-      },
-    });
+    change
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: state => {
+          this.state = state;
+          this.isSaving = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage =
+            error.error?.message ?? 'That could not be saved. Try again.';
+          this.isSaving = false;
+        },
+      });
   }
 }

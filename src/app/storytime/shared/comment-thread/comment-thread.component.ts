@@ -1,10 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, Input, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  Input,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
   StorytimeComment,
   StorytimeCommentStatus,
@@ -99,6 +108,8 @@ export class CommentThreadComponent implements OnInit {
   private readonly _commentService = inject(CommentService);
   private readonly _authService = inject(AuthService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Whether the reader may join in.
@@ -304,7 +315,10 @@ export class CommentThreadComponent implements OnInit {
 
     this._commentService
       .getComments(this.targetType, this.targetId)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: comments => {
           this.nodes = this.arrange(comments);
@@ -374,17 +388,22 @@ export class CommentThreadComponent implements OnInit {
     this.isSaving = true;
     this.errorMessage = '';
 
-    change.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => {
-        this.isSaving = false;
-        onSuccess();
-        this.load();
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          error.error?.message ?? 'That could not be saved. Try again.';
-        this.isSaving = false;
-      },
-    });
+    change
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => {
+          this.isSaving = false;
+          onSuccess();
+          this.load();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage =
+            error.error?.message ?? 'That could not be saved. Try again.';
+          this.isSaving = false;
+        },
+      });
   }
 }

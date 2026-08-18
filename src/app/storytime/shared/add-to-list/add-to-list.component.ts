@@ -1,9 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, Input, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  Input,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
   ReadingList,
   StorytimeTargetType,
@@ -51,6 +60,8 @@ export class AddToListComponent implements OnInit {
   private readonly _readingListService = inject(ReadingListService);
   private readonly _authService = inject(AuthService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Whether there is anything to show at all.
@@ -71,7 +82,10 @@ export class AddToListComponent implements OnInit {
 
     this._readingListService
       .getMyLists()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: lists => (this.lists = lists),
         error: () => (this.lists = []),
@@ -79,7 +93,10 @@ export class AddToListComponent implements OnInit {
 
     this._readingListService
       .getListsHolding(this.targetType, this.targetId)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: listIds => (this.holding = new Set(listIds)),
         error: () => (this.holding = new Set()),
@@ -119,7 +136,10 @@ export class AddToListComponent implements OnInit {
 
     this._readingListService
       .addItem(list.id, this.targetType, this.targetId)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: () => {
           this.holding.add(list.id);
