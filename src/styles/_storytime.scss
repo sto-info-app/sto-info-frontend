@@ -1081,7 +1081,8 @@ p.storytime-moderation__note,
   // Storytime's own navigation, which used to be a row of sidebar buttons.
   // Each entry gets a line saying what it is, which is the whole reason for
   // moving it here: "Arcs" alone tells a first-time reader nothing.
-  &__browse {
+  &__browse,
+  &__yours {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1rem;
@@ -1141,24 +1142,6 @@ p.storytime-moderation__note,
 
   &__stories {
     margin-bottom: 1.5rem;
-  }
-
-  // The reader's own corner of the feature: their feed, their lists, their
-  // library. Only shown to somebody signed in, so it is a shortcut rather
-  // than an advertisement.
-  &__yours {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding: 0;
-    margin: 0 0 1.5rem;
-    list-style: none;
-
-    a {
-      @include storytime-work-title;
-
-      font-size: 1rem;
-    }
   }
 
   &__unread {

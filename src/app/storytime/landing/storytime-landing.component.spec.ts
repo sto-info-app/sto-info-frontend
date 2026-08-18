@@ -396,6 +396,24 @@ describe('StorytimeLandingComponent', () => {
       ]);
     });
 
+    it('presents each destination as a panel with a description', () => {
+      const element = render();
+      const panels = [
+        ...element.querySelectorAll('.storytime-landing__yours a'),
+      ];
+
+      expect(panels).toHaveLength(6);
+      expect(
+        panels.every(
+          panel =>
+            panel.querySelector('.storytime-landing__browse-name') &&
+            (panel
+              .querySelector('.storytime-landing__summary')
+              ?.textContent?.trim().length ?? 0) > 0,
+        ),
+      ).toBe(true);
+    });
+
     it('says how much of the feed is new', () => {
       const element = render();
 

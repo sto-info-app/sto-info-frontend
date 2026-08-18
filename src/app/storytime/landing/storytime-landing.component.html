@@ -101,33 +101,53 @@
     <ul class="storytime-landing__yours">
       <li>
         <a [routerLink]="['/', appRoutes.STORYTIME, 'feed']">
-          Your feed
+          <span class="storytime-landing__browse-name">Your feed</span>
           @if (unreadCount > 0) {
             <span class="storytime-landing__unread">{{ unreadCount }} new</span>
           }
+          <p class="storytime-landing__summary">
+            Follow the latest activity from writers and readers.
+          </p>
         </a>
       </li>
       <li>
         <a [routerLink]="['/', appRoutes.STORYTIME, 'reading-lists']">
-          Your reading lists
+          <span class="storytime-landing__browse-name">Your reading lists</span>
+          <p class="storytime-landing__summary">
+            Keep Stories together for later or read them in order.
+          </p>
         </a>
       </li>
       <li>
-        <a [routerLink]="['/', appRoutes.STORYTIME, 'library']">Your library</a>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'library']">
+          <span class="storytime-landing__browse-name">Your library</span>
+          <p class="storytime-landing__summary">
+            Find the Stories and Arcs you have saved.
+          </p>
+        </a>
       </li>
       <li>
         <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories']">
-          Your Stories
+          <span class="storytime-landing__browse-name">Your Stories</span>
+          <p class="storytime-landing__summary">
+            Write, edit and publish your own Stories.
+          </p>
         </a>
       </li>
       <li>
         <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']">
-          Your Arcs
+          <span class="storytime-landing__browse-name">Your Arcs</span>
+          <p class="storytime-landing__summary">
+            Arrange your Stories into connected reading orders.
+          </p>
         </a>
       </li>
       <li>
         <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'invitations']">
-          Invitations
+          <span class="storytime-landing__browse-name">Invitations</span>
+          <p class="storytime-landing__summary">
+            See collaboration invitations waiting for your response.
+          </p>
         </a>
       </li>
     </ul>
