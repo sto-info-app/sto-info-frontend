@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, of, shareReplay } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   MyPermissions,
@@ -34,9 +34,8 @@ export class AccessControlService {
   /**
    * Loads the permissions the signed-in user holds.
    *
-   * An anonymous caller, or a failed lookup, yields an empty set rather than an
-   * error: a page that cannot determine permissions should show the controls
-   * available to everyone, not break.
+   * An anonymous caller yields an empty set. Request failures remain errors so
+   * route guards can distinguish an unavailable API from a permission denial.
    *
    * @returns An observable of the permission codes held.
    */
@@ -83,7 +82,6 @@ export class AccessControlService {
       .get<MyPermissions>(API_URLS.ACCESS_CONTROL_ME, httpOptions)
       .pipe(
         map(response => new Set<string>(response.permissions)),
-        catchError(() => of(new Set<string>())),
         // Replayed so the many templates asking about permissions share one
         // response rather than each triggering a request.
         shareReplay({ bufferSize: 1, refCount: false }),

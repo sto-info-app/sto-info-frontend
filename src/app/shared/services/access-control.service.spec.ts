@@ -99,15 +99,14 @@ describe('AccessControlService', () => {
     httpMock.expectNone(API_URLS.ACCESS_CONTROL_ME);
   });
 
-  it('yields no permissions when the request fails', async () => {
+  it('preserves an error when the permission request fails', async () => {
     const permissions = firstValueFrom(service.getMyPermissions());
 
     httpMock
       .expectOne(API_URLS.ACCESS_CONTROL_ME)
       .flush('failed', { status: 500, statusText: 'Server Error' });
 
-    const result = await permissions;
-    expect(result.size).toBe(0);
+    await expect(permissions).rejects.toMatchObject({ status: 500 });
   });
 
   describe('hasPermission', () => {

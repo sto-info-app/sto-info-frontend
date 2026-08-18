@@ -6,8 +6,9 @@ import {
   RouterStateSnapshot,
 } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { Permission } from 'src/app/models/access-control.models';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { AuthService } from './auth.service';
 
@@ -62,6 +63,10 @@ export class PermissionGuard implements CanActivate {
           void this._router.navigate(['/']);
         }
         return isPermitted;
+      }),
+      catchError(() => {
+        void this._router.navigate([`/${APP_ROUTES.SERVICE_INTERRUPTION}`]);
+        return of(false);
       }),
     );
   }

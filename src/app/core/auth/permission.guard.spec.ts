@@ -4,8 +4,9 @@ import {
   Router,
   RouterStateSnapshot,
 } from '@angular/router';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { PERMISSIONS } from 'src/app/models/access-control.models';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { AuthService } from './auth.service';
 import { PermissionGuard } from './permission.guard';
@@ -68,6 +69,22 @@ describe('PermissionGuard', () => {
 
     expect(allowed).toBe(false);
     expect(router.navigate).toHaveBeenCalledWith(['/']);
+  });
+
+  it('shows service interruption when the permission lookup fails', async () => {
+    accessControlService.hasPermission.mockReturnValue(
+      throwError(() => new Error('Database error')),
+    );
+
+    const allowed = await firstValueFrom(
+      guard.canActivate(routeWith(PERMISSIONS.STORYTIME_MODERATE), state),
+    );
+
+    expect(allowed).toBe(false);
+    expect(router.navigate).toHaveBeenCalledWith([
+      `/${APP_ROUTES.SERVICE_INTERRUPTION}`,
+    ]);
+    expect(router.navigate).not.toHaveBeenCalledWith(['/']);
   });
 
   it('sends an unauthenticated user to login with a return URL', async () => {
