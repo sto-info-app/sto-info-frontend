@@ -1,12 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
   MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
   MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
@@ -38,18 +45,22 @@ export class VerifyEmailComponent implements OnInit {
   private readonly _route = inject(ActivatedRoute);
   private readonly _http = inject(HttpClient);
   private readonly _routingService = inject(RoutingService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Reads the verification token from the query string.
    */
   ngOnInit() {
-    this._route.queryParams.subscribe(params => {
-      this.token = params['token'];
-      if (!this.token) {
-        this.message = 'Invalid token!';
-        this.messageType = MessageType.Error;
-      }
-    });
+    this._route.queryParams
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe(params => {
+        this.token = params['token'];
+        if (!this.token) {
+          this.message = 'Invalid token!';
+          this.messageType = MessageType.Error;
+        }
+      });
   }
 
   /**
@@ -58,6 +69,7 @@ export class VerifyEmailComponent implements OnInit {
   verifyEmail() {
     this._http
       .post(API_URLS.AUTH_VERIFICATION_EMAIL, { token: this.token })
+      .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe({
         next: () => {
           this.message = 'Verification successful! You can now login.';
@@ -90,6 +102,7 @@ export class VerifyEmailComponent implements OnInit {
       .post(API_URLS.AUTH_RESEND_VERIFICATION_EMAIL, {
         token: this.token,
       })
+      .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe({
         next: () => {
           this.message = 'Verification email sent. Please check your email.';
