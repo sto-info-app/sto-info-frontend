@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { Observable, finalize, forkJoin } from 'rxjs';
@@ -12,6 +19,7 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import { CrewService } from '../../crew.service';
 import {
@@ -64,6 +72,8 @@ export class InvitationsComponent implements OnInit {
   private readonly _crewService = inject(CrewService);
   private readonly _arcService = inject(ArcService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Loads everything waiting on the caller.
@@ -192,14 +202,19 @@ export class InvitationsComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    action.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => this.load(),
-      error: () => {
-        this.errorMessage =
-          'That could not be saved. Please try again shortly.';
-        this.isLoading = false;
-      },
-    });
+    action
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => this.load(),
+        error: () => {
+          this.errorMessage =
+            'That could not be saved. Please try again shortly.';
+          this.isLoading = false;
+        },
+      });
   }
 
   /**
@@ -218,6 +233,7 @@ export class InvitationsComponent implements OnInit {
     })
       .pipe(
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isLoading = false;
         }),

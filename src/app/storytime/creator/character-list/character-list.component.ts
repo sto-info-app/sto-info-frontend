@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, finalize } from 'rxjs';
@@ -8,6 +15,7 @@ import { ManagedCharacter } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CharacterService } from '../../character.service';
 
 /**
@@ -43,6 +51,8 @@ export class CharacterListComponent implements OnInit {
   private readonly _route = inject(ActivatedRoute);
   private readonly _characterService = inject(CharacterService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Loads the cast of the Story named in the route.
@@ -115,14 +125,19 @@ export class CharacterListComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    action.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => this.load(),
-      error: () => {
-        this.errorMessage =
-          'That change could not be saved. Please try again shortly.';
-        this.isLoading = false;
-      },
-    });
+    action
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => this.load(),
+        error: () => {
+          this.errorMessage =
+            'That change could not be saved. Please try again shortly.';
+          this.isLoading = false;
+        },
+      });
   }
 
   /**
@@ -135,6 +150,7 @@ export class CharacterListComponent implements OnInit {
       .getMyCharacters(this.storyId)
       .pipe(
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isLoading = false;
         }),

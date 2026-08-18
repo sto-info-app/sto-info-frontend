@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { Observable, finalize } from 'rxjs';
@@ -8,6 +15,7 @@ import { ArcStatus, ManagedArc } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import {
   PUBLICATION_STATUS_LABELS,
@@ -53,6 +61,8 @@ export class ArcDashboardComponent implements OnInit {
 
   private readonly _arcService = inject(ArcService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Loads the caller's Arcs.
@@ -98,18 +108,23 @@ export class ArcDashboardComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    action.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => this.load(),
-      error: (error: HttpErrorResponse) => {
-        // The server explains why an Arc cannot be published — most often
-        // that nothing has agreed to be in it — and repeating that verbatim
-        // beats a generic apology.
-        this.errorMessage =
-          (error.error as { message?: string } | undefined)?.message ??
-          'That change could not be saved. Please try again shortly.';
-        this.isLoading = false;
-      },
-    });
+    action
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => this.load(),
+        error: (error: HttpErrorResponse) => {
+          // The server explains why an Arc cannot be published — most often
+          // that nothing has agreed to be in it — and repeating that verbatim
+          // beats a generic apology.
+          this.errorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'That change could not be saved. Please try again shortly.';
+          this.isLoading = false;
+        },
+      });
   }
 
   /**
@@ -122,6 +137,7 @@ export class ArcDashboardComponent implements OnInit {
       .getMyArcs()
       .pipe(
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isLoading = false;
         }),

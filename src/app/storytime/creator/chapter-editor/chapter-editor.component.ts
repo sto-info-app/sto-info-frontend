@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -22,6 +29,7 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
 import { MediaService } from '../../media.service';
@@ -100,6 +108,8 @@ export class ChapterEditorComponent implements OnInit {
   private readonly _mediaService = inject(MediaService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Builds the form and loads the Chapter when editing an existing one.
@@ -115,7 +125,10 @@ export class ChapterEditorComponent implements OnInit {
 
     this._storytimeService
       .getLanguages()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe(languages => {
         this.languages = languages;
       });
@@ -181,7 +194,10 @@ export class ChapterEditorComponent implements OnInit {
           .filter(character => this.appearingCharacterIds.has(character.id))
           .map(character => ({ characterId: character.id })),
       )
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: () => {
           this.isSavingCast = false;
@@ -213,7 +229,10 @@ export class ChapterEditorComponent implements OnInit {
 
     this._mediaService
       .addMedia(chapterId, { url })
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: media => {
           this.media = [...this.media, media];
@@ -235,7 +254,10 @@ export class ChapterEditorComponent implements OnInit {
   removeMedia(media: ChapterMedia): void {
     this._mediaService
       .removeMedia(media.id)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: () => {
           this.media = this.media.filter(entry => entry.id !== media.id);
@@ -261,6 +283,7 @@ export class ChapterEditorComponent implements OnInit {
       .pipe(
         catchError(() => of([] as ChapterMedia[])),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe(media => {
         this.media = media;
@@ -284,6 +307,7 @@ export class ChapterEditorComponent implements OnInit {
       .pipe(
         catchError(() => of([] as ManagedCharacter[])),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe(cast => {
         this.cast = cast;
@@ -301,6 +325,7 @@ export class ChapterEditorComponent implements OnInit {
       .pipe(
         catchError(() => of([] as ChapterAppearance[])),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe(appearances => {
         this.appearingCharacterIds = new Set(
@@ -348,26 +373,31 @@ export class ChapterEditorComponent implements OnInit {
       ? this._chapterService.updateChapter(this.chapter.id, payload)
       : this._chapterService.createChapter(this.storyId, payload);
 
-    request.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: saved => {
-        this.isSaving = false;
-        void this._router.navigate([
-          '/',
-          this.appRoutes.STORYTIME,
-          'manage',
-          'chapters',
-          saved.id,
-        ]);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.isSaving = false;
-        // The server names the specific problem, which is more use to a writer
-        // than a generic failure would be.
-        this.errorMessage =
-          (error.error as { message?: string } | undefined)?.message ??
-          'This Chapter could not be saved. Please try again shortly.';
-      },
-    });
+    request
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: saved => {
+          this.isSaving = false;
+          void this._router.navigate([
+            '/',
+            this.appRoutes.STORYTIME,
+            'manage',
+            'chapters',
+            saved.id,
+          ]);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.isSaving = false;
+          // The server names the specific problem, which is more use to a writer
+          // than a generic failure would be.
+          this.errorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'This Chapter could not be saved. Please try again shortly.';
+        },
+      });
   }
 
   /**
@@ -380,7 +410,10 @@ export class ChapterEditorComponent implements OnInit {
 
     this._chapterService
       .getMyChapter(chapterId)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: chapter => {
           this.chapter = chapter;

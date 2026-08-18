@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -13,6 +20,7 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import { ARC_MEMBERSHIP_STATUS_LABELS } from '../../storytime.constants';
 import { StoryService } from '../../story.service';
@@ -66,6 +74,8 @@ export class ArcStoryListComponent implements OnInit {
   private readonly _storyService = inject(StoryService);
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /** The form for inviting a Story by its identifier. */
   readonly form = this._formBuilder.nonNullable.group({
@@ -257,18 +267,23 @@ export class ArcStoryListComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    action.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => {
-        onSuccess?.();
-        this.load();
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          (error.error as { message?: string } | undefined)?.message ??
-          'That change could not be saved. Please try again shortly.';
-        this.isLoading = false;
-      },
-    });
+    action
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => {
+          onSuccess?.();
+          this.load();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'That change could not be saved. Please try again shortly.';
+          this.isLoading = false;
+        },
+      });
   }
 
   /**
@@ -281,6 +296,7 @@ export class ArcStoryListComponent implements OnInit {
       .getArcStories(this.arcId)
       .pipe(
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isLoading = false;
         }),
@@ -307,7 +323,10 @@ export class ArcStoryListComponent implements OnInit {
   private loadMyStories(): void {
     this._storyService
       .getMyStories()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: stories => {
           this.myStories = stories;

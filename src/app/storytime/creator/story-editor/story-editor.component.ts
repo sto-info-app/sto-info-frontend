@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -21,6 +28,7 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
   COMPLETION_STATE_LABELS,
   VISIBILITY_DESCRIPTIONS,
@@ -98,6 +106,8 @@ export class StoryEditorComponent implements OnInit {
   private readonly _storyService = inject(StoryService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Builds the form and loads the Story when editing an existing one.
@@ -116,7 +126,10 @@ export class StoryEditorComponent implements OnInit {
 
     this._storytimeService
       .getLanguages()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe(languages => {
         this.languages = languages;
       });
@@ -176,26 +189,31 @@ export class StoryEditorComponent implements OnInit {
       ? this._storyService.updateStory(this.story.id, payload)
       : this._storyService.createStory(payload);
 
-    request.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: saved => {
-        this.isSaving = false;
-        void this._router.navigate([
-          '/',
-          this.appRoutes.STORYTIME,
-          'manage',
-          'stories',
-          saved.id,
-        ]);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.isSaving = false;
-        // The server's message names the specific problem, which is more
-        // use to a creator than a generic failure would be.
-        this.errorMessage =
-          (error.error as { message?: string } | undefined)?.message ??
-          'This Story could not be saved. Please try again shortly.';
-      },
-    });
+    request
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: saved => {
+          this.isSaving = false;
+          void this._router.navigate([
+            '/',
+            this.appRoutes.STORYTIME,
+            'manage',
+            'stories',
+            saved.id,
+          ]);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.isSaving = false;
+          // The server's message names the specific problem, which is more
+          // use to a creator than a generic failure would be.
+          this.errorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'This Story could not be saved. Please try again shortly.';
+        },
+      });
   }
 
   /**
@@ -208,7 +226,10 @@ export class StoryEditorComponent implements OnInit {
 
     this._storyService
       .getMyStory(storyId)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: story => {
           this.story = story;

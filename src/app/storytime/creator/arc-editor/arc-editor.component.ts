@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -18,6 +25,7 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import { TagPickerComponent } from '../../shared/tag-picker/tag-picker.component';
 import {
@@ -82,6 +90,8 @@ export class ArcEditorComponent implements OnInit {
   private readonly _arcService = inject(ArcService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Builds the form and loads the Arc when editing an existing one.
@@ -98,7 +108,10 @@ export class ArcEditorComponent implements OnInit {
 
     this._storytimeService
       .getLanguages()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe(languages => {
         this.languages = languages;
       });
@@ -158,28 +171,33 @@ export class ArcEditorComponent implements OnInit {
       ? this._arcService.updateArc(this.arc.id, payload)
       : this._arcService.createArc(payload);
 
-    request.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: saved => {
-        this.isSaving = false;
-        void this._router.navigate([
-          '/',
-          this.appRoutes.STORYTIME,
-          'manage',
-          'arcs',
-          saved.id,
-          'stories',
-        ]);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.isSaving = false;
-        // The server's message names the specific problem — a slug already
-        // taken, or an edit somebody else got in first — which is more use
-        // than a generic failure would be.
-        this.errorMessage =
-          (error.error as { message?: string } | undefined)?.message ??
-          'This Arc could not be saved. Please try again shortly.';
-      },
-    });
+    request
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: saved => {
+          this.isSaving = false;
+          void this._router.navigate([
+            '/',
+            this.appRoutes.STORYTIME,
+            'manage',
+            'arcs',
+            saved.id,
+            'stories',
+          ]);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.isSaving = false;
+          // The server's message names the specific problem — a slug already
+          // taken, or an edit somebody else got in first — which is more use
+          // than a generic failure would be.
+          this.errorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'This Arc could not be saved. Please try again shortly.';
+        },
+      });
   }
 
   /**
@@ -192,7 +210,10 @@ export class ArcEditorComponent implements OnInit {
 
     this._arcService
       .getMyArc(arcId)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: arc => {
           this.arc = arc;

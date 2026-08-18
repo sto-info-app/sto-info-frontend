@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -12,6 +19,7 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CrewService } from '../../crew.service';
 import { COLLABORATION_STATUS_LABELS } from '../../storytime.constants';
 
@@ -56,6 +64,8 @@ export class CollaboratorListComponent implements OnInit {
   private readonly _crewService = inject(CrewService);
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /** The invitation form. */
   readonly form = this._formBuilder.nonNullable.group({
@@ -156,18 +166,23 @@ export class CollaboratorListComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    action.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => {
-        onSuccess?.();
-        this.load();
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          (error.error as { message?: string } | undefined)?.message ??
-          'That change could not be saved. Please try again shortly.';
-        this.isLoading = false;
-      },
-    });
+    action
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => {
+          onSuccess?.();
+          this.load();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'That change could not be saved. Please try again shortly.';
+          this.isLoading = false;
+        },
+      });
   }
 
   /**
@@ -180,6 +195,7 @@ export class CollaboratorListComponent implements OnInit {
       .getCollaborators(this.storyId)
       .pipe(
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isLoading = false;
         }),
