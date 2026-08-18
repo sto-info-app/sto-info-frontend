@@ -1029,22 +1029,26 @@
 }
 
 .storytime-landing {
-  &__search {
-    @include storytime-panel;
+  // Storytime's own navigation, which used to be a row of sidebar buttons.
+  // Each entry gets a line saying what it is, which is the whole reason for
+  // moving it here: "Arcs" alone tells a first-time reader nothing.
+  &__browse {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    list-style: none;
 
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    a {
+      @include storytime-work-title;
 
-    input {
-      @include storytime-input;
-
-      flex: 1;
-      min-width: 200px;
+      font-size: 1rem;
     }
 
-    button {
-      @include storytime-button;
+    .storytime-landing__summary {
+      margin: 0.25rem 0 0;
+      font-size: 0.9rem;
     }
   }
 
@@ -1218,6 +1222,47 @@
     h3 {
       font-family: vars.$font-antonio;
       color: vars.$lcars-sunflower;
+    }
+
+    // The rule name carries the weight; the definition list markup is what
+    // makes a screen reader pair it with its explanation.
+    dt {
+      font-family: vars.$font-antonio;
+      color: vars.$lcars-sunflower;
+      margin-bottom: 0.25rem;
+    }
+
+    dd {
+      margin: 0;
+      color: vars.$lcars-grey-light;
+      line-height: 1.5;
+    }
+  }
+
+  &__version {
+    font-size: 0.8rem;
+    color: vars.$lcars-grey-light;
+    margin-bottom: 0.5rem;
+  }
+
+  // The three publishing documents cross-link to each other from every one of
+  // them, so the set reads as one thing rather than three loose pages.
+  &__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+
+    a {
+      color: vars.$lcars-sunflower;
+    }
+
+    // The page you are already on: still in the set, but not a link back to
+    // where you are standing.
+    [aria-current='page'] {
+      color: vars.$lcars-grey-light;
+      font-weight: 700;
     }
   }
 }

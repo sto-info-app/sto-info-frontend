@@ -1,15 +1,72 @@
 <section id="storytime-content-policy-page">
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>Content Policy</span>
+  <app-policy-header
+    current="policy"
+    title="Storytime Content Policy"
+    [intro]="copy.CONTENT_POLICY_INTRO" />
+
+  <div class="lcars-bar">
+    <div class="lcars-bar-inner"></div>
   </div>
 
-  <h1>The Storytime content policy</h1>
+  <h2>1. Fan-created and unofficial</h2>
+  <p>
+    Storytime is for unofficial, non-commercial fan work. Nothing published here
+    is official Star Trek or Star Trek Online content, and nothing may claim to
+    be: not as canon, not as approved or endorsed by a rights holder, and not as
+    a continuation or replacement for anything official.
+  </p>
+  <p>
+    Within that, build what you like. Your own continuity, Stories that connect
+    to each other, Arcs written with other people — all of it is welcome, so
+    long as it stays clearly identifiable as fan work.
+  </p>
 
-  <p class="storytime-policy__intro">
-    Storytime is a place for Star Trek Online fan fiction written by the
-    community. These are the rules everything published here has to meet. You
-    are asked to confirm your Story meets them before you publish it, and
-    anybody reading can report something they believe does not.
+  <hr />
+  <h2>2. Non-commercial</h2>
+  <p>
+    STO Info does not charge for Storytime and will not. There are no
+    subscriptions, paywalls, paid memberships, premium Stories or paid Chapter
+    access, and creators may not add any.
+  </p>
+  <p>
+    That rules out selling access, paid early access, affiliate marketing,
+    sponsored placements, advertising within Stories and commercial
+    solicitation. Published Stories stay freely readable here.
+  </p>
+  <p>
+    What you do professionally outside STO Info is your own business. The rule
+    is about using this service to make money.
+  </p>
+
+  <hr />
+  <h2>3. Who owns what</h2>
+  <p>
+    Star Trek, Star Trek Online, and every character, species, ship, location,
+    organisation, design and mark that came with them belong to their rights
+    holders. Publishing a Story here transfers none of that to you, to another
+    member, or to STO Info — and using an established character in your Story
+    does not make it yours.
+  </p>
+  <p>
+    Your original writing stays yours, as far as the law allows: your prose,
+    dialogue, characters, plots, artwork and recordings. Publishing gives STO
+    Info only the limited rights needed to run the service, set out in the
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'terms']">Terms of Use</a>. It
+    does not let STO Info sell your work or put it behind a paywall.
+  </p>
+  <p>
+    Only submit material you made, have permission to use, or are otherwise
+    entitled to use. That applies as much to artwork, music, recordings and
+    screenshots as it does to writing. Crediting somebody is not the same as
+    asking them.
+  </p>
+
+  <hr />
+  <h2>4. The rules</h2>
+  <p>
+    These are the categories the feature enforces. A reader reporting something
+    picks from this list, and an administrator names one when they act, so what
+    you read here is what the report form and the moderation queue use.
   </p>
 
   <dl class="storytime-policy">
@@ -21,21 +78,148 @@
     }
   </dl>
 
-  <h2>If something breaks these rules</h2>
-
+  <hr />
+  <h2>5. Content ratings</h2>
   <p>
-    Report it. A report goes to the site’s administrators and never removes
-    anything by itself — somebody reads it and decides. You are not told what
-    was decided about somebody else’s work, and the person you reported is never
-    told who reported them.
+    Every Story carries a rating, and choosing an accurate one is the creator’s
+    job — including updating it when a Story changes. Readers rely on it to
+    decide what they want to open.
   </p>
 
-  <h2>If your work is removed</h2>
+  <dl class="storytime-policy">
+    @for (rating of ratings; track rating) {
+      <div class="storytime-policy__rule">
+        <dt>{{ ratingLabels[rating] }}</dt>
+        <dd>{{ ratingDescriptions[rating] }}</dd>
+      </div>
+    }
+  </dl>
 
+  <p>
+    Mature Stories are marked in listings and warn you when you open them.
+    Adults Only Stories warn you before the content itself. A rating is not
+    permission: an Adults Only label does not allow anything this policy
+    otherwise prohibits, and explicit sexual images and video are never
+    permitted whatever the rating says.
+  </p>
+
+  <hr />
+  <h2>6. AI-generated writing</h2>
+  <p>
+    Storytime exists to show what the community writes. Stories, Chapters and
+    other substantive narrative written by generative AI are not permitted, and
+    AI-written prose must not be published as your own work.
+  </p>
+  <p>
+    AI must also not be used to imitate somebody’s voice, to fake audio or video
+    of a real person, to impersonate another creator, to reproduce somebody
+    else’s work, or to get around copyright and moderation rules.
+  </p>
+  <p>
+    Help with spelling, grammar, formatting and accessibility is not what this
+    section is about. Writing the story for you is.
+  </p>
+
+  <hr />
+  <h2>7. Real people</h2>
+  <p>
+    A character and the actor who plays them are not the same thing. Do not
+    impersonate a real person, claim somebody contributed when they did not, put
+    words or performances in their mouth, or use another member’s identity,
+    voice or likeness without their agreement. If you credit a real person for a
+    voice, performance or likeness, you need their permission to do it.
+  </p>
+
+  <hr />
+  <h2>8. Media and links</h2>
+  <p>
+    Storytime is not a video host. Supported external media goes through the
+    Storytime media controls, which at launch means YouTube, and Chapter text
+    may not carry arbitrary external links. Anything that would break these
+    rules if uploaded here breaks them when embedded from somewhere else, and
+    disguised addresses, redirects and similar workarounds count as attempts to
+    break them.
+  </p>
+
+  <hr />
+  <h2>9. Reporting</h2>
+  <p>
+    Report anything you believe breaks these rules, infringes copyright, misuses
+    your identity or work, or creates a safety concern. Report in good faith:
+    knowingly false or abusive reports are themselves actionable.
+  </p>
+  <p>
+    A report goes to the site’s administrators and never removes anything by
+    itself — somebody reads it and decides. You are not told what was decided
+    about somebody else’s work, and the person you reported is never told who
+    reported them.
+  </p>
+
+  <hr />
+  <h2>10. Moderation and removal</h2>
+  <p>
+    An administrator may do nothing, require a warning or a corrected rating,
+    hide media or comments, remove credits, unpublish, or mark content as
+    Removed. Removed is a moderation state, separate from you deleting,
+    archiving or unpublishing your own work.
+  </p>
+  <p>
+    Removed work stays stored, disappears from public listings, search,
+    Spotlight, feeds and navigation, and its public address reports that it is
+    gone rather than showing it.
+  </p>
+
+  <h3>If your work is removed</h3>
   <p>
     You keep it. Removed work stays in your own pages, flagged with the reason
     an administrator gave, so you can see exactly what was said. You may appeal
-    once, and if the appeal is upheld the work goes back as it was.
+    once, and if the appeal is upheld the work goes back as it was. An appeal
+    does not restore anything by itself.
+  </p>
+
+  <hr />
+  <h2>11. Copyright complaints</h2>
+  <p>
+    If you believe something here infringes copyright you own or represent, tell
+    STO Info. Say which work is affected, which Storytime content you mean and
+    where it is, what your relationship to the work is, why you believe the use
+    is unauthorised, and how you can be contacted. Content may be restricted
+    while a complaint is looked at, and the creator may be given a chance to
+    respond.
+  </p>
+
+  <hr />
+  <h2>12. Your responsibility</h2>
+  <p>
+    You are responsible for what you publish. Every time you accept these terms
+    for a Story, you are confirming:
+  </p>
+  <ul class="lcars-list">
+    @for (representation of representations; track representation) {
+      <li>{{ representation }}</li>
+    }
+  </ul>
+  <p>
+    That STO Info lets a Story publish is not a judgement that it is lawful,
+    accurate or yours.
+  </p>
+
+  <hr />
+  <h2>13. Changes</h2>
+  <p>
+    This policy may change as Storytime, the community, the law or the
+    technology does. The current version and its date are shown at the top. When
+    a change materially affects what creators must do, you will be asked to
+    accept the revised version before publishing or updating again.
+  </p>
+
+  <p>
+    Read alongside the
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'terms']">Terms of Use</a> and
+    the
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'fan-content']">
+      Fan Content &amp; Intellectual Property Notice </a
+    >.
   </p>
 
   <p class="storytime-fan-notice">{{ copy.FAN_CONTENT_NOTICE }}</p>

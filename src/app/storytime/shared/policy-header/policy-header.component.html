@@ -1,0 +1,37 @@
+<div class="lcars-text-bar small-lcars-bar-gap">
+  <span>Storytime</span>
+</div>
+
+<h1>{{ title }}</h1>
+
+<p class="storytime-policy__intro">{{ intro }}</p>
+
+<p class="storytime-policy__version">
+  Version {{ version }} · {{ effectiveDate }}
+</p>
+
+<nav
+  class="storytime-policy__nav"
+  aria-label="Storytime publishing documents">
+  @if (current === 'policy') {
+    <span aria-current="page">Content Policy</span>
+  } @else {
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']">
+      Content Policy
+    </a>
+  }
+
+  @if (current === 'terms') {
+    <span aria-current="page">Terms of Use</span>
+  } @else {
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'terms']">Terms of Use</a>
+  }
+
+  @if (current === 'notice') {
+    <span aria-current="page">Fan Content &amp; IP Notice</span>
+  } @else {
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'fan-content']">
+      Fan Content &amp; IP Notice
+    </a>
+  }
+</nav>

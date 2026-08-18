@@ -158,6 +158,16 @@ export interface ManagedStory extends Story {
   moderationStatus: StorytimeModerationStatus;
   moderationMessage: string | null;
   contentPolicyAcceptedAt: string | null;
+  /** Which version of the publishing terms was accepted, if any. */
+  contentPolicyVersion: string | null;
+  /**
+   * Whether the accepted terms are the current ones.
+   *
+   * Decided by the server rather than compared here: the client would have to
+   * carry its own copy of the current version to do it, and a stale bundle
+   * would then tell a creator they were ready to publish when they were not.
+   */
+  contentPolicyCurrent: boolean;
 }
 
 /**

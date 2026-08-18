@@ -277,9 +277,11 @@ export const STORYTIME_ROUTES: Routes = [
         canActivate: [AuthGuard, PermissionGuard],
       },
 
-      // The content policy is the one Storytime page that must be readable by
-      // anybody: a reader deciding whether to report something, and a creator
-      // deciding whether to publish, both need it before they have an account.
+      // The three publishing documents are the Storytime pages that must be
+      // readable by anybody: a reader deciding whether to report something, a
+      // creator deciding whether to publish, and a rights holder deciding
+      // whether the site claims anything it should not, all need them before
+      // they have an account — or without ever wanting one.
       {
         path: 'content-policy',
         loadComponent: () =>
@@ -287,6 +289,22 @@ export const STORYTIME_ROUTES: Routes = [
             m => m.ContentPolicyComponent,
           ),
         data: { title: APP_ROUTE_TITLES.STORYTIME_CONTENT_POLICY },
+      },
+      {
+        path: 'terms',
+        loadComponent: () =>
+          import('./public/storytime-terms/storytime-terms.component').then(
+            m => m.StorytimeTermsComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_TERMS },
+      },
+      {
+        path: 'fan-content',
+        loadComponent: () =>
+          import('./public/fan-content-notice/fan-content-notice.component').then(
+            m => m.FanContentNoticeComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.STORYTIME_FAN_CONTENT },
       },
       {
         path: 'removed',

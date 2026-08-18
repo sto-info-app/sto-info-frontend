@@ -1,0 +1,339 @@
+<section id="storytime-terms-page">
+  <app-policy-header
+    current="terms"
+    title="Storytime Terms of Use"
+    [intro]="copy.TERMS_INTRO" />
+
+  <p>
+    Using Storytime — creating, publishing, contributing or taking part — means
+    agreeing to these Terms, the
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']">
+      Content Policy
+    </a>
+    , the
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'fan-content']">
+      Fan Content &amp; Intellectual Property Notice
+    </a>
+    and the wider STO Info policies. If you do not agree to them, do not publish
+    here.
+  </p>
+
+  <div class="lcars-bar">
+    <div class="lcars-bar-inner"></div>
+  </div>
+
+  <h2>1. What Storytime is</h2>
+  <p>
+    A place for eligible STO Info members to publish unofficial, non-commercial
+    fan stories: Stories and Chapters, Characters, Crew credits, Arcs, images
+    and supported media, comments and reactions, following, activity feeds,
+    reading progress, reading lists, Spotlight, and reporting and moderation.
+    Features may be added, changed or withdrawn.
+  </p>
+  <p>
+    STO Info is not the owner or operator of Star Trek or Star Trek Online, and
+    is not affiliated with, sponsored by, approved by or endorsed by CBS
+    Studios, Paramount, Cryptic Studios or any other rights holder. Nothing here
+    lets you claim to act for any of them.
+  </p>
+
+  <hr />
+  <h2>2. Non-commercial, permanently</h2>
+  <p>
+    STO Info does not run Storytime through subscriptions, paywalls, paid
+    memberships, premium tiers, paid Story or Chapter access, or commercial
+    licensing of access. Public Storytime content is meant to stay freely
+    readable here, and the licence you grant below will not be used to sell
+    access to your work or put it behind a paywall.
+  </p>
+  <p>
+    You must not use Storytime to monetise your Stories either — no selling
+    access, no payment to keep reading, no paid early access, no affiliate
+    advertising, no sponsored placement, no commercial solicitation. Unrelated
+    professional work outside STO Info is unaffected.
+  </p>
+
+  <hr />
+  <h2>3. Your account</h2>
+  <p>
+    Publishing and interactive features need an eligible STO Info account. Keep
+    it secure, take responsibility for what happens through it, and tell STO
+    Info promptly if you think somebody else has got into it. Do not use anybody
+    else’s account without their permission.
+  </p>
+  <p>
+    Storytime access can be restricted on its own, without affecting the rest of
+    your STO Info account.
+  </p>
+
+  <hr />
+  <h2>4. What you keep</h2>
+  <p>
+    As between you and STO Info, you keep whatever rights you are legally
+    entitled to hold in your original contributions. Submitting or publishing
+    does not hand ownership to STO Info.
+  </p>
+  <p>
+    Those rights remain subject to the Star Trek and Star Trek Online rights
+    underneath them, to other third-party rights, to what collaborators
+    contributed, and to any agreements you have made separately. These Terms do
+    not settle ownership disputes between collaborators — agree that between
+    yourselves, ideally before you publish.
+  </p>
+
+  <hr />
+  <h2>5. What you grant STO Info</h2>
+  <p>
+    A non-exclusive, worldwide, royalty-free licence to use your content only as
+    reasonably necessary to provide, maintain, secure, moderate and improve
+    Storytime and STO Info. In practice that means storing and backing it up,
+    reproducing it as the service technically requires, converting and
+    formatting it for display, showing and distributing it through STO Info,
+    generating previews, excerpts and search results, including published work
+    in discovery, feeds and Spotlight, and keeping copies where genuinely needed
+    for moderation, complaints, security, legal compliance or disputes.
+  </p>
+  <p>
+    Non-exclusive means you stay free to use your own material elsewhere.
+    Royalty-free means STO Info owes you nothing merely for running the service.
+    Hosting, security, content-delivery and storage providers get only the
+    access technically needed to do their job on STO Info’s behalf.
+  </p>
+  <p>
+    The licence does not allow STO Info to sell your work, charge for access to
+    it, paywall it, or otherwise commercially exploit it.
+  </p>
+
+  <hr />
+  <h2>6. Deleting your work</h2>
+  <p>
+    When you permanently delete content, the licence for displaying it publicly
+    ends once it leaves active systems — except where copies are still needed
+    for backups, audit records, moderation history, copyright or other legal
+    complaints, security investigations, disputes, legal compliance or
+    preventing abuse. Backups persist until normal rotation clears them.
+  </p>
+  <p>
+    Content an administrator has Removed may be kept for moderation, appeal and
+    audit purposes even though nobody can read it.
+  </p>
+
+  <hr />
+  <h2>7. What you confirm when you publish</h2>
+  <p>Each time you accept these terms for a Story, you confirm that:</p>
+  <ul class="lcars-list">
+    @for (representation of representations; track representation) {
+      <li>{{ representation }}</li>
+    }
+  </ul>
+  <p>
+    STO Info does not independently verify who owns every contribution before it
+    is published.
+  </p>
+
+  <hr />
+  <h2>8. Collaborating</h2>
+  <p>
+    Being able to edit a Story does not decide who owns what is in it. A Crew
+    credit does not grant editing access; editing access does not transfer
+    copyright; Arc membership does not hand your Story to the curator; and
+    taking part in a Story does not give you rights over somebody else’s
+    contribution.
+  </p>
+  <p>
+    Sort out between yourselves how jointly-created material may be used. STO
+    Info may restrict disputed material while a genuine dispute is resolved, but
+    is not required to arbitrate private disagreements.
+  </p>
+
+  <hr />
+  <h2>9. Ratings and adult material</h2>
+  <p>
+    Classify your Story honestly using the supported ratings — General, Mature
+    or Adults Only. Mature is flagged through warnings and rating information;
+    Adults Only carries a prominent warning. Neither classification permits
+    anything the Content Policy prohibits: explicit written sexual description
+    may be allowed in a correctly rated Story, but explicit sexual images and
+    video are not permitted at all. Deciding whether to open something carrying
+    a warning is up to you.
+  </p>
+
+  <hr />
+  <h2>10. What you must not do</h2>
+  <p>
+    The prohibitions are set out in the
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']">
+      Content Policy </a
+    >, and breaking them breaks these Terms. Alongside those: do not manipulate
+    Storytime systems or metrics, artificially inflate reactions or ratings,
+    interfere with the operation or security of STO Info, or evade a moderation
+    restriction through another account. Trying to get around a restriction is
+    itself a separate breach.
+  </p>
+
+  <hr />
+  <h2>11. Comments, reactions and community features</h2>
+  <p>
+    Do not coordinate artificial voting, run accounts to manipulate ratings,
+    harass creators through comments, repeat substantially identical comments,
+    use comments for advertising, or abuse the reporting and reaction
+    mechanisms.
+  </p>
+  <p>
+    A Story owner can hide comments on their own content. That is separate from
+    administrative removal, which applies across Storytime.
+  </p>
+
+  <hr />
+  <h2>12. Reading lists and visible activity</h2>
+  <p>
+    Reading lists can be private or public, and following creators, Stories and
+    Arcs may surface through activity feeds according to the relevant settings.
+    Where you choose to make something public, you are authorising STO Info to
+    display it that way. Check the visibility setting before you make anything
+    public.
+  </p>
+
+  <hr />
+  <h2>13. Moderation, removal and appeals</h2>
+  <p>
+    Content may be reviewed after a report, a copyright complaint, a security
+    alert, an administrator noticing something, or another legitimate concern. A
+    report never removes anything by itself. Action taken is proportionate, and
+    ranges from dismissing the report through requiring a corrected
+    classification, hiding a comment, removing media or a credit, unpublishing,
+    marking content Removed, restricting Storytime permissions, or restricting
+    an account where warranted. STO Info may act before notifying the creator
+    where security, safety, the law or somebody else’s rights require it.
+  </p>
+  <p>
+    Removed is separate from deletion, archiving or unpublishing. Removed
+    content is not publicly reachable, is excluded from search, discovery,
+    Spotlight, feeds and navigation, and may stay stored for moderation and
+    audit. Creators and relevant collaborators are shown the administrative
+    reason.
+  </p>
+  <p>
+    You may appeal a removal once. Explain why you think the decision should be
+    reconsidered. Appealing does not restore anything by itself; an
+    administrator upholds or rejects it, and the decision is recorded in the
+    moderation history.
+  </p>
+
+  <hr />
+  <h2>14. Copyright complaints</h2>
+  <p>
+    If you believe something here infringes copyright you own or represent, use
+    the reporting or contact process. Identify the work, the Storytime material,
+    where it appears, the basis of your complaint, your relationship to the
+    work, and how to reach you. Evidence may be requested where ownership or
+    authority is unclear, access may be restricted while it is investigated, and
+    the creator may be given a chance to respond. Repeated infringement or
+    deliberate misuse may cost you publishing access or your account.
+  </p>
+
+  <hr />
+  <h2>15. Trade marks</h2>
+  <p>
+    Star Trek, Star Trek Online and other third-party trade marks stay with
+    their owners. Using Storytime grants you no rights over them, and you must
+    not use STO Info, Star Trek or Star Trek Online branding in a way that
+    suggests official endorsement or affiliation.
+  </p>
+
+  <hr />
+  <h2>16. Spotlight</h2>
+  <p>
+    STO Info may highlight Stories or Arcs through Spotlight. Selection is
+    discretionary. Being featured does not make a Story official or canon, does
+    not imply endorsement by any rights holder, transfers no ownership, creates
+    no commercial relationship, and guarantees no continued placement. A
+    selection may be changed or removed.
+  </p>
+
+  <hr />
+  <h2>17. Availability</h2>
+  <p>
+    Storytime is not guaranteed to be always available, uninterrupted or
+    error-free. Features may be modified, restricted, replaced or discontinued.
+    STO Info will try to avoid needless loss of creator work, but
+    <strong>
+      you should keep your own copies. STO Info is not a backup of your writing.
+    </strong>
+  </p>
+
+  <hr />
+  <h2>18. Changes to Storytime and to these Terms</h2>
+  <p>
+    Storytime may change to add or improve features, address security or
+    accessibility, comply with the law, respond to intellectual-property
+    requirements, or deal with abuse. Those changes may affect how existing
+    content is displayed or processed. None of them allow Storytime to become a
+    subscription, paywalled or monetised service.
+  </p>
+  <p>
+    These Terms may be updated. The current version and its date are shown at
+    the top. Where a change materially affects creators’ rights or
+    responsibilities, you may be asked to accept the revised version before
+    publishing or updating again; continuing to publish afterwards means you
+    agree to it.
+  </p>
+
+  <hr />
+  <h2>19. Suspension and termination</h2>
+  <p>
+    Storytime privileges may be suspended or ended for serious or repeated
+    breaches of these Terms or the Content Policy, copyright infringement,
+    harassment or abuse, security threats, attempts to evade moderation, or
+    legal requirements. Where it is appropriate, restrictions apply to Storytime
+    alone rather than your whole account.
+  </p>
+
+  <hr />
+  <h2>20. Disclaimers and liability</h2>
+  <p>
+    Storytime carries work written by members of the community. STO Info does
+    not necessarily endorse the opinions, interpretations or fictional
+    portrayals within it, and does not guarantee that community work is
+    accurate, that every contributor holds the rights they claim, or that any
+    Story stays available indefinitely.
+  </p>
+  <p>
+    So far as the law permits, STO Info is not responsible for indirect or
+    consequential losses arising from using, or being unable to use, Storytime.
+    Nothing here excludes liability that cannot lawfully be excluded, including
+    rights under applicable consumer law.
+  </p>
+
+  <hr />
+  <h2>21. Privacy</h2>
+  <p>
+    Using Storytime is subject to the
+    <a [routerLink]="getRouteLink(appRoutes.PRIVACY_POLICY)">Privacy Policy</a>.
+    Storytime processes information including your account identity, creator
+    attribution, Crew relationships, comments and reactions, follows, reading
+    progress, reading lists, reports, moderation records and appeals. What is
+    publicly visible depends on the feature and the relevant privacy setting.
+  </p>
+
+  <hr />
+  <h2>22. How these Terms fit with the rest</h2>
+  <p>
+    These Terms apply specifically to Storytime and should be read together with
+    the other STO Info policies. Where a Storytime-specific publishing or
+    moderation question conflicts, these Terms and the Content Policy govern it
+    unless the site-wide
+    <a [routerLink]="getRouteLink(appRoutes.TERMS_OF_USE)">Terms of Use</a>
+    expressly say otherwise.
+  </p>
+  <p>
+    These Terms are governed by the laws of England and Wales, except where
+    mandatory consumer law where you live gives you rights that cannot be
+    excluded, and the courts of England and Wales have jurisdiction subject to
+    those rights. If any provision turns out to be unenforceable, the rest still
+    applies. If STO Info does not immediately enforce something, it has not
+    given it up.
+  </p>
+
+  <p class="storytime-fan-notice">{{ copy.FAN_CONTENT_NOTICE }}</p>
+</section>
