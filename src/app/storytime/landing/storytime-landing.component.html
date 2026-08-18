@@ -58,32 +58,38 @@
 
   <ul class="storytime-landing__browse">
     <li>
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'stories']">All Stories</a>
-      <p class="storytime-landing__summary">
-        Everything published, newest first.
-      </p>
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'stories']">
+        <span class="storytime-landing__browse-name">All Stories</span>
+        <p class="storytime-landing__summary">
+          Everything published, newest first.
+        </p>
+      </a>
     </li>
     <li>
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs']">Arcs</a>
-      <p class="storytime-landing__summary">
-        Reading orders assembled across several Stories.
-      </p>
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs']">
+        <span class="storytime-landing__browse-name">Arcs</span>
+        <p class="storytime-landing__summary">
+          Reading orders assembled across several Stories.
+        </p>
+      </a>
     </li>
     @if (isSpotlightEnabled) {
       <li>
-        <a [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']">Spotlight</a>
-        <p class="storytime-landing__summary">
-          What we have chosen to feature, and everything chosen before.
-        </p>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']">
+          <span class="storytime-landing__browse-name">Spotlight</span>
+          <p class="storytime-landing__summary">
+            What we have chosen to feature, and everything chosen before.
+          </p>
+        </a>
       </li>
     }
     <li>
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'search']"
-        >Search Storytime</a
-      >
-      <p class="storytime-landing__summary">
-        Find a Story by title, author or tag.
-      </p>
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'search']">
+        <span class="storytime-landing__browse-name">Search Storytime</span>
+        <p class="storytime-landing__summary">
+          Find a Story by title, author or tag.
+        </p>
+      </a>
     </li>
   </ul>
 
@@ -166,17 +172,16 @@
     </ul>
   }
 
+  <nav
+    class="buttons-row"
+    aria-label="Storytime publishing documents">
+    <a
+      [routerLink]="['/', appRoutes.STORYTIME, 'policies']"
+      class="sky"
+      >Policies &amp; Terms</a
+    >
+  </nav>
+  
   <p class="storytime-fan-notice">{{ copy.FAN_CONTENT_NOTICE }}</p>
 
-  <nav
-    class="storytime-policy__nav"
-    aria-label="Storytime publishing documents">
-    <a [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']">
-      Content Policy
-    </a>
-    <a [routerLink]="['/', appRoutes.STORYTIME, 'terms']">Terms of Use</a>
-    <a [routerLink]="['/', appRoutes.STORYTIME, 'fan-content']">
-      Fan Content &amp; IP Notice
-    </a>
-  </nav>
 </div>

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
   STORYTIME_POLICY_EFFECTIVE_DATE,
   STORYTIME_POLICY_VERSION,
@@ -10,19 +11,28 @@ describe('PolicyHeaderComponent', () => {
   let fixture: ComponentFixture<PolicyHeaderComponent>;
 
   /**
-   * Renders the header for one of the three documents.
+   * Renders the header above one of the three documents.
    *
-   * @param current - Which document is being shown.
    * @returns The rendered element.
    */
-  const render = (current: 'policy' | 'terms' | 'notice'): HTMLElement => {
+  const render = (): HTMLElement => {
     fixture.componentRef.setInput('title', 'A Document');
     fixture.componentRef.setInput('intro', 'What it is for.');
-    fixture.componentRef.setInput('current', current);
     fixture.detectChanges();
 
     return fixture.nativeElement as HTMLElement;
   };
+
+  /**
+   * Reads the tab strip.
+   *
+   * @returns Each tab's label paired with where it goes.
+   */
+  const tabs = (): { label: string; href: string | null }[] =>
+    [...render().querySelectorAll('nav.lcars-tabs a.lcars-tab')].map(tab => ({
+      label: tab.textContent?.trim() ?? '',
+      href: tab.getAttribute('href'),
+    }));
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -34,47 +44,59 @@ describe('PolicyHeaderComponent', () => {
   });
 
   it('is created', () => {
-    expect(render('policy')).toBeTruthy();
+    expect(render()).toBeTruthy();
   });
 
   it('shows the title and intro it was given', () => {
-    const element = render('policy');
+    const element = render();
 
     expect(element.querySelector('h1')?.textContent).toContain('A Document');
     expect(element.textContent).toContain('What it is for.');
   });
 
   // A creator asked to accept terms has to be able to tell which terms.
-  it('states the version and when it took effect', () => {
-    const text = render('terms').textContent ?? '';
+  it('states the version and when it took effect in the same style as the main policy pages', () => {
+    const element = render();
+    const text = element.textContent ?? '';
 
+    expect(text).toContain('Version:');
     expect(text).toContain(STORYTIME_POLICY_VERSION);
+    expect(text).toContain('Effective Date:');
     expect(text).toContain(STORYTIME_POLICY_EFFECTIVE_DATE);
+    expect(element.querySelectorAll('strong.go-gold')).toHaveLength(2);
+    expect(element.querySelectorAll('span.go-roseblush')).toHaveLength(2);
   });
 
-  // The three documents defer to each other, so each has to reach the others.
-  it.each([
-    ['policy' as const, 2],
-    ['terms' as const, 2],
-    ['notice' as const, 2],
-  ])('links to the other documents from %s', (current, expectedLinks) => {
-    const element = render(current);
-
-    expect(element.querySelectorAll('nav a')).toHaveLength(expectedLinks);
+  // The three documents defer to each other, so the set has to be reachable
+  // from whichever one a reader landed on.
+  it('offers a tab for each of the three documents', () => {
+    expect(tabs()).toEqual([
+      {
+        label: 'Content Policy',
+        href: `/${APP_ROUTES.STORYTIME_CONTENT_POLICY}`,
+      },
+      { label: 'Terms of Use', href: `/${APP_ROUTES.STORYTIME_TERMS}` },
+      {
+        label: 'Fan Content & IP Notice',
+        href: `/${APP_ROUTES.STORYTIME_FAN_CONTENT}`,
+      },
+    ]);
   });
 
-  // Following a link back to the page you are already on tells you nothing.
-  it.each([
-    ['policy' as const, 'Content Policy'],
-    ['terms' as const, 'Terms of Use'],
-    ['notice' as const, 'Fan Content & IP Notice'],
-  ])(
-    'marks %s as the current page rather than linking it',
-    (current, label) => {
-      const element = render(current);
-      const marker = element.querySelector('nav [aria-current="page"]');
+  // Nothing tells the strip which document it sits above: `routerLinkActive`
+  // reads the URL, so the lit tab cannot disagree with the page.
+  it('lights no tab and marks no current page away from the documents', () => {
+    const element = render();
 
-      expect(marker?.textContent?.trim()).toBe(label);
-    },
-  );
+    expect(element.querySelectorAll('.lcars-tab.active')).toHaveLength(0);
+    expect(element.querySelector('[aria-current="page"]')).toBeNull();
+  });
+
+  // The LCARS strip is closed by an end cap, which is decoration rather than
+  // anything a screen reader should announce as a tab.
+  it('hides the strip end cap from assistive technology', () => {
+    const filler = render().querySelector('.lcars-tabs-filler');
+
+    expect(filler?.getAttribute('aria-hidden')).toBe('true');
+  });
 });

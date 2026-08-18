@@ -39,12 +39,26 @@ describe('STORYTIME_ROUTES', () => {
   });
 
   it('lazily loads every page other than the landing', () => {
-    const lazy = children.filter(child => child.path !== '');
+    // Redirects are not pages: they resolve to another route and have nothing
+    // of their own to load.
+    const lazy = children.filter(
+      child => child.path !== '' && child.redirectTo === undefined,
+    );
 
     expect(lazy.length).toBeGreaterThan(0);
     expect(lazy.every(child => typeof child.loadComponent === 'function')).toBe(
       true,
     );
+  });
+
+  // The publishing documents are one tabbed set, so there is one way in for
+  // anybody who wants "the policies" rather than a particular document. It
+  // opens on the content policy, which is the one most readers came for.
+  it('sends the policies entry to the first document', () => {
+    const policies = childAt('policies');
+
+    expect(policies?.redirectTo).toBe('content-policy');
+    expect(policies?.pathMatch).toBe('full');
   });
 
   // Actually resolving each import proves the paths are right. A typo in a

@@ -7,6 +7,7 @@ import {
   StorySort,
   STORYTIME_DISABLED_STATE,
 } from 'src/app/models/storytime.models';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { FollowService } from '../follow.service';
 import { SpotlightService } from '../spotlight.service';
@@ -437,15 +438,14 @@ describe('StorytimeLandingComponent', () => {
 
   // The landing page is where most readers meet Storytime, so the documents
   // governing it have to be reachable from it rather than only from a Story.
-  it.each(['content-policy', 'terms', 'fan-content'])(
-    'links to the %s document',
-    path => {
-      const element = render();
-      const hrefs = Array.from(element.querySelectorAll('a')).map(link =>
-        link.getAttribute('href'),
-      );
+  // One link rather than three: the documents are one tabbed set, and this
+  // entry opens it.
+  it('links to the publishing documents', () => {
+    const element = render();
+    const hrefs = Array.from(element.querySelectorAll('a')).map(link =>
+      link.getAttribute('href'),
+    );
 
-      expect(hrefs).toContain(`/storytime/${path}`);
-    },
-  );
+    expect(hrefs).toContain(`/${APP_ROUTES.STORYTIME_POLICIES}`);
+  });
 });

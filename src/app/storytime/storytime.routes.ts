@@ -282,6 +282,16 @@ export const STORYTIME_ROUTES: Routes = [
       // creator deciding whether to publish, and a rights holder deciding
       // whether the site claims anything it should not, all need them before
       // they have an account — or without ever wanting one.
+      //
+      // One way in for anybody who wants "the Storytime policies" rather than
+      // a particular document. The set opens on the content policy, which is
+      // the one a creator or a reporter came for; the tabs carry them to the
+      // other two.
+      {
+        path: 'policies',
+        redirectTo: 'content-policy',
+        pathMatch: 'full',
+      },
       {
         path: 'content-policy',
         loadComponent: () =>

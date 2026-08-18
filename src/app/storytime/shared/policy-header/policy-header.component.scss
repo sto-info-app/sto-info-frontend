@@ -1,0 +1,12 @@
+@use 'lcars-tabs' as tabs;
+
+// A narrower minimum than the default: "Fan Content & IP Notice" is a good
+// deal longer than the other two labels, and padding all three out to match it
+// would leave the short ones looking empty.
+@include tabs.lcars-tab-strip($min-width: 0);
+
+// A block host, so the strip spans the page rather than shrinking to an inline
+// box the width of its own text.
+:host {
+  display: block;
+}
