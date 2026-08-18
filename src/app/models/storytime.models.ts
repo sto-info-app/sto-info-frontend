@@ -249,6 +249,13 @@ export interface Chapter extends ChapterSummary {
   contentHtml: string | null;
   /** Resolved from the Chapter or its Story, ready for a lang attribute. */
   languageCode: string;
+  /**
+   * Inherited from the Story, so the reader can warn before the content.
+   *
+   * A Chapter reached from a link, a feed or a search result never passes the
+   * Story page, which is where the warning would otherwise have been shown.
+   */
+  contentRating: ContentRating;
   coverImageUrl: string | null;
   rating: number;
 }

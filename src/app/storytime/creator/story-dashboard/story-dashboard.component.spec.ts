@@ -8,6 +8,11 @@ import {
   StorytimeTargetType,
   StoryStatus,
 } from 'src/app/models/storytime.models';
+import {
+  PUBLISHING_REPRESENTATIONS,
+  STORYTIME_COPY,
+  STORYTIME_POLICY_VERSION,
+} from '../../storytime.constants';
 import { StorytimeModerationService } from '../../storytime-moderation.service';
 import { StoryService } from '../../story.service';
 import { StoryDashboardComponent } from './story-dashboard.component';
@@ -37,6 +42,9 @@ describe('StoryDashboardComponent', () => {
       moderationStatus: 'ACTIVE',
       moderationMessage: null,
       publishedChapterCount: 1,
+      contentPolicyAcceptedAt: '2026-06-01T00:00:00Z',
+      contentPolicyVersion: STORYTIME_POLICY_VERSION,
+      contentPolicyCurrent: true,
       ...overrides,
     }) as ManagedStory;
 
@@ -187,17 +195,41 @@ describe('StoryDashboardComponent', () => {
     expect(element.textContent).toContain('Breached the content policy');
   });
 
-  describe('the content policy', () => {
+  describe('the publishing terms', () => {
     // Publishing is the moment a creator says their work meets the rules
     // everybody else's is held to, and the server refuses until they have.
     it('asks for confirmation before a Story can be published', () => {
       storyService.getMyStories.mockReturnValue(
-        of([buildStory({ contentPolicyAcceptedAt: null })]),
+        of([
+          buildStory({
+            contentPolicyAcceptedAt: null,
+            contentPolicyVersion: null,
+            contentPolicyCurrent: false,
+          }),
+        ]),
       );
 
       const element = render();
 
-      expect(element.textContent).toContain('confirm this Story meets');
+      expect(element.textContent).toContain(
+        STORYTIME_COPY.POLICY_ACCEPTANCE_PROMPT,
+      );
+    });
+
+    // The promises are made here, so they have to be readable here rather
+    // than only on the document being agreed to.
+    it.each(PUBLISHING_REPRESENTATIONS)('sets out that %s', representation => {
+      storyService.getMyStories.mockReturnValue(
+        of([
+          buildStory({
+            contentPolicyAcceptedAt: null,
+            contentPolicyVersion: null,
+            contentPolicyCurrent: false,
+          }),
+        ]),
+      );
+
+      expect(render().textContent).toContain(representation);
     });
 
     it('says nothing once it has been confirmed', () => {
@@ -207,7 +239,28 @@ describe('StoryDashboardComponent', () => {
 
       const element = render();
 
-      expect(element.textContent).not.toContain('confirm this Story meets');
+      expect(element.textContent).not.toContain(
+        STORYTIME_COPY.POLICY_ACCEPTANCE_PROMPT,
+      );
+    });
+
+    // Being told to do something a second time is confusing unless you are
+    // told why, so the wording changes rather than simply reappearing.
+    it('explains itself when the terms have been superseded', () => {
+      storyService.getMyStories.mockReturnValue(
+        of([
+          buildStory({
+            contentPolicyAcceptedAt: '2026-06-01T00:00:00Z',
+            contentPolicyVersion: '0',
+            contentPolicyCurrent: false,
+          }),
+        ]),
+      );
+
+      const text = render().textContent ?? '';
+
+      expect(text).toContain(STORYTIME_COPY.POLICY_REACCEPTANCE_PROMPT);
+      expect(text).not.toContain(STORYTIME_COPY.POLICY_ACCEPTANCE_PROMPT);
     });
 
     it('records the confirmation and reloads', () => {

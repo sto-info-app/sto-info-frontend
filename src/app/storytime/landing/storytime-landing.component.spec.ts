@@ -332,8 +332,54 @@ describe('StorytimeLandingComponent', () => {
     });
   });
 
+  // These used to be sidebar buttons. The landing page is where they belong,
+  // because here each one can say what it is.
+  describe('the browse links', () => {
+    /**
+     * Reads the browse block's destinations.
+     *
+     * @returns The href of every browse link, in order.
+     */
+    const browseLinks = (): (string | null)[] =>
+      [...render().querySelectorAll('.storytime-landing__browse a')].map(link =>
+        link.getAttribute('href'),
+      );
+
+    it('offers Stories, Arcs, the Spotlight and search', () => {
+      expect(browseLinks()).toEqual([
+        '/storytime/stories',
+        '/storytime/arcs',
+        '/storytime/spotlight',
+        '/storytime/search',
+      ]);
+    });
+
+    it('says what each of them is', () => {
+      const summaries = [
+        ...render().querySelectorAll('.storytime-landing__browse p'),
+      ].map(summary => summary.textContent?.trim());
+
+      expect(summaries).toHaveLength(4);
+      expect(summaries.every(summary => (summary?.length ?? 0) > 0)).toBe(true);
+    });
+
+    // A link to a feature the environment has switched off would only lead to
+    // an empty page.
+    it('omits the Spotlight when it is switched off', () => {
+      storytimeService.getFeatureState.mockReturnValue(
+        of({ ...STORYTIME_DISABLED_STATE, isEnabled: true }),
+      );
+
+      expect(browseLinks()).toEqual([
+        '/storytime/stories',
+        '/storytime/arcs',
+        '/storytime/search',
+      ]);
+    });
+  });
+
   describe('the reader’s own corner of the page', () => {
-    it('links to the feed, the reading lists and the library', () => {
+    it('links to everything that is theirs, reading and writing alike', () => {
       const element = render();
       const links = [
         ...element.querySelectorAll('.storytime-landing__yours a'),
@@ -343,6 +389,9 @@ describe('StorytimeLandingComponent', () => {
         '/storytime/feed',
         '/storytime/reading-lists',
         '/storytime/library',
+        '/storytime/manage/stories',
+        '/storytime/manage/arcs',
+        '/storytime/manage/invitations',
       ]);
     });
 
@@ -385,4 +434,18 @@ describe('StorytimeLandingComponent', () => {
       expect(followService.getUnreadCount).not.toHaveBeenCalled();
     });
   });
+
+  // The landing page is where most readers meet Storytime, so the documents
+  // governing it have to be reachable from it rather than only from a Story.
+  it.each(['content-policy', 'terms', 'fan-content'])(
+    'links to the %s document',
+    path => {
+      const element = render();
+      const hrefs = Array.from(element.querySelectorAll('a')).map(link =>
+        link.getAttribute('href'),
+      );
+
+      expect(hrefs).toContain(`/storytime/${path}`);
+    },
+  );
 });

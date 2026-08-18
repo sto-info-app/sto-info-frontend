@@ -47,11 +47,51 @@
     </p>
   }
 
-  <p class="storytime-landing__search">
-    <a [routerLink]="['/', appRoutes.STORYTIME, 'search']">Search Storytime</a>
-  </p>
+  <!--
+    Storytime's own navigation lives here rather than in the site sidebar. The
+    landing page can say what each of these is in a line; a sidebar button can
+    only say "Arcs", which means nothing to somebody who has not met one yet.
+  -->
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Browse</span>
+  </div>
+
+  <ul class="storytime-landing__browse">
+    <li>
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'stories']">All Stories</a>
+      <p class="storytime-landing__summary">
+        Everything published, newest first.
+      </p>
+    </li>
+    <li>
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs']">Arcs</a>
+      <p class="storytime-landing__summary">
+        Reading orders assembled across several Stories.
+      </p>
+    </li>
+    @if (isSpotlightEnabled) {
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']">Spotlight</a>
+        <p class="storytime-landing__summary">
+          What we have chosen to feature, and everything chosen before.
+        </p>
+      </li>
+    }
+    <li>
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'search']"
+        >Search Storytime</a
+      >
+      <p class="storytime-landing__summary">
+        Find a Story by title, author or tag.
+      </p>
+    </li>
+  </ul>
 
   @if (isSignedIn) {
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Yours</span>
+    </div>
+
     <ul class="storytime-landing__yours">
       <li>
         <a [routerLink]="['/', appRoutes.STORYTIME, 'feed']">
@@ -68,6 +108,21 @@
       </li>
       <li>
         <a [routerLink]="['/', appRoutes.STORYTIME, 'library']">Your library</a>
+      </li>
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories']">
+          Your Stories
+        </a>
+      </li>
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']">
+          Your Arcs
+        </a>
+      </li>
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'invitations']">
+          Invitations
+        </a>
       </li>
     </ul>
   }
@@ -112,4 +167,16 @@
   }
 
   <p class="storytime-fan-notice">{{ copy.FAN_CONTENT_NOTICE }}</p>
+
+  <nav
+    class="storytime-policy__nav"
+    aria-label="Storytime publishing documents">
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']">
+      Content Policy
+    </a>
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'terms']">Terms of Use</a>
+    <a [routerLink]="['/', appRoutes.STORYTIME, 'fan-content']">
+      Fan Content &amp; IP Notice
+    </a>
+  </nav>
 </div>

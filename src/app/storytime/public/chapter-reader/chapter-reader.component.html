@@ -59,6 +59,13 @@
       </p>
     }
 
+    @if (needsRatingWarning) {
+      <app-lcars-warning-message
+        [title]="ratingLabels[chapter.contentRating]"
+        [message]="ratingDescriptions[chapter.contentRating]">
+      </app-lcars-warning-message>
+    }
+
     @if (contentHtml) {
       <div
         #chapterBody

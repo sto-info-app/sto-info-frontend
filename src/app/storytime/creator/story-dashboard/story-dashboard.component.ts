@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -14,8 +21,11 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
   PUBLICATION_STATUS_LABELS,
+  PUBLISHING_REPRESENTATIONS,
+  STORYTIME_COPY,
   VISIBILITY_LABELS,
 } from '../../storytime.constants';
 import { StorytimeModerationService } from '../../storytime-moderation.service';
@@ -49,6 +59,17 @@ export class StoryDashboardComponent implements OnInit {
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
 
+  /** User-facing copy, held centrally so wording stays consistent. */
+  readonly copy = STORYTIME_COPY;
+
+  /**
+   * What the creator confirms when they accept.
+   *
+   * The same list the Content Policy and Terms pages set out, so a creator
+   * cannot be shown one set of promises and asked to make another.
+   */
+  readonly representations = PUBLISHING_REPRESENTATIONS;
+
   /** Status labels, so a raw enum value is never shown. */
   readonly statusLabels = PUBLICATION_STATUS_LABELS;
 
@@ -62,6 +83,8 @@ export class StoryDashboardComponent implements OnInit {
   private readonly _moderationService = inject(StorytimeModerationService);
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /** The appeal a creator is writing, if any. */
   readonly appealForm = this._formBuilder.nonNullable.group({ body: [''] });
@@ -80,17 +103,36 @@ export class StoryDashboardComponent implements OnInit {
   }
 
   /**
-   * Whether the creator still has to confirm the content policy.
+   * Whether the creator still has to accept the publishing terms.
+   *
+   * Asks the server's verdict rather than checking for a date, because a
+   * creator who accepted superseded wording has a date and still has to agree
+   * again — and only the server knows which version is current.
    *
    * @param story - The Story.
-   * @returns True when it has not been accepted for this Story yet.
+   * @returns True when the current terms have not been accepted for it.
    */
   needsContentPolicy(story: ManagedStory): boolean {
-    return !story.contentPolicyAcceptedAt;
+    return !story.contentPolicyCurrent;
   }
 
   /**
-   * Records that the creator confirms this Story meets the content policy.
+   * Whether the creator is being asked again rather than for the first time.
+   *
+   * Worth distinguishing: being told to do something a second time is
+   * confusing unless you are told why.
+   *
+   * @param story - The Story.
+   * @returns True when they accepted wording that has since been replaced.
+   */
+  hasSupersededContentPolicy(story: ManagedStory): boolean {
+    return (
+      !story.contentPolicyCurrent && story.contentPolicyAcceptedAt !== null
+    );
+  }
+
+  /**
+   * Records that the creator accepts the publishing terms for this Story.
    *
    * @param story - The Story.
    */
@@ -140,7 +182,10 @@ export class StoryDashboardComponent implements OnInit {
         targetId: storyId,
         body,
       })
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: () => {
           this.appealingStoryId = null;
@@ -193,6 +238,7 @@ export class StoryDashboardComponent implements OnInit {
       .getMyStories()
       .pipe(
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isLoading = false;
         }),
@@ -218,13 +264,18 @@ export class StoryDashboardComponent implements OnInit {
    * @param action - The action observable.
    */
   private runAction(action: ReturnType<StoryService['publishStory']>): void {
-    action.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => this.load(),
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          (error.error as { message?: string } | undefined)?.message ??
-          'That action could not be completed. Please try again shortly.';
-      },
-    });
+    action
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => this.load(),
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'That action could not be completed. Please try again shortly.';
+        },
+      });
   }
 }

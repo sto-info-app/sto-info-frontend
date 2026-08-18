@@ -54,6 +54,28 @@ describe('FooterComponent', () => {
 
       expect(linkLabels()).toContain('Storytime');
     });
+
+    // Somebody looking for what the site permits looks in the footer, and a
+    // rights holder checking what is claimed about their property will not go
+    // hunting through a fan-fiction section to find it.
+    it.each([
+      'Content Policy',
+      'Storytime Terms of Use',
+      'Fan Content & IP Notice',
+    ])('should link to the %s once the feature is switched on', label => {
+      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.detectChanges();
+
+      expect(linkLabels()).toContain(label);
+    });
+
+    it.each([
+      'Content Policy',
+      'Storytime Terms of Use',
+      'Fan Content & IP Notice',
+    ])('should hide the %s while the feature is off', label => {
+      expect(linkLabels()).not.toContain(label);
+    });
   });
 
   // The footer is the one part of the page a lost visitor is always looking

@@ -897,6 +897,20 @@
 
   &__policy {
     @include storytime-panel;
+
+    button {
+      @include storytime-button;
+    }
+  }
+
+  // The three documents, reachable from the point of acceptance. A creator
+  // asked to agree to something needs it one click away, not one search away.
+  &__policy-links {
+    font-size: 0.85rem;
+
+    a {
+      color: vars.$lcars-sunflower;
+    }
   }
 }
 

@@ -11,8 +11,11 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import { CommentService } from '../../comment.service';
 import { ReactionService } from '../../reaction.service';
 import {
+  CONTENT_RATING_DESCRIPTIONS,
+  CONTENT_RATING_LABELS,
   ChapterProgress,
   ChapterWithNavigation,
+  ContentRating,
   ReaderChapterStatus,
   StoryProgress,
 } from 'src/app/models/storytime.models';
@@ -115,6 +118,7 @@ describe('ChapterReaderComponent', () => {
         synopsis: 'A summary',
         contentHtml: '<p id="b1">The Enterprise went to warp.</p>',
         languageCode: 'en',
+        contentRating: ContentRating.GENERAL,
         wordCount: 5,
         estimatedReadingMinutes: 1,
         coverImageUrl: null,
@@ -134,6 +138,22 @@ describe('ChapterReaderComponent', () => {
     fixture = TestBed.createComponent(ChapterReaderComponent);
     fixture.detectChanges();
     return fixture.nativeElement as HTMLElement;
+  };
+
+  /**
+   * Renders a Chapter carrying a chosen rating.
+   *
+   * @param contentRating - The rating inherited from the Story.
+   * @returns The rendered element.
+   */
+  const renderRated = (contentRating: ContentRating): HTMLElement => {
+    const response = buildResponse();
+
+    chapterService.getChapter.mockReturnValue(
+      of({ ...response, chapter: { ...response.chapter, contentRating } }),
+    );
+
+    return render();
   };
 
   beforeEach(() => {
@@ -675,6 +695,45 @@ describe('ChapterReaderComponent', () => {
       const element = render();
 
       expect(element.textContent).toContain('The Enterprise went to warp.');
+    });
+  });
+
+  // A Chapter opened from a link, a feed or a search result never passes the
+  // Story page, which is where the rating warning would otherwise have been.
+  describe('the rating warning', () => {
+    it.each([ContentRating.MATURE, ContentRating.ADULTS_ONLY])(
+      'warns before the content of a %s Chapter',
+      rating => {
+        const element = renderRated(rating);
+        const warning = element.querySelector('app-lcars-warning-message');
+
+        expect(warning).not.toBeNull();
+        expect(element.textContent).toContain(CONTENT_RATING_LABELS[rating]);
+        expect(element.textContent).toContain(
+          CONTENT_RATING_DESCRIPTIONS[rating],
+        );
+      },
+    );
+
+    // The warning has to come first to be a warning at all.
+    it('places the warning ahead of the Chapter body', () => {
+      const element = renderRated(ContentRating.ADULTS_ONLY);
+      const warning = element.querySelector('app-lcars-warning-message');
+      const body = element.querySelector('.storytime-chapter__body');
+
+      expect(warning).not.toBeNull();
+      expect(body).not.toBeNull();
+      expect(
+        warning?.compareDocumentPosition(body as Node) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    });
+
+    // Warning on everything would teach readers to ignore the warning.
+    it('says nothing about a General Chapter', () => {
+      const element = renderRated(ContentRating.GENERAL);
+
+      expect(element.querySelector('app-lcars-warning-message')).toBeNull();
     });
   });
 

@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
+  ChangeDetectorRef,
   Component,
   DestroyRef,
   ElementRef,
   HostListener,
+  NgZone,
   OnInit,
   ViewChild,
   inject,
@@ -16,17 +18,22 @@ import { Subject, debounceTime, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
+  CONTENT_RATING_DESCRIPTIONS,
+  CONTENT_RATING_LABELS,
   Chapter,
   ChapterLink,
   ChapterMedia,
   ChapterProgressUpdate,
+  ContentRating,
   ReaderChapterStatus,
   StoryProgress,
   StorytimeTargetType,
 } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ChapterService } from '../../chapter.service';
 import { MediaService } from '../../media.service';
 import { ProgressService } from '../../progress.service';
@@ -57,6 +64,7 @@ import { resolveReadingPosition } from '../../reading-position.utility';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsWarningMessageComponent,
     MediaEmbedComponent,
     ReactionControlComponent,
     CommentThreadComponent,
@@ -65,6 +73,29 @@ import { resolveReadingPosition } from '../../reading-position.utility';
 export class ChapterReaderComponent implements OnInit {
   /** The kinds of thing the social controls act on. */
   readonly targetTypes = StorytimeTargetType;
+
+  /** How each rating is named, as readers meet it elsewhere. */
+  readonly ratingLabels = CONTENT_RATING_LABELS;
+
+  /** How each rating is explained. */
+  readonly ratingDescriptions = CONTENT_RATING_DESCRIPTIONS;
+
+  /**
+   * Whether the Chapter's rating warrants a warning before the content.
+   *
+   * The Content Policy promises Mature warns on opening and Adults Only warns
+   * before the content is read. A Chapter opened from a link, a feed or a
+   * search result never passes the Story page, so the promise has to be kept
+   * here too.
+   *
+   * @returns True for Mature and Adults Only.
+   */
+  get needsRatingWarning(): boolean {
+    return (
+      this.chapter !== null &&
+      this.chapter.contentRating !== ContentRating.GENERAL
+    );
+  }
 
   /** The Chapter being read. */
   chapter: Chapter | null = null;
@@ -112,6 +143,8 @@ export class ChapterReaderComponent implements OnInit {
   private readonly _authService = inject(AuthService);
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Reported positions, written at most once per debounce window.
@@ -157,6 +190,7 @@ export class ChapterReaderComponent implements OnInit {
           );
         }),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe({
         next: result => {
@@ -224,6 +258,7 @@ export class ChapterReaderComponent implements OnInit {
       .pipe(
         catchError(() => of(null)),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe(progress => {
         if (progress) {
@@ -263,6 +298,7 @@ export class ChapterReaderComponent implements OnInit {
             .pipe(catchError(() => of(null))),
         ),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe(progress => {
         if (progress) {
@@ -284,6 +320,7 @@ export class ChapterReaderComponent implements OnInit {
       .pipe(
         catchError(() => of(null)),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe(progress => {
         if (!progress) {
@@ -316,6 +353,7 @@ export class ChapterReaderComponent implements OnInit {
       .pipe(
         catchError(() => of([] as ChapterMedia[])),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe(media => {
         this.media = media;
