@@ -8,8 +8,21 @@ import {
   ContentRating,
 } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { CONTENT_POLICY_RULES } from 'src/app/storytime/storytime.constants';
 
 import { HelpGuideLocation, HelpTopic } from './help.models';
+
+/**
+ * The content policy's rules, worded exactly as the policy page words them.
+ *
+ * Derived rather than restated. An earlier version of this guide listed seven
+ * of the rules from memory, and stayed listing seven after the policy grew to
+ * thirteen — which is how a help page ends up telling somebody that a thing
+ * the site prohibits is allowed.
+ */
+const CONTENT_POLICY_POINTS: string[] = CONTENT_POLICY_RULES.map(
+  rule => `${rule.title} — ${rule.summary}`,
+);
 
 /**
  * The content ratings, worded exactly as a reader meets them elsewhere.
@@ -504,7 +517,7 @@ const STORYTIME_TOPIC: HelpTopic = {
         {
           heading: 'Confirm the content policy, then publish',
           paragraphs: [
-            'The first time you publish a Story you are asked to confirm it meets the content policy. This is a single confirmation, not a review queue — nobody has to approve your Story before it appears.',
+            'Before a Story can be published you are asked to confirm it meets the Storytime publishing terms. This is a single confirmation, not a review queue — nobody has to approve your Story before it appears. If the terms are ever materially changed you will be asked once more, and told that is why.',
             'Publish the Chapter, publish the Story, and it is live.',
           ],
         },
@@ -650,8 +663,9 @@ const STORYTIME_TOPIC: HelpTopic = {
         {
           heading: 'The content policy',
           paragraphs: [
-            'The content policy is the short list of rules everything published here has to meet — harassment, hate content, explicit content beyond your rating, plagiarism, impersonation, other people’s personal details, and copyright. You confirm your Story meets it before you publish.',
+            'The content policy is the list of rules everything published here has to meet. You confirm your Story meets them before you publish it, and anybody reading can report something they believe does not.',
           ],
+          points: CONTENT_POLICY_POINTS,
         },
         {
           heading: 'Reporting something',
@@ -678,6 +692,11 @@ const STORYTIME_TOPIC: HelpTopic = {
         {
           label: 'Content policy',
           route: APP_ROUTES.STORYTIME_CONTENT_POLICY,
+        },
+        { label: 'Terms of use', route: APP_ROUTES.STORYTIME_TERMS },
+        {
+          label: 'Fan content & IP notice',
+          route: APP_ROUTES.STORYTIME_FAN_CONTENT,
         },
         { label: 'Contact us', route: APP_ROUTES.CONTACT },
       ],

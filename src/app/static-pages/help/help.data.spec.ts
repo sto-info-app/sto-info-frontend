@@ -2,6 +2,7 @@ import { REPORT_REASON_LABELS } from 'src/app/models/moderation.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 
 import helpGuideSlugs from './help-guide-slugs.json';
+import { CONTENT_POLICY_RULES } from 'src/app/storytime/storytime.constants';
 import { HELP_TOPICS, findHelpGuide } from './help.data';
 import { HelpGuide } from './help.models';
 
@@ -167,5 +168,20 @@ describe('help data', () => {
       expect(ratingCopy).toContain('Adults Only');
       expect(ratingCopy).toContain('Intended for adults only.');
     });
+
+    // An earlier version of this guide listed seven rules from memory and
+    // stayed listing seven after the policy grew, which is how a help page
+    // ends up telling somebody a prohibited thing is allowed.
+    it.each(CONTENT_POLICY_RULES.map(rule => rule.title))(
+      'should name the %s rule the policy names',
+      title => {
+        const policyCopy = storytimeTopic?.guides
+          .flatMap(guide => guide.sections)
+          .flatMap(section => section.points ?? [])
+          .join(' ');
+
+        expect(policyCopy).toContain(title);
+      },
+    );
   });
 });
