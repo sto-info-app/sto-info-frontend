@@ -130,29 +130,53 @@ describe('SideBarComponent', () => {
       expect(linkLabels()).toContain('Storytime');
     });
 
-    // Writing is only reachable by somebody signed in, so the creator link
-    // belongs with the other signed-in entries rather than beside the public
-    // Storytime link.
-    it('should not offer the creator link to a signed-out visitor', () => {
+    // Storytime is a section of the site, not a set of peers to Community and
+    // Help. Its own pages are reached from its landing page, where each can be
+    // described; the sidebar offers the way in and nothing else.
+    it.each([
+      'Arcs',
+      'Spotlight',
+      'Your Library',
+      'Your Stories',
+      'Your Arcs',
+      'Invitations',
+    ])('should not offer the %s link to a signed-out visitor', label => {
       fixture.componentRef.setInput('isStorytimeEnabled', true);
       fixture.detectChanges();
 
-      expect(linkLabels()).not.toContain('Your Stories');
+      expect(linkLabels()).not.toContain(label);
     });
 
-    it('should offer the creator link to a signed-in member', () => {
+    it.each([
+      'Arcs',
+      'Spotlight',
+      'Your Library',
+      'Your Stories',
+      'Your Arcs',
+      'Invitations',
+    ])('should not offer the %s link to a signed-in member', label => {
       fixture.componentRef.setInput('isStorytimeEnabled', true);
       fixture.componentRef.setInput('isLoggedIn', true);
       fixture.detectChanges();
 
-      expect(linkLabels()).toContain('Your Stories');
+      expect(linkLabels()).not.toContain(label);
     });
 
-    it('should hide the creator link while the feature is switched off', () => {
+    it('should offer exactly one Storytime entry to a signed-in member', () => {
+      fixture.componentRef.setInput('isStorytimeEnabled', true);
       fixture.componentRef.setInput('isLoggedIn', true);
       fixture.detectChanges();
 
-      expect(linkLabels()).not.toContain('Your Stories');
+      expect(linkLabels().filter(label => label === 'Storytime')).toHaveLength(
+        1,
+      );
+    });
+
+    it('should hide the Storytime link while the feature is switched off', () => {
+      fixture.componentRef.setInput('isLoggedIn', true);
+      fixture.detectChanges();
+
+      expect(linkLabels()).not.toContain('Storytime');
     });
   });
 

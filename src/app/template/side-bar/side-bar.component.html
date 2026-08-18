@@ -19,23 +19,18 @@
         routerLinkActive="peach"
         >{{ appRouteTitles.COMMUNITY }}</a
       >
+      <!--
+        One entry only. Storytime is a section of the site rather than a set of
+        peers to Community and Help, and its own pages — Stories, Arcs, the
+        Spotlight, and a member's writing — are reached from its landing page,
+        where they can be described. A sidebar that listed them all would push
+        the rest of the site off the bottom of the frame to no one's benefit.
+      -->
       @if (isStorytimeEnabled) {
         <a
           [routerLink]="getRouteLink(appRoutes.STORYTIME)"
           routerLinkActive="peach"
           >{{ appRouteTitles.STORYTIME }}</a
-        >
-        <a
-          [routerLink]="getRouteLink(appRoutes.STORYTIME_ARCS)"
-          [routerLinkActiveOptions]="{ exact: true }"
-          routerLinkActive="peach"
-          >{{ appRouteTitles.STORYTIME_ARCS }}</a
-        >
-        <a
-          [routerLink]="getRouteLink(appRoutes.STORYTIME_SPOTLIGHT)"
-          [routerLinkActiveOptions]="{ exact: true }"
-          routerLinkActive="peach"
-          >{{ appRouteTitles.STORYTIME_SPOTLIGHT }}</a
         >
       }
       @if (isLoggedIn) {
@@ -57,32 +52,6 @@
           routerLinkActive="peach"
           >{{ appRouteTitles.STO_DASHBOARD_STATS }}</a
         >
-        @if (isStorytimeEnabled) {
-          <a
-            [routerLink]="getRouteLink(appRoutes.STORYTIME_LIBRARY)"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="peach"
-            >{{ appRouteTitles.STORYTIME_LIBRARY }}</a
-          >
-          <a
-            [routerLink]="getRouteLink(appRoutes.STORYTIME_MANAGE)"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="peach"
-            >{{ appRouteTitles.STORYTIME_MANAGE }}</a
-          >
-          <a
-            [routerLink]="getRouteLink(appRoutes.STORYTIME_MANAGE_ARCS)"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="peach"
-            >{{ appRouteTitles.STORYTIME_MANAGE_ARCS }}</a
-          >
-          <a
-            [routerLink]="getRouteLink(appRoutes.STORYTIME_INVITATIONS)"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="peach"
-            >{{ appRouteTitles.STORYTIME_INVITATIONS }}</a
-          >
-        }
         @if (isAdmin) {
           <a
             [routerLink]="getRouteLink(appRoutes.ADMIN)"
