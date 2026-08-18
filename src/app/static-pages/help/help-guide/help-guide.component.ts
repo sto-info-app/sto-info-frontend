@@ -1,8 +1,16 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { combineLatest, map } from 'rxjs';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { StorytimeService } from 'src/app/storytime/storytime.service';
@@ -48,6 +56,8 @@ export class HelpGuideComponent implements OnInit {
   private readonly _pageTitleService = inject(PageTitleService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Resolves the guide named in the address.
@@ -62,7 +72,10 @@ export class HelpGuideComponent implements OnInit {
       this._route.paramMap.pipe(map(params => params.get('guideSlug'))),
       this._storytimeService.isEnabled(),
     ])
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe(([slug, isStorytimeEnabled]) => {
         const location = findHelpGuide(slug);
 

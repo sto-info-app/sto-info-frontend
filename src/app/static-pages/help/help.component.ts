@@ -1,7 +1,15 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { StorytimeService } from 'src/app/storytime/storytime.service';
 
@@ -36,6 +44,8 @@ export class HelpComponent implements OnInit {
   private readonly _routingService = inject(RoutingService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Works out which topics to show.
@@ -49,7 +59,10 @@ export class HelpComponent implements OnInit {
   ngOnInit(): void {
     this._storytimeService
       .isEnabled()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe(isStorytimeEnabled => {
         this.topics = HELP_TOPICS.filter(
           topic => isStorytimeEnabled || !topic.requiresStorytime,

@@ -1,4 +1,11 @@
-import { Component, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import {
   MatDialog,
   MatDialogModule,
@@ -12,6 +19,7 @@ import { AuthService } from './core/auth/auth.service';
 import { NotificationService } from './notifications/notification.service';
 import { StorytimeService } from './storytime/storytime.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
+import { observeInZone } from './shared/rxjs/observe-in-zone.operator';
 import { CookieService } from './shared/services/cookie.service';
 import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
@@ -57,6 +65,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly _seoService = inject(SeoService);
   private readonly _cookieService = inject(CookieService);
   private readonly _zone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _router = inject(Router);
   private readonly _scriptLoader = inject(ScriptLoaderService);
   public readonly dialog = inject(MatDialog);
@@ -181,7 +190,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private subscribeToStorytimeAvailability() {
     this._storytimeService
       .isEnabled()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.destroy$), observeInZone(this._zone, this._cdr))
       .subscribe(isEnabled => {
         this.isStorytimeEnabled = isEnabled;
       });
@@ -195,7 +204,7 @@ export class AppComponent implements OnInit, OnDestroy {
    */
   private subscribeToAuthenticationState() {
     this._authService.isAuthenticated$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.destroy$), observeInZone(this._zone, this._cdr))
       .subscribe(loggedIn => {
         this.isLoggedIn = loggedIn;
         if (this.isLoggedIn) {
@@ -339,6 +348,10 @@ export class AppComponent implements OnInit, OnDestroy {
       this._zone.run(() => {
         this.autoLogoutCountdown =
           this._authService.getSecondsUntilLoginSessionExpiry();
+        // The countdown is read through an input binding on the header, and
+        // this component is `OnPush` like every other. Re-entering the zone
+        // gets a tick; only the mark gets this view included in it.
+        this._cdr.markForCheck();
         if (this.autoLogoutCountdown <= 0) {
           this.stopCountdown();
 

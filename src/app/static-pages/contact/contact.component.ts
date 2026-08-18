@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -26,6 +26,7 @@ import {
   MAX_CHARS_NAMES,
 } from 'src/app/shared/constants/forms.constants';
 import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CONTACT_TOPICS } from './contact.constants';
 import { ContactService } from './contact.service';
 import {
@@ -64,6 +65,8 @@ export class ContactComponent {
 
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _contactService = inject(ContactService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   contactForm = this._formBuilder.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(MAX_CHARS_NAMES)]],
@@ -106,6 +109,7 @@ export class ContactComponent {
     this._contactService
       .submitContactForm(payload)
       .pipe(
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isSubmitting = false;
         }),
