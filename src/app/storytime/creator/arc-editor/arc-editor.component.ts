@@ -103,7 +103,7 @@ export class ArcEditorComponent implements OnInit {
       shortDescription: ['', Validators.maxLength(500)],
       description: [''],
       visibility: [StorytimeVisibility.PRIVATE],
-      languageCode: ['en'],
+      languageCode: ['en-GB'],
     });
 
     this._storytimeService

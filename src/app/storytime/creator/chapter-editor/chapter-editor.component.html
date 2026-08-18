@@ -2,7 +2,7 @@
   <app-loading-bar loadingText="Loading Chapter"></app-loading-bar>
 }
 
-<div id="storytime-chapter-editor-page">
+<div id="storytime-chapter-editor-page" class="storytime-editor-page">
   <h1>{{ isNew ? 'Write a Chapter' : 'Edit Chapter' }}</h1>
 
   @if (errorMessage) {
@@ -13,68 +13,53 @@
 
   <form
     [formGroup]="form"
+    class="storytime-editor-form"
     (ngSubmit)="save()">
-    <label for="chapter-title">Title</label>
-    <input
-      id="chapter-title"
-      type="text"
-      formControlName="title"
-      maxlength="200"
-      required />
-    @if (form.controls['title'].touched && form.controls['title'].invalid) {
-      <p class="field-error">A title is required.</p>
-    }
+    <div class="lcars-text-bar small-lcars-bar-gap"><span>Chapter Details</span></div>
 
-    <label for="chapter-slug">URL slug</label>
-    <input
-      id="chapter-slug"
-      type="text"
-      formControlName="slug"
-      maxlength="220" />
-    <p class="field-hint">
-      Leave blank to build one from the title. Changing it keeps the old address
-      working.
-    </p>
+    <div class="lcars-input-container perano">
+      <label for="chapter-title">Title</label>
+      <input id="chapter-title" type="text" formControlName="title" maxlength="200" required />
+      @if (form.controls['title'].touched && form.controls['title'].invalid) {
+        <p class="field-error">A title is required.</p>
+      }
+    </div>
+    <div class="lcars-input-container bluey">
+      <label for="chapter-slug">URL slug</label>
+      <input id="chapter-slug" type="text" formControlName="slug" maxlength="220" />
+      <p class="field-hint">Leave blank to build one from the title. Changing it keeps the old address working.</p>
+    </div>
+    <div class="lcars-input-container sunflower">
+      <label for="chapter-synopsis">Synopsis</label>
+      <textarea id="chapter-synopsis" formControlName="synopsis" rows="3" maxlength="1000"></textarea>
+      <p class="field-hint">Shown in the Chapter list.</p>
+    </div>
+    <div class="lcars-input-container perano field-full">
+      <label for="chapter-content">Chapter</label>
+      <textarea id="chapter-content" formControlName="contentSource" rows="24"></textarea>
+      <p class="field-hint">Markdown is supported. Links to other sites are not shown, and a Chapter needs some content before it can be published.</p>
+    </div>
 
-    <label for="chapter-synopsis">Synopsis</label>
-    <textarea
-      id="chapter-synopsis"
-      formControlName="synopsis"
-      rows="3"
-      maxlength="1000"></textarea>
-    <p class="field-hint">Shown in the Chapter list.</p>
-
-    <label for="chapter-content">Chapter</label>
-    <textarea
-      id="chapter-content"
-      formControlName="contentSource"
-      rows="24"></textarea>
-    <p class="field-hint">
-      Markdown is supported. Links to other sites are not shown, and a Chapter
-      needs some content before it can be published.
-    </p>
-
-    <label for="chapter-language">Language</label>
-    <select
-      id="chapter-language"
-      formControlName="languageCode">
+    <div class="lcars-select-container gold">
+      <label class="select-label" for="chapter-language">Language</label>
+      <select id="chapter-language" title="Language" formControlName="languageCode">
       <option value="">Same as the Story</option>
       @for (language of languages; track language.code) {
         <option [value]="language.code">{{ language.name }}</option>
       }
-    </select>
-    <p class="field-hint">
-      Only set this when the Chapter is written in a different language from the
-      rest of the Story.
-    </p>
+      </select>
+      <p class="field-hint">Only set this when the Chapter is written in a different language from the rest of the Story.</p>
+    </div>
 
     <div class="storytime-editor__actions">
       <button
+        class="lcars-btn green"
         type="submit"
         [disabled]="isSaving">
         {{ isSaving ? 'Saving…' : 'Save' }}
       </button>
       <a
+        class="lcars-btn red"
         [routerLink]="[
           '/',
           appRoutes.STORYTIME,

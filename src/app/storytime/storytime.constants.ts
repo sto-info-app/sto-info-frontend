@@ -362,6 +362,16 @@ export const COMPLETION_STATE_LABELS = {
 } as const;
 
 /**
+ * What each completion state tells readers about a Story.
+ */
+export const COMPLETION_STATE_DESCRIPTIONS = {
+  ONGOING: 'The Story is still being written.',
+  COMPLETED: 'The Story has reached its planned ending.',
+  HIATUS: 'The Story is paused and may continue later.',
+  CANCELLED: 'The Story will not receive any more Chapters.',
+} as const;
+
+/**
  * How each visibility option is described to creators.
  */
 export const VISIBILITY_LABELS = {

@@ -1,4 +1,4 @@
-<section id="storytime-character-editor-page">
+<section id="storytime-character-editor-page" class="storytime-editor-page">
   <div class="lcars-text-bar small-lcars-bar-gap">
     <span>{{ isCreating ? 'Add a Character' : 'Edit Character' }}</span>
   </div>
@@ -14,6 +14,7 @@
   } @else {
     <form
       [formGroup]="form"
+      class="storytime-editor-form"
       (ngSubmit)="save()">
       <label for="character-name">Name</label>
       <input
@@ -119,6 +120,7 @@
               maxlength="60"
               [formControl]="trait" />
             <button
+              class="lcars-btn red"
               type="button"
               (click)="removeTrait(index)">
               Remove
@@ -127,6 +129,7 @@
         }
 
         <button
+          class="lcars-btn sunflower"
           type="button"
           [disabled]="traits.length >= maxTraits"
           (click)="addTrait()">
@@ -143,11 +146,13 @@
 
       <div class="storytime-character-editor__actions">
         <button
+          class="lcars-btn green"
           type="submit"
           [disabled]="isSaving">
           {{ isSaving ? 'Saving…' : 'Save' }}
         </button>
         <a
+          class="lcars-btn red"
           [routerLink]="[
             '/',
             appRoutes.STORYTIME,

@@ -42,7 +42,7 @@ export const CONTENT_RATING_DESCRIPTIONS: Readonly<
 export interface StorytimeLanguage {
   /** BCP 47 language tag. */
   code: string;
-  /** English name of the language. */
+  /** Native display name of the language. */
   name: string;
 }
 

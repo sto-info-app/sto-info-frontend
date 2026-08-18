@@ -164,6 +164,225 @@ nav[class^='storytime-'] :where(a, [aria-current='page']) {
   font-style: italic;
 }
 
+.storytime-editor-page {
+  max-width: 1100px;
+  padding: 2rem;
+  margin: 0 auto;
+}
+
+.storytime-editor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.storytime-editor-form .form-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.storytime-editor-form .form-row > * {
+  flex: 1;
+  min-width: 220px;
+  margin-bottom: 0;
+}
+
+.storytime-editor-form .field-full {
+  margin-bottom: 0;
+}
+
+.storytime-editor-form > label {
+  @include storytime-label-colour;
+}
+
+.storytime-editor-form > input,
+.storytime-editor-form > textarea,
+.storytime-editor-form > select,
+.storytime-editor-form .storytime-character-editor__trait input {
+  @include storytime-input;
+}
+
+.storytime-editor-form fieldset {
+  border: 1px solid vars.$lcars-grey-border;
+  padding: 1rem;
+}
+
+.storytime-editor-form legend {
+  @include storytime-label-colour;
+
+  padding: 0 0.5rem;
+}
+
+.storytime-editor-form .field-hint {
+  color: vars.$lcars-grey-light;
+  box-sizing: border-box;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin: 0.35rem 0 0;
+  padding: 0 1rem;
+}
+
+.storytime-editor-form .field-error {
+  color: vars.$lcars-red;
+  font-size: 0.85rem;
+  margin: 0.35rem 0 0;
+}
+
+.storytime-visibility-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.storytime-setting-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.storytime-setting-field .lcars-select-container {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.storytime-visibility-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.storytime-visibility-control .lcars-select-container {
+  margin-bottom: 0;
+}
+
+.storytime-visibility-control .lcars-select-container select {
+  min-height: 4rem;
+}
+
+.storytime-setting-help {
+  position: relative;
+  flex: 0 0 24px;
+}
+
+.storytime-setting-help[open] .storytime-setting-help__trigger {
+  background-color: rgb(111 255 143 / 20%);
+  color: #6fff8f;
+}
+
+.storytime-setting-help__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: #6cf;
+  background: #1d2d3e;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 700;
+  list-style: none;
+  user-select: none;
+  transition: background-color 120ms ease;
+}
+
+.storytime-setting-help__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.storytime-setting-help__trigger::marker {
+  display: none;
+}
+
+.storytime-setting-help__trigger:hover {
+  background-color: #263e54;
+}
+
+.storytime-setting-help__trigger:focus-visible {
+  outline: 2px solid #6cf;
+  outline-offset: 2px;
+}
+
+.storytime-setting-help__popup {
+  display: block;
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 10;
+  width: min(360px, calc(100vw - 80px));
+  padding: 10px 12px;
+  border: 1px solid #9de0ff;
+  border-radius: 8px;
+  background: #1d2d3e;
+  color: #f2f8ff;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.storytime-setting-help__popup p {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0 0 0.65rem;
+}
+
+.storytime-setting-help__popup p:last-child {
+  margin-bottom: 0;
+}
+
+.storytime-setting-help__popup strong {
+  color: vars.$lcars-perano;
+  font-family: vars.$font-antonio;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.storytime-editor__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.storytime-editor__actions a {
+  @include storytime-button;
+
+  background: vars.$lcars-red;
+  text-decoration: none;
+}
+
+.storytime-editor__actions button {
+  @include storytime-button;
+
+  background: vars.$lcars-green;
+}
+
+@media (width <= 768px) {
+  .storytime-editor-page {
+    padding: 1rem;
+  }
+
+  .storytime-editor__actions {
+    justify-content: stretch;
+
+    a,
+    button {
+      flex: 1;
+      text-align: center;
+    }
+  }
+}
+
 p.storytime-fan-notice,
 p.storytime-arcs__note,
 p.storytime-invitations__note,

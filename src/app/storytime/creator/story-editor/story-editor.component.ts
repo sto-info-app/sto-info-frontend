@@ -20,6 +20,7 @@ import { Observable } from 'rxjs';
 import {
   CompletionState,
   ContentRating,
+  CONTENT_RATING_DESCRIPTIONS,
   CONTENT_RATING_LABELS,
   ManagedStory,
   StorytimeLanguage,
@@ -31,6 +32,7 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
   COMPLETION_STATE_LABELS,
+  COMPLETION_STATE_DESCRIPTIONS,
   VISIBILITY_DESCRIPTIONS,
   VISIBILITY_LABELS,
 } from '../../storytime.constants';
@@ -82,11 +84,31 @@ export class StoryEditorComponent implements OnInit {
   /** Rating labels. */
   readonly ratingLabels = CONTENT_RATING_LABELS;
 
+  /** Rating descriptions. */
+  readonly ratingDescriptions = CONTENT_RATING_DESCRIPTIONS;
+
+  /** Rating choices and their creator-facing explanations. */
+  readonly ratingOptions = Object.values(ContentRating).map(rating => ({
+    value: rating,
+    label: CONTENT_RATING_LABELS[rating],
+    description: CONTENT_RATING_DESCRIPTIONS[rating],
+  }));
+
   /** Completion states. */
   readonly completionStates = Object.values(CompletionState);
 
   /** Completion labels. */
   readonly completionLabels = COMPLETION_STATE_LABELS;
+
+  /** Completion descriptions. */
+  readonly completionDescriptions = COMPLETION_STATE_DESCRIPTIONS;
+
+  /** Completion choices and their creator-facing explanations. */
+  readonly completionOptions = Object.values(CompletionState).map(state => ({
+    value: state,
+    label: COMPLETION_STATE_LABELS[state],
+    description: COMPLETION_STATE_DESCRIPTIONS[state],
+  }));
 
   /** Visibility options. */
   readonly visibilities = Object.values(StorytimeVisibility);
@@ -96,6 +118,15 @@ export class StoryEditorComponent implements OnInit {
 
   /** Explanations of what each visibility actually means. */
   readonly visibilityDescriptions = VISIBILITY_DESCRIPTIONS;
+
+  /** Visibility choices and their creator-facing explanations. */
+  readonly visibilityOptions = Object.values(StorytimeVisibility).map(
+    visibility => ({
+      value: visibility,
+      label: VISIBILITY_LABELS[visibility],
+      description: VISIBILITY_DESCRIPTIONS[visibility],
+    }),
+  );
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
@@ -121,7 +152,7 @@ export class StoryEditorComponent implements OnInit {
       contentRating: [ContentRating.GENERAL],
       completionState: [CompletionState.ONGOING],
       visibility: [StorytimeVisibility.PRIVATE],
-      languageCode: ['en'],
+      languageCode: ['en-GB'],
     });
 
     this._storytimeService
