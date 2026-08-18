@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -24,6 +31,7 @@ import { StoAccountService } from 'src/app/dashboard/services/sto-account.servic
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { STO_HANDLE_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 
 /**
  * Interface for data passed to the account dialog.
@@ -68,6 +76,8 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
   private readonly _fb = inject(FormBuilder);
   private readonly _stoAccountService = inject(StoAccountService);
   private readonly _dialogRef = inject(MatDialogRef<AccountDialogComponent>);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _destroy$ = new Subject<void>();
 
   /**
@@ -96,7 +106,10 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.accountForm
       .get('platformId')
-      ?.valueChanges.pipe(takeUntil(this._destroy$))
+      ?.valueChanges.pipe(
+        takeUntil(this._destroy$),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe((platformId: string | null) => {
         if (platformId) {
           this.filterLaunchers(platformId);
@@ -117,7 +130,7 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
       launchers: this._stoAccountService.getLaunchers(),
       mappings: this._stoAccountService.getPlatformLaunchers(),
     })
-      .pipe(takeUntil(this._destroy$))
+      .pipe(takeUntil(this._destroy$), observeInZone(this._ngZone, this._cdr))
       .subscribe({
         next: ({ platforms, launchers, mappings }) => {
           this.platforms = platforms;
@@ -188,27 +201,31 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
     const accountData = this.accountForm.value;
 
     if (this.data.mode === 'add') {
-      this._stoAccountService.createAccount(accountData).subscribe({
-        next: () => {
-          this.isSubmitting = false;
-          this._dialogRef.close(true);
-        },
-        error: error => {
-          this.isSubmitting = false;
-          if (error.status === 409) {
-            this.errorMessage =
-              error.error?.message ||
-              'A STO account with this handle already exists.';
-          } else {
-            this.errorMessage =
-              'An error occurred while creating the account. Please try again.';
-          }
-          console.error('Error creating account:', error);
-        },
-      });
+      this._stoAccountService
+        .createAccount(accountData)
+        .pipe(observeInZone(this._ngZone, this._cdr))
+        .subscribe({
+          next: () => {
+            this.isSubmitting = false;
+            this._dialogRef.close(true);
+          },
+          error: error => {
+            this.isSubmitting = false;
+            if (error.status === 409) {
+              this.errorMessage =
+                error.error?.message ||
+                'A STO account with this handle already exists.';
+            } else {
+              this.errorMessage =
+                'An error occurred while creating the account. Please try again.';
+            }
+            console.error('Error creating account:', error);
+          },
+        });
     } else if (this.data.mode === 'edit' && this.data.account) {
       this._stoAccountService
         .updateAccount(this.data.account.id, accountData)
+        .pipe(observeInZone(this._ngZone, this._cdr))
         .subscribe({
           next: () => {
             this.isSubmitting = false;
