@@ -63,7 +63,7 @@ export const STORYTIME_POLICY_VERSION = '1.0';
 /**
  * When the current version of the publishing terms took effect.
  */
-export const STORYTIME_POLICY_EFFECTIVE_DATE = 'August 2026';
+export const STORYTIME_POLICY_EFFECTIVE_DATE = '18th August 2026';
 
 /**
  * What a creator confirms when they accept the publishing terms.

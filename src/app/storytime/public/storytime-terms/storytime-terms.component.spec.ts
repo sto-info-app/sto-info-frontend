@@ -45,6 +45,11 @@ describe('StorytimeTermsComponent', () => {
     );
   });
 
+  it('states that STO Info may use published stories in videos and images', () => {
+    expect(text).toContain('use published Stories in videos and images');
+    expect(text).toContain('STO Info may also use published Stories');
+  });
+
   // A creator who believes the site is their backup will eventually lose work.
   it('warns that STO Info is not a backup', () => {
     expect(text).toContain('STO Info is not a backup of your writing');
