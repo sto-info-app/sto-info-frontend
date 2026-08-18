@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -14,6 +21,7 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { StorytimeModerationService } from '../../storytime-moderation.service';
 import { REPORT_REASON_LABELS } from '../../storytime.constants';
 
@@ -68,6 +76,8 @@ export class ModerationQueueComponent implements OnInit {
   private readonly _moderationService = inject(StorytimeModerationService);
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /** What an administrator is saying about the report they are working on. */
   readonly form = this._formBuilder.nonNullable.group({
@@ -135,7 +145,10 @@ export class ModerationQueueComponent implements OnInit {
             status: StorytimeReportStatus.ACTIONED,
             resolution: message,
           })
-          .pipe(takeUntilDestroyed(this._destroyRef))
+          .pipe(
+            takeUntilDestroyed(this._destroyRef),
+            observeInZone(this._ngZone, this._cdr),
+          )
           .subscribe(),
     );
   }
@@ -197,19 +210,24 @@ export class ModerationQueueComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    action.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => {
-        onSuccess?.();
-        this.form.reset();
-        this.load();
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          (error.error as { message?: string } | undefined)?.message ??
-          'That could not be saved. Please try again shortly.';
-        this.isLoading = false;
-      },
-    });
+    action
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => {
+          onSuccess?.();
+          this.form.reset();
+          this.load();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'That could not be saved. Please try again shortly.';
+          this.isLoading = false;
+        },
+      });
   }
 
   /**
@@ -224,6 +242,7 @@ export class ModerationQueueComponent implements OnInit {
     })
       .pipe(
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isLoading = false;
         }),

@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { Observable, finalize } from 'rxjs';
@@ -8,6 +15,7 @@ import { ManagedSpotlight } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { SpotlightService } from '../../spotlight.service';
 
 /**
@@ -44,6 +52,8 @@ export class SpotlightAdminListComponent implements OnInit {
 
   private readonly _spotlightService = inject(SpotlightService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Loads the entries.
@@ -126,18 +136,23 @@ export class SpotlightAdminListComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    action.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => this.load(),
-      error: (error: HttpErrorResponse) => {
-        // The server explains why an entry cannot be published — most often
-        // that the work has since been unpublished or removed — and repeating
-        // that verbatim beats a generic apology.
-        this.errorMessage =
-          (error.error as { message?: string } | undefined)?.message ??
-          'That change could not be saved. Please try again shortly.';
-        this.isLoading = false;
-      },
-    });
+    action
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => this.load(),
+        error: (error: HttpErrorResponse) => {
+          // The server explains why an entry cannot be published — most often
+          // that the work has since been unpublished or removed — and repeating
+          // that verbatim beats a generic apology.
+          this.errorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'That change could not be saved. Please try again shortly.';
+          this.isLoading = false;
+        },
+      });
   }
 
   /**
@@ -150,6 +165,7 @@ export class SpotlightAdminListComponent implements OnInit {
       .getAll()
       .pipe(
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isLoading = false;
         }),

@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -18,6 +25,7 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { SpotlightService } from '../../spotlight.service';
 
 /**
@@ -88,6 +96,8 @@ export class SpotlightAdminFormComponent implements OnInit {
   private readonly _router = inject(Router);
   private readonly _spotlightService = inject(SpotlightService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Builds the form and loads the entry when editing an existing one.
@@ -150,26 +160,31 @@ export class SpotlightAdminFormComponent implements OnInit {
       ? this._spotlightService.update(this.entry.id, this.buildChanges())
       : this._spotlightService.create(this.buildDraft());
 
-    request.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => {
-        this.isSaving = false;
-        void this._router.navigate([
-          '/',
-          this.appRoutes.STORYTIME,
-          'manage',
-          'spotlight',
-        ]);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.isSaving = false;
-        // The server names the specific problem — work that cannot be
-        // featured, or a period that ends before it starts — which is more use
-        // to an editor than a generic failure would be.
-        this.errorMessage =
-          (error.error as { message?: string } | undefined)?.message ??
-          'This selection could not be saved. Please try again shortly.';
-      },
-    });
+    request
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => {
+          this.isSaving = false;
+          void this._router.navigate([
+            '/',
+            this.appRoutes.STORYTIME,
+            'manage',
+            'spotlight',
+          ]);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.isSaving = false;
+          // The server names the specific problem — work that cannot be
+          // featured, or a period that ends before it starts — which is more use
+          // to an editor than a generic failure would be.
+          this.errorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'This selection could not be saved. Please try again shortly.';
+        },
+      });
   }
 
   /**
@@ -227,7 +242,10 @@ export class SpotlightAdminFormComponent implements OnInit {
 
     this._spotlightService
       .getOne(spotlightId)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: entry => {
           this.entry = entry;

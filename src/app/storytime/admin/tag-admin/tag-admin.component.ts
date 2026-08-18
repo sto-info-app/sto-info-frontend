@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -12,6 +19,7 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { TagService } from '../../tag.service';
 import { TAG_CATEGORY_LABELS } from '../../storytime.constants';
 
@@ -59,6 +67,8 @@ export class TagAdminComponent implements OnInit {
   private readonly _tagService = inject(TagService);
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /** The form for adding a tag, or editing the one selected. */
   readonly form = this._formBuilder.nonNullable.group({
@@ -152,20 +162,25 @@ export class TagAdminComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    action.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => {
-        onSuccess?.();
-        this.load();
-      },
-      error: (error: HttpErrorResponse) => {
-        // The server names the problem — usually a tag that already exists —
-        // which is more use than a generic failure.
-        this.errorMessage =
-          (error.error as { message?: string } | undefined)?.message ??
-          'That change could not be saved. Please try again shortly.';
-        this.isLoading = false;
-      },
-    });
+    action
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => {
+          onSuccess?.();
+          this.load();
+        },
+        error: (error: HttpErrorResponse) => {
+          // The server names the problem — usually a tag that already exists —
+          // which is more use than a generic failure.
+          this.errorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'That change could not be saved. Please try again shortly.';
+          this.isLoading = false;
+        },
+      });
   }
 
   /**
@@ -178,6 +193,7 @@ export class TagAdminComponent implements OnInit {
       .getTags()
       .pipe(
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isLoading = false;
         }),
