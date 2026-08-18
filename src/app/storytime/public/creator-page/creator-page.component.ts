@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { finalize, switchMap } from 'rxjs';
@@ -12,6 +19,7 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ReadingListService } from '../../reading-list.service';
 import { SearchService } from '../../search.service';
 import { FollowButtonComponent } from '../../shared/follow-button/follow-button.component';
@@ -67,6 +75,8 @@ export class CreatorPageComponent implements OnInit {
   private readonly _searchService = inject(SearchService);
   private readonly _readingListService = inject(ReadingListService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Loads the member named in the route, and again if the route changes.
@@ -83,6 +93,7 @@ export class CreatorPageComponent implements OnInit {
           return this._searchService.getCreatorWork(this.userId);
         }),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isLoading = false;
         }),
@@ -124,7 +135,10 @@ export class CreatorPageComponent implements OnInit {
   private loadReadingLists(): void {
     this._readingListService
       .getPublicLists(this.userId)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: lists => (this.readingLists = lists),
         error: () => (this.readingLists = []),

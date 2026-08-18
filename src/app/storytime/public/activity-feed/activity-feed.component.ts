@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import {
@@ -8,6 +15,7 @@ import {
   StorytimeActivityType,
 } from 'src/app/models/storytime.models';
 import { FollowService } from '../../follow.service';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 
 /** What each kind of activity says in a feed. */
 export const ACTIVITY_WORDING: Record<StorytimeActivityType, string> = {
@@ -55,6 +63,8 @@ export class ActivityFeedComponent implements OnInit {
 
   private readonly _followService = inject(FollowService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Loads the first page and marks the feed as seen.
@@ -66,7 +76,10 @@ export class ActivityFeedComponent implements OnInit {
     // on arrival rather than waiting for a button nobody would press.
     this._followService
       .markFeedRead()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({ error: () => undefined });
   }
 
@@ -139,7 +152,10 @@ export class ActivityFeedComponent implements OnInit {
 
     this._followService
       .getFeed(page)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: entries => {
           this.entries = page === 1 ? entries : [...this.entries, ...entries];

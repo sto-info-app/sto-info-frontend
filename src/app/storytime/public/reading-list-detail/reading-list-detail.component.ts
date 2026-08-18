@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -11,6 +18,7 @@ import {
   StorytimeTargetType,
 } from 'src/app/models/storytime.models';
 import { ReadingListService } from '../../reading-list.service';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 
 /**
  * One reading list, and what is on it.
@@ -51,6 +59,8 @@ export class ReadingListDetailComponent implements OnInit {
   private readonly _readingListService = inject(ReadingListService);
   private readonly _route = inject(ActivatedRoute);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Loads whichever list the route names.
@@ -147,17 +157,22 @@ export class ReadingListDetailComponent implements OnInit {
   private read(source: Observable<ReadingListDetail>): void {
     this.isLoading = true;
 
-    source.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: list => {
-        this.list = list;
-        this.isLoading = false;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          error.error?.message ?? 'That reading list could not be loaded.';
-        this.isLoading = false;
-      },
-    });
+    source
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: list => {
+          this.list = list;
+          this.isLoading = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage =
+            error.error?.message ?? 'That reading list could not be loaded.';
+          this.isLoading = false;
+        },
+      });
   }
 
   /**
@@ -169,17 +184,22 @@ export class ReadingListDetailComponent implements OnInit {
     this.isSaving = true;
     this.errorMessage = '';
 
-    change.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: list => {
-        this.list = list;
-        this.isSaving = false;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          error.error?.message ?? 'That change could not be saved.';
-        this.isSaving = false;
-      },
-    });
+    change
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: list => {
+          this.list = list;
+          this.isSaving = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage =
+            error.error?.message ?? 'That change could not be saved.';
+          this.isSaving = false;
+        },
+      });
   }
 
   /**
@@ -205,18 +225,23 @@ export class ReadingListDetailComponent implements OnInit {
     this.isSaving = true;
     this.errorMessage = '';
 
-    change.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: list => {
-        // The items are unchanged and were not sent back, so they are carried
-        // over rather than emptied by a response that never had them.
-        this.list = { ...list, items };
-        this.isSaving = false;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          error.error?.message ?? 'That change could not be saved.';
-        this.isSaving = false;
-      },
-    });
+    change
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: list => {
+          // The items are unchanged and were not sent back, so they are carried
+          // over rather than emptied by a response that never had them.
+          this.list = { ...list, items };
+          this.isSaving = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage =
+            error.error?.message ?? 'That change could not be saved.';
+          this.isSaving = false;
+        },
+      });
   }
 }

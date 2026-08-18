@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -16,6 +23,7 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import { AddToListComponent } from '../../shared/add-to-list/add-to-list.component';
 import { CommentThreadComponent } from '../../shared/comment-thread/comment-thread.component';
@@ -92,6 +100,8 @@ export class ArcDetailComponent implements OnInit {
   }
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Loads the Arc named in the route.
@@ -106,6 +116,7 @@ export class ArcDetailComponent implements OnInit {
           return this._arcService.getArc(params.get('arcSlug') ?? '');
         }),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe({
         next: result => {
@@ -195,7 +206,10 @@ export class ArcDetailComponent implements OnInit {
 
     this._arcService
       .getArcProgress(arcSlug)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: progress => {
           this.progress = progress;

@@ -1,11 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { forkJoin, switchMap, of } from 'rxjs';
 import { Spotlight, Story, StorySort } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { FollowService } from '../follow.service';
 import { SpotlightService } from '../spotlight.service';
 import { StoryService } from '../story.service';
@@ -42,6 +50,14 @@ export class StorytimeLandingComponent implements OnInit {
   /** The selections showing now, best first. */
   spotlight: Spotlight[] = [];
 
+  /**
+   * Whether the Spotlight exists at all in this environment.
+   *
+   * Decides whether the page offers a way into it. Defaults to hidden, so a
+   * link never appears and then vanishes once the feature state arrives.
+   */
+  isSpotlightEnabled = false;
+
   /** The most recently published Stories. */
   newest: Story[] = [];
 
@@ -63,6 +79,8 @@ export class StorytimeLandingComponent implements OnInit {
   private readonly _storyService = inject(StoryService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Loads the Spotlight and the two Story lists.
@@ -73,12 +91,14 @@ export class StorytimeLandingComponent implements OnInit {
     this._storytimeService
       .getFeatureState()
       .pipe(
-        switchMap(features =>
-          features.spotlightEnabled
+        switchMap(features => {
+          this.isSpotlightEnabled = features.spotlightEnabled;
+          return features.spotlightEnabled
             ? this._spotlightService.getSpotlight()
-            : of([]),
-        ),
+            : of([]);
+        }),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe({
         next: spotlight => {
@@ -116,7 +136,10 @@ export class StorytimeLandingComponent implements OnInit {
 
     this._followService
       .getUnreadCount()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: ({ unread }) => (this.unreadCount = unread),
         error: () => (this.unreadCount = 0),
@@ -141,7 +164,10 @@ export class StorytimeLandingComponent implements OnInit {
         sort: StorySort.RECENTLY_UPDATED,
       }),
     })
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: lists => {
           this.newest = lists.newest.items;

@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -30,6 +37,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
 import { CrewService } from '../../crew.service';
@@ -133,6 +141,8 @@ export class StoryDetailComponent implements OnInit {
   private readonly _dialog = inject(MatDialog);
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Loads the Story named in the route.
@@ -145,6 +155,7 @@ export class StoryDetailComponent implements OnInit {
           return this._storyService.getStory(this.storySlug);
         }),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isLoading = false;
         }),
@@ -181,7 +192,10 @@ export class StoryDetailComponent implements OnInit {
   private loadChapters(): void {
     this._chapterService
       .getChapters(this.storySlug)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: chapters => {
           this.chapters = chapters;
@@ -206,6 +220,7 @@ export class StoryDetailComponent implements OnInit {
       .pipe(
         catchError(() => of([] as Character[])),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe(characters => {
         this.characters = characters;
@@ -225,6 +240,7 @@ export class StoryDetailComponent implements OnInit {
       .pipe(
         catchError(() => of([] as CrewCredit[])),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe(credits => {
         this.credits = credits;
@@ -326,7 +342,10 @@ export class StoryDetailComponent implements OnInit {
         },
       })
       .afterClosed()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe((result?: ReportContentDialogResult) => {
         if (!result || !this.story) {
           return;
@@ -339,7 +358,10 @@ export class StoryDetailComponent implements OnInit {
             reasonCode: result.reasonCode,
             description: result.description,
           })
-          .pipe(takeUntilDestroyed(this._destroyRef))
+          .pipe(
+            takeUntilDestroyed(this._destroyRef),
+            observeInZone(this._ngZone, this._cdr),
+          )
           .subscribe({
             next: () => {
               this.reportMessage =
@@ -405,6 +427,7 @@ export class StoryDetailComponent implements OnInit {
       .pipe(
         catchError(() => of(null)),
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe(progress => {
         if (progress) {

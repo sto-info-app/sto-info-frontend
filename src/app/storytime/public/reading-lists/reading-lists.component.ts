@@ -1,10 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { ReadingList } from 'src/app/models/storytime.models';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ReadingListService } from '../../reading-list.service';
 
 /**
@@ -40,6 +48,8 @@ export class ReadingListsComponent implements OnInit {
 
   private readonly _readingListService = inject(ReadingListService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Loads the reader's lists.
@@ -63,7 +73,10 @@ export class ReadingListsComponent implements OnInit {
 
     this._readingListService
       .createList({ name, isPublic: this.newIsPublic })
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: () => {
           this.newName = '';
@@ -94,7 +107,10 @@ export class ReadingListsComponent implements OnInit {
 
     this._readingListService
       .deleteList(list.id)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: () => {
           this.isSaving = false;
@@ -116,7 +132,10 @@ export class ReadingListsComponent implements OnInit {
 
     this._readingListService
       .getMyLists()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe({
         next: lists => {
           this.lists = lists;

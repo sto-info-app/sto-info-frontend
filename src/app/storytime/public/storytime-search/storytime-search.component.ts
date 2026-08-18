@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -12,6 +19,7 @@ import {
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { SearchService } from '../../search.service';
 import { SEARCHABLE_KINDS } from '../../storytime.constants';
 
@@ -55,6 +63,8 @@ export class StorytimeSearchComponent implements OnInit {
   private readonly _searchService = inject(SearchService);
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /** The search box, and what it is limited to. */
   readonly form = this._formBuilder.nonNullable.group({
@@ -67,7 +77,10 @@ export class StorytimeSearchComponent implements OnInit {
    */
   ngOnInit(): void {
     this._route.queryParamMap
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe(params => {
         const term = params.get('q') ?? '';
         const type = params.get('type') ?? '';
@@ -161,6 +174,7 @@ export class StorytimeSearchComponent implements OnInit {
       })
       .pipe(
         takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
         finalize(() => {
           this.isSearching = false;
         }),

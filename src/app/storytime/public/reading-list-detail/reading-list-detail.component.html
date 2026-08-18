@@ -19,7 +19,11 @@
     @if (isMine) {
       <div class="storytime-reading-list__controls">
         <span class="storytime-reading-list__visibility">
-          {{ list.isPublic ? 'Anybody may read this list.' : 'Only you can see this list.' }}
+          {{
+            list.isPublic
+              ? 'Anybody may read this list.'
+              : 'Only you can see this list.'
+          }}
         </span>
         <button
           type="button"
@@ -31,12 +35,14 @@
     }
 
     @if (list.items.length === 0) {
-      <p class="storytime-empty">
-        Nothing on this list yet.
-      </p>
+      <p class="storytime-empty">Nothing on this list yet.</p>
     } @else {
       <ol class="storytime-reading-list__items">
-        @for (item of list.items; track item.id; let first = $first, last = $last) {
+        @for (
+          item of list.items;
+          track item.id;
+          let first = $first, last = $last
+        ) {
           <li class="storytime-reading-list__item">
             <a
               class="storytime-reading-list__title"
