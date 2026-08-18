@@ -4,8 +4,13 @@
 ///
 /// The strip works for both `button` tabs (panels swapped in place, as on the
 /// character detail page) and `a` tabs (each section is its own route, as in
-/// the community section) — hence the explicit anchor resets, which the global
-/// `a` styles would otherwise underline and recolour.
+/// the community section and the Storytime publishing documents) — hence the
+/// explicit anchor resets, which the global `a` styles would otherwise
+/// underline and recolour.
+///
+/// Everything a strip looks like lives here, including the rule that closes it
+/// and how it behaves when it runs out of room. Three pages had grown three
+/// answers to each of those; a caller should now need nothing but the include.
 ///
 /// Mark the current tab with an `active` class.
 ///
@@ -23,8 +28,24 @@
     max-width: none;
     align-items: stretch;
     gap: 6px;
-    margin: 0.5rem 0 0.1rem;
+    margin: 0.5rem 0 1rem;
     height: 40px;
+
+    // The rule that closes the strip, drawn by the strip itself rather than by
+    // whatever happens to sit beneath it — a panel container on one page, a
+    // host pseudo-element on another, nothing at all on a third.
+    // Content-box so the gap and the rule are drawn below the strip's 40px of
+    // tab rather than out of it: left as border-box they take their space from
+    // the tabs, which lose the bottom of every label to make room.
+    box-sizing: content-box;
+    padding-bottom: 4px;
+    border-bottom: 3px solid #455580;
+
+    // When the labels stop fitting the strip scrolls sideways rather than
+    // wrapping to a second row, which would strand the LCARS end cap in the
+    // middle of the strip, or shrinking the labels until they say nothing.
+    overflow-x: auto;
+    scrollbar-width: thin;
   }
 
   .lcars-tab {
@@ -41,10 +62,18 @@
     height: 100%;
 
     // The same global `nav` styles give every anchor a fixed 210px width; tabs
-    // are sized by their label plus the padding below instead.
+    // are sized by their label plus the padding below instead, and never
+    // shrink below it — a tab that has given up half its label to fit is worse
+    // than a strip you have to scroll.
     width: auto;
     min-width: $min-width;
-    padding: 0 24px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+
+    // A little more room before the label than after it. The first tab carries
+    // the strip's rounded corner, which eats into the space ahead of its text,
+    // and matching the others to it keeps the strip reading as one thing.
+    padding: 0 24px 0 34px;
     border-radius: 6px 6px 0 0;
     background-color: #455580;
     color: vars.$lcars-perano;
@@ -88,12 +117,18 @@
     background-color: #455580;
   }
 
+  // Narrow enough that the strip is going to scroll whatever we do, so the
+  // labels give up their generous padding first and the end cap — which only
+  // exists to fill space there is none of — goes entirely.
   @media (width <= 768px) {
     .lcars-tab {
       min-width: 0;
-      flex: 1 1 auto;
-      padding: 0 12px;
+      padding: 0 14px 0 20px;
       font-size: 1rem;
+    }
+
+    .lcars-tabs-filler {
+      display: none;
     }
   }
 }

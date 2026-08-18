@@ -180,6 +180,14 @@ button.lcars-btn,
   margin-top: 5px !important;
   padding-top: 5px !important;
 
+  // A row of links to other pages is navigation, so it is sometimes a `nav`
+  // rather than a `div`. The LCARS frame caps every `nav` at the sidebar's
+  // 660px and would silently wrap the row onto a second line once it holds
+  // more than two buttons.
+  &:is(nav) {
+    max-width: none;
+  }
+
   a {
     display: block;
     margin: 0 8px 16px;

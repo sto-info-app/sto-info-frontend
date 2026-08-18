@@ -115,6 +115,25 @@
 // Shared building blocks
 // -----------------------------------------------------------------------------
 
+// The LCARS frame styles every `nav a` on the site as a full-size sidebar
+// button: 210px wide, 72px tall, right-aligned and violet. That is right for
+// the frame and wrong for a row of links inside a page, so Storytime's own
+// navigation blocks start from a clean slate and then say what they are. The
+// reset is here rather than in the theme because the frame's rule is load
+// bearing everywhere else.
+// `:where()` keeps the reset at one class of specificity: enough to outrank
+// the frame's `nav a`, low enough that a nav's own rules below still outrank
+// the reset without having to repeat themselves.
+nav[class^='storytime-'] :where(a, [aria-current='page']) {
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  text-align: inherit;
+}
+
+// The line under a page's heading saying what the page is for, and the one-line
+// summaries that sit under a title in a list. Same voice, same colour.
 .storytime-intro,
 .storytime-landing__summary,
 .storytime-arc-list__intro,
@@ -123,8 +142,16 @@
 .storytime-policy__intro,
 .storytime-report__intro {
   color: vars.$lcars-grey-light;
-  max-width: 60ch;
   margin-bottom: 1rem;
+}
+
+// An intro runs the full width of the page. It sits directly under a
+// full-width heading and above full-width content, and a measure-capped line
+// between the two reads as a column that has lost its other half. The summaries
+// keep a measure, because they are read as a list of short lines rather than as
+// prose and are already held by whatever panel or row they sit in.
+.storytime-landing__summary {
+  max-width: 60ch;
 }
 
 // Every "there is nothing here" line in the feature. One rule, because an
@@ -137,15 +164,23 @@
   font-style: italic;
 }
 
+p.storytime-fan-notice,
+p.storytime-arcs__note,
+p.storytime-invitations__note,
+p.storytime-collaborators__note,
+p.storytime-tag-admin__note,
+p.storytime-moderation__note,
 .storytime-fan-notice,
 .storytime-arcs__note,
 .storytime-invitations__note,
 .storytime-collaborators__note,
 .storytime-tag-admin__note,
 .storytime-moderation__note {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: vars.$lcars-grey-light;
   line-height: 1.5;
+  font-style: italic;
+  margin: 0;
 }
 
 // Stories and Arcs
@@ -1054,16 +1089,54 @@
     margin: 0 0 1.5rem;
     list-style: none;
 
-    a {
-      @include storytime-work-title;
+    // Each way in gets its own panel. Four headings with a line under each
+    // reads as one paragraph of links; four panels reads as four things to
+    // choose between, which is what this section is for.
+    li {
+      @include mixins.lcars-card;
 
-      font-size: 1rem;
+      display: flex;
+      padding: 0;
+      list-style: none;
+    }
+
+    // The panel is the link rather than something with a link in it. Somebody
+    // reaching for "Arcs" aims at the box, so the anchor fills the box and
+    // carries its padding; a card that only answers along its first line
+    // reads as broken.
+    a {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0.75rem 1rem;
+      text-decoration: none;
+
+      &:hover .storytime-landing__browse-name,
+      &:focus-visible .storytime-landing__browse-name {
+        color: vars.$lcars-gold;
+        text-decoration: underline;
+      }
+
+      &:focus-visible {
+        outline: 2px solid vars.$lcars-perano;
+        outline-offset: 2px;
+      }
     }
 
     .storytime-landing__summary {
-      margin: 0.25rem 0 0;
+      margin: 0;
+      max-width: none;
       font-size: 0.9rem;
     }
+  }
+
+  // The heading inside a browse panel. It is a span rather than a link of its
+  // own, because the panel around it is already the link.
+  &__browse-name {
+    font-family: vars.$font-antonio;
+    font-size: 1rem;
+    color: vars.$lcars-sunflower;
   }
 
   &__stories {
@@ -1257,27 +1330,6 @@
     font-size: 0.8rem;
     color: vars.$lcars-grey-light;
     margin-bottom: 0.5rem;
-  }
-
-  // The three publishing documents cross-link to each other from every one of
-  // them, so the set reads as one thing rather than three loose pages.
-  &__nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    font-size: 0.85rem;
-
-    a {
-      color: vars.$lcars-sunflower;
-    }
-
-    // The page you are already on: still in the set, but not a link back to
-    // where you are standing.
-    [aria-current='page'] {
-      color: vars.$lcars-grey-light;
-      font-weight: 700;
-    }
   }
 }
 
