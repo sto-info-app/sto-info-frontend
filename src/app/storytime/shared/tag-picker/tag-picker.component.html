@@ -1,52 +1,56 @@
-<section class="storytime-tag-picker">
-  <h2>Tags</h2>
+<section class="storytime-section storytime-tag-picker">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Tags</span>
+  </div>
 
-  @if (errorMessage) {
-    <p
-      class="storytime-tag-picker__error"
-      role="alert">
-      {{ errorMessage }}
-    </p>
-  }
-
-  @if (isLoading) {
-    <p class="storytime-tag-picker__loading">Loading tags…</p>
-  } @else if (groups.length === 0) {
-    <p class="storytime-empty">
-      No tags have been set up yet. An administrator adds them.
-    </p>
-  } @else {
-    @for (group of groups; track group.category) {
-      <fieldset class="storytime-tag-picker__group">
-        <legend>{{ group.label }}</legend>
-        @for (tag of group.tags; track tag.id) {
-          <label
-            class="storytime-tag-picker__tag"
-            [title]="tag.description ?? ''">
-            <input
-              type="checkbox"
-              [checked]="isChosen(tag)"
-              (change)="toggle(tag)" />
-            {{ tag.name }}
-          </label>
-        }
-      </fieldset>
+  <div class="storytime-panel">
+    @if (errorMessage) {
+      <p
+        class="storytime-tag-picker__error"
+        role="alert">
+        {{ errorMessage }}
+      </p>
     }
 
-    <div class="storytime-tag-picker__actions">
-      <button
-        type="button"
-        [disabled]="isSaving"
-        (click)="save()">
-        {{ isSaving ? 'Saving…' : 'Save tags' }}
-      </button>
-      @if (isSaved) {
-        <span
-          class="storytime-tag-picker__saved"
-          role="status"
-          >Tags saved.</span
-        >
+    @if (isLoading) {
+      <p class="storytime-tag-picker__loading">Loading tags…</p>
+    } @else if (groups.length === 0) {
+      <p class="storytime-empty">
+        No tags have been set up yet. An administrator adds them.
+      </p>
+    } @else {
+      @for (group of groups; track group.category) {
+        <div class="storytime-tag-picker__group">
+          <p class="storytime-form__legend">{{ group.label }}</p>
+          <div class="storytime-toggle-row">
+            @for (tag of group.tags; track tag.id) {
+              <app-lcars-toggle
+                [label]="tag.name"
+                [ariaLabel]="tag.description ?? tag.name"
+                [ngModel]="isChosen(tag)"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="toggle(tag)"></app-lcars-toggle>
+            }
+          </div>
+        </div>
       }
-    </div>
-  }
+
+      <div class="storytime-form-actions">
+        @if (isSaved) {
+          <span
+            class="storytime-tag-picker__saved"
+            role="status"
+            >Tags saved.</span
+          >
+        }
+        <button
+          class="lcars-btn green"
+          type="button"
+          [disabled]="isSaving"
+          (click)="save()">
+          {{ isSaving ? 'Saving…' : 'Save tags' }}
+        </button>
+      </div>
+    }
+  </div>
 </section>

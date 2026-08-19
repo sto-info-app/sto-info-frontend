@@ -1,10 +1,12 @@
-<section id="storytime-collaborator-list-page">
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>Collaborators</span>
-  </div>
+<section
+  id="storytime-collaborator-list-page"
+  class="storytime-page">
+  <h1>Collaborators</h1>
 
-  <nav class="storytime-collaborators__actions">
-    <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', storyId]">
+  <nav class="storytime-page-actions">
+    <a
+      class="lcars-btn lcars-btn-auto bluey"
+      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', storyId]">
       Back to the Story
     </a>
   </nav>
@@ -15,67 +17,64 @@
       [message]="errorMessage"></app-lcars-error-message>
   }
 
-  <p class="storytime-collaborators__note">
+  <p class="storytime-intro">
     Collaborators can change the Story. Crediting somebody is separate, and
     gives them no access at all. Only you can publish.
   </p>
 
-  <form
-    class="storytime-collaborators__invite"
-    [formGroup]="form"
-    (ngSubmit)="invite()">
-    <label for="collaborator-user">Member ID</label>
-    <input
-      id="collaborator-user"
-      type="text"
-      formControlName="userId" />
-    @if (form.controls.userId.touched && form.controls.userId.invalid) {
-      <p class="form-error">Name the member you want to invite.</p>
-    }
+  <section class="storytime-section">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Invite somebody</span>
+    </div>
 
-    <label for="collaborator-role">What you call them</label>
-    <input
-      id="collaborator-role"
-      type="text"
-      formControlName="collaborationRole"
-      maxlength="100" />
+    <form
+      class="storytime-panel storytime-form"
+      [formGroup]="form"
+      (ngSubmit)="invite()">
+      <div class="form-row">
+        <div class="lcars-input-container perano">
+          <label for="collaborator-user">Member ID</label>
+          <input
+            id="collaborator-user"
+            type="text"
+            formControlName="userId" />
+          @if (form.controls.userId.touched && form.controls.userId.invalid) {
+            <small class="field-error"
+              >Name the member you want to invite.</small
+            >
+          }
+        </div>
 
-    <fieldset>
-      <legend>What they may do</legend>
-      <label>
-        <input
-          type="checkbox"
-          formControlName="canEditStory" />
-        Edit the Story’s details
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          formControlName="canManageChapters" />
-        Write and edit Chapters
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          formControlName="canManageCharacters" />
-        Manage the cast
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          formControlName="canManageCrew" />
-        Manage the credits
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          formControlName="canManageCollaborators" />
-        Invite other collaborators
-      </label>
-    </fieldset>
+        <div class="lcars-input-container gold">
+          <label for="collaborator-role">What you call them</label>
+          <input
+            id="collaborator-role"
+            type="text"
+            formControlName="collaborationRole"
+            maxlength="100" />
+          <p class="field-hint">Shown in the credits, not a permission.</p>
+        </div>
+      </div>
 
-    <button type="submit">Send invitation</button>
-  </form>
+      <p class="storytime-form__legend">What they may do</p>
+      <div class="storytime-toggle-row">
+        @for (capability of capabilities; track capability.key) {
+          <app-lcars-toggle
+            [formControlName]="capability.key"
+            [label]="capability.label"
+            [ariaLabel]="capability.label"></app-lcars-toggle>
+        }
+      </div>
+
+      <div class="storytime-form-actions">
+        <button
+          class="lcars-btn green"
+          type="submit">
+          Send invitation
+        </button>
+      </div>
+    </form>
+  </section>
 
   @if (isLoading) {
     <app-loading-bar loadingText="Loading collaborators"></app-loading-bar>
@@ -100,80 +99,27 @@
             </p>
           }
 
-          <div class="storytime-collaborators__capabilities">
-            <label>
-              <input
-                type="checkbox"
-                [checked]="collaborator.canEditStory"
-                (change)="
-                  setCapability(
-                    collaborator,
-                    'canEditStory',
-                    !collaborator.canEditStory
-                  )
-                " />
-              Edit the Story’s details
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                [checked]="collaborator.canManageChapters"
-                (change)="
-                  setCapability(
-                    collaborator,
-                    'canManageChapters',
-                    !collaborator.canManageChapters
-                  )
-                " />
-              Write and edit Chapters
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                [checked]="collaborator.canManageCharacters"
-                (change)="
-                  setCapability(
-                    collaborator,
-                    'canManageCharacters',
-                    !collaborator.canManageCharacters
-                  )
-                " />
-              Manage the cast
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                [checked]="collaborator.canManageCrew"
-                (change)="
-                  setCapability(
-                    collaborator,
-                    'canManageCrew',
-                    !collaborator.canManageCrew
-                  )
-                " />
-              Manage the credits
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                [checked]="collaborator.canManageCollaborators"
-                (change)="
-                  setCapability(
-                    collaborator,
-                    'canManageCollaborators',
-                    !collaborator.canManageCollaborators
-                  )
-                " />
-              Invite other collaborators
-            </label>
+          <div class="storytime-toggle-row">
+            @for (capability of capabilities; track capability.key) {
+              <app-lcars-toggle
+                [label]="capability.label"
+                [ariaLabel]="capability.label"
+                [ngModel]="collaborator[capability.key]"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="
+                  setCapability(collaborator, capability.key, $event)
+                "></app-lcars-toggle>
+            }
           </div>
 
-          <button
-            type="button"
-            class="storytime-collaborators__revoke"
-            (click)="revoke(collaborator)">
-            {{ isPending(collaborator) ? 'Withdraw invitation' : 'Remove' }}
-          </button>
+          <div class="storytime-actions">
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto cardinal"
+              (click)="revoke(collaborator)">
+              {{ isPending(collaborator) ? 'Withdraw invitation' : 'Remove' }}
+            </button>
+          </div>
         </li>
       }
     </ul>

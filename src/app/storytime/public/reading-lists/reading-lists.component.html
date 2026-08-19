@@ -1,4 +1,4 @@
-<section class="storytime-reading-lists">
+<section class="storytime-page storytime-reading-lists">
   <h1>Your reading lists</h1>
   <p class="storytime-reading-lists__intro">
     Stories and Arcs you have gathered, in the order you mean them. A list is
@@ -13,37 +13,45 @@
     </p>
   }
 
-  <form
-    class="storytime-reading-lists__form"
-    (ngSubmit)="create()">
-    <label
-      class="storytime-reading-lists__label"
-      for="new-list-name">
-      New list
-    </label>
-    <input
-      id="new-list-name"
-      class="storytime-reading-lists__input"
-      type="text"
-      maxlength="120"
-      placeholder="Klingon favourites"
-      [(ngModel)]="newName"
-      name="newName" />
+  <section class="storytime-section">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Make a list</span>
+    </div>
 
-    <label class="storytime-reading-lists__checkbox">
-      <input
-        type="checkbox"
-        [(ngModel)]="newIsPublic"
-        name="newIsPublic" />
-      Anybody may read it
-    </label>
+    <form
+      class="storytime-panel storytime-form"
+      (ngSubmit)="create()">
+      <div class="form-row">
+        <div class="lcars-input-container perano">
+          <label for="new-list-name">New list</label>
+          <input
+            id="new-list-name"
+            type="text"
+            maxlength="120"
+            placeholder="Klingon favourites"
+            [(ngModel)]="newName"
+            name="newName" />
+        </div>
+      </div>
 
-    <button
-      type="submit"
-      [disabled]="isSaving || !newName.trim()">
-      {{ isSaving ? 'Saving…' : 'Make list' }}
-    </button>
-  </form>
+      <div class="storytime-toggle-row">
+        <app-lcars-toggle
+          label="Anybody may read it"
+          ariaLabel="Anybody may read it"
+          [(ngModel)]="newIsPublic"
+          name="newIsPublic"></app-lcars-toggle>
+      </div>
+
+      <div class="storytime-form-actions">
+        <button
+          class="lcars-btn green"
+          type="submit"
+          [disabled]="isSaving || !newName.trim()">
+          {{ isSaving ? 'Saving…' : 'Make list' }}
+        </button>
+      </div>
+    </form>
+  </section>
 
   @if (isLoading) {
     <p class="storytime-reading-lists__loading">Loading your lists…</p>
@@ -69,10 +77,15 @@
             {{ list.isPublic ? 'Public' : 'Private' }}
           </span>
           <button
+            class="cta-icon delete-icon"
             type="button"
+            title="Delete list"
+            aria-label="Delete list"
             [disabled]="isSaving"
             (click)="remove(list)">
-            Delete
+            <i
+              class="fa-solid fa-trash"
+              aria-hidden="true"></i>
           </button>
         </li>
       }

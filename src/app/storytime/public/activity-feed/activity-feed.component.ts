@@ -16,6 +16,8 @@ import {
 } from 'src/app/models/storytime.models';
 import { FollowService } from '../../follow.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 
 /** What each kind of activity says in a feed. */
 export const ACTIVITY_WORDING: Record<StorytimeActivityType, string> = {
@@ -43,7 +45,12 @@ const PAGE_SIZE = 30;
   selector: 'app-activity-feed',
   templateUrl: './activity-feed.component.html',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    RouterLink,
+    LcarsErrorMessageComponent,
+    LoadingBarComponent,
+  ],
 })
 export class ActivityFeedComponent implements OnInit {
   /** What has happened, newest first. */

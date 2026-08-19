@@ -1,19 +1,25 @@
-<section id="storytime-search-page">
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>Search</span>
-  </div>
+<section
+  id="storytime-search-page"
+  class="storytime-page">
+  <h1>Search</h1>
 
   <form
-    class="storytime-search__form"
+    class="storytime-panel storytime-search__form"
     [formGroup]="form"
     (ngSubmit)="submit()">
-    <label for="storytime-search-q">Search Storytime</label>
-    <input
-      id="storytime-search-q"
-      type="search"
-      formControlName="q"
-      placeholder="A title, a name, a phrase" />
-    <button type="submit">Search</button>
+    <div class="lcars-input-container perano">
+      <label for="storytime-search-q">Search Storytime</label>
+      <input
+        id="storytime-search-q"
+        type="search"
+        formControlName="q"
+        placeholder="A title, a name, a phrase" />
+    </div>
+    <button
+      class="lcars-btn green"
+      type="submit">
+      Search
+    </button>
   </form>
 
   @if (errorMessage) {
@@ -29,7 +35,10 @@
       @for (kind of kinds; track kind.code) {
         <button
           type="button"
-          [class.storytime-search__kind--active]="form.value.type === kind.code"
+          class="lcars-btn lcars-btn-auto storytime-search__filter"
+          [class.sunflower]="form.value.type === kind.code"
+          [class.bluey]="form.value.type !== kind.code"
+          [attr.aria-pressed]="form.value.type === kind.code"
           (click)="filterTo(kind.code)">
           {{ kind.label }}
           @if (countFor(kind.code)) {

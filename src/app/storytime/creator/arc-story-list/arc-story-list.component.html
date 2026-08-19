@@ -1,13 +1,16 @@
-<section id="storytime-arc-stories-page">
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>Stories in this Arc</span>
-  </div>
+<section
+  id="storytime-arc-stories-page"
+  class="storytime-page">
+  <h1>Stories in this Arc</h1>
 
-  <nav class="storytime-arc-stories__actions">
-    <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', arcId]">
+  <nav class="storytime-page-actions">
+    <a
+      class="lcars-btn lcars-btn-auto bluey"
+      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', arcId]">
       Back to the Arc
     </a>
     <a
+      class="lcars-btn lcars-btn-auto sky"
       [routerLink]="[
         '/',
         appRoutes.STORYTIME,
@@ -26,128 +29,180 @@
       [message]="errorMessage"></app-lcars-error-message>
   }
 
-  <p class="storytime-arc-stories__note">
+  <p class="storytime-intro">
     Anything you did not write joins only once its author agrees. Until then the
     invitation sits here, and readers see nothing.
   </p>
 
   @if (invitableStories.length > 0) {
-    <div class="storytime-arc-stories__mine">
-      <h2>Your Stories</h2>
-      <ul>
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Your Stories</span>
+      </div>
+
+      <ul class="storytime-arc-stories">
         @for (story of invitableStories; track story.id) {
-          <li>
-            <span>{{ story.title }}</span>
-            <button
-              type="button"
-              (click)="inviteStory(story.id)">
-              Add to the Arc
-            </button>
+          <li class="storytime-arc-stories__entry">
+            <span class="storytime-arc-stories__title">{{ story.title }}</span>
+
+            <div class="storytime-actions">
+              <button
+                class="lcars-btn lcars-btn-auto green"
+                type="button"
+                (click)="inviteStory(story.id)">
+                Add to the Arc
+              </button>
+            </div>
           </li>
         }
       </ul>
-    </div>
+    </section>
   }
 
-  <form
-    class="storytime-arc-stories__invite"
-    [formGroup]="form"
-    (ngSubmit)="invite()">
-    <label for="arc-story-id">Story ID</label>
-    <input
-      id="arc-story-id"
-      type="text"
-      formControlName="storyId" />
-    <p class="field-hint">
-      To invite somebody else’s Story, paste its identifier. They will be asked
-      before it joins.
-    </p>
-    @if (form.controls.storyId.touched && form.controls.storyId.invalid) {
-      <p class="form-error">Name the Story you want to invite.</p>
-    }
+  <section class="storytime-section">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Invite a Story</span>
+    </div>
 
-    <button type="submit">Send invitation</button>
-  </form>
+    <form
+      class="storytime-panel storytime-form"
+      [formGroup]="form"
+      (ngSubmit)="invite()">
+      <div class="form-row">
+        <div class="lcars-input-container perano storytime-field-full">
+          <label for="arc-story-id">Story ID</label>
+          <input
+            id="arc-story-id"
+            type="text"
+            formControlName="storyId" />
+          <p class="field-hint">
+            To invite somebody else’s Story, paste its identifier. They will be
+            asked before it joins.
+          </p>
+          @if (form.controls.storyId.touched && form.controls.storyId.invalid) {
+            <small class="field-error"
+              >Name the Story you want to invite.</small
+            >
+          }
+        </div>
+      </div>
+
+      <div class="storytime-form-actions">
+        <button
+          class="lcars-btn green"
+          type="submit">
+          Send invitation
+        </button>
+      </div>
+    </form>
+  </section>
 
   @if (isLoading) {
     <app-loading-bar loadingText="Loading the Arc"></app-loading-bar>
   } @else {
-    <h2>Reading order</h2>
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Reading order</span>
+      </div>
 
-    @if (approved.length === 0) {
-      <p class="storytime-empty">
-        Nothing has joined this Arc yet. An Arc needs at least one agreed Story
-        before it can be published.
-      </p>
-    } @else {
-      <ol class="storytime-arc-stories">
-        @for (membership of approved; track membership.id; let index = $index) {
-          <li class="storytime-arc-stories__entry">
-            <span class="storytime-arc-stories__title">{{
-              describe(membership)
-            }}</span>
+      @if (approved.length === 0) {
+        <p class="storytime-empty">
+          Nothing has joined this Arc yet. An Arc needs at least one agreed
+          Story before it can be published.
+        </p>
+      } @else {
+        <ol class="storytime-arc-stories">
+          @for (
+            membership of approved;
+            track membership.id;
+            let index = $index
+          ) {
+            <li class="storytime-arc-stories__entry">
+              <span class="storytime-arc-stories__title">{{
+                describe(membership)
+              }}</span>
 
-            <div class="storytime-arc-stories__order">
-              <button
-                type="button"
-                [disabled]="index === 0"
-                (click)="moveUp(index)"
-                [attr.aria-label]="'Move ' + describe(membership) + ' earlier'">
-                Move up
-              </button>
-              <button
-                type="button"
-                [disabled]="index === approved.length - 1"
-                (click)="moveDown(index)"
-                [attr.aria-label]="'Move ' + describe(membership) + ' later'">
-                Move down
-              </button>
-              <button
-                type="button"
-                (click)="remove(membership)">
-                Remove
-              </button>
-            </div>
-          </li>
-        }
-      </ol>
-    }
-
-    @if (pending.length > 0) {
-      <h2>Waiting on an answer</h2>
-      <ul class="storytime-arc-stories__pending">
-        @for (membership of pending; track membership.id) {
-          <li class="storytime-arc-stories__entry">
-            <span class="storytime-arc-stories__title">{{
-              describe(membership)
-            }}</span>
-            <span class="storytime-arc-stories__status">{{
-              statusLabels[membership.membershipStatus]
-            }}</span>
-
-            <div class="storytime-arc-stories__order">
-              @if (awaitsCurator(membership)) {
+              <div class="storytime-arc-stories__order">
                 <button
+                  class="cta-icon"
                   type="button"
-                  (click)="approve(membership)">
-                  Accept
+                  [disabled]="index === 0"
+                  (click)="moveUp(index)"
+                  [title]="'Move ' + describe(membership) + ' earlier'"
+                  [attr.aria-label]="
+                    'Move ' + describe(membership) + ' earlier'
+                  ">
+                  <i
+                    class="fa-solid fa-caret-up"
+                    aria-hidden="true"></i>
                 </button>
                 <button
+                  class="cta-icon"
                   type="button"
-                  (click)="decline(membership)">
-                  Decline
+                  [disabled]="index === approved.length - 1"
+                  (click)="moveDown(index)"
+                  [title]="'Move ' + describe(membership) + ' later'"
+                  [attr.aria-label]="'Move ' + describe(membership) + ' later'">
+                  <i
+                    class="fa-solid fa-caret-down"
+                    aria-hidden="true"></i>
                 </button>
-              } @else {
                 <button
+                  class="lcars-btn lcars-btn-auto cardinal"
                   type="button"
                   (click)="remove(membership)">
-                  Withdraw invitation
+                  Remove
                 </button>
-              }
-            </div>
-          </li>
-        }
-      </ul>
+              </div>
+            </li>
+          }
+        </ol>
+      }
+    </section>
+
+    @if (pending.length > 0) {
+      <section class="storytime-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Waiting on an answer</span>
+        </div>
+
+        <ul class="storytime-arc-stories">
+          @for (membership of pending; track membership.id) {
+            <li class="storytime-arc-stories__entry">
+              <span class="storytime-arc-stories__title">{{
+                describe(membership)
+              }}</span>
+              <span class="storytime-arc-stories__status">{{
+                statusLabels[membership.membershipStatus]
+              }}</span>
+
+              <div class="storytime-actions">
+                @if (awaitsCurator(membership)) {
+                  <button
+                    class="lcars-btn lcars-btn-auto green"
+                    type="button"
+                    (click)="approve(membership)">
+                    Accept
+                  </button>
+                  <button
+                    class="lcars-btn lcars-btn-auto cardinal"
+                    type="button"
+                    (click)="decline(membership)">
+                    Decline
+                  </button>
+                } @else {
+                  <button
+                    class="lcars-btn lcars-btn-auto cardinal"
+                    type="button"
+                    (click)="remove(membership)">
+                    Withdraw invitation
+                  </button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
     }
   }
 </section>

@@ -2,7 +2,9 @@
   <app-loading-bar loadingText="Loading Arc"></app-loading-bar>
 }
 
-<div id="storytime-arc-editor-page">
+<div
+  id="storytime-arc-editor-page"
+  class="storytime-page">
   <h1>{{ isNew ? 'Create an Arc' : 'Edit Arc' }}</h1>
 
   @if (errorMessage) {
@@ -13,78 +15,165 @@
 
   <form
     [formGroup]="form"
+    class="storytime-form"
     (ngSubmit)="save()">
-    <label for="arc-title">Title</label>
-    <input
-      id="arc-title"
-      type="text"
-      formControlName="title"
-      maxlength="200"
-      required />
-    @if (form.controls['title'].touched && form.controls['title'].invalid) {
-      <p class="field-error">A title is required.</p>
-    }
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Arc Details</span>
+      </div>
 
-    <label for="arc-slug">URL slug</label>
-    <input
-      id="arc-slug"
-      type="text"
-      formControlName="slug"
-      maxlength="220" />
-    <p class="field-hint">
-      Leave blank to build one from the title. Changing it keeps the old address
-      working.
-    </p>
+      <div class="storytime-panel">
+        <div class="form-row">
+          <div class="lcars-input-container perano storytime-field-full">
+            <label for="arc-title">Title</label>
+            <input
+              id="arc-title"
+              type="text"
+              formControlName="title"
+              maxlength="200"
+              required />
+            @if (
+              form.controls['title'].touched && form.controls['title'].invalid
+            ) {
+              <small class="field-error">A title is required.</small>
+            }
+          </div>
+        </div>
 
-    <label for="arc-short-description">Short description</label>
-    <input
-      id="arc-short-description"
-      type="text"
-      formControlName="shortDescription"
-      maxlength="500" />
-    <p class="field-hint">Shown in listings. Required before publishing.</p>
+        <div class="form-row">
+          <div class="lcars-input-container bluey">
+            <label for="arc-slug">URL slug</label>
+            <input
+              id="arc-slug"
+              type="text"
+              formControlName="slug"
+              maxlength="220" />
+            <p class="field-hint">
+              Leave blank to build one from the title. Changing it keeps the old
+              address working.
+            </p>
+          </div>
 
-    <label for="arc-description">Description</label>
-    <textarea
-      id="arc-description"
-      formControlName="description"
-      rows="8"></textarea>
-    <p class="field-hint">
-      Markdown is supported. Links to other sites are not shown.
-    </p>
+          <div class="lcars-input-container gold">
+            <label for="arc-short-description">Short description</label>
+            <input
+              id="arc-short-description"
+              type="text"
+              formControlName="shortDescription"
+              maxlength="500" />
+            <p class="field-hint">
+              Shown in listings. Required before publishing.
+            </p>
+          </div>
+        </div>
 
-    <label for="arc-visibility">Visibility</label>
-    <select
-      id="arc-visibility"
-      formControlName="visibility">
-      @for (visibility of visibilities; track visibility) {
-        <option [value]="visibility">{{ visibilityLabels[visibility] }}</option>
-      }
-    </select>
-    <p class="field-hint">
-      {{ visibilityDescription }}
-    </p>
+        <div class="form-row">
+          <div class="lcars-input-container perano storytime-field-full">
+            <label for="arc-description">Description</label>
+            <textarea
+              id="arc-description"
+              formControlName="description"
+              rows="8"></textarea>
+            <p class="field-hint">
+              Markdown is supported. Links to other sites are not shown.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <label for="arc-language">Language</label>
-    <select
-      id="arc-language"
-      formControlName="languageCode">
-      @for (language of languages; track language.code) {
-        <option [value]="language.code">{{ language.name }}</option>
-      }
-    </select>
-    <p class="field-hint">
-      The language of your own writing about the Arc. The Stories in it keep
-      their own.
-    </p>
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Arc Settings</span>
+      </div>
 
-    <div class="storytime-editor__actions">
+      <div class="storytime-panel">
+        <div class="form-row">
+          <div class="storytime-setting-field">
+            <div class="lcars-select-container bluey">
+              <label
+                class="select-label"
+                for="arc-visibility"
+                >Visibility</label
+              >
+              <select
+                id="arc-visibility"
+                title="Visibility"
+                formControlName="visibility">
+                @for (visibility of visibilities; track visibility) {
+                  <option [value]="visibility">
+                    {{ visibilityLabels[visibility] }}
+                  </option>
+                }
+              </select>
+            </div>
+            <details class="storytime-setting-help">
+              <summary
+                class="storytime-setting-help__trigger"
+                aria-label="Visibility details">
+                <i
+                  class="fas fa-question-circle"
+                  aria-hidden="true"></i>
+              </summary>
+              <div class="storytime-setting-help__popup">
+                @for (option of visibilityOptions; track option.value) {
+                  <p>
+                    <strong>{{ option.label }}</strong>
+                    <span>{{ option.description }}</span>
+                  </p>
+                }
+              </div>
+            </details>
+          </div>
+
+          <div class="storytime-setting-field">
+            <div class="lcars-select-container sunflower">
+              <label
+                class="select-label"
+                for="arc-language"
+                >Language</label
+              >
+              <select
+                id="arc-language"
+                title="Language"
+                formControlName="languageCode">
+                @for (language of languages; track language.code) {
+                  <option [value]="language.code">{{ language.name }}</option>
+                }
+              </select>
+            </div>
+            <details class="storytime-setting-help">
+              <summary
+                class="storytime-setting-help__trigger"
+                aria-label="Language details">
+                <i
+                  class="fas fa-question-circle"
+                  aria-hidden="true"></i>
+              </summary>
+              <div class="storytime-setting-help__popup">
+                <p>
+                  The language of your own writing about the Arc. The Stories in
+                  it keep their own.
+                </p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="storytime-form-actions">
       <button
+        class="lcars-btn green"
         type="submit"
         [disabled]="isSaving">
         {{ isSaving ? 'Saving…' : 'Save' }}
       </button>
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']">Cancel</a>
+      <a
+        class="lcars-btn red"
+        [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']"
+        >Cancel</a
+      >
     </div>
   </form>
 

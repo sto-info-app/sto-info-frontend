@@ -11,6 +11,7 @@
 @if (story) {
   <article
     id="storytime-story-detail-page"
+    class="storytime-page"
     [attr.lang]="story.languageCode">
     @if (story.bannerImageUrl) {
       <img
@@ -30,7 +31,7 @@
 
     <ul class="storytime-story__meta">
       <li>
-        <span class="visually-hidden">Status: </span>
+        <span class="sr-only">Status: </span>
         {{ completionLabels[story.completionState] }}
       </li>
       <li>
@@ -38,7 +39,7 @@
         {{ story.publishedChapterCount === 1 ? 'Chapter' : 'Chapters' }}
       </li>
       <li>
-        <span class="visually-hidden">Rating: </span>
+        <span class="sr-only">Rating: </span>
         {{ story.rating }}
       </li>
     </ul>
@@ -90,7 +91,7 @@
         <div class="storytime-story__progress-actions">
           @if (continueChapter) {
             <a
-              class="storytime-story__continue"
+              class="lcars-btn green storytime-story__continue"
               [routerLink]="[
                 '/',
                 appRoutes.STORYTIME,
@@ -110,6 +111,7 @@
           @for (status of deliberateStatuses; track status) {
             @if (progress.status !== status) {
               <button
+                class="lcars-btn lcars-btn-auto bluey"
                 type="button"
                 (click)="setStatus(status)">
                 {{ readerStatusLabels[status] }}
@@ -119,6 +121,7 @@
 
           @if (progress.readChapters < progress.totalChapters) {
             <button
+              class="lcars-btn lcars-btn-auto sunflower"
               type="button"
               (click)="completeStory()">
               Mark whole Story read
@@ -128,7 +131,7 @@
           @if (hasProgress) {
             <button
               type="button"
-              class="storytime-story__reset"
+              class="lcars-btn lcars-btn-auto sky storytime-story__reset"
               (click)="resetStory()">
               Start again
             </button>
@@ -204,7 +207,7 @@
     } @else {
       <ol class="storytime-chapter-list">
         @for (chapter of chapters; track chapter.id) {
-          <li>
+          <li class="storytime-chapter-list__item">
             <a
               [routerLink]="[
                 '/',
@@ -249,6 +252,7 @@
     @if (isTrackingProgress) {
       <div class="storytime-story__report">
         <button
+          class="lcars-btn lcars-btn-auto cardinal"
           type="button"
           (click)="report()">
           <i

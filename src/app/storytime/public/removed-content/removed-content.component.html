@@ -1,4 +1,6 @@
-<section id="storytime-removed-content-page">
+<section
+  id="storytime-removed-content-page"
+  class="storytime-page">
   <div class="lcars-text-bar small-lcars-bar-gap">
     <span>Removed</span>
   </div>
@@ -11,8 +13,14 @@
   </p>
 
   <nav class="storytime-removed__actions">
-    <a [routerLink]="['/', appRoutes.STORYTIME, 'stories']">Browse Stories</a>
-    <a [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']"
+    <a
+      class="lcars-btn bluey"
+      [routerLink]="['/', appRoutes.STORYTIME, 'stories']"
+      >Browse Stories</a
+    >
+    <a
+      class="lcars-btn sunflower"
+      [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']"
       >Read the content policy</a
     >
   </nav>

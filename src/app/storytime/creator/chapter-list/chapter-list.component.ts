@@ -11,7 +11,11 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
-import { ChapterStatus, ManagedChapter } from 'src/app/models/storytime.models';
+import {
+  ChapterStatus,
+  ManagedChapter,
+  StorytimeModerationStatus,
+} from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -64,6 +68,16 @@ export class ChapterListComponent implements OnInit {
   ngOnInit(): void {
     this.storyId = this._route.snapshot.paramMap.get('storyId') ?? '';
     this.load();
+  }
+
+  /**
+   * Whether a Chapter has been taken down by an administrator.
+   *
+   * @param chapter - The Chapter.
+   * @returns True when it has been removed.
+   */
+  isRemoved(chapter: ManagedChapter): boolean {
+    return chapter.moderationStatus === StorytimeModerationStatus.REMOVED;
   }
 
   /**

@@ -1,20 +1,26 @@
-<section id="storytime-reader-library-page">
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>Your Library</span>
-  </div>
+<section
+  id="storytime-reader-library-page"
+  class="storytime-page">
+  <h1>Your Library</h1>
 
   <nav
     class="storytime-library__filters"
     aria-label="Filter by status">
     <button
+      class="lcars-btn lcars-btn-auto"
       type="button"
+      [class.sunflower]="activeStatus === null"
+      [class.bluey]="activeStatus !== null"
       [attr.aria-pressed]="activeStatus === null"
       (click)="filterBy(null)">
       Everything
     </button>
     @for (status of statuses; track status) {
       <button
+        class="lcars-btn lcars-btn-auto"
         type="button"
+        [class.sunflower]="activeStatus === status"
+        [class.bluey]="activeStatus !== status"
         [attr.aria-pressed]="activeStatus === status"
         (click)="filterBy(status)">
         {{ statusLabels[status] }}

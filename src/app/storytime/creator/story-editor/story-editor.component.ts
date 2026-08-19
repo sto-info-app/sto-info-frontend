@@ -84,9 +84,6 @@ export class StoryEditorComponent implements OnInit {
   /** Rating labels. */
   readonly ratingLabels = CONTENT_RATING_LABELS;
 
-  /** Rating descriptions. */
-  readonly ratingDescriptions = CONTENT_RATING_DESCRIPTIONS;
-
   /** Rating choices and their creator-facing explanations. */
   readonly ratingOptions = Object.values(ContentRating).map(rating => ({
     value: rating,
@@ -100,9 +97,6 @@ export class StoryEditorComponent implements OnInit {
   /** Completion labels. */
   readonly completionLabels = COMPLETION_STATE_LABELS;
 
-  /** Completion descriptions. */
-  readonly completionDescriptions = COMPLETION_STATE_DESCRIPTIONS;
-
   /** Completion choices and their creator-facing explanations. */
   readonly completionOptions = Object.values(CompletionState).map(state => ({
     value: state,
@@ -115,9 +109,6 @@ export class StoryEditorComponent implements OnInit {
 
   /** Visibility labels. */
   readonly visibilityLabels = VISIBILITY_LABELS;
-
-  /** Explanations of what each visibility actually means. */
-  readonly visibilityDescriptions = VISIBILITY_DESCRIPTIONS;
 
   /** Visibility choices and their creator-facing explanations. */
   readonly visibilityOptions = Object.values(StorytimeVisibility).map(
@@ -179,21 +170,6 @@ export class StoryEditorComponent implements OnInit {
    */
   get isNew(): boolean {
     return this.story === null;
-  }
-
-  /**
-   * Explains what the currently selected visibility actually means.
-   *
-   * Resolved here rather than in the template because a form control's value is
-   * untyped, and indexing the description map with it does not compile.
-   *
-   * @returns The explanation for the selected visibility.
-   */
-  get visibilityDescription(): string {
-    const selected = this.form.controls['visibility']
-      .value as StorytimeVisibility;
-
-    return this.visibilityDescriptions[selected];
   }
 
   /**

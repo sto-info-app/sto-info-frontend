@@ -1,4 +1,4 @@
-<section class="storytime-reading-list">
+<section class="storytime-page storytime-reading-list">
   @if (errorMessage) {
     <p
       class="storytime-reading-list__error"
@@ -26,6 +26,7 @@
           }}
         </span>
         <button
+          class="lcars-btn lcars-btn-auto bluey"
           type="button"
           [disabled]="isSaving"
           (click)="toggleVisibility()">
@@ -66,22 +67,37 @@
             @if (isMine) {
               <div class="storytime-reading-list__item-controls">
                 <button
+                  class="cta-icon"
                   type="button"
+                  title="Move up"
+                  aria-label="Move up"
                   [disabled]="isSaving || first"
                   (click)="move(item, -1)">
-                  Move up
+                  <i
+                    class="fa-solid fa-caret-up"
+                    aria-hidden="true"></i>
                 </button>
                 <button
+                  class="cta-icon"
                   type="button"
+                  title="Move down"
+                  aria-label="Move down"
                   [disabled]="isSaving || last"
                   (click)="move(item, 1)">
-                  Move down
+                  <i
+                    class="fa-solid fa-caret-down"
+                    aria-hidden="true"></i>
                 </button>
                 <button
+                  class="cta-icon delete-icon"
                   type="button"
+                  title="Remove from the list"
+                  aria-label="Remove from the list"
                   [disabled]="isSaving"
                   (click)="removeItem(item)">
-                  Remove
+                  <i
+                    class="fa-solid fa-trash"
+                    aria-hidden="true"></i>
                 </button>
               </div>
             }

@@ -21,7 +21,10 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { TagService } from '../../tag.service';
-import { TAG_CATEGORY_LABELS } from '../../storytime.constants';
+import {
+  TAG_CATEGORY_DESCRIPTIONS,
+  TAG_CATEGORY_LABELS,
+} from '../../storytime.constants';
 
 /**
  * The Storytime tag vocabulary, as an administrator manages it.
@@ -60,6 +63,21 @@ export class TagAdminComponent implements OnInit {
 
   /** How each category is named. */
   readonly categoryLabels = TAG_CATEGORY_LABELS;
+
+  /**
+   * The categories with the explanation shown beside the chooser.
+   *
+   * A select's container is a solid colour, so hint text inside one cannot be
+   * read; the explanations go in the help popup beside it instead, the same way
+   * the Story editor explains its ratings.
+   */
+  readonly categoryOptions = Object.values(StorytimeTagCategory).map(
+    category => ({
+      value: category,
+      label: TAG_CATEGORY_LABELS[category],
+      description: TAG_CATEGORY_DESCRIPTIONS[category],
+    }),
+  );
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;

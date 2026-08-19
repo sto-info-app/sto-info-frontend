@@ -1,7 +1,7 @@
-<section id="storytime-character-editor-page" class="storytime-editor-page">
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>{{ isCreating ? 'Add a Character' : 'Edit Character' }}</span>
-  </div>
+<section
+  id="storytime-character-editor-page"
+  class="storytime-page">
+  <h1>{{ isCreating ? 'Add a Character' : 'Edit Character' }}</h1>
 
   @if (errorMessage) {
     <app-lcars-error-message
@@ -14,137 +14,207 @@
   } @else {
     <form
       [formGroup]="form"
-      class="storytime-editor-form"
+      class="storytime-form"
       (ngSubmit)="save()">
-      <label for="character-name">Name</label>
-      <input
-        id="character-name"
-        type="text"
-        formControlName="name"
-        maxlength="200" />
-      @if (form.controls.name.touched && form.controls.name.invalid) {
-        <p class="form-error">A Character needs a name.</p>
-      }
+      <section class="storytime-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Who they are</span>
+        </div>
 
-      <label for="character-slug">URL slug</label>
-      <input
-        id="character-slug"
-        type="text"
-        formControlName="slug"
-        maxlength="220"
-        placeholder="Generated from the name when left blank" />
+        <div class="storytime-panel">
+          <div class="form-row">
+            <div class="lcars-input-container perano">
+              <label for="character-name">Name</label>
+              <input
+                id="character-name"
+                type="text"
+                formControlName="name"
+                maxlength="200" />
+              @if (form.controls.name.touched && form.controls.name.invalid) {
+                <small class="field-error">A Character needs a name.</small>
+              }
+            </div>
 
-      <label for="character-short-bio">One-line description</label>
-      <input
-        id="character-short-bio"
-        type="text"
-        formControlName="shortBio"
-        maxlength="500" />
+            <div class="lcars-input-container bluey">
+              <label for="character-slug">URL slug</label>
+              <input
+                id="character-slug"
+                type="text"
+                formControlName="slug"
+                maxlength="220"
+                placeholder="Generated from the name when left blank" />
+            </div>
+          </div>
 
-      <label for="character-biography">Biography</label>
-      <textarea
-        id="character-biography"
-        rows="10"
-        formControlName="biographySource"></textarea>
+          <div class="form-row">
+            <div class="lcars-input-container gold storytime-field-full">
+              <label for="character-short-bio">One-line description</label>
+              <input
+                id="character-short-bio"
+                type="text"
+                formControlName="shortBio"
+                maxlength="500" />
+              <p class="field-hint">Shown beside them in the cast list.</p>
+            </div>
+          </div>
 
-      <label for="character-species">Species</label>
-      <input
-        id="character-species"
-        type="text"
-        formControlName="species"
-        maxlength="100" />
+          <div class="form-row">
+            <div class="lcars-input-container perano storytime-field-full">
+              <label for="character-biography">Biography</label>
+              <textarea
+                id="character-biography"
+                rows="10"
+                formControlName="biographySource"></textarea>
+              <p class="field-hint">
+                Markdown is supported. Links to other sites are not shown.
+              </p>
+            </div>
+          </div>
 
-      <label for="character-faction">Faction</label>
-      <input
-        id="character-faction"
-        type="text"
-        formControlName="faction"
-        maxlength="100" />
+          <div class="storytime-toggle-row">
+            <app-lcars-toggle
+              formControlName="isPrimary"
+              label="One of the Story’s main Characters"
+              ariaLabel="One of the Story’s main Characters"></app-lcars-toggle>
+          </div>
+        </div>
+      </section>
 
-      <label for="character-rank">Rank</label>
-      <input
-        id="character-rank"
-        type="text"
-        formControlName="rank"
-        maxlength="100" />
+      <section class="storytime-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Service record</span>
+        </div>
 
-      <label for="character-occupation">Occupation</label>
-      <input
-        id="character-occupation"
-        type="text"
-        formControlName="occupation"
-        maxlength="150" />
+        <div class="storytime-panel">
+          <div class="form-row">
+            <div class="lcars-input-container sky">
+              <label for="character-species">Species</label>
+              <input
+                id="character-species"
+                type="text"
+                formControlName="species"
+                maxlength="100" />
+            </div>
 
-      <label for="character-affiliation">Affiliation</label>
-      <input
-        id="character-affiliation"
-        type="text"
-        formControlName="affiliation"
-        maxlength="200" />
+            <div class="lcars-input-container sky">
+              <label for="character-faction">Faction</label>
+              <input
+                id="character-faction"
+                type="text"
+                formControlName="faction"
+                maxlength="100" />
+            </div>
 
-      <label for="character-ship">Ship or posting</label>
-      <input
-        id="character-ship"
-        type="text"
-        formControlName="shipAssignment"
-        maxlength="200" />
+            <div class="lcars-input-container sky">
+              <label for="character-rank">Rank</label>
+              <input
+                id="character-rank"
+                type="text"
+                formControlName="rank"
+                maxlength="100" />
+            </div>
+          </div>
 
-      <label for="character-portrait">Portrait image ID</label>
-      <input
-        id="character-portrait"
-        type="text"
-        formControlName="portraitImageId"
-        maxlength="100" />
+          <div class="form-row">
+            <div class="lcars-input-container cool">
+              <label for="character-occupation">Occupation</label>
+              <input
+                id="character-occupation"
+                type="text"
+                formControlName="occupation"
+                maxlength="150" />
+            </div>
 
-      <label for="character-portrait-alt">Portrait description</label>
-      <input
-        id="character-portrait-alt"
-        type="text"
-        formControlName="portraitImageAlt"
-        maxlength="300"
-        placeholder="Required when a portrait is set" />
+            <div class="lcars-input-container cool">
+              <label for="character-affiliation">Affiliation</label>
+              <input
+                id="character-affiliation"
+                type="text"
+                formControlName="affiliation"
+                maxlength="200" />
+            </div>
 
-      <fieldset class="storytime-character-editor__traits">
-        <legend>Traits</legend>
+            <div class="lcars-input-container cool">
+              <label for="character-ship">Ship or posting</label>
+              <input
+                id="character-ship"
+                type="text"
+                formControlName="shipAssignment"
+                maxlength="200" />
+            </div>
+          </div>
+        </div>
+      </section>
 
-        @for (trait of traits.controls; track $index; let index = $index) {
-          <div class="storytime-character-editor__trait">
-            <label
-              class="visually-hidden"
-              [attr.for]="'character-trait-' + index"
-              >Trait {{ index + 1 }}</label
-            >
-            <input
-              [id]="'character-trait-' + index"
-              type="text"
-              maxlength="60"
-              [formControl]="trait" />
+      <section class="storytime-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Portrait</span>
+        </div>
+
+        <div class="storytime-panel">
+          <div class="form-row">
+            <div class="lcars-input-container tangerine">
+              <label for="character-portrait">Portrait image ID</label>
+              <input
+                id="character-portrait"
+                type="text"
+                formControlName="portraitImageId"
+                maxlength="100" />
+            </div>
+
+            <div class="lcars-input-container tangerine">
+              <label for="character-portrait-alt">Portrait description</label>
+              <input
+                id="character-portrait-alt"
+                type="text"
+                formControlName="portraitImageAlt"
+                maxlength="300"
+                placeholder="Required when a portrait is set" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="storytime-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Traits</span>
+        </div>
+
+        <div class="storytime-panel">
+          @for (trait of traits.controls; track $index; let index = $index) {
+            <div class="storytime-trait-row">
+              <div class="lcars-input-container violet">
+                <label [attr.for]="'character-trait-' + index"
+                  >Trait {{ index + 1 }}</label
+                >
+                <input
+                  [id]="'character-trait-' + index"
+                  type="text"
+                  maxlength="60"
+                  [formControl]="trait" />
+              </div>
+              <button
+                class="lcars-btn lcars-btn-auto red"
+                type="button"
+                (click)="removeTrait(index)">
+                Remove
+              </button>
+            </div>
+          }
+
+          <div class="storytime-actions">
             <button
-              class="lcars-btn red"
+              class="lcars-btn lcars-btn-auto sunflower"
               type="button"
-              (click)="removeTrait(index)">
-              Remove
+              [disabled]="traits.length >= maxTraits"
+              (click)="addTrait()">
+              Add a trait
             </button>
           </div>
-        }
+        </div>
+      </section>
 
-        <button
-          class="lcars-btn sunflower"
-          type="button"
-          [disabled]="traits.length >= maxTraits"
-          (click)="addTrait()">
-          Add a trait
-        </button>
-      </fieldset>
-
-      <label class="storytime-character-editor__primary">
-        <input
-          type="checkbox"
-          formControlName="isPrimary" />
-        One of the Story’s main Characters
-      </label>
-
-      <div class="storytime-character-editor__actions">
+      <div class="storytime-form-actions">
         <button
           class="lcars-btn green"
           type="submit"

@@ -11,6 +11,7 @@
 @if (chapter) {
   <article
     id="storytime-chapter-reader-page"
+    class="storytime-page"
     [attr.lang]="chapter.languageCode">
     <nav
       class="storytime-chapter__breadcrumb"
@@ -49,7 +50,7 @@
       <p class="storytime-chapter__resume">
         <button
           type="button"
-          class="storytime-chapter__resume-button"
+          class="lcars-btn lcars-btn-auto sunflower storytime-chapter__resume-button"
           (click)="resume()">
           <i
             class="fa-solid fa-bookmark"
@@ -89,7 +90,9 @@
       <div class="storytime-chapter__progress">
         <button
           type="button"
-          class="storytime-chapter__read-toggle"
+          class="lcars-btn lcars-btn-auto storytime-chapter__read-toggle"
+          [class.green]="isRead"
+          [class.bluey]="!isRead"
           [attr.aria-pressed]="isRead"
           (click)="setRead(!isRead)">
           <i
@@ -126,7 +129,7 @@
           <i
             class="fa-solid fa-chevron-left"
             aria-hidden="true"></i>
-          <span class="visually-hidden">Previous Chapter: </span>
+          <span class="sr-only">Previous Chapter: </span>
           {{ previous.title }}
         </a>
       }
@@ -141,7 +144,7 @@
             'chapters',
             next.slug,
           ]">
-          <span class="visually-hidden">Next Chapter: </span>
+          <span class="sr-only">Next Chapter: </span>
           {{ next.title }}
           <i
             class="fa-solid fa-chevron-right"

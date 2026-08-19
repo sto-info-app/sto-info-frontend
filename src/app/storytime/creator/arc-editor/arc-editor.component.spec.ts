@@ -117,12 +117,14 @@ describe('ArcEditorComponent', () => {
       );
     });
 
-    it('explains what the chosen visibility means', () => {
+    it('explains what every visibility means', () => {
       render();
 
-      expect(fixture.componentInstance.visibilityDescription).toContain(
-        'only by you',
-      );
+      expect(
+        fixture.componentInstance.visibilityOptions.map(
+          option => option.description,
+        ),
+      ).toContain('Readable only by you.');
     });
   });
 

@@ -27,6 +27,7 @@ import {
   StorytimeLanguage,
 } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
@@ -52,6 +53,7 @@ import { StorytimeService } from '../../storytime.service';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsToggleComponent,
   ],
 })
 export class ChapterEditorComponent implements OnInit {

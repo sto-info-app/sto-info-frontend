@@ -78,8 +78,14 @@ export class ArcEditorComponent implements OnInit {
   /** Visibility labels. */
   readonly visibilityLabels = VISIBILITY_LABELS;
 
-  /** Explanations of what each visibility actually means. */
-  readonly visibilityDescriptions = VISIBILITY_DESCRIPTIONS;
+  /** Visibility choices and their creator-facing explanations. */
+  readonly visibilityOptions = Object.values(StorytimeVisibility).map(
+    visibility => ({
+      value: visibility,
+      label: VISIBILITY_LABELS[visibility],
+      description: VISIBILITY_DESCRIPTIONS[visibility],
+    }),
+  );
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
@@ -130,21 +136,6 @@ export class ArcEditorComponent implements OnInit {
    */
   get isNew(): boolean {
     return this.arc === null;
-  }
-
-  /**
-   * Explains what the currently selected visibility actually means.
-   *
-   * Resolved here rather than in the template because a form control's value is
-   * untyped, and indexing the description map with it does not compile.
-   *
-   * @returns The explanation for the selected visibility.
-   */
-  get visibilityDescription(): string {
-    const selected = this.form.controls['visibility']
-      .value as StorytimeVisibility;
-
-    return this.visibilityDescriptions[selected];
   }
 
   /**

@@ -1,7 +1,7 @@
-<section id="storytime-spotlight-admin-page">
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>Spotlight</span>
-  </div>
+<section
+  id="storytime-spotlight-admin-page"
+  class="storytime-page">
+  <h1>Spotlight</h1>
 
   @if (errorMessage) {
     <app-lcars-error-message
@@ -9,14 +9,13 @@
       [message]="errorMessage"></app-lcars-error-message>
   }
 
-  <a
-    class="storytime-dashboard__new"
-    [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'spotlight', 'new']">
-    <i
-      class="fa-solid fa-plus"
-      aria-hidden="true"></i>
-    Draft a selection
-  </a>
+  <div class="storytime-page-actions">
+    <a
+      class="lcars-btn lcars-btn-auto green"
+      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'spotlight', 'new']">
+      Draft a selection
+    </a>
+  </div>
 
   @if (isLoading) {
     <app-loading-bar loadingText="Loading Spotlight entries"></app-loading-bar>
@@ -43,7 +42,7 @@
 
           <ul class="storytime-spotlight-admin__meta">
             <li>
-              <span class="visually-hidden">State: </span>
+              <span class="sr-only">State: </span>
               {{ stateOf(entry) }}
             </li>
             <li>{{ titleFor(entry) }}</li>
@@ -58,21 +57,24 @@
             <li>Priority {{ entry.displayPriority }}</li>
           </ul>
 
-          <div class="storytime-spotlight-admin__actions">
+          <div class="storytime-actions">
             @if (entry.isPublished) {
               <button
+                class="lcars-btn lcars-btn-auto cardinal"
                 type="button"
                 (click)="unpublish(entry)">
                 Withdraw
               </button>
             } @else {
               <button
+                class="lcars-btn lcars-btn-auto green"
                 type="button"
                 (click)="publish(entry)">
                 Publish
               </button>
             }
             <button
+              class="lcars-btn lcars-btn-auto red"
               type="button"
               (click)="remove(entry)">
               Delete

@@ -10,8 +10,10 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { StorytimeTag } from 'src/app/models/storytime.models';
+import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { TagService } from '../../tag.service';
 import { TAG_CATEGORY_LABELS } from '../../storytime.constants';
@@ -30,7 +32,7 @@ import { TAG_CATEGORY_LABELS } from '../../storytime.constants';
   selector: 'app-tag-picker',
   templateUrl: './tag-picker.component.html',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, LcarsToggleComponent],
 })
 export class TagPickerComponent implements OnInit {
   /** What is being tagged. */

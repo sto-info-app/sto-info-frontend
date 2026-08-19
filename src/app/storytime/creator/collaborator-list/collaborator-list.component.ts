@@ -8,7 +8,12 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, finalize } from 'rxjs';
@@ -17,11 +22,15 @@ import {
   Collaborator,
 } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CrewService } from '../../crew.service';
-import { COLLABORATION_STATUS_LABELS } from '../../storytime.constants';
+import {
+  COLLABORATION_STATUS_LABELS,
+  COLLABORATOR_CAPABILITIES,
+} from '../../storytime.constants';
 
 /**
  * Who is helping write one of the creator's Stories.
@@ -35,10 +44,12 @@ import { COLLABORATION_STATUS_LABELS } from '../../storytime.constants';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsToggleComponent,
   ],
 })
 export class CollaboratorListComponent implements OnInit {
@@ -56,6 +67,15 @@ export class CollaboratorListComponent implements OnInit {
 
   /** Status labels, so a raw enum value is never shown. */
   readonly statusLabels = COLLABORATION_STATUS_LABELS;
+
+  /**
+   * The capabilities an invitation may grant.
+   *
+   * Read from the constant rather than written out in the template, so the
+   * invitation form and the switches on an existing collaborator cannot end up
+   * offering different things.
+   */
+  readonly capabilities = COLLABORATOR_CAPABILITIES;
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;

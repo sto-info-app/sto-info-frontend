@@ -17,7 +17,7 @@
 
   <ul class="storytime-story-card__meta">
     <li>
-      <span class="visually-hidden">Content rating: </span>
+      <span class="sr-only">Content rating: </span>
       @if (needsRatingWarning) {
         <i
           class="fa-solid fa-triangle-exclamation"
@@ -26,7 +26,7 @@
       {{ ratingLabels[story.contentRating] }}
     </li>
     <li>
-      <span class="visually-hidden">Status: </span>
+      <span class="sr-only">Status: </span>
       {{ completionLabels[story.completionState] }}
     </li>
     <li>

@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { ReadingList } from 'src/app/models/storytime.models';
+import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ReadingListService } from '../../reading-list.service';
 
@@ -25,7 +26,7 @@ import { ReadingListService } from '../../reading-list.service';
   selector: 'app-reading-lists',
   templateUrl: './reading-lists.component.html',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, LcarsToggleComponent],
 })
 export class ReadingListsComponent implements OnInit {
   /** The reader's lists, most recently touched first. */

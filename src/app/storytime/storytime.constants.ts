@@ -215,8 +215,14 @@ export const REPORT_REASONS = [
   ...CONTENT_POLICY_RULES.map(rule => ({
     code: rule.code,
     label: rule.title,
+    description: rule.summary,
   })),
-  { code: 'OTHER', label: 'Something else' },
+  {
+    code: 'OTHER',
+    label: 'Something else',
+    description:
+      'Anything the categories above do not cover. Say what is wrong in your own words.',
+  },
 ];
 
 /**
@@ -235,6 +241,26 @@ export const TAG_CATEGORY_LABELS: Record<string, string> = {
   CONTENT_WARNING: 'Content warning',
   FORMAT: 'Format',
   CONTINUITY: 'Continuity',
+};
+
+/**
+ * What each tag category is for.
+ *
+ * Shown beside the category chooser rather than under it: a select's own
+ * container is a solid colour, so a line of hint text inside one is a line
+ * nobody can read. The same reason the content rating and visibility choices
+ * explain themselves through a help popup.
+ */
+export const TAG_CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  FACTION: 'Which power the Story belongs to: Federation, Klingon and so on.',
+  ERA: 'When the Story is set, by the period of Star Trek it belongs to.',
+  GENRE: 'The shape of the Story: mystery, romance, war, exploration.',
+  TONE: 'How the Story reads: light, bleak, comic, hopeful.',
+  THEME: 'What the Story is about underneath its plot.',
+  SPECIES: 'A species the Story is substantially about.',
+  CONTENT_WARNING: 'Something a reader may want to know before they start.',
+  FORMAT: 'How the Story is written: log entries, letters, a script.',
+  CONTINUITY: 'Which continuity the Story treats as true.',
 };
 
 /**
@@ -378,6 +404,24 @@ export const VISIBILITY_LABELS = {
   PUBLIC: 'Public',
   UNLISTED: 'Unlisted',
   PRIVATE: 'Private',
+} as const;
+
+/**
+ * The icon standing for each visibility, on a creator's own list of works.
+ *
+ * A row carries its visibility as a mark rather than a word, the way a captain
+ * card carries its recruit type: the list is scanned rather than read, and
+ * three shapes are told apart faster than three words. Each is paired with its
+ * label for anyone not reading the screen.
+ *
+ * Read as a set: seen by anyone, reached by link, or locked. The site's Font
+ * Awesome kit is subsetted, so an icon has to be one it actually carries —
+ * `fa-globe` for instance is not in it, and renders as an empty circle.
+ */
+export const VISIBILITY_ICONS = {
+  PUBLIC: 'fa-eye',
+  UNLISTED: 'fa-link',
+  PRIVATE: 'fa-lock',
 } as const;
 
 /**

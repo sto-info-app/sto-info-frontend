@@ -9,7 +9,12 @@ import {
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, finalize } from 'rxjs';
 import {
@@ -17,11 +22,15 @@ import {
   CollaborationInvitationStatus,
 } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
-import { COLLABORATION_STATUS_LABELS } from '../../storytime.constants';
+import {
+  ARC_COLLABORATOR_CAPABILITIES,
+  COLLABORATION_STATUS_LABELS,
+} from '../../storytime.constants';
 
 /**
  * Who is helping curate an Arc.
@@ -36,10 +45,12 @@ import { COLLABORATION_STATUS_LABELS } from '../../storytime.constants';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsToggleComponent,
   ],
 })
 export class ArcCollaboratorListComponent implements OnInit {
@@ -57,6 +68,15 @@ export class ArcCollaboratorListComponent implements OnInit {
 
   /** Status labels, so a raw enum value is never shown. */
   readonly statusLabels = COLLABORATION_STATUS_LABELS;
+
+  /**
+   * The capabilities an Arc invitation may grant.
+   *
+   * Read from the constant rather than written out in the template, so the
+   * invitation form and the switches on an existing collaborator cannot end up
+   * offering different things.
+   */
+  readonly capabilities = ARC_COLLABORATOR_CAPABILITIES;
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;

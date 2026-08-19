@@ -19,6 +19,7 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import {
   PUBLICATION_STATUS_LABELS,
+  VISIBILITY_ICONS,
   VISIBILITY_LABELS,
 } from '../../storytime.constants';
 
@@ -55,6 +56,9 @@ export class ArcDashboardComponent implements OnInit {
 
   /** Visibility labels. */
   readonly visibilityLabels = VISIBILITY_LABELS;
+
+  /** The mark standing for each visibility on an Arc's title bar. */
+  readonly visibilityIcons = VISIBILITY_ICONS;
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;

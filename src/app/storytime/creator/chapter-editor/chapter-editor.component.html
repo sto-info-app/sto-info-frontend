@@ -2,8 +2,30 @@
   <app-loading-bar loadingText="Loading Chapter"></app-loading-bar>
 }
 
-<div id="storytime-chapter-editor-page" class="storytime-editor-page">
+<div
+  id="storytime-chapter-editor-page"
+  class="storytime-page">
   <h1>{{ isNew ? 'Write a Chapter' : 'Edit Chapter' }}</h1>
+
+  <nav class="storytime-page-actions">
+    <a
+      class="lcars-btn lcars-btn-auto bluey"
+      [routerLink]="[
+        '/',
+        appRoutes.STORYTIME,
+        'manage',
+        'stories',
+        storyId,
+        'chapters',
+      ]">
+      Back to the Chapters
+    </a>
+    <a
+      class="lcars-btn lcars-btn-auto sky"
+      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', storyId]">
+      Back to the Story
+    </a>
+  </nav>
 
   @if (errorMessage) {
     <app-lcars-error-message
@@ -12,95 +34,156 @@
   }
 
   <form
+    id="chapter-editor-form"
     [formGroup]="form"
-    class="storytime-editor-form"
+    class="storytime-form"
     (ngSubmit)="save()">
-    <div class="lcars-text-bar small-lcars-bar-gap"><span>Chapter Details</span></div>
-
-    <div class="lcars-input-container perano">
-      <label for="chapter-title">Title</label>
-      <input id="chapter-title" type="text" formControlName="title" maxlength="200" required />
-      @if (form.controls['title'].touched && form.controls['title'].invalid) {
-        <p class="field-error">A title is required.</p>
-      }
-    </div>
-    <div class="lcars-input-container bluey">
-      <label for="chapter-slug">URL slug</label>
-      <input id="chapter-slug" type="text" formControlName="slug" maxlength="220" />
-      <p class="field-hint">Leave blank to build one from the title. Changing it keeps the old address working.</p>
-    </div>
-    <div class="lcars-input-container sunflower">
-      <label for="chapter-synopsis">Synopsis</label>
-      <textarea id="chapter-synopsis" formControlName="synopsis" rows="3" maxlength="1000"></textarea>
-      <p class="field-hint">Shown in the Chapter list.</p>
-    </div>
-    <div class="lcars-input-container perano field-full">
-      <label for="chapter-content">Chapter</label>
-      <textarea id="chapter-content" formControlName="contentSource" rows="24"></textarea>
-      <p class="field-hint">Markdown is supported. Links to other sites are not shown, and a Chapter needs some content before it can be published.</p>
-    </div>
-
-    <div class="lcars-select-container gold">
-      <label class="select-label" for="chapter-language">Language</label>
-      <select id="chapter-language" title="Language" formControlName="languageCode">
-      <option value="">Same as the Story</option>
-      @for (language of languages; track language.code) {
-        <option [value]="language.code">{{ language.name }}</option>
-      }
-      </select>
-      <p class="field-hint">Only set this when the Chapter is written in a different language from the rest of the Story.</p>
-    </div>
-
-    <div class="storytime-editor__actions">
-      <button
-        class="lcars-btn green"
-        type="submit"
-        [disabled]="isSaving">
-        {{ isSaving ? 'Saving…' : 'Save' }}
-      </button>
-      <a
-        class="lcars-btn red"
-        [routerLink]="[
-          '/',
-          appRoutes.STORYTIME,
-          'manage',
-          'stories',
-          storyId,
-          'chapters',
-        ]"
-        >Cancel</a
-      >
-    </div>
-  </form>
-
-  @if (!isNew) {
-    <section class="storytime-editor__media">
+    <section class="storytime-section">
       <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Videos</span>
+        <span>Chapter Details</span>
       </div>
 
+      <div class="storytime-panel">
+        <div class="form-row">
+          <div class="lcars-input-container perano storytime-field-full">
+            <label for="chapter-title">Title</label>
+            <input
+              id="chapter-title"
+              type="text"
+              formControlName="title"
+              maxlength="200"
+              required />
+            @if (
+              form.controls['title'].touched && form.controls['title'].invalid
+            ) {
+              <small class="field-error">A title is required.</small>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container bluey">
+            <label for="chapter-slug">URL slug</label>
+            <input
+              id="chapter-slug"
+              type="text"
+              formControlName="slug"
+              maxlength="220" />
+            <p class="field-hint">
+              Leave blank to build one from the title. Changing it keeps the old
+              address working.
+            </p>
+          </div>
+
+          <div class="storytime-setting-field">
+            <div class="lcars-select-container sunflower">
+              <label
+                class="select-label"
+                for="chapter-language"
+                >Language</label
+              >
+              <select
+                id="chapter-language"
+                title="Language"
+                formControlName="languageCode">
+                <option value="">Same as the Story</option>
+                @for (language of languages; track language.code) {
+                  <option [value]="language.code">{{ language.name }}</option>
+                }
+              </select>
+            </div>
+            <details class="storytime-setting-help">
+              <summary
+                class="storytime-setting-help__trigger"
+                aria-label="Language details">
+                <i
+                  class="fas fa-question-circle"
+                  aria-hidden="true"></i>
+              </summary>
+              <div class="storytime-setting-help__popup">
+                <p>
+                  Only set this when the Chapter is written in a different
+                  language from the rest of the Story.
+                </p>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container gold storytime-field-full">
+            <label for="chapter-synopsis">Synopsis</label>
+            <textarea
+              id="chapter-synopsis"
+              formControlName="synopsis"
+              rows="3"
+              maxlength="1000"></textarea>
+            <p class="field-hint">Shown in the Chapter list.</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container perano storytime-field-full">
+            <label for="chapter-content">Chapter</label>
+            <textarea
+              id="chapter-content"
+              formControlName="contentSource"
+              rows="24"></textarea>
+            <p class="field-hint">
+              Markdown is supported. Links to other sites are not shown, and a
+              Chapter needs some content before it can be published.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </form>
+
+  <section class="storytime-section">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Videos</span>
+    </div>
+
+    <div class="storytime-panel">
       @if (mediaErrorMessage) {
         <app-lcars-error-message
           title="Video unavailable"
           [message]="mediaErrorMessage"></app-lcars-error-message>
       }
 
-      <label for="chapter-media-url">Paste a YouTube link</label>
-      <input
-        id="chapter-media-url"
-        type="url"
-        [(ngModel)]="mediaUrl"
-        [ngModelOptions]="{ standalone: true }"
-        placeholder="https://www.youtube.com/watch?v=..." />
-      <p class="field-hint">
-        Only the video is saved, never the link. Readers see a still image until
-        they press play, so nothing loads from YouTube before then.
-      </p>
-      <button
-        type="button"
-        (click)="addMedia()">
-        Add video
-      </button>
+      <div class="form-row">
+        <div class="lcars-input-container cool storytime-field-full">
+          <label for="chapter-media-url">Paste a YouTube link</label>
+          <input
+            id="chapter-media-url"
+            type="url"
+            [(ngModel)]="mediaUrl"
+            [ngModelOptions]="{ standalone: true }"
+            [disabled]="isNew"
+            placeholder="https://www.youtube.com/watch?v=..." />
+          @if (isNew) {
+            <p class="field-hint">
+              A video hangs off the Chapter it plays in, so save the Chapter
+              once and this is ready to use.
+            </p>
+          } @else {
+            <p class="field-hint">
+              Only the video is saved, never the link. Readers see a still image
+              until they press play, so nothing loads from YouTube before then.
+            </p>
+          }
+        </div>
+      </div>
+
+      <div class="storytime-form-actions">
+        <button
+          class="lcars-btn sunflower"
+          type="button"
+          [disabled]="isNew"
+          (click)="addMedia()">
+          Add video
+        </button>
+      </div>
 
       @if (media.length > 0) {
         <ul class="storytime-editor__media-list">
@@ -112,6 +195,7 @@
                 alt="" />
               <span>{{ video.title ?? video.externalId }}</span>
               <button
+                class="lcars-btn lcars-btn-auto red"
                 type="button"
                 (click)="removeMedia(video)">
                 Remove
@@ -120,41 +204,72 @@
           }
         </ul>
       }
-    </section>
-  }
+    </div>
+  </section>
 
   @if (!isNew && cast.length > 0) {
-    <section class="storytime-editor__cast">
+    <section class="storytime-section">
       <div class="lcars-text-bar small-lcars-bar-gap">
         <span>Who appears</span>
       </div>
 
-      @if (castErrorMessage) {
-        <app-lcars-error-message
-          title="Cast unavailable"
-          [message]="castErrorMessage"></app-lcars-error-message>
-      }
-
-      <ul class="storytime-editor__cast-list">
-        @for (character of cast; track character.id) {
-          <li>
-            <label>
-              <input
-                type="checkbox"
-                [checked]="isAppearing(character.id)"
-                (change)="toggleAppearance(character.id)" />
-              {{ character.name }}
-            </label>
-          </li>
+      <div class="storytime-panel">
+        @if (castErrorMessage) {
+          <app-lcars-error-message
+            title="Cast unavailable"
+            [message]="castErrorMessage"></app-lcars-error-message>
         }
-      </ul>
 
-      <button
-        type="button"
-        [disabled]="isSavingCast"
-        (click)="saveCast()">
-        {{ isSavingCast ? 'Saving…' : 'Save who appears' }}
-      </button>
+        <div class="storytime-toggle-row">
+          @for (character of cast; track character.id) {
+            <app-lcars-toggle
+              [label]="character.name"
+              [ariaLabel]="character.name"
+              [ngModel]="isAppearing(character.id)"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="toggleAppearance(character.id)" />
+          }
+        </div>
+
+        <div class="storytime-form-actions">
+          <button
+            class="lcars-btn green"
+            type="button"
+            [disabled]="isSavingCast"
+            (click)="saveCast()">
+            {{ isSavingCast ? 'Saving…' : 'Save who appears' }}
+          </button>
+        </div>
+      </div>
     </section>
   }
+
+  <!--
+    Saving the Chapter is the last thing on the page rather than the last thing
+    in the form: the videos and the cast are saved on their own, and a Save
+    sitting above them reads as though the sections below it are not covered.
+    The button is tied back to the form by name, which also keeps the media box
+    outside it — pressing Enter there should not submit the Chapter.
+  -->
+  <div class="storytime-form-actions">
+    <button
+      class="lcars-btn green"
+      type="submit"
+      form="chapter-editor-form"
+      [disabled]="isSaving">
+      {{ isSaving ? 'Saving…' : 'Save' }}
+    </button>
+    <a
+      class="lcars-btn red"
+      [routerLink]="[
+        '/',
+        appRoutes.STORYTIME,
+        'manage',
+        'stories',
+        storyId,
+        'chapters',
+      ]"
+      >Cancel</a
+    >
+  </div>
 </div>
