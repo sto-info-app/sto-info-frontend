@@ -11,7 +11,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { finalize } from 'rxjs';
+import { catchError, finalize, forkJoin, of } from 'rxjs';
 import {
   ManagedStory,
   StorytimeModerationStatus,
@@ -26,10 +26,35 @@ import {
   PUBLICATION_STATUS_LABELS,
   PUBLISHING_REPRESENTATIONS,
   STORYTIME_COPY,
+  VISIBILITY_ICONS,
   VISIBILITY_LABELS,
 } from '../../storytime.constants';
+import { ChapterService } from '../../chapter.service';
+import { CharacterService } from '../../character.service';
+import { CrewService } from '../../crew.service';
 import { StorytimeModerationService } from '../../storytime-moderation.service';
 import { StoryService } from '../../story.service';
+
+/**
+ * How much of each kind of thing a Story holds.
+ *
+ * Shown on the buttons that open them, so a creator can see there are four
+ * Chapters without opening the Chapter list to find out.
+ */
+export interface StoryCounts {
+  chapters: number;
+  cast: number;
+  collaborators: number;
+}
+
+/**
+ * What a Story counts as before its own counts have arrived.
+ *
+ * One shared object rather than a fresh one per call: the template asks for a
+ * Story's counts on every check, and a new object each time would be a new
+ * value each time.
+ */
+const NO_COUNTS: StoryCounts = { chapters: 0, cast: 0, collaborators: 0 };
 
 /**
  * A creator's own Stories, with the actions available on each.
@@ -76,10 +101,19 @@ export class StoryDashboardComponent implements OnInit {
   /** Visibility labels. */
   readonly visibilityLabels = VISIBILITY_LABELS;
 
+  /** The mark standing for each visibility on a Story's title bar. */
+  readonly visibilityIcons = VISIBILITY_ICONS;
+
+  /** What each Story holds, once counted, keyed by Story. */
+  counts: Record<string, StoryCounts> = {};
+
   /** Publication states, for deciding which actions to offer. */
   readonly storyStatus = StoryStatus;
 
   private readonly _storyService = inject(StoryService);
+  private readonly _chapterService = inject(ChapterService);
+  private readonly _characterService = inject(CharacterService);
+  private readonly _crewService = inject(CrewService);
   private readonly _moderationService = inject(StorytimeModerationService);
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _destroyRef = inject(DestroyRef);
@@ -219,6 +253,16 @@ export class StoryDashboardComponent implements OnInit {
   }
 
   /**
+   * What a Story holds, for the buttons that open each part of it.
+   *
+   * @param story - The Story.
+   * @returns Its counts, or zeroes while they are still being fetched.
+   */
+  countsFor(story: ManagedStory): StoryCounts {
+    return this.counts[story.id] ?? NO_COUNTS;
+  }
+
+  /**
    * Whether a Story can be published from its current state.
    *
    * @param story - The Story to test.
@@ -247,12 +291,56 @@ export class StoryDashboardComponent implements OnInit {
         next: stories => {
           this.stories = stories;
           this.errorMessage = '';
+          this.countContents(stories);
         },
         error: () => {
           this.errorMessage =
             'Your Stories could not be loaded. Please try again shortly.';
         },
       });
+  }
+
+  /**
+   * Counts what each Story holds.
+   *
+   * The Story payload carries a published Chapter count and nothing else, and
+   * a creator's own list wants the number of Chapters they have written rather
+   * than the number readers can see — so each part is counted from the list
+   * that the button beside it opens.
+   *
+   * A count that cannot be fetched is left at zero rather than reported: it is
+   * a number on a button, and failing to load one is no reason to tell somebody
+   * their Stories are broken.
+   *
+   * @param stories - The Stories to count.
+   */
+  private countContents(stories: ManagedStory[]): void {
+    this.counts = {};
+
+    for (const story of stories) {
+      forkJoin({
+        chapters: this._chapterService
+          .getMyChapters(story.id)
+          .pipe(catchError(() => of([]))),
+        cast: this._characterService
+          .getMyCharacters(story.id)
+          .pipe(catchError(() => of([]))),
+        collaborators: this._crewService
+          .getCollaborators(story.id)
+          .pipe(catchError(() => of([]))),
+      })
+        .pipe(
+          takeUntilDestroyed(this._destroyRef),
+          observeInZone(this._ngZone, this._cdr),
+        )
+        .subscribe(held => {
+          this.counts[story.id] = {
+            chapters: held.chapters.length,
+            cast: held.cast.length,
+            collaborators: held.collaborators.length,
+          };
+        });
+    }
   }
 
   /**

@@ -2,6 +2,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { ChapterService } from '../../chapter.service';
+import { CharacterService } from '../../character.service';
+import { CrewService } from '../../crew.service';
 import {
   ManagedStory,
   StorytimeModerationStatus,
@@ -26,6 +29,9 @@ describe('StoryDashboardComponent', () => {
     acceptContentPolicy: jest.Mock;
   };
   let moderationService: { appeal: jest.Mock };
+  let chapterService: { getMyChapters: jest.Mock };
+  let characterService: { getMyCharacters: jest.Mock };
+  let crewService: { getCollaborators: jest.Mock };
 
   /**
    * Builds a managed Story.
@@ -69,6 +75,17 @@ describe('StoryDashboardComponent', () => {
     moderationService = {
       appeal: jest.fn().mockReturnValue(of({ id: 'appeal-1' })),
     };
+    chapterService = {
+      getMyChapters: jest
+        .fn()
+        .mockReturnValue(of([{ id: 'c1' }, { id: 'c2' }])),
+    };
+    characterService = {
+      getMyCharacters: jest.fn().mockReturnValue(of([{ id: 'ch1' }])),
+    };
+    crewService = {
+      getCollaborators: jest.fn().mockReturnValue(of([])),
+    };
 
     TestBed.configureTestingModule({
       imports: [StoryDashboardComponent],
@@ -76,6 +93,9 @@ describe('StoryDashboardComponent', () => {
         provideRouter([]),
         { provide: StoryService, useValue: storyService },
         { provide: StorytimeModerationService, useValue: moderationService },
+        { provide: ChapterService, useValue: chapterService },
+        { provide: CharacterService, useValue: characterService },
+        { provide: CrewService, useValue: crewService },
       ],
     });
   });
@@ -91,6 +111,52 @@ describe('StoryDashboardComponent', () => {
 
     expect(element.textContent).toContain('Draft');
     expect(element.textContent).toContain('Private');
+  });
+
+  describe('what each Story holds', () => {
+    // The Story payload counts published Chapters, which is not the number the
+    // creator is about to open.
+    it('counts what is behind each button', () => {
+      const element = render();
+
+      expect(fixture.componentInstance.countsFor(buildStory())).toEqual({
+        chapters: 2,
+        cast: 1,
+        collaborators: 0,
+      });
+      expect(
+        element.querySelector('.header-count-badge')?.textContent,
+      ).toContain('2');
+    });
+
+    // A count is a number on a button. Failing to fetch one is no reason to
+    // tell somebody their Stories are broken, and the counts that did arrive
+    // are still worth showing.
+    it.each([
+      ['Chapters', () => chapterService.getMyChapters, 'chapters'],
+      ['the cast', () => characterService.getMyCharacters, 'cast'],
+      ['collaborators', () => crewService.getCollaborators, 'collaborators'],
+    ] as const)(
+      'says nothing when %s cannot be counted',
+      (_what, mock, key) => {
+        mock().mockReturnValue(
+          throwError(() => new HttpErrorResponse({ status: 500 })),
+        );
+
+        render();
+
+        expect(fixture.componentInstance.countsFor(buildStory())[key]).toBe(0);
+        expect(fixture.componentInstance.errorMessage).toBe('');
+      },
+    );
+
+    it('counts a Story it has not heard about as empty', () => {
+      render();
+
+      expect(
+        fixture.componentInstance.countsFor(buildStory({ id: 'other' })),
+      ).toEqual({ chapters: 0, cast: 0, collaborators: 0 });
+    });
   });
 
   it('invites a first Story when there are none', () => {
