@@ -422,7 +422,7 @@ describe('ArcDetailComponent', () => {
       const element = render();
       const bar = element.querySelector('.storytime-arc__progress-bar');
 
-      expect(bar?.getAttribute('aria-valuenow')).toBe('50');
+      expect(bar?.getAttribute('value')).toBe('50');
     });
 
     // An Arc with nothing in it cannot be part-read.

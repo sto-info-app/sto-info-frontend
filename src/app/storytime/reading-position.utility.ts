@@ -5,7 +5,7 @@
  * embed — is not a position the server will accept, so it is ignored here
  * rather than sent and rejected.
  */
-const BLOCK_ANCHOR_PATTERN = /^b[0-9]{1,6}$/;
+const BLOCK_ANCHOR_PATTERN = /^b\d{1,6}$/;
 
 /**
  * Where a reader has got to in a Chapter.

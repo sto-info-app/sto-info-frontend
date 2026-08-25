@@ -97,7 +97,7 @@ describe('ChapterService', () => {
       expect(request.request.headers.get('Authorization')).toBe(AUTH_HEADER);
       request.flush([]);
 
-      await chapters;
+      await expect(chapters).resolves.toEqual([]);
     });
 
     it('retrieves a Chapter for editing', async () => {
@@ -107,7 +107,7 @@ describe('ChapterService', () => {
         .expectOne(`${API_URLS.STORYTIME_MANAGE_CHAPTERS}/${CHAPTER_ID}`)
         .flush({ id: CHAPTER_ID });
 
-      await chapter;
+      await expect(chapter).resolves.toEqual({ id: CHAPTER_ID });
     });
 
     it('creates a Chapter in a Story', async () => {

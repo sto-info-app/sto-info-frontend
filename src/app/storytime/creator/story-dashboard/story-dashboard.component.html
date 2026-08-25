@@ -115,11 +115,11 @@
             }
 
             @if (appealMessage && appealingStoryId !== story.id) {
-              <p
+              <output
                 class="storytime-dashboard__appeal-message"
-                role="status">
+                >
                 {{ appealMessage }}
-              </p>
+              </output>
             }
           }
 

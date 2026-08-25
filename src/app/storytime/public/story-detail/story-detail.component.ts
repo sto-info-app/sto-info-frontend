@@ -6,12 +6,13 @@ import {
   DestroyRef,
   NgZone,
   OnInit,
+  SecurityContext,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { finalize, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -89,7 +90,7 @@ export class StoryDetailComponent implements OnInit {
   storySlug = '';
 
   /** The rendered description, ready to insert. */
-  descriptionHtml: SafeHtml | null = null;
+  descriptionHtml: string | null = null;
 
   /** Whether the Story is still loading. */
   isLoading = true;
@@ -164,8 +165,10 @@ export class StoryDetailComponent implements OnInit {
         next: story => {
           this.story = story;
           this.descriptionHtml = story.descriptionHtml
-            ? // NOSONAR - server-rendered and sanitised; see the class comment.
-              this._sanitizer.bypassSecurityTrustHtml(story.descriptionHtml)
+            ? this._sanitizer.sanitize(
+                SecurityContext.HTML,
+                story.descriptionHtml,
+              )
             : null;
           this.isLoading = false;
           this.loadChapters();

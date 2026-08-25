@@ -476,7 +476,7 @@ nav[class^='storytime-'] :where(a, [aria-current='page']) {
   justify-content: center;
   width: 24px;
   height: 24px;
-  color: #6cf;
+  color: #b8e8ff;
   background: #1d2d3e;
   border-radius: 3px;
   cursor: pointer;
@@ -638,10 +638,14 @@ p.storytime-fan-notice,
     border-radius: 4px;
     background: vars.$lcars-grey-border;
     overflow: hidden;
+    appearance: none;
 
-    > * {
-      display: block;
-      height: 100%;
+    &::-webkit-progress-bar {
+      background: vars.$lcars-grey-border;
+    }
+
+    &::-webkit-progress-value,
+    &::-moz-progress-bar {
       background: vars.$lcars-green;
     }
   }
@@ -689,10 +693,14 @@ p.storytime-fan-notice,
     border-radius: 4px;
     background: vars.$lcars-grey-border;
     overflow: hidden;
+    appearance: none;
 
-    > * {
-      display: block;
-      height: 100%;
+    &::-webkit-progress-bar {
+      background: vars.$lcars-grey-border;
+    }
+
+    &::-webkit-progress-value,
+    &::-moz-progress-bar {
       background: vars.$lcars-green;
     }
   }
@@ -1142,7 +1150,7 @@ $storytime-record-statuses: (
     padding: 0.6rem 1rem;
     background: #333;
     border-bottom: 2px solid rgb(255 255 255 / 10%);
-    color: #000;
+    color: vars.$lcars-white;
     text-decoration: none;
     cursor: pointer;
 
@@ -1156,7 +1164,7 @@ $storytime-record-statuses: (
   &__name {
     font-weight: bold;
     font-size: 1.15rem;
-    color: #000;
+    color: vars.$lcars-white;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     overflow: hidden;
@@ -1352,10 +1360,14 @@ $storytime-record-statuses: (
     background: vars.$lcars-grey-border;
     overflow: hidden;
     margin: 0.5rem 0;
+    appearance: none;
 
-    > * {
-      display: block;
-      height: 100%;
+    &::-webkit-progress-bar {
+      background: vars.$lcars-grey-border;
+    }
+
+    &::-webkit-progress-value,
+    &::-moz-progress-bar {
       background: vars.$lcars-green;
     }
   }

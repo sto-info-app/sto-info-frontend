@@ -6,10 +6,11 @@ import {
   DestroyRef,
   NgZone,
   OnInit,
+  SecurityContext,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { switchMap } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -66,7 +67,7 @@ export class ArcDetailComponent implements OnInit {
   stories: ArcMembership[] = [];
 
   /** The rendered description, ready to insert. */
-  descriptionHtml: SafeHtml | null = null;
+  descriptionHtml: string | null = null;
 
   /** How far the signed-in reader has got, or null when there is nobody. */
   progress: ArcProgress | null = null;
@@ -123,8 +124,8 @@ export class ArcDetailComponent implements OnInit {
           this.arc = result.arc;
           this.stories = result.stories;
           this.descriptionHtml = result.arc.descriptionHtml
-            ? // NOSONAR - server-rendered and sanitised; see the class comment.
-              this._sanitizer.bypassSecurityTrustHtml(
+            ? this._sanitizer.sanitize(
+                SecurityContext.HTML,
                 result.arc.descriptionHtml,
               )
             : null;

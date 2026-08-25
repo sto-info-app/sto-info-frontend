@@ -174,7 +174,7 @@ describe('CharacterEditorComponent', () => {
       expect(value.name).toBe('Captain Shran');
       expect(value.rank).toBe('Captain');
       expect(value.isPrimary).toBe(true);
-      expect(fixture.componentInstance.traits.length).toBe(1);
+      expect(fixture.componentInstance.traits).toHaveLength(1);
     });
 
     // A Character created with nothing but a name has every other field null,
@@ -204,7 +204,7 @@ describe('CharacterEditorComponent', () => {
       expect(Object.values(value).filter(entry => entry === null)).toEqual([]);
       expect(value.shortBio).toBe('');
       expect(value.rank).toBe('');
-      expect(fixture.componentInstance.traits.length).toBe(0);
+      expect(fixture.componentInstance.traits).toHaveLength(0);
     });
 
     // Sending the version back is what makes a stale edit fail rather than
@@ -278,7 +278,7 @@ describe('CharacterEditorComponent', () => {
 
       fixture.componentInstance.addTrait();
 
-      expect(fixture.componentInstance.traits.length).toBe(1);
+      expect(fixture.componentInstance.traits).toHaveLength(1);
     });
 
     it('removes a row', () => {
@@ -287,7 +287,7 @@ describe('CharacterEditorComponent', () => {
 
       fixture.componentInstance.removeTrait(0);
 
-      expect(fixture.componentInstance.traits.length).toBe(0);
+      expect(fixture.componentInstance.traits).toHaveLength(0);
     });
 
     it('stops at the limit', () => {
@@ -297,7 +297,7 @@ describe('CharacterEditorComponent', () => {
         fixture.componentInstance.addTrait();
       }
 
-      expect(fixture.componentInstance.traits.length).toBe(
+      expect(fixture.componentInstance.traits).toHaveLength(
         fixture.componentInstance.maxTraits,
       );
     });

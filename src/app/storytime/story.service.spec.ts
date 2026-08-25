@@ -111,7 +111,7 @@ describe('StoryService', () => {
 
       httpMock.expectOne(`${API_URLS.STORYTIME_STORIES}/a%20b`).flush({});
 
-      await story;
+      await expect(story).resolves.toBeDefined();
     });
   });
 

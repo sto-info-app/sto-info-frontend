@@ -6,10 +6,11 @@ import {
   DestroyRef,
   NgZone,
   OnInit,
+  SecurityContext,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { switchMap } from 'rxjs';
 import {
@@ -48,7 +49,7 @@ export class StorytimeCharacterDetailComponent implements OnInit {
   appearsIn: CharacterAppearanceLink[] = [];
 
   /** The rendered biography, ready to insert. */
-  biographyHtml: SafeHtml | null = null;
+  biographyHtml: string | null = null;
 
   /** The Story slug, for building links back. */
   storySlug = '';
@@ -122,8 +123,8 @@ export class StorytimeCharacterDetailComponent implements OnInit {
           this.character = result.character;
           this.appearsIn = result.appearsIn;
           this.biographyHtml = result.character.biographyHtml
-            ? // NOSONAR - server-rendered and sanitised; see the class comment.
-              this._sanitizer.bypassSecurityTrustHtml(
+            ? this._sanitizer.sanitize(
+                SecurityContext.HTML,
                 result.character.biographyHtml,
               )
             : null;

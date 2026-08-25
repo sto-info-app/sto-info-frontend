@@ -67,15 +67,12 @@
             }}%)
           </p>
 
-          <div
+          <progress
             class="storytime-library__bar"
-            role="progressbar"
             aria-label="Chapters read"
-            [attr.aria-valuenow]="entry.progress.percentComplete"
-            aria-valuemin="0"
-            aria-valuemax="100">
-            <span [style.width.%]="entry.progress.percentComplete"></span>
-          </div>
+            [value]="entry.progress.percentComplete"
+            max="100">
+          </progress>
 
           @if (entry.progress.newChapterCount > 0) {
             <p class="storytime-library__new">

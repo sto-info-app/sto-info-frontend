@@ -69,15 +69,12 @@
             }}%)
           </p>
 
-          <div
+          <progress
             class="storytime-story__progress-bar"
-            role="progressbar"
             aria-label="Chapters read"
-            [attr.aria-valuenow]="progress.percentComplete"
-            aria-valuemin="0"
-            aria-valuemax="100">
-            <span [style.width.%]="progress.percentComplete"></span>
-          </div>
+            [value]="progress.percentComplete"
+            max="100">
+          </progress>
         }
 
         @if (progress.newChapterCount > 0) {
@@ -261,11 +258,11 @@
           Report this Story
         </button>
         @if (reportMessage) {
-          <p
+          <output
             class="storytime-story__report-message"
-            role="status">
+            >
             {{ reportMessage }}
-          </p>
+          </output>
         }
       </div>
     }

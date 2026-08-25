@@ -19,11 +19,11 @@
         }
 
         @if (statusMessage) {
-          <p
+          <output
             class="storytime-add-to-list__status"
-            role="status">
+            >
             {{ statusMessage }}
-          </p>
+          </output>
         }
 
         @if (lists.length === 0) {

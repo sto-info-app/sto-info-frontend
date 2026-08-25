@@ -8,11 +8,12 @@ import {
   HostListener,
   NgZone,
   OnInit,
+  SecurityContext,
   ViewChild,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Subject, debounceTime, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -101,7 +102,7 @@ export class ChapterReaderComponent implements OnInit {
   chapter: Chapter | null = null;
 
   /** The rendered body, ready to insert. */
-  contentHtml: SafeHtml | null = null;
+  contentHtml: string | null = null;
 
   /** The Chapter before this one, if any. */
   previous: ChapterLink | null = null;
@@ -198,8 +199,8 @@ export class ChapterReaderComponent implements OnInit {
           this.previous = result.previous;
           this.next = result.next;
           this.contentHtml = result.chapter.contentHtml
-            ? // NOSONAR - server-rendered and sanitised; see the class comment.
-              this._sanitizer.bypassSecurityTrustHtml(
+            ? this._sanitizer.sanitize(
+                SecurityContext.HTML,
                 result.chapter.contentHtml,
               )
             : null;

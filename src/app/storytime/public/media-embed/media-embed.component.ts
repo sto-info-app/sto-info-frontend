@@ -42,10 +42,27 @@ export class MediaEmbedComponent {
       return null;
     }
 
-    // NOSONAR - built by the server from stored identifiers; see the class
-    // comment. No creator-supplied text reaches this value.
+    let embedUrl: URL;
+    try {
+      embedUrl = new URL(this.media.embedUrl);
+    } catch {
+      return null;
+    }
+
+    if (
+      embedUrl.protocol !== 'https:' ||
+      ![
+        'www.youtube.com',
+        'youtube-nocookie.com',
+        'www.youtube-nocookie.com',
+      ].includes(embedUrl.hostname)
+    ) {
+      return null;
+    }
+
+    // NOSONAR - the URL is restricted to HTTPS YouTube origins above.
     return this._sanitizer.bypassSecurityTrustResourceUrl(
-      `${this.media.embedUrl}${this.media.embedUrl.includes('?') ? '&' : '?'}autoplay=1`,
+      `${embedUrl}${embedUrl.search ? '&' : '?'}autoplay=1`,
     );
   }
 
