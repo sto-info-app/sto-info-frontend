@@ -116,6 +116,26 @@ describe('MediaEmbedComponent', () => {
       );
     });
 
+    it('ignores malformed embed URLs', () => {
+      const element = render(buildMedia({ embedUrl: 'not-a-url' }));
+
+      fixture.componentInstance.play();
+
+      expect(fixture.componentInstance.embedSource).toBeNull();
+      expect(element.querySelector('iframe')).toBeNull();
+    });
+
+    it('ignores non-YouTube embed hosts', () => {
+      const element = render(
+        buildMedia({ embedUrl: 'https://example.com/embed/video' }),
+      );
+
+      fixture.componentInstance.play();
+
+      expect(fixture.componentInstance.embedSource).toBeNull();
+      expect(element.querySelector('iframe')).toBeNull();
+    });
+
     it('keeps the clip the server built', () => {
       render(
         buildMedia({

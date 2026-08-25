@@ -6,7 +6,6 @@ import {
   DestroyRef,
   NgZone,
   OnInit,
-  SecurityContext,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -165,10 +164,9 @@ export class StoryDetailComponent implements OnInit {
         next: story => {
           this.story = story;
           this.descriptionHtml = story.descriptionHtml
-            ? this._sanitizer.sanitize(
-                SecurityContext.HTML,
+            ? (this._sanitizer.bypassSecurityTrustHtml(
                 story.descriptionHtml,
-              )
+              ) as string)
             : null;
           this.isLoading = false;
           this.loadChapters();

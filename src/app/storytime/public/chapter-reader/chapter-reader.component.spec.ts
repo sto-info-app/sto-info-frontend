@@ -642,6 +642,14 @@ describe('ChapterReaderComponent', () => {
       expect(fixture.componentInstance.resumeBlockId).toBeNull();
     });
 
+    it('does nothing when there is no resume anchor to scroll to', () => {
+      render();
+
+      fixture.componentInstance.resumeBlockId = null;
+      expect(() => fixture.componentInstance.resume()).not.toThrow();
+      expect(fixture.componentInstance.resumeBlockId).toBeNull();
+    });
+
     it('offers nothing when the reader has not started the Chapter', () => {
       const element = render();
 

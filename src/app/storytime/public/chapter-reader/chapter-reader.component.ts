@@ -8,7 +8,6 @@ import {
   HostListener,
   NgZone,
   OnInit,
-  SecurityContext,
   ViewChild,
   inject,
 } from '@angular/core';
@@ -199,10 +198,9 @@ export class ChapterReaderComponent implements OnInit {
           this.previous = result.previous;
           this.next = result.next;
           this.contentHtml = result.chapter.contentHtml
-            ? this._sanitizer.sanitize(
-                SecurityContext.HTML,
+            ? (this._sanitizer.bypassSecurityTrustHtml(
                 result.chapter.contentHtml,
-              )
+              ) as string)
             : null;
           this.isLoading = false;
           this.loadProgress();

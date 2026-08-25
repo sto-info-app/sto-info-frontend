@@ -6,7 +6,6 @@ import {
   DestroyRef,
   NgZone,
   OnInit,
-  SecurityContext,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -124,10 +123,9 @@ export class ArcDetailComponent implements OnInit {
           this.arc = result.arc;
           this.stories = result.stories;
           this.descriptionHtml = result.arc.descriptionHtml
-            ? this._sanitizer.sanitize(
-                SecurityContext.HTML,
+            ? (this._sanitizer.bypassSecurityTrustHtml(
                 result.arc.descriptionHtml,
-              )
+              ) as string)
             : null;
           this.isLoading = false;
           this.loadProgress(result.arc.slug);

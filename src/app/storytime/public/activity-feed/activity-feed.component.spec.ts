@@ -238,17 +238,21 @@ describe('ActivityFeedComponent', () => {
   });
 
   it('reads more when the button is pressed', () => {
-    followService.getFeed.mockReturnValue(
+    followService.getFeed.mockReturnValueOnce(
       of(
         Array.from({ length: 30 }, (_unused, index) =>
           buildEntry({ id: `item-${index}` }),
         ),
       ),
     );
+    followService.getFeed.mockReturnValueOnce(
+      of([buildEntry({ id: 'item-30' })]),
+    );
 
     create();
     fixture.nativeElement.querySelector('.storytime-feed__more').click();
 
     expect(followService.getFeed).toHaveBeenLastCalledWith(2);
+    expect(component.entries).toHaveLength(31);
   });
 });
