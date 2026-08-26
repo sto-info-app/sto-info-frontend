@@ -732,7 +732,7 @@ describe('ChapterReaderComponent', () => {
       expect(warning).not.toBeNull();
       expect(body).not.toBeNull();
       expect(
-        warning?.compareDocumentPosition(body as Node) &
+        warning!.compareDocumentPosition(body as Node) &
           Node.DOCUMENT_POSITION_FOLLOWING,
       ).toBeTruthy();
     });

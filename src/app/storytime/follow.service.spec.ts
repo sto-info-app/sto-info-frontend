@@ -4,7 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   FeedEntry,
@@ -151,7 +151,7 @@ describe('FollowService', () => {
   });
 
   // A feed is one person's, so there is nothing to show without a token.
-  it.each([
+  it.each<[string, () => Observable<unknown>]>([
     [
       'reading follow state',
       () => service.getFollowState(FollowTargetKind.ARC, 'arc-1'),

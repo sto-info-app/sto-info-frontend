@@ -4,7 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   AppealStatus,
@@ -261,7 +261,7 @@ describe('StorytimeModerationService', () => {
       authService.getHttpOptionsWithAccessToken.mockReturnValue(null);
     });
 
-    it.each([
+    it.each<[string, () => Observable<unknown>]>([
       ['report', () => service.report(reportRequest)],
       [
         'appeal',

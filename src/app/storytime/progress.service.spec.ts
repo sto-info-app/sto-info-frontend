@@ -4,7 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { ReaderStoryStatus } from 'src/app/models/storytime.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
@@ -174,7 +174,7 @@ describe('ProgressService', () => {
       authService.getHttpOptionsWithAccessToken.mockReturnValue(null);
     });
 
-    it.each([
+    it.each<[string, () => Observable<unknown>]>([
       ['getLibrary', () => service.getLibrary()],
       ['getStoryProgress', () => service.getStoryProgress(STORY_ID)],
       ['getChapterProgress', () => service.getChapterProgress(CHAPTER_ID)],

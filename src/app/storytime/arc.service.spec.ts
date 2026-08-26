@@ -4,7 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { ArcService } from './arc.service';
@@ -329,7 +329,7 @@ describe('ArcService', () => {
       authService.getHttpOptionsWithAccessToken.mockReturnValue(null);
     });
 
-    it.each([
+    it.each<[string, () => Observable<unknown>]>([
       ['getMyArcs', () => service.getMyArcs()],
       ['getMyArc', () => service.getMyArc(ARC_ID)],
       ['createArc', () => service.createArc({ title: 'X' })],

@@ -4,7 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { SpotlightEntityType } from 'src/app/models/storytime.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
@@ -173,7 +173,7 @@ describe('SpotlightService', () => {
       authService.getHttpOptionsWithAccessToken.mockReturnValue(null);
     });
 
-    it.each([
+    it.each<[string, () => Observable<unknown>]>([
       ['getAll', () => service.getAll()],
       ['getOne', () => service.getOne(SPOTLIGHT_ID)],
       [
