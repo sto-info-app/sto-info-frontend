@@ -47,8 +47,7 @@
   // real selector (see usages below), so this is the known stylelint/Sonar
   // false positive for `&` referenced inside a @mixin definition rather than
   // a missing scoping root.
-  &:hover, // NOSONAR
-  &:focus { // NOSONAR
+  &:hover, &:focus { // NOSONAR
     color: vars.$lcars-gold;
     text-decoration: underline;
   }
