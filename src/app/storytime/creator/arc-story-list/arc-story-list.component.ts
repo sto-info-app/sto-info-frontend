@@ -11,7 +11,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, finalize } from 'rxjs';
+import { finalize } from 'rxjs';
 import {
   ArcMembership,
   ArcMembershipStatus,
@@ -22,8 +22,9 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
-import { ARC_MEMBERSHIP_STATUS_LABELS } from '../../storytime.constants';
+import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
 import { StoryService } from '../../story.service';
+import { ARC_MEMBERSHIP_STATUS_LABELS } from '../../storytime.constants';
 
 /**
  * What is in an Arc, and in what order.
@@ -76,6 +77,9 @@ export class ArcStoryListComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _actions = new StorytimeActionRunner(this, () =>
+    this.load(),
+  );
 
   /** The form for inviting a Story by its identifier. */
   readonly form = this._formBuilder.nonNullable.group({
@@ -180,7 +184,7 @@ export class ArcStoryListComponent implements OnInit {
    * @param storyId - The Story to invite.
    */
   inviteStory(storyId: string): void {
-    this.runAction(this._arcService.inviteStory(this.arcId, storyId), () =>
+    this._actions.run(this._arcService.inviteStory(this.arcId, storyId), () =>
       this.form.reset(),
     );
   }
@@ -191,7 +195,7 @@ export class ArcStoryListComponent implements OnInit {
    * @param membership - The membership.
    */
   approve(membership: ArcMembership): void {
-    this.runAction(this._arcService.approveMembership(membership.id));
+    this._actions.run(this._arcService.approveMembership(membership.id));
   }
 
   /**
@@ -200,7 +204,7 @@ export class ArcStoryListComponent implements OnInit {
    * @param membership - The membership.
    */
   decline(membership: ArcMembership): void {
-    this.runAction(this._arcService.declineMembership(membership.id));
+    this._actions.run(this._arcService.declineMembership(membership.id));
   }
 
   /**
@@ -209,7 +213,7 @@ export class ArcStoryListComponent implements OnInit {
    * @param membership - The membership.
    */
   remove(membership: ArcMembership): void {
-    this.runAction(this._arcService.leaveArc(membership.id));
+    this._actions.run(this._arcService.leaveArc(membership.id));
   }
 
   /**
@@ -249,41 +253,12 @@ export class ArcStoryListComponent implements OnInit {
 
     [ordered[from], ordered[to]] = [ordered[to], ordered[from]];
 
-    this.runAction(
+    this._actions.run(
       this._arcService.reorderArcStories(
         this.arcId,
         ordered.map(membership => membership.id),
       ),
     );
-  }
-
-  /**
-   * Runs an action, then reloads so the list reflects what the server did.
-   *
-   * @param action - The action to run.
-   * @param onSuccess - Anything else to do once it succeeds.
-   */
-  private runAction(action: Observable<unknown>, onSuccess?: () => void): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    action
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        observeInZone(this._ngZone, this._cdr),
-      )
-      .subscribe({
-        next: () => {
-          onSuccess?.();
-          this.load();
-        },
-        error: (error: HttpErrorResponse) => {
-          this.errorMessage =
-            (error.error as { message?: string } | undefined)?.message ??
-            'That change could not be saved. Please try again shortly.';
-          this.isLoading = false;
-        },
-      });
   }
 
   /**

@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component,
@@ -11,7 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Observable, finalize } from 'rxjs';
+import { finalize } from 'rxjs';
 import {
   StorytimeTag,
   StorytimeTagCategory,
@@ -20,11 +19,13 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
-import { TagService } from '../../tag.service';
+import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
 import {
   TAG_CATEGORY_DESCRIPTIONS,
   TAG_CATEGORY_LABELS,
 } from '../../storytime.constants';
+import { groupTagsByCategory } from '../../tag-grouping.utility';
+import { TagService } from '../../tag.service';
 
 /**
  * The Storytime tag vocabulary, as an administrator manages it.
@@ -87,6 +88,9 @@ export class TagAdminComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _actions = new StorytimeActionRunner(this, () =>
+    this.load(),
+  );
 
   /** The form for adding a tag, or editing the one selected. */
   readonly form = this._formBuilder.nonNullable.group({
@@ -149,7 +153,7 @@ export class TagAdminComponent implements OnInit {
       displayOrder: Number(value.displayOrder),
     };
 
-    this.runAction(
+    this._actions.run(
       this.editingTagId
         ? this._tagService.updateTag(this.editingTagId, payload)
         : this._tagService.createTag(payload),
@@ -163,42 +167,11 @@ export class TagAdminComponent implements OnInit {
    * @param tag - The tag.
    */
   remove(tag: StorytimeTag): void {
-    this.runAction(this._tagService.deleteTag(tag.id), () => {
+    this._actions.run(this._tagService.deleteTag(tag.id), () => {
       if (this.editingTagId === tag.id) {
         this.cancelEdit();
       }
     });
-  }
-
-  /**
-   * Runs an action, then reloads so the list reflects what the server did.
-   *
-   * @param action - The action to run.
-   * @param onSuccess - Anything else to do once it succeeds.
-   */
-  private runAction(action: Observable<unknown>, onSuccess?: () => void): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    action
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        observeInZone(this._ngZone, this._cdr),
-      )
-      .subscribe({
-        next: () => {
-          onSuccess?.();
-          this.load();
-        },
-        error: (error: HttpErrorResponse) => {
-          // The server names the problem — usually a tag that already exists —
-          // which is more use than a generic failure.
-          this.errorMessage =
-            (error.error as { message?: string } | undefined)?.message ??
-            'That change could not be saved. Please try again shortly.';
-          this.isLoading = false;
-        },
-      });
   }
 
   /**
@@ -218,34 +191,12 @@ export class TagAdminComponent implements OnInit {
       )
       .subscribe({
         next: tags => {
-          this.groups = this.groupByCategory(tags);
+          this.groups = groupTagsByCategory(tags);
         },
         error: () => {
           this.errorMessage =
             'The tag list could not be loaded. Please try again shortly.';
         },
       });
-  }
-
-  /**
-   * Groups the vocabulary into the shelves it is shown on.
-   *
-   * @param tags - The whole vocabulary, already in order.
-   * @returns The tags by category.
-   */
-  private groupByCategory(
-    tags: StorytimeTag[],
-  ): { category: string; label: string; tags: StorytimeTag[] }[] {
-    const groups = new Map<string, StorytimeTag[]>();
-
-    for (const tag of tags) {
-      groups.set(tag.category, [...(groups.get(tag.category) ?? []), tag]);
-    }
-
-    return [...groups.entries()].map(([category, categoryTags]) => ({
-      category,
-      label: TAG_CATEGORY_LABELS[category] ?? category,
-      tags: categoryTags,
-    }));
   }
 }

@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component,
@@ -10,12 +9,13 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { Observable, finalize } from 'rxjs';
+import { finalize } from 'rxjs';
 import { ManagedSpotlight } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
 import { SpotlightService } from '../../spotlight.service';
 
 /**
@@ -54,6 +54,9 @@ export class SpotlightAdminListComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _actions = new StorytimeActionRunner(this, () =>
+    this.load(),
+  );
 
   /**
    * Loads the entries.
@@ -106,7 +109,7 @@ export class SpotlightAdminListComponent implements OnInit {
    * @param entry - The entry.
    */
   publish(entry: ManagedSpotlight): void {
-    this.runAction(this._spotlightService.publish(entry.id));
+    this._actions.run(this._spotlightService.publish(entry.id));
   }
 
   /**
@@ -115,7 +118,7 @@ export class SpotlightAdminListComponent implements OnInit {
    * @param entry - The entry.
    */
   unpublish(entry: ManagedSpotlight): void {
-    this.runAction(this._spotlightService.unpublish(entry.id));
+    this._actions.run(this._spotlightService.unpublish(entry.id));
   }
 
   /**
@@ -124,35 +127,7 @@ export class SpotlightAdminListComponent implements OnInit {
    * @param entry - The entry.
    */
   remove(entry: ManagedSpotlight): void {
-    this.runAction(this._spotlightService.remove(entry.id));
-  }
-
-  /**
-   * Runs an action, then reloads so the list reflects what the server did.
-   *
-   * @param action - The action to run.
-   */
-  private runAction(action: Observable<unknown>): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    action
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        observeInZone(this._ngZone, this._cdr),
-      )
-      .subscribe({
-        next: () => this.load(),
-        error: (error: HttpErrorResponse) => {
-          // The server explains why an entry cannot be published — most often
-          // that the work has since been unpublished or removed — and repeating
-          // that verbatim beats a generic apology.
-          this.errorMessage =
-            (error.error as { message?: string } | undefined)?.message ??
-            'That change could not be saved. Please try again shortly.';
-          this.isLoading = false;
-        },
-      });
+    this._actions.run(this._spotlightService.remove(entry.id));
   }
 
   /**

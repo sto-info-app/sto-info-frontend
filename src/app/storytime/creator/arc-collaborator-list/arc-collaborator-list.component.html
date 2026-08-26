@@ -1,24 +1,27 @@
 <section
   id="storytime-arc-collaborator-list-page"
-  class="storytime-page">
+  class="storytime-page"
+>
   <h1>Arc collaborators</h1>
 
   <nav class="storytime-page-actions">
     <a
       class="lcars-btn lcars-btn-auto bluey"
-      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', arcId]">
+      [routerLink]='["/", appRoutes.STORYTIME, "manage", "arcs", arcId]'
+    >
       Back to the Arc
     </a>
     <a
       class="lcars-btn lcars-btn-auto sky"
-      [routerLink]="[
-        '/',
-        appRoutes.STORYTIME,
-        'manage',
-        'arcs',
-        arcId,
-        'stories',
-      ]">
+      [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "arcs",
+  arcId,
+  "stories",
+]'
+    >
       Stories
     </a>
   </nav>
@@ -26,7 +29,8 @@
   @if (errorMessage) {
     <app-lcars-error-message
       title="Collaborators unavailable"
-      [message]="errorMessage"></app-lcars-error-message>
+      [message]="errorMessage"
+    ></app-lcars-error-message>
   }
 
   <p class="storytime-intro">
@@ -34,106 +38,15 @@
     in it, and only you can publish it.
   </p>
 
-  <section class="storytime-section">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Invite somebody</span>
-    </div>
-
-    <form
-      class="storytime-panel storytime-form"
-      [formGroup]="form"
-      (ngSubmit)="invite()">
-      <div class="form-row">
-        <div class="lcars-input-container perano">
-          <label for="arc-collaborator-user">Member ID</label>
-          <input
-            id="arc-collaborator-user"
-            type="text"
-            formControlName="userId" />
-          @if (form.controls.userId.touched && form.controls.userId.invalid) {
-            <small class="field-error"
-              >Name the member you want to invite.</small
-            >
-          }
-        </div>
-
-        <div class="lcars-input-container gold">
-          <label for="arc-collaborator-role">What you call them</label>
-          <input
-            id="arc-collaborator-role"
-            type="text"
-            formControlName="collaborationRole"
-            maxlength="100" />
-          <p class="field-hint">Shown in the credits, not a permission.</p>
-        </div>
-      </div>
-
-      <p class="storytime-form__legend">What they may do</p>
-      <div class="storytime-toggle-row">
-        @for (capability of capabilities; track capability.key) {
-          <app-lcars-toggle
-            [formControlName]="capability.key"
-            [label]="capability.label"
-            [ariaLabel]="capability.label"></app-lcars-toggle>
-        }
-      </div>
-
-      <div class="storytime-form-actions">
-        <button
-          class="lcars-btn green"
-          type="submit">
-          Send invitation
-        </button>
-      </div>
-    </form>
-  </section>
-
-  @if (isLoading) {
-    <app-loading-bar loadingText="Loading collaborators"></app-loading-bar>
-  } @else if (collaborators.length === 0) {
-    <p class="storytime-empty">Nobody else is helping with this Arc yet.</p>
-  } @else {
-    <ul class="storytime-collaborators">
-      @for (collaborator of collaborators; track collaborator.id) {
-        <li class="storytime-collaborators__entry">
-          <p class="storytime-collaborators__identity">
-            <span class="storytime-collaborators__member">{{
-              collaborator.collaborationRole ?? collaborator.userId
-            }}</span>
-            <span class="storytime-collaborators__status">{{
-              statusLabels[collaborator.invitationStatus]
-            }}</span>
-          </p>
-
-          @if (isPending(collaborator)) {
-            <p class="storytime-collaborators__pending">
-              They have not answered yet, so they cannot change anything.
-            </p>
-          }
-
-          <div class="storytime-toggle-row">
-            @for (capability of capabilities; track capability.key) {
-              <app-lcars-toggle
-                [label]="capability.label"
-                [ariaLabel]="capability.label"
-                [ngModel]="collaborator[capability.key]"
-                [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="
-                  setCapability(collaborator, capability.key, $event)
-                "></app-lcars-toggle>
-            }
-          </div>
-
-          <div class="storytime-actions">
-            <button
-              type="button"
-              class="lcars-btn lcars-btn-auto cardinal"
-              (click)="revoke(collaborator)">
-              {{ isPending(collaborator) ? 'Withdraw invitation' : 'Remove' }}
-            </button>
-          </div>
-        </li>
-      }
-    </ul>
-  }
+  <app-collaborator-panel
+    idPrefix="arc-collaborator"
+    emptyMessage="Nobody else is helping with this Arc yet."
+    [form]="form"
+    [capabilities]="capabilities"
+    [collaborators]="collaborators"
+    [isLoading]="isLoading"
+    (invited)="invite()"
+    (capabilityChanged)="setCapability($event.collaborator, $event.capability, $event.granted)"
+    (revoked)="revoke($event)"
+  />
 </section>

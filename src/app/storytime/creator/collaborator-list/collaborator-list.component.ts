@@ -8,29 +8,18 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
-import {
-  FormBuilder,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, finalize } from 'rxjs';
-import {
-  CollaborationInvitationStatus,
-  Collaborator,
-} from 'src/app/models/storytime.models';
+import { finalize } from 'rxjs';
+import { Collaborator } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
-import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
-import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CrewService } from '../../crew.service';
-import {
-  COLLABORATION_STATUS_LABELS,
-  COLLABORATOR_CAPABILITIES,
-} from '../../storytime.constants';
+import { CollaboratorPanelComponent } from '../../shared/collaborator-panel/collaborator-panel.component';
+import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
+import { COLLABORATOR_CAPABILITIES } from '../../storytime.constants';
 
 /**
  * Who is helping write one of the creator's Stories.
@@ -44,12 +33,9 @@ import {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
     RouterModule,
-    LoadingBarComponent,
     LcarsErrorMessageComponent,
-    LcarsToggleComponent,
+    CollaboratorPanelComponent,
   ],
 })
 export class CollaboratorListComponent implements OnInit {
@@ -64,9 +50,6 @@ export class CollaboratorListComponent implements OnInit {
 
   /** A message to show when something failed. */
   errorMessage = '';
-
-  /** Status labels, so a raw enum value is never shown. */
-  readonly statusLabels = COLLABORATION_STATUS_LABELS;
 
   /**
    * The capabilities an invitation may grant.
@@ -86,6 +69,9 @@ export class CollaboratorListComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _actions = new StorytimeActionRunner(this, () =>
+    this.load(),
+  );
 
   /** The invitation form. */
   readonly form = this._formBuilder.nonNullable.group({
@@ -107,18 +93,6 @@ export class CollaboratorListComponent implements OnInit {
   }
 
   /**
-   * Whether a collaboration is waiting on an answer.
-   *
-   * @param collaborator - The collaboration.
-   * @returns True while it is still an invitation.
-   */
-  isPending(collaborator: Collaborator): boolean {
-    return (
-      collaborator.invitationStatus === CollaborationInvitationStatus.INVITED
-    );
-  }
-
-  /**
    * Sends an invitation.
    */
   invite(): void {
@@ -129,7 +103,7 @@ export class CollaboratorListComponent implements OnInit {
 
     const value = this.form.getRawValue();
 
-    this.runAction(
+    this._actions.run(
       this._crewService.invite(this.storyId, {
         userId: value.userId.trim(),
         collaborationRole: value.collaborationRole.trim() || undefined,
@@ -152,15 +126,10 @@ export class CollaboratorListComponent implements OnInit {
    */
   setCapability(
     collaborator: Collaborator,
-    capability:
-      | 'canEditStory'
-      | 'canManageChapters'
-      | 'canManageCharacters'
-      | 'canManageCrew'
-      | 'canManageCollaborators',
+    capability: string,
     granted: boolean,
   ): void {
-    this.runAction(
+    this._actions.run(
       this._crewService.updateCollaborator(collaborator.id, {
         [capability]: granted,
       }),
@@ -173,36 +142,7 @@ export class CollaboratorListComponent implements OnInit {
    * @param collaborator - The collaboration.
    */
   revoke(collaborator: Collaborator): void {
-    this.runAction(this._crewService.revoke(collaborator.id));
-  }
-
-  /**
-   * Runs an action, then reloads so the list reflects what the server did.
-   *
-   * @param action - The action to run.
-   * @param onSuccess - Anything else to do once it succeeds.
-   */
-  private runAction(action: Observable<unknown>, onSuccess?: () => void): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    action
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        observeInZone(this._ngZone, this._cdr),
-      )
-      .subscribe({
-        next: () => {
-          onSuccess?.();
-          this.load();
-        },
-        error: (error: HttpErrorResponse) => {
-          this.errorMessage =
-            (error.error as { message?: string } | undefined)?.message ??
-            'That change could not be saved. Please try again shortly.';
-          this.isLoading = false;
-        },
-      });
+    this._actions.run(this._crewService.revoke(collaborator.id));
   }
 
   /**

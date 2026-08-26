@@ -34,7 +34,12 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
 import { MediaService } from '../../media.service';
-import { StorytimeService } from '../../storytime.service';
+import { SettingOption } from '../../shared/setting-help/setting-help.component';
+import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
+import {
+  StorytimeEditorSupport,
+  toLanguageOptions,
+} from '../../shared/storytime-editor.support';
 
 /**
  * Writing and editing a Chapter.
@@ -54,6 +59,7 @@ import { StorytimeService } from '../../storytime.service';
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsToggleComponent,
+    SettingSelectComponent,
   ],
 })
 export class ChapterEditorComponent implements OnInit {
@@ -102,16 +108,31 @@ export class ChapterEditorComponent implements OnInit {
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
 
+  /**
+   * The languages, as the chooser shows them.
+   *
+   * The Story's own language leads, because a Chapter written in something
+   * else is the exception rather than a choice every writer has to make.
+   *
+   * @returns The choices, starting with deferring to the Story.
+   */
+  get languageOptions(): SettingOption[] {
+    return [
+      { value: '', label: 'Same as the Story' },
+      ...toLanguageOptions(this.languages),
+    ];
+  }
+
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
   private readonly _chapterService = inject(ChapterService);
   private readonly _characterService = inject(CharacterService);
   private readonly _mediaService = inject(MediaService);
-  private readonly _storytimeService = inject(StorytimeService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _editor = new StorytimeEditorSupport(this);
 
   /**
    * Builds the form and loads the Chapter when editing an existing one.
@@ -125,15 +146,7 @@ export class ChapterEditorComponent implements OnInit {
       languageCode: [''],
     });
 
-    this._storytimeService
-      .getLanguages()
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        observeInZone(this._ngZone, this._cdr),
-      )
-      .subscribe(languages => {
-        this.languages = languages;
-      });
+    this._editor.loadLanguages();
 
     this.storyId = this._route.snapshot.paramMap.get('storyId') ?? '';
     const chapterId = this._route.snapshot.paramMap.get('chapterId');
@@ -351,15 +364,11 @@ export class ChapterEditorComponent implements OnInit {
    * Saves the Chapter, creating it when new and updating it otherwise.
    */
   save(): void {
-    if (this.form.invalid || this.isSaving) {
-      this.form.markAllAsTouched();
+    const payload = this._editor.beginSave(this.form, this.chapter?.version);
+
+    if (!payload) {
       return;
     }
-
-    this.isSaving = true;
-    this.errorMessage = '';
-
-    const payload = { ...this.form.value } as Record<string, unknown>;
 
     // An empty language means "the same as the Story", which the server
     // expects as an absent field rather than an empty string.
@@ -367,39 +376,15 @@ export class ChapterEditorComponent implements OnInit {
       delete payload['languageCode'];
     }
 
-    if (this.chapter) {
-      payload['version'] = this.chapter.version;
-    }
-
     const request: Observable<ManagedChapter> = this.chapter
       ? this._chapterService.updateChapter(this.chapter.id, payload)
       : this._chapterService.createChapter(this.storyId, payload);
 
-    request
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        observeInZone(this._ngZone, this._cdr),
-      )
-      .subscribe({
-        next: saved => {
-          this.isSaving = false;
-          void this._router.navigate([
-            '/',
-            this.appRoutes.STORYTIME,
-            'manage',
-            'chapters',
-            saved.id,
-          ]);
-        },
-        error: (error: HttpErrorResponse) => {
-          this.isSaving = false;
-          // The server names the specific problem, which is more use to a writer
-          // than a generic failure would be.
-          this.errorMessage =
-            (error.error as { message?: string } | undefined)?.message ??
-            'This Chapter could not be saved. Please try again shortly.';
-        },
-      });
+    this._editor.save(
+      request,
+      savedId => ['manage', 'chapters', savedId],
+      'This Chapter could not be saved. Please try again shortly.',
+    );
   }
 
   /**

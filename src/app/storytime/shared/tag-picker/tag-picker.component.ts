@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component,
@@ -9,14 +10,13 @@ import {
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { StorytimeTag } from 'src/app/models/storytime.models';
 import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { groupTagsByCategory } from '../../tag-grouping.utility';
 import { TagService } from '../../tag.service';
-import { TAG_CATEGORY_LABELS } from '../../storytime.constants';
 
 /**
  * Choosing tags for a Story or an Arc.
@@ -76,7 +76,7 @@ export class TagPickerComponent implements OnInit {
       )
       .subscribe({
         next: tags => {
-          this.groups = this.groupByCategory(tags);
+          this.groups = groupTagsByCategory(tags);
           this.loadChosen();
         },
         error: () => {
@@ -178,27 +178,5 @@ export class TagPickerComponent implements OnInit {
             'The tags on this could not be loaded. Please try again shortly.';
         },
       });
-  }
-
-  /**
-   * Groups the vocabulary into the shelves it is shown on.
-   *
-   * @param tags - The whole vocabulary, already in order.
-   * @returns The tags by category, keeping the order they arrived in.
-   */
-  private groupByCategory(
-    tags: StorytimeTag[],
-  ): { category: string; label: string; tags: StorytimeTag[] }[] {
-    const groups = new Map<string, StorytimeTag[]>();
-
-    for (const tag of tags) {
-      groups.set(tag.category, [...(groups.get(tag.category) ?? []), tag]);
-    }
-
-    return [...groups.entries()].map(([category, categoryTags]) => ({
-      category,
-      label: TAG_CATEGORY_LABELS[category] ?? category,
-      tags: categoryTags,
-    }));
   }
 }

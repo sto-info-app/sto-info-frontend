@@ -212,13 +212,6 @@ describe('CollaboratorListComponent', () => {
       const element = render();
 
       expect(element.textContent).toContain('have not answered yet');
-      expect(
-        fixture.componentInstance.isPending(
-          buildCollaborator({
-            invitationStatus: CollaborationInvitationStatus.INVITED,
-          }),
-        ),
-      ).toBe(true);
     });
 
     it('offers to withdraw it rather than remove them', () => {

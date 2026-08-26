@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { Observable, finalize, forkJoin } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
 import {
   ArcCollaborator,
   ArcMembership,
@@ -22,6 +22,7 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import { CrewService } from '../../crew.service';
+import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
 import {
   ARC_COLLABORATOR_CAPABILITIES,
   COLLABORATOR_CAPABILITIES,
@@ -74,6 +75,11 @@ export class InvitationsComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _actions = new StorytimeActionRunner(
+    this,
+    () => this.load(),
+    'That could not be saved. Please try again shortly.',
+  );
 
   /**
    * Loads everything waiting on the caller.
@@ -145,7 +151,7 @@ export class InvitationsComponent implements OnInit {
    * @param invitation - The invitation.
    */
   accept(invitation: Collaborator): void {
-    this.runAction(this._crewService.accept(invitation.id));
+    this._actions.run(this._crewService.accept(invitation.id));
   }
 
   /**
@@ -154,7 +160,7 @@ export class InvitationsComponent implements OnInit {
    * @param invitation - The invitation.
    */
   decline(invitation: Collaborator): void {
-    this.runAction(this._crewService.decline(invitation.id));
+    this._actions.run(this._crewService.decline(invitation.id));
   }
 
   /**
@@ -163,7 +169,7 @@ export class InvitationsComponent implements OnInit {
    * @param invitation - The invitation.
    */
   acceptArc(invitation: ArcCollaborator): void {
-    this.runAction(this._arcService.acceptArcCollaboration(invitation.id));
+    this._actions.run(this._arcService.acceptArcCollaboration(invitation.id));
   }
 
   /**
@@ -172,7 +178,7 @@ export class InvitationsComponent implements OnInit {
    * @param invitation - The invitation.
    */
   declineArc(invitation: ArcCollaborator): void {
-    this.runAction(this._arcService.declineArcCollaboration(invitation.id));
+    this._actions.run(this._arcService.declineArcCollaboration(invitation.id));
   }
 
   /**
@@ -181,7 +187,7 @@ export class InvitationsComponent implements OnInit {
    * @param membership - The membership.
    */
   approveMembership(membership: ArcMembership): void {
-    this.runAction(this._arcService.approveMembership(membership.id));
+    this._actions.run(this._arcService.approveMembership(membership.id));
   }
 
   /**
@@ -190,31 +196,7 @@ export class InvitationsComponent implements OnInit {
    * @param membership - The membership.
    */
   declineMembership(membership: ArcMembership): void {
-    this.runAction(this._arcService.declineMembership(membership.id));
-  }
-
-  /**
-   * Runs an action, then reloads so the lists reflect what the server did.
-   *
-   * @param action - The action to run.
-   */
-  private runAction(action: Observable<unknown>): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    action
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        observeInZone(this._ngZone, this._cdr),
-      )
-      .subscribe({
-        next: () => this.load(),
-        error: () => {
-          this.errorMessage =
-            'That could not be saved. Please try again shortly.';
-          this.isLoading = false;
-        },
-      });
+    this._actions.run(this._arcService.declineMembership(membership.id));
   }
 
   /**

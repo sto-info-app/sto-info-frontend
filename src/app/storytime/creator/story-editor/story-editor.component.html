@@ -4,19 +4,22 @@
 
 <div
   id="storytime-story-editor-page"
-  class="storytime-page">
-  <h1>{{ isNew ? 'Create a Story' : 'Edit Story' }}</h1>
+  class="storytime-page"
+>
+  <h1>{{ isNew ? "Create a Story" : "Edit Story" }}</h1>
 
   @if (errorMessage) {
     <app-lcars-error-message
       title="Could not save"
-      [message]="errorMessage"></app-lcars-error-message>
+      [message]="errorMessage"
+    ></app-lcars-error-message>
   }
 
   <form
     [formGroup]="form"
     class="storytime-form"
-    (ngSubmit)="save()">
+    (ngSubmit)="save()"
+  >
     <section class="storytime-section">
       <div class="lcars-text-bar small-lcars-bar-gap">
         <span>Story Details</span>
@@ -31,10 +34,9 @@
               type="text"
               formControlName="title"
               maxlength="200"
-              required />
-            @if (
-              form.controls['title'].touched && form.controls['title'].invalid
-            ) {
+              required
+            />
+            @if (form.controls["title"].touched && form.controls["title"].invalid) {
               <small class="field-error">A title is required.</small>
             }
           </div>
@@ -47,7 +49,8 @@
               id="story-slug"
               type="text"
               formControlName="slug"
-              maxlength="220" />
+              maxlength="220"
+            />
             <p class="field-hint">
               Leave blank to build one from the title. Changing it keeps the old
               address working.
@@ -60,7 +63,8 @@
               id="story-short-description"
               type="text"
               formControlName="shortDescription"
-              maxlength="500" />
+              maxlength="500"
+            />
             <p class="field-hint">
               Shown in listings. Required before publishing.
             </p>
@@ -73,7 +77,8 @@
             <textarea
               id="story-description"
               formControlName="description"
-              rows="8"></textarea>
+              rows="8"
+            ></textarea>
             <p class="field-hint">
               Markdown is supported. Links to other sites are not shown.
             </p>
@@ -89,147 +94,44 @@
 
       <div class="storytime-panel">
         <div class="form-row">
-          <div class="storytime-setting-field">
-            <div class="lcars-select-container gold">
-              <label
-                class="select-label"
-                for="story-rating"
-                >Content rating</label
-              >
-              <select
-                id="story-rating"
-                title="Content rating"
-                formControlName="contentRating">
-                @for (rating of ratings; track rating) {
-                  <option [value]="rating">{{ ratingLabels[rating] }}</option>
-                }
-              </select>
-            </div>
-            <details class="storytime-setting-help">
-              <summary
-                class="storytime-setting-help__trigger"
-                aria-label="Content rating details">
-                <i
-                  class="fas fa-question-circle"
-                  aria-hidden="true"></i>
-              </summary>
-              <div class="storytime-setting-help__popup">
-                @for (option of ratingOptions; track option.value) {
-                  <p>
-                    <strong>{{ option.label }}</strong>
-                    <span>{{ option.description }}</span>
-                  </p>
-                }
-              </div>
-            </details>
-          </div>
+          <app-storytime-setting-select
+            fieldId="story-rating"
+            label="Content rating"
+            controlName="contentRating"
+            colour="gold"
+            [options]="ratingOptions"
+          />
 
-          <div class="storytime-setting-field">
-            <div class="lcars-select-container tangerine">
-              <label
-                class="select-label"
-                for="story-completion"
-                >Status</label
-              >
-              <select
-                id="story-completion"
-                title="Status"
-                formControlName="completionState">
-                @for (state of completionStates; track state) {
-                  <option [value]="state">{{ completionLabels[state] }}</option>
-                }
-              </select>
-            </div>
-            <details class="storytime-setting-help">
-              <summary
-                class="storytime-setting-help__trigger"
-                aria-label="Status details">
-                <i
-                  class="fas fa-question-circle"
-                  aria-hidden="true"></i>
-              </summary>
-              <div class="storytime-setting-help__popup">
-                @for (option of completionOptions; track option.value) {
-                  <p>
-                    <strong>{{ option.label }}</strong>
-                    <span>{{ option.description }}</span>
-                  </p>
-                }
-              </div>
-            </details>
-          </div>
+          <app-storytime-setting-select
+            fieldId="story-completion"
+            label="Status"
+            controlName="completionState"
+            colour="tangerine"
+            [options]="completionOptions"
+          />
         </div>
 
         <div class="form-row">
-          <div class="storytime-setting-field">
-            <div class="lcars-select-container bluey">
-              <label
-                class="select-label"
-                for="story-visibility"
-                >Visibility</label
-              >
-              <select
-                id="story-visibility"
-                title="Visibility"
-                formControlName="visibility">
-                @for (visibility of visibilities; track visibility) {
-                  <option [value]="visibility">
-                    {{ visibilityLabels[visibility] }}
-                  </option>
-                }
-              </select>
-            </div>
-            <details class="storytime-setting-help">
-              <summary
-                class="storytime-setting-help__trigger"
-                aria-label="Visibility details">
-                <i
-                  class="fas fa-question-circle"
-                  aria-hidden="true"></i>
-              </summary>
-              <div class="storytime-setting-help__popup">
-                @for (option of visibilityOptions; track option.value) {
-                  <p>
-                    <strong>{{ option.label }}</strong>
-                    <span>{{ option.description }}</span>
-                  </p>
-                }
-              </div>
-            </details>
-          </div>
+          <app-storytime-setting-select
+            fieldId="story-visibility"
+            label="Visibility"
+            controlName="visibility"
+            colour="bluey"
+            [options]="visibilityOptions"
+          />
 
-          <div class="storytime-setting-field">
-            <div class="lcars-select-container sunflower">
-              <label
-                class="select-label"
-                for="story-language"
-                >Language</label
-              >
-              <select
-                id="story-language"
-                title="Language"
-                formControlName="languageCode">
-                @for (language of languages; track language.code) {
-                  <option [value]="language.code">{{ language.name }}</option>
-                }
-              </select>
-            </div>
-            <details class="storytime-setting-help">
-              <summary
-                class="storytime-setting-help__trigger"
-                aria-label="Language details">
-                <i
-                  class="fas fa-question-circle"
-                  aria-hidden="true"></i>
-              </summary>
-              <div class="storytime-setting-help__popup">
-                <p>
-                  The language the Story is written in. A Chapter written in
-                  another language can say so on its own.
-                </p>
-              </div>
-            </details>
-          </div>
+          <app-storytime-setting-select
+            fieldId="story-language"
+            label="Language"
+            controlName="languageCode"
+            colour="sunflower"
+            [options]="languageOptions"
+          >
+            <p>
+              The language the Story is written in. A Chapter written in another
+              language can say so on its own.
+            </p>
+          </app-storytime-setting-select>
         </div>
       </div>
     </section>
@@ -238,14 +140,14 @@
       <button
         class="lcars-btn green"
         type="submit"
-        [disabled]="isSaving">
-        {{ isSaving ? 'Saving…' : 'Save' }}
+        [disabled]="isSaving"
+      >
+        {{ isSaving ? "Saving…" : "Save" }}
       </button>
       <a
         class="lcars-btn red"
-        [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories']"
-        >Cancel</a
-      >
+        [routerLink]='["/", appRoutes.STORYTIME, "manage", "stories"]'
+      >Cancel</a>
     </div>
   </form>
 
@@ -253,6 +155,7 @@
     <!-- Tagging needs something to tag, so it appears once the Story exists. -->
     <app-tag-picker
       targetType="STORY"
-      [targetId]="story.id"></app-tag-picker>
+      [targetId]="story.id"
+    ></app-tag-picker>
   }
 </div>

@@ -10,13 +10,14 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, finalize } from 'rxjs';
+import { finalize } from 'rxjs';
 import { ManagedCharacter } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CharacterService } from '../../character.service';
+import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
 
 /**
  * The cast of one of the creator's Stories, with the actions on each.
@@ -53,6 +54,9 @@ export class CharacterListComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _actions = new StorytimeActionRunner(this, () =>
+    this.load(),
+  );
 
   /**
    * Loads the cast of the Story named in the route.
@@ -86,7 +90,7 @@ export class CharacterListComponent implements OnInit {
    * @param character - The Character to delete.
    */
   remove(character: ManagedCharacter): void {
-    this.runAction(this._characterService.deleteCharacter(character.id));
+    this._actions.run(this._characterService.deleteCharacter(character.id));
   }
 
   /**
@@ -108,36 +112,12 @@ export class CharacterListComponent implements OnInit {
     const [moved] = reordered.splice(from, 1);
     reordered.splice(to, 0, moved);
 
-    this.runAction(
+    this._actions.run(
       this._characterService.reorderCharacters(
         this.storyId,
         reordered.map(character => character.id),
       ),
     );
-  }
-
-  /**
-   * Runs an action, then reloads so the list reflects what the server did.
-   *
-   * @param action - The action to run.
-   */
-  private runAction(action: Observable<unknown>): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    action
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        observeInZone(this._ngZone, this._cdr),
-      )
-      .subscribe({
-        next: () => this.load(),
-        error: () => {
-          this.errorMessage =
-            'That change could not be saved. Please try again shortly.';
-          this.isLoading = false;
-        },
-      });
   }
 
   /**
