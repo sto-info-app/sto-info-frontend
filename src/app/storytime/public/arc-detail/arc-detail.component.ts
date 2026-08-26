@@ -9,7 +9,6 @@ import {
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { switchMap } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -98,7 +97,6 @@ export class ArcDetailComponent implements OnInit {
       this.arc.ownerUserId === this._authService.getUserId()
     );
   }
-  private readonly _sanitizer = inject(DomSanitizer);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
@@ -122,11 +120,9 @@ export class ArcDetailComponent implements OnInit {
         next: result => {
           this.arc = result.arc;
           this.stories = result.stories;
-          this.descriptionHtml = result.arc.descriptionHtml
-            ? (this._sanitizer.bypassSecurityTrustHtml(
-                result.arc.descriptionHtml,
-              ) as string)
-            : null;
+          // Assigned as a plain string (not SafeHtml) so Angular's built-in
+          // sanitizer still runs on it before it reaches [innerHTML].
+          this.descriptionHtml = result.arc.descriptionHtml;
           this.isLoading = false;
           this.loadProgress(result.arc.slug);
         },

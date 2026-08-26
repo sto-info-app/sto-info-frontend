@@ -11,7 +11,6 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { DomSanitizer } from '@angular/platform-browser';
 import { finalize, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -139,7 +138,6 @@ export class StoryDetailComponent implements OnInit {
   private readonly _authService = inject(AuthService);
   private readonly _moderationService = inject(StorytimeModerationService);
   private readonly _dialog = inject(MatDialog);
-  private readonly _sanitizer = inject(DomSanitizer);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
@@ -163,11 +161,9 @@ export class StoryDetailComponent implements OnInit {
       .subscribe({
         next: story => {
           this.story = story;
-          this.descriptionHtml = story.descriptionHtml
-            ? (this._sanitizer.bypassSecurityTrustHtml(
-                story.descriptionHtml,
-              ) as string)
-            : null;
+          // Assigned as a plain string (not SafeHtml) so Angular's built-in
+          // sanitizer still runs on it before it reaches [innerHTML].
+          this.descriptionHtml = story.descriptionHtml;
           this.isLoading = false;
           this.loadChapters();
           this.loadCharacters();

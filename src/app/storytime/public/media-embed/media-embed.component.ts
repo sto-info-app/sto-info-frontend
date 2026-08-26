@@ -60,10 +60,8 @@ export class MediaEmbedComponent {
       return null;
     }
 
-    // NOSONAR - the URL is restricted to HTTPS YouTube origins above.
-    return this._sanitizer.bypassSecurityTrustResourceUrl(
-      `${embedUrl}${embedUrl.search ? '&' : '?'}autoplay=1`,
-    );
+    const url = `${embedUrl}${embedUrl.search ? '&' : '?'}autoplay=1`;
+    return this._sanitizer.bypassSecurityTrustResourceUrl(url); // NOSONAR - the URL is restricted to HTTPS YouTube origins above.
   }
 
   /**

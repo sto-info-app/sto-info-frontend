@@ -43,8 +43,12 @@
   color: vars.$lcars-sunflower;
   text-decoration: none;
 
-  &:hover,
-  &:focus {
+  // & is always resolved here: every @include of this mixin sits inside a
+  // real selector (see usages below), so this is the known stylelint/Sonar
+  // false positive for `&` referenced inside a @mixin definition rather than
+  // a missing scoping root.
+  &:hover, // NOSONAR
+  &:focus { // NOSONAR
     color: vars.$lcars-gold;
     text-decoration: underline;
   }
@@ -466,8 +470,8 @@ nav[class^='storytime-'] :where(a, [aria-current='page']) {
 }
 
 .storytime-setting-help[open] .storytime-setting-help__trigger {
-  background-color: rgb(111 255 143 / 20%);
-  color: #6fff8f;
+  background-color: vars.$lcars-green;
+  color: #000;
 }
 
 .storytime-setting-help__trigger {

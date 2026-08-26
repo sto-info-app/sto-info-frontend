@@ -79,9 +79,11 @@ describe('ChapterService', () => {
     it('escapes both slugs in the URL', async () => {
       const result = firstValueFrom(service.getChapter('a b', 'c d'));
 
-      httpMock
-        .expectOne(`${API_URLS.STORYTIME_STORIES}/a%20b/chapters/c%20d`)
-        .flush({});
+      const request = httpMock.expectOne(
+        `${API_URLS.STORYTIME_STORIES}/a%20b/chapters/c%20d`,
+      );
+      expect(request.request.method).toBe('GET');
+      request.flush({});
 
       await result;
     });

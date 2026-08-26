@@ -198,9 +198,7 @@ export class ChapterReaderComponent implements OnInit {
           this.previous = result.previous;
           this.next = result.next;
           this.contentHtml = result.chapter.contentHtml
-            ? (this._sanitizer.bypassSecurityTrustHtml(
-                result.chapter.contentHtml,
-              ) as string)
+            ? this.trustContentHtml(result.chapter.contentHtml)
             : null;
           this.isLoading = false;
           this.loadProgress();
@@ -216,6 +214,20 @@ export class ChapterReaderComponent implements OnInit {
           this.isLoading = false;
         },
       });
+  }
+
+  /**
+   * Marks a Chapter's body as trusted HTML.
+   *
+   * See the class doc comment: the server already sanitises this HTML, and
+   * it is trusted here (rather than re-sanitised) because Angular's
+   * sanitiser would strip the block anchors reading progress depends on.
+   *
+   * @param html - The server-rendered Chapter body.
+   * @returns The trusted HTML.
+   */
+  private trustContentHtml(html: string): string {
+    return this._sanitizer.bypassSecurityTrustHtml(html) as string; // NOSONAR - server-sanitised HTML; see method doc comment above.
   }
 
   /**

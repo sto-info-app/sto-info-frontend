@@ -9,7 +9,6 @@ import {
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { switchMap } from 'rxjs';
 import {
@@ -64,7 +63,6 @@ export class StorytimeCharacterDetailComponent implements OnInit {
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _characterService = inject(CharacterService);
-  private readonly _sanitizer = inject(DomSanitizer);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
@@ -121,11 +119,9 @@ export class StorytimeCharacterDetailComponent implements OnInit {
         next: result => {
           this.character = result.character;
           this.appearsIn = result.appearsIn;
-          this.biographyHtml = result.character.biographyHtml
-            ? (this._sanitizer.bypassSecurityTrustHtml(
-                result.character.biographyHtml,
-              ) as string)
-            : null;
+          // Assigned as a plain string (not SafeHtml) so Angular's built-in
+          // sanitizer still runs on it before it reaches [innerHTML].
+          this.biographyHtml = result.character.biographyHtml;
           this.isLoading = false;
         },
         error: (error: HttpErrorResponse) => {
