@@ -1,0 +1,120 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Arc"></app-loading-bar>
+}
+
+@if (errorMessage) {
+  <app-lcars-error-message
+    title="Arc unavailable"
+    [message]="errorMessage"></app-lcars-error-message>
+}
+
+@if (arc) {
+  <article
+    id="storytime-arc-detail-page"
+    class="storytime-page"
+    [attr.lang]="arc.languageCode">
+    @if (arc.bannerImageUrl) {
+      <img
+        class="storytime-arc__banner"
+        [src]="arc.bannerImageUrl"
+        [alt]="arc.bannerImageAlt ?? ''" />
+    }
+
+    <h1>{{ arc.title }}</h1>
+
+    @if (arc.shortDescription) {
+      <p class="storytime-arc__summary">{{ arc.shortDescription }}</p>
+    }
+
+    @if (descriptionHtml) {
+      <div
+        class="storytime-arc__description"
+        [innerHTML]="descriptionHtml"></div>
+    }
+
+    @if (hasProgress && progress) {
+      <section class="storytime-arc__progress">
+        <p class="storytime-arc__progress-summary">
+          You have read {{ progress.completedStories }} of
+          {{ progress.totalStories }}
+          {{ progress.totalStories === 1 ? 'Story' : 'Stories' }} in this Arc.
+        </p>
+        <progress
+          class="storytime-arc__progress-bar"
+          [value]="progress.percentComplete"
+          max="100"
+          [attr.aria-label]="'Progress through ' + arc.title">
+        </progress>
+
+        @if (continueStory && continueStory.story) {
+          <a
+            class="storytime-arc__continue"
+            [routerLink]="[
+              '/',
+              appRoutes.STORYTIME,
+              'stories',
+              continueStory.story.slug,
+            ]">
+            Continue with {{ continueStory.story.title }}
+          </a>
+        }
+      </section>
+    }
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Reading Order</span>
+    </div>
+
+    @if (stories.length === 0) {
+      <p class="storytime-empty">
+        None of the Stories in this Arc are published yet. Check back soon.
+      </p>
+    } @else {
+      <ol class="storytime-arc__stories">
+        @for (membership of stories; track membership.id) {
+          <li
+            class="storytime-arc__story"
+            [class.storytime-arc__story--read]="isRead(membership)">
+            <a
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'stories',
+                membership.story?.slug,
+              ]">
+              {{ membership.story?.title }}
+            </a>
+            @if (membership.introductoryNote) {
+              <p class="storytime-arc__note">
+                {{ membership.introductoryNote }}
+              </p>
+            } @else if (membership.story?.shortDescription) {
+              <p class="storytime-arc__story-summary">
+                {{ membership.story.shortDescription }}
+              </p>
+            }
+          </li>
+        }
+      </ol>
+    }
+    @if (arc) {
+      <div class="storytime-arc__social">
+        <app-reaction-control
+          [targetType]="targetTypes.ARC"
+          [targetId]="arc.id" />
+        <app-follow-button
+          [kind]="followKinds.ARC"
+          [targetId]="arc.id"
+          label="this Arc" />
+        <app-add-to-list
+          [targetType]="targetTypes.ARC"
+          [targetId]="arc.id" />
+      </div>
+
+      <app-comment-thread
+        [targetType]="targetTypes.ARC"
+        [targetId]="arc.id"
+        [isOwner]="isOwner" />
+    }
+  </article>
+}

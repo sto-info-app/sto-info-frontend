@@ -1,9 +1,4 @@
-import {
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  tick,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
@@ -82,7 +77,27 @@ describe('ChangePasswordComponent', () => {
   });
 
   describe('onSubmit', () => {
+    let setTimeoutSpy: jest.SpyInstance;
+
+    /**
+     * Runs whatever the component scheduled for the given delay.
+     *
+     * `observeInZone` delivers the subscription's notifications inside the
+     * Angular zone, so a timer started from one of them belongs to that zone
+     * rather than to `fakeAsync`, and `tick` cannot reach it. Invoking the
+     * scheduled callback asserts the same behaviour without depending on which
+     * zone the timer landed in.
+     *
+     * @param delay - The delay the callback was scheduled with.
+     */
+    const runTimersFor = (delay: number): void => {
+      setTimeoutSpy.mock.calls
+        .filter(call => call[1] === delay)
+        .forEach(call => (call[0] as () => void)());
+    };
+
     beforeEach(() => {
+      setTimeoutSpy = jest.spyOn(globalThis, 'setTimeout');
       fixture.detectChanges();
       component.changePasswordForm.patchValue({
         password: 'Password@123', // NOSONAR - Testing valid password format
@@ -105,7 +120,7 @@ describe('ChangePasswordComponent', () => {
       );
     });
 
-    it('should logout after a short delay and show additional message if logged in after success', fakeAsync(() => {
+    it('should logout after a short delay and show additional message if logged in after success', () => {
       mockAuthService.changePassword.mockReturnValue(of(undefined));
       mockAuthService.isLoggedIn.mockReturnValue(true);
 
@@ -116,9 +131,9 @@ describe('ChangePasswordComponent', () => {
       );
       expect(mockAuthService.performLogout).not.toHaveBeenCalled();
 
-      tick(3000);
+      runTimersFor(3000);
       expect(mockAuthService.performLogout).toHaveBeenCalled();
-    }));
+    });
 
     it('should handle token expired error (400)', () => {
       mockAuthService.changePassword.mockReturnValue(
@@ -211,7 +226,7 @@ describe('ChangePasswordComponent', () => {
       expect(component.successMessage).toBe('');
     });
 
-    it('should handle generic error', fakeAsync(() => {
+    it('should handle generic error', () => {
       mockAuthService.changePassword.mockReturnValue(
         throwError(() => ({ status: 500 })),
       );
@@ -220,11 +235,11 @@ describe('ChangePasswordComponent', () => {
 
       expect(component.errorMessage).toContain('There was an error');
 
-      tick(MILLISECONDS_SHOW_ERROR_MSG);
+      runTimersFor(MILLISECONDS_SHOW_ERROR_MSG);
       expect(component.errorMessage).toBe('');
-    }));
+    });
 
-    it('should handle generic error when status fields are missing', fakeAsync(() => {
+    it('should handle generic error when status fields are missing', () => {
       mockAuthService.changePassword.mockReturnValue(
         throwError(() => ({ message: ['unexpected', 'failure'] })),
       );
@@ -233,11 +248,11 @@ describe('ChangePasswordComponent', () => {
 
       expect(component.errorMessage).toContain('There was an error');
 
-      tick(MILLISECONDS_SHOW_ERROR_MSG);
+      runTimersFor(MILLISECONDS_SHOW_ERROR_MSG);
       expect(component.errorMessage).toBe('');
-    }));
+    });
 
-    it('should fallback to a plain string error body when message is missing', fakeAsync(() => {
+    it('should fallback to a plain string error body when message is missing', () => {
       mockAuthService.changePassword.mockReturnValue(
         throwError(() => ({
           status: 500,
@@ -249,9 +264,9 @@ describe('ChangePasswordComponent', () => {
 
       expect(component.errorMessage).toContain('There was an error');
 
-      tick(MILLISECONDS_SHOW_ERROR_MSG);
+      runTimersFor(MILLISECONDS_SHOW_ERROR_MSG);
       expect(component.errorMessage).toBe('');
-    }));
+    });
 
     it('should normalize top-level array messages when no nested message is present', () => {
       mockAuthService.changePassword.mockReturnValue(
@@ -269,7 +284,7 @@ describe('ChangePasswordComponent', () => {
       expect(component.errorMessage).toBe('');
     });
 
-    it('should fallback when message is neither string nor array', fakeAsync(() => {
+    it('should fallback when message is neither string nor array', () => {
       mockAuthService.changePassword.mockReturnValue(
         throwError(() => ({
           status: 500,
@@ -283,9 +298,9 @@ describe('ChangePasswordComponent', () => {
 
       expect(component.errorMessage).toContain('There was an error');
 
-      tick(MILLISECONDS_SHOW_ERROR_MSG);
+      runTimersFor(MILLISECONDS_SHOW_ERROR_MSG);
       expect(component.errorMessage).toBe('');
-    }));
+    });
 
     it('should not call authService if form is invalid', () => {
       component.changePasswordForm.patchValue({ password: '' });

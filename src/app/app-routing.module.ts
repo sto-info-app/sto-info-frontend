@@ -97,6 +97,20 @@ export const routes: Routes = [
     data: { title: APP_ROUTE_TITLES.RESOURCES },
   },
   {
+    path: APP_ROUTES.HELP,
+    loadComponent: () =>
+      import('./static-pages/help/help.component').then(m => m.HelpComponent),
+    data: { title: APP_ROUTE_TITLES.HELP },
+  },
+  {
+    path: APP_ROUTES.HELP_GUIDE,
+    loadComponent: () =>
+      import('./static-pages/help/help-guide/help-guide.component').then(
+        m => m.HelpGuideComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.HELP_GUIDE },
+  },
+  {
     path: APP_ROUTES.ABOUT_DEVELOPERS,
     component: TeamDevelopersComponent,
     data: { title: APP_ROUTE_TITLES.ABOUT_DEVELOPERS },
@@ -499,6 +513,16 @@ export const routes: Routes = [
       requiresApi: true,
     },
     canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+
+  // *****************************************
+  // * Storytime
+  {
+    path: APP_ROUTES.STORYTIME,
+    loadChildren: () =>
+      import('./storytime/storytime.routes').then(m => m.STORYTIME_ROUTES),
+    data: { title: APP_ROUTE_TITLES.STORYTIME, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
   },
 
   // *****************************************

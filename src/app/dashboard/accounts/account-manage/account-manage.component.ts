@@ -7,14 +7,8 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject, forkJoin, of, takeUntil } from 'rxjs';
 import {
@@ -25,13 +19,14 @@ import {
 } from 'src/app/dashboard/models/sto-account.model';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
-import { STO_HANDLE_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import {
   decodeStoHandle,
   encodeStoHandle,
 } from 'src/app/shared/utils/sto-handle.utils';
+import { createAccountForm } from '../account-form.factory';
 
 @Component({
   selector: 'app-account-manage',
@@ -88,20 +83,7 @@ export class AccountManageComponent implements OnInit, OnDestroy {
   private readonly _destroy$ = new Subject<void>();
 
   constructor() {
-    this.accountForm = this._fb.group({
-      handle: [
-        '',
-        [Validators.required, Validators.pattern(STO_HANDLE_PATTERN)],
-      ],
-      username: [''],
-      email: ['', [Validators.email]],
-      notes: [''],
-      accountCreatedDate: [null],
-      publiclyVisible: [true],
-      lifetimeSubscription: [false],
-      platformId: [''],
-      launcherId: [''],
-    });
+    this.accountForm = createAccountForm(this._fb);
   }
 
   ngOnInit(): void {

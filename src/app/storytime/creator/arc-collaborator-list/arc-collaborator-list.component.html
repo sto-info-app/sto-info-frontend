@@ -1,0 +1,52 @@
+<section
+  id="storytime-arc-collaborator-list-page"
+  class="storytime-page"
+>
+  <h1>Arc collaborators</h1>
+
+  <nav class="storytime-page-actions">
+    <a
+      class="lcars-btn lcars-btn-auto bluey"
+      [routerLink]='["/", appRoutes.STORYTIME, "manage", "arcs", arcId]'
+    >
+      Back to the Arc
+    </a>
+    <a
+      class="lcars-btn lcars-btn-auto sky"
+      [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "arcs",
+  arcId,
+  "stories",
+]'
+    >
+      Stories
+    </a>
+  </nav>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Collaborators unavailable"
+      [message]="errorMessage"
+    ></app-lcars-error-message>
+  }
+
+  <p class="storytime-intro">
+    Collaborators can help assemble the Arc. They gain nothing over the Stories
+    in it, and only you can publish it.
+  </p>
+
+  <app-collaborator-panel
+    idPrefix="arc-collaborator"
+    emptyMessage="Nobody else is helping with this Arc yet."
+    [form]="form"
+    [capabilities]="capabilities"
+    [collaborators]="collaborators"
+    [isLoading]="isLoading"
+    (invited)="invite()"
+    (capabilityChanged)="setCapability($event.collaborator, $event.capability, $event.granted)"
+    (revoked)="revoke($event)"
+  />
+</section>

@@ -1,0 +1,42 @@
+<div class="lcars-text-bar small-lcars-bar-gap">
+  <span>Storytime Policies</span>
+</div>
+
+<!--
+  The three publishing documents are one set read together — each defers to the
+  other two on points it does not settle — so they are presented as one page
+  with three tabs rather than three pages that link to each other. Each tab is
+  still its own route, which keeps every existing link and bookmark working and
+  lets a reader send somebody straight to the document they mean.
+-->
+<nav
+  class="lcars-tabs"
+  aria-label="Storytime publishing documents">
+  @for (tab of tabs; track tab.link) {
+    <a
+      class="lcars-tab"
+      [routerLink]="tab.link"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      #tabActive="routerLinkActive"
+      [attr.aria-current]="tabActive.isActive ? 'page' : null"
+      >{{ tab.label }}</a
+    >
+  }
+  <span
+    class="lcars-tabs-filler"
+    aria-hidden="true"></span>
+</nav>
+
+<h1>{{ title }}</h1>
+
+<p class="storytime-policy__intro">{{ intro }}</p>
+
+<p class="storytime-policy__version">
+  <strong class="go-gold">Version: </strong>
+  <span class="go-roseblush">{{ version }}</span
+  >.<br />
+  <strong class="go-gold">Effective Date: </strong>
+  <span class="go-roseblush">{{ effectiveDate }}</span
+  >.
+</p>

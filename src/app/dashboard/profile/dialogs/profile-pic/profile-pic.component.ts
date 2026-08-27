@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -10,6 +10,7 @@ import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { ImageCropperBaseComponent } from 'src/app/dashboard/base/image-cropper-base.component';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { EditPersonalDetailsComponent } from '../edit-personal-details/edit-personal-details.component';
 
 @Component({
@@ -33,6 +34,8 @@ export class ProfilePicComponent extends ImageCropperBaseComponent {
   } | null;
 
   private readonly _dashboardService = inject(DashboardService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   onUploadImageClick(): void {
     try {
@@ -46,16 +49,19 @@ export class ProfilePicComponent extends ImageCropperBaseComponent {
       );
 
       this.isSubmitting = true;
-      this._dashboardService.updateProfilePic(formData).subscribe({
-        next: () => {
-          this.isSubmitting = false;
-          this._dialogRef?.close(true);
-        },
-        error: error => {
-          this.handleHttpError(error);
-          this.isSubmitting = false;
-        },
-      });
+      this._dashboardService
+        .updateProfilePic(formData)
+        .pipe(observeInZone(this._ngZone, this._cdr))
+        .subscribe({
+          next: () => {
+            this.isSubmitting = false;
+            this._dialogRef?.close(true);
+          },
+          error: error => {
+            this.handleHttpError(error);
+            this.isSubmitting = false;
+          },
+        });
     } catch (error) {
       console.error('Error processing image blob:', error);
       this.displayErrorMessage('Invalid image format.');

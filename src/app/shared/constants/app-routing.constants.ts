@@ -2,8 +2,10 @@ export const ROOT_ROUTES = {
   ABOUT: 'about',
   COMMUNITY: 'community',
   DASHBOARD: 'dashboard',
+  HELP: 'help',
   NEWS: 'news',
   ADMIN: 'admin',
+  STORYTIME: 'storytime',
 };
 
 const REGISTRY_ROOT = ROOT_ROUTES.COMMUNITY + '/registry';
@@ -25,6 +27,8 @@ export const APP_ROUTES = {
   ABOUT: 'about',
   ROADMAP: 'roadmap',
   RESOURCES: 'resources',
+  HELP: ROOT_ROUTES.HELP,
+  HELP_GUIDE: ROOT_ROUTES.HELP + '/:guideSlug',
   CONTACT: 'contact',
   TERMS_OF_USE: 'terms-of-use',
   CREDITS: 'credits',
@@ -87,8 +91,65 @@ export const APP_ROUTES = {
   ADMIN_REPORTS: ROOT_ROUTES.ADMIN + '/reports',
   ADMIN_USERS: ROOT_ROUTES.ADMIN + '/users',
 
+  // Storytime
+  STORYTIME: ROOT_ROUTES.STORYTIME,
+  STORYTIME_STORIES: ROOT_ROUTES.STORYTIME + '/stories',
+  STORYTIME_LIBRARY: ROOT_ROUTES.STORYTIME + '/library',
+  STORYTIME_ARCS: ROOT_ROUTES.STORYTIME + '/arcs',
+  STORYTIME_ARC: ROOT_ROUTES.STORYTIME + '/arcs/:arcSlug',
+  STORYTIME_STORY: ROOT_ROUTES.STORYTIME + '/stories/:storySlug',
+  STORYTIME_MANAGE: ROOT_ROUTES.STORYTIME + '/manage/stories',
+  STORYTIME_STORY_NEW: ROOT_ROUTES.STORYTIME + '/manage/stories/new',
+  STORYTIME_STORY_EDIT: ROOT_ROUTES.STORYTIME + '/manage/stories/:storyId',
+  STORYTIME_CHAPTER:
+    ROOT_ROUTES.STORYTIME + '/stories/:storySlug/chapters/:chapterSlug',
+  STORYTIME_CHARACTER:
+    ROOT_ROUTES.STORYTIME + '/stories/:storySlug/characters/:characterSlug',
+  STORYTIME_MANAGE_CHARACTERS:
+    ROOT_ROUTES.STORYTIME + '/manage/stories/:storyId/characters',
+  STORYTIME_CHARACTER_NEW:
+    ROOT_ROUTES.STORYTIME + '/manage/stories/:storyId/characters/new',
+  STORYTIME_CHARACTER_EDIT:
+    ROOT_ROUTES.STORYTIME + '/manage/characters/:characterId',
+  STORYTIME_COLLABORATORS:
+    ROOT_ROUTES.STORYTIME + '/manage/stories/:storyId/collaborators',
+  STORYTIME_INVITATIONS: ROOT_ROUTES.STORYTIME + '/manage/invitations',
+  STORYTIME_MANAGE_CHAPTERS:
+    ROOT_ROUTES.STORYTIME + '/manage/stories/:storyId/chapters',
+  STORYTIME_CHAPTER_NEW:
+    ROOT_ROUTES.STORYTIME + '/manage/stories/:storyId/chapters/new',
+  STORYTIME_CHAPTER_EDIT: ROOT_ROUTES.STORYTIME + '/manage/chapters/:chapterId',
+  STORYTIME_MANAGE_ARCS: ROOT_ROUTES.STORYTIME + '/manage/arcs',
+  STORYTIME_ARC_NEW: ROOT_ROUTES.STORYTIME + '/manage/arcs/new',
+  STORYTIME_ARC_EDIT: ROOT_ROUTES.STORYTIME + '/manage/arcs/:arcId',
+  STORYTIME_ARC_STORIES: ROOT_ROUTES.STORYTIME + '/manage/arcs/:arcId/stories',
+  STORYTIME_ARC_COLLABORATORS:
+    ROOT_ROUTES.STORYTIME + '/manage/arcs/:arcId/collaborators',
+  STORYTIME_SPOTLIGHT: ROOT_ROUTES.STORYTIME + '/spotlight',
+  STORYTIME_SEARCH: ROOT_ROUTES.STORYTIME + '/search',
+  STORYTIME_CREATOR: ROOT_ROUTES.STORYTIME + '/creators/:userId',
+  STORYTIME_POLICIES: ROOT_ROUTES.STORYTIME + '/policies',
+  STORYTIME_CONTENT_POLICY: ROOT_ROUTES.STORYTIME + '/content-policy',
+  STORYTIME_TERMS: ROOT_ROUTES.STORYTIME + '/terms',
+  STORYTIME_FAN_CONTENT: ROOT_ROUTES.STORYTIME + '/fan-content',
+  STORYTIME_REMOVED: ROOT_ROUTES.STORYTIME + '/removed',
+  STORYTIME_MODERATION: ROOT_ROUTES.STORYTIME + '/manage/moderation',
+  STORYTIME_MANAGE_TAGS: ROOT_ROUTES.STORYTIME + '/manage/tags',
+  STORYTIME_MANAGE_SPOTLIGHT: ROOT_ROUTES.STORYTIME + '/manage/spotlight',
+  STORYTIME_SPOTLIGHT_NEW: ROOT_ROUTES.STORYTIME + '/manage/spotlight/new',
+  STORYTIME_SPOTLIGHT_EDIT:
+    ROOT_ROUTES.STORYTIME + '/manage/spotlight/:spotlightId',
+  STORYTIME_FEED: ROOT_ROUTES.STORYTIME + '/feed',
+  STORYTIME_READING_LISTS: ROOT_ROUTES.STORYTIME + '/reading-lists',
+  STORYTIME_READING_LIST: ROOT_ROUTES.STORYTIME + '/reading-lists/:listId',
+  STORYTIME_PUBLIC_READING_LIST:
+    ROOT_ROUTES.STORYTIME + '/creators/:userId/reading-lists/:slug',
+
   // Error Pages
   SERVICE_INTERRUPTION: 'service-interruption',
+  // Matches no route, so the wildcard renders the not-found page. Used when
+  // code needs to send a visitor there deliberately.
+  PAGE_NOT_FOUND: 'page-not-found',
 };
 
 export const APP_ROUTE_TITLES = {
@@ -108,6 +169,10 @@ export const APP_ROUTE_TITLES = {
   ABOUT: 'About',
   ROADMAP: 'Roadmap',
   RESOURCES: 'STO Resources',
+  HELP: 'Help',
+  // Replaced once the guide loads: one route serves every guide, so the
+  // address is the only thing that says which one is being read.
+  HELP_GUIDE: 'Help',
   CONTACT: 'Contact us',
   TERMS_OF_USE: 'Terms of Use',
   CREDITS: 'Credits',
@@ -165,6 +230,48 @@ export const APP_ROUTE_TITLES = {
   ADMIN_NOTIFICATIONS_SEND: 'Send Notification',
   ADMIN_REPORTS: 'Reported Officers',
   ADMIN_USERS: 'Manage Members',
+
+  // Storytime
+  STORYTIME: 'Storytime',
+  STORYTIME_STORIES: 'Stories',
+  STORYTIME_LIBRARY: 'Your Library',
+  STORYTIME_ARCS: 'Arcs',
+  STORYTIME_ARC: 'Arc',
+  STORYTIME_STORY: 'Story',
+  STORYTIME_MANAGE: 'Your Stories',
+  STORYTIME_STORY_NEW: 'Create a Story',
+  STORYTIME_STORY_EDIT: 'Edit Story',
+  STORYTIME_CHAPTER: 'Chapter',
+  STORYTIME_CHARACTER: 'Character',
+  STORYTIME_MANAGE_CHARACTERS: 'Cast',
+  STORYTIME_CHARACTER_NEW: 'Add a Character',
+  STORYTIME_CHARACTER_EDIT: 'Edit Character',
+  STORYTIME_COLLABORATORS: 'Collaborators',
+  STORYTIME_INVITATIONS: 'Invitations',
+  STORYTIME_MANAGE_CHAPTERS: 'Chapters',
+  STORYTIME_CHAPTER_NEW: 'Write a Chapter',
+  STORYTIME_CHAPTER_EDIT: 'Edit Chapter',
+  STORYTIME_MANAGE_ARCS: 'Your Arcs',
+  STORYTIME_ARC_NEW: 'Create an Arc',
+  STORYTIME_ARC_EDIT: 'Edit Arc',
+  STORYTIME_ARC_STORIES: 'Arc Stories',
+  STORYTIME_ARC_COLLABORATORS: 'Arc Collaborators',
+  STORYTIME_SPOTLIGHT: 'Spotlight',
+  STORYTIME_SEARCH: 'Search Storytime',
+  STORYTIME_CREATOR: 'Creator',
+  STORYTIME_CONTENT_POLICY: 'Content Policy',
+  STORYTIME_TERMS: 'Storytime Terms of Use',
+  STORYTIME_FAN_CONTENT: 'Fan Content & IP Notice',
+  STORYTIME_REMOVED: 'Removed',
+  STORYTIME_MODERATION: 'Storytime Moderation',
+  STORYTIME_MANAGE_TAGS: 'Storytime Tags',
+  STORYTIME_MANAGE_SPOTLIGHT: 'Manage Spotlight',
+  STORYTIME_SPOTLIGHT_NEW: 'Draft a Selection',
+  STORYTIME_SPOTLIGHT_EDIT: 'Edit Selection',
+  STORYTIME_FEED: 'Your Feed',
+  STORYTIME_READING_LISTS: 'Your Reading Lists',
+  STORYTIME_READING_LIST: 'Reading List',
+  STORYTIME_PUBLIC_READING_LIST: 'Reading List',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'Service Interruption',

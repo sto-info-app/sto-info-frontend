@@ -1,0 +1,178 @@
+<section
+  id="storytime-tag-admin-page"
+  class="storytime-page">
+  <h1>Storytime Tags</h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Action failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <p class="storytime-intro">
+    Creators choose from this list. Keeping it short and unambiguous is what
+    makes a tag filter find anything.
+  </p>
+
+  <section class="storytime-section">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>{{ editingTagId ? 'Edit a tag' : 'Add a tag' }}</span>
+    </div>
+
+    <form
+      class="storytime-panel storytime-form"
+      [formGroup]="form"
+      (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="lcars-input-container perano">
+          <label for="tag-name">Name</label>
+          <input
+            id="tag-name"
+            type="text"
+            formControlName="name"
+            maxlength="100" />
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <small class="field-error">A tag needs a name.</small>
+          }
+        </div>
+
+        <div class="storytime-setting-field">
+          <div class="lcars-select-container gold">
+            <label
+              class="select-label"
+              for="tag-category"
+              >Category</label
+            >
+            <select
+              id="tag-category"
+              title="Category"
+              formControlName="category">
+              @for (category of categories; track category) {
+                <option [value]="category">
+                  {{ categoryLabels[category] }}
+                </option>
+              }
+            </select>
+          </div>
+          <details class="storytime-setting-help">
+            <summary
+              class="storytime-setting-help__trigger"
+              aria-label="Category details">
+              <i
+                class="fas fa-question-circle"
+                aria-hidden="true"></i>
+            </summary>
+            <div class="storytime-setting-help__popup">
+              @for (option of categoryOptions; track option.value) {
+                <p>
+                  <strong>{{ option.label }}</strong>
+                  <span>{{ option.description }}</span>
+                </p>
+              }
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="lcars-input-container bluey">
+          <label for="tag-slug">URL slug</label>
+          <input
+            id="tag-slug"
+            type="text"
+            formControlName="slug"
+            maxlength="120" />
+          <p class="field-hint">
+            Leave blank to build one from the name. Changing it breaks filter
+            links already shared.
+          </p>
+        </div>
+
+        <div class="lcars-input-container sky">
+          <label for="tag-description">What it means</label>
+          <input
+            id="tag-description"
+            type="text"
+            formControlName="description"
+            maxlength="500" />
+        </div>
+
+        <div class="lcars-input-container violet">
+          <label for="tag-order">Order within its category</label>
+          <input
+            id="tag-order"
+            type="number"
+            min="0"
+            formControlName="displayOrder" />
+        </div>
+      </div>
+
+      <div class="storytime-form-actions">
+        <button
+          class="lcars-btn green"
+          type="submit">
+          {{ editingTagId ? 'Save changes' : 'Add tag' }}
+        </button>
+        @if (editingTagId) {
+          <button
+            class="lcars-btn red"
+            type="button"
+            (click)="cancelEdit()">
+            Cancel
+          </button>
+        }
+      </div>
+    </form>
+  </section>
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading tags"></app-loading-bar>
+  } @else if (groups.length === 0) {
+    <p class="storytime-empty">There are no tags yet.</p>
+  } @else {
+    @for (group of groups; track group.category) {
+      <section class="storytime-section storytime-tag-admin__group">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>{{ group.label }}</span>
+        </div>
+
+        <ul class="storytime-tag-admin__tags">
+          @for (tag of group.tags; track tag.id) {
+            <li>
+              <span class="storytime-tag-admin__name">{{ tag.name }}</span>
+              <span class="storytime-tag-admin__slug">{{ tag.slug }}</span>
+              @if (tag.description) {
+                <span class="storytime-tag-admin__description">{{
+                  tag.description
+                }}</span>
+              }
+
+              <div class="storytime-tag-admin__actions">
+                <button
+                  class="cta-icon"
+                  type="button"
+                  title="Edit tag"
+                  aria-label="Edit tag"
+                  (click)="edit(tag)">
+                  <i
+                    class="fa-solid fa-user-pen"
+                    aria-hidden="true"></i>
+                </button>
+                <button
+                  class="cta-icon delete-icon"
+                  type="button"
+                  title="Remove tag"
+                  aria-label="Remove tag"
+                  (click)="remove(tag)">
+                  <i
+                    class="fa-solid fa-trash"
+                    aria-hidden="true"></i>
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+</section>

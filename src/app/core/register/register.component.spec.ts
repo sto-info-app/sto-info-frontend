@@ -1,9 +1,4 @@
-import {
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  tick,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
@@ -155,21 +150,27 @@ describe('RegisterComponent', () => {
 
     test.each(errorCases)(
       'should handle status $status',
-      fakeAsync(
-        ({ status, errorMsg }: { status: number; errorMsg: string }) => {
-          authServiceSpy.register.mockReturnValue(
-            throwError(() => ({ status })),
+      ({ status, errorMsg }: { status: number; errorMsg: string }) => {
+        // `observeInZone` delivers the error inside the Angular zone, so the
+        // reset timer started from it belongs to that zone rather than to
+        // `fakeAsync`, and `tick` cannot reach it. Running the scheduled
+        // callback asserts the same behaviour whichever zone won.
+        const setTimeoutSpy = jest.spyOn(globalThis, 'setTimeout');
+        authServiceSpy.register.mockReturnValue(throwError(() => ({ status })));
+
+        component.onRegister();
+        expect(component.errorMessage).toBe(errorMsg);
+
+        if (status === 0) {
+          const scheduled = setTimeoutSpy.mock.calls.filter(
+            call => call[1] === component.showErrorMilliseconds,
           );
 
-          component.onRegister();
-          expect(component.errorMessage).toBe(errorMsg);
-
-          if (status === 0) {
-            tick(component.showErrorMilliseconds);
-            expect(component.errorMessage).toBe('');
-          }
-        },
-      ),
+          expect(scheduled).not.toHaveLength(0);
+          scheduled.forEach(call => (call[0] as () => void)());
+          expect(component.errorMessage).toBe('');
+        }
+      },
     );
 
     it('should handle 409 Email conflict', () => {

@@ -1,0 +1,143 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Arc"></app-loading-bar>
+}
+
+<div
+  id="storytime-arc-editor-page"
+  class="storytime-page"
+>
+  <h1>{{ isNew ? "Create an Arc" : "Edit Arc" }}</h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Could not save"
+      [message]="errorMessage"
+    ></app-lcars-error-message>
+  }
+
+  <form
+    [formGroup]="form"
+    class="storytime-form"
+    (ngSubmit)="save()"
+  >
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Arc Details</span>
+      </div>
+
+      <div class="storytime-panel">
+        <div class="form-row">
+          <div class="lcars-input-container perano storytime-field-full">
+            <label for="arc-title">Title</label>
+            <input
+              id="arc-title"
+              type="text"
+              formControlName="title"
+              maxlength="200"
+              required
+            />
+            @if (form.controls["title"].touched && form.controls["title"].invalid) {
+              <small class="field-error">A title is required.</small>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container bluey">
+            <label for="arc-slug">URL slug</label>
+            <input
+              id="arc-slug"
+              type="text"
+              formControlName="slug"
+              maxlength="220"
+            />
+            <p class="field-hint">
+              Leave blank to build one from the title. Changing it keeps the old
+              address working.
+            </p>
+          </div>
+
+          <div class="lcars-input-container gold">
+            <label for="arc-short-description">Short description</label>
+            <input
+              id="arc-short-description"
+              type="text"
+              formControlName="shortDescription"
+              maxlength="500"
+            />
+            <p class="field-hint">
+              Shown in listings. Required before publishing.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container perano storytime-field-full">
+            <label for="arc-description">Description</label>
+            <textarea
+              id="arc-description"
+              formControlName="description"
+              rows="8"
+            ></textarea>
+            <p class="field-hint">
+              Markdown is supported. Links to other sites are not shown.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Arc Settings</span>
+      </div>
+
+      <div class="storytime-panel">
+        <div class="form-row">
+          <app-storytime-setting-select
+            fieldId="arc-visibility"
+            label="Visibility"
+            controlName="visibility"
+            colour="bluey"
+            [options]="visibilityOptions"
+          />
+
+          <app-storytime-setting-select
+            fieldId="arc-language"
+            label="Language"
+            controlName="languageCode"
+            colour="sunflower"
+            [options]="languageOptions"
+          >
+            <p>
+              The language of your own writing about the Arc. The Stories in it
+              keep their own.
+            </p>
+          </app-storytime-setting-select>
+        </div>
+      </div>
+    </section>
+
+    <div class="storytime-form-actions">
+      <button
+        class="lcars-btn green"
+        type="submit"
+        [disabled]="isSaving"
+      >
+        {{ isSaving ? "Saving…" : "Save" }}
+      </button>
+      <a
+        class="lcars-btn red"
+        [routerLink]='["/", appRoutes.STORYTIME, "manage", "arcs"]'
+      >Cancel</a>
+    </div>
+  </form>
+
+  @if (arc) {
+    <!-- Tagging needs something to tag, so it appears once the Arc exists. -->
+    <app-tag-picker
+      targetType="ARC"
+      [targetId]="arc.id"
+    ></app-tag-picker>
+  }
+</div>

@@ -35,6 +35,15 @@
             >{{ appRouteTitles.COMMUNITY }}</a
           >
         </li>
+        @if (isStorytimeEnabled) {
+          <li>
+            <a
+              [routerLink]="getRouteLink(appRoutes.STORYTIME)"
+              routerLinkActive="active"
+              >{{ appRouteTitles.STORYTIME }}</a
+            >
+          </li>
+        }
         <li>
           <a
             [routerLink]="getRouteLink(appRoutes.RESOURCES)"
@@ -61,6 +70,13 @@
             [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="active"
             >{{ appRouteTitles.NOTIFICATIONS }}</a
+          >
+        </li>
+        <li>
+          <a
+            [routerLink]="getRouteLink(appRoutes.HELP)"
+            routerLinkActive="active"
+            >{{ appRouteTitles.HELP }}</a
           >
         </li>
         <li>
@@ -115,6 +131,38 @@
             >{{ appRouteTitles.TERMS_OF_USE }}</a
           >
         </li>
+        <!--
+          The Storytime documents sit with the site-wide ones rather than only
+          inside the feature: somebody looking for what a site permits looks in
+          the footer, and a rights holder checking what is claimed about their
+          property will not first go hunting through a fan-fiction section.
+        -->
+        @if (isStorytimeEnabled) {
+          <li>
+            <a
+              [routerLink]="getRouteLink(appRoutes.STORYTIME_CONTENT_POLICY)"
+              [routerLinkActiveOptions]="{ exact: true }"
+              routerLinkActive="active"
+              >{{ appRouteTitles.STORYTIME_CONTENT_POLICY }}</a
+            >
+          </li>
+          <li>
+            <a
+              [routerLink]="getRouteLink(appRoutes.STORYTIME_TERMS)"
+              [routerLinkActiveOptions]="{ exact: true }"
+              routerLinkActive="active"
+              >{{ appRouteTitles.STORYTIME_TERMS }}</a
+            >
+          </li>
+          <li>
+            <a
+              [routerLink]="getRouteLink(appRoutes.STORYTIME_FAN_CONTENT)"
+              [routerLinkActiveOptions]="{ exact: true }"
+              routerLinkActive="active"
+              >{{ appRouteTitles.STORYTIME_FAN_CONTENT }}</a
+            >
+          </li>
+        }
       </ul>
     </div>
   </div>

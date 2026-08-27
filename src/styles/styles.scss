@@ -5,6 +5,14 @@
 // `.go-rarity-*` utility classes for reuse across modules and components.
 @use 'sto-rarity-colours';
 
+// Emits the styles for every STO Storytime page. Held in one partial rather
+// than per component because the feature's pages are built from the same
+// handful of shapes, and that is what keeps them recognisably one thing.
+@use 'storytime';
+
+// Emits the styles for the help section's index and guide pages.
+@use 'help';
+
 /* You can add global styles to this file, and also import other style files */
 
 html {
@@ -171,6 +179,14 @@ button.lcars-btn,
   gap: 0.75rem;
   margin-top: 5px !important;
   padding-top: 5px !important;
+
+  // A row of links to other pages is navigation, so it is sometimes a `nav`
+  // rather than a `div`. The LCARS frame caps every `nav` at the sidebar's
+  // 660px and would silently wrap the row onto a second line once it holds
+  // more than two buttons.
+  &:is(nav) {
+    max-width: none;
+  }
 
   a {
     display: block;

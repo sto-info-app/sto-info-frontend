@@ -1,0 +1,168 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Chapter"></app-loading-bar>
+}
+
+@if (errorMessage) {
+  <app-lcars-error-message
+    title="Chapter unavailable"
+    [message]="errorMessage"></app-lcars-error-message>
+}
+
+@if (chapter) {
+  <article
+    id="storytime-chapter-reader-page"
+    class="storytime-page"
+    [attr.lang]="chapter.languageCode">
+    <nav
+      class="storytime-chapter__breadcrumb"
+      aria-label="Breadcrumb">
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', storySlug]"
+        >Back to the Story</a
+      >
+    </nav>
+
+    @if (chapter.coverImageUrl) {
+      <img
+        class="storytime-chapter__cover"
+        [src]="chapter.coverImageUrl"
+        [alt]="chapter.coverImageAlt ?? ''" />
+    }
+
+    <h1>{{ chapter.title }}</h1>
+
+    @if (chapter.synopsis) {
+      <p class="storytime-chapter__synopsis">{{ chapter.synopsis }}</p>
+    }
+
+    <ul class="storytime-chapter__meta">
+      @if (chapter.estimatedReadingMinutes) {
+        <li>
+          <i
+            class="fa-solid fa-clock"
+            aria-hidden="true"></i>
+          {{ chapter.estimatedReadingMinutes }} min read
+        </li>
+      }
+      <li>{{ chapter.wordCount }} words</li>
+    </ul>
+
+    @if (resumeBlockId) {
+      <p class="storytime-chapter__resume">
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto sunflower storytime-chapter__resume-button"
+          (click)="resume()">
+          <i
+            class="fa-solid fa-bookmark"
+            aria-hidden="true"></i>
+          Pick up where you left off
+        </button>
+      </p>
+    }
+
+    @if (needsRatingWarning) {
+      <app-lcars-warning-message
+        [title]="ratingLabels[chapter.contentRating]"
+        [message]="ratingDescriptions[chapter.contentRating]">
+      </app-lcars-warning-message>
+    }
+
+    @if (contentHtml) {
+      <div
+        #chapterBody
+        class="storytime-chapter__body"
+        [innerHTML]="contentHtml"></div>
+    } @else {
+      <p class="storytime-empty">This Chapter has no content yet.</p>
+    }
+
+    @if (media.length > 0) {
+      <section
+        class="storytime-chapter__media"
+        aria-label="Videos">
+        @for (video of media; track video.id) {
+          <app-media-embed [media]="video"></app-media-embed>
+        }
+      </section>
+    }
+
+    @if (isTrackingProgress) {
+      <div class="storytime-chapter__progress">
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto storytime-chapter__read-toggle"
+          [class.green]="isRead"
+          [class.bluey]="!isRead"
+          [attr.aria-pressed]="isRead"
+          (click)="setRead(!isRead)">
+          <i
+            class="fa-solid"
+            [class.fa-circle-check]="isRead"
+            [class.fa-circle]="!isRead"
+            aria-hidden="true"></i>
+          {{ isRead ? 'Read' : 'Mark as read' }}
+        </button>
+
+        @if (storyProgress) {
+          <p class="storytime-chapter__story-progress">
+            {{ storyProgress.readChapters }} of
+            {{ storyProgress.totalChapters }} Chapters read
+          </p>
+        }
+      </div>
+    }
+
+    <nav
+      class="storytime-chapter__navigation"
+      aria-label="Chapter navigation">
+      @if (previous) {
+        <a
+          class="storytime-chapter__previous"
+          [routerLink]="[
+            '/',
+            appRoutes.STORYTIME,
+            'stories',
+            storySlug,
+            'chapters',
+            previous.slug,
+          ]">
+          <i
+            class="fa-solid fa-chevron-left"
+            aria-hidden="true"></i>
+          <span class="sr-only">Previous Chapter: </span>
+          {{ previous.title }}
+        </a>
+      }
+      @if (next) {
+        <a
+          class="storytime-chapter__next"
+          [routerLink]="[
+            '/',
+            appRoutes.STORYTIME,
+            'stories',
+            storySlug,
+            'chapters',
+            next.slug,
+          ]">
+          <span class="sr-only">Next Chapter: </span>
+          {{ next.title }}
+          <i
+            class="fa-solid fa-chevron-right"
+            aria-hidden="true"></i>
+        </a>
+      }
+    </nav>
+
+    @if (chapter) {
+      <div class="storytime-chapter__social">
+        <app-reaction-control
+          [targetType]="targetTypes.CHAPTER"
+          [targetId]="chapter.id" />
+      </div>
+
+      <app-comment-thread
+        [targetType]="targetTypes.CHAPTER"
+        [targetId]="chapter.id" />
+    }
+  </article>
+}

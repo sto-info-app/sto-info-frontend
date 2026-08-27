@@ -1,0 +1,264 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading your Stories"></app-loading-bar>
+}
+
+<div
+  id="storytime-dashboard-page"
+  class="storytime-page">
+  <h1>Your Stories</h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Action failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <div class="storytime-page-actions">
+    <a
+      class="lcars-btn lcars-btn-auto green"
+      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', 'new']">
+      Create a Story
+    </a>
+  </div>
+
+  @if (!isLoading && stories.length === 0) {
+    <p class="storytime-empty">
+      You have not written a Story yet. Create one to get started.
+    </p>
+  }
+
+  @for (story of stories; track story.id) {
+    <article
+      class="storytime-record"
+      [ngClass]="'storytime-record--' + story.status.toLowerCase()"
+      [class.storytime-record--removed]="isRemoved(story)">
+      <a
+        class="storytime-record__header"
+        [routerLink]="[
+          '/',
+          appRoutes.STORYTIME,
+          'manage',
+          'stories',
+          story.id,
+        ]">
+        <span class="storytime-record__name">{{ story.title }}</span>
+        <span class="storytime-record__marks">
+          <span class="storytime-record__badge">{{
+            statusLabels[story.status]
+          }}</span>
+          <span
+            class="storytime-record__visibility"
+            [title]="visibilityLabels[story.visibility]">
+            <i
+              class="fa-solid"
+              [ngClass]="visibilityIcons[story.visibility]"
+              aria-hidden="true"></i>
+            <span class="sr-only">
+              Visibility: {{ visibilityLabels[story.visibility] }}
+            </span>
+          </span>
+        </span>
+      </a>
+
+      <div class="storytime-record__body">
+        <div class="storytime-record__details">
+          @if (isRemoved(story)) {
+            <p class="storytime-record__removed">
+              <i
+                class="fa-solid fa-ban"
+                aria-hidden="true"></i>
+              This Story has been removed by an administrator.
+              @if (story.moderationMessage) {
+                <span class="storytime-dashboard__removed-reason">{{
+                  story.moderationMessage
+                }}</span>
+              }
+            </p>
+
+            @if (appealingStoryId === story.id) {
+              <form
+                class="storytime-panel storytime-form storytime-dashboard__appeal"
+                [formGroup]="appealForm"
+                (ngSubmit)="sendAppeal()">
+                <div class="form-row">
+                  <div class="lcars-input-container red storytime-field-full">
+                    <label [attr.for]="'appeal-' + story.id">Your appeal</label>
+                    <textarea
+                      [id]="'appeal-' + story.id"
+                      formControlName="body"
+                      rows="4"
+                      maxlength="2000"></textarea>
+                    <p class="field-hint">
+                      You may appeal once. Say why you think this should come
+                      back.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="storytime-form-actions">
+                  <button
+                    class="lcars-btn green"
+                    type="submit">
+                    Send appeal
+                  </button>
+                </div>
+              </form>
+            } @else {
+              <div class="storytime-actions">
+                <button
+                  class="lcars-btn lcars-btn-auto sunflower storytime-dashboard__appeal-open"
+                  type="button"
+                  (click)="startAppeal(story)">
+                  Appeal this removal
+                </button>
+              </div>
+            }
+
+            @if (appealMessage && appealingStoryId !== story.id) {
+              <output
+                class="storytime-dashboard__appeal-message"
+                >
+                {{ appealMessage }}
+              </output>
+            }
+          }
+
+          <nav class="storytime-actions">
+            <a
+              class="lcars-btn lcars-btn-auto bluey"
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'manage',
+                'stories',
+                story.id,
+                'chapters',
+              ]"
+              >Chapters
+              @if (countsFor(story).chapters > 0) {
+                <span class="header-count-badge">{{
+                  countsFor(story).chapters
+                }}</span>
+              }
+            </a>
+            <a
+              class="lcars-btn lcars-btn-auto bluey"
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'manage',
+                'stories',
+                story.id,
+                'characters',
+              ]"
+              >Cast
+              @if (countsFor(story).cast > 0) {
+                <span class="header-count-badge">{{
+                  countsFor(story).cast
+                }}</span>
+              }
+            </a>
+            <a
+              class="lcars-btn lcars-btn-auto bluey"
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'manage',
+                'stories',
+                story.id,
+                'collaborators',
+              ]"
+              >Collaborators
+              @if (countsFor(story).collaborators > 0) {
+                <span class="header-count-badge">{{
+                  countsFor(story).collaborators
+                }}</span>
+              }
+            </a>
+          </nav>
+
+          @if (needsContentPolicy(story)) {
+            <div class="storytime-panel storytime-dashboard__policy">
+              <p>
+                @if (hasSupersededContentPolicy(story)) {
+                  {{ copy.POLICY_REACCEPTANCE_PROMPT }}
+                } @else {
+                  {{ copy.POLICY_ACCEPTANCE_PROMPT }}
+                }
+              </p>
+
+              <p class="storytime-dashboard__policy-links">
+                <a [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']">
+                  Content Policy </a
+                >·
+                <a [routerLink]="['/', appRoutes.STORYTIME, 'terms']">
+                  Terms of Use </a
+                >·
+                <a [routerLink]="['/', appRoutes.STORYTIME, 'fan-content']">
+                  Fan Content &amp; IP Notice
+                </a>
+              </p>
+
+              <p>By confirming, you are stating that:</p>
+              <ul class="lcars-list">
+                @for (representation of representations; track representation) {
+                  <li>{{ representation }}</li>
+                }
+              </ul>
+
+              <div class="storytime-form-actions">
+                <button
+                  type="button"
+                  class="lcars-btn green"
+                  (click)="acceptContentPolicy(story)">
+                  I confirm
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="storytime-record__controls">
+          <a
+            class="cta-icon"
+            title="Edit this Story"
+            aria-label="Edit this Story"
+            [routerLink]="[
+              '/',
+              appRoutes.STORYTIME,
+              'manage',
+              'stories',
+              story.id,
+            ]">
+            <i
+              class="fa-solid fa-user-pen"
+              aria-hidden="true"></i>
+          </a>
+          @if (canPublish(story)) {
+            <button
+              type="button"
+              class="cta-icon"
+              title="Publish this Story"
+              aria-label="Publish this Story"
+              (click)="publish(story)">
+              <i
+                class="fa-solid fa-rocket-launch"
+                aria-hidden="true"></i>
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="cta-icon delete-icon"
+              title="Unpublish this Story"
+              aria-label="Unpublish this Story"
+              (click)="unpublish(story)">
+              <i
+                class="fa-solid fa-box-archive"
+                aria-hidden="true"></i>
+            </button>
+          }
+        </div>
+      </div>
+    </article>
+  }
+</div>

@@ -11,6 +11,15 @@ describe('SideBarComponent', () => {
   let routingServiceSpy: jest.Mocked<RoutingService>;
   let authServiceSpy: Pick<AuthService, 'isLoggedInAsAdmin'>;
 
+  /**
+   * Builds the component with the current provider stubs.
+   */
+  const createComponent = (): void => {
+    fixture = TestBed.createComponent(SideBarComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  };
+
   beforeEach(() => {
     routingServiceSpy = {
       getLink: jest.fn().mockReturnValue('/test'),
@@ -34,9 +43,7 @@ describe('SideBarComponent', () => {
         { provide: AuthService, useValue: authServiceSpy },
       ],
     });
-    fixture = TestBed.createComponent(SideBarComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    createComponent();
   });
 
   it('should create', () => {
@@ -71,11 +78,106 @@ describe('SideBarComponent', () => {
     expect(linkTextsWhenSignedIn).toContain('Community');
   });
 
+  // Help is for the whole application rather than any one feature, so it is
+  // offered to everybody, signed in or not.
+  it('should offer the Help link in both signed-in states', () => {
+    const linkLabels = (): string[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.sidebar-buttons a',
+        ),
+      ).map(link => link.textContent?.trim() ?? '');
+
+    expect(linkLabels()).toContain('Help');
+
+    fixture.componentRef.setInput('isLoggedIn', true);
+    fixture.detectChanges();
+
+    expect(linkLabels()).toContain('Help');
+  });
+
   it('should return admin status from auth service', () => {
     expect(component.isAdmin).toBe(false);
 
     (authServiceSpy.isLoggedInAsAdmin as jest.Mock).mockReturnValue(true);
     expect(component.isAdmin).toBe(true);
+  });
+
+  describe('Storytime link', () => {
+    /**
+     * Reads the sidebar's link labels.
+     *
+     * @returns The text of every sidebar link.
+     */
+    const linkLabels = (): string[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.sidebar-buttons a',
+        ),
+      ).map(link => link.textContent?.trim() ?? '');
+
+    // A link that appears and then disappears is worse than one that arrives
+    // a moment late, so the default has to be hidden.
+    it('should default to hidden before the feature state is known', () => {
+      expect(component.isStorytimeEnabled).toBe(false);
+      expect(linkLabels()).not.toContain('Storytime');
+    });
+
+    it('should offer Storytime once the feature is switched on', () => {
+      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.detectChanges();
+
+      expect(linkLabels()).toContain('Storytime');
+    });
+
+    // Storytime is a section of the site, not a set of peers to Community and
+    // Help. Its own pages are reached from its landing page, where each can be
+    // described; the sidebar offers the way in and nothing else.
+    it.each([
+      'Arcs',
+      'Spotlight',
+      'Your Library',
+      'Your Stories',
+      'Your Arcs',
+      'Invitations',
+    ])('should not offer the %s link to a signed-out visitor', label => {
+      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.detectChanges();
+
+      expect(linkLabels()).not.toContain(label);
+    });
+
+    it.each([
+      'Arcs',
+      'Spotlight',
+      'Your Library',
+      'Your Stories',
+      'Your Arcs',
+      'Invitations',
+    ])('should not offer the %s link to a signed-in member', label => {
+      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.componentRef.setInput('isLoggedIn', true);
+      fixture.detectChanges();
+
+      expect(linkLabels()).not.toContain(label);
+    });
+
+    it('should offer exactly one Storytime entry to a signed-in member', () => {
+      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.componentRef.setInput('isLoggedIn', true);
+      fixture.detectChanges();
+
+      expect(linkLabels().filter(label => label === 'Storytime')).toHaveLength(
+        1,
+      );
+    });
+
+    it('should hide the Storytime link while the feature is switched off', () => {
+      fixture.componentRef.setInput('isLoggedIn', true);
+      fixture.detectChanges();
+
+      expect(linkLabels()).not.toContain('Storytime');
+    });
   });
 
   describe('onResize', () => {

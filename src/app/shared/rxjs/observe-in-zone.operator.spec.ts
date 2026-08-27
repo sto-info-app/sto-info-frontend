@@ -4,15 +4,20 @@ import { observeInZone } from './observe-in-zone.operator';
 
 describe('observeInZone', () => {
   let ngZone: jest.Mocked<Pick<NgZone, 'run'>>;
-  let cdr: jest.Mocked<Pick<ChangeDetectorRef, 'detectChanges'>>;
+  let cdr: jest.Mocked<
+    Pick<ChangeDetectorRef, 'detectChanges' | 'markForCheck'>
+  >;
 
   beforeEach(() => {
     // `run` executes the callback synchronously so assertions stay simple.
     ngZone = { run: jest.fn(fn => fn()) } as unknown as jest.Mocked<
       Pick<NgZone, 'run'>
     >;
-    cdr = { detectChanges: jest.fn() } as unknown as jest.Mocked<
-      Pick<ChangeDetectorRef, 'detectChanges'>
+    cdr = {
+      detectChanges: jest.fn(),
+      markForCheck: jest.fn(),
+    } as unknown as jest.Mocked<
+      Pick<ChangeDetectorRef, 'detectChanges' | 'markForCheck'>
     >;
   });
 
@@ -52,6 +57,7 @@ describe('observeInZone', () => {
       return fn();
     });
     cdr.detectChanges.mockImplementation(() => order.push('detect'));
+    cdr.markForCheck.mockImplementation(() => order.push('mark'));
 
     of('a')
       .pipe(
@@ -66,10 +72,31 @@ describe('observeInZone', () => {
       'zone',
       'next',
       'detect',
+      'mark',
       // completion
       'zone',
       'detect',
+      'mark',
     ]);
+  });
+
+  // The mark has to outlive the pass, not precede it: `detectChanges` marks the
+  // view checked on its way out, so marking first would be undone immediately
+  // and a notification arriving during the creation pass would never render.
+  it('leaves the view marked for check after detecting changes', () => {
+    of('a')
+      .pipe(
+        observeInZone(
+          ngZone as unknown as NgZone,
+          cdr as unknown as ChangeDetectorRef,
+        ),
+      )
+      .subscribe();
+
+    expect(cdr.markForCheck).toHaveBeenCalledTimes(2);
+    expect(cdr.markForCheck.mock.invocationCallOrder[0]).toBeGreaterThan(
+      cdr.detectChanges.mock.invocationCallOrder[0],
+    );
   });
 
   it('delivers errors inside the zone and forces change detection', () => {
@@ -112,6 +139,8 @@ describe('observeInZone', () => {
     expect(cdr.detectChanges).toHaveBeenCalledTimes(1);
   });
 
+  // A view torn down mid-flight throws from `detectChanges`, and the mark that
+  // would follow it is equally pointless — neither may reach the caller.
   it('swallows change-detection errors from a destroyed view', () => {
     cdr.detectChanges.mockImplementation(() => {
       throw new Error('view destroyed');
@@ -130,5 +159,6 @@ describe('observeInZone', () => {
     }).not.toThrow();
 
     expect(received).toEqual(['a']);
+    expect(cdr.markForCheck).not.toHaveBeenCalled();
   });
 });

@@ -44,8 +44,9 @@
 
 // ─── Tab Panels ──────────────────────────────────────────────────────────────
 
+// The rule that used to sit here is drawn by the strip itself now, so every
+// tabbed page closes its tabs the same way.
 .tab-panels {
-  border-top: 3px solid #455580;
   padding-top: 0.5rem;
 }
 

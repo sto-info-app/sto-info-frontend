@@ -1,0 +1,28 @@
+<section class="help-section">
+  <div class="lcars-text-bar">
+    <h2 class="help-section__title">
+      <span>{{ heading }}</span>
+    </h2>
+    <button
+      type="button"
+      class="cta-icon"
+      [attr.aria-expanded]="isExpanded"
+      [attr.aria-controls]="contentId"
+      [title]="isExpanded ? 'Collapse' : 'Expand'"
+      (click)="toggle()">
+      <i
+        class="fas"
+        [class.fa-caret-up]="isExpanded"
+        [class.fa-caret-down]="!isExpanded"
+        aria-hidden="true"></i>
+    </button>
+  </div>
+
+  @if (isExpanded) {
+    <div
+      class="help-section__content"
+      [id]="contentId">
+      <ng-content />
+    </div>
+  }
+</section>

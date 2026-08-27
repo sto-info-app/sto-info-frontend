@@ -1,0 +1,26 @@
+@if (isVisible && state) {
+  <div class="storytime-follow">
+    @if (errorMessage) {
+      <p
+        class="storytime-follow__error"
+        role="alert">
+        {{ errorMessage }}
+      </p>
+    }
+
+    <button
+      type="button"
+      class="storytime-follow__button"
+      [class.storytime-follow__button--following]="state.isFollowing"
+      [attr.aria-pressed]="state.isFollowing"
+      [disabled]="isSaving"
+      (click)="toggle()">
+      {{ state.isFollowing ? 'Following ' + label : 'Follow ' + label }}
+    </button>
+
+    <span class="storytime-follow__count">
+      {{ state.followerCount }}
+      {{ state.followerCount === 1 ? 'follower' : 'followers' }}
+    </span>
+  </div>
+}

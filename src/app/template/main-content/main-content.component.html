@@ -1,7 +1,9 @@
 <div
   class="wrap gap"
   id="lcars-body-container">
-  <app-side-bar [isLoggedIn]="isLoggedIn"></app-side-bar>
+  <app-side-bar
+    [isLoggedIn]="isLoggedIn"
+    [isStorytimeEnabled]="isStorytimeEnabled"></app-side-bar>
 
   <div class="right-frame">
     <app-main-content-bar-panel></app-main-content-bar-panel>
@@ -25,7 +27,8 @@
         aria-live="polite">
         <div id="footer-text">
           @defer (on viewport) {
-            <app-footer></app-footer>
+            <app-footer
+              [isStorytimeEnabled]="isStorytimeEnabled"></app-footer>
           } @placeholder {
             <span class="footer-placeholder">Loading footer…</span>
           }
