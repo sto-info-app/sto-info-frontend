@@ -1,0 +1,102 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Character"></app-loading-bar>
+}
+
+@if (errorMessage) {
+  <app-lcars-error-message
+    title="Character unavailable"
+    [message]="errorMessage"></app-lcars-error-message>
+}
+
+@if (character) {
+  <article
+    id="storytime-character-detail-page"
+    class="storytime-page">
+    <nav
+      class="storytime-character__breadcrumb"
+      aria-label="Breadcrumb">
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', storySlug]"
+        >Back to the Story</a
+      >
+    </nav>
+
+    <div class="storytime-character__header">
+      @if (character.portraitImageUrl) {
+        <img
+          class="storytime-character__portrait"
+          [src]="character.portraitImageUrl"
+          [alt]="character.portraitImageAlt ?? ''" />
+      }
+
+      <div class="storytime-character__identity">
+        <h1>{{ character.name }}</h1>
+
+        @if (character.isPrimary) {
+          <p class="storytime-character__billing">Main Character</p>
+        }
+
+        @if (character.shortBio) {
+          <p class="storytime-character__summary">{{ character.shortBio }}</p>
+        }
+      </div>
+    </div>
+
+    @if (profileFields.length > 0) {
+      <dl class="storytime-character__profile">
+        @for (field of profileFields; track field.label) {
+          <div class="storytime-character__profile-row">
+            <dt>{{ field.label }}</dt>
+            <dd>{{ field.value }}</dd>
+          </div>
+        }
+      </dl>
+    }
+
+    @if (character.traits && character.traits.length > 0) {
+      <ul class="storytime-character__traits">
+        @for (trait of character.traits; track trait) {
+          <li>{{ trait }}</li>
+        }
+      </ul>
+    }
+
+    @if (biographyHtml) {
+      <div
+        class="storytime-character__biography"
+        [innerHTML]="biographyHtml"></div>
+    }
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Appears In</span>
+    </div>
+
+    @if (appearsIn.length === 0) {
+      <p class="storytime-empty">
+        They have not appeared in any published Chapters yet.
+      </p>
+    } @else {
+      <ul class="storytime-character__appearances">
+        @for (appearance of appearsIn; track appearance.chapterId) {
+          <li>
+            <a
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'stories',
+                storySlug,
+                'chapters',
+                appearance.chapterSlug,
+              ]">
+              {{ appearance.chapterTitle }}
+            </a>
+            @if (appearance.isPrimary) {
+              <span class="storytime-character__appearance-billing"
+                >Central</span
+              >
+            }
+          </li>
+        }
+      </ul>
+    }
+  </article>
+}

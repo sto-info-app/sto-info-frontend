@@ -1,0 +1,39 @@
+<section
+  id="storytime-collaborator-list-page"
+  class="storytime-page"
+>
+  <h1>Collaborators</h1>
+
+  <nav class="storytime-page-actions">
+    <a
+      class="lcars-btn lcars-btn-auto bluey"
+      [routerLink]='["/", appRoutes.STORYTIME, "manage", "stories", storyId]'
+    >
+      Back to the Story
+    </a>
+  </nav>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Collaborators unavailable"
+      [message]="errorMessage"
+    ></app-lcars-error-message>
+  }
+
+  <p class="storytime-intro">
+    Collaborators can change the Story. Crediting somebody is separate, and
+    gives them no access at all. Only you can publish.
+  </p>
+
+  <app-collaborator-panel
+    idPrefix="collaborator"
+    emptyMessage="Nobody else is working on this Story yet."
+    [form]="form"
+    [capabilities]="capabilities"
+    [collaborators]="collaborators"
+    [isLoading]="isLoading"
+    (invited)="invite()"
+    (capabilityChanged)="setCapability($event.collaborator, $event.capability, $event.granted)"
+    (revoked)="revoke($event)"
+  />
+</section>

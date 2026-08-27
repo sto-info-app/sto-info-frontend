@@ -1,0 +1,109 @@
+<section class="storytime-page storytime-reading-list">
+  @if (errorMessage) {
+    <p
+      class="storytime-reading-list__error"
+      role="alert">
+      {{ errorMessage }}
+    </p>
+  }
+
+  @if (isLoading) {
+    <p class="storytime-reading-list__loading">Loading the list…</p>
+  } @else if (list) {
+    <h1>{{ list.name }}</h1>
+
+    @if (list.description) {
+      <p class="storytime-reading-list__description">{{ list.description }}</p>
+    }
+
+    @if (isMine) {
+      <div class="storytime-reading-list__controls">
+        <span class="storytime-reading-list__visibility">
+          {{
+            list.isPublic
+              ? 'Anybody may read this list.'
+              : 'Only you can see this list.'
+          }}
+        </span>
+        <button
+          class="lcars-btn lcars-btn-auto bluey"
+          type="button"
+          [disabled]="isSaving"
+          (click)="toggleVisibility()">
+          {{ list.isPublic ? 'Make private' : 'Make public' }}
+        </button>
+      </div>
+    }
+
+    @if (list.items.length === 0) {
+      <p class="storytime-empty">Nothing on this list yet.</p>
+    } @else {
+      <ol class="storytime-reading-list__items">
+        @for (
+          item of list.items;
+          track item.id;
+          let first = $first, last = $last
+        ) {
+          <li class="storytime-reading-list__item">
+            <a
+              class="storytime-reading-list__title"
+              [routerLink]="linkFor(item)">
+              {{ item.title }}
+            </a>
+            <span class="storytime-reading-list__kind">
+              {{ item.targetType === targetTypes.STORY ? 'Story' : 'Arc' }}
+            </span>
+
+            @if (item.shortDescription) {
+              <p class="storytime-reading-list__summary">
+                {{ item.shortDescription }}
+              </p>
+            }
+
+            @if (item.note) {
+              <p class="storytime-reading-list__note">{{ item.note }}</p>
+            }
+
+            @if (isMine) {
+              <div class="storytime-reading-list__item-controls">
+                <button
+                  class="cta-icon"
+                  type="button"
+                  title="Move up"
+                  aria-label="Move up"
+                  [disabled]="isSaving || first"
+                  (click)="move(item, -1)">
+                  <i
+                    class="fa-solid fa-caret-up"
+                    aria-hidden="true"></i>
+                </button>
+                <button
+                  class="cta-icon"
+                  type="button"
+                  title="Move down"
+                  aria-label="Move down"
+                  [disabled]="isSaving || last"
+                  (click)="move(item, 1)">
+                  <i
+                    class="fa-solid fa-caret-down"
+                    aria-hidden="true"></i>
+                </button>
+                <button
+                  class="cta-icon delete-icon"
+                  type="button"
+                  title="Remove from the list"
+                  aria-label="Remove from the list"
+                  [disabled]="isSaving"
+                  (click)="removeItem(item)">
+                  <i
+                    class="fa-solid fa-trash"
+                    aria-hidden="true"></i>
+                </button>
+              </div>
+            }
+          </li>
+        }
+      </ol>
+    }
+  }
+</section>

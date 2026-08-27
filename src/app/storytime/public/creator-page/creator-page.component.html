@@ -1,0 +1,89 @@
+<section
+  id="storytime-creator-page"
+  class="storytime-page">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Storytime</span>
+  </div>
+
+  <app-follow-button
+    [kind]="followKinds.CREATOR"
+    [targetId]="userId"
+    label="this writer" />
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Creator unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading published work"></app-loading-bar>
+  } @else if (isEmpty) {
+    <p class="storytime-empty">
+      This member has not published anything in Storytime yet.
+    </p>
+  } @else {
+    @if (stories.length > 0) {
+      <h2>Stories</h2>
+      <ul class="storytime-creator__stories">
+        @for (story of stories; track story.id) {
+          <li>
+            <a
+              [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]"
+              >{{ story.title }}</a
+            >
+            @if (story.shortDescription) {
+              <p class="storytime-creator__summary">
+                {{ story.shortDescription }}
+              </p>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    @if (arcs.length > 0) {
+      <h2>Arcs</h2>
+      <ul class="storytime-creator__arcs">
+        @for (arc of arcs; track arc.id) {
+          <li>
+            <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]">{{
+              arc.title
+            }}</a>
+            @if (arc.shortDescription) {
+              <p class="storytime-creator__summary">
+                {{ arc.shortDescription }}
+              </p>
+            }
+          </li>
+        }
+      </ul>
+    }
+    @if (readingLists.length > 0) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Reading lists</span>
+      </div>
+
+      <ul class="storytime-creator__lists">
+        @for (list of readingLists; track list.id) {
+          <li class="storytime-creator__list">
+            <a
+              [routerLink]="[
+                '/storytime',
+                'creators',
+                userId,
+                'reading-lists',
+                list.slug,
+              ]">
+              {{ list.name }}
+            </a>
+            <span class="storytime-creator__list-count">
+              {{ list.itemCount }}
+              {{ list.itemCount === 1 ? 'thing' : 'things' }}
+            </span>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

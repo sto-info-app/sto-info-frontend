@@ -1,0 +1,90 @@
+<section
+  id="storytime-reader-library-page"
+  class="storytime-page">
+  <h1>Your Library</h1>
+
+  <nav
+    class="storytime-library__filters"
+    aria-label="Filter by status">
+    <button
+      class="lcars-btn lcars-btn-auto"
+      type="button"
+      [class.sunflower]="activeStatus === null"
+      [class.bluey]="activeStatus !== null"
+      [attr.aria-pressed]="activeStatus === null"
+      (click)="filterBy(null)">
+      Everything
+    </button>
+    @for (status of statuses; track status) {
+      <button
+        class="lcars-btn lcars-btn-auto"
+        type="button"
+        [class.sunflower]="activeStatus === status"
+        [class.bluey]="activeStatus !== status"
+        [attr.aria-pressed]="activeStatus === status"
+        (click)="filterBy(status)">
+        {{ statusLabels[status] }}
+      </button>
+    }
+  </nav>
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading your library"></app-loading-bar>
+  } @else if (errorMessage) {
+    <app-lcars-error-message
+      title="Library unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  } @else if (entries.length === 0) {
+    <p class="storytime-empty">
+      You have not started any Stories yet. Anything you read will appear here.
+    </p>
+  } @else {
+    <ul class="storytime-library">
+      @for (entry of entries; track entry.progress.storyId) {
+        <li class="storytime-library__entry">
+          @if (entry.story) {
+            <a
+              class="storytime-library__title"
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'stories',
+                entry.story.slug,
+              ]">
+              {{ entry.story.title }}
+            </a>
+          } @else {
+            <span class="storytime-library__title storytime-library__gone">
+              A Story that is no longer available
+            </span>
+          }
+
+          <p class="storytime-library__status">
+            {{ statusLabels[entry.progress.status] }} —
+            {{ entry.progress.readChapters }} of
+            {{ entry.progress.totalChapters }} Chapters read ({{
+              entry.progress.percentComplete
+            }}%)
+          </p>
+
+          <progress
+            class="storytime-library__bar"
+            aria-label="Chapters read"
+            [value]="entry.progress.percentComplete"
+            max="100">
+          </progress>
+
+          @if (entry.progress.newChapterCount > 0) {
+            <p class="storytime-library__new">
+              {{ entry.progress.newChapterCount }} new
+              {{
+                entry.progress.newChapterCount === 1 ? 'Chapter' : 'Chapters'
+              }}
+              since you last read.
+            </p>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

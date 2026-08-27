@@ -1,0 +1,17 @@
+{
+  "comment": "Every help guide slug, in reading order. Read at build time by scripts/generate-content.mjs so each guide gets its own sitemap entry. The guides themselves live in help.data.ts; help.data.spec.ts fails if this list and that one ever disagree.",
+  "slugs": [
+    "the-galactic-personnel-registry",
+    "listing-your-own-record",
+    "finding-and-adding-friends",
+    "blocking-and-reporting",
+    "what-is-storytime",
+    "finding-something-to-read",
+    "reading-and-keeping-your-place",
+    "joining-in",
+    "writing-your-first-story",
+    "cast-crew-and-pictures",
+    "writing-with-other-people",
+    "ratings-reporting-and-safety"
+  ]
+}

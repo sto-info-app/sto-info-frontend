@@ -1,9 +1,11 @@
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
-  inject,
+  NgZone,
   OnDestroy,
   Renderer2,
+  inject,
 } from '@angular/core';
 import { distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { alertStateFromHttpStatus } from 'src/app/shared/_helpers/alert-state-from-http-status';
@@ -15,6 +17,7 @@ import {
   API_HEALTH_STATE_UP,
 } from 'src/app/shared/constants/health.constants';
 import { AlertState } from 'src/app/shared/constants/lcars-theme.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
 import { HealthService } from '../../../core/health/health.service';
 
@@ -31,6 +34,8 @@ export class ServiceInterruptionContentComponent implements OnDestroy {
   private readonly _alertThemeService = inject(AlertThemeService);
   private readonly _subs = new Subscription();
   readonly _backendHealth = inject(HealthService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
   errorCode = 400;
   errorTitle = 'Service Unavailable';
   errorDescription = 'TRIBBLES! Tribbles are in the computer core!';
@@ -44,6 +49,7 @@ export class ServiceInterruptionContentComponent implements OnDestroy {
         .pipe(
           filter((state): state is API_HEALTH_STATE => state != null),
           distinctUntilChanged(),
+          observeInZone(this._ngZone, this._cdr),
         )
         .subscribe(state => {
           if (state === API_HEALTH_STATE_UP) {

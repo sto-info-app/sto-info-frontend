@@ -1,6 +1,13 @@
 import { AsyncPipe } from '@angular/common';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { Component, inject, Input, OnDestroy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  NgZone,
+  OnDestroy,
+  inject,
+} from '@angular/core';
 import {
   ActivatedRoute,
   NavigationEnd,
@@ -28,6 +35,7 @@ import { GeneralThemeService } from 'src/app/shared/services/general-theme.servi
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 import { BannerComponent } from 'src/app/notifications/banner/banner.component';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { FooterComponent } from '../footer/footer.component';
 import { MainContentBarPanelComponent } from '../main-content-bar-panel/main-content-bar-panel.component';
 import { SideBarComponent } from '../side-bar/side-bar.component';
@@ -50,6 +58,15 @@ import { SideBarComponent } from '../side-bar/side-bar.component';
 export class MainContentComponent implements OnDestroy {
   @Input() isLoggedIn!: boolean;
 
+  /**
+   * Whether Storytime should be offered in the navigation.
+   *
+   * Passed straight through to the sidebar. Resolved once at the application
+   * root rather than here, so the feature state is fetched a single time
+   * however often this component is rendered in tests.
+   */
+  @Input() isStorytimeEnabled = false;
+
   appTitle = environment.appTitle;
   frontendAppVersion = environment.version || '';
   backendAppVersion = '';
@@ -63,6 +80,8 @@ export class MainContentComponent implements OnDestroy {
   private readonly _generalThemeService = inject(GeneralThemeService);
   private readonly _http = inject(HttpClient);
   private readonly _backendHealth = inject(HealthService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   // True only when the currently activated deepest route has data.requiresApi === true
   readonly requiresApi$ = this._router.events.pipe(
@@ -100,6 +119,7 @@ export class MainContentComponent implements OnDestroy {
           observe: 'response',
           responseType: HTTP_RESPONSE_TYPE_TEXT,
         })
+        .pipe(observeInZone(this._ngZone, this._cdr))
         .subscribe({
           next: response => this.updateBackendVersion(response),
           error: err => {
@@ -113,6 +133,8 @@ export class MainContentComponent implements OnDestroy {
 
     // Start/stop polling only while on API-required routes
     this._subs.add(
+      // No `observeInZone` here: this drives the health poller and touches
+      // nothing the template reads.
       this.requiresApi$.subscribe(requiresApi => {
         if (requiresApi) {
           this._backendHealth.startPolling();

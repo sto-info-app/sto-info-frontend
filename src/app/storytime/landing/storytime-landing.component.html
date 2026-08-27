@@ -1,0 +1,208 @@
+<div
+  id="storytime-landing-page"
+  class="storytime-page">
+  <h1>{{ copy.LANDING_TITLE }}</h1>
+
+  <p class="storytime-intro">{{ copy.LANDING_INTRO }}</p>
+
+  @if (spotlight.length > 0) {
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Spotlight</span>
+    </div>
+
+    <ul class="storytime-spotlight">
+      @for (entry of spotlight; track entry.id) {
+        <li class="storytime-spotlight__entry">
+          @if (imageFor(entry)) {
+            <img
+              class="storytime-spotlight__image"
+              [src]="imageFor(entry)"
+              [alt]="imageAltFor(entry)" />
+          }
+
+          <h2 class="storytime-spotlight__headline">
+            <a [routerLink]="linkFor(entry)">{{ entry.headline }}</a>
+          </h2>
+
+          <p class="storytime-spotlight__work">
+            <i
+              class="fa-solid fa-star"
+              aria-hidden="true"></i>
+            {{ entry.story ? entry.story.title : entry.arc?.title }}
+          </p>
+
+          <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
+
+          @if (entry.selectionReason) {
+            <p class="storytime-spotlight__reason">
+              {{ entry.selectionReason }}
+            </p>
+          }
+        </li>
+      }
+    </ul>
+
+    <p class="storytime-spotlight__archive">
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']"
+        >Past Spotlight selections</a
+      >
+    </p>
+  }
+
+  <!--
+    Storytime's own navigation lives here rather than in the site sidebar. The
+    landing page can say what each of these is in a line; a sidebar button can
+    only say "Arcs", which means nothing to somebody who has not met one yet.
+  -->
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Browse</span>
+  </div>
+
+  <ul class="storytime-landing__browse">
+    <li>
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'stories']">
+        <span class="storytime-landing__browse-name">All Stories</span>
+        <p class="storytime-landing__summary">
+          Everything published, newest first.
+        </p>
+      </a>
+    </li>
+    <li>
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs']">
+        <span class="storytime-landing__browse-name">Arcs</span>
+        <p class="storytime-landing__summary">
+          Reading orders assembled across several Stories.
+        </p>
+      </a>
+    </li>
+    @if (isSpotlightEnabled) {
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']">
+          <span class="storytime-landing__browse-name">Spotlight</span>
+          <p class="storytime-landing__summary">
+            What we have chosen to feature, and everything chosen before.
+          </p>
+        </a>
+      </li>
+    }
+    <li>
+      <a [routerLink]="['/', appRoutes.STORYTIME, 'search']">
+        <span class="storytime-landing__browse-name">Search Storytime</span>
+        <p class="storytime-landing__summary">
+          Find a Story by title, author or tag.
+        </p>
+      </a>
+    </li>
+  </ul>
+
+  @if (isSignedIn) {
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Yours</span>
+    </div>
+
+    <ul class="storytime-landing__yours">
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'feed']">
+          <span class="storytime-landing__browse-name">Your feed</span>
+          @if (unreadCount > 0) {
+            <span class="storytime-landing__unread">{{ unreadCount }} new</span>
+          }
+          <p class="storytime-landing__summary">
+            Follow the latest activity from writers and readers.
+          </p>
+        </a>
+      </li>
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'reading-lists']">
+          <span class="storytime-landing__browse-name">Your reading lists</span>
+          <p class="storytime-landing__summary">
+            Keep Stories together for later or read them in order.
+          </p>
+        </a>
+      </li>
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'library']">
+          <span class="storytime-landing__browse-name">Your library</span>
+          <p class="storytime-landing__summary">
+            Find the Stories and Arcs you have saved.
+          </p>
+        </a>
+      </li>
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories']">
+          <span class="storytime-landing__browse-name">Your Stories</span>
+          <p class="storytime-landing__summary">
+            Write, edit and publish your own Stories.
+          </p>
+        </a>
+      </li>
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']">
+          <span class="storytime-landing__browse-name">Your Arcs</span>
+          <p class="storytime-landing__summary">
+            Arrange your Stories into connected reading orders.
+          </p>
+        </a>
+      </li>
+      <li>
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'invitations']">
+          <span class="storytime-landing__browse-name">Invitations</span>
+          <p class="storytime-landing__summary">
+            See collaboration invitations waiting for your response.
+          </p>
+        </a>
+      </li>
+    </ul>
+  }
+
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>New Stories</span>
+  </div>
+
+  @if (newest.length === 0) {
+    <p class="storytime-empty">{{ copy.LANDING_EMPTY }}</p>
+  } @else {
+    <ul class="storytime-landing__stories">
+      @for (story of newest; track story.id) {
+        <li>
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]">{{
+            story.title
+          }}</a>
+          @if (story.shortDescription) {
+            <p class="storytime-landing__summary">
+              {{ story.shortDescription }}
+            </p>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  @if (updated.length > 0) {
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Recently Updated</span>
+    </div>
+
+    <ul class="storytime-landing__stories storytime-landing__stories--updated">
+      @for (story of updated; track story.id) {
+        <li>
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]">{{
+            story.title
+          }}</a>
+        </li>
+      }
+    </ul>
+  }
+
+  <nav
+    class="buttons-row"
+    aria-label="Storytime publishing documents">
+    <a
+      [routerLink]="['/', appRoutes.STORYTIME, 'policies']"
+      class="sky"
+      >Policies &amp; Terms</a
+    >
+  </nav>
+
+  <p class="storytime-fan-notice">{{ copy.FAN_CONTENT_NOTICE }}</p>
+</div>

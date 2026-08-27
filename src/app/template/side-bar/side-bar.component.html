@@ -19,6 +19,20 @@
         routerLinkActive="peach"
         >{{ appRouteTitles.COMMUNITY }}</a
       >
+      <!--
+        One entry only. Storytime is a section of the site rather than a set of
+        peers to Community and Help, and its own pages — Stories, Arcs, the
+        Spotlight, and a member's writing — are reached from its landing page,
+        where they can be described. A sidebar that listed them all would push
+        the rest of the site off the bottom of the frame to no one's benefit.
+      -->
+      @if (isStorytimeEnabled) {
+        <a
+          [routerLink]="getRouteLink(appRoutes.STORYTIME)"
+          routerLinkActive="peach"
+          >{{ appRouteTitles.STORYTIME }}</a
+        >
+      }
       @if (isLoggedIn) {
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
@@ -47,6 +61,11 @@
           >
         }
       }
+      <a
+        [routerLink]="getRouteLink(appRoutes.HELP)"
+        routerLinkActive="peach"
+        >{{ appRouteTitles.HELP }}</a
+      >
     </div>
     <div class="panel panel-4"></div>
     @if (isPanel5Hidden) {

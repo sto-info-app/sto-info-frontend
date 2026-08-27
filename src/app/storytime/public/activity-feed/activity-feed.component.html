@@ -1,0 +1,49 @@
+<section class="storytime-page storytime-feed">
+  <h1>Your Storytime feed</h1>
+  <p class="storytime-feed__intro">
+    What the writers, Stories and Arcs you follow have been doing.
+  </p>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Feed unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (isLoading && entries.length === 0) {
+    <app-loading-bar loadingText="Loading your feed"></app-loading-bar>
+  } @else if (entries.length === 0) {
+    <p class="storytime-empty">
+      Nothing here yet. Follow a writer, a Story or an Arc and their news will
+      appear here.
+    </p>
+  } @else {
+    <ol class="storytime-feed__list">
+      @for (entry of entries; track entry.id) {
+        <li class="storytime-feed__entry">
+          <p class="storytime-feed__what">{{ wordingFor(entry) }}</p>
+          <a
+            class="storytime-feed__link"
+            [routerLink]="linkFor(entry)">
+            {{ titleFor(entry) }}
+          </a>
+          <time
+            class="storytime-feed__when"
+            [attr.datetime]="entry.occurredAt">
+            {{ entry.occurredAt | date: 'medium' }}
+          </time>
+        </li>
+      }
+    </ol>
+
+    @if (hasMore) {
+      <button
+        type="button"
+        class="lcars-btn bluey storytime-feed__more"
+        [disabled]="isLoading"
+        (click)="loadMore()">
+        {{ isLoading ? 'Loading…' : 'Show more' }}
+      </button>
+    }
+  }
+</section>

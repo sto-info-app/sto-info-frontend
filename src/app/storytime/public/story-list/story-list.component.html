@@ -1,0 +1,27 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Stories"></app-loading-bar>
+}
+
+<div
+  id="storytime-story-list-page"
+  class="storytime-page">
+  <h1>{{ copy.LANDING_TITLE }}</h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Archive unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (!isLoading && !errorMessage) {
+    @if (stories.length === 0) {
+      <p class="storytime-empty">{{ copy.LANDING_EMPTY }}</p>
+    } @else {
+      <div class="storytime-story-grid">
+        @for (story of stories; track story.id) {
+          <app-story-card [story]="story"></app-story-card>
+        }
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,276 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Story"></app-loading-bar>
+}
+
+@if (errorMessage) {
+  <app-lcars-error-message
+    title="Story unavailable"
+    [message]="errorMessage"></app-lcars-error-message>
+}
+
+@if (story) {
+  <article
+    id="storytime-story-detail-page"
+    class="storytime-page"
+    [attr.lang]="story.languageCode">
+    @if (story.bannerImageUrl) {
+      <img
+        class="storytime-story__banner"
+        [src]="story.bannerImageUrl"
+        [alt]="story.bannerImageAlt ?? ''" />
+    }
+
+    <h1>{{ story.title }}</h1>
+
+    @if (needsRatingWarning) {
+      <app-lcars-warning-message
+        [title]="ratingLabels[story.contentRating]"
+        [message]="ratingDescriptions[story.contentRating]">
+      </app-lcars-warning-message>
+    }
+
+    <ul class="storytime-story__meta">
+      <li>
+        <span class="sr-only">Status: </span>
+        {{ completionLabels[story.completionState] }}
+      </li>
+      <li>
+        {{ story.publishedChapterCount }}
+        {{ story.publishedChapterCount === 1 ? 'Chapter' : 'Chapters' }}
+      </li>
+      <li>
+        <span class="sr-only">Rating: </span>
+        {{ story.rating }}
+      </li>
+    </ul>
+
+    @if (story.shortDescription) {
+      <p class="storytime-story__summary">{{ story.shortDescription }}</p>
+    }
+
+    @if (descriptionHtml) {
+      <div
+        class="storytime-story__description"
+        [innerHTML]="descriptionHtml"></div>
+    }
+
+    @if (isTrackingProgress && progress) {
+      <section
+        class="storytime-story__progress"
+        aria-label="Your progress">
+        @if (hasProgress) {
+          <p class="storytime-story__progress-summary">
+            <span class="storytime-story__progress-status">{{
+              readerStatusLabels[progress.status]
+            }}</span>
+            — {{ progress.readChapters }} of
+            {{ progress.totalChapters }} Chapters read ({{
+              progress.percentComplete
+            }}%)
+          </p>
+
+          <progress
+            class="storytime-story__progress-bar"
+            aria-label="Chapters read"
+            [value]="progress.percentComplete"
+            max="100">
+          </progress>
+        }
+
+        @if (progress.newChapterCount > 0) {
+          <p class="storytime-story__new-chapters">
+            {{ progress.newChapterCount }} new
+            {{ progress.newChapterCount === 1 ? 'Chapter' : 'Chapters' }} since
+            you last read.
+          </p>
+        }
+
+        <div class="storytime-story__progress-actions">
+          @if (continueChapter) {
+            <a
+              class="lcars-btn green storytime-story__continue"
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'stories',
+                storySlug,
+                'chapters',
+                continueChapter.slug,
+              ]">
+              <i
+                class="fa-solid fa-book-open"
+                aria-hidden="true"></i>
+              {{ hasProgress ? 'Continue reading' : 'Start reading' }}:
+              {{ continueChapter.title }}
+            </a>
+          }
+
+          @for (status of deliberateStatuses; track status) {
+            @if (progress.status !== status) {
+              <button
+                class="lcars-btn lcars-btn-auto bluey"
+                type="button"
+                (click)="setStatus(status)">
+                {{ readerStatusLabels[status] }}
+              </button>
+            }
+          }
+
+          @if (progress.readChapters < progress.totalChapters) {
+            <button
+              class="lcars-btn lcars-btn-auto sunflower"
+              type="button"
+              (click)="completeStory()">
+              Mark whole Story read
+            </button>
+          }
+
+          @if (hasProgress) {
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto sky storytime-story__reset"
+              (click)="resetStory()">
+              Start again
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (characters.length > 0) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Cast</span>
+      </div>
+
+      <ul class="storytime-cast">
+        @for (cast of characters; track cast.id) {
+          <li class="storytime-cast__member">
+            <a
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'stories',
+                storySlug,
+                'characters',
+                cast.slug,
+              ]">
+              @if (cast.portraitImageThumbnailUrl) {
+                <img
+                  class="storytime-cast__portrait"
+                  [src]="cast.portraitImageThumbnailUrl"
+                  [alt]="cast.portraitImageAlt ?? ''" />
+              }
+              <span class="storytime-cast__name">{{ cast.name }}</span>
+            </a>
+            @if (cast.shortBio) {
+              <p class="storytime-cast__bio">{{ cast.shortBio }}</p>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    @if (credits.length > 0) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Credits</span>
+      </div>
+
+      <ul class="storytime-credits">
+        @for (credit of credits; track credit.id) {
+          <li class="storytime-credits__entry">
+            <span class="storytime-credits__role">{{
+              credit.displayLabel
+            }}</span>
+            @if (credit.notes) {
+              <span class="storytime-credits__notes">{{ credit.notes }}</span>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Chapters</span>
+    </div>
+
+    @if (chapterErrorMessage) {
+      <app-lcars-error-message
+        title="Chapters unavailable"
+        [message]="chapterErrorMessage"></app-lcars-error-message>
+    } @else if (chapters.length === 0) {
+      <p class="storytime-empty">
+        No Chapters have been published for this Story yet.
+      </p>
+    } @else {
+      <ol class="storytime-chapter-list">
+        @for (chapter of chapters; track chapter.id) {
+          <li class="storytime-chapter-list__item">
+            <a
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'stories',
+                storySlug,
+                'chapters',
+                chapter.slug,
+              ]">
+              {{ chapter.title }}
+            </a>
+            @if (chapter.synopsis) {
+              <p class="storytime-chapter-list__synopsis">
+                {{ chapter.synopsis }}
+              </p>
+            }
+            @if (chapter.estimatedReadingMinutes) {
+              <span class="storytime-chapter-list__meta">
+                {{ chapter.estimatedReadingMinutes }} min read
+              </span>
+            }
+          </li>
+        }
+      </ol>
+    }
+
+    @if (story) {
+      <div class="storytime-story__social">
+        <app-reaction-control
+          [targetType]="targetTypes.STORY"
+          [targetId]="story.id" />
+        <app-follow-button
+          [kind]="followKinds.STORY"
+          [targetId]="story.id"
+          label="this Story" />
+        <app-add-to-list
+          [targetType]="targetTypes.STORY"
+          [targetId]="story.id" />
+      </div>
+    }
+
+    @if (isTrackingProgress) {
+      <div class="storytime-story__report">
+        <button
+          class="lcars-btn lcars-btn-auto cardinal"
+          type="button"
+          (click)="report()">
+          <i
+            class="fa-solid fa-flag"
+            aria-hidden="true"></i>
+          Report this Story
+        </button>
+        @if (reportMessage) {
+          <output
+            class="storytime-story__report-message"
+            >
+            {{ reportMessage }}
+          </output>
+        }
+      </div>
+    }
+    @if (story) {
+      <app-comment-thread
+        [targetType]="targetTypes.STORY"
+        [targetId]="story.id"
+        [isOwner]="isOwner" />
+    }
+  </article>
+}

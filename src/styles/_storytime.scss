@@ -1,0 +1,2225 @@
+@use 'sass:color';
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// STO Storytime.
+// One partial for the whole feature rather than a stylesheet per component:
+// every page is built from the same handful of shapes — a panel, a list of
+// works, a row of controls, a form — and holding them together is what keeps a
+// Story page and an Arc page recognisably the same site.
+// Everything here is scoped by the `storytime-` prefix its templates use, so
+// nothing leaks into the rest of the application.
+// ---
+// Storytime does not define its own buttons or fields. A button is
+// `.lcars-btn` with a colour class, a text field is `.lcars-input-container`,
+// a chooser is `.lcars-select-container` and a switch is `<app-lcars-toggle>` —
+// the same controls the dashboard, the admin pages and the registry are built
+// from. What is left here is layout: where those controls sit and how far
+// apart, plus the shapes the rest of the site has no equivalent for.
+
+// The panel a block of Storytime sits in. Deliberately the same surface the
+// admin pages use for theirs, so a form on a Story page and a form on the news
+// admin page read as the same kind of thing.
+@mixin storytime-panel-surface {
+  margin-top: 0.5rem;
+  padding: 1.25rem;
+  border-radius: 6px;
+  background: vars.$lcars-grey-bg;
+}
+
+// A row in any of the feature's lists.
+@mixin storytime-row {
+  @include mixins.lcars-card;
+
+  list-style: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+// A heading that names a work, wherever one appears.
+@mixin storytime-work-title {
+  font-family: vars.$font-antonio;
+  font-size: 1.15rem;
+  color: vars.$lcars-sunflower;
+  text-decoration: none;
+
+  // & is always resolved here: every @include of this mixin sits inside a
+  // real selector (see usages below), so this is the known stylelint/Sonar
+  // false positive for `&` referenced inside a @mixin definition rather than
+  // a missing scoping root.
+  &:hover, &:focus { // NOSONAR
+    color: vars.$lcars-gold;
+    text-decoration: underline;
+  }
+}
+
+// The small print under a title: word counts, dates, ratings.
+@mixin storytime-meta {
+  font-size: 0.8rem;
+  color: vars.$lcars-grey-light;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// The same, when it is a list. Several of these are `ul`s — the facts are a
+// list and the markup says so — and left alone they arrive with disc bullets
+// and the global left indent, which reads as content rather than as a caption.
+@mixin storytime-meta-list {
+  @include storytime-meta;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+// The label on a field or a group of them.
+@mixin storytime-label-colour {
+  color: vars.$lcars-perano;
+  font-family: vars.$font-antonio;
+  text-transform: uppercase;
+}
+
+// Anything the reader is told: an error, a status, a note.
+@mixin storytime-message($colour) {
+  font-size: 0.9rem;
+  color: $colour;
+  margin: 0.5rem 0;
+}
+
+// Page furniture
+// -----------------------------------------------------------------------------
+
+// The LCARS frame styles every `nav` as part of the sidebar: capped at 660px,
+// right-aligned, with each `nav a` a 210px violet button. That is right for the
+// frame and wrong for a row of links inside a page, so Storytime's own
+// navigation blocks start from a clean slate and then say what they are. The
+// reset is here rather than in the theme because the frame's rule is load
+// bearing everywhere else.
+// `:where()` keeps the reset at one class of specificity: enough to outrank
+// the frame's `nav a`, low enough that a nav's own rules below still outrank
+// the reset without having to repeat themselves.
+// `max-width` is safe to reset from here because nothing inside the feature
+// sets one. Alignment is not: `.storytime-chapter__navigation` wants its two
+// links pushed apart, so `justify-content` is left to each row's own class,
+// which outranks the frame's element rule without having to outrank this one.
+nav[class^='storytime-'] {
+  max-width: none;
+}
+
+nav[class^='storytime-'] :where(a, [aria-current='page']) {
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  text-align: inherit;
+}
+
+// Every Storytime page gets the same gutter and measure as the rest of the
+// site's full-width pages, so moving between a Story and the dashboard does
+// not move the content sideways.
+.storytime-page {
+  max-width: 1200px;
+  padding: 2rem;
+  margin: 0 auto;
+}
+
+// An anchor wearing a button's clothes is still an anchor, and the global
+// underline would show through the pill.
+.storytime-page a.lcars-btn,
+.storytime-page a.lcars-btn:hover {
+  text-decoration: none;
+}
+
+// The theme gives a bare `button` a 16px bottom margin and 8px sides, which
+// `.lcars-btn` never undoes. An anchor in the same row has no such margin, so a
+// centred row aligns the button's margin box against the anchor's border box
+// and stands the two 8px apart — Save above Cancel. Spacing in these rows comes
+// from their own `gap`, so the margin has nothing to contribute.
+.storytime-page .lcars-btn {
+  margin: 0;
+}
+
+// The line under a page's heading saying what the page is for, and the one-line
+// summaries that sit under a title in a list. Same voice, same colour.
+.storytime-intro,
+.storytime-landing__summary,
+.storytime-arc-list__intro,
+.storytime-reading-lists__intro,
+.storytime-feed__intro,
+.storytime-policy__intro,
+.storytime-report__intro {
+  color: vars.$lcars-grey-light;
+  margin-bottom: 1rem;
+}
+
+// An intro runs the full width of the page. It sits directly under a
+// full-width heading and above full-width content, and a measure-capped line
+// between the two reads as a column that has lost its other half. The summaries
+// keep a measure, because they are read as a list of short lines rather than as
+// prose and are already held by whatever panel or row they sit in.
+.storytime-landing__summary {
+  max-width: 60ch;
+}
+
+// Every "there is nothing here" line in the feature. One rule, because an
+// empty Story list and an empty reading list should not look like different
+// kinds of absence.
+.storytime-empty {
+  @include storytime-panel-surface;
+
+  color: vars.$lcars-grey-light;
+  font-style: italic;
+}
+
+// An empty state already sitting in a panel does not need a panel of its own;
+// a box inside a box reads as something having gone wrong.
+.storytime-panel > .storytime-empty {
+  margin-top: 0;
+  padding: 0;
+  background: none;
+}
+
+// A heading bar and the block it introduces.
+.storytime-section {
+  margin-top: 1.5rem;
+}
+
+// A heading that opens a row sits at the top of it. The row's own padding is
+// the space it needs, and the heading's leading margin on top of that drops the
+// title a line and a half into a box it is supposed to be naming.
+.storytime-chapter-list__item > h2:first-child,
+.storytime-spotlight-admin__entry > h2:first-child {
+  margin-top: 0;
+}
+
+// A panel stacks what it holds on the same rhythm a form uses between its
+// sections. Without this its rows are plain blocks carrying no margin, and two
+// fields end up flush against one another.
+.storytime-panel {
+  @include storytime-panel-surface;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  // The gap is the rhythm. The block margins these elements bring with them
+  // would only add to it, and unevenly.
+  > * {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+// Forms
+// -----------------------------------------------------------------------------
+
+.storytime-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// Fields sit side by side until there is no room for them, at which point they
+// wrap rather than shrinking into something too narrow to type in.
+.storytime-form .form-row,
+.storytime-panel .form-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.storytime-form .form-row > .lcars-input-container,
+.storytime-form .form-row > .lcars-select-container,
+.storytime-panel .form-row > .lcars-input-container,
+.storytime-panel .form-row > .lcars-select-container {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 0;
+}
+
+// A field that has no business sharing its line: a title, a Chapter's body.
+.storytime-field-full {
+  flex-basis: 100%;
+}
+
+// The heading over a group of switches. A `legend` would need a `fieldset`
+// around it, and a fieldset's border cuts across the panel it sits in.
+.storytime-form__legend {
+  @include storytime-label-colour;
+
+  margin: 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+}
+
+// What a field means, under the field. Inside the input's own container, where
+// the background is dark enough to read it — never inside a select's, which is
+// a solid colour. A chooser that needs explaining gets a help popup instead.
+.storytime-page .field-hint,
+.storytime-report__form .field-hint {
+  color: vars.$lcars-grey-light;
+  box-sizing: border-box;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin: 0.35rem 0 0;
+
+  // Padded on all four sides: the container's coloured bottom rule closes the
+  // field off directly under this line, and text sitting on it reads as an
+  // overflow rather than as part of the field.
+  padding: 0 1rem 0.5rem;
+}
+
+.storytime-page .field-error,
+.storytime-report__form .field-error {
+  color: vars.$lcars-orange;
+  font-size: 0.8rem;
+}
+
+// A row of switches, in a form or against a record.
+.storytime-toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+
+  // A switch keeps its label on one line, so a flex item allowed to shrink
+  // below its content runs that label straight through the switch next to it.
+  > * {
+    flex: 0 0 auto;
+  }
+
+  // The theme styles a bare `button` as a fixed 200px LCARS pill, and the
+  // switch is a button whose own stylesheet never says otherwise. Everywhere
+  // else it is used the labels are a word or two and fit; Storytime's say what
+  // a collaborator may do, and at 200px they run out of the switch and through
+  // the one beside it.
+  .lcars-toggle {
+    width: auto;
+    height: auto;
+    margin: 0;
+  }
+}
+
+// One trait and the button that removes it.
+.storytime-trait-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+
+  .lcars-input-container {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+
+  .lcars-btn {
+    flex: 0 0 auto;
+  }
+}
+
+// Button rows
+// -----------------------------------------------------------------------------
+// Three of them, because a form's Save is not the same thing as a list row's
+// Publish. All three stop their pills from shrinking: a flex item may shrink
+// below its content, and a label spilling out of its pill is the one way an
+// LCARS button can look broken.
+
+// What a form ends with, against the right-hand edge like every other form on
+// the site.
+.storytime-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+
+  .lcars-btn {
+    flex: 0 0 auto;
+    min-width: 10rem;
+  }
+}
+
+// What a page opens with: create a Story, add a Chapter, go back.
+.storytime-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  .lcars-btn {
+    flex: 0 0 auto;
+  }
+}
+
+// What one record in a list offers.
+.storytime-actions,
+.storytime-character-list__controls,
+.storytime-arc-stories__order,
+.storytime-tag-admin__actions,
+.storytime-comments__controls,
+.storytime-comments__actions,
+.storytime-reading-list__controls,
+.storytime-reading-list__item-controls,
+.storytime-library__filters,
+.storytime-search__kinds,
+.storytime-removed__actions,
+.storytime-story__progress-actions,
+.storytime-story__social,
+.storytime-story__report,
+.storytime-arc__social,
+.storytime-chapter__social,
+.storytime-chapter__progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+
+  .lcars-btn {
+    flex: 0 0 auto;
+  }
+}
+
+// A count on a button that opens what it counts. The badge rule in `styles.scss`
+// is scoped to `.lcars-text-bar`, so inside a pill the number would render as
+// bare text tacked onto the label; the crew page restates it for its side-menu
+// buttons for the same reason. A dark pill reads on every button colour the
+// feature uses.
+.storytime-page .lcars-btn .header-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  margin-left: 0.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: vars.$lcars-black;
+  color: vars.$lcars-white;
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+// A row of icon-only controls is tighter than a row of pills: the icons carry
+// their meaning in a tooltip, not in a label that needs room.
+.storytime-character-list__controls,
+.storytime-arc-stories__order,
+.storytime-tag-admin__actions,
+.storytime-comments__controls,
+.storytime-reading-list__item-controls {
+  gap: 1rem;
+  font-size: 1.1rem;
+}
+
+// The controls on a list row belong at its right-hand end, where the eye
+// arrives after reading the row.
+.storytime-character-list__controls,
+.storytime-tag-admin__actions {
+  margin-left: auto;
+}
+
+// A disabled icon control has to look disabled: `.cta-icon` is a bare `button`
+// with no state of its own, and an arrow that cannot move anything still
+// invites a press.
+.storytime-page .cta-icon:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+
+  &:hover {
+    color: vars.$lcars-perano;
+    transform: none;
+  }
+}
+
+// A chooser and its explanation
+// -----------------------------------------------------------------------------
+// A `.lcars-select-container` is a solid block of colour, so hint text inside
+// one cannot be read. Anything that needs explaining says so through the mark
+// beside it instead, which also keeps a row of choosers the same height
+// whether or not they have anything to explain.
+
+.storytime-setting-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.storytime-setting-field .lcars-select-container {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.storytime-setting-help {
+  position: relative;
+  flex: 0 0 24px;
+}
+
+.storytime-setting-help[open] .storytime-setting-help__trigger {
+  background-color: vars.$lcars-green;
+  color: #000;
+}
+
+.storytime-setting-help__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: #b8e8ff;
+  background: #1d2d3e;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 700;
+  list-style: none;
+  user-select: none;
+  transition: background-color 120ms ease;
+}
+
+.storytime-setting-help__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.storytime-setting-help__trigger::marker {
+  display: none;
+}
+
+.storytime-setting-help__trigger:hover {
+  background-color: #263e54;
+}
+
+.storytime-setting-help__trigger:focus-visible {
+  outline: 2px solid #6cf;
+  outline-offset: 2px;
+}
+
+.storytime-setting-help__popup {
+  display: block;
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 10;
+  width: min(360px, calc(100vw - 80px));
+  padding: 10px 12px;
+  border: 1px solid #9de0ff;
+  border-radius: 8px;
+  background: #1d2d3e;
+  color: #f2f8ff;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.storytime-setting-help__popup p {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0 0 0.65rem;
+}
+
+.storytime-setting-help__popup p:last-child {
+  margin-bottom: 0;
+}
+
+.storytime-setting-help__popup strong {
+  color: vars.$lcars-perano;
+  font-family: vars.$font-antonio;
+  text-transform: uppercase;
+}
+
+// Notes and asides
+// -----------------------------------------------------------------------------
+
+p.storytime-fan-notice,
+.storytime-fan-notice {
+  font-size: 0.7rem;
+  color: vars.$lcars-grey-light;
+  line-height: 1.5;
+  font-style: italic;
+  margin: 0;
+}
+
+// Stories and Arcs
+// -----------------------------------------------------------------------------
+
+.storytime-story-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  padding: 0;
+  margin: 0 0 1rem;
+  list-style: none;
+}
+
+.storytime-story-card {
+  @include mixins.lcars-card;
+
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+
+  &__image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  &__title {
+    @include storytime-work-title;
+
+    display: block;
+    padding: 0.75rem 1rem 0;
+  }
+
+  &__summary {
+    padding: 0.25rem 1rem;
+    color: vars.$lcars-white;
+    font-size: 0.9rem;
+    flex: 1;
+  }
+
+  // The card's own padding places this line, so it takes the list treatment
+  // without the mixin's zeroed padding.
+  &__meta {
+    @include storytime-meta;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0 1rem 0.75rem;
+    margin: 0;
+    list-style: none;
+  }
+}
+
+.storytime-story {
+  &__banner,
+  &__description,
+  &__summary {
+    margin-bottom: 1rem;
+  }
+
+  &__banner {
+    width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  &__summary {
+    font-size: 1.05rem;
+    color: vars.$lcars-white;
+  }
+
+  &__meta {
+    @include storytime-meta-list;
+
+    margin-bottom: 1rem;
+  }
+
+  &__progress {
+    @include storytime-panel-surface;
+  }
+
+  &__progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: vars.$lcars-grey-border;
+    overflow: hidden;
+    appearance: none;
+
+    &::-webkit-progress-bar {
+      background: vars.$lcars-grey-border;
+    }
+
+    &::-webkit-progress-value,
+    &::-moz-progress-bar {
+      background: vars.$lcars-green;
+    }
+  }
+
+  &__progress-summary,
+  &__progress-status {
+    @include storytime-meta;
+
+    margin: 0.5rem 0;
+  }
+
+  &__new-chapters {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-orange;
+    color: vars.$lcars-black;
+  }
+
+  &__report-message {
+    @include storytime-message(vars.$lcars-green);
+  }
+}
+
+.storytime-arc {
+  &__banner {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+
+  &__summary,
+  &__description {
+    color: vars.$lcars-white;
+    margin-bottom: 1rem;
+  }
+
+  &__progress {
+    @include storytime-panel-surface;
+  }
+
+  &__progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: vars.$lcars-grey-border;
+    overflow: hidden;
+    appearance: none;
+
+    &::-webkit-progress-bar {
+      background: vars.$lcars-grey-border;
+    }
+
+    &::-webkit-progress-value,
+    &::-moz-progress-bar {
+      background: vars.$lcars-green;
+    }
+  }
+
+  &__progress-summary {
+    @include storytime-meta;
+  }
+
+  &__continue {
+    display: inline-block;
+    text-decoration: none;
+  }
+
+  &__stories {
+    padding: 0;
+    margin: 0;
+    counter-reset: storytime-arc-order;
+  }
+
+  &__story {
+    @include storytime-row;
+
+    counter-increment: storytime-arc-order;
+
+    a {
+      @include storytime-work-title;
+    }
+
+    &::before {
+      content: counter(storytime-arc-order) '.';
+      color: vars.$lcars-perano;
+      font-family: vars.$font-antonio;
+      margin-right: 0.5rem;
+    }
+  }
+
+  &__note,
+  &__story-summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+}
+
+.storytime-arc-list {
+  padding: 0;
+  margin: 0;
+
+  &__entry {
+    @include storytime-row;
+
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  &__image {
+    width: 120px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  &__title {
+    @include storytime-work-title;
+  }
+
+  &__summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+}
+
+// Chapters
+// -----------------------------------------------------------------------------
+
+.storytime-chapter-list {
+  padding: 0;
+  margin: 0;
+
+  &__item {
+    @include storytime-row;
+
+    a {
+      @include storytime-work-title;
+    }
+  }
+
+  &__synopsis {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+
+  &__meta {
+    @include storytime-meta-list;
+
+    margin: 0.5rem 0;
+  }
+
+  &__removed {
+    color: vars.$lcars-cardinal;
+    font-size: 0.85rem;
+  }
+}
+
+.storytime-chapter {
+  &__breadcrumb {
+    @include storytime-meta;
+
+    justify-content: flex-start;
+    margin-bottom: 0.5rem;
+
+    a {
+      color: vars.$lcars-perano;
+    }
+  }
+
+  &__cover {
+    width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+
+  &__synopsis {
+    color: vars.$lcars-grey-light;
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
+
+  &__meta {
+    @include storytime-meta-list;
+
+    margin-bottom: 1rem;
+  }
+
+  // The Chapter itself. Wider line height and a capped measure, because this
+  // is the one part of Storytime somebody reads for half an hour at a time.
+  &__body {
+    color: vars.$lcars-white;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 70ch;
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    h2,
+    h3 {
+      font-family: vars.$font-antonio;
+      color: vars.$lcars-sunflower;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    blockquote {
+      border-left: 3px solid vars.$lcars-perano;
+      padding-left: 1rem;
+      color: vars.$lcars-grey-light;
+      margin: 1rem 0;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+  }
+
+  &__navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 2rem 0 1rem;
+
+    a {
+      @include storytime-work-title;
+
+      font-size: 1rem;
+    }
+  }
+
+  &__story-progress {
+    @include storytime-meta;
+
+    margin: 0;
+  }
+
+  &__resume {
+    margin: 1rem 0;
+  }
+
+  &__media {
+    margin: 1rem 0;
+  }
+}
+
+// Characters and Crew
+// -----------------------------------------------------------------------------
+
+.storytime-cast {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 0;
+  margin: 0 0 1rem;
+  list-style: none;
+
+  &__member {
+    @include mixins.lcars-card;
+
+    padding: 0.75rem;
+  }
+
+  &__portrait {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  &__name {
+    @include storytime-work-title;
+
+    display: block;
+    margin-top: 0.5rem;
+  }
+
+  &__bio {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+  }
+}
+
+.storytime-character {
+  &__header,
+  &__identity,
+  &__profile-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  &__portrait {
+    width: 180px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  &__breadcrumb {
+    @include storytime-meta;
+
+    justify-content: flex-start;
+
+    a {
+      color: vars.$lcars-perano;
+    }
+  }
+
+  &__summary,
+  &__biography {
+    color: vars.$lcars-white;
+    max-width: 70ch;
+  }
+
+  &__profile {
+    @include storytime-panel-surface;
+  }
+
+  &__traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+
+    li {
+      @include mixins.lcars-badge;
+
+      background: vars.$lcars-bluey;
+      color: vars.$lcars-black;
+    }
+  }
+
+  &__billing,
+  &__appearance-billing {
+    @include storytime-meta;
+  }
+
+  &__appearances {
+    padding: 0;
+    margin: 0;
+
+    li {
+      @include storytime-row;
+    }
+  }
+}
+
+.storytime-character-list,
+.storytime-collaborators,
+.storytime-credits,
+.storytime-invitations,
+.storytime-arc-stories,
+.storytime-spotlight-admin {
+  padding: 0;
+  margin: 0;
+}
+
+.storytime-character-list {
+  &__entry {
+    @include storytime-row;
+
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  &__portrait {
+    width: 72px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  &__identity {
+    flex: 1;
+    min-width: 0;
+
+    a {
+      @include storytime-work-title;
+    }
+  }
+
+  &__bio {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+  }
+
+  &__billing {
+    @include storytime-meta;
+  }
+}
+
+.storytime-credits {
+  &__entry {
+    @include storytime-row;
+  }
+
+  &__role {
+    @include storytime-label-colour;
+  }
+
+  &__notes {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+  }
+}
+
+// Collaboration
+// -----------------------------------------------------------------------------
+
+.storytime-collaborators,
+.storytime-invitations,
+.storytime-arc-stories {
+  &__entry {
+    @include storytime-row;
+  }
+
+  &__identity,
+  &__member,
+  &__title,
+  &__summary,
+  &__role {
+    color: vars.$lcars-white;
+  }
+
+  &__status,
+  &__pending,
+  &__grants-label,
+  &__note {
+    @include storytime-meta;
+  }
+
+  &__grants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+    margin: 0.5rem 0;
+
+    li {
+      @include mixins.lcars-badge;
+
+      background: vars.$lcars-bluey;
+      color: vars.$lcars-black;
+    }
+  }
+}
+
+// Creator dashboard and editors
+// -----------------------------------------------------------------------------
+
+// A work in a creator's own list, built to the same plan as a captain card on
+// the dashboard: a coloured spine down the left, a title bar carrying the name
+// in black, a body, and a strip of controls at the right-hand end. What the
+// colour stands for here is publication status rather than faction, because
+// that is what a creator scanning their own list is looking for.
+$storytime-record-statuses: (
+  'draft': vars.$lcars-sunflower,
+  'in_review': vars.$lcars-tangerine,
+  'scheduled': vars.$lcars-perano,
+  'published': vars.$lcars-green,
+  'unpublished': vars.$lcars-cardinal,
+  'archived': vars.$lcars-grey-light,
+);
+
+.storytime-record {
+  @include mixins.lcars-card;
+
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  border-left: 10px solid vars.$faction-undecided;
+
+  // A Chapter list is an `ol`, because reading order is part of what it says.
+  // The record is the same shape whether it is a list item or an article.
+  list-style: none;
+
+  // The card as a whole lifts on hover, which would fight with a title bar
+  // that lifted again on its own.
+  &:hover {
+    transform: none;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 1rem;
+    background: #333;
+    border-bottom: 2px solid rgb(255 255 255 / 10%);
+    color: vars.$lcars-white;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      filter: brightness(1.1);
+      text-decoration: none;
+    }
+  }
+
+  &__name {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: vars.$lcars-white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // What state the work is in, said again in the bar so a creator scanning a
+  // column of cards does not have to trust the colour alone.
+  // What the bar says about the work besides its name, at its right-hand end
+  // the way a captain card carries its recruit type.
+  &__marks {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  // Dark chip rather than a tint of the bar: the bar is a different colour for
+  // every state, and only a solid ground reads on all six of them.
+  &__badge {
+    @include mixins.lcars-badge;
+
+    flex: 0 0 auto;
+    background: rgb(0 0 0 / 55%);
+    color: vars.$lcars-white;
+    letter-spacing: 0.05em;
+  }
+
+  // Who can reach the work, as a mark rather than a word. On the same dark
+  // ground as the badge beside it so the two read as one set, and paired with
+  // its label for anyone not reading the screen.
+  &__visibility {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 55%);
+    color: vars.$lcars-white;
+    font-size: 0.9rem;
+  }
+
+  &__body {
+    display: flex;
+    align-items: stretch;
+    min-height: 90px;
+    background: rgb(255 255 255 / 3%);
+  }
+
+  &__details {
+    flex: 1;
+    min-width: 0;
+    padding: 0.75rem 1rem;
+  }
+
+  &__meta {
+    @include storytime-meta-list;
+  }
+
+  &__removed {
+    color: vars.$lcars-cardinal;
+    margin: 0.5rem 0 0;
+  }
+
+  // The controls live in their own darkened strip at the end of the row, the
+  // way a captain card's do, so pressing one is never mistaken for opening the
+  // work.
+  &__controls {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 0.8rem;
+    font-size: 1.2rem;
+    background: rgb(0 0 0 / 40%);
+    border-left: 1px solid rgb(255 255 255 / 10%);
+
+    .cta-icon {
+      color: rgb(255 255 255 / 50%);
+
+      &:hover {
+        color: vars.$lcars-sunflower;
+      }
+    }
+  }
+}
+
+@each $status, $colour in $storytime-record-statuses {
+  .storytime-record--#{$status} {
+    border-left-color: color.adjust($colour, $lightness: -16%);
+    background: linear-gradient(
+      180deg,
+      rgba($colour, 0.18) 0%,
+      vars.$lcars-grey-bg 100%
+    );
+
+    .storytime-record__header {
+      background-color: $colour;
+      border-bottom-color: color.adjust($colour, $lightness: -20%);
+    }
+  }
+}
+
+// A removed work is not in any of the ordinary states, and reads as its own.
+.storytime-record--removed {
+  border-left-color: color.adjust(vars.$lcars-cardinal, $lightness: -16%);
+  background: linear-gradient(
+    180deg,
+    rgba(vars.$lcars-cardinal, 0.25) 0%,
+    vars.$lcars-grey-bg 100%
+  );
+
+  .storytime-record__header {
+    background-color: vars.$lcars-cardinal;
+    border-bottom-color: color.adjust(vars.$lcars-cardinal, $lightness: -20%);
+  }
+}
+
+.storytime-dashboard {
+  &__removed-reason,
+  &__appeal-message {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+
+  &__policy {
+    margin: 1rem 0;
+  }
+
+  // The three documents, reachable from the point of acceptance. A creator
+  // asked to agree to something needs it one click away, not one search away.
+  &__policy-links {
+    font-size: 0.85rem;
+
+    a {
+      color: vars.$lcars-sunflower;
+    }
+  }
+}
+
+.storytime-editor {
+  &__media-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    padding: 0;
+    margin: 1rem 0 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+  }
+
+  &__media-thumbnail {
+    width: 120px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+}
+
+// Reading: library, search, landing, Spotlight
+// -----------------------------------------------------------------------------
+
+.storytime-library {
+  padding: 0;
+  margin: 0;
+
+  &__entry {
+    @include storytime-row;
+  }
+
+  &__title {
+    @include storytime-work-title;
+  }
+
+  &__status {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-perano;
+    color: vars.$lcars-black;
+  }
+
+  &__bar {
+    height: 8px;
+    border-radius: 4px;
+    background: vars.$lcars-grey-border;
+    overflow: hidden;
+    margin: 0.5rem 0;
+    appearance: none;
+
+    &::-webkit-progress-bar {
+      background: vars.$lcars-grey-border;
+    }
+
+    &::-webkit-progress-value,
+    &::-moz-progress-bar {
+      background: vars.$lcars-green;
+    }
+  }
+
+  &__new {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-orange;
+    color: vars.$lcars-black;
+  }
+
+  // A Story that has gone private or been removed still belongs in a reader's
+  // history, so it is dimmed rather than dropped.
+  &__gone {
+    color: vars.$lcars-grey-light;
+    font-style: italic;
+  }
+}
+
+.storytime-landing {
+  // Storytime's own navigation, which used to be a row of sidebar buttons.
+  // Each entry gets a line saying what it is, which is the whole reason for
+  // moving it here: "Arcs" alone tells a first-time reader nothing.
+  &__browse,
+  &__yours {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    list-style: none;
+
+    // Each way in gets its own panel. Four headings with a line under each
+    // reads as one paragraph of links; four panels reads as four things to
+    // choose between, which is what this section is for.
+    li {
+      @include mixins.lcars-card;
+
+      display: flex;
+      padding: 0;
+      list-style: none;
+    }
+
+    // The panel is the link rather than something with a link in it. Somebody
+    // reaching for "Arcs" aims at the box, so the anchor fills the box and
+    // carries its padding; a card that only answers along its first line
+    // reads as broken.
+    a {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0.75rem 1rem;
+      text-decoration: none;
+
+      &:hover .storytime-landing__browse-name,
+      &:focus-visible .storytime-landing__browse-name {
+        color: vars.$lcars-gold;
+        text-decoration: underline;
+      }
+
+      &:focus-visible {
+        outline: 2px solid vars.$lcars-perano;
+        outline-offset: 2px;
+      }
+    }
+
+    .storytime-landing__summary {
+      margin: 0;
+      max-width: none;
+      font-size: 0.9rem;
+    }
+  }
+
+  // The heading inside a browse panel. It is a span rather than a link of its
+  // own, because the panel around it is already the link.
+  &__browse-name {
+    font-family: vars.$font-antonio;
+    font-size: 1rem;
+    color: vars.$lcars-sunflower;
+  }
+
+  &__stories {
+    margin-bottom: 1.5rem;
+  }
+
+  &__unread {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-orange;
+    color: vars.$lcars-black;
+    margin-left: 0.5rem;
+  }
+}
+
+.storytime-search {
+  &__form {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 1rem;
+    align-items: flex-start;
+
+    .lcars-input-container {
+      flex: 1;
+      min-width: 220px;
+      margin-bottom: 0;
+    }
+
+    .lcars-btn {
+      flex: 0 0 auto;
+    }
+  }
+
+  &__kind {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-bluey;
+    color: vars.$lcars-black;
+  }
+
+  // The count on a filter chip, inside a pill whose label is already
+  // right-aligned and uppercase.
+  &__count {
+    margin-left: 0.4rem;
+    font-weight: 900;
+  }
+
+  &__results {
+    padding: 0;
+    margin: 0;
+  }
+
+  &__result {
+    @include storytime-row;
+
+    a {
+      @include storytime-work-title;
+    }
+  }
+
+  &__summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+  }
+
+  &__prompt {
+    @include storytime-meta;
+  }
+}
+
+.storytime-spotlight {
+  @include storytime-panel-surface;
+
+  &__headline {
+    font-family: vars.$font-antonio;
+    font-size: 1.4rem;
+    color: vars.$lcars-sunflower;
+  }
+
+  &__image {
+    width: 100%;
+    max-height: 260px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  &__work {
+    @include storytime-work-title;
+  }
+
+  &__reason,
+  &__summary {
+    color: vars.$lcars-white;
+  }
+
+  &__dates {
+    @include storytime-meta;
+  }
+
+  &__archive {
+    padding: 0;
+    margin: 0;
+  }
+
+  &__entry {
+    @include storytime-row;
+  }
+
+  // A past selection is history rather than news, and reads as such.
+  &--past {
+    opacity: 0.75;
+  }
+}
+
+.storytime-spotlight-admin {
+  &__entry {
+    @include storytime-row;
+  }
+
+  &__meta {
+    @include storytime-meta-list;
+
+    margin: 0.5rem 0;
+  }
+}
+
+// Moderation and policy
+// -----------------------------------------------------------------------------
+
+.storytime-policy {
+  &__rule {
+    @include storytime-panel-surface;
+
+    h2,
+    h3 {
+      font-family: vars.$font-antonio;
+      color: vars.$lcars-sunflower;
+    }
+
+    // The rule name carries the weight; the definition list markup is what
+    // makes a screen reader pair it with its explanation.
+    dt {
+      font-family: vars.$font-antonio;
+      color: vars.$lcars-sunflower;
+      margin-bottom: 0.25rem;
+    }
+
+    dd {
+      margin: 0;
+      color: vars.$lcars-grey-light;
+      line-height: 1.5;
+    }
+  }
+
+  &__version {
+    font-size: 0.8rem;
+    color: vars.$lcars-grey-light;
+    margin-bottom: 0.5rem;
+  }
+}
+
+// The report dialog is a Material dialog rather than a page, so it carries its
+// own padding and its own form spacing; everything inside it is the same
+// container, pill and help popup the pages use.
+#storytime-report-dialog-container {
+  padding: 10px;
+
+  .mat-mdc-dialog-actions {
+    gap: 1rem;
+    padding: 1rem 3rem;
+  }
+}
+
+.storytime-report {
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  &__policy {
+    margin: 1rem 0 0;
+    font-size: 0.85rem;
+  }
+}
+
+.storytime-removed {
+  &__summary {
+    color: vars.$lcars-grey-light;
+    max-width: 60ch;
+  }
+}
+
+.storytime-moderation {
+  &__reports,
+  &__appeals {
+    padding: 0;
+    margin: 0;
+  }
+
+  &__report,
+  &__appeal {
+    @include storytime-row;
+  }
+
+  &__what {
+    @include storytime-work-title;
+
+    font-size: 1rem;
+  }
+
+  &__meta {
+    @include storytime-meta-list;
+
+    margin: 0.5rem 0;
+  }
+
+  &__description {
+    color: vars.$lcars-white;
+    font-size: 0.9rem;
+  }
+}
+
+// Tags
+// -----------------------------------------------------------------------------
+
+.storytime-tag-picker {
+  &__group {
+    margin-bottom: 1.25rem;
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .storytime-form__legend {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+
+  &__saved {
+    @include storytime-message(vars.$lcars-green);
+  }
+
+  &__loading {
+    @include storytime-meta;
+  }
+}
+
+.storytime-tag-admin {
+  &__tags {
+    padding: 0;
+    margin: 0;
+
+    li {
+      @include storytime-row;
+
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+  }
+
+  &__name {
+    color: vars.$lcars-white;
+    font-family: vars.$font-antonio;
+  }
+
+  &__slug {
+    @include storytime-meta;
+  }
+
+  &__description {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+    flex-basis: 100%;
+  }
+}
+
+// Media
+// -----------------------------------------------------------------------------
+
+.storytime-media {
+  @include storytime-panel-surface;
+
+  &__thumbnail,
+  &__poster {
+    width: 100%;
+    max-width: 480px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  &__poster {
+    position: relative;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+
+  &__player {
+    width: 100%;
+    max-width: 720px;
+    aspect-ratio: 16 / 9;
+    border: none;
+    border-radius: 6px;
+  }
+
+  &__play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: vars.$lcars-white;
+    text-shadow: 0 2px 8px rgb(0 0 0 / 70%);
+  }
+
+  &__title {
+    @include storytime-work-title;
+
+    font-size: 1rem;
+  }
+
+  &__caption,
+  &__notes {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+  }
+
+  // Says that nothing is loaded from the provider until the reader asks. It
+  // has to be legible, because it is a promise about their privacy.
+  &__privacy {
+    @include storytime-meta;
+
+    color: vars.$lcars-perano;
+  }
+}
+
+// Ratings, follows and comments
+// ----------------------------------------------------------------------------
+// The three inline controls that sit in a reader's way rather than at the end
+// of a form. They are toggles reporting a count, not actions, so they stay the
+// bordered chip they have always been rather than becoming full LCARS pills.
+
+.storytime-reactions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: 1px solid vars.$lcars-grey-border;
+    border-radius: 14px;
+    padding: 0.25rem 0.75rem;
+    color: vars.$lcars-grey-light;
+    cursor: pointer;
+    transition:
+      color 0.2s,
+      border-color 0.2s;
+
+    &:hover:not(:disabled) {
+      color: vars.$lcars-sunflower;
+      border-color: vars.$lcars-sunflower;
+    }
+
+    // What this reader chose, which has to be obvious at a glance or the
+    // button cannot be read as a toggle.
+    &--chosen {
+      color: vars.$lcars-black;
+      background: vars.$lcars-sunflower;
+      border-color: vars.$lcars-sunflower;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  &__label {
+    @include storytime-meta;
+
+    color: inherit;
+  }
+
+  &__count {
+    font-family: vars.$font-antonio;
+  }
+
+  &__rating {
+    font-family: vars.$font-antonio;
+    font-size: 1.2rem;
+    color: vars.$lcars-white;
+    min-width: 2ch;
+    text-align: center;
+  }
+
+  &__note {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+.storytime-follow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 14px;
+    padding: 0.25rem 0.75rem;
+    font-family: vars.$font-antonio;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: transparent;
+    color: vars.$lcars-perano;
+    border: 1px solid vars.$lcars-perano;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: vars.$lcars-perano;
+      color: vars.$lcars-black;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    // Already following, so the button offers to stop rather than to start.
+    &--following {
+      background: vars.$lcars-perano;
+      color: vars.$lcars-black;
+    }
+  }
+
+  &__count {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+.storytime-comments {
+  &__list,
+  &__replies {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__comment {
+    @include storytime-row;
+  }
+
+  // Replies are indented once and never again: the thread is one level deep,
+  // and the rule says so.
+  &__replies {
+    margin: 0.75rem 0 0 1.5rem;
+    border-left: 2px solid vars.$lcars-grey-border;
+    padding-left: 0.75rem;
+  }
+
+  &__reply {
+    list-style: none;
+    padding: 0.5rem 0;
+  }
+
+  &__text {
+    color: vars.$lcars-white;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    margin: 0;
+  }
+
+  // A comment that has lost its words keeps its place in the thread, and says
+  // so plainly rather than pretending to be missing.
+  &__silenced {
+    color: vars.$lcars-grey-light;
+    font-style: italic;
+    margin: 0;
+  }
+
+  &__edited {
+    @include storytime-meta;
+
+    margin: 0.25rem 0 0;
+  }
+
+  &__form {
+    margin-top: 0.75rem;
+  }
+
+  &__note,
+  &__loading {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+// The feed and reading lists
+// -----------------------------------------------------------------------------
+
+.storytime-feed {
+  &__list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__entry {
+    @include storytime-row;
+  }
+
+  &__what {
+    @include storytime-meta;
+
+    margin: 0;
+  }
+
+  &__link {
+    @include storytime-work-title;
+  }
+
+  &__when {
+    @include storytime-meta;
+
+    display: block;
+    margin-top: 0.25rem;
+  }
+
+  &__more {
+    display: block;
+    margin: 1.5rem auto 0;
+  }
+}
+
+.storytime-reading-lists {
+  &__list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__item {
+    @include storytime-row;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+
+    .cta-icon {
+      margin-left: auto;
+      font-size: 1.1rem;
+    }
+  }
+
+  &__name {
+    @include storytime-work-title;
+  }
+
+  &__count,
+  &__visibility,
+  &__loading {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+.storytime-reading-list {
+  &__description {
+    color: vars.$lcars-white;
+    max-width: 70ch;
+  }
+
+  &__visibility,
+  &__kind,
+  &__loading {
+    @include storytime-meta;
+  }
+
+  &__items {
+    padding: 0;
+    margin: 0;
+    counter-reset: storytime-list-order;
+  }
+
+  &__item {
+    @include storytime-row;
+
+    counter-increment: storytime-list-order;
+
+    &::before {
+      content: counter(storytime-list-order) '.';
+      color: vars.$lcars-perano;
+      font-family: vars.$font-antonio;
+      margin-right: 0.5rem;
+    }
+  }
+
+  &__title {
+    @include storytime-work-title;
+  }
+
+  &__summary,
+  &__note {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+
+  &__note {
+    font-style: italic;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+.storytime-add-to-list {
+  display: inline-block;
+  position: relative;
+
+  &__panel {
+    position: absolute;
+    z-index: 20;
+    min-width: 260px;
+    margin-top: 0.5rem;
+    background: #1d2d3e;
+    border: 1px solid vars.$lcars-grey-border;
+    box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
+  }
+
+  &__lists {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__list {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__already,
+  &__empty {
+    @include storytime-meta;
+  }
+
+  &__empty {
+    max-width: 30ch;
+  }
+
+  &__status {
+    @include storytime-message(vars.$lcars-green);
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+// The creator page
+// -----------------------------------------------------------------------------
+
+.storytime-creator {
+  &__stories,
+  &__arcs,
+  &__lists {
+    padding: 0;
+    margin: 0 0 1.5rem;
+    list-style: none;
+
+    li {
+      @include storytime-row;
+    }
+
+    a {
+      @include storytime-work-title;
+    }
+  }
+
+  &__summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+
+  &__list-count {
+    @include storytime-meta;
+
+    margin-left: 0.5rem;
+  }
+}
+
+// Narrow screens
+// -----------------------------------------------------------------------------
+
+@media (width <= 768px) {
+  .storytime-page {
+    padding: 1rem;
+  }
+
+  .storytime-arc-list__entry,
+  .storytime-character-list__entry,
+  .storytime-character__header,
+  .storytime-character__identity {
+    flex-direction: column;
+  }
+
+  .storytime-arc-list__image,
+  .storytime-character-list__portrait,
+  .storytime-character__portrait {
+    width: 100%;
+    max-width: 240px;
+  }
+
+  .storytime-chapter__navigation {
+    flex-direction: column;
+  }
+
+  // With the row stacked there is nothing left of the controls to push them
+  // against, so they go back to the start of their own line.
+  .storytime-character-list__controls,
+  .storytime-tag-admin__actions,
+  .storytime-reading-lists__item .cta-icon {
+    margin-left: 0;
+  }
+
+  // A form's buttons stop being an afterthought at the end of a line and
+  // become the width of the form.
+  .storytime-form-actions {
+    justify-content: stretch;
+
+    .lcars-btn {
+      flex: 1 1 auto;
+    }
+  }
+}

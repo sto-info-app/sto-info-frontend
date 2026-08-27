@@ -1,0 +1,51 @@
+<div id="help-page">
+  <h1>Help</h1>
+
+  <p>
+    Guides to using STO Info, written for people who want to get on with it.
+    None of them assume you have read any of the others.
+  </p>
+
+  @for (topic of topics; track topic.id) {
+    <app-help-section [heading]="topic.title">
+      <p class="help-topic__intro">{{ topic.intro }}</p>
+
+      <ul class="help-guide-list">
+        @for (guide of topic.guides; track guide.slug) {
+          <li class="help-guide-list__item">
+            <h3 class="help-guide-list__title">
+              <a [routerLink]="getGuideLink(guide.slug)">{{ guide.title }}</a>
+            </h3>
+            <p class="help-guide-list__summary">{{ guide.summary }}</p>
+          </li>
+        }
+      </ul>
+    </app-help-section>
+  }
+
+  <app-help-section heading="Still stuck?">
+    <p>
+      If a guide does not answer your question, ask us. We would rather hear
+      about it than have you work around it — and a question asked often enough
+      becomes the next guide.
+    </p>
+
+    <div class="buttons-row">
+      <a
+        [routerLink]="getRouteLink(appRoutes.CONTACT)"
+        class="sky"
+        >Contact us</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.ABOUT)"
+        class="violet"
+        >About STO Info</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.ROADMAP)"
+        class="ice"
+        >Roadmap</a
+      >
+    </div>
+  </app-help-section>
+</div>

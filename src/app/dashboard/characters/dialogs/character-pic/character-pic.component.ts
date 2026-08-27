@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -10,6 +10,7 @@ import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 
 @Component({
   selector: 'app-character-pic',
@@ -32,6 +33,8 @@ export class CharacterPicComponent extends ImageCropperBaseComponent {
   };
 
   private readonly _characterService = inject(CharacterService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   onUploadImageClick(): void {
     try {
@@ -47,6 +50,7 @@ export class CharacterPicComponent extends ImageCropperBaseComponent {
       this.isSubmitting = true;
       this._characterService
         .updateCharacterProfilePic(this.data.character.id, formData)
+        .pipe(observeInZone(this._ngZone, this._cdr))
         .subscribe({
           next: () => {
             this.isSubmitting = false;

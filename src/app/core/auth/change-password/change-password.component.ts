@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -21,6 +27,7 @@ import {
 import { MIN_CHARS_PASSWORD } from 'src/app/shared/constants/forms.constants';
 import { PASSWORD_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { AuthService } from '../auth.service';
 
@@ -57,6 +64,7 @@ export class ChangePasswordComponent implements OnInit {
   private readonly _authService = inject(AuthService);
   private readonly _routingService = inject(RoutingService);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _ngZone = inject(NgZone);
   private readonly _logoutAfterSuccessDelayMs = 3000;
 
   private getStatusCode(
@@ -133,6 +141,7 @@ export class ChangePasswordComponent implements OnInit {
 
       this._authService
         .changePassword(this.token, this.changePasswordForm.value.password)
+        .pipe(observeInZone(this._ngZone, this._cdr))
         .subscribe({
           next: () => {
             this.successMessage =

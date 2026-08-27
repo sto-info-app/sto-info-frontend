@@ -18,6 +18,20 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
 export class SideBarComponent {
   @Input() isLoggedIn!: boolean;
 
+  /**
+   * Whether to offer Storytime in the navigation.
+   *
+   * Supplied from above rather than fetched here, matching `isLoggedIn`. The
+   * sidebar renders on every page and in most component tests, so giving it
+   * its own HTTP dependency would make it expensive to render and awkward to
+   * test everywhere it appears.
+   *
+   * Defaults to hidden so the link never flickers into view before the feature
+   * state is known — a link that appears and then disappears is worse than one
+   * that arrives a moment late.
+   */
+  @Input() isStorytimeEnabled = false;
+
   appRoutes = APP_ROUTES;
   appRouteTitles = APP_ROUTE_TITLES;
   themePanel6RandomText: string;

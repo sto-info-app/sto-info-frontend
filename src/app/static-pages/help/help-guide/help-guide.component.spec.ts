@@ -1,0 +1,226 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ActivatedRoute,
+  Router,
+  convertToParamMap,
+  provideRouter,
+} from '@angular/router';
+import { BehaviorSubject, of } from 'rxjs';
+import { PageTitleService } from 'src/app/shared/services/page-title.service';
+import { StorytimeService } from 'src/app/storytime/storytime.service';
+
+import { HELP_TOPICS } from '../help.data';
+import { HelpTopic } from '../help.models';
+import { HelpGuideComponent } from './help-guide.component';
+
+describe('HelpGuideComponent', () => {
+  let fixture: ComponentFixture<HelpGuideComponent>;
+  let component: HelpGuideComponent;
+  let paramMap$: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
+  let navigateSpy: jest.SpyInstance;
+  let pageTitleSpy: { setTitle: jest.Mock };
+
+  // The Storytime topic is the gated one, so it is what the visibility tests
+  // need; the Community topic is always available and proves the other side.
+  const storytimeTopic = HELP_TOPICS.find(
+    topic => topic.requiresStorytime,
+  ) as HelpTopic;
+  const openTopic = HELP_TOPICS.find(
+    topic => !topic.requiresStorytime,
+  ) as HelpTopic;
+  const firstGuide = storytimeTopic.guides[0];
+  const secondGuide = storytimeTopic.guides[1];
+
+  /**
+   * Builds the page for one guide slug.
+   *
+   * @param slug The slug in the address.
+   * @param isStorytimeEnabled Whether the Storytime feature is available.
+   */
+  const createComponent = (
+    slug: string | null,
+    isStorytimeEnabled = true,
+  ): void => {
+    paramMap$ = new BehaviorSubject(
+      convertToParamMap(slug === null ? {} : { guideSlug: slug }),
+    );
+    pageTitleSpy = { setTitle: jest.fn() };
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [HelpGuideComponent],
+      providers: [
+        provideRouter([]),
+        { provide: ActivatedRoute, useValue: { paramMap: paramMap$ } },
+        { provide: PageTitleService, useValue: pageTitleSpy },
+        {
+          provide: StorytimeService,
+          useValue: { isEnabled: () => of(isStorytimeEnabled) },
+        },
+      ],
+    });
+
+    // Spied rather than replaced: the real Router still has to render the
+    // links on the page, and only the redirect is being watched.
+    navigateSpy = jest
+      .spyOn(TestBed.inject(Router), 'navigate')
+      .mockResolvedValue(true);
+
+    fixture = TestBed.createComponent(HelpGuideComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  };
+
+  /**
+   * Reads the page's text.
+   *
+   * @returns Everything the page renders.
+   */
+  const pageText = (): string =>
+    (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+  it('should create', () => {
+    createComponent(firstGuide.slug);
+
+    expect(component).toBeTruthy();
+  });
+
+  it('should show the guide named in the address', () => {
+    createComponent(firstGuide.slug);
+
+    expect(component.guide).toBe(firstGuide);
+    expect(pageText()).toContain(firstGuide.title);
+    expect(pageText()).toContain(firstGuide.summary);
+  });
+
+  it('should render every section of the guide', () => {
+    createComponent(firstGuide.slug);
+
+    firstGuide.sections.forEach(section => {
+      expect(pageText()).toContain(section.heading);
+      section.paragraphs.forEach(paragraph => {
+        expect(pageText()).toContain(paragraph);
+      });
+      (section.points ?? []).forEach(point => {
+        expect(pageText()).toContain(point);
+      });
+    });
+  });
+
+  // One route serves every guide, so route data cannot name the page and the
+  // component has to.
+  it('should set the page title from the guide', () => {
+    createComponent(firstGuide.slug);
+
+    expect(pageTitleSpy.setTitle).toHaveBeenCalledWith(firstGuide.title);
+  });
+
+  it('should name the topic the guide belongs to', () => {
+    createComponent(firstGuide.slug);
+
+    expect(component.topicTitle).toBe(storytimeTopic.title);
+    expect(pageText()).toContain(storytimeTopic.title);
+  });
+
+  it('should offer the other guides in the topic, but not this one', () => {
+    createComponent(firstGuide.slug);
+
+    const otherSlugs = component.otherGuides.map(guide => guide.slug);
+
+    expect(otherSlugs).not.toContain(firstGuide.slug);
+    expect(otherSlugs).toContain(secondGuide.slug);
+  });
+
+  it('should show a different guide when the address changes', () => {
+    createComponent(firstGuide.slug);
+
+    paramMap$.next(convertToParamMap({ guideSlug: secondGuide.slug }));
+    fixture.detectChanges();
+
+    expect(component.guide).toBe(secondGuide);
+    expect(pageText()).toContain(secondGuide.title);
+  });
+
+  it('should give every section of the guide a bar the reader can collapse', () => {
+    createComponent(firstGuide.slug);
+
+    const bars = (fixture.nativeElement as HTMLElement).querySelectorAll(
+      'app-help-section',
+    );
+
+    // One per section, plus the list of other guides in the topic.
+    expect(bars).toHaveLength(firstGuide.sections.length + 1);
+  });
+
+  it('should hide a section’s copy once its bar is collapsed', () => {
+    createComponent(firstGuide.slug);
+
+    const [firstSection] = firstGuide.sections;
+    const firstToggle = (fixture.nativeElement as HTMLElement).querySelector(
+      'app-help-section button',
+    ) as HTMLButtonElement;
+
+    firstToggle.click();
+    fixture.detectChanges();
+
+    expect(pageText()).not.toContain(firstSection.paragraphs[0]);
+    expect(pageText()).toContain(firstSection.heading);
+  });
+
+  it('should send a slug that names no guide to the not-found page', () => {
+    createComponent('not-a-guide');
+
+    expect(component.guide).toBeNull();
+    expect(navigateSpy).toHaveBeenCalledWith(['/page-not-found']);
+  });
+
+  it('should send an address with no slug at all to the not-found page', () => {
+    createComponent(null);
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/page-not-found']);
+  });
+
+  // A guide describing a feature that is switched off would announce the
+  // feature exists, which is exactly what the switch is there to prevent.
+  it('should refuse a Storytime guide while the feature is switched off', () => {
+    createComponent(firstGuide.slug, false);
+
+    expect(component.guide).toBeNull();
+    expect(navigateSpy).toHaveBeenCalledWith(['/page-not-found']);
+  });
+
+  // Only Storytime waits on a switch. A Community guide is help for a feature
+  // that is always there, and refusing it would be a bug rather than caution.
+  it('should still show a guide whose topic needs no feature switch', () => {
+    const [communityGuide] = openTopic.guides;
+
+    createComponent(communityGuide.slug, false);
+
+    expect(component.guide).toBe(communityGuide);
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  it('should render nothing at all when there is no guide to show', () => {
+    createComponent('not-a-guide');
+
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('#help-guide-page'),
+    ).toBeNull();
+  });
+
+  describe('getGuideLink', () => {
+    it('should build the path to another guide', () => {
+      createComponent(firstGuide.slug);
+
+      expect(component.getGuideLink('a-guide')).toBe('/help/a-guide');
+    });
+  });
+
+  describe('getRouteLink', () => {
+    it('should build the path to a route', () => {
+      createComponent(firstGuide.slug);
+
+      expect(component.getRouteLink('contact')).toBe('/contact');
+    });
+  });
+});

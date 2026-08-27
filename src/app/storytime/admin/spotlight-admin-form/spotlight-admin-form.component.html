@@ -1,0 +1,247 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading selection"></app-loading-bar>
+}
+
+<div
+  id="storytime-spotlight-form-page"
+  class="storytime-page">
+  <h1>
+    {{ isNew ? 'Draft a Spotlight selection' : 'Edit Spotlight selection' }}
+  </h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Could not save"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <form
+    [formGroup]="form"
+    class="storytime-form"
+    (ngSubmit)="save()">
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>What is featured</span>
+      </div>
+
+      <div class="storytime-panel">
+        <div class="form-row">
+          <div class="storytime-setting-field">
+            <div class="lcars-select-container gold">
+              <label
+                class="select-label"
+                for="spotlight-entity-type"
+                >Featuring</label
+              >
+              <select
+                id="spotlight-entity-type"
+                title="Featuring"
+                formControlName="entityType">
+                @for (entityType of entityTypes; track entityType) {
+                  <option [value]="entityType">
+                    {{ entityType === 'ARC' ? 'An Arc' : 'A Story' }}
+                  </option>
+                }
+              </select>
+            </div>
+            <details class="storytime-setting-help">
+              <summary
+                class="storytime-setting-help__trigger"
+                aria-label="Featuring details">
+                <i
+                  class="fas fa-question-circle"
+                  aria-hidden="true"></i>
+              </summary>
+              <div class="storytime-setting-help__popup">
+                <p>
+                  <strong>A Story</strong>
+                  <span>One piece of writing, with its own Chapters.</span>
+                </p>
+                <p>
+                  <strong>An Arc</strong>
+                  <span>A reading order gathering several Stories.</span>
+                </p>
+              </div>
+            </details>
+          </div>
+
+          <div class="lcars-input-container perano">
+            <label for="spotlight-target">{{ targetLabel }}</label>
+            <input
+              id="spotlight-target"
+              type="text"
+              formControlName="targetId" />
+            @if (isNew) {
+              <p class="field-hint">
+                The work must be published and public. What a selection features
+                cannot be changed once it exists.
+              </p>
+            } @else {
+              <p class="field-hint">
+                What this selection features cannot be changed. Draft another
+                one to feature something else.
+              </p>
+            }
+            @if (
+              form.controls['targetId'].touched &&
+              form.controls['targetId'].invalid
+            ) {
+              <small class="field-error"
+                >Name the work you want to feature.</small
+              >
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>What readers see</span>
+      </div>
+
+      <div class="storytime-panel">
+        <div class="form-row">
+          <div class="lcars-input-container perano storytime-field-full">
+            <label for="spotlight-headline">Headline</label>
+            <input
+              id="spotlight-headline"
+              type="text"
+              formControlName="headline"
+              maxlength="200"
+              required />
+            @if (
+              form.controls['headline'].touched &&
+              form.controls['headline'].invalid
+            ) {
+              <small class="field-error">A headline is required.</small>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container bluey storytime-field-full">
+            <label for="spotlight-summary">Summary</label>
+            <textarea
+              id="spotlight-summary"
+              formControlName="summary"
+              rows="5"
+              required></textarea>
+            @if (
+              form.controls['summary'].touched &&
+              form.controls['summary'].invalid
+            ) {
+              <small class="field-error">A summary is required.</small>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container gold storytime-field-full">
+            <label for="spotlight-reason">Why it was chosen</label>
+            <textarea
+              id="spotlight-reason"
+              formControlName="selectionReason"
+              rows="3"></textarea>
+            <p class="field-hint">Shown to readers alongside the selection.</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container sky">
+            <label for="spotlight-slug">URL slug</label>
+            <input
+              id="spotlight-slug"
+              type="text"
+              formControlName="slug"
+              maxlength="220" />
+            <p class="field-hint">
+              Leave blank to build one from the headline. Changing it keeps the
+              old address working.
+            </p>
+          </div>
+
+          <div class="lcars-input-container tangerine">
+            <label for="spotlight-image">Override image ID</label>
+            <input
+              id="spotlight-image"
+              type="text"
+              formControlName="overrideImageId" />
+            <p class="field-hint">Leave blank to use the work’s own banner.</p>
+          </div>
+
+          <div class="lcars-input-container tangerine">
+            <label for="spotlight-image-alt">Override image description</label>
+            <input
+              id="spotlight-image-alt"
+              type="text"
+              formControlName="overrideImageAlt"
+              maxlength="300" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>When it shows</span>
+      </div>
+
+      <div class="storytime-panel">
+        <div class="form-row">
+          <div class="lcars-input-container violet">
+            <label for="spotlight-priority">Display priority</label>
+            <input
+              id="spotlight-priority"
+              type="number"
+              min="0"
+              formControlName="displayPriority" />
+            <p class="field-hint">
+              Higher selections show first while several overlap.
+            </p>
+          </div>
+
+          <div class="lcars-input-container green">
+            <label for="spotlight-starts">Starts showing</label>
+            <input
+              id="spotlight-starts"
+              type="datetime-local"
+              formControlName="startsAt"
+              required />
+            @if (
+              form.controls['startsAt'].touched &&
+              form.controls['startsAt'].invalid
+            ) {
+              <small class="field-error">Say when the selection starts.</small>
+            }
+          </div>
+
+          <div class="lcars-input-container red">
+            <label for="spotlight-ends">Stops showing</label>
+            <input
+              id="spotlight-ends"
+              type="datetime-local"
+              formControlName="endsAt" />
+            <p class="field-hint">
+              Leave blank to keep it showing until it is withdrawn.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="storytime-form-actions">
+      <button
+        class="lcars-btn green"
+        type="submit"
+        [disabled]="isSaving">
+        {{ isSaving ? 'Saving…' : 'Save' }}
+      </button>
+      <a
+        class="lcars-btn red"
+        [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'spotlight']"
+        >Cancel</a
+      >
+    </div>
+  </form>
+</div>

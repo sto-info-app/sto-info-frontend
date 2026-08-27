@@ -1,0 +1,78 @@
+<section
+  id="storytime-search-page"
+  class="storytime-page">
+  <h1>Search</h1>
+
+  <form
+    class="storytime-panel storytime-search__form"
+    [formGroup]="form"
+    (ngSubmit)="submit()">
+    <div class="lcars-input-container perano">
+      <label for="storytime-search-q">Search Storytime</label>
+      <input
+        id="storytime-search-q"
+        type="search"
+        formControlName="q"
+        placeholder="A title, a name, a phrase" />
+    </div>
+    <button
+      class="lcars-btn green"
+      type="submit">
+      Search
+    </button>
+  </form>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Search unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (isSearching) {
+    <app-loading-bar loadingText="Searching"></app-loading-bar>
+  } @else if (results) {
+    <nav class="storytime-search__kinds">
+      @for (kind of kinds; track kind.code) {
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto storytime-search__filter"
+          [class.sunflower]="form.value.type === kind.code"
+          [class.bluey]="form.value.type !== kind.code"
+          [attr.aria-pressed]="form.value.type === kind.code"
+          (click)="filterTo(kind.code)">
+          {{ kind.label }}
+          @if (countFor(kind.code)) {
+            <span class="storytime-search__count">{{
+              countFor(kind.code)
+            }}</span>
+          }
+        </button>
+      }
+    </nav>
+
+    @if (results.items.length === 0) {
+      <p class="storytime-empty">
+        Nothing matched that. Try fewer words, or a name from the Story.
+      </p>
+    } @else {
+      <ol class="storytime-search__results">
+        @for (hit of results.items; track hit.id) {
+          <li class="storytime-search__result">
+            <a [routerLink]="linkFor(hit)">{{ hit.title }}</a>
+            <span class="storytime-search__kind">{{
+              hit.targetType | titlecase
+            }}</span>
+            @if (hit.summary) {
+              <p class="storytime-search__summary">{{ hit.summary }}</p>
+            }
+          </li>
+        }
+      </ol>
+    }
+  } @else {
+    <p class="storytime-search__prompt">
+      Search published Stories, Chapters, Characters and Arcs. Two letters is
+      enough to start.
+    </p>
+  }
+</section>
