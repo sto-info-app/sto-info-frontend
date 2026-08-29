@@ -214,7 +214,8 @@
       </div>
 
       @if (hasControls(comment)) {
-        <div class="storytime-panel-card__controls">
+        <div
+          class="storytime-panel-card__controls storytime-comments__controls">
           @if (isMine(comment) && comment.status === statuses.VISIBLE) {
             <button
               class="cta-icon"

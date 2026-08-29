@@ -2269,6 +2269,15 @@ $storytime-landing-colours: (
     list-style: none;
   }
 
+  // A captain card stacks its controls down the side because the row beside
+  // them is a portrait and a biography. A comment is a line or two, and four
+  // controls stacked against one line make a panel four times taller than what
+  // it holds — so they run across the end of the row instead.
+  &__controls {
+    flex-direction: row;
+    align-items: center;
+  }
+
   // The name sits on the bar in black like every other panel's does, so it
   // says it is a link by underlining rather than by changing colour.
   a.storytime-comments__author {
