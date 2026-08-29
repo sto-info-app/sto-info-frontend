@@ -153,34 +153,12 @@
       </div>
     </section>
 
-    <div class="storytime-form-actions">
-      <button
-        class="lcars-btn green"
-        type="submit"
-        [disabled]="isSaving"
-      >
-        {{ isSaving ? "Saving…" : "Save" }}
-      </button>
-      <!--
-        Publishing saves first, so what goes out is what is on the screen, and
-        then returns to the list. A plain button rather than a second submit,
-        so pressing Enter in a field cannot publish an Arc.
-      -->
-      @if (canPublish) {
-        <button
-          class="lcars-btn sunflower"
-          type="button"
-          [disabled]="isSaving"
-          (click)="publish()"
-        >
-          Save and publish
-        </button>
-      }
-      <a
-        class="lcars-btn red"
-        [routerLink]='["/", appRoutes.STORYTIME, "manage", "arcs"]'
-      >Cancel</a>
-    </div>
+    <app-storytime-editor-actions
+      [isSaving]="isSaving"
+      [canPublish]="canPublish"
+      [cancelLink]='["/", appRoutes.STORYTIME, "manage", "arcs"]'
+      (publish)="publish()"
+    />
   </form>
 
   @if (arc) {

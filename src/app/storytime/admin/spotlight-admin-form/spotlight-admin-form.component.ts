@@ -26,6 +26,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
 import { SpotlightService } from '../../spotlight.service';
 
 /**
@@ -67,6 +68,7 @@ interface SpotlightFields {
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    EditorActionsComponent,
   ],
 })
 export class SpotlightAdminFormComponent implements OnInit {

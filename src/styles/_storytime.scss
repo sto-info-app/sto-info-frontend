@@ -515,6 +515,14 @@ $storytime-panel-colours: (
 // below its content, and a label spilling out of its pill is the one way an
 // LCARS button can look broken.
 
+// The shared actions component wraps the row in a host element, which a form
+// laying its sections out as a flex column would otherwise treat as the
+// section rather than the row. Making it a block hands the row the full width
+// the plain `div` had before it was lifted into a component of its own.
+app-storytime-editor-actions {
+  display: block;
+}
+
 // What a form ends with, against the right-hand edge like every other form on
 // the site.
 .storytime-form-actions {

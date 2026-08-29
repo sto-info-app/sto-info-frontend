@@ -22,6 +22,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
+import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
 import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
 import { SettingOption } from '../../shared/setting-help/setting-help.component';
 import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
@@ -55,6 +56,7 @@ import {
     TagPickerComponent,
     SettingSelectComponent,
     MarkdownHintComponent,
+    EditorActionsComponent,
   ],
 })
 export class ArcEditorComponent implements OnInit {

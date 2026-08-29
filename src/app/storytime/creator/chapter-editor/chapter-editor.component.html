@@ -242,36 +242,14 @@
     Saving the Chapter is the last thing on the page rather than the last thing
     in the form: the videos and the cast are saved on their own, and a Save
     sitting above them reads as though the sections below it are not covered.
-    The button is tied back to the form by name, which also keeps the media box
+    Naming the form ties the button back to it, which also keeps the media box
     outside it — pressing Enter there should not submit the Chapter.
   -->
-  <div class="storytime-form-actions">
-    <button
-      class="lcars-btn green"
-      type="submit"
-      form="chapter-editor-form"
-      [disabled]="isSaving"
-    >
-      {{ isSaving ? "Saving…" : "Save" }}
-    </button>
-    <!--
-      Publishing saves the writing first, so what readers get is what is on the
-      screen. The videos and the cast are saved on their own and are already
-      stored by the time this is pressed.
-    -->
-    @if (canPublish) {
-      <button
-        class="lcars-btn sunflower"
-        type="button"
-        [disabled]="isSaving"
-        (click)="publish()"
-      >
-        Save and publish
-      </button>
-    }
-    <a
-      class="lcars-btn red"
-      [routerLink]='[
+  <app-storytime-editor-actions
+    formId="chapter-editor-form"
+    [isSaving]="isSaving"
+    [canPublish]="canPublish"
+    [cancelLink]='[
   "/",
   appRoutes.STORYTIME,
   "manage",
@@ -279,6 +257,6 @@
   storyId,
   "chapters",
 ]'
-    >Cancel</a>
-  </div>
+    (publish)="publish()"
+  />
 </div>
