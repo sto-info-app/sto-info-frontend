@@ -244,7 +244,7 @@ describe('ChapterReaderComponent', () => {
           buildResponse({
             chapter: {
               ...buildResponse().chapter,
-              authorUsername: 'captain.picard',
+              author: { username: 'captain.picard', publiclyVisible: true },
             },
           }),
         ),
@@ -257,7 +257,7 @@ describe('ChapterReaderComponent', () => {
       chapterService.getChapter.mockReturnValue(
         of(
           buildResponse({
-            chapter: { ...buildResponse().chapter, authorUsername: null },
+            chapter: { ...buildResponse().chapter, author: null },
           }),
         ),
       );

@@ -37,10 +37,31 @@
     }
 
     <div class="info-grid storytime-facts">
-      @if (chapter.authorUsername) {
+      @if (chapter.author) {
         <div class="info-item">
           <span class="label">Author</span>
-          <span class="value">{{ chapter.authorUsername }}</span>
+          <span class="value">
+            <!--
+              A name only leads somewhere when its owner has chosen to be
+              listed in the registry. Everybody else is credited by name and
+              left alone, which is what that setting is for.
+            -->
+            @if (chapter.author.publiclyVisible) {
+              <a
+                class="storytime-facts__author"
+                [routerLink]="[
+                  '/',
+                  appRoutes.COMMUNITY,
+                  'registry',
+                  'profiles',
+                  chapter.author.username,
+                ]"
+                >{{ chapter.author.username }}</a
+              >
+            } @else {
+              {{ chapter.author.username }}
+            }
+          </span>
         </div>
       }
       @if (chapter.estimatedReadingMinutes) {

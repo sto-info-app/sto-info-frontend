@@ -588,11 +588,16 @@ app-storytime-editor-actions {
   }
 }
 
-// A Chapter puts the conversation directly under the reactions, with nothing
-// between them. Left on the row's own margin the heading bar reads as part of
-// that row rather than as the start of the next thing.
-.storytime-chapter__social {
-  margin-bottom: 1.5rem;
+// The conversation stands off whatever it follows. A Story, a Chapter and an
+// Arc all put the row of reactions directly above it, and on that row's own
+// margin the heading bar read as part of the row rather than as the start of
+// the next thing.
+// ---
+// A block host as well, because a bare custom element is inline, and an inline
+// box has no top margin to give.
+.storytime-page app-comment-thread {
+  display: block;
+  margin-top: 2rem;
 }
 
 // A count on a button that opens what it counts. The badge rule in `styles.scss`
@@ -946,6 +951,18 @@ p.storytime-fan-notice,
   grid-template-columns: repeat(auto-fit, minmax(140px, max-content));
   gap: 1rem 2.5rem;
   margin-bottom: 1rem;
+}
+
+// The author's name, when it leads to their profile. A value is set in white,
+// so a link inside one has to say it is a link rather than relying on the
+// colour it inherits.
+.storytime-facts__author {
+  color: vars.$lcars-perano;
+
+  &:hover,
+  &:focus-visible {
+    color: vars.$lcars-sky;
+  }
 }
 
 // A fact whose name needs explaining carries the same help control a setting

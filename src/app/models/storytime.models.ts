@@ -124,13 +124,25 @@ export enum StorytimeModerationStatus {
 /**
  * A Story as readers see it.
  */
+/**
+ * The member who published a work, as a reader is shown them.
+ *
+ * Whether they are listed in the registry travels with the name because it
+ * decides whether the name leads anywhere: a profile that is not listed has no
+ * page to open.
+ */
+export interface StorytimeAuthor {
+  username: string;
+  publiclyVisible: boolean;
+}
+
 export interface Story {
   id: string;
   slug: string;
   title: string;
   ownerUserId: string;
   /** Who published it, or null once they no longer have an account. */
-  authorUsername: string | null;
+  author: StorytimeAuthor | null;
   shortDescription: string | null;
   descriptionHtml: string | null;
   completionState: CompletionState;
@@ -254,7 +266,7 @@ export interface Chapter extends ChapterSummary {
    * Carried on the Chapter for the reason its rating is: a reader who follows
    * a link straight here never passes the Story page.
    */
-  authorUsername: string | null;
+  author: StorytimeAuthor | null;
   contentHtml: string | null;
   /** Resolved from the Chapter or its Story, ready for a lang attribute. */
   languageCode: string;
