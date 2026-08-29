@@ -9,7 +9,7 @@ export class ApiRequiredGuard implements CanActivate {
   private readonly _backendHealth: HealthService = inject(HealthService);
 
   /**
-   * Refreshes the cached backend health state before allowing navigation.
+   * Records one backend health observation before allowing navigation.
    *
    * @returns An observable that always resolves to `true`.
    */
@@ -18,8 +18,8 @@ export class ApiRequiredGuard implements CanActivate {
       take(1),
       tap(state =>
         state === API_HEALTH_STATE_DOWN
-          ? this._backendHealth.markDown()
-          : this._backendHealth.markUp(),
+          ? this._backendHealth.recordFailure()
+          : this._backendHealth.recordSuccess(),
       ),
       map(() => true), // Always allow navigation; UI swap happens in MainContentComponent
     );

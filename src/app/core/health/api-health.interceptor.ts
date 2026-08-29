@@ -11,9 +11,10 @@ export const apiHealthInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
       if (isApiCall) {
-        // Network error / 5xx = likely API trouble.
+        // Network error / 5xx = likely API trouble. Recorded as a single
+        // failed observation; the service decides when that adds up to DOWN.
         if (err.status === 0 || (err.status >= 500 && err.status <= 599)) {
-          health.markDown();
+          health.recordFailure();
         }
       }
       return throwError(() => err);
