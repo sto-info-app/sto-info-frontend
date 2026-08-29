@@ -17,6 +17,7 @@ import {
   CompletionState,
   ContentRating,
   ManagedStory,
+  StoryStatus,
   StorytimeLanguage,
   StorytimeVisibility,
 } from 'src/app/models/storytime.models';
@@ -24,6 +25,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { ContentPolicyPanelComponent } from '../../shared/content-policy-panel/content-policy-panel.component';
 import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
 import { SettingOption } from '../../shared/setting-help/setting-help.component';
 import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
@@ -60,6 +62,7 @@ import {
     TagPickerComponent,
     SettingSelectComponent,
     MarkdownHintComponent,
+    ContentPolicyPanelComponent,
   ],
 })
 export class StoryEditorComponent implements OnInit {
@@ -152,9 +155,58 @@ export class StoryEditorComponent implements OnInit {
   }
 
   /**
+   * Whether publishing is a sensible next action from here.
+   *
+   * Offered only once the Story exists and is not already published: a Story
+   * with nothing in it cannot be published, and a button that could only ever
+   * be refused is worse than no button.
+   *
+   * @returns True when the Story can be published.
+   */
+  get canPublish(): boolean {
+    return this.story !== null && this.story.status !== StoryStatus.PUBLISHED;
+  }
+
+  /**
    * Saves the Story, creating it when new and updating it otherwise.
    */
   save(): void {
+    this.submit(savedId => ['manage', 'stories', savedId]);
+  }
+
+  /**
+   * Saves what is on the screen, publishes it, and returns to the list.
+   *
+   * Back to the list rather than staying here, because publishing is the end
+   * of working on this Story and the beginning of deciding what to do with the
+   * next one.
+   */
+  publish(): void {
+    this.submit(
+      () => ['manage', 'stories'],
+      saved => this._storyService.publishStory(saved.id),
+    );
+  }
+
+  /**
+   * Records that the terms have been accepted, so the panel closes.
+   *
+   * @param story - The Story as the server now holds it.
+   */
+  onPolicyAccepted(story: ManagedStory): void {
+    this.story = story;
+  }
+
+  /**
+   * Sends the form, then goes where the caller asked.
+   *
+   * @param destination - The route under Storytime to go to, from the saved id.
+   * @param then - Anything to do with the saved Story before leaving.
+   */
+  private submit(
+    destination: (savedId: string) => string[],
+    then?: (saved: ManagedStory) => Observable<unknown>,
+  ): void {
     const payload = this._editor.beginSave(this.form, this.story?.version);
 
     if (!payload) {
@@ -167,8 +219,9 @@ export class StoryEditorComponent implements OnInit {
 
     this._editor.save(
       request,
-      savedId => ['manage', 'stories', savedId],
+      destination,
       'This Story could not be saved. Please try again shortly.',
+      then,
     );
   }
 

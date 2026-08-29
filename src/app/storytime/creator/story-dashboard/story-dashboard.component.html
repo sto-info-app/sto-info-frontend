@@ -177,45 +177,9 @@
             </a>
           </nav>
 
-          @if (needsContentPolicy(story)) {
-            <div class="storytime-panel storytime-dashboard__policy">
-              <p>
-                @if (hasSupersededContentPolicy(story)) {
-                  {{ copy.POLICY_REACCEPTANCE_PROMPT }}
-                } @else {
-                  {{ copy.POLICY_ACCEPTANCE_PROMPT }}
-                }
-              </p>
-
-              <p class="storytime-dashboard__policy-links">
-                <a [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']">
-                  Content Policy </a
-                >·
-                <a [routerLink]="['/', appRoutes.STORYTIME, 'terms']">
-                  Terms of Use </a
-                >·
-                <a [routerLink]="['/', appRoutes.STORYTIME, 'fan-content']">
-                  Fan Content &amp; IP Notice
-                </a>
-              </p>
-
-              <p>By confirming, you are stating that:</p>
-              <ul class="lcars-list">
-                @for (representation of representations; track representation) {
-                  <li>{{ representation }}</li>
-                }
-              </ul>
-
-              <div class="storytime-form-actions">
-                <button
-                  type="button"
-                  class="lcars-btn green"
-                  (click)="acceptContentPolicy(story)">
-                  I confirm
-                </button>
-              </div>
-            </div>
-          }
+          <app-storytime-content-policy-panel
+            [story]="story"
+            (accepted)="load()"></app-storytime-content-policy-panel>
         </div>
 
         <div class="storytime-record__controls">

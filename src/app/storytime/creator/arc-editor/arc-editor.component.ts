@@ -12,6 +12,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import {
+  ArcStatus,
   ManagedArc,
   StorytimeLanguage,
   StorytimeVisibility,
@@ -129,9 +130,45 @@ export class ArcEditorComponent implements OnInit {
   }
 
   /**
+   * Whether publishing is a sensible next action from here.
+   *
+   * Offered once the Arc exists and is not already published. An Arc still
+   * needs an agreed Story in it before the server will publish one, which is
+   * the server's to say — and it says so in words worth reading.
+   *
+   * @returns True when the Arc can be published.
+   */
+  get canPublish(): boolean {
+    return this.arc !== null && this.arc.status !== ArcStatus.PUBLISHED;
+  }
+
+  /**
    * Saves the Arc, creating it when new and updating it otherwise.
    */
   save(): void {
+    this.submit(savedId => ['manage', 'arcs', savedId, 'stories']);
+  }
+
+  /**
+   * Saves what is on the screen, publishes it, and returns to the list.
+   */
+  publish(): void {
+    this.submit(
+      () => ['manage', 'arcs'],
+      saved => this._arcService.publishArc(saved.id),
+    );
+  }
+
+  /**
+   * Sends the form, then goes where the caller asked.
+   *
+   * @param destination - The route under Storytime to go to, from the saved id.
+   * @param then - Anything to do with the saved Arc before leaving.
+   */
+  private submit(
+    destination: (savedId: string) => string[],
+    then?: (saved: ManagedArc) => Observable<unknown>,
+  ): void {
     const payload = this._editor.beginSave(this.form, this.arc?.version);
 
     if (!payload) {
@@ -144,8 +181,9 @@ export class ArcEditorComponent implements OnInit {
 
     this._editor.save(
       request,
-      savedId => ['manage', 'arcs', savedId, 'stories'],
+      destination,
       'This Arc could not be saved. Please try again shortly.',
+      then,
     );
   }
 

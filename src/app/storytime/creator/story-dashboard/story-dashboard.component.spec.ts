@@ -329,9 +329,26 @@ describe('StoryDashboardComponent', () => {
       expect(text).not.toContain(STORYTIME_COPY.POLICY_ACCEPTANCE_PROMPT);
     });
 
+    // The server settles what confirming changed — which Story, and whether
+    // it can now be published — so the list is asked again rather than the
+    // page deciding for itself.
     it('records the confirmation and reloads', () => {
-      render();
-      fixture.componentInstance.acceptContentPolicy(buildStory());
+      storyService.getMyStories.mockReturnValue(
+        of([
+          buildStory({
+            contentPolicyAcceptedAt: null,
+            contentPolicyVersion: null,
+            contentPolicyCurrent: false,
+          }),
+        ]),
+      );
+
+      const element = render();
+      const confirm = [
+        ...element.querySelectorAll<HTMLButtonElement>('button'),
+      ].find(button => button.textContent?.includes('I confirm'));
+
+      confirm?.click();
 
       expect(storyService.acceptContentPolicy).toHaveBeenCalledWith('story-1');
       expect(storyService.getMyStories).toHaveBeenCalledTimes(2);

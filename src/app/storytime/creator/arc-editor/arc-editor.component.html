@@ -8,6 +8,42 @@
 >
   <h1>{{ isNew ? "Create an Arc" : "Edit Arc" }}</h1>
 
+  <!--
+    Reached from here as well as from the list, for the same reason a Story's
+    Chapters are: what an Arc is for is the Stories in it, and that is the next
+    thing anybody wants after describing one.
+  -->
+  @if (arc) {
+    <nav class="storytime-page-actions">
+      <a
+        class="lcars-btn lcars-btn-auto green"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "arcs",
+  arc.id,
+  "stories",
+]'
+      >Stories</a>
+      <a
+        class="lcars-btn lcars-btn-auto bluey"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "arcs",
+  arc.id,
+  "collaborators",
+]'
+      >Collaborators</a>
+      <a
+        class="lcars-btn lcars-btn-auto sky"
+        [routerLink]='["/", appRoutes.STORYTIME, "manage", "arcs"]'
+      >Back to your Arcs</a>
+    </nav>
+  }
+
   @if (errorMessage) {
     <app-lcars-error-message
       title="Could not save"
@@ -124,6 +160,21 @@
       >
         {{ isSaving ? "Saving…" : "Save" }}
       </button>
+      <!--
+        Publishing saves first, so what goes out is what is on the screen, and
+        then returns to the list. A plain button rather than a second submit,
+        so pressing Enter in a field cannot publish an Arc.
+      -->
+      @if (canPublish) {
+        <button
+          class="lcars-btn sunflower"
+          type="button"
+          [disabled]="isSaving"
+          (click)="publish()"
+        >
+          Save and publish
+        </button>
+      }
       <a
         class="lcars-btn red"
         [routerLink]='["/", appRoutes.STORYTIME, "manage", "arcs"]'

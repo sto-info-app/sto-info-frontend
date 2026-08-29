@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import {
+  ArcStatus,
   ManagedArc,
   StorytimeVisibility,
 } from 'src/app/models/storytime.models';
@@ -16,6 +17,7 @@ describe('ArcEditorComponent', () => {
     getMyArc: jest.Mock;
     createArc: jest.Mock;
     updateArc: jest.Mock;
+    publishArc: jest.Mock;
   };
   let storytimeService: { getLanguages: jest.Mock };
   let router: { navigate: jest.Mock };
@@ -27,6 +29,7 @@ describe('ArcEditorComponent', () => {
     slug: 'the-long-war',
     shortDescription: 'A summary',
     description: '# Source',
+    status: ArcStatus.DRAFT,
     visibility: StorytimeVisibility.PRIVATE,
     languageCode: 'en',
     version: 4,
@@ -35,9 +38,10 @@ describe('ArcEditorComponent', () => {
   /**
    * Builds and renders the component.
    */
-  const render = (): void => {
+  const render = (): ComponentFixture<ArcEditorComponent> => {
     fixture = TestBed.createComponent(ArcEditorComponent);
     fixture.detectChanges();
+    return fixture;
   };
 
   beforeEach(() => {
@@ -46,6 +50,7 @@ describe('ArcEditorComponent', () => {
       getMyArc: jest.fn().mockReturnValue(of(existingArc)),
       createArc: jest.fn().mockReturnValue(of({ id: 'new-arc' })),
       updateArc: jest.fn().mockReturnValue(of(existingArc)),
+      publishArc: jest.fn().mockReturnValue(of(existingArc)),
     };
     storytimeService = {
       getLanguages: jest
@@ -70,6 +75,15 @@ describe('ArcEditorComponent', () => {
   });
 
   describe('creating', () => {
+    // Nothing to publish and nothing to curate yet, so neither is offered.
+    it('offers no publish and no way into the Arc', () => {
+      const element = render().nativeElement as HTMLElement;
+
+      expect(fixture.componentInstance.canPublish).toBe(false);
+      expect(element.textContent).not.toContain('Save and publish');
+      expect(element.querySelector('nav')).toBeNull();
+    });
+
     it('starts with an empty form', () => {
       render();
 
@@ -178,6 +192,69 @@ describe('ArcEditorComponent', () => {
       expect(fixture.componentInstance.errorMessage).toContain(
         'could not be loaded',
       );
+    });
+
+    // Gathering Stories is what an Arc is for, and the list a curator came
+    // through is not where they get to it.
+    it('opens the rest of the Arc from here', () => {
+      const element = render().nativeElement as HTMLElement;
+      const links = [...element.querySelectorAll('nav a')].map(
+        link => link.textContent?.trim() ?? '',
+      );
+
+      expect(links).toContain('Stories');
+      expect(links).toContain('Collaborators');
+    });
+
+    // Publishing what is on the screen means saving it first.
+    it('saves before publishing, then returns to the list', () => {
+      render();
+      fixture.componentInstance.publish();
+
+      expect(arcService.updateArc).toHaveBeenCalledWith(
+        'arc-1',
+        expect.objectContaining({ version: 4 }),
+      );
+      expect(arcService.publishArc).toHaveBeenCalledWith('arc-1');
+      expect(router.navigate).toHaveBeenCalledWith([
+        '/',
+        'storytime',
+        'manage',
+        'arcs',
+      ]);
+    });
+
+    // An Arc still needs an agreed Story in it, which is the server's to say
+    // and worth repeating in its own words.
+    it('shows why the server refused a publish', () => {
+      arcService.publishArc.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: { message: 'This Arc has no Stories in it.' },
+            }),
+        ),
+      );
+
+      render();
+      fixture.componentInstance.publish();
+
+      expect(fixture.componentInstance.errorMessage).toContain(
+        'no Stories in it',
+      );
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    it('offers no publish for an Arc that is already published', () => {
+      arcService.getMyArc.mockReturnValue(
+        of({ ...existingArc, status: ArcStatus.PUBLISHED } as ManagedArc),
+      );
+
+      const element = render().nativeElement as HTMLElement;
+
+      expect(fixture.componentInstance.canPublish).toBe(false);
+      expect(element.textContent).not.toContain('Save and publish');
     });
 
     it('shows the reason the server refused a save', () => {

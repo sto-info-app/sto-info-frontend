@@ -253,6 +253,21 @@
     >
       {{ isSaving ? "Saving…" : "Save" }}
     </button>
+    <!--
+      Publishing saves the writing first, so what readers get is what is on the
+      screen. The videos and the cast are saved on their own and are already
+      stored by the time this is pressed.
+    -->
+    @if (canPublish) {
+      <button
+        class="lcars-btn sunflower"
+        type="button"
+        [disabled]="isSaving"
+        (click)="publish()"
+      >
+        Save and publish
+      </button>
+    }
     <a
       class="lcars-btn red"
       [routerLink]='[

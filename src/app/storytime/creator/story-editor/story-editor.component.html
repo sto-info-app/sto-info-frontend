@@ -8,6 +8,55 @@
 >
   <h1>{{ isNew ? "Create a Story" : "Edit Story" }}</h1>
 
+  <!--
+    The rest of a Story is reached from here rather than only from the list a
+    creator came through. Saving a new Story leaves them on this page, and a
+    Story with nothing in it is exactly the point at which somebody wants to
+    start writing a Chapter — sending them back to the list first is a step for
+    its own sake.
+  -->
+  @if (story) {
+    <nav class="storytime-page-actions">
+      <a
+        class="lcars-btn lcars-btn-auto green"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "stories",
+  story.id,
+  "chapters",
+]'
+      >Chapters</a>
+      <a
+        class="lcars-btn lcars-btn-auto bluey"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "stories",
+  story.id,
+  "characters",
+]'
+      >Cast</a>
+      <a
+        class="lcars-btn lcars-btn-auto bluey"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "stories",
+  story.id,
+  "collaborators",
+]'
+      >Collaborators</a>
+      <a
+        class="lcars-btn lcars-btn-auto sky"
+        [routerLink]='["/", appRoutes.STORYTIME, "manage", "stories"]'
+      >Back to your Stories</a>
+    </nav>
+  }
+
   @if (errorMessage) {
     <app-lcars-error-message
       title="Could not save"
@@ -142,12 +191,38 @@
       >
         {{ isSaving ? "Saving…" : "Save" }}
       </button>
+      <!--
+        Publishing saves first, so what goes out is what is on the screen, and
+        then returns to the list. It is a plain button rather than a second
+        submit so that pressing Enter in a field cannot publish a Story.
+      -->
+      @if (canPublish) {
+        <button
+          class="lcars-btn sunflower"
+          type="button"
+          [disabled]="isSaving"
+          (click)="publish()"
+        >
+          Save and publish
+        </button>
+      }
       <a
         class="lcars-btn red"
         [routerLink]='["/", appRoutes.STORYTIME, "manage", "stories"]'
       >Cancel</a>
     </div>
   </form>
+
+  @if (story) {
+    <!--
+      The terms are confirmed here as well as on the list, because this is
+      where the publish that needs them is pressed.
+    -->
+    <app-storytime-content-policy-panel
+      [story]="story"
+      (accepted)="onPolicyAccepted($event)"
+    ></app-storytime-content-policy-panel>
+  }
 
   @if (story) {
     <!-- Tagging needs something to tag, so it appears once the Story exists. -->
