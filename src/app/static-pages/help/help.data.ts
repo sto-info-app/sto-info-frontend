@@ -8,9 +8,14 @@ import {
   ContentRating,
 } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  MARKDOWN_REFERENCE,
+  MARKDOWN_REFERENCE_NOTES,
+  MarkdownReferenceGroup,
+} from 'src/app/storytime/storytime-markdown.constants';
 import { CONTENT_POLICY_RULES } from 'src/app/storytime/storytime.constants';
 
-import { HelpGuideLocation, HelpTopic } from './help.models';
+import { HelpGuideLocation, HelpGuideSection, HelpTopic } from './help.models';
 
 /**
  * The content policy's rules, worded exactly as the policy page words them.
@@ -22,6 +27,27 @@ import { HelpGuideLocation, HelpTopic } from './help.models';
  */
 const CONTENT_POLICY_POINTS: string[] = CONTENT_POLICY_RULES.map(
   rule => `${rule.title} — ${rule.summary}`,
+);
+
+/**
+ * The Markdown reference, as guide sections.
+ *
+ * A guide is headings, paragraphs and points, which is the right shape for
+ * prose and the wrong shape for a two-column table. Rather than teach the help
+ * section about tables for one guide, each construct becomes a line.
+ *
+ * Derived from the same constant the popup beside the editor reads, and
+ * derived whole rather than picked from, so a construct added to the renderer
+ * appears in both places or neither.
+ */
+const MARKDOWN_SECTIONS: HelpGuideSection[] = MARKDOWN_REFERENCE.map(
+  (group: MarkdownReferenceGroup) => ({
+    heading: group.heading,
+    paragraphs: [group.intro],
+    points: group.constructs.map(
+      construct => `${construct.syntax} — ${construct.meaning}`,
+    ),
+  }),
 );
 
 /**
@@ -560,6 +586,39 @@ const STORYTIME_TOPIC: HelpTopic = {
           label: 'Content policy',
           route: APP_ROUTES.STORYTIME_CONTENT_POLICY,
         },
+      ],
+    },
+    {
+      slug: 'writing-with-markdown',
+      title: 'Writing with Markdown',
+      summary:
+        'Everything the Storytime editor understands, and what it does with the rest.',
+      sections: [
+        {
+          heading: 'What Markdown is doing here',
+          paragraphs: [
+            'Chapters, Story and Arc descriptions and Character biographies are all written as plain text with a few marks in it. Two asterisks around a word make it bold; a line starting with a hash is a heading. That is Markdown, and Storytime understands a deliberately small amount of it.',
+            'Small on purpose. Everything published here is written by a member rather than by an administrator, so the writing is turned into a page by a set of rules narrow enough to be certain about. Nothing you type can become part of the page itself — which also means anything outside the list below is shown exactly as you typed it, rather than doing something you did not intend.',
+            'The same reference is a click away while you write: the mark beside "Markdown is supported" under any of those fields opens it.',
+          ],
+        },
+        ...MARKDOWN_SECTIONS,
+        {
+          heading: 'Things worth knowing',
+          paragraphs: ['Most of what surprises people is one of these:'],
+          points: [...MARKDOWN_REFERENCE_NOTES],
+        },
+        {
+          heading: 'Why links work the way they do',
+          paragraphs: [
+            'Storytime never sends a reader somewhere it cannot vouch for. A link to another page on this site is fine; anything else is not turned into a link at all.',
+            'Nothing is refused for it and you are not warned. Write an address in full and it stays on the page as ordinary text, so a reader can still see where you meant. Write it as a Markdown link and the whole thing goes, label included — a label with nothing behind it reads as a broken promise.',
+            'A video is the exception, and it does not come from the writing: a Chapter takes YouTube links in its own Videos box, which stores the video rather than the address.',
+          ],
+        },
+      ],
+      relatedLinks: [
+        { label: 'Your Stories', route: APP_ROUTES.STORYTIME_MANAGE },
       ],
     },
     {

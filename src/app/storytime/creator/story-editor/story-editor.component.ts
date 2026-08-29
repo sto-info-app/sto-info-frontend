@@ -24,6 +24,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
 import { SettingOption } from '../../shared/setting-help/setting-help.component';
 import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
 import {
@@ -58,6 +59,7 @@ import {
     LcarsErrorMessageComponent,
     TagPickerComponent,
     SettingSelectComponent,
+    MarkdownHintComponent,
   ],
 })
 export class StoryEditorComponent implements OnInit {

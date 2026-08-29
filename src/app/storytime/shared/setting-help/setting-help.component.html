@@ -8,7 +8,10 @@
       aria-hidden="true"
     ></i>
   </summary>
-  <div class="storytime-setting-help__popup">
+  <div
+    class="storytime-setting-help__popup"
+    [class.storytime-setting-help__popup--wide]="wide"
+  >
     @for (option of options; track option.value) {
       @if (option.description) {
         <p>

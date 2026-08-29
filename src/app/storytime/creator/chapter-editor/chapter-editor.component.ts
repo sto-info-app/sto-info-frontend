@@ -34,6 +34,7 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
 import { MediaService } from '../../media.service';
+import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
 import { SettingOption } from '../../shared/setting-help/setting-help.component';
 import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
 import {
@@ -60,6 +61,7 @@ import {
     LcarsErrorMessageComponent,
     LcarsToggleComponent,
     SettingSelectComponent,
+    MarkdownHintComponent,
   ],
 })
 export class ChapterEditorComponent implements OnInit {

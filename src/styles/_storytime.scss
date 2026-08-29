@@ -542,6 +542,85 @@ nav[class^='storytime-'] :where(a, [aria-current='page']) {
   text-transform: uppercase;
 }
 
+// A reference is read rather than glanced at, so it gets the width a chooser's
+// one-line explanations do not need, and a ceiling with a scroll behind it so
+// a long list cannot run off the bottom of the window.
+.storytime-setting-help__popup--wide {
+  width: min(560px, calc(100vw - 80px));
+  max-height: min(60vh, 30rem);
+  overflow-y: auto;
+}
+
+// Markdown, and the reference behind it
+// -----------------------------------------------------------------------------
+
+// The note under a field that takes Markdown, with the mark that opens the
+// whole reference beside it. A row rather than two lines, so the mark belongs
+// to the note rather than floating under the field.
+.storytime-markdown-hint {
+  display: flex;
+  align-items: flex-start;
+}
+
+.storytime-page .storytime-markdown-hint .field-hint {
+  flex: 1;
+  min-width: 0;
+}
+
+// Lined up with the note's first line rather than the container's edge: the
+// note carries the field's own padding, and the mark has none.
+.storytime-markdown-hint .storytime-setting-help {
+  margin: 0.35rem 1rem 0.5rem 0;
+}
+
+// What you type, and what it does underneath it. A description list because
+// that is the shape of the thing; a table would want a header row to say the
+// same, and this is read a pair at a time rather than scanned across.
+.storytime-markdown-reference__heading {
+  @include storytime-label-colour;
+
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  margin: 1rem 0 0.4rem;
+}
+
+.storytime-markdown-reference__heading:first-child {
+  margin-top: 0;
+}
+
+.storytime-markdown-reference__list {
+  margin: 0;
+  padding: 0;
+}
+
+.storytime-markdown-reference__list dt {
+  margin-top: 0.5rem;
+}
+
+// The syntax has to survive being read literally, so it sits on its own
+// surface rather than relying on the theme's colour alone.
+.storytime-markdown-reference__list dt code {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  background: rgb(0 0 0 / 35%);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.storytime-markdown-reference__list dd {
+  margin: 0.15rem 0 0;
+}
+
+.storytime-markdown-reference__notes {
+  margin: 1rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.storytime-markdown-reference__notes li {
+  margin-top: 0.4rem;
+}
+
 // Notes and asides
 // -----------------------------------------------------------------------------
 
