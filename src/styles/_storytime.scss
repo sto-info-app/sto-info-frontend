@@ -65,7 +65,11 @@
 
   // The card lifts on hover as a whole. A title bar that lifted again on its
   // own would fight with it.
-  &:hover {
+  // ---
+  // & is always resolved here: every @include of this mixin sits inside a real
+  // selector, so this is the known stylelint/Sonar false positive for `&` in a
+  // mixin body rather than a missing scoping root.
+  &:hover { // NOSONAR
     transform: none;
   }
 }
