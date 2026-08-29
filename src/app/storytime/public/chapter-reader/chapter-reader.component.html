@@ -14,9 +14,11 @@
     class="storytime-page"
     [attr.lang]="chapter.languageCode">
     <nav
-      class="storytime-chapter__breadcrumb"
-      aria-label="Breadcrumb">
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', storySlug]"
+      class="storytime-page-actions"
+      aria-label="Back to the Story">
+      <a
+        class="lcars-btn lcars-btn-auto sky"
+        [routerLink]="['/', appRoutes.STORYTIME, 'stories', storySlug]"
         >Back to the Story</a
       >
     </nav>
@@ -34,17 +36,18 @@
       <p class="storytime-chapter__synopsis">{{ chapter.synopsis }}</p>
     }
 
-    <ul class="storytime-chapter__meta">
+    <div class="info-grid storytime-facts">
       @if (chapter.estimatedReadingMinutes) {
-        <li>
-          <i
-            class="fa-solid fa-clock"
-            aria-hidden="true"></i>
-          {{ chapter.estimatedReadingMinutes }} min read
-        </li>
+        <div class="info-item">
+          <span class="label">Reading time</span>
+          <span class="value">{{ chapter.estimatedReadingMinutes }} min</span>
+        </div>
       }
-      <li>{{ chapter.wordCount }} words</li>
-    </ul>
+      <div class="info-item">
+        <span class="label">Words</span>
+        <span class="value">{{ chapter.wordCount }}</span>
+      </div>
+    </div>
 
     @if (resumeBlockId) {
       <p class="storytime-chapter__resume">
@@ -117,7 +120,7 @@
       aria-label="Chapter navigation">
       @if (previous) {
         <a
-          class="storytime-chapter__previous"
+          class="lcars-btn lcars-btn-auto bluey storytime-chapter__previous"
           [routerLink]="[
             '/',
             appRoutes.STORYTIME,
@@ -135,7 +138,7 @@
       }
       @if (next) {
         <a
-          class="storytime-chapter__next"
+          class="lcars-btn lcars-btn-auto bluey storytime-chapter__next"
           [routerLink]="[
             '/',
             appRoutes.STORYTIME,

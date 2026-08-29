@@ -930,10 +930,12 @@ p.storytime-fan-notice,
   }
 }
 
-// The facts under a Story's title, set as the site sets a fact and its name
-// everywhere else. Wrapping rather than a fixed two columns, because there are
-// four of them and they are short.
-.storytime-story__facts.info-grid {
+// The facts under a work's title — a Story's rating and status, a Chapter's
+// length — set as the site sets a fact and its name everywhere else. Wrapping
+// rather than a fixed two columns, because there are only a few of them and
+// they are short. Named alongside the grid it varies, because the site's own
+// rule is written after this file and would otherwise win on source order.
+.storytime-facts.info-grid {
   grid-template-columns: repeat(auto-fit, minmax(140px, max-content));
   gap: 1rem 2.5rem;
   margin-bottom: 1rem;
@@ -941,7 +943,7 @@ p.storytime-fan-notice,
 
 // A fact whose name needs explaining carries the same help control a setting
 // does, beside the name rather than above the value.
-.storytime-story__fact-label {
+.storytime-facts__label {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -1124,17 +1126,6 @@ p.storytime-fan-notice,
 }
 
 .storytime-chapter {
-  &__breadcrumb {
-    @include storytime-meta;
-
-    justify-content: flex-start;
-    margin-bottom: 0.5rem;
-
-    a {
-      color: vars.$lcars-perano;
-    }
-  }
-
   &__cover {
     width: 100%;
     max-height: 320px;
@@ -1146,12 +1137,6 @@ p.storytime-fan-notice,
   &__synopsis {
     color: vars.$lcars-grey-light;
     font-style: italic;
-    margin-bottom: 1rem;
-  }
-
-  &__meta {
-    @include storytime-meta-list;
-
     margin-bottom: 1rem;
   }
 
@@ -1188,16 +1173,38 @@ p.storytime-fan-notice,
     }
   }
 
+  // The way on and the way back, one pushed to each end so the pair reads as
+  // a direction rather than a list. Both are LCARS buttons, as every other way
+  // out of a Storytime page is.
+  // The way on and the way back, one pushed to each end so the pair reads as a
+  // direction rather than a list. Both are LCARS buttons, as every other way
+  // out of a Storytime page is.
+  // ---
+  // A first Chapter has no way back and a last one has no way on, so the
+  // alignment is done by pushing rather than by spacing between: the row ends
+  // right, and Back claims the space to its own right when it is there. That
+  // puts a lone Next at the right and a lone Back at the left without the row
+  // having to know which of them it has.
   &__navigation {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 1rem;
     margin: 2rem 0 1rem;
 
-    a {
-      @include storytime-work-title;
+    // A Chapter title can be long, and a pill sized to its own label would
+    // otherwise take the whole row and push the other one off the end. The
+    // label shortens instead, which is what the pair is for.
+    .lcars-btn {
+      flex: 0 1 auto;
+      max-width: calc(50% - 0.5rem);
+      overflow: hidden;
+    }
 
-      font-size: 1rem;
+    // Named through the row rather than on its own, because the feature zeroes
+    // the margin on every LCARS button it draws and would otherwise take this
+    // one back off again.
+    .storytime-chapter__previous {
+      margin-right: auto;
     }
   }
 
