@@ -37,6 +37,12 @@
     }
 
     <div class="info-grid storytime-facts">
+      @if (chapter.authorUsername) {
+        <div class="info-item">
+          <span class="label">Author</span>
+          <span class="value">{{ chapter.authorUsername }}</span>
+        </div>
+      }
       @if (chapter.estimatedReadingMinutes) {
         <div class="info-item">
           <span class="label">Reading time</span>

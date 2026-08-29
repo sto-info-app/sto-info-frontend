@@ -53,6 +53,12 @@
         </div>
         <span class="value">{{ ratingLabels[story.contentRating] }}</span>
       </div>
+      @if (story.authorUsername) {
+        <div class="info-item">
+          <span class="label">Author</span>
+          <span class="value">{{ story.authorUsername }}</span>
+        </div>
+      }
       <div class="info-item">
         <span class="label">Chapters</span>
         <span class="value">{{ story.publishedChapterCount }}</span>

@@ -359,6 +359,42 @@ describe('StoryDetailComponent', () => {
     });
   });
 
+  // A reader wants to know whose work this is, and the page never said.
+  describe('who wrote it', () => {
+    /**
+     * Reads a fact by its caption.
+     *
+     * @param element - The rendered page.
+     * @param name - The caption.
+     * @returns The value shown against it, or null when it is not shown.
+     */
+    const factFor = (element: HTMLElement, name: string): string | null =>
+      [...element.querySelectorAll('.info-item')]
+        .find(item =>
+          item.querySelector('.label')?.textContent?.trim().startsWith(name),
+        )
+        ?.querySelector('.value')
+        ?.textContent?.trim() ?? null;
+
+    it('names the author among the facts', () => {
+      storyService.getStory.mockReturnValue(
+        of(buildStory({ authorUsername: 'captain.picard' })),
+      );
+
+      expect(factFor(render(), 'Author')).toBe('captain.picard');
+    });
+
+    // The Story is still readable when the account behind it has gone; it
+    // simply stops saying whose it was.
+    it('says nothing when the account has gone', () => {
+      storyService.getStory.mockReturnValue(
+        of(buildStory({ authorUsername: null })),
+      );
+
+      expect(factFor(render(), 'Author')).toBeNull();
+    });
+  });
+
   describe('the facts that need explaining', () => {
     /**
      * Reads a fact's help control.

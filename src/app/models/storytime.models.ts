@@ -129,6 +129,8 @@ export interface Story {
   slug: string;
   title: string;
   ownerUserId: string;
+  /** Who published it, or null once they no longer have an account. */
+  authorUsername: string | null;
   shortDescription: string | null;
   descriptionHtml: string | null;
   completionState: CompletionState;
@@ -246,6 +248,13 @@ export interface ChapterSummary {
  */
 export interface Chapter extends ChapterSummary {
   storyId: string;
+  /**
+   * Who published the Story, or null once they no longer have an account.
+   *
+   * Carried on the Chapter for the reason its rating is: a reader who follows
+   * a link straight here never passes the Story page.
+   */
+  authorUsername: string | null;
   contentHtml: string | null;
   /** Resolved from the Chapter or its Story, ready for a lang attribute. */
   languageCode: string;
