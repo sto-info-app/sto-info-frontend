@@ -24,13 +24,6 @@ import { SearchService } from '../../search.service';
 import { SEARCHABLE_KINDS } from '../../storytime.constants';
 
 /**
- * Searching Storytime.
- *
- * The query lives in the URL rather than only in the form, so a search can be
- * shared, bookmarked and returned to with the back button — all of which a
- * reader will expect of something that looks like a search engine.
- */
-/**
  * The panel each kind of result wears, keyed by what was found.
  *
  * Held as a map rather than a switch because it is a lookup and nothing else,
@@ -43,6 +36,13 @@ const SEARCH_PANEL_CLASSES: Record<string, string> = {
   [StorytimeTargetType.ARC]: 'storytime-panel-card--arc',
 };
 
+/**
+ * Searching Storytime.
+ *
+ * The query lives in the URL rather than only in the form, so a search can be
+ * shared, bookmarked and returned to with the back button — all of which a
+ * reader will expect of something that looks like a search engine.
+ */
 @Component({
   selector: 'app-storytime-search',
   templateUrl: './storytime-search.component.html',
