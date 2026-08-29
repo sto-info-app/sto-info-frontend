@@ -40,7 +40,7 @@
           {{ progress.totalStories === 1 ? 'Story' : 'Stories' }} in this Arc.
         </p>
         <progress
-          class="storytime-arc__progress-bar"
+          class="storytime-progress storytime-arc__progress-bar"
           [value]="progress.percentComplete"
           max="100"
           [attr.aria-label]="'Progress through ' + arc.title">

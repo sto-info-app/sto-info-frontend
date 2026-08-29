@@ -62,16 +62,6 @@
 
   // A list of these is still a list; the bullet and the indent are not wanted.
   list-style: none;
-
-  // The card lifts on hover as a whole. A title bar that lifted again on its
-  // own would fight with it.
-  // ---
-  // & is always resolved here: every @include of this mixin sits inside a real
-  // selector, so this is the known stylelint/Sonar false positive for `&` in a
-  // mixin body rather than a missing scoping root.
-  &:hover { // NOSONAR
-    transform: none;
-  }
 }
 
 // The block across the top, carrying the name.
@@ -101,15 +91,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  // & is always resolved here: every @include of this mixin sits inside a real
-  // selector, so this is the known stylelint/Sonar false positive for `&` in a
-  // mixin body rather than a missing scoping root.
-  &:hover, // NOSONAR
-  &:focus-visible {
-    filter: brightness(1.08);
-    text-decoration: none;
   }
 }
 
@@ -159,13 +140,24 @@
   text-transform: uppercase;
 }
 
-// How far through something a reader is. A `progress` element is inline and
-// carries a default width of its own, so left alone it renders as a short bar
-// the width of a text field with whatever follows it sitting on the same line —
-// which is how an Arc's "continue reading" link ended up welded to the end of
-// its own progress bar. Three surfaces draw one of these, so they draw it from
-// here.
-@mixin storytime-progress-bar {
+// Anything the reader is told: an error, a status, a note.
+@mixin storytime-message($colour) {
+  font-size: 0.9rem;
+  color: $colour;
+  margin: 0.5rem 0;
+}
+
+// How far through something a reader is.
+// ---
+// A `progress` element is inline and carries a default width of its own, so
+// left alone it renders as a short bar the width of a text field with whatever
+// follows it sitting on the same line — which is how an Arc's "continue
+// reading" link ended up welded to the end of its own progress bar.
+// ---
+// A class rather than a mixin, because the parts of the bar are pseudo-elements
+// and have nothing to attach to until a mixin is used. Every bar in the feature
+// wears this and adds only its own spacing.
+.storytime-progress {
   display: block;
   width: 100%;
   height: 8px;
@@ -174,21 +166,14 @@
   overflow: hidden;
   appearance: none;
 
-  &::-webkit-progress-bar { // NOSONAR
+  &::-webkit-progress-bar {
     background: vars.$lcars-grey-border;
   }
 
-  &::-webkit-progress-value, // NOSONAR
+  &::-webkit-progress-value,
   &::-moz-progress-bar {
     background: vars.$lcars-green;
   }
-}
-
-// Anything the reader is told: an error, a status, a note.
-@mixin storytime-message($colour) {
-  font-size: 0.9rem;
-  color: $colour;
-  margin: 0.5rem 0;
 }
 
 // Page furniture
@@ -325,6 +310,23 @@ $storytime-panel-colours: (
       @include storytime-panel-heading($colour);
     }
   }
+}
+
+// How a panel answers the pointer. Neither of these varies with the colour, so
+// both are written once against the classes every panel carries rather than
+// from inside the mixins — which would put them behind a `&` with no selector
+// to resolve against until the mixin is used.
+// ---
+// This has to follow the loop above: `.lcars-card` sets its own lift on hover
+// at the same specificity, and a panel is meant to stay still.
+.storytime-panel-card:hover {
+  transform: none;
+}
+
+.storytime-panel-card__heading:hover,
+.storytime-panel-card__heading:focus-visible {
+  filter: brightness(1.08);
+  text-decoration: none;
 }
 
 // What a panel holds under its name.
@@ -993,10 +995,6 @@ p.storytime-fan-notice,
     @include storytime-panel-surface;
   }
 
-  &__progress-bar {
-    @include storytime-progress-bar;
-  }
-
   &__progress-summary,
   &__progress-status {
     @include storytime-meta;
@@ -1033,10 +1031,6 @@ p.storytime-fan-notice,
 
   &__progress {
     @include storytime-panel-surface;
-  }
-
-  &__progress-bar {
-    @include storytime-progress-bar;
   }
 
   &__progress-summary {
@@ -1658,8 +1652,6 @@ $storytime-record-statuses: (
   }
 
   &__bar {
-    @include storytime-progress-bar;
-
     margin: 0.5rem 0;
   }
 
