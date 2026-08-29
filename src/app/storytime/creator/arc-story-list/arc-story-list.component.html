@@ -4,6 +4,18 @@
   <h1>Stories in this Arc</h1>
 
   <nav class="storytime-page-actions">
+    <!--
+      An Arc is often the reason a Story gets written at all, so writing one
+      starts here rather than somewhere else. It joins this Arc on its first
+      save, without an invitation to answer: it is yours either side.
+    -->
+    <a
+      *appHasPermission="permissions.STORYTIME_STORY_CREATE"
+      class="lcars-btn lcars-btn-auto green"
+      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', 'new']"
+      [queryParams]="{ arc: arcId }">
+      Write a Story for this Arc
+    </a>
     <a
       class="lcars-btn lcars-btn-auto bluey"
       [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', arcId]">
@@ -30,8 +42,9 @@
   }
 
   <p class="storytime-intro">
-    Anything you did not write joins only once its author agrees. Until then the
-    invitation sits here, and readers see nothing.
+    Your own Stories join straight away — there is nobody to ask. Anything you
+    did not write joins only once its author agrees, and until then the
+    invitation sits here with readers seeing nothing.
   </p>
 
   @if (invitableStories.length > 0) {

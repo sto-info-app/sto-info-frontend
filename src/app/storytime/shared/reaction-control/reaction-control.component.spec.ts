@@ -77,20 +77,28 @@ describe('ReactionControlComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('shows how the thing stands', () => {
+  // One number, not three: the two buttons are what a reader may do, and the
+  // rating is what everybody did. Their own tallies say nothing a reader acts
+  // on and only invite the score to be read off the wrong one.
+  it('shows how the thing stands, as a rating and nothing else', () => {
     create();
-
-    const text = fixture.nativeElement.textContent as string;
+    const element = fixture.nativeElement as HTMLElement;
 
     expect(reactionService.getSummary).toHaveBeenCalledWith(
       StorytimeTargetType.STORY,
       STORY_ID,
     );
-    expect(text).toContain('3');
-    expect(text).toContain('1');
+    expect(
+      element.querySelector('.storytime-reactions__rating .value')?.textContent,
+    ).toBe('2');
+    expect(
+      [...element.querySelectorAll('.storytime-reactions__button')].map(
+        button => button.textContent?.trim(),
+      ),
+    ).toEqual(['Thumbs up', 'Thumbs down']);
   });
 
-  it('shows nothing when the counts cannot be read', () => {
+  it('shows nothing when the rating cannot be read', () => {
     reactionService.getSummary.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 500 })),
     );

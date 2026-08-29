@@ -10,17 +10,22 @@
 
     <button
       type="button"
-      class="storytime-follow__button"
-      [class.storytime-follow__button--following]="state.isFollowing"
+      class="lcars-btn lcars-btn-auto storytime-follow__button"
+      [class.green]="state.isFollowing"
+      [class.sky]="!state.isFollowing"
       [attr.aria-pressed]="state.isFollowing"
       [disabled]="isSaving"
       (click)="toggle()">
+      <i
+        class="fa-solid fa-user-plus"
+        aria-hidden="true"></i>
       {{ state.isFollowing ? 'Following ' + label : 'Follow ' + label }}
+      <span class="storytime-follow__count">
+        {{ state.followerCount }}
+        <span class="sr-only">{{
+          state.followerCount === 1 ? 'follower' : 'followers'
+        }}</span>
+      </span>
     </button>
-
-    <span class="storytime-follow__count">
-      {{ state.followerCount }}
-      {{ state.followerCount === 1 ? 'follower' : 'followers' }}
-    </span>
   </div>
 }

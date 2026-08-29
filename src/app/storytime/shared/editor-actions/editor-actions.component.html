@@ -1,0 +1,25 @@
+<div class="storytime-form-actions">
+  <button
+    class="lcars-btn green"
+    type="submit"
+    [attr.form]="formId || null"
+    [disabled]="isSaving">
+    {{ isSaving ? 'Saving…' : 'Save' }}
+  </button>
+
+  @if (canPublish) {
+    <button
+      class="lcars-btn sunflower"
+      type="button"
+      [disabled]="isSaving"
+      (click)="publish.emit()">
+      Save and publish
+    </button>
+  }
+
+  <a
+    class="lcars-btn red"
+    [routerLink]="cancelLink"
+    >Cancel</a
+  >
+</div>

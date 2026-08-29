@@ -8,6 +8,7 @@ import {
   StorytimeTargetType,
 } from 'src/app/models/storytime.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { targetTypeSegment } from './target-type.utility';
 
 /**
  * What readers think of Storytime content.
@@ -39,7 +40,9 @@ export class ReactionService {
     // Signed out is a legitimate way to read a rating, so the token is
     // attached when there is one rather than required.
     return this._http.get<ReactionSummary>(
-      `${API_URLS.STORYTIME_REACTIONS}/${targetType}/${targetId}`,
+      `${API_URLS.STORYTIME_REACTIONS}/${targetTypeSegment(
+        targetType,
+      )}/${targetId}`,
       options ?? {},
     );
   }
@@ -82,7 +85,9 @@ export class ReactionService {
   ): Observable<ReactionSummary> {
     return this.authenticated(options =>
       this._http.delete<ReactionSummary>(
-        `${API_URLS.STORYTIME_REACTIONS}/${targetType}/${targetId}`,
+        `${API_URLS.STORYTIME_REACTIONS}/${targetTypeSegment(
+          targetType,
+        )}/${targetId}`,
         options,
       ),
     );

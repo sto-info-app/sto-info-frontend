@@ -8,6 +8,14 @@
  *
  * British English throughout, matching the rest of the site.
  */
+import {
+  CONTENT_RATING_DESCRIPTIONS,
+  CONTENT_RATING_LABELS,
+  CompletionState,
+  ContentRating,
+} from 'src/app/models/storytime.models';
+import type { SettingOption } from './shared/setting-help/setting-help.component';
+
 export const STORYTIME_COPY = {
   /** The feature's name. Never abbreviated or pluralised. */
   FEATURE_NAME: 'Storytime',
@@ -396,6 +404,31 @@ export const COMPLETION_STATE_DESCRIPTIONS = {
   HIATUS: 'The Story is paused and may continue later.',
   CANCELLED: 'The Story will not receive any more Chapters.',
 } as const;
+
+/**
+ * The ratings, as something that explains itself.
+ *
+ * A creator chooses one of these and a reader is told which was chosen, and
+ * both need the same words for what it means — so the pair is built once here
+ * rather than in the editor that sets it and again on the page that reports
+ * it.
+ */
+export const CONTENT_RATING_OPTIONS: readonly SettingOption[] = Object.values(
+  ContentRating,
+).map(rating => ({
+  value: rating,
+  label: CONTENT_RATING_LABELS[rating],
+  description: CONTENT_RATING_DESCRIPTIONS[rating],
+}));
+
+/** The completion states, explained the same way and for the same reason. */
+export const COMPLETION_STATE_OPTIONS: readonly SettingOption[] = Object.values(
+  CompletionState,
+).map(state => ({
+  value: state,
+  label: COMPLETION_STATE_LABELS[state],
+  description: COMPLETION_STATE_DESCRIPTIONS[state],
+}));
 
 /**
  * How each visibility option is described to creators.

@@ -1,37 +1,57 @@
-<article class="storytime-story-card">
-  <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]">
-    @if (story.profileImageThumbnailUrl) {
-      <img
-        class="storytime-story-card__image"
-        [src]="story.profileImageThumbnailUrl"
-        [alt]="story.profileImageAlt ?? ''"
-        loading="lazy" />
+<article class="storytime-panel-card storytime-panel-card--story">
+  <a
+    class="storytime-panel-card__heading"
+    [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]"
+    [title]="story.title">
+    <span class="storytime-panel-card__name">{{ story.title }}</span>
+    @if (needsRatingWarning) {
+      <span class="storytime-panel-card__marks">
+        <span class="storytime-panel-card__badge">
+          <i
+            class="fa-solid fa-triangle-exclamation"
+            aria-hidden="true"></i>
+          {{ ratingLabels[story.contentRating] }}
+        </span>
+      </span>
     }
-
-    <h2 class="storytime-story-card__title">{{ story.title }}</h2>
   </a>
 
-  @if (story.shortDescription) {
-    <p class="storytime-story-card__summary">{{ story.shortDescription }}</p>
-  }
+  <!--
+    Laid out as a captain card is: the picture at the left, what the thing is
+    beside it. Artwork is optional throughout Storytime, so a Story without any
+    renders no frame at all and the facts close up against the edge.
+  -->
+  <div class="storytime-panel-card__main">
+    @if (story.profileImageThumbnailUrl) {
+      <div class="storytime-story-card__image">
+        <img
+          [src]="story.profileImageThumbnailUrl"
+          [alt]="story.profileImageAlt ?? ''"
+          loading="lazy" />
+      </div>
+    }
 
-  <ul class="storytime-story-card__meta">
-    <li>
-      <span class="sr-only">Content rating: </span>
-      @if (needsRatingWarning) {
-        <i
-          class="fa-solid fa-triangle-exclamation"
-          aria-hidden="true"></i>
+    <div class="storytime-panel-card__body storytime-story-card__body">
+      @if (story.shortDescription) {
+        <p class="storytime-story-card__summary">{{ story.shortDescription }}</p>
       }
-      {{ ratingLabels[story.contentRating] }}
-    </li>
-    <li>
-      <span class="sr-only">Status: </span>
-      {{ completionLabels[story.completionState] }}
-    </li>
-    <li>
-      {{ story.publishedChapterCount }}
-      {{ story.publishedChapterCount === 1 ? 'Chapter' : 'Chapters' }}
-    </li>
-  </ul>
+
+      <div class="info-grid storytime-story-card__facts">
+        <div class="info-item">
+          <span class="label">Content rating</span>
+          <span class="value">{{ ratingLabels[story.contentRating] }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Status</span>
+          <span class="value">{{
+            completionLabels[story.completionState]
+          }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Chapters</span>
+          <span class="value">{{ story.publishedChapterCount }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </article>

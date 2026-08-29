@@ -5,6 +5,7 @@ import { of, throwError } from 'rxjs';
 import {
   ChapterAppearance,
   ChapterMedia,
+  ChapterStatus,
   ManagedChapter,
   ManagedCharacter,
 } from 'src/app/models/storytime.models';
@@ -20,6 +21,7 @@ describe('ChapterEditorComponent', () => {
     getMyChapter: jest.Mock;
     createChapter: jest.Mock;
     updateChapter: jest.Mock;
+    publishChapter: jest.Mock;
   };
   let characterService: {
     getMyCharacters: jest.Mock;
@@ -42,6 +44,7 @@ describe('ChapterEditorComponent', () => {
     slug: 'chapter-one',
     synopsis: 'A summary',
     contentSource: 'The Enterprise went to warp.',
+    status: ChapterStatus.DRAFT,
     languageCode: 'en',
     ownLanguageCode: null,
     version: 4,
@@ -50,9 +53,10 @@ describe('ChapterEditorComponent', () => {
   /**
    * Builds and renders the component.
    */
-  const render = (): void => {
+  const render = (): ComponentFixture<ChapterEditorComponent> => {
     fixture = TestBed.createComponent(ChapterEditorComponent);
     fixture.detectChanges();
+    return fixture;
   };
 
   beforeEach(() => {
@@ -61,6 +65,7 @@ describe('ChapterEditorComponent', () => {
       getMyChapter: jest.fn().mockReturnValue(of(existingChapter)),
       createChapter: jest.fn().mockReturnValue(of({ id: 'new-chapter' })),
       updateChapter: jest.fn().mockReturnValue(of(existingChapter)),
+      publishChapter: jest.fn().mockReturnValue(of(existingChapter)),
     };
     mediaService = {
       getMyChapterMedia: jest.fn().mockReturnValue(of([])),
@@ -102,6 +107,15 @@ describe('ChapterEditorComponent', () => {
   });
 
   describe('writing a new Chapter', () => {
+    // Nothing to publish until there is a Chapter: saving once puts it on the
+    // page it is then published from.
+    it('offers no publish', () => {
+      const element = render().nativeElement as HTMLElement;
+
+      expect(fixture.componentInstance.canPublish).toBe(false);
+      expect(element.textContent).not.toContain('Save and publish');
+    });
+
     it('starts with an empty form', () => {
       render();
 
@@ -166,6 +180,67 @@ describe('ChapterEditorComponent', () => {
         'story-1',
         expect.objectContaining({ languageCode: 'tlh' }),
       );
+    });
+  });
+
+  // A Chapter is published from the page it is written on, and a writer who
+  // presses Publish after typing expects what they typed to be what goes out.
+  describe('publishing', () => {
+    beforeEach(() => {
+      routeParams.set('chapterId', 'chapter-1');
+    });
+
+    it('saves the writing before publishing, then returns to the Chapters', () => {
+      render();
+      fixture.componentInstance.publish();
+
+      expect(chapterService.updateChapter).toHaveBeenCalledWith(
+        'chapter-1',
+        expect.objectContaining({ version: 4 }),
+      );
+      expect(chapterService.publishChapter).toHaveBeenCalledWith('chapter-1');
+      expect(router.navigate).toHaveBeenCalledWith([
+        '/',
+        'storytime',
+        'manage',
+        'stories',
+        'story-1',
+        'chapters',
+      ]);
+    });
+
+    // The refusal names what the Chapter is still missing, and leaves the
+    // writer on the page with their writing to put it right.
+    it('shows why the server refused a publish', () => {
+      chapterService.publishChapter.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: { message: 'This Chapter has no content.' },
+            }),
+        ),
+      );
+
+      render();
+      fixture.componentInstance.publish();
+
+      expect(fixture.componentInstance.errorMessage).toContain('no content');
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    it('offers no publish for a Chapter that is already published', () => {
+      chapterService.getMyChapter.mockReturnValue(
+        of({
+          ...existingChapter,
+          status: ChapterStatus.PUBLISHED,
+        } as ManagedChapter),
+      );
+
+      const element = render().nativeElement as HTMLElement;
+
+      expect(fixture.componentInstance.canPublish).toBe(false);
+      expect(element.textContent).not.toContain('Save and publish');
     });
   });
 

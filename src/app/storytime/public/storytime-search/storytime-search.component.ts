@@ -24,6 +24,19 @@ import { SearchService } from '../../search.service';
 import { SEARCHABLE_KINDS } from '../../storytime.constants';
 
 /**
+ * The panel each kind of result wears, keyed by what was found.
+ *
+ * Held as a map rather than a switch because it is a lookup and nothing else,
+ * and because the panel colours it names are defined once in the stylesheet.
+ */
+const SEARCH_PANEL_CLASSES: Record<string, string> = {
+  [StorytimeTargetType.STORY]: 'storytime-panel-card--story',
+  [StorytimeTargetType.CHAPTER]: 'storytime-panel-card--chapter',
+  [StorytimeTargetType.CHARACTER]: 'storytime-panel-card--character',
+  [StorytimeTargetType.ARC]: 'storytime-panel-card--arc',
+};
+
+/**
  * Searching Storytime.
  *
  * The query lives in the URL rather than only in the form, so a search can be
@@ -134,6 +147,23 @@ export class StorytimeSearchComponent implements OnInit {
       default:
         return [...storytime, 'stories', hit.slug];
     }
+  }
+
+  /**
+   * Which panel a result wears.
+   *
+   * A search is the one list holding every kind of thing at once, so the
+   * colour is the only thing telling a reader whether they are looking at a
+   * Story or the Character in it before they read the badge.
+   *
+   * @param hit - The result.
+   * @returns The panel modifier class for its kind.
+   */
+  panelClassFor(hit: SearchHit): string {
+    return (
+      SEARCH_PANEL_CLASSES[hit.targetType] ??
+      SEARCH_PANEL_CLASSES[StorytimeTargetType.STORY]
+    );
   }
 
   /**

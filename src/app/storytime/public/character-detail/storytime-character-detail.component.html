@@ -12,59 +12,106 @@
   <article
     id="storytime-character-detail-page"
     class="storytime-page">
-    <nav
-      class="storytime-character__breadcrumb"
-      aria-label="Breadcrumb">
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', storySlug]"
-        >Back to the Story</a
-      >
-    </nav>
+    <h1>{{ character.name }}</h1>
 
-    <div class="storytime-character__header">
-      @if (character.portraitImageUrl) {
-        <img
-          class="storytime-character__portrait"
-          [src]="character.portraitImageUrl"
-          [alt]="character.portraitImageAlt ?? ''" />
-      }
+    @if (character.shortBio) {
+      <p class="storytime-character__summary">{{ character.shortBio }}</p>
+    }
 
-      <div class="storytime-character__identity">
-        <h1>{{ character.name }}</h1>
+    <!--
+      Built to the plan a captain's own details page uses: what the Character
+      is down the main column, their picture and the ways out beside it. The
+      two pages describe the same kind of thing, so a reader who has met one
+      already knows where to look on the other.
+    -->
+    <div class="storytime-character__layout">
+      <div class="storytime-character__main">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Character Data</span>
+        </div>
 
-        @if (character.isPrimary) {
-          <p class="storytime-character__billing">Main Character</p>
-        }
+        <div class="storytime-panel">
+          @if (character.isPrimary) {
+            <p class="storytime-character__billing">Main Character</p>
+          }
 
-        @if (character.shortBio) {
-          <p class="storytime-character__summary">{{ character.shortBio }}</p>
-        }
-      </div>
-    </div>
+          @if (profileFields.length > 0) {
+            <div class="info-grid">
+              @for (field of profileFields; track field.label) {
+                <div class="info-item">
+                  <span class="label">{{ field.label }}</span>
+                  <span class="value">{{ field.value }}</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="storytime-empty">
+              Nothing has been recorded about them yet.
+            </p>
+          }
+        </div>
 
-    @if (profileFields.length > 0) {
-      <dl class="storytime-character__profile">
-        @for (field of profileFields; track field.label) {
-          <div class="storytime-character__profile-row">
-            <dt>{{ field.label }}</dt>
-            <dd>{{ field.value }}</dd>
+        @if (character.traits && character.traits.length > 0) {
+          <div class="lcars-text-bar small-lcars-bar-gap">
+            <span>Traits</span>
+          </div>
+
+          <div class="storytime-panel">
+            <ul class="storytime-character__traits">
+              @for (trait of character.traits; track trait) {
+                <li>{{ trait }}</li>
+              }
+            </ul>
           </div>
         }
-      </dl>
-    }
 
-    @if (character.traits && character.traits.length > 0) {
-      <ul class="storytime-character__traits">
-        @for (trait of character.traits; track trait) {
-          <li>{{ trait }}</li>
+        @if (biographyHtml) {
+          <div class="lcars-text-bar small-lcars-bar-gap">
+            <span>Biography</span>
+          </div>
+
+          <div class="storytime-panel">
+            <div
+              class="storytime-character__biography"
+              [innerHTML]="biographyHtml"></div>
+          </div>
         }
-      </ul>
-    }
+      </div>
 
-    @if (biographyHtml) {
-      <div
-        class="storytime-character__biography"
-        [innerHTML]="biographyHtml"></div>
-    }
+      <div class="storytime-character__side">
+        @if (character.portraitImageUrl) {
+          <div class="lcars-text-bar small-lcars-bar-gap">
+            <span>Portrait</span>
+          </div>
+
+          <div class="storytime-panel">
+            <img
+              class="storytime-character__portrait"
+              [src]="character.portraitImageUrl"
+              [alt]="character.portraitImageAlt ?? ''" />
+          </div>
+        }
+
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Navigation</span>
+        </div>
+
+        <nav
+          class="storytime-character__navigation"
+          aria-label="Character navigation">
+          <a
+            class="lcars-btn lcars-btn-auto sunflower"
+            [routerLink]="['/', appRoutes.STORYTIME, 'stories', storySlug]"
+            >Back to the Story</a
+          >
+          <a
+            class="lcars-btn lcars-btn-auto bluey"
+            [routerLink]="['/', appRoutes.STORYTIME, 'stories']"
+            >All Stories</a
+          >
+        </nav>
+      </div>
+    </div>
 
     <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Appears In</span>
@@ -77,8 +124,9 @@
     } @else {
       <ul class="storytime-character__appearances">
         @for (appearance of appearsIn; track appearance.chapterId) {
-          <li>
+          <li class="storytime-panel-card storytime-panel-card--chapter">
             <a
+              class="storytime-panel-card__heading"
               [routerLink]="[
                 '/',
                 appRoutes.STORYTIME,
@@ -86,14 +134,17 @@
                 storySlug,
                 'chapters',
                 appearance.chapterSlug,
-              ]">
-              {{ appearance.chapterTitle }}
+              ]"
+              [title]="appearance.chapterTitle">
+              <span class="storytime-panel-card__name">{{
+                appearance.chapterTitle
+              }}</span>
+              @if (appearance.isPrimary) {
+                <span class="storytime-panel-card__marks">
+                  <span class="storytime-panel-card__badge">Central</span>
+                </span>
+              }
             </a>
-            @if (appearance.isPrimary) {
-              <span class="storytime-character__appearance-billing"
-                >Central</span
-              >
-            }
           </li>
         }
       </ul>

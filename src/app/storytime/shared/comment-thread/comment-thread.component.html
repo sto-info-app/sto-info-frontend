@@ -1,119 +1,123 @@
-<section class="storytime-section storytime-comments">
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>Comments</span>
-  </div>
-
-  @if (errorMessage) {
-    <p
-      class="storytime-comments__error"
-      role="alert">
-      {{ errorMessage }}
-    </p>
-  }
-
-  @if (isLoading) {
-    <p class="storytime-comments__loading">Loading the conversation…</p>
-  } @else {
-    @if (nodes.length === 0) {
-      <p class="storytime-empty">Nobody has said anything yet. Be the first.</p>
+<app-collapsible-section
+  heading="Comments"
+  barClass="small-lcars-bar-gap">
+  <section class="storytime-section storytime-comments">
+    @if (errorMessage) {
+      <p
+        class="storytime-comments__error"
+        role="alert">
+        {{ errorMessage }}
+      </p>
     }
 
-    <ol class="storytime-comments__list">
-      @for (node of nodes; track node.comment.id) {
-        <li class="storytime-comments__comment">
-          <ng-container
-            *ngTemplateOutlet="
-              commentBody;
-              context: { $implicit: node.comment }
-            "></ng-container>
-
-          @if (node.replies.length > 0) {
-            <ol class="storytime-comments__replies">
-              @for (reply of node.replies; track reply.id) {
-                <li class="storytime-comments__reply">
-                  <ng-container
-                    *ngTemplateOutlet="
-                      commentBody;
-                      context: { $implicit: reply }
-                    "></ng-container>
-                </li>
-              }
-            </ol>
-          }
-
-          @if (canComment) {
-            @if (replyingTo === node.comment.id) {
-              <form
-                class="storytime-comments__form"
-                (ngSubmit)="postReply()">
-                <div class="lcars-input-container perano">
-                  <label [attr.for]="'reply-' + node.comment.id"
-                    >Your reply</label
-                  >
-                  <textarea
-                    [id]="'reply-' + node.comment.id"
-                    class="storytime-comments__input"
-                    rows="3"
-                    maxlength="2000"
-                    [(ngModel)]="replyDraft"
-                    name="replyDraft"></textarea>
-                </div>
-                <div class="storytime-comments__actions">
-                  <button
-                    class="lcars-btn lcars-btn-auto green"
-                    type="submit"
-                    [disabled]="isSaving || !replyDraft.trim()">
-                    Post reply
-                  </button>
-                  <button
-                    class="lcars-btn lcars-btn-auto red"
-                    type="button"
-                    (click)="cancelReply()">
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            } @else {
-              <button
-                type="button"
-                class="lcars-btn lcars-btn-auto sky storytime-comments__reply-button"
-                (click)="startReply(node.comment.id)">
-                Reply
-              </button>
-            }
-          }
-        </li>
-      }
-    </ol>
-
-    @if (canComment) {
-      <form
-        class="storytime-comments__form"
-        (ngSubmit)="post()">
-        <div class="lcars-input-container perano">
-          <label for="comment-draft">Add a comment</label>
-          <textarea
-            id="comment-draft"
-            class="storytime-comments__input"
-            rows="4"
-            maxlength="2000"
-            [(ngModel)]="draft"
-            name="draft"></textarea>
-        </div>
-        <div class="storytime-comments__actions">
-          <button
-            class="lcars-btn lcars-btn-auto green"
-            type="submit"
-            [disabled]="isSaving || !draft.trim()">
-            {{ isSaving ? 'Posting…' : 'Post comment' }}
-          </button>
-        </div>
-      </form>
+    @if (isLoading) {
+      <p class="storytime-comments__loading">Loading the conversation…</p>
     } @else {
-      <p class="storytime-comments__note">Sign in to join the conversation.</p>
+      @if (nodes.length === 0) {
+        <p class="storytime-empty">
+          Nobody has said anything yet. Be the first.
+        </p>
+      }
+
+      <ol class="storytime-comments__list">
+        @for (node of nodes; track node.comment.id) {
+          <li class="storytime-comments__comment">
+            <ng-container
+              *ngTemplateOutlet="
+                commentBody;
+                context: { $implicit: node.comment }
+              "></ng-container>
+
+            @if (node.replies.length > 0) {
+              <ol class="storytime-comments__replies">
+                @for (reply of node.replies; track reply.id) {
+                  <li class="storytime-comments__reply">
+                    <ng-container
+                      *ngTemplateOutlet="
+                        commentBody;
+                        context: { $implicit: reply }
+                      "></ng-container>
+                  </li>
+                }
+              </ol>
+            }
+
+            @if (canComment) {
+              @if (replyingTo === node.comment.id) {
+                <form
+                  class="storytime-comments__form"
+                  (ngSubmit)="postReply()">
+                  <div class="lcars-input-container perano">
+                    <label [attr.for]="'reply-' + node.comment.id"
+                      >Your reply</label
+                    >
+                    <textarea
+                      [id]="'reply-' + node.comment.id"
+                      class="storytime-comments__input"
+                      rows="3"
+                      maxlength="2000"
+                      [(ngModel)]="replyDraft"
+                      name="replyDraft"></textarea>
+                  </div>
+                  <div class="storytime-comments__actions">
+                    <button
+                      class="lcars-btn lcars-btn-auto green"
+                      type="submit"
+                      [disabled]="isSaving || !replyDraft.trim()">
+                      Post reply
+                    </button>
+                    <button
+                      class="lcars-btn lcars-btn-auto red"
+                      type="button"
+                      (click)="cancelReply()">
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              } @else {
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto sky storytime-comments__reply-button"
+                  (click)="startReply(node.comment.id)">
+                  Reply
+                </button>
+              }
+            }
+          </li>
+        }
+      </ol>
+
+      @if (canComment) {
+        <form
+          class="storytime-comments__form"
+          (ngSubmit)="post()">
+          <div class="lcars-input-container perano">
+            <label for="comment-draft">Add a comment</label>
+            <textarea
+              id="comment-draft"
+              class="storytime-comments__input"
+              rows="4"
+              maxlength="2000"
+              [(ngModel)]="draft"
+              name="draft"></textarea>
+          </div>
+          <div class="storytime-comments__actions">
+            <button
+              class="lcars-btn lcars-btn-auto green"
+              type="submit"
+              [disabled]="isSaving || !draft.trim()">
+              {{ isSaving ? 'Posting…' : 'Post comment' }}
+            </button>
+          </div>
+        </form>
+      } @else {
+        <p class="storytime-comments__note">
+          Sign in to join the conversation.
+        </p>
+      }
     }
-  }
-</section>
+  </section>
+</app-collapsible-section>
 
 <ng-template
   #commentBody
@@ -189,25 +193,38 @@
 
       @if (isOwner && comment.status !== statuses.REMOVED_BY_ADMIN) {
         <button
-          class="lcars-btn lcars-btn-auto sunflower"
+          class="cta-icon"
           type="button"
           [disabled]="isSaving"
+          [title]="hideLabel(comment)"
+          [attr.aria-label]="hideLabel(comment)"
           (click)="toggleHidden(comment)">
-          {{
-            comment.status === statuses.HIDDEN_BY_OWNER
-              ? 'Show on my page'
-              : 'Hide from my page'
-          }}
+          <i
+            class="fa-solid"
+            [class.fa-eye]="comment.status === statuses.HIDDEN_BY_OWNER"
+            [class.fa-eye-slash]="comment.status !== statuses.HIDDEN_BY_OWNER"
+            aria-hidden="true"></i>
         </button>
       }
 
+      <!--
+        An administrator removing a comment under the content policy is not the
+        same act as its author deleting it, and does not go to the same place:
+        this one asks for a reason and shows it to the author. It is an icon
+        beside the others so the row reads as one set of controls, and its own
+        icon so the two are never mistaken for each other.
+      -->
       @if (isAdministrator && comment.status !== statuses.REMOVED_BY_ADMIN) {
         <button
-          class="lcars-btn lcars-btn-auto cardinal"
+          class="cta-icon delete-icon"
           type="button"
           [disabled]="isSaving"
+          title="Remove under the content policy"
+          aria-label="Remove under the content policy"
           (click)="startRemove(comment.id)">
-          Remove
+          <i
+            class="fa-solid fa-ban"
+            aria-hidden="true"></i>
         </button>
       }
     </div>

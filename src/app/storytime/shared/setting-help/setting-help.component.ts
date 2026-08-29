@@ -34,4 +34,14 @@ export class SettingHelpComponent {
 
   /** The choices to explain. Ones without a description are left out. */
   @Input() options: readonly SettingOption[] = [];
+
+  /**
+   * Whether the explanation needs more room than a setting's does.
+   *
+   * A chooser's explanation is a sentence per option and fits a narrow popup.
+   * Anything longer — a reference somebody reads rather than glances at —
+   * would come out as a column of two words a line, so it gets the width
+   * instead of a component of its own.
+   */
+  @Input() wide = false;
 }

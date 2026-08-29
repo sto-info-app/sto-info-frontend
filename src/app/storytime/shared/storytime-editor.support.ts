@@ -3,7 +3,8 @@ import { ChangeDetectorRef, DestroyRef, NgZone, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { StorytimeLanguage } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
@@ -110,17 +111,33 @@ export class StorytimeEditorSupport {
   /**
    * Sends the save, then goes to where the saved work is managed.
    *
+   * An editor that also publishes passes the publish as `then`, so the two
+   * happen in that order against one set of edits. Publishing what is on the
+   * screen means saving it first — a creator who presses Publish after typing
+   * has every right to expect what they typed to be what goes out — and a
+   * failure at either step leaves them where they are with the server's own
+   * explanation rather than halfway through.
+   *
    * @param request - The save.
    * @param destination - The route under Storytime to go to, from the new id.
    * @param failureMessage - What to say when the server explains nothing.
+   * @param then - Anything to do with the saved work before leaving the page.
+   *   It is handed the saved work rather than only its identifier, so an
+   *   editor can hold on to what was created: a follow-up that fails then
+   *   leaves the editor editing that work rather than offering to create it
+   *   a second time.
    */
   save<T extends { id: string }>(
     request: Observable<T>,
     destination: (savedId: string) => string[],
     failureMessage: string,
+    then?: (saved: T) => Observable<unknown>,
   ): void {
     request
       .pipe(
+        switchMap(saved =>
+          then ? then(saved).pipe(map(() => saved)) : of(saved),
+        ),
         takeUntilDestroyed(this._destroyRef),
         observeInZone(this._ngZone, this._cdr),
       )

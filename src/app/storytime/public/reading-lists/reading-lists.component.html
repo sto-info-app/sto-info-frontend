@@ -63,30 +63,46 @@
   } @else {
     <ul class="storytime-reading-lists__list">
       @for (list of lists; track list.id) {
-        <li class="storytime-reading-lists__item">
+        <li class="storytime-panel-card storytime-panel-card--list">
           <a
-            class="storytime-reading-lists__name"
-            [routerLink]="['/storytime', 'reading-lists', list.id]">
-            {{ list.name }}
+            class="storytime-panel-card__heading"
+            [routerLink]="['/storytime', 'reading-lists', list.id]"
+            [title]="list.name">
+            <span class="storytime-panel-card__name">{{ list.name }}</span>
+            <span class="storytime-panel-card__marks">
+              <span class="storytime-panel-card__badge">
+                {{ list.itemCount }}
+                {{ list.itemCount === 1 ? 'thing' : 'things' }}
+              </span>
+              <span class="storytime-panel-card__badge">
+                {{ list.isPublic ? 'Public' : 'Private' }}
+              </span>
+            </span>
           </a>
-          <span class="storytime-reading-lists__count">
-            {{ list.itemCount }}
-            {{ list.itemCount === 1 ? 'thing' : 'things' }}
-          </span>
-          <span class="storytime-reading-lists__visibility">
-            {{ list.isPublic ? 'Public' : 'Private' }}
-          </span>
-          <button
-            class="cta-icon delete-icon"
-            type="button"
-            title="Delete list"
-            aria-label="Delete list"
-            [disabled]="isSaving"
-            (click)="remove(list)">
-            <i
-              class="fa-solid fa-trash"
-              aria-hidden="true"></i>
-          </button>
+
+          <div class="storytime-panel-card__main">
+            <div class="storytime-panel-card__body">
+              @if (list.description) {
+                <p class="storytime-reading-lists__summary">
+                  {{ list.description }}
+                </p>
+              }
+            </div>
+
+            <div class="storytime-panel-card__controls">
+              <button
+                class="cta-icon delete-icon"
+                type="button"
+                title="Delete list"
+                aria-label="Delete list"
+                [disabled]="isSaving"
+                (click)="remove(list)">
+                <i
+                  class="fa-solid fa-trash"
+                  aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
         </li>
       }
     </ul>

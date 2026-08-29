@@ -7,6 +7,8 @@ import {
   ArcMembershipStatus,
   ManagedStory,
 } from 'src/app/models/storytime.models';
+import { PERMISSIONS } from 'src/app/models/access-control.models';
+import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { ArcService } from '../../arc.service';
 import { StoryService } from '../../story.service';
 import { ArcStoryListComponent } from './arc-story-list.component';
@@ -22,6 +24,7 @@ describe('ArcStoryListComponent', () => {
     leaveArc: jest.Mock;
   };
   let storyService: { getMyStories: jest.Mock };
+  let accessControlService: { hasPermission: jest.Mock };
   let routeParams: Map<string, string>;
 
   /**
@@ -73,17 +76,56 @@ describe('ArcStoryListComponent', () => {
         ),
     };
 
+    accessControlService = {
+      hasPermission: jest.fn().mockReturnValue(of(true)),
+    };
+
     TestBed.configureTestingModule({
       imports: [ArcStoryListComponent],
       providers: [
         provideRouter([]),
         { provide: ArcService, useValue: arcService },
         { provide: StoryService, useValue: storyService },
+        { provide: AccessControlService, useValue: accessControlService },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: routeParams } },
         },
       ],
+    });
+  });
+
+  // An Arc is often the reason a Story gets written at all, so writing one
+  // starts from the Arc rather than from the list of somebody's own work.
+  describe('writing a Story for the Arc', () => {
+    /**
+     * The link that starts a Story for this Arc, if it is offered.
+     *
+     * @param element - The rendered page.
+     * @returns The link, or null when it is not offered.
+     */
+    const writeLink = (element: HTMLElement): HTMLAnchorElement | null =>
+      [...element.querySelectorAll('a')].find(link =>
+        link.textContent?.includes('Write a Story for this Arc'),
+      ) ?? null;
+
+    it('carries the Arc, so the Story joins it on its first save', () => {
+      const link = writeLink(render());
+
+      expect(link?.getAttribute('href')).toBe(
+        '/storytime/manage/stories/new?arc=arc-1',
+      );
+      expect(accessControlService.hasPermission).toHaveBeenCalledWith(
+        PERMISSIONS.STORYTIME_STORY_CREATE,
+      );
+    });
+
+    // Curating an Arc needs no writing permission, so somebody who cannot
+    // create a Story is not invited to try.
+    it('is not offered to a curator who cannot write Stories', () => {
+      accessControlService.hasPermission.mockReturnValue(of(false));
+
+      expect(writeLink(render())).toBeNull();
     });
   });
 

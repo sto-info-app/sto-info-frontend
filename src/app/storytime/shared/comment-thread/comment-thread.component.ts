@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
   StorytimeComment,
@@ -52,7 +53,7 @@ export const SILENCED_TEXT: Record<StorytimeCommentStatus, string> = {
   selector: 'app-comment-thread',
   templateUrl: './comment-thread.component.html',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CollapsibleSectionComponent],
 })
 export class CommentThreadComponent implements OnInit {
   /** What is being commented on. */
@@ -255,6 +256,21 @@ export class CommentThreadComponent implements OnInit {
    */
   deleteOwn(comment: StorytimeComment): void {
     this.send(this._commentService.deleteComment(comment.id));
+  }
+
+  /**
+   * What the hide control does to this comment, said in words.
+   *
+   * The control is an icon, so the words live in its title and its accessible
+   * name rather than on its face.
+   *
+   * @param comment - The comment.
+   * @returns The label for the control.
+   */
+  hideLabel(comment: StorytimeComment): string {
+    return comment.status === StorytimeCommentStatus.HIDDEN_BY_OWNER
+      ? 'Show on my page'
+      : 'Hide from my page';
   }
 
   /**

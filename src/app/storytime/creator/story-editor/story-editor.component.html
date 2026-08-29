@@ -8,6 +8,62 @@
 >
   <h1>{{ isNew ? "Create a Story" : "Edit Story" }}</h1>
 
+  @if (isJoiningArc) {
+    <p class="storytime-intro">
+      This Story joins the Arc you came from as soon as you save it, and you
+      will be taken straight to its Chapters.
+    </p>
+  }
+
+  <!--
+    The rest of a Story is reached from here rather than only from the list a
+    creator came through. Saving a new Story leaves them on this page, and a
+    Story with nothing in it is exactly the point at which somebody wants to
+    start writing a Chapter — sending them back to the list first is a step for
+    its own sake.
+  -->
+  @if (story) {
+    <nav class="storytime-page-actions">
+      <a
+        class="lcars-btn lcars-btn-auto green"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "stories",
+  story.id,
+  "chapters",
+]'
+      >Chapters</a>
+      <a
+        class="lcars-btn lcars-btn-auto bluey"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "stories",
+  story.id,
+  "characters",
+]'
+      >Cast</a>
+      <a
+        class="lcars-btn lcars-btn-auto bluey"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "stories",
+  story.id,
+  "collaborators",
+]'
+      >Collaborators</a>
+      <a
+        class="lcars-btn lcars-btn-auto sky"
+        [routerLink]='["/", appRoutes.STORYTIME, "manage", "stories"]'
+      >Back to your Stories</a>
+    </nav>
+  }
+
   @if (errorMessage) {
     <app-lcars-error-message
       title="Could not save"
@@ -79,10 +135,9 @@
               formControlName="description"
               rows="8"
             ></textarea>
-            <p class="field-hint">
-              Markdown is supported. Links to other sites are not shown.
-            </p>
           </div>
+
+          <app-storytime-markdown-hint />
         </div>
       </div>
     </section>
@@ -136,23 +191,26 @@
       </div>
     </section>
 
-    <div class="storytime-form-actions">
-      <button
-        class="lcars-btn green"
-        type="submit"
-        [disabled]="isSaving"
-      >
-        {{ isSaving ? "Saving…" : "Save" }}
-      </button>
-      <a
-        class="lcars-btn red"
-        [routerLink]='["/", appRoutes.STORYTIME, "manage", "stories"]'
-      >Cancel</a>
-    </div>
+    <app-storytime-editor-actions
+      [isSaving]="isSaving"
+      [canPublish]="canPublish"
+      [cancelLink]='["/", appRoutes.STORYTIME, "manage", "stories"]'
+      (publish)="publish()"
+    />
   </form>
 
   @if (story) {
-    <!-- Tagging needs something to tag, so it appears once the Story exists. -->
+    <!--
+      The terms are confirmed here as well as on the list, because this is
+      where the publish that needs them is pressed.
+    -->
+    <app-storytime-content-policy-panel
+      heading="Publishing Terms"
+      [story]="story"
+      (accepted)="onPolicyAccepted($event)"
+    ></app-storytime-content-policy-panel>
+
+    <!-- Tagging needs something to tag, so it waits for the Story too. -->
     <app-tag-picker
       targetType="STORY"
       [targetId]="story.id"

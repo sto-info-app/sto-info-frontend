@@ -22,6 +22,7 @@ import { catchError } from 'rxjs/operators';
 import {
   ChapterAppearance,
   ChapterMedia,
+  ChapterStatus,
   ManagedChapter,
   ManagedCharacter,
   StorytimeLanguage,
@@ -34,6 +35,8 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
 import { MediaService } from '../../media.service';
+import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
+import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
 import { SettingOption } from '../../shared/setting-help/setting-help.component';
 import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
 import {
@@ -60,6 +63,8 @@ import {
     LcarsErrorMessageComponent,
     LcarsToggleComponent,
     SettingSelectComponent,
+    MarkdownHintComponent,
+    EditorActionsComponent,
   ],
 })
 export class ChapterEditorComponent implements OnInit {
@@ -361,9 +366,51 @@ export class ChapterEditorComponent implements OnInit {
   }
 
   /**
+   * Whether publishing is a sensible next action from here.
+   *
+   * Offered once the Chapter exists and is not already published. A Chapter
+   * may be published while its Story is still a draft — it becomes readable
+   * when the Story does — so there is nothing else to wait for.
+   *
+   * @returns True when the Chapter can be published.
+   */
+  get canPublish(): boolean {
+    return (
+      this.chapter !== null && this.chapter.status !== ChapterStatus.PUBLISHED
+    );
+  }
+
+  /**
    * Saves the Chapter, creating it when new and updating it otherwise.
    */
   save(): void {
+    this.submit(savedId => ['manage', 'chapters', savedId]);
+  }
+
+  /**
+   * Saves what is on the screen, publishes it, and returns to the Chapters.
+   *
+   * Back to the list rather than staying here, because the list is where a
+   * writer sees the Chapter take its new state alongside the others — and
+   * where they publish the Story once its first Chapter is out.
+   */
+  publish(): void {
+    this.submit(
+      () => ['manage', 'stories', this.storyId, 'chapters'],
+      saved => this._chapterService.publishChapter(saved.id),
+    );
+  }
+
+  /**
+   * Sends the form, then goes where the caller asked.
+   *
+   * @param destination - The route under Storytime to go to, from the saved id.
+   * @param then - Anything to do with the saved Chapter before leaving.
+   */
+  private submit(
+    destination: (savedId: string) => string[],
+    then?: (saved: ManagedChapter) => Observable<unknown>,
+  ): void {
     const payload = this._editor.beginSave(this.form, this.chapter?.version);
 
     if (!payload) {
@@ -382,8 +429,9 @@ export class ChapterEditorComponent implements OnInit {
 
     this._editor.save(
       request,
-      savedId => ['manage', 'chapters', savedId],
+      destination,
       'This Chapter could not be saved. Please try again shortly.',
+      then,
     );
   }
 

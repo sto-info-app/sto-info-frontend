@@ -8,6 +8,42 @@
 >
   <h1>{{ isNew ? "Create an Arc" : "Edit Arc" }}</h1>
 
+  <!--
+    Reached from here as well as from the list, for the same reason a Story's
+    Chapters are: what an Arc is for is the Stories in it, and that is the next
+    thing anybody wants after describing one.
+  -->
+  @if (arc) {
+    <nav class="storytime-page-actions">
+      <a
+        class="lcars-btn lcars-btn-auto green"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "arcs",
+  arc.id,
+  "stories",
+]'
+      >Stories</a>
+      <a
+        class="lcars-btn lcars-btn-auto bluey"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "arcs",
+  arc.id,
+  "collaborators",
+]'
+      >Collaborators</a>
+      <a
+        class="lcars-btn lcars-btn-auto sky"
+        [routerLink]='["/", appRoutes.STORYTIME, "manage", "arcs"]'
+      >Back to your Arcs</a>
+    </nav>
+  }
+
   @if (errorMessage) {
     <app-lcars-error-message
       title="Could not save"
@@ -79,10 +115,9 @@
               formControlName="description"
               rows="8"
             ></textarea>
-            <p class="field-hint">
-              Markdown is supported. Links to other sites are not shown.
-            </p>
           </div>
+
+          <app-storytime-markdown-hint />
         </div>
       </div>
     </section>
@@ -118,19 +153,12 @@
       </div>
     </section>
 
-    <div class="storytime-form-actions">
-      <button
-        class="lcars-btn green"
-        type="submit"
-        [disabled]="isSaving"
-      >
-        {{ isSaving ? "Saving…" : "Save" }}
-      </button>
-      <a
-        class="lcars-btn red"
-        [routerLink]='["/", appRoutes.STORYTIME, "manage", "arcs"]'
-      >Cancel</a>
-    </div>
+    <app-storytime-editor-actions
+      [isSaving]="isSaving"
+      [canPublish]="canPublish"
+      [cancelLink]='["/", appRoutes.STORYTIME, "manage", "arcs"]'
+      (publish)="publish()"
+    />
   </form>
 
   @if (arc) {

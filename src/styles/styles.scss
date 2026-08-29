@@ -105,7 +105,11 @@ button.lcars-btn,
 .submit-button {
   height: 60px !important;
   border-radius: 30px !important;
-  padding: 0 25px 8px 0 !important;
+
+  // The left gutter matches the pill's own radius, which is the least that
+  // keeps a label clear of the curve: the text is right-aligned, so anything
+  // long enough to fill the pill used to run out through the rounded edge.
+  padding: 0 25px 8px 30px !important;
   font-size: 1rem !important;
   text-transform: uppercase !important;
   text-align: right !important;
@@ -137,7 +141,13 @@ button.lcars-btn,
   }
 }
 
-.lcars-btn-auto {
+// A pill sized to its own label, with the wide left gutter the LCARS look
+// wants. `button` is named as well as the class because the base rule above
+// reaches a button by element and class at once, and would otherwise outrank
+// this one and leave every LCARS button with no left gutter at all while the
+// anchors beside them kept theirs.
+.lcars-btn-auto,
+button.lcars-btn-auto {
   width: auto !important;
   min-width: 0 !important;
   padding-left: 65px !important;
@@ -193,7 +203,11 @@ button.lcars-btn,
     margin: 0 8px 16px;
     width: 200px;
     height: 60px;
-    padding: 24px 25px 0 0;
+
+    // The left gutter matches the pill's radius, for the reason the LCARS
+    // button above wants one: the label is right-aligned, so anything long
+    // enough to fill the pill runs out through the rounded edge without it.
+    padding: 24px 25px 0 26px;
     background-color: #58e;
     border-radius: 26px;
     text-align: right;
@@ -686,6 +700,26 @@ button.lcars-btn,
 }
 
 /* LCARS Standard Layouts */
+
+// An LCARS heading bar and the content it folds away. The bar carries a title
+// and a caret button, so the title has to give up the margin and weight a
+// heading normally brings or it pushes the caret off the bar.
+.collapsible-section {
+  margin-bottom: 1.75rem;
+
+  .collapsible-section__title {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+  }
+
+  .collapsible-section__content {
+    min-width: 0;
+    margin-top: 0.35rem;
+  }
+}
+
 .info-grid {
   @include mixins.lcars-info-grid;
 }

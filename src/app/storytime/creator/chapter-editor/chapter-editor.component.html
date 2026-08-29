@@ -115,11 +115,11 @@
               formControlName="contentSource"
               rows="24"
             ></textarea>
-            <p class="field-hint">
-              Markdown is supported. Links to other sites are not shown, and a
-              Chapter needs some content before it can be published.
-            </p>
           </div>
+
+          <app-storytime-markdown-hint>
+            A Chapter needs some content before it can be published.
+          </app-storytime-markdown-hint>
         </div>
       </div>
     </section>
@@ -242,21 +242,14 @@
     Saving the Chapter is the last thing on the page rather than the last thing
     in the form: the videos and the cast are saved on their own, and a Save
     sitting above them reads as though the sections below it are not covered.
-    The button is tied back to the form by name, which also keeps the media box
+    Naming the form ties the button back to it, which also keeps the media box
     outside it — pressing Enter there should not submit the Chapter.
   -->
-  <div class="storytime-form-actions">
-    <button
-      class="lcars-btn green"
-      type="submit"
-      form="chapter-editor-form"
-      [disabled]="isSaving"
-    >
-      {{ isSaving ? "Saving…" : "Save" }}
-    </button>
-    <a
-      class="lcars-btn red"
-      [routerLink]='[
+  <app-storytime-editor-actions
+    formId="chapter-editor-form"
+    [isSaving]="isSaving"
+    [canPublish]="canPublish"
+    [cancelLink]='[
   "/",
   appRoutes.STORYTIME,
   "manage",
@@ -264,6 +257,6 @@
   storyId,
   "chapters",
 ]'
-    >Cancel</a>
-  </div>
+    (publish)="publish()"
+  />
 </div>

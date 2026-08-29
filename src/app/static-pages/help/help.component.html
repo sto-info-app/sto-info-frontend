@@ -7,7 +7,7 @@
   </p>
 
   @for (topic of topics; track topic.id) {
-    <app-help-section [heading]="topic.title">
+    <app-collapsible-section [heading]="topic.title">
       <p class="help-topic__intro">{{ topic.intro }}</p>
 
       <ul class="help-guide-list">
@@ -20,10 +20,10 @@
           </li>
         }
       </ul>
-    </app-help-section>
+    </app-collapsible-section>
   }
 
-  <app-help-section heading="Still stuck?">
+  <app-collapsible-section heading="Still stuck?">
     <p>
       If a guide does not answer your question, ask us. We would rather hear
       about it than have you work around it — and a question asked often enough
@@ -47,5 +47,5 @@
         >Roadmap</a
       >
     </div>
-  </app-help-section>
+  </app-collapsible-section>
 </div>

@@ -106,6 +106,26 @@ describe('CommentThreadComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('A fine chapter.');
   });
 
+  // A thread runs long, and a reader who has read it wants the page back.
+  it('folds the conversation away behind its own bar', () => {
+    create();
+    const element = fixture.nativeElement as HTMLElement;
+    const toggle = element.querySelector(
+      'app-collapsible-section button',
+    ) as HTMLButtonElement;
+
+    expect(element.querySelector('.lcars-text-bar')?.textContent).toContain(
+      'Comments',
+    );
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(element.querySelector('.storytime-comments')).toBeNull();
+    expect(element.textContent).not.toContain('A fine chapter.');
+  });
+
   it('says so when nobody has commented', () => {
     commentService.getComments.mockReturnValue(of([]));
 
@@ -380,9 +400,25 @@ describe('CommentThreadComponent', () => {
     it('offers the control only to the owner', () => {
       create();
 
-      const labels = (fixture.nativeElement.textContent as string) ?? '';
+      const titles = [...fixture.nativeElement.querySelectorAll('button')].map(
+        (button: HTMLButtonElement) => button.getAttribute('title'),
+      );
 
-      expect(labels).not.toContain('Hide from my page');
+      expect(titles).not.toContain('Hide from my page');
+    });
+
+    // The control is an icon, so what it does lives in its title and its
+    // accessible name rather than on its face — and has to say which way it
+    // is about to go.
+    it('says which way the control goes', () => {
+      create(true);
+
+      expect(component.hideLabel(buildComment())).toBe('Hide from my page');
+      expect(
+        component.hideLabel(
+          buildComment({ status: StorytimeCommentStatus.HIDDEN_BY_OWNER }),
+        ),
+      ).toBe('Show on my page');
     });
   });
 

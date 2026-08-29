@@ -248,6 +248,145 @@ describe('StoryDetailComponent', () => {
     expect(fixture.componentInstance.needsRatingWarning).toBe(false);
   });
 
+  // The page runs long: a cast, every Chapter, and the whole conversation. A
+  // reader who came back for one of them should be able to put the rest away.
+  describe('the sections that fold away', () => {
+    /**
+     * Reads the toggle on the bar of the section with this heading.
+     *
+     * Named through the bar rather than the section, because a section's
+     * contents have buttons of their own and the first one down the tree is
+     * not reliably the one that folds it.
+     *
+     * @param element - The rendered page.
+     * @param heading - What the bar says.
+     * @returns The toggle, or null when the page has no such bar.
+     */
+    const toggleFor = (
+      element: HTMLElement,
+      heading: string,
+    ): HTMLButtonElement | null => {
+      const bar = [...element.querySelectorAll('.lcars-text-bar')].find(
+        candidate => candidate.textContent?.includes(heading),
+      );
+
+      return (bar?.querySelector('button') as HTMLButtonElement) ?? null;
+    };
+
+    beforeEach(() => {
+      characterService.getCharacters.mockReturnValue(
+        of([
+          {
+            id: 'character-1',
+            slug: 'captain-shran',
+            name: 'Captain Shran',
+            shortBio: 'An Andorian officer.',
+            portraitImageThumbnailUrl: null,
+            portraitImageAlt: null,
+          },
+        ] as Character[]),
+      );
+      chapterService.getChapters.mockReturnValue(
+        of([
+          {
+            id: 'chapter-1',
+            slug: 'chapter-one',
+            title: 'Chapter One',
+            synopsis: 'A summary',
+            estimatedReadingMinutes: 3,
+          },
+        ]),
+      );
+    });
+
+    it.each([
+      ['Cast', '.storytime-cast'],
+      ['Chapters', '.storytime-chapter-list'],
+    ])('folds %s away', (heading, contents) => {
+      const element = render();
+      const toggle = toggleFor(element, heading);
+
+      expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+      expect(element.querySelector(contents)).not.toBeNull();
+
+      toggle?.click();
+      fixture.detectChanges();
+
+      expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+      expect(element.querySelector(contents)).toBeNull();
+    });
+
+    // The conversation folds away too, but it belongs to the thread rather
+    // than to this page, and is tested where it is built.
+    it('opens every section it has', () => {
+      const element = render();
+
+      expect(
+        ['Cast', 'Chapters', 'Comments'].map(heading =>
+          toggleFor(element, heading)?.getAttribute('aria-expanded'),
+        ),
+      ).toEqual(['true', 'true', 'true']);
+    });
+  });
+
+  describe('the facts that need explaining', () => {
+    /**
+     * Reads a fact's help control.
+     *
+     * Matched on the start of the caption rather than anywhere in it: the
+     * explanation lives inside the label, so a label carrying help reads as
+     * its caption followed by every word of that explanation.
+     *
+     * @param element - The rendered page.
+     * @param name - The fact's caption.
+     * @returns The control beside that caption, or null when it has none.
+     */
+    const helpFor = (element: HTMLElement, name: string): Element | null =>
+      [...element.querySelectorAll('.info-item')]
+        .find(item =>
+          item.querySelector('.label')?.textContent?.trim().startsWith(name),
+        )
+        ?.querySelector('app-storytime-setting-help') ?? null;
+
+    // A rating and a status are each one word standing for a decision about
+    // somebody else's reading, and neither word explains itself.
+    it.each([['Status'], ['Content rating']])('offers help on %s', name => {
+      expect(helpFor(render(), name)).not.toBeNull();
+    });
+
+    it('leaves the facts that speak for themselves alone', () => {
+      const element = render();
+
+      expect(helpFor(element, 'Chapters')).toBeNull();
+    });
+
+    it('explains every rating there is', () => {
+      const element = render();
+      const help = helpFor(element, 'Content rating');
+
+      expect(help?.textContent).toContain('General');
+      expect(help?.textContent).toContain('Mature');
+      expect(help?.textContent).toContain('Adults Only');
+    });
+
+    it('explains every status there is', () => {
+      const element = render();
+      const help = helpFor(element, 'Status');
+
+      expect(help?.textContent).toContain('The Story is still being written.');
+      expect(help?.textContent).toContain(
+        'The Story will not receive any more Chapters.',
+      );
+    });
+
+    // Closed until asked for: the page is read, not interrogated.
+    it('keeps the explanation out of the way until it is opened', () => {
+      const details = helpFor(render(), 'Status')?.querySelector('details');
+
+      expect((details as HTMLDetailsElement | null)?.open).toBe(false);
+    });
+  });
+
   // Artwork is optional: no banner must mean no image element at all.
   it('renders no banner when the Story has none', () => {
     const element = render();
@@ -393,7 +532,9 @@ describe('StoryDetailComponent', () => {
 
       expect(
         element
-          .querySelector('.storytime-cast__member a')
+          .querySelector(
+            '.storytime-panel-card--character .storytime-panel-card__heading',
+          )
           ?.getAttribute('href'),
       ).toContain('captain-shran');
     });

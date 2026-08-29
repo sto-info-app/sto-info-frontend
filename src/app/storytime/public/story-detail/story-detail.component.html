@@ -29,20 +29,39 @@
       </app-lcars-warning-message>
     }
 
-    <ul class="storytime-story__meta">
-      <li>
-        <span class="sr-only">Status: </span>
-        {{ completionLabels[story.completionState] }}
-      </li>
-      <li>
-        {{ story.publishedChapterCount }}
-        {{ story.publishedChapterCount === 1 ? 'Chapter' : 'Chapters' }}
-      </li>
-      <li>
-        <span class="sr-only">Rating: </span>
-        {{ story.rating }}
-      </li>
-    </ul>
+    <div class="info-grid storytime-story__facts">
+      <!--
+        Both of these stand for a decision the creator made about somebody
+        else's reading, and neither word explains itself. The same help the
+        editor offers the creator is offered here to the reader.
+      -->
+      <div class="info-item">
+        <div class="label storytime-story__fact-label">
+          <span>Status</span>
+          <app-storytime-setting-help
+            label="Status"
+            [options]="completionOptions"></app-storytime-setting-help>
+        </div>
+        <span class="value">{{ completionLabels[story.completionState] }}</span>
+      </div>
+      <div class="info-item">
+        <div class="label storytime-story__fact-label">
+          <span>Content rating</span>
+          <app-storytime-setting-help
+            label="Content rating"
+            [options]="ratingOptions"></app-storytime-setting-help>
+        </div>
+        <span class="value">{{ ratingLabels[story.contentRating] }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Chapters</span>
+        <span class="value">{{ story.publishedChapterCount }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Rating</span>
+        <span class="value">{{ story.rating }}</span>
+      </div>
+    </div>
 
     @if (story.shortDescription) {
       <p class="storytime-story__summary">{{ story.shortDescription }}</p>
@@ -70,11 +89,10 @@
           </p>
 
           <progress
-            class="storytime-story__progress-bar"
+            class="storytime-progress storytime-story__progress-bar"
             aria-label="Chapters read"
             [value]="progress.percentComplete"
-            max="100">
-          </progress>
+            max="100"></progress>
         }
 
         @if (progress.newChapterCount > 0) {
@@ -138,36 +156,41 @@
     }
 
     @if (characters.length > 0) {
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Cast</span>
-      </div>
+      <app-collapsible-section
+        heading="Cast"
+        barClass="small-lcars-bar-gap">
+        <ul class="storytime-cast">
+          @for (cast of characters; track cast.id) {
+            <li class="storytime-panel-card storytime-panel-card--character">
+              <a
+                class="storytime-panel-card__heading"
+                [routerLink]="[
+                  '/',
+                  appRoutes.STORYTIME,
+                  'stories',
+                  storySlug,
+                  'characters',
+                  cast.slug,
+                ]"
+                [title]="cast.name">
+                <span class="storytime-panel-card__name">{{ cast.name }}</span>
+              </a>
 
-      <ul class="storytime-cast">
-        @for (cast of characters; track cast.id) {
-          <li class="storytime-cast__member">
-            <a
-              [routerLink]="[
-                '/',
-                appRoutes.STORYTIME,
-                'stories',
-                storySlug,
-                'characters',
-                cast.slug,
-              ]">
-              @if (cast.portraitImageThumbnailUrl) {
-                <img
-                  class="storytime-cast__portrait"
-                  [src]="cast.portraitImageThumbnailUrl"
-                  [alt]="cast.portraitImageAlt ?? ''" />
-              }
-              <span class="storytime-cast__name">{{ cast.name }}</span>
-            </a>
-            @if (cast.shortBio) {
-              <p class="storytime-cast__bio">{{ cast.shortBio }}</p>
-            }
-          </li>
-        }
-      </ul>
+              <div class="storytime-panel-card__body storytime-cast__member">
+                @if (cast.portraitImageThumbnailUrl) {
+                  <img
+                    class="storytime-cast__portrait"
+                    [src]="cast.portraitImageThumbnailUrl"
+                    [alt]="cast.portraitImageAlt ?? ''" />
+                }
+                @if (cast.shortBio) {
+                  <p class="storytime-cast__bio">{{ cast.shortBio }}</p>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </app-collapsible-section>
     }
 
     @if (credits.length > 0) {
@@ -177,59 +200,75 @@
 
       <ul class="storytime-credits">
         @for (credit of credits; track credit.id) {
-          <li class="storytime-credits__entry">
-            <span class="storytime-credits__role">{{
-              credit.displayLabel
-            }}</span>
+          <li class="storytime-panel-card storytime-panel-card--crew">
+            <div
+              class="storytime-panel-card__heading"
+              [title]="credit.displayLabel">
+              <span class="storytime-panel-card__name">{{
+                credit.displayLabel
+              }}</span>
+            </div>
+
             @if (credit.notes) {
-              <span class="storytime-credits__notes">{{ credit.notes }}</span>
+              <div class="storytime-panel-card__body">
+                <span class="storytime-credits__notes">{{ credit.notes }}</span>
+              </div>
             }
           </li>
         }
       </ul>
     }
 
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Chapters</span>
-    </div>
+    <app-collapsible-section
+      heading="Chapters"
+      barClass="small-lcars-bar-gap">
+      @if (chapterErrorMessage) {
+        <app-lcars-error-message
+          title="Chapters unavailable"
+          [message]="chapterErrorMessage"></app-lcars-error-message>
+      } @else if (chapters.length === 0) {
+        <p class="storytime-empty">
+          No Chapters have been published for this Story yet.
+        </p>
+      } @else {
+        <ol class="storytime-chapter-list">
+          @for (chapter of chapters; track chapter.id) {
+            <li class="storytime-panel-card storytime-panel-card--chapter">
+              <a
+                class="storytime-panel-card__heading"
+                [routerLink]="[
+                  '/',
+                  appRoutes.STORYTIME,
+                  'stories',
+                  storySlug,
+                  'chapters',
+                  chapter.slug,
+                ]"
+                [title]="chapter.title">
+                <span class="storytime-panel-card__name">{{
+                  chapter.title
+                }}</span>
+                @if (chapter.estimatedReadingMinutes) {
+                  <span class="storytime-panel-card__marks">
+                    <span class="storytime-panel-card__badge">
+                      {{ chapter.estimatedReadingMinutes }} min read
+                    </span>
+                  </span>
+                }
+              </a>
 
-    @if (chapterErrorMessage) {
-      <app-lcars-error-message
-        title="Chapters unavailable"
-        [message]="chapterErrorMessage"></app-lcars-error-message>
-    } @else if (chapters.length === 0) {
-      <p class="storytime-empty">
-        No Chapters have been published for this Story yet.
-      </p>
-    } @else {
-      <ol class="storytime-chapter-list">
-        @for (chapter of chapters; track chapter.id) {
-          <li class="storytime-chapter-list__item">
-            <a
-              [routerLink]="[
-                '/',
-                appRoutes.STORYTIME,
-                'stories',
-                storySlug,
-                'chapters',
-                chapter.slug,
-              ]">
-              {{ chapter.title }}
-            </a>
-            @if (chapter.synopsis) {
-              <p class="storytime-chapter-list__synopsis">
-                {{ chapter.synopsis }}
-              </p>
-            }
-            @if (chapter.estimatedReadingMinutes) {
-              <span class="storytime-chapter-list__meta">
-                {{ chapter.estimatedReadingMinutes }} min read
-              </span>
-            }
-          </li>
-        }
-      </ol>
-    }
+              @if (chapter.synopsis) {
+                <div class="storytime-panel-card__body">
+                  <p class="storytime-chapter-list__synopsis">
+                    {{ chapter.synopsis }}
+                  </p>
+                </div>
+              }
+            </li>
+          }
+        </ol>
+      }
+    </app-collapsible-section>
 
     @if (story) {
       <div class="storytime-story__social">
@@ -258,9 +297,7 @@
           Report this Story
         </button>
         @if (reportMessage) {
-          <output
-            class="storytime-story__report-message"
-            >
+          <output class="storytime-story__report-message">
             {{ reportMessage }}
           </output>
         }

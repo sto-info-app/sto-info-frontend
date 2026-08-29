@@ -12,11 +12,10 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import {
-  CONTENT_RATING_DESCRIPTIONS,
-  CONTENT_RATING_LABELS,
   CompletionState,
   ContentRating,
   ManagedStory,
+  StoryStatus,
   StorytimeLanguage,
   StorytimeVisibility,
 } from 'src/app/models/storytime.models';
@@ -24,6 +23,10 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { ArcService } from '../../arc.service';
+import { ContentPolicyPanelComponent } from '../../shared/content-policy-panel/content-policy-panel.component';
+import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
+import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
 import { SettingOption } from '../../shared/setting-help/setting-help.component';
 import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
 import {
@@ -34,8 +37,8 @@ import { TagPickerComponent } from '../../shared/tag-picker/tag-picker.component
 import { createWorkForm } from '../../shared/work-form.factory';
 import { StoryService } from '../../story.service';
 import {
-  COMPLETION_STATE_DESCRIPTIONS,
-  COMPLETION_STATE_LABELS,
+  COMPLETION_STATE_OPTIONS,
+  CONTENT_RATING_OPTIONS,
   VISIBILITY_DESCRIPTIONS,
   VISIBILITY_LABELS,
 } from '../../storytime.constants';
@@ -58,6 +61,9 @@ import {
     LcarsErrorMessageComponent,
     TagPickerComponent,
     SettingSelectComponent,
+    MarkdownHintComponent,
+    ContentPolicyPanelComponent,
+    EditorActionsComponent,
   ],
 })
 export class StoryEditorComponent implements OnInit {
@@ -66,6 +72,15 @@ export class StoryEditorComponent implements OnInit {
 
   /** The Story being edited, or null when creating a new one. */
   story: ManagedStory | null = null;
+
+  /**
+   * The Arc this Story is being written for, when reached from one.
+   *
+   * Carried in the address rather than held on a service, so the page works
+   * on its own: a curator who opens it in a new tab, or comes back to it,
+   * still gets the Story they meant into the Arc they meant.
+   */
+  arcId: string | null = null;
 
   /** Whether the editor is still loading an existing Story. */
   isLoading = false;
@@ -79,19 +94,11 @@ export class StoryEditorComponent implements OnInit {
   /** Languages the server will accept. */
   languages: StorytimeLanguage[] = [];
 
-  /** Rating choices and their creator-facing explanations. */
-  readonly ratingOptions = Object.values(ContentRating).map(rating => ({
-    value: rating,
-    label: CONTENT_RATING_LABELS[rating],
-    description: CONTENT_RATING_DESCRIPTIONS[rating],
-  }));
+  /** Rating choices, explained as the Story page explains them. */
+  readonly ratingOptions = CONTENT_RATING_OPTIONS;
 
-  /** Completion choices and their creator-facing explanations. */
-  readonly completionOptions = Object.values(CompletionState).map(state => ({
-    value: state,
-    label: COMPLETION_STATE_LABELS[state],
-    description: COMPLETION_STATE_DESCRIPTIONS[state],
-  }));
+  /** Completion choices, explained as the Story page explains them. */
+  readonly completionOptions = COMPLETION_STATE_OPTIONS;
 
   /** Visibility choices and their creator-facing explanations. */
   readonly visibilityOptions = Object.values(StorytimeVisibility).map(
@@ -108,6 +115,7 @@ export class StoryEditorComponent implements OnInit {
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _route = inject(ActivatedRoute);
   private readonly _storyService = inject(StoryService);
+  private readonly _arcService = inject(ArcService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
@@ -125,10 +133,20 @@ export class StoryEditorComponent implements OnInit {
     this._editor.loadLanguages();
 
     const storyId = this._route.snapshot.paramMap.get('storyId');
+    this.arcId = this._route.snapshot.queryParamMap.get('arc') ?? null;
 
     if (storyId) {
       this.loadStory(storyId);
     }
+  }
+
+  /**
+   * Whether this Story will join an Arc as soon as it is saved.
+   *
+   * @returns True when a new Story was started from an Arc.
+   */
+  get isJoiningArc(): boolean {
+    return this.isNew && this.arcId !== null;
   }
 
   /**
@@ -150,9 +168,88 @@ export class StoryEditorComponent implements OnInit {
   }
 
   /**
+   * Whether publishing is a sensible next action from here.
+   *
+   * Offered only once the Story exists and is not already published: a Story
+   * with nothing in it cannot be published, and a button that could only ever
+   * be refused is worse than no button.
+   *
+   * @returns True when the Story can be published.
+   */
+  get canPublish(): boolean {
+    return this.story !== null && this.story.status !== StoryStatus.PUBLISHED;
+  }
+
+  /**
    * Saves the Story, creating it when new and updating it otherwise.
+   *
+   * A Story started from an Arc joins it on that first save and goes straight
+   * to its Chapters, because somebody who has just described a Story wants to
+   * write it — not to be returned to the Arc to admire the title.
    */
   save(): void {
+    const arcId = this.arcId;
+
+    if (this.isNew && arcId) {
+      this.submit(
+        savedId => ['manage', 'stories', savedId, 'chapters'],
+        saved => this.joinArc(arcId, saved),
+      );
+      return;
+    }
+
+    this.submit(savedId => ['manage', 'stories', savedId]);
+  }
+
+  /**
+   * Saves what is on the screen, publishes it, and returns to the list.
+   *
+   * Back to the list rather than staying here, because publishing is the end
+   * of working on this Story and the beginning of deciding what to do with the
+   * next one.
+   */
+  publish(): void {
+    this.submit(
+      () => ['manage', 'stories'],
+      saved => this._storyService.publishStory(saved.id),
+    );
+  }
+
+  /**
+   * Records that the terms have been accepted, so the panel closes.
+   *
+   * @param story - The Story as the server now holds it.
+   */
+  onPolicyAccepted(story: ManagedStory): void {
+    this.story = story;
+  }
+
+  /**
+   * Puts the newly created Story into the Arc it was written for.
+   *
+   * The Story is kept first: it exists whatever the Arc says next, and an
+   * editor that forgot about it would offer to create a second one.
+   *
+   * @param arcId - The Arc it was started from.
+   * @param saved - The Story as the server created it.
+   * @returns The join.
+   */
+  private joinArc(arcId: string, saved: ManagedStory): Observable<unknown> {
+    this.story = saved;
+
+    return this._arcService.inviteStory(arcId, saved.id);
+  }
+
+  /**
+   * Sends the form, then goes where the caller asked.
+   *
+   * @param destination - The route under Storytime to go to, from the saved id.
+   * @param then - Anything to do with the saved Story before leaving.
+   */
+  private submit(
+    destination: (savedId: string) => string[],
+    then?: (saved: ManagedStory) => Observable<unknown>,
+  ): void {
     const payload = this._editor.beginSave(this.form, this.story?.version);
 
     if (!payload) {
@@ -165,8 +262,9 @@ export class StoryEditorComponent implements OnInit {
 
     this._editor.save(
       request,
-      savedId => ['manage', 'stories', savedId],
+      destination,
       'This Story could not be saved. Please try again shortly.',
+      then,
     );
   }
 

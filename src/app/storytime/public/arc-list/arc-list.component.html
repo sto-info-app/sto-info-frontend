@@ -25,21 +25,27 @@
   } @else {
     <ul class="storytime-arc-list">
       @for (arc of arcs; track arc.id) {
-        <li class="storytime-arc-list__entry">
-          <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]">
+        <li class="storytime-panel-card storytime-panel-card--arc">
+          <a
+            class="storytime-panel-card__heading"
+            [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]"
+            [title]="arc.title">
+            <span class="storytime-panel-card__name">{{ arc.title }}</span>
+          </a>
+
+          <div class="storytime-panel-card__body storytime-arc-list__entry">
             @if (arc.profileImageUrl) {
               <img
                 class="storytime-arc-list__image"
                 [src]="arc.profileImageUrl"
                 [alt]="arc.profileImageAlt ?? ''" />
             }
-            <span class="storytime-arc-list__title">{{ arc.title }}</span>
-          </a>
-          @if (arc.shortDescription) {
-            <p class="storytime-arc-list__summary">
-              {{ arc.shortDescription }}
-            </p>
-          }
+            @if (arc.shortDescription) {
+              <p class="storytime-arc-list__summary">
+                {{ arc.shortDescription }}
+              </p>
+            }
+          </div>
         </li>
       }
     </ul>

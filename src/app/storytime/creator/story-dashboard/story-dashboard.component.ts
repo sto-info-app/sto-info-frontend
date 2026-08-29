@@ -24,14 +24,13 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
   PUBLICATION_STATUS_LABELS,
-  PUBLISHING_REPRESENTATIONS,
-  STORYTIME_COPY,
   VISIBILITY_ICONS,
   VISIBILITY_LABELS,
 } from '../../storytime.constants';
 import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
 import { CrewService } from '../../crew.service';
+import { ContentPolicyPanelComponent } from '../../shared/content-policy-panel/content-policy-panel.component';
 import { StorytimeModerationService } from '../../storytime-moderation.service';
 import { StoryService } from '../../story.service';
 
@@ -69,6 +68,7 @@ const NO_COUNTS: StoryCounts = { chapters: 0, cast: 0, collaborators: 0 };
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    ContentPolicyPanelComponent,
   ],
 })
 export class StoryDashboardComponent implements OnInit {
@@ -83,17 +83,6 @@ export class StoryDashboardComponent implements OnInit {
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
-
-  /** User-facing copy, held centrally so wording stays consistent. */
-  readonly copy = STORYTIME_COPY;
-
-  /**
-   * What the creator confirms when they accept.
-   *
-   * The same list the Content Policy and Terms pages set out, so a creator
-   * cannot be shown one set of promises and asked to make another.
-   */
-  readonly representations = PUBLISHING_REPRESENTATIONS;
 
   /** Status labels, so a raw enum value is never shown. */
   readonly statusLabels = PUBLICATION_STATUS_LABELS;
@@ -134,44 +123,6 @@ export class StoryDashboardComponent implements OnInit {
    */
   ngOnInit(): void {
     this.load();
-  }
-
-  /**
-   * Whether the creator still has to accept the publishing terms.
-   *
-   * Asks the server's verdict rather than checking for a date, because a
-   * creator who accepted superseded wording has a date and still has to agree
-   * again — and only the server knows which version is current.
-   *
-   * @param story - The Story.
-   * @returns True when the current terms have not been accepted for it.
-   */
-  needsContentPolicy(story: ManagedStory): boolean {
-    return !story.contentPolicyCurrent;
-  }
-
-  /**
-   * Whether the creator is being asked again rather than for the first time.
-   *
-   * Worth distinguishing: being told to do something a second time is
-   * confusing unless you are told why.
-   *
-   * @param story - The Story.
-   * @returns True when they accepted wording that has since been replaced.
-   */
-  hasSupersededContentPolicy(story: ManagedStory): boolean {
-    return (
-      !story.contentPolicyCurrent && story.contentPolicyAcceptedAt !== null
-    );
-  }
-
-  /**
-   * Records that the creator accepts the publishing terms for this Story.
-   *
-   * @param story - The Story.
-   */
-  acceptContentPolicy(story: ManagedStory): void {
-    this.runAction(this._storyService.acceptContentPolicy(story.id));
   }
 
   /**
@@ -274,8 +225,12 @@ export class StoryDashboardComponent implements OnInit {
 
   /**
    * Loads the caller's Stories.
+   *
+   * Public because the list is also refetched from the template, after the
+   * publishing terms are accepted for one of them: the server settles what
+   * that changed, so the list is asked again rather than patched here.
    */
-  private load(): void {
+  load(): void {
     this.isLoading = true;
 
     this._storyService

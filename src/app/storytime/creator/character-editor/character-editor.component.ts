@@ -28,6 +28,8 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CharacterService } from '../../character.service';
+import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
+import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
 
 /** How many traits one Character may carry, matching the server. */
 export const MAX_CHARACTER_TRAITS = 20;
@@ -50,6 +52,8 @@ export const MAX_CHARACTER_TRAITS = 20;
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsToggleComponent,
+    MarkdownHintComponent,
+    EditorActionsComponent,
   ],
 })
 export class CharacterEditorComponent implements OnInit {

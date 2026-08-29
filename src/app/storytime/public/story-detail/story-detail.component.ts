@@ -14,8 +14,10 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { finalize, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { AddToListComponent } from '../../shared/add-to-list/add-to-list.component';
 import { CommentThreadComponent } from '../../shared/comment-thread/comment-thread.component';
+import { SettingHelpComponent } from '../../shared/setting-help/setting-help.component';
 import { FollowButtonComponent } from '../../shared/follow-button/follow-button.component';
 import { ReactionControlComponent } from '../../shared/reaction-control/reaction-control.component';
 import {
@@ -43,6 +45,8 @@ import { CrewService } from '../../crew.service';
 import { ProgressService } from '../../progress.service';
 import {
   COMPLETION_STATE_LABELS,
+  COMPLETION_STATE_OPTIONS,
+  CONTENT_RATING_OPTIONS,
   READER_STORY_STATUS_LABELS,
 } from '../../storytime.constants';
 import { StorytimeModerationService } from '../../storytime-moderation.service';
@@ -75,6 +79,8 @@ import {
     FollowButtonComponent,
     AddToListComponent,
     CommentThreadComponent,
+    SettingHelpComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class StoryDetailComponent implements OnInit {
@@ -110,6 +116,20 @@ export class StoryDetailComponent implements OnInit {
 
   /** Completion labels. */
   readonly completionLabels = COMPLETION_STATE_LABELS;
+
+  /**
+   * What every rating and every status means.
+   *
+   * Both facts are a single word standing for a decision the creator made
+   * about somebody else's reading, and a reader meeting one has no way to know
+   * what it covers. The same explanations the editor shows the creator are
+   * offered here, so the two can never say different things about the same
+   * word.
+   */
+  readonly ratingOptions = CONTENT_RATING_OPTIONS;
+
+  /** The same, for how far along the Story is. */
+  readonly completionOptions = COMPLETION_STATE_OPTIONS;
 
   /** The Story's cast, in display order. */
   characters: Character[] = [];

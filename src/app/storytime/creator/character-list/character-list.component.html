@@ -39,68 +39,78 @@
   } @else {
     <ol class="storytime-character-list">
       @for (character of characters; track character.id; let index = $index) {
-        <li class="storytime-character-list__entry">
-          @if (character.portraitImageThumbnailUrl) {
-            <img
-              class="storytime-character-list__portrait"
-              [src]="character.portraitImageThumbnailUrl"
-              [alt]="character.portraitImageAlt ?? ''" />
-          }
-
-          <div class="storytime-character-list__identity">
-            <a
-              [routerLink]="[
-                '/',
-                appRoutes.STORYTIME,
-                'manage',
-                'characters',
-                character.id,
-              ]">
-              {{ character.name }}
-            </a>
+        <li class="storytime-panel-card storytime-panel-card--character">
+          <a
+            class="storytime-panel-card__heading"
+            [routerLink]="[
+              '/',
+              appRoutes.STORYTIME,
+              'manage',
+              'characters',
+              character.id,
+            ]"
+            [title]="character.name">
+            <span class="storytime-panel-card__name">{{ character.name }}</span>
             @if (character.isPrimary) {
-              <span class="storytime-character-list__billing">Main</span>
+              <span class="storytime-panel-card__marks">
+                <span class="storytime-panel-card__badge">Main</span>
+              </span>
             }
-            @if (character.shortBio) {
-              <p class="storytime-character-list__bio">
-                {{ character.shortBio }}
-              </p>
-            }
-          </div>
+          </a>
 
-          <div class="storytime-character-list__controls">
-            <button
-              class="cta-icon"
-              type="button"
-              title="Move up"
-              aria-label="Move up"
-              [disabled]="index === 0"
-              (click)="moveUp(index)">
-              <i
-                class="fa-solid fa-caret-up"
-                aria-hidden="true"></i>
-            </button>
-            <button
-              class="cta-icon"
-              type="button"
-              title="Move down"
-              aria-label="Move down"
-              [disabled]="index === characters.length - 1"
-              (click)="moveDown(index)">
-              <i
-                class="fa-solid fa-caret-down"
-                aria-hidden="true"></i>
-            </button>
-            <button
-              class="cta-icon delete-icon"
-              type="button"
-              title="Delete Character"
-              aria-label="Delete Character"
-              (click)="remove(character)">
-              <i
-                class="fa-solid fa-trash"
-                aria-hidden="true"></i>
-            </button>
+          <div class="storytime-panel-card__main">
+            <div
+              class="storytime-panel-card__body storytime-character-list__entry">
+              @if (character.portraitImageThumbnailUrl) {
+                <img
+                  class="storytime-character-list__portrait"
+                  [src]="character.portraitImageThumbnailUrl"
+                  [alt]="character.portraitImageAlt ?? ''" />
+              }
+
+              <div class="storytime-character-list__identity">
+                @if (character.shortBio) {
+                  <p class="storytime-character-list__bio">
+                    {{ character.shortBio }}
+                  </p>
+                }
+              </div>
+            </div>
+
+            <div class="storytime-panel-card__controls">
+              <button
+                class="cta-icon"
+                type="button"
+                title="Move up"
+                aria-label="Move up"
+                [disabled]="index === 0"
+                (click)="moveUp(index)">
+                <i
+                  class="fa-solid fa-caret-up"
+                  aria-hidden="true"></i>
+              </button>
+              <button
+                class="cta-icon"
+                type="button"
+                title="Move down"
+                aria-label="Move down"
+                [disabled]="index === characters.length - 1"
+                (click)="moveDown(index)">
+                <i
+                  class="fa-solid fa-caret-down"
+                  aria-hidden="true"></i>
+              </button>
+              <button
+                class="cta-icon delete-icon"
+                type="button"
+                title="Delete Character"
+                aria-label="Delete Character"
+                (click)="remove(character)">
+                <i
+                  class="fa-solid fa-trash"
+                  aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
         </li>
       }

@@ -15,7 +15,7 @@ import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { StorytimeService } from 'src/app/storytime/storytime.service';
 
-import { HelpSectionComponent } from '../help-section/help-section.component';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { findHelpGuide } from '../help.data';
 import { HelpGuide, HelpGuideLocation } from '../help.models';
 
@@ -35,7 +35,7 @@ import { HelpGuide, HelpGuideLocation } from '../help.models';
   selector: 'app-help-guide',
   templateUrl: './help-guide.component.html',
   standalone: true,
-  imports: [RouterModule, HelpSectionComponent],
+  imports: [RouterModule, CollapsibleSectionComponent],
 })
 export class HelpGuideComponent implements OnInit {
   /** Route constants, for the links out of this page. */

@@ -6,47 +6,58 @@
   <p class="storytime-intro">{{ copy.LANDING_INTRO }}</p>
 
   @if (spotlight.length > 0) {
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Spotlight</span>
-    </div>
+    <app-collapsible-section
+      heading="Spotlight"
+      barClass="small-lcars-bar-gap">
+      <ul class="storytime-spotlight">
+        @for (entry of spotlight; track entry.id) {
+          <li class="storytime-panel-card storytime-panel-card--spotlight">
+            <a
+              class="storytime-panel-card__heading"
+              [routerLink]="linkFor(entry)"
+              [title]="entry.headline">
+              <span class="storytime-panel-card__name">{{
+                entry.headline
+              }}</span>
+            </a>
 
-    <ul class="storytime-spotlight">
-      @for (entry of spotlight; track entry.id) {
-        <li class="storytime-spotlight__entry">
-          @if (imageFor(entry)) {
-            <img
-              class="storytime-spotlight__image"
-              [src]="imageFor(entry)"
-              [alt]="imageAltFor(entry)" />
-          }
+            @if (imageFor(entry)) {
+              <img
+                class="storytime-spotlight__image"
+                [src]="imageFor(entry)"
+                [alt]="imageAltFor(entry)" />
+            }
 
-          <h2 class="storytime-spotlight__headline">
-            <a [routerLink]="linkFor(entry)">{{ entry.headline }}</a>
-          </h2>
+            <div class="storytime-panel-card__body">
+              <p class="storytime-spotlight__work">
+                <i
+                  class="fa-solid fa-star"
+                  aria-hidden="true"></i>
+                {{ entry.story ? entry.story.title : entry.arc?.title }}
+              </p>
 
-          <p class="storytime-spotlight__work">
-            <i
-              class="fa-solid fa-star"
-              aria-hidden="true"></i>
-            {{ entry.story ? entry.story.title : entry.arc?.title }}
-          </p>
+              <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
 
-          <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
+              @if (entry.selectionReason) {
+                <p class="storytime-spotlight__reason">
+                  {{ entry.selectionReason }}
+                </p>
+              }
+            </div>
+          </li>
+        }
+      </ul>
 
-          @if (entry.selectionReason) {
-            <p class="storytime-spotlight__reason">
-              {{ entry.selectionReason }}
-            </p>
-          }
-        </li>
-      }
-    </ul>
-
-    <p class="storytime-spotlight__archive">
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']"
-        >Past Spotlight selections</a
-      >
-    </p>
+      <nav
+        class="storytime-page-actions"
+        aria-label="Spotlight archive">
+        <a
+          class="lcars-btn lcars-btn-auto gold"
+          [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']"
+          >Past Spotlight selections</a
+        >
+      </nav>
+    </app-collapsible-section>
   }
 
   <!--
@@ -54,152 +65,143 @@
     landing page can say what each of these is in a line; a sidebar button can
     only say "Arcs", which means nothing to somebody who has not met one yet.
   -->
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>Browse</span>
-  </div>
-
-  <ul class="storytime-landing__browse">
-    <li>
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'stories']">
-        <span class="storytime-landing__browse-name">All Stories</span>
-        <p class="storytime-landing__summary">
-          Everything published, newest first.
-        </p>
-      </a>
-    </li>
-    <li>
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs']">
-        <span class="storytime-landing__browse-name">Arcs</span>
-        <p class="storytime-landing__summary">
-          Reading orders assembled across several Stories.
-        </p>
-      </a>
-    </li>
-    @if (isSpotlightEnabled) {
-      <li>
-        <a [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']">
-          <span class="storytime-landing__browse-name">Spotlight</span>
+  <app-collapsible-section
+    heading="Browse"
+    barClass="small-lcars-bar-gap">
+    <ul class="storytime-landing__browse">
+      <li class="storytime-landing__card--stories">
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'stories']">
+          <span class="storytime-landing__browse-name">All Stories</span>
           <p class="storytime-landing__summary">
-            What we have chosen to feature, and everything chosen before.
+            Everything published, newest first.
           </p>
         </a>
       </li>
-    }
-    <li>
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'search']">
-        <span class="storytime-landing__browse-name">Search Storytime</span>
-        <p class="storytime-landing__summary">
-          Find a Story by title, author or tag.
-        </p>
-      </a>
-    </li>
-  </ul>
+      <li class="storytime-landing__card--arcs">
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs']">
+          <span class="storytime-landing__browse-name">Arcs</span>
+          <p class="storytime-landing__summary">
+            Reading orders assembled across several Stories.
+          </p>
+        </a>
+      </li>
+      @if (isSpotlightEnabled) {
+        <li class="storytime-landing__card--spotlight">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']">
+            <span class="storytime-landing__browse-name">Spotlight</span>
+            <p class="storytime-landing__summary">
+              What we have chosen to feature, and everything chosen before.
+            </p>
+          </a>
+        </li>
+      }
+      <li class="storytime-landing__card--search">
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'search']">
+          <span class="storytime-landing__browse-name">Search Storytime</span>
+          <p class="storytime-landing__summary">
+            Find a Story by title, author or tag.
+          </p>
+        </a>
+      </li>
+    </ul>
+  </app-collapsible-section>
 
   @if (isSignedIn) {
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Yours</span>
-    </div>
-
-    <ul class="storytime-landing__yours">
-      <li>
-        <a [routerLink]="['/', appRoutes.STORYTIME, 'feed']">
-          <span class="storytime-landing__browse-name">Your feed</span>
-          @if (unreadCount > 0) {
-            <span class="storytime-landing__unread">{{ unreadCount }} new</span>
-          }
-          <p class="storytime-landing__summary">
-            Follow the latest activity from writers and readers.
-          </p>
-        </a>
-      </li>
-      <li>
-        <a [routerLink]="['/', appRoutes.STORYTIME, 'reading-lists']">
-          <span class="storytime-landing__browse-name">Your reading lists</span>
-          <p class="storytime-landing__summary">
-            Keep Stories together for later or read them in order.
-          </p>
-        </a>
-      </li>
-      <li>
-        <a [routerLink]="['/', appRoutes.STORYTIME, 'library']">
-          <span class="storytime-landing__browse-name">Your library</span>
-          <p class="storytime-landing__summary">
-            Find the Stories and Arcs you have saved.
-          </p>
-        </a>
-      </li>
-      <li>
-        <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories']">
-          <span class="storytime-landing__browse-name">Your Stories</span>
-          <p class="storytime-landing__summary">
-            Write, edit and publish your own Stories.
-          </p>
-        </a>
-      </li>
-      <li>
-        <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']">
-          <span class="storytime-landing__browse-name">Your Arcs</span>
-          <p class="storytime-landing__summary">
-            Arrange your Stories into connected reading orders.
-          </p>
-        </a>
-      </li>
-      <li>
-        <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'invitations']">
-          <span class="storytime-landing__browse-name">Invitations</span>
-          <p class="storytime-landing__summary">
-            See collaboration invitations waiting for your response.
-          </p>
-        </a>
-      </li>
-    </ul>
-  }
-
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>New Stories</span>
-  </div>
-
-  @if (newest.length === 0) {
-    <p class="storytime-empty">{{ copy.LANDING_EMPTY }}</p>
-  } @else {
-    <ul class="storytime-landing__stories">
-      @for (story of newest; track story.id) {
-        <li>
-          <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]">{{
-            story.title
-          }}</a>
-          @if (story.shortDescription) {
+    <app-collapsible-section
+      heading="Yours"
+      barClass="small-lcars-bar-gap">
+      <ul class="storytime-landing__yours">
+        <li class="storytime-landing__card--feed">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'feed']">
+            <span class="storytime-landing__browse-name">Your feed</span>
+            @if (unreadCount > 0) {
+              <span class="storytime-landing__unread"
+                >{{ unreadCount }} new</span
+              >
+            }
             <p class="storytime-landing__summary">
-              {{ story.shortDescription }}
+              Follow the latest activity from writers and readers.
             </p>
-          }
+          </a>
         </li>
-      }
-    </ul>
+        <li class="storytime-landing__card--lists">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'reading-lists']">
+            <span class="storytime-landing__browse-name"
+              >Your reading lists</span
+            >
+            <p class="storytime-landing__summary">
+              Keep Stories together for later or read them in order.
+            </p>
+          </a>
+        </li>
+        <li class="storytime-landing__card--library">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'library']">
+            <span class="storytime-landing__browse-name">Your library</span>
+            <p class="storytime-landing__summary">
+              Find the Stories and Arcs you have saved.
+            </p>
+          </a>
+        </li>
+        <li class="storytime-landing__card--own-stories">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories']">
+            <span class="storytime-landing__browse-name">Your Stories</span>
+            <p class="storytime-landing__summary">
+              Write, edit and publish your own Stories.
+            </p>
+          </a>
+        </li>
+        <li class="storytime-landing__card--own-arcs">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']">
+            <span class="storytime-landing__browse-name">Your Arcs</span>
+            <p class="storytime-landing__summary">
+              Arrange your Stories into connected reading orders.
+            </p>
+          </a>
+        </li>
+        <li class="storytime-landing__card--invitations">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'invitations']">
+            <span class="storytime-landing__browse-name">Invitations</span>
+            <p class="storytime-landing__summary">
+              See collaboration invitations waiting for your response.
+            </p>
+          </a>
+        </li>
+      </ul>
+    </app-collapsible-section>
   }
+
+  <app-collapsible-section
+    heading="New Stories"
+    barClass="small-lcars-bar-gap">
+    @if (newest.length === 0) {
+      <p class="storytime-empty">{{ copy.LANDING_EMPTY }}</p>
+    } @else {
+      <div class="storytime-story-list">
+        @for (story of newest; track story.id) {
+          <app-story-card [story]="story"></app-story-card>
+        }
+      </div>
+    }
+  </app-collapsible-section>
 
   @if (updated.length > 0) {
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Recently Updated</span>
-    </div>
-
-    <ul class="storytime-landing__stories storytime-landing__stories--updated">
-      @for (story of updated; track story.id) {
-        <li>
-          <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]">{{
-            story.title
-          }}</a>
-        </li>
-      }
-    </ul>
+    <app-collapsible-section
+      heading="Recently Updated"
+      barClass="small-lcars-bar-gap">
+      <div class="storytime-story-list">
+        @for (story of updated; track story.id) {
+          <app-story-card [story]="story"></app-story-card>
+        }
+      </div>
+    </app-collapsible-section>
   }
 
   <nav
-    class="buttons-row"
+    class="storytime-page-actions"
     aria-label="Storytime publishing documents">
     <a
+      class="lcars-btn lcars-btn-auto sky"
       [routerLink]="['/', appRoutes.STORYTIME, 'policies']"
-      class="sky"
       >Policies &amp; Terms</a
     >
   </nav>

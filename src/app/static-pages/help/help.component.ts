@@ -13,7 +13,7 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { StorytimeService } from 'src/app/storytime/storytime.service';
 
-import { HelpSectionComponent } from './help-section/help-section.component';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { HELP_TOPICS } from './help.data';
 import { HelpTopic } from './help.models';
 
@@ -32,7 +32,7 @@ import { HelpTopic } from './help.models';
   selector: 'app-help',
   templateUrl: './help.component.html',
   standalone: true,
-  imports: [RouterModule, HelpSectionComponent],
+  imports: [RouterModule, CollapsibleSectionComponent],
 })
 export class HelpComponent implements OnInit {
   /** Route constants, for the links out of this page. */

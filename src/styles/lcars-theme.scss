@@ -391,6 +391,13 @@ a:active {
 #column-page-container {
   flex: 1;
   margin-inline: auto;
+
+  // The same reason `.right-frame` below needs one: a flex item holding the
+  // page will not shrink under the width its content claims to want, and a
+  // single `nowrap` heading deep inside is enough to hold the whole column
+  // open. Without this the page stops narrowing at `.wrap`'s 1340px and the
+  // window scrolls sideways instead.
+  min-width: 0;
 }
 
 .wrap {
@@ -1027,6 +1034,14 @@ nav a:hover {
   flex: 1;
   background-color: #0d0d0d;
   position: relative;
+
+  // A flex item refuses by default to shrink below the width its own content
+  // asks for, and this one holds the whole page. Anything inside that reports a
+  // wide intrinsic size — a heading set to `nowrap` so it can end in an
+  // ellipsis is enough — therefore pushed the column out past `.wrap`, which
+  // clips what overflows it, and the right-hand side of the page disappeared.
+  // The column takes its share of the row and what is inside it fits to that.
+  min-width: 0;
 }
 
 .right-frame::before {

@@ -147,7 +147,9 @@ describe('StorytimeLandingComponent', () => {
     });
 
     it('sends a reader to the featured Story', () => {
-      const link = render().querySelector('.storytime-spotlight__headline a');
+      const link = render().querySelector(
+        '.storytime-panel-card--spotlight .storytime-panel-card__heading',
+      );
 
       expect(link?.getAttribute('href')).toContain('stories/a-fine-story');
     });
@@ -167,7 +169,9 @@ describe('StorytimeLandingComponent', () => {
         ]),
       );
 
-      const link = render().querySelector('.storytime-spotlight__headline a');
+      const link = render().querySelector(
+        '.storytime-panel-card--spotlight .storytime-panel-card__heading',
+      );
 
       expect(link?.getAttribute('href')).toContain('arcs/the-long-war');
     });
@@ -301,6 +305,50 @@ describe('StorytimeLandingComponent', () => {
       expect(element.textContent).toContain('Recently Updated');
     });
 
+    // The same card the Stories archive uses, so a Story looks the same
+    // wherever a reader meets one, and both lists end their rows level.
+    it('presents both lists as the shared Story card', () => {
+      const element = render();
+
+      expect(element.querySelectorAll('.storytime-story-list')).toHaveLength(2);
+      expect(
+        element.querySelectorAll('.storytime-story-list app-story-card').length,
+      ).toBeGreaterThan(0);
+    });
+
+    // Signed in, the page runs to five sections. A reader who comes back for
+    // one of them should be able to put the rest away.
+    it('lets a reader fold every section away', () => {
+      const element = render();
+      const headings = [
+        ...element.querySelectorAll('app-collapsible-section'),
+      ].map(section => section.querySelector('.lcars-text-bar')?.textContent);
+
+      expect(headings).toEqual([
+        'Spotlight',
+        'Browse',
+        'Yours',
+        'New Stories',
+        'Recently Updated',
+      ]);
+    });
+
+    it('hides a section when its heading bar is collapsed', () => {
+      const element = render();
+      const stories = [
+        ...element.querySelectorAll('app-collapsible-section'),
+      ].find(section =>
+        section
+          .querySelector('.lcars-text-bar')
+          ?.textContent?.includes('New Stories'),
+      );
+
+      stories?.querySelector('button')?.click();
+      fixture.detectChanges();
+
+      expect(stories?.querySelector('.storytime-story-list')).toBeNull();
+    });
+
     it('offers search', () => {
       const element = render();
 
@@ -364,6 +412,49 @@ describe('StorytimeLandingComponent', () => {
       expect(summaries.every(summary => (summary?.length ?? 0) > 0)).toBe(true);
     });
 
+    // Each card wears an LCARS colour, and which one it wears is decided by
+    // where it leads rather than by where it sits. The Spotlight card comes
+    // and goes with its feature flag, and a row that reshuffled its colours
+    // whenever that happened would be no landmark at all.
+    it('gives every card a colour of its own, keyed to where it leads', () => {
+      const element = render();
+      const cards = [
+        ...element.querySelectorAll(
+          '.storytime-landing__browse li, .storytime-landing__yours li',
+        ),
+      ].map(card => card.className);
+
+      expect(cards).toEqual([
+        'storytime-landing__card--stories',
+        'storytime-landing__card--arcs',
+        'storytime-landing__card--spotlight',
+        'storytime-landing__card--search',
+        'storytime-landing__card--feed',
+        'storytime-landing__card--lists',
+        'storytime-landing__card--library',
+        'storytime-landing__card--own-stories',
+        'storytime-landing__card--own-arcs',
+        'storytime-landing__card--invitations',
+      ]);
+    });
+
+    // The colour follows the card, so the ones that remain keep theirs.
+    it('leaves the other cards their colours when the Spotlight goes', () => {
+      storytimeService.getFeatureState.mockReturnValue(
+        of({ ...STORYTIME_DISABLED_STATE, isEnabled: true }),
+      );
+
+      const cards = [
+        ...render().querySelectorAll('.storytime-landing__browse li'),
+      ].map(card => card.className);
+
+      expect(cards).toEqual([
+        'storytime-landing__card--stories',
+        'storytime-landing__card--arcs',
+        'storytime-landing__card--search',
+      ]);
+    });
+
     // A link to a feature the environment has switched off would only lead to
     // an empty page.
     it('omits the Spotlight when it is switched off', () => {
@@ -376,6 +467,27 @@ describe('StorytimeLandingComponent', () => {
         '/storytime/arcs',
         '/storytime/search',
       ]);
+    });
+  });
+
+  describe('the Spotlight', () => {
+    it('presents each selection as a panel of its own', () => {
+      const element = render();
+      const list = element.querySelector('.storytime-spotlight');
+
+      expect(
+        list?.querySelectorAll('.storytime-panel-card--spotlight').length,
+      ).toBe(1);
+    });
+
+    // The way into the archive is an action, so it is dressed as one rather
+    // than left as a line of text under the selection.
+    it('offers the archive as a button', () => {
+      const archive = [...render().querySelectorAll('a.lcars-btn')].find(link =>
+        link.textContent?.includes('Past Spotlight selections'),
+      );
+
+      expect(archive?.getAttribute('href')).toBe('/storytime/spotlight');
     });
   });
 

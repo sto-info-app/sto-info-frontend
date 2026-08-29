@@ -27,15 +27,20 @@
       <h2>Stories</h2>
       <ul class="storytime-creator__stories">
         @for (story of stories; track story.id) {
-          <li>
+          <li class="storytime-panel-card storytime-panel-card--story">
             <a
+              class="storytime-panel-card__heading"
               [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]"
-              >{{ story.title }}</a
-            >
+              [title]="story.title">
+              <span class="storytime-panel-card__name">{{ story.title }}</span>
+            </a>
+
             @if (story.shortDescription) {
-              <p class="storytime-creator__summary">
-                {{ story.shortDescription }}
-              </p>
+              <div class="storytime-panel-card__body">
+                <p class="storytime-creator__summary">
+                  {{ story.shortDescription }}
+                </p>
+              </div>
             }
           </li>
         }
@@ -46,14 +51,20 @@
       <h2>Arcs</h2>
       <ul class="storytime-creator__arcs">
         @for (arc of arcs; track arc.id) {
-          <li>
-            <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]">{{
-              arc.title
-            }}</a>
+          <li class="storytime-panel-card storytime-panel-card--arc">
+            <a
+              class="storytime-panel-card__heading"
+              [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]"
+              [title]="arc.title">
+              <span class="storytime-panel-card__name">{{ arc.title }}</span>
+            </a>
+
             @if (arc.shortDescription) {
-              <p class="storytime-creator__summary">
-                {{ arc.shortDescription }}
-              </p>
+              <div class="storytime-panel-card__body">
+                <p class="storytime-creator__summary">
+                  {{ arc.shortDescription }}
+                </p>
+              </div>
             }
           </li>
         }
