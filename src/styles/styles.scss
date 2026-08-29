@@ -105,7 +105,11 @@ button.lcars-btn,
 .submit-button {
   height: 60px !important;
   border-radius: 30px !important;
-  padding: 0 25px 8px 0 !important;
+
+  // The left gutter matches the pill's own radius, which is the least that
+  // keeps a label clear of the curve: the text is right-aligned, so anything
+  // long enough to fill the pill used to run out through the rounded edge.
+  padding: 0 25px 8px 30px !important;
   font-size: 1rem !important;
   text-transform: uppercase !important;
   text-align: right !important;
@@ -137,7 +141,13 @@ button.lcars-btn,
   }
 }
 
-.lcars-btn-auto {
+// A pill sized to its own label, with the wide left gutter the LCARS look
+// wants. `button` is named as well as the class because the base rule above
+// reaches a button by element and class at once, and would otherwise outrank
+// this one and leave every LCARS button with no left gutter at all while the
+// anchors beside them kept theirs.
+.lcars-btn-auto,
+button.lcars-btn-auto {
   width: auto !important;
   min-width: 0 !important;
   padding-left: 65px !important;
