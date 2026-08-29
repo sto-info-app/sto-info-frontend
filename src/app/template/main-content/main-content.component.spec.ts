@@ -31,6 +31,20 @@ describe('MainContentComponent', () => {
   let router: Router;
   let routerEventsSubject: Subject<unknown>;
   let originalEnvName: string;
+  let activatedRouteStub: {
+    snapshot: { paramMap: Map<string, string>; data: Record<string, unknown> };
+    queryParams: ReturnType<typeof of>;
+    firstChild: null;
+  };
+
+  /**
+   * Drives the real route gate: sets `requiresApi` on the activated route and
+   * announces a navigation, the way the router would.
+   */
+  const navigateWithRequiresApi = (requiresApi: boolean, url: string) => {
+    activatedRouteStub.snapshot.data = requiresApi ? { requiresApi: true } : {};
+    routerEventsSubject.next(new NavigationEnd(1, url, url));
+  };
 
   interface MainContentComponentInternals {
     getDeepestRouteRequiresApi(route: ActivatedRoute): boolean;
@@ -72,6 +86,12 @@ describe('MainContentComponent', () => {
         .mockReturnValue('random-theme-text'),
     };
 
+    activatedRouteStub = {
+      snapshot: { paramMap: new Map(), data: {} },
+      queryParams: of({}),
+      firstChild: null,
+    };
+
     routerEventsSubject = new Subject<unknown>();
     const stateSubject = new Subject<string>();
 
@@ -87,14 +107,7 @@ describe('MainContentComponent', () => {
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: { paramMap: new Map(), data: {} },
-            queryParams: of({}),
-            firstChild: null,
-          },
-        },
+        { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: RoutingService, useValue: mockRoutingService },
         { provide: GeneralThemeService, useValue: mockGeneralThemeService },
         { provide: HealthService, useValue: healthServiceSpy },
@@ -297,18 +310,7 @@ describe('MainContentComponent', () => {
         healthServiceSpy.state$ as unknown as Subject<string>;
       const API_HEALTH_STATE_DOWN = 'DOWN';
 
-      // Mock the private method to return true
-      jest
-        .spyOn(
-          component as unknown as MainContentComponentInternals,
-          'getDeepestRouteRequiresApi',
-        )
-        .mockReturnValue(true);
-
-      // Trigger navigation event to refresh requiresApi$
-      routerEventsSubject.next(
-        new NavigationEnd(1, '/dashboard', '/dashboard'),
-      );
+      navigateWithRequiresApi(true, '/dashboard');
 
       component.showBackendWarning$.subscribe(show => {
         if (show === true) {
@@ -325,16 +327,7 @@ describe('MainContentComponent', () => {
         healthServiceSpy.state$ as unknown as Subject<string>;
       const API_HEALTH_STATE_DOWN = 'DOWN';
 
-      // Mock the private method to return false
-      jest
-        .spyOn(
-          component as unknown as MainContentComponentInternals,
-          'getDeepestRouteRequiresApi',
-        )
-        .mockReturnValue(false);
-
-      // Trigger navigation event
-      routerEventsSubject.next(new NavigationEnd(1, '/home', '/home'));
+      navigateWithRequiresApi(false, '/home');
 
       component.showBackendWarning$.subscribe(show => {
         expect(show).toBe(false);
@@ -347,26 +340,15 @@ describe('MainContentComponent', () => {
 
   describe('Health polling triggers', () => {
     it('should start polling when requiresApi becomes true', () => {
-      jest
-        .spyOn(
-          component as unknown as MainContentComponentInternals,
-          'getDeepestRouteRequiresApi',
-        )
-        .mockReturnValue(true);
-      routerEventsSubject.next(
-        new NavigationEnd(1, '/dashboard', '/dashboard'),
-      );
+      navigateWithRequiresApi(true, '/dashboard');
+
       expect(healthServiceSpy.startPolling).toHaveBeenCalled();
     });
 
     it('should stop polling when requiresApi becomes false', () => {
-      jest
-        .spyOn(
-          component as unknown as MainContentComponentInternals,
-          'getDeepestRouteRequiresApi',
-        )
-        .mockReturnValue(false);
-      routerEventsSubject.next(new NavigationEnd(1, '/home', '/home'));
+      navigateWithRequiresApi(true, '/dashboard');
+      navigateWithRequiresApi(false, '/home');
+
       expect(healthServiceSpy.stopPolling).toHaveBeenCalled();
     });
 

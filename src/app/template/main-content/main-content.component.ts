@@ -8,21 +8,13 @@ import {
   OnDestroy,
   inject,
 } from '@angular/core';
-import {
-  ActivatedRoute,
-  NavigationEnd,
-  Router,
-  RouterOutlet,
-} from '@angular/router';
-import {
-  combineLatest,
-  distinctUntilChanged,
-  filter,
-  map,
-  startWith,
-  Subscription,
-} from 'rxjs';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
+import { combineLatest, distinctUntilChanged, map, Subscription } from 'rxjs';
 import { HealthService } from 'src/app/core/health/health.service';
+import {
+  createRequiresApiStream,
+  routeRequiresApi,
+} from 'src/app/core/health/requires-api';
 import { ServiceInterruptionContentComponent } from 'src/app/error-pages/service-interruption/service-interruption-content/service-interruption-content.component';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -84,12 +76,7 @@ export class MainContentComponent implements OnDestroy {
   private readonly _cdr = inject(ChangeDetectorRef);
 
   // True only when the currently activated deepest route has data.requiresApi === true
-  readonly requiresApi$ = this._router.events.pipe(
-    filter(e => e instanceof NavigationEnd),
-    startWith(null),
-    map(() => this.getDeepestRouteRequiresApi(this._route)),
-    distinctUntilChanged(),
-  );
+  readonly requiresApi$ = createRequiresApiStream(this._router, this._route);
 
   //NOTE: Show warning only when:
   //NOTE: - current route requires API, AND
@@ -169,11 +156,7 @@ export class MainContentComponent implements OnDestroy {
    * @returns True if the deepest route requires API, false otherwise.
    */
   private getDeepestRouteRequiresApi(route: ActivatedRoute): boolean {
-    let activeRoute: ActivatedRoute = route;
-    while (activeRoute.firstChild) {
-      activeRoute = activeRoute.firstChild;
-    }
-    return activeRoute.snapshot.data?.['requiresApi'] === true;
+    return routeRequiresApi(route);
   }
 
   /**
