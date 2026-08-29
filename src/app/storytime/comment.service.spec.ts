@@ -21,6 +21,7 @@ const COMMENT_ID = 'comment-1';
 const COMMENT: StorytimeComment = {
   id: COMMENT_ID,
   authorUserId: 'reader-1',
+  author: null,
   parentCommentId: null,
   body: 'A fine chapter.',
   status: StorytimeCommentStatus.VISIBLE,

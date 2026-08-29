@@ -20,7 +20,7 @@ describe('HeaderComponent', () => {
   let healthServiceSpy: { degraded$: BehaviorSubject<boolean> };
   let activatedRouteStub: {
     snapshot: { paramMap: Map<string, string>; data: Record<string, unknown> };
-    queryParams: ReturnType<typeof of>;
+    queryParams: ReturnType<typeof of<Record<string, unknown>>>;
     firstChild: null;
   };
 
