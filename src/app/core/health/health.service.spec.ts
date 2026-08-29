@@ -3,7 +3,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom, of } from 'rxjs';
+import { Observable, firstValueFrom, of } from 'rxjs';
 
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import {
@@ -347,6 +347,32 @@ describe('HealthService', () => {
       expect(checkOnceSpy).toHaveBeenCalledTimes(2);
 
       service.stopPolling();
+    });
+
+    // stopPolling() normally tears the in-flight check down with it, but a
+    // check that is already emitting when polling stops runs to completion.
+    // It must not queue the next one behind it, or stopping would not stop.
+    it('should not queue another check when one finishes after polling stopped', () => {
+      jest.useFakeTimers();
+
+      const checkOnceSpy = jest.spyOn(service, 'checkOnce').mockReturnValue(
+        new Observable<API_HEALTH_STATE>(subscriber => {
+          subscriber.next(API_HEALTH_STATE_UP);
+          // Polling stops while this check is mid-flight.
+          (service as unknown as { isPolling: boolean }).isPolling = false;
+          subscriber.complete();
+        }),
+      );
+
+      service.startPolling();
+      jest.advanceTimersByTime(0);
+      expect(checkOnceSpy).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(
+        MILLISECONDS_API_HEALTH_CHECK_POLLING_INTERVAL * 3,
+      );
+
+      expect(checkOnceSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should keep an accumulated failure count across a polling stop', () => {
