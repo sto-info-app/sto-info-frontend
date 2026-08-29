@@ -18,6 +18,23 @@ import { CONTENT_POLICY_RULES } from 'src/app/storytime/storytime.constants';
 import { HelpGuideLocation, HelpGuideSection, HelpTopic } from './help.models';
 
 /**
+ * The links several guides finish with.
+ *
+ * Named once rather than written out per guide: the same destination described
+ * two different ways is the sort of thing that creeps in when a list this long
+ * is edited a topic at a time.
+ */
+const YOUR_STORIES_LINK = {
+  label: 'Your Stories',
+  route: APP_ROUTES.STORYTIME_MANAGE,
+};
+
+const CONTENT_POLICY_LINK = {
+  label: 'Content policy',
+  route: APP_ROUTES.STORYTIME_CONTENT_POLICY,
+};
+
+/**
  * The content policy's rules, worded exactly as the policy page words them.
  *
  * Derived rather than restated. An earlier version of this guide listed seven
@@ -356,10 +373,7 @@ const STORYTIME_TOPIC: HelpTopic = {
       ],
       relatedLinks: [
         { label: 'Open Storytime', route: APP_ROUTES.STORYTIME },
-        {
-          label: 'Content policy',
-          route: APP_ROUTES.STORYTIME_CONTENT_POLICY,
-        },
+        CONTENT_POLICY_LINK,
       ],
     },
     {
@@ -503,12 +517,7 @@ const STORYTIME_TOPIC: HelpTopic = {
           ],
         },
       ],
-      relatedLinks: [
-        {
-          label: 'Content policy',
-          route: APP_ROUTES.STORYTIME_CONTENT_POLICY,
-        },
-      ],
+      relatedLinks: [CONTENT_POLICY_LINK],
     },
     {
       slug: 'writing-your-first-story',
@@ -580,12 +589,9 @@ const STORYTIME_TOPIC: HelpTopic = {
         },
       ],
       relatedLinks: [
-        { label: 'Your Stories', route: APP_ROUTES.STORYTIME_MANAGE },
+        YOUR_STORIES_LINK,
         { label: 'Create a Story', route: APP_ROUTES.STORYTIME_STORY_NEW },
-        {
-          label: 'Content policy',
-          route: APP_ROUTES.STORYTIME_CONTENT_POLICY,
-        },
+        CONTENT_POLICY_LINK,
       ],
     },
     {
@@ -617,9 +623,7 @@ const STORYTIME_TOPIC: HelpTopic = {
           ],
         },
       ],
-      relatedLinks: [
-        { label: 'Your Stories', route: APP_ROUTES.STORYTIME_MANAGE },
-      ],
+      relatedLinks: [YOUR_STORIES_LINK],
     },
     {
       slug: 'cast-crew-and-pictures',
@@ -656,9 +660,7 @@ const STORYTIME_TOPIC: HelpTopic = {
           ],
         },
       ],
-      relatedLinks: [
-        { label: 'Your Stories', route: APP_ROUTES.STORYTIME_MANAGE },
-      ],
+      relatedLinks: [YOUR_STORIES_LINK],
     },
     {
       slug: 'writing-with-other-people',
@@ -748,10 +750,7 @@ const STORYTIME_TOPIC: HelpTopic = {
         },
       ],
       relatedLinks: [
-        {
-          label: 'Content policy',
-          route: APP_ROUTES.STORYTIME_CONTENT_POLICY,
-        },
+        CONTENT_POLICY_LINK,
         { label: 'Terms of use', route: APP_ROUTES.STORYTIME_TERMS },
         {
           label: 'Fan content & IP notice',
