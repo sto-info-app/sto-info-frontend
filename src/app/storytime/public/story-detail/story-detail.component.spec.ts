@@ -608,12 +608,58 @@ describe('StoryDetailComponent', () => {
       expect(element.textContent).toContain('Chapters 1–4');
     });
 
-    // Most Stories are written by one person and have no credits roll at all.
-    it('shows no credits section when there are none', () => {
+    // They are behind a tab, which only exists when there is something to
+    // thank somebody for.
+    it('offers them as a tab of their own', () => {
+      crewService.getCredits.mockReturnValue(
+        of([{ id: 'credit-1', displayLabel: 'Narrator' }] as CrewCredit[]),
+      );
+
       const element = render();
+      const tabs = [...element.querySelectorAll('.lcars-tabs .lcars-tab')].map(
+        tab => tab.textContent?.trim(),
+      );
+
+      expect(tabs).toContain('Credits');
+      expect(
+        element
+          .querySelector('[role="tabpanel"][aria-label="Credits"]')
+          ?.hasAttribute('hidden'),
+      ).toBe(true);
+    });
+
+    it('shows them once their tab is chosen', () => {
+      crewService.getCredits.mockReturnValue(
+        of([{ id: 'credit-1', displayLabel: 'Narrator' }] as CrewCredit[]),
+      );
+
+      const element = render();
+      const credits = [
+        ...element.querySelectorAll<HTMLButtonElement>(
+          '.lcars-tabs .lcars-tab',
+        ),
+      ].find(tab => tab.textContent?.trim() === 'Credits');
+
+      credits?.click();
+      fixture.detectChanges();
+
+      expect(
+        element
+          .querySelector('[role="tabpanel"][aria-label="Credits"]')
+          ?.hasAttribute('hidden'),
+      ).toBe(false);
+      expect(element.querySelector('.storytime-credits')).not.toBeNull();
+    });
+
+    // Most Stories are written by one person and have no credits roll at all.
+    it('offers no credits tab when there are none', () => {
+      const element = render();
+      const tabs = [...element.querySelectorAll('.lcars-tabs .lcars-tab')].map(
+        tab => tab.textContent?.trim(),
+      );
 
       expect(element.querySelector('.storytime-credits')).toBeNull();
-      expect(element.textContent).not.toContain('Credits');
+      expect(tabs).not.toContain('Credits');
     });
 
     it('leaves the Story readable when the credits cannot be loaded', () => {

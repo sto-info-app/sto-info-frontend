@@ -155,37 +155,11 @@
       </section>
     }
 
-    @if (credits.length > 0) {
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Credits</span>
-      </div>
-
-      <ul class="storytime-credits">
-        @for (credit of credits; track credit.id) {
-          <li class="storytime-panel-card storytime-panel-card--crew">
-            <div
-              class="storytime-panel-card__heading"
-              [title]="credit.displayLabel">
-              <span class="storytime-panel-card__name">{{
-                credit.displayLabel
-              }}</span>
-            </div>
-
-            @if (credit.notes) {
-              <div class="storytime-panel-card__body">
-                <span class="storytime-credits__notes">{{ credit.notes }}</span>
-              </div>
-            }
-          </li>
-        }
-      </ul>
-    }
-
     <!--
-      A Story's Chapters and its cast are two ways of looking at the same
-      work, read one at a time rather than one after the other, so they share
-      the page as tabs. Chapters leads, because that is what somebody arriving
-      at a Story came for.
+      A Story's Chapters, its cast and who made it are three ways of looking at
+      the same work, read one at a time rather than one after another, so they
+      share the page as tabs. Chapters leads, because that is what somebody
+      arriving at a Story came for.
     -->
     <div
       class="lcars-tabs"
@@ -292,6 +266,35 @@
                   <p class="storytime-cast__bio">{{ cast.shortBio }}</p>
                 }
               </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (credits.length > 0) {
+      <section
+        role="tabpanel"
+        aria-label="Credits"
+        [hidden]="activeTab !== 'credits'">
+        <ul class="storytime-credits">
+          @for (credit of credits; track credit.id) {
+            <li class="storytime-panel-card storytime-panel-card--crew">
+              <div
+                class="storytime-panel-card__heading"
+                [title]="credit.displayLabel">
+                <span class="storytime-panel-card__name">{{
+                  credit.displayLabel
+                }}</span>
+              </div>
+
+              @if (credit.notes) {
+                <div class="storytime-panel-card__body">
+                  <span class="storytime-credits__notes">{{
+                    credit.notes
+                  }}</span>
+                </div>
+              }
             </li>
           }
         </ul>

@@ -55,8 +55,8 @@ import {
   ReportContentDialogResult,
 } from '../report-content-dialog/report-content-dialog.component';
 
-/** The two views a Story offers of itself. */
-export type StoryTab = 'chapters' | 'cast';
+/** The views a Story offers of itself. */
+export type StoryTab = 'chapters' | 'cast' | 'credits';
 
 /**
  * A published Story's own page.
@@ -162,8 +162,9 @@ export class StoryDetailComponent implements OnInit {
   /**
    * The tabs this Story has.
    *
-   * A Story with nobody in it offers only the one, rather than a tab that
-   * opens on an empty list.
+   * Only the ones with something behind them: a Story with nobody in it and
+   * nobody to thank offers Chapters alone, rather than tabs that open on empty
+   * lists.
    *
    * @returns The tabs, in the order they are shown.
    */
@@ -174,6 +175,10 @@ export class StoryDetailComponent implements OnInit {
 
     if (this.characters.length > 0) {
       tabs.push({ id: 'cast', label: 'Cast' });
+    }
+
+    if (this.credits.length > 0) {
+      tabs.push({ id: 'credits', label: 'Credits' });
     }
 
     return tabs;
