@@ -68,6 +68,22 @@ export interface StorytimeConfiguration {
 }
 
 /**
+ * Whether Storytime may be reached, and why not when it may not.
+ *
+ * Kept separate from {@link StorytimeFeatureState.isEnabled} because "the
+ * server says the feature is off" and "the server could not be asked" call for
+ * different answers: the first is a feature that does not exist as far as a
+ * visitor is concerned, the second is an outage.
+ */
+export const STORYTIME_AVAILABILITY_ENABLED = 'ENABLED';
+export const STORYTIME_AVAILABILITY_DISABLED = 'DISABLED';
+export const STORYTIME_AVAILABILITY_UNAVAILABLE = 'UNAVAILABLE';
+export type StorytimeAvailability =
+  | typeof STORYTIME_AVAILABILITY_ENABLED
+  | typeof STORYTIME_AVAILABILITY_DISABLED
+  | typeof STORYTIME_AVAILABILITY_UNAVAILABLE;
+
+/**
  * The feature state assumed when the server cannot be reached.
  *
  * Everything off: a client that cannot confirm Storytime is available must not
