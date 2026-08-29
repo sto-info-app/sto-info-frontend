@@ -203,7 +203,11 @@ button.lcars-btn-auto {
     margin: 0 8px 16px;
     width: 200px;
     height: 60px;
-    padding: 24px 25px 0 0;
+
+    // The left gutter matches the pill's radius, for the reason the LCARS
+    // button above wants one: the label is right-aligned, so anything long
+    // enough to fill the pill runs out through the rounded edge without it.
+    padding: 24px 25px 0 26px;
     background-color: #58e;
     border-radius: 26px;
     text-align: right;
