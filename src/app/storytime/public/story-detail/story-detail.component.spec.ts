@@ -876,7 +876,7 @@ describe('StoryDetailComponent', () => {
         element.querySelector(
           '.storytime-story__progress .storytime-panel-card__name',
         )?.textContent,
-      ).toContain('Your reading');
+      ).toContain('Your Reading Status');
       expect(
         element.querySelector('.storytime-story__progress-marks .label')
           ?.textContent,

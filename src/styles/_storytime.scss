@@ -86,6 +86,13 @@
     text-transform: uppercase;
     color: vars.$lcars-black;
 
+    // The name is a heading element where the panel is a section of the page
+    // rather than a row in a list, and `.mat-typography` gives a heading
+    // 30px above and 10px below. Left alone that stands the bar half as tall
+    // again as every other panel's.
+    margin: 0;
+    line-height: 1.2;
+
     // A long title shortens rather than growing the bar, so a row of panels
     // keeps one height and the marks stay where the eye expects them. The
     // whole of it is on the panel it opens, and on hover here.
@@ -1047,6 +1054,10 @@ p.storytime-fan-notice,
   &__summary {
     font-size: 1.05rem;
     color: vars.$lcars-white;
+  }
+
+  &__progress {
+    margin-bottom: 2rem;
   }
 
   // Where the reading stands, set apart from what to do with it next.
