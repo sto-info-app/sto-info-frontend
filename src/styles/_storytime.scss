@@ -913,8 +913,10 @@ p.storytime-fan-notice,
 
 // The facts under a Story's title, set as the site sets a fact and its name
 // everywhere else. Wrapping rather than a fixed two columns, because there are
-// four of them and they are short.
-.storytime-story__facts {
+// four of them and they are short. Named alongside the grid it varies, because
+// the site's own rule is written after this file and would otherwise win on
+// source order.
+.storytime-story__facts.info-grid {
   grid-template-columns: repeat(auto-fit, minmax(140px, max-content));
   gap: 1rem 2.5rem;
   margin-bottom: 1rem;
@@ -2082,10 +2084,6 @@ $storytime-landing-colours: (
   &__button {
     gap: 0.5rem;
 
-    // The pill's own gutter is set for a label; an icon and a number need far
-    // less, and the count would otherwise sit a third of the way across.
-    padding-left: 25px !important;
-
     i {
       font-size: 1.1rem;
     }
@@ -2132,7 +2130,6 @@ $storytime-landing-colours: (
 
   &__button {
     gap: 0.5rem;
-    padding-left: 30px !important;
   }
 
   // A dark chip on the button's own colour, so it reads on every state the
