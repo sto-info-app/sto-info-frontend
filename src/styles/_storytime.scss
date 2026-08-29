@@ -588,6 +588,13 @@ app-storytime-editor-actions {
   }
 }
 
+// A Chapter puts the conversation directly under the reactions, with nothing
+// between them. Left on the row's own margin the heading bar reads as part of
+// that row rather than as the start of the next thing.
+.storytime-chapter__social {
+  margin-bottom: 1.5rem;
+}
+
 // A count on a button that opens what it counts. The badge rule in `styles.scss`
 // is scoped to `.lcars-text-bar`, so inside a pill the number would render as
 // bare text tacked onto the label; the crew page restates it for its side-menu
