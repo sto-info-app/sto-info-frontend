@@ -13,6 +13,7 @@ import { forkJoin, switchMap, of } from 'rxjs';
 import { Spotlight, Story, StorySort } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { FollowService } from '../follow.service';
 import { StoryCardComponent } from '../public/story-card/story-card.component';
@@ -36,6 +37,10 @@ const LANDING_STORY_COUNT = 6;
  * and a reader following work in progress are not the same person, and one
  * "recent" list would serve neither.
  *
+ * Every section folds away. Signed in, the page runs to five of them, and a
+ * reader who comes back for one — their own works, or what is new — should be
+ * able to put the rest out of the way rather than scroll past it each time.
+ *
  * It does not check the master switch itself: the route guard has already
  * refused the visitor if Storytime is off, so re-checking here would duplicate
  * the decision and risk the two disagreeing. The Spotlight's own switch is
@@ -45,7 +50,12 @@ const LANDING_STORY_COUNT = 6;
   selector: 'app-storytime-landing',
   templateUrl: './storytime-landing.component.html',
   standalone: true,
-  imports: [CommonModule, RouterModule, StoryCardComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    StoryCardComponent,
+    CollapsibleSectionComponent,
+  ],
 })
 export class StorytimeLandingComponent implements OnInit {
   /** The selections showing now, best first. */

@@ -316,6 +316,39 @@ describe('StorytimeLandingComponent', () => {
       ).toBeGreaterThan(0);
     });
 
+    // Signed in, the page runs to five sections. A reader who comes back for
+    // one of them should be able to put the rest away.
+    it('lets a reader fold every section away', () => {
+      const element = render();
+      const headings = [
+        ...element.querySelectorAll('app-collapsible-section'),
+      ].map(section => section.querySelector('.lcars-text-bar')?.textContent);
+
+      expect(headings).toEqual([
+        'Spotlight',
+        'Browse',
+        'Yours',
+        'New Stories',
+        'Recently Updated',
+      ]);
+    });
+
+    it('hides a section when its heading bar is collapsed', () => {
+      const element = render();
+      const stories = [
+        ...element.querySelectorAll('app-collapsible-section'),
+      ].find(section =>
+        section
+          .querySelector('.lcars-text-bar')
+          ?.textContent?.includes('New Stories'),
+      );
+
+      stories?.querySelector('button')?.click();
+      fixture.detectChanges();
+
+      expect(stories?.querySelector('.storytime-story-list')).toBeNull();
+    });
+
     it('offers search', () => {
       const element = render();
 
