@@ -8,6 +8,7 @@ import {
   StorytimeTargetType,
 } from 'src/app/models/storytime.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { targetTypeSegment } from './target-type.utility';
 
 /**
  * Comments on Stories, Chapters and Arcs.
@@ -40,7 +41,9 @@ export class CommentService {
     // The token is attached when there is one so that a reader sees their own
     // deleted comment as theirs, rather than as an anonymous gap.
     return this._http.get<StorytimeComment[]>(
-      `${API_URLS.STORYTIME_COMMENTS}/${targetType}/${targetId}`,
+      `${API_URLS.STORYTIME_COMMENTS}/${targetTypeSegment(
+        targetType,
+      )}/${targetId}`,
       options ?? {},
     );
   }

@@ -15,6 +15,7 @@ import {
   StorytimeTargetType,
 } from 'src/app/models/storytime.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { targetTypeSegment } from './target-type.utility';
 
 /**
  * Reporting content, appealing a removal, and the moderation queue behind
@@ -258,7 +259,9 @@ export class StorytimeModerationService {
     targetType: StorytimeTargetType,
     targetId: string,
   ): string {
-    return `${API_URLS.STORYTIME_ADMIN_MODERATION}/content/${targetType}/${targetId}`;
+    return `${API_URLS.STORYTIME_ADMIN_MODERATION}/content/${targetTypeSegment(
+      targetType,
+    )}/${targetId}`;
   }
 
   /**

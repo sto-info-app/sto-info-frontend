@@ -66,7 +66,7 @@ describe('CommentService', () => {
     );
 
     const request = httpMock.expectOne(
-      `${API_URLS.STORYTIME_COMMENTS}/${StorytimeTargetType.STORY}/${STORY_ID}`,
+      `${API_URLS.STORYTIME_COMMENTS}/story/${STORY_ID}`,
     );
     request.flush([COMMENT]);
 
@@ -83,7 +83,7 @@ describe('CommentService', () => {
     );
 
     const request = httpMock.expectOne(
-      `${API_URLS.STORYTIME_COMMENTS}/${StorytimeTargetType.ARC}/arc-1`,
+      `${API_URLS.STORYTIME_COMMENTS}/arc/arc-1`,
     );
     expect(request.request.headers.has('Authorization')).toBe(false);
     request.flush([]);

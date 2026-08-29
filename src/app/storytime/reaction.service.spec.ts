@@ -63,7 +63,7 @@ describe('ReactionService', () => {
     );
 
     const request = httpMock.expectOne(
-      `${API_URLS.STORYTIME_REACTIONS}/${StorytimeTargetType.STORY}/${STORY_ID}`,
+      `${API_URLS.STORYTIME_REACTIONS}/story/${STORY_ID}`,
     );
     expect(request.request.headers.get('Authorization')).toBe(AUTH_HEADER);
     request.flush(SUMMARY);
@@ -81,7 +81,7 @@ describe('ReactionService', () => {
     );
 
     const request = httpMock.expectOne(
-      `${API_URLS.STORYTIME_REACTIONS}/${StorytimeTargetType.STORY}/${STORY_ID}`,
+      `${API_URLS.STORYTIME_REACTIONS}/story/${STORY_ID}`,
     );
     expect(request.request.headers.has('Authorization')).toBe(false);
     request.flush({ ...SUMMARY, mine: null });
@@ -116,7 +116,7 @@ describe('ReactionService', () => {
     );
 
     const request = httpMock.expectOne(
-      `${API_URLS.STORYTIME_REACTIONS}/${StorytimeTargetType.STORY}/${STORY_ID}`,
+      `${API_URLS.STORYTIME_REACTIONS}/story/${STORY_ID}`,
     );
     expect(request.request.method).toBe('DELETE');
     request.flush({ ...SUMMARY, mine: null });

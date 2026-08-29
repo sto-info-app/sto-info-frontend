@@ -176,7 +176,7 @@ describe('StorytimeModerationService', () => {
 
       httpMock
         .expectOne(
-          `${API_URLS.STORYTIME_ADMIN_MODERATION}/content/STORY/${STORY_ID}/reports`,
+          `${API_URLS.STORYTIME_ADMIN_MODERATION}/content/story/${STORY_ID}/reports`,
         )
         .flush([]);
 
@@ -190,7 +190,7 @@ describe('StorytimeModerationService', () => {
 
       httpMock
         .expectOne(
-          `${API_URLS.STORYTIME_ADMIN_MODERATION}/content/STORY/${STORY_ID}/history`,
+          `${API_URLS.STORYTIME_ADMIN_MODERATION}/content/story/${STORY_ID}/history`,
         )
         .flush([]);
 
