@@ -14,7 +14,6 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { finalize, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/auth/auth.service';
-import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { AddToListComponent } from '../../shared/add-to-list/add-to-list.component';
 import { CommentThreadComponent } from '../../shared/comment-thread/comment-thread.component';
 import { SettingHelpComponent } from '../../shared/setting-help/setting-help.component';
@@ -56,6 +55,9 @@ import {
   ReportContentDialogResult,
 } from '../report-content-dialog/report-content-dialog.component';
 
+/** The two views a Story offers of itself. */
+export type StoryTab = 'chapters' | 'cast';
+
 /**
  * A published Story's own page.
  *
@@ -68,6 +70,7 @@ import {
 @Component({
   selector: 'app-story-detail',
   templateUrl: './story-detail.component.html',
+  styleUrls: ['./story-detail.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -80,7 +83,6 @@ import {
     AddToListComponent,
     CommentThreadComponent,
     SettingHelpComponent,
-    CollapsibleSectionComponent,
   ],
 })
 export class StoryDetailComponent implements OnInit {
@@ -148,6 +150,44 @@ export class StoryDetailComponent implements OnInit {
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
+
+  /**
+   * Which of the two views of the work is showing.
+   *
+   * Chapters leads, because that is what somebody arriving at a Story came
+   * for; the cast is who they will meet once they start.
+   */
+  activeTab: StoryTab = 'chapters';
+
+  /**
+   * The tabs this Story has.
+   *
+   * A Story with nobody in it offers only the one, rather than a tab that
+   * opens on an empty list.
+   *
+   * @returns The tabs, in the order they are shown.
+   */
+  get tabs(): { id: StoryTab; label: string }[] {
+    const tabs: { id: StoryTab; label: string }[] = [
+      { id: 'chapters', label: 'Chapters' },
+    ];
+
+    if (this.characters.length > 0) {
+      tabs.push({ id: 'cast', label: 'Cast' });
+    }
+
+    return tabs;
+  }
+
+  /**
+   * Shows one of the tabs.
+   *
+   * @param tab - The tab to show.
+   * @returns void
+   */
+  selectTab(tab: StoryTab): void {
+    this.activeTab = tab;
+  }
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _storyService = inject(StoryService);

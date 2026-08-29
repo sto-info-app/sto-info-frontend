@@ -248,30 +248,29 @@ describe('StoryDetailComponent', () => {
     expect(fixture.componentInstance.needsRatingWarning).toBe(false);
   });
 
-  // The page runs long: a cast, every Chapter, and the whole conversation. A
-  // reader who came back for one of them should be able to put the rest away.
-  describe('the sections that fold away', () => {
+  // Two views of the same work, read one at a time rather than one after the
+  // other. The conversation still folds away, but it belongs to the thread
+  // rather than to this page, and is tested where it is built.
+  describe('the tabs', () => {
     /**
-     * Reads the toggle on the bar of the section with this heading.
-     *
-     * Named through the bar rather than the section, because a section's
-     * contents have buttons of their own and the first one down the tree is
-     * not reliably the one that folds it.
+     * Reads the tab strip's buttons.
      *
      * @param element - The rendered page.
-     * @param heading - What the bar says.
-     * @returns The toggle, or null when the page has no such bar.
+     * @returns One button per tab, in the order they are shown.
      */
-    const toggleFor = (
-      element: HTMLElement,
-      heading: string,
-    ): HTMLButtonElement | null => {
-      const bar = [...element.querySelectorAll('.lcars-text-bar')].find(
-        candidate => candidate.textContent?.includes(heading),
-      );
+    const tabButtons = (element: HTMLElement): HTMLButtonElement[] => [
+      ...element.querySelectorAll<HTMLButtonElement>('.lcars-tabs .lcars-tab'),
+    ];
 
-      return (bar?.querySelector('button') as HTMLButtonElement) ?? null;
-    };
+    /**
+     * Reads a panel by the name it carries.
+     *
+     * @param element - The rendered page.
+     * @param name - The panel's label.
+     * @returns The panel, or null when the page has no such panel.
+     */
+    const panelFor = (element: HTMLElement, name: string): Element | null =>
+      element.querySelector(`[role="tabpanel"][aria-label="${name}"]`);
 
     beforeEach(() => {
       characterService.getCharacters.mockReturnValue(
@@ -299,33 +298,64 @@ describe('StoryDetailComponent', () => {
       );
     });
 
-    it.each([
-      ['Cast', '.storytime-cast'],
-      ['Chapters', '.storytime-chapter-list'],
-    ])('folds %s away', (heading, contents) => {
-      const element = render();
-      const toggle = toggleFor(element, heading);
-
-      expect(toggle?.getAttribute('aria-expanded')).toBe('true');
-      expect(element.querySelector(contents)).not.toBeNull();
-
-      toggle?.click();
-      fixture.detectChanges();
-
-      expect(toggle?.getAttribute('aria-expanded')).toBe('false');
-      expect(element.querySelector(contents)).toBeNull();
-    });
-
-    // The conversation folds away too, but it belongs to the thread rather
-    // than to this page, and is tested where it is built.
-    it('opens every section it has', () => {
+    // Chapters leads: it is what somebody arriving at a Story came for.
+    it('opens on the Chapters', () => {
       const element = render();
 
       expect(
-        ['Cast', 'Chapters', 'Comments'].map(heading =>
-          toggleFor(element, heading)?.getAttribute('aria-expanded'),
-        ),
-      ).toEqual(['true', 'true', 'true']);
+        tabButtons(element).map(button => button.textContent?.trim()),
+      ).toEqual(['Chapters', 'Cast']);
+      expect(panelFor(element, 'Chapters')?.hasAttribute('hidden')).toBe(false);
+      expect(panelFor(element, 'Cast')?.hasAttribute('hidden')).toBe(true);
+    });
+
+    it('shows the cast when its tab is chosen', () => {
+      const element = render();
+
+      tabButtons(element)[1].click();
+      fixture.detectChanges();
+
+      expect(panelFor(element, 'Cast')?.hasAttribute('hidden')).toBe(false);
+      expect(panelFor(element, 'Chapters')?.hasAttribute('hidden')).toBe(true);
+      expect(element.textContent).toContain('Captain Shran');
+    });
+
+    it('goes back to the Chapters again', () => {
+      const element = render();
+
+      tabButtons(element)[1].click();
+      fixture.detectChanges();
+      tabButtons(element)[0].click();
+      fixture.detectChanges();
+
+      expect(panelFor(element, 'Chapters')?.hasAttribute('hidden')).toBe(false);
+      expect(element.textContent).toContain('Chapter One');
+    });
+
+    it('marks the chosen tab for a screen reader', () => {
+      const element = render();
+      const [chapters, cast] = tabButtons(element);
+
+      expect(chapters.getAttribute('aria-selected')).toBe('true');
+      expect(cast.getAttribute('aria-selected')).toBe('false');
+
+      cast.click();
+      fixture.detectChanges();
+
+      expect(chapters.getAttribute('aria-selected')).toBe('false');
+      expect(cast.getAttribute('aria-selected')).toBe('true');
+    });
+
+    // A tab that opens on an empty list is worse than no tab at all.
+    it('offers no cast tab for a Story with nobody in it', () => {
+      characterService.getCharacters.mockReturnValue(of([]));
+
+      const element = render();
+
+      expect(
+        tabButtons(element).map(button => button.textContent?.trim()),
+      ).toEqual(['Chapters']);
+      expect(panelFor(element, 'Cast')).toBeNull();
     });
   });
 

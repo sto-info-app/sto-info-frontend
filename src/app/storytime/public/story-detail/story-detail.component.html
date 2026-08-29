@@ -155,44 +155,6 @@
       </section>
     }
 
-    @if (characters.length > 0) {
-      <app-collapsible-section
-        heading="Cast"
-        barClass="small-lcars-bar-gap">
-        <ul class="storytime-cast">
-          @for (cast of characters; track cast.id) {
-            <li class="storytime-panel-card storytime-panel-card--character">
-              <a
-                class="storytime-panel-card__heading"
-                [routerLink]="[
-                  '/',
-                  appRoutes.STORYTIME,
-                  'stories',
-                  storySlug,
-                  'characters',
-                  cast.slug,
-                ]"
-                [title]="cast.name">
-                <span class="storytime-panel-card__name">{{ cast.name }}</span>
-              </a>
-
-              <div class="storytime-panel-card__body storytime-cast__member">
-                @if (cast.portraitImageThumbnailUrl) {
-                  <img
-                    class="storytime-cast__portrait"
-                    [src]="cast.portraitImageThumbnailUrl"
-                    [alt]="cast.portraitImageAlt ?? ''" />
-                }
-                @if (cast.shortBio) {
-                  <p class="storytime-cast__bio">{{ cast.shortBio }}</p>
-                }
-              </div>
-            </li>
-          }
-        </ul>
-      </app-collapsible-section>
-    }
-
     @if (credits.length > 0) {
       <div class="lcars-text-bar small-lcars-bar-gap">
         <span>Credits</span>
@@ -219,9 +181,36 @@
       </ul>
     }
 
-    <app-collapsible-section
-      heading="Chapters"
-      barClass="small-lcars-bar-gap">
+    <!--
+      A Story's Chapters and its cast are two ways of looking at the same
+      work, read one at a time rather than one after the other, so they share
+      the page as tabs. Chapters leads, because that is what somebody arriving
+      at a Story came for.
+    -->
+    <div
+      class="lcars-tabs"
+      role="tablist"
+      aria-label="Story sections">
+      @for (tab of tabs; track tab.id) {
+        <button
+          type="button"
+          role="tab"
+          class="lcars-tab"
+          [class.active]="activeTab === tab.id"
+          [attr.aria-selected]="activeTab === tab.id"
+          (click)="selectTab(tab.id)">
+          {{ tab.label }}
+        </button>
+      }
+      <span
+        class="lcars-tabs-filler"
+        aria-hidden="true"></span>
+    </div>
+
+    <section
+      role="tabpanel"
+      aria-label="Chapters"
+      [hidden]="activeTab !== 'chapters'">
       @if (chapterErrorMessage) {
         <app-lcars-error-message
           title="Chapters unavailable"
@@ -268,7 +257,46 @@
           }
         </ol>
       }
-    </app-collapsible-section>
+    </section>
+
+    @if (characters.length > 0) {
+      <section
+        role="tabpanel"
+        aria-label="Cast"
+        [hidden]="activeTab !== 'cast'">
+        <ul class="storytime-cast">
+          @for (cast of characters; track cast.id) {
+            <li class="storytime-panel-card storytime-panel-card--character">
+              <a
+                class="storytime-panel-card__heading"
+                [routerLink]="[
+                  '/',
+                  appRoutes.STORYTIME,
+                  'stories',
+                  storySlug,
+                  'characters',
+                  cast.slug,
+                ]"
+                [title]="cast.name">
+                <span class="storytime-panel-card__name">{{ cast.name }}</span>
+              </a>
+
+              <div class="storytime-panel-card__body storytime-cast__member">
+                @if (cast.portraitImageThumbnailUrl) {
+                  <img
+                    class="storytime-cast__portrait"
+                    [src]="cast.portraitImageThumbnailUrl"
+                    [alt]="cast.portraitImageAlt ?? ''" />
+                }
+                @if (cast.shortBio) {
+                  <p class="storytime-cast__bio">{{ cast.shortBio }}</p>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
 
     @if (story) {
       <div class="storytime-story__social">
