@@ -59,7 +59,7 @@
   </div>
 
   <ul class="storytime-landing__browse">
-    <li>
+    <li class="storytime-landing__card--stories">
       <a [routerLink]="['/', appRoutes.STORYTIME, 'stories']">
         <span class="storytime-landing__browse-name">All Stories</span>
         <p class="storytime-landing__summary">
@@ -67,7 +67,7 @@
         </p>
       </a>
     </li>
-    <li>
+    <li class="storytime-landing__card--arcs">
       <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs']">
         <span class="storytime-landing__browse-name">Arcs</span>
         <p class="storytime-landing__summary">
@@ -76,7 +76,7 @@
       </a>
     </li>
     @if (isSpotlightEnabled) {
-      <li>
+      <li class="storytime-landing__card--spotlight">
         <a [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']">
           <span class="storytime-landing__browse-name">Spotlight</span>
           <p class="storytime-landing__summary">
@@ -85,7 +85,7 @@
         </a>
       </li>
     }
-    <li>
+    <li class="storytime-landing__card--search">
       <a [routerLink]="['/', appRoutes.STORYTIME, 'search']">
         <span class="storytime-landing__browse-name">Search Storytime</span>
         <p class="storytime-landing__summary">
@@ -101,7 +101,7 @@
     </div>
 
     <ul class="storytime-landing__yours">
-      <li>
+      <li class="storytime-landing__card--feed">
         <a [routerLink]="['/', appRoutes.STORYTIME, 'feed']">
           <span class="storytime-landing__browse-name">Your feed</span>
           @if (unreadCount > 0) {
@@ -112,7 +112,7 @@
           </p>
         </a>
       </li>
-      <li>
+      <li class="storytime-landing__card--lists">
         <a [routerLink]="['/', appRoutes.STORYTIME, 'reading-lists']">
           <span class="storytime-landing__browse-name">Your reading lists</span>
           <p class="storytime-landing__summary">
@@ -120,7 +120,7 @@
           </p>
         </a>
       </li>
-      <li>
+      <li class="storytime-landing__card--library">
         <a [routerLink]="['/', appRoutes.STORYTIME, 'library']">
           <span class="storytime-landing__browse-name">Your library</span>
           <p class="storytime-landing__summary">
@@ -128,7 +128,7 @@
           </p>
         </a>
       </li>
-      <li>
+      <li class="storytime-landing__card--own-stories">
         <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories']">
           <span class="storytime-landing__browse-name">Your Stories</span>
           <p class="storytime-landing__summary">
@@ -136,7 +136,7 @@
           </p>
         </a>
       </li>
-      <li>
+      <li class="storytime-landing__card--own-arcs">
         <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']">
           <span class="storytime-landing__browse-name">Your Arcs</span>
           <p class="storytime-landing__summary">
@@ -144,7 +144,7 @@
           </p>
         </a>
       </li>
-      <li>
+      <li class="storytime-landing__card--invitations">
         <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'invitations']">
           <span class="storytime-landing__browse-name">Invitations</span>
           <p class="storytime-landing__summary">

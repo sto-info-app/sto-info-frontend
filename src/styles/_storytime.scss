@@ -1506,6 +1506,32 @@ $storytime-record-statuses: (
   }
 }
 
+// What each way into Storytime is coloured. Keyed by what the card leads to
+// rather than by its position, so a card keeps its colour when the one beside
+// it is switched off — the Spotlight card comes and goes with its feature flag,
+// and a row that reshuffled its colours every time would be no landmark at all.
+// ---
+// This is the page a reader meets Storytime on, and a grid of identical grey
+// boxes on a site built out of colour reads as a page nobody finished. Each
+// card is built to the same plan as a work in a creator's list and a field in
+// a form: a solid LCARS block carrying the name in black, over a dark body
+// carrying the line that explains it.
+$storytime-landing-colours: (
+  'stories': vars.$lcars-sunflower,
+  // Violet is the one colour here that will not carry black text at the size
+  // these names are set in: 4.3:1, against the 4.5 the rest of the site holds
+  // to. Taken a shade lighter it clears it and is still recognisably violet.
+  'arcs': color.adjust(vars.$lcars-violet, $lightness: 10%),
+  'spotlight': vars.$lcars-gold,
+  'search': vars.$lcars-perano,
+  'feed': vars.$lcars-orange,
+  'lists': vars.$lcars-sky,
+  'library': vars.$lcars-bluey,
+  'own-stories': vars.$lcars-green,
+  'own-arcs': vars.$lcars-tangerine,
+  'invitations': vars.$lcars-cool,
+);
+
 .storytime-landing {
   // Storytime's own navigation, which used to be a row of sidebar buttons.
   // Each entry gets a line saying what it is, which is the whole reason for
@@ -1528,25 +1554,22 @@ $storytime-record-statuses: (
       display: flex;
       padding: 0;
       list-style: none;
+
+      // The spine, in the card's own colour. Named here so a card without one
+      // still has an edge rather than a gap where an edge should be.
+      border-left: 4px solid vars.$lcars-grey-border;
     }
 
     // The panel is the link rather than something with a link in it. Somebody
-    // reaching for "Arcs" aims at the box, so the anchor fills the box and
-    // carries its padding; a card that only answers along its first line
-    // reads as broken.
+    // reaching for "Arcs" aims at the box, so the anchor fills the box; the
+    // padding belongs to the pieces inside it, because the name is a block of
+    // colour that has to run the full width of the card.
     a {
       display: flex;
       flex: 1;
       flex-direction: column;
-      gap: 0.25rem;
-      padding: 0.75rem 1rem;
+      padding: 0;
       text-decoration: none;
-
-      &:hover .storytime-landing__browse-name,
-      &:focus-visible .storytime-landing__browse-name {
-        color: vars.$lcars-gold;
-        text-decoration: underline;
-      }
 
       &:focus-visible {
         outline: 2px solid vars.$lcars-perano;
@@ -1554,19 +1577,31 @@ $storytime-record-statuses: (
       }
     }
 
+    .storytime-landing__browse-name {
+      display: block;
+      padding: 0.4rem 1rem;
+      font-family: vars.$font-antonio;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+
+      // Until a card says which colour it is. A name is unreadable on a
+      // background that never arrived, so the fallback is a real block.
+      background: vars.$lcars-grey-border;
+      color: vars.$lcars-white;
+    }
+
     .storytime-landing__summary {
       margin: 0;
+      padding: 0.6rem 1rem 0.75rem;
       max-width: none;
       font-size: 0.9rem;
     }
-  }
 
-  // The heading inside a browse panel. It is a span rather than a link of its
-  // own, because the panel around it is already the link.
-  &__browse-name {
-    font-family: vars.$font-antonio;
-    font-size: 1rem;
-    color: vars.$lcars-sunflower;
+    .storytime-landing__unread {
+      margin: 0.6rem 1rem 0;
+      align-self: flex-start;
+    }
   }
 
   &__stories {
@@ -1579,6 +1614,35 @@ $storytime-record-statuses: (
     background: vars.$lcars-orange;
     color: vars.$lcars-black;
     margin-left: 0.5rem;
+  }
+}
+
+// Scoped to the lists rather than named on their own: the card's shape is set
+// at `.storytime-landing__browse li`, which is a class and an element, and a
+// lone modifier class is not heard over it.
+@each $name, $colour in $storytime-landing-colours {
+  .storytime-landing__browse .storytime-landing__card--#{$name},
+  .storytime-landing__yours .storytime-landing__card--#{$name} {
+    border-left-color: color.adjust($colour, $lightness: -18%);
+
+    .storytime-landing__browse-name {
+      background: $colour;
+
+      // Black on the block, the way every other LCARS label is set. The
+      // palette is built for it: these are all light enough to carry it.
+      color: vars.$lcars-black;
+    }
+
+    // The card lifts on hover from the shared card mixin; the block brightens
+    // with it, so the thing under the pointer is the thing that answers.
+    a:hover .storytime-landing__browse-name,
+    a:focus-visible .storytime-landing__browse-name {
+      background: color.adjust($colour, $lightness: 10%);
+    }
+
+    a:focus-visible {
+      outline-color: $colour;
+    }
   }
 }
 
