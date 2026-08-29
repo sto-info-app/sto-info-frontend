@@ -188,13 +188,15 @@ export class CommentThreadComponent implements OnInit {
    * beside every comment offering nothing.
    *
    * @param comment - The comment.
+   * @param canReply - Whether this comment is one that can be replied to.
    * @returns True when at least one control applies.
    */
-  hasControls(comment: StorytimeComment): boolean {
+  hasControls(comment: StorytimeComment, canReply = false): boolean {
     const isVisible = comment.status === this.statuses.VISIBLE;
     const isRemoved = comment.status === this.statuses.REMOVED_BY_ADMIN;
 
     return (
+      (this.canComment && canReply && isVisible) ||
       (this.isMine(comment) && isVisible) ||
       ((this.isOwner || this.isAdministrator) && !isRemoved)
     );

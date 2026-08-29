@@ -25,7 +25,11 @@
             <ng-container
               *ngTemplateOutlet="
                 commentBody;
-                context: { $implicit: node.comment, colour: colourFor(index) }
+                context: {
+                  $implicit: node.comment,
+                  colour: colourFor(index),
+                  canReply: true,
+                }
               "></ng-container>
 
             @if (node.replies.length > 0) {
@@ -35,7 +39,11 @@
                     <ng-container
                       *ngTemplateOutlet="
                         commentBody;
-                        context: { $implicit: reply, colour: colourFor(index) }
+                        context: {
+                          $implicit: reply,
+                          colour: colourFor(index),
+                          canReply: false,
+                        }
                       "></ng-container>
                   </li>
                 }
@@ -74,13 +82,6 @@
                     </button>
                   </div>
                 </form>
-              } @else {
-                <button
-                  type="button"
-                  class="lcars-btn lcars-btn-auto sky storytime-comments__reply-button"
-                  (click)="startReply(node.comment.id)">
-                  Reply
-                </button>
               }
             }
           </li>
@@ -122,7 +123,8 @@
 <ng-template
   #commentBody
   let-comment
-  let-colour="colour">
+  let-colour="colour"
+  let-canReply="canReply">
   <article
     class="storytime-panel-card storytime-comments__body"
     [ngClass]="colour">
@@ -213,9 +215,22 @@
         }
       </div>
 
-      @if (hasControls(comment)) {
+      @if (hasControls(comment, canReply)) {
         <div
           class="storytime-panel-card__controls storytime-comments__controls">
+          @if (canComment && canReply && comment.status === statuses.VISIBLE) {
+            <button
+              class="cta-icon"
+              type="button"
+              title="Reply to this comment"
+              aria-label="Reply to this comment"
+              (click)="startReply(comment.id)">
+              <i
+                class="fa-solid fa-reply"
+                aria-hidden="true"></i>
+            </button>
+          }
+
           @if (isMine(comment) && comment.status === statuses.VISIBLE) {
             <button
               class="cta-icon"

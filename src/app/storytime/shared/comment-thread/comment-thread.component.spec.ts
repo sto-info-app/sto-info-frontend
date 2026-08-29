@@ -204,6 +204,56 @@ describe('CommentThreadComponent', () => {
     });
   });
 
+  // The thread is one level deep, so only a root comment offers a reply.
+  describe('replying', () => {
+    /**
+     * Reads the reply controls on the thread.
+     *
+     * @returns One button per comment that offers a reply.
+     */
+    const replyControls = (): HTMLButtonElement[] => [
+      ...(
+        fixture.nativeElement as HTMLElement
+      ).querySelectorAll<HTMLButtonElement>(
+        '[aria-label="Reply to this comment"]',
+      ),
+    ];
+
+    it('offers a reply on a root comment and not on a reply to one', () => {
+      commentService.getComments.mockReturnValue(
+        of([
+          buildComment(),
+          buildComment({ id: 'reply-1', parentCommentId: 'comment-1' }),
+        ]),
+      );
+
+      create();
+
+      expect(replyControls()).toHaveLength(1);
+    });
+
+    it('opens the reply form when the control is pressed', () => {
+      create();
+
+      replyControls()[0].click();
+      fixture.detectChanges();
+
+      expect(component.replyingTo).toBe('comment-1');
+      expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+        'Your reply',
+      );
+    });
+
+    // Signing in is what a reader is asked to do instead.
+    it('offers no reply to a signed-out reader', () => {
+      authService.isLoggedIn.mockReturnValue(false);
+
+      create();
+
+      expect(replyControls()).toHaveLength(0);
+    });
+  });
+
   // A conversation is one kind of thing all the way down, so the colour marks
   // where one comment ends and the next begins.
   describe('the colours a thread runs through', () => {
