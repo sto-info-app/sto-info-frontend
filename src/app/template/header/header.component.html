@@ -44,20 +44,19 @@
     <div class="banner">{{ appTitle }}</div>
     <div class="data-cascade-button-group">
       @if (showApiDegradedNotice$ | async) {
-        <div
+        <output
           class="comms-alert comms-alert-warning"
           id="header-api-degraded-alert"
-          role="status"
           aria-live="polite">
           <span class="comms-alert-heading">Connection Unstable</span>
           <span class="comms-alert-detail"
             >Computer core connection unstable.<br />
             Reconnecting... Please stand by.</span
           >
-        </div>
+        </output>
       } @else {
         @if (isLoggedIn ? (unreadCount$ | async) : 0; as unreadCount) {
-          <div
+          <output
             class="comms-alert"
             id="header-comms-alert"
             aria-live="polite">
@@ -70,7 +69,7 @@
               ">
               {{ unreadCount > 99 ? '99+' : unreadCount }} Unread
             </a>
-          </div>
+          </output>
         } @else {
           <div class="cascade-wrapper">
             <div
