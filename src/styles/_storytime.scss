@@ -300,6 +300,10 @@ $storytime-panel-colours: (
   'activity': vars.$lcars-orange,
   'invitation': vars.$lcars-cool,
   'moderation': vars.$lcars-red,
+  // The reader's own record of their reading, rather than a thing in a list.
+  // Takes the frame's own cyan, which no kind of content uses, so it is never
+  // read as one of them.
+  'progress': vars.$lcars-c48,
 );
 
 // A conversation is one kind of thing all the way down, so a colour cannot
@@ -993,20 +997,6 @@ p.storytime-fan-notice,
   }
 }
 
-// The reader's own record of their reading, headed so it is never taken for
-// the Story's own state: "On hold" is a word away from "On hiatus", and only
-// one of the two is the reader's to set.
-// ---
-// Named through the page it sits on: `.mat-typography h2` is an element and a
-// class together, and would otherwise set this at 43px in a blue of its own.
-.storytime-page .storytime-story__progress-heading {
-  @include storytime-label-colour;
-
-  font-size: 0.95rem;
-  letter-spacing: 0.06em;
-  margin: 0 0 0.75rem;
-}
-
 // A fact whose name needs explaining carries the same help control a setting
 // does, beside the name rather than above the value.
 .storytime-facts__label {
@@ -1057,10 +1047,6 @@ p.storytime-fan-notice,
   &__summary {
     font-size: 1.05rem;
     color: vars.$lcars-white;
-  }
-
-  &__progress {
-    @include storytime-panel-surface;
   }
 
   // Where the reading stands, set apart from what to do with it next.

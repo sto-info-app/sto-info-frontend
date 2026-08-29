@@ -873,8 +873,9 @@ describe('StoryDetailComponent', () => {
       const element = render();
 
       expect(
-        element.querySelector('.storytime-story__progress-heading')
-          ?.textContent,
+        element.querySelector(
+          '.storytime-story__progress .storytime-panel-card__name',
+        )?.textContent,
       ).toContain('Your reading');
       expect(
         element.querySelector('.storytime-story__progress-marks .label')
