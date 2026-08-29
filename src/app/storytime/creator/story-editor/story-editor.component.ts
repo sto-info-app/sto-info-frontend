@@ -25,6 +25,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { ArcService } from '../../arc.service';
 import { ContentPolicyPanelComponent } from '../../shared/content-policy-panel/content-policy-panel.component';
 import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
 import { SettingOption } from '../../shared/setting-help/setting-help.component';
@@ -72,6 +73,15 @@ export class StoryEditorComponent implements OnInit {
   /** The Story being edited, or null when creating a new one. */
   story: ManagedStory | null = null;
 
+  /**
+   * The Arc this Story is being written for, when reached from one.
+   *
+   * Carried in the address rather than held on a service, so the page works
+   * on its own: a curator who opens it in a new tab, or comes back to it,
+   * still gets the Story they meant into the Arc they meant.
+   */
+  arcId: string | null = null;
+
   /** Whether the editor is still loading an existing Story. */
   isLoading = false;
 
@@ -113,6 +123,7 @@ export class StoryEditorComponent implements OnInit {
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _route = inject(ActivatedRoute);
   private readonly _storyService = inject(StoryService);
+  private readonly _arcService = inject(ArcService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
@@ -130,10 +141,20 @@ export class StoryEditorComponent implements OnInit {
     this._editor.loadLanguages();
 
     const storyId = this._route.snapshot.paramMap.get('storyId');
+    this.arcId = this._route.snapshot.queryParamMap.get('arc') ?? null;
 
     if (storyId) {
       this.loadStory(storyId);
     }
+  }
+
+  /**
+   * Whether this Story will join an Arc as soon as it is saved.
+   *
+   * @returns True when a new Story was started from an Arc.
+   */
+  get isJoiningArc(): boolean {
+    return this.isNew && this.arcId !== null;
   }
 
   /**
@@ -169,8 +190,22 @@ export class StoryEditorComponent implements OnInit {
 
   /**
    * Saves the Story, creating it when new and updating it otherwise.
+   *
+   * A Story started from an Arc joins it on that first save and goes straight
+   * to its Chapters, because somebody who has just described a Story wants to
+   * write it — not to be returned to the Arc to admire the title.
    */
   save(): void {
+    const arcId = this.arcId;
+
+    if (this.isNew && arcId) {
+      this.submit(
+        savedId => ['manage', 'stories', savedId, 'chapters'],
+        saved => this.joinArc(arcId, saved),
+      );
+      return;
+    }
+
     this.submit(savedId => ['manage', 'stories', savedId]);
   }
 
@@ -195,6 +230,22 @@ export class StoryEditorComponent implements OnInit {
    */
   onPolicyAccepted(story: ManagedStory): void {
     this.story = story;
+  }
+
+  /**
+   * Puts the newly created Story into the Arc it was written for.
+   *
+   * The Story is kept first: it exists whatever the Arc says next, and an
+   * editor that forgot about it would offer to create a second one.
+   *
+   * @param arcId - The Arc it was started from.
+   * @param saved - The Story as the server created it.
+   * @returns The join.
+   */
+  private joinArc(arcId: string, saved: ManagedStory): Observable<unknown> {
+    this.story = saved;
+
+    return this._arcService.inviteStory(arcId, saved.id);
   }
 
   /**

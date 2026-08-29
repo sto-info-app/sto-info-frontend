@@ -8,6 +8,13 @@
 >
   <h1>{{ isNew ? "Create a Story" : "Edit Story" }}</h1>
 
+  @if (isJoiningArc) {
+    <p class="storytime-intro">
+      This Story joins the Arc you came from as soon as you save it, and you
+      will be taken straight to its Chapters.
+    </p>
+  }
+
   <!--
     The rest of a Story is reached from here rather than only from the list a
     creator came through. Saving a new Story leaves them on this page, and a

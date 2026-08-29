@@ -17,9 +17,11 @@ import {
   ArcMembershipStatus,
   ManagedStory,
 } from 'src/app/models/storytime.models';
+import { PERMISSIONS } from 'src/app/models/access-control.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { HasPermissionDirective } from 'src/app/shared/directives/has-permission.directive';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
@@ -43,6 +45,7 @@ import { ARC_MEMBERSHIP_STATUS_LABELS } from '../../storytime.constants';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    HasPermissionDirective,
   ],
 })
 export class ArcStoryListComponent implements OnInit {
@@ -69,6 +72,14 @@ export class ArcStoryListComponent implements OnInit {
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
+
+  /**
+   * Permission codes, for the template.
+   *
+   * Curating an Arc needs no writing permission, so the invitation to write a
+   * Story for it is offered only to somebody who could actually follow it.
+   */
+  readonly permissions = PERMISSIONS;
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _arcService = inject(ArcService);

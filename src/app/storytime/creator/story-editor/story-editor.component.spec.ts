@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ManagedStory, StoryStatus } from 'src/app/models/storytime.models';
+import { ArcService } from '../../arc.service';
 import { STORYTIME_COPY } from '../../storytime.constants';
 import { StorytimeService } from '../../storytime.service';
 import { StoryService } from '../../story.service';
@@ -18,8 +19,10 @@ describe('StoryEditorComponent', () => {
     acceptContentPolicy: jest.Mock;
   };
   let storytimeService: { getLanguages: jest.Mock };
+  let arcService: { inviteStory: jest.Mock };
   let router: { navigate: jest.Mock };
   let routeParams: Map<string, string>;
+  let queryParams: Map<string, string>;
 
   const existingStory = {
     id: 'story-1',
@@ -48,6 +51,7 @@ describe('StoryEditorComponent', () => {
 
   beforeEach(() => {
     routeParams = new Map();
+    queryParams = new Map();
     storyService = {
       getMyStory: jest.fn().mockReturnValue(of(existingStory)),
       createStory: jest.fn().mockReturnValue(of({ id: 'new-story' })),
@@ -64,6 +68,9 @@ describe('StoryEditorComponent', () => {
         .fn()
         .mockReturnValue(of([{ code: 'en', name: 'English' }])),
     };
+    arcService = {
+      inviteStory: jest.fn().mockReturnValue(of([{ id: 'membership-1' }])),
+    };
     router = { navigate: jest.fn() };
 
     TestBed.configureTestingModule({
@@ -72,10 +79,13 @@ describe('StoryEditorComponent', () => {
         provideRouter([]),
         { provide: StoryService, useValue: storyService },
         { provide: StorytimeService, useValue: storytimeService },
+        { provide: ArcService, useValue: arcService },
         { provide: Router, useValue: router },
         {
           provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: routeParams } },
+          useValue: {
+            snapshot: { paramMap: routeParams, queryParamMap: queryParams },
+          },
         },
       ],
     });
@@ -332,6 +342,73 @@ describe('StoryEditorComponent', () => {
       expect(fixture.componentInstance.errorMessage).toContain(
         'could not be saved',
       );
+    });
+  });
+  // An Arc is often the reason a Story gets written at all, so writing one can
+  // start from the Arc rather than from the list of somebody's own work.
+  describe('writing for an Arc', () => {
+    beforeEach(() => {
+      queryParams.set('arc', 'arc-1');
+    });
+
+    it('says the Story will join the Arc', () => {
+      const element = render().nativeElement as HTMLElement;
+
+      expect(fixture.componentInstance.isJoiningArc).toBe(true);
+      expect(element.textContent).toContain('joins the Arc you came from');
+    });
+
+    // Straight to the Chapters, because somebody who has just described a
+    // Story wants to write it rather than be returned to admire the title.
+    it('joins the Arc on the first save and opens the Chapters', () => {
+      render();
+      fixture.componentInstance.form.patchValue({ title: 'A New Story' });
+      fixture.componentInstance.save();
+
+      expect(arcService.inviteStory).toHaveBeenCalledWith('arc-1', 'new-story');
+      expect(router.navigate).toHaveBeenCalledWith([
+        '/',
+        'storytime',
+        'manage',
+        'stories',
+        'new-story',
+        'chapters',
+      ]);
+    });
+
+    // The Story exists whatever the Arc says next, so the editor holds on to
+    // it: offering to create a second one would be the worst answer available.
+    it('keeps the created Story when it could not join', () => {
+      arcService.inviteStory.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 403,
+              error: { message: 'You do not curate this Arc.' },
+            }),
+        ),
+      );
+
+      render();
+      fixture.componentInstance.form.patchValue({ title: 'A New Story' });
+      fixture.componentInstance.save();
+
+      expect(fixture.componentInstance.errorMessage).toContain(
+        'do not curate this Arc',
+      );
+      expect(fixture.componentInstance.isNew).toBe(false);
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    // An existing Story reached with the parameter still on the address is
+    // already somewhere; it is not joined again behind its owner's back.
+    it('leaves an existing Story alone', () => {
+      routeParams.set('storyId', 'story-1');
+
+      render();
+      fixture.componentInstance.save();
+
+      expect(arcService.inviteStory).not.toHaveBeenCalled();
     });
   });
 });
