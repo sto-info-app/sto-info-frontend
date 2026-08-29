@@ -557,6 +557,22 @@ nav[class^='storytime-'] :where(a, [aria-current='page']) {
 // The note under a field that takes Markdown, with the mark that opens the
 // whole reference beside it. A row rather than two lines, so the mark belongs
 // to the note rather than floating under the field.
+// ---
+// It sits below its field rather than inside it, unlike every other field
+// hint. A `.lcars-input-container` clips its contents so the coloured label
+// follows the container's rounded corner, and anything opening out of one is
+// cut off at the edge of the box — which is the whole of a reference popup.
+// Below the field it opens over the form, which is where it can be read.
+.storytime-form app-storytime-markdown-hint,
+.storytime-panel app-storytime-markdown-hint {
+  display: block;
+  flex-basis: 100%;
+
+  // Closes the row's own gap, so the note reads as belonging to the field
+  // above it rather than as a line of its own.
+  margin-top: -0.85rem;
+}
+
 .storytime-markdown-hint {
   display: flex;
   align-items: flex-start;
