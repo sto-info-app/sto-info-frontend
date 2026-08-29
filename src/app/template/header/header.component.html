@@ -43,29 +43,43 @@
   <div class="right-frame-top">
     <div class="banner">{{ appTitle }}</div>
     <div class="data-cascade-button-group">
-      @if (isLoggedIn ? (unreadCount$ | async) : 0; as unreadCount) {
+      @if (showApiDegradedNotice$ | async) {
         <div
-          class="comms-alert"
-          id="header-comms-alert"
+          class="comms-alert comms-alert-warning"
+          id="header-api-degraded-alert"
+          role="status"
           aria-live="polite">
-          <span class="comms-alert-heading">Incoming Transmission</span>
-          <a
-            class="full-width-btn-link sunflower comms-alert-button"
-            [routerLink]="getRouteLink(appRoutes.NOTIFICATIONS)"
-            [attr.aria-label]="
-              unreadCount + ' unread notifications. Open notifications.'
-            ">
-            {{ unreadCount > 99 ? '99+' : unreadCount }} Unread
-          </a>
+          <span class="comms-alert-heading">Connection Unstable</span>
+          <span class="comms-alert-detail"
+            >Computer core connection unstable.<br />
+            Reconnecting... Please stand by.</span
+          >
         </div>
       } @else {
-        <div class="cascade-wrapper">
+        @if (isLoggedIn ? (unreadCount$ | async) : 0; as unreadCount) {
           <div
-            class="data-cascade"
-            id="default">
-            <div [innerHTML]="dataCascade"></div>
+            class="comms-alert"
+            id="header-comms-alert"
+            aria-live="polite">
+            <span class="comms-alert-heading">Incoming Transmission</span>
+            <a
+              class="full-width-btn-link sunflower comms-alert-button"
+              [routerLink]="getRouteLink(appRoutes.NOTIFICATIONS)"
+              [attr.aria-label]="
+                unreadCount + ' unread notifications. Open notifications.'
+              ">
+              {{ unreadCount > 99 ? '99+' : unreadCount }} Unread
+            </a>
           </div>
-        </div>
+        } @else {
+          <div class="cascade-wrapper">
+            <div
+              class="data-cascade"
+              id="default">
+              <div [innerHTML]="dataCascade"></div>
+            </div>
+          </div>
+        }
       }
       <nav id="nav-standard">
         <a
