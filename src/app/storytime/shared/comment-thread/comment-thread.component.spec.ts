@@ -133,18 +133,31 @@ describe('CommentThreadComponent', () => {
 
   // A comment that says neither who wrote it nor when reads as though it came
   // from nobody.
-  describe('the byline', () => {
+  // A comment is a panel like every other thing the feature lists, with who
+  // said it and when on the bar.
+  describe('the heading', () => {
     it('names the commenter and dates the comment', () => {
       create();
       const element = fixture.nativeElement as HTMLElement;
-      const byline = element.querySelector('.storytime-comments__byline');
+      const heading = element.querySelector('.storytime-panel-card__heading');
 
       expect(
-        byline?.querySelector('.storytime-comments__author')?.textContent,
+        heading?.querySelector('.storytime-panel-card__name')?.textContent,
       ).toContain('captain.picard');
-      expect(byline?.querySelector('time')?.getAttribute('datetime')).toBe(
+      expect(heading?.querySelector('time')?.getAttribute('datetime')).toBe(
         '2026-01-01T00:00:00.000Z',
       );
+    });
+
+    // The time is stamped in UTC and read wherever the reader is, so it has to
+    // say which of the two it is showing.
+    it('says which timezone the time is in', () => {
+      create();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector('time')
+          ?.textContent,
+      ).toMatch(/\d{2}:\d{2}\s\S+$/);
     });
 
     it('links a listed commenter to their profile', () => {
@@ -170,7 +183,7 @@ describe('CommentThreadComponent', () => {
       const element = fixture.nativeElement as HTMLElement;
 
       expect(
-        element.querySelector('.storytime-comments__author')?.textContent,
+        element.querySelector('.storytime-panel-card__name')?.textContent,
       ).toContain('captain.picard');
       expect(element.querySelector('a.storytime-comments__author')).toBeNull();
     });
@@ -185,9 +198,84 @@ describe('CommentThreadComponent', () => {
 
       expect(
         (fixture.nativeElement as HTMLElement).querySelector(
-          '.storytime-comments__author',
+          '.storytime-panel-card__name',
         )?.textContent,
       ).toContain('A former member');
+    });
+  });
+
+  // A conversation is one kind of thing all the way down, so the colour marks
+  // where one comment ends and the next begins.
+  describe('the colours a thread runs through', () => {
+    /**
+     * Reads the colour class each comment panel wears.
+     *
+     * @returns One class per panel, in the order they are shown.
+     */
+    const colours = (): (string | undefined)[] =>
+      [
+        ...(fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.storytime-comments__body',
+        ),
+      ].map(panel =>
+        [...panel.classList].find(name =>
+          name.startsWith('storytime-panel-card--comment-'),
+        ),
+      );
+
+    it('gives each comment in turn the next colour', () => {
+      commentService.getComments.mockReturnValue(
+        of([
+          buildComment(),
+          buildComment({ id: 'comment-2' }),
+          buildComment({ id: 'comment-3' }),
+        ]),
+      );
+
+      create();
+
+      expect(colours()).toEqual([
+        'storytime-panel-card--comment-0',
+        'storytime-panel-card--comment-1',
+        'storytime-panel-card--comment-2',
+      ]);
+    });
+
+    // A reply belongs to what it replies to, so the pair reads as one block.
+    it('gives a reply the colour of what it replies to', () => {
+      commentService.getComments.mockReturnValue(
+        of([
+          buildComment(),
+          buildComment({ id: 'comment-2' }),
+          buildComment({ id: 'reply-1', parentCommentId: 'comment-2' }),
+        ]),
+      );
+
+      create();
+
+      expect(colours()).toEqual([
+        'storytime-panel-card--comment-0',
+        'storytime-panel-card--comment-1',
+        'storytime-panel-card--comment-1',
+      ]);
+    });
+
+    // Two of the same colour are only far enough apart to read as unrelated
+    // once the cycle has run its length.
+    it('starts the cycle again once it runs out', () => {
+      commentService.getComments.mockReturnValue(
+        of(
+          Array.from({ length: 7 }, (_unused, position) =>
+            buildComment({ id: `comment-${position}` }),
+          ),
+        ),
+      );
+
+      create();
+      const shown = colours();
+
+      expect(shown).toHaveLength(7);
+      expect(shown[6]).toBe(shown[0]);
     });
   });
 

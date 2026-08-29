@@ -20,12 +20,12 @@
       }
 
       <ol class="storytime-comments__list">
-        @for (node of nodes; track node.comment.id) {
+        @for (node of nodes; track node.comment.id; let index = $index) {
           <li class="storytime-comments__comment">
             <ng-container
               *ngTemplateOutlet="
                 commentBody;
-                context: { $implicit: node.comment }
+                context: { $implicit: node.comment, colour: colourFor(index) }
               "></ng-container>
 
             @if (node.replies.length > 0) {
@@ -35,7 +35,7 @@
                     <ng-container
                       *ngTemplateOutlet="
                         commentBody;
-                        context: { $implicit: reply }
+                        context: { $implicit: reply, colour: colourFor(index) }
                       "></ng-container>
                   </li>
                 }
@@ -121,17 +121,21 @@
 
 <ng-template
   #commentBody
-  let-comment>
-  <article class="storytime-comments__body">
+  let-comment
+  let-colour="colour">
+  <article
+    class="storytime-panel-card storytime-comments__body"
+    [ngClass]="colour">
     <!--
-      Who said it and when. A comment without either reads as though it came
-      from nobody, which is not what a conversation looks like.
+      Who said it and when, on the bar every other panel in the feature puts
+      its name on. A comment without either reads as though it came from
+      nobody, which is not what a conversation looks like.
     -->
-    <p class="storytime-comments__byline">
+    <div class="storytime-panel-card__heading">
       @if (comment.author) {
         @if (comment.author.publiclyVisible) {
           <a
-            class="storytime-comments__author"
+            class="storytime-panel-card__name storytime-comments__author"
             [routerLink]="[
               '/',
               appRoutes.COMMUNITY,
@@ -142,155 +146,180 @@
             >{{ comment.author.username }}</a
           >
         } @else {
-          <span class="storytime-comments__author">{{
+          <span class="storytime-panel-card__name">{{
             comment.author.username
           }}</span>
         }
       } @else {
-        <span class="storytime-comments__author">A former member</span>
+        <span class="storytime-panel-card__name">A former member</span>
       }
-      <time [attr.datetime]="comment.createdAt">{{
-        comment.createdAt | date: 'medium'
-      }}</time>
-    </p>
 
-    @if (comment.status === statuses.VISIBLE) {
-      @if (editingId === comment.id) {
-        <form
-          class="storytime-comments__form"
-          (ngSubmit)="saveEdit()">
-          <div class="lcars-input-container gold">
-            <label [attr.for]="'edit-' + comment.id">Edit your comment</label>
-            <textarea
-              [id]="'edit-' + comment.id"
-              class="storytime-comments__input"
-              rows="3"
-              maxlength="2000"
-              [(ngModel)]="editDraft"
-              name="editDraft"></textarea>
-          </div>
-          <div class="storytime-comments__actions">
-            <button
-              class="lcars-btn lcars-btn-auto green"
-              type="submit"
-              [disabled]="isSaving || !editDraft.trim()">
-              Save
-            </button>
-            <button
-              class="lcars-btn lcars-btn-auto red"
-              type="button"
-              (click)="cancelEdit()">
-              Cancel
-            </button>
-          </div>
-        </form>
-      } @else {
-        <p class="storytime-comments__text">{{ comment.body }}</p>
-        @if (comment.editedAt) {
-          <p class="storytime-comments__edited">Edited.</p>
+      <span class="storytime-panel-card__marks">
+        <time
+          class="storytime-panel-card__badge"
+          [attr.datetime]="comment.createdAt"
+          >{{ comment.createdAt | date: 'd MMM y, HH:mm z' }}</time
+        >
+      </span>
+    </div>
+
+    <div class="storytime-panel-card__main">
+      <div class="storytime-panel-card__body">
+        @if (comment.status === statuses.VISIBLE) {
+          @if (editingId === comment.id) {
+            <form
+              class="storytime-comments__form"
+              (ngSubmit)="saveEdit()">
+              <div class="lcars-input-container gold">
+                <label [attr.for]="'edit-' + comment.id"
+                  >Edit your comment</label
+                >
+                <textarea
+                  [id]="'edit-' + comment.id"
+                  class="storytime-comments__input"
+                  rows="3"
+                  maxlength="2000"
+                  [(ngModel)]="editDraft"
+                  name="editDraft"></textarea>
+              </div>
+              <div class="storytime-comments__actions">
+                <button
+                  class="lcars-btn lcars-btn-auto green"
+                  type="submit"
+                  [disabled]="isSaving || !editDraft.trim()">
+                  Save
+                </button>
+                <button
+                  class="lcars-btn lcars-btn-auto red"
+                  type="button"
+                  (click)="cancelEdit()">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          } @else {
+            <p class="storytime-comments__text">{{ comment.body }}</p>
+            @if (comment.editedAt) {
+              <p class="storytime-comments__edited">Edited.</p>
+            }
+          }
+        } @else {
+          <p class="storytime-comments__silenced">
+            {{ silencedText(comment) }}
+          </p>
+          @if (comment.body) {
+            <p class="storytime-comments__text">{{ comment.body }}</p>
+          }
         }
-      }
-    } @else {
-      <p class="storytime-comments__silenced">{{ silencedText(comment) }}</p>
-      @if (comment.body) {
-        <p class="storytime-comments__text">{{ comment.body }}</p>
-      }
-    }
+      </div>
 
-    <div class="storytime-comments__controls">
-      @if (isMine(comment) && comment.status === statuses.VISIBLE) {
-        <button
-          class="cta-icon"
-          type="button"
-          title="Edit comment"
-          aria-label="Edit comment"
-          (click)="startEdit(comment)">
-          <i
-            class="fa-solid fa-user-pen"
-            aria-hidden="true"></i>
-        </button>
-        <button
-          class="cta-icon delete-icon"
-          type="button"
-          title="Delete comment"
-          aria-label="Delete comment"
-          [disabled]="isSaving"
-          (click)="deleteOwn(comment)">
-          <i
-            class="fa-solid fa-trash"
-            aria-hidden="true"></i>
-        </button>
-      }
+      @if (hasControls(comment)) {
+        <div class="storytime-panel-card__controls">
+          @if (isMine(comment) && comment.status === statuses.VISIBLE) {
+            <button
+              class="cta-icon"
+              type="button"
+              title="Edit comment"
+              aria-label="Edit comment"
+              (click)="startEdit(comment)">
+              <i
+                class="fa-solid fa-user-pen"
+                aria-hidden="true"></i>
+            </button>
+            <button
+              class="cta-icon delete-icon"
+              type="button"
+              title="Delete comment"
+              aria-label="Delete comment"
+              [disabled]="isSaving"
+              (click)="deleteOwn(comment)">
+              <i
+                class="fa-solid fa-trash"
+                aria-hidden="true"></i>
+            </button>
+          }
 
-      @if (isOwner && comment.status !== statuses.REMOVED_BY_ADMIN) {
-        <button
-          class="cta-icon"
-          type="button"
-          [disabled]="isSaving"
-          [title]="hideLabel(comment)"
-          [attr.aria-label]="hideLabel(comment)"
-          (click)="toggleHidden(comment)">
-          <i
-            class="fa-solid"
-            [class.fa-eye]="comment.status === statuses.HIDDEN_BY_OWNER"
-            [class.fa-eye-slash]="comment.status !== statuses.HIDDEN_BY_OWNER"
-            aria-hidden="true"></i>
-        </button>
-      }
+          @if (isOwner && comment.status !== statuses.REMOVED_BY_ADMIN) {
+            <button
+              class="cta-icon"
+              type="button"
+              [disabled]="isSaving"
+              [title]="hideLabel(comment)"
+              [attr.aria-label]="hideLabel(comment)"
+              (click)="toggleHidden(comment)">
+              <i
+                class="fa-solid"
+                [class.fa-eye]="comment.status === statuses.HIDDEN_BY_OWNER"
+                [class.fa-eye-slash]="
+                  comment.status !== statuses.HIDDEN_BY_OWNER
+                "
+                aria-hidden="true"></i>
+            </button>
+          }
 
-      <!--
+          <!--
         An administrator removing a comment under the content policy is not the
         same act as its author deleting it, and does not go to the same place:
         this one asks for a reason and shows it to the author. It is an icon
         beside the others so the row reads as one set of controls, and its own
         icon so the two are never mistaken for each other.
       -->
-      @if (isAdministrator && comment.status !== statuses.REMOVED_BY_ADMIN) {
-        <button
-          class="cta-icon delete-icon"
-          type="button"
-          [disabled]="isSaving"
-          title="Remove under the content policy"
-          aria-label="Remove under the content policy"
-          (click)="startRemove(comment.id)">
-          <i
-            class="fa-solid fa-ban"
-            aria-hidden="true"></i>
-        </button>
+          @if (
+            isAdministrator && comment.status !== statuses.REMOVED_BY_ADMIN
+          ) {
+            <button
+              class="cta-icon delete-icon"
+              type="button"
+              [disabled]="isSaving"
+              title="Remove under the content policy"
+              aria-label="Remove under the content policy"
+              (click)="startRemove(comment.id)">
+              <i
+                class="fa-solid fa-ban"
+                aria-hidden="true"></i>
+            </button>
+          }
+        </div>
       }
     </div>
 
+    <!--
+      Asking why sits under the whole row rather than inside the controls: it
+      is a form, and the strip beside the comment is for single presses.
+    -->
     @if (removingId === comment.id) {
-      <form
-        class="storytime-comments__form"
-        (ngSubmit)="confirmRemove()">
-        <div class="lcars-input-container red">
-          <label [attr.for]="'remove-' + comment.id"
-            >What the author is told</label
-          >
-          <textarea
-            [id]="'remove-' + comment.id"
-            class="storytime-comments__input"
-            rows="2"
-            maxlength="1000"
-            [(ngModel)]="removeDraft"
-            name="removeDraft"></textarea>
-        </div>
-        <div class="storytime-comments__actions">
-          <button
-            class="lcars-btn lcars-btn-auto cardinal"
-            type="submit"
-            [disabled]="isSaving || !removeDraft.trim()">
-            Remove comment
-          </button>
-          <button
-            class="lcars-btn lcars-btn-auto red"
-            type="button"
-            (click)="cancelRemove()">
-            Cancel
-          </button>
-        </div>
-      </form>
+      <div class="storytime-panel-card__body">
+        <form
+          class="storytime-comments__form"
+          (ngSubmit)="confirmRemove()">
+          <div class="lcars-input-container red">
+            <label [attr.for]="'remove-' + comment.id"
+              >What the author is told</label
+            >
+            <textarea
+              [id]="'remove-' + comment.id"
+              class="storytime-comments__input"
+              rows="2"
+              maxlength="1000"
+              [(ngModel)]="removeDraft"
+              name="removeDraft"></textarea>
+          </div>
+          <div class="storytime-comments__actions">
+            <button
+              class="lcars-btn lcars-btn-auto cardinal"
+              type="submit"
+              [disabled]="isSaving || !removeDraft.trim()">
+              Remove comment
+            </button>
+            <button
+              class="lcars-btn lcars-btn-auto red"
+              type="button"
+              (click)="cancelRemove()">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     }
   </article>
 </ng-template>

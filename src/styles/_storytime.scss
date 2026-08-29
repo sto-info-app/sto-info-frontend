@@ -1,4 +1,5 @@
 @use 'sass:color';
+@use 'sass:list';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 
@@ -295,12 +296,41 @@ $storytime-panel-colours: (
   'character': vars.$lcars-green,
   'crew': vars.$lcars-sky,
   'spotlight': vars.$lcars-gold,
-  'comment': vars.$lcars-bluey,
   'list': vars.$lcars-tangerine,
   'activity': vars.$lcars-orange,
   'invitation': vars.$lcars-cool,
   'moderation': vars.$lcars-red,
 );
+
+// A conversation is one kind of thing all the way down, so a colour cannot
+// mean what a comment is the way it does elsewhere. It marks where one comment
+// ends and the next begins instead: each in turn from this list, with a reply
+// taking its parent's so a thread reads as one block rather than as a run of
+// unrelated panels.
+// ---
+// Every one of them carries black at 4.5:1 or better, which is what lets the
+// name sit on the bar. Kept clear of the colours a moderation notice uses, so
+// a comment is never mistaken for a warning about one.
+$storytime-comment-colours: (
+  vars.$lcars-bluey,
+  vars.$lcars-perano,
+  vars.$lcars-tangerine,
+  vars.$lcars-sky,
+  vars.$lcars-gold,
+  vars.$lcars-green
+);
+
+@each $colour in $storytime-comment-colours {
+  $index: list.index($storytime-comment-colours, $colour) - 1;
+
+  .storytime-panel-card--comment-#{$index} {
+    @include storytime-panel-card($colour);
+
+    > .storytime-panel-card__heading {
+      @include storytime-panel-heading($colour);
+    }
+  }
+}
 
 @each $kind, $colour in $storytime-panel-colours {
   .storytime-panel-card--#{$kind} {
@@ -563,7 +593,6 @@ app-storytime-editor-actions {
 .storytime-character-list__controls,
 .storytime-arc-stories__order,
 .storytime-tag-admin__actions,
-.storytime-comments__controls,
 .storytime-comments__actions,
 .storytime-reading-list__controls,
 .storytime-reading-list__item-controls,
@@ -627,7 +656,6 @@ app-storytime-editor-actions {
 .storytime-character-list__controls,
 .storytime-arc-stories__order,
 .storytime-tag-admin__actions,
-.storytime-comments__controls,
 .storytime-reading-list__item-controls {
   gap: 1rem;
   font-size: 1.1rem;
@@ -2222,44 +2250,42 @@ $storytime-landing-colours: (
     list-style: none;
   }
 
+  // Each comment is a panel like every other thing the feature lists. The
+  // surface, the spine and the bar come from there; what is left is the room
+  // between one comment and the next.
   &__comment {
-    @include storytime-row;
+    list-style: none;
+    margin-bottom: 0.75rem;
   }
 
   // Replies are indented once and never again: the thread is one level deep,
-  // and the rule says so.
+  // and the rule says so. The spine down the left of each panel already marks
+  // them, so the indent needs no rule of its own beside it.
   &__replies {
-    margin: 0.75rem 0 0 1.5rem;
-    border-left: 2px solid vars.$lcars-grey-border;
-    padding-left: 0.75rem;
+    margin: 0 0 0 1.5rem;
   }
 
   &__reply {
     list-style: none;
-    padding: 0.5rem 0;
   }
 
-  // Who said it and when, above what they said.
-  &__byline {
-    @include storytime-meta;
-
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0 0 0.35rem;
-  }
-
-  &__author {
-    color: vars.$lcars-perano;
-    font-family: vars.$font-antonio;
-    letter-spacing: 0.04em;
-  }
-
+  // The name sits on the bar in black like every other panel's does, so it
+  // says it is a link by underlining rather than by changing colour.
   a.storytime-comments__author {
+    text-decoration: none;
+
     &:hover,
     &:focus-visible {
-      color: vars.$lcars-sky;
+      text-decoration: underline;
     }
+  }
+
+  // When it was said, in the corner a panel keeps for what it is rather than
+  // what it says.
+  &__body time {
+    font-family: vars.$font-antonio;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
   }
 
   &__text {
