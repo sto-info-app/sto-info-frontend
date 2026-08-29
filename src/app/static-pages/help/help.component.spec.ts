@@ -106,7 +106,7 @@ describe('HelpComponent', () => {
     createComponent(true);
 
     const bars = (fixture.nativeElement as HTMLElement).querySelectorAll(
-      'app-help-section',
+      'app-collapsible-section',
     );
 
     // One per topic, plus the "Still stuck?" section.
@@ -118,7 +118,7 @@ describe('HelpComponent', () => {
 
     const [guide] = HELP_TOPICS[0].guides;
     const firstToggle = (fixture.nativeElement as HTMLElement).querySelector(
-      'app-help-section button',
+      'app-collapsible-section button',
     ) as HTMLButtonElement;
 
     firstToggle.click();

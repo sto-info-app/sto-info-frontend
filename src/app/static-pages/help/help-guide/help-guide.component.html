@@ -11,7 +11,7 @@
     <p class="help-guide__summary">{{ guide.summary }}</p>
 
     @for (section of guide.sections; track section.heading) {
-      <app-help-section [heading]="section.heading">
+      <app-collapsible-section [heading]="section.heading">
         @for (paragraph of section.paragraphs; track paragraph) {
           <p>{{ paragraph }}</p>
         }
@@ -23,7 +23,7 @@
             }
           </ul>
         }
-      </app-help-section>
+      </app-collapsible-section>
     }
 
     @if (guide.relatedLinks) {
@@ -39,7 +39,7 @@
     }
 
     @if (otherGuides.length > 0) {
-      <app-help-section [heading]="'More ' + topicTitle + ' guides'">
+      <app-collapsible-section [heading]="'More ' + topicTitle + ' guides'">
         <ul class="lcars-list">
           @for (other of otherGuides; track other.slug) {
             <li>
@@ -50,7 +50,7 @@
             </li>
           }
         </ul>
-      </app-help-section>
+      </app-collapsible-section>
     }
 
     <div class="buttons-row">

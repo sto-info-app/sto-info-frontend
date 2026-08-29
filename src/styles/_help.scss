@@ -7,23 +7,6 @@
 // enough to keep a wall of prose comfortable to read. Everything is scoped by
 // the `help-` prefix its templates use.
 
-// A collapsible heading bar and its content, on both help pages.
-.help-section {
-  margin-bottom: 1.75rem;
-
-  .help-section__title {
-    margin: 0;
-    font-size: inherit;
-    font-weight: inherit;
-    line-height: inherit;
-  }
-
-  .help-section__content {
-    min-width: 0;
-    margin-top: 0.35rem;
-  }
-}
-
 #help-page {
   .help-topic__intro {
     margin-bottom: 1rem;
@@ -68,7 +51,7 @@
     color: vars.$lcars-sunflower;
   }
 
-  .help-section__content {
+  .collapsible-section__content {
     max-width: 70ch;
   }
 

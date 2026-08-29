@@ -145,7 +145,7 @@ describe('HelpGuideComponent', () => {
     createComponent(firstGuide.slug);
 
     const bars = (fixture.nativeElement as HTMLElement).querySelectorAll(
-      'app-help-section',
+      'app-collapsible-section',
     );
 
     // One per section, plus the list of other guides in the topic.
@@ -157,7 +157,7 @@ describe('HelpGuideComponent', () => {
 
     const [firstSection] = firstGuide.sections;
     const firstToggle = (fixture.nativeElement as HTMLElement).querySelector(
-      'app-help-section button',
+      'app-collapsible-section button',
     ) as HTMLButtonElement;
 
     firstToggle.click();

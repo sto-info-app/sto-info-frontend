@@ -1,6 +1,8 @@
-<section class="help-section">
-  <div class="lcars-text-bar">
-    <h2 class="help-section__title">
+<section class="collapsible-section">
+  <div
+    class="lcars-text-bar"
+    [ngClass]="barClass">
+    <h2 class="collapsible-section__title">
       <span>{{ heading }}</span>
     </h2>
     <button
@@ -20,7 +22,7 @@
 
   @if (isExpanded) {
     <div
-      class="help-section__content"
+      class="collapsible-section__content"
       [id]="contentId">
       <ng-content />
     </div>

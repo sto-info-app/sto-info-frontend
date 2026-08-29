@@ -1,19 +1,19 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { HelpSectionComponent } from './help-section.component';
+import { CollapsibleSectionComponent } from './collapsible-section.component';
 
 /** Hosts the section with something projected into it. */
 @Component({
   standalone: true,
-  imports: [HelpSectionComponent],
-  template: `<app-help-section heading="A heading">
+  imports: [CollapsibleSectionComponent],
+  template: `<app-collapsible-section heading="A heading">
     <p>Projected content.</p>
-  </app-help-section>`,
+  </app-collapsible-section>`,
 })
 class HostComponent {}
 
-describe('HelpSectionComponent', () => {
+describe('CollapsibleSectionComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
 
   /**
@@ -49,7 +49,7 @@ describe('HelpSectionComponent', () => {
     expect(hostText()).toContain('A heading');
   });
 
-  // A reader arriving at a guide wants to read it, not to open it first.
+  // A reader arriving at a page wants to read it, not to open it first.
   it('should start open', () => {
     expect(hostText()).toContain('Projected content.');
     expect(toggleButton().getAttribute('aria-expanded')).toBe('true');

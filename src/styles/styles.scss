@@ -700,6 +700,26 @@ button.lcars-btn-auto {
 }
 
 /* LCARS Standard Layouts */
+
+// An LCARS heading bar and the content it folds away. The bar carries a title
+// and a caret button, so the title has to give up the margin and weight a
+// heading normally brings or it pushes the caret off the bar.
+.collapsible-section {
+  margin-bottom: 1.75rem;
+
+  .collapsible-section__title {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+  }
+
+  .collapsible-section__content {
+    min-width: 0;
+    margin-top: 0.35rem;
+  }
+}
+
 .info-grid {
   @include mixins.lcars-info-grid;
 }
