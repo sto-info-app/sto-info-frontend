@@ -10,6 +10,7 @@ import {
   inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -20,6 +21,7 @@ import {
   StorytimeCommentStatus,
   StorytimeTargetType,
 } from 'src/app/models/storytime.models';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { CommentService } from '../../comment.service';
 
 /** One comment and the replies to it. */
@@ -53,9 +55,17 @@ export const SILENCED_TEXT: Record<StorytimeCommentStatus, string> = {
   selector: 'app-comment-thread',
   templateUrl: './comment-thread.component.html',
   standalone: true,
-  imports: [CommonModule, FormsModule, CollapsibleSectionComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    CollapsibleSectionComponent,
+  ],
 })
 export class CommentThreadComponent implements OnInit {
+  /** Route constants, for the link to a commenter's profile. */
+  readonly appRoutes = APP_ROUTES;
+
   /** What is being commented on. */
   @Input({ required: true }) targetType!: StorytimeTargetType;
 

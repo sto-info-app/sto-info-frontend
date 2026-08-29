@@ -9,6 +9,7 @@ import {
 } from 'src/app/models/storytime.models';
 import { CommentService } from '../../comment.service';
 import { CommentThreadComponent } from './comment-thread.component';
+import { provideRouter } from '@angular/router';
 
 const STORY_ID = 'story-1';
 const READER_ID = 'reader-1';
@@ -25,6 +26,7 @@ const buildComment = (
 ): StorytimeComment => ({
   id: 'comment-1',
   authorUserId: READER_ID,
+  author: { username: 'captain.picard', publiclyVisible: true },
   parentCommentId: null,
   body: 'A fine chapter.',
   status: StorytimeCommentStatus.VISIBLE,
@@ -86,6 +88,9 @@ describe('CommentThreadComponent', () => {
       providers: [
         { provide: CommentService, useValue: commentService },
         { provide: AuthService, useValue: authService },
+        // The byline links a commenter to their profile, and a router link
+        // cannot be built without one.
+        provideRouter([]),
       ],
     }).compileComponents();
   });
@@ -124,6 +129,66 @@ describe('CommentThreadComponent', () => {
 
     expect(element.querySelector('.storytime-comments')).toBeNull();
     expect(element.textContent).not.toContain('A fine chapter.');
+  });
+
+  // A comment that says neither who wrote it nor when reads as though it came
+  // from nobody.
+  describe('the byline', () => {
+    it('names the commenter and dates the comment', () => {
+      create();
+      const element = fixture.nativeElement as HTMLElement;
+      const byline = element.querySelector('.storytime-comments__byline');
+
+      expect(
+        byline?.querySelector('.storytime-comments__author')?.textContent,
+      ).toContain('captain.picard');
+      expect(byline?.querySelector('time')?.getAttribute('datetime')).toBe(
+        '2026-01-01T00:00:00.000Z',
+      );
+    });
+
+    it('links a listed commenter to their profile', () => {
+      create();
+
+      expect(
+        (fixture.nativeElement as HTMLElement)
+          .querySelector('a.storytime-comments__author')
+          ?.getAttribute('href'),
+      ).toBe('/community/registry/profiles/captain.picard');
+    });
+
+    it('names an unlisted commenter without linking them', () => {
+      commentService.getComments.mockReturnValue(
+        of([
+          buildComment({
+            author: { username: 'captain.picard', publiclyVisible: false },
+          }),
+        ]),
+      );
+
+      create();
+      const element = fixture.nativeElement as HTMLElement;
+
+      expect(
+        element.querySelector('.storytime-comments__author')?.textContent,
+      ).toContain('captain.picard');
+      expect(element.querySelector('a.storytime-comments__author')).toBeNull();
+    });
+
+    // The conversation outlives the accounts in it.
+    it('says a former member wrote it when the account has gone', () => {
+      commentService.getComments.mockReturnValue(
+        of([buildComment({ author: null })]),
+      );
+
+      create();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '.storytime-comments__author',
+        )?.textContent,
+      ).toContain('A former member');
+    });
   });
 
   it('says so when nobody has commented', () => {

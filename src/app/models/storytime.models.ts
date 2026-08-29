@@ -1187,6 +1187,8 @@ export enum StorytimeCommentStatus {
 export interface StorytimeComment {
   id: string;
   authorUserId: string;
+  /** Who wrote it, or null once they no longer have an account. */
+  author: StorytimeAuthor | null;
   parentCommentId: string | null;
   body: string | null;
   status: StorytimeCommentStatus;

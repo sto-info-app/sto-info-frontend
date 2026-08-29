@@ -2239,6 +2239,29 @@ $storytime-landing-colours: (
     padding: 0.5rem 0;
   }
 
+  // Who said it and when, above what they said.
+  &__byline {
+    @include storytime-meta;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 0.35rem;
+  }
+
+  &__author {
+    color: vars.$lcars-perano;
+    font-family: vars.$font-antonio;
+    letter-spacing: 0.04em;
+  }
+
+  a.storytime-comments__author {
+    &:hover,
+    &:focus-visible {
+      color: vars.$lcars-sky;
+    }
+  }
+
   &__text {
     color: vars.$lcars-white;
     white-space: pre-wrap;

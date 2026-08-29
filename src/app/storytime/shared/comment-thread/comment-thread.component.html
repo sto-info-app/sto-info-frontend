@@ -123,6 +123,37 @@
   #commentBody
   let-comment>
   <article class="storytime-comments__body">
+    <!--
+      Who said it and when. A comment without either reads as though it came
+      from nobody, which is not what a conversation looks like.
+    -->
+    <p class="storytime-comments__byline">
+      @if (comment.author) {
+        @if (comment.author.publiclyVisible) {
+          <a
+            class="storytime-comments__author"
+            [routerLink]="[
+              '/',
+              appRoutes.COMMUNITY,
+              'registry',
+              'profiles',
+              comment.author.username,
+            ]"
+            >{{ comment.author.username }}</a
+          >
+        } @else {
+          <span class="storytime-comments__author">{{
+            comment.author.username
+          }}</span>
+        }
+      } @else {
+        <span class="storytime-comments__author">A former member</span>
+      }
+      <time [attr.datetime]="comment.createdAt">{{
+        comment.createdAt | date: 'medium'
+      }}</time>
+    </p>
+
     @if (comment.status === statuses.VISIBLE) {
       @if (editingId === comment.id) {
         <form
