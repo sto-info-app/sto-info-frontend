@@ -911,6 +911,15 @@ p.storytime-fan-notice,
   }
 }
 
+// The facts under a Story's title, set as the site sets a fact and its name
+// everywhere else. Wrapping rather than a fixed two columns, because there are
+// four of them and they are short.
+.storytime-story__facts {
+  grid-template-columns: repeat(auto-fit, minmax(140px, max-content));
+  gap: 1rem 2.5rem;
+  margin-bottom: 1rem;
+}
+
 .storytime-story {
   &__banner,
   &__description,
@@ -928,12 +937,6 @@ p.storytime-fan-notice,
   &__summary {
     font-size: 1.05rem;
     color: vars.$lcars-white;
-  }
-
-  &__meta {
-    @include storytime-meta-list;
-
-    margin-bottom: 1rem;
   }
 
   &__progress {
@@ -1172,10 +1175,10 @@ p.storytime-fan-notice,
 // Characters and Crew
 // -----------------------------------------------------------------------------
 
+// One panel per row rather than a grid of narrow cards: a Character's name and
+// the line under it read across, and three to a row left every one of them
+// wrapping in a column too narrow for either.
 .storytime-cast {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
   padding: 0;
   margin: 0 0 1rem;
   list-style: none;
@@ -1199,31 +1202,46 @@ p.storytime-fan-notice,
   }
 }
 
+@media (width <= 900px) {
+  .storytime-character__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .storytime-character {
-  &__header,
-  &__identity,
-  &__profile-row {
+  // What the Character is down the main column, their picture and the ways out
+  // beside it — the shape a captain's own details page uses. Below a certain
+  // width the side column has nowhere to be, so it falls under the main one.
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  &__main,
+  &__side {
+    min-width: 0;
+  }
+
+  // The ways out, stacked so each pill is the full width of the column, which
+  // is how the captain page stacks its own.
+  &__navigation {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+
+    .lcars-btn {
+      width: 100% !important;
+    }
   }
 
   &__portrait {
-    width: 180px;
-    aspect-ratio: 1 / 1;
+    width: 100%;
+    aspect-ratio: 2 / 3;
     object-fit: cover;
     border-radius: 10px;
-  }
-
-  &__breadcrumb {
-    @include storytime-meta;
-
-    justify-content: flex-start;
-
-    a {
-      color: vars.$lcars-perano;
-    }
   }
 
   &__summary,
@@ -1232,8 +1250,8 @@ p.storytime-fan-notice,
     max-width: 70ch;
   }
 
-  &__profile {
-    @include storytime-panel-surface;
+  &__summary {
+    margin-bottom: 1rem;
   }
 
   &__traits {
@@ -2052,60 +2070,48 @@ $storytime-landing-colours: (
 // of a form. They are toggles reporting a count, not actions, so they stay the
 // bordered chip they have always been rather than becoming full LCARS pills.
 
+// Rating a work. Both are LCARS buttons carrying the thumb and its count, so
+// the two things a reader can do to a Story look like the other things they
+// can do to it rather than like a pair of chips.
 .storytime-reactions {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 
   &__button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: transparent;
-    border: 1px solid vars.$lcars-grey-border;
-    border-radius: 14px;
-    padding: 0.25rem 0.75rem;
-    color: vars.$lcars-grey-light;
-    cursor: pointer;
-    transition:
-      color 0.2s,
-      border-color 0.2s;
+    gap: 0.5rem;
 
-    &:hover:not(:disabled) {
-      color: vars.$lcars-sunflower;
-      border-color: vars.$lcars-sunflower;
+    // The pill's own gutter is set for a label; an icon and a number need far
+    // less, and the count would otherwise sit a third of the way across.
+    padding-left: 25px !important;
+
+    i {
+      font-size: 1.1rem;
     }
-
-    // What this reader chose, which has to be obvious at a glance or the
-    // button cannot be read as a toggle.
-    &--chosen {
-      color: vars.$lcars-black;
-      background: vars.$lcars-sunflower;
-      border-color: vars.$lcars-sunflower;
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-  }
-
-  &__label {
-    @include storytime-meta;
-
-    color: inherit;
   }
 
   &__count {
     font-family: vars.$font-antonio;
+    font-size: 1.1rem;
   }
 
+  // The score the two buttons add up to, named so it is not read as a third
+  // count of something.
   &__rating {
-    font-family: vars.$font-antonio;
-    font-size: 1.2rem;
-    color: vars.$lcars-white;
-    min-width: 2ch;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+
+    .label {
+      @include mixins.lcars-label;
+    }
+
+    .value {
+      @include mixins.lcars-value;
+
+      font-family: vars.$font-antonio;
+      font-size: 1.2rem;
+    }
   }
 
   &__note {
@@ -2117,44 +2123,26 @@ $storytime-landing-colours: (
   }
 }
 
+// Following a work. The count rides inside the button, because it is what the
+// button is about rather than a separate fact beside it.
 .storytime-follow {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
 
   &__button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    border-radius: 14px;
-    padding: 0.25rem 0.75rem;
-    font-family: vars.$font-antonio;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    background: transparent;
-    color: vars.$lcars-perano;
-    border: 1px solid vars.$lcars-perano;
-    cursor: pointer;
-
-    &:hover:not(:disabled) {
-      background: vars.$lcars-perano;
-      color: vars.$lcars-black;
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
-    // Already following, so the button offers to stop rather than to start.
-    &--following {
-      background: vars.$lcars-perano;
-      color: vars.$lcars-black;
-    }
+    gap: 0.5rem;
+    padding-left: 30px !important;
   }
 
+  // A dark chip on the button's own colour, so it reads on every state the
+  // button takes.
   &__count {
-    @include storytime-meta;
+    @include mixins.lcars-badge;
+
+    background: rgb(0 0 0 / 55%);
+    color: vars.$lcars-white;
+    font-family: vars.$font-antonio;
   }
 
   &__error {
@@ -2417,15 +2405,12 @@ $storytime-landing-colours: (
   }
 
   .storytime-arc-list__entry,
-  .storytime-character-list__entry,
-  .storytime-character__header,
-  .storytime-character__identity {
+  .storytime-character-list__entry {
     flex-direction: column;
   }
 
   .storytime-arc-list__image,
-  .storytime-character-list__portrait,
-  .storytime-character__portrait {
+  .storytime-character-list__portrait {
     width: 100%;
     max-width: 240px;
   }

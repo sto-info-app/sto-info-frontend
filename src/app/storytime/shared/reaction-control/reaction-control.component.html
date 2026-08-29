@@ -10,37 +10,40 @@
   @if (summary) {
     <button
       type="button"
-      class="storytime-reactions__button"
-      [class.storytime-reactions__button--chosen]="isMine(reactions.THUMBS_UP)"
+      class="lcars-btn lcars-btn-auto storytime-reactions__button"
+      [class.green]="isMine(reactions.THUMBS_UP)"
+      [class.bluey]="!isMine(reactions.THUMBS_UP)"
       [attr.aria-pressed]="isMine(reactions.THUMBS_UP)"
       [disabled]="!canReact || isSaving"
       [title]="canReact ? 'Thumbs up' : 'Sign in to rate this'"
       (click)="react(reactions.THUMBS_UP)">
-      <span aria-hidden="true">▲</span>
-      <span class="storytime-reactions__label">Thumbs up</span>
+      <i
+        class="fa-solid fa-thumbs-up"
+        aria-hidden="true"></i>
+      <span class="sr-only">Thumbs up</span>
       <span class="storytime-reactions__count">{{ summary.upVotes }}</span>
     </button>
 
-    <output
-      class="storytime-reactions__rating"
-      >
-      {{ summary.rating }}
-    </output>
-
     <button
       type="button"
-      class="storytime-reactions__button"
-      [class.storytime-reactions__button--chosen]="
-        isMine(reactions.THUMBS_DOWN)
-      "
+      class="lcars-btn lcars-btn-auto storytime-reactions__button"
+      [class.cardinal]="isMine(reactions.THUMBS_DOWN)"
+      [class.bluey]="!isMine(reactions.THUMBS_DOWN)"
       [attr.aria-pressed]="isMine(reactions.THUMBS_DOWN)"
       [disabled]="!canReact || isSaving"
       [title]="canReact ? 'Thumbs down' : 'Sign in to rate this'"
       (click)="react(reactions.THUMBS_DOWN)">
-      <span aria-hidden="true">▼</span>
-      <span class="storytime-reactions__label">Thumbs down</span>
+      <i
+        class="fa-solid fa-thumbs-down"
+        aria-hidden="true"></i>
+      <span class="sr-only">Thumbs down</span>
       <span class="storytime-reactions__count">{{ summary.downVotes }}</span>
     </button>
+
+    <output class="storytime-reactions__rating">
+      <span class="label">Rating</span>
+      <span class="value">{{ summary.rating }}</span>
+    </output>
 
     @if (!canReact) {
       <span class="storytime-reactions__note">Sign in to rate this.</span>

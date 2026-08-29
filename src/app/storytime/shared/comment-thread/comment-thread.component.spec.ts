@@ -380,9 +380,25 @@ describe('CommentThreadComponent', () => {
     it('offers the control only to the owner', () => {
       create();
 
-      const labels = (fixture.nativeElement.textContent as string) ?? '';
+      const titles = [...fixture.nativeElement.querySelectorAll('button')].map(
+        (button: HTMLButtonElement) => button.getAttribute('title'),
+      );
 
-      expect(labels).not.toContain('Hide from my page');
+      expect(titles).not.toContain('Hide from my page');
+    });
+
+    // The control is an icon, so what it does lives in its title and its
+    // accessible name rather than on its face — and has to say which way it
+    // is about to go.
+    it('says which way the control goes', () => {
+      create(true);
+
+      expect(component.hideLabel(buildComment())).toBe('Hide from my page');
+      expect(
+        component.hideLabel(
+          buildComment({ status: StorytimeCommentStatus.HIDDEN_BY_OWNER }),
+        ),
+      ).toBe('Show on my page');
     });
   });
 

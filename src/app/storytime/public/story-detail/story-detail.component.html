@@ -29,20 +29,26 @@
       </app-lcars-warning-message>
     }
 
-    <ul class="storytime-story__meta">
-      <li>
-        <span class="sr-only">Status: </span>
-        {{ completionLabels[story.completionState] }}
-      </li>
-      <li>
-        {{ story.publishedChapterCount }}
-        {{ story.publishedChapterCount === 1 ? 'Chapter' : 'Chapters' }}
-      </li>
-      <li>
-        <span class="sr-only">Rating: </span>
-        {{ story.rating }}
-      </li>
-    </ul>
+    <div class="info-grid storytime-story__facts">
+      <div class="info-item">
+        <span class="label">Status</span>
+        <span class="value">{{
+          completionLabels[story.completionState]
+        }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Content rating</span>
+        <span class="value">{{ ratingLabels[story.contentRating] }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Chapters</span>
+        <span class="value">{{ story.publishedChapterCount }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Rating</span>
+        <span class="value">{{ story.rating }}</span>
+      </div>
+    </div>
 
     @if (story.shortDescription) {
       <p class="storytime-story__summary">{{ story.shortDescription }}</p>

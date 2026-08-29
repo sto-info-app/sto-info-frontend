@@ -137,7 +137,7 @@ describe('StorytimeCharacterDetailComponent', () => {
     it('shows only the fields that have been filled in', () => {
       const element = render();
       const rows = element.querySelectorAll(
-        '.storytime-character__profile-row',
+        '.storytime-character__main .info-item',
       );
 
       expect(rows).toHaveLength(2);
@@ -172,7 +172,7 @@ describe('StorytimeCharacterDetailComponent', () => {
       const element = render();
 
       expect(
-        element.querySelectorAll('.storytime-character__profile-row'),
+        element.querySelectorAll('.storytime-character__main .info-item'),
       ).toHaveLength(1);
     });
 

@@ -258,6 +258,21 @@ export class CommentThreadComponent implements OnInit {
   }
 
   /**
+   * What the hide control does to this comment, said in words.
+   *
+   * The control is an icon, so the words live in its title and its accessible
+   * name rather than on its face.
+   *
+   * @param comment - The comment.
+   * @returns The label for the control.
+   */
+  hideLabel(comment: StorytimeComment): string {
+    return comment.status === StorytimeCommentStatus.HIDDEN_BY_OWNER
+      ? 'Show on my page'
+      : 'Hide from my page';
+  }
+
+  /**
    * Hides a comment from the reader's own page, or puts it back.
    *
    * @param comment - The comment.
