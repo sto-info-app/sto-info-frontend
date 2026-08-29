@@ -727,6 +727,47 @@ describe('CommentThreadComponent', () => {
     );
   });
 
+  // The controls sit in a strip of their own down the side of the panel, and
+  // an empty strip is still a strip.
+  describe('the controls strip', () => {
+    const THEIRS = { authorUserId: 'other' };
+
+    it('offers the owner the hide control on somebody else’s comment', () => {
+      create(true);
+
+      expect(component.hasControls(buildComment(THEIRS))).toBe(true);
+    });
+
+    it('offers an administrator the same on a comment they cannot reply to', () => {
+      authService.isLoggedInAsAdmin.mockReturnValue(true);
+
+      create();
+
+      expect(component.hasControls(buildComment(THEIRS))).toBe(true);
+    });
+
+    // Nothing is left to do to a comment an administrator has already removed.
+    it('offers the owner nothing once an administrator has removed it', () => {
+      create(true);
+
+      expect(
+        component.hasControls(
+          buildComment({
+            ...THEIRS,
+            status: StorytimeCommentStatus.REMOVED_BY_ADMIN,
+          }),
+          true,
+        ),
+      ).toBe(false);
+    });
+
+    it('offers a plain reader nothing on somebody else’s comment', () => {
+      create();
+
+      expect(component.hasControls(buildComment(THEIRS))).toBe(false);
+    });
+  });
+
   it('reads the thread back after a change', () => {
     create();
     commentService.getComments.mockClear();
