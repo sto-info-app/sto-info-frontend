@@ -30,14 +30,29 @@
     }
 
     <div class="info-grid storytime-story__facts">
+      <!--
+        Both of these stand for a decision the creator made about somebody
+        else's reading, and neither word explains itself. The same help the
+        editor offers the creator is offered here to the reader.
+      -->
       <div class="info-item">
-        <span class="label">Status</span>
+        <div class="label storytime-story__fact-label">
+          <span>Status</span>
+          <app-storytime-setting-help
+            label="Status"
+            [options]="completionOptions"></app-storytime-setting-help>
+        </div>
         <span class="value">{{
           completionLabels[story.completionState]
         }}</span>
       </div>
       <div class="info-item">
-        <span class="label">Content rating</span>
+        <div class="label storytime-story__fact-label">
+          <span>Content rating</span>
+          <app-storytime-setting-help
+            label="Content rating"
+            [options]="ratingOptions"></app-storytime-setting-help>
+        </div>
         <span class="value">{{ ratingLabels[story.contentRating] }}</span>
       </div>
       <div class="info-item">

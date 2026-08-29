@@ -12,8 +12,6 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import {
-  CONTENT_RATING_DESCRIPTIONS,
-  CONTENT_RATING_LABELS,
   CompletionState,
   ContentRating,
   ManagedStory,
@@ -38,8 +36,8 @@ import { TagPickerComponent } from '../../shared/tag-picker/tag-picker.component
 import { createWorkForm } from '../../shared/work-form.factory';
 import { StoryService } from '../../story.service';
 import {
-  COMPLETION_STATE_DESCRIPTIONS,
-  COMPLETION_STATE_LABELS,
+  COMPLETION_STATE_OPTIONS,
+  CONTENT_RATING_OPTIONS,
   VISIBILITY_DESCRIPTIONS,
   VISIBILITY_LABELS,
 } from '../../storytime.constants';
@@ -94,19 +92,11 @@ export class StoryEditorComponent implements OnInit {
   /** Languages the server will accept. */
   languages: StorytimeLanguage[] = [];
 
-  /** Rating choices and their creator-facing explanations. */
-  readonly ratingOptions = Object.values(ContentRating).map(rating => ({
-    value: rating,
-    label: CONTENT_RATING_LABELS[rating],
-    description: CONTENT_RATING_DESCRIPTIONS[rating],
-  }));
+  /** Rating choices, explained as the Story page explains them. */
+  readonly ratingOptions = CONTENT_RATING_OPTIONS;
 
-  /** Completion choices and their creator-facing explanations. */
-  readonly completionOptions = Object.values(CompletionState).map(state => ({
-    value: state,
-    label: COMPLETION_STATE_LABELS[state],
-    description: COMPLETION_STATE_DESCRIPTIONS[state],
-  }));
+  /** Completion choices, explained as the Story page explains them. */
+  readonly completionOptions = COMPLETION_STATE_OPTIONS;
 
   /** Visibility choices and their creator-facing explanations. */
   readonly visibilityOptions = Object.values(StorytimeVisibility).map(

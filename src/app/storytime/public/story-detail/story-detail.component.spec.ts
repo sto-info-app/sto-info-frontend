@@ -248,6 +248,64 @@ describe('StoryDetailComponent', () => {
     expect(fixture.componentInstance.needsRatingWarning).toBe(false);
   });
 
+  describe('the facts that need explaining', () => {
+    /**
+     * Reads a fact's help control.
+     *
+     * Matched on the start of the caption rather than anywhere in it: the
+     * explanation lives inside the label, so a label carrying help reads as
+     * its caption followed by every word of that explanation.
+     *
+     * @param element - The rendered page.
+     * @param name - The fact's caption.
+     * @returns The control beside that caption, or null when it has none.
+     */
+    const helpFor = (element: HTMLElement, name: string): Element | null =>
+      [...element.querySelectorAll('.info-item')]
+        .find(item =>
+          item.querySelector('.label')?.textContent?.trim().startsWith(name),
+        )
+        ?.querySelector('app-storytime-setting-help') ?? null;
+
+    // A rating and a status are each one word standing for a decision about
+    // somebody else's reading, and neither word explains itself.
+    it.each([['Status'], ['Content rating']])('offers help on %s', name => {
+      expect(helpFor(render(), name)).not.toBeNull();
+    });
+
+    it('leaves the facts that speak for themselves alone', () => {
+      const element = render();
+
+      expect(helpFor(element, 'Chapters')).toBeNull();
+    });
+
+    it('explains every rating there is', () => {
+      const element = render();
+      const help = helpFor(element, 'Content rating');
+
+      expect(help?.textContent).toContain('General');
+      expect(help?.textContent).toContain('Mature');
+      expect(help?.textContent).toContain('Adults Only');
+    });
+
+    it('explains every status there is', () => {
+      const element = render();
+      const help = helpFor(element, 'Status');
+
+      expect(help?.textContent).toContain('The Story is still being written.');
+      expect(help?.textContent).toContain(
+        'The Story will not receive any more Chapters.',
+      );
+    });
+
+    // Closed until asked for: the page is read, not interrogated.
+    it('keeps the explanation out of the way until it is opened', () => {
+      const details = helpFor(render(), 'Status')?.querySelector('details');
+
+      expect((details as HTMLDetailsElement | null)?.open).toBe(false);
+    });
+  });
+
   // Artwork is optional: no banner must mean no image element at all.
   it('renders no banner when the Story has none', () => {
     const element = render();

@@ -925,6 +925,39 @@ p.storytime-fan-notice,
   margin-bottom: 1rem;
 }
 
+// A fact whose name needs explaining carries the same help control a setting
+// does, beside the name rather than above the value.
+.storytime-story__fact-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  // The control is sized for a form row, where it sits alone at the end of a
+  // line. Here it stands next to a caption a third of its height, and full
+  // size would make the row about the question mark rather than the fact.
+  .storytime-setting-help {
+    flex: 0 0 18px;
+  }
+
+  .storytime-setting-help__trigger {
+    width: 18px;
+    height: 18px;
+    font-size: 13px;
+  }
+
+  // Elsewhere the trigger sits at the right-hand end of its row and the popup
+  // hangs back to the left of it. These are at the left of the page, so it
+  // opens the other way or it opens off the edge.
+  // The explanation is sentences, and it is inside a label that puts its
+  // caption in capitals — which the sentences inherit, and three paragraphs
+  // shouted at a reader is not an explanation.
+  .storytime-setting-help__popup {
+    right: auto;
+    left: 0;
+    text-transform: none;
+  }
+}
+
 .storytime-story {
   &__banner,
   &__description,
