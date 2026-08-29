@@ -169,7 +169,7 @@
   @if (newest.length === 0) {
     <p class="storytime-empty">{{ copy.LANDING_EMPTY }}</p>
   } @else {
-    <div class="storytime-story-grid">
+    <div class="storytime-story-list">
       @for (story of newest; track story.id) {
         <app-story-card [story]="story"></app-story-card>
       }
@@ -181,7 +181,7 @@
       <span>Recently Updated</span>
     </div>
 
-    <div class="storytime-story-grid">
+    <div class="storytime-story-list">
       @for (story of updated; track story.id) {
         <app-story-card [story]="story"></app-story-card>
       }
@@ -189,11 +189,11 @@
   }
 
   <nav
-    class="buttons-row"
+    class="storytime-page-actions"
     aria-label="Storytime publishing documents">
     <a
+      class="lcars-btn lcars-btn-auto sky"
       [routerLink]="['/', appRoutes.STORYTIME, 'policies']"
-      class="sky"
       >Policies &amp; Terms</a
     >
   </nav>

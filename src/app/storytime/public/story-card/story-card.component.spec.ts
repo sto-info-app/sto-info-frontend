@@ -65,15 +65,20 @@ describe('StoryCardComponent', () => {
     expect(element.textContent).toContain('Ongoing');
   });
 
-  it('pluralises the Chapter count', () => {
-    expect(render(buildStory()).textContent).toContain('3 Chapters');
-  });
+  // Every fact is named, so a reader does not have to work out what a bare
+  // word or number in a row of them is meant to be.
+  it('names each fact it shows', () => {
+    const element = render(buildStory());
+    const facts = [...element.querySelectorAll('.info-item')].map(item => [
+      item.querySelector('.label')?.textContent,
+      item.querySelector('.value')?.textContent?.trim(),
+    ]);
 
-  it('uses the singular for one Chapter', () => {
-    const element = render(buildStory({ publishedChapterCount: 1 }));
-
-    expect(element.textContent).toContain('1 Chapter');
-    expect(element.textContent).not.toContain('1 Chapters');
+    expect(facts).toEqual([
+      ['Content rating', 'General'],
+      ['Status', 'Ongoing'],
+      ['Chapters', '3'],
+    ]);
   });
 
   // Artwork is optional throughout Storytime: a missing image must render as

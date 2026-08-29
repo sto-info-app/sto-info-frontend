@@ -17,7 +17,7 @@
     @if (stories.length === 0) {
       <p class="storytime-empty">{{ copy.LANDING_EMPTY }}</p>
     } @else {
-      <div class="storytime-story-grid">
+      <div class="storytime-story-list">
         @for (story of stories; track story.id) {
           <app-story-card [story]="story"></app-story-card>
         }

@@ -310,9 +310,9 @@ describe('StorytimeLandingComponent', () => {
     it('presents both lists as the shared Story card', () => {
       const element = render();
 
-      expect(element.querySelectorAll('.storytime-story-grid')).toHaveLength(2);
+      expect(element.querySelectorAll('.storytime-story-list')).toHaveLength(2);
       expect(
-        element.querySelectorAll('.storytime-story-grid app-story-card').length,
+        element.querySelectorAll('.storytime-story-list app-story-card').length,
       ).toBeGreaterThan(0);
     });
 

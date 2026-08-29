@@ -858,64 +858,67 @@ p.storytime-fan-notice,
 // Stories and Arcs
 // -----------------------------------------------------------------------------
 
-.storytime-story-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1rem;
+// One Story to a row, each the full width of the page, so a reader compares
+// them down a column rather than across a grid of cards.
+.storytime-story-list {
   padding: 0;
   margin: 0 0 1rem;
   list-style: none;
 }
 
-// A grid stretches its items to the tallest in the row, and the item is the
-// element the component renders into rather than the card inside it — so a
-// card shorter than its neighbours stopped partway down its cell and left a
-// strip of page showing beneath it. Both have to fill the row for the cards to
-// end level, which is the whole point of putting them in a grid.
-.storytime-story-grid app-story-card,
-.storytime-story-grid .storytime-panel-card--story {
-  height: 100%;
-}
-
-.storytime-story-grid app-story-card {
+// The component renders into an element of its own, which is inline until
+// told otherwise and would leave every panel sharing a line.
+.storytime-story-list app-story-card {
   display: block;
 }
 
 // A Story summarised for a listing. The shape and the colour come from the
-// shared panel; what is left is the artwork and the two lines under the name.
+// shared panel; what is left is the picture at the left and the facts beside
+// it, laid out as a captain card lays out the same two things.
 .storytime-story-card {
+  // The frame the picture sits in, sized and bordered as a captain's is.
   &__image {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
+    flex: 0 0 auto;
+    width: 100px;
+    height: 100px;
+    margin: 0.75rem 0 0.75rem 1rem;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border: 2px solid vars.$lcars-c47;
+      background: rgb(0 0 0 / 40%);
+    }
   }
 
-  // The body fills the card, so a row of cards ends its meta lines level
-  // however much summary each of them has.
   &__body {
     display: flex;
-    flex: 1;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   &__summary {
     margin: 0;
     color: vars.$lcars-white;
-    font-size: 0.9rem;
-    flex: 1;
+    font-size: 0.95rem;
+    max-width: 80ch;
   }
 
-  &__meta {
-    @include storytime-meta-list;
+  // The facts wrap rather than holding a fixed two columns: there are three of
+  // them and they are short, and a Story panel is the full width of the page.
+  // Named alongside the grid it varies, because the site's own two-column rule
+  // is written after this file and would otherwise win on source order.
+  &__facts.info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, max-content));
+    gap: 0.75rem 2.5rem;
   }
 }
 
 // The facts under a Story's title, set as the site sets a fact and its name
 // everywhere else. Wrapping rather than a fixed two columns, because there are
-// four of them and they are short. Named alongside the grid it varies, because
-// the site's own rule is written after this file and would otherwise win on
-// source order.
+// four of them and they are short.
 .storytime-story__facts.info-grid {
   grid-template-columns: repeat(auto-fit, minmax(140px, max-content));
   gap: 1rem 2.5rem;
