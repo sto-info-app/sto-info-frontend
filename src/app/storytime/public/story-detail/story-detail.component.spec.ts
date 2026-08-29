@@ -332,6 +332,32 @@ describe('StoryDetailComponent', () => {
       expect(element.textContent).toContain('Chapter One');
     });
 
+    // The whole panel opens the thing, but a heading that happens to be a link
+    // is not obviously a way in, so each row carries a control that says so.
+    it('offers a way into each Chapter and each Character', () => {
+      const element = render();
+      const chapterCta = element.querySelector(
+        '.storytime-chapter-list .storytime-panel-card__controls a',
+      );
+
+      expect(chapterCta?.getAttribute('href')).toBe(
+        '/storytime/stories/a-story/chapters/chapter-one',
+      );
+      expect(chapterCta?.getAttribute('aria-label')).toBe('Read Chapter One');
+
+      tabButtons(element)[1].click();
+      fixture.detectChanges();
+
+      const castCta = element.querySelector(
+        '.storytime-cast .storytime-panel-card__controls a',
+      );
+
+      expect(castCta?.getAttribute('href')).toBe(
+        '/storytime/stories/a-story/characters/captain-shran',
+      );
+      expect(castCta?.getAttribute('aria-label')).toBe('View Captain Shran');
+    });
+
     it('marks the chosen tab for a screen reader', () => {
       const element = render();
       const [chapters, cast] = tabButtons(element);
@@ -378,18 +404,52 @@ describe('StoryDetailComponent', () => {
 
     it('names the author among the facts', () => {
       storyService.getStory.mockReturnValue(
-        of(buildStory({ authorUsername: 'captain.picard' })),
+        of(
+          buildStory({
+            author: { username: 'captain.picard', publiclyVisible: true },
+          }),
+        ),
       );
 
       expect(factFor(render(), 'Author')).toBe('captain.picard');
     });
 
+    // A name leads somewhere only when its owner has chosen to be listed.
+    it('links a listed author to their profile', () => {
+      storyService.getStory.mockReturnValue(
+        of(
+          buildStory({
+            author: { username: 'captain.picard', publiclyVisible: true },
+          }),
+        ),
+      );
+
+      expect(
+        render()
+          .querySelector('.storytime-facts__author')
+          ?.getAttribute('href'),
+      ).toBe('/community/registry/profiles/captain.picard');
+    });
+
+    it('names an unlisted author without linking them', () => {
+      storyService.getStory.mockReturnValue(
+        of(
+          buildStory({
+            author: { username: 'captain.picard', publiclyVisible: false },
+          }),
+        ),
+      );
+
+      const element = render();
+
+      expect(factFor(element, 'Author')).toBe('captain.picard');
+      expect(element.querySelector('.storytime-facts__author')).toBeNull();
+    });
+
     // The Story is still readable when the account behind it has gone; it
     // simply stops saying whose it was.
     it('says nothing when the account has gone', () => {
-      storyService.getStory.mockReturnValue(
-        of(buildStory({ authorUsername: null })),
-      );
+      storyService.getStory.mockReturnValue(of(buildStory({ author: null })));
 
       expect(factFor(render(), 'Author')).toBeNull();
     });

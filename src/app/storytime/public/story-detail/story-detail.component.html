@@ -53,10 +53,31 @@
         </div>
         <span class="value">{{ ratingLabels[story.contentRating] }}</span>
       </div>
-      @if (story.authorUsername) {
+      @if (story.author) {
         <div class="info-item">
           <span class="label">Author</span>
-          <span class="value">{{ story.authorUsername }}</span>
+          <span class="value">
+            <!--
+              A name only leads somewhere when its owner has chosen to be
+              listed in the registry. Everybody else is credited by name and
+              left alone, which is what that setting is for.
+            -->
+            @if (story.author.publiclyVisible) {
+              <a
+                class="storytime-facts__author"
+                [routerLink]="[
+                  '/',
+                  appRoutes.COMMUNITY,
+                  'registry',
+                  'profiles',
+                  story.author.username,
+                ]"
+                >{{ story.author.username }}</a
+              >
+            } @else {
+              {{ story.author.username }}
+            }
+          </span>
         </div>
       }
       <div class="info-item">
@@ -226,13 +247,39 @@
                 }
               </a>
 
-              @if (chapter.synopsis) {
+              <!--
+                The whole panel opens the Chapter, but a heading that happens
+                to be a link is not obviously a way in. The control says so,
+                and sits in the strip a panel keeps for its controls.
+              -->
+              <div class="storytime-panel-card__main">
                 <div class="storytime-panel-card__body">
-                  <p class="storytime-chapter-list__synopsis">
-                    {{ chapter.synopsis }}
-                  </p>
+                  @if (chapter.synopsis) {
+                    <p class="storytime-chapter-list__synopsis">
+                      {{ chapter.synopsis }}
+                    </p>
+                  }
                 </div>
-              }
+
+                <div class="storytime-panel-card__controls">
+                  <a
+                    class="cta-icon"
+                    [routerLink]="[
+                      '/',
+                      appRoutes.STORYTIME,
+                      'stories',
+                      storySlug,
+                      'chapters',
+                      chapter.slug,
+                    ]"
+                    [title]="'Read ' + chapter.title"
+                    [attr.aria-label]="'Read ' + chapter.title">
+                    <i
+                      class="fa-solid fa-book-open"
+                      aria-hidden="true"></i>
+                  </a>
+                </div>
+              </div>
             </li>
           }
         </ol>
@@ -261,16 +308,37 @@
                 <span class="storytime-panel-card__name">{{ cast.name }}</span>
               </a>
 
-              <div class="storytime-panel-card__body storytime-cast__member">
-                @if (cast.portraitImageThumbnailUrl) {
-                  <img
-                    class="storytime-cast__portrait"
-                    [src]="cast.portraitImageThumbnailUrl"
-                    [alt]="cast.portraitImageAlt ?? ''" />
-                }
-                @if (cast.shortBio) {
-                  <p class="storytime-cast__bio">{{ cast.shortBio }}</p>
-                }
+              <div class="storytime-panel-card__main">
+                <div class="storytime-panel-card__body storytime-cast__member">
+                  @if (cast.portraitImageThumbnailUrl) {
+                    <img
+                      class="storytime-cast__portrait"
+                      [src]="cast.portraitImageThumbnailUrl"
+                      [alt]="cast.portraitImageAlt ?? ''" />
+                  }
+                  @if (cast.shortBio) {
+                    <p class="storytime-cast__bio">{{ cast.shortBio }}</p>
+                  }
+                </div>
+
+                <div class="storytime-panel-card__controls">
+                  <a
+                    class="cta-icon"
+                    [routerLink]="[
+                      '/',
+                      appRoutes.STORYTIME,
+                      'stories',
+                      storySlug,
+                      'characters',
+                      cast.slug,
+                    ]"
+                    [title]="'View ' + cast.name"
+                    [attr.aria-label]="'View ' + cast.name">
+                    <i
+                      class="fa-solid fa-eye"
+                      aria-hidden="true"></i>
+                  </a>
+                </div>
               </div>
             </li>
           }
