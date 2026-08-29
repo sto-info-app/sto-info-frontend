@@ -229,6 +229,12 @@ describe('StoryDetailComponent', () => {
     expect(
       element.querySelector('.storytime-story__description')?.innerHTML,
     ).toContain('Rendered');
+    // Bound as a plain string, so Angular's sanitizer runs on it and takes the
+    // server's block id with it. Nothing anchors to a description, so losing
+    // the id costs nothing and the warning it logs is expected.
+    expect(
+      element.querySelector('.storytime-story__description')?.innerHTML,
+    ).not.toContain('id="b1"');
   });
 
   it('warns about a Mature rating', () => {

@@ -191,6 +191,12 @@ describe('ArcDetailComponent', () => {
     expect(
       element.querySelector('.storytime-arc__description')?.innerHTML,
     ).toContain('A curated order.');
+    // Bound as a plain string, so Angular's sanitizer runs on it and takes the
+    // server's block id with it. Nothing anchors to a description, so losing
+    // the id costs nothing and the warning it logs is expected.
+    expect(
+      element.querySelector('.storytime-arc__description')?.innerHTML,
+    ).not.toContain('id="b1"');
   });
 
   // The lang attribute lets a screen reader pronounce the Arc correctly.
