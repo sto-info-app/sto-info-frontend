@@ -82,6 +82,31 @@
   text-transform: uppercase;
 }
 
+// How far through something a reader is. A `progress` element is inline and
+// carries a default width of its own, so left alone it renders as a short bar
+// the width of a text field with whatever follows it sitting on the same line —
+// which is how an Arc's "continue reading" link ended up welded to the end of
+// its own progress bar. Three surfaces draw one of these, so they draw it from
+// here.
+@mixin storytime-progress-bar {
+  display: block;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: vars.$lcars-grey-border;
+  overflow: hidden;
+  appearance: none;
+
+  &::-webkit-progress-bar { // NOSONAR
+    background: vars.$lcars-grey-border;
+  }
+
+  &::-webkit-progress-value, // NOSONAR
+  &::-moz-progress-bar {
+    background: vars.$lcars-green;
+  }
+}
+
 // Anything the reader is told: an error, a status, a note.
 @mixin storytime-message($colour) {
   font-size: 0.9rem;
@@ -752,20 +777,7 @@ p.storytime-fan-notice,
   }
 
   &__progress-bar {
-    height: 8px;
-    border-radius: 4px;
-    background: vars.$lcars-grey-border;
-    overflow: hidden;
-    appearance: none;
-
-    &::-webkit-progress-bar {
-      background: vars.$lcars-grey-border;
-    }
-
-    &::-webkit-progress-value,
-    &::-moz-progress-bar {
-      background: vars.$lcars-green;
-    }
+    @include storytime-progress-bar;
   }
 
   &__progress-summary,
@@ -807,20 +819,7 @@ p.storytime-fan-notice,
   }
 
   &__progress-bar {
-    height: 8px;
-    border-radius: 4px;
-    background: vars.$lcars-grey-border;
-    overflow: hidden;
-    appearance: none;
-
-    &::-webkit-progress-bar {
-      background: vars.$lcars-grey-border;
-    }
-
-    &::-webkit-progress-value,
-    &::-moz-progress-bar {
-      background: vars.$lcars-green;
-    }
+    @include storytime-progress-bar;
   }
 
   &__progress-summary {
@@ -829,6 +828,7 @@ p.storytime-fan-notice,
 
   &__continue {
     display: inline-block;
+    margin-top: 0.75rem;
     text-decoration: none;
   }
 
@@ -1474,21 +1474,9 @@ $storytime-record-statuses: (
   }
 
   &__bar {
-    height: 8px;
-    border-radius: 4px;
-    background: vars.$lcars-grey-border;
-    overflow: hidden;
+    @include storytime-progress-bar;
+
     margin: 0.5rem 0;
-    appearance: none;
-
-    &::-webkit-progress-bar {
-      background: vars.$lcars-grey-border;
-    }
-
-    &::-webkit-progress-value,
-    &::-moz-progress-bar {
-      background: vars.$lcars-green;
-    }
   }
 
   &__new {
