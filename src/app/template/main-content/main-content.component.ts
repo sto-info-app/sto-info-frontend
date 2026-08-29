@@ -135,10 +135,15 @@ export class MainContentComponent implements OnDestroy {
   /**
    * Determines whether the current route is the service interruption route.
    *
+   * Compares against the router's own form of the address — leading slash,
+   * without any query string or fragment — so a visitor sent here by a guard
+   * still gets the interruption panel before the route's component activates.
+   *
    * @returns True if the current route is the service interruption route, false otherwise.
    */
   get isServiceInterruptionRoute(): boolean {
-    return this._router.url === this.appRoutes.SERVICE_INTERRUPTION;
+    const path = this._router.url.split(/[?#]/)[0];
+    return path === `/${this.appRoutes.SERVICE_INTERRUPTION}`;
   }
 
   /**

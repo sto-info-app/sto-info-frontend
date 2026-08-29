@@ -293,7 +293,16 @@ describe('MainContentComponent', () => {
   describe('Service interruption detection', () => {
     it('should detect service interruption route', () => {
       Object.defineProperty(router, 'url', {
-        get: () => APP_ROUTES.SERVICE_INTERRUPTION,
+        get: () => `/${APP_ROUTES.SERVICE_INTERRUPTION}`,
+      });
+      expect(component.isServiceInterruptionRoute).toBe(true);
+    });
+
+    // Guards send visitors here with the router's own form of the address, so
+    // the getter has to recognise that form rather than the bare constant.
+    it('should detect the service interruption route with a query string', () => {
+      Object.defineProperty(router, 'url', {
+        get: () => `/${APP_ROUTES.SERVICE_INTERRUPTION}?returnUrl=%2Fnews`,
       });
       expect(component.isServiceInterruptionRoute).toBe(true);
     });
