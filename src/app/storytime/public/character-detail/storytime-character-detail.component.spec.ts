@@ -145,7 +145,9 @@ describe('StorytimeCharacterDetailComponent', () => {
       expect(element.textContent).toContain('Captain');
     });
 
-    it('shows no profile at all when nothing is filled in', () => {
+    // The panel stays, because the page's shape should not change with the
+    // data; what it says is that there is nothing to say.
+    it('says so when nothing is filled in', () => {
       characterService.getCharacter.mockReturnValue(
         of(
           buildResponse({
@@ -156,7 +158,12 @@ describe('StorytimeCharacterDetailComponent', () => {
 
       const element = render();
 
-      expect(element.querySelector('.storytime-character__profile')).toBeNull();
+      expect(
+        element.querySelectorAll('.storytime-character__main .info-item'),
+      ).toHaveLength(0);
+      expect(element.textContent).toContain(
+        'Nothing has been recorded about them yet.',
+      );
     });
 
     // An empty string is not a value worth a row of its own.
