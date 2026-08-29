@@ -43,6 +43,14 @@ export class ContentPolicyPanelComponent {
   /** The Story the terms are being accepted for. */
   @Input({ required: true }) story!: ManagedStory;
 
+  /**
+   * What to call the panel where it stands as a block of the page.
+   *
+   * Left unset inside a row of somebody's own work, where the card around it
+   * already names the Story and a second heading bar would say it twice.
+   */
+  @Input() heading = '';
+
   /** Announces the accepted Story, so the caller can show its new state. */
   @Output() readonly accepted = new EventEmitter<ManagedStory>();
 

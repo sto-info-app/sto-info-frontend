@@ -1,44 +1,58 @@
 @if (isNeeded) {
-  <div class="storytime-panel storytime-dashboard__policy">
-    @if (errorMessage) {
-      <app-lcars-error-message
-        title="Could not record that"
-        [message]="errorMessage"></app-lcars-error-message>
+  <section class="storytime-section storytime-policy-acceptance">
+    <!--
+      Titled only where it stands as a block of the page in its own right,
+      alongside the Story's details, settings and tags. Inside a row of the
+      creator's own list it is one thing among several in a card that already
+      names the Story, and a heading bar there would announce it twice.
+    -->
+    @if (heading) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>{{ heading }}</span>
+      </div>
     }
 
-    <p>
-      @if (isSuperseded) {
-        {{ copy.POLICY_REACCEPTANCE_PROMPT }}
-      } @else {
-        {{ copy.POLICY_ACCEPTANCE_PROMPT }}
+    <div class="storytime-panel">
+      @if (errorMessage) {
+        <app-lcars-error-message
+          title="Could not record that"
+          [message]="errorMessage"></app-lcars-error-message>
       }
-    </p>
 
-    <p class="storytime-dashboard__policy-links">
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']">
-        Content Policy </a
-      >·
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'terms']"> Terms of Use </a
-      >·
-      <a [routerLink]="['/', appRoutes.STORYTIME, 'fan-content']">
-        Fan Content &amp; IP Notice
-      </a>
-    </p>
+      <p>
+        @if (isSuperseded) {
+          {{ copy.POLICY_REACCEPTANCE_PROMPT }}
+        } @else {
+          {{ copy.POLICY_ACCEPTANCE_PROMPT }}
+        }
+      </p>
 
-    <p>By confirming, you are stating that:</p>
-    <ul class="lcars-list">
-      @for (representation of representations; track representation) {
-        <li>{{ representation }}</li>
-      }
-    </ul>
+      <p class="storytime-policy-acceptance__links">
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']">
+          Content Policy </a
+        >·
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'terms']"> Terms of Use </a
+        >·
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'fan-content']">
+          Fan Content &amp; IP Notice
+        </a>
+      </p>
 
-    <div class="storytime-form-actions">
-      <button
-        type="button"
-        class="lcars-btn green"
-        (click)="accept()">
-        I confirm
-      </button>
+      <p>By confirming, you are stating that:</p>
+      <ul class="lcars-list">
+        @for (representation of representations; track representation) {
+          <li>{{ representation }}</li>
+        }
+      </ul>
+
+      <div class="storytime-form-actions">
+        <button
+          type="button"
+          class="lcars-btn green"
+          (click)="accept()">
+          I confirm
+        </button>
+      </div>
     </div>
-  </div>
+  </section>
 }

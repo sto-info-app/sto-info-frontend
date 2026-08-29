@@ -592,59 +592,69 @@ nav[class^='storytime-'] :where(a, [aria-current='page']) {
 // What you type, and what it does underneath it. A description list because
 // that is the shape of the thing; a table would want a header row to say the
 // same, and this is read a pair at a time rather than scanned across.
-.storytime-markdown-reference__heading {
-  @include storytime-label-colour;
+// ---
+// Scoped to the popup it is shown in rather than named on its own. Two rules
+// already reach this content two selectors deep — the popup styles its own
+// paragraphs into the label-above-explanation pairs a chooser needs, and
+// Material's typography claims every `h2` on the page — so a single class
+// naming this content is not heard over either of them, and the reference
+// comes out with headings half again the size of the panel around it.
+.storytime-setting-help__popup .storytime-markdown-reference {
+  &__heading {
+    @include storytime-label-colour;
 
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
-  margin: 1rem 0 0.4rem;
-}
+    // A step above the popup's own text rather than a page heading: this sits
+    // inside a panel, and the labels it is grouping are already at body size.
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    margin: 1rem 0 0.4rem;
 
-.storytime-markdown-reference__heading:first-child {
-  margin-top: 0;
-}
+    &:first-child {
+      margin-top: 0;
+    }
+  }
 
-// Overrides the popup's own paragraph rule, which lays a `p` out as a flex
-// column so a chooser's label and explanation stack. This is one sentence of
-// prose and wants nothing of the sort.
-.storytime-markdown-reference__intro {
-  display: block;
-  margin: 0 0 0.5rem;
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
+  // One sentence of prose, so it wants none of the popup's column layout —
+  // and the popup's own text size rather than the theme's paragraph size.
+  &__intro {
+    display: block;
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
 
-.storytime-markdown-reference__list {
-  margin: 0;
-  padding: 0;
-}
+  &__list {
+    margin: 0;
+    padding: 0;
 
-.storytime-markdown-reference__list dt {
-  margin-top: 0.5rem;
-}
+    dt {
+      margin-top: 0.5rem;
+    }
 
-// The syntax has to survive being read literally, so it sits on its own
-// surface rather than relying on the theme's colour alone.
-.storytime-markdown-reference__list dt code {
-  display: inline-block;
-  padding: 0.1rem 0.4rem;
-  border-radius: 3px;
-  background: rgb(0 0 0 / 35%);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
+    // The syntax has to survive being read literally, so it sits on its own
+    // surface rather than relying on the theme's colour alone.
+    dt code {
+      display: inline-block;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      background: rgb(0 0 0 / 35%);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
 
-.storytime-markdown-reference__list dd {
-  margin: 0.15rem 0 0;
-}
+    dd {
+      margin: 0.15rem 0 0;
+    }
+  }
 
-.storytime-markdown-reference__notes {
-  margin: 1rem 0 0;
-  padding-left: 1.1rem;
-}
+  &__notes {
+    margin: 1rem 0 0;
+    padding-left: 1.1rem;
 
-.storytime-markdown-reference__notes li {
-  margin-top: 0.4rem;
+    li {
+      margin-top: 0.4rem;
+    }
+  }
 }
 
 // Notes and asides
@@ -1399,14 +1409,15 @@ $storytime-record-statuses: (
   &__appeal-message {
     @include storytime-message(vars.$lcars-cardinal);
   }
+}
 
-  &__policy {
-    margin: 1rem 0;
-  }
-
+// Accepting the publishing terms for one Story. Shown in two places — the
+// creator's own list and the editor they publish from — so it is a block of
+// its own rather than a piece of either.
+.storytime-policy-acceptance {
   // The three documents, reachable from the point of acceptance. A creator
   // asked to agree to something needs it one click away, not one search away.
-  &__policy-links {
+  &__links {
     font-size: 0.85rem;
 
     a {

@@ -35,9 +35,17 @@ describe('ContentPolicyPanelComponent', () => {
    * @param story - The Story the terms are being accepted for.
    * @returns The rendered element.
    */
-  const render = (story: ManagedStory = buildStory()): HTMLElement => {
+  const render = (
+    story: ManagedStory = buildStory(),
+    heading?: string,
+  ): HTMLElement => {
     fixture = TestBed.createComponent(ContentPolicyPanelComponent);
     fixture.componentRef.setInput('story', story);
+
+    if (heading !== undefined) {
+      fixture.componentRef.setInput('heading', heading);
+    }
+
     fixture.detectChanges();
     return fixture.nativeElement as HTMLElement;
   };
@@ -92,6 +100,23 @@ describe('ContentPolicyPanelComponent', () => {
     );
 
     expect(element.textContent?.trim()).toBe('');
+  });
+
+  // Where it stands as a block of the page it is titled like the blocks around
+  // it — a bar naming it, then the panel — which is how every other section of
+  // an editor introduces itself.
+  it('carries a heading bar where it is given one', () => {
+    const element = render(buildStory(), 'Publishing Terms');
+
+    expect(element.querySelector('.lcars-text-bar')?.textContent?.trim()).toBe(
+      'Publishing Terms',
+    );
+  });
+
+  // Inside a row of somebody's own work the card already names the Story, so a
+  // heading bar would announce it twice.
+  it('carries no heading bar where it is given none', () => {
+    expect(render().querySelector('.lcars-text-bar')).toBeNull();
   });
 
   it('records the confirmation and announces the Story', () => {
