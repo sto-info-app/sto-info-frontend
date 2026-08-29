@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, of, throwError } from 'rxjs';
+import { ActivatedRoute, Params } from '@angular/router';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { HealthService } from 'src/app/core/health/health.service';
 import { NotificationService } from 'src/app/notifications/notification.service';
@@ -20,7 +20,7 @@ describe('HeaderComponent', () => {
   let healthServiceSpy: { degraded$: BehaviorSubject<boolean> };
   let activatedRouteStub: {
     snapshot: { paramMap: Map<string, string>; data: Record<string, unknown> };
-    queryParams: ReturnType<typeof of<Record<string, unknown>>>;
+    queryParams: Observable<Params>;
     firstChild: null;
   };
 

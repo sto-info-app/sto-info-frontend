@@ -7,10 +7,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   ActivatedRoute,
   NavigationEnd,
+  Params,
   provideRouter,
   Router,
 } from '@angular/router';
-import { of, Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { HealthService } from 'src/app/core/health/health.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -33,7 +34,7 @@ describe('MainContentComponent', () => {
   let originalEnvName: string;
   let activatedRouteStub: {
     snapshot: { paramMap: Map<string, string>; data: Record<string, unknown> };
-    queryParams: ReturnType<typeof of<Record<string, unknown>>>;
+    queryParams: Observable<Params>;
     firstChild: null;
   };
 
