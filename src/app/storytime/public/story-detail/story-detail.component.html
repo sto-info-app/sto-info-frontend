@@ -101,19 +101,37 @@
     }
 
     @if (isTrackingProgress && progress) {
+      <!--
+        Everything in here is the reader's own record of their reading, not
+        the Story's: the heading says so, because "On hold" and "Abandoned"
+        are a word apart from the "On hiatus" and "Cancelled" the Story itself
+        can be, and the two are easily read as the same thing.
+      -->
       <section
         class="storytime-story__progress"
-        aria-label="Your progress">
+        aria-label="Your reading">
+        <h2 class="storytime-story__progress-heading">Your reading</h2>
+
         @if (hasProgress) {
-          <p class="storytime-story__progress-summary">
-            <span class="storytime-story__progress-status">{{
-              readerStatusLabels[progress.status]
-            }}</span>
-            — {{ progress.readChapters }} of
-            {{ progress.totalChapters }} Chapters read ({{
-              progress.percentComplete
-            }}%)
-          </p>
+          <div class="info-grid storytime-facts">
+            <div class="info-item">
+              <span class="label">Your status</span>
+              <span class="value">{{
+                readerStatusLabels[progress.status]
+              }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Chapters read</span>
+              <span class="value"
+                >{{ progress.readChapters }} of
+                {{ progress.totalChapters }}</span
+              >
+            </div>
+            <div class="info-item">
+              <span class="label">Complete</span>
+              <span class="value">{{ progress.percentComplete }}%</span>
+            </div>
+          </div>
 
           <progress
             class="storytime-progress storytime-story__progress-bar"
@@ -150,17 +168,6 @@
             </a>
           }
 
-          @for (status of deliberateStatuses; track status) {
-            @if (progress.status !== status) {
-              <button
-                class="lcars-btn lcars-btn-auto bluey"
-                type="button"
-                (click)="setStatus(status)">
-                {{ readerStatusLabels[status] }}
-              </button>
-            }
-          }
-
           @if (progress.readChapters < progress.totalChapters) {
             <button
               class="lcars-btn lcars-btn-auto sunflower"
@@ -178,6 +185,29 @@
               Start again
             </button>
           }
+        </div>
+
+        <!--
+          Where the reading stands, rather than what to do with it next. Every
+          one of these is still the reader's own record — they are set apart
+          from the row above because they answer a different question, not
+          because they belong to somebody else.
+        -->
+        <div class="storytime-story__progress-marks">
+          <span class="label">Set your status</span>
+
+          <div class="storytime-story__progress-actions">
+            @for (status of deliberateStatuses; track status) {
+              @if (progress.status !== status) {
+                <button
+                  class="lcars-btn lcars-btn-auto bluey"
+                  type="button"
+                  (click)="setStatus(status)">
+                  {{ readerStatusLabels[status] }}
+                </button>
+              }
+            }
+          </div>
         </div>
       </section>
     }

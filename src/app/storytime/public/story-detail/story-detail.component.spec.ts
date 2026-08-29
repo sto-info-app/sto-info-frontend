@@ -849,11 +849,37 @@ describe('StoryDetailComponent', () => {
       chapterService.getChapters.mockReturnValue(of(buildChapters()));
     });
 
-    it('shows how far the reader has got', () => {
+    // Named facts rather than a sentence, and named as the reader's own: the
+    // Story has a status of its own a few lines above this one.
+    it('shows how far the reader has got, fact by fact', () => {
+      const element = render();
+      const facts = [
+        ...element.querySelectorAll('.storytime-story__progress .info-item'),
+      ].map(item => [
+        item.querySelector('.label')?.textContent?.trim(),
+        item.querySelector('.value')?.textContent?.trim(),
+      ]);
+
+      expect(facts).toEqual([
+        ['Your status', 'In progress'],
+        ['Chapters read', '1 of 2'],
+        ['Complete', '50%'],
+      ]);
+    });
+
+    // "On hold" is a word away from the "On hiatus" a Story itself can be, so
+    // the section says whose record this is.
+    it('says the record is the reader’s own', () => {
       const element = render();
 
-      expect(element.textContent).toContain('1 of 2 Chapters read');
-      expect(element.textContent).toContain('In progress');
+      expect(
+        element.querySelector('.storytime-story__progress-heading')
+          ?.textContent,
+      ).toContain('Your reading');
+      expect(
+        element.querySelector('.storytime-story__progress-marks .label')
+          ?.textContent,
+      ).toContain('Set your status');
     });
 
     it('sends Continue Reading to the first unfinished Chapter', () => {
