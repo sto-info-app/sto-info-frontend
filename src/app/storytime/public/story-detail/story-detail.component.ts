@@ -14,6 +14,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { finalize, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { AddToListComponent } from '../../shared/add-to-list/add-to-list.component';
 import { CommentThreadComponent } from '../../shared/comment-thread/comment-thread.component';
 import { SettingHelpComponent } from '../../shared/setting-help/setting-help.component';
@@ -79,6 +80,7 @@ import {
     AddToListComponent,
     CommentThreadComponent,
     SettingHelpComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class StoryDetailComponent implements OnInit {

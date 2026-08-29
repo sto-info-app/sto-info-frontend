@@ -106,6 +106,26 @@ describe('CommentThreadComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('A fine chapter.');
   });
 
+  // A thread runs long, and a reader who has read it wants the page back.
+  it('folds the conversation away behind its own bar', () => {
+    create();
+    const element = fixture.nativeElement as HTMLElement;
+    const toggle = element.querySelector(
+      'app-collapsible-section button',
+    ) as HTMLButtonElement;
+
+    expect(element.querySelector('.lcars-text-bar')?.textContent).toContain(
+      'Comments',
+    );
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(element.querySelector('.storytime-comments')).toBeNull();
+    expect(element.textContent).not.toContain('A fine chapter.');
+  });
+
   it('says so when nobody has commented', () => {
     commentService.getComments.mockReturnValue(of([]));
 

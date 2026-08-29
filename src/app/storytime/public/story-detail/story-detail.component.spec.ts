@@ -248,6 +248,87 @@ describe('StoryDetailComponent', () => {
     expect(fixture.componentInstance.needsRatingWarning).toBe(false);
   });
 
+  // The page runs long: a cast, every Chapter, and the whole conversation. A
+  // reader who came back for one of them should be able to put the rest away.
+  describe('the sections that fold away', () => {
+    /**
+     * Reads the toggle on the bar of the section with this heading.
+     *
+     * Named through the bar rather than the section, because a section's
+     * contents have buttons of their own and the first one down the tree is
+     * not reliably the one that folds it.
+     *
+     * @param element - The rendered page.
+     * @param heading - What the bar says.
+     * @returns The toggle, or null when the page has no such bar.
+     */
+    const toggleFor = (
+      element: HTMLElement,
+      heading: string,
+    ): HTMLButtonElement | null => {
+      const bar = [...element.querySelectorAll('.lcars-text-bar')].find(
+        candidate => candidate.textContent?.includes(heading),
+      );
+
+      return (bar?.querySelector('button') as HTMLButtonElement) ?? null;
+    };
+
+    beforeEach(() => {
+      characterService.getCharacters.mockReturnValue(
+        of([
+          {
+            id: 'character-1',
+            slug: 'captain-shran',
+            name: 'Captain Shran',
+            shortBio: 'An Andorian officer.',
+            portraitImageThumbnailUrl: null,
+            portraitImageAlt: null,
+          },
+        ] as Character[]),
+      );
+      chapterService.getChapters.mockReturnValue(
+        of([
+          {
+            id: 'chapter-1',
+            slug: 'chapter-one',
+            title: 'Chapter One',
+            synopsis: 'A summary',
+            estimatedReadingMinutes: 3,
+          },
+        ]),
+      );
+    });
+
+    it.each([
+      ['Cast', '.storytime-cast'],
+      ['Chapters', '.storytime-chapter-list'],
+    ])('folds %s away', (heading, contents) => {
+      const element = render();
+      const toggle = toggleFor(element, heading);
+
+      expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+      expect(element.querySelector(contents)).not.toBeNull();
+
+      toggle?.click();
+      fixture.detectChanges();
+
+      expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+      expect(element.querySelector(contents)).toBeNull();
+    });
+
+    // The conversation folds away too, but it belongs to the thread rather
+    // than to this page, and is tested where it is built.
+    it('opens every section it has', () => {
+      const element = render();
+
+      expect(
+        ['Cast', 'Chapters', 'Comments'].map(heading =>
+          toggleFor(element, heading)?.getAttribute('aria-expanded'),
+        ),
+      ).toEqual(['true', 'true', 'true']);
+    });
+  });
+
   describe('the facts that need explaining', () => {
     /**
      * Reads a fact's help control.
