@@ -15,6 +15,7 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { FollowService } from '../follow.service';
+import { StoryCardComponent } from '../public/story-card/story-card.component';
 import { SpotlightService } from '../spotlight.service';
 import { StoryService } from '../story.service';
 import { STORYTIME_COPY } from '../storytime.constants';
@@ -44,7 +45,7 @@ const LANDING_STORY_COUNT = 6;
   selector: 'app-storytime-landing',
   templateUrl: './storytime-landing.component.html',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, StoryCardComponent],
 })
 export class StorytimeLandingComponent implements OnInit {
   /** The selections showing now, best first. */

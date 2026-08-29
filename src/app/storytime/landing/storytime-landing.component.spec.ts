@@ -301,6 +301,17 @@ describe('StorytimeLandingComponent', () => {
       expect(element.textContent).toContain('Recently Updated');
     });
 
+    // The same card the Stories archive uses, so a Story looks the same
+    // wherever a reader meets one, and both lists end their rows level.
+    it('presents both lists as the shared Story card', () => {
+      const element = render();
+
+      expect(element.querySelectorAll('.storytime-story-grid')).toHaveLength(2);
+      expect(
+        element.querySelectorAll('.storytime-story-grid app-story-card').length,
+      ).toBeGreaterThan(0);
+    });
+
     it('offers search', () => {
       const element = render();
 
@@ -419,6 +430,27 @@ describe('StorytimeLandingComponent', () => {
         '/storytime/arcs',
         '/storytime/search',
       ]);
+    });
+  });
+
+  describe('the Spotlight', () => {
+    it('presents each selection as a panel of its own', () => {
+      const element = render();
+      const list = element.querySelector('.storytime-spotlight');
+
+      expect(list?.querySelectorAll('.storytime-spotlight__entry').length).toBe(
+        1,
+      );
+    });
+
+    // The way into the archive is an action, so it is dressed as one rather
+    // than left as a line of text under the selection.
+    it('offers the archive as a button', () => {
+      const archive = [...render().querySelectorAll('a.lcars-btn')].find(link =>
+        link.textContent?.includes('Past Spotlight selections'),
+      );
+
+      expect(archive?.getAttribute('href')).toBe('/storytime/spotlight');
     });
   });
 

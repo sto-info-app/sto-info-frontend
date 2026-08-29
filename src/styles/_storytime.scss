@@ -706,6 +706,20 @@ p.storytime-fan-notice,
   list-style: none;
 }
 
+// A grid stretches its items to the tallest in the row, and the item is the
+// element the component renders into rather than the card inside it — so a
+// card shorter than its neighbours stopped partway down its cell and left a
+// strip of page showing beneath it. Both have to fill the row for the cards to
+// end level, which is the whole point of putting them in a grid.
+.storytime-story-grid app-story-card,
+.storytime-story-grid .storytime-story-card {
+  height: 100%;
+}
+
+.storytime-story-grid app-story-card {
+  display: block;
+}
+
 .storytime-story-card {
   @include mixins.lcars-card;
 
@@ -1592,10 +1606,6 @@ $storytime-landing-colours: (
     }
   }
 
-  &__stories {
-    margin-bottom: 1.5rem;
-  }
-
   &__unread {
     @include mixins.lcars-badge;
 
@@ -1690,7 +1700,12 @@ $storytime-landing-colours: (
 }
 
 .storytime-spotlight {
-  @include storytime-panel-surface;
+  // A list of panels rather than a panel of rows. Each selection is already a
+  // card, and wrapping the list in a surface of its own drew a box around a
+  // box — most visibly on the landing page, where there is one selection.
+  padding: 0;
+  margin: 0 0 1rem;
+  list-style: none;
 
   &__headline {
     font-family: vars.$font-antonio;
@@ -1716,11 +1731,6 @@ $storytime-landing-colours: (
 
   &__dates {
     @include storytime-meta;
-  }
-
-  &__archive {
-    padding: 0;
-    margin: 0;
   }
 
   &__entry {
