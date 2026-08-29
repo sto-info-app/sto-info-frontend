@@ -229,10 +229,8 @@
       [story]="story"
       (accepted)="onPolicyAccepted($event)"
     ></app-storytime-content-policy-panel>
-  }
 
-  @if (story) {
-    <!-- Tagging needs something to tag, so it appears once the Story exists. -->
+    <!-- Tagging needs something to tag, so it waits for the Story too. -->
     <app-tag-picker
       targetType="STORY"
       [targetId]="story.id"

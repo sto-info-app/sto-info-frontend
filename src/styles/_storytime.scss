@@ -588,6 +588,16 @@ nav[class^='storytime-'] :where(a, [aria-current='page']) {
   margin-top: 0;
 }
 
+// Overrides the popup's own paragraph rule, which lays a `p` out as a flex
+// column so a chooser's label and explanation stack. This is one sentence of
+// prose and wants nothing of the sort.
+.storytime-markdown-reference__intro {
+  display: block;
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
 .storytime-markdown-reference__list {
   margin: 0;
   padding: 0;
