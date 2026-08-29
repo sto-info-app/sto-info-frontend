@@ -1,4 +1,5 @@
 @use 'sass:color';
+@use 'sass:list';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 
@@ -84,6 +85,13 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: vars.$lcars-black;
+
+    // The name is a heading element where the panel is a section of the page
+    // rather than a row in a list, and `.mat-typography` gives a heading
+    // 30px above and 10px below. Left alone that stands the bar half as tall
+    // again as every other panel's.
+    margin: 0;
+    line-height: 1.2;
 
     // A long title shortens rather than growing the bar, so a row of panels
     // keeps one height and the marks stay where the eye expects them. The
@@ -295,12 +303,45 @@ $storytime-panel-colours: (
   'character': vars.$lcars-green,
   'crew': vars.$lcars-sky,
   'spotlight': vars.$lcars-gold,
-  'comment': vars.$lcars-bluey,
   'list': vars.$lcars-tangerine,
   'activity': vars.$lcars-orange,
   'invitation': vars.$lcars-cool,
   'moderation': vars.$lcars-red,
+  // The reader's own record of their reading, rather than a thing in a list.
+  // Takes the frame's own cyan, which no kind of content uses, so it is never
+  // read as one of them.
+  'progress': vars.$lcars-c48,
 );
+
+// A conversation is one kind of thing all the way down, so a colour cannot
+// mean what a comment is the way it does elsewhere. It marks where one comment
+// ends and the next begins instead: each in turn from this list, with a reply
+// taking its parent's so a thread reads as one block rather than as a run of
+// unrelated panels.
+// ---
+// Every one of them carries black at 4.5:1 or better, which is what lets the
+// name sit on the bar. Kept clear of the colours a moderation notice uses, so
+// a comment is never mistaken for a warning about one.
+$storytime-comment-colours: (
+  vars.$lcars-bluey,
+  vars.$lcars-perano,
+  vars.$lcars-tangerine,
+  vars.$lcars-sky,
+  vars.$lcars-gold,
+  vars.$lcars-green
+);
+
+@each $colour in $storytime-comment-colours {
+  $index: list.index($storytime-comment-colours, $colour) - 1;
+
+  .storytime-panel-card--comment-#{$index} {
+    @include storytime-panel-card($colour);
+
+    > .storytime-panel-card__heading {
+      @include storytime-panel-heading($colour);
+    }
+  }
+}
 
 @each $kind, $colour in $storytime-panel-colours {
   .storytime-panel-card--#{$kind} {
@@ -563,7 +604,6 @@ app-storytime-editor-actions {
 .storytime-character-list__controls,
 .storytime-arc-stories__order,
 .storytime-tag-admin__actions,
-.storytime-comments__controls,
 .storytime-comments__actions,
 .storytime-reading-list__controls,
 .storytime-reading-list__item-controls,
@@ -586,6 +626,18 @@ app-storytime-editor-actions {
   .lcars-btn {
     flex: 0 0 auto;
   }
+}
+
+// The conversation stands off whatever it follows. A Story, a Chapter and an
+// Arc all put the row of reactions directly above it, and on that row's own
+// margin the heading bar read as part of the row rather than as the start of
+// the next thing.
+// ---
+// A block host as well, because a bare custom element is inline, and an inline
+// box has no top margin to give.
+.storytime-page app-comment-thread {
+  display: block;
+  margin-top: 2rem;
 }
 
 // A count on a button that opens what it counts. The badge rule in `styles.scss`
@@ -615,7 +667,6 @@ app-storytime-editor-actions {
 .storytime-character-list__controls,
 .storytime-arc-stories__order,
 .storytime-tag-admin__actions,
-.storytime-comments__controls,
 .storytime-reading-list__item-controls {
   gap: 1rem;
   font-size: 1.1rem;
@@ -930,18 +981,32 @@ p.storytime-fan-notice,
   }
 }
 
-// The facts under a Story's title, set as the site sets a fact and its name
-// everywhere else. Wrapping rather than a fixed two columns, because there are
-// four of them and they are short.
-.storytime-story__facts.info-grid {
+// The facts under a work's title — a Story's rating and status, a Chapter's
+// length — set as the site sets a fact and its name everywhere else. Wrapping
+// rather than a fixed two columns, because there are only a few of them and
+// they are short. Named alongside the grid it varies, because the site's own
+// rule is written after this file and would otherwise win on source order.
+.storytime-facts.info-grid {
   grid-template-columns: repeat(auto-fit, minmax(140px, max-content));
   gap: 1rem 2.5rem;
   margin-bottom: 1rem;
 }
 
+// The author's name, when it leads to their profile. A value is set in white,
+// so a link inside one has to say it is a link rather than relying on the
+// colour it inherits.
+.storytime-facts__author {
+  color: vars.$lcars-perano;
+
+  &:hover,
+  &:focus-visible {
+    color: vars.$lcars-sky;
+  }
+}
+
 // A fact whose name needs explaining carries the same help control a setting
 // does, beside the name rather than above the value.
-.storytime-story__fact-label {
+.storytime-facts__label {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -992,14 +1057,26 @@ p.storytime-fan-notice,
   }
 
   &__progress {
-    @include storytime-panel-surface;
+    margin-bottom: 2rem;
   }
 
-  &__progress-summary,
-  &__progress-status {
-    @include storytime-meta;
+  // Where the reading stands, set apart from what to do with it next.
+  &__progress-marks {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid vars.$lcars-grey-border;
 
-    margin: 0.5rem 0;
+    > .label {
+      @include mixins.lcars-label;
+
+      display: block;
+    }
+
+    // The row above already spaces itself from what precedes it; a second
+    // margin here would double the gap under the rule.
+    .storytime-story__progress-actions {
+      margin-top: 0.35rem;
+    }
   }
 
   &__new-chapters {
@@ -1124,17 +1201,6 @@ p.storytime-fan-notice,
 }
 
 .storytime-chapter {
-  &__breadcrumb {
-    @include storytime-meta;
-
-    justify-content: flex-start;
-    margin-bottom: 0.5rem;
-
-    a {
-      color: vars.$lcars-perano;
-    }
-  }
-
   &__cover {
     width: 100%;
     max-height: 320px;
@@ -1146,12 +1212,6 @@ p.storytime-fan-notice,
   &__synopsis {
     color: vars.$lcars-grey-light;
     font-style: italic;
-    margin-bottom: 1rem;
-  }
-
-  &__meta {
-    @include storytime-meta-list;
-
     margin-bottom: 1rem;
   }
 
@@ -1188,16 +1248,38 @@ p.storytime-fan-notice,
     }
   }
 
+  // The way on and the way back, one pushed to each end so the pair reads as
+  // a direction rather than a list. Both are LCARS buttons, as every other way
+  // out of a Storytime page is.
+  // The way on and the way back, one pushed to each end so the pair reads as a
+  // direction rather than a list. Both are LCARS buttons, as every other way
+  // out of a Storytime page is.
+  // ---
+  // A first Chapter has no way back and a last one has no way on, so the
+  // alignment is done by pushing rather than by spacing between: the row ends
+  // right, and Back claims the space to its own right when it is there. That
+  // puts a lone Next at the right and a lone Back at the left without the row
+  // having to know which of them it has.
   &__navigation {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 1rem;
     margin: 2rem 0 1rem;
 
-    a {
-      @include storytime-work-title;
+    // A Chapter title can be long, and a pill sized to its own label would
+    // otherwise take the whole row and push the other one off the end. The
+    // label shortens instead, which is what the pair is for.
+    .lcars-btn {
+      flex: 0 1 auto;
+      max-width: calc(50% - 0.5rem);
+      overflow: hidden;
+    }
 
-      font-size: 1rem;
+    // Named through the row rather than on its own, because the feature zeroes
+    // the margin on every LCARS button it draws and would otherwise take this
+    // one back off again.
+    .storytime-chapter__previous {
+      margin-right: auto;
     }
   }
 
@@ -2191,21 +2273,51 @@ $storytime-landing-colours: (
     list-style: none;
   }
 
+  // Each comment is a panel like every other thing the feature lists. The
+  // surface, the spine and the bar come from there; what is left is the room
+  // between one comment and the next.
   &__comment {
-    @include storytime-row;
+    list-style: none;
+    margin-bottom: 0.75rem;
   }
 
   // Replies are indented once and never again: the thread is one level deep,
-  // and the rule says so.
+  // and the rule says so. The spine down the left of each panel already marks
+  // them, so the indent needs no rule of its own beside it.
   &__replies {
-    margin: 0.75rem 0 0 1.5rem;
-    border-left: 2px solid vars.$lcars-grey-border;
-    padding-left: 0.75rem;
+    margin: 0 0 0 1.5rem;
   }
 
   &__reply {
     list-style: none;
-    padding: 0.5rem 0;
+  }
+
+  // A captain card stacks its controls down the side because the row beside
+  // them is a portrait and a biography. A comment is a line or two, and four
+  // controls stacked against one line make a panel four times taller than what
+  // it holds — so they run across the end of the row instead.
+  &__controls {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  // The name sits on the bar in black like every other panel's does, so it
+  // says it is a link by underlining rather than by changing colour.
+  a.storytime-comments__author {
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+
+  // When it was said, in the corner a panel keeps for what it is rather than
+  // what it says.
+  &__body time {
+    font-family: vars.$font-antonio;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
   }
 
   &__text {

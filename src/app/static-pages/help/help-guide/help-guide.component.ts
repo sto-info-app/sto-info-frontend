@@ -9,6 +9,10 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { combineLatest, map } from 'rxjs';
+import {
+  STORYTIME_AVAILABILITY_ENABLED,
+  STORYTIME_AVAILABILITY_UNAVAILABLE,
+} from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
@@ -30,6 +34,11 @@ import { HelpGuide, HelpGuideLocation } from '../help.models';
  * goes to the not-found page. Refusing quietly matters for the Storytime
  * guides: while the feature is off it is meant to look like a feature that does
  * not exist, and a help page explaining it would say otherwise.
+ *
+ * A Storytime guide asked for while the backend cannot be reached is a
+ * different case, and goes to the service interruption page: the feature was
+ * never said to be off, so answering with a 404 would blame the address for an
+ * outage.
  */
 @Component({
   selector: 'app-help-guide',
@@ -70,16 +79,34 @@ export class HelpGuideComponent implements OnInit {
   ngOnInit(): void {
     combineLatest([
       this._route.paramMap.pipe(map(params => params.get('guideSlug'))),
-      this._storytimeService.isEnabled(),
+      this._storytimeService.getAvailability(),
     ])
       .pipe(
         takeUntilDestroyed(this._destroyRef),
         observeInZone(this._ngZone, this._cdr),
       )
-      .subscribe(([slug, isStorytimeEnabled]) => {
+      .subscribe(([slug, storytimeAvailability]) => {
         const location = findHelpGuide(slug);
 
-        if (!location || !this.isVisible(location, isStorytimeEnabled)) {
+        if (!location) {
+          this.sendToNotFound();
+          return;
+        }
+
+        if (
+          location.topic.requiresStorytime &&
+          storytimeAvailability === STORYTIME_AVAILABILITY_UNAVAILABLE
+        ) {
+          this.sendToServiceInterruption();
+          return;
+        }
+
+        if (
+          !this.isVisible(
+            location,
+            storytimeAvailability === STORYTIME_AVAILABILITY_ENABLED,
+          )
+        ) {
           this.sendToNotFound();
           return;
         }
@@ -147,5 +174,14 @@ export class HelpGuideComponent implements OnInit {
    */
   private sendToNotFound(): void {
     void this._router.navigate([`/${this.appRoutes.PAGE_NOT_FOUND}`]);
+  }
+
+  /**
+   * Sends the visitor to the service interruption page.
+   *
+   * @returns void
+   */
+  private sendToServiceInterruption(): void {
+    void this._router.navigate([`/${this.appRoutes.SERVICE_INTERRUPTION}`]);
   }
 }

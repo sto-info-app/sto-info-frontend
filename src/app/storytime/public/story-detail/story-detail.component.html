@@ -29,14 +29,14 @@
       </app-lcars-warning-message>
     }
 
-    <div class="info-grid storytime-story__facts">
+    <div class="info-grid storytime-facts">
       <!--
         Both of these stand for a decision the creator made about somebody
         else's reading, and neither word explains itself. The same help the
         editor offers the creator is offered here to the reader.
       -->
       <div class="info-item">
-        <div class="label storytime-story__fact-label">
+        <div class="label storytime-facts__label">
           <span>Status</span>
           <app-storytime-setting-help
             label="Status"
@@ -45,7 +45,7 @@
         <span class="value">{{ completionLabels[story.completionState] }}</span>
       </div>
       <div class="info-item">
-        <div class="label storytime-story__fact-label">
+        <div class="label storytime-facts__label">
           <span>Content rating</span>
           <app-storytime-setting-help
             label="Content rating"
@@ -53,6 +53,33 @@
         </div>
         <span class="value">{{ ratingLabels[story.contentRating] }}</span>
       </div>
+      @if (story.author) {
+        <div class="info-item">
+          <span class="label">Author</span>
+          <span class="value">
+            <!--
+              A name only leads somewhere when its owner has chosen to be
+              listed in the registry. Everybody else is credited by name and
+              left alone, which is what that setting is for.
+            -->
+            @if (story.author.publiclyVisible) {
+              <a
+                class="storytime-facts__author"
+                [routerLink]="[
+                  '/',
+                  appRoutes.COMMUNITY,
+                  'registry',
+                  'profiles',
+                  story.author.username,
+                ]"
+                >{{ story.author.username }}</a
+              >
+            } @else {
+              {{ story.author.username }}
+            }
+          </span>
+        </div>
+      }
       <div class="info-item">
         <span class="label">Chapters</span>
         <span class="value">{{ story.publishedChapterCount }}</span>
@@ -74,154 +101,153 @@
     }
 
     @if (isTrackingProgress && progress) {
+      <!--
+        Everything in here is the reader's own record of their reading, not
+        the Story's: the heading says so, because "On hold" and "Abandoned"
+        are a word apart from the "On hiatus" and "Cancelled" the Story itself
+        can be, and the two are easily read as the same thing.
+      -->
       <section
-        class="storytime-story__progress"
-        aria-label="Your progress">
-        @if (hasProgress) {
-          <p class="storytime-story__progress-summary">
-            <span class="storytime-story__progress-status">{{
-              readerStatusLabels[progress.status]
-            }}</span>
-            — {{ progress.readChapters }} of
-            {{ progress.totalChapters }} Chapters read ({{
-              progress.percentComplete
-            }}%)
-          </p>
-
-          <progress
-            class="storytime-progress storytime-story__progress-bar"
-            aria-label="Chapters read"
-            [value]="progress.percentComplete"
-            max="100"></progress>
-        }
-
-        @if (progress.newChapterCount > 0) {
-          <p class="storytime-story__new-chapters">
-            {{ progress.newChapterCount }} new
-            {{ progress.newChapterCount === 1 ? 'Chapter' : 'Chapters' }} since
-            you last read.
-          </p>
-        }
-
-        <div class="storytime-story__progress-actions">
-          @if (continueChapter) {
-            <a
-              class="lcars-btn green storytime-story__continue"
-              [routerLink]="[
-                '/',
-                appRoutes.STORYTIME,
-                'stories',
-                storySlug,
-                'chapters',
-                continueChapter.slug,
-              ]">
-              <i
-                class="fa-solid fa-book-open"
-                aria-hidden="true"></i>
-              {{ hasProgress ? 'Continue reading' : 'Start reading' }}:
-              {{ continueChapter.title }}
-            </a>
-          }
-
-          @for (status of deliberateStatuses; track status) {
-            @if (progress.status !== status) {
-              <button
-                class="lcars-btn lcars-btn-auto bluey"
-                type="button"
-                (click)="setStatus(status)">
-                {{ readerStatusLabels[status] }}
-              </button>
-            }
-          }
-
-          @if (progress.readChapters < progress.totalChapters) {
-            <button
-              class="lcars-btn lcars-btn-auto sunflower"
-              type="button"
-              (click)="completeStory()">
-              Mark whole Story read
-            </button>
-          }
-
-          @if (hasProgress) {
-            <button
-              type="button"
-              class="lcars-btn lcars-btn-auto sky storytime-story__reset"
-              (click)="resetStory()">
-              Start again
-            </button>
-          }
+        class="storytime-panel-card storytime-panel-card--progress storytime-story__progress"
+        aria-label="Your Reading Status">
+        <div class="storytime-panel-card__heading">
+          <h2 class="storytime-panel-card__name">Your Reading Status</h2>
         </div>
-      </section>
-    }
 
-    @if (characters.length > 0) {
-      <app-collapsible-section
-        heading="Cast"
-        barClass="small-lcars-bar-gap">
-        <ul class="storytime-cast">
-          @for (cast of characters; track cast.id) {
-            <li class="storytime-panel-card storytime-panel-card--character">
+        <div class="storytime-panel-card__body">
+          @if (hasProgress) {
+            <div class="info-grid storytime-facts">
+              <div class="info-item">
+                <span class="label">Your status</span>
+                <span class="value">{{
+                  readerStatusLabels[progress.status]
+                }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Chapters read</span>
+                <span class="value"
+                  >{{ progress.readChapters }} of
+                  {{ progress.totalChapters }}</span
+                >
+              </div>
+              <div class="info-item">
+                <span class="label">Complete</span>
+                <span class="value">{{ progress.percentComplete }}%</span>
+              </div>
+            </div>
+
+            <progress
+              class="storytime-progress storytime-story__progress-bar"
+              aria-label="Chapters read"
+              [value]="progress.percentComplete"
+              max="100"></progress>
+          }
+
+          @if (progress.newChapterCount > 0) {
+            <p class="storytime-story__new-chapters">
+              {{ progress.newChapterCount }} new
+              {{
+                progress.newChapterCount === 1 ? 'Chapter' : 'Chapters'
+              }}
+              since you last read.
+            </p>
+          }
+
+          <div class="storytime-story__progress-actions">
+            @if (continueChapter) {
               <a
-                class="storytime-panel-card__heading"
+                class="lcars-btn green storytime-story__continue"
                 [routerLink]="[
                   '/',
                   appRoutes.STORYTIME,
                   'stories',
                   storySlug,
-                  'characters',
-                  cast.slug,
-                ]"
-                [title]="cast.name">
-                <span class="storytime-panel-card__name">{{ cast.name }}</span>
+                  'chapters',
+                  continueChapter.slug,
+                ]">
+                <i
+                  class="fa-solid fa-book-open"
+                  aria-hidden="true"></i>
+                {{ hasProgress ? 'Continue reading' : 'Start reading' }}:
+                {{ continueChapter.title }}
               </a>
-
-              <div class="storytime-panel-card__body storytime-cast__member">
-                @if (cast.portraitImageThumbnailUrl) {
-                  <img
-                    class="storytime-cast__portrait"
-                    [src]="cast.portraitImageThumbnailUrl"
-                    [alt]="cast.portraitImageAlt ?? ''" />
-                }
-                @if (cast.shortBio) {
-                  <p class="storytime-cast__bio">{{ cast.shortBio }}</p>
-                }
-              </div>
-            </li>
-          }
-        </ul>
-      </app-collapsible-section>
-    }
-
-    @if (credits.length > 0) {
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Credits</span>
-      </div>
-
-      <ul class="storytime-credits">
-        @for (credit of credits; track credit.id) {
-          <li class="storytime-panel-card storytime-panel-card--crew">
-            <div
-              class="storytime-panel-card__heading"
-              [title]="credit.displayLabel">
-              <span class="storytime-panel-card__name">{{
-                credit.displayLabel
-              }}</span>
-            </div>
-
-            @if (credit.notes) {
-              <div class="storytime-panel-card__body">
-                <span class="storytime-credits__notes">{{ credit.notes }}</span>
-              </div>
             }
-          </li>
-        }
-      </ul>
+
+            @if (progress.readChapters < progress.totalChapters) {
+              <button
+                class="lcars-btn lcars-btn-auto sunflower"
+                type="button"
+                (click)="completeStory()">
+                Mark whole Story read
+              </button>
+            }
+
+            @if (hasProgress) {
+              <button
+                type="button"
+                class="lcars-btn lcars-btn-auto sky storytime-story__reset"
+                (click)="resetStory()">
+                Start again
+              </button>
+            }
+          </div>
+
+          <!--
+            Where the reading stands, rather than what to do with it next. Every
+            one of these is still the reader's own record — they are set apart
+            from the row above because they answer a different question, not
+            because they belong to somebody else.
+          -->
+          <div class="storytime-story__progress-marks">
+            <span class="label">Set your status</span>
+
+            <div class="storytime-story__progress-actions">
+              @for (status of deliberateStatuses; track status) {
+                @if (progress.status !== status) {
+                  <button
+                    class="lcars-btn lcars-btn-auto bluey"
+                    type="button"
+                    (click)="setStatus(status)">
+                    {{ readerStatusLabels[status] }}
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      </section>
     }
 
-    <app-collapsible-section
-      heading="Chapters"
-      barClass="small-lcars-bar-gap">
+    <!--
+      A Story's Chapters, its cast and who made it are three ways of looking at
+      the same work, read one at a time rather than one after another, so they
+      share the page as tabs. Chapters leads, because that is what somebody
+      arriving at a Story came for.
+    -->
+    <div
+      class="lcars-tabs"
+      role="tablist"
+      aria-label="Story sections">
+      @for (tab of tabs; track tab.id) {
+        <button
+          type="button"
+          role="tab"
+          class="lcars-tab"
+          [class.active]="activeTab === tab.id"
+          [attr.aria-selected]="activeTab === tab.id"
+          (click)="selectTab(tab.id)">
+          {{ tab.label }}
+        </button>
+      }
+      <span
+        class="lcars-tabs-filler"
+        aria-hidden="true"></span>
+    </div>
+
+    <section
+      role="tabpanel"
+      aria-label="Chapters"
+      [hidden]="activeTab !== 'chapters'">
       @if (chapterErrorMessage) {
         <app-lcars-error-message
           title="Chapters unavailable"
@@ -257,18 +283,139 @@
                 }
               </a>
 
-              @if (chapter.synopsis) {
+              <!--
+                The whole panel opens the Chapter, but a heading that happens
+                to be a link is not obviously a way in. The control says so,
+                and sits in the strip a panel keeps for its controls.
+              -->
+              <div class="storytime-panel-card__main">
                 <div class="storytime-panel-card__body">
-                  <p class="storytime-chapter-list__synopsis">
-                    {{ chapter.synopsis }}
-                  </p>
+                  @if (chapter.synopsis) {
+                    <p class="storytime-chapter-list__synopsis">
+                      {{ chapter.synopsis }}
+                    </p>
+                  }
                 </div>
-              }
+
+                <div class="storytime-panel-card__controls">
+                  <a
+                    class="cta-icon"
+                    [routerLink]="[
+                      '/',
+                      appRoutes.STORYTIME,
+                      'stories',
+                      storySlug,
+                      'chapters',
+                      chapter.slug,
+                    ]"
+                    [title]="'Read ' + chapter.title"
+                    [attr.aria-label]="'Read ' + chapter.title">
+                    <i
+                      class="fa-solid fa-book-open"
+                      aria-hidden="true"></i>
+                  </a>
+                </div>
+              </div>
             </li>
           }
         </ol>
       }
-    </app-collapsible-section>
+    </section>
+
+    @if (characters.length > 0) {
+      <section
+        role="tabpanel"
+        aria-label="Cast"
+        [hidden]="activeTab !== 'cast'">
+        <ul class="storytime-cast">
+          @for (cast of characters; track cast.id) {
+            <li class="storytime-panel-card storytime-panel-card--character">
+              <a
+                class="storytime-panel-card__heading"
+                [routerLink]="[
+                  '/',
+                  appRoutes.STORYTIME,
+                  'stories',
+                  storySlug,
+                  'characters',
+                  cast.slug,
+                ]"
+                [title]="cast.name">
+                <span class="storytime-panel-card__name">{{ cast.name }}</span>
+              </a>
+
+              <div class="storytime-panel-card__main">
+                <div class="storytime-panel-card__body storytime-cast__member">
+                  @if (cast.portraitImageThumbnailUrl) {
+                    <img
+                      class="storytime-cast__portrait"
+                      [src]="cast.portraitImageThumbnailUrl"
+                      [alt]="cast.portraitImageAlt ?? ''" />
+                  }
+                  @if (cast.shortBio) {
+                    <p class="storytime-cast__bio">{{ cast.shortBio }}</p>
+                  }
+                </div>
+
+                <div class="storytime-panel-card__controls">
+                  <a
+                    class="cta-icon"
+                    [routerLink]="[
+                      '/',
+                      appRoutes.STORYTIME,
+                      'stories',
+                      storySlug,
+                      'characters',
+                      cast.slug,
+                    ]"
+                    [title]="'View ' + cast.name"
+                    [attr.aria-label]="'View ' + cast.name">
+                    <i
+                      class="fa-solid fa-eye"
+                      aria-hidden="true"></i>
+                  </a>
+                </div>
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (credits.length > 0) {
+      <section
+        role="tabpanel"
+        aria-label="Credits"
+        [hidden]="activeTab !== 'credits'">
+        <ul class="storytime-credits">
+          @for (credit of credits; track credit.id) {
+            <li class="storytime-panel-card storytime-panel-card--crew">
+              <div
+                class="storytime-panel-card__heading"
+                [title]="credit.displayLabel">
+                <span class="storytime-panel-card__name">{{
+                  credit.displayLabel
+                }}</span>
+              </div>
+
+              <!--
+                What the creator said about this credit, or failing that what
+                the role itself means. A credit with neither used to render as
+                a heading bar with nothing under it, which read as unfinished
+                beside the ones that had something to say.
+              -->
+              @if (credit.notes || credit.role?.description) {
+                <div class="storytime-panel-card__body">
+                  <span class="storytime-credits__notes">{{
+                    credit.notes ?? credit.role?.description
+                  }}</span>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
 
     @if (story) {
       <div class="storytime-story__social">

@@ -7,9 +7,20 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { EMPTY, Subscription, catchError, filter, switchMap } from 'rxjs';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import {
+  EMPTY,
+  Subscription,
+  catchError,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  switchMap,
+} from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { HealthService } from 'src/app/core/health/health.service';
+import { createRequiresApiStream } from 'src/app/core/health/requires-api';
 import { NotificationService } from 'src/app/notifications/notification.service';
 import {
   APP_ROUTE_TITLES,
@@ -42,6 +53,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private readonly _debuggingService = inject(DebuggingService);
   private readonly _authService = inject(AuthService);
   private readonly _notificationService = inject(NotificationService);
+  private readonly _backendHealth = inject(HealthService);
+  private readonly _router = inject(Router);
+  private readonly _route = inject(ActivatedRoute);
 
   appTitle = environment.appTitle;
   appRoutes = APP_ROUTES;
@@ -52,6 +66,27 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   /** Unread notification count driving the header "incoming transmission" alert. */
   readonly unreadCount$ = this._notificationService.unreadCount$;
+
+  /** True only while the active route actually needs the API. */
+  private readonly _requiresApi$ = createRequiresApiStream(
+    this._router,
+    this._route,
+  );
+
+  //NOTE: Show the "connection unstable" warning only when:
+  //NOTE: - the current route requires the API, AND
+  //NOTE: - enough health checks have failed to be worth mentioning, but not
+  //NOTE:   enough to declare the API down (which takes the whole page over).
+  //NOTE: Route-gated because polling stops off API routes, which would
+  //NOTE: otherwise leave a stale count showing a warning that cannot clear.
+  readonly showApiDegradedNotice$ = combineLatest([
+    this._requiresApi$,
+    this._backendHealth.degraded$,
+  ]).pipe(
+    map(([requiresApi, degraded]) => requiresApi && degraded),
+    distinctUntilChanged(),
+  );
+
   private readonly _subs = new Subscription();
 
   dataCascade: string;

@@ -10,6 +10,7 @@ import {
   inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -20,7 +21,17 @@ import {
   StorytimeCommentStatus,
   StorytimeTargetType,
 } from 'src/app/models/storytime.models';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { CommentService } from '../../comment.service';
+
+/**
+ * How many colours a thread cycles through before starting again.
+ *
+ * Kept in step with `$storytime-comment-colours` in the stylesheet: a longer
+ * thread than this repeats, which is the point at which two of the same colour
+ * are far enough apart not to be read as related.
+ */
+const COMMENT_COLOURS = 6;
 
 /** One comment and the replies to it. */
 export interface CommentNode {
@@ -53,9 +64,17 @@ export const SILENCED_TEXT: Record<StorytimeCommentStatus, string> = {
   selector: 'app-comment-thread',
   templateUrl: './comment-thread.component.html',
   standalone: true,
-  imports: [CommonModule, FormsModule, CollapsibleSectionComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    CollapsibleSectionComponent,
+  ],
 })
 export class CommentThreadComponent implements OnInit {
+  /** Route constants, for the link to a commenter's profile. */
+  readonly appRoutes = APP_ROUTES;
+
   /** What is being commented on. */
   @Input({ required: true }) targetType!: StorytimeTargetType;
 
@@ -145,6 +164,42 @@ export class CommentThreadComponent implements OnInit {
    */
   isMine(comment: StorytimeComment): boolean {
     return comment.authorUserId === this._authService.getUserId();
+  }
+
+  /**
+   * The panel colour a comment wears.
+   *
+   * Taken in turn from the cycle the stylesheet defines, by where the comment
+   * sits in the thread — so one comment is told from the next by colour, and a
+   * reply takes its parent's because it belongs to it.
+   *
+   * @param index - The root comment's position in the thread.
+   * @returns The class carrying that colour.
+   */
+  colourFor(index: number): string {
+    return `storytime-panel-card--comment-${index % COMMENT_COLOURS}`;
+  }
+
+  /**
+   * Whether this reader can do anything to a comment.
+   *
+   * The controls sit in a strip of their own down the side of the panel, and
+   * an empty strip is still a strip: a signed-out reader would get a dark band
+   * beside every comment offering nothing.
+   *
+   * @param comment - The comment.
+   * @param canReply - Whether this comment is one that can be replied to.
+   * @returns True when at least one control applies.
+   */
+  hasControls(comment: StorytimeComment, canReply = false): boolean {
+    const isVisible = comment.status === this.statuses.VISIBLE;
+    const isRemoved = comment.status === this.statuses.REMOVED_BY_ADMIN;
+
+    return (
+      (this.canComment && canReply && isVisible) ||
+      (this.isMine(comment) && isVisible) ||
+      ((this.isOwner || this.isAdministrator) && !isRemoved)
+    );
   }
 
   /**

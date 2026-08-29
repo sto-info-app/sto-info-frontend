@@ -55,7 +55,7 @@ if (globalThis.IntersectionObserver === undefined) {
     unobserve(): void {}
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     disconnect(): void {}
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     takeRecords(): IntersectionObserverEntry[] {
       return [];
     }
@@ -67,3 +67,24 @@ if (globalThis.IntersectionObserver === undefined) {
 
 // JSDOM throws "Not implemented" for window.scrollTo. Provide a stub to silence it.
 globalThis.scrollTo = jest.fn();
+
+// Angular's sanitizer strips the block ids the backend writes onto every
+// rendered paragraph, and warns each time it does. Story and Arc descriptions
+// are bound to [innerHTML] as plain strings precisely so that the sanitizer
+// runs on them, so the stripping is the intended behaviour rather than a
+// problem — and it is logged often enough to bury anything genuine. The
+// specs that render a description pin the stripping itself; only the noise is
+// dropped here. Every other warning still comes through.
+const SANITIZER_STRIPPED_WARNING = 'sanitizing HTML stripped some content';
+const passThroughWarn = console.warn.bind(console);
+
+console.warn = (...args: unknown[]): void => {
+  if (
+    typeof args[0] === 'string' &&
+    args[0].includes(SANITIZER_STRIPPED_WARNING)
+  ) {
+    return;
+  }
+
+  passThroughWarn(...args);
+};

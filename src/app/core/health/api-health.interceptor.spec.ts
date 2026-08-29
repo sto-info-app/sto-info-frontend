@@ -19,7 +19,7 @@ describe('apiHealthInterceptor', () => {
 
   beforeEach(() => {
     const spy = {
-      markDown: jest.fn(),
+      recordFailure: jest.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -48,10 +48,10 @@ describe('apiHealthInterceptor', () => {
     const req = httpMock.expectOne(url);
     req.flush({});
 
-    expect(healthServiceSpy.markDown).not.toHaveBeenCalled();
+    expect(healthServiceSpy.recordFailure).not.toHaveBeenCalled();
   });
 
-  it('should mark down on status 0 (network error)', () => {
+  it('should record a failure on status 0 (network error)', () => {
     const url = API_URLS.ROOT + '/test';
     httpClient.get(url).subscribe({
       error: () => {},
@@ -60,10 +60,10 @@ describe('apiHealthInterceptor', () => {
     const req = httpMock.expectOne(url);
     req.error(new ProgressEvent('error'), { status: 0 });
 
-    expect(healthServiceSpy.markDown).toHaveBeenCalled();
+    expect(healthServiceSpy.recordFailure).toHaveBeenCalled();
   });
 
-  it('should mark down on status 500', () => {
+  it('should record a failure on status 500', () => {
     const url = API_URLS.ROOT + '/test';
     httpClient.get(url).subscribe({
       error: () => {},
@@ -72,10 +72,10 @@ describe('apiHealthInterceptor', () => {
     const req = httpMock.expectOne(url);
     req.flush('error', { status: 500, statusText: 'Server Error' });
 
-    expect(healthServiceSpy.markDown).toHaveBeenCalled();
+    expect(healthServiceSpy.recordFailure).toHaveBeenCalled();
   });
 
-  it('should NOT mark down on status 400', () => {
+  it('should NOT record a failure on status 400', () => {
     const url = API_URLS.ROOT + '/test';
     httpClient.get(url).subscribe({
       error: () => {},
@@ -84,10 +84,10 @@ describe('apiHealthInterceptor', () => {
     const req = httpMock.expectOne(url);
     req.flush('error', { status: 400, statusText: 'Bad Request' });
 
-    expect(healthServiceSpy.markDown).not.toHaveBeenCalled();
+    expect(healthServiceSpy.recordFailure).not.toHaveBeenCalled();
   });
 
-  it('should NOT mark down if not an API call', () => {
+  it('should NOT record a failure if not an API call', () => {
     const url = 'https://other-domain.com/test';
     httpClient.get(url).subscribe({
       error: () => {},
@@ -96,10 +96,10 @@ describe('apiHealthInterceptor', () => {
     const req = httpMock.expectOne(url);
     req.flush('error', { status: 500, statusText: 'Server Error' });
 
-    expect(healthServiceSpy.markDown).not.toHaveBeenCalled();
+    expect(healthServiceSpy.recordFailure).not.toHaveBeenCalled();
   });
 
-  it('should mark down on status 503 (service unavailable)', () => {
+  it('should record a failure on status 503 (service unavailable)', () => {
     const url = API_URLS.ROOT + '/test';
     httpClient.get(url).subscribe({
       error: () => {},
@@ -108,10 +108,10 @@ describe('apiHealthInterceptor', () => {
     const req = httpMock.expectOne(url);
     req.flush('error', { status: 503, statusText: 'Service Unavailable' });
 
-    expect(healthServiceSpy.markDown).toHaveBeenCalled();
+    expect(healthServiceSpy.recordFailure).toHaveBeenCalled();
   });
 
-  it('should NOT mark down on 4xx client errors (e.g. 404)', () => {
+  it('should NOT record a failure on 4xx client errors (e.g. 404)', () => {
     const url = API_URLS.ROOT + '/missing';
     httpClient.get(url).subscribe({
       error: () => {},
@@ -120,6 +120,6 @@ describe('apiHealthInterceptor', () => {
     const req = httpMock.expectOne(url);
     req.flush('Not Found', { status: 404, statusText: 'Not Found' });
 
-    expect(healthServiceSpy.markDown).not.toHaveBeenCalled();
+    expect(healthServiceSpy.recordFailure).not.toHaveBeenCalled();
   });
 });

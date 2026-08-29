@@ -68,6 +68,22 @@ export interface StorytimeConfiguration {
 }
 
 /**
+ * Whether Storytime may be reached, and why not when it may not.
+ *
+ * Kept separate from {@link StorytimeFeatureState.isEnabled} because "the
+ * server says the feature is off" and "the server could not be asked" call for
+ * different answers: the first is a feature that does not exist as far as a
+ * visitor is concerned, the second is an outage.
+ */
+export const STORYTIME_AVAILABILITY_ENABLED = 'ENABLED';
+export const STORYTIME_AVAILABILITY_DISABLED = 'DISABLED';
+export const STORYTIME_AVAILABILITY_UNAVAILABLE = 'UNAVAILABLE';
+export type StorytimeAvailability =
+  | typeof STORYTIME_AVAILABILITY_ENABLED
+  | typeof STORYTIME_AVAILABILITY_DISABLED
+  | typeof STORYTIME_AVAILABILITY_UNAVAILABLE;
+
+/**
  * The feature state assumed when the server cannot be reached.
  *
  * Everything off: a client that cannot confirm Storytime is available must not
@@ -124,11 +140,25 @@ export enum StorytimeModerationStatus {
 /**
  * A Story as readers see it.
  */
+/**
+ * The member who published a work, as a reader is shown them.
+ *
+ * Whether they are listed in the registry travels with the name because it
+ * decides whether the name leads anywhere: a profile that is not listed has no
+ * page to open.
+ */
+export interface StorytimeAuthor {
+  username: string;
+  publiclyVisible: boolean;
+}
+
 export interface Story {
   id: string;
   slug: string;
   title: string;
   ownerUserId: string;
+  /** Who published it, or null once they no longer have an account. */
+  author: StorytimeAuthor | null;
   shortDescription: string | null;
   descriptionHtml: string | null;
   completionState: CompletionState;
@@ -246,6 +276,13 @@ export interface ChapterSummary {
  */
 export interface Chapter extends ChapterSummary {
   storyId: string;
+  /**
+   * Who published the Story, or null once they no longer have an account.
+   *
+   * Carried on the Chapter for the reason its rating is: a reader who follows
+   * a link straight here never passes the Story page.
+   */
+  author: StorytimeAuthor | null;
   contentHtml: string | null;
   /** Resolved from the Chapter or its Story, ready for a lang attribute. */
   languageCode: string;
@@ -1166,6 +1203,8 @@ export enum StorytimeCommentStatus {
 export interface StorytimeComment {
   id: string;
   authorUserId: string;
+  /** Who wrote it, or null once they no longer have an account. */
+  author: StorytimeAuthor | null;
   parentCommentId: string | null;
   body: string | null;
   status: StorytimeCommentStatus;

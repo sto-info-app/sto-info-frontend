@@ -6,6 +6,9 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import {
   ContentRating,
+  STORYTIME_AVAILABILITY_DISABLED,
+  STORYTIME_AVAILABILITY_ENABLED,
+  STORYTIME_AVAILABILITY_UNAVAILABLE,
   StorytimeConfiguration,
 } from 'src/app/models/storytime.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
@@ -124,5 +127,62 @@ describe('StorytimeService', () => {
     expect(result.features.isEnabled).toBe(false);
     expect(result.features.creationEnabled).toBe(false);
     expect(result.languages).toEqual([]);
+  });
+
+  describe('availability', () => {
+    it('reports Storytime as enabled when the server says it is on', async () => {
+      const availability = firstValueFrom(service.getAvailability());
+
+      httpMock
+        .expectOne(API_URLS.STORYTIME_CONFIGURATION)
+        .flush(enabledConfiguration);
+
+      await expect(availability).resolves.toBe(STORYTIME_AVAILABILITY_ENABLED);
+    });
+
+    it('reports Storytime as disabled when the server says it is off', async () => {
+      const availability = firstValueFrom(service.getAvailability());
+
+      httpMock.expectOne(API_URLS.STORYTIME_CONFIGURATION).flush({
+        ...enabledConfiguration,
+        features: { ...enabledConfiguration.features, isEnabled: false },
+      });
+
+      await expect(availability).resolves.toBe(STORYTIME_AVAILABILITY_DISABLED);
+    });
+
+    // A server that could not be asked never said the feature was off, and a
+    // caller that cannot tell the two apart answers an outage with a 404.
+    it('separates a configuration that could not be loaded from one that is switched off', async () => {
+      const availability = firstValueFrom(service.getAvailability());
+
+      httpMock
+        .expectOne(API_URLS.STORYTIME_CONFIGURATION)
+        .flush('failed', { status: 503, statusText: 'Service Unavailable' });
+
+      await expect(availability).resolves.toBe(
+        STORYTIME_AVAILABILITY_UNAVAILABLE,
+      );
+    });
+
+    // An outage that lasted one request must not switch Storytime off for the
+    // rest of the visit.
+    it('asks again after a failed load rather than caching the failure', async () => {
+      const first = firstValueFrom(service.getAvailability());
+
+      httpMock
+        .expectOne(API_URLS.STORYTIME_CONFIGURATION)
+        .flush('failed', { status: 0, statusText: 'Unknown Error' });
+
+      await expect(first).resolves.toBe(STORYTIME_AVAILABILITY_UNAVAILABLE);
+
+      const second = firstValueFrom(service.getAvailability());
+
+      httpMock
+        .expectOne(API_URLS.STORYTIME_CONFIGURATION)
+        .flush(enabledConfiguration);
+
+      await expect(second).resolves.toBe(STORYTIME_AVAILABILITY_ENABLED);
+    });
   });
 });

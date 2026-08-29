@@ -9,6 +9,7 @@ import {
 } from 'src/app/models/storytime.models';
 import { CommentService } from '../../comment.service';
 import { CommentThreadComponent } from './comment-thread.component';
+import { provideRouter } from '@angular/router';
 
 const STORY_ID = 'story-1';
 const READER_ID = 'reader-1';
@@ -25,6 +26,7 @@ const buildComment = (
 ): StorytimeComment => ({
   id: 'comment-1',
   authorUserId: READER_ID,
+  author: { username: 'captain.picard', publiclyVisible: true },
   parentCommentId: null,
   body: 'A fine chapter.',
   status: StorytimeCommentStatus.VISIBLE,
@@ -86,6 +88,9 @@ describe('CommentThreadComponent', () => {
       providers: [
         { provide: CommentService, useValue: commentService },
         { provide: AuthService, useValue: authService },
+        // The byline links a commenter to their profile, and a router link
+        // cannot be built without one.
+        provideRouter([]),
       ],
     }).compileComponents();
   });
@@ -124,6 +129,204 @@ describe('CommentThreadComponent', () => {
 
     expect(element.querySelector('.storytime-comments')).toBeNull();
     expect(element.textContent).not.toContain('A fine chapter.');
+  });
+
+  // A comment that says neither who wrote it nor when reads as though it came
+  // from nobody.
+  // A comment is a panel like every other thing the feature lists, with who
+  // said it and when on the bar.
+  describe('the heading', () => {
+    it('names the commenter and dates the comment', () => {
+      create();
+      const element = fixture.nativeElement as HTMLElement;
+      const heading = element.querySelector('.storytime-panel-card__heading');
+
+      expect(
+        heading?.querySelector('.storytime-panel-card__name')?.textContent,
+      ).toContain('captain.picard');
+      expect(heading?.querySelector('time')?.getAttribute('datetime')).toBe(
+        '2026-01-01T00:00:00.000Z',
+      );
+    });
+
+    // The time is stamped in UTC and read wherever the reader is, so it has to
+    // say which of the two it is showing.
+    it('says which timezone the time is in', () => {
+      create();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector('time')
+          ?.textContent,
+      ).toMatch(/\d{2}:\d{2}\s\S+$/);
+    });
+
+    it('links a listed commenter to their profile', () => {
+      create();
+
+      expect(
+        (fixture.nativeElement as HTMLElement)
+          .querySelector('a.storytime-comments__author')
+          ?.getAttribute('href'),
+      ).toBe('/community/registry/profiles/captain.picard');
+    });
+
+    it('names an unlisted commenter without linking them', () => {
+      commentService.getComments.mockReturnValue(
+        of([
+          buildComment({
+            author: { username: 'captain.picard', publiclyVisible: false },
+          }),
+        ]),
+      );
+
+      create();
+      const element = fixture.nativeElement as HTMLElement;
+
+      expect(
+        element.querySelector('.storytime-panel-card__name')?.textContent,
+      ).toContain('captain.picard');
+      expect(element.querySelector('a.storytime-comments__author')).toBeNull();
+    });
+
+    // The conversation outlives the accounts in it.
+    it('says a former member wrote it when the account has gone', () => {
+      commentService.getComments.mockReturnValue(
+        of([buildComment({ author: null })]),
+      );
+
+      create();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '.storytime-panel-card__name',
+        )?.textContent,
+      ).toContain('A former member');
+    });
+  });
+
+  // The thread is one level deep, so only a root comment offers a reply.
+  describe('replying', () => {
+    /**
+     * Reads the reply controls on the thread.
+     *
+     * @returns One button per comment that offers a reply.
+     */
+    const replyControls = (): HTMLButtonElement[] => [
+      ...(
+        fixture.nativeElement as HTMLElement
+      ).querySelectorAll<HTMLButtonElement>(
+        '[aria-label="Reply to this comment"]',
+      ),
+    ];
+
+    it('offers a reply on a root comment and not on a reply to one', () => {
+      commentService.getComments.mockReturnValue(
+        of([
+          buildComment(),
+          buildComment({ id: 'reply-1', parentCommentId: 'comment-1' }),
+        ]),
+      );
+
+      create();
+
+      expect(replyControls()).toHaveLength(1);
+    });
+
+    it('opens the reply form when the control is pressed', () => {
+      create();
+
+      replyControls()[0].click();
+      fixture.detectChanges();
+
+      expect(component.replyingTo).toBe('comment-1');
+      expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+        'Your reply',
+      );
+    });
+
+    // Signing in is what a reader is asked to do instead.
+    it('offers no reply to a signed-out reader', () => {
+      authService.isLoggedIn.mockReturnValue(false);
+
+      create();
+
+      expect(replyControls()).toHaveLength(0);
+    });
+  });
+
+  // A conversation is one kind of thing all the way down, so the colour marks
+  // where one comment ends and the next begins.
+  describe('the colours a thread runs through', () => {
+    /**
+     * Reads the colour class each comment panel wears.
+     *
+     * @returns One class per panel, in the order they are shown.
+     */
+    const colours = (): (string | undefined)[] =>
+      [
+        ...(fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.storytime-comments__body',
+        ),
+      ].map(panel =>
+        [...panel.classList].find(name =>
+          name.startsWith('storytime-panel-card--comment-'),
+        ),
+      );
+
+    it('gives each comment in turn the next colour', () => {
+      commentService.getComments.mockReturnValue(
+        of([
+          buildComment(),
+          buildComment({ id: 'comment-2' }),
+          buildComment({ id: 'comment-3' }),
+        ]),
+      );
+
+      create();
+
+      expect(colours()).toEqual([
+        'storytime-panel-card--comment-0',
+        'storytime-panel-card--comment-1',
+        'storytime-panel-card--comment-2',
+      ]);
+    });
+
+    // A reply belongs to what it replies to, so the pair reads as one block.
+    it('gives a reply the colour of what it replies to', () => {
+      commentService.getComments.mockReturnValue(
+        of([
+          buildComment(),
+          buildComment({ id: 'comment-2' }),
+          buildComment({ id: 'reply-1', parentCommentId: 'comment-2' }),
+        ]),
+      );
+
+      create();
+
+      expect(colours()).toEqual([
+        'storytime-panel-card--comment-0',
+        'storytime-panel-card--comment-1',
+        'storytime-panel-card--comment-1',
+      ]);
+    });
+
+    // Two of the same colour are only far enough apart to read as unrelated
+    // once the cycle has run its length.
+    it('starts the cycle again once it runs out', () => {
+      commentService.getComments.mockReturnValue(
+        of(
+          Array.from({ length: 7 }, (_unused, position) =>
+            buildComment({ id: `comment-${position}` }),
+          ),
+        ),
+      );
+
+      create();
+      const shown = colours();
+
+      expect(shown).toHaveLength(7);
+      expect(shown[6]).toBe(shown[0]);
+    });
   });
 
   it('says so when nobody has commented', () => {
@@ -522,6 +725,47 @@ describe('CommentThreadComponent', () => {
     expect(component.isMine(buildComment({ authorUserId: 'other' }))).toBe(
       false,
     );
+  });
+
+  // The controls sit in a strip of their own down the side of the panel, and
+  // an empty strip is still a strip.
+  describe('the controls strip', () => {
+    const THEIRS = { authorUserId: 'other' };
+
+    it('offers the owner the hide control on somebody else’s comment', () => {
+      create(true);
+
+      expect(component.hasControls(buildComment(THEIRS))).toBe(true);
+    });
+
+    it('offers an administrator the same on a comment they cannot reply to', () => {
+      authService.isLoggedInAsAdmin.mockReturnValue(true);
+
+      create();
+
+      expect(component.hasControls(buildComment(THEIRS))).toBe(true);
+    });
+
+    // Nothing is left to do to a comment an administrator has already removed.
+    it('offers the owner nothing once an administrator has removed it', () => {
+      create(true);
+
+      expect(
+        component.hasControls(
+          buildComment({
+            ...THEIRS,
+            status: StorytimeCommentStatus.REMOVED_BY_ADMIN,
+          }),
+          true,
+        ),
+      ).toBe(false);
+    });
+
+    it('offers a plain reader nothing on somebody else’s comment', () => {
+      create();
+
+      expect(component.hasControls(buildComment(THEIRS))).toBe(false);
+    });
   });
 
   it('reads the thread back after a change', () => {

@@ -6,6 +6,12 @@ import {
   provideRouter,
 } from '@angular/router';
 import { BehaviorSubject, of } from 'rxjs';
+import {
+  STORYTIME_AVAILABILITY_DISABLED,
+  STORYTIME_AVAILABILITY_ENABLED,
+  STORYTIME_AVAILABILITY_UNAVAILABLE,
+  StorytimeAvailability,
+} from 'src/app/models/storytime.models';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { StorytimeService } from 'src/app/storytime/storytime.service';
 
@@ -35,11 +41,12 @@ describe('HelpGuideComponent', () => {
    * Builds the page for one guide slug.
    *
    * @param slug The slug in the address.
-   * @param isStorytimeEnabled Whether the Storytime feature is available.
+   * @param storytimeAvailability Whether the Storytime feature is on, off, or
+   *   could not be asked about at all.
    */
   const createComponent = (
     slug: string | null,
-    isStorytimeEnabled = true,
+    storytimeAvailability: StorytimeAvailability = STORYTIME_AVAILABILITY_ENABLED,
   ): void => {
     paramMap$ = new BehaviorSubject(
       convertToParamMap(slug === null ? {} : { guideSlug: slug }),
@@ -55,7 +62,7 @@ describe('HelpGuideComponent', () => {
         { provide: PageTitleService, useValue: pageTitleSpy },
         {
           provide: StorytimeService,
-          useValue: { isEnabled: () => of(isStorytimeEnabled) },
+          useValue: { getAvailability: () => of(storytimeAvailability) },
         },
       ],
     });
@@ -183,7 +190,7 @@ describe('HelpGuideComponent', () => {
   // A guide describing a feature that is switched off would announce the
   // feature exists, which is exactly what the switch is there to prevent.
   it('should refuse a Storytime guide while the feature is switched off', () => {
-    createComponent(firstGuide.slug, false);
+    createComponent(firstGuide.slug, STORYTIME_AVAILABILITY_DISABLED);
 
     expect(component.guide).toBeNull();
     expect(navigateSpy).toHaveBeenCalledWith(['/page-not-found']);
@@ -194,7 +201,27 @@ describe('HelpGuideComponent', () => {
   it('should still show a guide whose topic needs no feature switch', () => {
     const [communityGuide] = openTopic.guides;
 
-    createComponent(communityGuide.slug, false);
+    createComponent(communityGuide.slug, STORYTIME_AVAILABILITY_DISABLED);
+
+    expect(component.guide).toBe(communityGuide);
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  // An outage is not a missing page: the feature was never said to be off, so
+  // a 404 would tell the reader their address is wrong when it is not.
+  it('should send a Storytime guide to the service interruption page when the backend cannot be reached', () => {
+    createComponent(firstGuide.slug, STORYTIME_AVAILABILITY_UNAVAILABLE);
+
+    expect(component.guide).toBeNull();
+    expect(navigateSpy).toHaveBeenCalledWith(['/service-interruption']);
+  });
+
+  // Only the gated topic waits on the backend. A Community guide is words on a
+  // page, and an outage is no reason to withhold it.
+  it('should still show a guide whose topic needs no feature switch when the backend cannot be reached', () => {
+    const [communityGuide] = openTopic.guides;
+
+    createComponent(communityGuide.slug, STORYTIME_AVAILABILITY_UNAVAILABLE);
 
     expect(component.guide).toBe(communityGuide);
     expect(navigateSpy).not.toHaveBeenCalled();

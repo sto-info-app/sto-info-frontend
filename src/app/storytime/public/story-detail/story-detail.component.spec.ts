@@ -229,6 +229,12 @@ describe('StoryDetailComponent', () => {
     expect(
       element.querySelector('.storytime-story__description')?.innerHTML,
     ).toContain('Rendered');
+    // Bound as a plain string, so Angular's sanitizer runs on it and takes the
+    // server's block id with it. Nothing anchors to a description, so losing
+    // the id costs nothing and the warning it logs is expected.
+    expect(
+      element.querySelector('.storytime-story__description')?.innerHTML,
+    ).not.toContain('id="b1"');
   });
 
   it('warns about a Mature rating', () => {
@@ -248,30 +254,29 @@ describe('StoryDetailComponent', () => {
     expect(fixture.componentInstance.needsRatingWarning).toBe(false);
   });
 
-  // The page runs long: a cast, every Chapter, and the whole conversation. A
-  // reader who came back for one of them should be able to put the rest away.
-  describe('the sections that fold away', () => {
+  // Two views of the same work, read one at a time rather than one after the
+  // other. The conversation still folds away, but it belongs to the thread
+  // rather than to this page, and is tested where it is built.
+  describe('the tabs', () => {
     /**
-     * Reads the toggle on the bar of the section with this heading.
-     *
-     * Named through the bar rather than the section, because a section's
-     * contents have buttons of their own and the first one down the tree is
-     * not reliably the one that folds it.
+     * Reads the tab strip's buttons.
      *
      * @param element - The rendered page.
-     * @param heading - What the bar says.
-     * @returns The toggle, or null when the page has no such bar.
+     * @returns One button per tab, in the order they are shown.
      */
-    const toggleFor = (
-      element: HTMLElement,
-      heading: string,
-    ): HTMLButtonElement | null => {
-      const bar = [...element.querySelectorAll('.lcars-text-bar')].find(
-        candidate => candidate.textContent?.includes(heading),
-      );
+    const tabButtons = (element: HTMLElement): HTMLButtonElement[] => [
+      ...element.querySelectorAll<HTMLButtonElement>('.lcars-tabs .lcars-tab'),
+    ];
 
-      return (bar?.querySelector('button') as HTMLButtonElement) ?? null;
-    };
+    /**
+     * Reads a panel by the name it carries.
+     *
+     * @param element - The rendered page.
+     * @param name - The panel's label.
+     * @returns The panel, or null when the page has no such panel.
+     */
+    const panelFor = (element: HTMLElement, name: string): Element | null =>
+      element.querySelector(`[role="tabpanel"][aria-label="${name}"]`);
 
     beforeEach(() => {
       characterService.getCharacters.mockReturnValue(
@@ -299,33 +304,160 @@ describe('StoryDetailComponent', () => {
       );
     });
 
-    it.each([
-      ['Cast', '.storytime-cast'],
-      ['Chapters', '.storytime-chapter-list'],
-    ])('folds %s away', (heading, contents) => {
-      const element = render();
-      const toggle = toggleFor(element, heading);
-
-      expect(toggle?.getAttribute('aria-expanded')).toBe('true');
-      expect(element.querySelector(contents)).not.toBeNull();
-
-      toggle?.click();
-      fixture.detectChanges();
-
-      expect(toggle?.getAttribute('aria-expanded')).toBe('false');
-      expect(element.querySelector(contents)).toBeNull();
-    });
-
-    // The conversation folds away too, but it belongs to the thread rather
-    // than to this page, and is tested where it is built.
-    it('opens every section it has', () => {
+    // Chapters leads: it is what somebody arriving at a Story came for.
+    it('opens on the Chapters', () => {
       const element = render();
 
       expect(
-        ['Cast', 'Chapters', 'Comments'].map(heading =>
-          toggleFor(element, heading)?.getAttribute('aria-expanded'),
+        tabButtons(element).map(button => button.textContent?.trim()),
+      ).toEqual(['Chapters', 'Cast']);
+      expect(panelFor(element, 'Chapters')?.hasAttribute('hidden')).toBe(false);
+      expect(panelFor(element, 'Cast')?.hasAttribute('hidden')).toBe(true);
+    });
+
+    it('shows the cast when its tab is chosen', () => {
+      const element = render();
+
+      tabButtons(element)[1].click();
+      fixture.detectChanges();
+
+      expect(panelFor(element, 'Cast')?.hasAttribute('hidden')).toBe(false);
+      expect(panelFor(element, 'Chapters')?.hasAttribute('hidden')).toBe(true);
+      expect(element.textContent).toContain('Captain Shran');
+    });
+
+    it('goes back to the Chapters again', () => {
+      const element = render();
+
+      tabButtons(element)[1].click();
+      fixture.detectChanges();
+      tabButtons(element)[0].click();
+      fixture.detectChanges();
+
+      expect(panelFor(element, 'Chapters')?.hasAttribute('hidden')).toBe(false);
+      expect(element.textContent).toContain('Chapter One');
+    });
+
+    // The whole panel opens the thing, but a heading that happens to be a link
+    // is not obviously a way in, so each row carries a control that says so.
+    it('offers a way into each Chapter and each Character', () => {
+      const element = render();
+      const chapterCta = element.querySelector(
+        '.storytime-chapter-list .storytime-panel-card__controls a',
+      );
+
+      expect(chapterCta?.getAttribute('href')).toBe(
+        '/storytime/stories/a-story/chapters/chapter-one',
+      );
+      expect(chapterCta?.getAttribute('aria-label')).toBe('Read Chapter One');
+
+      tabButtons(element)[1].click();
+      fixture.detectChanges();
+
+      const castCta = element.querySelector(
+        '.storytime-cast .storytime-panel-card__controls a',
+      );
+
+      expect(castCta?.getAttribute('href')).toBe(
+        '/storytime/stories/a-story/characters/captain-shran',
+      );
+      expect(castCta?.getAttribute('aria-label')).toBe('View Captain Shran');
+    });
+
+    it('marks the chosen tab for a screen reader', () => {
+      const element = render();
+      const [chapters, cast] = tabButtons(element);
+
+      expect(chapters.getAttribute('aria-selected')).toBe('true');
+      expect(cast.getAttribute('aria-selected')).toBe('false');
+
+      cast.click();
+      fixture.detectChanges();
+
+      expect(chapters.getAttribute('aria-selected')).toBe('false');
+      expect(cast.getAttribute('aria-selected')).toBe('true');
+    });
+
+    // A tab that opens on an empty list is worse than no tab at all.
+    it('offers no cast tab for a Story with nobody in it', () => {
+      characterService.getCharacters.mockReturnValue(of([]));
+
+      const element = render();
+
+      expect(
+        tabButtons(element).map(button => button.textContent?.trim()),
+      ).toEqual(['Chapters']);
+      expect(panelFor(element, 'Cast')).toBeNull();
+    });
+  });
+
+  // A reader wants to know whose work this is, and the page never said.
+  describe('who wrote it', () => {
+    /**
+     * Reads a fact by its caption.
+     *
+     * @param element - The rendered page.
+     * @param name - The caption.
+     * @returns The value shown against it, or null when it is not shown.
+     */
+    const factFor = (element: HTMLElement, name: string): string | null =>
+      [...element.querySelectorAll('.info-item')]
+        .find(item =>
+          item.querySelector('.label')?.textContent?.trim().startsWith(name),
+        )
+        ?.querySelector('.value')
+        ?.textContent?.trim() ?? null;
+
+    it('names the author among the facts', () => {
+      storyService.getStory.mockReturnValue(
+        of(
+          buildStory({
+            author: { username: 'captain.picard', publiclyVisible: true },
+          }),
         ),
-      ).toEqual(['true', 'true', 'true']);
+      );
+
+      expect(factFor(render(), 'Author')).toBe('captain.picard');
+    });
+
+    // A name leads somewhere only when its owner has chosen to be listed.
+    it('links a listed author to their profile', () => {
+      storyService.getStory.mockReturnValue(
+        of(
+          buildStory({
+            author: { username: 'captain.picard', publiclyVisible: true },
+          }),
+        ),
+      );
+
+      expect(
+        render()
+          .querySelector('.storytime-facts__author')
+          ?.getAttribute('href'),
+      ).toBe('/community/registry/profiles/captain.picard');
+    });
+
+    it('names an unlisted author without linking them', () => {
+      storyService.getStory.mockReturnValue(
+        of(
+          buildStory({
+            author: { username: 'captain.picard', publiclyVisible: false },
+          }),
+        ),
+      );
+
+      const element = render();
+
+      expect(factFor(element, 'Author')).toBe('captain.picard');
+      expect(element.querySelector('.storytime-facts__author')).toBeNull();
+    });
+
+    // The Story is still readable when the account behind it has gone; it
+    // simply stops saying whose it was.
+    it('says nothing when the account has gone', () => {
+      storyService.getStory.mockReturnValue(of(buildStory({ author: null })));
+
+      expect(factFor(render(), 'Author')).toBeNull();
     });
   });
 
@@ -578,12 +710,132 @@ describe('StoryDetailComponent', () => {
       expect(element.textContent).toContain('Chapters 1–4');
     });
 
-    // Most Stories are written by one person and have no credits roll at all.
-    it('shows no credits section when there are none', () => {
+    // A credit with nothing said about it used to render as a heading bar and
+    // nothing else, which read as unfinished beside its neighbours.
+    it('falls back to what the role means when there are no notes', () => {
+      crewService.getCredits.mockReturnValue(
+        of([
+          {
+            id: 'credit-1',
+            displayLabel: 'Composer',
+            notes: null,
+            role: {
+              id: 'role-1',
+              code: 'COMPOSER',
+              name: 'Composer',
+              description: 'Composed music.',
+              displayOrder: 1,
+            },
+          },
+        ] as CrewCredit[]),
+      );
+
       const element = render();
 
+      expect(
+        element.querySelector('.storytime-credits__notes')?.textContent,
+      ).toContain('Composed music.');
+    });
+
+    // What the creator wrote about this credit beats what the role means in
+    // general, which is only there because they wrote nothing.
+    it('prefers the creator’s own notes to the role’s description', () => {
+      crewService.getCredits.mockReturnValue(
+        of([
+          {
+            id: 'credit-1',
+            displayLabel: 'Composer',
+            notes: 'Wrote the theme in an afternoon.',
+            role: {
+              id: 'role-1',
+              code: 'COMPOSER',
+              name: 'Composer',
+              description: 'Composed music.',
+              displayOrder: 1,
+            },
+          },
+        ] as CrewCredit[]),
+      );
+
+      const element = render();
+      const shown = element.querySelector('.storytime-credits__notes');
+
+      expect(shown?.textContent).toContain('Wrote the theme in an afternoon.');
+      expect(shown?.textContent).not.toContain('Composed music.');
+    });
+
+    // Nothing to say and no role to explain: the bar stands on its own rather
+    // than opening an empty box under it.
+    it('says nothing at all when there is nothing to say', () => {
+      crewService.getCredits.mockReturnValue(
+        of([
+          {
+            id: 'credit-1',
+            displayLabel: 'Contributor',
+            notes: null,
+            role: null,
+          },
+        ] as CrewCredit[]),
+      );
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-credits__notes')).toBeNull();
+      expect(element.querySelector('.storytime-credits')).not.toBeNull();
+    });
+
+    // They are behind a tab, which only exists when there is something to
+    // thank somebody for.
+    it('offers them as a tab of their own', () => {
+      crewService.getCredits.mockReturnValue(
+        of([{ id: 'credit-1', displayLabel: 'Narrator' }] as CrewCredit[]),
+      );
+
+      const element = render();
+      const tabs = [...element.querySelectorAll('.lcars-tabs .lcars-tab')].map(
+        tab => tab.textContent?.trim(),
+      );
+
+      expect(tabs).toContain('Credits');
+      expect(
+        element
+          .querySelector('[role="tabpanel"][aria-label="Credits"]')
+          ?.hasAttribute('hidden'),
+      ).toBe(true);
+    });
+
+    it('shows them once their tab is chosen', () => {
+      crewService.getCredits.mockReturnValue(
+        of([{ id: 'credit-1', displayLabel: 'Narrator' }] as CrewCredit[]),
+      );
+
+      const element = render();
+      const credits = [
+        ...element.querySelectorAll<HTMLButtonElement>(
+          '.lcars-tabs .lcars-tab',
+        ),
+      ].find(tab => tab.textContent?.trim() === 'Credits');
+
+      credits?.click();
+      fixture.detectChanges();
+
+      expect(
+        element
+          .querySelector('[role="tabpanel"][aria-label="Credits"]')
+          ?.hasAttribute('hidden'),
+      ).toBe(false);
+      expect(element.querySelector('.storytime-credits')).not.toBeNull();
+    });
+
+    // Most Stories are written by one person and have no credits roll at all.
+    it('offers no credits tab when there are none', () => {
+      const element = render();
+      const tabs = [...element.querySelectorAll('.lcars-tabs .lcars-tab')].map(
+        tab => tab.textContent?.trim(),
+      );
+
       expect(element.querySelector('.storytime-credits')).toBeNull();
-      expect(element.textContent).not.toContain('Credits');
+      expect(tabs).not.toContain('Credits');
     });
 
     it('leaves the Story readable when the credits cannot be loaded', () => {
@@ -603,11 +855,38 @@ describe('StoryDetailComponent', () => {
       chapterService.getChapters.mockReturnValue(of(buildChapters()));
     });
 
-    it('shows how far the reader has got', () => {
+    // Named facts rather than a sentence, and named as the reader's own: the
+    // Story has a status of its own a few lines above this one.
+    it('shows how far the reader has got, fact by fact', () => {
+      const element = render();
+      const facts = [
+        ...element.querySelectorAll('.storytime-story__progress .info-item'),
+      ].map(item => [
+        item.querySelector('.label')?.textContent?.trim(),
+        item.querySelector('.value')?.textContent?.trim(),
+      ]);
+
+      expect(facts).toEqual([
+        ['Your status', 'In progress'],
+        ['Chapters read', '1 of 2'],
+        ['Complete', '50%'],
+      ]);
+    });
+
+    // "On hold" is a word away from the "On hiatus" a Story itself can be, so
+    // the section says whose record this is.
+    it('says the record is the reader’s own', () => {
       const element = render();
 
-      expect(element.textContent).toContain('1 of 2 Chapters read');
-      expect(element.textContent).toContain('In progress');
+      expect(
+        element.querySelector(
+          '.storytime-story__progress .storytime-panel-card__name',
+        )?.textContent,
+      ).toContain('Your Reading Status');
+      expect(
+        element.querySelector('.storytime-story__progress-marks .label')
+          ?.textContent,
+      ).toContain('Set your status');
     });
 
     it('sends Continue Reading to the first unfinished Chapter', () => {

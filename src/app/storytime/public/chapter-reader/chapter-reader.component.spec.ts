@@ -220,6 +220,52 @@ describe('ChapterReaderComponent', () => {
     expect(element.textContent).toContain('A summary');
   });
 
+  // A reader who follows a link straight to a Chapter never passes the Story
+  // page, so whose work it is has to be said here too.
+  describe('who wrote it', () => {
+    /**
+     * Reads a fact by its caption.
+     *
+     * @param element - The rendered page.
+     * @param name - The caption.
+     * @returns The value shown against it, or null when it is not shown.
+     */
+    const factFor = (element: HTMLElement, name: string): string | null =>
+      [...element.querySelectorAll('.info-item')]
+        .find(item =>
+          item.querySelector('.label')?.textContent?.trim().startsWith(name),
+        )
+        ?.querySelector('.value')
+        ?.textContent?.trim() ?? null;
+
+    it('names the author among the facts', () => {
+      chapterService.getChapter.mockReturnValue(
+        of(
+          buildResponse({
+            chapter: {
+              ...buildResponse().chapter,
+              author: { username: 'captain.picard', publiclyVisible: true },
+            },
+          }),
+        ),
+      );
+
+      expect(factFor(render(), 'Author')).toBe('captain.picard');
+    });
+
+    it('says nothing when the account has gone', () => {
+      chapterService.getChapter.mockReturnValue(
+        of(
+          buildResponse({
+            chapter: { ...buildResponse().chapter, author: null },
+          }),
+        ),
+      );
+
+      expect(factFor(render(), 'Author')).toBeNull();
+    });
+  });
+
   it('renders the server-rendered body', () => {
     const element = render();
 
