@@ -608,6 +608,80 @@ describe('StoryDetailComponent', () => {
       expect(element.textContent).toContain('Chapters 1–4');
     });
 
+    // A credit with nothing said about it used to render as a heading bar and
+    // nothing else, which read as unfinished beside its neighbours.
+    it('falls back to what the role means when there are no notes', () => {
+      crewService.getCredits.mockReturnValue(
+        of([
+          {
+            id: 'credit-1',
+            displayLabel: 'Composer',
+            notes: null,
+            role: {
+              id: 'role-1',
+              code: 'COMPOSER',
+              name: 'Composer',
+              description: 'Composed music.',
+              displayOrder: 1,
+            },
+          },
+        ] as CrewCredit[]),
+      );
+
+      const element = render();
+
+      expect(
+        element.querySelector('.storytime-credits__notes')?.textContent,
+      ).toContain('Composed music.');
+    });
+
+    // What the creator wrote about this credit beats what the role means in
+    // general, which is only there because they wrote nothing.
+    it('prefers the creator’s own notes to the role’s description', () => {
+      crewService.getCredits.mockReturnValue(
+        of([
+          {
+            id: 'credit-1',
+            displayLabel: 'Composer',
+            notes: 'Wrote the theme in an afternoon.',
+            role: {
+              id: 'role-1',
+              code: 'COMPOSER',
+              name: 'Composer',
+              description: 'Composed music.',
+              displayOrder: 1,
+            },
+          },
+        ] as CrewCredit[]),
+      );
+
+      const element = render();
+      const shown = element.querySelector('.storytime-credits__notes');
+
+      expect(shown?.textContent).toContain('Wrote the theme in an afternoon.');
+      expect(shown?.textContent).not.toContain('Composed music.');
+    });
+
+    // Nothing to say and no role to explain: the bar stands on its own rather
+    // than opening an empty box under it.
+    it('says nothing at all when there is nothing to say', () => {
+      crewService.getCredits.mockReturnValue(
+        of([
+          {
+            id: 'credit-1',
+            displayLabel: 'Contributor',
+            notes: null,
+            role: null,
+          },
+        ] as CrewCredit[]),
+      );
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-credits__notes')).toBeNull();
+      expect(element.querySelector('.storytime-credits')).not.toBeNull();
+    });
+
     // They are behind a tab, which only exists when there is something to
     // thank somebody for.
     it('offers them as a tab of their own', () => {

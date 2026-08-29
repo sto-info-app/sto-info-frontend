@@ -288,10 +288,16 @@
                 }}</span>
               </div>
 
-              @if (credit.notes) {
+              <!--
+                What the creator said about this credit, or failing that what
+                the role itself means. A credit with neither used to render as
+                a heading bar with nothing under it, which read as unfinished
+                beside the ones that had something to say.
+              -->
+              @if (credit.notes || credit.role?.description) {
                 <div class="storytime-panel-card__body">
                   <span class="storytime-credits__notes">{{
-                    credit.notes
+                    credit.notes ?? credit.role?.description
                   }}</span>
                 </div>
               }
