@@ -147,7 +147,9 @@ describe('StorytimeLandingComponent', () => {
     });
 
     it('sends a reader to the featured Story', () => {
-      const link = render().querySelector('.storytime-spotlight__headline a');
+      const link = render().querySelector(
+        '.storytime-panel-card--spotlight .storytime-panel-card__heading',
+      );
 
       expect(link?.getAttribute('href')).toContain('stories/a-fine-story');
     });
@@ -167,7 +169,9 @@ describe('StorytimeLandingComponent', () => {
         ]),
       );
 
-      const link = render().querySelector('.storytime-spotlight__headline a');
+      const link = render().querySelector(
+        '.storytime-panel-card--spotlight .storytime-panel-card__heading',
+      );
 
       expect(link?.getAttribute('href')).toContain('arcs/the-long-war');
     });
@@ -438,9 +442,9 @@ describe('StorytimeLandingComponent', () => {
       const element = render();
       const list = element.querySelector('.storytime-spotlight');
 
-      expect(list?.querySelectorAll('.storytime-spotlight__entry').length).toBe(
-        1,
-      );
+      expect(
+        list?.querySelectorAll('.storytime-panel-card--spotlight').length,
+      ).toBe(1);
     });
 
     // The way into the archive is an action, so it is dressed as one rather

@@ -57,13 +57,25 @@
     } @else {
       <ol class="storytime-search__results">
         @for (hit of results.items; track hit.id) {
-          <li class="storytime-search__result">
-            <a [routerLink]="linkFor(hit)">{{ hit.title }}</a>
-            <span class="storytime-search__kind">{{
-              hit.targetType | titlecase
-            }}</span>
+          <li
+            class="storytime-panel-card"
+            [ngClass]="panelClassFor(hit)">
+            <a
+              class="storytime-panel-card__heading"
+              [routerLink]="linkFor(hit)"
+              [title]="hit.title">
+              <span class="storytime-panel-card__name">{{ hit.title }}</span>
+              <span class="storytime-panel-card__marks">
+                <span class="storytime-panel-card__badge">{{
+                  hit.targetType | titlecase
+                }}</span>
+              </span>
+            </a>
+
             @if (hit.summary) {
-              <p class="storytime-search__summary">{{ hit.summary }}</p>
+              <div class="storytime-panel-card__body">
+                <p class="storytime-search__summary">{{ hit.summary }}</p>
+              </div>
             }
           </li>
         }

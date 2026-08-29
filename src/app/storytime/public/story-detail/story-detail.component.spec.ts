@@ -393,7 +393,9 @@ describe('StoryDetailComponent', () => {
 
       expect(
         element
-          .querySelector('.storytime-cast__member a')
+          .querySelector(
+            '.storytime-panel-card--character .storytime-panel-card__heading',
+          )
           ?.getAttribute('href'),
       ).toContain('captain-shran');
     });

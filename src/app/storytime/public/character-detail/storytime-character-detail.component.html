@@ -77,8 +77,9 @@
     } @else {
       <ul class="storytime-character__appearances">
         @for (appearance of appearsIn; track appearance.chapterId) {
-          <li>
+          <li class="storytime-panel-card storytime-panel-card--chapter">
             <a
+              class="storytime-panel-card__heading"
               [routerLink]="[
                 '/',
                 appRoutes.STORYTIME,
@@ -86,14 +87,17 @@
                 storySlug,
                 'chapters',
                 appearance.chapterSlug,
-              ]">
-              {{ appearance.chapterTitle }}
+              ]"
+              [title]="appearance.chapterTitle">
+              <span class="storytime-panel-card__name">{{
+                appearance.chapterTitle
+              }}</span>
+              @if (appearance.isPrimary) {
+                <span class="storytime-panel-card__marks">
+                  <span class="storytime-panel-card__badge">Central</span>
+                </span>
+              }
             </a>
-            @if (appearance.isPrimary) {
-              <span class="storytime-character__appearance-billing"
-                >Central</span
-              >
-            }
           </li>
         }
       </ul>

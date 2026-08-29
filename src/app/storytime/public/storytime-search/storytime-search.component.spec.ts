@@ -214,6 +214,36 @@ describe('StorytimeSearchComponent', () => {
     });
   });
 
+  // A search is the one list holding every kind of thing at once, so the
+  // colour is what tells a reader whether they are looking at a Story or the
+  // Character in it before they read the badge.
+  describe('the panel a result wears', () => {
+    it.each([
+      [StorytimeTargetType.STORY, 'storytime-panel-card--story'],
+      [StorytimeTargetType.CHAPTER, 'storytime-panel-card--chapter'],
+      [StorytimeTargetType.CHARACTER, 'storytime-panel-card--character'],
+      [StorytimeTargetType.ARC, 'storytime-panel-card--arc'],
+    ])('gives a %s its own colour', (targetType, expected) => {
+      render();
+
+      expect(
+        fixture.componentInstance.panelClassFor(buildHit({ targetType })),
+      ).toBe(expected);
+    });
+
+    // Search only returns the four above, but the enum holds more. A kind the
+    // map has no colour for reads as a Story rather than as an unstyled row.
+    it('falls back to the Story panel for a kind it does not know', () => {
+      render();
+
+      expect(
+        fixture.componentInstance.panelClassFor(
+          buildHit({ targetType: StorytimeTargetType.COMMENT }),
+        ),
+      ).toBe('storytime-panel-card--story');
+    });
+  });
+
   it('reports a search that could not be run', () => {
     searchService.search.mockReturnValue(
       throwError(() => new Error('unavailable')),

@@ -20,18 +20,24 @@
   } @else {
     <ol class="storytime-feed__list">
       @for (entry of entries; track entry.id) {
-        <li class="storytime-feed__entry">
-          <p class="storytime-feed__what">{{ wordingFor(entry) }}</p>
+        <li class="storytime-panel-card storytime-panel-card--activity">
           <a
-            class="storytime-feed__link"
-            [routerLink]="linkFor(entry)">
-            {{ titleFor(entry) }}
+            class="storytime-panel-card__heading"
+            [routerLink]="linkFor(entry)"
+            [title]="titleFor(entry)">
+            <span class="storytime-panel-card__name">{{
+              titleFor(entry)
+            }}</span>
           </a>
-          <time
-            class="storytime-feed__when"
-            [attr.datetime]="entry.occurredAt">
-            {{ entry.occurredAt | date: 'medium' }}
-          </time>
+
+          <div class="storytime-panel-card__body">
+            <p class="storytime-feed__what">{{ wordingFor(entry) }}</p>
+            <time
+              class="storytime-feed__when"
+              [attr.datetime]="entry.occurredAt">
+              {{ entry.occurredAt | date: 'medium' }}
+            </time>
+          </div>
         </li>
       }
     </ol>

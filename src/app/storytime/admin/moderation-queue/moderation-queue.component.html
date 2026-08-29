@@ -61,50 +61,58 @@
       } @else {
         <ul class="storytime-moderation__reports">
           @for (report of reports; track report.id) {
-            <li class="storytime-moderation__report">
-              <p class="storytime-moderation__what">
-                {{ reasonLabels[report.reasonCode] }} —
-                {{ report.targetType | lowercase }}
-              </p>
+            <li class="storytime-panel-card storytime-panel-card--moderation">
+              <div class="storytime-panel-card__heading">
+                <span class="storytime-panel-card__name">{{
+                  reasonLabels[report.reasonCode]
+                }}</span>
+                <span class="storytime-panel-card__marks">
+                  <span class="storytime-panel-card__badge">{{
+                    report.targetType | lowercase
+                  }}</span>
+                </span>
+              </div>
 
-              @if (report.description) {
-                <p class="storytime-moderation__description">
-                  {{ report.description }}
-                </p>
-              }
-
-              <ul class="storytime-moderation__meta">
-                <li>{{ report.status }}</li>
-                <li>{{ report.createdAt | date: 'short' }}</li>
-                @if (report.resolution) {
-                  <li>{{ report.resolution }}</li>
+              <div class="storytime-panel-card__body">
+                @if (report.description) {
+                  <p class="storytime-moderation__description">
+                    {{ report.description }}
+                  </p>
                 }
-              </ul>
 
-              @if (isLive(report)) {
-                <div class="storytime-actions">
-                  @if (report.status === reportStatus.OPEN) {
-                    <button
-                      class="lcars-btn lcars-btn-auto bluey"
-                      type="button"
-                      (click)="claim(report)">
-                      Claim
-                    </button>
+                <ul class="storytime-moderation__meta">
+                  <li>{{ report.status }}</li>
+                  <li>{{ report.createdAt | date: 'short' }}</li>
+                  @if (report.resolution) {
+                    <li>{{ report.resolution }}</li>
                   }
-                  <button
-                    class="lcars-btn lcars-btn-auto cardinal"
-                    type="button"
-                    (click)="removeContent(report)">
-                    Remove the content
-                  </button>
-                  <button
-                    class="lcars-btn lcars-btn-auto sunflower"
-                    type="button"
-                    (click)="dismiss(report)">
-                    Dismiss
-                  </button>
-                </div>
-              }
+                </ul>
+
+                @if (isLive(report)) {
+                  <div class="storytime-actions">
+                    @if (report.status === reportStatus.OPEN) {
+                      <button
+                        class="lcars-btn lcars-btn-auto bluey"
+                        type="button"
+                        (click)="claim(report)">
+                        Claim
+                      </button>
+                    }
+                    <button
+                      class="lcars-btn lcars-btn-auto cardinal"
+                      type="button"
+                      (click)="removeContent(report)">
+                      Remove the content
+                    </button>
+                    <button
+                      class="lcars-btn lcars-btn-auto sunflower"
+                      type="button"
+                      (click)="dismiss(report)">
+                      Dismiss
+                    </button>
+                  </div>
+                }
+              </div>
             </li>
           }
         </ul>
@@ -121,28 +129,38 @@
       } @else {
         <ul class="storytime-moderation__appeals">
           @for (appeal of appeals; track appeal.id) {
-            <li class="storytime-moderation__appeal">
-              <p class="storytime-moderation__what">
-                Appeal against a removed {{ appeal.targetType | lowercase }}
-              </p>
-              <p class="storytime-moderation__description">{{ appeal.body }}</p>
-              <p class="storytime-moderation__meta">
-                {{ appeal.createdAt | date: 'short' }}
-              </p>
+            <li class="storytime-panel-card storytime-panel-card--moderation">
+              <div class="storytime-panel-card__heading">
+                <span class="storytime-panel-card__name">Appeal</span>
+                <span class="storytime-panel-card__marks">
+                  <span class="storytime-panel-card__badge">{{
+                    appeal.targetType | lowercase
+                  }}</span>
+                </span>
+              </div>
 
-              <div class="storytime-actions">
-                <button
-                  class="lcars-btn lcars-btn-auto green"
-                  type="button"
-                  (click)="uphold(appeal)">
-                  Uphold and restore
-                </button>
-                <button
-                  class="lcars-btn lcars-btn-auto cardinal"
-                  type="button"
-                  (click)="reject(appeal)">
-                  Reject
-                </button>
+              <div class="storytime-panel-card__body">
+                <p class="storytime-moderation__description">
+                  {{ appeal.body }}
+                </p>
+                <p class="storytime-moderation__meta">
+                  {{ appeal.createdAt | date: 'short' }}
+                </p>
+
+                <div class="storytime-actions">
+                  <button
+                    class="lcars-btn lcars-btn-auto green"
+                    type="button"
+                    (click)="uphold(appeal)">
+                    Uphold and restore
+                  </button>
+                  <button
+                    class="lcars-btn lcars-btn-auto cardinal"
+                    type="button"
+                    (click)="reject(appeal)">
+                    Reject
+                  </button>
+                </div>
               </div>
             </li>
           }

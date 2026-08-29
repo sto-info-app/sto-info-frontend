@@ -62,7 +62,9 @@ describe('ArcListComponent', () => {
 
     expect(
       element
-        .querySelector('.storytime-arc-list__entry a')
+        .querySelector(
+          '.storytime-panel-card--arc .storytime-panel-card__heading',
+        )
         ?.getAttribute('href'),
     ).toContain('the-long-war');
   });

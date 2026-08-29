@@ -73,25 +73,34 @@
       <ol class="storytime-arc__stories">
         @for (membership of stories; track membership.id) {
           <li
-            class="storytime-arc__story"
+            class="storytime-panel-card storytime-panel-card--story"
             [class.storytime-arc__story--read]="isRead(membership)">
             <a
+              class="storytime-panel-card__heading"
               [routerLink]="[
                 '/',
                 appRoutes.STORYTIME,
                 'stories',
                 membership.story?.slug,
-              ]">
-              {{ membership.story?.title }}
+              ]"
+              [title]="membership.story?.title">
+              <span class="storytime-panel-card__name">{{
+                membership.story?.title
+              }}</span>
             </a>
-            @if (membership.introductoryNote) {
-              <p class="storytime-arc__note">
-                {{ membership.introductoryNote }}
-              </p>
-            } @else if (membership.story?.shortDescription) {
-              <p class="storytime-arc__story-summary">
-                {{ membership.story.shortDescription }}
-              </p>
+
+            @if (membership.introductoryNote || membership.story?.shortDescription) {
+              <div class="storytime-panel-card__body">
+                @if (membership.introductoryNote) {
+                  <p class="storytime-arc__note">
+                    {{ membership.introductoryNote }}
+                  </p>
+                } @else {
+                  <p class="storytime-arc__story-summary">
+                    {{ membership.story?.shortDescription }}
+                  </p>
+                }
+              </div>
             }
           </li>
         }

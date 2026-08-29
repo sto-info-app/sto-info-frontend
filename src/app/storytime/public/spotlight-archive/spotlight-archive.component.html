@@ -23,22 +23,28 @@
     } @else {
       <ul class="storytime-spotlight">
         @for (entry of showing; track entry.id) {
-          <li class="storytime-spotlight__entry">
-            <h2 class="storytime-spotlight__headline">
-              <a [routerLink]="linkFor(entry)">{{ entry.headline }}</a>
-            </h2>
-            <p class="storytime-spotlight__work">
-              <i
-                class="fa-solid fa-star"
-                aria-hidden="true"></i>
-              {{ titleFor(entry) }}
-            </p>
-            <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
-            @if (entry.selectionReason) {
-              <p class="storytime-spotlight__reason">
-                {{ entry.selectionReason }}
+          <li class="storytime-panel-card storytime-panel-card--spotlight">
+            <a
+              class="storytime-panel-card__heading"
+              [routerLink]="linkFor(entry)"
+              [title]="entry.headline">
+              <h2 class="storytime-panel-card__name">{{ entry.headline }}</h2>
+            </a>
+
+            <div class="storytime-panel-card__body">
+              <p class="storytime-spotlight__work">
+                <i
+                  class="fa-solid fa-star"
+                  aria-hidden="true"></i>
+                {{ titleFor(entry) }}
               </p>
-            }
+              <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
+              @if (entry.selectionReason) {
+                <p class="storytime-spotlight__reason">
+                  {{ entry.selectionReason }}
+                </p>
+              }
+            </div>
           </li>
         }
       </ul>
@@ -48,16 +54,22 @@
       <h2>Previously in the Spotlight</h2>
       <ul class="storytime-spotlight storytime-spotlight--past">
         @for (entry of past; track entry.id) {
-          <li class="storytime-spotlight__entry">
-            <h3 class="storytime-spotlight__headline">
-              <a [routerLink]="linkFor(entry)">{{ entry.headline }}</a>
-            </h3>
-            <p class="storytime-spotlight__work">{{ titleFor(entry) }}</p>
-            <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
-            <p class="storytime-spotlight__dates">
-              {{ entry.startsAt | date: 'longDate' }} –
-              {{ entry.endsAt | date: 'longDate' }}
-            </p>
+          <li class="storytime-panel-card storytime-panel-card--spotlight">
+            <a
+              class="storytime-panel-card__heading"
+              [routerLink]="linkFor(entry)"
+              [title]="entry.headline">
+              <h3 class="storytime-panel-card__name">{{ entry.headline }}</h3>
+            </a>
+
+            <div class="storytime-panel-card__body">
+              <p class="storytime-spotlight__work">{{ titleFor(entry) }}</p>
+              <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
+              <p class="storytime-spotlight__dates">
+                {{ entry.startsAt | date: 'longDate' }} –
+                {{ entry.endsAt | date: 'longDate' }}
+              </p>
+            </div>
           </li>
         }
       </ul>

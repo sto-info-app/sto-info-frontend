@@ -104,7 +104,9 @@ describe('SpotlightArchiveComponent', () => {
   });
 
   it('sends a reader to the featured Story', () => {
-    const link = render().querySelector('.storytime-spotlight__headline a');
+    const link = render().querySelector(
+      '.storytime-panel-card--spotlight .storytime-panel-card__heading',
+    );
 
     expect(link?.getAttribute('href')).toContain('stories/a-fine-story');
   });
@@ -124,7 +126,9 @@ describe('SpotlightArchiveComponent', () => {
 
     expect(
       element
-        .querySelector('.storytime-spotlight__headline a')
+        .querySelector(
+          '.storytime-panel-card--spotlight .storytime-panel-card__heading',
+        )
         ?.getAttribute('href'),
     ).toContain('arcs/the-long-war');
     expect(element.textContent).toContain('The Long War');

@@ -1,37 +1,50 @@
-<article class="storytime-story-card">
-  <a [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]">
-    @if (story.profileImageThumbnailUrl) {
-      <img
-        class="storytime-story-card__image"
-        [src]="story.profileImageThumbnailUrl"
-        [alt]="story.profileImageAlt ?? ''"
-        loading="lazy" />
-    }
-
-    <h2 class="storytime-story-card__title">{{ story.title }}</h2>
+<article class="storytime-panel-card storytime-panel-card--story">
+  <a
+    class="storytime-panel-card__heading"
+    [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]"
+    [title]="story.title">
+    <span class="storytime-panel-card__name">{{ story.title }}</span>
+    <span class="storytime-panel-card__marks">
+      @if (needsRatingWarning) {
+        <span class="storytime-panel-card__badge">
+          <i
+            class="fa-solid fa-triangle-exclamation"
+            aria-hidden="true"></i>
+          <span class="sr-only">Content rating: </span>
+          {{ ratingLabels[story.contentRating] }}
+        </span>
+      }
+    </span>
   </a>
 
-  @if (story.shortDescription) {
-    <p class="storytime-story-card__summary">{{ story.shortDescription }}</p>
+  @if (story.profileImageThumbnailUrl) {
+    <img
+      class="storytime-story-card__image"
+      [src]="story.profileImageThumbnailUrl"
+      [alt]="story.profileImageAlt ?? ''"
+      loading="lazy" />
   }
 
-  <ul class="storytime-story-card__meta">
-    <li>
-      <span class="sr-only">Content rating: </span>
-      @if (needsRatingWarning) {
-        <i
-          class="fa-solid fa-triangle-exclamation"
-          aria-hidden="true"></i>
+  <div class="storytime-panel-card__body storytime-story-card__body">
+    @if (story.shortDescription) {
+      <p class="storytime-story-card__summary">{{ story.shortDescription }}</p>
+    }
+
+    <ul class="storytime-story-card__meta">
+      @if (!needsRatingWarning) {
+        <li>
+          <span class="sr-only">Content rating: </span>
+          {{ ratingLabels[story.contentRating] }}
+        </li>
       }
-      {{ ratingLabels[story.contentRating] }}
-    </li>
-    <li>
-      <span class="sr-only">Status: </span>
-      {{ completionLabels[story.completionState] }}
-    </li>
-    <li>
-      {{ story.publishedChapterCount }}
-      {{ story.publishedChapterCount === 1 ? 'Chapter' : 'Chapters' }}
-    </li>
-  </ul>
+      <li>
+        <span class="sr-only">Status: </span>
+        {{ completionLabels[story.completionState] }}
+      </li>
+      <li>
+        {{ story.publishedChapterCount }}
+        {{ story.publishedChapterCount === 1 ? 'Chapter' : 'Chapters' }}
+      </li>
+    </ul>
+  </div>
 </article>

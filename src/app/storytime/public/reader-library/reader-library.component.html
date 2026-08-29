@@ -41,48 +41,64 @@
   } @else {
     <ul class="storytime-library">
       @for (entry of entries; track entry.progress.storyId) {
-        <li class="storytime-library__entry">
+        <li class="storytime-panel-card storytime-panel-card--story">
           @if (entry.story) {
             <a
-              class="storytime-library__title"
+              class="storytime-panel-card__heading"
               [routerLink]="[
                 '/',
                 appRoutes.STORYTIME,
                 'stories',
                 entry.story.slug,
-              ]">
-              {{ entry.story.title }}
+              ]"
+              [title]="entry.story.title">
+              <span class="storytime-panel-card__name">{{
+                entry.story.title
+              }}</span>
+              <span class="storytime-panel-card__marks">
+                <span class="storytime-panel-card__badge">{{
+                  statusLabels[entry.progress.status]
+                }}</span>
+              </span>
             </a>
           } @else {
-            <span class="storytime-library__title storytime-library__gone">
-              A Story that is no longer available
-            </span>
+            <div class="storytime-panel-card__heading storytime-library__gone">
+              <span class="storytime-panel-card__name">
+                A Story that is no longer available
+              </span>
+              <span class="storytime-panel-card__marks">
+                <span class="storytime-panel-card__badge">{{
+                  statusLabels[entry.progress.status]
+                }}</span>
+              </span>
+            </div>
           }
 
-          <p class="storytime-library__status">
-            {{ statusLabels[entry.progress.status] }} —
-            {{ entry.progress.readChapters }} of
-            {{ entry.progress.totalChapters }} Chapters read ({{
-              entry.progress.percentComplete
-            }}%)
-          </p>
-
-          <progress
-            class="storytime-library__bar"
-            aria-label="Chapters read"
-            [value]="entry.progress.percentComplete"
-            max="100">
-          </progress>
-
-          @if (entry.progress.newChapterCount > 0) {
-            <p class="storytime-library__new">
-              {{ entry.progress.newChapterCount }} new
-              {{
-                entry.progress.newChapterCount === 1 ? 'Chapter' : 'Chapters'
-              }}
-              since you last read.
+          <div class="storytime-panel-card__body">
+            <p class="storytime-library__status">
+              {{ entry.progress.readChapters }} of
+              {{ entry.progress.totalChapters }} Chapters read ({{
+                entry.progress.percentComplete
+              }}%)
             </p>
-          }
+
+            <progress
+              class="storytime-library__bar"
+              aria-label="Chapters read"
+              [value]="entry.progress.percentComplete"
+              max="100">
+            </progress>
+
+            @if (entry.progress.newChapterCount > 0) {
+              <p class="storytime-library__new">
+                {{ entry.progress.newChapterCount }} new
+                {{
+                  entry.progress.newChapterCount === 1 ? 'Chapter' : 'Chapters'
+                }}
+                since you last read.
+              </p>
+            }
+          </div>
         </li>
       }
     </ul>

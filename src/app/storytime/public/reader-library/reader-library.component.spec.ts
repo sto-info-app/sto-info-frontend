@@ -76,7 +76,9 @@ describe('ReaderLibraryComponent', () => {
     const element = render();
 
     expect(
-      element.querySelector('.storytime-library__title')?.getAttribute('href'),
+      element
+        .querySelector('.storytime-panel-card__heading')
+        ?.getAttribute('href'),
     ).toContain('a-story');
   });
 
@@ -96,7 +98,7 @@ describe('ReaderLibraryComponent', () => {
     const element = render();
 
     expect(element.textContent).toContain('no longer available');
-    expect(element.querySelector('.storytime-library__title a')).toBeNull();
+    expect(element.querySelector('a.storytime-panel-card__heading')).toBeNull();
   });
 
   it('says when there is new content since the reader last read', () => {
