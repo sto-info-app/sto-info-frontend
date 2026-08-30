@@ -3,7 +3,11 @@ import { inject, Injectable } from '@angular/core';
 
 import { catchError, Observable, throwError } from 'rxjs';
 
-import { User, UserProfileUpdateResult } from '../models/user.model';
+import {
+  User,
+  UserProfileUpdateResult,
+  UserSettings,
+} from '../models/user.model';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
@@ -23,6 +27,26 @@ export class DashboardService {
       return throwError(() => new Error('No token found'));
     }
     return this._http.get<User>(API_URLS.USER, httpOptions);
+  }
+
+  getUserSettings(): Observable<UserSettings> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+    return this._http.get<UserSettings>(API_URLS.USER_SETTINGS, httpOptions);
+  }
+
+  updateUserSettings(settings: UserSettings): Observable<UserSettings> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+    return this._http.put<UserSettings>(
+      API_URLS.USER_SETTINGS,
+      settings,
+      httpOptions,
+    );
   }
 
   updatePersonalDetails(

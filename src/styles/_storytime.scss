@@ -113,7 +113,9 @@
   // real selector (see usages below), so this is the known stylelint/Sonar
   // false positive for `&` referenced inside a @mixin definition rather than
   // a missing scoping root.
-  &:hover, &:focus { // NOSONAR
+  &:hover,
+  &:focus {
+    // NOSONAR
     color: vars.$lcars-gold;
     text-decoration: underline;
   }
@@ -738,6 +740,9 @@ app-storytime-editor-actions {
   line-height: 1;
   font-weight: 700;
   list-style: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
   transition: background-color 120ms ease;
 }
@@ -1441,7 +1446,6 @@ p.storytime-fan-notice,
     color: vars.$lcars-grey-light;
     font-size: 0.85rem;
   }
-
 }
 
 .storytime-credits {

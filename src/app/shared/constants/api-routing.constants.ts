@@ -29,6 +29,7 @@ export const API_URLS = {
 
   // User
   USER: apiUrl + '/user',
+  USER_SETTINGS: apiUrl + '/user/settings',
   CLOSE_ACCOUNT: apiUrl + '/user/close-account',
   UPDATE_USER_PROFILE: apiUrl + '/user/update-profile',
   UPDATE_USER_PROFILE_PIC: apiUrl + '/user/update-profile-pic',

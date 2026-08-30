@@ -28,11 +28,11 @@
             </div>
             <div class="info-item">
               <span class="label"><i class="fas fa-user"></i> Username:</span>
-              <span class="value">{{ account.username || 'N/A' }}</span>
+              <span class="value" [class.privacy-blur]="privacyMode.isEnabled()">{{ account.username || 'N/A' }}</span>
             </div>
             <div class="info-item">
               <span class="label"><i class="fas fa-envelope"></i> Email:</span>
-              <span class="value">{{ account.email || 'N/A' }}</span>
+              <span class="value" [class.privacy-blur]="privacyMode.isEnabled()">{{ account.email || 'N/A' }}</span>
             </div>
             @if (account.notes) {
               <div class="info-item">

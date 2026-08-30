@@ -1,0 +1,66 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+<div class="settings-container">
+  <div class="settings-main-column col">
+    <h1>Settings</h1>
+    @if (!isLoading) {
+      <form [formGroup]="settingsForm" (ngSubmit)="save()">
+        <div class="lcars-text-bar settings-bar"><span>Privacy</span></div>
+        <div class="settings-content">
+          <div class="settings-row">
+            <app-lcars-toggle
+              formControlName="privacyMode"
+              label="Privacy Mode"
+              ariaLabel="Privacy Mode"
+            ></app-lcars-toggle>
+            <details class="settings-help">
+              <summary
+                class="settings-help-trigger"
+                aria-label="Privacy mode details"
+                title="Privacy mode details"
+              >
+                <i class="fas fa-question-circle" aria-hidden="true"></i>
+              </summary>
+              <div class="settings-help-popup">
+                <p>
+                  <strong>Privacy mode</strong>
+                  <span>
+                    Private details like email addresses and usernames are
+                    hidden while this is on. This helps protect your privacy if
+                    you are broadcasting, sharing your screen or recording
+                    videos.
+                  </span>
+                </p>
+              </div>
+            </details>
+          </div>
+        </div>
+        <button
+          type="submit"
+          class="lcars-btn sunflower"
+          [disabled]="isSaving || !settingsForm.dirty"
+        >
+          Save
+        </button>
+      </form>
+    }
+    @if (errorMessage) {
+      <app-lcars-error-message
+        [message]="errorMessage"
+      ></app-lcars-error-message>
+    }
+  </div>
+  <div class="settings-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a [routerLink]="dashboardLink" class="full-width-btn-link sunflower"
+      >Dashboard</a>
+      <a [routerLink]="profileLink" class="full-width-btn-link gold"
+      >Personnel Record</a>
+    </div>
+  </div>
+</div>

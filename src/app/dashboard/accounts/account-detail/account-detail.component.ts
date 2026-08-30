@@ -20,6 +20,7 @@ import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { EndeavourService } from 'src/app/dashboard/services/endeavour.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
+import { PrivacyModeService } from 'src/app/dashboard/services/privacy-mode.service';
 import { CharacterCardComponent } from 'src/app/shared/components/character-card/character-card.component';
 import { CharacterCardVm } from 'src/app/shared/components/character-card/character-card.model';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
@@ -86,6 +87,7 @@ interface CharacterFilterOptionsVm {
   ],
 })
 export class AccountDetailComponent implements OnInit, OnDestroy {
+  readonly privacyMode = inject(PrivacyModeService);
   // ── Non-signal state (changed infrequently via HTTP callbacks) ────────────
   account: StoAccount | null = null;
   isLoading = true;
@@ -351,6 +353,7 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.privacyMode.load().subscribe();
     this._route.params.pipe(takeUntil(this._destroy$)).subscribe(params => {
       const handle = decodeStoHandle(params['handle']);
       if (handle) {
