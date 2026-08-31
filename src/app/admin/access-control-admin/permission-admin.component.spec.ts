@@ -7,14 +7,16 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { provideRouter } from '@angular/router';
-import { NEVER, Subject, of, throwError } from 'rxjs';
-import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
+import { NEVER, Observable, Subject, of, throwError } from 'rxjs';
 import { UserSettings } from 'src/app/dashboard/models/user.model';
+import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import {
   ADMIN_ROLE,
   ASSIGNABLE_ROLES,
   AdminPermission,
   PermissionEffect,
+  SetPermissionOverrideRequest,
+  SetUserRoleRequest,
   UserAccessSummary,
   UserPermissionOverride,
 } from 'src/app/models/access-control.models';
@@ -193,10 +195,21 @@ describe('PermissionAdminComponent', () => {
   beforeEach(async () => {
     adminServiceSpy = {
       listPermissions: jest.fn(() => of(permissions)),
-      getUserAccessSummary: jest.fn(() => of(buildSummary())),
-      setPermissionOverride: jest.fn(() => of(buildSummary())),
-      removePermissionOverride: jest.fn(() => of(buildSummary())),
-      setUserRole: jest.fn(() => of(buildSummary())),
+      getUserAccessSummary: jest.fn<Observable<UserAccessSummary>, [string]>(
+        () => of(buildSummary()),
+      ),
+      setPermissionOverride: jest.fn<
+        Observable<UserAccessSummary>,
+        [string, SetPermissionOverrideRequest]
+      >(() => of(buildSummary())),
+      removePermissionOverride: jest.fn<
+        Observable<UserAccessSummary>,
+        [string, string]
+      >(() => of(buildSummary())),
+      setUserRole: jest.fn<
+        Observable<UserAccessSummary>,
+        [string, SetUserRoleRequest]
+      >(() => of(buildSummary())),
     };
 
     moderationServiceSpy = {
