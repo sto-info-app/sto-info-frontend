@@ -9,7 +9,6 @@
       @if (!isLoggedIn) {
         <a
           [routerLink]="getRouteLink(appRoutes.REGISTER)"
-          [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="peach"
           >{{ appRouteTitles.REGISTER }}</a
         >
@@ -34,28 +33,33 @@
         >
       }
       @if (isLoggedIn) {
+        <!--
+          Lit by hand rather than by `routerLinkActive`. Every other entry can
+          match on the start of the address, but Your Accounts and Stats sit
+          underneath the dashboard, so a plain prefix match would light this
+          entry as well as theirs and leave two buttons on at once. The
+          component pushes this class off the router's own events, because a
+          binding alone would go stale on an `OnPush` view that the navigation
+          did not dirty.
+        -->
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
-          [routerLinkActiveOptions]="{ exact: true }"
-          routerLinkActive="peach"
+          [class.peach]="isDashboardActive"
           >{{ appRouteTitles.STO_DASHBOARD }}</a
         >
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
-          [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="peach"
           >{{ appRouteTitles.STO_DASHBOARD_ACCOUNTS }}</a
         >
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)"
-          [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="peach"
           >{{ appRouteTitles.STO_DASHBOARD_STATS }}</a
         >
         @if (isAdmin) {
           <a
             [routerLink]="getRouteLink(appRoutes.ADMIN)"
-            [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="peach"
             >{{ appRouteTitles.ADMIN }}</a
           >

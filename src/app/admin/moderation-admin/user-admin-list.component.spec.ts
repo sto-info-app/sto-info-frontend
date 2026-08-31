@@ -8,6 +8,8 @@ import {
 } from '@angular/material/dialog';
 import { provideRouter } from '@angular/router';
 import { NEVER, of, throwError } from 'rxjs';
+import { UserSettings } from 'src/app/dashboard/models/user.model';
+import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import {
   ModeratedUser,
   PaginatedModeratedUsers,
@@ -57,6 +59,9 @@ describe('UserAdminListComponent', () => {
     Pick<ModerationService, 'getUsers' | 'disableUser' | 'enableUser'>
   >;
   let dialogSpy: jest.Mocked<MatDialog>;
+  let dashboardServiceSpy: jest.Mocked<
+    Pick<DashboardService, 'getUserSettings'>
+  >;
 
   /**
    * Stubs the confirm dialog to close with the given result.
@@ -88,11 +93,20 @@ describe('UserAdminListComponent', () => {
 
     dialogSpy = { open: jest.fn() } as unknown as jest.Mocked<MatDialog>;
 
+    // Privacy mode is read through the real service, so the page's blurring is
+    // exercised the way the dashboard's is: from the saved user setting.
+    dashboardServiceSpy = {
+      getUserSettings: jest.fn(() =>
+        of({ privacyMode: false } as UserSettings),
+      ),
+    };
+
     await TestBed.configureTestingModule({
       imports: [UserAdminListComponent, HttpClientTestingModule],
       providers: [
         provideRouter([]),
         { provide: ModerationService, useValue: serviceSpy },
+        { provide: DashboardService, useValue: dashboardServiceSpy },
       ],
     })
       .overrideComponent(UserAdminListComponent, {
@@ -296,13 +310,6 @@ describe('UserAdminListComponent', () => {
     expect(component.errorMessage).toBe('Failed to disable that account.');
   });
 
-  it('falls back to the email when a member never set a username', () => {
-    expect(component.displayName(buildUser({ username: null }))).toBe(
-      'member@example.com',
-    );
-    expect(component.displayName(buildUser())).toBe('member');
-  });
-
   it('renders an active member with their details', () => {
     serviceSpy.getUsers.mockReturnValueOnce(of(buildPage([buildUser()])));
 
@@ -312,6 +319,107 @@ describe('UserAdminListComponent', () => {
     expect(text).toContain('member@example.com');
     expect(text).toContain('Active');
     expect(text).toContain('USER');
+    // The timestamps carry their zone, so a sign-in can be compared with a
+    // support request or a log line from elsewhere in the world.
+    expect(text).toMatch(/Aug \d+, 2026, [\d:]+ [AP]M GMT/);
+  });
+
+  it('colours a member card and their role by the role they hold', () => {
+    serviceSpy.getUsers.mockReturnValueOnce(
+      of(buildPage([buildUser({ role: 'ADMIN' })])),
+    );
+
+    fixture.detectChanges();
+
+    const card = fixture.nativeElement.querySelector('.member-card');
+    expect(card.classList).toContain('role-admin');
+    const role = card.querySelector('.member-role');
+    expect(role.classList).toContain('role-admin');
+    expect(role.textContent.trim()).toBe('ADMIN');
+  });
+
+  it('lights the status lamp green for an active account and red for a disabled one', () => {
+    serviceSpy.getUsers.mockReturnValueOnce(
+      of(
+        buildPage([
+          buildUser(),
+          buildUser({ id: 'member-2', isAccountDisabled: true }),
+        ]),
+      ),
+    );
+
+    fixture.detectChanges();
+
+    const statuses = fixture.nativeElement.querySelectorAll('.member-status');
+    expect(statuses[0].textContent.trim()).toBe('Active');
+    expect(statuses[0].querySelector('.status-light').classList).toContain(
+      'on',
+    );
+    expect(statuses[1].textContent.trim()).toBe('Disabled');
+    expect(statuses[1].querySelector('.status-light').classList).toContain(
+      'off',
+    );
+  });
+
+  it('leaves names and addresses legible when privacy mode is off', () => {
+    serviceSpy.getUsers.mockReturnValueOnce(of(buildPage([buildUser()])));
+
+    fixture.detectChanges();
+
+    const card = fixture.nativeElement.querySelector('.member-card');
+    expect(card.querySelector('.member-email').classList).not.toContain(
+      'privacy-blur',
+    );
+    expect(
+      card.querySelector('.admin-record-title strong').classList,
+    ).not.toContain('privacy-blur');
+  });
+
+  it('blurs the address and the search box, but not the username', () => {
+    dashboardServiceSpy.getUserSettings.mockReturnValueOnce(
+      of({ privacyMode: true } as UserSettings),
+    );
+    serviceSpy.getUsers.mockReturnValueOnce(of(buildPage([buildUser()])));
+
+    fixture.detectChanges();
+
+    const card = fixture.nativeElement.querySelector('.member-card');
+    expect(card.querySelector('.member-email').classList).toContain(
+      'privacy-blur',
+    );
+    expect(
+      card.querySelector('.admin-record-title strong').classList,
+    ).not.toContain('privacy-blur');
+    expect(
+      fixture.nativeElement.querySelector('#user-search-input').classList,
+    ).toContain('privacy-blur');
+  });
+
+  it('blurs the heading of a member who is named by their address', () => {
+    dashboardServiceSpy.getUserSettings.mockReturnValueOnce(
+      of({ privacyMode: true } as UserSettings),
+    );
+    serviceSpy.getUsers.mockReturnValueOnce(
+      of(buildPage([buildUser({ username: null })])),
+    );
+
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('.admin-record-title strong')
+        .classList,
+    ).toContain('privacy-blur');
+  });
+
+  it('keeps names and addresses hidden when the privacy setting cannot be read', () => {
+    dashboardServiceSpy.getUserSettings.mockReturnValueOnce(
+      throwError(() => new Error('offline')),
+    );
+
+    fixture.detectChanges();
+
+    expect(component.privacyMode.isEnabled()).toBe(true);
+    expect(component.errorMessage).toBe('');
   });
 
   it('shows when and why a disabled member was locked out', () => {

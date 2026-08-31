@@ -281,7 +281,7 @@
         icon so the two are never mistaken for each other.
       -->
           @if (
-            isAdministrator && comment.status !== statuses.REMOVED_BY_ADMIN
+            canModerate && comment.status !== statuses.REMOVED_BY_ADMIN
           ) {
             <button
               class="cta-icon delete-icon"

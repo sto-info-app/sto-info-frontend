@@ -11,14 +11,22 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 import { Observable, finalize, take } from 'rxjs';
+import { PrivacyModeService } from 'src/app/dashboard/services/privacy-mode.service';
 import { ModeratedUser } from 'src/app/models/moderation.models';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { DATE_TIME_WITH_ZONE_FORMAT } from 'src/app/shared/constants/date-formats.constants';
 import { ModerationService } from 'src/app/shared/services/moderation.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import {
+  isMemberNamedByEmail,
+  memberDisplayName,
+  memberRoleLabel,
+  memberRoleModifier,
+} from 'src/app/shared/utils/member-role.utils';
 
 const PAGE_SIZE = 20;
 const LOAD_TIMEOUT_MS = 12000;
@@ -65,7 +73,14 @@ export class UserAdminListComponent implements OnInit {
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _dialog = inject(MatDialog);
 
+  /**
+   * Whether the names and email addresses on this page are blurred. Read by the
+   * template, so it is public.
+   */
+  readonly privacyMode = inject(PrivacyModeService);
+
   appRoutes = APP_ROUTES;
+  dateTimeFormat = DATE_TIME_WITH_ZONE_FORMAT;
   disabledFilters: DisabledFilter[] = ['ALL', 'ACTIVE', 'DISABLED'];
   disabledFilterLabels = DISABLED_FILTER_LABELS;
 
@@ -79,10 +94,29 @@ export class UserAdminListComponent implements OnInit {
   successMessage = '';
 
   /**
-   * Loads the first page of members on init.
+   * Loads the first page of members on init, along with the viewer's
+   * privacy-mode setting, which decides whether the names and email addresses
+   * on this page are blurred.
    */
   ngOnInit(): void {
     this.load();
+    this.loadPrivacyMode();
+  }
+
+  /**
+   * Loads the viewer's privacy-mode setting, which decides whether the member
+   * names and email addresses on this page are blurred.
+   *
+   * A failure is deliberately silent: the service starts out enabled, so an
+   * unreadable setting leaves them hidden rather than exposing them, and this
+   * page's error banner stays free for failures that stop the administrator
+   * getting their work done.
+   */
+  private loadPrivacyMode(): void {
+    this.privacyMode
+      .load()
+      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+      .subscribe({ error: () => undefined });
   }
 
   /**
@@ -193,16 +227,23 @@ export class UserAdminListComponent implements OnInit {
     );
   }
 
+  // The member card is formatted the same way on the Manage Permissions list,
+  // so how a member is named, coloured and labelled lives in one shared place.
+
+  /** How a member is named on screen. */
+  displayName = memberDisplayName;
+
   /**
-   * How a member is named on screen: their username, falling back to the email
-   * address every account has.
-   *
-   * @param user - The member.
-   * @returns The display name.
+   * Whether a member's name on screen is really their email address, which
+   * privacy mode blurs even though an STO Info username is not private.
    */
-  displayName(user: ModeratedUser): string {
-    return user.username ?? user.email;
-  }
+  isNameAnEmail = isMemberNamedByEmail;
+
+  /** The class modifier for a member's role, used to colour their card. */
+  roleModifier = memberRoleModifier;
+
+  /** How a member's role reads on screen. */
+  roleLabel = memberRoleLabel;
 
   // ----- Helpers -----
 

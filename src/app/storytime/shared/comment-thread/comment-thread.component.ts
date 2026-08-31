@@ -12,10 +12,12 @@ import {
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { PERMISSIONS } from 'src/app/models/access-control.models';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import {
   StorytimeComment,
   StorytimeCommentStatus,
@@ -122,11 +124,20 @@ export class CommentThreadComponent implements OnInit {
   /** A message to show when something failed. */
   errorMessage = '';
 
+  /**
+   * Whether the reader may remove comments under the content policy.
+   *
+   * False until the answer arrives, so the control never appears and then
+   * vanishes for somebody who does not moderate.
+   */
+  canModerate = false;
+
   /** The statuses, so the template does not spell out the enum. */
   readonly statuses = StorytimeCommentStatus;
 
   private readonly _commentService = inject(CommentService);
   private readonly _authService = inject(AuthService);
+  private readonly _accessControlService = inject(AccessControlService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
@@ -141,19 +152,36 @@ export class CommentThreadComponent implements OnInit {
   }
 
   /**
-   * Whether the reader may remove comments under the content policy.
-   *
-   * @returns True for an administrator.
-   */
-  get isAdministrator(): boolean {
-    return this._authService.isLoggedInAsAdmin();
-  }
-
-  /**
-   * Loads the thread.
+   * Loads the thread, and asks whether this reader moderates.
    */
   ngOnInit(): void {
     this.load();
+    this.loadModeration();
+  }
+
+  /**
+   * Asks whether the reader may remove comments under the content policy.
+   *
+   * The permission rather than the administrator role, because that is what
+   * the endpoint behind the control checks. Moderating Storytime is a job
+   * somebody can be given without the rest of the site coming with it, and
+   * reading the role here would offer the control to the wrong people in both
+   * directions.
+   *
+   * Silent when it fails: the control is hidden, and the server refuses the
+   * action anyway if the answer was wrong.
+   */
+  private loadModeration(): void {
+    this._accessControlService
+      .hasPermission(PERMISSIONS.STORYTIME_MODERATE)
+      .pipe(
+        catchError(() => of(false)),
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(canModerate => {
+        this.canModerate = canModerate;
+      });
   }
 
   /**
@@ -198,7 +226,7 @@ export class CommentThreadComponent implements OnInit {
     return (
       (this.canComment && canReply && isVisible) ||
       (this.isMine(comment) && isVisible) ||
-      ((this.isOwner || this.isAdministrator) && !isRemoved)
+      ((this.isOwner || this.canModerate) && !isRemoved)
     );
   }
 

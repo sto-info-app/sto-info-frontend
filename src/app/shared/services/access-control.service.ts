@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { DestroyRef, Injectable, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, of, shareReplay } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -14,8 +15,12 @@ import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
  *
  * Answers are cached for the session because permissions change rarely and
  * every template that shows a conditional control would otherwise trigger its
- * own request. {@link refresh} clears the cache for the cases that do change
- * it, such as signing in as somebody else.
+ * own request. The cache is dropped whenever the authenticated state changes,
+ * because the alternative is worse in both directions: an administrator who
+ * signs in after the cache was filled anonymously is refused their own pages,
+ * and somebody who signs in after an administrator has signed out inherits
+ * permissions they were never granted. {@link refresh} does the same thing on
+ * demand, for anything else that changes what the user may do.
  *
  * This drives presentation only. Hiding a control is a courtesy to the user,
  * never a protection: the server independently refuses any action the caller
@@ -30,6 +35,22 @@ export class AccessControlService {
 
   /** The in-flight or completed permission lookup for this session. */
   private _permissions$: Observable<ReadonlySet<string>> | null = null;
+
+  /**
+   * Creates an instance of AccessControlService.
+   *
+   * Watches the authenticated state so signing in or out discards whatever was
+   * cached for whoever came before. Every emission clears it rather than only
+   * the changes: a token renewal costs one extra request, and getting this
+   * wrong costs somebody the pages they are entitled to.
+   */
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+
+    this._authService.isAuthenticated$
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe(() => this.refresh());
+  }
 
   /**
    * Loads the permissions the signed-in user holds.

@@ -1,3 +1,5 @@
+import { Permission } from 'src/app/models/access-control.models';
+
 /**
  * One block of a guide: a heading and the plain-English copy beneath it.
  *
@@ -45,6 +47,17 @@ export interface HelpGuide {
   sections: HelpGuideSection[];
   /** Places to go and try what the guide describes. */
   relatedLinks?: HelpGuideLink[];
+  /**
+   * The permission a reader must hold to be offered this guide.
+   *
+   * Set on the guide rather than the topic because the jobs it covers are
+   * handed out one at a time: somebody trusted with the Spotlight has not
+   * necessarily been trusted with the moderation queue, and a guide describing
+   * a page they would be turned away from is not help.
+   *
+   * Absent on every guide anybody may read, which is most of them.
+   */
+  requiresPermission?: Permission;
 }
 
 /**

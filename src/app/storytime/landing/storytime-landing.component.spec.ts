@@ -7,7 +7,9 @@ import {
   StorySort,
   STORYTIME_DISABLED_STATE,
 } from 'src/app/models/storytime.models';
+import { PERMISSIONS } from 'src/app/models/access-control.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { FollowService } from '../follow.service';
 import { SpotlightService } from '../spotlight.service';
@@ -23,6 +25,7 @@ describe('StorytimeLandingComponent', () => {
   let storyService: { getStories: jest.Mock };
   let followService: { getUnreadCount: jest.Mock };
   let authService: { isLoggedIn: jest.Mock };
+  let accessControlService: { getMyPermissions: jest.Mock };
 
   /**
    * Builds a Spotlight selection.
@@ -82,6 +85,13 @@ describe('StorytimeLandingComponent', () => {
     // Signed in by default, so the reader's own corner of the page is there
     // to be asserted about; the signed-out case is its own test.
     authService = { isLoggedIn: jest.fn().mockReturnValue(true) };
+    // Nobody runs Storytime unless a test says so: the management cards are
+    // the exception on this page, not the rule.
+    accessControlService = {
+      getMyPermissions: jest
+        .fn()
+        .mockReturnValue(of(new Set<string>() as ReadonlySet<string>)),
+    };
     followService = {
       getUnreadCount: jest.fn().mockReturnValue(of({ unread: 3 })),
     };
@@ -113,6 +123,7 @@ describe('StorytimeLandingComponent', () => {
         { provide: StorytimeService, useValue: storytimeService },
         { provide: FollowService, useValue: followService },
         { provide: AuthService, useValue: authService },
+        { provide: AccessControlService, useValue: accessControlService },
       ],
     });
   });
@@ -563,6 +574,91 @@ describe('StorytimeLandingComponent', () => {
 
       expect(element.querySelector('.storytime-landing__yours')).toBeNull();
       expect(followService.getUnreadCount).not.toHaveBeenCalled();
+    });
+  });
+
+  // This section is the only way into Storytime's management pages. The
+  // sidebar and the site's Admin page both know only whether somebody is an
+  // administrator, and these jobs are given out by permission instead.
+  describe('running Storytime', () => {
+    /**
+     * Renders the page for somebody holding the given permissions.
+     *
+     * @param permissions - The permission codes the reader holds.
+     * @returns The rendered element.
+     */
+    const renderHolding = (permissions: string[]): HTMLElement => {
+      accessControlService.getMyPermissions.mockReturnValue(
+        of(new Set<string>(permissions) as ReadonlySet<string>),
+      );
+
+      return render();
+    };
+
+    it('offers nothing of the kind to a reader given none of it', () => {
+      const element = renderHolding([]);
+
+      expect(element.querySelector('.storytime-landing__running')).toBeNull();
+      expect(element.textContent).not.toContain('Running Storytime');
+    });
+
+    it('offers the moderation queue to a moderator', () => {
+      const element = renderHolding([PERMISSIONS.STORYTIME_MODERATE]);
+      const hrefs = Array.from(element.querySelectorAll('a')).map(link =>
+        link.getAttribute('href'),
+      );
+
+      expect(element.textContent).toContain('Running Storytime');
+      expect(hrefs).toContain(`/${APP_ROUTES.STORYTIME_MODERATION}`);
+    });
+
+    // Each job is given out on its own, so holding one shows one card. A card
+    // for a page the route would refuse is worse than no card at all.
+    it('offers only the pages the reader holds the permission for', () => {
+      const element = renderHolding([PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE]);
+      const hrefs = Array.from(element.querySelectorAll('a')).map(link =>
+        link.getAttribute('href'),
+      );
+
+      expect(hrefs).toContain(`/${APP_ROUTES.STORYTIME_MANAGE_SPOTLIGHT}`);
+      expect(hrefs).not.toContain(`/${APP_ROUTES.STORYTIME_MODERATION}`);
+      expect(hrefs).not.toContain(`/${APP_ROUTES.STORYTIME_MANAGE_TAGS}`);
+    });
+
+    it('offers all three to somebody who runs the whole of it', () => {
+      const element = renderHolding([
+        PERMISSIONS.STORYTIME_MODERATE,
+        PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE,
+        PERMISSIONS.STORYTIME_TAG_MANAGE,
+      ]);
+
+      expect(
+        element.querySelectorAll('.storytime-landing__running li'),
+      ).toHaveLength(3);
+    });
+
+    it('asks nothing of the API for a signed-out reader', () => {
+      authService.isLoggedIn.mockReturnValue(false);
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-landing__running')).toBeNull();
+      expect(accessControlService.getMyPermissions).not.toHaveBeenCalled();
+    });
+
+    // The rest of the page is worth more than these three cards, so a lookup
+    // that fails costs the cards rather than the page.
+    it('shows the page when the permissions cannot be read', () => {
+      accessControlService.getMyPermissions.mockReturnValue(
+        throwError(() => new Error('nope')),
+      );
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-landing__running')).toBeNull();
+      expect(
+        element.querySelector('.storytime-landing__browse'),
+      ).not.toBeNull();
     });
   });
 
