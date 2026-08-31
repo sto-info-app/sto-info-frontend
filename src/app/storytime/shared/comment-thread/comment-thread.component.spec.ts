@@ -1,17 +1,17 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { PERMISSIONS } from 'src/app/models/access-control.models';
-import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import {
   StorytimeComment,
   StorytimeCommentStatus,
   StorytimeTargetType,
 } from 'src/app/models/storytime.models';
+import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { CommentService } from '../../comment.service';
 import { CommentThreadComponent } from './comment-thread.component';
-import { provideRouter } from '@angular/router';
 
 const STORY_ID = 'story-1';
 const READER_ID = 'reader-1';
@@ -399,6 +399,30 @@ describe('CommentThreadComponent', () => {
 
       expect(component.nodes).toHaveLength(1);
       expect(component.nodes[0].comment.id).toBe('comment-2');
+    });
+  });
+
+  describe('moderation permission loading', () => {
+    it('sets canModerate to true when the reader has the permission', async () => {
+      accessControlService.hasPermission.mockReturnValue(of(true));
+
+      create();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.canModerate).toBe(true);
+    });
+
+    it('silently fails and leaves canModerate false if permission check fails', async () => {
+      accessControlService.hasPermission.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      create();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.canModerate).toBe(false);
     });
   });
 

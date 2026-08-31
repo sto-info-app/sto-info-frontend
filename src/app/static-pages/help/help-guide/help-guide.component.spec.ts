@@ -5,14 +5,14 @@ import {
   convertToParamMap,
   provideRouter,
 } from '@angular/router';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
+import { PERMISSIONS } from 'src/app/models/access-control.models';
 import {
   STORYTIME_AVAILABILITY_DISABLED,
   STORYTIME_AVAILABILITY_ENABLED,
   STORYTIME_AVAILABILITY_UNAVAILABLE,
   StorytimeAvailability,
 } from 'src/app/models/storytime.models';
-import { PERMISSIONS } from 'src/app/models/access-control.models';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { StorytimeService } from 'src/app/storytime/storytime.service';
@@ -300,5 +300,49 @@ describe('HelpGuideComponent', () => {
 
       expect(component.getRouteLink('contact')).toBe('/contact');
     });
+  });
+
+  // When permission loading fails, the page should still show with an empty
+  // permission set so that guides requiring permissions are hidden, rather than
+  // the whole page being blocked by a loading error.
+  it('should continue loading when permission retrieval fails', () => {
+    paramMap$ = new BehaviorSubject(
+      convertToParamMap({ guideSlug: firstGuide.slug }),
+    );
+    pageTitleSpy = { setTitle: jest.fn() };
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [HelpGuideComponent],
+      providers: [
+        provideRouter([]),
+        { provide: ActivatedRoute, useValue: { paramMap: paramMap$ } },
+        { provide: PageTitleService, useValue: pageTitleSpy },
+        {
+          provide: StorytimeService,
+          useValue: {
+            getAvailability: () => of(STORYTIME_AVAILABILITY_ENABLED),
+          },
+        },
+        {
+          provide: AccessControlService,
+          useValue: {
+            getMyPermissions: () =>
+              throwError(() => new Error('Permission check failed')),
+          },
+        },
+      ],
+    });
+
+    navigateSpy = jest
+      .spyOn(TestBed.inject(Router), 'navigate')
+      .mockResolvedValue(true);
+
+    fixture = TestBed.createComponent(HelpGuideComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(component.guide).toBe(firstGuide);
+    expect(navigateSpy).not.toHaveBeenCalled();
   });
 });

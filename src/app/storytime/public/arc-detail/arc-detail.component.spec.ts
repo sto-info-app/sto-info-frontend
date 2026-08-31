@@ -3,10 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
-import { CommentService } from '../../comment.service';
-import { FollowService } from '../../follow.service';
-import { ReactionService } from '../../reaction.service';
-import { ReadingListService } from '../../reading-list.service';
 import {
   Arc,
   ArcMembership,
@@ -15,6 +11,10 @@ import {
   ArcWithStories,
 } from 'src/app/models/storytime.models';
 import { ArcService } from '../../arc.service';
+import { CommentService } from '../../comment.service';
+import { FollowService } from '../../follow.service';
+import { ReactionService } from '../../reaction.service';
+import { ReadingListService } from '../../reading-list.service';
 import { ArcDetailComponent } from './arc-detail.component';
 
 describe('ArcDetailComponent', () => {
@@ -470,5 +470,31 @@ describe('ArcDetailComponent', () => {
 
     expect(arcService.getArcProgress).not.toHaveBeenCalled();
     expect(fixture.componentInstance.hasProgress).toBe(false);
+  });
+
+  describe('isOwner', () => {
+    it('returns true when the signed-in reader is the Arc owner', () => {
+      authService.getUserId.mockReturnValue('curator-1');
+
+      render();
+
+      expect(fixture.componentInstance.isOwner).toBe(true);
+    });
+
+    it('returns false when the signed-in reader is not the Arc owner', () => {
+      authService.getUserId.mockReturnValue('other-reader');
+
+      render();
+
+      expect(fixture.componentInstance.isOwner).toBe(false);
+    });
+
+    it('returns false when no Arc is loaded', () => {
+      fixture = TestBed.createComponent(ArcDetailComponent);
+      fixture.componentInstance.arc = null;
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.isOwner).toBe(false);
+    });
   });
 });
