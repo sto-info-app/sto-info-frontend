@@ -9,15 +9,21 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { forkJoin, switchMap, of } from 'rxjs';
+import { catchError, forkJoin, switchMap, of } from 'rxjs';
 import { Spotlight, Story, StorySort } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { FollowService } from '../follow.service';
 import { StoryCardComponent } from '../public/story-card/story-card.component';
 import { SpotlightService } from '../spotlight.service';
+import {
+  STORYTIME_ADMIN_LINKS,
+  StorytimeAdminLink,
+  storytimeAdminRouterLink,
+} from '../storytime-admin-links';
 import { StoryService } from '../story.service';
 import { STORYTIME_COPY } from '../storytime.constants';
 import { StorytimeService } from '../storytime.service';
@@ -84,9 +90,18 @@ export class StorytimeLandingComponent implements OnInit {
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
 
+  /**
+   * The management pages this reader has been given, if any.
+   *
+   * Empty for almost everybody, and empty until the answer arrives, so a card
+   * never appears and then vanishes.
+   */
+  adminLinks: StorytimeAdminLink[] = [];
+
   private readonly _spotlightService = inject(SpotlightService);
   private readonly _followService = inject(FollowService);
   private readonly _authService = inject(AuthService);
+  private readonly _accessControlService = inject(AccessControlService);
   private readonly _storyService = inject(StoryService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _destroyRef = inject(DestroyRef);
@@ -99,6 +114,7 @@ export class StorytimeLandingComponent implements OnInit {
   ngOnInit(): void {
     this.loadStories();
     this.countUnread();
+    this.loadAdminLinks();
     this._storytimeService
       .getFeatureState()
       .pipe(
@@ -131,6 +147,47 @@ export class StorytimeLandingComponent implements OnInit {
    */
   get isSignedIn(): boolean {
     return this._authService.isLoggedIn();
+  }
+
+  /**
+   * Works out which of Storytime's own management pages to offer.
+   *
+   * The same cards appear on the site's Admin page, filtered the same way.
+   * They are not in the sidebar, which knows only whether somebody is an
+   * administrator: moderating Storytime, curating the Spotlight and keeping the
+   * tag list are jobs given out one at a time by permission.
+   *
+   * Silent when it fails, and silent for everybody who holds none of the
+   * three. Hiding the cards is a courtesy either way — the routes and the API
+   * refuse anybody who does not hold the permission, whatever this page shows.
+   */
+  private loadAdminLinks(): void {
+    if (!this.isSignedIn) {
+      return;
+    }
+
+    this._accessControlService
+      .getMyPermissions()
+      .pipe(
+        catchError(() => of(new Set<string>() as ReadonlySet<string>)),
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(permissions => {
+        this.adminLinks = STORYTIME_ADMIN_LINKS.filter(link =>
+          permissions.has(link.permission),
+        );
+      });
+  }
+
+  /**
+   * Where a management card sends its reader.
+   *
+   * @param link - The management page.
+   * @returns The router link for it.
+   */
+  adminLinkFor(link: StorytimeAdminLink): unknown[] {
+    return storytimeAdminRouterLink(link);
   }
 
   /**

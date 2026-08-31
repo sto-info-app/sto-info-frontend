@@ -8,19 +8,20 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { combineLatest, map } from 'rxjs';
+import { catchError, combineLatest, map, of } from 'rxjs';
 import {
   STORYTIME_AVAILABILITY_ENABLED,
   STORYTIME_AVAILABILITY_UNAVAILABLE,
 } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { StorytimeService } from 'src/app/storytime/storytime.service';
 
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
-import { findHelpGuide } from '../help.data';
+import { findHelpGuide, isGuidePermitted } from '../help.data';
 import { HelpGuide, HelpGuideLocation } from '../help.models';
 
 /**
@@ -30,10 +31,11 @@ import { HelpGuide, HelpGuideLocation } from '../help.models';
  * only in their words, so giving each one a component would be seven copies of
  * the same template kept in step by hand.
  *
- * A slug that names no guide, or one whose topic this visitor may not be shown,
- * goes to the not-found page. Refusing quietly matters for the Storytime
- * guides: while the feature is off it is meant to look like a feature that does
- * not exist, and a help page explaining it would say otherwise.
+ * A slug that names no guide, one whose topic this visitor may not be shown, or
+ * one asking for a permission they do not hold, goes to the not-found page.
+ * Refusing quietly matters for the Storytime guides: while the feature is off
+ * it is meant to look like a feature that does not exist, and a help page
+ * explaining it would say otherwise.
  *
  * A Storytime guide asked for while the backend cannot be reached is a
  * different case, and goes to the service interruption page: the feature was
@@ -64,6 +66,7 @@ export class HelpGuideComponent implements OnInit {
   private readonly _routingService = inject(RoutingService);
   private readonly _pageTitleService = inject(PageTitleService);
   private readonly _storytimeService = inject(StorytimeService);
+  private readonly _accessControlService = inject(AccessControlService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
@@ -80,12 +83,15 @@ export class HelpGuideComponent implements OnInit {
     combineLatest([
       this._route.paramMap.pipe(map(params => params.get('guideSlug'))),
       this._storytimeService.getAvailability(),
+      this._accessControlService
+        .getMyPermissions()
+        .pipe(catchError(() => of(new Set<string>() as ReadonlySet<string>))),
     ])
       .pipe(
         takeUntilDestroyed(this._destroyRef),
         observeInZone(this._ngZone, this._cdr),
       )
-      .subscribe(([slug, storytimeAvailability]) => {
+      .subscribe(([slug, storytimeAvailability, permissions]) => {
         const location = findHelpGuide(slug);
 
         if (!location) {
@@ -105,13 +111,14 @@ export class HelpGuideComponent implements OnInit {
           !this.isVisible(
             location,
             storytimeAvailability === STORYTIME_AVAILABILITY_ENABLED,
+            permissions,
           )
         ) {
           this.sendToNotFound();
           return;
         }
 
-        this.show(location);
+        this.show(location, permissions);
       });
   }
 
@@ -138,15 +145,26 @@ export class HelpGuideComponent implements OnInit {
   /**
    * Determines whether a guide may be shown to this visitor.
    *
+   * A guide asking for a permission is refused the same way a missing one is,
+   * rather than with a message: the pages those guides describe are not
+   * something to advertise to somebody who cannot open them.
+   *
    * @param location The guide and the topic it belongs to.
    * @param isStorytimeEnabled Whether Storytime is switched on.
-   * @returns `true` when the guide's topic is available.
+   * @param permissions The permission codes the visitor holds.
+   * @returns `true` when the guide's topic is available and the visitor holds
+   *   whatever the guide asks for.
    */
   private isVisible(
     location: HelpGuideLocation,
     isStorytimeEnabled: boolean,
+    permissions: ReadonlySet<string>,
   ): boolean {
-    return isStorytimeEnabled || !location.topic.requiresStorytime;
+    if (location.topic.requiresStorytime && !isStorytimeEnabled) {
+      return false;
+    }
+
+    return isGuidePermitted(location.guide, permissions);
   }
 
   /**
@@ -155,14 +173,25 @@ export class HelpGuideComponent implements OnInit {
    * The title is set here rather than from route data because one route serves
    * every guide, so the address is the only thing that says which.
    *
+   * What is offered at the foot is filtered the same way the index is. A
+   * moderator reading about the queue should not be offered the Spotlight
+   * guide when the Spotlight is not their job: the link would take them to the
+   * not-found page.
+   *
    * @param location The guide and the topic it belongs to.
+   * @param permissions The permission codes the visitor holds.
    * @returns void
    */
-  private show(location: HelpGuideLocation): void {
+  private show(
+    location: HelpGuideLocation,
+    permissions: ReadonlySet<string>,
+  ): void {
     this.guide = location.guide;
     this.topicTitle = location.topic.title;
     this.otherGuides = location.topic.guides.filter(
-      candidate => candidate.slug !== location.guide.slug,
+      candidate =>
+        candidate.slug !== location.guide.slug &&
+        isGuidePermitted(candidate, permissions),
     );
     this._pageTitleService.setTitle(location.guide.title);
   }

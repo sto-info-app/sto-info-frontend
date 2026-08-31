@@ -1,40 +1,97 @@
-<div id="admin-page">
+<div
+  id="admin-page"
+  class="admin-landing">
   <h1>Admin</h1>
-  <p>
+
+  <p class="admin-landing__intro">
     Manage public news, site banners and user notifications, and moderate the
     community.
   </p>
 
-  <div class="admin-cards">
-    <a
-      class="admin-card"
-      [routerLink]="getRouteLink(appRoutes.ADMIN_NEWS)">
-      <h2>News &amp; Release Notes</h2>
-      <p>Create, edit and publish public posts.</p>
-    </a>
-    <a
-      class="admin-card"
-      [routerLink]="getRouteLink(appRoutes.ADMIN_BANNERS)">
-      <h2>Banners</h2>
-      <p>Manage site-wide banners and their schedule.</p>
-    </a>
-    <a
-      class="admin-card"
-      [routerLink]="getRouteLink(appRoutes.ADMIN_NOTIFICATIONS)">
-      <h2>Notifications</h2>
-      <p>Review sent notifications and compose new broadcasts or per-user messages.</p>
-    </a>
-    <a
-      class="admin-card"
-      [routerLink]="getRouteLink(appRoutes.ADMIN_REPORTS)">
-      <h2>Reported Officers</h2>
-      <p>Work through reports members have raised about other members.</p>
-    </a>
-    <a
-      class="admin-card"
-      [routerLink]="getRouteLink(appRoutes.ADMIN_USERS)">
-      <h2>Manage Members</h2>
-      <p>Find an account and disable or restore access to it.</p>
-    </a>
-  </div>
+  <app-collapsible-section
+    heading="Site Content"
+    barClass="small-lcars-bar-gap">
+    <ul class="admin-landing__panels">
+      <li class="admin-landing__card--news">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_NEWS)">
+          <span class="admin-landing__name">News &amp; Release Notes</span>
+          <p class="admin-landing__summary">
+            Create, edit and publish public posts.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--banners">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_BANNERS)">
+          <span class="admin-landing__name">Banners</span>
+          <p class="admin-landing__summary">
+            Manage site-wide banners and their schedule.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--notifications">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_NOTIFICATIONS)">
+          <span class="admin-landing__name">Notifications</span>
+          <p class="admin-landing__summary">
+            Review sent notifications and compose new broadcasts or per-user
+            messages.
+          </p>
+        </a>
+      </li>
+    </ul>
+  </app-collapsible-section>
+
+  <app-collapsible-section
+    heading="Community"
+    barClass="small-lcars-bar-gap">
+    <ul class="admin-landing__panels">
+      <li class="admin-landing__card--reports">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_REPORTS)">
+          <span class="admin-landing__name">Reported Officers</span>
+          <p class="admin-landing__summary">
+            Work through reports members have raised about other members.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--members">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_USERS)">
+          <span class="admin-landing__name">Manage Members</span>
+          <p class="admin-landing__summary">
+            Find an account and disable or restore access to it.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--permissions">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_PERMISSIONS)">
+          <span class="admin-landing__name">Manage Permissions</span>
+          <p class="admin-landing__summary">
+            Grant or withhold an individual permission for one member, so
+            somebody can moderate or curate without running the whole site.
+          </p>
+        </a>
+      </li>
+    </ul>
+  </app-collapsible-section>
+
+  <!--
+    Storytime's own management pages, for administrators who hold them. Filtered
+    by permission rather than by role, so this section is empty for an
+    administrator who has not been given any of the three, and absent entirely
+    while Storytime is switched off.
+  -->
+  @if (storytimeLinks.length > 0) {
+    <app-collapsible-section
+      heading="Storytime"
+      barClass="small-lcars-bar-gap">
+      <ul class="admin-landing__panels">
+        @for (link of storytimeLinks; track link.permission) {
+          <li class="admin-landing__card--{{ link.cardKey }}">
+            <a [routerLink]="storytimeLinkFor(link)">
+              <span class="admin-landing__name">{{ link.label }}</span>
+              <p class="admin-landing__summary">{{ link.summary }}</p>
+            </a>
+          </li>
+        }
+      </ul>
+    </app-collapsible-section>
+  }
 </div>

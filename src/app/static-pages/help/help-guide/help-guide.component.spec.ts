@@ -5,13 +5,15 @@ import {
   convertToParamMap,
   provideRouter,
 } from '@angular/router';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
+import { PERMISSIONS } from 'src/app/models/access-control.models';
 import {
   STORYTIME_AVAILABILITY_DISABLED,
   STORYTIME_AVAILABILITY_ENABLED,
   STORYTIME_AVAILABILITY_UNAVAILABLE,
   StorytimeAvailability,
 } from 'src/app/models/storytime.models';
+import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { StorytimeService } from 'src/app/storytime/storytime.service';
 
@@ -43,10 +45,12 @@ describe('HelpGuideComponent', () => {
    * @param slug The slug in the address.
    * @param storytimeAvailability Whether the Storytime feature is on, off, or
    *   could not be asked about at all.
+   * @param permissions The permission codes the reader holds.
    */
   const createComponent = (
     slug: string | null,
     storytimeAvailability: StorytimeAvailability = STORYTIME_AVAILABILITY_ENABLED,
+    permissions: string[] = [],
   ): void => {
     paramMap$ = new BehaviorSubject(
       convertToParamMap(slug === null ? {} : { guideSlug: slug }),
@@ -63,6 +67,13 @@ describe('HelpGuideComponent', () => {
         {
           provide: StorytimeService,
           useValue: { getAvailability: () => of(storytimeAvailability) },
+        },
+        {
+          provide: AccessControlService,
+          useValue: {
+            getMyPermissions: () =>
+              of(new Set<string>(permissions) as ReadonlySet<string>),
+          },
         },
       ],
     });
@@ -227,6 +238,46 @@ describe('HelpGuideComponent', () => {
     expect(navigateSpy).not.toHaveBeenCalled();
   });
 
+  // The pages these guides describe are not something to advertise to
+  // somebody who cannot open them, so the address is refused the way a
+  // misspelt one is rather than with an explanation.
+  it('should send a reader without the permission to the not-found page', () => {
+    createComponent('moderating-storytime');
+
+    expect(component.guide).toBeNull();
+    expect(navigateSpy).toHaveBeenCalledWith(['/page-not-found']);
+  });
+
+  it('should show the guide to a reader who holds the permission', () => {
+    createComponent('moderating-storytime', STORYTIME_AVAILABILITY_ENABLED, [
+      PERMISSIONS.STORYTIME_MODERATE,
+    ]);
+
+    expect(component.guide?.slug).toBe('moderating-storytime');
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  // A link at the foot to a guide this reader would be turned away from is a
+  // link to the not-found page, offered by the page meant to help them.
+  it('should offer no further guides the reader cannot open', () => {
+    createComponent('moderating-storytime', STORYTIME_AVAILABILITY_ENABLED, [
+      PERMISSIONS.STORYTIME_MODERATE,
+    ]);
+
+    expect(component.otherGuides).toEqual([]);
+  });
+
+  it('should offer the other guides a reader given both jobs may read', () => {
+    createComponent('moderating-storytime', STORYTIME_AVAILABILITY_ENABLED, [
+      PERMISSIONS.STORYTIME_MODERATE,
+      PERMISSIONS.STORYTIME_TAG_MANAGE,
+    ]);
+
+    expect(component.otherGuides.map(guide => guide.slug)).toEqual([
+      'managing-storytime-tags',
+    ]);
+  });
+
   it('should render nothing at all when there is no guide to show', () => {
     createComponent('not-a-guide');
 
@@ -249,5 +300,49 @@ describe('HelpGuideComponent', () => {
 
       expect(component.getRouteLink('contact')).toBe('/contact');
     });
+  });
+
+  // When permission loading fails, the page should still show with an empty
+  // permission set so that guides requiring permissions are hidden, rather than
+  // the whole page being blocked by a loading error.
+  it('should continue loading when permission retrieval fails', () => {
+    paramMap$ = new BehaviorSubject(
+      convertToParamMap({ guideSlug: firstGuide.slug }),
+    );
+    pageTitleSpy = { setTitle: jest.fn() };
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [HelpGuideComponent],
+      providers: [
+        provideRouter([]),
+        { provide: ActivatedRoute, useValue: { paramMap: paramMap$ } },
+        { provide: PageTitleService, useValue: pageTitleSpy },
+        {
+          provide: StorytimeService,
+          useValue: {
+            getAvailability: () => of(STORYTIME_AVAILABILITY_ENABLED),
+          },
+        },
+        {
+          provide: AccessControlService,
+          useValue: {
+            getMyPermissions: () =>
+              throwError(() => new Error('Permission check failed')),
+          },
+        },
+      ],
+    });
+
+    navigateSpy = jest
+      .spyOn(TestBed.inject(Router), 'navigate')
+      .mockResolvedValue(true);
+
+    fixture = TestBed.createComponent(HelpGuideComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(component.guide).toBe(firstGuide);
+    expect(navigateSpy).not.toHaveBeenCalled();
   });
 });

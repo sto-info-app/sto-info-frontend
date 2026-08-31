@@ -82,8 +82,12 @@ export const API_URLS = {
   MODERATION_ADMIN_REPORTS: apiUrl + '/admin/moderation/reports',
   MODERATION_ADMIN_USERS: apiUrl + '/admin/moderation/users',
 
-  // Access control (what the signed-in user is permitted to do)
+  // Access control (what the signed-in user is permitted to do, and the admin
+  // side that grants or withholds it per user)
   ACCESS_CONTROL_ME: apiUrl + '/access-control/me',
+  ACCESS_CONTROL_ADMIN_PERMISSIONS:
+    apiUrl + '/admin/access-control/permissions',
+  ACCESS_CONTROL_ADMIN_USERS: apiUrl + '/admin/access-control/users',
 
   // Storytime
   STORYTIME_CONFIGURATION: apiUrl + '/storytime/configuration',
