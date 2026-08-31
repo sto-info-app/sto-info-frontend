@@ -1782,6 +1782,13 @@ $storytime-landing-colours: (
   'own-stories': vars.$lcars-green,
   'own-arcs': vars.$lcars-tangerine,
   'invitations': vars.$lcars-cool,
+  // The management cards. Red for the queue because it is the one with
+  // somebody waiting on it, taken light enough to carry black text the way
+  // every other name block here does. The Spotlight keeps the colour it has on
+  // the card that reads it: the same thing seen from the other side.
+  'moderation': color.adjust(vars.$lcars-red, $lightness: 10%),
+  'manage-spotlight': vars.$lcars-gold,
+  'tags': vars.$lcars-c48,
 );
 
 .storytime-landing {
@@ -1789,7 +1796,8 @@ $storytime-landing-colours: (
   // Each entry gets a line saying what it is, which is the whole reason for
   // moving it here: "Arcs" alone tells a first-time reader nothing.
   &__browse,
-  &__yours {
+  &__yours,
+  &__running {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1rem;
@@ -1870,7 +1878,8 @@ $storytime-landing-colours: (
 // lone modifier class is not heard over it.
 @each $name, $colour in $storytime-landing-colours {
   .storytime-landing__browse .storytime-landing__card--#{$name},
-  .storytime-landing__yours .storytime-landing__card--#{$name} {
+  .storytime-landing__yours .storytime-landing__card--#{$name},
+  .storytime-landing__running .storytime-landing__card--#{$name} {
     border-left-color: color.adjust($colour, $lightness: -18%);
 
     .storytime-landing__browse-name {

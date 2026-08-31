@@ -170,6 +170,31 @@
     </app-collapsible-section>
   }
 
+  <!--
+    The way into Storytime's own management pages, and the only one. They are
+    reached by permission rather than by role, so neither the sidebar nor the
+    site's Admin page — both of which know only whether somebody is an
+    administrator — could offer them to the right people.
+  -->
+  @if (adminLinks.length > 0) {
+    <app-collapsible-section
+      heading="Running Storytime"
+      barClass="small-lcars-bar-gap">
+      <ul class="storytime-landing__running">
+        @for (link of adminLinks; track link.permission) {
+          <li [class]="link.cardClass">
+            <a [routerLink]="adminLinkFor(link)">
+              <span class="storytime-landing__browse-name">{{
+                link.label
+              }}</span>
+              <p class="storytime-landing__summary">{{ link.summary }}</p>
+            </a>
+          </li>
+        }
+      </ul>
+    </app-collapsible-section>
+  }
+
   <app-collapsible-section
     heading="New Stories"
     barClass="small-lcars-bar-gap">
