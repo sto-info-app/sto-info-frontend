@@ -1,3 +1,4 @@
+import { PERMISSIONS } from 'src/app/models/access-control.models';
 import {
   REPORT_REASON_LABELS,
   ReportReason,
@@ -13,9 +14,18 @@ import {
   MARKDOWN_REFERENCE_NOTES,
   MarkdownReferenceGroup,
 } from 'src/app/storytime/storytime-markdown.constants';
-import { CONTENT_POLICY_RULES } from 'src/app/storytime/storytime.constants';
+import {
+  CONTENT_POLICY_RULES,
+  TAG_CATEGORY_DESCRIPTIONS,
+  TAG_CATEGORY_LABELS,
+} from 'src/app/storytime/storytime.constants';
 
-import { HelpGuideLocation, HelpGuideSection, HelpTopic } from './help.models';
+import {
+  HelpGuide,
+  HelpGuideLocation,
+  HelpGuideSection,
+  HelpTopic,
+} from './help.models';
 
 /**
  * The links several guides finish with.
@@ -98,6 +108,18 @@ const REPORT_REASON_POINTS: string[] = [
   ReportReason.INAPPROPRIATE_CONTENT,
   ReportReason.OTHER,
 ].map(reason => REPORT_REASON_LABELS[reason]);
+
+/**
+ * The tag categories, worded exactly as the tag form words them.
+ *
+ * Derived from the same constants the picker and the tag admin page read, so a
+ * category added to the vocabulary cannot be missing from the guide that
+ * explains how to file a tag under one.
+ */
+const TAG_CATEGORY_POINTS: string[] = Object.keys(TAG_CATEGORY_LABELS).map(
+  category =>
+    `${TAG_CATEGORY_LABELS[category]} — ${TAG_CATEGORY_DESCRIPTIONS[category]}`,
+);
 
 /**
  * The Community guides.
@@ -763,13 +785,248 @@ const STORYTIME_TOPIC: HelpTopic = {
 };
 
 /**
+ * The guides for the jobs Storytime hands out.
+ *
+ * Each one waits on the permission for the page it describes rather than on
+ * the administrator role, because that is how the pages themselves are gated:
+ * moderating, curating the Spotlight and keeping the tag vocabulary are three
+ * separate jobs, and somebody may be trusted with one and not the others.
+ *
+ * They are written for the person doing the job rather than about them, and
+ * they say what each control actually does — a moderator guessing at what
+ * “Dismiss” tells the reporter is a moderator about to get it wrong.
+ */
+const STORYTIME_ADMIN_GUIDES: HelpGuide[] = [
+  {
+    slug: 'moderating-storytime',
+    title: 'Working the moderation queue',
+    summary:
+      'What a report is, what removing something does to the creator, and how appeals reach you.',
+    requiresPermission: PERMISSIONS.STORYTIME_MODERATE,
+    sections: [
+      {
+        heading: 'What the queue holds',
+        paragraphs: [
+          'The moderation queue is one page with two lists: reports members have raised about Storytime content, and appeals from creators whose work has been removed. They are the same job seen from two sides, which is why they sit together — the person who removed something is usually the person best placed to read the argument against it.',
+          'A report names what was reported, the reason chosen on the report form, and anything the reporter wrote. Nothing is hidden or removed because a report exists. A report is somebody asking you to look.',
+        ],
+        points: REPORT_REASON_POINTS,
+      },
+      {
+        heading: 'Before you act: the two boxes at the top',
+        paragraphs: [
+          'The page opens with two fields, and they are not the same thing. “What the creator is told” goes to the creator word for word, and is what they answer if they appeal — you cannot remove anything without writing it. “Note for the record” stays with the report, and the reporter never sees it.',
+          'Write the message as though the creator will read it, because they will. A removal nobody can explain is a removal nobody can appeal.',
+        ],
+      },
+      {
+        heading: 'What each action does',
+        paragraphs: [
+          'Claim, remove and dismiss are offered on a report that is still live. Once a report is closed, its actions go with it.',
+        ],
+        points: [
+          'Claim — takes an open report so another moderator does not work the same one. It decides nothing.',
+          'Remove the content — takes the work away from readers and sends the creator your message. It needs that message first.',
+          'Dismiss — closes the report without touching the content. Use it when the report is wrong, not when you are unsure.',
+        ],
+      },
+      {
+        heading: 'What removal does not do',
+        paragraphs: [
+          'Removed work is not deleted. The creator keeps it in their own pages, marked with the reason you gave, so they can see exactly what was said about it. Readers see that it has gone rather than seeing the work.',
+          'A creator may appeal once. An upheld appeal restores the work as it was; a rejected one ends the matter. Both decisions are made on this page, under Appeals.',
+        ],
+      },
+      {
+        heading: 'Decide against the policy, not against taste',
+        paragraphs: [
+          'The content policy is the whole of what Storytime prohibits, and it is public. Work you would not have written is not work that breaks a rule, and a rating you would have set differently is a conversation with the creator rather than a removal.',
+        ],
+        points: CONTENT_POLICY_POINTS,
+      },
+    ],
+    relatedLinks: [
+      { label: 'Moderation queue', route: APP_ROUTES.STORYTIME_MODERATION },
+      CONTENT_POLICY_LINK,
+    ],
+  },
+  {
+    slug: 'curating-the-spotlight',
+    title: 'Curating the Spotlight',
+    summary:
+      'How a selection is drafted, scheduled, published and withdrawn, and what readers see of it.',
+    requiresPermission: PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE,
+    sections: [
+      {
+        heading: 'What the Spotlight is for',
+        paragraphs: [
+          'The Spotlight is the top of the Storytime landing page: work somebody chose, with a headline, a summary and — if you write one — the reason it was chosen. It opens the page with a choice somebody made rather than with a list a reader has to sort through.',
+          'A selection points at a Story or an Arc. What is shown with it comes from the selection or from the work itself, so a work that changes after you feature it keeps the entry accurate.',
+        ],
+      },
+      {
+        heading: 'Drafting a selection',
+        paragraphs: [
+          '“Draft a selection” opens the form. Nothing saved there is visible to readers until you publish it, so a selection can be written now and held.',
+          'The image is the work’s own banner unless you override it. If you do override it, write the alternative text as well: the Spotlight is the first thing on the page, and a reader using a screen reader meets it first.',
+        ],
+      },
+      {
+        heading: 'Scheduling and priority',
+        paragraphs: [
+          'A selection runs from its start date. An end date takes it down on its own; leaving it blank means it runs onwards until you withdraw it.',
+          'Priority orders the selections showing at the same time, and the landing page leads with the highest. Two selections can run together, but a Spotlight of everything is a spotlight of nothing.',
+        ],
+      },
+      {
+        heading: 'Publishing and withdrawing',
+        paragraphs: [
+          'Publish makes a selection live once its start date has arrived. Withdraw takes it down and keeps it, so a selection pulled in a hurry can go back up.',
+          'Delete removes the entry itself. Withdraw is almost always the one you want: a past selection stays readable in the Spotlight archive, and deleting it takes it out of that history too.',
+        ],
+      },
+      {
+        heading: 'Choosing well',
+        paragraphs: [
+          'Say why. The reason is the part readers remember, and “we liked it” is not a reason. Featuring the same few writers is the failure this page makes easy — the archive is the honest record of who has been chosen, so read it before you choose again.',
+        ],
+      },
+    ],
+    relatedLinks: [
+      {
+        label: 'Manage Spotlight',
+        route: APP_ROUTES.STORYTIME_MANAGE_SPOTLIGHT,
+      },
+      { label: 'Spotlight archive', route: APP_ROUTES.STORYTIME_SPOTLIGHT },
+    ],
+  },
+  {
+    slug: 'managing-storytime-tags',
+    title: 'Looking after the tag list',
+    summary:
+      'The shared vocabulary creators pick from, and why changing a tag is never a private edit.',
+    requiresPermission: PERMISSIONS.STORYTIME_CONFIGURE,
+    sections: [
+      {
+        heading: 'A tag is shared, not personal',
+        paragraphs: [
+          'Creators do not invent tags; they pick from this list. That is what makes a tag filter find anything — twenty spellings of one idea would each find a twentieth of the Stories that match it.',
+          'So the list is a vocabulary rather than a collection. Keeping it short and unambiguous is the whole of the job.',
+        ],
+      },
+      {
+        heading: 'The categories',
+        paragraphs: [
+          'Every tag is filed under one category, and the category decides where a reader meets it. Filing a tag under the wrong one hides it from the people looking for it.',
+        ],
+        points: TAG_CATEGORY_POINTS,
+      },
+      {
+        heading: 'Adding a tag',
+        paragraphs: [
+          'A tag needs a name and a category. The description says what it means — write one, because the next person deciding whether a Story fits this tag or the one beside it will read it.',
+          'The slug is built from the name if you leave it blank. Order within a category is a number, and decides where the tag sits in the picker rather than how important it is.',
+        ],
+      },
+      {
+        heading: 'Renaming, reordering and removing',
+        paragraphs: [
+          'Changing a slug breaks filter links already shared — links in a Story’s notes, in a forum post, in somebody’s bookmarks. Rename freely; change slugs rarely, and only for something genuinely wrong.',
+          'Removing a tag takes it off the Stories using it. Before you remove one, look at what is filed under it: a tag that is wrong is worth removing, and a tag that is merely unpopular is worth leaving alone.',
+        ],
+      },
+      {
+        heading: 'Content warnings are not decoration',
+        paragraphs: [
+          'A content warning tag is a promise to the reader who needs it. Warnings have their own category for that reason, and thinning them out to tidy the list is the one edit here that costs somebody something.',
+        ],
+      },
+    ],
+    relatedLinks: [
+      { label: 'Manage tags', route: APP_ROUTES.STORYTIME_MANAGE_TAGS },
+      CONTENT_POLICY_LINK,
+    ],
+  },
+];
+
+/**
+ * The topic that gathers the Storytime jobs.
+ *
+ * Waits on the Storytime switch like the rest of Storytime, and each guide in
+ * it waits on its own permission on top of that. Somebody holding none of the
+ * three never sees the topic at all, because a topic left with no guides is
+ * dropped rather than shown empty.
+ */
+const STORYTIME_ADMIN_TOPIC: HelpTopic = {
+  id: 'storytime-admin',
+  title: 'Running Storytime',
+  intro:
+    'For the people who moderate Storytime, choose what it features, and keep its tag list. Each guide covers one of those jobs, and you are shown the ones you have been given.',
+  requiresStorytime: true,
+  guides: STORYTIME_ADMIN_GUIDES,
+};
+
+/**
  * Every help topic, in the order the help index presents them.
  *
  * Community leads because it is always available, while Storytime waits on its
  * feature switch — a reader with Storytime switched off should still open the
- * help to something rather than to an apology.
+ * help to something rather than to an apology. The guides for running
+ * Storytime come last, because almost nobody is shown them.
  */
-export const HELP_TOPICS: HelpTopic[] = [COMMUNITY_TOPIC, STORYTIME_TOPIC];
+export const HELP_TOPICS: HelpTopic[] = [
+  COMMUNITY_TOPIC,
+  STORYTIME_TOPIC,
+  STORYTIME_ADMIN_TOPIC,
+];
+
+/**
+ * The topics a visitor may be offered.
+ *
+ * Two filters, for two different reasons. Storytime’s guides wait on the
+ * feature switch because while Storytime is off it is meant to look like a
+ * feature that does not exist. A guide with a permission on it waits on that
+ * permission because it describes a page its reader would be turned away
+ * from, and help for a door somebody cannot open is not help.
+ *
+ * A topic whose guides have all been filtered away is dropped rather than
+ * shown as a heading with nothing under it.
+ *
+ * @param isStorytimeEnabled Whether Storytime is switched on.
+ * @param permissions The permission codes the visitor holds.
+ * @returns The topics to show, each carrying only the guides on offer.
+ */
+export function visibleHelpTopics(
+  isStorytimeEnabled: boolean,
+  permissions: ReadonlySet<string>,
+): HelpTopic[] {
+  return HELP_TOPICS.filter(
+    topic => isStorytimeEnabled || !topic.requiresStorytime,
+  )
+    .map(topic => ({
+      ...topic,
+      guides: topic.guides.filter(guide =>
+        isGuidePermitted(guide, permissions),
+      ),
+    }))
+    .filter(topic => topic.guides.length > 0);
+}
+
+/**
+ * Whether a visitor holds what a guide asks for.
+ *
+ * A guide asking for nothing is for everybody, which is most of them.
+ *
+ * @param guide The guide.
+ * @param permissions The permission codes the visitor holds.
+ * @returns True when the guide may be shown.
+ */
+export function isGuidePermitted(
+  guide: HelpGuide,
+  permissions: ReadonlySet<string>,
+): boolean {
+  return !guide.requiresPermission || permissions.has(guide.requiresPermission);
+}
 
 /**
  * Finds a guide by its slug.
