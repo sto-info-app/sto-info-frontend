@@ -905,7 +905,7 @@ const STORYTIME_ADMIN_GUIDES: HelpGuide[] = [
     title: 'Looking after the tag list',
     summary:
       'The shared vocabulary creators pick from, and why changing a tag is never a private edit.',
-    requiresPermission: PERMISSIONS.STORYTIME_CONFIGURE,
+    requiresPermission: PERMISSIONS.STORYTIME_TAG_MANAGE,
     sections: [
       {
         heading: 'A tag is shared, not personal',

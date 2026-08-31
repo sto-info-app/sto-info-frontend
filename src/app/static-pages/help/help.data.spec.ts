@@ -187,7 +187,7 @@ describe('help data', () => {
     it.each([
       ['moderating-storytime', PERMISSIONS.STORYTIME_MODERATE],
       ['curating-the-spotlight', PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE],
-      ['managing-storytime-tags', PERMISSIONS.STORYTIME_CONFIGURE],
+      ['managing-storytime-tags', PERMISSIONS.STORYTIME_TAG_MANAGE],
     ])('should put %s behind %s', (slug, permission) => {
       const guide = adminTopic?.guides.find(
         candidate => candidate.slug === slug,

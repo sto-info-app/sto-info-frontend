@@ -262,8 +262,9 @@ export const STORYTIME_ROUTES: Routes = [
         canActivate: [AuthGuard, PermissionGuard],
       },
 
-      // The tag vocabulary. Behind the configure permission: a tag is a shared
-      // classification rather than one creator's label.
+      // The tag vocabulary. Behind its own permission rather than a creator
+      // one: a tag is a shared classification rather than one creator's label,
+      // and it is part of running Storytime rather than configuring it.
       {
         path: 'manage/tags',
         loadComponent: () =>
@@ -272,7 +273,7 @@ export const STORYTIME_ROUTES: Routes = [
           ),
         data: {
           title: APP_ROUTE_TITLES.STORYTIME_MANAGE_TAGS,
-          permission: PERMISSIONS.STORYTIME_CONFIGURE,
+          permission: PERMISSIONS.STORYTIME_TAG_MANAGE,
         },
         canActivate: [AuthGuard, PermissionGuard],
       },

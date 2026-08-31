@@ -629,7 +629,7 @@ describe('StorytimeLandingComponent', () => {
       const element = renderHolding([
         PERMISSIONS.STORYTIME_MODERATE,
         PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE,
-        PERMISSIONS.STORYTIME_CONFIGURE,
+        PERMISSIONS.STORYTIME_TAG_MANAGE,
       ]);
 
       expect(

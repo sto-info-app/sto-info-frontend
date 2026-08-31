@@ -270,7 +270,7 @@ describe('HelpGuideComponent', () => {
   it('should offer the other guides a reader given both jobs may read', () => {
     createComponent('moderating-storytime', STORYTIME_AVAILABILITY_ENABLED, [
       PERMISSIONS.STORYTIME_MODERATE,
-      PERMISSIONS.STORYTIME_CONFIGURE,
+      PERMISSIONS.STORYTIME_TAG_MANAGE,
     ]);
 
     expect(component.otherGuides.map(guide => guide.slug)).toEqual([

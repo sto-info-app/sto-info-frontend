@@ -65,7 +65,7 @@ const STORYTIME_ADMIN_LINKS: StorytimeAdminLink[] = [
     cardClass: 'storytime-landing__card--manage-spotlight',
   },
   {
-    permission: PERMISSIONS.STORYTIME_CONFIGURE,
+    permission: PERMISSIONS.STORYTIME_TAG_MANAGE,
     label: 'Manage tags',
     summary: 'Keep the shared tag vocabulary creators choose from.',
     segments: ['manage', 'tags'],

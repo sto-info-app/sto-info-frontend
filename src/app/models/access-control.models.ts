@@ -18,6 +18,7 @@ export const PERMISSIONS = {
   STORYTIME_REPORT_CREATE: 'storytime.report.create',
   STORYTIME_MODERATE: 'storytime.moderate',
   STORYTIME_SPOTLIGHT_MANAGE: 'storytime.spotlight.manage',
+  STORYTIME_TAG_MANAGE: 'storytime.tag.manage',
   STORYTIME_CONFIGURE: 'storytime.configure',
 } as const;
 
