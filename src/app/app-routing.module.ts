@@ -411,6 +411,15 @@ export const routes: Routes = [
     data: { title: APP_ROUTE_TITLES.ADMIN_USERS, requiresApi: true },
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
+  {
+    path: APP_ROUTES.ADMIN_PERMISSIONS,
+    loadComponent: () =>
+      import('./admin/access-control-admin/permission-admin.component').then(
+        m => m.PermissionAdminComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_PERMISSIONS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
 
   // *****************************************
   // * STO App routes

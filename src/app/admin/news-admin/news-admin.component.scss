@@ -344,6 +344,115 @@
   }
 }
 
+// ----- Member cards -----
+// Manage Members and Manage Permissions both list accounts, so they render the
+// same card: the role colours the header and left edge, and the identifying
+// details — role, email — sit in the body where privacy mode can blur the ones
+// that name a person. Defined once here rather than twice, so the two lists
+// cannot drift apart.
+.member-card {
+  border-left-color: vars.$lcars-grey-light;
+
+  .admin-record-header {
+    background: vars.$lcars-grey-light;
+    color: #000;
+  }
+
+  &.role-admin {
+    border-left-color: color.adjust(vars.$lcars-tangerine, $lightness: -12%);
+
+    .admin-record-header {
+      background: vars.$lcars-tangerine;
+    }
+  }
+
+  &.role-user {
+    border-left-color: color.adjust(vars.$lcars-perano, $lightness: -18%);
+
+    .admin-record-header {
+      background: vars.$lcars-perano;
+    }
+  }
+
+  &.role-storytime-curator {
+    border-left-color: color.adjust(vars.$lcars-violet, $lightness: -12%);
+
+    .admin-record-header {
+      background: vars.$lcars-violet;
+      color: vars.$lcars-white;
+    }
+  }
+}
+
+// Two fixed columns rather than the shared auto-fit track, so the details
+// pair off into rows that belong together — who the account is, then when it
+// has been used — instead of reflowing into whatever fits the width.
+.member-card .admin-record-details {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1.5rem;
+  align-items: start;
+}
+
+// A blurred address still has to hold its line, or the row jumps as privacy
+// mode is turned on and off.
+.member-email {
+  font-family: monospace;
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+
+// The same role colours as the card, on the dark body background. Plain text
+// rather than a pill: the card header already carries the colour, and a second
+// filled shape next to it only competed with the action icon.
+.member-role {
+  color: vars.$lcars-grey-light;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &.role-admin {
+    color: vars.$lcars-tangerine;
+  }
+
+  &.role-user {
+    color: vars.$lcars-perano;
+  }
+
+  &.role-storytime-curator {
+    color: vars.$lcars-violet;
+  }
+}
+
+// Whether an account is usable is a state, not a label, so it reads as a
+// traffic light: the word, then a lamp lit green for a working account and red
+// for a disabled one. The word carries the meaning on its own, so the lamp is
+// hidden from assistive technology.
+.member-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-light {
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 1px solid rgb(0 0 0 / 45%);
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &.on {
+    background: vars.$lcars-green;
+  }
+
+  &.off {
+    background: vars.$lcars-red;
+  }
+}
+
 .buttons {
   display: flex;
   flex-direction: column;
@@ -586,5 +695,10 @@
 
   .admin-record-meta {
     justify-content: flex-start;
+  }
+
+  // Two columns of detail do not fit a phone, so each pair stacks.
+  .member-card .admin-record-details {
+    grid-template-columns: 1fr;
   }
 }

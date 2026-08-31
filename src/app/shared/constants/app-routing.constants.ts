@@ -91,6 +91,7 @@ export const APP_ROUTES = {
   ADMIN_NOTIFICATIONS_SEND: ROOT_ROUTES.ADMIN + '/notifications/send',
   ADMIN_REPORTS: ROOT_ROUTES.ADMIN + '/reports',
   ADMIN_USERS: ROOT_ROUTES.ADMIN + '/users',
+  ADMIN_PERMISSIONS: ROOT_ROUTES.ADMIN + '/permissions',
 
   // Storytime
   STORYTIME: ROOT_ROUTES.STORYTIME,
@@ -232,6 +233,7 @@ export const APP_ROUTE_TITLES = {
   ADMIN_NOTIFICATIONS_SEND: 'Send Notification',
   ADMIN_REPORTS: 'Reported Officers',
   ADMIN_USERS: 'Manage Members',
+  ADMIN_PERMISSIONS: 'Manage Permissions',
 
   // Storytime
   STORYTIME: 'Storytime',
