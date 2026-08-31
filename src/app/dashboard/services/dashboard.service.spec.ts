@@ -91,6 +91,75 @@ describe('DashboardService', () => {
     });
   });
 
+  describe('getUserSettings', () => {
+    it('should fetch user settings successfully', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue({
+        headers: new HttpHeaders().set('Authorization', 'Bearer fake-token'),
+      });
+
+      service.getUserSettings().subscribe(settings => {
+        expect(settings).toEqual({ privacyMode: true });
+      });
+
+      const req = httpMock.expectOne(API_URLS.USER_SETTINGS);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('Authorization')).toBe(
+        'Bearer fake-token',
+      );
+      req.flush({ privacyMode: true });
+    });
+
+    it('should return error if no token found', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      service.getUserSettings().subscribe({
+        next: () => {
+          throw new Error('should have failed');
+        },
+        error: error => {
+          expect(error.message).toBe('No token found');
+        },
+      });
+
+      httpMock.expectNone(API_URLS.USER_SETTINGS);
+    });
+  });
+
+  describe('updateUserSettings', () => {
+    it('should update user settings successfully', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue({
+        headers: new HttpHeaders().set('Authorization', 'Bearer fake-token'),
+      });
+
+      service.updateUserSettings({ privacyMode: true }).subscribe(settings => {
+        expect(settings).toEqual({ privacyMode: true });
+      });
+
+      const req = httpMock.expectOne(API_URLS.USER_SETTINGS);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual({ privacyMode: true });
+      expect(req.request.headers.get('Authorization')).toBe(
+        'Bearer fake-token',
+      );
+      req.flush({ privacyMode: true });
+    });
+
+    it('should return error if no token found', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      service.updateUserSettings({ privacyMode: false }).subscribe({
+        next: () => {
+          throw new Error('should have failed');
+        },
+        error: error => {
+          expect(error.message).toBe('No token found');
+        },
+      });
+
+      httpMock.expectNone(API_URLS.USER_SETTINGS);
+    });
+  });
+
   describe('updatePersonalDetails', () => {
     const details: EditPersonalDetailsFormValues = {
       firstName: 'Updated',

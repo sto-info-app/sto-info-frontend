@@ -1,4 +1,4 @@
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   MatDialog,
@@ -11,6 +11,7 @@ import { of, throwError } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
+import { PrivacyModeService } from '../services/privacy-mode.service';
 import { StoAccountService } from '../services/sto-account.service';
 import { AccountsComponent, AccountVm } from './accounts.component';
 
@@ -19,6 +20,7 @@ describe('AccountsComponent', () => {
   let fixture: ComponentFixture<AccountsComponent>;
   let stoAccountServiceSpy: jest.Mocked<StoAccountService>;
   let routingServiceSpy: jest.Mocked<RoutingService>;
+  let privacyModeServiceSpy: Pick<PrivacyModeService, 'isEnabled' | 'load'>;
   let dialogSpy: jest.Mocked<MatDialog>;
   let router: Router;
 
@@ -46,6 +48,11 @@ describe('AccountsComponent', () => {
       getLink: jest.fn().mockReturnValue('test-link'),
     } as unknown as jest.Mocked<RoutingService>;
 
+    privacyModeServiceSpy = {
+      isEnabled: signal(false),
+      load: jest.fn().mockReturnValue(of({ privacyMode: false })),
+    };
+
     dialogSpy = {
       open: jest.fn(),
     } as unknown as jest.Mocked<MatDialog>;
@@ -55,6 +62,7 @@ describe('AccountsComponent', () => {
       providers: [
         { provide: StoAccountService, useValue: stoAccountServiceSpy },
         { provide: RoutingService, useValue: routingServiceSpy },
+        { provide: PrivacyModeService, useValue: privacyModeServiceSpy },
         provideRouter([]),
         provideNoopAnimations(),
       ],

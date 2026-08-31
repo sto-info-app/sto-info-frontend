@@ -49,6 +49,7 @@ describe('ProfileComponent', () => {
   beforeEach(async () => {
     mockDashboardService = {
       getUser: jest.fn().mockReturnValue(of(mockUser)),
+      getUserSettings: jest.fn().mockReturnValue(of({ privacyMode: false })),
       closeAccount: jest.fn().mockReturnValue(of({ success: true })),
     } as unknown as jest.Mocked<DashboardService>;
 

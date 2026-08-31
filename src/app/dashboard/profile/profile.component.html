@@ -38,7 +38,8 @@
             {{ user.profile?.username }}
           </p>
           <p>
-            <span class="record-title">Email:</span> {{ user.email }}
+            <span class="record-title">Email:</span>
+            <span [class.privacy-blur]="privacyMode.isEnabled()">{{ user.email }}</span>
             <i
               class="fas fa-lock restricted-icon go-red"
               title="Restricted: Cannot be changed"></i>
@@ -162,6 +163,11 @@
           [routerLink]="resetPasswordLink"
           class="full-width-btn-link gold"
           >{{ appRouteTitles.RESET_PASSWORD }}</a
+        >
+        <a
+          [routerLink]="settingsLink"
+          class="full-width-btn-link sunflower"
+          >Settings</a
         >
         <a
           href="#"

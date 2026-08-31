@@ -427,6 +427,15 @@ export const routes: Routes = [
     canActivate: [AuthGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.STO_DASHBOARD_SETTINGS,
+    loadComponent: () =>
+      import('./dashboard/settings/settings.component').then(
+        m => m.SettingsComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_SETTINGS, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.STO_DASHBOARD_ACCOUNTS,
     component: AccountsComponent,
     data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_ACCOUNTS, requiresApi: true },

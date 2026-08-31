@@ -20,6 +20,7 @@ import { AccountCardVm } from './account-card.model';
 })
 export class AccountCardComponent {
   @Input({ required: true }) vm!: AccountCardVm;
+  @Input() privacyMode = false;
 
   /** Emits the `key` of the action button the user activated. */
   @Output() readonly action = new EventEmitter<string>();

@@ -1,5 +1,9 @@
 @use 'lcars-variables' as vars;
 
+.privacy-blur {
+  filter: blur(0.35rem);
+}
+
 // Keyframe animations
 @keyframes blink {
   0% {
