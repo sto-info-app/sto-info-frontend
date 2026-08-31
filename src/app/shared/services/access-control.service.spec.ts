@@ -4,7 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { PERMISSIONS } from 'src/app/models/access-control.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
@@ -15,13 +15,19 @@ const AUTH_HEADER = 'Bearer token-1';
 describe('AccessControlService', () => {
   let service: AccessControlService;
   let httpMock: HttpTestingController;
-  let authService: { getHttpOptionsWithAccessToken: jest.Mock };
+  let authService: {
+    getHttpOptionsWithAccessToken: jest.Mock;
+    isAuthenticated$: BehaviorSubject<boolean>;
+  };
+  let isAuthenticated$: BehaviorSubject<boolean>;
 
   beforeEach(() => {
+    isAuthenticated$ = new BehaviorSubject<boolean>(true);
     authService = {
       getHttpOptionsWithAccessToken: jest.fn().mockReturnValue({
         headers: new HttpHeaders({ Authorization: AUTH_HEADER }),
       }),
+      isAuthenticated$,
     };
 
     TestBed.configureTestingModule({
@@ -86,6 +92,29 @@ describe('AccessControlService', () => {
 
     const result = await second;
     expect(result.has(PERMISSIONS.STORYTIME_MODERATE)).toBe(true);
+  });
+
+  // The failure this prevents is somebody signing in as an administrator
+  // behind a cache filled while they were anonymous, and being turned away
+  // from their own pages until they reload the whole application.
+  it('reloads once the authenticated state changes', async () => {
+    const first = firstValueFrom(service.getMyPermissions());
+    httpMock
+      .expectOne(API_URLS.ACCESS_CONTROL_ME)
+      .flush({ permissions: [PERMISSIONS.STORYTIME_VIEW] });
+    await first;
+
+    isAuthenticated$.next(false);
+    isAuthenticated$.next(true);
+
+    const second = firstValueFrom(service.getMyPermissions());
+    httpMock
+      .expectOne(API_URLS.ACCESS_CONTROL_ME)
+      .flush({ permissions: [PERMISSIONS.STORYTIME_MODERATE] });
+
+    const result = await second;
+    expect(result.has(PERMISSIONS.STORYTIME_MODERATE)).toBe(true);
+    expect(result.has(PERMISSIONS.STORYTIME_VIEW)).toBe(false);
   });
 
   // A page that cannot determine permissions should show what everyone can
