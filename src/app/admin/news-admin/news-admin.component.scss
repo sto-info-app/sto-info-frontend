@@ -210,11 +210,33 @@
   margin-top: 0.75rem;
 }
 
+// The same lift the shared `lcars-card` mixin gives the cards on the public
+// pages, without adopting its border and resting shadow: an admin list is read
+// by running down it, and a row that answers the pointer makes the one being
+// worked on obvious.
 .admin-record-card {
   border-left: 10px solid color.adjust(vars.$lcars-sunflower, $lightness: -16%);
   border-radius: 6px;
   overflow: hidden;
   background: vars.$lcars-grey-bg;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgb(0 0 0 / 50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-record-card {
+    transition: none;
+  }
+
+  .admin-record-card:hover {
+    transform: none;
+  }
 }
 
 .admin-record-header {
