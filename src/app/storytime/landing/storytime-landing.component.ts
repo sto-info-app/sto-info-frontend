@@ -10,7 +10,6 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { catchError, forkJoin, switchMap, of } from 'rxjs';
-import { PERMISSIONS, Permission } from 'src/app/models/access-control.models';
 import { Spotlight, Story, StorySort } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -20,58 +19,17 @@ import { AccessControlService } from 'src/app/shared/services/access-control.ser
 import { FollowService } from '../follow.service';
 import { StoryCardComponent } from '../public/story-card/story-card.component';
 import { SpotlightService } from '../spotlight.service';
+import {
+  STORYTIME_ADMIN_LINKS,
+  StorytimeAdminLink,
+  storytimeAdminRouterLink,
+} from '../storytime-admin-links';
 import { StoryService } from '../story.service';
 import { STORYTIME_COPY } from '../storytime.constants';
 import { StorytimeService } from '../storytime.service';
 
 /** How many Stories each landing list shows. */
 const LANDING_STORY_COUNT = 6;
-
-/** One of Storytime's own management pages, and what opens it. */
-export interface StorytimeAdminLink {
-  /** The permission that lets somebody through to the page. */
-  permission: Permission;
-  /** What the card reads as. */
-  label: string;
-  /** What the page is for, in a line. */
-  summary: string;
-  /** The path segments beneath Storytime. */
-  segments: string[];
-  /** The modifier that gives the card its own styling. */
-  cardClass: string;
-}
-
-/**
- * The pages that run Storytime, and what each one needs.
- *
- * Held here rather than written into the template so the page cannot offer a
- * card the route would then refuse: both read the same permission. They are
- * listed in the order they are needed — moderation is the one with somebody
- * waiting on it.
- */
-const STORYTIME_ADMIN_LINKS: StorytimeAdminLink[] = [
-  {
-    permission: PERMISSIONS.STORYTIME_MODERATE,
-    label: 'Moderation queue',
-    summary: 'Work through reported content and the appeals against removals.',
-    segments: ['manage', 'moderation'],
-    cardClass: 'storytime-landing__card--moderation',
-  },
-  {
-    permission: PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE,
-    label: 'Manage Spotlight',
-    summary: 'Choose, schedule and withdraw what Storytime features.',
-    segments: ['manage', 'spotlight'],
-    cardClass: 'storytime-landing__card--manage-spotlight',
-  },
-  {
-    permission: PERMISSIONS.STORYTIME_TAG_MANAGE,
-    label: 'Manage tags',
-    summary: 'Keep the shared tag vocabulary creators choose from.',
-    segments: ['manage', 'tags'],
-    cardClass: 'storytime-landing__card--tags',
-  },
-];
 
 /**
  * The Storytime landing page.
@@ -194,10 +152,10 @@ export class StorytimeLandingComponent implements OnInit {
   /**
    * Works out which of Storytime's own management pages to offer.
    *
-   * This is the only way into them. They are deliberately not in the site
-   * sidebar or on the site's Admin page: moderating Storytime, curating the
-   * Spotlight and keeping the tag list are jobs given out one at a time by
-   * permission, and neither of those places can say who holds one.
+   * The same cards appear on the site's Admin page, filtered the same way.
+   * They are not in the sidebar, which knows only whether somebody is an
+   * administrator: moderating Storytime, curating the Spotlight and keeping the
+   * tag list are jobs given out one at a time by permission.
    *
    * Silent when it fails, and silent for everybody who holds none of the
    * three. Hiding the cards is a courtesy either way — the routes and the API
@@ -229,7 +187,7 @@ export class StorytimeLandingComponent implements OnInit {
    * @returns The router link for it.
    */
   adminLinkFor(link: StorytimeAdminLink): unknown[] {
-    return ['/', this.appRoutes.STORYTIME, ...link.segments];
+    return storytimeAdminRouterLink(link);
   }
 
   /**

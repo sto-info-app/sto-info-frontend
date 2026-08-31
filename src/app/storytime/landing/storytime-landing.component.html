@@ -171,10 +171,11 @@
   }
 
   <!--
-    The way into Storytime's own management pages, and the only one. They are
-    reached by permission rather than by role, so neither the sidebar nor the
-    site's Admin page — both of which know only whether somebody is an
-    administrator — could offer them to the right people.
+    The way into Storytime's own management pages, for somebody who came to
+    Storytime rather than to the Admin page, which offers the same cards. They
+    are reached by permission rather than by role, so the sidebar — which knows
+    only whether somebody is an administrator — could not offer them to the
+    right people.
   -->
   @if (adminLinks.length > 0) {
     <app-collapsible-section
@@ -182,7 +183,7 @@
       barClass="small-lcars-bar-gap">
       <ul class="storytime-landing__running">
         @for (link of adminLinks; track link.permission) {
-          <li [class]="link.cardClass">
+          <li class="storytime-landing__card--{{ link.cardKey }}">
             <a [routerLink]="adminLinkFor(link)">
               <span class="storytime-landing__browse-name">{{
                 link.label
