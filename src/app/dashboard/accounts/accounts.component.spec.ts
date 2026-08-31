@@ -1,4 +1,4 @@
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   MatDialog,
@@ -49,7 +49,7 @@ describe('AccountsComponent', () => {
     } as unknown as jest.Mocked<RoutingService>;
 
     privacyModeServiceSpy = {
-      isEnabled: () => false,
+      isEnabled: signal(false),
       load: jest.fn().mockReturnValue(of({ privacyMode: false })),
     };
 
