@@ -2,6 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { PERMISSIONS } from 'src/app/models/access-control.models';
+import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import {
   StorytimeComment,
   StorytimeCommentStatus,
@@ -52,6 +54,21 @@ describe('CommentThreadComponent', () => {
     isLoggedInAsAdmin: jest.Mock;
     getUserId: jest.Mock;
   };
+  let accessControlService: { hasPermission: jest.Mock };
+
+  /**
+   * Makes the reader somebody who moderates Storytime.
+   *
+   * The control is offered on the moderation permission rather than on the
+   * administrator role, which is what the endpoint behind it checks.
+   *
+   * @returns void
+   */
+  const moderates = (): void => {
+    accessControlService.hasPermission.mockImplementation(
+      (permission: string) => of(permission === PERMISSIONS.STORYTIME_MODERATE),
+    );
+  };
 
   /**
    * Creates the component and runs its first change detection.
@@ -82,12 +99,16 @@ describe('CommentThreadComponent', () => {
       isLoggedInAsAdmin: jest.fn().mockReturnValue(false),
       getUserId: jest.fn().mockReturnValue(READER_ID),
     };
+    accessControlService = {
+      hasPermission: jest.fn().mockReturnValue(of(false)),
+    };
 
     await TestBed.configureTestingModule({
       imports: [CommentThreadComponent],
       providers: [
         { provide: CommentService, useValue: commentService },
         { provide: AuthService, useValue: authService },
+        { provide: AccessControlService, useValue: accessControlService },
         // The byline links a commenter to their profile, and a router link
         // cannot be built without one.
         provideRouter([]),
@@ -627,7 +648,7 @@ describe('CommentThreadComponent', () => {
 
   describe('an administrator removing a comment', () => {
     beforeEach(() => {
-      authService.isLoggedInAsAdmin.mockReturnValue(true);
+      moderates();
     });
 
     // The message is quoted to the author word for word, so it is typed
@@ -738,12 +759,24 @@ describe('CommentThreadComponent', () => {
       expect(component.hasControls(buildComment(THEIRS))).toBe(true);
     });
 
-    it('offers an administrator the same on a comment they cannot reply to', () => {
-      authService.isLoggedInAsAdmin.mockReturnValue(true);
+    it('offers a moderator the same on a comment they cannot reply to', () => {
+      moderates();
 
       create();
 
       expect(component.hasControls(buildComment(THEIRS))).toBe(true);
+    });
+
+    // Moderating is a job given out by permission. Reading the role instead
+    // would offer the control to an administrator who has been denied it, and
+    // withhold it from a moderator who is not an administrator.
+    it('offers nothing to an administrator without the moderation permission', () => {
+      authService.isLoggedInAsAdmin.mockReturnValue(true);
+
+      create();
+
+      expect(component.canModerate).toBe(false);
+      expect(component.hasControls(buildComment(THEIRS))).toBe(false);
     });
 
     // Nothing is left to do to a comment an administrator has already removed.
