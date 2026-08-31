@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -177,6 +177,138 @@ describe('SideBarComponent', () => {
       fixture.detectChanges();
 
       expect(linkLabels()).not.toContain('Storytime');
+    });
+  });
+
+  // Every sidebar entry stays lit while a page beneath it is being read: the
+  // address is matched on its opening segments rather than in full. Exactly
+  // one button is lit at a time, so the frame always says where the reader is.
+  describe('active entry', () => {
+    let routedFixture: ComponentFixture<SideBarComponent>;
+    let router: Router;
+
+    /**
+     * Reads the labels of the lit sidebar entries.
+     *
+     * @returns The text of every sidebar link carrying the active class.
+     */
+    const litLabels = (): string[] =>
+      Array.from(
+        (routedFixture.nativeElement as HTMLElement).querySelectorAll(
+          '.sidebar-buttons a.peach',
+        ),
+      ).map(link => link.textContent?.trim() ?? '');
+
+    /**
+     * Renders the sidebar, then navigates.
+     *
+     * Nothing is rendered after the navigation on purpose. A component that
+     * declares no strategy gets `OnPush` in Angular 22, and a navigation
+     * elsewhere on the page does not dirty this view, so every entry has to
+     * put itself right off the router's own events. Rendering again here
+     * would hide an entry that cannot.
+     *
+     * @param url The address to visit.
+     * @param isLoggedIn Whether the visitor is signed in.
+     */
+    const visit = async (url: string, isLoggedIn = true): Promise<void> => {
+      routedFixture.componentRef.setInput('isLoggedIn', isLoggedIn);
+      routedFixture.componentRef.setInput('isStorytimeEnabled', true);
+      routedFixture.detectChanges();
+
+      await router.navigateByUrl(url);
+    };
+
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [SideBarComponent],
+        providers: [
+          provideRouter([{ path: '**', children: [] }]),
+          {
+            provide: AuthService,
+            useValue: { isLoggedInAsAdmin: jest.fn().mockReturnValue(true) },
+          },
+        ],
+      });
+
+      router = TestBed.inject(Router);
+      routedFixture = TestBed.createComponent(SideBarComponent);
+    });
+
+    it.each([
+      ['/register', 'Register'],
+      ['/register/complete', 'Register'],
+    ])('should light Register at %s', async (url, label) => {
+      await visit(url, false);
+
+      expect(litLabels()).toEqual([label]);
+    });
+
+    it.each([
+      ['/community', 'Community'],
+      ['/community/registry/profiles/somebody', 'Community'],
+      ['/community/friends', 'Community'],
+      ['/storytime', 'Storytime'],
+      ['/storytime/stories/a-story', 'Storytime'],
+      ['/dashboard', 'Dashboard'],
+      ['/dashboard/settings', 'Dashboard'],
+      ['/dashboard/profile', 'Dashboard'],
+      ['/dashboard/accounts', 'Your Accounts'],
+      ['/dashboard/accounts/add', 'Your Accounts'],
+      ['/dashboard/accounts/a-handle/endeavours', 'Your Accounts'],
+      ['/dashboard/stats', 'Stats'],
+      ['/dashboard/stats/some-breakdown', 'Stats'],
+      ['/admin', 'Admin'],
+      ['/admin/permissions', 'Admin'],
+      ['/admin/news/12/edit', 'Admin'],
+      ['/help', 'Help'],
+      ['/help/getting-started', 'Help'],
+    ])('should light exactly %s at %s', async (url, label) => {
+      await visit(url);
+
+      expect(litLabels()).toEqual([label]);
+    });
+
+    // A query string or fragment says nothing about which section is being
+    // read, so it must not put the frame's lights out.
+    it('should ignore the query string and fragment', async () => {
+      await visit('/dashboard/settings?tab=privacy#alerts');
+
+      expect(litLabels()).toEqual(['Dashboard']);
+    });
+
+    // The dashboard's own button stands down while one of its sections is
+    // being read, so the two never light together.
+    it('should not light the Dashboard alongside one of its sections', async () => {
+      await visit('/dashboard/accounts/a-handle');
+
+      expect(litLabels()).not.toContain('Dashboard');
+    });
+
+    // The reported fault: a header button navigates, nothing else about the
+    // sidebar changes, and the entry that should have lit stayed dark.
+    it('should follow a navigation that leaves the rest of the sidebar alone', async () => {
+      await visit('/news/some-post');
+      expect(litLabels()).toEqual([]);
+
+      await router.navigateByUrl('/dashboard');
+      expect(litLabels()).toEqual(['Dashboard']);
+
+      await router.navigateByUrl('/dashboard/accounts');
+      expect(litLabels()).toEqual(['Your Accounts']);
+
+      await router.navigateByUrl('/dashboard/settings');
+      expect(litLabels()).toEqual(['Dashboard']);
+
+      await router.navigateByUrl('/admin/permissions');
+      expect(litLabels()).toEqual(['Admin']);
+    });
+
+    it('should light nothing on a page outside the sidebar', async () => {
+      await visit('/news/some-post');
+
+      expect(litLabels()).toEqual([]);
     });
   });
 
