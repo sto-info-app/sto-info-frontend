@@ -1,3 +1,34 @@
+@use 'sass:color';
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// The colour each card carries, in the order the page reads. The content
+// pages are the cool half of the palette and the community pages the warm
+// half, so the two bands stay apart at a glance the way they did when this
+// page was one long grid. Every one of these is light enough to carry black
+// text on the name block, which is how LCARS labels are set everywhere else.
+$admin-landing-colours: (
+  'news': vars.$lcars-cool,
+  'banners': vars.$lcars-perano,
+  'notifications': vars.$lcars-green,
+  // Red for the report queues — this site's and Storytime's — because they
+  // are the ones with somebody waiting on them, taken light enough to carry
+  // black text the way every other name block here does. The two are the same
+  // job on either side of the site, so they are the same colour.
+  'reports': color.adjust(vars.$lcars-red, $lightness: 10%),
+  'moderation': color.adjust(vars.$lcars-red, $lightness: 10%),
+  'members': vars.$lcars-tangerine,
+  // Violet is the one colour here that will not carry black text at the size
+  // these names are set in. Taken a shade lighter it clears the contrast the
+  // rest of the site holds to and is still recognisably violet.
+  'permissions': color.adjust(vars.$lcars-violet, $lightness: 10%),
+  // Storytime's own management cards, in the colours they carry on the
+  // Storytime landing page. An administrator who runs both sees the same card
+  // in both places, and the colour is part of what says it is the same card.
+  'manage-spotlight': vars.$lcars-gold,
+  'tags': vars.$lcars-c48,
+);
+
 #admin-page {
   max-width: 72rem;
   margin: 0 auto;
@@ -6,62 +37,97 @@
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
+}
 
-  > p {
+.admin-landing {
+  &__intro {
     max-width: 42rem;
   }
-}
 
-.admin-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: 0.9rem;
-  margin-top: 1.5rem;
-}
+  // The same panel grid Storytime's management cards use: a card is a way
+  // into a page, and the two admin areas should not look like two different
+  // sites.
+  &__panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    list-style: none;
 
-.admin-card {
-  display: block;
-  min-height: 9.5rem;
-  padding: 1rem 1.1rem 1rem 1.4rem;
-  border-left: 10px solid #0d0d0d;
-  border-radius: 0 26px 26px 0;
-  background: #58e;
-  text-decoration: none;
-  color: #0d0d0d;
-  transition: filter 0.15s ease;
+    li {
+      @include mixins.lcars-card;
 
-  &:nth-child(2) {
-    background: #9cf;
+      display: flex;
+      padding: 0;
+      list-style: none;
+
+      // The spine, in the card's own colour. Named here so a card without one
+      // still has an edge rather than a gap where an edge should be.
+      border-left: 4px solid vars.$lcars-grey-border;
+    }
+
+    // The panel is the link rather than something with a link in it: the whole
+    // box is what somebody aims at, so the anchor fills it and the padding
+    // belongs to the pieces inside, because the name is a block of colour that
+    // has to run the full width of the card.
+    a {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      padding: 0;
+      text-decoration: none;
+
+      &:focus-visible {
+        outline: 2px solid vars.$lcars-perano;
+        outline-offset: 2px;
+      }
+    }
   }
 
-  &:nth-child(3) {
-    background: #8ff;
-  }
-
-  // The two moderation cards sit in a warmer band so the community-facing
-  // actions read apart from the content-management ones above them.
-  &:nth-child(4) {
-    background: #fc9;
-  }
-
-  &:nth-child(5) {
-    background: #f96;
-  }
-
-  &:hover {
-    filter: brightness(1.08);
-  }
-
-  h2 {
-    margin: 0 0 0.55rem;
-    color: inherit;
-    text-transform: uppercase;
+  &__name {
+    display: block;
+    padding: 0.4rem 1rem;
+    font-family: vars.$font-antonio;
+    font-size: 1rem;
     letter-spacing: 0.04em;
-    font-size: 1.1rem;
+    text-transform: uppercase;
+
+    // Until a card says which colour it is. A name is unreadable on a
+    // background that never arrived, so the fallback is a real block.
+    background: vars.$lcars-grey-border;
+    color: vars.$lcars-white;
   }
 
-  p {
+  &__summary {
     margin: 0;
-    opacity: 0.9;
+    padding: 0.6rem 1rem 0.75rem;
+    max-width: none;
+    font-size: 0.9rem;
+  }
+}
+
+// Scoped to the list rather than named on their own: the card's shape is set
+// at `.admin-landing__panels li`, which is a class and an element, and a lone
+// modifier class is not heard over it.
+@each $name, $colour in $admin-landing-colours {
+  .admin-landing__panels .admin-landing__card--#{$name} {
+    border-left-color: color.adjust($colour, $lightness: -18%);
+
+    .admin-landing__name {
+      background: $colour;
+      color: vars.$lcars-black;
+    }
+
+    // The card lifts on hover from the shared card mixin; the block brightens
+    // with it, so the thing under the pointer is the thing that answers.
+    a:hover .admin-landing__name,
+    a:focus-visible .admin-landing__name {
+      background: color.adjust($colour, $lightness: 10%);
+    }
+
+    a:focus-visible {
+      outline-color: $colour;
+    }
   }
 }

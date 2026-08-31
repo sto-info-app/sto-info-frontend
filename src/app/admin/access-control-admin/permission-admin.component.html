@@ -1,0 +1,491 @@
+@if (isBusy) {
+  <app-loading-bar loadingText="Working"></app-loading-bar>
+}
+
+<div
+  id="permission-admin-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Manage Permissions</h1>
+    <p class="admin-page-intro">
+      Give one member a job without giving them the whole site. Find an account,
+      make them a curator or return them to an ordinary member, and grant or
+      withhold individual permissions on top of that. Every override is recorded
+      with the reason you give. The administrator role is set outside STO Info.
+    </p>
+
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Action failed"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    @if (successMessage) {
+      <app-lcars-success-message
+        title="Acknowledged"
+        [message]="successMessage"></app-lcars-success-message>
+    }
+
+    @if (!selectedMember) {
+      <section class="admin-section">
+        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+          <span class="title-with-badge">
+            Find A Member
+            @if (memberTotal > 0) {
+              <span class="header-count-badge">{{ memberTotal }}</span>
+            }
+          </span>
+        </div>
+
+        <div class="admin-panel">
+          <div class="form-row compact">
+            <div class="lcars-input-container bluey admin-field-full">
+              <label for="permission-search-input"
+                >Search by email or username</label
+              >
+              <input
+                id="permission-search-input"
+                type="search"
+                maxlength="255"
+                [class.privacy-blur]="privacyMode.isEnabled()"
+                [(ngModel)]="search"
+                (keyup.enter)="searchMembers()" />
+            </div>
+          </div>
+
+          <div class="admin-form-actions">
+            @if (search || hasSearched) {
+              <button
+                type="button"
+                class="lcars-btn red"
+                (click)="clearSearch()">
+                Clear
+              </button>
+            }
+            <button
+              type="button"
+              class="lcars-btn green"
+              [disabled]="isBusy"
+              (click)="searchMembers()">
+              Search
+            </button>
+          </div>
+        </div>
+
+        @if (hasSearched && !isSearching && members.length === 0) {
+          <p class="records-empty">No members match this search.</p>
+        }
+
+        @if (members.length > 0) {
+          <div class="admin-records">
+            @for (member of members; track member.id) {
+              <article
+                class="admin-record-card member-card"
+                [ngClass]="'role-' + roleModifier(member)">
+                <header class="admin-record-header">
+                  <div class="admin-record-title">
+                    <strong
+                      [class.privacy-blur]="
+                        isNameAnEmail(member) && privacyMode.isEnabled()
+                      "
+                      >{{ displayName(member) }}</strong
+                    >
+                  </div>
+                  <div class="admin-record-meta">
+                    <span class="member-status">
+                      {{ member.isAccountDisabled ? 'Disabled' : 'Active' }}
+                      <span
+                        class="status-light"
+                        [ngClass]="member.isAccountDisabled ? 'off' : 'on'"
+                        aria-hidden="true"></span>
+                    </span>
+                  </div>
+                </header>
+
+                <div class="admin-record-body">
+                  <dl class="admin-record-details">
+                    <div class="admin-record-detail">
+                      <span class="label">Role</span>
+                      <span
+                        class="value member-role"
+                        [ngClass]="'role-' + roleModifier(member)"
+                        >{{ roleLabel(member) }}</span
+                      >
+                    </div>
+                    <div class="admin-record-detail">
+                      <span class="label">Email</span>
+                      <span
+                        class="value member-email"
+                        [class.privacy-blur]="privacyMode.isEnabled()"
+                        >{{ member.email }}</span
+                      >
+                    </div>
+                  </dl>
+
+                  <div class="admin-record-actions">
+                    <button
+                      type="button"
+                      class="cta-icon"
+                      [disabled]="isSearching"
+                      (click)="selectMember(member)"
+                      title="Manage permissions"
+                      aria-label="Manage permissions"
+                    ><i class="fas fa-user-pen"></i
+                    ></button>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+
+          @if (totalPages > 1) {
+            <div class="lcars-pagination">
+              <button
+                type="button"
+                [disabled]="page <= 1 || isSearching"
+                (click)="loadPage(page - 1)">
+                Previous
+              </button>
+              <span>Page {{ page }} of {{ totalPages }}</span>
+              <button
+                type="button"
+                [disabled]="page >= totalPages || isSearching"
+                (click)="loadPage(page + 1)">
+                Next
+              </button>
+            </div>
+          }
+        }
+      </section>
+    } @else {
+      <section class="admin-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Selected Member</span>
+        </div>
+
+        <div class="admin-panel selected-member">
+          <dl class="admin-record-details">
+            <div class="admin-record-detail">
+              <span class="label">Member</span>
+              <span
+                class="value"
+                [class.privacy-blur]="
+                  isNameAnEmail(selectedMember) && privacyMode.isEnabled()
+                "
+                >{{ displayName(selectedMember) }}</span
+              >
+            </div>
+            <div class="admin-record-detail">
+              <span class="label">Email</span>
+              <span
+                class="value member-email"
+                [class.privacy-blur]="privacyMode.isEnabled()"
+                >{{ selectedMember.email }}</span
+              >
+            </div>
+            <div class="admin-record-detail">
+              <span class="label">Role</span>
+              <span
+                class="value member-role"
+                [ngClass]="'role-' + roleModifier(selectedMember)"
+                >{{ roleLabel(selectedMember) }}</span
+              >
+            </div>
+            <div class="admin-record-detail">
+              <span class="label">Permissions held</span>
+              <span class="value">{{
+                summary ? summary.effectivePermissions.length : 0
+              }}</span>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="admin-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Account Role</span>
+        </div>
+
+        <div class="admin-panel">
+          @if (isAdminMember) {
+            <p class="role-locked">
+              Administrators are appointed outside STO Info, so this account’s
+              role is read here and changed there.
+            </p>
+          } @else {
+            <div class="form-row compact">
+              <div class="lcars-select-container violet">
+                <label
+                  class="select-label"
+                  for="member-role-select"
+                  >Role</label
+                >
+                <select
+                  id="member-role-select"
+                  title="Role"
+                  [(ngModel)]="chosenRole">
+                  @for (role of assignableRoles; track role) {
+                    <option [value]="role">{{ roleLabels[role] }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <p class="role-note">{{ roleDescriptions[chosenRole] }}</p>
+
+            @if (!isRoleChanged) {
+              <p class="role-note">This is the role they already hold.</p>
+            }
+
+            <div class="admin-form-actions">
+              <button
+                type="button"
+                class="lcars-btn green"
+                [disabled]="isBusy || !isRoleChanged"
+                (click)="changeRole()">
+                {{ isSaving ? 'Changing…' : 'Change role' }}
+              </button>
+            </div>
+          }
+        </div>
+      </section>
+
+      @if (summary) {
+        <section class="admin-section">
+          <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+            <span class="title-with-badge">
+              Effective Permissions
+              @if (summary.overrides.length > 0) {
+                <span class="header-count-badge"
+                  >{{ summary.overrides.length }} override{{
+                    summary.overrides.length === 1 ? '' : 's'
+                  }}</span
+                >
+              }
+            </span>
+          </div>
+
+          @if (rows.length === 0) {
+            <p class="records-empty">
+              The API reports no permissions to manage.
+            </p>
+          }
+
+          <div class="permission-rows">
+            @for (row of rows; track row.permission.code) {
+              <article
+                class="permission-row"
+                [ngClass]="'status-' + row.status.toLowerCase()">
+                <div class="permission-row-main">
+                  <div class="permission-row-title">
+                    <strong>{{ row.permission.name }}</strong>
+                    <span
+                      class="status-pill"
+                      [ngClass]="statusPillClasses[row.status]">
+                      {{ statusLabels[row.status] }}
+                    </span>
+                  </div>
+                  <code class="permission-code">{{ row.permission.code }}</code>
+                  @if (row.permission.description) {
+                    <p class="permission-description">
+                      {{ row.permission.description }}
+                    </p>
+                  }
+                  @if (row.override) {
+                    <dl class="override-details">
+                      <div class="admin-record-detail">
+                        <span class="label">Reason</span>
+                        <span class="value">{{ row.override.reason }}</span>
+                      </div>
+                      <div class="admin-record-detail">
+                        <span class="label">Applied</span>
+                        <span class="value">{{
+                          row.override.createdAt | date: dateTimeFormat
+                        }}</span>
+                      </div>
+                      <div class="admin-record-detail">
+                        <span class="label">Expires</span>
+                        <span class="value">{{
+                          row.override.expiresAt
+                            ? (row.override.expiresAt | date: dateTimeFormat)
+                            : 'Never'
+                        }}</span>
+                      </div>
+                    </dl>
+                  }
+                </div>
+
+                <div class="permission-row-actions">
+                  <button
+                    type="button"
+                    class="lcars-btn green"
+                    [disabled]="isBusy"
+                    (click)="prepareOverride(row, permissionEffect.GRANT)">
+                    Grant
+                  </button>
+                  <button
+                    type="button"
+                    class="lcars-btn tangerine"
+                    [disabled]="isBusy"
+                    (click)="prepareOverride(row, permissionEffect.DENY)">
+                    Deny
+                  </button>
+                  @if (row.override) {
+                    <button
+                      type="button"
+                      class="lcars-btn perano"
+                      [disabled]="isBusy"
+                      (click)="withdrawOverride(row)">
+                      Withdraw
+                    </button>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+
+        <section class="admin-section">
+          <div class="lcars-text-bar small-lcars-bar-gap">
+            <span>Apply An Override</span>
+          </div>
+
+          <form
+            [formGroup]="form"
+            (ngSubmit)="applyOverride()"
+            class="admin-form">
+            <div class="admin-panel">
+              <div class="form-row compact">
+                <div class="lcars-select-container sunflower">
+                  <label
+                    class="select-label"
+                    for="override-permission-select"
+                    >Permission</label
+                  >
+                  <select
+                    id="override-permission-select"
+                    title="Permission"
+                    formControlName="permissionCode">
+                    <option value="">Choose a permission…</option>
+                    @for (permission of permissions; track permission.code) {
+                      <option [value]="permission.code">
+                        {{ permission.name }} ({{ permission.code }})
+                      </option>
+                    }
+                  </select>
+                </div>
+
+                <div class="lcars-select-container perano">
+                  <label
+                    class="select-label"
+                    for="override-effect-select"
+                    >Effect</label
+                  >
+                  <select
+                    id="override-effect-select"
+                    title="Effect"
+                    formControlName="effect">
+                    @for (effect of effects; track effect) {
+                      <option [value]="effect">
+                        {{ effectLabels[effect] }}
+                      </option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="lcars-input-container bluey admin-field-full">
+                  <label for="override-reason-input">Reason</label>
+                  <input
+                    id="override-reason-input"
+                    type="text"
+                    formControlName="reason"
+                    [maxlength]="reasonMaxLength" />
+                  <div class="field-footer">
+                    @if (
+                      form.controls.reason.touched &&
+                      form.controls.reason.invalid
+                    ) {
+                      <small class="field-error"
+                        >A reason is required, so the decision stays
+                        reviewable.</small
+                      >
+                    }
+                    <small class="char-count"
+                      >{{ form.controls.reason.value?.length || 0 }}/{{
+                        reasonMaxLength
+                      }}</small
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row compact">
+                <div class="lcars-input-container gold">
+                  <label for="override-expires-input"
+                    >Expires At (optional)</label
+                  >
+                  <input
+                    id="override-expires-input"
+                    type="datetime-local"
+                    formControlName="expiresAt" />
+                  <div class="field-footer">
+                    <small class="field-hint"
+                      >Leave empty for an override that never lapses.</small
+                    >
+                  </div>
+                </div>
+              </div>
+
+              @if (
+                form.controls.permissionCode.touched &&
+                form.controls.permissionCode.invalid
+              ) {
+                <small class="field-error"
+                  >Choose a permission to override.</small
+                >
+              }
+
+              <div class="admin-form-actions">
+                <button
+                  type="submit"
+                  class="lcars-btn green"
+                  [disabled]="isBusy">
+                  {{ isSaving ? 'Applying…' : 'Apply override' }}
+                </button>
+              </div>
+            </div>
+          </form>
+        </section>
+      }
+    }
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      @if (selectedMember) {
+        <button
+          type="button"
+          class="full-width-btn-link sunflower"
+          [disabled]="isBusy"
+          (click)="clearSelection()">
+          Manage permissions
+        </button>
+      }
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN_USERS"
+        >Manage members</a
+      >
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN"
+        >Admin home</a
+      >
+    </div>
+  </div>
+</div>

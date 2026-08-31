@@ -763,6 +763,18 @@ button.lcars-btn-auto {
     filter: none;
   }
 
+  // A disabled icon control has to look disabled: this is a bare `button` with
+  // no state of its own, so without this an action that cannot run still
+  // invites a press and still grows under the pointer.
+  &:is(button):disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  &:is(button):disabled:hover {
+    transform: none;
+  }
+
   &.delete-icon:hover {
     color: vars.$lcars-red;
   }
@@ -883,6 +895,9 @@ button.lcars-btn-auto {
   gap: 0.8rem;
 }
 
+// One or two digits keep the round badge the design started with; three or
+// more grow it sideways into a pill instead of overflowing a fixed-width
+// circle, which is what a member or story count in the hundreds used to do.
 .lcars-text-bar .header-count-badge {
   position: relative;
   display: inline-flex;
@@ -890,12 +905,14 @@ button.lcars-btn-auto {
   justify-content: center;
   background-color: vars.$lcars-tangerine;
   color: #000;
-  width: 26px;
+  min-width: 26px;
   height: 26px;
-  border-radius: 50%;
+  padding: 0 0.45rem;
+  border-radius: 999px;
   font-size: 0.95rem;
   font-weight: 900;
   line-height: 1;
+  white-space: nowrap;
   flex-shrink: 0;
   margin-top: 8px;
 }
