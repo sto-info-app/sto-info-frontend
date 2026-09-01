@@ -489,7 +489,8 @@ $storytime-comment-colours: (
 // the background is dark enough to read it — never inside a select's, which is
 // a solid colour. A chooser that needs explaining gets a help popup instead.
 .storytime-page .field-hint,
-.storytime-report__form .field-hint {
+.storytime-report__form .field-hint,
+#storytime-image-dialog-container .field-hint {
   color: vars.$lcars-grey-light;
   box-sizing: border-box;
   font-size: 0.8rem;
@@ -2576,6 +2577,144 @@ $storytime-landing-colours: (
   }
 }
 
+// Artwork
+// -----------------------------------------------------------------------------
+// A work's pictures are set against the saved work rather than staged into the
+// form around them, so each slot is its own block with its own controls. The
+// description is the exception and belongs to the editor's form, which is why
+// it sits inside the same panel rather than in a dialog the creator has closed.
+
+.storytime-image-manager {
+  &__guidance {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+    margin: 0 0 0.75rem;
+    max-width: 70ch;
+  }
+
+  &__body {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  // Sized by its own picture rather than by a fixed frame: an empty slot
+  // renders nothing at all, so there is no box here to leave standing.
+  &__preview {
+    flex: 0 1 240px;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 2px solid vars.$lcars-sunflower;
+      border-radius: 4px;
+    }
+
+    // A 5:1 banner at 240px wide is 48px tall and shows nothing. It gets the
+    // width of the row instead, which is the shape it is actually seen in.
+    &--wide {
+      flex: 1 1 100%;
+    }
+  }
+
+  &__controls {
+    flex: 1 1 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__buttons {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.5rem;
+  }
+
+  .lcars-input-container {
+    margin-top: 1rem;
+  }
+}
+
+// The crop dialog. A Material dialog rather than a page, so it carries its own
+// padding; everything inside it is the same bar, field and button the editors
+// behind it are built from.
+#storytime-image-dialog-container {
+  padding: 10px;
+
+  .mat-mdc-dialog-actions {
+    gap: 1rem;
+    padding: 1rem 3rem;
+  }
+}
+
+.storytime-image-crop {
+  &__guidance {
+    margin: 0 0 0.35rem;
+    max-width: 70ch;
+  }
+
+  &__layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 1rem;
+
+    // Only once a picture has been chosen is there a second column worth
+    // reserving room for.
+    &.has-image {
+      flex-flow: row nowrap;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+  }
+
+  &__main {
+    flex: 2;
+    min-width: 0;
+
+    --cropper-overlay-color: transparent;
+
+    image-cropper {
+      width: 100%;
+      max-height: 55vh;
+
+      div,
+      div img {
+        max-height: 55vh;
+        width: auto;
+      }
+    }
+  }
+
+  &__side {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  &__preview img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    border: 2px solid vars.$lcars-sunflower;
+  }
+
+  &__alt {
+    margin-top: 1rem;
+  }
+
+  &__actions {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.5rem;
+  }
+}
+
 // Narrow screens
 // -----------------------------------------------------------------------------
 
@@ -2615,5 +2754,11 @@ $storytime-landing-colours: (
     .lcars-btn {
       flex: 1 1 auto;
     }
+  }
+
+  // With no room for a preview beside the cropper, it goes under it.
+  .storytime-image-crop__layout.has-image {
+    flex-flow: column nowrap;
+    gap: 1rem;
   }
 }

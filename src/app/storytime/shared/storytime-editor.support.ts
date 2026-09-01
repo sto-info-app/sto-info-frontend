@@ -1,13 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, DestroyRef, NgZone, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { StorytimeLanguage } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { STORYTIME_IMAGE_ALT_MAX_LENGTH } from '../storytime-image.constants';
 import { StorytimeService } from '../storytime.service';
 import { SettingOption } from './setting-help/setting-help.component';
 
@@ -27,6 +28,46 @@ export function toLanguageOptions(
     value: language.code,
     label: language.name,
   }));
+}
+
+/**
+ * Puts an artwork description on a form, or takes it off.
+ *
+ * The control exists only while the picture does. A description is required
+ * whenever there is something to describe and refused when there is not, so a
+ * form that always carried the field would send an empty one on every save of
+ * a work with no artwork and be turned away for it.
+ *
+ * @param form - The editor's form.
+ * @param controlName - The control holding the description.
+ * @param imageUrl - The picture, or null when the slot is empty.
+ * @param altText - The description the server holds, if any.
+ */
+export function syncImageDescription(
+  form: FormGroup,
+  controlName: string,
+  imageUrl: string | null,
+  altText: string | null,
+): void {
+  if (!imageUrl) {
+    form.removeControl(controlName);
+    return;
+  }
+
+  const control = form.get(controlName);
+
+  if (control) {
+    control.setValue(altText ?? '');
+    return;
+  }
+
+  form.addControl(
+    controlName,
+    new FormControl(altText ?? '', [
+      Validators.required,
+      Validators.maxLength(STORYTIME_IMAGE_ALT_MAX_LENGTH),
+    ]),
+  );
 }
 
 /** What an editor shows progress, failure and language choices on. */

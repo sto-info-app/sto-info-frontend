@@ -1,0 +1,80 @@
+<div class="storytime-image-manager">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>{{ spec.label }}</span>
+  </div>
+
+  <div class="storytime-panel">
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Could not change that"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    <p class="storytime-image-manager__guidance">{{ spec.guidance }}</p>
+
+    <div class="storytime-image-manager__body">
+      <!--
+        Nothing at all stands in for a missing picture: no placeholder, no
+        empty frame. An artless Story should look like a Story without art,
+        not like one whose art failed to load.
+      -->
+      @if (hasImage) {
+        <div
+          class="storytime-image-manager__preview"
+          [class.storytime-image-manager__preview--wide]="
+            spec.aspectLabel === '5:1'
+          ">
+          <img
+            [src]="imageUrl"
+            [alt]="imageAlt ?? ''" />
+        </div>
+      }
+
+      <div class="storytime-image-manager__controls">
+        <p class="field-hint">{{ requirement }}</p>
+
+        <div class="storytime-image-manager__buttons">
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto sunflower"
+            [disabled]="isRemoving"
+            (click)="onChooseClick()">
+            {{ hasImage ? 'Replace' : 'Add' }}
+          </button>
+
+          @if (hasImage) {
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto red"
+              [disabled]="isRemoving"
+              (click)="onRemoveClick()">
+              Remove
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!--
+      Only offered once there is a picture, because a description of nothing
+      would be stored against an empty slot and read out over whatever was
+      uploaded into it next. The server refuses it on the same grounds.
+    -->
+    @if (hasImage) {
+      <div class="lcars-input-container bluey storytime-field-full">
+        <label [attr.for]="'storytime-alt-' + slot">
+          What does this picture show?
+        </label>
+        <input
+          [id]="'storytime-alt-' + slot"
+          type="text"
+          [formControlName]="altControlName"
+          [maxlength]="altMaxLength" />
+        <p class="field-hint">
+          Read out to anybody who cannot see the picture. Saved with the rest of
+          this page.
+        </p>
+      </div>
+    }
+  </div>
+</div>
