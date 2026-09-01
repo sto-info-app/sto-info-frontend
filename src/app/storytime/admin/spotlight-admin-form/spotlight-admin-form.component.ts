@@ -37,6 +37,9 @@ import { SearchService } from '../../search.service';
 import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
 import { SpotlightService } from '../../spotlight.service';
 
+/** The details a chosen work can fill in for the editor. */
+type SeededField = 'headline' | 'summary';
+
 /**
  * The fields of a selection an editor may change after it exists.
  *
@@ -116,6 +119,14 @@ export class SpotlightAdminFormComponent implements OnInit {
   private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
+   * The details last filled in from a chosen work.
+   *
+   * Kept so a later choice can replace what an earlier one wrote while leaving
+   * anything the editor typed themselves alone.
+   */
+  private _seeded: Record<SeededField, string> | null = null;
+
+  /**
    * Builds the form and loads the entry when editing an existing one.
    */
   ngOnInit(): void {
@@ -139,6 +150,7 @@ export class SpotlightAdminFormComponent implements OnInit {
         if (this.isNew) {
           this.form.controls['targetId'].setValue('');
           this.selectedTitle = '';
+          this.seedDetails(null);
         }
       });
 
@@ -154,6 +166,9 @@ export class SpotlightAdminFormComponent implements OnInit {
    *
    * The dialog is seeded with the entity type the editor has chosen, so a
    * Story search never returns Arcs and vice versa.
+   *
+   * Choosing a work also fills in the headline and summary readers will see
+   * from the work's own, as a draft to write over rather than a blank page.
    */
   openPicker(): void {
     const entityType = this.form.controls['entityType']
@@ -180,8 +195,43 @@ export class SpotlightAdminFormComponent implements OnInit {
         if (hit) {
           this.form.controls['targetId'].setValue(hit.id);
           this.selectedTitle = hit.title;
+          this.seedDetails(hit);
         }
       });
+  }
+
+  /**
+   * Fills the reader-facing details in from the work that was chosen.
+   *
+   * @param hit - The chosen work, or null when the choice was cleared.
+   */
+  private seedDetails(hit: SearchHit | null): void {
+    const seed: Record<SeededField, string> = {
+      headline: hit?.title ?? '',
+      summary: hit?.summary ?? '',
+    };
+
+    this.applySeed('headline', seed.headline);
+    this.applySeed('summary', seed.summary);
+    this._seeded = seed;
+  }
+
+  /**
+   * Writes one seeded detail into the form, unless the editor wrote it.
+   *
+   * A field is filled while it is empty or still holds what the last choice
+   * put there. Words an editor typed themselves survive changing the
+   * selection: the point of the seed is to save typing, not to overwrite it.
+   *
+   * @param field - The field to fill.
+   * @param value - What the chosen work calls it.
+   */
+  private applySeed(field: SeededField, value: string): void {
+    const current = String(this.form.controls[field].value);
+
+    if (current === '' || current === this._seeded?.[field]) {
+      this.form.controls[field].setValue(value);
+    }
   }
 
   /**

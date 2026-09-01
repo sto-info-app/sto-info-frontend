@@ -312,6 +312,105 @@ describe('SpotlightAdminFormComponent', () => {
         );
       });
 
+      // An editor starts from what the work already says rather than a blank
+      // page.
+      it('fills the headline and summary in from the chosen work', () => {
+        const hit: SearchHit = {
+          id: 'story-123',
+          slug: 'story-slug',
+          title: 'The Search for Spock',
+          summary: 'A thrilling tale',
+          storySlug: null,
+          targetType: StorytimeTargetType.STORY,
+        };
+        dialogRef.afterClosed.mockReturnValue(of(hit));
+
+        render();
+        fixture.componentInstance.openPicker();
+
+        expect(fixture.componentInstance.form.getRawValue().headline).toBe(
+          'The Search for Spock',
+        );
+        expect(fixture.componentInstance.form.getRawValue().summary).toBe(
+          'A thrilling tale',
+        );
+      });
+
+      it('fills an empty summary in as nothing when the work has none', () => {
+        const hit: SearchHit = {
+          id: 'story-123',
+          slug: 'story-slug',
+          title: 'The Search for Spock',
+          summary: null,
+          storySlug: null,
+          targetType: StorytimeTargetType.STORY,
+        };
+        dialogRef.afterClosed.mockReturnValue(of(hit));
+
+        render();
+        fixture.componentInstance.openPicker();
+
+        expect(fixture.componentInstance.form.getRawValue().summary).toBe('');
+      });
+
+      // The seed saves typing; it does not overwrite it.
+      it('keeps words the editor wrote when the selection changes', () => {
+        const first: SearchHit = {
+          id: 'story-1',
+          slug: 'first',
+          title: 'The Search for Spock',
+          summary: 'A thrilling tale',
+          storySlug: null,
+          targetType: StorytimeTargetType.STORY,
+        };
+        const second: SearchHit = {
+          id: 'story-2',
+          slug: 'second',
+          title: 'The Voyage Home',
+          summary: 'Whales, mostly.',
+          storySlug: null,
+          targetType: StorytimeTargetType.STORY,
+        };
+        dialogRef.afterClosed.mockReturnValue(of(first));
+
+        render();
+        fixture.componentInstance.openPicker();
+        fixture.componentInstance.form.controls['headline'].setValue(
+          'Our pick of the month',
+        );
+        dialogRef.afterClosed.mockReturnValue(of(second));
+        fixture.componentInstance.openPicker();
+
+        // The headline was theirs; the summary was still the last seed.
+        expect(fixture.componentInstance.form.getRawValue().headline).toBe(
+          'Our pick of the month',
+        );
+        expect(fixture.componentInstance.form.getRawValue().summary).toBe(
+          'Whales, mostly.',
+        );
+      });
+
+      it('clears seeded details when entityType changes', () => {
+        const hit: SearchHit = {
+          id: 'story-1',
+          slug: 'first',
+          title: 'The Search for Spock',
+          summary: 'A thrilling tale',
+          storySlug: null,
+          targetType: StorytimeTargetType.STORY,
+        };
+        dialogRef.afterClosed.mockReturnValue(of(hit));
+
+        render();
+        fixture.componentInstance.openPicker();
+        fixture.componentInstance.form.controls['entityType'].setValue(
+          SpotlightEntityType.ARC,
+        );
+
+        expect(fixture.componentInstance.form.getRawValue().headline).toBe('');
+        expect(fixture.componentInstance.form.getRawValue().summary).toBe('');
+      });
+
       it('leaves form unchanged when picker is cancelled', () => {
         dialogRef.afterClosed.mockReturnValue(of(undefined));
 
