@@ -16,16 +16,24 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import {
   CreateSpotlightRequest,
   ManagedSpotlight,
+  SearchHit,
   SpotlightEntityType,
+  StorytimeTargetType,
 } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import {
+  LcarsSearchDialogComponent,
+  LcarsSearchDialogData,
+} from 'src/app/shared/components/lcars-search-dialog/lcars-search-dialog.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { SearchService } from '../../search.service';
 import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
 import { SpotlightService } from '../../spotlight.service';
 
@@ -66,6 +74,7 @@ interface SpotlightFields {
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
+    MatDialogModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     EditorActionsComponent,
@@ -87,6 +96,9 @@ export class SpotlightAdminFormComponent implements OnInit {
   /** A message to show when saving failed. */
   errorMessage = '';
 
+  /** Human-readable title of the selected work (display only). */
+  selectedTitle = '';
+
   /** The kinds of work that may be featured. */
   readonly entityTypes = Object.values(SpotlightEntityType);
 
@@ -97,6 +109,8 @@ export class SpotlightAdminFormComponent implements OnInit {
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
   private readonly _spotlightService = inject(SpotlightService);
+  private readonly _searchService = inject(SearchService);
+  private readonly _dialog = inject(MatDialog);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
@@ -119,11 +133,55 @@ export class SpotlightAdminFormComponent implements OnInit {
       endsAt: [''],
     });
 
+    this.form.controls['entityType'].valueChanges
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(() => {
+        if (this.isNew) {
+          this.form.controls['targetId'].setValue('');
+          this.selectedTitle = '';
+        }
+      });
+
     const spotlightId = this._route.snapshot.paramMap.get('spotlightId');
 
     if (spotlightId) {
       this.loadEntry(spotlightId);
     }
+  }
+
+  /**
+   * Opens the search-and-select dialog for Stories or Arcs.
+   *
+   * The dialog is seeded with the entity type the editor has chosen, so a
+   * Story search never returns Arcs and vice versa.
+   */
+  openPicker(): void {
+    const entityType = this.form.controls['entityType']
+      .value as SpotlightEntityType;
+    const isArc = entityType === SpotlightEntityType.ARC;
+    const data: LcarsSearchDialogData<SearchHit> = {
+      title: isArc ? 'Select an Arc' : 'Select a Story',
+      searchFn: (term, page) =>
+        this._searchService.search(term, {
+          types: [isArc ? StorytimeTargetType.ARC : StorytimeTargetType.STORY],
+          page,
+          pageSize: 5,
+        }),
+      resultLabel: hit => hit.title,
+      resultSublabel: hit => hit.summary,
+      pageSize: 5,
+    };
+
+    this._dialog
+      .open(LcarsSearchDialogComponent<SearchHit>, { data })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((hit?: SearchHit) => {
+        if (hit) {
+          this.form.controls['targetId'].setValue(hit.id);
+          this.selectedTitle = hit.title;
+        }
+      });
   }
 
   /**
@@ -136,14 +194,18 @@ export class SpotlightAdminFormComponent implements OnInit {
   }
 
   /**
-   * How to describe the identifier field for the chosen kind of work.
+   * How to describe the field naming the work that is featured.
+   *
+   * The field shows what the work is called. Its identifier stays in the form
+   * and out of sight: an editor chooses work by name, and a row of identifiers
+   * is a row nobody can read.
    *
    * @returns The field label.
    */
   get targetLabel(): string {
     return this.form.controls['entityType'].value === SpotlightEntityType.ARC
-      ? 'Arc ID'
-      : 'Story ID';
+      ? 'Featured Arc'
+      : 'Featured Story';
   }
 
   /**
@@ -251,6 +313,10 @@ export class SpotlightAdminFormComponent implements OnInit {
       .subscribe({
         next: entry => {
           this.entry = entry;
+          // The server resolves the work an entry features unless it can no
+          // longer be shown, which is the one case an editor is left with
+          // nothing to read.
+          this.selectedTitle = entry.story?.title ?? entry.arc?.title ?? '';
           this.form.patchValue({
             entityType: entry.entityType,
             // Exactly one of these is set: the database enforces it.

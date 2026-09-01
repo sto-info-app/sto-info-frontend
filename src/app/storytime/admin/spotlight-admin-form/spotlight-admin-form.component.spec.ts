@@ -1,11 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import {
   ManagedSpotlight,
+  SearchHit,
   SpotlightEntityType,
+  StorytimeTargetType,
 } from 'src/app/models/storytime.models';
+import { SearchService } from '../../search.service';
 import { SpotlightService } from '../../spotlight.service';
 import { SpotlightAdminFormComponent } from './spotlight-admin-form.component';
 
@@ -16,6 +20,9 @@ describe('SpotlightAdminFormComponent', () => {
     create: jest.Mock;
     update: jest.Mock;
   };
+  let searchService: { search: jest.Mock };
+  let dialog: { open: jest.Mock };
+  let dialogRef: { afterClosed: jest.Mock };
   let router: { navigate: jest.Mock };
   let routeParams: Map<string, string>;
 
@@ -51,6 +58,17 @@ describe('SpotlightAdminFormComponent', () => {
       create: jest.fn().mockReturnValue(of({ id: 'new-spotlight' })),
       update: jest.fn().mockReturnValue(of(existingEntry)),
     };
+    dialogRef = {
+      afterClosed: jest.fn().mockReturnValue(of(undefined)),
+    };
+    dialog = {
+      open: jest.fn().mockReturnValue(dialogRef),
+    };
+    searchService = {
+      search: jest
+        .fn()
+        .mockReturnValue(of({ items: [], total: 0, page: 1, pageSize: 5 })),
+    };
     router = { navigate: jest.fn() };
 
     TestBed.configureTestingModule({
@@ -58,12 +76,16 @@ describe('SpotlightAdminFormComponent', () => {
       providers: [
         provideRouter([]),
         { provide: SpotlightService, useValue: spotlightService },
+        { provide: SearchService, useValue: searchService },
         { provide: Router, useValue: router },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: routeParams } },
         },
       ],
+    }).overrideComponent(SpotlightAdminFormComponent, {
+      remove: { imports: [MatDialogModule] },
+      add: { providers: [{ provide: MatDialog, useValue: dialog }] },
     });
   });
 
@@ -120,16 +142,32 @@ describe('SpotlightAdminFormComponent', () => {
       );
     });
 
-    it('names the identifier field after the kind of work chosen', () => {
+    it('names the field after the kind of work chosen', () => {
       render();
 
-      expect(fixture.componentInstance.targetLabel).toBe('Story ID');
+      expect(fixture.componentInstance.targetLabel).toBe('Featured Story');
 
       fixture.componentInstance.form.patchValue({
         entityType: SpotlightEntityType.ARC,
       });
 
-      expect(fixture.componentInstance.targetLabel).toBe('Arc ID');
+      expect(fixture.componentInstance.targetLabel).toBe('Featured Arc');
+    });
+
+    // An editor chooses work by name. The identifier stays in the form, where
+    // it is sent from, and off the screen.
+    it('shows the chosen work by name and not by identifier', () => {
+      render();
+      fixture.componentInstance.form.controls['targetId'].setValue('story-1');
+      fixture.componentInstance.selectedTitle = 'A Fine Story';
+      fixture.detectChanges();
+
+      const text = (fixture.nativeElement as HTMLElement).querySelector(
+        '.field-picker',
+      )?.textContent;
+
+      expect(text).toContain('A Fine Story');
+      expect(text).not.toContain('story-1');
     });
 
     // Clearing a field means "there is none", not "there is one, and it is
@@ -176,6 +214,135 @@ describe('SpotlightAdminFormComponent', () => {
       expect(sent.startsAt).toBe(new Date('2026-06-01T09:00').toISOString());
       expect(sent.endsAt).toBe(new Date('2026-06-08T09:00').toISOString());
     });
+
+    describe('search and select picker', () => {
+      it('opens picker dialog with Story configuration by default', () => {
+        render();
+        fixture.componentInstance.openPicker();
+
+        expect(dialog.open).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            data: expect.objectContaining({
+              title: 'Select a Story',
+              pageSize: 5,
+            }),
+          }),
+        );
+      });
+
+      it('opens picker dialog with Arc configuration when entityType is ARC', () => {
+        render();
+        fixture.componentInstance.form.patchValue({
+          entityType: SpotlightEntityType.ARC,
+        });
+        fixture.componentInstance.openPicker();
+
+        expect(dialog.open).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            data: expect.objectContaining({
+              title: 'Select an Arc',
+              pageSize: 5,
+            }),
+          }),
+        );
+      });
+
+      it('calls searchService with Story type inside searchFn', () => {
+        render();
+        fixture.componentInstance.openPicker();
+
+        const openedData = dialog.open.mock.calls[0][1].data;
+        openedData.searchFn('voyager', 2);
+
+        expect(searchService.search).toHaveBeenCalledWith('voyager', {
+          types: [StorytimeTargetType.STORY],
+          page: 2,
+          pageSize: 5,
+        });
+        const testHit: SearchHit = {
+          id: 's1',
+          slug: 's1',
+          title: 'T',
+          summary: 'S',
+          storySlug: null,
+          targetType: StorytimeTargetType.STORY,
+        };
+        expect(openedData.resultLabel(testHit)).toBe('T');
+        expect(openedData.resultSublabel(testHit)).toBe('S');
+      });
+
+      it('calls searchService with Arc type inside searchFn when entityType is ARC', () => {
+        render();
+        fixture.componentInstance.form.patchValue({
+          entityType: SpotlightEntityType.ARC,
+        });
+        fixture.componentInstance.openPicker();
+
+        const openedData = dialog.open.mock.calls[0][1].data;
+        openedData.searchFn('dominion', 1);
+
+        expect(searchService.search).toHaveBeenCalledWith('dominion', {
+          types: [StorytimeTargetType.ARC],
+          page: 1,
+          pageSize: 5,
+        });
+      });
+
+      it('patches targetId and selectedTitle when a hit is chosen', () => {
+        const hit: SearchHit = {
+          id: 'story-123',
+          slug: 'story-slug',
+          title: 'The Search for Spock',
+          summary: 'A thrilling tale',
+          storySlug: null,
+          targetType: StorytimeTargetType.STORY,
+        };
+        dialogRef.afterClosed.mockReturnValue(of(hit));
+
+        render();
+        fixture.componentInstance.openPicker();
+
+        expect(fixture.componentInstance.form.controls['targetId'].value).toBe(
+          'story-123',
+        );
+        expect(fixture.componentInstance.selectedTitle).toBe(
+          'The Search for Spock',
+        );
+      });
+
+      it('leaves form unchanged when picker is cancelled', () => {
+        dialogRef.afterClosed.mockReturnValue(of(undefined));
+
+        render();
+        fixture.componentInstance.form.controls['targetId'].setValue(
+          'story-old',
+        );
+        fixture.componentInstance.selectedTitle = 'Old Title';
+        fixture.componentInstance.openPicker();
+
+        expect(fixture.componentInstance.form.controls['targetId'].value).toBe(
+          'story-old',
+        );
+        expect(fixture.componentInstance.selectedTitle).toBe('Old Title');
+      });
+
+      it('clears targetId and selectedTitle when entityType changes', () => {
+        render();
+        fixture.componentInstance.form.controls['targetId'].setValue('story-1');
+        fixture.componentInstance.selectedTitle = 'Some Story';
+
+        fixture.componentInstance.form.controls['entityType'].setValue(
+          SpotlightEntityType.ARC,
+        );
+
+        expect(fixture.componentInstance.form.controls['targetId'].value).toBe(
+          '',
+        );
+        expect(fixture.componentInstance.selectedTitle).toBe('');
+      });
+    });
   });
 
   describe('editing', () => {
@@ -204,6 +371,47 @@ describe('SpotlightAdminFormComponent', () => {
       ).toBe(true);
       expect(fixture.componentInstance.form.controls['targetId'].disabled).toBe(
         true,
+      );
+    });
+
+    // The server resolves what an entry features, so an editor reads the name
+    // of the work rather than the identifier behind it.
+    it('shows the name of the Story a selection features', () => {
+      spotlightService.getOne.mockReturnValue(
+        of({
+          ...existingEntry,
+          story: { title: 'A Fine Story' },
+        } as unknown as ManagedSpotlight),
+      );
+
+      render();
+
+      expect(fixture.componentInstance.selectedTitle).toBe('A Fine Story');
+    });
+
+    it('shows the name of the Arc a selection features', () => {
+      spotlightService.getOne.mockReturnValue(
+        of({
+          ...existingEntry,
+          entityType: SpotlightEntityType.ARC,
+          storyId: null,
+          arcId: 'arc-1',
+          arc: { title: 'The Long War' },
+        } as unknown as ManagedSpotlight),
+      );
+
+      render();
+
+      expect(fixture.componentInstance.selectedTitle).toBe('The Long War');
+    });
+
+    // The entry an editor most needs to find is the one whose work has gone.
+    it('leaves the name empty when the work can no longer be shown', () => {
+      render();
+
+      expect(fixture.componentInstance.selectedTitle).toBe('');
+      expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+        'Work that can no longer be shown',
       );
     });
 
