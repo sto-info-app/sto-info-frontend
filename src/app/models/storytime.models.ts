@@ -992,7 +992,7 @@ export interface CharacterRequest {
   slug?: string;
   shortBio?: string;
   biographySource?: string;
-  portraitImageId?: string;
+  /** Sent only when there is a portrait to describe. */
   portraitImageAlt?: string;
   species?: string;
   faction?: string;

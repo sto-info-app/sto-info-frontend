@@ -145,34 +145,25 @@
         </div>
       </section>
 
-      <section class="storytime-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Portrait</span>
-        </div>
-
-        <div class="storytime-panel">
-          <div class="form-row">
-            <div class="lcars-input-container tangerine">
-              <label for="character-portrait">Portrait image ID</label>
-              <input
-                id="character-portrait"
-                type="text"
-                formControlName="portraitImageId"
-                maxlength="100" />
-            </div>
-
-            <div class="lcars-input-container tangerine">
-              <label for="character-portrait-alt">Portrait description</label>
-              <input
-                id="character-portrait-alt"
-                type="text"
-                formControlName="portraitImageAlt"
-                maxlength="300"
-                placeholder="Required when a portrait is set" />
-            </div>
+      <!--
+        The portrait waits for the Character to exist. It is set against a
+        saved Character rather than staged into this form, so offering it
+        before the first save would mean holding a file with nowhere to put it.
+      -->
+      @if (character) {
+        <section class="storytime-section">
+          <div class="storytime-panel">
+            <app-storytime-image-manager
+              [slot]="imageSlots.CHARACTER_PORTRAIT"
+              [targetId]="character.id"
+              [imageUrl]="character.portraitImageUrl"
+              [imageAlt]="character.portraitImageAlt"
+              altControlName="portraitImageAlt"
+              (changed)="onImageChanged($event)"
+            ></app-storytime-image-manager>
           </div>
-        </div>
-      </section>
+        </section>
+      }
 
       <section class="storytime-section">
         <div class="lcars-text-bar small-lcars-bar-gap">
