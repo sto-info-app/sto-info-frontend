@@ -35,7 +35,9 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { SearchService } from '../../search.service';
 import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
+import { ImageManagerComponent } from '../../shared/image-manager/image-manager.component';
 import { SpotlightService } from '../../spotlight.service';
+import { StorytimeImageSlot } from '../../storytime-image.constants';
 
 /** The details a chosen work can fill in for the editor. */
 type SeededField = 'headline' | 'summary';
@@ -52,8 +54,7 @@ interface SpotlightFields {
   summary: string;
   slug?: string;
   selectionReason: string | null;
-  overrideImageId: string | null;
-  overrideImageAlt: string | null;
+  overrideImageAlt?: string;
   displayPriority: number;
   startsAt: string;
   endsAt: string | null;
@@ -80,6 +81,7 @@ interface SpotlightFields {
     MatDialogModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    ImageManagerComponent,
     EditorActionsComponent,
   ],
 })
@@ -137,7 +139,6 @@ export class SpotlightAdminFormComponent implements OnInit {
       summary: ['', Validators.required],
       slug: ['', Validators.maxLength(220)],
       selectionReason: [''],
-      overrideImageId: [''],
       overrideImageAlt: [''],
       displayPriority: [0, [Validators.min(0)]],
       startsAt: ['', Validators.required],
@@ -232,6 +233,32 @@ export class SpotlightAdminFormComponent implements OnInit {
     if (current === '' || current === this._seeded?.[field]) {
       this.form.controls[field].setValue(value);
     }
+  }
+
+  /**
+   * Whether the entry carries editorial artwork of its own.
+   *
+   * @returns True when an override image has been uploaded.
+   */
+  get hasArtwork(): boolean {
+    return Boolean(this.entry?.overrideImageUrl);
+  }
+
+  /** The artwork slots a Spotlight entry carries. */
+  readonly imageSlots = StorytimeImageSlot;
+
+  /**
+   * Takes the entry back from an artwork change.
+   *
+   * @param updated - The entry as the server now holds it.
+   */
+  onImageChanged(updated: unknown): void {
+    const entry = updated as ManagedSpotlight;
+
+    this.entry = entry;
+    this.form.patchValue({
+      overrideImageAlt: entry.overrideImageAlt ?? '',
+    });
   }
 
   /**
@@ -330,14 +357,19 @@ export class SpotlightAdminFormComponent implements OnInit {
    */
   private buildChanges(): SpotlightFields {
     const value = this.form.getRawValue() as Record<string, string | number>;
+    const description = String(value['overrideImageAlt']).trim();
 
     return {
       headline: String(value['headline']).trim(),
       summary: String(value['summary']).trim(),
       slug: String(value['slug']).trim() || undefined,
       selectionReason: String(value['selectionReason']).trim() || null,
-      overrideImageId: String(value['overrideImageId']).trim() || null,
-      overrideImageAlt: String(value['overrideImageAlt']).trim() || null,
+      // Sent only when there is artwork to describe. The server refuses a
+      // description of an empty slot, because it would be read out over
+      // whatever picture was uploaded into that slot next.
+      ...(this.hasArtwork && description
+        ? { overrideImageAlt: description }
+        : {}),
       displayPriority: Number(value['displayPriority']),
       startsAt: new Date(String(value['startsAt'])).toISOString(),
       endsAt: value['endsAt']
@@ -375,7 +407,6 @@ export class SpotlightAdminFormComponent implements OnInit {
             summary: entry.summary,
             slug: entry.slug,
             selectionReason: entry.selectionReason ?? '',
-            overrideImageId: entry.overrideImageId ?? '',
             overrideImageAlt: entry.overrideImageAlt ?? '',
             displayPriority: entry.displayPriority,
             startsAt: this.toInputValue(entry.startsAt),

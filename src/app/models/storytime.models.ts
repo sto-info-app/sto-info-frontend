@@ -715,8 +715,6 @@ export interface CreateSpotlightRequest {
   slug?: string;
   /** Null and absent both mean "there is none": the server accepts either. */
   selectionReason?: string | null;
-  overrideImageId?: string | null;
-  overrideImageAlt?: string | null;
   displayPriority?: number;
   startsAt: string;
   endsAt?: string | null;
@@ -730,7 +728,16 @@ export interface CreateSpotlightRequest {
  */
 export type UpdateSpotlightRequest = Partial<
   Omit<CreateSpotlightRequest, 'entityType'>
-> & { isPublished?: boolean };
+> & {
+  isPublished?: boolean;
+  /**
+   * Sent only when there is artwork to describe.
+   *
+   * Absent from the create request because a new entry has none yet: the
+   * picture is uploaded against the saved entry.
+   */
+  overrideImageAlt?: string;
+};
 
 /**
  * Somebody helping curate an Arc.
