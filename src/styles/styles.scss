@@ -968,3 +968,62 @@ button.lcars-btn-auto {
   white-space: nowrap;
   border: 0;
 }
+
+// ─── Field Picker ─────────────────────────────────────────────────────────────
+
+// A field whose value is chosen in a dialog rather than typed: a recipient, a
+// featured work. It sits inside a `.lcars-input-container` where an input
+// would, and reads as one — the same dark body under the same coloured label.
+// What it shows is the name of the thing chosen. The identifier behind it
+// stays in the form and out of sight: it tells an editor nothing they can act
+// on, and a screen of them is a screen nobody can read.
+.field-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.75rem 1rem;
+  background: #1c1c1c;
+  border-top: 1px solid rgb(255 255 255 / 8%);
+}
+
+.field-picker__identity {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.field-picker__name {
+  margin: 0;
+  font-family: vars.$font-antonio;
+  font-size: 1.1rem;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+.field-picker__meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: vars.$lcars-grey-light;
+  overflow-wrap: anywhere;
+}
+
+.field-picker__empty {
+  flex: 1 1 12rem;
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: vars.$lcars-grey-light;
+}
+
+// The button keeps its words on one line: "Search and select" broken across
+// two lines in a narrow column was most of what made these fields look cramped.
+.field-picker__btn {
+  flex: 0 0 auto;
+  margin: 0 !important;
+  white-space: nowrap;
+}

@@ -18,6 +18,13 @@ const ROLE_MODIFIERS: Record<string, string> = {
 const DEFAULT_ROLE_MODIFIER = 'other';
 
 /**
+ * The little these helpers need of a member: the role, and nothing else. Named
+ * structurally so a search result, which carries a role but not a whole
+ * moderated account, is described by the same rules as a member card.
+ */
+type RoleBearer = Pick<ModeratedUser, 'role'>;
+
+/**
  * A member's role in the one shape the colour map and the label are both
  * derived from, so an account the API sends without a role still renders as
  * something rather than blowing up the list.
@@ -25,7 +32,7 @@ const DEFAULT_ROLE_MODIFIER = 'other';
  * @param member - The member.
  * @returns The upper-cased role, or `UNKNOWN`.
  */
-function normalisedRole(member: ModeratedUser): string {
+function normalisedRole(member: RoleBearer): string {
   return member.role ? member.role.toUpperCase() : 'UNKNOWN';
 }
 
@@ -61,7 +68,7 @@ export function isMemberNamedByEmail(member: ModeratedUser): boolean {
  * @param member - The member.
  * @returns The modifier, e.g. `admin`.
  */
-export function memberRoleModifier(member: ModeratedUser): string {
+export function memberRoleModifier(member: RoleBearer): string {
   return ROLE_MODIFIERS[normalisedRole(member)] ?? DEFAULT_ROLE_MODIFIER;
 }
 
@@ -72,6 +79,6 @@ export function memberRoleModifier(member: ModeratedUser): string {
  * @param member - The member.
  * @returns The role label.
  */
-export function memberRoleLabel(member: ModeratedUser): string {
+export function memberRoleLabel(member: RoleBearer): string {
   return normalisedRole(member).replace(/_/g, ' ');
 }
