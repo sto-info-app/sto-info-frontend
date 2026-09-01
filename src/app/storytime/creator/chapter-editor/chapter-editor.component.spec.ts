@@ -299,6 +299,57 @@ describe('ChapterEditorComponent', () => {
       );
     });
 
+    // The cover is set against the saved Chapter rather than staged into this
+    // form, so there is nothing to offer before the first save.
+    it('offers a cover once the Chapter exists', () => {
+      render();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          'app-storytime-image-manager',
+        ),
+      ).not.toBeNull();
+    });
+
+    // Setting a cover moves the version on, so an editor still holding the old
+    // one would have its next save refused as stale.
+    it('keeps the Chapter the cover panel hands back, version and all', () => {
+      render();
+
+      fixture.componentInstance.onImageChanged({
+        ...existingChapter,
+        version: 5,
+        coverImageUrl: 'https://images.example/cover',
+        coverImageAlt: 'A shuttle on approach',
+      } as ManagedChapter);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.form.value.coverImageAlt).toBe(
+        'A shuttle on approach',
+      );
+
+      fixture.componentInstance.save();
+
+      expect(chapterService.updateChapter).toHaveBeenCalledWith(
+        'chapter-1',
+        expect.objectContaining({ version: 5 }),
+      );
+    });
+
+    // A description of an empty slot would be stored against nothing and read
+    // out over whatever was uploaded into it next, which the server refuses.
+    it('says nothing about a cover the Chapter does not have', () => {
+      render();
+      fixture.componentInstance.save();
+
+      expect(chapterService.updateChapter).toHaveBeenCalledWith(
+        'chapter-1',
+        expect.not.objectContaining({
+          coverImageAlt: expect.anything(),
+        }),
+      );
+    });
+
     it('reports a Chapter it could not load', () => {
       chapterService.getMyChapter.mockReturnValue(
         throwError(() => new HttpErrorResponse({ status: 404 })),

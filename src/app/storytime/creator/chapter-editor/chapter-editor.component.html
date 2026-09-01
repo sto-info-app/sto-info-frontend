@@ -123,6 +123,30 @@
         </div>
       </div>
     </section>
+
+    <!--
+      The cover waits for the Chapter to exist. It is set against a saved
+      Chapter rather than staged into this form, so offering it before the
+      first save would mean holding a file with nowhere to put it.
+    -->
+    @if (chapter) {
+      <section class="storytime-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Cover</span>
+        </div>
+
+        <div class="storytime-panel">
+          <app-storytime-image-manager
+            [slot]="imageSlots.CHAPTER_COVER"
+            [targetId]="chapter.id"
+            [imageUrl]="chapter.coverImageUrl"
+            [imageAlt]="chapter.coverImageAlt"
+            altControlName="coverImageAlt"
+            (changed)="onImageChanged($event)"
+          ></app-storytime-image-manager>
+        </div>
+      </section>
+    }
   </form>
 
   <section class="storytime-section">

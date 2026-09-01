@@ -36,13 +36,16 @@ import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
 import { MediaService } from '../../media.service';
 import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
+import { ImageManagerComponent } from '../../shared/image-manager/image-manager.component';
 import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
 import { SettingOption } from '../../shared/setting-help/setting-help.component';
 import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
 import {
   StorytimeEditorSupport,
+  syncImageDescription,
   toLanguageOptions,
 } from '../../shared/storytime-editor.support';
+import { StorytimeImageSlot } from '../../storytime-image.constants';
 
 /**
  * Writing and editing a Chapter.
@@ -65,6 +68,7 @@ import {
     SettingSelectComponent,
     MarkdownHintComponent,
     EditorActionsComponent,
+    ImageManagerComponent,
   ],
 })
 export class ChapterEditorComponent implements OnInit {
@@ -112,6 +116,9 @@ export class ChapterEditorComponent implements OnInit {
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
+
+  /** The artwork slots a Chapter carries. */
+  readonly imageSlots = StorytimeImageSlot;
 
   /**
    * The languages, as the chooser shows them.
@@ -163,6 +170,36 @@ export class ChapterEditorComponent implements OnInit {
     }
 
     this.loadCast();
+  }
+
+  /**
+   * Takes the Chapter back from a cover change.
+   *
+   * The whole Chapter is kept rather than only the new picture, because
+   * setting one moves the version on: an editor still holding the old one
+   * would have its next save refused as stale.
+   *
+   * @param updated - The Chapter as the server now holds it.
+   */
+  onImageChanged(updated: unknown): void {
+    const chapter = updated as ManagedChapter;
+
+    this.chapter = chapter;
+    this.syncCoverDescription(chapter);
+  }
+
+  /**
+   * Matches the description field to the cover the Chapter actually has.
+   *
+   * @param chapter - The Chapter as the server holds it.
+   */
+  private syncCoverDescription(chapter: ManagedChapter): void {
+    syncImageDescription(
+      this.form,
+      'coverImageAlt',
+      chapter.coverImageUrl,
+      chapter.coverImageAlt,
+    );
   }
 
   /**
@@ -462,6 +499,7 @@ export class ChapterEditorComponent implements OnInit {
             // the field alone keeps the Chapter following its Story.
             languageCode: chapter.ownLanguageCode ?? '',
           });
+          this.syncCoverDescription(chapter);
           this.isLoading = false;
           // Only now is the Story known, when editing an existing Chapter
           // reached by its own identifier rather than through its Story.

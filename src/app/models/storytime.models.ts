@@ -1154,7 +1154,7 @@ export interface ChapterRequest {
   synopsis?: string;
   contentSource?: string;
   languageCode?: string;
-  coverImageId?: string;
+  /** Sent only when there is a cover to describe. */
   coverImageAlt?: string;
   /** Sent on update so a stale edit is refused rather than overwriting. */
   version?: number;
