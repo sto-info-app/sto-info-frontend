@@ -66,16 +66,37 @@
           </div>
 
           <div class="lcars-input-container perano">
-            <label for="spotlight-target">{{ targetLabel }}</label>
-            <input
-              id="spotlight-target"
-              type="text"
-              formControlName="targetId" />
+            <label>{{ targetLabel }}</label>
+            <div class="field-picker">
+              @if (selectedTitle) {
+                <div class="field-picker__identity">
+                  <p class="field-picker__name">{{ selectedTitle }}</p>
+                </div>
+              } @else {
+                <p class="field-picker__empty">
+                  {{
+                    isNew
+                      ? 'Nothing chosen yet.'
+                      : 'Work that can no longer be shown.'
+                  }}
+                </p>
+              }
+              @if (isNew) {
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto perano field-picker__btn"
+                  (click)="openPicker()">
+                  {{ selectedTitle ? 'Change selection' : 'Search and select' }}
+                </button>
+              }
+            </div>
             @if (isNew) {
-              <p class="field-hint">
-                The work must be published and public. What a selection features
-                cannot be changed once it exists.
-              </p>
+              @if (!selectedTitle) {
+                <p class="field-hint">
+                  The work must be published and public. What a selection features
+                  cannot be changed once it exists.
+                </p>
+              }
             } @else {
               <p class="field-hint">
                 What this selection features cannot be changed. Draft another
