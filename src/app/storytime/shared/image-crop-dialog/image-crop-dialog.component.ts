@@ -9,6 +9,7 @@ import {
 import { ImageCropperComponent } from 'ngx-image-cropper';
 import { ImageCropperBaseComponent } from 'src/app/shared/base/image-cropper-base.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
@@ -37,6 +38,12 @@ export interface StorytimeImageCropData {
  * would be letterboxed or cut on the way to the reader, and the creator would
  * never see which.
  *
+ * Size is treated differently from shape. A crop below the slot's recommended
+ * size is warned about rather than refused: only the largest rendering has to
+ * enlarge it, and whoever is looking at the picture is better placed than the
+ * dialog to decide whether that matters. Below the slot's minimum, where even
+ * the compact rendering would be upscaled, it is still refused.
+ *
  * The description is asked for here rather than on the editor behind it. This
  * is the one moment somebody is certainly looking at the picture, and an image
  * nobody has described is simply absent to a reader using a screen reader.
@@ -52,6 +59,7 @@ export interface StorytimeImageCropData {
     MatDialogModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsWarningMessageComponent,
   ],
 })
 export class StorytimeImageCropDialogComponent extends ImageCropperBaseComponent {
@@ -87,6 +95,8 @@ export class StorytimeImageCropDialogComponent extends ImageCropperBaseComponent
     this.outputFormat = this.spec.outputFormat;
     this.minimumCroppedWidth = this.spec.minimumWidth;
     this.minimumCroppedHeight = this.spec.minimumHeight;
+    this.recommendedCroppedWidth = this.spec.recommendedWidth;
+    this.recommendedCroppedHeight = this.spec.recommendedHeight;
   }
 
   /**

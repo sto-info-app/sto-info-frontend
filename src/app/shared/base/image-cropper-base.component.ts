@@ -50,6 +50,19 @@ export abstract class ImageCropperBaseComponent {
   /** The shortest crop the destination will accept, when it has one. */
   protected minimumCroppedHeight = 0;
 
+  /**
+   * The crop width the destination would rather have, when it has one.
+   *
+   * Above the minimum but below this, the picture is usable and is accepted;
+   * it is only the largest place it is shown that has to enlarge it. That is a
+   * judgement for whoever chose the picture, so it produces a warning they can
+   * read and upload past, not a refusal.
+   */
+  protected recommendedCroppedWidth = 0;
+
+  /** The crop height the destination would rather have, when it has one. */
+  protected recommendedCroppedHeight = 0;
+
   onFileChangeEvent(event: Event): void {
     this.uploadedInvalidImageType = false;
     this.resetErrorMessage();
@@ -80,6 +93,53 @@ export abstract class ImageCropperBaseComponent {
       this.uploadedInvalidImageType = true;
       console.warn('Invalid file type attempted:', file.type, fileName);
     }
+  }
+
+  /**
+   * Whether the current crop is usable but smaller than is wanted.
+   *
+   * @returns True when there is a crop, it clears the minimum, and it falls
+   * short of the recommended size.
+   */
+  get isCroppedImageBelowRecommended(): boolean {
+    if (!this.croppedImageWidth || !this.croppedImageHeight) return false;
+    if (this.isCroppedImageBelowMinimum) return false;
+
+    return (
+      this.croppedImageWidth < this.recommendedCroppedWidth ||
+      this.croppedImageHeight < this.recommendedCroppedHeight
+    );
+  }
+
+  /**
+   * What the creator is told about a crop that is smaller than is wanted.
+   *
+   * @returns The warning, or an empty string when the crop is big enough.
+   */
+  get croppedImageSizeWarning(): string {
+    if (!this.isCroppedImageBelowRecommended) return '';
+
+    return (
+      `This selection is ${this.croppedImageWidth} by ` +
+      `${this.croppedImageHeight} pixels, below the ` +
+      `${this.recommendedCroppedWidth} by ${this.recommendedCroppedHeight} ` +
+      `this is shown at, so it will look soft there. You can upload it as it ` +
+      `is, but a larger picture will look better.`
+    );
+  }
+
+  /**
+   * Whether the current crop is too small for the destination to take.
+   *
+   * @returns True when there is a crop and it falls short of the minimum.
+   */
+  protected get isCroppedImageBelowMinimum(): boolean {
+    if (!this.croppedImageWidth || !this.croppedImageHeight) return false;
+
+    return (
+      this.croppedImageWidth < this.minimumCroppedWidth ||
+      this.croppedImageHeight < this.minimumCroppedHeight
+    );
   }
 
   onImageCropped(event: ImageCroppedEvent): void {
@@ -164,11 +224,7 @@ export abstract class ImageCropperBaseComponent {
    * @returns True when there is no minimum, or the crop reaches it.
    */
   protected validateCroppedSize(): boolean {
-    const tooSmall =
-      this.croppedImageWidth < this.minimumCroppedWidth ||
-      this.croppedImageHeight < this.minimumCroppedHeight;
-
-    if (!tooSmall) {
+    if (!this.isCroppedImageBelowMinimum) {
       return true;
     }
 

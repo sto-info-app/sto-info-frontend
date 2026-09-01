@@ -30,6 +30,10 @@ export interface StorytimeImageSpec {
   readonly minimumWidth: number;
   /** The shortest crop the server will accept. */
   readonly minimumHeight: number;
+  /** The width at which the slot's largest rendering stops being enlarged. */
+  readonly recommendedWidth: number;
+  /** The height at which the slot's largest rendering stops being enlarged. */
+  readonly recommendedHeight: number;
   /** The encoding the crop is sent as. */
   readonly outputFormat: 'png' | 'jpeg';
   /** The path segment the artwork endpoints live under. */
@@ -39,11 +43,18 @@ export interface StorytimeImageSpec {
 /**
  * The rules each artwork slot is held to.
  *
- * The minimums match the largest Cloudflare variant each slot is delivered
- * through, and the server enforces exactly these numbers. They are stated here
- * so a crop that is too small is refused while the creator is still looking at
- * the picture, rather than after an upload that was never going to be kept —
- * not so that the browser can be trusted to have checked.
+ * Two sizes, matching the server's, because they answer different questions.
+ * The recommended size is the largest Cloudflare variant the slot is delivered
+ * through, so a crop that reaches it is never enlarged; the minimum is the
+ * smallest variant, below which even the compact rendering would be upscaled.
+ * A crop between the two is accepted with a warning rather than refused — the
+ * creator can see the picture and is better placed than we are to decide
+ * whether the softness matters.
+ *
+ * They are stated here so both the warning and the refusal happen while the
+ * creator is still looking at the picture, rather than after an upload that
+ * was never going to be kept — not so that the browser can be trusted to have
+ * checked.
  */
 export const STORYTIME_IMAGE_SPECS: Record<
   StorytimeImageSlot,
@@ -55,8 +66,10 @@ export const STORYTIME_IMAGE_SPECS: Record<
       'The wide header across the top of the Story page. A quiet image works best: the title sits over it.',
     aspectRatio: 5 / 1,
     aspectLabel: '5:1',
-    minimumWidth: 2400,
-    minimumHeight: 480,
+    minimumWidth: 1200,
+    minimumHeight: 240,
+    recommendedWidth: 2400,
+    recommendedHeight: 480,
     outputFormat: 'jpeg',
     endpoint: 'banner-image',
   },
@@ -66,8 +79,10 @@ export const STORYTIME_IMAGE_SPECS: Record<
       'The square image that identifies the Story in listings, cards and Arc pages. It is shown small, so a single clear subject reads better than a scene.',
     aspectRatio: 1,
     aspectLabel: 'square',
-    minimumWidth: 300,
-    minimumHeight: 300,
+    minimumWidth: 100,
+    minimumHeight: 100,
+    recommendedWidth: 300,
+    recommendedHeight: 300,
     outputFormat: 'png',
     endpoint: 'profile-image',
   },
@@ -77,8 +92,10 @@ export const STORYTIME_IMAGE_SPECS: Record<
       'Shown at the head of the Chapter, on its card, and as the preview when somebody shares the link.',
     aspectRatio: 16 / 9,
     aspectLabel: '16:9',
-    minimumWidth: 1920,
-    minimumHeight: 1080,
+    minimumWidth: 640,
+    minimumHeight: 360,
+    recommendedWidth: 1920,
+    recommendedHeight: 1080,
     outputFormat: 'jpeg',
     endpoint: 'cover-image',
   },
@@ -88,8 +105,10 @@ export const STORYTIME_IMAGE_SPECS: Record<
       'Shown on the Character page and in the cast list. Taller than it is wide, so a head-and-shoulders crop suits it.',
     aspectRatio: 2 / 3,
     aspectLabel: '2:3',
-    minimumWidth: 400,
-    minimumHeight: 600,
+    minimumWidth: 133,
+    minimumHeight: 200,
+    recommendedWidth: 400,
+    recommendedHeight: 600,
     outputFormat: 'png',
     endpoint: 'portrait-image',
   },
@@ -99,8 +118,10 @@ export const STORYTIME_IMAGE_SPECS: Record<
       'The wide header across the top of the Arc page. A quiet image works best: the title sits over it.',
     aspectRatio: 5 / 1,
     aspectLabel: '5:1',
-    minimumWidth: 2400,
-    minimumHeight: 480,
+    minimumWidth: 1200,
+    minimumHeight: 240,
+    recommendedWidth: 2400,
+    recommendedHeight: 480,
     outputFormat: 'jpeg',
     endpoint: 'banner-image',
   },
@@ -110,8 +131,10 @@ export const STORYTIME_IMAGE_SPECS: Record<
       'The square image that identifies the Arc in listings and cards. It is shown small, so keep it simple.',
     aspectRatio: 1,
     aspectLabel: 'square',
-    minimumWidth: 300,
-    minimumHeight: 300,
+    minimumWidth: 100,
+    minimumHeight: 100,
+    recommendedWidth: 300,
+    recommendedHeight: 300,
     outputFormat: 'png',
     endpoint: 'profile-image',
   },
@@ -121,8 +144,10 @@ export const STORYTIME_IMAGE_SPECS: Record<
       'Shown on the Spotlight panel instead of the featured work’s own banner. Leave it empty to use the work’s banner.',
     aspectRatio: 5 / 1,
     aspectLabel: '5:1',
-    minimumWidth: 2400,
-    minimumHeight: 480,
+    minimumWidth: 1200,
+    minimumHeight: 240,
+    recommendedWidth: 2400,
+    recommendedHeight: 480,
     outputFormat: 'jpeg',
     endpoint: 'override-image',
   },
@@ -134,11 +159,19 @@ export const STORYTIME_IMAGE_ALT_MAX_LENGTH = 300;
 /**
  * How a slot's size requirement is put to a creator.
  *
+ * The recommended size leads, because it is the one worth aiming at; the
+ * minimum follows so that somebody holding a smaller picture knows it will
+ * still be accepted rather than going away to find another.
+ *
  * @param slot - The slot being filled.
- * @returns A sentence naming the shape and the smallest usable picture.
+ * @returns A sentence naming the shape and both sizes.
  */
 export function describeImageRequirement(slot: StorytimeImageSlot): string {
   const spec = STORYTIME_IMAGE_SPECS[slot];
 
-  return `${spec.aspectLabel}, at least ${spec.minimumWidth} by ${spec.minimumHeight} pixels.`;
+  return (
+    `${spec.aspectLabel}, ideally ${spec.recommendedWidth} by ` +
+    `${spec.recommendedHeight} pixels or larger ` +
+    `(${spec.minimumWidth} by ${spec.minimumHeight} at the smallest).`
+  );
 }

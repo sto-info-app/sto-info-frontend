@@ -47,6 +47,12 @@
               [message]="errorMessage"></app-lcars-error-message>
           }
 
+          @if (croppedImageSizeWarning && !errorMessage) {
+            <app-lcars-warning-message
+              title="Small Image"
+              [message]="croppedImageSizeWarning"></app-lcars-warning-message>
+          }
+
           @if (croppedImage && !errorMessage) {
             <div class="storytime-image-crop__preview">
               <div class="lcars-text-bar">

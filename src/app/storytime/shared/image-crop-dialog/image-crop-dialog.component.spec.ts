@@ -100,7 +100,10 @@ describe('StorytimeImageCropDialogComponent', () => {
 
     expect(component.spec.aspectRatio).toBeCloseTo(2 / 3);
     expect(component.spec.outputFormat).toBe('png');
-    expect(element.textContent).toContain('at least 400 by 600 pixels');
+    expect(element.textContent).toContain(
+      'ideally 400 by 600 pixels or larger',
+    );
+    expect(element.textContent).toContain('133 by 200 at the smallest');
   });
 
   it('starts from the description already on the slot', () => {
@@ -164,15 +167,38 @@ describe('StorytimeImageCropDialogComponent', () => {
       expect(dialogRef.close).toHaveBeenCalledWith(updatedWork);
     });
 
-    it('refuses a crop smaller than the slot delivers', () => {
+    it('refuses a crop below the smallest the slot delivers', () => {
       render();
-      withCrop(1200, 240);
+      withCrop(800, 160);
       component.altText = 'A ship';
 
       component.onUploadImageClick();
 
       expect(imageService.upload).not.toHaveBeenCalled();
-      expect(component.errorMessage).toContain('2400 by 480');
+      expect(component.errorMessage).toContain('1200 by 240');
+    });
+
+    // Between the minimum and the recommended size the picture is usable, and
+    // only the widest rendering has to enlarge it. Warned about, not refused.
+    it('warns about a crop below the recommended size but still uploads it', () => {
+      render();
+      withCrop(1600, 320);
+      component.altText = 'A ship';
+
+      expect(component.croppedImageSizeWarning).toContain('1600 by 320');
+      expect(component.croppedImageSizeWarning).toContain('2400 by 480');
+
+      component.onUploadImageClick();
+
+      expect(imageService.upload).toHaveBeenCalled();
+      expect(component.errorMessage).toBe('');
+    });
+
+    it('says nothing about a crop that reaches the recommended size', () => {
+      render();
+      withCrop(2400, 480);
+
+      expect(component.croppedImageSizeWarning).toBe('');
     });
 
     // The button is disabled without one, but a description of only spaces
