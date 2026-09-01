@@ -53,19 +53,6 @@
               </select>
             </div>
 
-            @if (isUserTarget) {
-              <div class="lcars-input-container bluey">
-                <label for="notification-user-input">Recipient User ID</label>
-                <input
-                  id="notification-user-input"
-                  type="text"
-                  formControlName="userId" />
-                @if (form.controls.userId.touched && form.controls.userId.invalid) {
-                  <small class="field-error">A valid user ID is required.</small>
-                }
-              </div>
-            }
-
             <div class="lcars-select-container tangerine">
               <label
                 class="select-label"
@@ -82,6 +69,43 @@
               </select>
             </div>
           </div>
+
+          @if (isUserTarget) {
+            <div class="form-row">
+              <div class="lcars-input-container bluey admin-field-full">
+                <label>Recipient</label>
+                <div class="field-picker">
+                  @if (selectedUser) {
+                    <div class="field-picker__identity">
+                      <p class="field-picker__name">{{ recipientName }}</p>
+                      @if (recipientRealName) {
+                        <p
+                          class="field-picker__meta"
+                          [class.privacy-blur]="privacyMode.isEnabled()">
+                          {{ recipientRealName }}
+                        </p>
+                      }
+                    </div>
+                  } @else {
+                    <p class="field-picker__empty">Nobody chosen yet.</p>
+                  }
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto bluey field-picker__btn"
+                    (click)="openUserPicker()">
+                    {{ selectedUser ? 'Change recipient' : 'Search and select' }}
+                  </button>
+                </div>
+                @if (
+                  form.controls.userId.touched && form.controls.userId.invalid
+                ) {
+                  <small class="field-error"
+                    >Choose who this notification goes to.</small
+                  >
+                }
+              </div>
+            </div>
+          }
 
           <div class="form-row">
             <div class="lcars-input-container perano admin-field-full">
