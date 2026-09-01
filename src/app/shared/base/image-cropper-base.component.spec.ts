@@ -38,6 +38,14 @@ class TestImageCropperComponent extends ImageCropperBaseComponent {
   callResetCropperState(): void {
     return this.resetCropperState();
   }
+
+  // A destination whose picture is wide and photographic overrides these; the
+  // defaults keep the profile and character pictures exactly as they were.
+  expectJpegAtLeast(width: number, height: number): void {
+    this.outputFormat = 'jpeg';
+    this.minimumCroppedWidth = width;
+    this.minimumCroppedHeight = height;
+  }
 }
 
 describe('ImageCropperBaseComponent', () => {
@@ -192,9 +200,17 @@ describe('ImageCropperBaseComponent', () => {
         .spyOn(window, 'FileReader')
         .mockImplementation(() => mockReader as unknown as FileReader);
 
-      component.onImageCropped({ blob } as ImageCroppedEvent);
+      component.onImageCropped({
+        blob,
+        width: 2400,
+        height: 480,
+      } as ImageCroppedEvent);
 
       expect(component.croppedImageBlob).toBe(blob);
+      // Kept so the size can be checked, and shown, before an upload that the
+      // destination was never going to accept.
+      expect(component.croppedImageWidth).toBe(2400);
+      expect(component.croppedImageHeight).toBe(480);
       expect(mockReader.readAsDataURL).toHaveBeenCalledWith(blob);
 
       mockReader.onloadend();
@@ -320,6 +336,43 @@ describe('ImageCropperBaseComponent', () => {
       expect(result).toBe(true);
       expect(component.errorMessage).toBe('');
     });
+
+    // A banner reaches its reader at 2400 x 480 through a fixed Cloudflare
+    // variant, so anything under that would be delivered enlarged. Saying so
+    // here means saying it while the picture is still on the screen.
+    it('should refuse a crop smaller than the destination needs', () => {
+      component.expectJpegAtLeast(2400, 480);
+      component.croppedImageBlob = new Blob(['data'], { type: 'image/jpeg' });
+      component.croppedImageWidth = 1200;
+      component.croppedImageHeight = 240;
+
+      const result = component.callValidateCroppedImage();
+
+      expect(result).toBe(false);
+      expect(component.errorMessage).toContain('1200 by 240');
+      expect(component.errorMessage).toContain('2400 by 480');
+    });
+
+    it('should accept a crop that reaches the minimum', () => {
+      component.expectJpegAtLeast(2400, 480);
+      component.croppedImageBlob = new Blob(['data'], { type: 'image/jpeg' });
+      component.croppedImageWidth = 2400;
+      component.croppedImageHeight = 480;
+
+      expect(component.callValidateCroppedImage()).toBe(true);
+    });
+
+    it('should name the format the destination asked for', () => {
+      component.expectJpegAtLeast(0, 0);
+      component.croppedImageBlob = new Blob(['data'], { type: 'image/png' });
+
+      const result = component.callValidateCroppedImage();
+
+      expect(result).toBe(false);
+      expect(component.errorMessage).toBe(
+        'The cropped image must be in JPEG format.',
+      );
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -353,6 +406,8 @@ describe('ImageCropperBaseComponent', () => {
     it('should clear all cropper-related state', () => {
       component.croppedImageBlob = new Blob(['x'], { type: 'image/png' });
       component.croppedImage = 'data:image/png;base64,abc';
+      component.croppedImageWidth = 800;
+      component.croppedImageHeight = 600;
       component.imageChangedEvent = {} as Event;
 
       component.callResetCropperState();
@@ -360,6 +415,8 @@ describe('ImageCropperBaseComponent', () => {
       expect(component.cropper).toBeNull();
       expect(component.croppedImage).toBe('');
       expect(component.croppedImageBlob).toBeNull();
+      expect(component.croppedImageWidth).toBe(0);
+      expect(component.croppedImageHeight).toBe(0);
       expect(component.imageChangedEvent).toBeNull();
     });
   });

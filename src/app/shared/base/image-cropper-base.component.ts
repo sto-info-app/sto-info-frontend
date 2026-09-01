@@ -22,9 +22,33 @@ export abstract class ImageCropperBaseComponent {
   imageChangedEvent: Event | null = null;
   croppedImage: SafeUrl = '';
   croppedImageBlob: Blob | null = null;
+  croppedImageWidth = 0;
+  croppedImageHeight = 0;
   cropper: ImageCropperComponent | null = null;
 
   showErrorMilliseconds = MILLISECONDS_SHOW_ERROR_MSG;
+
+  /**
+   * The encoding the cropper is configured to produce.
+   *
+   * PNG by default, because that is what the profile and character pictures
+   * have always used and flat artwork loses nothing to it. A subclass whose
+   * image is wide and photographic overrides this, since a 2400 x 480 banner
+   * stored losslessly is several megabytes of noise.
+   */
+  protected outputFormat: 'png' | 'jpeg' = 'png';
+
+  /**
+   * The smallest crop the destination will accept, when it has one.
+   *
+   * Checked here rather than only on the server so that somebody who has just
+   * chosen a picture is told it is too small while they are still looking at
+   * it, instead of after an upload that was never going to be kept.
+   */
+  protected minimumCroppedWidth = 0;
+
+  /** The shortest crop the destination will accept, when it has one. */
+  protected minimumCroppedHeight = 0;
 
   onFileChangeEvent(event: Event): void {
     this.uploadedInvalidImageType = false;
@@ -65,6 +89,8 @@ export abstract class ImageCropperBaseComponent {
     }
 
     this.croppedImageBlob = event.blob;
+    this.croppedImageWidth = event.width;
+    this.croppedImageHeight = event.height;
 
     const reader = new FileReader();
     reader.readAsDataURL(event.blob);
@@ -112,9 +138,14 @@ export abstract class ImageCropperBaseComponent {
       return false;
     }
 
-    if (this.croppedImageBlob.type !== 'image/png') {
-      console.error('Cropped image is not in PNG format');
-      this.displayErrorMessage('The cropped image must be in PNG format.');
+    const expectedType = `image/${this.outputFormat}`;
+    const formatName = this.outputFormat.toUpperCase();
+
+    if (this.croppedImageBlob.type !== expectedType) {
+      console.error(`Cropped image is not in ${formatName} format`);
+      this.displayErrorMessage(
+        `The cropped image must be in ${formatName} format.`,
+      );
       return false;
     }
 
@@ -124,7 +155,30 @@ export abstract class ImageCropperBaseComponent {
       return false;
     }
 
-    return true;
+    return this.validateCroppedSize();
+  }
+
+  /**
+   * Checks the crop is large enough for where it is going.
+   *
+   * @returns True when there is no minimum, or the crop reaches it.
+   */
+  protected validateCroppedSize(): boolean {
+    const tooSmall =
+      this.croppedImageWidth < this.minimumCroppedWidth ||
+      this.croppedImageHeight < this.minimumCroppedHeight;
+
+    if (!tooSmall) {
+      return true;
+    }
+
+    console.error('Cropped image is smaller than the destination needs');
+    this.displayErrorMessage(
+      `That selection is ${this.croppedImageWidth} by ${this.croppedImageHeight} pixels. ` +
+        `Please choose a larger picture, or select a bigger area: at least ` +
+        `${this.minimumCroppedWidth} by ${this.minimumCroppedHeight} is needed.`,
+    );
+    return false;
   }
 
   protected handleHttpError(error: { status: number }): void {
@@ -146,6 +200,8 @@ export abstract class ImageCropperBaseComponent {
     this.cropper = null;
     this.croppedImage = '';
     this.croppedImageBlob = null;
+    this.croppedImageWidth = 0;
+    this.croppedImageHeight = 0;
     this.imageChangedEvent = null;
   }
 }
