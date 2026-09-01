@@ -25,6 +25,9 @@ describe('NotificationAdminSendComponent', () => {
   /** Whether the stubbed Privacy Mode is on. Flipped by the tests that care. */
   let isPrivacyModeOn: boolean;
 
+  /** Whether reading the stubbed Privacy Mode setting fails. */
+  let privacyModeLoadFails: boolean;
+
   beforeEach(async () => {
     const createdNotification: AppNotification = {
       id: '1',
@@ -57,6 +60,7 @@ describe('NotificationAdminSendComponent', () => {
         .mockReturnValue(of({ items: [], total: 0, page: 1, pageSize: 5 })),
     };
     isPrivacyModeOn = true;
+    privacyModeLoadFails = false;
 
     await TestBed.configureTestingModule({
       imports: [NotificationAdminSendComponent, HttpClientTestingModule],
@@ -69,7 +73,9 @@ describe('NotificationAdminSendComponent', () => {
           useValue: {
             isEnabled: (): boolean => isPrivacyModeOn,
             load: (): ReturnType<PrivacyModeService['load']> =>
-              of({ privacyMode: isPrivacyModeOn }),
+              privacyModeLoadFails
+                ? throwError(() => new Error('Setting unavailable'))
+                : of({ privacyMode: isPrivacyModeOn }),
           },
         },
       ],
@@ -154,6 +160,10 @@ describe('NotificationAdminSendComponent', () => {
   });
 
   describe('search and select recipient picker', () => {
+    it('names nobody until a recipient has been chosen', () => {
+      expect(component.recipientName).toBe('');
+    });
+
     it('opens dialog with Recipient picker configuration', () => {
       component.openUserPicker();
 
@@ -331,6 +341,18 @@ describe('NotificationAdminSendComponent', () => {
       expect(
         recipientPanel()?.querySelector('.field-picker__name')?.className,
       ).not.toContain('privacy-blur');
+    });
+
+    // The service starts out enabled, so a setting that cannot be read leaves
+    // the names hidden rather than exposing them, and the page's error banner
+    // stays free for failures that stop an administrator getting work done.
+    it('carries on with names hidden when the setting cannot be read', () => {
+      privacyModeLoadFails = true;
+
+      const retried = TestBed.createComponent(NotificationAdminSendComponent);
+      retried.detectChanges();
+
+      expect(retried.componentInstance.errorMessage).toBe('');
     });
 
     it('shows the real name once privacy mode is off', () => {
