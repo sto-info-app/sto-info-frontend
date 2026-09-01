@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, NgZone, ViewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   FormBuilder,
@@ -7,7 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { StorytimeImageSlot } from '../../storytime-image.constants';
 import { StorytimeImageService } from '../../storytime-image.service';
@@ -190,6 +190,30 @@ describe('ImageManagerComponent', () => {
 
       button(element, 'Add').click();
 
+      expect(fixture.componentInstance.changed).toBe(updatedWork);
+    });
+
+    // The dialog closes on the back of its upload's response, and this app
+    // loads scripts that patch XMLHttpRequest out of zone.js's sight, so the
+    // result arrives outside the Angular zone. Handing it on from there leaves
+    // the editor holding the new picture with nothing to render it: the Add
+    // button stays on screen until the page is reloaded.
+    it('hands it on inside the Angular zone, however it arrives', () => {
+      const closed = new Subject<unknown>();
+      dialog.open.mockReturnValue({ afterClosed: () => closed.asObservable() });
+      const element = render();
+
+      let wasInZone = false;
+      fixture.componentInstance.manager.changed.subscribe(() => {
+        wasInZone = NgZone.isInAngularZone();
+      });
+
+      button(element, 'Add').click();
+      // As it arrives in the browser, where zone.js has lost sight of the
+      // request the dialog closed on the back of.
+      TestBed.inject(NgZone).runOutsideAngular(() => closed.next(updatedWork));
+
+      expect(wasInZone).toBe(true);
       expect(fixture.componentInstance.changed).toBe(updatedWork);
     });
 

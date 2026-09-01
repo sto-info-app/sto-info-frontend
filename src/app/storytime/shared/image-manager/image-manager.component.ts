@@ -139,7 +139,15 @@ export class ImageManagerComponent {
         data,
       })
       .afterClosed()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        // The dialog closes on the back of its upload's response, and this app
+        // loads scripts that patch XMLHttpRequest out of zone.js's sight. The
+        // result therefore arrives outside the Angular zone: the editor around
+        // this would take the new picture and never render it, leaving the Add
+        // button on screen until the page was reloaded.
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe(updated => {
         // Undefined when the dialog was cancelled, which is not a failure and
         // leaves the slot exactly as it was.
@@ -168,7 +176,10 @@ export class ImageManagerComponent {
         },
       })
       .afterClosed()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe(confirmed => {
         if (confirmed) {
           this.remove();
