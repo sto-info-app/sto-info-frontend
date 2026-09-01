@@ -9,7 +9,7 @@ import { User } from 'src/app/dashboard/models/user.model';
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { ImageCropperBaseComponent } from 'src/app/dashboard/base/image-cropper-base.component';
+import { ImageCropperBaseComponent } from 'src/app/shared/base/image-cropper-base.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { EditPersonalDetailsComponent } from '../edit-personal-details/edit-personal-details.component';
 
