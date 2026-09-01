@@ -191,6 +191,44 @@
       </div>
     </section>
 
+    <!--
+      Artwork waits for the Story to exist. A picture is set against a saved
+      Story rather than staged into this form, so offering it before the first
+      save would mean holding a file with nowhere to put it.
+    -->
+    @if (story) {
+      <section class="storytime-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Artwork</span>
+        </div>
+
+        <div class="storytime-panel">
+          <p class="field-hint">
+            Both are optional. A Story without them shows no gap where they
+            would have been.
+          </p>
+
+          <app-storytime-image-manager
+            [slot]="imageSlots.STORY_BANNER"
+            [targetId]="story.id"
+            [imageUrl]="story.bannerImageUrl"
+            [imageAlt]="story.bannerImageAlt"
+            altControlName="bannerImageAlt"
+            (changed)="onImageChanged($event)"
+          ></app-storytime-image-manager>
+
+          <app-storytime-image-manager
+            [slot]="imageSlots.STORY_PROFILE"
+            [targetId]="story.id"
+            [imageUrl]="story.profileImageUrl"
+            [imageAlt]="story.profileImageAlt"
+            altControlName="profileImageAlt"
+            (changed)="onImageChanged($event)"
+          ></app-storytime-image-manager>
+        </div>
+      </section>
+    }
+
     <app-storytime-editor-actions
       [isSaving]="isSaving"
       [canPublish]="canPublish"

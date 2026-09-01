@@ -23,15 +23,18 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
+import { ImageManagerComponent } from '../../shared/image-manager/image-manager.component';
 import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
 import { SettingOption } from '../../shared/setting-help/setting-help.component';
 import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
 import {
   StorytimeEditorSupport,
+  syncImageDescription,
   toLanguageOptions,
 } from '../../shared/storytime-editor.support';
 import { TagPickerComponent } from '../../shared/tag-picker/tag-picker.component';
 import { createWorkForm } from '../../shared/work-form.factory';
+import { StorytimeImageSlot } from '../../storytime-image.constants';
 import {
   VISIBILITY_DESCRIPTIONS,
   VISIBILITY_LABELS,
@@ -56,6 +59,7 @@ import {
     TagPickerComponent,
     SettingSelectComponent,
     MarkdownHintComponent,
+    ImageManagerComponent,
     EditorActionsComponent,
   ],
 })
@@ -89,6 +93,9 @@ export class ArcEditorComponent implements OnInit {
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
+
+  /** The artwork slots an Arc carries. */
+  readonly imageSlots = StorytimeImageSlot;
 
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _route = inject(ActivatedRoute);
@@ -162,6 +169,42 @@ export class ArcEditorComponent implements OnInit {
   }
 
   /**
+   * Takes the Arc back from an artwork change.
+   *
+   * The whole Arc is kept rather than only the new picture, because setting
+   * one moves the version on: an editor still holding the old one would have
+   * its next save refused as stale.
+   *
+   * @param updated - The Arc as the server now holds it.
+   */
+  onImageChanged(updated: unknown): void {
+    const arc = updated as ManagedArc;
+
+    this.arc = arc;
+    this.syncImageDescriptions(arc);
+  }
+
+  /**
+   * Matches the description fields to the artwork the Arc actually has.
+   *
+   * @param arc - The Arc as the server holds it.
+   */
+  private syncImageDescriptions(arc: ManagedArc): void {
+    syncImageDescription(
+      this.form,
+      'bannerImageAlt',
+      arc.bannerImageUrl,
+      arc.bannerImageAlt,
+    );
+    syncImageDescription(
+      this.form,
+      'profileImageAlt',
+      arc.profileImageUrl,
+      arc.profileImageAlt,
+    );
+  }
+
+  /**
    * Sends the form, then goes where the caller asked.
    *
    * @param destination - The route under Storytime to go to, from the saved id.
@@ -214,6 +257,7 @@ export class ArcEditorComponent implements OnInit {
             visibility: arc.visibility,
             languageCode: arc.languageCode,
           });
+          this.syncImageDescriptions(arc);
           this.isLoading = false;
         },
         error: () => {

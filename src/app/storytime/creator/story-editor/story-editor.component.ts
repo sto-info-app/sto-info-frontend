@@ -26,16 +26,19 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import { ContentPolicyPanelComponent } from '../../shared/content-policy-panel/content-policy-panel.component';
 import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
+import { ImageManagerComponent } from '../../shared/image-manager/image-manager.component';
 import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
 import { SettingOption } from '../../shared/setting-help/setting-help.component';
 import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
 import {
   StorytimeEditorSupport,
+  syncImageDescription,
   toLanguageOptions,
 } from '../../shared/storytime-editor.support';
 import { TagPickerComponent } from '../../shared/tag-picker/tag-picker.component';
 import { createWorkForm } from '../../shared/work-form.factory';
 import { StoryService } from '../../story.service';
+import { StorytimeImageSlot } from '../../storytime-image.constants';
 import {
   COMPLETION_STATE_OPTIONS,
   CONTENT_RATING_OPTIONS,
@@ -64,6 +67,7 @@ import {
     MarkdownHintComponent,
     ContentPolicyPanelComponent,
     EditorActionsComponent,
+    ImageManagerComponent,
   ],
 })
 export class StoryEditorComponent implements OnInit {
@@ -111,6 +115,9 @@ export class StoryEditorComponent implements OnInit {
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
+
+  /** The artwork slots a Story carries. */
+  readonly imageSlots = StorytimeImageSlot;
 
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _route = inject(ActivatedRoute);
@@ -225,6 +232,22 @@ export class StoryEditorComponent implements OnInit {
   }
 
   /**
+   * Takes the Story back from an artwork change.
+   *
+   * The whole Story is kept rather than only the new picture, because setting
+   * one moves the version on: an editor still holding the old one would have
+   * its next save refused as stale.
+   *
+   * @param updated - The Story as the server now holds it.
+   */
+  onImageChanged(updated: unknown): void {
+    const story = updated as ManagedStory;
+
+    this.story = story;
+    this.syncImageDescriptions(story);
+  }
+
+  /**
    * Puts the newly created Story into the Arc it was written for.
    *
    * The Story is kept first: it exists whatever the Arc says next, and an
@@ -269,6 +292,26 @@ export class StoryEditorComponent implements OnInit {
   }
 
   /**
+   * Matches the description fields to the artwork the Story actually has.
+   *
+   * @param story - The Story as the server holds it.
+   */
+  private syncImageDescriptions(story: ManagedStory): void {
+    syncImageDescription(
+      this.form,
+      'bannerImageAlt',
+      story.bannerImageUrl,
+      story.bannerImageAlt,
+    );
+    syncImageDescription(
+      this.form,
+      'profileImageAlt',
+      story.profileImageUrl,
+      story.profileImageAlt,
+    );
+  }
+
+  /**
    * Loads an existing Story into the form.
    *
    * @param storyId - The Story to load.
@@ -295,6 +338,7 @@ export class StoryEditorComponent implements OnInit {
             visibility: story.visibility,
             languageCode: story.languageCode,
           });
+          this.syncImageDescriptions(story);
           this.isLoading = false;
         },
         error: () => {

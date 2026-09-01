@@ -153,6 +153,44 @@
       </div>
     </section>
 
+    <!--
+      Artwork waits for the Arc to exist. A picture is set against a saved Arc
+      rather than staged into this form, so offering it before the first save
+      would mean holding a file with nowhere to put it.
+    -->
+    @if (arc) {
+      <section class="storytime-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Artwork</span>
+        </div>
+
+        <div class="storytime-panel">
+          <p class="field-hint">
+            Both are optional. An Arc without them shows no gap where they would
+            have been.
+          </p>
+
+          <app-storytime-image-manager
+            [slot]="imageSlots.ARC_BANNER"
+            [targetId]="arc.id"
+            [imageUrl]="arc.bannerImageUrl"
+            [imageAlt]="arc.bannerImageAlt"
+            altControlName="bannerImageAlt"
+            (changed)="onImageChanged($event)"
+          ></app-storytime-image-manager>
+
+          <app-storytime-image-manager
+            [slot]="imageSlots.ARC_PROFILE"
+            [targetId]="arc.id"
+            [imageUrl]="arc.profileImageUrl"
+            [imageAlt]="arc.profileImageAlt"
+            altControlName="profileImageAlt"
+            (changed)="onImageChanged($event)"
+          ></app-storytime-image-manager>
+        </div>
+      </section>
+    }
+
     <app-storytime-editor-actions
       [isSaving]="isSaving"
       [canPublish]="canPublish"

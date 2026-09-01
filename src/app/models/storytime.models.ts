@@ -235,9 +235,15 @@ export interface StoryRequest {
   completionState?: CompletionState;
   contentRating?: ContentRating;
   languageCode?: string;
-  bannerImageId?: string;
+  /**
+   * Sent only when there is a banner to describe.
+   *
+   * The picture itself is set through the artwork endpoints, so a Story can
+   * only ever point at an image this site was given. The server refuses a
+   * description of an empty slot.
+   */
   bannerImageAlt?: string;
-  profileImageId?: string;
+  /** Sent only when there is a profile image to describe. */
   profileImageAlt?: string;
   /** Sent on update so a stale edit is rejected rather than overwriting. */
   version?: number;
@@ -788,9 +794,9 @@ export interface ArcRequest {
   description?: string;
   visibility?: StorytimeVisibility;
   languageCode?: string;
-  bannerImageId?: string;
+  /** Sent only when there is a banner to describe. */
   bannerImageAlt?: string;
-  profileImageId?: string;
+  /** Sent only when there is a profile image to describe. */
   profileImageAlt?: string;
   /** Sent on update so a stale edit is refused rather than overwriting. */
   version?: number;

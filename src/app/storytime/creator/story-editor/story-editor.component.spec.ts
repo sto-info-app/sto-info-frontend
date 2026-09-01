@@ -191,6 +191,68 @@ describe('StoryEditorComponent', () => {
       expect(fixture.componentInstance.form.value.description).toBe('');
     });
 
+    // Artwork is set against the saved Story rather than staged into this
+    // form, so there is nothing to offer before the first save.
+    it('offers no artwork until the Story exists', () => {
+      routeParams.delete('storyId');
+      render();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          'app-storytime-image-manager',
+        ),
+      ).toBeNull();
+    });
+
+    it('offers both artwork slots once it does', () => {
+      render();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          'app-storytime-image-manager',
+        ),
+      ).toHaveLength(2);
+    });
+
+    // Setting a picture moves the version on, so an editor still holding the
+    // old one would have its next save refused as stale.
+    it('keeps the Story the artwork panel hands back, version and all', () => {
+      render();
+
+      fixture.componentInstance.onImageChanged({
+        ...existingStory,
+        version: 5,
+        bannerImageUrl: 'https://images.example/banner',
+        bannerImageAlt: 'The USS Ares at warp',
+      } as ManagedStory);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.form.value.bannerImageAlt).toBe(
+        'The USS Ares at warp',
+      );
+
+      fixture.componentInstance.save();
+
+      expect(storyService.updateStory).toHaveBeenCalledWith(
+        'story-1',
+        expect.objectContaining({ version: 5 }),
+      );
+    });
+
+    // A description of an empty slot would be stored against nothing and read
+    // out over whatever was uploaded into it next, which the server refuses.
+    it('says nothing about artwork the Story does not have', () => {
+      render();
+      fixture.componentInstance.save();
+
+      expect(storyService.updateStory).toHaveBeenCalledWith(
+        'story-1',
+        expect.not.objectContaining({
+          bannerImageAlt: expect.anything(),
+        }),
+      );
+    });
+
     it('reports a Story it could not load', () => {
       storyService.getMyStory.mockReturnValue(
         throwError(() => new HttpErrorResponse({ status: 404 })),
