@@ -7,6 +7,7 @@ import {
   Story,
 } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { StorytimeTagRowComponent } from '../../shared/tag-row/tag-row.component';
 import { COMPLETION_STATE_LABELS } from '../../storytime.constants';
 
 /**
@@ -20,7 +21,7 @@ import { COMPLETION_STATE_LABELS } from '../../storytime.constants';
   selector: 'app-story-card',
   templateUrl: './story-card.component.html',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, StorytimeTagRowComponent],
 })
 export class StoryCardComponent {
   /** The Story to summarise. */

@@ -4,6 +4,7 @@ import {
   CompletionState,
   ContentRating,
   Story,
+  StorytimeTagCategory,
 } from 'src/app/models/storytime.models';
 import { StoryCardComponent } from './story-card.component';
 
@@ -27,6 +28,7 @@ describe('StoryCardComponent', () => {
       publishedChapterCount: 3,
       profileImageThumbnailUrl: null,
       profileImageAlt: null,
+      tags: [],
       ...overrides,
     }) as Story;
 
@@ -119,5 +121,36 @@ describe('StoryCardComponent', () => {
     const element = render(buildStory({ shortDescription: null }));
 
     expect(element.querySelector('.storytime-story-card__summary')).toBeNull();
+  });
+
+  // The same row the Spotlight panel closes with, so what a Story is about
+  // reads the same wherever a reader meets it.
+  it('closes the panel with what the Story is tagged with', () => {
+    const element = render(
+      buildStory({
+        tags: [
+          {
+            id: 'tag-1',
+            slug: 'first-contact',
+            name: 'First contact',
+            description: null,
+            category: StorytimeTagCategory.THEME,
+            displayOrder: 0,
+          },
+        ],
+      }),
+    );
+
+    expect(
+      [...element.querySelectorAll('.storytime-tag-row__tag')].map(tag =>
+        tag.textContent?.trim(),
+      ),
+    ).toEqual(['First contact']);
+  });
+
+  it('renders no tag row for an untagged Story', () => {
+    const element = render(buildStory());
+
+    expect(element.querySelector('.storytime-tag-row')).toBeNull();
   });
 });

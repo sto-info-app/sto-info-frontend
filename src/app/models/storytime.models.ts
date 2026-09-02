@@ -174,6 +174,13 @@ export interface Story {
   rating: number;
   publishedAt: string | null;
   lastContentUpdateAt: string | null;
+  /**
+   * What the Story is about, in vocabulary order.
+   *
+   * Empty on the creator's own management views, which read and set tags
+   * through the tag routes rather than carrying them alongside the Story.
+   */
+  tags: StorytimeTag[];
 }
 
 /**
@@ -382,6 +389,13 @@ export interface Arc {
   profileImageAlt: string | null;
   rating: number;
   publishedAt: string | null;
+  /**
+   * What the Arc is about, in vocabulary order.
+   *
+   * Empty on the curator's own management views, which read and set tags
+   * through the tag routes rather than carrying them alongside the Arc.
+   */
+  tags: StorytimeTag[];
 }
 
 /**

@@ -19,6 +19,7 @@ describe('StoryListComponent', () => {
     completionState: 'ONGOING',
     publishedChapterCount: 1,
     profileImageThumbnailUrl: null,
+    tags: [],
   } as unknown as Story;
 
   /**

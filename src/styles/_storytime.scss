@@ -2046,6 +2046,52 @@ $storytime-landing-colours: (
   }
 }
 
+// The row is a component, and its host element sits between the panel and the
+// strip. Left inline it would not fill the panel it is closing off.
+app-storytime-tag-row {
+  display: block;
+}
+
+// What a work is about, closing a panel off in a strip of its own the way a
+// panel's controls do — darkened rather than a colour, because the ground
+// behind it is a different colour on every kind of panel. One block rather
+// than one per panel, so the Spotlight selection, a Story in a listing and an
+// Arc in a listing all say it the same way.
+.storytime-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgb(0 0 0 / 25%);
+  border-top: 1px solid rgb(255 255 255 / 10%);
+
+  // The icon says what the row is instead of a caption.
+  &__icon {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    color: vars.$lcars-perano;
+  }
+
+  // Words rather than pills: a pill on this site is something you press, and
+  // nothing public browses by tag yet. Set apart by spacing and by the caption
+  // vocabulary the rest of the feature uses for small print.
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__tag {
+    @include storytime-meta;
+
+    color: vars.$lcars-white;
+  }
+}
+
 .storytime-spotlight-admin {
   &__entry {
     @include storytime-row;

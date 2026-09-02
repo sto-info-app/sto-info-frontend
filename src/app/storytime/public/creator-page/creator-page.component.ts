@@ -23,6 +23,7 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ReadingListService } from '../../reading-list.service';
 import { SearchService } from '../../search.service';
 import { FollowButtonComponent } from '../../shared/follow-button/follow-button.component';
+import { StorytimeTagRowComponent } from '../../shared/tag-row/tag-row.component';
 
 /**
  * Everything one member has published, in one place.
@@ -44,6 +45,7 @@ import { FollowButtonComponent } from '../../shared/follow-button/follow-button.
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     FollowButtonComponent,
+    StorytimeTagRowComponent,
   ],
 })
 export class CreatorPageComponent implements OnInit {

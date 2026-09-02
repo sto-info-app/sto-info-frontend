@@ -16,6 +16,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
+import { StorytimeTagRowComponent } from '../../shared/tag-row/tag-row.component';
 
 /**
  * The Arcs anybody may discover.
@@ -33,6 +34,7 @@ import { ArcService } from '../../arc.service';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    StorytimeTagRowComponent,
   ],
 })
 export class ArcListComponent implements OnInit {
