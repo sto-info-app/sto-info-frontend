@@ -331,6 +331,32 @@ describe('SpotlightAdminFormComponent', () => {
         );
       });
 
+      // The work arrives after the dialog has finished closing, long after the
+      // click that chose it. Nothing marks this view for checking then, so the
+      // picker is only right if choosing a work renders the form itself: the
+      // assertions below deliberately never ask the fixture to.
+      it('renders the chosen work without a further render pass', () => {
+        const hit: SearchHit = {
+          id: 'story-123',
+          slug: 'story-slug',
+          title: 'The Search for Spock',
+          summary: 'A thrilling tale',
+          storySlug: null,
+          targetType: StorytimeTargetType.STORY,
+        };
+        dialogRef.afterClosed.mockReturnValue(of(hit));
+
+        render();
+        fixture.componentInstance.openPicker();
+
+        const panel = (fixture.nativeElement as HTMLElement).querySelector(
+          '.field-picker',
+        );
+
+        expect(panel?.textContent).toContain('The Search for Spock');
+        expect(panel?.textContent).not.toContain('Nothing chosen yet');
+      });
+
       // An editor starts from what the work already says rather than a blank
       // page.
       it('fills the headline and summary in from the chosen work', () => {

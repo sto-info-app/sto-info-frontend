@@ -247,6 +247,32 @@ describe('NotificationAdminSendComponent', () => {
       expect(component.selectedUser).toEqual(chosenUser);
     });
 
+    // The recipient arrives after the dialog has finished closing, long after
+    // the click that chose them. Nothing marks this view for checking then, so
+    // the panel is only right if choosing a recipient renders the screen
+    // itself: the assertions below deliberately never ask the fixture to.
+    it('renders the chosen recipient without a further render pass', () => {
+      const chosenUser: UserSearchResult = {
+        id: 'u-100',
+        username: 'picard',
+        fullName: 'Jean-Luc Picard',
+        role: 'USER',
+        lastLoginAt: null,
+      };
+      dialogRef.afterClosed.mockReturnValue(of(chosenUser));
+      component.form.controls.target.setValue(NotificationTarget.USER);
+      fixture.detectChanges();
+
+      component.openUserPicker();
+
+      const panel = (fixture.nativeElement as HTMLElement).querySelector(
+        '.field-picker',
+      );
+
+      expect(panel?.textContent).toContain('picard');
+      expect(panel?.textContent).not.toContain('Nobody chosen yet');
+    });
+
     it('leaves userId unchanged when picker is cancelled', () => {
       dialogRef.afterClosed.mockReturnValue(of(undefined));
 

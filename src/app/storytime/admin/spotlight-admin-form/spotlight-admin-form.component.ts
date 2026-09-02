@@ -191,7 +191,16 @@ export class SpotlightAdminFormComponent implements OnInit {
     this._dialog
       .open(LcarsSearchDialogComponent<SearchHit>, { data })
       .afterClosed()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      // The chosen work arrives once the dialog has finished closing, which is
+      // a callback of its own rather than part of the click that chose it:
+      // nothing marks this view for checking then, and the title and the
+      // details seeded from it would stay off the screen with the work in
+      // hand. Rendering the result is this operator's job everywhere else on
+      // the form, and it is its job here too.
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe((hit?: SearchHit) => {
         if (hit) {
           this.form.controls['targetId'].setValue(hit.id);
