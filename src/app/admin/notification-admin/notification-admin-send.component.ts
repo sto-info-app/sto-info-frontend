@@ -185,7 +185,16 @@ export class NotificationAdminSendComponent implements OnInit {
     this._dialog
       .open(LcarsSearchDialogComponent<UserSearchResult>, { data })
       .afterClosed()
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      // The chosen member arrives once the dialog has finished closing, which
+      // is a callback of its own rather than part of the click that picked
+      // them: this view is never marked for checking by it, and the recipient
+      // panel would go on reading `Nobody chosen yet` with the recipient in
+      // hand. Rendering the result is this operator's job everywhere else on
+      // the page, and it is its job here too.
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
       .subscribe((user?: UserSearchResult) => {
         if (user) {
           this.selectedUser = user;
