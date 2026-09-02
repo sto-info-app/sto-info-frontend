@@ -15,6 +15,7 @@ import { finalize, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { AddToListComponent } from '../../shared/add-to-list/add-to-list.component';
+import { StorytimeCastEntryComponent } from '../../shared/cast-entry/cast-entry.component';
 import { CommentThreadComponent } from '../../shared/comment-thread/comment-thread.component';
 import { SettingHelpComponent } from '../../shared/setting-help/setting-help.component';
 import { FollowButtonComponent } from '../../shared/follow-button/follow-button.component';
@@ -87,6 +88,7 @@ export type StoryTab = 'chapters' | 'cast' | 'credits';
     AddToListComponent,
     CommentThreadComponent,
     SettingHelpComponent,
+    StorytimeCastEntryComponent,
   ],
 })
 export class StoryDetailComponent implements OnInit {

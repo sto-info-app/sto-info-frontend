@@ -327,9 +327,19 @@
         [hidden]="activeTab !== 'cast'">
         <ul class="storytime-cast">
           @for (entry of cast; track entry.character.id) {
-            <li class="storytime-panel-card storytime-panel-card--character">
+            <li
+              appStorytimeCastEntry
+              [entry]="entry"
+              [link]="[
+                '/',
+                appRoutes.STORYTIME,
+                'stories',
+                storySlug,
+                'characters',
+                entry.character.slug,
+              ]">
               <a
-                class="storytime-panel-card__heading"
+                class="cta-icon"
                 [routerLink]="[
                   '/',
                   appRoutes.STORYTIME,
@@ -338,95 +348,12 @@
                   'characters',
                   entry.character.slug,
                 ]"
-                [title]="entry.character.name">
-                <span class="storytime-panel-card__name">{{
-                  entry.character.name
-                }}</span>
-                @if (entry.character.isPrimary) {
-                  <span class="storytime-panel-card__marks">
-                    <span class="storytime-panel-card__badge">Main</span>
-                  </span>
-                }
+                [title]="'View ' + entry.character.name"
+                [attr.aria-label]="'View ' + entry.character.name">
+                <i
+                  class="fa-solid fa-eye"
+                  aria-hidden="true"></i>
               </a>
-
-              <div class="storytime-panel-card__main">
-                <div class="storytime-panel-card__body storytime-cast-entry">
-                  @if (entry.character.portraitImageThumbnailUrl) {
-                    <img
-                      class="storytime-cast-entry__portrait"
-                      [src]="entry.character.portraitImageThumbnailUrl"
-                      [alt]="entry.character.portraitImageAlt ?? ''" />
-                  }
-
-                  <div class="storytime-cast-entry__identity">
-                    @if (entry.rank) {
-                      <p class="storytime-cast-entry__rank">
-                        <i
-                          class="fa-solid fa-user-shield"
-                          aria-hidden="true"></i>
-                        <span>{{ entry.rank }}</span>
-                      </p>
-                    }
-
-                    @if (entry.facts.length > 0) {
-                      <ul class="storytime-cast-entry__facts">
-                        @for (fact of entry.facts; track fact.label) {
-                          <li>
-                            <i
-                              [class]="fact.icon"
-                              aria-hidden="true"></i>
-                            <span class="storytime-cast-entry__fact-label"
-                              >{{ fact.label }}:</span
-                            >
-                            <span class="storytime-cast-entry__fact-value">{{
-                              fact.value
-                            }}</span>
-                          </li>
-                        }
-                      </ul>
-                    }
-
-                    @if (entry.character.shortBio) {
-                      <p class="storytime-cast-entry__bio">
-                        {{ entry.character.shortBio }}
-                      </p>
-                    }
-
-                    @if (entry.traits.length > 0) {
-                      <ul class="storytime-cast-entry__traits">
-                        @for (trait of entry.traits; track trait) {
-                          <li>{{ trait }}</li>
-                        }
-                      </ul>
-                    }
-
-                    @if (!entry.hasDetails) {
-                      <p class="storytime-cast-entry__bio">
-                        Nothing has been recorded about them yet.
-                      </p>
-                    }
-                  </div>
-                </div>
-
-                <div class="storytime-panel-card__controls">
-                  <a
-                    class="cta-icon"
-                    [routerLink]="[
-                      '/',
-                      appRoutes.STORYTIME,
-                      'stories',
-                      storySlug,
-                      'characters',
-                      entry.character.slug,
-                    ]"
-                    [title]="'View ' + entry.character.name"
-                    [attr.aria-label]="'View ' + entry.character.name">
-                    <i
-                      class="fa-solid fa-eye"
-                      aria-hidden="true"></i>
-                  </a>
-                </div>
-              </div>
             </li>
           }
         </ul>

@@ -21,6 +21,7 @@ import {
   CharacterPanelVm,
   buildCharacterPanelVm,
 } from '../../character-panel.utility';
+import { StorytimeCastEntryComponent } from '../../shared/cast-entry/cast-entry.component';
 import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
 
 /**
@@ -35,6 +36,7 @@ import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    StorytimeCastEntryComponent,
   ],
 })
 export class CharacterListComponent implements OnInit {
