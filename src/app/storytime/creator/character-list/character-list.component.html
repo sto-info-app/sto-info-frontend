@@ -32,13 +32,13 @@
 
   @if (isLoading) {
     <app-loading-bar loadingText="Loading cast"></app-loading-bar>
-  } @else if (characters.length === 0) {
+  } @else if (entries.length === 0) {
     <p class="storytime-empty">
       This Story has no Characters yet. Add the first one.
     </p>
   } @else {
     <ol class="storytime-character-list">
-      @for (character of characters; track character.id; let index = $index) {
+      @for (entry of entries; track entry.character.id; let index = $index) {
         <li class="storytime-panel-card storytime-panel-card--character">
           <a
             class="storytime-panel-card__heading"
@@ -47,11 +47,13 @@
               appRoutes.STORYTIME,
               'manage',
               'characters',
-              character.id,
+              entry.character.id,
             ]"
-            [title]="character.name">
-            <span class="storytime-panel-card__name">{{ character.name }}</span>
-            @if (character.isPrimary) {
+            [title]="entry.character.name">
+            <span class="storytime-panel-card__name">{{
+              entry.character.name
+            }}</span>
+            @if (entry.character.isPrimary) {
               <span class="storytime-panel-card__marks">
                 <span class="storytime-panel-card__badge">Main</span>
               </span>
@@ -59,25 +61,80 @@
           </a>
 
           <div class="storytime-panel-card__main">
-            <div
-              class="storytime-panel-card__body storytime-character-list__entry">
-              @if (character.portraitImageThumbnailUrl) {
+            <div class="storytime-panel-card__body storytime-cast-entry">
+              @if (entry.character.portraitImageThumbnailUrl) {
                 <img
-                  class="storytime-character-list__portrait"
-                  [src]="character.portraitImageThumbnailUrl"
-                  [alt]="character.portraitImageAlt ?? ''" />
+                  class="storytime-cast-entry__portrait"
+                  [src]="entry.character.portraitImageThumbnailUrl"
+                  [alt]="entry.character.portraitImageAlt ?? ''" />
               }
 
-              <div class="storytime-character-list__identity">
-                @if (character.shortBio) {
-                  <p class="storytime-character-list__bio">
-                    {{ character.shortBio }}
+              <div class="storytime-cast-entry__identity">
+                @if (entry.rank) {
+                  <p class="storytime-cast-entry__rank">
+                    <i
+                      class="fa-solid fa-user-shield"
+                      aria-hidden="true"></i>
+                    <span>{{ entry.rank }}</span>
+                  </p>
+                }
+
+                @if (entry.facts.length > 0) {
+                  <ul class="storytime-cast-entry__facts">
+                    @for (fact of entry.facts; track fact.label) {
+                      <li>
+                        <i
+                          [class]="fact.icon"
+                          aria-hidden="true"></i>
+                        <span class="storytime-cast-entry__fact-label"
+                          >{{ fact.label }}:</span
+                        >
+                        <span class="storytime-cast-entry__fact-value">{{
+                          fact.value
+                        }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
+
+                @if (entry.character.shortBio) {
+                  <p class="storytime-cast-entry__bio">
+                    {{ entry.character.shortBio }}
+                  </p>
+                }
+
+                @if (entry.traits.length > 0) {
+                  <ul class="storytime-cast-entry__traits">
+                    @for (trait of entry.traits; track trait) {
+                      <li>{{ trait }}</li>
+                    }
+                  </ul>
+                }
+
+                @if (!entry.hasDetails) {
+                  <p class="storytime-cast-entry__bio">
+                    Nothing has been recorded about them yet.
                   </p>
                 }
               </div>
             </div>
 
             <div class="storytime-panel-card__controls">
+              <a
+                class="cta-icon"
+                title="Edit this Character"
+                aria-label="Edit this Character"
+                [routerLink]="[
+                  '/',
+                  appRoutes.STORYTIME,
+                  'manage',
+                  'characters',
+                  entry.character.id,
+                ]">
+                <i
+                  class="fa-solid fa-user-pen"
+                  aria-hidden="true"></i>
+              </a>
               <button
                 class="cta-icon"
                 type="button"
@@ -94,7 +151,7 @@
                 type="button"
                 title="Move down"
                 aria-label="Move down"
-                [disabled]="index === characters.length - 1"
+                [disabled]="index === entries.length - 1"
                 (click)="moveDown(index)">
                 <i
                   class="fa-solid fa-caret-down"
@@ -105,7 +162,7 @@
                 type="button"
                 title="Delete Character"
                 aria-label="Delete Character"
-                (click)="remove(character)">
+                (click)="remove(entry.character)">
                 <i
                   class="fa-solid fa-trash"
                   aria-hidden="true"></i>
