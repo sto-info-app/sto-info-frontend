@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { StorytimeLanguage } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
@@ -80,6 +80,22 @@ export interface StorytimeEditorHost {
 
   /** The languages the server will accept. */
   languages: StorytimeLanguage[];
+
+  /**
+   * Takes the work back as the server now holds it.
+   *
+   * Saving does not always take a creator off the page: an existing Chapter
+   * and an existing Story are both managed at the address they are saved
+   * from, so the navigation that follows a save is a no-op and the editor
+   * stays on screen with whatever it was holding. Every save moves the
+   * version on, so an editor that did not take the saved work back would have
+   * its next save refused as stale — from a page that looks untouched.
+   *
+   * Optional, for editors whose every save leads somewhere else.
+   *
+   * @param saved - The work as the server now holds it.
+   */
+  onSaved?(saved: { id: string }): void;
 }
 
 /**
@@ -176,6 +192,10 @@ export class StorytimeEditorSupport {
   ): void {
     request
       .pipe(
+        // Before the follow-up rather than after it, so an editor left on the
+        // page by a failed publish is still holding the work as the save left
+        // it and can be saved again without a reload.
+        tap(saved => this._host.onSaved?.(saved)),
         switchMap(saved =>
           then ? then(saved).pipe(map(() => saved)) : of(saved),
         ),

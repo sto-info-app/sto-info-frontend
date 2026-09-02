@@ -248,6 +248,22 @@ export class StoryEditorComponent implements OnInit {
   }
 
   /**
+   * Takes the Story back from a save.
+   *
+   * An existing Story is edited at the address it is saved to, so the
+   * navigation that follows a save leaves the creator here. Without this the
+   * editor would still be holding the version it loaded, and a second save —
+   * from a page showing no sign of anything having changed — would be refused
+   * as stale.
+   *
+   * @param saved - The Story as the server now holds it.
+   */
+  onSaved(saved: ManagedStory): void {
+    this.story = saved;
+    this.syncImageDescriptions(saved);
+  }
+
+  /**
    * Puts the newly created Story into the Arc it was written for.
    *
    * The Story is kept first: it exists whatever the Arc says next, and an

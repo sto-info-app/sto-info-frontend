@@ -189,6 +189,22 @@ export class ChapterEditorComponent implements OnInit {
   }
 
   /**
+   * Takes the Chapter back from a save.
+   *
+   * An existing Chapter is edited at the address it is saved to, so the
+   * navigation that follows a save leaves the creator here. Without this the
+   * editor would still be holding the version it loaded, and a second save —
+   * from a page showing no sign of anything having changed — would be refused
+   * as stale.
+   *
+   * @param saved - The Chapter as the server now holds it.
+   */
+  onSaved(saved: ManagedChapter): void {
+    this.chapter = saved;
+    this.syncCoverDescription(saved);
+  }
+
+  /**
    * Matches the description field to the cover the Chapter actually has.
    *
    * @param chapter - The Chapter as the server holds it.

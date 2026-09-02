@@ -350,6 +350,44 @@ describe('ChapterEditorComponent', () => {
       );
     });
 
+    // An existing Chapter is edited at the address it is saved to, so a save
+    // leaves the creator here. An editor still holding the version it loaded
+    // would have its next save refused — from a page showing nothing amiss.
+    it('sends the version the last save produced', () => {
+      chapterService.updateChapter.mockReturnValue(
+        of({ ...existingChapter, version: 5 } as ManagedChapter),
+      );
+
+      render();
+      fixture.componentInstance.save();
+      fixture.componentInstance.save();
+
+      expect(chapterService.updateChapter).toHaveBeenLastCalledWith(
+        'chapter-1',
+        expect.objectContaining({ version: 5 }),
+      );
+    });
+
+    // The writing was saved whatever the publish did next, so the editor the
+    // failure left behind has to be savable without a reload.
+    it('keeps the saved version when the publish after it failed', () => {
+      chapterService.updateChapter.mockReturnValue(
+        of({ ...existingChapter, version: 5 } as ManagedChapter),
+      );
+      chapterService.publishChapter.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      render();
+      fixture.componentInstance.publish();
+      fixture.componentInstance.save();
+
+      expect(chapterService.updateChapter).toHaveBeenLastCalledWith(
+        'chapter-1',
+        expect.objectContaining({ version: 5 }),
+      );
+    });
+
     it('reports a Chapter it could not load', () => {
       chapterService.getMyChapter.mockReturnValue(
         throwError(() => new HttpErrorResponse({ status: 404 })),

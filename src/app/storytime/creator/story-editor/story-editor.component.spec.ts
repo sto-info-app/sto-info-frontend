@@ -174,6 +174,24 @@ describe('StoryEditorComponent', () => {
       );
     });
 
+    // An existing Story is edited at the address it is saved to, so a save
+    // leaves the creator here. An editor still holding the version it loaded
+    // would have its next save refused — from a page showing nothing amiss.
+    it('sends the version the last save produced', () => {
+      storyService.updateStory.mockReturnValue(
+        of({ ...existingStory, version: 5 } as ManagedStory),
+      );
+
+      render();
+      fixture.componentInstance.save();
+      fixture.componentInstance.save();
+
+      expect(storyService.updateStory).toHaveBeenLastCalledWith(
+        'story-1',
+        expect.objectContaining({ version: 5 }),
+      );
+    });
+
     // A Story with no summary or description must load as empty fields, not
     // as the string "null".
     it('loads a Story with no summary or description as blank fields', () => {
