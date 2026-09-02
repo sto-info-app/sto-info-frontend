@@ -829,7 +829,10 @@ export interface ChapterMedia {
   provider: MediaProvider;
   externalId: string;
   embedUrl: string;
+  /** The still held for every video, and so what a page falls back to. */
   thumbnailUrl: string;
+  /** The full-size still, which YouTube does not hold for every video. */
+  thumbnailHdUrl: string;
   title: string | null;
   caption: string | null;
   startSeconds: number | null;

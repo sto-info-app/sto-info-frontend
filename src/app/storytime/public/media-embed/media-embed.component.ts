@@ -30,7 +30,28 @@ export class MediaEmbedComponent {
   /** Whether the reader has asked for playback. */
   isPlaying = false;
 
+  /** Whether the full-size still turned out not to exist. */
+  private _hasHdThumbnail = true;
+
   private readonly _sanitizer = inject(DomSanitizer);
+
+  /**
+   * The still to show before playback.
+   *
+   * The full-size one is asked for first, because the still is shown at the
+   * width of the Chapter and the size YouTube holds for every video would be
+   * stretched to nearly twice its own. YouTube produces the full-size still
+   * for most uploads but not all, and answers for the ones it does not with
+   * an error rather than a smaller picture — so the miss is what
+   * `onThumbnailMissing` is for.
+   *
+   * @returns The still's address.
+   */
+  get thumbnailSource(): string {
+    return this._hasHdThumbnail
+      ? this.media.thumbnailHdUrl
+      : this.media.thumbnailUrl;
+  }
 
   /**
    * The embed source, once the reader has asked for it.
@@ -71,6 +92,30 @@ export class MediaEmbedComponent {
    */
   get label(): string {
     return this.media.title ?? 'Embedded video';
+  }
+
+  /**
+   * What the panel's bar calls the video.
+   *
+   * Shorter than the name a screen reader is given, because the bar is read
+   * alongside the picture underneath it: "Embedded video" over an embedded
+   * video says nothing that is not already on the screen.
+   *
+   * @returns The creator's title, or what the panel holds.
+   */
+  get panelName(): string {
+    return this.media.title ?? 'Video';
+  }
+
+  /**
+   * Falls back to the still every video has, when the full-size one is not
+   * one of them.
+   *
+   * The reader sees the smaller picture rather than a broken image, which is
+   * the whole reason the two are offered separately.
+   */
+  onThumbnailMissing(): void {
+    this._hasHdThumbnail = false;
   }
 
   /**

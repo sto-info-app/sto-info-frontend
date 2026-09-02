@@ -303,6 +303,10 @@ $storytime-panel-colours: (
   'activity': vars.$lcars-orange,
   'invitation': vars.$lcars-cool,
   'moderation': vars.$lcars-red,
+  // A video embedded in a Chapter. Its own colour rather than the Chapter's,
+  // because it is somebody else's work sitting inside the writing and should
+  // not be read as part of it.
+  'video': vars.$lcars-c47,
   // The reader's own record of their reading, rather than a thing in a list.
   // Takes the frame's own cyan, which no kind of content uses, so it is never
   // read as one of them.
@@ -2208,32 +2212,52 @@ $storytime-landing-colours: (
 // Media
 // -----------------------------------------------------------------------------
 
+// A video takes the same shape as every other panel in the feature — a
+// coloured spine, a bar across the top naming it, and the body beneath — so it
+// reads as a thing in its own right rather than as a picture that happened to
+// land in the middle of the writing. Its colour is on the panel itself, from
+// the map every panel colour comes from.
 .storytime-media {
-  @include storytime-panel-surface;
-
+  // The still, the player that replaces it and the button holding the still
+  // are all one size, so pressing play swaps a picture for a video rather than
+  // resizing the page around it. That size is the width of the Chapter around
+  // it, which is why the reader page asks YouTube for its full-size still
+  // rather than the 480-wide one every video has.
   &__thumbnail,
-  &__poster {
+  &__poster,
+  &__player {
     width: 100%;
-    max-width: 480px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
     border-radius: 6px;
   }
 
+  // The still is a picture, not one of the site's buttons. The element rule
+  // that shapes every LCARS button fixes them all at 200 by 60, which left the
+  // still overflowing its own button and lying across the caption beneath it,
+  // so the sizing is taken back here.
   &__poster {
+    display: block;
     position: relative;
+    height: auto;
+    margin: 0;
     padding: 0;
     border: none;
     background: none;
+
+    // Nothing but the picture rides in this button, so the line box a
+    // baseline-aligned image sits on has nothing to align to and only adds a
+    // strip of panel under the still.
+    line-height: 0;
     cursor: pointer;
   }
 
+  &__thumbnail {
+    display: block;
+  }
+
   &__player {
-    width: 100%;
-    max-width: 720px;
-    aspect-ratio: 16 / 9;
     border: none;
-    border-radius: 6px;
   }
 
   &__play {
@@ -2247,29 +2271,13 @@ $storytime-landing-colours: (
     text-shadow: 0 2px 8px rgb(0 0 0 / 70%);
   }
 
-  &__title {
-    @include storytime-work-title;
-
-    &:hover,
-    &:focus {
-      @include storytime-work-title-active;
-    }
-
-    font-size: 1rem;
-  }
-
-  &__caption,
+  // What the creator wrote about the video, under it. The video's own name is
+  // on the bar above rather than here, which is where every other panel in the
+  // feature carries the name of what it holds.
   &__notes {
+    margin: 0.75rem 0 0;
     color: vars.$lcars-grey-light;
     font-size: 0.85rem;
-  }
-
-  // Says that nothing is loaded from the provider until the reader asks. It
-  // has to be legible, because it is a promise about their privacy.
-  &__privacy {
-    @include storytime-meta;
-
-    color: vars.$lcars-perano;
   }
 }
 

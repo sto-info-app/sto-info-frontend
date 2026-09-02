@@ -457,6 +457,7 @@ describe('ChapterEditorComponent', () => {
         chapterId: 'chapter-1',
         externalId: 'dQw4w9WgXcQ',
         thumbnailUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+        thumbnailHdUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
         title: 'The escape',
       }) as ChapterMedia;
 

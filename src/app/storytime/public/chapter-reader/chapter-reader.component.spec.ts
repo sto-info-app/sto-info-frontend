@@ -409,6 +409,7 @@ describe('ChapterReaderComponent', () => {
         chapterId: 'chapter-1',
         embedUrl: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
         thumbnailUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+        thumbnailHdUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
         title: 'The escape',
         caption: null,
       }) as never;
