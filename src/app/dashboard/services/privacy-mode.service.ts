@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Observable, of, tap } from 'rxjs';
 import { UserSettings } from '../models/user.model';
 import { DashboardService } from './dashboard.service';
+import { DEFAULT_SESSION_TIMEOUT_MINUTES } from 'src/app/shared/constants/session-timeout.constants';
 
 @Injectable({ providedIn: 'root' })
 export class PrivacyModeService {
@@ -14,9 +15,10 @@ export class PrivacyModeService {
 
   load(): Observable<UserSettings> {
     if (!this._dashboardService) {
-      return of({ privacyMode: false }).pipe(
-        tap(settings => this._privacyMode.set(settings.privacyMode)),
-      );
+      return of({
+        privacyMode: false,
+        sessionTimeoutMinutes: DEFAULT_SESSION_TIMEOUT_MINUTES,
+      }).pipe(tap(settings => this._privacyMode.set(settings.privacyMode)));
     }
 
     return this._dashboardService
@@ -24,15 +26,18 @@ export class PrivacyModeService {
       .pipe(tap(settings => this._privacyMode.set(settings.privacyMode)));
   }
 
-  update(privacyMode: boolean): Observable<UserSettings> {
+  update(
+    privacyMode: boolean,
+    sessionTimeoutMinutes: number,
+  ): Observable<UserSettings> {
     if (!this._dashboardService) {
-      return of({ privacyMode }).pipe(
+      return of({ privacyMode, sessionTimeoutMinutes }).pipe(
         tap(settings => this._privacyMode.set(settings.privacyMode)),
       );
     }
 
     return this._dashboardService
-      .updateUserSettings({ privacyMode })
+      .updateUserSettings({ privacyMode, sessionTimeoutMinutes })
       .pipe(tap(settings => this._privacyMode.set(settings.privacyMode)));
   }
 }

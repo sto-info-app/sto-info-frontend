@@ -11,10 +11,16 @@ describe('PrivacyModeService', () => {
 
     beforeEach(() => {
       dashboardService = {
-        getUserSettings: jest.fn().mockReturnValue(of({ privacyMode: true })),
+        getUserSettings: jest
+          .fn()
+          .mockReturnValue(
+            of({ privacyMode: true, sessionTimeoutMinutes: 240 }),
+          ),
         updateUserSettings: jest
           .fn()
-          .mockReturnValue(of({ privacyMode: false })),
+          .mockReturnValue(
+            of({ privacyMode: false, sessionTimeoutMinutes: 240 }),
+          ),
       } as unknown as jest.Mocked<DashboardService>;
 
       TestBed.configureTestingModule({
@@ -33,22 +39,28 @@ describe('PrivacyModeService', () => {
     });
 
     it('should load settings and update the signal', () => {
-      let result: { privacyMode: boolean } | undefined;
+      let result:
+        { privacyMode: boolean; sessionTimeoutMinutes: number } | undefined;
       service.load().subscribe(settings => (result = settings));
 
       expect(dashboardService.getUserSettings).toHaveBeenCalled();
-      expect(result).toEqual({ privacyMode: true });
+      expect(result).toEqual({ privacyMode: true, sessionTimeoutMinutes: 240 });
       expect(service.isEnabled()).toBe(true);
     });
 
     it('should update settings and update the signal', () => {
-      let result: { privacyMode: boolean } | undefined;
-      service.update(false).subscribe(settings => (result = settings));
+      let result:
+        { privacyMode: boolean; sessionTimeoutMinutes: number } | undefined;
+      service.update(false, 240).subscribe(settings => (result = settings));
 
       expect(dashboardService.updateUserSettings).toHaveBeenCalledWith({
         privacyMode: false,
+        sessionTimeoutMinutes: 240,
       });
-      expect(result).toEqual({ privacyMode: false });
+      expect(result).toEqual({
+        privacyMode: false,
+        sessionTimeoutMinutes: 240,
+      });
       expect(service.isEnabled()).toBe(false);
     });
   });
@@ -68,18 +80,26 @@ describe('PrivacyModeService', () => {
     });
 
     it('should fall back to privacy mode disabled when loading', () => {
-      let result: { privacyMode: boolean } | undefined;
+      let result:
+        { privacyMode: boolean; sessionTimeoutMinutes: number } | undefined;
       service.load().subscribe(settings => (result = settings));
 
-      expect(result).toEqual({ privacyMode: false });
+      expect(result).toEqual({
+        privacyMode: false,
+        sessionTimeoutMinutes: 240,
+      });
       expect(service.isEnabled()).toBe(false);
     });
 
     it('should echo the requested value when updating', () => {
-      let result: { privacyMode: boolean } | undefined;
-      service.update(true).subscribe(settings => (result = settings));
+      let result:
+        { privacyMode: boolean; sessionTimeoutMinutes: number } | undefined;
+      service.update(true, 480).subscribe(settings => (result = settings));
 
-      expect(result).toEqual({ privacyMode: true });
+      expect(result).toEqual({
+        privacyMode: true,
+        sessionTimeoutMinutes: 480,
+      });
       expect(service.isEnabled()).toBe(true);
     });
   });

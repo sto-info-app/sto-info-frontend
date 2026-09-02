@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { PrivacyModeService } from '../services/privacy-mode.service';
 import { SettingsComponent } from './settings.component';
 
@@ -9,6 +10,10 @@ describe('SettingsComponent', () => {
   let fixture: ComponentFixture<SettingsComponent>;
   let component: SettingsComponent;
   let privacyModeService: jest.Mocked<PrivacyModeService>;
+  let authService: {
+    getSessionTimeoutMinutes: jest.Mock;
+    refreshToken: jest.Mock;
+  };
 
   const createComponent = (): void => {
     fixture = TestBed.createComponent(SettingsComponent);
@@ -18,14 +23,26 @@ describe('SettingsComponent', () => {
 
   beforeEach(async () => {
     privacyModeService = {
-      load: jest.fn().mockReturnValue(of({ privacyMode: false })),
-      update: jest.fn().mockReturnValue(of({ privacyMode: true })),
+      load: jest
+        .fn()
+        .mockReturnValue(
+          of({ privacyMode: false, sessionTimeoutMinutes: 240 }),
+        ),
+      update: jest
+        .fn()
+        .mockReturnValue(of({ privacyMode: true, sessionTimeoutMinutes: 240 })),
     } as unknown as jest.Mocked<PrivacyModeService>;
+
+    authService = {
+      getSessionTimeoutMinutes: jest.fn().mockReturnValue(240),
+      refreshToken: jest.fn().mockReturnValue(of({})),
+    };
 
     await TestBed.configureTestingModule({
       imports: [SettingsComponent, RouterTestingModule],
       providers: [
         { provide: PrivacyModeService, useValue: privacyModeService },
+        { provide: AuthService, useValue: authService },
       ],
     }).compileComponents();
   });
@@ -39,6 +56,7 @@ describe('SettingsComponent', () => {
     expect(component.errorMessage).toBe('');
     expect(component.settingsForm.getRawValue()).toEqual({
       privacyMode: false,
+      sessionTimeoutMinutes: 240,
     });
   });
 
@@ -77,9 +95,12 @@ describe('SettingsComponent', () => {
 
     component.save();
 
-    expect(privacyModeService.update).toHaveBeenCalledWith(true);
+    expect(privacyModeService.update).toHaveBeenCalledWith(true, 240);
     expect(component.isSaving).toBe(false);
-    expect(component.settingsForm.getRawValue()).toEqual({ privacyMode: true });
+    expect(component.settingsForm.getRawValue()).toEqual({
+      privacyMode: true,
+      sessionTimeoutMinutes: 240,
+    });
     expect(component.settingsForm.pristine).toBe(true);
   });
 
@@ -114,6 +135,64 @@ describe('SettingsComponent', () => {
     ) as HTMLButtonElement;
     button.click();
 
-    expect(privacyModeService.update).toHaveBeenCalledWith(false);
+    expect(privacyModeService.update).toHaveBeenCalledWith(false, 240);
+  });
+
+  it('offers every inactivity window, and describes what it does', () => {
+    createComponent();
+
+    const select = fixture.nativeElement.querySelector(
+      '#session-timeout',
+    ) as HTMLSelectElement;
+    const labels = Array.from(select.options).map(option => option.textContent);
+
+    expect(labels).toEqual(['1 hour', '4 hours', '8 hours']);
+    expect(select.getAttribute('aria-describedby')).toBe(
+      'session-timeout-description',
+    );
+    expect(fixture.nativeElement.textContent).toContain(
+      'How long you can be away before you are signed out.',
+    );
+  });
+
+  it('renews the session so a changed timeout applies straight away', () => {
+    privacyModeService.update.mockReturnValue(
+      of({ privacyMode: false, sessionTimeoutMinutes: 480 }),
+    );
+    createComponent();
+    component.settingsForm.controls.sessionTimeoutMinutes.setValue(480);
+    component.settingsForm.markAsDirty();
+
+    component.save();
+
+    expect(privacyModeService.update).toHaveBeenCalledWith(false, 480);
+    expect(authService.refreshToken).toHaveBeenCalled();
+  });
+
+  it('leaves the session alone when the timeout is unchanged', () => {
+    createComponent();
+    component.settingsForm.controls.privacyMode.setValue(true);
+    component.settingsForm.markAsDirty();
+
+    component.save();
+
+    expect(authService.refreshToken).not.toHaveBeenCalled();
+  });
+
+  it('still saves when renewing the session fails', () => {
+    authService.refreshToken.mockReturnValue(
+      throwError(() => new Error('nope')),
+    );
+    privacyModeService.update.mockReturnValue(
+      of({ privacyMode: false, sessionTimeoutMinutes: 60 }),
+    );
+    createComponent();
+    component.settingsForm.controls.sessionTimeoutMinutes.setValue(60);
+    component.settingsForm.markAsDirty();
+
+    component.save();
+
+    expect(component.errorMessage).toBe('');
+    expect(component.settingsForm.pristine).toBe(true);
   });
 });
