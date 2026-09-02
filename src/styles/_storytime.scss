@@ -303,6 +303,10 @@ $storytime-panel-colours: (
   'activity': vars.$lcars-orange,
   'invitation': vars.$lcars-cool,
   'moderation': vars.$lcars-red,
+  // A video embedded in a Chapter. Its own colour rather than the Chapter's,
+  // because it is somebody else's work sitting inside the writing and should
+  // not be read as part of it.
+  'video': vars.$lcars-c47,
   // The reader's own record of their reading, rather than a thing in a list.
   // Takes the frame's own cyan, which no kind of content uses, so it is never
   // read as one of them.
@@ -489,7 +493,8 @@ $storytime-comment-colours: (
 // the background is dark enough to read it — never inside a select's, which is
 // a solid colour. A chooser that needs explaining gets a help popup instead.
 .storytime-page .field-hint,
-.storytime-report__form .field-hint {
+.storytime-report__form .field-hint,
+#storytime-image-dialog-container .field-hint {
   color: vars.$lcars-grey-light;
   box-sizing: border-box;
   font-size: 0.8rem;
@@ -607,6 +612,7 @@ app-storytime-editor-actions {
 .storytime-search__kinds,
 .storytime-removed__actions,
 .storytime-story__progress-actions,
+.storytime-spotlight__actions,
 .storytime-story__social,
 .storytime-story__report,
 .storytime-arc__social,
@@ -1045,7 +1051,6 @@ p.storytime-fan-notice,
     width: 100%;
     max-height: 320px;
     object-fit: cover;
-    border-radius: 10px;
   }
 
   &__summary {
@@ -1093,7 +1098,6 @@ p.storytime-fan-notice,
     width: 100%;
     max-height: 280px;
     object-fit: cover;
-    border-radius: 10px;
     margin-bottom: 1rem;
   }
 
@@ -1207,7 +1211,6 @@ p.storytime-fan-notice,
     width: 100%;
     max-height: 320px;
     object-fit: cover;
-    border-radius: 10px;
     margin-bottom: 1rem;
   }
 
@@ -1310,23 +1313,115 @@ p.storytime-fan-notice,
   padding: 0;
   margin: 0 0 1rem;
   list-style: none;
+}
 
-  &__member {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+// What a cast panel holds under the name: the portrait beside what has been
+// recorded about the Character, the way a captain card sets its picture beside
+// its rank and species. Shared by the reader's cast tab and the creator's own
+// list, because the two describe the same thing and a reader who has read one
+// should not have to learn the other.
+.storytime-cast-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
 
   &__portrait {
-    width: 100%;
+    flex: 0 0 auto;
+    width: 96px;
     aspect-ratio: 1 / 1;
     object-fit: cover;
+    border: 2px solid vars.$lcars-perano;
     border-radius: 6px;
+    background: rgb(0 0 0 / 40%);
+  }
+
+  &__identity {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+
+  // The headline of the panel, set the way a captain card sets a rank.
+  &__rank {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    color: vars.$lcars-white;
+    font-size: 0.95rem;
+    font-weight: bold;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+
+    i {
+      color: vars.$lcars-sunflower;
+      font-size: 0.85rem;
+    }
+  }
+
+  // The rest of what is recorded. A list, because that is what it is, so it
+  // needs the indent and the bullets taken off it.
+  &__facts {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.25rem 1rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+      min-width: 0;
+      color: vars.$lcars-white;
+      font-size: 0.85rem;
+    }
+
+    i {
+      color: vars.$lcars-perano;
+      font-size: 0.8rem;
+    }
+  }
+
+  // The label says which fact it is; the value is what the eye is after, so
+  // the label is the quieter of the two.
+  &__fact-label {
+    color: vars.$lcars-grey-light;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.75rem;
+  }
+
+  &__fact-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__bio {
+    margin: 0;
     color: vars.$lcars-grey-light;
     font-size: 0.85rem;
+  }
+
+  // The same chips the Character's own page uses for their traits.
+  &__traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    li {
+      @include mixins.lcars-badge;
+
+      background: vars.$lcars-bluey;
+      color: vars.$lcars-black;
+    }
   }
 }
 
@@ -1369,7 +1464,6 @@ p.storytime-fan-notice,
     width: 100%;
     aspect-ratio: 2 / 3;
     object-fit: cover;
-    border-radius: 10px;
   }
 
   &__summary,
@@ -1420,34 +1514,6 @@ p.storytime-fan-notice,
 .storytime-spotlight-admin {
   padding: 0;
   margin: 0;
-}
-
-.storytime-character-list {
-  &__portrait {
-    width: 72px;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 6px;
-  }
-
-  &__identity {
-    flex: 1;
-    min-width: 0;
-
-    a {
-      @include storytime-work-title;
-
-      &:hover,
-      &:focus {
-        @include storytime-work-title-active;
-      }
-    }
-  }
-
-  &__bio {
-    color: vars.$lcars-grey-light;
-    font-size: 0.85rem;
-  }
 }
 
 .storytime-credits {
@@ -1955,7 +2021,6 @@ $storytime-landing-colours: (
     width: 100%;
     max-height: 260px;
     object-fit: cover;
-    border-radius: 10px;
   }
 
   &__work {
@@ -1967,9 +2032,27 @@ $storytime-landing-colours: (
     }
   }
 
+  // On the landing page the work's title is the link itself rather than a
+  // paragraph about it, and an anchor arrives inline with none of the block
+  // flow a paragraph gets for nothing.
+  &__work-link {
+    display: block;
+  }
+
   &__reason,
   &__summary {
     color: vars.$lcars-white;
+  }
+
+  // A captioned part of the panel, borrowing the caption a fact carries. The
+  // paragraph inside it brings the margin every paragraph has, which would put
+  // the next caption a line and a half below the last answer.
+  &__field {
+    margin-bottom: 0.75rem;
+
+    p {
+      margin: 0;
+    }
   }
 
   &__dates {
@@ -1979,6 +2062,52 @@ $storytime-landing-colours: (
   // A past selection is history rather than news, and reads as such.
   &--past {
     opacity: 0.75;
+  }
+}
+
+// The row is a component, and its host element sits between the panel and the
+// strip. Left inline it would not fill the panel it is closing off.
+app-storytime-tag-row {
+  display: block;
+}
+
+// What a work is about, closing a panel off in a strip of its own the way a
+// panel's controls do — darkened rather than a colour, because the ground
+// behind it is a different colour on every kind of panel. One block rather
+// than one per panel, so the Spotlight selection, a Story in a listing and an
+// Arc in a listing all say it the same way.
+.storytime-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgb(0 0 0 / 25%);
+  border-top: 1px solid rgb(255 255 255 / 10%);
+
+  // The icon says what the row is instead of a caption.
+  &__icon {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    color: vars.$lcars-perano;
+  }
+
+  // Words rather than pills: a pill on this site is something you press, and
+  // nothing public browses by tag yet. Set apart by spacing and by the caption
+  // vocabulary the rest of the feature uses for small print.
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__tag {
+    @include storytime-meta;
+
+    color: vars.$lcars-white;
   }
 }
 
@@ -2148,32 +2277,52 @@ $storytime-landing-colours: (
 // Media
 // -----------------------------------------------------------------------------
 
+// A video takes the same shape as every other panel in the feature — a
+// coloured spine, a bar across the top naming it, and the body beneath — so it
+// reads as a thing in its own right rather than as a picture that happened to
+// land in the middle of the writing. Its colour is on the panel itself, from
+// the map every panel colour comes from.
 .storytime-media {
-  @include storytime-panel-surface;
-
+  // The still, the player that replaces it and the button holding the still
+  // are all one size, so pressing play swaps a picture for a video rather than
+  // resizing the page around it. That size is the width of the Chapter around
+  // it, which is why the reader page asks YouTube for its full-size still
+  // rather than the 480-wide one every video has.
   &__thumbnail,
-  &__poster {
+  &__poster,
+  &__player {
     width: 100%;
-    max-width: 480px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
     border-radius: 6px;
   }
 
+  // The still is a picture, not one of the site's buttons. The element rule
+  // that shapes every LCARS button fixes them all at 200 by 60, which left the
+  // still overflowing its own button and lying across the caption beneath it,
+  // so the sizing is taken back here.
   &__poster {
+    display: block;
     position: relative;
+    height: auto;
+    margin: 0;
     padding: 0;
     border: none;
     background: none;
+
+    // Nothing but the picture rides in this button, so the line box a
+    // baseline-aligned image sits on has nothing to align to and only adds a
+    // strip of panel under the still.
+    line-height: 0;
     cursor: pointer;
   }
 
+  &__thumbnail {
+    display: block;
+  }
+
   &__player {
-    width: 100%;
-    max-width: 720px;
-    aspect-ratio: 16 / 9;
     border: none;
-    border-radius: 6px;
   }
 
   &__play {
@@ -2187,29 +2336,13 @@ $storytime-landing-colours: (
     text-shadow: 0 2px 8px rgb(0 0 0 / 70%);
   }
 
-  &__title {
-    @include storytime-work-title;
-
-    &:hover,
-    &:focus {
-      @include storytime-work-title-active;
-    }
-
-    font-size: 1rem;
-  }
-
-  &__caption,
+  // What the creator wrote about the video, under it. The video's own name is
+  // on the bar above rather than here, which is where every other panel in the
+  // feature carries the name of what it holds.
   &__notes {
+    margin: 0.75rem 0 0;
     color: vars.$lcars-grey-light;
     font-size: 0.85rem;
-  }
-
-  // Says that nothing is loaded from the provider until the reader asks. It
-  // has to be legible, because it is a promise about their privacy.
-  &__privacy {
-    @include storytime-meta;
-
-    color: vars.$lcars-perano;
   }
 }
 
@@ -2576,6 +2709,144 @@ $storytime-landing-colours: (
   }
 }
 
+// Artwork
+// -----------------------------------------------------------------------------
+// A work's pictures are set against the saved work rather than staged into the
+// form around them, so each slot is its own block with its own controls. The
+// description is the exception and belongs to the editor's form, which is why
+// it sits inside the same panel rather than in a dialog the creator has closed.
+
+.storytime-image-manager {
+  &__guidance {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+    margin: 0 0 0.75rem;
+    max-width: 70ch;
+  }
+
+  &__body {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  // Sized by its own picture rather than by a fixed frame: an empty slot
+  // renders nothing at all, so there is no box here to leave standing.
+  &__preview {
+    flex: 0 1 240px;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 2px solid vars.$lcars-sunflower;
+      border-radius: 4px;
+    }
+
+    // A 5:1 banner at 240px wide is 48px tall and shows nothing. It gets the
+    // width of the row instead, which is the shape it is actually seen in.
+    &--wide {
+      flex: 1 1 100%;
+    }
+  }
+
+  &__controls {
+    flex: 1 1 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__buttons {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.5rem;
+  }
+
+  .lcars-input-container {
+    margin-top: 1rem;
+  }
+}
+
+// The crop dialog. A Material dialog rather than a page, so it carries its own
+// padding; everything inside it is the same bar, field and button the editors
+// behind it are built from.
+#storytime-image-dialog-container {
+  padding: 10px;
+
+  .mat-mdc-dialog-actions {
+    gap: 1rem;
+    padding: 1rem 3rem;
+  }
+}
+
+.storytime-image-crop {
+  &__guidance {
+    margin: 0 0 0.35rem;
+    max-width: 70ch;
+  }
+
+  &__layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 1rem;
+
+    // Only once a picture has been chosen is there a second column worth
+    // reserving room for.
+    &.has-image {
+      flex-flow: row nowrap;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+  }
+
+  &__main {
+    flex: 2;
+    min-width: 0;
+
+    --cropper-overlay-color: transparent;
+
+    image-cropper {
+      width: 100%;
+      max-height: 55vh;
+
+      div,
+      div img {
+        max-height: 55vh;
+        width: auto;
+      }
+    }
+  }
+
+  &__side {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  &__preview img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    border: 2px solid vars.$lcars-sunflower;
+  }
+
+  &__alt {
+    margin-top: 1rem;
+  }
+
+  &__actions {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.5rem;
+  }
+}
+
 // Narrow screens
 // -----------------------------------------------------------------------------
 
@@ -2585,12 +2856,12 @@ $storytime-landing-colours: (
   }
 
   .storytime-arc-list__entry,
-  .storytime-character-list__entry {
+  .storytime-cast-entry {
     flex-direction: column;
   }
 
   .storytime-arc-list__image,
-  .storytime-character-list__portrait {
+  .storytime-cast-entry__portrait {
     width: 100%;
     max-width: 240px;
   }
@@ -2615,5 +2886,11 @@ $storytime-landing-colours: (
     .lcars-btn {
       flex: 1 1 auto;
     }
+  }
+
+  // With no room for a preview beside the cropper, it goes under it.
+  .storytime-image-crop__layout.has-image {
+    flex-flow: column nowrap;
+    gap: 1rem;
   }
 }

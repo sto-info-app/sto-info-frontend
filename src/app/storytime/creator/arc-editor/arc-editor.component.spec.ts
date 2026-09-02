@@ -167,6 +167,68 @@ describe('ArcEditorComponent', () => {
       );
     });
 
+    // Artwork is set against the saved Arc rather than staged into this form,
+    // so there is nothing to offer before the first save.
+    it('offers no artwork until the Arc exists', () => {
+      routeParams.delete('arcId');
+      render();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          'app-storytime-image-manager',
+        ),
+      ).toBeNull();
+    });
+
+    it('offers both artwork slots once it does', () => {
+      render();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          'app-storytime-image-manager',
+        ),
+      ).toHaveLength(2);
+    });
+
+    // Setting a picture moves the version on, so an editor still holding the
+    // old one would have its next save refused as stale.
+    it('keeps the Arc the artwork panel hands back, version and all', () => {
+      render();
+
+      fixture.componentInstance.onImageChanged({
+        ...existingArc,
+        version: 5,
+        profileImageUrl: 'https://images.example/profile',
+        profileImageAlt: 'An Arc badge',
+      } as ManagedArc);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.form.value.profileImageAlt).toBe(
+        'An Arc badge',
+      );
+
+      fixture.componentInstance.save();
+
+      expect(arcService.updateArc).toHaveBeenCalledWith(
+        'arc-1',
+        expect.objectContaining({ version: 5 }),
+      );
+    });
+
+    // A description of an empty slot would be stored against nothing and read
+    // out over whatever was uploaded into it next, which the server refuses.
+    it('says nothing about artwork the Arc does not have', () => {
+      render();
+      fixture.componentInstance.save();
+
+      expect(arcService.updateArc).toHaveBeenCalledWith(
+        'arc-1',
+        expect.not.objectContaining({
+          bannerImageAlt: expect.anything(),
+        }),
+      );
+    });
+
     it('loads an Arc with no summary or description as blank fields', () => {
       arcService.getMyArc.mockReturnValue(
         of({

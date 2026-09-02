@@ -28,6 +28,8 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CharacterService } from '../../character.service';
+import { ImageManagerComponent } from '../../shared/image-manager/image-manager.component';
+import { StorytimeImageSlot } from '../../storytime-image.constants';
 import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
 import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
 
@@ -54,11 +56,15 @@ export const MAX_CHARACTER_TRAITS = 20;
     LcarsToggleComponent,
     MarkdownHintComponent,
     EditorActionsComponent,
+    ImageManagerComponent,
   ],
 })
 export class CharacterEditorComponent implements OnInit {
   /** The Character being edited, or null when creating one. */
   character: ManagedCharacter | null = null;
+
+  /** The artwork slots a Character carries. */
+  readonly imageSlots = StorytimeImageSlot;
 
   /** The Story the Character belongs to. */
   storyId = '';
@@ -104,7 +110,8 @@ export class CharacterEditorComponent implements OnInit {
     occupation: ['', Validators.maxLength(150)],
     affiliation: ['', Validators.maxLength(200)],
     shipAssignment: ['', Validators.maxLength(200)],
-    portraitImageId: ['', Validators.maxLength(100)],
+    // The picture itself is set through the artwork panel, against the saved
+    // Character; only its description belongs to this form.
     portraitImageAlt: ['', Validators.maxLength(300)],
     isPrimary: [false],
     traits: this._formBuilder.array<FormControl<string>>([]),
@@ -269,7 +276,6 @@ export class CharacterEditorComponent implements OnInit {
       'occupation',
       'affiliation',
       'shipAssignment',
-      'portraitImageId',
       'portraitImageAlt',
     ] as const;
 
@@ -282,6 +288,24 @@ export class CharacterEditorComponent implements OnInit {
     }
 
     return payload;
+  }
+
+  /**
+   * Takes the Character back from a portrait change.
+   *
+   * The whole Character is kept rather than only the new picture, because
+   * setting one moves the version on: an editor still holding the old one
+   * would have its next save refused as stale.
+   *
+   * @param updated - The Character as the server now holds it.
+   */
+  onImageChanged(updated: unknown): void {
+    const character = updated as ManagedCharacter;
+
+    this.character = character;
+    this.form.patchValue({
+      portraitImageAlt: character.portraitImageAlt ?? '',
+    });
   }
 
   /**
@@ -301,7 +325,6 @@ export class CharacterEditorComponent implements OnInit {
       occupation: character.occupation ?? '',
       affiliation: character.affiliation ?? '',
       shipAssignment: character.shipAssignment ?? '',
-      portraitImageId: character.portraitImageId ?? '',
       portraitImageAlt: character.portraitImageAlt ?? '',
       isPrimary: character.isPrimary,
     });

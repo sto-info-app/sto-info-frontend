@@ -1,0 +1,124 @@
+@if (isSubmitting) {
+  <app-loading-bar loadingText="Uploading"></app-loading-bar>
+}
+
+<div id="storytime-image-dialog-container">
+  <div mat-dialog-content>
+    <div class="lcars-text-bar">
+      <span>{{ spec.label }}</span>
+    </div>
+
+    <p class="storytime-image-crop__guidance">{{ spec.guidance }}</p>
+    <p class="field-hint">
+      The selection is locked to {{ requirement }} Larger pictures are welcome —
+      only the area you select is kept.
+    </p>
+
+    <div
+      class="storytime-image-crop__layout"
+      [class.has-image]="imageChangedEvent">
+      <div class="storytime-image-crop__main">
+        <input
+          type="file"
+          [title]="'Choose a picture for the ' + spec.label"
+          [attr.aria-label]="'Choose a picture for the ' + spec.label"
+          (change)="onFileChangeEvent($event)"
+          accept="image/jpg, image/jpeg, image/png"
+          [disabled]="isSubmitting"
+          class="file-input" />
+
+        @if (imageChangedEvent) {
+          <image-cropper
+            [imageChangedEvent]="imageChangedEvent"
+            [maintainAspectRatio]="true"
+            [aspectRatio]="spec.aspectRatio"
+            [output]="'blob'"
+            [format]="spec.outputFormat"
+            (imageCropped)="onImageCropped($event)"
+            (loadImageFailed)="loadImageFailed()"></image-cropper>
+        }
+      </div>
+
+      @if (imageChangedEvent) {
+        <div class="storytime-image-crop__side">
+          @if (errorMessage) {
+            <app-lcars-error-message
+              title="Transmission Error"
+              [message]="errorMessage"></app-lcars-error-message>
+          }
+
+          @if (croppedImageSizeWarning && !errorMessage) {
+            <app-lcars-warning-message
+              title="Small Image"
+              [message]="croppedImageSizeWarning"></app-lcars-warning-message>
+          }
+
+          @if (croppedImage && !errorMessage) {
+            <div class="storytime-image-crop__preview">
+              <div class="lcars-text-bar">
+                <span>Preview</span>
+              </div>
+              <img
+                id="storytime-cropped-image-preview"
+                [src]="croppedImage"
+                alt="Your cropped selection"
+                title="Your cropped selection" />
+              <p class="field-hint">
+                {{ croppedImageWidth }} &times; {{ croppedImageHeight }} pixels
+              </p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (!imageChangedEvent && errorMessage) {
+      <app-lcars-error-message
+        title="Transmission Error"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    <!--
+      Asked for here rather than on the editor behind, because this is the one
+      moment somebody is certainly looking at the picture. An image nobody has
+      described is simply absent to a reader using a screen reader.
+    -->
+    <div class="lcars-input-container perano storytime-image-crop__alt">
+      <label for="storytime-image-alt">What does this picture show?</label>
+      <input
+        id="storytime-image-alt"
+        type="text"
+        name="altText"
+        [(ngModel)]="altText"
+        [maxlength]="altMaxLength"
+        [disabled]="isSubmitting"
+        required />
+      <p class="field-hint">
+        Read out to anybody who cannot see the picture, so describe it rather
+        than repeating the title.
+      </p>
+    </div>
+  </div>
+
+  <div
+    mat-dialog-actions
+    class="storytime-image-crop__actions">
+    <button
+      type="button"
+      class="lcars-btn sunflower"
+      mat-button
+      [disabled]="!canUpload"
+      (click)="onUploadImageClick()">
+      Upload
+    </button>
+    <button
+      type="button"
+      class="lcars-btn red"
+      mat-button
+      mat-dialog-close
+      [disabled]="isSubmitting"
+      (click)="onCloseClick()">
+      Cancel
+    </button>
+  </div>
+</div>

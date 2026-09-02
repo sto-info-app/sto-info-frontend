@@ -247,6 +247,72 @@ describe('CharacterEditorComponent', () => {
       );
     });
 
+    // The portrait is set against the saved Character rather than staged into
+    // this form, so there is nothing to offer before the first save.
+    it('offers a portrait once the Character exists', () => {
+      const element = render();
+
+      expect(
+        element.querySelector('app-storytime-image-manager'),
+      ).not.toBeNull();
+    });
+
+    // Setting a portrait moves the version on, so an editor still holding the
+    // old one would have its next save refused as stale.
+    it('keeps the Character the portrait panel hands back', () => {
+      render();
+
+      fixture.componentInstance.onImageChanged(
+        buildCharacter({
+          version: 4,
+          portraitImageUrl: 'https://images.example/portrait',
+          portraitImageAlt: 'An Andorian in uniform',
+        }),
+      );
+
+      expect(
+        fixture.componentInstance.form.getRawValue().portraitImageAlt,
+      ).toBe('An Andorian in uniform');
+
+      fixture.componentInstance.save();
+
+      expect(characterService.updateCharacter).toHaveBeenCalledWith(
+        'character-1',
+        expect.objectContaining({ version: 4 }),
+      );
+    });
+
+    // A portrait can be replaced without its wording being carried over, and
+    // the form has to show that rather than keeping the old description.
+    it('empties the wording when the new portrait carries none', () => {
+      render();
+
+      fixture.componentInstance.onImageChanged(
+        buildCharacter({
+          portraitImageUrl: 'https://images.example/portrait',
+          portraitImageAlt: null,
+        }),
+      );
+
+      expect(
+        fixture.componentInstance.form.getRawValue().portraitImageAlt,
+      ).toBe('');
+    });
+
+    // A description of an empty slot would be stored against nothing and read
+    // out over whatever was uploaded into it next, which the server refuses.
+    it('says nothing about a portrait the Character does not have', () => {
+      render();
+      fixture.componentInstance.save();
+
+      expect(characterService.updateCharacter).toHaveBeenCalledWith(
+        'character-1',
+        expect.not.objectContaining({
+          portraitImageAlt: expect.anything(),
+        }),
+      );
+    });
+
     it('explains a Character that could not be found', () => {
       characterService.getMyCharacter.mockReturnValue(
         throwError(() => new HttpErrorResponse({ status: 404 })),

@@ -17,6 +17,11 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CharacterService } from '../../character.service';
+import {
+  CharacterPanelVm,
+  buildCharacterPanelVm,
+} from '../../character-panel.utility';
+import { StorytimeCastEntryComponent } from '../../shared/cast-entry/cast-entry.component';
 import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
 
 /**
@@ -31,11 +36,21 @@ import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    StorytimeCastEntryComponent,
   ],
 })
 export class CharacterListComponent implements OnInit {
   /** The cast, in display order. */
   characters: ManagedCharacter[] = [];
+
+  /**
+   * The same cast as the panels render them.
+   *
+   * Built once a load lands rather than read off the Character in the
+   * template, so the facts under a name are worked out when they change
+   * rather than on every check.
+   */
+  entries: CharacterPanelVm<ManagedCharacter>[] = [];
 
   /** The Story this cast belongs to. */
   storyId = '';
@@ -138,6 +153,7 @@ export class CharacterListComponent implements OnInit {
       .subscribe({
         next: characters => {
           this.characters = characters;
+          this.entries = characters.map(buildCharacterPanelVm);
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage =

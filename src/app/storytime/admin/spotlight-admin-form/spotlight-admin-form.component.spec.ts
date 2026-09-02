@@ -185,10 +185,29 @@ describe('SpotlightAdminFormComponent', () => {
       expect(spotlightService.create).toHaveBeenCalledWith(
         expect.objectContaining({
           selectionReason: null,
-          overrideImageId: null,
-          overrideImageAlt: null,
           slug: undefined,
           endsAt: null,
+        }),
+      );
+    });
+
+    // A new entry has no artwork yet — it is uploaded against the saved entry
+    // — so there is nothing to describe and the server refuses a description
+    // of an empty slot.
+    it('says nothing about artwork on a new entry', () => {
+      render();
+      fixture.componentInstance.form.patchValue({
+        targetId: 'story-1',
+        headline: 'Start here',
+        summary: 'Worth your evening.',
+        startsAt: '2026-06-01T00:00',
+        overrideImageAlt: 'A fleet at anchor',
+      });
+      fixture.componentInstance.save();
+
+      expect(spotlightService.create).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          overrideImageAlt: expect.anything(),
         }),
       );
     });
@@ -470,6 +489,68 @@ describe('SpotlightAdminFormComponent', () => {
       ).toBe(true);
       expect(fixture.componentInstance.form.controls['targetId'].disabled).toBe(
         true,
+      );
+    });
+
+    // The artwork is set against the saved entry rather than staged into this
+    // form, so there is nothing to offer before the first save.
+    it('offers artwork once the entry exists', () => {
+      render();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          'app-storytime-image-manager',
+        ),
+      ).not.toBeNull();
+    });
+
+    it('keeps the entry the artwork panel hands back', () => {
+      render();
+
+      fixture.componentInstance.onImageChanged({
+        ...existingEntry,
+        overrideImageUrl: 'https://images.example/spotlight',
+        overrideImageAlt: 'A fleet at anchor',
+      } as unknown as ManagedSpotlight);
+
+      expect(fixture.componentInstance.hasArtwork).toBe(true);
+
+      fixture.componentInstance.save();
+
+      expect(spotlightService.update).toHaveBeenCalledWith(
+        'spotlight-1',
+        expect.objectContaining({ overrideImageAlt: 'A fleet at anchor' }),
+      );
+    });
+
+    it('empties the wording when the new artwork carries none', () => {
+      render();
+
+      fixture.componentInstance.onImageChanged({
+        ...existingEntry,
+        overrideImageUrl: 'https://images.example/spotlight',
+        overrideImageAlt: null,
+      } as unknown as ManagedSpotlight);
+
+      expect(
+        fixture.componentInstance.form.getRawValue().overrideImageAlt,
+      ).toBe('');
+    });
+
+    // A description of an empty slot would be stored against nothing and read
+    // out over whatever was uploaded into it next, which the server refuses.
+    it('says nothing about artwork the entry does not have', () => {
+      render();
+      fixture.componentInstance.form.patchValue({
+        overrideImageAlt: 'A fleet at anchor',
+      });
+      fixture.componentInstance.save();
+
+      expect(spotlightService.update).toHaveBeenCalledWith(
+        'spotlight-1',
+        expect.not.objectContaining({
+          overrideImageAlt: expect.anything(),
+        }),
       );
     });
 

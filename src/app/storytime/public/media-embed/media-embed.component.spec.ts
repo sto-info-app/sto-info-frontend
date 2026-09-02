@@ -19,6 +19,7 @@ describe('MediaEmbedComponent', () => {
       externalId: 'dQw4w9WgXcQ',
       embedUrl: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
       thumbnailUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+      thumbnailHdUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
       title: null,
       caption: null,
       startSeconds: null,
@@ -70,17 +71,33 @@ describe('MediaEmbedComponent', () => {
       expect(fixture.componentInstance.embedSource).toBeNull();
     });
 
-    it('shows the still instead', () => {
+    // The full size first: the still is shown at the width of the Chapter,
+    // and the one every video has is 480 across.
+    it('shows the full-size still instead', () => {
       const element = render();
       const thumbnail = element.querySelector('.storytime-media__thumbnail');
 
-      expect(thumbnail?.getAttribute('src')).toContain('i.ytimg.com');
+      expect(thumbnail?.getAttribute('src')).toBe(
+        'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+      );
     });
 
-    it('says plainly that nothing has been loaded', () => {
+    // YouTube holds no full-size still for some videos and answers with an
+    // error rather than a smaller picture, which would leave the reader
+    // looking at a broken image where the video should be.
+    it('falls back to the still every video has', () => {
       const element = render();
 
-      expect(element.textContent).toContain('until you press play');
+      element
+        .querySelector('.storytime-media__thumbnail')
+        ?.dispatchEvent(new Event('error'));
+      fixture.detectChanges();
+
+      expect(
+        element
+          .querySelector('.storytime-media__thumbnail')
+          ?.getAttribute('src'),
+      ).toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg');
     });
   });
 
@@ -158,7 +175,6 @@ describe('MediaEmbedComponent', () => {
       pressPlay(element);
 
       expect(element.querySelector('.storytime-media__poster')).toBeNull();
-      expect(element.textContent).not.toContain('until you press play');
     });
   });
 
@@ -189,19 +205,28 @@ describe('MediaEmbedComponent', () => {
   });
 
   describe('the caption', () => {
-    it('shows the title and caption together', () => {
+    it('puts the title on the bar and the caption under the video', () => {
       const element = render(
         buildMedia({ title: 'The escape', caption: 'Shot on Risa.' }),
       );
 
-      expect(element.textContent).toContain('The escape');
-      expect(element.textContent).toContain('Shot on Risa.');
+      expect(
+        element.querySelector('.storytime-panel-card__name')?.textContent,
+      ).toContain('The escape');
+      expect(
+        element.querySelector('.storytime-media__notes')?.textContent,
+      ).toContain('Shot on Risa.');
     });
 
-    it('shows nothing when there is neither', () => {
+    // The panel always carries a bar, the way every other panel in the feature
+    // does, so a video the creator never named still says what it is.
+    it('names an untitled video plainly', () => {
       const element = render();
 
-      expect(element.querySelector('figcaption')).toBeNull();
+      expect(fixture.componentInstance.panelName).toBe('Video');
+      expect(
+        element.querySelector('.storytime-panel-card__name')?.textContent,
+      ).toContain('Video');
     });
 
     it('shows a caption with no title', () => {

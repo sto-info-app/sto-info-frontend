@@ -5,7 +5,7 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { ImageCropperComponent } from 'ngx-image-cropper';
-import { ImageCropperBaseComponent } from 'src/app/dashboard/base/image-cropper-base.component';
+import { ImageCropperBaseComponent } from 'src/app/shared/base/image-cropper-base.component';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';

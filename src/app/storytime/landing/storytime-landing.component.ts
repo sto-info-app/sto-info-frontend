@@ -10,7 +10,12 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { catchError, forkJoin, switchMap, of } from 'rxjs';
-import { Spotlight, Story, StorySort } from 'src/app/models/storytime.models';
+import {
+  CONTENT_RATING_LABELS,
+  Spotlight,
+  Story,
+  StorySort,
+} from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
@@ -18,6 +23,7 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { FollowService } from '../follow.service';
 import { StoryCardComponent } from '../public/story-card/story-card.component';
+import { StorytimeTagRowComponent } from '../shared/tag-row/tag-row.component';
 import { SpotlightService } from '../spotlight.service';
 import {
   STORYTIME_ADMIN_LINKS,
@@ -25,7 +31,10 @@ import {
   storytimeAdminRouterLink,
 } from '../storytime-admin-links';
 import { StoryService } from '../story.service';
-import { STORYTIME_COPY } from '../storytime.constants';
+import {
+  COMPLETION_STATE_LABELS,
+  STORYTIME_COPY,
+} from '../storytime.constants';
 import { StorytimeService } from '../storytime.service';
 
 /** How many Stories each landing list shows. */
@@ -60,6 +69,7 @@ const LANDING_STORY_COUNT = 6;
     CommonModule,
     RouterModule,
     StoryCardComponent,
+    StorytimeTagRowComponent,
     CollapsibleSectionComponent,
   ],
 })
@@ -89,6 +99,12 @@ export class StorytimeLandingComponent implements OnInit {
 
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
+
+  /** Rating labels, so a raw enum value is never shown. */
+  readonly ratingLabels = CONTENT_RATING_LABELS;
+
+  /** Completion labels, so a raw enum value is never shown. */
+  readonly completionLabels = COMPLETION_STATE_LABELS;
 
   /**
    * The management pages this reader has been given, if any.
@@ -258,6 +274,56 @@ export class StorytimeLandingComponent implements OnInit {
     return entry.story
       ? ['/', this.appRoutes.STORYTIME, 'stories', entry.story.slug]
       : ['/', this.appRoutes.STORYTIME, 'arcs', entry.arc?.slug];
+  }
+
+  /**
+   * The title of the work a selection features.
+   *
+   * @param entry - The selection.
+   * @returns The Story's or the Arc's title.
+   */
+  titleFor(entry: Spotlight): string {
+    return entry.story?.title ?? entry.arc?.title ?? '';
+  }
+
+  /**
+   * What the featured work is, as the editor who chose it was asked for it.
+   *
+   * The same words the Spotlight form uses, so the caption on the panel and
+   * the caption on the form that filled it in say the same thing.
+   *
+   * @param entry - The selection.
+   * @returns The caption for the work's title.
+   */
+  targetLabelFor(entry: Spotlight): string {
+    return entry.story ? 'Featured Story' : 'Featured Arc';
+  }
+
+  /**
+   * What the selection's button offers to open.
+   *
+   * Named rather than a bare "Read", because a Story and an Arc are different
+   * commitments and a reader deciding between them should be told which one
+   * the button leads to.
+   *
+   * @param entry - The selection.
+   * @returns The button's label.
+   */
+  readLabelFor(entry: Spotlight): string {
+    return entry.story ? 'Read the Story' : 'Read the Arc';
+  }
+
+  /**
+   * How the featured work has been rated.
+   *
+   * A Story and an Arc both carry one, and a panel that showed it for only one
+   * of them would read as a Story fact that Arcs happen to be missing.
+   *
+   * @param entry - The selection.
+   * @returns Thumbs up minus thumbs down, and zero when nothing is featured.
+   */
+  ratingFor(entry: Spotlight): number {
+    return entry.story?.rating ?? entry.arc?.rating ?? 0;
   }
 
   /**

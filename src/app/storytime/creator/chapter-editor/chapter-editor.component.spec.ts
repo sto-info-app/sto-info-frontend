@@ -299,6 +299,95 @@ describe('ChapterEditorComponent', () => {
       );
     });
 
+    // The cover is set against the saved Chapter rather than staged into this
+    // form, so there is nothing to offer before the first save.
+    it('offers a cover once the Chapter exists', () => {
+      render();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          'app-storytime-image-manager',
+        ),
+      ).not.toBeNull();
+    });
+
+    // Setting a cover moves the version on, so an editor still holding the old
+    // one would have its next save refused as stale.
+    it('keeps the Chapter the cover panel hands back, version and all', () => {
+      render();
+
+      fixture.componentInstance.onImageChanged({
+        ...existingChapter,
+        version: 5,
+        coverImageUrl: 'https://images.example/cover',
+        coverImageAlt: 'A shuttle on approach',
+      } as ManagedChapter);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.form.value.coverImageAlt).toBe(
+        'A shuttle on approach',
+      );
+
+      fixture.componentInstance.save();
+
+      expect(chapterService.updateChapter).toHaveBeenCalledWith(
+        'chapter-1',
+        expect.objectContaining({ version: 5 }),
+      );
+    });
+
+    // A description of an empty slot would be stored against nothing and read
+    // out over whatever was uploaded into it next, which the server refuses.
+    it('says nothing about a cover the Chapter does not have', () => {
+      render();
+      fixture.componentInstance.save();
+
+      expect(chapterService.updateChapter).toHaveBeenCalledWith(
+        'chapter-1',
+        expect.not.objectContaining({
+          coverImageAlt: expect.anything(),
+        }),
+      );
+    });
+
+    // An existing Chapter is edited at the address it is saved to, so a save
+    // leaves the creator here. An editor still holding the version it loaded
+    // would have its next save refused — from a page showing nothing amiss.
+    it('sends the version the last save produced', () => {
+      chapterService.updateChapter.mockReturnValue(
+        of({ ...existingChapter, version: 5 } as ManagedChapter),
+      );
+
+      render();
+      fixture.componentInstance.save();
+      fixture.componentInstance.save();
+
+      expect(chapterService.updateChapter).toHaveBeenLastCalledWith(
+        'chapter-1',
+        expect.objectContaining({ version: 5 }),
+      );
+    });
+
+    // The writing was saved whatever the publish did next, so the editor the
+    // failure left behind has to be savable without a reload.
+    it('keeps the saved version when the publish after it failed', () => {
+      chapterService.updateChapter.mockReturnValue(
+        of({ ...existingChapter, version: 5 } as ManagedChapter),
+      );
+      chapterService.publishChapter.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      render();
+      fixture.componentInstance.publish();
+      fixture.componentInstance.save();
+
+      expect(chapterService.updateChapter).toHaveBeenLastCalledWith(
+        'chapter-1',
+        expect.objectContaining({ version: 5 }),
+      );
+    });
+
     it('reports a Chapter it could not load', () => {
       chapterService.getMyChapter.mockReturnValue(
         throwError(() => new HttpErrorResponse({ status: 404 })),
@@ -368,6 +457,7 @@ describe('ChapterEditorComponent', () => {
         chapterId: 'chapter-1',
         externalId: 'dQw4w9WgXcQ',
         thumbnailUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+        thumbnailHdUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
         title: 'The escape',
       }) as ChapterMedia;
 

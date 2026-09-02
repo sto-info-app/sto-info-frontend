@@ -653,6 +653,51 @@ describe('StoryDetailComponent', () => {
       expect(element.textContent).toContain('An Andorian officer.');
     });
 
+    // The panel is the only place a reader meets the cast before opening one
+    // of them, so what is recorded about a Character belongs on it rather than
+    // a page away.
+    it('shows what has been recorded about each Character', () => {
+      characterService.getCharacters.mockReturnValue(
+        of([
+          {
+            id: 'character-1',
+            slug: 'captain-shran',
+            name: 'Captain Shran',
+            rank: 'Commander',
+            species: 'Andorian',
+            faction: 'Starfleet',
+            occupation: 'Executive Officer',
+            shipAssignment: 'USS Kumari',
+            traits: ['Loyal'],
+          },
+        ] as Character[]),
+      );
+
+      const element = render();
+      const entry = element.querySelector('.storytime-cast-entry');
+
+      expect(entry?.textContent).toContain('Commander');
+      expect(entry?.textContent).toContain('Andorian');
+      expect(entry?.textContent).toContain('Starfleet');
+      expect(entry?.textContent).toContain('Executive Officer');
+      expect(entry?.textContent).toContain('USS Kumari');
+      expect(entry?.textContent).toContain('Loyal');
+    });
+
+    it('says so when nothing has been recorded about a Character', () => {
+      characterService.getCharacters.mockReturnValue(
+        of([
+          { id: 'character-1', slug: 'captain-shran', name: 'Shran' },
+        ] as Character[]),
+      );
+
+      const element = render();
+
+      expect(
+        element.querySelector('.storytime-cast-entry')?.textContent,
+      ).toContain('Nothing has been recorded about them yet.');
+    });
+
     it('links each Character to their page', () => {
       characterService.getCharacters.mockReturnValue(
         of([

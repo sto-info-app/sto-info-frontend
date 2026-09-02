@@ -146,9 +146,7 @@
           @if (progress.newChapterCount > 0) {
             <p class="storytime-story__new-chapters">
               {{ progress.newChapterCount }} new
-              {{
-                progress.newChapterCount === 1 ? 'Chapter' : 'Chapters'
-              }}
+              {{ progress.newChapterCount === 1 ? 'Chapter' : 'Chapters' }}
               since you last read.
             </p>
           }
@@ -328,54 +326,34 @@
         aria-label="Cast"
         [hidden]="activeTab !== 'cast'">
         <ul class="storytime-cast">
-          @for (cast of characters; track cast.id) {
-            <li class="storytime-panel-card storytime-panel-card--character">
+          @for (entry of cast; track entry.character.id) {
+            <li
+              appStorytimeCastEntry
+              [entry]="entry"
+              [link]="[
+                '/',
+                appRoutes.STORYTIME,
+                'stories',
+                storySlug,
+                'characters',
+                entry.character.slug,
+              ]">
               <a
-                class="storytime-panel-card__heading"
+                class="cta-icon"
                 [routerLink]="[
                   '/',
                   appRoutes.STORYTIME,
                   'stories',
                   storySlug,
                   'characters',
-                  cast.slug,
+                  entry.character.slug,
                 ]"
-                [title]="cast.name">
-                <span class="storytime-panel-card__name">{{ cast.name }}</span>
+                [title]="'View ' + entry.character.name"
+                [attr.aria-label]="'View ' + entry.character.name">
+                <i
+                  class="fa-solid fa-eye"
+                  aria-hidden="true"></i>
               </a>
-
-              <div class="storytime-panel-card__main">
-                <div class="storytime-panel-card__body storytime-cast__member">
-                  @if (cast.portraitImageThumbnailUrl) {
-                    <img
-                      class="storytime-cast__portrait"
-                      [src]="cast.portraitImageThumbnailUrl"
-                      [alt]="cast.portraitImageAlt ?? ''" />
-                  }
-                  @if (cast.shortBio) {
-                    <p class="storytime-cast__bio">{{ cast.shortBio }}</p>
-                  }
-                </div>
-
-                <div class="storytime-panel-card__controls">
-                  <a
-                    class="cta-icon"
-                    [routerLink]="[
-                      '/',
-                      appRoutes.STORYTIME,
-                      'stories',
-                      storySlug,
-                      'characters',
-                      cast.slug,
-                    ]"
-                    [title]="'View ' + cast.name"
-                    [attr.aria-label]="'View ' + cast.name">
-                    <i
-                      class="fa-solid fa-eye"
-                      aria-hidden="true"></i>
-                  </a>
-                </div>
-              </div>
             </li>
           }
         </ul>

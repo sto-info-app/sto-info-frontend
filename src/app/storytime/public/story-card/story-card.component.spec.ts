@@ -4,6 +4,7 @@ import {
   CompletionState,
   ContentRating,
   Story,
+  StorytimeTagCategory,
 } from 'src/app/models/storytime.models';
 import { StoryCardComponent } from './story-card.component';
 
@@ -27,6 +28,7 @@ describe('StoryCardComponent', () => {
       publishedChapterCount: 3,
       profileImageThumbnailUrl: null,
       profileImageAlt: null,
+      tags: [],
       ...overrides,
     }) as Story;
 
@@ -81,12 +83,17 @@ describe('StoryCardComponent', () => {
     ]);
   });
 
-  // Artwork is optional throughout Storytime: a missing image must render as
-  // nothing at all rather than an empty frame.
-  it('renders no image when the Story has none', () => {
+  // What a Story does not have renders as nothing at all rather than an empty
+  // frame, a warning nobody needs, or a bare row: artwork, the Mature warning
+  // and the tag row are each optional throughout Storytime.
+  it.each([
+    ['no image when the Story has none', 'img'],
+    ['no warning icon for a General rating', '.fa-triangle-exclamation'],
+    ['no tag row for an untagged Story', '.storytime-tag-row'],
+  ])('renders %s', (_case, selector) => {
     const element = render(buildStory());
 
-    expect(element.querySelector('img')).toBeNull();
+    expect(element.querySelector(selector)).toBeNull();
   });
 
   it('renders the image with its alternative text when present', () => {
@@ -109,15 +116,34 @@ describe('StoryCardComponent', () => {
     expect(element.textContent).toContain('Mature');
   });
 
-  it('does not flag a General rating', () => {
-    const element = render(buildStory());
-
-    expect(element.querySelector('.fa-triangle-exclamation')).toBeNull();
-  });
-
   it('omits the summary when there is none', () => {
     const element = render(buildStory({ shortDescription: null }));
 
     expect(element.querySelector('.storytime-story-card__summary')).toBeNull();
+  });
+
+  // The same row the Spotlight panel closes with, so what a Story is about
+  // reads the same wherever a reader meets it.
+  it('closes the panel with what the Story is tagged with', () => {
+    const element = render(
+      buildStory({
+        tags: [
+          {
+            id: 'tag-1',
+            slug: 'first-contact',
+            name: 'First contact',
+            description: null,
+            category: StorytimeTagCategory.THEME,
+            displayOrder: 0,
+          },
+        ],
+      }),
+    );
+
+    expect(
+      [...element.querySelectorAll('.storytime-tag-row__tag')].map(tag =>
+        tag.textContent?.trim(),
+      ),
+    ).toEqual(['First contact']);
   });
 });

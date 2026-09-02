@@ -80,6 +80,55 @@ describe('CharacterListComponent', () => {
     expect(characterService.getMyCharacters).toHaveBeenCalledWith('story-1');
   });
 
+  // The panel is where a creator checks their cast at a glance, so what has
+  // been recorded about a Character belongs on it rather than a page away.
+  it('shows what has been recorded about a Character', () => {
+    characterService.getMyCharacters.mockReturnValue(
+      of([
+        {
+          ...buildCharacter('a', 'Shran'),
+          rank: 'Commander',
+          species: 'Andorian',
+          faction: 'Starfleet',
+          occupation: 'Executive Officer',
+          affiliation: 'Andorian Imperial Guard',
+          shipAssignment: 'USS Kumari',
+          shortBio: 'An Andorian officer.',
+          traits: ['Loyal'],
+        },
+      ]),
+    );
+
+    const entry = render().querySelector('.storytime-cast-entry');
+
+    expect(entry?.textContent).toContain('Commander');
+    expect(entry?.textContent).toContain('Andorian');
+    expect(entry?.textContent).toContain('Starfleet');
+    expect(entry?.textContent).toContain('Executive Officer');
+    expect(entry?.textContent).toContain('Andorian Imperial Guard');
+    expect(entry?.textContent).toContain('USS Kumari');
+    expect(entry?.textContent).toContain('An Andorian officer.');
+    expect(entry?.textContent).toContain('Loyal');
+  });
+
+  it('says so when nothing has been recorded about a Character', () => {
+    const entry = render().querySelector('.storytime-cast-entry');
+
+    expect(entry?.textContent).toContain(
+      'Nothing has been recorded about them yet.',
+    );
+  });
+
+  it('offers a way to edit each Character', () => {
+    const element = render();
+
+    expect(
+      element
+        .querySelector('[aria-label="Edit this Character"]')
+        ?.getAttribute('href'),
+    ).toBe('/storytime/manage/characters/a');
+  });
+
   it('explains a Story with no Characters yet', () => {
     characterService.getMyCharacters.mockReturnValue(of([]));
 

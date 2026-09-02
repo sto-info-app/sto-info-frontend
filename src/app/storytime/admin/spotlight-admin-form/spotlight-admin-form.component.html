@@ -182,26 +182,29 @@
             </p>
           </div>
 
-          <div class="lcars-input-container tangerine">
-            <label for="spotlight-image">Override image ID</label>
-            <input
-              id="spotlight-image"
-              type="text"
-              formControlName="overrideImageId" />
-            <p class="field-hint">Leave blank to use the work’s own banner.</p>
-          </div>
-
-          <div class="lcars-input-container tangerine">
-            <label for="spotlight-image-alt">Override image description</label>
-            <input
-              id="spotlight-image-alt"
-              type="text"
-              formControlName="overrideImageAlt"
-              maxlength="300" />
-          </div>
         </div>
       </div>
     </section>
+
+    <!--
+      Artwork waits for the entry to exist. It is set against a saved entry
+      rather than staged into this form, so offering it before the first save
+      would mean holding a file with nowhere to put it.
+    -->
+    @if (entry) {
+      <section class="storytime-section">
+        <div class="storytime-panel">
+          <app-storytime-image-manager
+            [slot]="imageSlots.SPOTLIGHT_OVERRIDE"
+            [targetId]="entry.id"
+            [imageUrl]="entry.overrideImageUrl"
+            [imageAlt]="entry.overrideImageAlt"
+            altControlName="overrideImageAlt"
+            (changed)="onImageChanged($event)"
+          ></app-storytime-image-manager>
+        </div>
+      </section>
+    }
 
     <section class="storytime-section">
       <div class="lcars-text-bar small-lcars-bar-gap">

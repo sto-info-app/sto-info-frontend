@@ -174,6 +174,13 @@ export interface Story {
   rating: number;
   publishedAt: string | null;
   lastContentUpdateAt: string | null;
+  /**
+   * What the Story is about, in vocabulary order.
+   *
+   * Empty on the creator's own management views, which read and set tags
+   * through the tag routes rather than carrying them alongside the Story.
+   */
+  tags: StorytimeTag[];
 }
 
 /**
@@ -235,9 +242,15 @@ export interface StoryRequest {
   completionState?: CompletionState;
   contentRating?: ContentRating;
   languageCode?: string;
-  bannerImageId?: string;
+  /**
+   * Sent only when there is a banner to describe.
+   *
+   * The picture itself is set through the artwork endpoints, so a Story can
+   * only ever point at an image this site was given. The server refuses a
+   * description of an empty slot.
+   */
   bannerImageAlt?: string;
-  profileImageId?: string;
+  /** Sent only when there is a profile image to describe. */
   profileImageAlt?: string;
   /** Sent on update so a stale edit is rejected rather than overwriting. */
   version?: number;
@@ -376,6 +389,13 @@ export interface Arc {
   profileImageAlt: string | null;
   rating: number;
   publishedAt: string | null;
+  /**
+   * What the Arc is about, in vocabulary order.
+   *
+   * Empty on the curator's own management views, which read and set tags
+   * through the tag routes rather than carrying them alongside the Arc.
+   */
+  tags: StorytimeTag[];
 }
 
 /**
@@ -680,6 +700,16 @@ export interface Spotlight {
   endsAt: string | null;
   story: Story | null;
   arc: Arc | null;
+  /**
+   * Who wrote or curated the featured work.
+   *
+   * Named on the entry rather than read off the work, because an Arc carries
+   * only its curator's identifier. Null when nothing is featured, and null
+   * when whoever made it no longer has an account.
+   */
+  author: StorytimeAuthor | null;
+  /** The tags on the featured work, in vocabulary order. */
+  tags: StorytimeTag[];
 }
 
 /**
@@ -709,8 +739,6 @@ export interface CreateSpotlightRequest {
   slug?: string;
   /** Null and absent both mean "there is none": the server accepts either. */
   selectionReason?: string | null;
-  overrideImageId?: string | null;
-  overrideImageAlt?: string | null;
   displayPriority?: number;
   startsAt: string;
   endsAt?: string | null;
@@ -724,7 +752,16 @@ export interface CreateSpotlightRequest {
  */
 export type UpdateSpotlightRequest = Partial<
   Omit<CreateSpotlightRequest, 'entityType'>
-> & { isPublished?: boolean };
+> & {
+  isPublished?: boolean;
+  /**
+   * Sent only when there is artwork to describe.
+   *
+   * Absent from the create request because a new entry has none yet: the
+   * picture is uploaded against the saved entry.
+   */
+  overrideImageAlt?: string;
+};
 
 /**
  * Somebody helping curate an Arc.
@@ -788,9 +825,9 @@ export interface ArcRequest {
   description?: string;
   visibility?: StorytimeVisibility;
   languageCode?: string;
-  bannerImageId?: string;
+  /** Sent only when there is a banner to describe. */
   bannerImageAlt?: string;
-  profileImageId?: string;
+  /** Sent only when there is a profile image to describe. */
   profileImageAlt?: string;
   /** Sent on update so a stale edit is refused rather than overwriting. */
   version?: number;
@@ -816,7 +853,10 @@ export interface ChapterMedia {
   provider: MediaProvider;
   externalId: string;
   embedUrl: string;
+  /** The still held for every video, and so what a page falls back to. */
   thumbnailUrl: string;
+  /** The full-size still, which YouTube does not hold for every video. */
+  thumbnailHdUrl: string;
   title: string | null;
   caption: string | null;
   startSeconds: number | null;
@@ -986,7 +1026,7 @@ export interface CharacterRequest {
   slug?: string;
   shortBio?: string;
   biographySource?: string;
-  portraitImageId?: string;
+  /** Sent only when there is a portrait to describe. */
   portraitImageAlt?: string;
   species?: string;
   faction?: string;
@@ -1148,7 +1188,7 @@ export interface ChapterRequest {
   synopsis?: string;
   contentSource?: string;
   languageCode?: string;
-  coverImageId?: string;
+  /** Sent only when there is a cover to describe. */
   coverImageAlt?: string;
   /** Sent on update so a stale edit is refused rather than overwriting. */
   version?: number;

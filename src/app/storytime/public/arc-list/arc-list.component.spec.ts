@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { Arc } from 'src/app/models/storytime.models';
+import { Arc, StorytimeTagCategory } from 'src/app/models/storytime.models';
 import { ArcService } from '../../arc.service';
 import { ArcListComponent } from './arc-list.component';
 
@@ -24,6 +24,7 @@ describe('ArcListComponent', () => {
       shortDescription: 'A summary',
       profileImageUrl: null,
       profileImageAlt: null,
+      tags: [],
       ...overrides,
     }) as Arc;
 
@@ -98,6 +99,41 @@ describe('ArcListComponent', () => {
     expect(
       element.querySelector('.storytime-arc-list__image')?.getAttribute('alt'),
     ).toBe('A fleet');
+  });
+
+  // The Arc listing says what an Arc is about the way the Spotlight panel and
+  // the Story listing do.
+  it('closes each panel with what the Arc is tagged with', () => {
+    arcService.getArcs.mockReturnValue(
+      of([
+        buildArc({
+          tags: [
+            {
+              id: 'tag-1',
+              slug: 'war',
+              name: 'War',
+              description: null,
+              category: StorytimeTagCategory.THEME,
+              displayOrder: 0,
+            },
+          ],
+        }),
+      ]),
+    );
+
+    const element = render();
+
+    expect(
+      [...element.querySelectorAll('.storytime-tag-row__tag')].map(tag =>
+        tag.textContent?.trim(),
+      ),
+    ).toEqual(['War']);
+  });
+
+  it('renders no tag row for an untagged Arc', () => {
+    const element = render();
+
+    expect(element.querySelector('.storytime-tag-row')).toBeNull();
   });
 
   it('explains a list that could not be loaded', () => {

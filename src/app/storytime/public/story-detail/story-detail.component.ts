@@ -15,6 +15,7 @@ import { finalize, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { AddToListComponent } from '../../shared/add-to-list/add-to-list.component';
+import { StorytimeCastEntryComponent } from '../../shared/cast-entry/cast-entry.component';
 import { CommentThreadComponent } from '../../shared/comment-thread/comment-thread.component';
 import { SettingHelpComponent } from '../../shared/setting-help/setting-help.component';
 import { FollowButtonComponent } from '../../shared/follow-button/follow-button.component';
@@ -40,6 +41,10 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ChapterService } from '../../chapter.service';
 import { CharacterService } from '../../character.service';
+import {
+  CharacterPanelVm,
+  buildCharacterPanelVm,
+} from '../../character-panel.utility';
 import { CrewService } from '../../crew.service';
 import { ProgressService } from '../../progress.service';
 import {
@@ -83,6 +88,7 @@ export type StoryTab = 'chapters' | 'cast' | 'credits';
     AddToListComponent,
     CommentThreadComponent,
     SettingHelpComponent,
+    StorytimeCastEntryComponent,
   ],
 })
 export class StoryDetailComponent implements OnInit {
@@ -135,6 +141,15 @@ export class StoryDetailComponent implements OnInit {
 
   /** The Story's cast, in display order. */
   characters: Character[] = [];
+
+  /**
+   * The same cast as the panels render them.
+   *
+   * Built when the cast lands rather than read off each Character in the
+   * template, so a page with a long cast does not work the same facts out
+   * again on every check.
+   */
+  cast: CharacterPanelVm[] = [];
 
   /** The Story's credits, in credits-roll order. */
   credits: CrewCredit[] = [];
@@ -286,6 +301,7 @@ export class StoryDetailComponent implements OnInit {
       )
       .subscribe(characters => {
         this.characters = characters;
+        this.cast = characters.map(buildCharacterPanelVm);
       });
   }
 
