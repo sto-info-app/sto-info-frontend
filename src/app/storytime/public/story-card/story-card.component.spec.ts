@@ -83,12 +83,17 @@ describe('StoryCardComponent', () => {
     ]);
   });
 
-  // Artwork is optional throughout Storytime: a missing image must render as
-  // nothing at all rather than an empty frame.
-  it('renders no image when the Story has none', () => {
+  // What a Story does not have renders as nothing at all rather than an empty
+  // frame, a warning nobody needs, or a bare row: artwork, the Mature warning
+  // and the tag row are each optional throughout Storytime.
+  it.each([
+    ['no image when the Story has none', 'img'],
+    ['no warning icon for a General rating', '.fa-triangle-exclamation'],
+    ['no tag row for an untagged Story', '.storytime-tag-row'],
+  ])('renders %s', (_case, selector) => {
     const element = render(buildStory());
 
-    expect(element.querySelector('img')).toBeNull();
+    expect(element.querySelector(selector)).toBeNull();
   });
 
   it('renders the image with its alternative text when present', () => {
@@ -109,12 +114,6 @@ describe('StoryCardComponent', () => {
 
     expect(element.querySelector('.fa-triangle-exclamation')).not.toBeNull();
     expect(element.textContent).toContain('Mature');
-  });
-
-  it('does not flag a General rating', () => {
-    const element = render(buildStory());
-
-    expect(element.querySelector('.fa-triangle-exclamation')).toBeNull();
   });
 
   it('omits the summary when there is none', () => {
@@ -146,11 +145,5 @@ describe('StoryCardComponent', () => {
         tag.textContent?.trim(),
       ),
     ).toEqual(['First contact']);
-  });
-
-  it('renders no tag row for an untagged Story', () => {
-    const element = render(buildStory());
-
-    expect(element.querySelector('.storytime-tag-row')).toBeNull();
   });
 });
