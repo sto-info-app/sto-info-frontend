@@ -98,7 +98,10 @@ describe('DashboardService', () => {
       });
 
       service.getUserSettings().subscribe(settings => {
-        expect(settings).toEqual({ privacyMode: true });
+        expect(settings).toEqual({
+          privacyMode: true,
+          sessionTimeoutMinutes: 30,
+        });
       });
 
       const req = httpMock.expectOne(API_URLS.USER_SETTINGS);
@@ -106,7 +109,7 @@ describe('DashboardService', () => {
       expect(req.request.headers.get('Authorization')).toBe(
         'Bearer fake-token',
       );
-      req.flush({ privacyMode: true });
+      req.flush({ privacyMode: true, sessionTimeoutMinutes: 30 });
     });
 
     it('should return error if no token found', () => {
@@ -131,30 +134,40 @@ describe('DashboardService', () => {
         headers: new HttpHeaders().set('Authorization', 'Bearer fake-token'),
       });
 
-      service.updateUserSettings({ privacyMode: true }).subscribe(settings => {
-        expect(settings).toEqual({ privacyMode: true });
-      });
+      service
+        .updateUserSettings({ privacyMode: true, sessionTimeoutMinutes: 30 })
+        .subscribe(settings => {
+          expect(settings).toEqual({
+            privacyMode: true,
+            sessionTimeoutMinutes: 30,
+          });
+        });
 
       const req = httpMock.expectOne(API_URLS.USER_SETTINGS);
       expect(req.request.method).toBe('PUT');
-      expect(req.request.body).toEqual({ privacyMode: true });
+      expect(req.request.body).toEqual({
+        privacyMode: true,
+        sessionTimeoutMinutes: 30,
+      });
       expect(req.request.headers.get('Authorization')).toBe(
         'Bearer fake-token',
       );
-      req.flush({ privacyMode: true });
+      req.flush({ privacyMode: true, sessionTimeoutMinutes: 30 });
     });
 
     it('should return error if no token found', () => {
       mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
 
-      service.updateUserSettings({ privacyMode: false }).subscribe({
-        next: () => {
-          throw new Error('should have failed');
-        },
-        error: error => {
-          expect(error.message).toBe('No token found');
-        },
-      });
+      service
+        .updateUserSettings({ privacyMode: false, sessionTimeoutMinutes: 30 })
+        .subscribe({
+          next: () => {
+            throw new Error('should have failed');
+          },
+          error: error => {
+            expect(error.message).toBe('No token found');
+          },
+        });
 
       httpMock.expectNone(API_URLS.USER_SETTINGS);
     });
