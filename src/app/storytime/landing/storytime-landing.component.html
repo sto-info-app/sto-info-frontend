@@ -19,6 +19,11 @@
               <span class="storytime-panel-card__name">{{
                 entry.headline
               }}</span>
+              <span class="storytime-panel-card__marks">
+                <i
+                  class="fa-solid fa-star"
+                  aria-hidden="true"></i>
+              </span>
             </a>
 
             @if (imageFor(entry)) {
@@ -29,21 +34,127 @@
             }
 
             <div class="storytime-panel-card__body">
-              <p class="storytime-spotlight__work">
-                <i
-                  class="fa-solid fa-star"
-                  aria-hidden="true"></i>
-                {{ entry.story ? entry.story.title : entry.arc?.title }}
-              </p>
+              <!--
+                Captioned the way the facts below them are, and in the words
+                the editor who wrote them saw on their own form: the headline
+                on the bar is the editor talking, and these say which part of
+                the panel is which.
+              -->
+              <div class="info-item storytime-spotlight__field">
+                <span class="label">{{ targetLabelFor(entry) }}</span>
+                <!--
+                  The work's own title is a second way in, for a reader who
+                  recognises the Story rather than the editor's headline.
+                -->
+                <a
+                  class="storytime-spotlight__work storytime-spotlight__work-link"
+                  [routerLink]="linkFor(entry)"
+                  [title]="titleFor(entry)"
+                  >{{ titleFor(entry) }}</a
+                >
+              </div>
 
-              <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
+              <div class="info-item storytime-spotlight__field">
+                <span class="label">Summary</span>
+                <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
+              </div>
 
               @if (entry.selectionReason) {
-                <p class="storytime-spotlight__reason">
-                  {{ entry.selectionReason }}
-                </p>
+                <div class="info-item storytime-spotlight__field">
+                  <span class="label">Why it was chosen</span>
+                  <p class="storytime-spotlight__reason">
+                    {{ entry.selectionReason }}
+                  </p>
+                </div>
               }
+
+              <!--
+                The same facts the Story page opens with. A reader choosing
+                whether to start something wants to know how long it is, how
+                finished it is and who wrote it before they click, not after.
+                An Arc has none of the first three — it is a reading order
+                rather than a text — so it shows what it has.
+              -->
+              <div class="info-grid storytime-facts">
+                @if (entry.story) {
+                  <div class="info-item">
+                    <span class="label">Status</span>
+                    <span class="value">{{
+                      completionLabels[entry.story.completionState]
+                    }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="label">Content rating</span>
+                    <span class="value">{{
+                      ratingLabels[entry.story.contentRating]
+                    }}</span>
+                  </div>
+                }
+
+                @if (entry.author) {
+                  <div class="info-item">
+                    <span class="label">{{
+                      entry.story ? 'Author' : 'Curator'
+                    }}</span>
+                    <span class="value">
+                      <!--
+                        A name only leads somewhere when its owner has chosen
+                        to be listed in the registry. Everybody else is
+                        credited by name and left alone.
+                      -->
+                      @if (entry.author.publiclyVisible) {
+                        <a
+                          class="storytime-facts__author"
+                          [routerLink]="[
+                            '/',
+                            appRoutes.COMMUNITY,
+                            'registry',
+                            'profiles',
+                            entry.author.username,
+                          ]"
+                          >{{ entry.author.username }}</a
+                        >
+                      } @else {
+                        {{ entry.author.username }}
+                      }
+                    </span>
+                  </div>
+                }
+
+                @if (entry.story) {
+                  <div class="info-item">
+                    <span class="label">Chapters</span>
+                    <span class="value">{{
+                      entry.story.publishedChapterCount
+                    }}</span>
+                  </div>
+                }
+
+                <div class="info-item">
+                  <span class="label">Rating</span>
+                  <span class="value">{{ ratingFor(entry) }}</span>
+                </div>
+              </div>
+
+              <div class="storytime-spotlight__actions">
+                <a
+                  class="lcars-btn lcars-btn-auto green"
+                  [routerLink]="linkFor(entry)">
+                  <i
+                    class="fa-solid fa-book-open"
+                    aria-hidden="true"></i>
+                  {{ readLabelFor(entry) }}
+                </a>
+              </div>
             </div>
+
+            <!--
+              What the work is about, closing the panel off on a ground of its
+              own: a row of chips is not a paragraph, and left in the body it
+              read as one more thing the editor had written. The same row the
+              Story and Arc listings close their panels with.
+            -->
+            <app-storytime-tag-row [tags]="entry.tags"></app-storytime-tag-row>
           </li>
         }
       </ul>

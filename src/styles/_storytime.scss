@@ -612,6 +612,7 @@ app-storytime-editor-actions {
 .storytime-search__kinds,
 .storytime-removed__actions,
 .storytime-story__progress-actions,
+.storytime-spotlight__actions,
 .storytime-story__social,
 .storytime-story__report,
 .storytime-arc__social,
@@ -2031,9 +2032,27 @@ $storytime-landing-colours: (
     }
   }
 
+  // On the landing page the work's title is the link itself rather than a
+  // paragraph about it, and an anchor arrives inline with none of the block
+  // flow a paragraph gets for nothing.
+  &__work-link {
+    display: block;
+  }
+
   &__reason,
   &__summary {
     color: vars.$lcars-white;
+  }
+
+  // A captioned part of the panel, borrowing the caption a fact carries. The
+  // paragraph inside it brings the margin every paragraph has, which would put
+  // the next caption a line and a half below the last answer.
+  &__field {
+    margin-bottom: 0.75rem;
+
+    p {
+      margin: 0;
+    }
   }
 
   &__dates {

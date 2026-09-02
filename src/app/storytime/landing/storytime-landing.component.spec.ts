@@ -2,6 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import {
+  CompletionState,
+  ContentRating,
+  CONTENT_RATING_LABELS,
   Spotlight,
   SpotlightEntityType,
   StorySort,
@@ -14,7 +17,10 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import { FollowService } from '../follow.service';
 import { SpotlightService } from '../spotlight.service';
 import { StoryService } from '../story.service';
-import { STORYTIME_COPY } from '../storytime.constants';
+import {
+  COMPLETION_STATE_LABELS,
+  STORYTIME_COPY,
+} from '../storytime.constants';
 import { StorytimeService } from '../storytime.service';
 import { StorytimeLandingComponent } from './storytime-landing.component';
 
@@ -52,8 +58,21 @@ describe('StorytimeLandingComponent', () => {
         title: 'A Fine Story',
         bannerImageUrl: null,
         bannerImageAlt: null,
+        completionState: CompletionState.COMPLETED,
+        contentRating: ContentRating.MATURE,
+        publishedChapterCount: 12,
+        rating: 7,
       },
       arc: null,
+      author: { username: 'Kira', publiclyVisible: true },
+      tags: [
+        {
+          id: 'tag-1',
+          slug: 'slow-burn',
+          name: 'Slow burn',
+          description: 'Takes its time.',
+        },
+      ],
       ...overrides,
     }) as Spotlight;
 
@@ -185,6 +204,172 @@ describe('StorytimeLandingComponent', () => {
       );
 
       expect(link?.getAttribute('href')).toContain('arcs/the-long-war');
+    });
+
+    // Somebody who recognises the Story rather than the editor's headline
+    // should be able to click the name they recognise.
+    it('sends a reader to the featured Story from its title', () => {
+      const link = render().querySelector(
+        '.storytime-panel-card--spotlight .storytime-spotlight__work-link',
+      );
+
+      expect(link?.textContent).toContain('A Fine Story');
+      expect(link?.getAttribute('href')).toContain('stories/a-fine-story');
+    });
+
+    it('offers a button that opens the featured Story', () => {
+      const button = render().querySelector(
+        '.storytime-spotlight__actions .lcars-btn',
+      );
+
+      expect(button?.textContent).toContain('Read the Story');
+      expect(button?.getAttribute('href')).toContain('stories/a-fine-story');
+    });
+
+    it('offers a button that opens the featured Arc', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([
+          buildEntry({
+            entityType: SpotlightEntityType.ARC,
+            story: null,
+            arc: {
+              id: 'arc-1',
+              slug: 'the-long-war',
+              title: 'The Long War',
+            } as never,
+          }),
+        ]),
+      );
+
+      const button = render().querySelector(
+        '.storytime-spotlight__actions .lcars-btn',
+      );
+
+      expect(button?.textContent).toContain('Read the Arc');
+      expect(button?.getAttribute('href')).toContain('arcs/the-long-war');
+    });
+
+    // The same facts the Story page opens with: a reader choosing whether to
+    // start something wants them before they click, not after.
+    it('shows what the featured Story is', () => {
+      const text = render().textContent ?? '';
+
+      expect(text).toContain(
+        COMPLETION_STATE_LABELS[CompletionState.COMPLETED],
+      );
+      expect(text).toContain(CONTENT_RATING_LABELS[ContentRating.MATURE]);
+      expect(text).toContain('12');
+      expect(text).toContain('Kira');
+      expect(text).toContain('Slow burn');
+    });
+
+    it('links a listed author to their profile', () => {
+      const link = render().querySelector(
+        '.storytime-panel-card--spotlight .storytime-facts__author',
+      );
+
+      expect(link?.getAttribute('href')).toContain('registry/profiles/Kira');
+    });
+
+    // Publishing credits somebody by name whatever they have chosen about
+    // being found, but an unlisted profile has no page to open.
+    it('credits an unlisted author without linking to them', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([
+          buildEntry({
+            author: { username: 'Kira', publiclyVisible: false },
+          }),
+        ]),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('Kira');
+      expect(
+        element.querySelector(
+          '.storytime-panel-card--spotlight .storytime-facts__author',
+        ),
+      ).toBeNull();
+    });
+
+    // An Arc is a reading order rather than a text, so the facts a Story has
+    // and it has not are left out instead of shown empty.
+    it('shows an Arc only the facts an Arc has', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([
+          buildEntry({
+            entityType: SpotlightEntityType.ARC,
+            story: null,
+            arc: {
+              id: 'arc-1',
+              slug: 'the-long-war',
+              title: 'The Long War',
+              rating: 4,
+            } as never,
+            tags: [],
+          }),
+        ]),
+      );
+
+      // Scoped to the panel: the Story lists further down the page carry
+      // captions of their own with the same words on them.
+      const panel = render().querySelector('.storytime-panel-card--spotlight');
+
+      expect(panel?.textContent).toContain('Curator');
+      expect(panel?.textContent).not.toContain('Chapters');
+      expect(panel?.textContent).not.toContain('Content rating');
+    });
+
+    it('shows no tags when the featured work carries none', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([buildEntry({ tags: [] })]),
+      );
+
+      expect(render().querySelector('.storytime-tag-row')).toBeNull();
+    });
+
+    // The editor's own words for these, so the caption on the panel and the
+    // caption on the form that filled it in say the same thing.
+    it('captions the work, the summary and the reason', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([buildEntry({ selectionReason: 'It stayed with us.' })]),
+      );
+
+      const captions = [
+        ...render().querySelectorAll(
+          '.storytime-panel-card--spotlight .storytime-spotlight__field .label',
+        ),
+      ].map(label => label.textContent?.trim());
+
+      expect(captions).toEqual([
+        'Featured Story',
+        'Summary',
+        'Why it was chosen',
+      ]);
+    });
+
+    it('captions an Arc as an Arc', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([
+          buildEntry({
+            entityType: SpotlightEntityType.ARC,
+            story: null,
+            arc: { id: 'arc-1', slug: 'the-long-war' } as never,
+          }),
+        ]),
+      );
+
+      expect(render().textContent).toContain('Featured Arc');
+    });
+
+    // The star marks the selection itself, so it belongs on the bar carrying
+    // the editor's headline rather than beside the work's own title.
+    it('marks the panel with a star on its heading', () => {
+      const star = render().querySelector(
+        '.storytime-panel-card--spotlight .storytime-panel-card__heading .fa-star',
+      );
+
+      expect(star).not.toBeNull();
     });
 
     it('shows why the work was chosen when an editor said', () => {

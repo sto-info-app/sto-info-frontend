@@ -700,6 +700,16 @@ export interface Spotlight {
   endsAt: string | null;
   story: Story | null;
   arc: Arc | null;
+  /**
+   * Who wrote or curated the featured work.
+   *
+   * Named on the entry rather than read off the work, because an Arc carries
+   * only its curator's identifier. Null when nothing is featured, and null
+   * when whoever made it no longer has an account.
+   */
+  author: StorytimeAuthor | null;
+  /** The tags on the featured work, in vocabulary order. */
+  tags: StorytimeTag[];
 }
 
 /**
