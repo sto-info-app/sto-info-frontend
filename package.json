@@ -146,8 +146,8 @@
     "usePathForSuiteName": "true"
   },
   "overrides": {
-    "@hono/node-server": "2.0.11",
-    "qs": "6.15.2",
+    "@puppeteer/browsers": "3.2.1",
+    "qs": "6.16.0",
     "tmp": "0.2.7",
     "uuid": "14.0.0"
   }
