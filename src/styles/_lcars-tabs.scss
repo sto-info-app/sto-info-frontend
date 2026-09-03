@@ -12,6 +12,10 @@
 /// and how it behaves when it runs out of room. Three pages had grown three
 /// answers to each of those; a caller should now need nothing but the include.
 ///
+/// A strip that will not fit its container wraps onto as many rows as it needs
+/// and never scrolls: a sideways scrollbar hides tabs behind an edge, and a
+/// tab nobody can see is a section nobody knows is there.
+///
 /// Mark the current tab with an `active` class.
 ///
 /// @param {Length} $min-width - Minimum width of a single tab.
@@ -20,16 +24,20 @@
     display: flex;
 
     // The global `nav` styles target the header's button pad, but a strip of
-    // `a` tabs is a `nav` too and picks them up: they wrap it onto a second
-    // row, cap it at 660px and push it to the right. Undo all three so the
-    // strip is laid out by the rules below whatever element carries it.
-    flex-wrap: nowrap;
-    justify-content: flex-start;
+    // `a` tabs is a `nav` too and picks them up: they cap it at 660px, push it
+    // to the right and centre its rows. Undo all three, and state the wrapping
+    // the strip does want rather than inheriting it, so the strip is laid out
+    // by the rules below whatever element carries it. Rows pack from the top
+    // and the strip is only ever as tall as the rows it ended up with — one on
+    // a wide page, more on a narrow one — so what sits below the strip moves
+    // down by exactly the rows that were added.
+    flex-wrap: wrap;
+    place-content: flex-start flex-start;
     max-width: none;
     align-items: stretch;
     gap: 6px;
     margin: 0.5rem 0 1rem;
-    height: 40px;
+    min-height: 40px;
 
     // The rule that closes the strip, drawn by the strip itself rather than by
     // whatever happens to sit beneath it — a panel container on one page, a
@@ -41,11 +49,11 @@
     padding-bottom: 4px;
     border-bottom: 3px solid #455580;
 
-    // When the labels stop fitting the strip scrolls sideways rather than
-    // wrapping to a second row, which would strand the LCARS end cap in the
-    // middle of the strip, or shrinking the labels until they say nothing.
-    overflow-x: auto;
-    scrollbar-width: thin;
+    // No sideways scrolling: when the labels stop fitting, the strip grows a
+    // second row instead. The rows below the first read as part of the same
+    // block because every row is filled edge to edge — see the grow factors
+    // on the tabs and the end cap.
+    overflow-x: visible;
   }
 
   .lcars-tab {
@@ -59,15 +67,26 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+
+    // The row sets the height — stretched tabs all match the tallest label in
+    // their own row — and no row is ever shorter than a single-line tab.
+    min-height: 40px;
 
     // The same global `nav` styles give every anchor a fixed 210px width; tabs
     // are sized by their label plus the padding below instead, and never
     // shrink below it — a tab that has given up half its label to fit is worse
     // than a strip you have to scroll.
     width: auto;
+    max-width: 100%;
     min-width: $min-width;
-    flex: 0 0 auto;
+
+    // Sized by the label, but able to take up slack: on a row that ends in the
+    // end cap the cap outgrows the tabs by two orders of magnitude and they
+    // keep their label width, while a wrapped row that has no cap on it is
+    // shared out between its own tabs so it still reaches the right-hand edge.
+    // Every row is therefore a solid band, which is what stops a wrapped strip
+    // looking like a list of buttons that happened to run on.
+    flex: 1 0 auto;
     white-space: nowrap;
 
     // A little more room before the label than after it. The first tab carries
@@ -110,21 +129,34 @@
   }
 
   .lcars-tabs-filler {
-    flex: 1 1 auto;
+    // Grows a hundred times faster than a tab, so the row it lands on — the
+    // last one, wherever that falls — gives it the slack and leaves the tabs
+    // at their label width. It is measured at nothing and may shrink to
+    // nothing, which is what keeps it from wrapping: a cap wide enough to
+    // count as an item of its own would be pushed onto a row by itself the
+    // moment the tabs filled the last one, and a bare end cap alone on a line
+    // is the one thing a wrapped strip must not do. Given no room it is simply
+    // not drawn.
+    flex: 100 1 0;
     align-self: stretch;
-    min-width: 40px;
+    min-width: 0;
     border-radius: 6px 20px 0 0;
     background-color: #455580;
   }
 
-  // Narrow enough that the strip is going to scroll whatever we do, so the
-  // labels give up their generous padding first and the end cap — which only
-  // exists to fill space there is none of — goes entirely.
+  // Narrow enough that the strip is going to wrap whatever we do, so the
+  // labels give up their generous padding first, a label with no room for one
+  // line takes two rather than run off the side of the page, and the end cap —
+  // which only exists to fill space there is none of — goes entirely, leaving
+  // the tabs themselves to fill the last row.
   @media (width <= 768px) {
     .lcars-tab {
       min-width: 0;
-      padding: 0 14px 0 20px;
+      padding: 8px 14px 8px 20px;
       font-size: 1rem;
+      white-space: normal;
+      text-align: center;
+      line-height: 1.15;
     }
 
     .lcars-tabs-filler {
