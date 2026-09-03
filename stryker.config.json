@@ -3,7 +3,7 @@
   "packageManager": "npm",
   "reporters": ["html", "clear-text", "progress"],
   "testRunner": "jest",
-  "testRunnerNodeArgs": ["--max-old-space-size=1024"],
+  "testRunnerNodeArgs": ["--max-old-space-size=2048"],
   "jest": {
     "projectType": "custom",
     "configFile": "jest.config.cjs",
@@ -33,7 +33,7 @@
   "checkers": ["typescript"],
   "tsconfigFile": "tsconfig.stryker.json",
   "coverageAnalysis": "perTest",
-  "concurrency": 2,
+  "concurrency": 4,
   "timeoutMS": 60000,
   "timeoutFactor": 1.5,
   "ignoreStatic": true,
