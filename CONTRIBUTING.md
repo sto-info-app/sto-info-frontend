@@ -46,7 +46,14 @@ git commit -s -m "Your descriptive commit message"
 
 By signing off on your commits, you certify that you have the right to submit the code under the project's licence.
 
-**Local check (Husky):** This repo uses [Husky](https://typicode.github.io/husky/) to run a Git `commit-msg` hook. The hook (see [.husky/commit-msg](.husky/commit-msg)) ensures every commit message contains a `Signed-off-by` line. If you commit without it, the hook will reject the commit and remind you to use `git commit -s` or add the line manually. DCO is also enforced in CI via the [DCO workflow](.github/workflows/dco.yml).
+**Local checks (Husky):** This repo uses [Husky](https://typicode.github.io/husky/) to run two Git hooks, both installed by `npm install`:
+
+- **`commit-msg`** (see [.husky/commit-msg](.husky/commit-msg)) ensures every commit message contains a `Signed-off-by` line. If you commit without it, the hook will reject the commit and remind you to use `git commit -s` or add the line manually. DCO is also enforced in CI via the [DCO workflow](.github/workflows/dco.yml).
+- **`pre-commit`** (see [.husky/pre-commit](.husky/pre-commit)) runs [lint-staged](https://github.com/lint-staged/lint-staged) over your staged files, matching what CI checks: `eslint --fix` and `prettier --write` on TypeScript and JavaScript, `eslint --fix` on Angular templates, and `stylelint --fix` on CSS and SCSS. Fixes are applied in place and restaged.
+
+Write hook scripts as bare commands: no shebang, and no `. "$(dirname "$0")/_/husky.sh"` line. Husky invokes them through `.husky/_/h` with `sh -e` and already puts `node_modules/.bin` on `PATH`. Both lines are deprecated in husky 9 and will break the hook in husky 10.
+
+To skip the hooks for a single commit — rarely a good idea — use `git commit --no-verify`.
 
 ## Code of Conduct
 
