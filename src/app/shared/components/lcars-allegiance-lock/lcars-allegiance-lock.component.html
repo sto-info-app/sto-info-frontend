@@ -1,0 +1,34 @@
+<div class="lcars-allegiance-lock-container">
+  <div class="lcars-text-bar">
+    <span class="go-october-sunset">{{ featureName }} Locked</span>
+  </div>
+
+  <div class="lcars-allegiance-lock-body">
+    <i
+      class="fas fa-lock lock-icon"
+      aria-hidden="true"
+    ></i>
+    <p class="lock-message">
+      Requires a general allegiance of Federation or Klingon.
+      @if (currentAllegiance) {
+        <br />{{ captainLabel }} is currently {{ currentAllegiance }}.
+      } @else {
+        <br />{{ captainLabel }} has no allegiance recorded.
+      }
+    </p>
+    <p class="lock-hint">
+      Diplomacy is earned Federation-side and Marauding Klingon-side.<br />
+      Record the captain's allegiance and this section will open up.
+    </p>
+    <div class="buttons-row">
+      <a
+        class="lcars-btn-auto sunflower"
+        [routerLink]="editLink"
+      >Edit Captain</a>
+    </div>
+  </div>
+
+  <div class="lcars-bar">
+    <div class="lcars-bar-inner"></div>
+  </div>
+</div>

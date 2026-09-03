@@ -1,0 +1,50 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.lcars-allegiance-lock-container {
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+
+  .lcars-text-bar {
+    background-color: #fa4;
+    border-right: 28px solid #f70;
+    border-left: 28px solid #f70;
+  }
+
+  .lcars-bar {
+    border-right: 28px solid #f70;
+    border-left: 28px solid #f70;
+
+    .lcars-bar-inner {
+      background-color: #fa4;
+    }
+  }
+
+  .lcars-allegiance-lock-body {
+    padding: 0 40px;
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .lock-icon {
+    display: block;
+    width: fit-content;
+    font-size: 2.5rem;
+    color: #fa4;
+    margin: 0 auto 1rem;
+  }
+
+  .lock-message {
+    color: #f9a;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .lock-hint {
+    color: #9cf;
+    margin-bottom: 0.5rem;
+  }
+}
