@@ -16,7 +16,12 @@ jobs:
     name: Full Mutation Analysis
     if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    # This run has been creeping towards its budget for months (89m, 75m, 120m,
+    # 121m, 118m) and was cancelled at the 180 minute mark on 2026-08-30. The
+    # concurrency and worker-recycling changes in stryker.config.json should
+    # pull it back well under that, but the budget is raised so a slow week is
+    # a slow run rather than a lost one.
+    timeout-minutes: 240
     permissions:
       contents: read
 
