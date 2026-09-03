@@ -309,6 +309,37 @@ export abstract class CharacterProgressBaseComponent<
     return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
   }
 
+  /**
+   * Ink that stays legible where the accent is used as a solid ground rather
+   * than a tint - the heading bar of a panel, say.
+   * ---
+   * Accents come from the catalogue rather than from a curated palette, so
+   * which of black and white carries cannot be settled once in a stylesheet.
+   * It is decided per colour from WCAG relative luminance, at the point where
+   * the two contrast equally against the ground: either side of it the winner
+   * clears 4.5:1, so any accent an editor saves is readable.
+   *
+   * @param item - The progress row whose accent is being set on.
+   * @returns A CSS colour: near-black on a light accent, white on a dark one.
+   */
+  accentTextColor(item: TProgress): string {
+    const rgb = this.hexToRgb(this.accent(item));
+    if (!rgb) {
+      return '#fff';
+    }
+    const luminance =
+      0.2126 * this.linearise(rgb.r) +
+      0.7152 * this.linearise(rgb.g) +
+      0.0722 * this.linearise(rgb.b);
+    return luminance > 0.179 ? '#0d0d0d' : '#fff';
+  }
+
+  /** One 0-255 sRGB channel as the linear value a luminance sum wants. */
+  private linearise(channel: number): number {
+    const ratio = channel / 255;
+    return ratio <= 0.04045 ? ratio / 12.92 : ((ratio + 0.055) / 1.055) ** 2.4;
+  }
+
   private hexToRgb(hex: string): { r: number; g: number; b: number } | null {
     const normalized = hex.replace('#', '');
     const expanded =
