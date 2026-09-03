@@ -27,6 +27,8 @@
     "lint:fix": "eslint \"src/**/*.{ts,js,html}\" --fix",
     "lint:style": "stylelint \"src/**/*.{css,scss}\"",
     "lint:style:fix": "stylelint \"src/**/*.{css,scss}\" --fix",
+    "format": "prettier --write \"src/**/*.{ts,js,css,scss}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,css,scss}\"",
     "lint:lighthouse": "cross-env ENV_NAME=lighthouse-audit API_URL=https://dev-api.startrekonline.info npm run build:render && lhci autorun",
     "lighthouse": "cross-env API_URL=https://dev-api.startrekonline.info npm run build:prod && lhci collect && lhci upload --target=filesystem --outputDir=reports/lighthouse && npm run summary:ci",
     "summary:ci": "node scripts/generate-ci-summary.mjs",
@@ -38,7 +40,7 @@
     "test:mutation": "stryker run --reporters clear-text --reporters html --reporters progress",
     "test:mutation:dry": "stryker run --reporters clear-text --reporters html --reporters progress --dryRunOnly",
     "test:mutation:incremental": "node ./scripts/run-incremental-mutation.mjs",
-    "verify": "npm audit --audit-level=high --omit=dev && npm run lint && npm run lint:style && npm run test:cov && npm run test:fuzz && npm run build",
+    "verify": "npm audit --audit-level=high --omit=dev && npm run lint && npm run lint:style && npm run format:check && npm run test:cov && npm run test:fuzz && npm run build",
     "verify:full": "npm run verify && npm run lighthouse && npm run test:mutation:incremental",
     "e2e": "ng e2e",
     "prepare": "husky"
@@ -52,35 +54,20 @@
     "@angular/forms": "^22.1.4",
     "@angular/material": "^22.1.4",
     "@angular/platform-browser": "^22.1.4",
-    "@angular/platform-browser-dynamic": "^22.1.4",
     "@angular/router": "^22.1.4",
     "@auth0/angular-jwt": "^5.1.2",
-    "@eslint/config-array": "^0.23.5",
-    "@eslint/object-schema": "^3.0.1",
     "@sentry/angular": "^10.72.0",
-    "glob": "^13.0.6",
-    "http-proxy-middleware": "^4.2.0",
     "js-base64": "^3.9.3",
     "logrocket": "^12.3.0",
-    "lru-cache": "^11.5.2",
-    "moment": "^2.29.4",
     "ngx-image-cropper": "^9.1.7",
-    "ngx-pagination": "^6.0.3",
-    "ngx-toastr": "^20.0.5",
-    "rimraf": "^6.0.1",
     "rxjs": "~7.8.2",
     "tslib": "^2.3.0",
     "zone.js": "~0.16.2"
   },
   "devDependencies": {
-    "@angular-eslint/builder": "^22.2.0",
-    "@angular-eslint/eslint-plugin": "^22.2.0",
-    "@angular-eslint/eslint-plugin-template": "^22.2.0",
-    "@angular-eslint/template-parser": "^22.2.0",
     "@angular/build": "^22.1.6",
     "@angular/cli": "^22.1.6",
     "@angular/compiler-cli": "^22.1.4",
-    "@eslint/eslintrc": "^3.3.6",
     "@eslint/js": "^10.0.1",
     "@lhci/cli": "^0.15.1",
     "@resvg/resvg-js": "^2.6.2",
@@ -89,8 +76,6 @@
     "@stryker-mutator/typescript-checker": "^10.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.4.0",
-    "@typescript-eslint/eslint-plugin": "^8.68.0",
-    "@typescript-eslint/parser": "^8.68.0",
     "angular-eslint": "^22.2.0",
     "cross-env": "^10.1.0",
     "eslint": "^10.9.1",
@@ -134,7 +119,14 @@
   },
   "lint-staged": {
     "*.{ts,js}": [
-      "eslint --fix",
+      "eslint --fix --no-warn-ignored",
+      "prettier --write"
+    ],
+    "*.html": [
+      "eslint --fix --no-warn-ignored"
+    ],
+    "*.{css,scss}": [
+      "stylelint --fix --allow-empty-input",
       "prettier --write"
     ]
   },
@@ -146,8 +138,8 @@
     "usePathForSuiteName": "true"
   },
   "overrides": {
-    "@hono/node-server": "2.0.11",
-    "qs": "6.15.2",
+    "@puppeteer/browsers": "3.2.1",
+    "qs": "6.16.0",
     "tmp": "0.2.7",
     "uuid": "14.0.0"
   }

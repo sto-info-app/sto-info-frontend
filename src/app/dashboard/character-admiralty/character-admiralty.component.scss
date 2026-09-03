@@ -1,0 +1,245 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+#admiralty-container {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+#admiralty-main-column {
+  flex: 2 1 69%;
+  min-width: 0;
+}
+
+#admiralty-side-column {
+  flex: 1 1 30%;
+}
+
+.admiralty-summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 1.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  background: var(--lcars-panel-bg, #1a1a2e);
+}
+
+.summary-stat {
+  display: flex;
+  min-width: 80px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.summary-value {
+  color: vars.$lcars-sunflower;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.summary-label {
+  color: rgb(255 255 255 / 55%);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.campaign-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+// A campaign takes the shape a Storytime panel takes, and the shape a captain
+// card takes: a darkened spine down the left, a solid block across the top
+// carrying the name, the body beneath it, and a strip closing it off.
+// ---
+// The colour is the campaign's own, bound as `--accent` from the catalogue
+// rather than picked from a curated palette, so it has to hold a solid bar
+// here and not only the tint it was carrying before. `color-mix` darkens it
+// for the spine and for the rule under the bar; which of black and white goes
+// on the bar is settled in the component, because CSS has no portable way to
+// ask that of a colour it is only handed at runtime.
+.admiralty-panel {
+  @include mixins.lcars-card;
+
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border-left: 10px solid color-mix(in srgb, var(--accent) 82%, #000);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 14%, transparent) 0%,
+    vars.$lcars-grey-bg 100%
+  );
+}
+
+// A panel is something to press inside rather than something to press, so the
+// lift `lcars-card` gives a card answers a gesture nobody made. This has to
+// follow the mixin, which sets its own at the same specificity.
+.admiralty-panel:hover {
+  transform: none;
+}
+
+// The block across the top, carrying the name.
+.admiralty-panel__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 80%, #000);
+  background: var(--accent);
+}
+
+.admiralty-panel__name {
+  overflow: hidden;
+  font-family: vars.$font-antonio;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+// What the bar says besides the name, at its right-hand end. On a dark ground
+// rather than on a tint, because the bar is a different colour on every
+// campaign and a tint of one of them is not readable on all of them.
+.admiralty-panel__marks {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admiralty-panel__badge {
+  @include mixins.lcars-badge;
+
+  flex: 0 0 auto;
+  background: rgb(0 0 0 / 55%);
+  color: vars.$lcars-white;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+// What the panel holds under its name.
+.admiralty-panel__body {
+  padding: 0.75rem 1rem;
+}
+
+// What the tour pays, closing the panel off the way a Storytime panel's tags
+// close theirs - darkened rather than coloured, because the ground behind it
+// is a different colour on every campaign.
+.admiralty-panel__reward {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid rgb(255 255 255 / 10%);
+  background: rgb(0 0 0 / 25%);
+}
+
+// The icon says what the strip is instead of a caption.
+.admiralty-panel__reward-icon {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  color: vars.$lcars-perano;
+}
+
+// The pair carries `.info-item`, so how a label and its value are set is the
+// site's answer rather than this panel's. All that is left is letting a long
+// reward wrap inside the strip instead of pushing the icon off it.
+.admiralty-panel__reward-text {
+  min-width: 0;
+}
+
+// A closing strip is small print, not a fact in a panel's body: the site's
+// label and value sizes are set against a two-column grid of facts and stand
+// taller here than the tier labels the strip is closing off. Both take a step
+// down, keeping the value above its label so the pair still reads as one.
+.admiralty-panel__reward-text .label {
+  font-size: 0.7rem;
+}
+
+.admiralty-panel__reward-text .value {
+  font-size: 0.75rem;
+}
+
+.progress-track + .progress-track {
+  margin-top: 0.7rem;
+}
+
+.track-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.track-label strong {
+  color: vars.$lcars-sunflower;
+}
+
+// Ten equal tracks that are free to shrink: a floor of 26px each needs ~350px
+// of row, more than the card has on a phone, and the surplus was clipped away
+// by the body container rather than scrolled to.
+.segments {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 3px;
+}
+
+// The global LCARS `button` rule gives every button a fixed 200px width, a
+// 60px height, side margins and right-aligned text. Left alone those win over
+// the grid track, so each segment overflowed its cell and the row spilled out
+// of the campaign card and under the aside column - reset them explicitly.
+.segments button {
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 2px;
+  background: rgb(255 255 255 / 6%);
+  color: rgb(255 255 255 / 55%);
+  cursor: pointer;
+  font-size: 0.7rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.segments button.filled {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+// Tour of Duty steps read as pills rather than circles: the tracks are wider
+// than they are tall, so a 50% radius stretches them into lopsided ellipses.
+.segments.round button {
+  border-radius: 999px;
+}
+
+.saving {
+  padding: 1rem;
+  color: vars.$lcars-sunflower;
+  text-align: center;
+}
+
+@media (width <= 768px) {
+  #admiralty-container {
+    flex-direction: column;
+  }
+
+  #admiralty-side-column {
+    width: 100%;
+  }
+}

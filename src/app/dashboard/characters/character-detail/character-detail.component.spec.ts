@@ -391,6 +391,39 @@ describe('CharacterDetailComponent', () => {
       expect(component.specializationsOpened()).toBe(true);
     }));
 
+    it('should switch to the Admiralty tab and mark it opened', () => {
+      component.selectTab('admiralty');
+
+      expect(component.activeTab()).toBe('admiralty');
+      expect(component.admiraltyOpened()).toBe(true);
+    });
+
+    it('should reflect the Admiralty tab in the URL query params', () => {
+      component.selectTab('admiralty');
+
+      expect(mockRouter.navigate).toHaveBeenCalledWith(
+        [],
+        expect.objectContaining({ queryParams: { tab: 'admiralty' } }),
+      );
+    });
+
+    it('should keep the Admiralty tab mounted after switching back', () => {
+      component.selectTab('admiralty');
+      component.selectTab('overview');
+
+      expect(component.activeTab()).toBe('overview');
+      expect(component.admiraltyOpened()).toBe(true);
+    });
+
+    it('should activate the Admiralty tab named in the URL on load (deep link)', fakeAsync(() => {
+      fixture.detectChanges();
+      routeQueryParamsSubject.next(convertToParamMap({ tab: 'admiralty' }));
+      tick();
+
+      expect(component.activeTab()).toBe('admiralty');
+      expect(component.admiraltyOpened()).toBe(true);
+    }));
+
     it('should activate the tab named in the URL on load (deep link)', fakeAsync(() => {
       fixture.detectChanges();
       routeQueryParamsSubject.next(convertToParamMap({ tab: 'reputations' }));

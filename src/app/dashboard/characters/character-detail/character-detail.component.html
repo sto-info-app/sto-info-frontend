@@ -16,9 +16,9 @@
             type="button"
             class="cta-icon"
             (click)="editCharacterPhoto()"
-            title="Edit Photo"
-          ><i class="fas fa-user-pen"></i
-          ></button>
+            title="Edit Photo">
+            <i class="fas fa-user-pen"></i>
+          </button>
         }
       </div>
       <div id="character-image">
@@ -89,16 +89,18 @@
                 type="button"
                 class="cta-icon"
                 (click)="editCharacter()"
-                title="Edit Character"
-              ><i class="fas fa-user-pen"></i
-              ></button>
+                title="Edit Character">
+                <i class="fas fa-user-pen"></i>
+              </button>
             </div>
 
             <div class="character-details-content">
               <div class="detail-grid">
                 <div class="detail-item">
                   <span class="label">Rank</span>
-                  <span class="value">{{ character.rank?.title || 'Unknown' }}</span>
+                  <span class="value">{{
+                    character.rank?.title || 'Unknown'
+                  }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="label">Level</span>
@@ -106,11 +108,15 @@
                 </div>
                 <div class="detail-item">
                   <span class="label">Sex</span>
-                  <span class="value">{{ character.sex?.name || 'Unknown' }}</span>
+                  <span class="value">{{
+                    character.sex?.name || 'Unknown'
+                  }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="label">Class</span>
-                  <span class="value">{{ character.class?.name || 'Unknown' }}</span>
+                  <span class="value">{{
+                    character.class?.name || 'Unknown'
+                  }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="label">Starting Faction</span>
@@ -208,6 +214,51 @@
       </section>
 
       <!-- Reputations (lazily mounted, then kept alive) -->
+      @if (admiraltyOpened()) {
+        <section
+          class="tab-panel"
+          role="tabpanel"
+          aria-label="Admiralty"
+          [hidden]="activeTab() !== 'admiralty'">
+          <app-character-admiralty [embedded]="true">
+            <div admiraltyAsidePhoto>
+              <ng-container
+                [ngTemplateOutlet]="photoPanel"
+                [ngTemplateOutletContext]="{ editable: false }"></ng-container>
+            </div>
+            <div admiraltyAsideNav>
+              <div class="lcars-text-bar small-lcars-bar-gap">
+                <span>Navigation</span>
+              </div>
+              <div class="buttons">
+                <button
+                  type="button"
+                  class="full-width-btn-link gold"
+                  (click)="selectTab('overview')">
+                  Overview
+                </button>
+                <a
+                  [routerLink]="getAccountLink()"
+                  [fragment]="'characters-section'"
+                  class="full-width-btn-link peach"
+                  >Captain List</a
+                >
+                <a
+                  [routerLink]="getAccountLink()"
+                  class="full-width-btn-link sunflower"
+                  >Account Profile</a
+                >
+                <a
+                  [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+                  class="full-width-btn-link bluey"
+                  >All Accounts</a
+                >
+              </div>
+            </div>
+          </app-character-admiralty>
+        </section>
+      }
+
       @if (reputationsOpened()) {
         <section
           class="tab-panel"
@@ -348,8 +399,7 @@
   </div>
 } @else if (!isLoading && errorMessage) {
   <div class="error-container">
-    <app-lcars-error-message
-      [message]="errorMessage"></app-lcars-error-message>
+    <app-lcars-error-message [message]="errorMessage"></app-lcars-error-message>
     <div class="buttons-row">
       <a
         class="lcars-btn-auto sunflower"

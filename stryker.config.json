@@ -3,6 +3,7 @@
   "packageManager": "npm",
   "reporters": ["html", "clear-text", "progress"],
   "testRunner": "jest",
+  "testRunnerNodeArgs": ["--max-old-space-size=1024"],
   "jest": {
     "projectType": "custom",
     "configFile": "jest.config.cjs",
@@ -35,6 +36,8 @@
   "concurrency": 2,
   "timeoutMS": 60000,
   "timeoutFactor": 1.5,
+  "ignoreStatic": true,
+  "maxTestRunnerReuse": 50,
   "incrementalFile": ".stryker-tmp/incremental.json",
   "thresholds": {
     "high": 80,

@@ -1,0 +1,175 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+<div id="admiralty-container">
+  <div
+    id="admiralty-main-column"
+    class="col">
+    <app-character-progress-state
+      [isLoading]="isLoading"
+      [errorMessage]="errorMessage"
+      [accountsLink]="accountsLink"
+      [embedded]="embedded"
+      title="Admiralty"
+      [characterHandle]="characterHandle"
+      [accountHandle]="accountHandle"
+      [levelLocked]="isLevelLocked()"
+      [featureName]="featureName"
+      [unlockLevel]="unlockLevel"
+      [characterLevel]="characterLevel()"
+      [characterEditLink]="characterEditLink()">
+    </app-character-progress-state>
+
+    @if (!isLoading && !errorMessage && !isLevelLocked()) {
+      @if (summary()) {
+        <div class="admiralty-summary-bar">
+          <div class="summary-stat">
+            <span class="summary-value"
+              >{{ summary()!.totalTiers }} /
+              {{ summary()!.maxPossibleTiers }}</span
+            ><span class="summary-label">Tiers Earnt</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-value"
+              >{{ summary()!.overallCompletionPercentage }}%</span
+            ><span class="summary-label">Overall</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-value"
+              >{{ summary()!.completedCampaigns }} /
+              {{ summary()!.totalCampaigns }}</span
+            ><span class="summary-label">Completed</span>
+          </div>
+        </div>
+      }
+
+      <div class="campaign-list">
+        @for (item of filteredProgress(); track item.campaignId) {
+          <!--
+            The shape a Storytime panel takes: the campaign's name on a solid
+            block across the top, its tracks beneath, and what the tour pays
+            closing the panel off in a strip of its own.
+          -->
+          <article
+            class="admiralty-panel"
+            [style.--accent]="accent(item)">
+            <header
+              class="admiralty-panel__heading"
+              [style.color]="accentTextColor(item)">
+              <span class="admiralty-panel__name">{{
+                item.campaign.name
+              }}</span>
+              @if (item.status === 'complete') {
+                <span class="admiralty-panel__marks">
+                  <span class="admiralty-panel__badge">Tier {{ maxTier }}</span>
+                </span>
+              }
+            </header>
+
+            <div class="admiralty-panel__body">
+              @if (savingItemId() === item.campaignId) {
+                <div class="saving">
+                  <i class="fas fa-spinner fa-spin"></i> Saving
+                </div>
+              } @else {
+                <div class="progress-track">
+                  <div class="track-label">
+                    <span>Campaign</span
+                    ><strong
+                      >Tier {{ item.currentTier }} / {{ maxTier }}</strong
+                    >
+                  </div>
+                  <div class="segments">
+                    @for (step of steps; track step) {
+                      <button
+                        type="button"
+                        [class.filled]="step <= item.currentTier"
+                        [attr.aria-label]="
+                          'Set ' + item.campaign.name + ' to tier ' + step
+                        "
+                        (click)="selectTier(item, step)">
+                        {{ step }}
+                      </button>
+                    }
+                  </div>
+                </div>
+                <div class="progress-track tour-track">
+                  <div class="track-label">
+                    <span>Tour of Duty</span
+                    ><strong
+                      >{{ item.tourOfDutyStep }} / {{ maxTourStep }}</strong
+                    >
+                  </div>
+                  <div class="segments round">
+                    @for (step of steps; track step) {
+                      <button
+                        type="button"
+                        [class.filled]="step <= item.tourOfDutyStep"
+                        [attr.aria-label]="
+                          'Set ' +
+                          item.campaign.name +
+                          ' Tour of Duty to ' +
+                          step +
+                          ' of 10'
+                        "
+                        (click)="selectTourStep(item, step)">
+                        {{ step }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            @if (item.campaign.description) {
+              <div class="admiralty-panel__reward">
+                <span class="admiralty-panel__reward-icon">
+                  <i
+                    class="fa-solid fa-trophy"
+                    aria-hidden="true"></i>
+                </span>
+                <!--
+                  Named and answered the way a fact in a Storytime panel's body
+                  is, on the site's own label/value pair rather than on styling
+                  of its own.
+                -->
+                @if (rewardParts(item); as reward) {
+                  <div class="admiralty-panel__reward-text info-item">
+                    @if (reward.label) {
+                      <span class="label">{{ reward.label }}</span>
+                    }
+                    <span class="value">{{ reward.value }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </article>
+        }
+      </div>
+    }
+  </div>
+
+  <aside
+    id="admiralty-side-column"
+    class="col">
+    @if (!isLevelLocked()) {
+      <app-character-progress-filters
+        searchId="admiralty-search"
+        searchLabel="Search campaigns"
+        [filtersCollapsed]="filtersCollapsed"
+        [searchText]="searchText()"
+        [hideComplete]="hideComplete()"
+        [completeCount]="completeCount()"
+        [activeFilterCount]="activeFilterCount()"
+        (filtersCollapsedChange)="filtersCollapsed = $event"
+        (searchTextChange)="searchText.set($event)"
+        (hideCompleteChange)="hideComplete.set($event)"
+        (clearFilters)="clearFilters()"
+        (refresh)="loadProgress()">
+      </app-character-progress-filters>
+    }
+    <ng-content select="[admiraltyAsidePhoto]"></ng-content>
+    <ng-content select="[admiraltyAsideNav]"></ng-content>
+  </aside>
+</div>
