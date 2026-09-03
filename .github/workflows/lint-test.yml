@@ -180,6 +180,9 @@ jobs:
       - name: Run Style Linter
         run: npm run lint:style
 
+      - name: Check formatting
+        run: npm run format:check
+
       - name: Run Tests (with coverage)
         run: npm run test:cov
 
