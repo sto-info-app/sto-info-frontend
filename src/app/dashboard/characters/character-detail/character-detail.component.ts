@@ -13,6 +13,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EMPTY, Subject, catchError, map, switchMap, takeUntil } from 'rxjs';
 import { CharacterRdComponent } from 'src/app/dashboard/character-rd/character-rd.component';
+import { CharacterAdmiraltyComponent } from 'src/app/dashboard/character-admiralty/character-admiralty.component';
 import { CharacterReputationsComponent } from 'src/app/dashboard/character-reputations/character-reputations.component';
 import { CharacterSpecializationComponent } from 'src/app/dashboard/character-specialization/character-specialization.component';
 import { Character } from 'src/app/dashboard/models/character.model';
@@ -35,7 +36,7 @@ import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.co
 
 /** Identifiers for the tabs available on the character detail page. */
 export type CharacterTab =
-  'overview' | 'reputations' | 'rd' | 'specializations';
+  'overview' | 'reputations' | 'rd' | 'specializations' | 'admiralty';
 
 @Component({
   selector: 'app-character-detail',
@@ -50,6 +51,7 @@ export type CharacterTab =
     LcarsErrorMessageComponent,
     MatButtonModule,
     CharacterReputationsComponent,
+    CharacterAdmiraltyComponent,
     CharacterRdComponent,
     CharacterSpecializationComponent,
   ],
@@ -67,6 +69,7 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
     { id: 'reputations', label: 'Reputations' },
     { id: 'rd', label: 'R&D' },
     { id: 'specializations', label: 'Specializations' },
+    { id: 'admiralty', label: 'Admiralty' },
   ];
 
   /** Currently selected tab. */
@@ -92,6 +95,9 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
    * so its data is only fetched once rather than on every tab switch.
    */
   readonly specializationsOpened = signal(false);
+
+  /** Whether the Admiralty tab has been opened at least once. */
+  readonly admiraltyOpened = signal(false);
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
@@ -311,6 +317,9 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
     }
     if (tab === 'specializations') {
       this.specializationsOpened.set(true);
+    }
+    if (tab === 'admiralty') {
+      this.admiraltyOpened.set(true);
     }
     this.activeTab.set(tab);
     this._cdr.markForCheck();

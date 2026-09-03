@@ -214,6 +214,51 @@
       </section>
 
       <!-- Reputations (lazily mounted, then kept alive) -->
+      @if (admiraltyOpened()) {
+        <section
+          class="tab-panel"
+          role="tabpanel"
+          aria-label="Admiralty"
+          [hidden]="activeTab() !== 'admiralty'">
+          <app-character-admiralty [embedded]="true">
+            <div admiraltyAsidePhoto>
+              <ng-container
+                [ngTemplateOutlet]="photoPanel"
+                [ngTemplateOutletContext]="{ editable: false }"></ng-container>
+            </div>
+            <div admiraltyAsideNav>
+              <div class="lcars-text-bar small-lcars-bar-gap">
+                <span>Navigation</span>
+              </div>
+              <div class="buttons">
+                <button
+                  type="button"
+                  class="full-width-btn-link gold"
+                  (click)="selectTab('overview')">
+                  Overview
+                </button>
+                <a
+                  [routerLink]="getAccountLink()"
+                  [fragment]="'characters-section'"
+                  class="full-width-btn-link peach"
+                  >Captain List</a
+                >
+                <a
+                  [routerLink]="getAccountLink()"
+                  class="full-width-btn-link sunflower"
+                  >Account Profile</a
+                >
+                <a
+                  [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+                  class="full-width-btn-link bluey"
+                  >All Accounts</a
+                >
+              </div>
+            </div>
+          </app-character-admiralty>
+        </section>
+      }
+
       @if (reputationsOpened()) {
         <section
           class="tab-panel"
