@@ -30,5 +30,14 @@
       [characterHandle]="characterHandle"
       [editLink]="characterEditLink"
     ></app-lcars-level-lock>
+  } @else if (allegianceLocked) {
+    <!-- The level gate is the more fundamental of the two, so a captain who is
+         behind both is only told about the level. -->
+    <app-lcars-allegiance-lock
+      [featureName]="featureName"
+      [currentAllegiance]="characterAllegiance"
+      [characterHandle]="characterHandle"
+      [editLink]="characterEditLink"
+    ></app-lcars-allegiance-lock>
   }
 }
