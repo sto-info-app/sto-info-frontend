@@ -126,7 +126,8 @@
       "eslint --fix --no-warn-ignored"
     ],
     "*.{css,scss}": [
-      "stylelint --fix --allow-empty-input"
+      "stylelint --fix --allow-empty-input",
+      "prettier --write"
     ]
   },
   "jest-junit": {
