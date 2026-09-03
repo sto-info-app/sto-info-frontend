@@ -24,6 +24,33 @@
     gap: 8px;
   }
 
+  .settings-field {
+    display: flex;
+    max-width: 360px;
+    flex-direction: column;
+    gap: 8px;
+
+    label {
+      color: #6cf;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    select {
+      padding: 8px 10px;
+      border: 1px solid #9de0ff;
+      border-radius: 4px;
+      background: #1d2d3e;
+      color: #f2f8ff;
+    }
+  }
+
+  .settings-description {
+    margin: 0;
+    color: #b8e8ff;
+    font-size: 0.9rem;
+  }
+
   .settings-help {
     position: relative;
     flex: 0 0 20px;

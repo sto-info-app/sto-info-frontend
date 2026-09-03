@@ -31,4 +31,5 @@ export interface UserProfileUpdateResult {
 
 export interface UserSettings {
   privacyMode: boolean;
+  sessionTimeoutMinutes: number;
 }

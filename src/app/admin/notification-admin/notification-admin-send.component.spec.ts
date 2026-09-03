@@ -3,13 +3,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { PrivacyModeService } from 'src/app/dashboard/services/privacy-mode.service';
 import {
   AppNotification,
   NotificationSeverity,
   NotificationTarget,
   UserSearchResult,
 } from 'src/app/models/notification.models';
-import { PrivacyModeService } from 'src/app/dashboard/services/privacy-mode.service';
 import { NotificationService } from 'src/app/notifications/notification.service';
 import { AdminUserSearchService } from '../admin-user-search.service';
 import { NotificationAdminSendComponent } from './notification-admin-send.component';
@@ -75,7 +75,10 @@ describe('NotificationAdminSendComponent', () => {
             load: (): ReturnType<PrivacyModeService['load']> =>
               privacyModeLoadFails
                 ? throwError(() => new Error('Setting unavailable'))
-                : of({ privacyMode: isPrivacyModeOn }),
+                : of({
+                    privacyMode: isPrivacyModeOn,
+                    sessionTimeoutMinutes: 30,
+                  }),
           },
         },
       ],

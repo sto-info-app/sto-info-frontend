@@ -37,6 +37,26 @@
             </details>
           </div>
         </div>
+        <div class="lcars-text-bar settings-bar"><span>Security</span></div>
+        <div class="settings-content">
+          <div class="settings-field">
+            <label for="session-timeout">Login inactivity timeout</label>
+            <select
+              id="session-timeout"
+              formControlName="sessionTimeoutMinutes"
+              aria-describedby="session-timeout-description"
+            >
+              @for (option of sessionTimeoutOptions; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <p id="session-timeout-description" class="settings-description">
+              How long you can be away before you are signed out. Anything you
+              do here keeps the session going, so the countdown only runs while
+              you are idle. You will be warned shortly before it runs out.
+            </p>
+          </div>
+        </div>
         <button
           type="submit"
           class="lcars-btn sunflower"

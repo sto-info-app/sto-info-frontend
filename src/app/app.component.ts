@@ -318,6 +318,11 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((stayLoggedIn = false) => {
         if (stayLoggedIn) {
+          // Answering the dialog is the clearest sign of the user there is.
+          // Activity is otherwise ignored once the warning is due, so without
+          // this the renewed session would keep the deadline it was warning
+          // about and warn again immediately.
+          this._authService.markActivity();
           this._authService
             .refreshToken()
             .pipe(takeUntil(this.destroy$))

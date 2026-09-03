@@ -100,6 +100,7 @@ export class LoginComponent implements OnDestroy {
           response.access_token,
           response.refresh_token,
           response.expires_in,
+          response.session_timeout_minutes,
         );
 
         // Store the user ID in the shared data service
