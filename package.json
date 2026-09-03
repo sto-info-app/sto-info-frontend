@@ -117,8 +117,14 @@
   },
   "lint-staged": {
     "*.{ts,js}": [
-      "eslint --fix",
+      "eslint --fix --no-warn-ignored",
       "prettier --write"
+    ],
+    "*.html": [
+      "eslint --fix --no-warn-ignored"
+    ],
+    "*.{css,scss}": [
+      "stylelint --fix --allow-empty-input"
     ]
   },
   "jest-junit": {
