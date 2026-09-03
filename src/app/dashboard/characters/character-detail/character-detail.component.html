@@ -350,6 +350,52 @@
         </section>
       }
 
+      <!-- Commendations (lazily mounted, then kept alive) -->
+      @if (commendationsOpened()) {
+        <section
+          class="tab-panel"
+          role="tabpanel"
+          aria-label="Commendations"
+          [hidden]="activeTab() !== 'commendations'">
+          <app-character-commendations [embedded]="true">
+            <div commendationAsidePhoto>
+              <ng-container
+                [ngTemplateOutlet]="photoPanel"
+                [ngTemplateOutletContext]="{ editable: false }"></ng-container>
+            </div>
+            <div commendationAsideNav>
+              <div class="lcars-text-bar small-lcars-bar-gap">
+                <span>Navigation</span>
+              </div>
+              <div class="buttons">
+                <button
+                  type="button"
+                  class="full-width-btn-link gold"
+                  (click)="selectTab('overview')">
+                  Overview
+                </button>
+                <a
+                  [routerLink]="getAccountLink()"
+                  [fragment]="'characters-section'"
+                  class="full-width-btn-link peach"
+                  >Captain List</a
+                >
+                <a
+                  [routerLink]="getAccountLink()"
+                  class="full-width-btn-link sunflower"
+                  >Account Profile</a
+                >
+                <a
+                  [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+                  class="full-width-btn-link bluey"
+                  >All Accounts</a
+                >
+              </div>
+            </div>
+          </app-character-commendations>
+        </section>
+      }
+
       <!-- Captain specializations (lazily mounted, then kept alive) -->
       @if (specializationsOpened()) {
         <section
