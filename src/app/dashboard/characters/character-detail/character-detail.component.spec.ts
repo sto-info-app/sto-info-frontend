@@ -424,6 +424,39 @@ describe('CharacterDetailComponent', () => {
       expect(component.admiraltyOpened()).toBe(true);
     }));
 
+    it('should switch to the Commendations tab and mark it opened', () => {
+      component.selectTab('commendations');
+
+      expect(component.activeTab()).toBe('commendations');
+      expect(component.commendationsOpened()).toBe(true);
+    });
+
+    it('should reflect the Commendations tab in the URL query params', () => {
+      component.selectTab('commendations');
+
+      expect(mockRouter.navigate).toHaveBeenCalledWith(
+        [],
+        expect.objectContaining({ queryParams: { tab: 'commendations' } }),
+      );
+    });
+
+    it('should keep the Commendations tab mounted after switching back', () => {
+      component.selectTab('commendations');
+      component.selectTab('overview');
+
+      expect(component.activeTab()).toBe('overview');
+      expect(component.commendationsOpened()).toBe(true);
+    });
+
+    it('should activate the Commendations tab named in the URL on load (deep link)', fakeAsync(() => {
+      fixture.detectChanges();
+      routeQueryParamsSubject.next(convertToParamMap({ tab: 'commendations' }));
+      tick();
+
+      expect(component.activeTab()).toBe('commendations');
+      expect(component.commendationsOpened()).toBe(true);
+    }));
+
     it('should activate the tab named in the URL on load (deep link)', fakeAsync(() => {
       fixture.detectChanges();
       routeQueryParamsSubject.next(convertToParamMap({ tab: 'reputations' }));

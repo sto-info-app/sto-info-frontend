@@ -14,6 +14,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EMPTY, Subject, catchError, map, switchMap, takeUntil } from 'rxjs';
 import { CharacterRdComponent } from 'src/app/dashboard/character-rd/character-rd.component';
 import { CharacterAdmiraltyComponent } from 'src/app/dashboard/character-admiralty/character-admiralty.component';
+import { CharacterCommendationsComponent } from 'src/app/dashboard/character-commendations/character-commendations.component';
 import { CharacterReputationsComponent } from 'src/app/dashboard/character-reputations/character-reputations.component';
 import { CharacterSpecializationComponent } from 'src/app/dashboard/character-specialization/character-specialization.component';
 import { Character } from 'src/app/dashboard/models/character.model';
@@ -36,7 +37,12 @@ import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.co
 
 /** Identifiers for the tabs available on the character detail page. */
 export type CharacterTab =
-  'overview' | 'reputations' | 'rd' | 'specializations' | 'admiralty';
+  | 'overview'
+  | 'reputations'
+  | 'rd'
+  | 'specializations'
+  | 'admiralty'
+  | 'commendations';
 
 @Component({
   selector: 'app-character-detail',
@@ -52,6 +58,7 @@ export type CharacterTab =
     MatButtonModule,
     CharacterReputationsComponent,
     CharacterAdmiraltyComponent,
+    CharacterCommendationsComponent,
     CharacterRdComponent,
     CharacterSpecializationComponent,
   ],
@@ -70,6 +77,7 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
     { id: 'rd', label: 'R&D' },
     { id: 'specializations', label: 'Specializations' },
     { id: 'admiralty', label: 'Admiralty' },
+    { id: 'commendations', label: 'Commendations' },
   ];
 
   /** Currently selected tab. */
@@ -98,6 +106,9 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
 
   /** Whether the Admiralty tab has been opened at least once. */
   readonly admiraltyOpened = signal(false);
+
+  /** Whether the Commendations tab has been opened at least once. */
+  readonly commendationsOpened = signal(false);
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
@@ -320,6 +331,9 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
     }
     if (tab === 'admiralty') {
       this.admiraltyOpened.set(true);
+    }
+    if (tab === 'commendations') {
+      this.commendationsOpened.set(true);
     }
     this.activeTab.set(tab);
     this._cdr.markForCheck();

@@ -110,10 +110,14 @@ function main() {
       'run',
       '--mutate',
       mutateArg,
-      '--concurrency',
-      '2',
-      '--incremental',
-      '--force',
+      // No --concurrency here: stryker.config.json owns that, so the two run
+      // modes cannot drift. No --incremental either: it was previously paired
+      // with --force, which Stryker documents as "run all mutants, even if
+      // --incremental is provided and an incremental file exists", so the
+      // cached result was read and then ignored on every run. Restoring the
+      // pair properly would not help either — restricting --mutate to the
+      // changed files means Stryker writes back a report covering only those
+      // files, overwriting the broader cache the next PR would have wanted.
     ],
     {
       stdio: 'inherit',

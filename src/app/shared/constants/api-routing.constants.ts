@@ -59,6 +59,9 @@ export const API_URLS = {
   // Admiralty campaigns
   ADMIRALTY: apiUrl + '/admiralty',
 
+  // Commendation categories
+  COMMENDATION: apiUrl + '/commendation',
+
   // Research & Development
   RD: apiUrl + '/rd',
 

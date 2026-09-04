@@ -51,6 +51,12 @@ export abstract class CharacterProgressBaseComponent<
   readonly summary = signal<TSummary | null>(null);
   /** The captain's recorded level, or null until the character resolves. */
   readonly characterLevel = signal<number | null>(null);
+  /**
+   * The captain's recorded general allegiance, or null until the character
+   * resolves (or where none was ever recorded). Trackers whose catalogue
+   * differs by faction gate on it via {@link isFeatureLocked}.
+   */
+  readonly characterGeneralFaction = signal<string | null>(null);
   readonly savingItemId = signal<string | null>(null);
   readonly searchText = signal('');
   readonly hideComplete = signal(false);
@@ -69,6 +75,14 @@ export abstract class CharacterProgressBaseComponent<
     const level = this.characterLevel();
     return typeof level === 'number' && level < this.unlockLevel;
   });
+
+  /**
+   * Whether any gate withholds the tracker: the shared level gate, or a
+   * tracker-specific one a subclass adds.
+   */
+  readonly isGated = computed(
+    () => this.isLevelLocked() || this.isFeatureLocked(),
+  );
 
   readonly accountLink = computed(
     () =>
@@ -107,6 +121,18 @@ export abstract class CharacterProgressBaseComponent<
 
   /** The in-game level at which this tracker's feature unlocks. */
   abstract readonly unlockLevel: number;
+
+  /**
+   * A gate beyond the level one, for trackers that need something else of the
+   * captain before their catalogue means anything. Read inside a computed, so
+   * an override may read signals freely. Nothing is gated by default.
+   *
+   * @returns Whether the tracker is withheld for a reason of its own.
+   */
+  protected isFeatureLocked(): boolean {
+    return false;
+  }
+
   /** Display name of the gated feature, used by the level-lock notice. */
   abstract readonly featureName: string;
 
@@ -170,10 +196,13 @@ export abstract class CharacterProgressBaseComponent<
         next: character => {
           this.characterId = character.id;
           this.characterLevel.set(character.level ?? null);
+          this.characterGeneralFaction.set(
+            character.generalFaction?.name ?? null,
+          );
           this.errorMessage = '';
-          // Below the unlock level there is nothing to show or track, so the
-          // catalog and progress requests are skipped entirely.
-          if (this.isLevelLocked()) {
+          // Behind a gate there is nothing to show or track, so the catalog
+          // and progress requests are skipped entirely.
+          if (this.isGated()) {
             this.progress.set([]);
             this.summary.set(null);
             this.isLoading = false;
