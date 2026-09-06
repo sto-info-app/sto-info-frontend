@@ -55,7 +55,7 @@ test('nothing is published until every gate above it is open', async ({
 
   await test.step('the field alone is not enough', async () => {
     await tracking.expand(SECTION);
-    await tracking.expand(TAB);
+    await tracking.showTab(TAB);
     await tracking.setPublic('field', FIELD, true);
     await expectPublished(false);
   });

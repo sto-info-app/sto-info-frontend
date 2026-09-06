@@ -45,7 +45,7 @@ test('a withdrawn choice still reads, and cannot be chosen again', async ({
   await test.step('withdraw it', async () => {
     await tracking.show('What you track');
     await tracking.expand(SECTION);
-    await tracking.expand(TAB);
+    await tracking.showTab(TAB);
     await tracking.editField(FIELD);
     await tracking.withdrawOption('Defiant');
   });

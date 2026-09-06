@@ -80,7 +80,7 @@ test('every Custom Tracking screen is mechanically accessible', async ({
   await test.step('the builder, with a hierarchy and an editor open', async () => {
     await tracking.openReady();
     await tracking.expand(SECTION);
-    await tracking.expand(TAB);
+    await tracking.showTab(TAB);
     await tracking.editField(FIELD);
 
     await noViolations(page, FEATURE);
@@ -159,13 +159,19 @@ test('a hierarchy can be reordered without a mouse', async ({
   // reading the list the instant the key is released.
   await expect
     .poll(async () => {
-      const names = await page
+      const bars = await page
         .locator(
-          '.custom-tracking-section-list > li .custom-tracking-panel-name',
+          '.custom-tracking-section-list > li .custom-tracking-section-heading',
         )
         .allTextContents();
 
-      return names.indexOf(second) < names.indexOf(first);
+      // A heading carries the section's name, what it holds and whether it is
+      // public, so this asks which bar mentions which name rather than for an
+      // exact match on one.
+      const positionOf = (name: string): number =>
+        bars.findIndex(bar => bar.includes(name));
+
+      return positionOf(second) < positionOf(first);
     })
     .toBe(true);
 });

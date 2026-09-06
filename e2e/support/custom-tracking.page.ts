@@ -123,21 +123,19 @@ export class CustomTrackingPage {
   }
 
   /**
-   * The disclosure button of a section or tab.
+   * The caret on a section's heading bar, which folds it away and opens it.
    *
-   * Its accessible name is the item's name followed by how many children it
-   * holds — "Fleet 3 tabs" — so the pattern requires that count. Matching the
-   * name alone would let "Fleet" find "Fleet holdings" as well. Every other
-   * control that mentions an item leads with a verb, which is what keeps this
-   * from finding Edit, Delete or Move up instead.
+   * Named for what pressing it would do and for the section it would do it to
+   * — "Expand Fleet" — which is what keeps it from matching "Fleet holdings"
+   * as well, and from finding Edit, Delete or Move up instead.
    */
   panelToggle(name: string): Locator {
     return this._page.getByRole('button', {
-      name: new RegExp(`^${escapeForRegExp(name)}\\s+\\d+\\s`),
+      name: new RegExp(`^(Expand|Collapse) ${escapeForRegExp(name)}$`),
     });
   }
 
-  /** Open a section or tab if it is not already open. */
+  /** Open a section if it is not already open. */
   async expand(name: string): Promise<void> {
     const toggle = this.panelToggle(name);
 
@@ -148,6 +146,21 @@ export class CustomTrackingPage {
     }
 
     await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  }
+
+  /**
+   * Bring one of a section's tabs to the front.
+   *
+   * A tab is one of a strip rather than a panel that folds away, so this
+   * chooses it rather than opening it. The section holding it has to be open
+   * already, because the strip is inside the section.
+   */
+  async showTab(name: string): Promise<void> {
+    const tab = this._page.getByRole('tab', { name, exact: true });
+
+    await expect(tab).toBeVisible();
+    await tab.click();
+    await expect(tab).toHaveAttribute('aria-selected', 'true');
   }
 
   async addSection(name: string, options: GroupOptions = {}): Promise<void> {
@@ -169,7 +182,9 @@ export class CustomTrackingPage {
       .getByRole('button', { name: `Add a tab to ${sectionName}` })
       .click();
     await this._fillGroupForm(/^New tab/, name, options);
-    await expect(this.panelToggle(name)).toBeVisible();
+    await expect(
+      this._page.getByRole('tab', { name, exact: true }),
+    ).toBeVisible();
   }
 
   async addField(
@@ -177,7 +192,7 @@ export class CustomTrackingPage {
     name: string,
     options: FieldOptions,
   ): Promise<void> {
-    await this.expand(tabName);
+    await this.showTab(tabName);
     await this._page
       .getByRole('button', { name: `Add a field to ${tabName}` })
       .click();

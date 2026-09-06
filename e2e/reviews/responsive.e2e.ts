@@ -74,7 +74,7 @@ test('a wide configuration stays usable on a phone', async ({
     await tracking.goto();
     await tracking.chooseScope(tracking.definitions, 'Accounts');
     await tracking.expand(SECTION);
-    await tracking.expand(TAB);
+    await tracking.showTab(TAB);
 
     expect(await scrollsSideways(page)).toBe(false);
   });
@@ -121,7 +121,7 @@ test('a wide configuration stays usable on a phone', async ({
     await tracking.show('What you track');
     await tracking.expand(SECTION);
     await tracking.setPublic('section', SECTION, true);
-    await tracking.expand(TAB);
+    await tracking.showTab(TAB);
     await tracking.setPublic('tab', TAB, true);
 
     for (const field of FIELDS) {
