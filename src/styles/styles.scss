@@ -5,6 +5,11 @@
 // `.go-rarity-*` utility classes for reuse across modules and components.
 @use 'sto-rarity-colours';
 
+// Emits the LCARS palette as custom properties, so a colour can be named at
+// runtime. Custom Tracking colour values store a palette token rather than a
+// hexadecimal, and this is what resolves one.
+@use 'lcars-palette-properties';
+
 // Emits the styles for every STO Storytime page. Held in one partial rather
 // than per component because the feature's pages are built from the same
 // handful of shapes, and that is what keeps them recognisably one thing.
@@ -12,6 +17,11 @@
 
 // Emits the styles for the help section's index and guide pages.
 @use 'help';
+
+// Emits the styles for every Custom Tracking panel. One partial for the whole
+// feature, for the same reason Storytime has one: the builder, the value
+// editor and the detail pages are built from the same handful of shapes.
+@use 'custom-tracking';
 
 /* You can add global styles to this file, and also import other style files */
 

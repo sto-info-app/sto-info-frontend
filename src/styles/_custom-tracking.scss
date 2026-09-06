@@ -1,0 +1,822 @@
+@use 'lcars-variables' as vars;
+
+// Custom Tracking.
+// One partial for the whole feature rather than a stylesheet per component,
+// for the same reason Storytime has one: every panel is built from the same
+// handful of shapes — a heading bar, a list of things inside it, a form, a row
+// of badges — and holding them together is what keeps the builder, the value
+// editor and the detail pages recognisably one thing.
+// Everything here is scoped by the `custom-tracking-` prefix its templates
+// use, so nothing leaks into the rest of the application.
+// ---
+// Custom Tracking defines no buttons or fields of its own. A button is
+// `.lcars-btn` with a colour class, a text field is `.lcars-input-container`, a
+// chooser is `.lcars-select-container` and a switch is `<app-lcars-toggle>` —
+// the same controls the dashboard, the admin pages and Storytime are built
+// from. What is left here is layout, and the few shapes the rest of the site
+// has no equivalent for.
+
+.custom-tracking-page {
+  padding: 1rem;
+
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  h2 {
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  p {
+    max-width: 70ch;
+    margin-bottom: 0.75rem;
+  }
+}
+
+.custom-tracking-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+// The row of panel tabs. A row rather than a stack, and it wraps rather than
+// scrolling, because a tab pushed off the side of a phone is a tab nobody
+// finds.
+.custom-tracking-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.custom-tracking-scope {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.custom-tracking-search {
+  max-width: 30rem;
+}
+
+.custom-tracking-builder {
+  .field-hint {
+    max-width: 70ch;
+    margin: 0 0 0.75rem;
+    color: vars.$lcars-grey-light;
+    font-size: 0.8rem;
+  }
+}
+
+// A count against a published ceiling. Deliberately quiet: it matters when
+// somebody is close to a limit and is noise the rest of the time.
+.custom-tracking-count {
+  color: vars.$lcars-grey-light;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.custom-tracking-empty {
+  max-width: 70ch;
+  padding: 0.75rem 0;
+  color: vars.$lcars-grey-light;
+}
+
+// Something the reader needs to notice but has not done wrong: a limit
+// reached, a public setting with no effect yet, a feature switched off.
+.custom-tracking-notice {
+  max-width: 70ch;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid vars.$lcars-sunflower;
+  margin: 0.75rem 0;
+  background: vars.$lcars-card-surface;
+}
+
+// ─── The hierarchy ───────────────────────────────────────────────────────────
+
+.custom-tracking-section-list,
+.custom-tracking-tab-list,
+.custom-tracking-field-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.custom-tracking-tab-list,
+.custom-tracking-field-list {
+  margin-top: 0.5rem;
+}
+
+.custom-tracking-panel {
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  background: vars.$lcars-grey-bg;
+}
+
+.custom-tracking-panel-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+}
+
+// The whole bar opens the panel, so it is one wide button rather than a small
+// arrow somebody has to aim at.
+.custom-tracking-panel-toggle {
+  display: flex;
+  flex: 1 1 12rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  border: none;
+  color: vars.$lcars-white;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+
+  &:hover {
+    color: vars.$lcars-sunflower;
+  }
+}
+
+.custom-tracking-panel-name {
+  font-weight: 700;
+}
+
+.custom-tracking-panel-body {
+  padding: 0 0.75rem 0.75rem;
+}
+
+.custom-tracking-panel-description {
+  max-width: 70ch;
+  margin: 0 0 0.75rem;
+  color: vars.$lcars-grey-light;
+}
+
+// ─── Fields ──────────────────────────────────────────────────────────────────
+
+.custom-tracking-field-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+}
+
+.custom-tracking-field-name {
+  font-weight: 700;
+}
+
+.custom-tracking-field-description,
+.custom-tracking-field-list .field-hint {
+  max-width: 70ch;
+  margin: 0 0 0.5rem;
+  color: vars.$lcars-grey-light;
+  font-size: 0.8rem;
+}
+
+// Every state a badge reports is a word as well as a colour, so a reader who
+// cannot tell one colour from another still reads the same facts.
+.custom-tracking-badge {
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+  background: vars.$lcars-sunflower;
+  color: vars.$lcars-black;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &.muted {
+    background: vars.$lcars-card-border;
+    color: vars.$lcars-white;
+  }
+
+  &.warning {
+    background: vars.$lcars-red;
+    color: vars.$lcars-white;
+  }
+}
+
+// ─── Forms ───────────────────────────────────────────────────────────────────
+
+.custom-tracking-form {
+  max-width: 40rem;
+  padding: 0.75rem;
+  border: 1px solid vars.$lcars-card-border;
+  border-radius: 8px;
+  margin: 0.5rem 0 1rem;
+  background: vars.$lcars-card-surface;
+
+  h3 {
+    margin: 0 0 0.75rem;
+    color: vars.$lcars-perano;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+
+  .field-hint {
+    max-width: 70ch;
+    margin: -0.4rem 0 0.75rem;
+    color: vars.$lcars-grey-light;
+    font-size: 0.8rem;
+  }
+
+  fieldset {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid vars.$lcars-grey-border;
+    border-radius: 6px;
+    margin: 0 0 1rem;
+  }
+
+  legend {
+    padding: 0 0.4rem;
+    color: vars.$lcars-perano;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+  }
+}
+
+.custom-tracking-form-toggle {
+  margin-bottom: 0.75rem;
+}
+
+.custom-tracking-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+// What a reader would actually see where the field is empty. Shown rather than
+// described, because "show the name and a placeholder" is a rule and what
+// somebody wants to know is what will be on the page.
+.custom-tracking-empty-preview {
+  padding: 0.5rem 0.75rem;
+  border-left: 4px solid vars.$lcars-perano;
+  margin-bottom: 0.75rem;
+  background: vars.$lcars-grey-bg;
+
+  p {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 0 0 0.25rem;
+  }
+}
+
+// A field cannot change what it asks, so its type is stated rather than
+// offered — and the sentence beside it says why.
+.custom-tracking-fixed-type {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  max-width: 70ch;
+  margin-bottom: 0.75rem;
+  color: vars.$lcars-grey-light;
+  font-size: 0.85rem;
+}
+
+// ─── The answers a choice field offers ───────────────────────────────────────
+
+.custom-tracking-options {
+  padding: 0.75rem;
+  border: 1px solid vars.$lcars-card-border;
+  border-radius: 8px;
+  margin: 0 0 1rem;
+  background: vars.$lcars-card-surface;
+
+  h4,
+  h5 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 0 0 0.5rem;
+    color: vars.$lcars-perano;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+  }
+
+  .field-hint {
+    max-width: 70ch;
+    margin: 0 0 0.75rem;
+    color: vars.$lcars-grey-light;
+    font-size: 0.8rem;
+  }
+}
+
+.custom-tracking-option-list {
+  padding: 0;
+  margin: 0 0 0.75rem;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+  }
+}
+
+.custom-tracking-option-label {
+  flex: 1 1 8rem;
+}
+
+.custom-tracking-option-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem;
+
+  .lcars-input-container {
+    flex: 1 1 12rem;
+  }
+}
+
+// Withdrawn options stay listed because a value that already chose one has to
+// go on reading correctly. They are plainly out of use rather than hidden.
+.custom-tracking-withdrawn {
+  padding-top: 0.5rem;
+  border-top: 1px solid vars.$lcars-grey-border;
+
+  ul {
+    margin-left: 1.25rem;
+    color: vars.$lcars-grey-light;
+  }
+}
+
+// ─── Reordering ──────────────────────────────────────────────────────────────
+
+.custom-tracking-reorder-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+// An affordance for people who would rather drag. The row itself carries the
+// drag, so this is deliberately not a control: everything it suggests can also
+// be done with the two buttons beside it.
+.custom-tracking-reorder-handle {
+  padding: 0 4px;
+  color: vars.$lcars-grey-light;
+  cursor: grab;
+}
+
+.custom-tracking-dragging {
+  opacity: 0.5;
+}
+
+// ─── The content agreement ───────────────────────────────────────────────────
+
+.custom-tracking-agreement {
+  max-width: 70ch;
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  h3 {
+    margin-bottom: 8px;
+    color: vars.$lcars-perano;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+}
+
+.custom-tracking-agreement-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-bottom: 24px;
+  color: vars.$lcars-grey-light;
+  font-size: 0.875rem;
+}
+
+// Only shown when the wording has changed since the user last accepted, so it
+// has to say plainly that nothing they recorded has gone.
+.custom-tracking-agreement-notice {
+  padding: 12px 16px;
+  border-left: 4px solid vars.$lcars-sunflower;
+  margin-bottom: 24px;
+  background: vars.$lcars-card-surface;
+}
+
+.custom-tracking-agreement-part {
+  margin-bottom: 20px;
+
+  p {
+    margin-bottom: 8px;
+  }
+
+  ul {
+    padding-left: 20px;
+    margin: 0;
+    list-style: disc;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+}
+
+.custom-tracking-agreement-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid vars.$lcars-card-border;
+  margin-bottom: 20px;
+  background: vars.$lcars-card-surface;
+
+  input {
+    // Large enough to be a comfortable touch target on a phone, where this is
+    // the one control standing between a user and the whole feature.
+    width: 20px;
+    height: 20px;
+    flex: none;
+    margin-top: 2px;
+  }
+
+  label {
+    cursor: pointer;
+  }
+}
+
+// ─── Recording values ────────────────────────────────────────────────────────
+
+.custom-tracking-values {
+  .lcars-select-container,
+  .lcars-input-container {
+    margin-bottom: 0.75rem;
+  }
+}
+
+// One field of a record. Separated by a rule rather than a box, because a tab
+// full of boxed fields reads as a stack of unrelated forms rather than as one
+// record.
+.custom-tracking-value-field {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid vars.$lcars-grey-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .field-hint {
+    max-width: 70ch;
+    margin: 0.25rem 0 0;
+    color: vars.$lcars-grey-light;
+    font-size: 0.8rem;
+  }
+}
+
+// The controls of a field that asks for more than one thing: a range, a
+// duration, a moment and the timezone it was meant in.
+.custom-tracking-value-group {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 6px;
+  margin: 0;
+
+  legend {
+    padding: 0 0.4rem;
+    color: vars.$lcars-perano;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+}
+
+.custom-tracking-value-required {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+  color: vars.$lcars-grey-light;
+  font-size: 0.8rem;
+}
+
+.custom-tracking-value-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.custom-tracking-value-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+
+  input {
+    // A comfortable touch target on a phone, where these are the whole of the
+    // answer.
+    width: 18px;
+    height: 18px;
+    flex: none;
+  }
+}
+
+.custom-tracking-value-switch {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+// Tags, as chips. A pressed chip is both filled and reported as pressed, so
+// the state does not rest on the colour alone.
+.custom-tracking-value-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.custom-tracking-value-tag {
+  padding: 0.2rem 0.7rem;
+  border: 1px solid vars.$lcars-card-border;
+  border-radius: 12px;
+  background: transparent;
+  color: vars.$lcars-white;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+
+  &.chosen {
+    border-color: vars.$lcars-sunflower;
+    background: vars.$lcars-sunflower;
+    color: vars.$lcars-black;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+// A colour is always written out beside its swatch, so it reads the same to
+// somebody who cannot tell one colour from another.
+.custom-tracking-value-colour {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.custom-tracking-value-swatch {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border: 1px solid vars.$lcars-card-border;
+  border-radius: 4px;
+}
+
+.custom-tracking-value-preview {
+  padding: 0.75rem;
+  border: 1px solid vars.$lcars-card-border;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+  background: vars.$lcars-card-surface;
+}
+
+.custom-tracking-value-picture {
+  margin: 0 0 0.75rem;
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+
+  figcaption {
+    margin-top: 0.25rem;
+  }
+}
+
+// ─── The picture cropper ─────────────────────────────────────────────────────
+
+.custom-tracking-image-dialog {
+  max-width: 640px;
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+.custom-tracking-image-preview {
+  margin: 0.75rem 0;
+}
+
+.custom-tracking-image-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+// ─── Showing values on a detail page ─────────────────────────────────────────
+
+.custom-tracking-display {
+  margin-top: 1.5rem;
+}
+
+// A name and its answer side by side where there is room, stacked where there
+// is not. A phone gets the stack, because a two-column grid at that width
+// leaves an answer four characters wide.
+.custom-tracking-display-field {
+  display: grid;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid vars.$lcars-grey-border;
+  gap: 0.15rem 1rem;
+  grid-template-columns: 1fr;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  @media (width >= 600px) {
+    align-items: baseline;
+    grid-template-columns: minmax(8rem, 16rem) 1fr;
+  }
+}
+
+.custom-tracking-display-name {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  color: vars.$lcars-perano;
+  font-weight: 700;
+}
+
+.custom-tracking-display-hint {
+  max-width: 60ch;
+  color: vars.$lcars-grey-light;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.custom-tracking-display-value {
+  min-width: 0;
+  color: vars.$lcars-white;
+  overflow-wrap: anywhere;
+}
+
+.custom-tracking-display-empty {
+  color: vars.$lcars-grey-light;
+  font-style: italic;
+}
+
+.custom-tracking-display-markdown {
+  max-width: 75ch;
+
+  :first-child {
+    margin-top: 0;
+  }
+
+  :last-child {
+    margin-bottom: 0;
+  }
+}
+
+.custom-tracking-display-choices {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0;
+  gap: 0.4rem;
+  list-style: none;
+}
+
+.custom-tracking-display-choice {
+  padding: 0.15rem 0.6rem;
+  border-radius: 10px;
+  background: vars.$lcars-card-surface;
+  font-size: 0.85rem;
+}
+
+.custom-tracking-display-rating {
+  color: vars.$lcars-sunflower;
+  letter-spacing: 0.1rem;
+}
+
+.custom-tracking-display-progress-figures {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.custom-tracking-display-progress-percentage {
+  color: vars.$lcars-grey-light;
+}
+
+.custom-tracking-display-progress-bar {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  max-width: 22rem;
+  height: 10px;
+  border-radius: 5px;
+  margin-top: 0.35rem;
+  background: vars.$lcars-card-surface;
+}
+
+.custom-tracking-display-progress-fill {
+  display: block;
+  height: 100%;
+  background: vars.$lcars-sunflower;
+}
+
+.custom-tracking-display-colour {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.custom-tracking-display-swatch {
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 4px;
+}
+
+// Bounded rather than full width. A picture cropped to a portrait shape would
+// otherwise push everything under it off a phone screen.
+.custom-tracking-display-image {
+  max-width: 22rem;
+  margin: 0;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+
+  figcaption {
+    margin-top: 0.35rem;
+    color: vars.$lcars-grey-light;
+    font-size: 0.8rem;
+  }
+}
+
+.custom-tracking-display-video {
+  max-width: 32rem;
+}
+
+.custom-tracking-display-player {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+}
+
+// The still is a button, so nothing is fetched from YouTube until a reader
+// asks for it.
+.custom-tracking-display-poster {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+}
+
+.custom-tracking-display-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 60%);
+  color: vars.$lcars-white;
+  place-items: center;
+  transform: translate(-50%, -50%);
+}
+
+.custom-tracking-display-watch {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+}
