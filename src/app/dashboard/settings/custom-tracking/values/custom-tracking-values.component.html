@@ -1,0 +1,249 @@
+<section class="custom-tracking-values">
+  @if (!canEdit) {
+    <p
+      class="custom-tracking-notice"
+      role="status">
+      Recording values is paused at the moment. Everything already recorded is
+      untouched and still shown below.
+    </p>
+  }
+
+  <div
+    class="custom-tracking-scope"
+    role="group"
+    aria-label="What to record against">
+    @for (choice of scopes; track choice.scope) {
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto"
+        [class.sunflower]="scope === choice.scope"
+        [class.bluey]="scope !== choice.scope"
+        [attr.aria-pressed]="scope === choice.scope"
+        (click)="chooseScope(choice.scope)">
+        {{ choice.label }}
+      </button>
+    }
+  </div>
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading"></app-loading-bar>
+  }
+
+  @if (errorMessage) {
+    <app-lcars-error-message [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (successMessage) {
+    <app-lcars-success-message
+      title="Saved"
+      [message]="successMessage"></app-lcars-success-message>
+  }
+
+  @if (!isLoading && targets.length === 0) {
+    <p class="custom-tracking-empty">
+      You have no {{ scopeNoun }} to record against yet. Add one from your
+      dashboard and it will appear here.
+    </p>
+  }
+
+  @if (targets.length > 0) {
+    <div class="lcars-input-container bluey custom-tracking-search">
+      <label for="custom-tracking-target-search">Find a record</label>
+      <input
+        id="custom-tracking-target-search"
+        type="search"
+        [formControl]="targetSearch"
+        placeholder="Name or handle" />
+    </div>
+
+    <div class="lcars-select-container perano">
+      <span class="select-label">Recording against</span>
+      <select
+        id="custom-tracking-target"
+        aria-label="Which record to fill in"
+        (change)="chooseTarget($any($event.target).value)">
+        @for (target of shownTargets; track target.id) {
+          <option
+            [value]="target.id"
+            [selected]="target.id === targetId">
+            {{ target.label }}
+          </option>
+        }
+      </select>
+    </div>
+    @if (shownTargets.length === 0) {
+      <p class="custom-tracking-empty">
+        Nothing matches that. Clear the box to see them all again.
+      </p>
+    }
+  }
+
+  @if (record) {
+    <div class="lcars-input-container bluey custom-tracking-search">
+      <label for="custom-tracking-value-search">Find a field</label>
+      <input
+        id="custom-tracking-value-search"
+        type="search"
+        [formControl]="search"
+        placeholder="Section, tab or field name" />
+    </div>
+
+    @if (missingRequired.length > 0) {
+      <p
+        class="custom-tracking-notice"
+        role="alert">
+        These still need an answer before this record can be saved:
+        {{ missingRequired.join(', ') }}.
+      </p>
+    }
+
+    @if (record.sections.length === 0) {
+      <p class="custom-tracking-empty">
+        You have not defined anything to record against {{ scopeNoun }} yet.
+        Build it in "What you track" and it will appear here.
+      </p>
+    } @else if (shownSections.length === 0) {
+      <p class="custom-tracking-empty">
+        Nothing matches that. Clear the box to see everything again.
+      </p>
+    }
+
+    <!--
+      No form group on the element itself: each field binds its own controls,
+      and a group bound in two places at once is a fight nobody wins.
+    -->
+    <form
+      class="custom-tracking-builder"
+      (submit)="onSubmit($event)">
+      @for (section of shownSections; track section.id) {
+        <div class="custom-tracking-panel">
+          <div class="custom-tracking-panel-bar">
+            <button
+              type="button"
+              class="custom-tracking-panel-toggle"
+              [attr.aria-expanded]="isOpen(section.id)"
+              [attr.aria-controls]="
+                'custom-tracking-value-section-' + section.id
+              "
+              (click)="toggleSection(section.id)">
+              <span aria-hidden="true">{{
+                isOpen(section.id) ? '▾' : '▸'
+              }}</span>
+              <span class="custom-tracking-panel-name">{{ section.name }}</span>
+              @if (section.publiclyVisible) {
+                <span class="custom-tracking-badge">Public</span>
+              }
+            </button>
+          </div>
+
+          <div
+            class="custom-tracking-panel-body"
+            [id]="'custom-tracking-value-section-' + section.id"
+            [hidden]="!isOpen(section.id)">
+            @if (section.description) {
+              <p class="custom-tracking-panel-description">
+                {{ section.description }}
+              </p>
+            }
+
+            @if (section.tabs.length === 0) {
+              <p class="custom-tracking-empty">This section has no tabs yet.</p>
+            } @else {
+              <div
+                class="custom-tracking-tabs"
+                role="tablist"
+                [attr.aria-label]="section.name">
+                @for (tab of section.tabs; track tab.id) {
+                  <button
+                    type="button"
+                    role="tab"
+                    class="lcars-btn lcars-btn-auto"
+                    [id]="'custom-tracking-value-tab-' + tab.id"
+                    [class.sunflower]="activeTab(section)?.id === tab.id"
+                    [class.bluey]="activeTab(section)?.id !== tab.id"
+                    [attr.aria-selected]="activeTab(section)?.id === tab.id"
+                    [attr.tabindex]="activeTab(section)?.id === tab.id ? 0 : -1"
+                    [attr.aria-controls]="
+                      'custom-tracking-value-panel-' + tab.id
+                    "
+                    (keydown)="onTabKeydown($event, section)"
+                    (click)="showTab(section.id, tab.id)">
+                    {{ tab.name }}
+                  </button>
+                }
+              </div>
+
+              @for (tab of section.tabs; track tab.id) {
+                <div
+                  role="tabpanel"
+                  tabindex="0"
+                  [id]="'custom-tracking-value-panel-' + tab.id"
+                  [attr.aria-labelledby]="'custom-tracking-value-tab-' + tab.id"
+                  [hidden]="activeTab(section)?.id !== tab.id">
+                  @if (tab.description) {
+                    <p class="custom-tracking-panel-description">
+                      {{ tab.description }}
+                    </p>
+                  }
+
+                  @if (tab.fields.length === 0) {
+                    <p class="custom-tracking-empty">
+                      This tab has no fields yet.
+                    </p>
+                  }
+
+                  @for (field of tab.fields; track field.id) {
+                    @if (isImage(field)) {
+                      <app-custom-tracking-image-value
+                        [field]="field"
+                        [configuration]="configuration"
+                        [scope]="scope"
+                        [targetId]="targetId"
+                        [image]="imageFor(field)"
+                        (changed)="onImageChanged(field, $event)">
+                      </app-custom-tracking-image-value>
+                    } @else {
+                      <app-custom-tracking-value-field
+                        [field]="field"
+                        [group]="groupFor(field)"
+                        [configuration]="configuration">
+                      </app-custom-tracking-value-field>
+                    }
+                  }
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
+
+      <div class="custom-tracking-form-actions">
+        <button
+          type="submit"
+          class="lcars-btn lcars-btn-auto sunflower"
+          [disabled]="isLoading || !canEdit">
+          Save this record
+        </button>
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto bluey"
+          [disabled]="isLoading || !hasUnsavedChanges()"
+          (click)="revert()">
+          Undo my changes
+        </button>
+        @if (hasUnsavedChanges()) {
+          <span
+            class="custom-tracking-count"
+            role="status">
+            Unsaved changes
+          </span>
+        }
+      </div>
+
+      <p class="field-hint">
+        The whole record is saved at once, so a problem with any answer leaves
+        every other one exactly as it was.
+      </p>
+    </form>
+  }
+</section>

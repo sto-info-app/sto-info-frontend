@@ -1,0 +1,64 @@
+<fieldset class="custom-tracking-value-group">
+  <legend>{{ field.name }}</legend>
+
+  @if (field.required) {
+    <p class="custom-tracking-value-required">
+      <span class="custom-tracking-badge">Required</span>
+      Every record has to answer this one.
+    </p>
+  }
+
+  @if (field.description) {
+    <p class="field-hint">{{ field.description }}</p>
+  }
+
+  @if (!isAvailable) {
+    <p
+      class="custom-tracking-notice"
+      role="status">
+      Pictures are switched off at the moment. Anything already uploaded is
+      untouched and will be here when they come back.
+    </p>
+  } @else {
+    @if (image) {
+      <figure class="custom-tracking-value-picture">
+        <img
+          [src]="imageUrl"
+          [alt]="image.altText" />
+        <figcaption class="field-hint">{{ image.altText }}</figcaption>
+      </figure>
+    } @else {
+      <p class="custom-tracking-empty">No picture yet.</p>
+    }
+
+    <div class="custom-tracking-form-actions">
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto sunflower"
+        (click)="choose()">
+        {{ image ? 'Replace picture' : 'Add picture' }}
+      </button>
+      @if (image) {
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto red"
+          (click)="remove()">
+          Remove picture
+        </button>
+      }
+    </div>
+
+    <p class="field-hint">
+      A picture is stored the moment it is uploaded, on its own. Saving the
+      record neither adds one nor takes one away.
+    </p>
+  }
+
+  @if (errorMessage) {
+    <small
+      class="field-error"
+      role="alert">
+      {{ errorMessage }}
+    </small>
+  }
+</fieldset>
