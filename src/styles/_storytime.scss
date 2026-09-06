@@ -22,10 +22,7 @@
 // admin pages use for theirs, so a form on a Story page and a form on the news
 // admin page read as the same kind of thing.
 @mixin storytime-panel-surface {
-  margin-top: 0.5rem;
-  padding: 1.25rem;
-  border-radius: 6px;
-  background: vars.$lcars-grey-bg;
+  @include mixins.lcars-panel-surface;
 }
 
 // A row in any of the feature's lists.
@@ -37,68 +34,21 @@
   margin-bottom: 0.75rem;
 }
 
-// The shape every Storytime panel takes, and the shape a captain card on the
-// dashboard takes: a coloured spine down the left, a solid block across the top
-// carrying the name in black, and the body beneath it. One shape learned once,
-// on every list in the feature.
-// ---
-// The colour says what kind of thing the panel is — a Story, a Chapter, an Arc
-// — rather than what state it is in, so it means the same on every page a
-// reader meets it. The one exception is a creator's own list of works, where
-// the colour has always carried publication status because that is what
-// somebody scanning their own drafts is looking for.
+// The shape every Storytime panel takes, drawn by the shared mixins rather
+// than here: it is also the shape a captain card on the dashboard takes and
+// the shape a field takes in the Custom Tracking builder, so it belongs to the
+// theme rather than to this feature. What is left here is the one part that is
+// Storytime's own — the class its name is carried in.
 @mixin storytime-panel-card($colour) {
-  @include mixins.lcars-card;
-
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  margin-bottom: 0.75rem;
-  border-left: 10px solid color.adjust($colour, $lightness: -18%);
-  background: linear-gradient(
-    180deg,
-    rgba($colour, 0.14) 0%,
-    vars.$lcars-grey-bg 100%
-  );
-
-  // A list of these is still a list; the bullet and the indent are not wanted.
-  list-style: none;
+  @include mixins.lcars-panel-card($colour);
 }
 
 // The block across the top, carrying the name.
 @mixin storytime-panel-heading($colour) {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.5rem 1rem;
-  background: $colour;
-  border-bottom: 2px solid color.adjust($colour, $lightness: -20%);
-  color: vars.$lcars-black;
-  text-decoration: none;
+  @include mixins.lcars-panel-card-heading($colour);
 
-  // Every colour in the map carries black at 4.5:1 or better, which is what
-  // lets the name be set on the block rather than beside it.
   .storytime-panel-card__name {
-    font-family: vars.$font-antonio;
-    font-size: 1.05rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: vars.$lcars-black;
-
-    // The name is a heading element where the panel is a section of the page
-    // rather than a row in a list, and `.mat-typography` gives a heading
-    // 30px above and 10px below. Left alone that stands the bar half as tall
-    // again as every other panel's.
-    margin: 0;
-    line-height: 1.2;
-
-    // A long title shortens rather than growing the bar, so a row of panels
-    // keeps one height and the marks stay where the eye expects them. The
-    // whole of it is on the panel it opens, and on hover here.
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @include mixins.lcars-panel-card-name;
   }
 }
 
@@ -372,13 +322,12 @@ $storytime-comment-colours: (
 
 // What a panel holds under its name.
 .storytime-panel-card__body {
-  padding: 0.75rem 1rem;
+  @include mixins.lcars-panel-card-body;
 }
 
 // A panel that can be acted on puts the body and the controls side by side.
 .storytime-panel-card__main {
-  display: flex;
-  flex: 1;
+  @include mixins.lcars-panel-card-main;
 }
 
 .storytime-panel-card__main > .storytime-panel-card__body {
@@ -386,46 +335,18 @@ $storytime-comment-colours: (
   min-width: 0;
 }
 
-// The controls live in their own darkened strip at the end of the row, the way
-// a captain card's do, so pressing one is never mistaken for opening the thing
-// the panel is about.
+// The controls live in their own darkened strip at the end of the row.
 .storytime-panel-card__controls {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.8rem;
-  padding: 0.8rem;
-  font-size: 1.2rem;
-  background: rgb(0 0 0 / 40%);
-  border-left: 1px solid rgb(255 255 255 / 10%);
-
-  .cta-icon {
-    color: rgb(255 255 255 / 50%);
-
-    &:hover {
-      color: vars.$lcars-sunflower;
-    }
-  }
+  @include mixins.lcars-panel-card-controls;
 }
 
-// What the bar says besides the name, at its right-hand end, the way a captain
-// card carries its recruit type. On a dark ground rather than a tint, because
-// the bar is a different colour for every kind of thing.
+// What the bar says besides the name, at its right-hand end.
 .storytime-panel-card__marks {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 0.5rem;
+  @include mixins.lcars-panel-card-marks;
 }
 
 .storytime-panel-card__badge {
-  @include mixins.lcars-badge;
-
-  flex: 0 0 auto;
-  background: rgb(0 0 0 / 55%);
-  color: vars.$lcars-white;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
+  @include mixins.lcars-panel-card-badge;
 }
 
 // A panel stacks what it holds on the same rhythm a form uses between its
