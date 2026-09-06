@@ -65,6 +65,15 @@
           Save
         </button>
       </form>
+      <div class="lcars-text-bar settings-bar"><span>Custom Tracking</span></div>
+      <div class="settings-content">
+        <p class="settings-description">
+          Decide what else to record about your own accounts and characters, and
+          fill it in. Everything you add is private until you say otherwise.
+        </p>
+        <a [routerLink]="customTrackingLink" class="lcars-btn gold"
+        >Custom Tracking</a>
+      </div>
     }
     @if (errorMessage) {
       <app-lcars-error-message

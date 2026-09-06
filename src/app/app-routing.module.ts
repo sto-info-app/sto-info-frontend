@@ -19,6 +19,7 @@ import {
   APP_ROUTE_TITLES,
   APP_ROUTES,
 } from './shared/constants/app-routing.constants';
+import { unsavedChangesGuard } from './shared/guards/unsaved-changes.guard';
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { CreditsComponent } from './static-pages/credits/credits.component';
@@ -443,6 +444,22 @@ export const routes: Routes = [
       ),
     data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_SETTINGS, requiresApi: true },
     canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_CUSTOM_TRACKING,
+    loadComponent: () =>
+      import('./dashboard/settings/custom-tracking/custom-tracking-settings.component').then(
+        m => m.CustomTrackingSettingsComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.STO_DASHBOARD_CUSTOM_TRACKING,
+      requiresApi: true,
+    },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+    // A half-filled record is work. Leaving the page would throw it away, and
+    // a stray click on a navigation link should not be able to do that
+    // without a word.
+    canDeactivate: [unsavedChangesGuard],
   },
   {
     path: APP_ROUTES.STO_DASHBOARD_ACCOUNTS,
