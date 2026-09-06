@@ -322,6 +322,28 @@ describe('CustomTrackingValueFieldComponent', () => {
       expect(text()).toContain('Recorded as yes');
     });
 
+    // A record is rebuilt whole every time it is loaded or saved, and the
+    // field it is drawn by is not: the same component is handed new controls.
+    // A switch that went on watching the old ones would read as unanswered
+    // however many times it was flipped, and an unanswered field is sent as a
+    // cleared one — so the flip would be dropped rather than stored.
+    it('goes on counting the switch as answered after the record is rebuilt', () => {
+      const field = aField({ fieldType: CustomTrackingFieldType.TOGGLE });
+
+      build(field);
+      fixture.componentRef.setInput(
+        'group',
+        buildValueGroup(field, undefined, configuration.limits),
+      );
+      fixture.detectChanges();
+
+      query<HTMLButtonElement>('button[role="switch"]').click();
+      fixture.detectChanges();
+
+      expect(component.group.value).toEqual({ answered: true, boolean: true });
+      expect(text()).toContain('Recorded as yes');
+    });
+
     it('offers to take a switch answer away again', () => {
       build(aField({ fieldType: CustomTrackingFieldType.TOGGLE }), true);
 

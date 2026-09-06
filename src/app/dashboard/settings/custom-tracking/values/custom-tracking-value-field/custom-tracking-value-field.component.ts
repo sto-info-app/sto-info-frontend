@@ -3,11 +3,11 @@ import {
   Component,
   DestroyRef,
   Input,
-  OnInit,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 import {
   CustomTrackingConfiguration,
@@ -93,12 +93,28 @@ const ERROR_SENTENCES: Record<string, string> = {
     MarkdownPipe,
   ],
 })
-export class CustomTrackingValueFieldComponent implements OnInit {
+export class CustomTrackingValueFieldComponent {
   /** The field being answered. */
   @Input({ required: true }) field!: CustomTrackingField;
 
-  /** The controls answering it. */
-  @Input({ required: true }) group!: CustomTrackingValueGroup;
+  /**
+   * The controls answering it.
+   *
+   * Set rather than assigned, because the record is rebuilt whole every time
+   * it is loaded or saved and this component is not: the fields are drawn by
+   * their own identifiers, so the same instance is handed a new set of
+   * controls. Anything watching the old ones would go on watching controls
+   * nothing is bound to.
+   */
+  @Input({ required: true })
+  set group(group: CustomTrackingValueGroup) {
+    this._group = group;
+    this.watchAnswered();
+  }
+
+  get group(): CustomTrackingValueGroup {
+    return this._group;
+  }
 
   /** Everything the server published about the feature. */
   @Input({ required: true }) configuration!: CustomTrackingConfiguration;
@@ -118,6 +134,11 @@ export class CustomTrackingValueFieldComponent implements OnInit {
   /** Whether the Markdown preview is showing. */
   isPreviewing = false;
 
+  private _group!: CustomTrackingValueGroup;
+
+  /** What is watching the switch of the controls in hand, if anything. */
+  private _answering: Subscription | null = null;
+
   private readonly _destroyRef = inject(DestroyRef);
 
   /**
@@ -126,16 +147,24 @@ export class CustomTrackingValueFieldComponent implements OnInit {
    * The switch has two positions and the answer has three states, so what it
    * is set to and whether it has been set are held separately. Touching it is
    * what turns "nobody has said" into "they said no".
+   *
+   * Rebound whenever the controls are replaced. Without that, a switch nobody
+   * had yet answered would go on reading as unanswered however many times it
+   * was flipped after the first save — and an unanswered field is sent as a
+   * cleared one, so the flip would be dropped rather than stored.
    */
-  ngOnInit(): void {
-    const answered = this.group.get('answered');
-    const boolean = this.group.get('boolean');
+  private watchAnswered(): void {
+    this._answering?.unsubscribe();
+    this._answering = null;
+
+    const answered = this._group.get('answered');
+    const boolean = this._group.get('boolean');
 
     if (!answered || !boolean) {
       return;
     }
 
-    boolean.valueChanges
+    this._answering = boolean.valueChanges
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe(() => answered.setValue(true));
   }
