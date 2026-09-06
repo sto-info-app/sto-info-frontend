@@ -36,16 +36,15 @@
       </app-custom-tracking-agreement>
     } @else {
       <div
-        class="custom-tracking-tabs"
+        class="lcars-tabs custom-tracking-panel-tabs"
         role="tablist"
         aria-label="Custom Tracking">
         <button
           type="button"
           role="tab"
           id="custom-tracking-tab-definitions"
-          class="lcars-btn lcars-btn-auto"
-          [class.sunflower]="panel === 'definitions'"
-          [class.bluey]="panel !== 'definitions'"
+          class="lcars-tab"
+          [class.active]="panel === 'definitions'"
           [attr.aria-selected]="panel === 'definitions'"
           [attr.tabindex]="panel === 'definitions' ? 0 : -1"
           aria-controls="custom-tracking-panel-definitions"
@@ -57,9 +56,8 @@
           type="button"
           role="tab"
           id="custom-tracking-tab-values"
-          class="lcars-btn lcars-btn-auto"
-          [class.sunflower]="panel === 'values'"
-          [class.bluey]="panel !== 'values'"
+          class="lcars-tab"
+          [class.active]="panel === 'values'"
           [attr.aria-selected]="panel === 'values'"
           [attr.tabindex]="panel === 'values' ? 0 : -1"
           aria-controls="custom-tracking-panel-values"
@@ -71,9 +69,8 @@
           type="button"
           role="tab"
           id="custom-tracking-tab-about"
-          class="lcars-btn lcars-btn-auto"
-          [class.sunflower]="panel === 'about'"
-          [class.bluey]="panel !== 'about'"
+          class="lcars-tab"
+          [class.active]="panel === 'about'"
           [attr.aria-selected]="panel === 'about'"
           [attr.tabindex]="panel === 'about' ? 0 : -1"
           aria-controls="custom-tracking-panel-about"
@@ -81,6 +78,9 @@
           (click)="show('about')">
           About and the rules
         </button>
+        <span
+          class="lcars-tabs-filler"
+          aria-hidden="true"></span>
       </div>
 
       <div

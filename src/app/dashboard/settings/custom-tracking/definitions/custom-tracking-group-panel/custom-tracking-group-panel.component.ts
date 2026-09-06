@@ -6,38 +6,41 @@ import {
   Output,
 } from '@angular/core';
 
+import { CustomTrackingSectionBarComponent } from '../../custom-tracking-section-bar/custom-tracking-section-bar.component';
 import { CustomTrackingReorderControlsComponent } from '../custom-tracking-reorder-controls/custom-tracking-reorder-controls.component';
 
 /** Distinguishes one panel from another, for `aria-controls`. */
 let nextGroupPanelId = 0;
 
 /**
- * The heading bar of a section or a tab, and whatever sits under it.
+ * One section of the builder: an LCARS heading bar, and everything under it.
  *
- * One component for both. A section and a tab are the same shape — a name, a
- * description, whether it is public, the controls that reorder it and the
- * things inside it — and two copies of that would be two chances for the
- * expanded state, the ARIA wiring or the button wording to drift apart.
+ * The bar is the shared one, so a section here folds away with the same caret
+ * as a section of a help guide or a Storytime page. What this adds to it are
+ * the controls that arrange a section rather than read it — the arrows, the
+ * pen and the bin — projected onto the bar beside that caret.
  *
- * What is inside is projected rather than passed in, because a section holds
- * tabs and a tab holds fields, and neither this component nor its expanded
- * state cares which.
+ * What is inside is projected rather than passed in — the strip of tabs, the
+ * fields of whichever tab is at the front, and the forms that change any of
+ * them. Neither this component nor its expanded state cares what that content
+ * turns out to be, which is what keeps the arranging of a section separate
+ * from the arranging of what is in it.
  */
 @Component({
   selector: 'app-custom-tracking-group-panel',
   templateUrl: './custom-tracking-group-panel.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CustomTrackingReorderControlsComponent],
+  imports: [
+    CustomTrackingSectionBarComponent,
+    CustomTrackingReorderControlsComponent,
+  ],
 })
 export class CustomTrackingGroupPanelComponent {
   /** What it is called. */
   @Input({ required: true }) name!: string;
 
-  /** What kind of thing it is, in prose: "section" or "tab". */
-  @Input({ required: true }) kind!: string;
-
-  /** What the things inside it are called, in prose: "tab" or "field". */
+  /** What the things inside it are called, in prose: "tab". */
   @Input({ required: true }) childKind!: string;
 
   /** Where it sits among its siblings. */
@@ -61,9 +64,6 @@ export class CustomTrackingGroupPanelComponent {
   /** Whether what is inside is showing. */
   @Input() isExpanded = false;
 
-  /** Whether it may still hold more. */
-  @Input() canAddChild = true;
-
   /** Whether a change is in flight anywhere in the builder. */
   @Input() isSaving = false;
 
@@ -81,9 +81,6 @@ export class CustomTrackingGroupPanelComponent {
 
   /** Raised when it should be deleted. */
   @Output() readonly removed = new EventEmitter<void>();
-
-  /** Raised when something new should be created inside it. */
-  @Output() readonly childAdded = new EventEmitter<void>();
 
   /** Identifies what this panel controls, for the button that opens it. */
   readonly contentId = `custom-tracking-group-panel-${nextGroupPanelId++}`;

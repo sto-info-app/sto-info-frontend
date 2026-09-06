@@ -1,32 +1,29 @@
 <span class="custom-tracking-reorder-controls">
-  <span
-    class="custom-tracking-reorder-handle"
-    aria-hidden="true"
-    title="Drag to reorder">
-    <i class="fa-solid fa-grip-vertical"></i>
-  </span>
-
   <button
     class="cta-icon"
     type="button"
-    [title]="'Move ' + itemName + ' up'"
-    [attr.aria-label]="'Move ' + itemName + ' up'"
+    [title]="earlierLabel"
+    [attr.aria-label]="earlierLabel"
     [disabled]="isFirst"
     (click)="moveUp.emit()">
     <i
-      class="fa-solid fa-caret-up"
+      class="fa-solid"
+      [class.fa-caret-up]="!isHorizontal"
+      [class.fa-caret-left]="isHorizontal"
       aria-hidden="true"></i>
   </button>
 
   <button
     class="cta-icon"
     type="button"
-    [title]="'Move ' + itemName + ' down'"
-    [attr.aria-label]="'Move ' + itemName + ' down'"
+    [title]="laterLabel"
+    [attr.aria-label]="laterLabel"
     [disabled]="isLast"
     (click)="moveDown.emit()">
     <i
-      class="fa-solid fa-caret-down"
+      class="fa-solid"
+      [class.fa-caret-down]="!isHorizontal"
+      [class.fa-caret-right]="isHorizontal"
       aria-hidden="true"></i>
   </button>
 </span>

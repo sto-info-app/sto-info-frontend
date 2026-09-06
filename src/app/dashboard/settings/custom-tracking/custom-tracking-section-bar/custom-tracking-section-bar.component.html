@@ -1,0 +1,40 @@
+<div class="lcars-text-bar small-lcars-bar-gap custom-tracking-section-bar">
+  <h3 class="custom-tracking-section-heading">
+    <span class="title-with-badge custom-tracking-section-title">
+      <span class="custom-tracking-section-name">{{ name }}</span>
+
+      @if (summary) {
+        <span class="custom-tracking-count">{{ summary }}</span>
+      }
+
+      @if (publiclyVisible) {
+        <span class="custom-tracking-badge">Public</span>
+      } @else {
+        <span class="custom-tracking-badge muted">Private</span>
+      }
+
+      @if (suppressed) {
+        <span class="custom-tracking-badge warning">Hidden by a moderator</span>
+      }
+    </span>
+  </h3>
+
+  <div class="lcars-bar-actions">
+    <ng-content select="[barActions]"></ng-content>
+
+    <button
+      type="button"
+      class="cta-icon custom-tracking-panel-toggle"
+      [attr.aria-expanded]="isExpanded"
+      [attr.aria-controls]="contentId"
+      [title]="toggleLabel"
+      [attr.aria-label]="toggleLabel"
+      (click)="toggled.emit()">
+      <i
+        class="fa-solid"
+        [class.fa-caret-up]="isExpanded"
+        [class.fa-caret-down]="!isExpanded"
+        aria-hidden="true"></i>
+    </button>
+  </div>
+</div>

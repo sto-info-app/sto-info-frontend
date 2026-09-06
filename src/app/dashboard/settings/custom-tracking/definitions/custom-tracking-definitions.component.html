@@ -1,21 +1,29 @@
 <section class="custom-tracking-builder">
-  <div
-    class="custom-tracking-scope"
-    role="group"
+  <!--
+    Accounts and Characters are two hierarchies rather than two panels of one,
+    so the strip that swaps between them is a row of pressed buttons rather
+    than a tab list. It is drawn as the LCARS strip every other switch on the
+    site is drawn as, because looking like one thing and behaving as another is
+    what makes a control hard to learn.
+  -->
+  <nav
+    class="lcars-tabs custom-tracking-scope-tabs"
     aria-label="Which hierarchy to build">
     @for (choice of scopes; track choice.scope) {
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto"
-        [class.sunflower]="scope === choice.scope"
-        [class.bluey]="scope !== choice.scope"
+        class="lcars-tab"
+        [class.active]="scope === choice.scope"
         [attr.aria-pressed]="scope === choice.scope"
         [disabled]="isLoading"
         (click)="chooseScope(choice.scope)">
         {{ choice.label }}
       </button>
     }
-  </div>
+    <span
+      class="lcars-tabs-filler"
+      aria-hidden="true"></span>
+  </nav>
 
   @for (choice of scopes; track choice.scope) {
     @if (scope === choice.scope) {
@@ -71,13 +79,8 @@
 
   <ol class="custom-tracking-section-list">
     @for (section of visibleSections; track section.id) {
-      <li
-        appCustomTrackingReorderable
-        reorderList="sections"
-        [reorderIndex]="sectionPosition(section.id)"
-        (reordered)="dropSection($event)">
+      <li>
         <app-custom-tracking-group-panel
-          kind="section"
           childKind="tab"
           [name]="section.name"
           [description]="section.description"
@@ -87,7 +90,6 @@
           [count]="sections.length"
           [childCount]="tabCount(section.id)"
           [isExpanded]="isExpanded(section.id)"
-          [canAddChild]="canAddTab(section.id)"
           [isSaving]="isLoading"
           (toggled)="toggle(section.id)"
           (moveUp)="
@@ -103,8 +105,7 @@
             )
           "
           (edited)="editSection(section)"
-          (removed)="removeSection(section)"
-          (childAdded)="addTab(section)">
+          (removed)="removeSection(section)">
           @if (
             editor && editor.kind === 'section' && editor.id === section.id
           ) {
@@ -134,145 +135,286 @@
             </app-custom-tracking-group-form>
           }
 
-          <ol class="custom-tracking-tab-list">
-            @for (tab of section.tabs; track tab.id) {
-              <li
-                appCustomTrackingReorderable
-                [reorderList]="'tabs-' + section.id"
-                [reorderIndex]="tabPosition(tab)"
-                (reordered)="dropTab(section.id, $event)">
-                <app-custom-tracking-group-panel
-                  kind="tab"
-                  childKind="field"
-                  [name]="tab.name"
-                  [description]="tab.description"
-                  [publiclyVisible]="tab.publiclyVisible"
-                  [suppressed]="tab.suppressed"
-                  [index]="tabPosition(tab)"
-                  [count]="tabCount(section.id)"
-                  [childCount]="fieldCountIn(tab.id)"
-                  [isExpanded]="isExpanded(tab.id)"
-                  [canAddChild]="canAddField(tab.id)"
-                  [isSaving]="isLoading"
-                  (toggled)="toggle(tab.id)"
-                  (moveUp)="
-                    reorderTabs(
-                      section.id,
-                      tabPosition(tab),
-                      tabPosition(tab) - 1
-                    )
-                  "
-                  (moveDown)="
-                    reorderTabs(
-                      section.id,
-                      tabPosition(tab),
-                      tabPosition(tab) + 1
-                    )
-                  "
-                  (edited)="editTab(tab)"
-                  (removed)="removeTab(tab)"
-                  (childAdded)="addField(tab)">
-                  @if (
-                    editor && editor.kind === 'tab' && editor.id === tab.id
-                  ) {
-                    <app-custom-tracking-group-form
-                      kind="tab"
-                      [limits]="configuration.limits"
-                      [group]="tab"
-                      [ancestorPublic]="section.publiclyVisible"
-                      [isSaving]="isLoading"
-                      (saved)="saveGroup($event)"
-                      (cancelled)="closeEditor()">
-                    </app-custom-tracking-group-form>
-                  }
+          <!--
+            The tabs of a section are a strip rather than a stack of foldable
+            panels: they are alternatives to one another, and one tab's worth
+            of fields is what somebody arranging them is looking at. The
+            toolbar beneath carries the arrows that reorder a tab, along with
+            the pen and the bin the strip has no room for.
+            ---
+            Adding a tab is the last thing on the strip, where a new tab would
+            appear: the control and what it makes are then in the same place,
+            which a button further down the panel never was.
+            ---
+            The strip carries the tabs and nothing else, because a `tablist`
+            may own nothing but tabs. So the list is a wrapper the strip lays
+            out around it, and Add sits beside the list rather than in it.
+          -->
+          <div class="lcars-tabs custom-tracking-section-tabs">
+            <span
+              class="custom-tracking-tablist"
+              role="tablist"
+              [attr.aria-label]="section.name">
+              @for (tab of section.tabs; track tab.id) {
+                <button
+                  type="button"
+                  role="tab"
+                  class="lcars-tab"
+                  [id]="elementId('tab', tab.id)"
+                  [class.active]="activeTab(section)?.id === tab.id"
+                  [attr.aria-selected]="activeTab(section)?.id === tab.id"
+                  [attr.tabindex]="activeTab(section)?.id === tab.id ? 0 : -1"
+                  [attr.aria-controls]="elementId('panel', tab.id)"
+                  (keydown)="onTabKeydown($event, section)"
+                  (click)="showTab(section.id, tab.id)">
+                  {{ tab.name }}
+                </button>
+              }
+            </span>
 
-                  @if (
-                    editor &&
-                    editor.kind === 'field' &&
-                    editor.id === null &&
-                    editor.parentId === tab.id
-                  ) {
-                    <app-custom-tracking-field-form
-                      [configuration]="configuration"
-                      [ancestorPublic]="
-                        section.publiclyVisible && tab.publiclyVisible
-                      "
-                      [isSaving]="isLoading"
-                      (saved)="saveField($event)"
-                      (cancelled)="closeEditor()">
-                    </app-custom-tracking-field-form>
-                  }
-
-                  <ol class="custom-tracking-field-list">
-                    @for (field of tab.fields; track field.id) {
-                      <li
-                        appCustomTrackingReorderable
-                        [reorderList]="'fields-' + tab.id"
-                        [reorderIndex]="fieldPosition(field)"
-                        (reordered)="dropField(tab.id, $event)">
-                        <app-custom-tracking-field-panel
-                          [field]="field"
-                          [typeLabel]="typeLabel(field.fieldType)"
-                          [index]="fieldPosition(field)"
-                          [count]="fieldCountIn(tab.id)"
-                          [usesOptions]="usesOptions(field)"
-                          [isSaving]="isLoading"
-                          (moveUp)="
-                            reorderFields(
-                              tab.id,
-                              fieldPosition(field),
-                              fieldPosition(field) - 1
-                            )
-                          "
-                          (moveDown)="
-                            reorderFields(
-                              tab.id,
-                              fieldPosition(field),
-                              fieldPosition(field) + 1
-                            )
-                          "
-                          (edited)="editField(section.id, field)"
-                          (removed)="removeField(field)">
-                        </app-custom-tracking-field-panel>
-
-                        @if (
-                          editor &&
-                          editor.kind === 'field' &&
-                          editor.id === field.id
-                        ) {
-                          <app-custom-tracking-field-form
-                            [configuration]="configuration"
-                            [field]="field"
-                            [ancestorPublic]="
-                              section.publiclyVisible && tab.publiclyVisible
-                            "
-                            [isSaving]="isLoading"
-                            (saved)="saveField($event)"
-                            (cancelled)="closeEditor()">
-                          </app-custom-tracking-field-form>
-
-                          @if (usesOptions(field)) {
-                            <app-custom-tracking-options-editor
-                              [options]="field.options"
-                              [limits]="configuration.limits"
-                              [optionNoun]="optionNoun(field)"
-                              [allowsMultiple]="allowsMultipleOptions(field)"
-                              [isSaving]="isLoading"
-                              (created)="addOption(field, $event)"
-                              (renamed)="renameOption($event)"
-                              (defaultToggled)="setOptionDefault($event)"
-                              (withdrawn)="withdrawOption($event)"
-                              (reordered)="reorderOptions(field, $event)">
-                            </app-custom-tracking-options-editor>
-                          }
-                        }
-                      </li>
-                    }
-                  </ol>
-                </app-custom-tracking-group-panel>
-              </li>
+            @if (canAddTab(section.id)) {
+              <button
+                type="button"
+                class="lcars-tab custom-tracking-add-tab"
+                [title]="'Add a tab to ' + section.name"
+                [attr.aria-label]="'Add a tab to ' + section.name"
+                [disabled]="isLoading"
+                (click)="addTab(section)">
+                <i
+                  class="fa-solid fa-plus"
+                  aria-hidden="true"></i>
+              </button>
             }
-          </ol>
+
+            <span
+              class="lcars-tabs-filler"
+              aria-hidden="true"></span>
+          </div>
+
+          @if (!canAddTab(section.id)) {
+            <p
+              class="custom-tracking-notice"
+              role="status">
+              This section already holds as many tabs as it may.
+            </p>
+          }
+
+          @if (section.tabs.length === 0) {
+            <p class="custom-tracking-empty">
+              This section holds no tabs yet. A tab is the page a field is asked
+              on — add one and the fields go inside it.
+            </p>
+          }
+
+          @for (tab of section.tabs; track tab.id) {
+            <div
+              class="custom-tracking-tab-panel"
+              role="tabpanel"
+              tabindex="0"
+              [id]="elementId('panel', tab.id)"
+              [attr.aria-labelledby]="elementId('tab', tab.id)"
+              [hidden]="activeTab(section)?.id !== tab.id">
+              <!--
+                What the strip above says is which tab is showing, and it says
+                it in two words on a button. This row says the same thing at
+                length — named, badged and counted — so the settings beside the
+                name are read as that tab's rather than the section's. It is
+                drawn as a panel in the selected tab's own colour, because a
+                bare line of badges under a strip belongs to nothing in
+                particular.
+              -->
+              <div class="custom-tracking-tab-toolbar">
+                <p class="custom-tracking-tab-scope">
+                  <i
+                    class="fa-solid fa-circle-info"
+                    aria-hidden="true"></i>
+                  <span class="custom-tracking-tab-scope-name">
+                    {{ tab.name }}
+                  </span>
+                  tab
+                </p>
+
+                <span class="custom-tracking-tab-meta">
+                  @if (tab.publiclyVisible) {
+                    <span class="custom-tracking-badge">Public</span>
+                  } @else {
+                    <span class="custom-tracking-badge muted">Private</span>
+                  }
+
+                  @if (tab.suppressed) {
+                    <span class="custom-tracking-badge warning">
+                      Hidden by a moderator
+                    </span>
+                  }
+
+                  <span class="custom-tracking-count">
+                    {{ fieldSummary(tab.id) }}
+                  </span>
+                </span>
+
+                <span class="custom-tracking-tab-actions">
+                  <app-custom-tracking-reorder-controls
+                    axis="horizontal"
+                    [itemName]="tab.name"
+                    [index]="tabPosition(tab)"
+                    [count]="tabCount(section.id)"
+                    (moveUp)="
+                      reorderTabs(
+                        section.id,
+                        tabPosition(tab),
+                        tabPosition(tab) - 1
+                      )
+                    "
+                    (moveDown)="
+                      reorderTabs(
+                        section.id,
+                        tabPosition(tab),
+                        tabPosition(tab) + 1
+                      )
+                    ">
+                  </app-custom-tracking-reorder-controls>
+
+                  <button
+                    type="button"
+                    class="cta-icon"
+                    [title]="'Edit ' + tab.name"
+                    [attr.aria-label]="'Edit ' + tab.name"
+                    [disabled]="isLoading"
+                    (click)="editTab(tab)">
+                    <i
+                      class="fa-solid fa-user-pen"
+                      aria-hidden="true"></i>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="cta-icon delete-icon"
+                    [title]="'Delete ' + tab.name"
+                    [attr.aria-label]="'Delete ' + tab.name"
+                    [disabled]="isLoading"
+                    (click)="removeTab(tab)">
+                    <i
+                      class="fa-solid fa-trash"
+                      aria-hidden="true"></i>
+                  </button>
+                </span>
+              </div>
+
+              @if (tab.description) {
+                <p class="custom-tracking-panel-description">
+                  {{ tab.description }}
+                </p>
+              }
+
+              @if (editor && editor.kind === 'tab' && editor.id === tab.id) {
+                <app-custom-tracking-group-form
+                  kind="tab"
+                  [limits]="configuration.limits"
+                  [group]="tab"
+                  [ancestorPublic]="section.publiclyVisible"
+                  [isSaving]="isLoading"
+                  (saved)="saveGroup($event)"
+                  (cancelled)="closeEditor()">
+                </app-custom-tracking-group-form>
+              }
+
+              @if (
+                editor &&
+                editor.kind === 'field' &&
+                editor.id === null &&
+                editor.parentId === tab.id
+              ) {
+                <app-custom-tracking-field-form
+                  [configuration]="configuration"
+                  [ancestorPublic]="
+                    section.publiclyVisible && tab.publiclyVisible
+                  "
+                  [isSaving]="isLoading"
+                  (saved)="saveField($event)"
+                  (cancelled)="closeEditor()">
+                </app-custom-tracking-field-form>
+              }
+
+              <ol class="custom-tracking-field-list">
+                @for (field of tab.fields; track field.id) {
+                  <li>
+                    <app-custom-tracking-field-panel
+                      [field]="field"
+                      [typeLabel]="typeLabel(field.fieldType)"
+                      [index]="fieldPosition(field)"
+                      [count]="fieldCountIn(tab.id)"
+                      [usesOptions]="usesOptions(field)"
+                      [isSaving]="isLoading"
+                      (moveUp)="
+                        reorderFields(
+                          tab.id,
+                          fieldPosition(field),
+                          fieldPosition(field) - 1
+                        )
+                      "
+                      (moveDown)="
+                        reorderFields(
+                          tab.id,
+                          fieldPosition(field),
+                          fieldPosition(field) + 1
+                        )
+                      "
+                      (edited)="editField(section.id, field)"
+                      (removed)="removeField(field)">
+                    </app-custom-tracking-field-panel>
+
+                    @if (
+                      editor &&
+                      editor.kind === 'field' &&
+                      editor.id === field.id
+                    ) {
+                      <app-custom-tracking-field-form
+                        [configuration]="configuration"
+                        [field]="field"
+                        [ancestorPublic]="
+                          section.publiclyVisible && tab.publiclyVisible
+                        "
+                        [isSaving]="isLoading"
+                        (saved)="saveField($event)"
+                        (cancelled)="closeEditor()">
+                      </app-custom-tracking-field-form>
+
+                      @if (usesOptions(field)) {
+                        <app-custom-tracking-options-editor
+                          [options]="field.options"
+                          [limits]="configuration.limits"
+                          [optionNoun]="optionNoun(field)"
+                          [allowsMultiple]="allowsMultipleOptions(field)"
+                          [isSaving]="isLoading"
+                          (created)="addOption(field, $event)"
+                          (renamed)="renameOption($event)"
+                          (defaultToggled)="setOptionDefault($event)"
+                          (withdrawn)="withdrawOption($event)"
+                          (reordered)="reorderOptions(field, $event)">
+                        </app-custom-tracking-options-editor>
+                      }
+                    }
+                  </li>
+                }
+              </ol>
+
+              @if (canAddField(tab.id)) {
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto green"
+                  [disabled]="isLoading"
+                  (click)="addField(tab)">
+                  Add a field to {{ tab.name }}
+                </button>
+              } @else {
+                <p
+                  class="custom-tracking-notice"
+                  role="status">
+                  This tab already holds as many fields as it may.
+                </p>
+              }
+            </div>
+          }
         </app-custom-tracking-group-panel>
       </li>
     }

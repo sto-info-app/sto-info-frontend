@@ -25,11 +25,7 @@
   } @else {
     <ol class="custom-tracking-option-list">
       @for (option of liveOptions; track option.id; let index = $index) {
-        <li
-          appCustomTrackingReorderable
-          [reorderList]="listId"
-          [reorderIndex]="index"
-          (reordered)="moveDropped($event)">
+        <li>
           @if (editingOptionId === option.id) {
             <div class="lcars-input-container perano">
               <label [attr.for]="editorId + '-edit'">
@@ -98,7 +94,7 @@
               [disabled]="isSaving"
               (click)="startEditing(option)">
               <i
-                class="fa-solid fa-pen"
+                class="fa-solid fa-user-pen"
                 aria-hidden="true"></i>
             </button>
 

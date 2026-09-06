@@ -8,22 +8,23 @@
     </p>
   }
 
-  <div
-    class="custom-tracking-scope"
-    role="group"
+  <nav
+    class="lcars-tabs custom-tracking-scope-tabs"
     aria-label="What to record against">
     @for (choice of scopes; track choice.scope) {
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto"
-        [class.sunflower]="scope === choice.scope"
-        [class.bluey]="scope !== choice.scope"
+        class="lcars-tab"
+        [class.active]="scope === choice.scope"
         [attr.aria-pressed]="scope === choice.scope"
         (click)="chooseScope(choice.scope)">
         {{ choice.label }}
       </button>
     }
-  </div>
+    <span
+      class="lcars-tabs-filler"
+      aria-hidden="true"></span>
+  </nav>
 
   @if (isLoading) {
     <app-loading-bar loadingText="Loading"></app-loading-bar>
@@ -117,24 +118,13 @@
       (submit)="onSubmit($event)">
       @for (section of shownSections; track section.id) {
         <div class="custom-tracking-panel">
-          <div class="custom-tracking-panel-bar">
-            <button
-              type="button"
-              class="custom-tracking-panel-toggle"
-              [attr.aria-expanded]="isOpen(section.id)"
-              [attr.aria-controls]="
-                'custom-tracking-value-section-' + section.id
-              "
-              (click)="toggleSection(section.id)">
-              <span aria-hidden="true">{{
-                isOpen(section.id) ? '▾' : '▸'
-              }}</span>
-              <span class="custom-tracking-panel-name">{{ section.name }}</span>
-              @if (section.publiclyVisible) {
-                <span class="custom-tracking-badge">Public</span>
-              }
-            </button>
-          </div>
+          <app-custom-tracking-section-bar
+            [name]="section.name"
+            [publiclyVisible]="section.publiclyVisible"
+            [isExpanded]="isOpen(section.id)"
+            [contentId]="'custom-tracking-value-section-' + section.id"
+            (toggled)="toggleSection(section.id)">
+          </app-custom-tracking-section-bar>
 
           <div
             class="custom-tracking-panel-body"
@@ -150,17 +140,16 @@
               <p class="custom-tracking-empty">This section has no tabs yet.</p>
             } @else {
               <div
-                class="custom-tracking-tabs"
+                class="lcars-tabs custom-tracking-section-tabs"
                 role="tablist"
                 [attr.aria-label]="section.name">
                 @for (tab of section.tabs; track tab.id) {
                   <button
                     type="button"
                     role="tab"
-                    class="lcars-btn lcars-btn-auto"
+                    class="lcars-tab"
                     [id]="'custom-tracking-value-tab-' + tab.id"
-                    [class.sunflower]="activeTab(section)?.id === tab.id"
-                    [class.bluey]="activeTab(section)?.id !== tab.id"
+                    [class.active]="activeTab(section)?.id === tab.id"
                     [attr.aria-selected]="activeTab(section)?.id === tab.id"
                     [attr.tabindex]="activeTab(section)?.id === tab.id ? 0 : -1"
                     [attr.aria-controls]="
@@ -171,10 +160,14 @@
                     {{ tab.name }}
                   </button>
                 }
+                <span
+                  class="lcars-tabs-filler"
+                  aria-hidden="true"></span>
               </div>
 
               @for (tab of section.tabs; track tab.id) {
                 <div
+                  class="custom-tracking-tab-panel"
                   role="tabpanel"
                   tabindex="0"
                   [id]="'custom-tracking-value-panel-' + tab.id"

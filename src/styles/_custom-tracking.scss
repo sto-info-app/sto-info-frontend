@@ -1,4 +1,7 @@
+@use 'sass:color';
 @use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+@use 'lcars-tabs' as tabs;
 
 // Custom Tracking.
 // One partial for the whole feature rather than a stylesheet per component,
@@ -40,21 +43,157 @@
   margin-bottom: 1rem;
 }
 
-// The row of panel tabs. A row rather than a stack, and it wraps rather than
-// scrolling, because a tab pushed off the side of a phone is a tab nobody
-// finds.
-.custom-tracking-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+// ─── Tab strips ──────────────────────────────────────────────────────────────
+
+// Every strip Custom Tracking draws is the site's LCARS tab strip: the three
+// panels of the settings page, the two hierarchies inside two of them, and the
+// tabs of a section wherever a section is drawn. One shape, whether the strip
+// swaps a whole panel or one tab's worth of fields.
+// Emitted here rather than globally, and once for the two places the feature
+// puts a strip: the settings page, and the block a detail page shows a
+// visitor. Nothing else on the site is inside either, so nothing else picks
+// these up.
+.custom-tracking-page,
+.custom-tracking-display {
+  @include tabs.lcars-tab-strip($min-width: 0);
 }
 
-.custom-tracking-scope {
+// The strips nested inside a panel — the hierarchy chooser and a section's own
+// tabs — are quieter than the page's. Three strips of identical weight stacked
+// one above another would say they were three of the same thing, and only the
+// outermost one swaps the page.
+.custom-tracking-scope-tabs,
+.custom-tracking-section-tabs {
+  margin: 0.5rem 0 0.75rem;
+  min-height: 32px;
+  border-bottom-width: 2px;
+
+  .lcars-tab {
+    min-height: 32px;
+    padding: 0 16px 0 22px;
+    font-size: 0.9rem;
+  }
+}
+
+// A section's tabs sit inside the section's own panel, which already draws a
+// surface: the strip needs no rule of its own under it, only the tabs.
+.custom-tracking-section-tabs {
+  border-bottom-color: vars.$lcars-grey-border;
+}
+
+// A `tablist` may own nothing but tabs, so the tabs of a section are wrapped
+// in one of their own and the control that adds another sits outside it. The
+// wrapper takes no part in the layout: the strip lays out the tabs themselves,
+// which is what lets Add sit among them and the whole row wrap as one.
+.custom-tracking-tablist {
+  display: contents;
+}
+
+// Adding a tab is the last thing on the strip, in the colour every other
+// control that makes something is drawn in. It is not a tab and does not
+// pretend to be one — it is never selected, and it never carries the strip's
+// rounded corner, which belongs to whatever is genuinely first.
+// ---
+// A plus rather than a sentence: the strip is a row of names, and a tab whose
+// label ran to five words would be read as the longest name on it. What it
+// adds and where is said in full to the pointer and to a screen reader.
+.lcars-tabs .lcars-tab.custom-tracking-add-tab {
+  min-width: 0;
+  padding: 0 18px;
+  background-color: vars.$lcars-green;
+  color: vars.$a11y-black;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.15);
+    color: vars.$a11y-black;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+// What one tab of a section holds. The rule above it is the strip's, so this
+// only has to give the fields room to breathe under it.
+.custom-tracking-tab-panel {
+  padding-top: 0.25rem;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// The controls a tab strip has no room for: what the tab showing is, and the
+// arrows, pen and bin that arrange it.
+// ---
+// Drawn as a panel rather than as a bare row, because a line of badges
+// floating under a strip is read as belonging to the section — and it is the
+// tab those badges describe. Blue, the colour the site draws a thing that
+// reports rather than a thing that is arranged: a field beneath it is a panel
+// of its own, in a colour of its own, and the two are never confused.
+.custom-tracking-tab-toolbar {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  padding: 0 0.9rem 0 0;
+  margin: 0.25rem 0 0.75rem;
+  border-left: 10px solid color.adjust(vars.$lcars-perano, $lightness: -18%);
+  border-radius: 6px;
+  background: linear-gradient(
+    180deg,
+    rgba(vars.$lcars-perano, 0.14) 0%,
+    vars.$lcars-grey-bg 100%
+  );
+  overflow: hidden;
+}
+
+// The block that names the tab, carrying the same solid colour and black
+// lettering a panel card's heading does. The icon is there to say the row
+// reports something rather than does something — everything that acts is at
+// the other end of it.
+.custom-tracking-tab-scope {
+  display: flex;
+  flex: 0 1 auto;
+  min-width: 0;
+  align-items: center;
+  align-self: stretch;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  padding: 0.4rem 0.9rem;
+  margin: 0;
+  background: vars.$lcars-perano;
+  color: vars.$lcars-black;
+  font-family: vars.$font-antonio;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+// The tab's name shortens rather than pushing the badges beside it off the
+// panel, the way a section's name does on its bar.
+.custom-tracking-tab-scope-name {
+  min-width: 0;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.custom-tracking-tab-meta,
+.custom-tracking-tab-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+// What can be done to the tab sits at the far end, away from what the panel
+// says about it.
+.custom-tracking-tab-actions {
+  margin-left: auto;
 }
 
 .custom-tracking-search {
@@ -97,59 +236,28 @@
 // ─── The hierarchy ───────────────────────────────────────────────────────────
 
 .custom-tracking-section-list,
-.custom-tracking-tab-list,
 .custom-tracking-field-list {
   padding: 0;
   margin: 0;
   list-style: none;
 }
 
-.custom-tracking-tab-list,
 .custom-tracking-field-list {
   margin-top: 0.5rem;
 }
 
+// A section: the LCARS heading bar, and the surface everything inside it sits
+// on. The bar draws itself, so all this holds is the space between one section
+// and the next.
 .custom-tracking-panel {
-  border: 1px solid vars.$lcars-grey-border;
-  border-radius: 8px;
-  margin-bottom: 0.75rem;
-  background: vars.$lcars-grey-bg;
+  margin-bottom: 1.25rem;
 }
 
-.custom-tracking-panel-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-}
-
-// The whole bar opens the panel, so it is one wide button rather than a small
-// arrow somebody has to aim at.
-.custom-tracking-panel-toggle {
-  display: flex;
-  flex: 1 1 12rem;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0;
-  border: none;
-  color: vars.$lcars-white;
-  background: transparent;
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
-
-  &:hover {
-    color: vars.$lcars-sunflower;
-  }
-}
-
-.custom-tracking-panel-name {
-  font-weight: 700;
-}
-
+// The bar names the section and the panel is the section, on the same surface
+// a block of Storytime sits on: without one the tabs and fields float loose on
+// the page background with nothing marking where a section ends.
 .custom-tracking-panel-body {
-  padding: 0 0.75rem 0.75rem;
+  @include mixins.lcars-panel-surface;
 }
 
 .custom-tracking-panel-description {
@@ -158,35 +266,181 @@
   color: vars.$lcars-grey-light;
 }
 
+// The bar carries the section's heading, so the heading gives up the margin,
+// size and weight it would otherwise bring — the bar decides all three, and a
+// heading keeping its own would push the controls off the end of it.
+.custom-tracking-section-heading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  text-decoration: none;
+}
+
+// The label is drawn by the bar, pinned to its left edge and free to run on
+// under the controls at the other one. Bounding it against the bar — which is
+// what the percentage resolves against — is what keeps a long section name off
+// the arrows and the bin.
+.custom-tracking-section-bar .custom-tracking-section-title {
+  display: flex;
+
+  // Room enough for the controls at the other end of the bar and a little
+  // clear air before them. They are six icons wide and no wider, so this is a
+  // measurement rather than a guess.
+  max-width: calc(100% - 8.5rem);
+  align-items: center;
+  gap: 0.6rem;
+  overflow: hidden;
+
+  // What the section holds and who may read it are short and fixed; the name
+  // is neither, so it is the part that gives way.
+  .custom-tracking-badge,
+  .custom-tracking-count {
+    flex: 0 0 auto;
+  }
+}
+
+// The name shortens rather than pushing the badges beside it off the bar, the
+// way a panel card's name does. Taken out of the bar's own absolute layout
+// first: every span a bar holds is otherwise pinned to an edge and drawn on
+// the page's black.
+.lcars-text-bar .custom-tracking-section-name {
+  position: static;
+  top: auto;
+  height: auto;
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// A phone leaves a heading bar barely a third of the room a desktop does — the
+// same width at which the bar itself shrinks — and what it carries beside the
+// name has to give way rather than the name.
+// ---
+// Nothing is lost by it. Every section opens by default, and what the badges
+// said is said again in full by the form the pen opens.
+@media (width <= 600px) {
+  .custom-tracking-section-bar .custom-tracking-section-title {
+    max-width: calc(100% - 7rem);
+  }
+
+  .custom-tracking-section-bar .custom-tracking-count,
+  .custom-tracking-section-bar .custom-tracking-badge {
+    display: none;
+  }
+}
+
 // ─── Fields ──────────────────────────────────────────────────────────────────
 
-.custom-tracking-field-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0;
+// One field, as the builder lists it: the panel card a captain and a Storytime
+// chapter are drawn as, so a reader who has learnt one has learnt this. The
+// name sits on the block across the top, what the field actually asks is
+// stated beneath it as labelled values, and the controls that arrange it are
+// in their own strip at the end — never mistaken for something the field
+// itself does.
+// ---
+// Warm, where the tab panel above it is blue: a field is a thing inside the
+// tab, not another statement about it, and a stack of blue panels under a blue
+// panel would read as one list rather than as a thing and its contents.
+.custom-tracking-field-panel {
+  @include mixins.lcars-panel-card(vars.$lcars-tangerine);
 }
 
-.custom-tracking-field-name {
-  font-weight: 700;
+// A panel of a list holds still under the pointer. The lift belongs to a card
+// that opens something, and every one of these opens its editor from a button
+// rather than from the panel.
+.custom-tracking-field-panel:hover {
+  transform: none;
 }
 
-.custom-tracking-field-description,
-.custom-tracking-field-list .field-hint {
+.custom-tracking-field-panel__heading {
+  @include mixins.lcars-panel-card-heading(vars.$lcars-tangerine);
+}
+
+.custom-tracking-field-panel__name {
+  @include mixins.lcars-panel-card-name;
+}
+
+.custom-tracking-field-panel__marks {
+  @include mixins.lcars-panel-card-marks;
+}
+
+.custom-tracking-field-panel__badge {
+  @include mixins.lcars-panel-card-badge;
+}
+
+.custom-tracking-field-panel__main {
+  @include mixins.lcars-panel-card-main;
+}
+
+.custom-tracking-field-panel__body {
+  @include mixins.lcars-panel-card-body;
+
+  flex: 1;
+  min-width: 0;
+}
+
+// One column of icons, no wider than an icon: what a field can be asked to do
+// is five buttons, and five buttons in a row would take a quarter of the panel
+// away from what the field actually says.
+.custom-tracking-field-panel__controls {
+  @include mixins.lcars-panel-card-controls;
+
+  flex: 0 0 auto;
+  gap: 0.4rem;
+  padding: 0.6rem 0.5rem;
+  line-height: 1;
+
+  .custom-tracking-reorder-controls {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+}
+
+// What the field asks and who may read it, as the labelled values the rest of
+// the site states facts with.
+.custom-tracking-field-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.5rem 1rem;
+  margin: 0;
+
+  .info-item {
+    min-width: 0;
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.custom-tracking-field-description {
   max-width: 70ch;
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.6rem;
   color: vars.$lcars-grey-light;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 // Every state a badge reports is a word as well as a colour, so a reader who
-// cannot tell one colour from another still reads the same facts.
+// cannot tell one colour from another still reads the same facts. The colours
+// are named rather than set outright, because a badge sitting on an LCARS
+// heading bar has to take its own box back from the bar and put the same two
+// colours on it again.
 .custom-tracking-badge {
+  --custom-tracking-badge-surface: #{vars.$lcars-sunflower};
+  --custom-tracking-badge-ink: #{vars.$lcars-black};
+
   padding: 0.1rem 0.5rem;
   border-radius: 10px;
-  background: vars.$lcars-sunflower;
-  color: vars.$lcars-black;
+  background: var(--custom-tracking-badge-surface);
+  color: var(--custom-tracking-badge-ink);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -194,14 +448,40 @@
   white-space: nowrap;
 
   &.muted {
-    background: vars.$lcars-card-border;
-    color: vars.$lcars-white;
+    --custom-tracking-badge-surface: #{vars.$lcars-card-border};
+    --custom-tracking-badge-ink: #{vars.$lcars-white};
   }
 
   &.warning {
-    background: vars.$lcars-red;
-    color: vars.$lcars-white;
+    --custom-tracking-badge-surface: #{vars.$lcars-red};
+    --custom-tracking-badge-ink: #{vars.$lcars-white};
   }
+}
+
+// An LCARS bar lays out every span it holds as a label of its own — pinned to
+// an edge, drawn on the page's black, in the bar's colour and size. A badge or
+// a count inside the bar's title is ordinary inline content again.
+.lcars-text-bar .custom-tracking-badge {
+  position: static;
+  top: auto;
+  height: auto;
+  padding: 0.1rem 0.5rem;
+  background: var(--custom-tracking-badge-surface);
+  color: var(--custom-tracking-badge-ink);
+  font-size: 0.7rem;
+  line-height: 1.6;
+}
+
+.lcars-text-bar .custom-tracking-count {
+  position: static;
+  top: auto;
+  height: auto;
+  padding: 0;
+  background: none;
+  color: vars.$lcars-grey-light;
+  font-size: 0.8rem;
+  font-weight: normal;
+  line-height: 1.6;
 }
 
 // ─── Forms ───────────────────────────────────────────────────────────────────
@@ -360,19 +640,6 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-}
-
-// An affordance for people who would rather drag. The row itself carries the
-// drag, so this is deliberately not a control: everything it suggests can also
-// be done with the two buttons beside it.
-.custom-tracking-reorder-handle {
-  padding: 0 4px;
-  color: vars.$lcars-grey-light;
-  cursor: grab;
-}
-
-.custom-tracking-dragging {
-  opacity: 0.5;
 }
 
 // ─── The content agreement ───────────────────────────────────────────────────

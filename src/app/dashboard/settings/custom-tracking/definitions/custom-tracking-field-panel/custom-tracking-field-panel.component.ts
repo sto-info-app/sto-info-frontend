@@ -14,17 +14,19 @@ import {
 import { CustomTrackingReorderControlsComponent } from '../custom-tracking-reorder-controls/custom-tracking-reorder-controls.component';
 
 /**
- * One field, as the builder lists it.
+ * One field, as the builder lists it: a panel of its own.
  *
- * A summary rather than a form: what it is called, what it asks for, whether
- * an answer is compulsory and whether anyone but its owner can see it. The
- * form that changes any of that is opened beneath this row, so a tab holding
- * twenty fields stays readable.
+ * A summary rather than a form. Its name and the controls that arrange it run
+ * along the top, and what it actually asks — whether an answer is compulsory,
+ * who may read it, what it offers to choose from and what it shows where
+ * nothing has been recorded — is stated beneath as the labelled values the
+ * rest of the site states facts with. The form that changes any of it opens
+ * below the panel, so a tab holding twenty fields stays readable.
  *
- * Every state it reports is a word as well as a colour. A field that is
- * compulsory, public or hidden by a moderator says so in text, because a
- * reader who cannot tell one badge colour from another still has to be able to
- * tell those apart.
+ * Everything it reports is a word rather than a colour. A row of coloured
+ * badges could say a field was public but never what "public" meant for a
+ * field nobody had filled in; a reader who cannot tell one badge from another
+ * reads exactly the same facts here.
  */
 @Component({
   selector: 'app-custom-tracking-field-panel',

@@ -1,31 +1,14 @@
 <div class="custom-tracking-panel">
-  <div class="custom-tracking-panel-bar">
-    <button
-      type="button"
-      class="custom-tracking-panel-toggle"
-      [attr.aria-expanded]="isExpanded"
-      [attr.aria-controls]="contentId"
-      (click)="toggled.emit()">
-      <i
-        class="fa-solid"
-        [class.fa-caret-down]="isExpanded"
-        [class.fa-caret-right]="!isExpanded"
-        aria-hidden="true"></i>
-      <span class="custom-tracking-panel-name">{{ name }}</span>
-      <span class="custom-tracking-count">{{ childSummary }}</span>
-    </button>
-
-    @if (publiclyVisible) {
-      <span class="custom-tracking-badge">Public</span>
-    } @else {
-      <span class="custom-tracking-badge muted">Private</span>
-    }
-
-    @if (suppressed) {
-      <span class="custom-tracking-badge warning">Hidden by a moderator</span>
-    }
-
+  <app-custom-tracking-section-bar
+    [name]="name"
+    [summary]="childSummary"
+    [publiclyVisible]="publiclyVisible"
+    [suppressed]="suppressed"
+    [isExpanded]="isExpanded"
+    [contentId]="contentId"
+    (toggled)="toggled.emit()">
     <app-custom-tracking-reorder-controls
+      barActions
       [itemName]="name"
       [index]="index"
       [count]="count"
@@ -34,6 +17,7 @@
     </app-custom-tracking-reorder-controls>
 
     <button
+      barActions
       type="button"
       class="cta-icon"
       [title]="'Edit ' + name"
@@ -41,13 +25,14 @@
       [disabled]="isSaving"
       (click)="edited.emit()">
       <i
-        class="fa-solid fa-pen"
+        class="fa-solid fa-user-pen"
         aria-hidden="true"></i>
     </button>
 
     <button
+      barActions
       type="button"
-      class="cta-icon"
+      class="cta-icon delete-icon"
       [title]="'Delete ' + name"
       [attr.aria-label]="'Delete ' + name"
       [disabled]="isSaving"
@@ -56,7 +41,7 @@
         class="fa-solid fa-trash"
         aria-hidden="true"></i>
     </button>
-  </div>
+  </app-custom-tracking-section-bar>
 
   <div
     class="custom-tracking-panel-body"
@@ -67,21 +52,5 @@
     }
 
     <ng-content></ng-content>
-
-    @if (canAddChild) {
-      <button
-        type="button"
-        class="lcars-btn lcars-btn-auto green"
-        [disabled]="isSaving"
-        (click)="childAdded.emit()">
-        Add a {{ childKind }} to {{ name }}
-      </button>
-    } @else {
-      <p
-        class="custom-tracking-notice"
-        role="status">
-        This {{ kind }} already holds as many {{ childKind }}s as it may.
-      </p>
-    }
   </div>
 </div>

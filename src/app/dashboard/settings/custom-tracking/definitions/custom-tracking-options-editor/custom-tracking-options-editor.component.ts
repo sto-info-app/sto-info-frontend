@@ -14,10 +14,6 @@ import {
 } from 'src/app/models/custom-tracking.models';
 
 import { CustomTrackingReorderControlsComponent } from '../custom-tracking-reorder-controls/custom-tracking-reorder-controls.component';
-import {
-  CustomTrackingReorderRequest,
-  CustomTrackingReorderableDirective,
-} from '../custom-tracking-reorderable.directive';
 import { moveInList } from '../custom-tracking-reordering.utility';
 
 /** A rename of one option. */
@@ -52,11 +48,7 @@ let nextOptionsEditorId = 0;
   templateUrl: './custom-tracking-options-editor.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    ReactiveFormsModule,
-    CustomTrackingReorderControlsComponent,
-    CustomTrackingReorderableDirective,
-  ],
+  imports: [ReactiveFormsModule, CustomTrackingReorderControlsComponent],
 })
 export class CustomTrackingOptionsEditorComponent {
   /** Every option the field has, withdrawn ones included. */
@@ -92,9 +84,6 @@ export class CustomTrackingOptionsEditorComponent {
 
   /** Identifies this editor, so its labels point at its own controls. */
   readonly editorId = `custom-tracking-options-${nextOptionsEditorId++}`;
-
-  /** Which list a drag belongs to, kept apart from every other field. */
-  readonly listId = `${this.editorId}-list`;
 
   /** The option being reworded, or null. */
   editingOptionId: string | null = null;
@@ -234,15 +223,6 @@ export class CustomTrackingOptionsEditorComponent {
    */
   moveDown(index: number): void {
     this.move(index, index + 1);
-  }
-
-  /**
-   * Moves an option to where it was dropped.
-   *
-   * @param request - Where it came from and where it landed.
-   */
-  moveDropped(request: CustomTrackingReorderRequest): void {
-    this.move(request.from, request.to);
   }
 
   /**

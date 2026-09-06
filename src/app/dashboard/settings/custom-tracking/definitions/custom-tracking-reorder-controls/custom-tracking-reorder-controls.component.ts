@@ -9,14 +9,16 @@ import {
 /**
  * The move-up and move-down buttons on one item of an orderable list.
  *
- * Drag-and-drop is never the only way to reorder anything here. These buttons
- * are what make an order reachable by keyboard and reliable on a touch screen,
- * and the drag handle beside them is an affordance for people who would rather
- * drag — not a replacement for them.
+ * These buttons are the only way an order changes, which is what makes it
+ * reachable by keyboard and reliable on a touch screen.
  *
  * Each button says what it moves, because "move up" on its own is ambiguous on
  * a page holding four orderable lists at once and a screen reader announces
  * the name rather than the row it sits in.
+ *
+ * The arrows point the way the list itself runs: up and down for a stack of
+ * panels, left and right for a strip of tabs. An arrow pointing up beside a
+ * row of tabs would be asking the reader to translate it.
  */
 @Component({
   selector: 'app-custom-tracking-reorder-controls',
@@ -34,11 +36,41 @@ export class CustomTrackingReorderControlsComponent {
   /** How many items the list holds. */
   @Input({ required: true }) count!: number;
 
+  /** Which way the list runs, and so which way the arrows point. */
+  @Input() axis: 'vertical' | 'horizontal' = 'vertical';
+
   /** Raised when the item should move one place earlier. */
   @Output() readonly moveUp = new EventEmitter<void>();
 
   /** Raised when the item should move one place later. */
   @Output() readonly moveDown = new EventEmitter<void>();
+
+  /**
+   * Whether the list runs across the page rather than down it.
+   *
+   * @returns True when the arrows should point left and right.
+   */
+  get isHorizontal(): boolean {
+    return this.axis === 'horizontal';
+  }
+
+  /**
+   * What moving the item one place earlier is called.
+   *
+   * @returns The label for the first button.
+   */
+  get earlierLabel(): string {
+    return `Move ${this.itemName} ${this.isHorizontal ? 'left' : 'up'}`;
+  }
+
+  /**
+   * What moving the item one place later is called.
+   *
+   * @returns The label for the second button.
+   */
+  get laterLabel(): string {
+    return `Move ${this.itemName} ${this.isHorizontal ? 'right' : 'down'}`;
+  }
 
   /**
    * Whether the item is already first.

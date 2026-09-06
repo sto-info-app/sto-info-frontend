@@ -20,7 +20,6 @@ describe('CustomTrackingGroupPanelComponent', () => {
     fixture = TestBed.createComponent(CustomTrackingGroupPanelComponent);
     component = fixture.componentInstance;
     component.name = 'Ship collection';
-    component.kind = 'section';
     component.childKind = 'tab';
     component.index = 0;
     component.count = 2;
@@ -116,21 +115,17 @@ describe('CustomTrackingGroupPanelComponent', () => {
     expect(text()).not.toContain('Hidden by a moderator');
   });
 
-  it('asks to be edited, deleted and added to', () => {
+  it('asks to be edited and deleted', () => {
     build({ isExpanded: true });
 
     const events: string[] = [];
     component.edited.subscribe(() => events.push('edited'));
     component.removed.subscribe(() => events.push('removed'));
-    component.childAdded.subscribe(() => events.push('added'));
 
     buttonLabelled('Edit Ship collection').click();
     buttonLabelled('Delete Ship collection').click();
-    fixture.nativeElement
-      .querySelector('.custom-tracking-panel-body .lcars-btn')
-      .click();
 
-    expect(events).toEqual(['edited', 'removed', 'added']);
+    expect(events).toEqual(['edited', 'removed']);
   });
 
   it('asks to be moved', () => {
@@ -144,18 +139,6 @@ describe('CustomTrackingGroupPanelComponent', () => {
     buttonLabelled('Move Ship collection down').click();
 
     expect(moves).toEqual(['up', 'down']);
-  });
-
-  // Told before the button is pressed rather than after the server refuses.
-  it('stops offering to add once it holds as many as it may', () => {
-    build({ isExpanded: true, canAddChild: false });
-
-    expect(text()).toContain('already holds as many tabs as it may');
-    expect(
-      fixture.nativeElement.querySelector(
-        '.custom-tracking-panel-body .lcars-btn',
-      ),
-    ).toBeNull();
   });
 
   it('offers nothing while a change is in flight', () => {

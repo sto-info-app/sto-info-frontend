@@ -9,14 +9,24 @@ describe('CustomTrackingReorderControlsComponent', () => {
   const buttons = (): HTMLButtonElement[] =>
     Array.from(fixture.nativeElement.querySelectorAll('button'));
 
-  const build = (index: number, count: number): void => {
+  const build = (
+    index: number,
+    count: number,
+    axis: 'vertical' | 'horizontal' = 'vertical',
+  ): void => {
     fixture = TestBed.createComponent(CustomTrackingReorderControlsComponent);
     component = fixture.componentInstance;
     component.itemName = 'Ship collection';
     component.index = index;
     component.count = count;
+    component.axis = axis;
     fixture.detectChanges();
   };
+
+  const icons = (): string[] =>
+    Array.from(fixture.nativeElement.querySelectorAll('button i')).map(
+      (icon: unknown) => (icon as HTMLElement).className,
+    );
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -33,6 +43,27 @@ describe('CustomTrackingReorderControlsComponent', () => {
       'Move Ship collection up',
       'Move Ship collection down',
     ]);
+  });
+
+  // A strip of tabs runs across the page, so an arrow pointing up beside one is
+  // asking the reader to translate it.
+  it('points along the list where the list runs across the page', () => {
+    build(1, 3, 'horizontal');
+
+    expect(buttons().map(button => button.getAttribute('aria-label'))).toEqual([
+      'Move Ship collection left',
+      'Move Ship collection right',
+    ]);
+    expect(icons()).toEqual([
+      'fa-solid fa-caret-left',
+      'fa-solid fa-caret-right',
+    ]);
+  });
+
+  it('points down the page for a stack of panels', () => {
+    build(1, 3);
+
+    expect(icons()).toEqual(['fa-solid fa-caret-up', 'fa-solid fa-caret-down']);
   });
 
   it('offers both moves in the middle of a list', () => {
@@ -74,17 +105,5 @@ describe('CustomTrackingReorderControlsComponent', () => {
     buttons()[1].click();
 
     expect(moves).toEqual(['up', 'down']);
-  });
-
-  // The row carries the drag itself, so the handle is an affordance rather
-  // than a control — everything it suggests is also on the two buttons.
-  it('hides the drag handle from assistive technology', () => {
-    build(0, 2);
-
-    const handle: HTMLElement = fixture.nativeElement.querySelector(
-      '.custom-tracking-reorder-handle',
-    );
-
-    expect(handle.getAttribute('aria-hidden')).toBe('true');
   });
 });

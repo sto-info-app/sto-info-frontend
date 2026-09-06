@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
+  ElementRef,
   Input,
   NgZone,
   OnInit,
@@ -23,6 +24,7 @@ import {
   CustomTrackingTabTree,
   CustomTrackingTargetScope,
 } from 'src/app/models/custom-tracking.models';
+import { nextTabIndex } from 'src/app/shared/a11y/roving-tabs.utility';
 import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -48,10 +50,7 @@ import {
   CustomTrackingOptionRename,
   CustomTrackingOptionsEditorComponent,
 } from './custom-tracking-options-editor/custom-tracking-options-editor.component';
-import {
-  CustomTrackingReorderRequest,
-  CustomTrackingReorderableDirective,
-} from './custom-tracking-reorderable.directive';
+import { CustomTrackingReorderControlsComponent } from './custom-tracking-reorder-controls/custom-tracking-reorder-controls.component';
 import { moveInList } from './custom-tracking-reordering.utility';
 
 /** Which form is open, and what it is editing. */
@@ -102,7 +101,7 @@ export interface CustomTrackingEditorState {
     CustomTrackingFieldPanelComponent,
     CustomTrackingFieldFormComponent,
     CustomTrackingOptionsEditorComponent,
-    CustomTrackingReorderableDirective,
+    CustomTrackingReorderControlsComponent,
   ],
 })
 export class CustomTrackingDefinitionsComponent implements OnInit {
@@ -141,7 +140,11 @@ export class CustomTrackingDefinitionsComponent implements OnInit {
   /** What is being looked for. */
   readonly search = new FormControl('', { nonNullable: true });
 
-  private readonly _expanded = new Set<string>();
+  /** Which tab of each section is showing, keyed by the section. */
+  activeTabs: Record<string, string> = {};
+
+  private readonly _collapsed = new Set<string>();
+  private readonly _host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly _customTracking = inject(CustomTrackingService);
   private readonly _dialog = inject(MatDialog);
   private readonly _ngZone = inject(NgZone);
@@ -295,34 +298,118 @@ export class CustomTrackingDefinitionsComponent implements OnInit {
 
     this.scope = scope;
     this.editor = null;
-    this._expanded.clear();
+    this._collapsed.clear();
+    this.activeTabs = {};
     this.load();
   }
 
   /**
-   * Whether a panel is showing what is inside it.
+   * Whether a section is showing what is inside it.
    *
-   * A search opens everything it matched. Leaving a match folded away would
-   * report a hit and then hide it.
+   * Open unless it has been folded away, the same as every other section on
+   * the site: somebody arriving at the builder came to see what they have
+   * built, not to open ten panels before they can read any of it.
    *
-   * @param id - The section or tab.
+   * A search opens everything it matched, whatever was folded away before it.
+   * Leaving a match closed would report a hit and then hide it.
+   *
+   * @param id - The section.
    * @returns True when it is open.
    */
   isExpanded(id: string): boolean {
-    return this.isSearching || this._expanded.has(id);
+    return this.isSearching || !this._collapsed.has(id);
   }
 
   /**
-   * Opens a panel, or folds it away.
+   * Folds a section away, or opens it again.
    *
-   * @param id - The section or tab.
+   * @param id - The section.
    */
   toggle(id: string): void {
-    if (this._expanded.has(id)) {
-      this._expanded.delete(id);
+    if (this._collapsed.has(id)) {
+      this._collapsed.delete(id);
     } else {
-      this._expanded.add(id);
+      this._collapsed.add(id);
     }
+  }
+
+  /**
+   * Which tab of a section is showing.
+   *
+   * The first one until somebody chooses another, and the first one again
+   * whenever the chosen tab is not among those on the screen — a search
+   * narrows a section to the tabs it matched, and a selection made before it
+   * may no longer be one of them.
+   *
+   * @param section - The section, as it is being shown.
+   * @returns The tab to draw, or null where the section has none.
+   */
+  activeTab(section: CustomTrackingSectionTree): CustomTrackingTabTree | null {
+    const chosen = section.tabs.find(
+      tab => tab.id === this.activeTabs[section.id],
+    );
+
+    return chosen ?? section.tabs[0] ?? null;
+  }
+
+  /**
+   * Shows one tab of a section.
+   *
+   * @param sectionId - The section.
+   * @param tabId - The tab to show.
+   */
+  showTab(sectionId: string, tabId: string): void {
+    this.activeTabs[sectionId] = tabId;
+  }
+
+  /**
+   * Moves between a section's tabs with the arrow keys.
+   *
+   * The same roving behaviour as every other tab strip on the site, taken from
+   * the shared helper rather than written again.
+   *
+   * @param event - The key that was pressed.
+   * @param section - The section whose tabs are being moved through.
+   */
+  onTabKeydown(event: KeyboardEvent, section: CustomTrackingSectionTree): void {
+    const current = section.tabs.findIndex(
+      tab => tab.id === this.activeTab(section)?.id,
+    );
+    const moved = nextTabIndex(event.key, current, section.tabs.length);
+
+    if (moved === null) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const tab = section.tabs[moved];
+
+    this.showTab(section.id, tab.id);
+    this.focusTab(tab.id);
+  }
+
+  /**
+   * The identifier of one of the strip's elements.
+   *
+   * @param part - Which element: the tab itself or the panel it controls.
+   * @param tabId - The tab it belongs to.
+   * @returns The identifier.
+   */
+  elementId(part: 'tab' | 'panel', tabId: string): string {
+    return `custom-tracking-definition-${part}-${tabId}`;
+  }
+
+  /**
+   * How many fields a tab holds, in words.
+   *
+   * @param tabId - The tab.
+   * @returns A count and the right noun for it.
+   */
+  fieldSummary(tabId: string): string {
+    const held = this.fieldCountIn(tabId);
+
+    return held === 1 ? '1 field' : `${held} fields`;
   }
 
   /**
@@ -539,18 +626,32 @@ export class CustomTrackingDefinitionsComponent implements OnInit {
   /**
    * Opens whatever has to be open for an editor to be seen.
    *
-   * Edit and Delete sit on a panel's bar, which is visible whether or not the
-   * panel is open; the form they summon renders inside the panel's body, which
-   * is not. Without this, pressing Edit on a folded section does nothing at
-   * all, and a button that appears to do nothing is a button people press
-   * again.
+   * Edit and Delete sit on a section's bar, which is visible whether or not the
+   * section is open, and on a tab's toolbar, which is only drawn for the tab
+   * showing. The form they summon renders inside one of those. Without this,
+   * pressing Edit on a folded section does nothing at all, and a button that
+   * appears to do nothing is a button people press again.
    *
-   * @param ids - The panels to open, outermost first.
+   * @param sectionId - The section to open.
+   * @param tabId - The tab to bring to the front, where the editor is in one.
    */
-  private reveal(...ids: string[]): void {
-    for (const id of ids) {
-      this._expanded.add(id);
+  private reveal(sectionId: string, tabId?: string): void {
+    this._collapsed.delete(sectionId);
+
+    if (tabId) {
+      this.showTab(sectionId, tabId);
     }
+  }
+
+  /**
+   * Puts the keyboard on one of a section's tabs.
+   *
+   * @param tabId - The tab to focus.
+   */
+  private focusTab(tabId: string): void {
+    this._host.nativeElement
+      .querySelector<HTMLElement>(`#${this.elementId('tab', tabId)}`)
+      ?.focus();
   }
 
   /** Closes whichever form is open. */
@@ -654,15 +755,6 @@ export class CustomTrackingDefinitionsComponent implements OnInit {
   }
 
   /**
-   * Moves a section by a drag.
-   *
-   * @param request - Where it came from and where it landed.
-   */
-  dropSection(request: CustomTrackingReorderRequest): void {
-    this.reorderSections(request.from, request.to);
-  }
-
-  /**
    * Moves a tab within its section and saves the whole new order.
    *
    * @param sectionId - The section it belongs to.
@@ -671,7 +763,17 @@ export class CustomTrackingDefinitionsComponent implements OnInit {
    */
   reorderTabs(sectionId: string, from: number, to: number): void {
     const tabs = this.sourceSection(sectionId)?.tabs ?? [];
+    const moved = tabs[from];
     const ordered = moveInList(tabs, from, to);
+
+    // The tab being moved is the tab somebody is looking at, and it stays the
+    // one they are looking at. Until a tab is chosen outright the strip shows
+    // whichever is first, so moving that one along would otherwise leave a
+    // different tab's fields on the screen — as though the arrow had swapped
+    // the contents rather than the order.
+    if (moved) {
+      this.showTab(sectionId, moved.id);
+    }
 
     this._actions.run(
       this._customTracking.reorderTabs(
@@ -679,16 +781,6 @@ export class CustomTrackingDefinitionsComponent implements OnInit {
         ordered.map(tab => tab.id),
       ),
     );
-  }
-
-  /**
-   * Moves a tab by a drag.
-   *
-   * @param sectionId - The section it belongs to.
-   * @param request - Where it came from and where it landed.
-   */
-  dropTab(sectionId: string, request: CustomTrackingReorderRequest): void {
-    this.reorderTabs(sectionId, request.from, request.to);
   }
 
   /**
@@ -708,16 +800,6 @@ export class CustomTrackingDefinitionsComponent implements OnInit {
         ordered.map(field => field.id),
       ),
     );
-  }
-
-  /**
-   * Moves a field by a drag.
-   *
-   * @param tabId - The tab it belongs to.
-   * @param request - Where it came from and where it landed.
-   */
-  dropField(tabId: string, request: CustomTrackingReorderRequest): void {
-    this.reorderFields(tabId, request.from, request.to);
   }
 
   /**

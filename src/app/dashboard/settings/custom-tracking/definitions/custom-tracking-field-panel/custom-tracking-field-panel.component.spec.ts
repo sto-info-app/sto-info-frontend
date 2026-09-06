@@ -70,8 +70,20 @@ describe('CustomTrackingFieldPanelComponent', () => {
     build();
 
     expect(text()).toContain('Class');
-    expect(text()).toContain('Menu');
     expect(text()).toContain('What kind of ship it is.');
+  });
+
+  // What a field asks for is one of the facts about it rather than a mark on
+  // its bar: "Menu" means nothing without the word Type beside it.
+  it('states the field type as a labelled value', () => {
+    build();
+
+    const facts: HTMLElement = fixture.nativeElement.querySelector(
+      '.custom-tracking-field-facts',
+    );
+
+    expect(facts.textContent).toContain('Type');
+    expect(facts.textContent).toContain('Menu');
   });
 
   it('says nothing where a field has no description', () => {

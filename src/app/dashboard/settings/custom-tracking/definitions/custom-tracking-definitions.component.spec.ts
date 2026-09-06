@@ -372,18 +372,20 @@ describe('CustomTrackingDefinitionsComponent', () => {
       ).toBe('choice');
     });
 
-    it('opens and folds a panel away', () => {
+    // Somebody arriving at the builder came to see what they have built, not
+    // to open ten panels before they can read any of it.
+    it('opens every section, and folds one away when asked', () => {
       build();
-
-      expect(component.isExpanded('section-1')).toBe(false);
-
-      component.toggle('section-1');
 
       expect(component.isExpanded('section-1')).toBe(true);
 
       component.toggle('section-1');
 
       expect(component.isExpanded('section-1')).toBe(false);
+
+      component.toggle('section-1');
+
+      expect(component.isExpanded('section-1')).toBe(true);
     });
 
     // Edit sits on the panel's bar, which is visible whether or not the panel
@@ -391,36 +393,132 @@ describe('CustomTrackingDefinitionsComponent', () => {
     it('opens a section when its editor is asked for', () => {
       build();
 
+      component.toggle('section-1');
       component.editSection(component.sections[0]);
 
       expect(component.isExpanded('section-1')).toBe(true);
     });
 
-    it('opens a tab and the section holding it', () => {
+    it('opens the section holding a tab and brings that tab forward', () => {
       build();
 
+      component.toggle('section-1');
+      component.showTab('section-1', 'tab-2');
       component.editTab(component.sections[0].tabs[0]);
 
       expect(component.isExpanded('section-1')).toBe(true);
-      expect(component.isExpanded('tab-1')).toBe(true);
+      expect(component.activeTab(component.sections[0])?.id).toBe('tab-1');
     });
 
     it('opens everything above a field', () => {
       build();
 
+      component.toggle('section-1');
+      component.showTab('section-1', 'tab-2');
       component.editField(
         component.sections[0].id,
         component.sections[0].tabs[0].fields[0],
       );
 
       expect(component.isExpanded('section-1')).toBe(true);
-      expect(component.isExpanded('tab-1')).toBe(true);
+      expect(component.activeTab(component.sections[0])?.id).toBe('tab-1');
+    });
+
+    // The tabs of a section are alternatives to one another, so one set of
+    // fields is shown at a time and the first until somebody says otherwise.
+    it('shows the first tab of a section until another is chosen', () => {
+      build();
+
+      expect(component.activeTab(component.sections[0])?.id).toBe('tab-1');
+
+      component.showTab('section-1', 'tab-2');
+
+      expect(component.activeTab(component.sections[0])?.id).toBe('tab-2');
+    });
+
+    it('falls back to the first tab where the chosen one is not shown', () => {
+      build();
+
+      component.showTab('section-1', 'gone');
+
+      expect(component.activeTab(component.sections[0])?.id).toBe('tab-1');
+    });
+
+    it('has no tab to show for a section holding none', () => {
+      build();
+
+      expect(component.activeTab(component.sections[1])).toBeNull();
+    });
+
+    it('forgets which tabs were showing when the scope changes', () => {
+      build();
+
+      component.showTab('section-1', 'tab-2');
+      component.chooseScope(CustomTrackingTargetScope.CHARACTER);
+
+      expect(component.activeTabs).toEqual({});
+    });
+
+    // A row of tabs is one stop in the tab order rather than one stop per tab.
+    it('moves between a section tabs with the arrow keys, and focus follows', () => {
+      build();
+
+      const first: HTMLButtonElement = fixture.nativeElement.querySelector(
+        '#custom-tracking-definition-tab-tab-1',
+      );
+
+      first.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }),
+      );
+      fixture.detectChanges();
+
+      expect(component.activeTabs['section-1']).toBe('tab-2');
+      expect(document.activeElement?.id).toBe(
+        'custom-tracking-definition-tab-tab-2',
+      );
+    });
+
+    it('leaves keys that mean nothing in a row of tabs alone', () => {
+      build();
+
+      const event = new KeyboardEvent('keydown', {
+        key: 'ArrowDown',
+        bubbles: true,
+        cancelable: true,
+      });
+
+      component.onTabKeydown(event, component.sections[0]);
+
+      expect(component.activeTabs['section-1']).toBeUndefined();
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    it('counts what a tab holds in words', () => {
+      build();
+
+      expect(component.fieldSummary('tab-1')).toBe('2 fields');
+      expect(component.fieldSummary('tab-2')).toBe('0 fields');
+
+      service['getDefinitions'].mockReturnValue(
+        of([
+          {
+            ...tree()[0],
+            tabs: [
+              { ...tree()[0].tabs[0], fields: [field('field-1', 'Class')] },
+            ],
+          },
+        ]),
+      );
+      build();
+
+      expect(component.fieldSummary('tab-1')).toBe('1 field');
     });
 
     // Leaving a match folded away would report a hit and then hide it.
     it('opens everything a search matched', () => {
       build();
 
+      component.toggle('section-1');
       component.search.setValue('registry');
 
       expect(component.isSearching).toBe(true);
@@ -815,6 +913,28 @@ describe('CustomTrackingDefinitionsComponent', () => {
       ]);
     });
 
+    // Until a tab is chosen outright the strip shows whichever is first, so
+    // moving the first tab along used to leave a different tab's fields on the
+    // screen — as though the arrow had swapped the contents, not the order.
+    it('keeps the moved tab the one showing', () => {
+      build();
+
+      expect(component.activeTabs['section-1']).toBeUndefined();
+
+      component.reorderTabs('section-1', 0, 1);
+
+      expect(component.activeTabs['section-1']).toBe('tab-1');
+    });
+
+    it('leaves the showing tab alone when the move went nowhere', () => {
+      build();
+
+      component.showTab('section-1', 'tab-2');
+      component.reorderTabs('gone', 0, 1);
+
+      expect(component.activeTabs['section-1']).toBe('tab-2');
+    });
+
     it('sends the whole order of a tab fields', () => {
       build();
 
@@ -834,18 +954,6 @@ describe('CustomTrackingDefinitionsComponent', () => {
 
       expect(service['reorderTabs']).toHaveBeenCalledWith('gone', []);
       expect(service['reorderFields']).toHaveBeenCalledWith('gone', []);
-    });
-
-    it('moves what was dragged', () => {
-      build();
-
-      component.dropSection({ from: 1, to: 0 });
-      component.dropTab('section-1', { from: 0, to: 1 });
-      component.dropField('tab-1', { from: 0, to: 1 });
-
-      expect(service['reorderSections']).toHaveBeenCalled();
-      expect(service['reorderTabs']).toHaveBeenCalled();
-      expect(service['reorderFields']).toHaveBeenCalled();
     });
 
     // A search shows a subset, and moving the second of two visible tabs when

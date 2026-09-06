@@ -37,6 +37,7 @@ import { confirmDiscard } from 'src/app/shared/guards/unsaved-changes.guard';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 
 import { CustomTrackingService } from '../custom-tracking.service';
+import { CustomTrackingSectionBarComponent } from '../custom-tracking-section-bar/custom-tracking-section-bar.component';
 import { filterDefinitions } from '../definitions/custom-tracking-definition-filter.utility';
 import { CustomTrackingImageValueComponent } from './custom-tracking-image-value/custom-tracking-image-value.component';
 import {
@@ -89,6 +90,7 @@ type CustomTrackingRecordForm = FormGroup<
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
+    CustomTrackingSectionBarComponent,
     CustomTrackingValueFieldComponent,
     CustomTrackingImageValueComponent,
   ],

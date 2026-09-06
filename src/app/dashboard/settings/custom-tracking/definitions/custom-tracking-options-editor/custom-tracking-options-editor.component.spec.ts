@@ -277,12 +277,10 @@ describe('CustomTrackingOptionsEditorComponent', () => {
 
     component.moveDown(0);
     component.moveUp(2);
-    component.moveDropped({ from: 2, to: 0 });
 
     expect(orders).toEqual([
       ['option-2', 'option-1', 'option-3'],
       ['option-1', 'option-3', 'option-2'],
-      ['option-3', 'option-1', 'option-2'],
     ]);
   });
 

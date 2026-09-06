@@ -1,74 +1,99 @@
-<div class="custom-tracking-field-row">
-  <span class="custom-tracking-field-name">{{ field.name }}</span>
-  <span class="custom-tracking-badge muted">{{ typeLabel }}</span>
+<article class="custom-tracking-field-panel">
+  <div class="custom-tracking-field-panel__heading">
+    <h4 class="custom-tracking-field-panel__name">{{ field.name }}</h4>
 
-  @if (field.required) {
-    <span class="custom-tracking-badge">Answer required</span>
-  }
+    @if (field.suppressed) {
+      <span class="custom-tracking-field-panel__marks">
+        <span class="custom-tracking-field-panel__badge">
+          Hidden by a moderator
+        </span>
+      </span>
+    }
+  </div>
 
-  @if (field.publiclyVisible) {
-    <span class="custom-tracking-badge">Public</span>
-  } @else {
-    <span class="custom-tracking-badge muted">Private</span>
-  }
+  <div class="custom-tracking-field-panel__main">
+    <div class="custom-tracking-field-panel__body">
+      @if (field.description) {
+        <p class="custom-tracking-field-description">{{ field.description }}</p>
+      }
 
-  @if (field.suppressed) {
-    <span class="custom-tracking-badge warning">Hidden by a moderator</span>
-  }
+      <dl class="custom-tracking-field-facts">
+        <div class="info-item">
+          <dt class="label">Type</dt>
+          <dd class="value">{{ typeLabel }}</dd>
+        </div>
 
-  @if (usesOptions) {
-    <span class="custom-tracking-count">
-      {{ liveOptionCount }} to choose from
-    </span>
-  }
+        <div class="info-item">
+          <dt class="label">Answer</dt>
+          <dd class="value">
+            {{ field.required ? 'Answer required' : 'Optional' }}
+          </dd>
+        </div>
 
-  <app-custom-tracking-reorder-controls
-    [itemName]="field.name"
-    [index]="index"
-    [count]="count"
-    (moveUp)="moveUp.emit()"
-    (moveDown)="moveDown.emit()">
-  </app-custom-tracking-reorder-controls>
+        <div class="info-item">
+          <dt class="label">Who can see it</dt>
+          <dd class="value">
+            {{ field.publiclyVisible ? 'Public' : 'Private' }}
+          </dd>
+        </div>
 
-  <button
-    type="button"
-    class="cta-icon"
-    [title]="'Edit ' + field.name"
-    [attr.aria-label]="'Edit ' + field.name"
-    [disabled]="isSaving"
-    (click)="edited.emit()">
-    <i
-      class="fa-solid fa-pen"
-      aria-hidden="true"></i>
-  </button>
+        @if (usesOptions) {
+          <div class="info-item">
+            <dt class="label">Choices</dt>
+            <dd class="value">{{ liveOptionCount }} to choose from</dd>
+          </div>
+        }
 
-  <button
-    type="button"
-    class="cta-icon"
-    [title]="'Delete ' + field.name"
-    [attr.aria-label]="'Delete ' + field.name"
-    [disabled]="isSaving"
-    (click)="removed.emit()">
-    <i
-      class="fa-solid fa-trash"
-      aria-hidden="true"></i>
-  </button>
-</div>
+        <div class="info-item">
+          <dt class="label">When empty</dt>
+          <dd class="value">
+            You see {{ emptySummary }}, the public sees {{ publicEmptySummary }}
+          </dd>
+        </div>
+      </dl>
 
-@if (field.description) {
-  <p class="custom-tracking-field-description">{{ field.description }}</p>
-}
+      @if (needsOptions) {
+        <p
+          class="custom-tracking-notice"
+          role="status">
+          This field offers nothing to choose from yet, so nobody can answer it.
+          Open it and add the first choice.
+        </p>
+      }
+    </div>
 
-<p class="field-hint">
-  When empty: you see {{ emptySummary }}, the public sees
-  {{ publicEmptySummary }}.
-</p>
+    <div class="custom-tracking-field-panel__controls">
+      <app-custom-tracking-reorder-controls
+        [itemName]="field.name"
+        [index]="index"
+        [count]="count"
+        (moveUp)="moveUp.emit()"
+        (moveDown)="moveDown.emit()">
+      </app-custom-tracking-reorder-controls>
 
-@if (needsOptions) {
-  <p
-    class="custom-tracking-notice"
-    role="status">
-    This field offers nothing to choose from yet, so nobody can answer it. Open
-    it and add the first choice.
-  </p>
-}
+      <button
+        type="button"
+        class="cta-icon"
+        [title]="'Edit ' + field.name"
+        [attr.aria-label]="'Edit ' + field.name"
+        [disabled]="isSaving"
+        (click)="edited.emit()">
+        <i
+          class="fa-solid fa-user-pen"
+          aria-hidden="true"></i>
+      </button>
+
+      <button
+        type="button"
+        class="cta-icon delete-icon"
+        [title]="'Delete ' + field.name"
+        [attr.aria-label]="'Delete ' + field.name"
+        [disabled]="isSaving"
+        (click)="removed.emit()">
+        <i
+          class="fa-solid fa-trash"
+          aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</article>
