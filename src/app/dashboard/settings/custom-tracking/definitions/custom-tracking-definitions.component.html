@@ -1,0 +1,306 @@
+<section class="custom-tracking-builder">
+  <div
+    class="custom-tracking-scope"
+    role="group"
+    aria-label="Which hierarchy to build">
+    @for (choice of scopes; track choice.scope) {
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto"
+        [class.sunflower]="scope === choice.scope"
+        [class.bluey]="scope !== choice.scope"
+        [attr.aria-pressed]="scope === choice.scope"
+        [disabled]="isLoading"
+        (click)="chooseScope(choice.scope)">
+        {{ choice.label }}
+      </button>
+    }
+  </div>
+
+  @for (choice of scopes; track choice.scope) {
+    @if (scope === choice.scope) {
+      <p class="field-hint">{{ choice.hint }}</p>
+    }
+  }
+
+  <div class="lcars-input-container bluey custom-tracking-search">
+    <label for="custom-tracking-search">Search these definitions</label>
+    <input
+      id="custom-tracking-search"
+      type="search"
+      [formControl]="search"
+      placeholder="A section, tab or field name" />
+  </div>
+
+  <p class="custom-tracking-count">
+    {{ sections.length }} of
+    {{ configuration.limits.MAX_SECTIONS_PER_SCOPE }} sections,
+    {{ fieldCount }} of {{ configuration.limits.MAX_FIELDS_PER_SCOPE }} fields.
+  </p>
+
+  @if (errorMessage) {
+    <app-lcars-error-message [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading your definitions"></app-loading-bar>
+  }
+
+  @if (editor && editor.kind === 'section' && editor.id === null) {
+    <app-custom-tracking-group-form
+      kind="section"
+      [context]="scopeContext"
+      [limits]="configuration.limits"
+      [isSaving]="isLoading"
+      (saved)="saveGroup($event)"
+      (cancelled)="closeEditor()">
+    </app-custom-tracking-group-form>
+  }
+
+  @if (sections.length === 0 && !isLoading) {
+    <p class="custom-tracking-empty">
+      Nothing is set up for
+      {{ scope === 'ACCOUNT' ? 'your accounts' : 'your characters' }} yet. A
+      section is the outermost grouping — start with one.
+    </p>
+  } @else if (visibleSections.length === 0) {
+    <p class="custom-tracking-empty">
+      Nothing here mentions that. Clear the search to see everything again.
+    </p>
+  }
+
+  <ol class="custom-tracking-section-list">
+    @for (section of visibleSections; track section.id) {
+      <li
+        appCustomTrackingReorderable
+        reorderList="sections"
+        [reorderIndex]="sectionPosition(section.id)"
+        (reordered)="dropSection($event)">
+        <app-custom-tracking-group-panel
+          kind="section"
+          childKind="tab"
+          [name]="section.name"
+          [description]="section.description"
+          [publiclyVisible]="section.publiclyVisible"
+          [suppressed]="section.suppressed"
+          [index]="sectionPosition(section.id)"
+          [count]="sections.length"
+          [childCount]="tabCount(section.id)"
+          [isExpanded]="isExpanded(section.id)"
+          [canAddChild]="canAddTab(section.id)"
+          [isSaving]="isLoading"
+          (toggled)="toggle(section.id)"
+          (moveUp)="
+            reorderSections(
+              sectionPosition(section.id),
+              sectionPosition(section.id) - 1
+            )
+          "
+          (moveDown)="
+            reorderSections(
+              sectionPosition(section.id),
+              sectionPosition(section.id) + 1
+            )
+          "
+          (edited)="editSection(section)"
+          (removed)="removeSection(section)"
+          (childAdded)="addTab(section)">
+          @if (
+            editor && editor.kind === 'section' && editor.id === section.id
+          ) {
+            <app-custom-tracking-group-form
+              kind="section"
+              [limits]="configuration.limits"
+              [group]="section"
+              [isSaving]="isLoading"
+              (saved)="saveGroup($event)"
+              (cancelled)="closeEditor()">
+            </app-custom-tracking-group-form>
+          }
+
+          @if (
+            editor &&
+            editor.kind === 'tab' &&
+            editor.id === null &&
+            editor.parentId === section.id
+          ) {
+            <app-custom-tracking-group-form
+              kind="tab"
+              [limits]="configuration.limits"
+              [ancestorPublic]="section.publiclyVisible"
+              [isSaving]="isLoading"
+              (saved)="saveGroup($event)"
+              (cancelled)="closeEditor()">
+            </app-custom-tracking-group-form>
+          }
+
+          <ol class="custom-tracking-tab-list">
+            @for (tab of section.tabs; track tab.id) {
+              <li
+                appCustomTrackingReorderable
+                [reorderList]="'tabs-' + section.id"
+                [reorderIndex]="tabPosition(tab)"
+                (reordered)="dropTab(section.id, $event)">
+                <app-custom-tracking-group-panel
+                  kind="tab"
+                  childKind="field"
+                  [name]="tab.name"
+                  [description]="tab.description"
+                  [publiclyVisible]="tab.publiclyVisible"
+                  [suppressed]="tab.suppressed"
+                  [index]="tabPosition(tab)"
+                  [count]="tabCount(section.id)"
+                  [childCount]="fieldCountIn(tab.id)"
+                  [isExpanded]="isExpanded(tab.id)"
+                  [canAddChild]="canAddField(tab.id)"
+                  [isSaving]="isLoading"
+                  (toggled)="toggle(tab.id)"
+                  (moveUp)="
+                    reorderTabs(
+                      section.id,
+                      tabPosition(tab),
+                      tabPosition(tab) - 1
+                    )
+                  "
+                  (moveDown)="
+                    reorderTabs(
+                      section.id,
+                      tabPosition(tab),
+                      tabPosition(tab) + 1
+                    )
+                  "
+                  (edited)="editTab(tab)"
+                  (removed)="removeTab(tab)"
+                  (childAdded)="addField(tab)">
+                  @if (
+                    editor && editor.kind === 'tab' && editor.id === tab.id
+                  ) {
+                    <app-custom-tracking-group-form
+                      kind="tab"
+                      [limits]="configuration.limits"
+                      [group]="tab"
+                      [ancestorPublic]="section.publiclyVisible"
+                      [isSaving]="isLoading"
+                      (saved)="saveGroup($event)"
+                      (cancelled)="closeEditor()">
+                    </app-custom-tracking-group-form>
+                  }
+
+                  @if (
+                    editor &&
+                    editor.kind === 'field' &&
+                    editor.id === null &&
+                    editor.parentId === tab.id
+                  ) {
+                    <app-custom-tracking-field-form
+                      [configuration]="configuration"
+                      [ancestorPublic]="
+                        section.publiclyVisible && tab.publiclyVisible
+                      "
+                      [isSaving]="isLoading"
+                      (saved)="saveField($event)"
+                      (cancelled)="closeEditor()">
+                    </app-custom-tracking-field-form>
+                  }
+
+                  <ol class="custom-tracking-field-list">
+                    @for (field of tab.fields; track field.id) {
+                      <li
+                        appCustomTrackingReorderable
+                        [reorderList]="'fields-' + tab.id"
+                        [reorderIndex]="fieldPosition(field)"
+                        (reordered)="dropField(tab.id, $event)">
+                        <app-custom-tracking-field-panel
+                          [field]="field"
+                          [typeLabel]="typeLabel(field.fieldType)"
+                          [index]="fieldPosition(field)"
+                          [count]="fieldCountIn(tab.id)"
+                          [usesOptions]="usesOptions(field)"
+                          [isSaving]="isLoading"
+                          (moveUp)="
+                            reorderFields(
+                              tab.id,
+                              fieldPosition(field),
+                              fieldPosition(field) - 1
+                            )
+                          "
+                          (moveDown)="
+                            reorderFields(
+                              tab.id,
+                              fieldPosition(field),
+                              fieldPosition(field) + 1
+                            )
+                          "
+                          (edited)="editField(section.id, field)"
+                          (removed)="removeField(field)">
+                        </app-custom-tracking-field-panel>
+
+                        @if (
+                          editor &&
+                          editor.kind === 'field' &&
+                          editor.id === field.id
+                        ) {
+                          <app-custom-tracking-field-form
+                            [configuration]="configuration"
+                            [field]="field"
+                            [ancestorPublic]="
+                              section.publiclyVisible && tab.publiclyVisible
+                            "
+                            [isSaving]="isLoading"
+                            (saved)="saveField($event)"
+                            (cancelled)="closeEditor()">
+                          </app-custom-tracking-field-form>
+
+                          @if (usesOptions(field)) {
+                            <app-custom-tracking-options-editor
+                              [options]="field.options"
+                              [limits]="configuration.limits"
+                              [optionNoun]="optionNoun(field)"
+                              [allowsMultiple]="allowsMultipleOptions(field)"
+                              [isSaving]="isLoading"
+                              (created)="addOption(field, $event)"
+                              (renamed)="renameOption($event)"
+                              (defaultToggled)="setOptionDefault($event)"
+                              (withdrawn)="withdrawOption($event)"
+                              (reordered)="reorderOptions(field, $event)">
+                            </app-custom-tracking-options-editor>
+                          }
+                        }
+                      </li>
+                    }
+                  </ol>
+                </app-custom-tracking-group-panel>
+              </li>
+            }
+          </ol>
+        </app-custom-tracking-group-panel>
+      </li>
+    }
+  </ol>
+
+  @if (canAddSection) {
+    <button
+      type="button"
+      class="lcars-btn lcars-btn-auto green"
+      [disabled]="isLoading"
+      (click)="addSection()">
+      Add a section
+    </button>
+  } @else {
+    <p
+      class="custom-tracking-notice"
+      role="status">
+      You already have as many sections as this scope allows. Delete one before
+      adding another.
+    </p>
+  }
+
+  @if (isScopeFull) {
+    <p
+      class="custom-tracking-notice"
+      role="status">
+      You already have as many fields as this scope allows, so no more can be
+      added anywhere in it.
+    </p>
+  }
+</section>

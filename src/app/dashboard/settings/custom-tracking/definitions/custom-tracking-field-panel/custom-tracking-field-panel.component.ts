@@ -1,0 +1,121 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
+
+import {
+  CustomTrackingEmptyMode,
+  CustomTrackingField,
+} from 'src/app/models/custom-tracking.models';
+
+import { CustomTrackingReorderControlsComponent } from '../custom-tracking-reorder-controls/custom-tracking-reorder-controls.component';
+
+/**
+ * One field, as the builder lists it.
+ *
+ * A summary rather than a form: what it is called, what it asks for, whether
+ * an answer is compulsory and whether anyone but its owner can see it. The
+ * form that changes any of that is opened beneath this row, so a tab holding
+ * twenty fields stays readable.
+ *
+ * Every state it reports is a word as well as a colour. A field that is
+ * compulsory, public or hidden by a moderator says so in text, because a
+ * reader who cannot tell one badge colour from another still has to be able to
+ * tell those apart.
+ */
+@Component({
+  selector: 'app-custom-tracking-field-panel',
+  templateUrl: './custom-tracking-field-panel.component.html',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CustomTrackingReorderControlsComponent],
+})
+export class CustomTrackingFieldPanelComponent {
+  /** The field being listed. */
+  @Input({ required: true }) field!: CustomTrackingField;
+
+  /** What its type is called, as the server named it. */
+  @Input({ required: true }) typeLabel!: string;
+
+  /** Where it sits among its siblings. */
+  @Input({ required: true }) index!: number;
+
+  /** How many siblings it has, itself included. */
+  @Input({ required: true }) count!: number;
+
+  /** Whether the type draws its answers from a list of options. */
+  @Input() usesOptions = false;
+
+  /** Whether a change is in flight anywhere in the builder. */
+  @Input() isSaving = false;
+
+  /** Raised when it should move one place earlier. */
+  @Output() readonly moveUp = new EventEmitter<void>();
+
+  /** Raised when it should move one place later. */
+  @Output() readonly moveDown = new EventEmitter<void>();
+
+  /** Raised when its settings should be opened. */
+  @Output() readonly edited = new EventEmitter<void>();
+
+  /** Raised when it should be deleted. */
+  @Output() readonly removed = new EventEmitter<void>();
+
+  /**
+   * How many answers the field offers, for the types that offer any.
+   *
+   * Withdrawn options are left out. They cannot be chosen, so counting them
+   * would overstate what the field asks of anybody filling it in.
+   *
+   * @returns The number of options still on offer.
+   */
+  get liveOptionCount(): number {
+    return this.field.options.filter(option => !option.withdrawn).length;
+  }
+
+  /**
+   * Whether the field offers nothing to choose from but should.
+   *
+   * @returns True when a choice field has no live options.
+   */
+  get needsOptions(): boolean {
+    return this.usesOptions && this.liveOptionCount === 0;
+  }
+
+  /**
+   * What the field shows its owner where it has no value.
+   *
+   * @returns A short phrase for the badge.
+   */
+  get emptySummary(): string {
+    return this.describeEmptyMode(this.field.ownerEmptyMode);
+  }
+
+  /**
+   * What the field shows the public where it has no value.
+   *
+   * @returns A short phrase for the badge.
+   */
+  get publicEmptySummary(): string {
+    return this.describeEmptyMode(this.field.publicEmptyMode);
+  }
+
+  /**
+   * Puts one empty mode into words.
+   *
+   * @param mode - The mode.
+   * @returns A short phrase.
+   */
+  private describeEmptyMode(mode: CustomTrackingEmptyMode): string {
+    if (mode === CustomTrackingEmptyMode.HIDE) {
+      return 'hidden';
+    }
+
+    return mode === CustomTrackingEmptyMode.SHOW_LABEL
+      ? 'name only'
+      : 'placeholder';
+  }
+}

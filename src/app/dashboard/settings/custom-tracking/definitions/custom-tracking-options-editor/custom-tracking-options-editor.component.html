@@ -1,0 +1,164 @@
+<section class="custom-tracking-options">
+  <h4>
+    {{ optionNoun === 'tag' ? 'Tags' : 'Choices' }}
+    <span class="custom-tracking-count">
+      {{ liveOptions.length }} of {{ limits.MAX_OPTIONS_PER_FIELD }}
+    </span>
+  </h4>
+
+  <p class="field-hint">
+    @if (optionNoun === 'tag') {
+      A tag field draws from this list. Nothing typed while recording a value is
+      added to it.
+    } @else if (allowsMultiple) {
+      More than one of these may be chosen at once.
+    } @else {
+      Exactly one of these may be chosen.
+    }
+  </p>
+
+  @if (liveOptions.length === 0) {
+    <p class="custom-tracking-empty">
+      This field offers nothing to choose yet. Add the first
+      {{ optionNoun }}.
+    </p>
+  } @else {
+    <ol class="custom-tracking-option-list">
+      @for (option of liveOptions; track option.id; let index = $index) {
+        <li
+          appCustomTrackingReorderable
+          [reorderList]="listId"
+          [reorderIndex]="index"
+          (reordered)="moveDropped($event)">
+          @if (editingOptionId === option.id) {
+            <div class="lcars-input-container perano">
+              <label [attr.for]="editorId + '-edit'">
+                Rename {{ option.label }}
+              </label>
+              <input
+                type="text"
+                [id]="editorId + '-edit'"
+                [formControl]="editedLabel"
+                [attr.maxlength]="limits.MAX_LABEL_LENGTH" />
+            </div>
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto sunflower"
+              [disabled]="isSaving || editedLabel.invalid"
+              (click)="saveEditing(option)">
+              Save
+            </button>
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto bluey"
+              (click)="cancelEditing()">
+              Cancel
+            </button>
+          } @else {
+            <span class="custom-tracking-option-label">{{ option.label }}</span>
+
+            @if (option.isDefault) {
+              <span class="custom-tracking-badge">Chosen to begin with</span>
+            }
+
+            <app-custom-tracking-reorder-controls
+              [itemName]="option.label"
+              [index]="index"
+              [count]="liveOptions.length"
+              (moveUp)="moveUp(index)"
+              (moveDown)="moveDown(index)">
+            </app-custom-tracking-reorder-controls>
+
+            <button
+              type="button"
+              class="cta-icon"
+              [title]="
+                option.isDefault
+                  ? 'Stop ' + option.label + ' being chosen to begin with'
+                  : 'Choose ' + option.label + ' to begin with'
+              "
+              [attr.aria-label]="
+                option.isDefault
+                  ? 'Stop ' + option.label + ' being chosen to begin with'
+                  : 'Choose ' + option.label + ' to begin with'
+              "
+              [attr.aria-pressed]="option.isDefault"
+              [disabled]="isSaving"
+              (click)="toggleDefault(option)">
+              <i
+                class="fa-solid fa-thumbtack"
+                aria-hidden="true"></i>
+            </button>
+
+            <button
+              type="button"
+              class="cta-icon"
+              [title]="'Rename ' + option.label"
+              [attr.aria-label]="'Rename ' + option.label"
+              [disabled]="isSaving"
+              (click)="startEditing(option)">
+              <i
+                class="fa-solid fa-pen"
+                aria-hidden="true"></i>
+            </button>
+
+            <button
+              type="button"
+              class="cta-icon"
+              [title]="'Withdraw ' + option.label"
+              [attr.aria-label]="'Withdraw ' + option.label"
+              [disabled]="isSaving"
+              (click)="withdraw(option)">
+              <i
+                class="fa-solid fa-ban"
+                aria-hidden="true"></i>
+            </button>
+          }
+        </li>
+      }
+    </ol>
+  }
+
+  @if (isFull) {
+    <p
+      class="custom-tracking-notice"
+      role="status">
+      This field is already offering the most
+      {{ optionNoun }}s allowed. Withdraw one before adding another.
+    </p>
+  } @else {
+    <div class="custom-tracking-option-add">
+      <div class="lcars-input-container gold">
+        <label [attr.for]="editorId + '-new'"> Add a {{ optionNoun }} </label>
+        <input
+          type="text"
+          [id]="editorId + '-new'"
+          [formControl]="newLabel"
+          [attr.maxlength]="limits.MAX_LABEL_LENGTH" />
+      </div>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto green"
+        [disabled]="isSaving || newLabel.invalid"
+        (click)="add()">
+        Add
+      </button>
+    </div>
+  }
+
+  @if (withdrawnOptions.length) {
+    <div class="custom-tracking-withdrawn">
+      <h5>Withdrawn</h5>
+      <p class="field-hint">
+        These cannot be chosen again. They stay here because values that already
+        chose them go on reading correctly, and an editor offering to replace
+        one has to be able to say what it was.
+      </p>
+      <ul>
+        @for (option of withdrawnOptions; track option.id) {
+          <li>{{ option.label }}</li>
+        }
+      </ul>
+    </div>
+  }
+</section>

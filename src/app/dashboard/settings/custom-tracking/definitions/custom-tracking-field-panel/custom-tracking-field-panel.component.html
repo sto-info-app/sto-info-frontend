@@ -1,0 +1,74 @@
+<div class="custom-tracking-field-row">
+  <span class="custom-tracking-field-name">{{ field.name }}</span>
+  <span class="custom-tracking-badge muted">{{ typeLabel }}</span>
+
+  @if (field.required) {
+    <span class="custom-tracking-badge">Answer required</span>
+  }
+
+  @if (field.publiclyVisible) {
+    <span class="custom-tracking-badge">Public</span>
+  } @else {
+    <span class="custom-tracking-badge muted">Private</span>
+  }
+
+  @if (field.suppressed) {
+    <span class="custom-tracking-badge warning">Hidden by a moderator</span>
+  }
+
+  @if (usesOptions) {
+    <span class="custom-tracking-count">
+      {{ liveOptionCount }} to choose from
+    </span>
+  }
+
+  <app-custom-tracking-reorder-controls
+    [itemName]="field.name"
+    [index]="index"
+    [count]="count"
+    (moveUp)="moveUp.emit()"
+    (moveDown)="moveDown.emit()">
+  </app-custom-tracking-reorder-controls>
+
+  <button
+    type="button"
+    class="cta-icon"
+    [title]="'Edit ' + field.name"
+    [attr.aria-label]="'Edit ' + field.name"
+    [disabled]="isSaving"
+    (click)="edited.emit()">
+    <i
+      class="fa-solid fa-pen"
+      aria-hidden="true"></i>
+  </button>
+
+  <button
+    type="button"
+    class="cta-icon"
+    [title]="'Delete ' + field.name"
+    [attr.aria-label]="'Delete ' + field.name"
+    [disabled]="isSaving"
+    (click)="removed.emit()">
+    <i
+      class="fa-solid fa-trash"
+      aria-hidden="true"></i>
+  </button>
+</div>
+
+@if (field.description) {
+  <p class="custom-tracking-field-description">{{ field.description }}</p>
+}
+
+<p class="field-hint">
+  When empty: you see {{ emptySummary }}, the public sees
+  {{ publicEmptySummary }}.
+</p>
+
+@if (needsOptions) {
+  <p
+    class="custom-tracking-notice"
+    role="status">
+    This field offers nothing to choose from yet, so nobody can answer it. Open
+    it and add the first choice.
+  </p>
+}

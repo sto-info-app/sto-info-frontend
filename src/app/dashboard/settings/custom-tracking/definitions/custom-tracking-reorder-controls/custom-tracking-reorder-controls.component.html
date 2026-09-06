@@ -1,0 +1,32 @@
+<span class="custom-tracking-reorder-controls">
+  <span
+    class="custom-tracking-reorder-handle"
+    aria-hidden="true"
+    title="Drag to reorder">
+    <i class="fa-solid fa-grip-vertical"></i>
+  </span>
+
+  <button
+    class="cta-icon"
+    type="button"
+    [title]="'Move ' + itemName + ' up'"
+    [attr.aria-label]="'Move ' + itemName + ' up'"
+    [disabled]="isFirst"
+    (click)="moveUp.emit()">
+    <i
+      class="fa-solid fa-caret-up"
+      aria-hidden="true"></i>
+  </button>
+
+  <button
+    class="cta-icon"
+    type="button"
+    [title]="'Move ' + itemName + ' down'"
+    [attr.aria-label]="'Move ' + itemName + ' down'"
+    [disabled]="isLast"
+    (click)="moveDown.emit()">
+    <i
+      class="fa-solid fa-caret-down"
+      aria-hidden="true"></i>
+  </button>
+</span>
