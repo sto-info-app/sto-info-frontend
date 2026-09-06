@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, inject } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ChapterMedia } from 'src/app/models/storytime.models';
+import { trustedYouTubeEmbedUrl } from 'src/app/shared/media/youtube-embed.utility';
 
 /**
  * One embedded video, loaded only when a reader asks for it.
@@ -13,9 +14,10 @@ import { ChapterMedia } from 'src/app/models/storytime.models';
  * they had decided to watch anything.
  *
  * The embed URL is built by the server from stored identifiers, so nothing a
- * creator typed is ever loaded. It is marked trusted here because Angular
- * refuses an iframe source otherwise, and the value never passed through a
- * creator's hands.
+ * creator typed is ever loaded. Marking it trusted, and refusing anything that
+ * is not a YouTube embed, is the shared helper's job — the same one the custom
+ * tracking display uses, because there should be exactly one place where a
+ * stored string is allowed to become an iframe source.
  */
 @Component({
   selector: 'app-media-embed',
@@ -59,30 +61,9 @@ export class MediaEmbedComponent {
    * @returns The trusted embed URL, or null before they have.
    */
   get embedSource(): SafeResourceUrl | null {
-    if (!this.isPlaying) {
-      return null;
-    }
-
-    let embedUrl: URL;
-    try {
-      embedUrl = new URL(this.media.embedUrl);
-    } catch {
-      return null;
-    }
-
-    if (
-      embedUrl.protocol !== 'https:' ||
-      ![
-        'www.youtube.com',
-        'youtube-nocookie.com',
-        'www.youtube-nocookie.com',
-      ].includes(embedUrl.hostname)
-    ) {
-      return null;
-    }
-
-    const url = `${embedUrl}${embedUrl.search ? '&' : '?'}autoplay=1`;
-    return this._sanitizer.bypassSecurityTrustResourceUrl(url); // NOSONAR - the URL is restricted to HTTPS YouTube origins above.
+    return this.isPlaying
+      ? trustedYouTubeEmbedUrl(this._sanitizer, this.media.embedUrl, true)
+      : null;
   }
 
   /**
