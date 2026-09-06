@@ -24,7 +24,7 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { HasPermissionDirective } from 'src/app/shared/directives/has-permission.directive';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
-import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
+import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
 import { StoryService } from '../../story.service';
 import { ARC_MEMBERSHIP_STATUS_LABELS } from '../../storytime.constants';
 
@@ -88,9 +88,7 @@ export class ArcStoryListComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
-  private readonly _actions = new StorytimeActionRunner(this, () =>
-    this.load(),
-  );
+  private readonly _actions = new ManagedActionRunner(this, () => this.load());
 
   /** The form for inviting a Story by its identifier. */
   readonly form = this._formBuilder.nonNullable.group({

@@ -16,7 +16,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
-import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
+import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
 import {
   PUBLICATION_STATUS_LABELS,
   VISIBILITY_ICONS,
@@ -67,9 +67,7 @@ export class ArcDashboardComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
-  private readonly _actions = new StorytimeActionRunner(this, () =>
-    this.load(),
-  );
+  private readonly _actions = new ManagedActionRunner(this, () => this.load());
 
   /**
    * Loads the caller's Arcs.

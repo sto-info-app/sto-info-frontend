@@ -22,7 +22,7 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import { CrewService } from '../../crew.service';
-import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
+import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
 import {
   ARC_COLLABORATOR_CAPABILITIES,
   COLLABORATOR_CAPABILITIES,
@@ -75,7 +75,7 @@ export class InvitationsComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
-  private readonly _actions = new StorytimeActionRunner(
+  private readonly _actions = new ManagedActionRunner(
     this,
     () => this.load(),
     'That could not be saved. Please try again shortly.',

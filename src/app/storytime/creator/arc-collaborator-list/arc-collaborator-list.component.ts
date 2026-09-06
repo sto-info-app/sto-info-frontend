@@ -18,7 +18,7 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import { CollaboratorPanelComponent } from '../../shared/collaborator-panel/collaborator-panel.component';
-import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
+import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
 import { ARC_COLLABORATOR_CAPABILITIES } from '../../storytime.constants';
 
 /**
@@ -70,9 +70,7 @@ export class ArcCollaboratorListComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
-  private readonly _actions = new StorytimeActionRunner(this, () =>
-    this.load(),
-  );
+  private readonly _actions = new ManagedActionRunner(this, () => this.load());
 
   /** The invitation form. */
   readonly form = this._formBuilder.nonNullable.group({
