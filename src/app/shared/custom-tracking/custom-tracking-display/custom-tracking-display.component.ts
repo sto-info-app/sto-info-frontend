@@ -13,6 +13,8 @@ import { CustomTrackingConfiguration } from 'src/app/models/custom-tracking.mode
 import { nextTabIndex } from 'src/app/shared/a11y/roving-tabs.utility';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+
 import { CustomTrackingConfigurationService } from '../custom-tracking-configuration.service';
 import {
   CustomTrackingDisplaySection,
@@ -23,11 +25,12 @@ import { CustomTrackingDisplayFieldComponent } from '../custom-tracking-display-
 /**
  * Somebody's own tracked information, beneath the STO data on a detail page.
  *
- * Sections collapse and tabs switch exactly as they do in the builder, because
- * a reader who arranged their information into sections and tabs should find
- * it arranged that way wherever they look at it. Sections open by default: a
- * page whose content is all behind closed headings looks empty, and this sits
- * at the bottom of a page somebody has already scrolled.
+ * Each section is one of the site's foldable LCARS heading bars and its tabs
+ * switch as they do in the builder, because a reader who arranged their
+ * information into sections and tabs should find it arranged that way wherever
+ * they look at it. Sections open by default: a page whose content is all
+ * behind closed headings looks empty, and this sits at the bottom of a page
+ * somebody has already scrolled.
  *
  * Nothing here can edit anything. Values are managed from Settings alone, and
  * that is the whole reason this component is separate from the one there
@@ -43,14 +46,15 @@ import { CustomTrackingDisplayFieldComponent } from '../custom-tracking-display-
   selector: 'app-custom-tracking-display',
   templateUrl: './custom-tracking-display.component.html',
   standalone: true,
-  imports: [CommonModule, CustomTrackingDisplayFieldComponent],
+  imports: [
+    CommonModule,
+    CollapsibleSectionComponent,
+    CustomTrackingDisplayFieldComponent,
+  ],
 })
 export class CustomTrackingDisplayComponent implements OnInit {
   /** The sections to draw. */
   @Input({ required: true }) sections: CustomTrackingDisplaySection[] = [];
-
-  /** What the whole block is called on this page. */
-  @Input() heading = 'Tracked information';
 
   /**
    * What distinguishes this block's element identifiers from any other's.
@@ -70,7 +74,6 @@ export class CustomTrackingDisplayComponent implements OnInit {
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
 
-  private readonly _closed = new Set<string>();
   private readonly _shownTabs = new Map<string, string>();
 
   /**
@@ -89,32 +92,6 @@ export class CustomTrackingDisplayComponent implements OnInit {
         observeInZone(this._ngZone, this._cdr),
       )
       .subscribe(configuration => (this.configuration = configuration));
-  }
-
-  /**
-   * Whether a section is open.
-   *
-   * Closed sections are remembered rather than open ones, so a section that
-   * arrives after the page was drawn is open like the rest of them.
-   *
-   * @param sectionId - The section.
-   * @returns True when it is open.
-   */
-  isOpen(sectionId: string): boolean {
-    return !this._closed.has(sectionId);
-  }
-
-  /**
-   * Opens a closed section, or closes an open one.
-   *
-   * @param sectionId - The section.
-   */
-  toggleSection(sectionId: string): void {
-    if (this._closed.has(sectionId)) {
-      this._closed.delete(sectionId);
-    } else {
-      this._closed.add(sectionId);
-    }
   }
 
   /**

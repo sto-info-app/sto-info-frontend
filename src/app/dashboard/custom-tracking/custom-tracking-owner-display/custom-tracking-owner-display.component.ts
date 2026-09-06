@@ -44,9 +44,6 @@ export class CustomTrackingOwnerDisplayComponent implements OnChanges {
   /** The record being shown, or null before the page knows which. */
   @Input() targetId: string | null = null;
 
-  /** What the block is called on this page. */
-  @Input() heading = 'Tracked information';
-
   /** What is left to draw. */
   sections: CustomTrackingDisplaySection[] = [];
 

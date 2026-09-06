@@ -106,22 +106,31 @@ describe('CustomTrackingDisplayComponent', () => {
   it('opens every section to begin with', () => {
     build([aSection([aTab('tab-1', 'Provisioning')])]);
 
-    expect(component.isOpen('section-1')).toBe(true);
-    expect(query('.custom-tracking-panel-body')?.hidden).toBe(false);
+    expect(query('.collapsible-section__content')).not.toBeNull();
   });
 
-  it('closes a section when its heading is pressed, and opens it again', () => {
+  // The section is one of the site's foldable heading bars, so it folds by the
+  // caret every other bar folds by.
+  it('folds a section away from its bar, and opens it again', () => {
     build([aSection([aTab('tab-1', 'Provisioning')])]);
 
-    query<HTMLButtonElement>('.custom-tracking-panel-toggle')?.click();
+    query<HTMLButtonElement>('.collapsible-section .cta-icon')?.click();
     fixture.detectChanges();
 
-    expect(query('.custom-tracking-panel-body')?.hidden).toBe(true);
+    expect(query('.collapsible-section__content')).toBeNull();
 
-    query<HTMLButtonElement>('.custom-tracking-panel-toggle')?.click();
+    query<HTMLButtonElement>('.collapsible-section .cta-icon')?.click();
     fixture.detectChanges();
 
-    expect(query('.custom-tracking-panel-body')?.hidden).toBe(false);
+    expect(query('.collapsible-section__content')).not.toBeNull();
+  });
+
+  it('names the section on its heading bar', () => {
+    build([aSection([aTab('tab-1', 'Provisioning')])]);
+
+    expect(query('.collapsible-section__title')?.textContent).toContain(
+      'Fleet duties',
+    );
   });
 
   // One tab is not a choice, and a row of one button is a control that does
@@ -237,8 +246,8 @@ describe('CustomTrackingDisplayComponent', () => {
     component.idPrefix = 'registry-account-custom';
     fixture.detectChanges();
 
-    expect(query('.custom-tracking-panel-body')?.id).toBe(
-      'registry-account-custom-section-section-1',
+    expect(query('[role="tabpanel"]')?.id).toBe(
+      'registry-account-custom-panel-tab-1',
     );
   });
 

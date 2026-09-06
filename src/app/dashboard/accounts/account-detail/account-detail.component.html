@@ -140,8 +140,7 @@
       -->
       <app-custom-tracking-owner-display
         [scope]="accountScope"
-        [targetId]="account.id"
-        heading="Your Own Tracking" />
+        [targetId]="account.id" />
     } @else if (!isLoading && errorMessage) {
       <div class="error-container">
         <app-lcars-error-message

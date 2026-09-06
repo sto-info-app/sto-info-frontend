@@ -899,44 +899,60 @@
   margin-top: 1.5rem;
 }
 
-// A name and its answer side by side where there is room, stacked where there
-// is not. A phone gets the stack, because a two-column grid at that width
-// leaves an answer four characters wide.
-.custom-tracking-display-field {
-  display: grid;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid vars.$lcars-grey-border;
-  gap: 0.15rem 1rem;
-  grid-template-columns: 1fr;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  @media (width >= 600px) {
-    align-items: baseline;
-    grid-template-columns: minmax(8rem, 16rem) 1fr;
-  }
+// What a section holds sits on a surface of its own beneath the heading bar,
+// the way a Storytime panel does: the bar names the thing and the panel is the
+// thing, and without it the captions and answers float loose on the page
+// background with nothing marking where one section ends.
+.custom-tracking-display-panel {
+  padding: 0.75rem 1rem;
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 8px;
+  background: vars.$lcars-grey-bg;
 }
 
+.custom-tracking-display-fields {
+  display: flex;
+  flex-direction: column;
+}
+
+// The caption sits above what was recorded under it, at every width. An answer
+// here may be a paragraph of Markdown, a picture or a video, none of which
+// leaves room for a column of names beside it.
+.custom-tracking-display-field {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid vars.$lcars-grey-border;
+  gap: 0.15rem;
+}
+
+// The rule belongs between two fields, and there is nothing under the last
+// one to divide it from. Asked of the host element rather than of the field
+// inside it, because each field is the only child of its own component and
+// would otherwise every one of them be the last.
+app-custom-tracking-display-field:last-child .custom-tracking-display-field {
+  border-bottom: none;
+}
+
+// The colour, size and capitals come from `.label`, which this shares with
+// every other caption on the site. What is left here is the room for a hint
+// under the name.
 .custom-tracking-display-name {
   display: flex;
   flex-direction: column;
   margin: 0;
-  color: vars.$lcars-perano;
-  font-weight: 700;
 }
 
+// A hint is a sentence somebody wrote, so it keeps the case they wrote it in
+// rather than taking the capitals of the caption it hangs beneath.
 .custom-tracking-display-hint {
   max-width: 60ch;
   color: vars.$lcars-grey-light;
   font-size: 0.8rem;
   font-weight: 400;
+  text-transform: none;
 }
 
 .custom-tracking-display-value {
   min-width: 0;
-  color: vars.$lcars-white;
   overflow-wrap: anywhere;
 }
 

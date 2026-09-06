@@ -3,16 +3,19 @@
   reaches them together. Not a description list: the fields are drawn by a
   component each, and a custom element between the list and its terms is
   markup no assistive technology is obliged to make sense of.
+
+  The site's own caption-above-answer pair, so a field somebody invented reads
+  like the facts printed beside it rather than like a second kind of readout.
 -->
-<div class="custom-tracking-display-field">
-  <p class="custom-tracking-display-name">
+<div class="info-item custom-tracking-display-field">
+  <p class="label custom-tracking-display-name">
     {{ field.name }}
     @if (field.description) {
       <span class="custom-tracking-display-hint">{{ field.description }}</span>
     }
   </p>
 
-  <div class="custom-tracking-display-value">
+  <div class="value custom-tracking-display-value">
     @if (isEmpty) {
       @if (placeholder) {
         <span class="custom-tracking-display-empty">{{ placeholder }}</span>
