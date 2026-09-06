@@ -1,0 +1,89 @@
+<!--
+  Nothing at all where nothing is permitted. A visitor who has published none
+  of their own information and one who has published some and kept it private
+  have to look identical, so an empty state here would be the one difference
+  that told them apart.
+-->
+@if (sections.length > 0) {
+  <section class="custom-tracking-display">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>{{ heading }}</span>
+    </div>
+
+    @for (section of sections; track section.id) {
+      <div class="custom-tracking-panel">
+        <div class="custom-tracking-panel-bar">
+          <button
+            type="button"
+            class="custom-tracking-panel-toggle"
+            [attr.aria-expanded]="isOpen(section.id)"
+            [attr.aria-controls]="elementId('section', section.id)"
+            (click)="toggleSection(section.id)">
+            <span aria-hidden="true">{{ isOpen(section.id) ? '▾' : '▸' }}</span>
+            <span class="custom-tracking-panel-name">{{ section.name }}</span>
+          </button>
+        </div>
+
+        <div
+          class="custom-tracking-panel-body"
+          [id]="elementId('section', section.id)"
+          [hidden]="!isOpen(section.id)">
+          @if (section.description) {
+            <p class="custom-tracking-panel-description">
+              {{ section.description }}
+            </p>
+          }
+
+          @if (section.tabs.length > 1) {
+            <div
+              class="custom-tracking-tabs"
+              role="tablist"
+              [attr.aria-label]="section.name">
+              @for (tab of section.tabs; track tab.id) {
+                <button
+                  type="button"
+                  role="tab"
+                  class="lcars-btn lcars-btn-auto"
+                  [id]="elementId('tab', tab.id)"
+                  [class.sunflower]="activeTab(section)?.id === tab.id"
+                  [class.bluey]="activeTab(section)?.id !== tab.id"
+                  [attr.aria-selected]="activeTab(section)?.id === tab.id"
+                  [attr.tabindex]="activeTab(section)?.id === tab.id ? 0 : -1"
+                  [attr.aria-controls]="elementId('panel', tab.id)"
+                  (keydown)="onTabKeydown($event, section)"
+                  (click)="showTab(section.id, tab.id)">
+                  {{ tab.name }}
+                </button>
+              }
+            </div>
+          }
+
+          @for (tab of section.tabs; track tab.id) {
+            <div
+              role="tabpanel"
+              tabindex="0"
+              [id]="elementId('panel', tab.id)"
+              [attr.aria-labelledby]="
+                section.tabs.length > 1 ? elementId('tab', tab.id) : null
+              "
+              [hidden]="activeTab(section)?.id !== tab.id">
+              @if (tab.description) {
+                <p class="custom-tracking-panel-description">
+                  {{ tab.description }}
+                </p>
+              }
+
+              <div class="custom-tracking-display-fields">
+                @for (field of tab.fields; track field.id) {
+                  <app-custom-tracking-display-field
+                    [field]="field"
+                    [configuration]="configuration" />
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </section>
+}
