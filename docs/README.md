@@ -34,6 +34,7 @@ Supporting docs:
 - [Dependency security overrides](security.md)
 - [Memory leak prevention](memory-leak-prevention-guide.md)
 - [UI Components](ui-components.md)
+- [Custom Tracking](custom-tracking.md)
 - [GitHub Automation & Standards](github/README.md)
 
 ## Local development
