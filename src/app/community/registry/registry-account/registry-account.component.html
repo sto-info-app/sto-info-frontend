@@ -76,6 +76,16 @@
           </div>
         </div>
       </div>
+
+      <!--
+        Only what every visibility gate permitted, decided by the server. A
+        member who has published none of their own tracking and one who has
+        published some and kept it private look identical here.
+      -->
+      <app-custom-tracking-display
+        [sections]="customSections"
+        heading="Tracked Information"
+        idPrefix="registry-account-custom" />
     }
   </div>
 

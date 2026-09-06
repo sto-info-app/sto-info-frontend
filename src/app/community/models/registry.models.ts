@@ -1,3 +1,5 @@
+import { CustomTrackingPublicSection } from 'src/app/models/custom-tracking.models';
+
 import { Relationship } from './community.models';
 
 /**
@@ -70,6 +72,8 @@ export interface RegistryCharacter extends RegistryCharacterSummary {
   lastName: string | null;
   biography: string | null;
   createdDate: string | null;
+  /** Whatever of the owner's own tracking this visitor may read. */
+  customSections: CustomTrackingPublicSection[];
 }
 
 /**
@@ -91,6 +95,8 @@ export interface RegistryAccountSummary {
  */
 export interface RegistryAccount extends RegistryAccountSummary {
   characters: RegistryCharacterSummary[];
+  /** Whatever of the owner's own tracking this visitor may read. */
+  customSections: CustomTrackingPublicSection[];
 }
 
 /**

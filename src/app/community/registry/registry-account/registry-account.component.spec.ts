@@ -5,6 +5,11 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
+import {
+  CustomTrackingEmptyMode,
+  CustomTrackingFieldType,
+} from 'src/app/models/custom-tracking.models';
+
 import { buildAccount } from '../registry-test-fixtures';
 import { RegistryService } from '../registry.service';
 import { RegistryAccountComponent } from './registry-account.component';
@@ -178,5 +183,71 @@ describe('RegistryAccountComponent', () => {
       '/community/registry/profiles',
       'a b',
     ]);
+  });
+  describe('the owner’s own tracking', () => {
+    const withCustomSections = () =>
+      buildAccount({
+        customSections: [
+          {
+            id: 'section-1',
+            name: 'Fleet duties',
+            description: null,
+            tabs: [
+              {
+                id: 'tab-1',
+                name: 'Provisioning',
+                description: null,
+                fields: [
+                  {
+                    id: 'field-1',
+                    fieldType: CustomTrackingFieldType.TEXT_SINGLE_LINE,
+                    name: 'Ship name',
+                    description: null,
+                    configuration: {},
+                    emptyMode: CustomTrackingEmptyMode.SHOW_LABEL,
+                    emptyPlaceholder: null,
+                    value: { text: 'Bellerophon' },
+                    chosen: [],
+                    image: null,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+    // It rides on the account response rather than being asked for
+    // separately, so there is no second set of gates to keep in step.
+    it('shows what arrived with the account', async () => {
+      await setup();
+      registryServiceSpy.getAccount.mockReturnValue(of(withCustomSections()));
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent).toContain('Fleet duties');
+      expect(fixture.nativeElement.textContent).toContain('Bellerophon');
+    });
+
+    it('shows nothing where the server permitted nothing', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      expect(component.customSections).toEqual([]);
+      expect(
+        fixture.nativeElement.querySelector('.custom-tracking-display'),
+      ).toBeNull();
+    });
+
+    it('offers nothing to edit with', async () => {
+      await setup();
+      registryServiceSpy.getAccount.mockReturnValue(of(withCustomSections()));
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelectorAll('input, textarea, select'),
+      ).toHaveLength(0);
+    });
   });
 });

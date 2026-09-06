@@ -111,6 +111,7 @@ export function buildAccount(
   return {
     ...buildAccountSummary(),
     characters: [buildCharacterSummary()],
+    customSections: [],
     ...overrides,
   };
 }
@@ -131,6 +132,7 @@ export function buildCharacter(
     lastName: 'Sorek',
     biography: 'A long and storied career.',
     createdDate: '2020-06-01T00:00:00.000Z',
+    customSections: [],
     ...overrides,
   };
 }
