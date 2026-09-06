@@ -48,8 +48,17 @@ describe('CustomTrackingSectionBarComponent', () => {
     ).toBeNull();
   });
 
-  // Public is opt-in, so a bar says which it is either way rather than leaving
-  // silence to mean private.
+  // The builder states a section's visibility on the info panel just beneath
+  // this bar. Saying it twice, a line apart, is one statement too many.
+  it('says nothing about visibility where it was told nothing', () => {
+    build();
+
+    expect(text()).not.toContain('Public');
+    expect(text()).not.toContain('Private');
+  });
+
+  // Public is opt-in, so a bar told about visibility says which it is either
+  // way rather than leaving silence to mean private.
   it('says whether the section is public', () => {
     build({ publiclyVisible: true });
 

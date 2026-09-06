@@ -31,6 +31,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 
+import { CustomTrackingInfoBarComponent } from '../custom-tracking-info-bar/custom-tracking-info-bar.component';
 import {
   CustomTrackingFieldInput,
   CustomTrackingGroupInput,
@@ -96,6 +97,7 @@ export interface CustomTrackingEditorState {
     ReactiveFormsModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    CustomTrackingInfoBarComponent,
     CustomTrackingGroupPanelComponent,
     CustomTrackingGroupFormComponent,
     CustomTrackingFieldPanelComponent,

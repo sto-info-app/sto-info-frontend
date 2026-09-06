@@ -124,15 +124,18 @@
   }
 }
 
-// The controls a tab strip has no room for: what the tab showing is, and the
-// arrows, pen and bin that arrange it.
+// What a section or a tab is, and the arrows, pen and bin that arrange it.
+// The heading bar of a section has room for a name and one caret, and the
+// caret it has room for is the one that folds the section away — so
+// everything else a reader needs is stated here, just inside the panel,
+// exactly where a tab states the same things.
 // ---
 // Drawn as a panel rather than as a bare row, because a line of badges
-// floating under a strip is read as belonging to the section — and it is the
-// tab those badges describe. Blue, the colour the site draws a thing that
-// reports rather than a thing that is arranged: a field beneath it is a panel
-// of its own, in a colour of its own, and the two are never confused.
-.custom-tracking-tab-toolbar {
+// floating under a heading is read as belonging to nothing in particular.
+// Blue, the colour the site draws a thing that reports rather than a thing
+// that is arranged: a field beneath it is a panel of its own, in a colour of
+// its own, and the two are never confused.
+.custom-tracking-info-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -149,11 +152,27 @@
   overflow: hidden;
 }
 
-// The block that names the tab, carrying the same solid colour and black
+// A section's panel and the panel of a tab inside it sit a few lines apart, so
+// they are told apart by colour: the deeper blue is the outer thing. Two
+// panels in the same blue would read as two of the same kind.
+.custom-tracking-info-bar--section {
+  border-left-color: color.adjust(vars.$lcars-bluey, $lightness: -18%);
+  background: linear-gradient(
+    180deg,
+    rgba(vars.$lcars-bluey, 0.16) 0%,
+    vars.$lcars-grey-bg 100%
+  );
+
+  .custom-tracking-info-bar__scope {
+    background: vars.$lcars-bluey;
+  }
+}
+
+// The block that names the thing, carrying the same solid colour and black
 // lettering a panel card's heading does. The icon is there to say the row
 // reports something rather than does something — everything that acts is at
 // the other end of it.
-.custom-tracking-tab-scope {
+.custom-tracking-info-bar__scope {
   display: flex;
   flex: 0 1 auto;
   min-width: 0;
@@ -171,9 +190,9 @@
   text-transform: uppercase;
 }
 
-// The tab's name shortens rather than pushing the badges beside it off the
-// panel, the way a section's name does on its bar.
-.custom-tracking-tab-scope-name {
+// The name shortens rather than pushing the badges beside it off the panel,
+// the way a section's name does on its bar.
+.custom-tracking-info-bar__name {
   min-width: 0;
   font-weight: 700;
   overflow: hidden;
@@ -181,8 +200,8 @@
   white-space: nowrap;
 }
 
-.custom-tracking-tab-meta,
-.custom-tracking-tab-actions {
+.custom-tracking-info-bar__meta,
+.custom-tracking-info-bar__actions {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
@@ -190,9 +209,9 @@
   padding: 0.25rem 0;
 }
 
-// What can be done to the tab sits at the far end, away from what the panel
-// says about it.
-.custom-tracking-tab-actions {
+// What can be done to it sits at the far end, away from what the panel says
+// about it.
+.custom-tracking-info-bar__actions {
   margin-left: auto;
 }
 
@@ -284,10 +303,11 @@
 .custom-tracking-section-bar .custom-tracking-section-title {
   display: flex;
 
-  // Room enough for the controls at the other end of the bar and a little
-  // clear air before them. They are six icons wide and no wider, so this is a
-  // measurement rather than a guess.
-  max-width: calc(100% - 8.5rem);
+  // Room enough for the caret at the other end of the bar and a little clear
+  // air before it. The bar carries that one control and nothing else, in the
+  // builder and in the value editor alike, so this is a measurement rather
+  // than a guess.
+  max-width: calc(100% - 4rem);
   align-items: center;
   gap: 0.6rem;
   overflow: hidden;
@@ -328,7 +348,7 @@
 // said is said again in full by the form the pen opens.
 @media (width <= 600px) {
   .custom-tracking-section-bar .custom-tracking-section-title {
-    max-width: calc(100% - 7rem);
+    max-width: calc(100% - 3.5rem);
   }
 
   .custom-tracking-section-bar .custom-tracking-count,

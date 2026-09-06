@@ -6,6 +6,7 @@ import {
   Output,
 } from '@angular/core';
 
+import { CustomTrackingInfoBarComponent } from '../../custom-tracking-info-bar/custom-tracking-info-bar.component';
 import { CustomTrackingSectionBarComponent } from '../../custom-tracking-section-bar/custom-tracking-section-bar.component';
 import { CustomTrackingReorderControlsComponent } from '../custom-tracking-reorder-controls/custom-tracking-reorder-controls.component';
 
@@ -16,9 +17,12 @@ let nextGroupPanelId = 0;
  * One section of the builder: an LCARS heading bar, and everything under it.
  *
  * The bar is the shared one, so a section here folds away with the same caret
- * as a section of a help guide or a Storytime page. What this adds to it are
- * the controls that arrange a section rather than read it — the arrows, the
- * pen and the bin — projected onto the bar beside that caret.
+ * as a section of a help guide or a Storytime page. It carries the name and
+ * that caret and nothing else: what the section is — who may see it, how many
+ * tabs are inside — and the arrows, pen and bin that arrange it are stated on
+ * an info panel just inside it, the way a tab states the same things. Arrows
+ * that reorder a section sitting beside a caret that folds it away were two
+ * carets an inch apart doing unrelated things.
  *
  * What is inside is projected rather than passed in — the strip of tabs, the
  * fields of whichever tab is at the front, and the forms that change any of
@@ -33,6 +37,7 @@ let nextGroupPanelId = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CustomTrackingSectionBarComponent,
+    CustomTrackingInfoBarComponent,
     CustomTrackingReorderControlsComponent,
   ],
 })

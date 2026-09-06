@@ -14,15 +14,16 @@ import {
  * own. A reader who has learnt what the caret does on the help guides and the
  * Storytime pages should not have to learn a second control here.
  *
- * One component for both places a section is listed: the builder, where the
- * bar also carries the arrows, the pen and the bin that arrange it, and the
- * value editor, where it carries nothing but the caret. Those extra controls
- * are projected in rather than built here, because what a section can be asked
- * to do differs between the two and where those controls sit does not.
+ * One component for both places a section is listed: the builder and the value
+ * editor. In both it carries the name and the caret, and anything else a
+ * caller needs on it is projected in rather than built here, because what a
+ * section can be asked to do differs between the two and where those controls
+ * sit does not.
  *
  * What the bar says about a section it says in words as well as in colour: a
  * section is labelled public or private either way, so silence never has to be
- * read as one of them.
+ * read as one of them. Where the panel beneath already states it, the bar is
+ * told nothing and says nothing, rather than repeating it a line apart.
  */
 @Component({
   selector: 'app-custom-tracking-section-bar',
@@ -37,8 +38,14 @@ export class CustomTrackingSectionBarComponent {
   /** What the section holds, in words, or null where nothing is counted. */
   @Input() summary: string | null = null;
 
-  /** Whether its owner has asked for it to be public. */
-  @Input() publiclyVisible = false;
+  /**
+   * Whether its owner has asked for it to be public, or null to say nothing.
+   *
+   * Null where something inside the panel already says it — the builder states
+   * a section's visibility on the info panel just under this bar, and saying
+   * it twice a line apart is one statement too many.
+   */
+  @Input() publiclyVisible: boolean | null = null;
 
   /** Whether a moderator has hidden it. */
   @Input() suppressed = false;

@@ -216,89 +216,58 @@
               [hidden]="activeTab(section)?.id !== tab.id">
               <!--
                 What the strip above says is which tab is showing, and it says
-                it in two words on a button. This row says the same thing at
+                it in two words on a button. This panel says the same thing at
                 length — named, badged and counted — so the settings beside the
                 name are read as that tab's rather than the section's. It is
-                drawn as a panel in the selected tab's own colour, because a
-                bare line of badges under a strip belongs to nothing in
-                particular.
+                the same panel the section states itself on, in the lighter of
+                the two blues.
               -->
-              <div class="custom-tracking-tab-toolbar">
-                <p class="custom-tracking-tab-scope">
+              <app-custom-tracking-info-bar
+                kind="tab"
+                [name]="tab.name"
+                [summary]="fieldSummary(tab.id)"
+                [publiclyVisible]="tab.publiclyVisible"
+                [suppressed]="tab.suppressed">
+                <app-custom-tracking-reorder-controls
+                  infoActions
+                  axis="horizontal"
+                  [itemName]="tab.name"
+                  [index]="tabPosition(tab)"
+                  [count]="tabCount(section.id)"
+                  (moveUp)="
+                    reorderTabs(section.id, tabPosition(tab), tabPosition(tab) - 1)
+                  "
+                  (moveDown)="
+                    reorderTabs(section.id, tabPosition(tab), tabPosition(tab) + 1)
+                  ">
+                </app-custom-tracking-reorder-controls>
+
+                <button
+                  infoActions
+                  type="button"
+                  class="cta-icon"
+                  [title]="'Edit ' + tab.name"
+                  [attr.aria-label]="'Edit ' + tab.name"
+                  [disabled]="isLoading"
+                  (click)="editTab(tab)">
                   <i
-                    class="fa-solid fa-circle-info"
+                    class="fa-solid fa-user-pen"
                     aria-hidden="true"></i>
-                  <span class="custom-tracking-tab-scope-name">
-                    {{ tab.name }}
-                  </span>
-                  tab
-                </p>
+                </button>
 
-                <span class="custom-tracking-tab-meta">
-                  @if (tab.publiclyVisible) {
-                    <span class="custom-tracking-badge">Public</span>
-                  } @else {
-                    <span class="custom-tracking-badge muted">Private</span>
-                  }
-
-                  @if (tab.suppressed) {
-                    <span class="custom-tracking-badge warning">
-                      Hidden by a moderator
-                    </span>
-                  }
-
-                  <span class="custom-tracking-count">
-                    {{ fieldSummary(tab.id) }}
-                  </span>
-                </span>
-
-                <span class="custom-tracking-tab-actions">
-                  <app-custom-tracking-reorder-controls
-                    axis="horizontal"
-                    [itemName]="tab.name"
-                    [index]="tabPosition(tab)"
-                    [count]="tabCount(section.id)"
-                    (moveUp)="
-                      reorderTabs(
-                        section.id,
-                        tabPosition(tab),
-                        tabPosition(tab) - 1
-                      )
-                    "
-                    (moveDown)="
-                      reorderTabs(
-                        section.id,
-                        tabPosition(tab),
-                        tabPosition(tab) + 1
-                      )
-                    ">
-                  </app-custom-tracking-reorder-controls>
-
-                  <button
-                    type="button"
-                    class="cta-icon"
-                    [title]="'Edit ' + tab.name"
-                    [attr.aria-label]="'Edit ' + tab.name"
-                    [disabled]="isLoading"
-                    (click)="editTab(tab)">
-                    <i
-                      class="fa-solid fa-user-pen"
-                      aria-hidden="true"></i>
-                  </button>
-
-                  <button
-                    type="button"
-                    class="cta-icon delete-icon"
-                    [title]="'Delete ' + tab.name"
-                    [attr.aria-label]="'Delete ' + tab.name"
-                    [disabled]="isLoading"
-                    (click)="removeTab(tab)">
-                    <i
-                      class="fa-solid fa-trash"
-                      aria-hidden="true"></i>
-                  </button>
-                </span>
-              </div>
+                <button
+                  infoActions
+                  type="button"
+                  class="cta-icon delete-icon"
+                  [title]="'Delete ' + tab.name"
+                  [attr.aria-label]="'Delete ' + tab.name"
+                  [disabled]="isLoading"
+                  (click)="removeTab(tab)">
+                  <i
+                    class="fa-solid fa-trash"
+                    aria-hidden="true"></i>
+                </button>
+              </app-custom-tracking-info-bar>
 
               @if (tab.description) {
                 <p class="custom-tracking-panel-description">

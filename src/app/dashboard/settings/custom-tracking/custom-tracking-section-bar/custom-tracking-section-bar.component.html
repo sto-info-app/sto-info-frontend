@@ -7,10 +7,12 @@
         <span class="custom-tracking-count">{{ summary }}</span>
       }
 
-      @if (publiclyVisible) {
-        <span class="custom-tracking-badge">Public</span>
-      } @else {
-        <span class="custom-tracking-badge muted">Private</span>
+      @if (publiclyVisible !== null) {
+        @if (publiclyVisible) {
+          <span class="custom-tracking-badge">Public</span>
+        } @else {
+          <span class="custom-tracking-badge muted">Private</span>
+        }
       }
 
       @if (suppressed) {

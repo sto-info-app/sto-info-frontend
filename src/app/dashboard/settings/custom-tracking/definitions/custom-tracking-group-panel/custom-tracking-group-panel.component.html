@@ -1,52 +1,63 @@
 <div class="custom-tracking-panel">
+  <!--
+    The bar carries the section's name and the caret that folds it away, and
+    nothing else. What the section is and what can be done to it are said on
+    the info panel inside it, because reorder arrows sitting an inch from a
+    collapse caret is two carets doing unrelated things.
+  -->
   <app-custom-tracking-section-bar
     [name]="name"
-    [summary]="childSummary"
-    [publiclyVisible]="publiclyVisible"
-    [suppressed]="suppressed"
     [isExpanded]="isExpanded"
     [contentId]="contentId"
     (toggled)="toggled.emit()">
-    <app-custom-tracking-reorder-controls
-      barActions
-      [itemName]="name"
-      [index]="index"
-      [count]="count"
-      (moveUp)="moveUp.emit()"
-      (moveDown)="moveDown.emit()">
-    </app-custom-tracking-reorder-controls>
-
-    <button
-      barActions
-      type="button"
-      class="cta-icon"
-      [title]="'Edit ' + name"
-      [attr.aria-label]="'Edit ' + name"
-      [disabled]="isSaving"
-      (click)="edited.emit()">
-      <i
-        class="fa-solid fa-user-pen"
-        aria-hidden="true"></i>
-    </button>
-
-    <button
-      barActions
-      type="button"
-      class="cta-icon delete-icon"
-      [title]="'Delete ' + name"
-      [attr.aria-label]="'Delete ' + name"
-      [disabled]="isSaving"
-      (click)="removed.emit()">
-      <i
-        class="fa-solid fa-trash"
-        aria-hidden="true"></i>
-    </button>
   </app-custom-tracking-section-bar>
 
   <div
     class="custom-tracking-panel-body"
     [id]="contentId"
     [hidden]="!isExpanded">
+    <app-custom-tracking-info-bar
+      kind="section"
+      [name]="name"
+      [summary]="childSummary"
+      [publiclyVisible]="publiclyVisible"
+      [suppressed]="suppressed">
+      <app-custom-tracking-reorder-controls
+        infoActions
+        [itemName]="name"
+        [index]="index"
+        [count]="count"
+        (moveUp)="moveUp.emit()"
+        (moveDown)="moveDown.emit()">
+      </app-custom-tracking-reorder-controls>
+
+      <button
+        infoActions
+        type="button"
+        class="cta-icon"
+        [title]="'Edit ' + name"
+        [attr.aria-label]="'Edit ' + name"
+        [disabled]="isSaving"
+        (click)="edited.emit()">
+        <i
+          class="fa-solid fa-user-pen"
+          aria-hidden="true"></i>
+      </button>
+
+      <button
+        infoActions
+        type="button"
+        class="cta-icon delete-icon"
+        [title]="'Delete ' + name"
+        [attr.aria-label]="'Delete ' + name"
+        [disabled]="isSaving"
+        (click)="removed.emit()">
+        <i
+          class="fa-solid fa-trash"
+          aria-hidden="true"></i>
+      </button>
+    </app-custom-tracking-info-bar>
+
     @if (description) {
       <p class="custom-tracking-panel-description">{{ description }}</p>
     }
