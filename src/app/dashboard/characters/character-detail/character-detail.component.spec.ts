@@ -16,6 +16,7 @@ import {
 } from '@angular/router';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
+import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
@@ -247,6 +248,35 @@ describe('CharacterDetailComponent', () => {
       expect(component.errorMessage).toBe('Failed to load character details');
       expect(component.isLoading).toBe(false);
       consoleSpy.mockRestore();
+    }));
+  });
+
+  describe('the owner’s own tracking', () => {
+    // Beneath the STO data on the overview tab, and pointed at this captain.
+    // Nothing here can edit it: values are managed from Settings alone.
+    it('shows the block for this captain, with nothing to edit', fakeAsync(() => {
+      mockStoAccountService.getAccounts.mockReturnValue(of([mockAccount]));
+      mockCharacterService.getCharactersByAccount.mockReturnValue(
+        of([mockCharacter]),
+      );
+      mockCharacterService.getCharacter.mockReturnValue(of(mockCharacter));
+
+      fixture.detectChanges();
+      routeParamsSubject.next({
+        handle: 'TestAccount',
+        characterHandle: 'TestChar',
+      });
+      tick();
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          'app-custom-tracking-owner-display',
+        ),
+      ).not.toBeNull();
+      expect(component.characterScope).toBe(
+        CustomTrackingTargetScope.CHARACTER,
+      );
     }));
   });
 

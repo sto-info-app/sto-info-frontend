@@ -28,11 +28,19 @@
             </div>
             <div class="info-item">
               <span class="label"><i class="fas fa-user"></i> Username:</span>
-              <span class="value" [class.privacy-blur]="privacyMode.isEnabled()">{{ account.username || 'N/A' }}</span>
+              <span
+                class="value"
+                [class.privacy-blur]="privacyMode.isEnabled()"
+                >{{ account.username || 'N/A' }}</span
+              >
             </div>
             <div class="info-item">
               <span class="label"><i class="fas fa-envelope"></i> Email:</span>
-              <span class="value" [class.privacy-blur]="privacyMode.isEnabled()">{{ account.email || 'N/A' }}</span>
+              <span
+                class="value"
+                [class.privacy-blur]="privacyMode.isEnabled()"
+                >{{ account.email || 'N/A' }}</span
+              >
             </div>
             @if (account.notes) {
               <div class="info-item">
@@ -125,6 +133,15 @@
           </div>
         </div>
       </div>
+
+      <!--
+        Beneath the STO data, and nothing to edit with. Values are managed
+        from Settings alone.
+      -->
+      <app-custom-tracking-owner-display
+        [scope]="accountScope"
+        [targetId]="account.id"
+        heading="Your Own Tracking" />
     } @else if (!isLoading && errorMessage) {
       <div class="error-container">
         <app-lcars-error-message

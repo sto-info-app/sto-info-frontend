@@ -17,9 +17,11 @@ import { CharacterAdmiraltyComponent } from 'src/app/dashboard/character-admiral
 import { CharacterCommendationsComponent } from 'src/app/dashboard/character-commendations/character-commendations.component';
 import { CharacterReputationsComponent } from 'src/app/dashboard/character-reputations/character-reputations.component';
 import { CharacterSpecializationComponent } from 'src/app/dashboard/character-specialization/character-specialization.component';
+import { CustomTrackingOwnerDisplayComponent } from 'src/app/dashboard/custom-tracking/custom-tracking-owner-display/custom-tracking-owner-display.component';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
+import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
@@ -61,9 +63,13 @@ export type CharacterTab =
     CharacterCommendationsComponent,
     CharacterRdComponent,
     CharacterSpecializationComponent,
+    CustomTrackingOwnerDisplayComponent,
   ],
 })
 export class CharacterDetailComponent implements OnInit, OnDestroy {
+  /** The scope the owner's own tracking is recorded against on this page. */
+  readonly characterScope = CustomTrackingTargetScope.CHARACTER;
+
   character: Character | null = null;
   accountHandle = '';
   isLoading = true;

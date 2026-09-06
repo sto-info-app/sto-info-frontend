@@ -179,6 +179,15 @@
                 </div>
               }
             </div>
+
+            <!--
+              Beneath the STO data, and nothing to edit with. Values are
+              managed from Settings alone.
+            -->
+            <app-custom-tracking-owner-display
+              [scope]="characterScope"
+              [targetId]="character.id"
+              heading="Your Own Tracking" />
           </div>
 
           <div

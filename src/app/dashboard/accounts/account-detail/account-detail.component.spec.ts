@@ -13,6 +13,7 @@ import {
   CLOUDFLARE_VARIANT_SQUARE_100PX_NAME,
   SRC_PHOTO_UNAVAILABLE_100PX,
 } from 'src/app/shared/constants/app-image-assets.constants';
+import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
 import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { AccountDetailComponent } from './account-detail.component';
 
@@ -163,6 +164,23 @@ describe('AccountDetailComponent', () => {
       expect(mockStoAccountService.getAccounts).not.toHaveBeenCalled();
       expect(component.isLoading).toBe(false);
       expect(component.errorMessage).toBe('Invalid account link');
+    });
+  });
+
+  describe('the owner’s own tracking', () => {
+    // Beneath the STO data on the page, and pointed at this account. Nothing
+    // here can edit it: values are managed from Settings alone.
+    it('shows the block for this account, with nothing to edit', () => {
+      fixture.detectChanges();
+      routeParamsSubject.next({ handle: encodeStoHandle(mockAccount.handle) });
+      fixture.detectChanges();
+
+      const block = fixture.nativeElement.querySelector(
+        'app-custom-tracking-owner-display',
+      ) as HTMLElement | null;
+
+      expect(block).not.toBeNull();
+      expect(component.accountScope).toBe(CustomTrackingTargetScope.ACCOUNT);
     });
   });
 

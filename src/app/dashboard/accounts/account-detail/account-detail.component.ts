@@ -17,6 +17,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { EndeavourSummary } from 'src/app/dashboard/models/endeavour.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
+import { CustomTrackingOwnerDisplayComponent } from 'src/app/dashboard/custom-tracking/custom-tracking-owner-display/custom-tracking-owner-display.component';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { EndeavourService } from 'src/app/dashboard/services/endeavour.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
@@ -40,6 +41,7 @@ import {
   getFactionClass,
   getSexIcon,
 } from 'src/app/shared/utils/card-theme.utils';
+import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
 import {
   decodeStoHandle,
   encodeStoHandle,
@@ -84,9 +86,13 @@ interface CharacterFilterOptionsVm {
     MatDialogModule,
     EndeavourRankBadgeComponent,
     CharacterCardComponent,
+    CustomTrackingOwnerDisplayComponent,
   ],
 })
 export class AccountDetailComponent implements OnInit, OnDestroy {
+  /** The scope the owner's own tracking is recorded against on this page. */
+  readonly accountScope = CustomTrackingTargetScope.ACCOUNT;
+
   readonly privacyMode = inject(PrivacyModeService);
   // ── Non-signal state (changed infrequently via HTTP callbacks) ────────────
   account: StoAccount | null = null;
