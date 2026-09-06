@@ -8,8 +8,8 @@
     (click)="moveUp.emit()">
     <i
       class="fa-solid"
-      [class.fa-caret-up]="!isHorizontal"
-      [class.fa-caret-left]="isHorizontal"
+      [class.fa-circle-caret-up]="!isHorizontal"
+      [class.fa-circle-caret-left]="isHorizontal"
       aria-hidden="true"></i>
   </button>
 
@@ -22,8 +22,8 @@
     (click)="moveDown.emit()">
     <i
       class="fa-solid"
-      [class.fa-caret-down]="!isHorizontal"
-      [class.fa-caret-right]="isHorizontal"
+      [class.fa-circle-caret-down]="!isHorizontal"
+      [class.fa-circle-caret-right]="isHorizontal"
       aria-hidden="true"></i>
   </button>
 </span>

@@ -55,15 +55,18 @@ describe('CustomTrackingReorderControlsComponent', () => {
       'Move Ship collection right',
     ]);
     expect(icons()).toEqual([
-      'fa-solid fa-caret-left',
-      'fa-solid fa-caret-right',
+      'fa-solid fa-circle-caret-left',
+      'fa-solid fa-circle-caret-right',
     ]);
   });
 
   it('points down the page for a stack of panels', () => {
     build(1, 3);
 
-    expect(icons()).toEqual(['fa-solid fa-caret-up', 'fa-solid fa-caret-down']);
+    expect(icons()).toEqual([
+      'fa-solid fa-circle-caret-up',
+      'fa-solid fa-circle-caret-down',
+    ]);
   });
 
   it('offers both moves in the middle of a list', () => {

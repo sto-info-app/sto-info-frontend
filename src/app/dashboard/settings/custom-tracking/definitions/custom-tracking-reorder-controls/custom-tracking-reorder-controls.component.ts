@@ -19,6 +19,10 @@ import {
  * The arrows point the way the list itself runs: up and down for a stack of
  * panels, left and right for a strip of tabs. An arrow pointing up beside a
  * row of tabs would be asking the reader to translate it.
+ *
+ * They are circled carets rather than bare ones, which is what tells them
+ * apart at a glance from the bare caret that folds a panel away — the site
+ * uses one shape for reordering and the other for expanding, everywhere.
  */
 @Component({
   selector: 'app-custom-tracking-reorder-controls',
