@@ -1,0 +1,149 @@
+<section
+  id="custom-tracking-settings"
+  class="custom-tracking-page">
+  <h1>Custom Tracking</h1>
+
+  <nav class="custom-tracking-page-actions">
+    <a
+      class="lcars-btn lcars-btn-auto bluey"
+      [routerLink]="settingsLink">
+      Back to Settings
+    </a>
+  </nav>
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading Custom Tracking"></app-loading-bar>
+  }
+
+  @if (errorMessage) {
+    <app-lcars-error-message [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (configuration && !isEnabled) {
+    <p
+      class="custom-tracking-notice"
+      role="status">
+      Custom Tracking is switched off at the moment. Anything you have already
+      recorded is untouched and will be here when it comes back.
+    </p>
+  }
+
+  @if (configuration && isEnabled) {
+    @if (needsAgreement) {
+      <app-custom-tracking-agreement
+        [status]="status"
+        (accepted)="onAccepted($event)">
+      </app-custom-tracking-agreement>
+    } @else {
+      <div
+        class="custom-tracking-tabs"
+        role="tablist"
+        aria-label="Custom Tracking">
+        <button
+          type="button"
+          role="tab"
+          id="custom-tracking-tab-definitions"
+          class="lcars-btn lcars-btn-auto"
+          [class.sunflower]="panel === 'definitions'"
+          [class.bluey]="panel !== 'definitions'"
+          [attr.aria-selected]="panel === 'definitions'"
+          [attr.tabindex]="panel === 'definitions' ? 0 : -1"
+          aria-controls="custom-tracking-panel-definitions"
+          (keydown)="onTabKeydown($event)"
+          (click)="show('definitions')">
+          What you track
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="custom-tracking-tab-values"
+          class="lcars-btn lcars-btn-auto"
+          [class.sunflower]="panel === 'values'"
+          [class.bluey]="panel !== 'values'"
+          [attr.aria-selected]="panel === 'values'"
+          [attr.tabindex]="panel === 'values' ? 0 : -1"
+          aria-controls="custom-tracking-panel-values"
+          (keydown)="onTabKeydown($event)"
+          (click)="show('values')">
+          What you have recorded
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="custom-tracking-tab-about"
+          class="lcars-btn lcars-btn-auto"
+          [class.sunflower]="panel === 'about'"
+          [class.bluey]="panel !== 'about'"
+          [attr.aria-selected]="panel === 'about'"
+          [attr.tabindex]="panel === 'about' ? 0 : -1"
+          aria-controls="custom-tracking-panel-about"
+          (keydown)="onTabKeydown($event)"
+          (click)="show('about')">
+          About and the rules
+        </button>
+      </div>
+
+      <div
+        id="custom-tracking-panel-definitions"
+        role="tabpanel"
+        tabindex="0"
+        aria-labelledby="custom-tracking-tab-definitions"
+        [hidden]="panel !== 'definitions'">
+        <app-custom-tracking-definitions [configuration]="configuration">
+        </app-custom-tracking-definitions>
+      </div>
+
+      <div
+        id="custom-tracking-panel-values"
+        role="tabpanel"
+        tabindex="0"
+        aria-labelledby="custom-tracking-tab-values"
+        [hidden]="panel !== 'values'">
+        <app-custom-tracking-values
+          [configuration]="configuration"
+          [active]="panel === 'values'">
+        </app-custom-tracking-values>
+      </div>
+
+      <div
+        id="custom-tracking-panel-about"
+        role="tabpanel"
+        tabindex="0"
+        aria-labelledby="custom-tracking-tab-about"
+        [hidden]="panel !== 'about'">
+        <h2>What this is</h2>
+        <p>
+          Custom Tracking lets you decide what to record about your own STO
+          accounts and characters. You define the sections, tabs and fields
+          once, and then record a separate answer for each account or character.
+        </p>
+        <p>
+          Everything is private until you say otherwise. A field appears on your
+          public registry page only when the field, the tab, the section and the
+          record itself are all public.
+        </p>
+
+        <h2>The rules</h2>
+        <p>
+          Everything you enter here is yours and is your responsibility. Do not
+          store other people's personal information, and do not publish anything
+          you would not put on a public page — because that is what a public
+          field is.
+        </p>
+        <p>
+          Read the <a [routerLink]="termsLink">Terms of Use</a>. They apply to
+          everything recorded here, and the content agreement you accepted sits
+          alongside them.
+        </p>
+
+        <h2>What happens when you delete something</h2>
+        <p>
+          Deleting a section, tab or field takes the answers recorded against it
+          too. Deleted definitions and answers are kept for 180 days and then
+          removed for good, so a mistake can be put right by asking within that
+          window — but not from this page.
+        </p>
+      </div>
+    }
+  }
+</section>

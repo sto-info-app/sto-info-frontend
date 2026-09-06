@@ -1,0 +1,78 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+@if (agreement) {
+  <section
+    class="custom-tracking-agreement"
+    aria-labelledby="custom-tracking-agreement-title">
+    <h2 id="custom-tracking-agreement-title">{{ agreement.title }}</h2>
+
+    <p class="custom-tracking-agreement-dates">
+      <span>Version {{ agreement.version }}</span>
+      <span>Effective {{ agreement.effectiveDate | date: 'd MMMM y' }}</span>
+      @if (agreement.updatedDate !== agreement.effectiveDate) {
+        <span>Updated {{ agreement.updatedDate | date: 'd MMMM y' }}</span>
+      }
+    </p>
+
+    @if (isReacceptance) {
+      <p
+        class="custom-tracking-agreement-notice"
+        role="status">
+        This agreement has changed since you last accepted it. Everything you
+        have already recorded is still here and still readable — only creating
+        and editing are paused until you accept the new wording.
+      </p>
+    }
+
+    @for (part of agreement.sections; track $index) {
+      <div class="custom-tracking-agreement-part">
+        @if (part.heading) {
+          <h3>{{ part.heading }}</h3>
+        }
+        @for (paragraph of part.paragraphs; track $index) {
+          <p>{{ paragraph }}</p>
+        }
+        @if (part.bullets.length) {
+          <ul>
+            @for (bullet of part.bullets; track $index) {
+              <li>{{ bullet }}</li>
+            }
+          </ul>
+        }
+      </div>
+    }
+
+    <p class="custom-tracking-agreement-part">
+      Read the <a [routerLink]="termsLink">Terms of Use</a> as well. They apply
+      to everything here.
+    </p>
+
+    <form
+      [formGroup]="agreementForm"
+      (ngSubmit)="accept()">
+      <div class="custom-tracking-agreement-consent">
+        <input
+          id="custom-tracking-agreed"
+          type="checkbox"
+          formControlName="agreed" />
+        <label for="custom-tracking-agreed">
+          I have read and will follow the Terms of Use and these Custom Tracking
+          content rules.
+        </label>
+      </div>
+
+      <button
+        type="submit"
+        class="lcars-btn sunflower"
+        [disabled]="isSaving || !agreementForm.value.agreed">
+        I agree
+      </button>
+    </form>
+  </section>
+}
+
+@if (errorMessage) {
+  <app-lcars-error-message [message]="errorMessage"></app-lcars-error-message>
+}
