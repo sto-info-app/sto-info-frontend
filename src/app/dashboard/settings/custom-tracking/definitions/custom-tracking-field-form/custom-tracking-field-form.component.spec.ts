@@ -22,6 +22,7 @@ describe('CustomTrackingFieldFormComponent', () => {
     category: CustomTrackingFieldCategory,
     label: string,
     usesOptions = false,
+    allowsRequired = true,
   ) => ({
     fieldType,
     label,
@@ -31,6 +32,7 @@ describe('CustomTrackingFieldFormComponent', () => {
     allowsMultipleOptions: false,
     defaultSource: CustomTrackingDefaultSource.NONE,
     usesTimezone: false,
+    allowsRequired,
   });
 
   const configuration: CustomTrackingConfiguration = {
@@ -67,6 +69,8 @@ describe('CustomTrackingFieldFormComponent', () => {
         CustomTrackingFieldType.TOGGLE,
         CustomTrackingFieldCategory.BOOLEAN,
         'Switch',
+        false,
+        false,
       ),
     ],
     palette: [],
@@ -250,6 +254,62 @@ describe('CustomTrackingFieldFormComponent', () => {
 
       expect(component.settingDescriptors).toEqual([]);
       expect(text()).not.toContain('Settings for this kind of field');
+    });
+  });
+
+  describe('demanding an answer', () => {
+    it('offers the requirement for a type that can express one', () => {
+      build();
+
+      expect(component.allowsRequired).toBe(true);
+      expect(text()).toContain('Every record must answer this');
+    });
+
+    // A switch is always showing one of its two positions, so a record that
+    // has to answer it is a rule nobody reading the record could tell was
+    // being kept.
+    it('does not offer it for a switch', () => {
+      build({ field: { ...field, fieldType: CustomTrackingFieldType.TOGGLE } });
+
+      expect(component.allowsRequired).toBe(false);
+      expect(text()).not.toContain('Every record must answer this');
+    });
+
+    it('follows the type as it is chosen', () => {
+      build();
+
+      component.fieldForm.controls.fieldType.setValue(
+        CustomTrackingFieldType.TOGGLE,
+      );
+      component.onTypeChange();
+
+      expect(component.allowsRequired).toBe(false);
+    });
+
+    // A hidden control holding true would go on demanding an answer its owner
+    // was no longer being shown.
+    it('drops a requirement a switch was carrying', () => {
+      build({
+        field: {
+          ...field,
+          fieldType: CustomTrackingFieldType.TOGGLE,
+          required: true,
+        },
+      });
+      component.submit();
+
+      expect(component.fieldForm.controls.required.value).toBe(false);
+      expect(saved).toEqual([expect.objectContaining({ required: false })]);
+    });
+
+    // The server is the one that decides, and it published nothing about this
+    // type, so the form asks rather than deciding for it.
+    it('offers it for a type the server described nothing about', () => {
+      build({
+        field: { ...field, fieldType: CustomTrackingFieldType.MARKDOWN },
+      });
+
+      expect(component.allowsRequired).toBe(true);
     });
   });
 

@@ -277,6 +277,14 @@ export interface CustomTrackingFieldTypeDescription {
   allowsMultipleOptions: boolean;
   defaultSource: CustomTrackingDefaultSource;
   usesTimezone: boolean;
+  /**
+   * Whether a field of this type may demand an answer.
+   *
+   * False for the types drawn as a control that always shows one of its two
+   * positions. A switch cannot look unanswered, so requiring an answer of one
+   * would be a rule nobody reading the record could tell was being kept.
+   */
+  allowsRequired: boolean;
 }
 
 /** One of the site's own colours, offered by name. */

@@ -23,6 +23,7 @@ describe('CustomTrackingDefinitionsComponent', () => {
     label: string,
     usesOptions = false,
     allowsMultipleOptions = false,
+    allowsRequired = true,
   ) => ({
     fieldType,
     label,
@@ -32,6 +33,7 @@ describe('CustomTrackingDefinitionsComponent', () => {
     allowsMultipleOptions,
     defaultSource: CustomTrackingDefaultSource.NONE,
     usesTimezone: false,
+    allowsRequired,
   });
 
   const configuration: CustomTrackingConfiguration = {

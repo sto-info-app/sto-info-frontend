@@ -70,17 +70,19 @@
     Optional. Shown beneath the name wherever this field appears.
   </p>
 
-  <div class="custom-tracking-form-toggle">
-    <app-lcars-toggle
-      formControlName="required"
-      label="Every record must answer this"
-      ariaLabel="Every record must answer this">
-    </app-lcars-toggle>
-    <p class="field-hint">
-      A record with this left empty cannot be saved. Records saved before you
-      turned this on are untouched until you next edit them.
-    </p>
-  </div>
+  @if (allowsRequired) {
+    <div class="custom-tracking-form-toggle">
+      <app-lcars-toggle
+        formControlName="required"
+        label="Every record must answer this"
+        ariaLabel="Every record must answer this">
+      </app-lcars-toggle>
+      <p class="field-hint">
+        A record with this left empty cannot be saved. Records saved before you
+        turned this on are untouched until you next edit them.
+      </p>
+    </div>
+  }
 
   <div class="custom-tracking-form-toggle">
     <app-lcars-toggle

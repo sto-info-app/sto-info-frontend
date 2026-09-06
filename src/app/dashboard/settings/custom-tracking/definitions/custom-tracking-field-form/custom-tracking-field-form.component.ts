@@ -163,6 +163,7 @@ export class CustomTrackingFieldFormComponent implements OnInit {
     }
 
     this.buildSettings();
+    this.syncRequired();
   }
 
   /**
@@ -194,6 +195,19 @@ export class CustomTrackingFieldFormComponent implements OnInit {
         type => type.fieldType === this.fieldType,
       ) ?? null
     );
+  }
+
+  /**
+   * Whether the chosen type may be made to demand an answer.
+   *
+   * Read from the catalogue rather than decided here, so a type added later
+   * arrives with its own answer instead of falling into whichever branch a
+   * list in the frontend happened to put it in.
+   *
+   * @returns True unless the server said this type never requires an answer.
+   */
+  get allowsRequired(): boolean {
+    return this.chosenType?.allowsRequired ?? true;
   }
 
   /**
@@ -344,6 +358,7 @@ export class CustomTrackingFieldFormComponent implements OnInit {
    */
   onTypeChange(): void {
     this.buildSettings();
+    this.syncRequired();
   }
 
   /**
@@ -374,6 +389,20 @@ export class CustomTrackingFieldFormComponent implements OnInit {
     this.saved.emit(
       this.isNew ? { ...input, fieldType: entered.fieldType } : input,
     );
+  }
+
+  /**
+   * Drops a requirement the chosen type cannot express.
+   *
+   * The toggle is hidden for such a type, and a hidden control holding true
+   * would go on demanding an answer nobody could see was being demanded. A
+   * field that was requiring one before its form was opened stops doing so
+   * when it is next saved, which is the only moment its owner is looking.
+   */
+  private syncRequired(): void {
+    if (!this.allowsRequired) {
+      this.fieldForm.controls.required.setValue(false);
+    }
   }
 
   /**
