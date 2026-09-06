@@ -1447,6 +1447,50 @@ button:hover {
   color: #fc6;
 }
 
+/* A group of controls at the right-hand end of an LCARS bar, for a heading
+   that carries more than one of them: reorder arrows, an edit pen, a bin and
+   the caret that folds the section away. It sits on the same black cut-out a
+   lone `.cta-icon` gets, so a bar with one action and a bar with five read as
+   the same shape rather than as two different components. */
+.lcars-text-bar .lcars-bar-actions {
+  position: absolute;
+  right: 1px;
+  top: -4px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 40px;
+  padding: 0 15px;
+  background-color: #0d0d0d;
+  color: #9bf;
+  font-size: 1rem;
+  line-height: 1.7rem;
+}
+
+/* The bar lays out every span and icon it holds as a label of its own, pinned
+   to an edge and drawn on the page's black. Inside the actions group they are
+   ordinary inline content again, laid out by the group. */
+.lcars-text-bar .lcars-bar-actions .cta-icon {
+  position: static;
+  top: auto;
+  right: auto;
+  height: auto;
+  padding: 0;
+  background: none;
+}
+
+.lcars-text-bar .lcars-bar-actions span {
+  position: static;
+  top: auto;
+  height: auto;
+  padding: 0;
+  background: none;
+  font-size: 1rem;
+  font-weight: normal;
+  line-height: 1.7rem;
+  text-transform: none;
+}
+
 .lcars-text-bar::before {
   content: '';
   background-color: #0d0d0d;
@@ -2426,6 +2470,14 @@ button.gold {
     height: 30px;
     line-height: 32px;
     padding: 0 10px;
+  }
+
+  .lcars-text-bar .lcars-bar-actions {
+    top: -6px;
+    height: 30px;
+    gap: 10px;
+    padding: 0 10px;
+    line-height: 32px;
   }
 
   .lcars-text-bar::before,
