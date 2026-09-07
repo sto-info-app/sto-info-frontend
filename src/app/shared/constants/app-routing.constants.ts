@@ -148,6 +148,10 @@ export const APP_ROUTES = {
   STORYTIME_READING_LIST: ROOT_ROUTES.STORYTIME + '/reading-lists/:listId',
   STORYTIME_PUBLIC_READING_LIST:
     ROOT_ROUTES.STORYTIME + '/creators/:userId/reading-lists/:slug',
+  // Where the Storytime guard sends everybody it turns away. Reachable while
+  // the feature is switched off or the backend is not answering, which is the
+  // whole point of it: it is the page that says which of the two happened.
+  STORYTIME_UNAVAILABLE: ROOT_ROUTES.STORYTIME + '/unavailable',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'service-interruption',
@@ -279,6 +283,7 @@ export const APP_ROUTE_TITLES = {
   STORYTIME_READING_LISTS: 'Your Reading Lists',
   STORYTIME_READING_LIST: 'Reading List',
   STORYTIME_PUBLIC_READING_LIST: 'Reading List',
+  STORYTIME_UNAVAILABLE: 'Storytime Unavailable',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'Service Interruption',

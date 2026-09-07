@@ -1,27 +1,26 @@
 import { Injectable, inject } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { CanActivate, Router, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import {
-  STORYTIME_AVAILABILITY_ENABLED,
-  STORYTIME_AVAILABILITY_UNAVAILABLE,
-} from 'src/app/models/storytime.models';
+import { STORYTIME_AVAILABILITY_ENABLED } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { StorytimeService } from './storytime.service';
 
 /**
- * Route guard that blocks every Storytime route while the feature is switched
- * off.
+ * Route guard that blocks every Storytime route while the feature is out of
+ * reach.
  *
- * Sends blocked visitors to the page-not-found route rather than showing a
- * "coming soon" message, matching how the server answers: a feature that is
- * off should be indistinguishable from one that does not exist, so a staged
- * rollout does not advertise what is coming.
+ * Everybody turned away goes to the same place — the Storytime unavailable
+ * page — which then says which of the two things happened: the master switch
+ * in `app_setting` is off, or the backend holding that switch could not be
+ * asked. Neither is a wrong address, so neither is answered with the not-found
+ * page; a visitor told their address is wrong stops trying, and both of these
+ * situations end.
  *
- * A configuration that could not be loaded at all is a different matter and is
- * sent to the service interruption page instead: the feature was never said to
- * be off, the backend simply could not be asked, and answering an outage with
- * a 404 tells the visitor their address is wrong when it is not.
+ * The guard does not decide the wording, because it cannot: the availability
+ * it read is a moment old by the time anything is drawn, and the page re-reads
+ * it so that a visitor arriving after a recovery is sent on to Storytime
+ * rather than shown a notice about an outage that is over.
  *
  * This is presentation only. The server independently refuses Storytime
  * requests while the feature is disabled, whatever the client believes.
@@ -36,23 +35,18 @@ export class StorytimeEnabledGuard implements CanActivate {
   /**
    * Determines whether a Storytime route can be activated.
    *
-   * @returns An observable emitting true when Storytime is enabled.
+   * @returns An observable emitting true when Storytime is enabled, and
+   *   otherwise a redirect to the Storytime unavailable page.
    */
-  canActivate(): Observable<boolean> {
-    return this._storytimeService.getAvailability().pipe(
-      map(availability => {
-        if (availability === STORYTIME_AVAILABILITY_ENABLED) {
-          return true;
-        }
-
-        const target =
-          availability === STORYTIME_AVAILABILITY_UNAVAILABLE
-            ? APP_ROUTES.SERVICE_INTERRUPTION
-            : APP_ROUTES.PAGE_NOT_FOUND;
-
-        void this._router.navigate([`/${target}`]);
-        return false;
-      }),
-    );
+  canActivate(): Observable<boolean | UrlTree> {
+    return this._storytimeService
+      .getAvailability()
+      .pipe(
+        map(availability =>
+          availability === STORYTIME_AVAILABILITY_ENABLED
+            ? true
+            : this._router.parseUrl(`/${APP_ROUTES.STORYTIME_UNAVAILABLE}`),
+        ),
+      );
   }
 }
