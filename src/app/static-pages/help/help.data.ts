@@ -1,4 +1,9 @@
+import {
+  CUSTOM_TRACKING_CATEGORY_LABELS,
+  CUSTOM_TRACKING_EMPTY_MODE_CHOICES,
+} from 'src/app/dashboard/settings/custom-tracking/definitions/custom-tracking-field-settings.constants';
 import { PERMISSIONS } from 'src/app/models/access-control.models';
+import { CustomTrackingFieldCategory } from 'src/app/models/custom-tracking.models';
 import {
   REPORT_REASON_LABELS,
   ReportReason,
@@ -120,6 +125,70 @@ const TAG_CATEGORY_POINTS: string[] = Object.keys(TAG_CATEGORY_LABELS).map(
   category =>
     `${TAG_CATEGORY_LABELS[category]} — ${TAG_CATEGORY_DESCRIPTIONS[category]}`,
 );
+
+/**
+ * The link to Custom Tracking, which every guide about it finishes with.
+ *
+ * The one page where the hierarchy is built and the content agreement is
+ * accepted, so every guide in the topic has reason to point at it.
+ */
+const CUSTOM_TRACKING_LINK = {
+  label: 'Open Custom Tracking',
+  route: APP_ROUTES.STO_DASHBOARD_CUSTOM_TRACKING,
+};
+
+/**
+ * An example of what each grouping of field types is for.
+ *
+ * Written here because the catalogue says what a group is called and not what
+ * somebody would reach for it to record. Typed against the enum so a grouping
+ * added to the picker will not compile until the guide has something to say
+ * about it — the alternative is a guide that lists five of six groups and
+ * gives no sign that it is doing so.
+ */
+const CUSTOM_TRACKING_CATEGORY_EXAMPLES: Record<
+  CustomTrackingFieldCategory,
+  string
+> = {
+  [CustomTrackingFieldCategory.TEXT]:
+    'a line for a build name, or a longer passage written in Markdown.',
+  [CustomTrackingFieldCategory.NUMBER]:
+    'a count, a proportion, a score out of five, or how far through something you are.',
+  [CustomTrackingFieldCategory.DATE_TIME]:
+    'when something happened, how long it took, or the span it ran over.',
+  [CustomTrackingFieldCategory.BOOLEAN]:
+    'a plain yes or no, drawn as a switch or as a tick box.',
+  [CustomTrackingFieldCategory.CHOICE]:
+    'an answer from a list you write, a colour, or a set of tags.',
+  [CustomTrackingFieldCategory.MEDIA]:
+    'one picture you upload and crop, or one YouTube video.',
+};
+
+/**
+ * The kinds of field the picker offers, as guide points.
+ *
+ * Derived from the same labels the picker groups its list under, so a group
+ * renamed in the builder is renamed here too. The individual types are not
+ * listed: the server publishes them with a description each, the picker shows
+ * that description as you choose, and a copy of twenty-seven of them here
+ * would be out of date the first time one is added.
+ */
+const CUSTOM_TRACKING_CATEGORY_POINTS: string[] = Object.values(
+  CustomTrackingFieldCategory,
+).map(
+  category =>
+    `${CUSTOM_TRACKING_CATEGORY_LABELS[category]} — ${CUSTOM_TRACKING_CATEGORY_EXAMPLES[category]}`,
+);
+
+/**
+ * What a field with no value can be made to look like.
+ *
+ * Taken from the choices the field form offers rather than described, because
+ * the guide is telling somebody which of three things to pick from a menu and
+ * naming them differently would leave them looking for a fourth.
+ */
+const CUSTOM_TRACKING_EMPTY_MODE_POINTS: string[] =
+  CUSTOM_TRACKING_EMPTY_MODE_CHOICES.map(choice => choice.label);
 
 /**
  * The Community guides.
@@ -328,6 +397,272 @@ const COMMUNITY_TOPIC: HelpTopic = {
       ],
       relatedLinks: [
         { label: 'Your friends', route: APP_ROUTES.COMMUNITY_FRIENDS },
+        { label: 'Contact us', route: APP_ROUTES.CONTACT },
+      ],
+    },
+  ],
+};
+
+/**
+ * The Custom Tracking guides.
+ *
+ * The feature is the one part of the site whose shape the user decides, so the
+ * guides are ordered the way somebody actually meets it: what it is, building
+ * it, filling it in, and then who can see the result. The visibility guide is
+ * last but is the one that matters most, because everything before it is
+ * private and reversible and that one is neither.
+ *
+ * Not gated on a feature switch, unlike Storytime. Custom Tracking is always
+ * offered from Settings and says on its own page when it is unavailable, so
+ * there is nothing here that withholding these guides would keep quiet.
+ */
+const CUSTOM_TRACKING_TOPIC: HelpTopic = {
+  id: 'custom-tracking',
+  title: 'Custom Tracking',
+  intro:
+    'Custom Tracking lets you decide what STO Info records about your own accounts and captains. You write the fields once, and then fill them in for each account or captain you have.',
+  requiresStorytime: false,
+  guides: [
+    {
+      slug: 'what-custom-tracking-is',
+      title: 'What Custom Tracking is',
+      summary:
+        'Fields you write yourself, and the three words the feature uses.',
+      sections: [
+        {
+          heading: 'The things the site does not know to ask about',
+          paragraphs: [
+            'STO Info records what every player has: accounts, captains, ranks, careers. Custom Tracking is for everything else — the reputations you are grinding, the builds you keep meaning to finish, which admiralty ships you have unlocked, how far through a campaign each captain is.',
+            'Nothing is set up for you. You decide what to ask, and then you answer it for each account or captain. Until you build something there is nothing there, which is why the page opens empty.',
+          ],
+        },
+        {
+          heading: 'Sections, tabs and fields',
+          paragraphs: [
+            'What you build has three levels, and they are the same three words everywhere the feature appears:',
+          ],
+          points: [
+            'Field — one question, such as “Reputation tier” or “Ship name”. A field has a kind, which decides what sort of answer it takes.',
+            'Tab — a group of fields, shown together under one heading.',
+            'Section — the outermost group, holding tabs.',
+          ],
+        },
+        {
+          heading: 'Accounts and captains are built separately',
+          paragraphs: [
+            'There are two hierarchies, not one. A section belongs either to your accounts or to your captains, and the strip at the top of the builder swaps between them.',
+            'A section built for captains appears against every captain you have, and one built for accounts against every account. Which of the two a section is for is settled when you create it and cannot be changed afterwards, because every answer beneath it hangs off an account or a captain and the other side has no row to move them to.',
+          ],
+        },
+        {
+          heading: 'Where you meet it',
+          paragraphs: [
+            'Everything is built in one place: Settings, then Custom Tracking. That page has three panels — what you track, what you have recorded, and a summary of the rules.',
+            'Answers can also be filled in without going there. Each of your own account and captain pages shows what you have recorded for it, and offers the same editor with that record already chosen.',
+          ],
+        },
+        {
+          heading: 'Agreeing to the rules first',
+          paragraphs: [
+            'The first time you open Custom Tracking you are shown the Custom Tracking Content Agreement and asked to accept it. Nothing can be created or changed until you do.',
+            'If the wording changes materially you are asked again, and creating and editing pause until you accept. Reading never does: everything you have already recorded stays in front of you, because a change of wording is not a reason to take your own data away from you.',
+          ],
+        },
+      ],
+      relatedLinks: [
+        CUSTOM_TRACKING_LINK,
+        { label: 'Your settings', route: APP_ROUTES.STO_DASHBOARD_SETTINGS },
+      ],
+    },
+    {
+      slug: 'building-what-you-track',
+      title: 'Building what you track',
+      summary:
+        'Creating sections, tabs and fields, and the settings each kind of field brings with it.',
+      sections: [
+        {
+          heading: 'Choose accounts or captains first',
+          paragraphs: [
+            'Open Custom Tracking and stay on “What you track”. The strip at the top decides which of the two hierarchies you are building, and everything you add belongs to whichever one is selected.',
+            'Start with a section, add tabs to it, then add fields to the tabs. Each of the three takes a name and, if it helps, a description shown beneath the name wherever it appears.',
+          ],
+        },
+        {
+          heading: 'Choosing what a field asks for',
+          paragraphs: [
+            'A field’s kind is the important choice. The picker groups the kinds it offers, and shows a description of whichever one you have highlighted:',
+          ],
+          points: CUSTOM_TRACKING_CATEGORY_POINTS,
+        },
+        {
+          heading: 'A field cannot change what it asks',
+          paragraphs: [
+            'The kind is chosen once. It decides how every answer recorded against the field is stored, checked and read back, so changing it later would reinterpret data you cannot get back — which is why the form shows the kind as a label rather than a menu once the field exists.',
+            'If a field turns out to be asking the wrong question, make a new one and delete the old one. Deleting it takes its answers with it, so it is worth being sure before you record against a field on forty captains.',
+          ],
+        },
+        {
+          heading: 'Settings that belong to the kind',
+          paragraphs: [
+            'Most kinds bring settings of their own, under “Settings for this kind of field”: the bounds of a slider, the top of a rating scale, how a date or a duration is written out, the fewest and most choices a multiple-choice field will take.',
+            'A few are worth settling before you record anything rather than after. The number of decimal places a decimal field keeps decides how every value is stored, and a default timezone decides where the editor starts for the kinds that carry one.',
+          ],
+        },
+        {
+          heading: 'Fields that must be answered',
+          paragraphs: [
+            'Turn on “Every record must answer this” and a record cannot be saved while that field is empty. Records saved before you turned it on are left alone until the next time you edit them.',
+            'Switches and tick boxes cannot be made required. Both always show one of their two positions, so there is no state that reads as unanswered and the rule would be one nobody could see being kept.',
+          ],
+        },
+        {
+          heading: 'Lists of choices',
+          paragraphs: [
+            'The kinds that offer a list — option lists, dropdowns, tick box lists, multiple select and tags — carry their choices with them, and you write those in the field’s own editor. One choice can be marked as chosen to begin with, and the list can be put in the order you want it read.',
+            'A choice can be withdrawn rather than deleted. A withdrawn choice cannot be picked again but stays listed under “Withdrawn”, so answers that already chose it go on reading correctly.',
+            'A tags field draws only from the list you write. Nothing typed while filling in a record is added to it.',
+          ],
+        },
+        {
+          heading: 'Order, and finding things again',
+          paragraphs: [
+            'Sections, tabs, fields and choices each have up and down controls, and the order you put them in is the order they appear everywhere else — in the editor, on your own pages, and publicly.',
+            'The search box above the hierarchy matches section, tab and field names across the whole of the scope you are in, whether or not the branch holding the match has been opened.',
+          ],
+        },
+        {
+          heading: 'How much you can build',
+          paragraphs: [
+            'There are ceilings on how many sections a scope may hold, how many tabs a section may hold, how many fields a tab may hold, and how many fields a scope may hold altogether. The builder counts what you have used against each of them and says plainly when you have reached one, rather than refusing a save without explaining why.',
+            'The ceilings are the same for everybody. They are what keeps a hierarchy something a page — including a phone — can draw in one go.',
+          ],
+        },
+      ],
+      relatedLinks: [CUSTOM_TRACKING_LINK],
+    },
+    {
+      slug: 'filling-in-your-records',
+      title: 'Filling in your records',
+      summary:
+        'Recording answers against an account or a captain, and how saving works.',
+      sections: [
+        {
+          heading: 'Two ways to the same editor',
+          paragraphs: [
+            'From Custom Tracking, the “What you have recorded” panel lets you pick any account or captain and fill it in, with a search box for finding one when the list is long.',
+            'From your own account or captain page, the same editor is offered with that record already chosen. It is the same form, the same checks and the same save either way, so it does not matter which you use.',
+          ],
+        },
+        {
+          heading: 'One record at a time',
+          paragraphs: [
+            'A record is loaded whole — the fields that apply to it arrive with the answers already recorded — and it is saved whole. Filling in six fields and saving once is one save, not six.',
+            'Anything still needed is named above the form, and the record cannot be saved while a required field is empty. Leaving the page with unsaved changes asks you first.',
+            'A field left empty is not a problem unless it is required, and clearing an answer and saving removes it.',
+          ],
+        },
+        {
+          heading: 'Finding a field',
+          paragraphs: [
+            'The editor has a search box of its own, matching section, tab and field names within the record you are filling in. On a large hierarchy it is usually quicker than opening tabs until you find the one you want.',
+          ],
+        },
+        {
+          heading: 'Pictures',
+          paragraphs: [
+            'An image field takes one picture, uploaded and cropped in place. The selection is locked to the shape the field was set up for, so a larger picture is welcome — only the area you select is kept.',
+            'You are asked what the picture shows while you are still looking at it. That description is read out to anybody who cannot see the picture, so describe the picture rather than repeating the field’s name.',
+            'A picture is stored the moment it is uploaded, on its own. Saving the record afterwards neither adds one nor takes one away, and removing one works the same way.',
+          ],
+        },
+        {
+          heading: 'Fields you have not filled in yet',
+          paragraphs: [
+            'Each field decides what an empty answer looks like, and decides it twice — once for you and once for the public — from the same three choices:',
+          ],
+          points: CUSTOM_TRACKING_EMPTY_MODE_POINTS,
+        },
+        {
+          heading: 'When recording is paused',
+          paragraphs: [
+            'Occasionally the editor says that recording values is paused. Everything already recorded is untouched and still shown; it is only saving that is unavailable, and it returns without anything having been lost.',
+          ],
+        },
+      ],
+      relatedLinks: [
+        CUSTOM_TRACKING_LINK,
+        { label: 'Your accounts', route: APP_ROUTES.STO_DASHBOARD_ACCOUNTS },
+      ],
+    },
+    {
+      slug: 'who-can-see-what-you-track',
+      title: 'Who can see what you track',
+      summary:
+        'What stays private, what publishing actually takes, and what deleting removes.',
+      sections: [
+        {
+          heading: 'Private until you say otherwise',
+          paragraphs: [
+            'Everything you build and everything you record is private. Every section, tab and field is created private, and each carries a Public or Private badge in the builder so you can see at a glance which it is.',
+            'Nothing you record appears anywhere else on the site because of anything you do in Custom Tracking alone.',
+          ],
+        },
+        {
+          heading: 'Publishing takes every switch, not one',
+          paragraphs: [
+            'A field appears on your public pages only when all of these are public at the same time:',
+          ],
+          points: [
+            'You — your own record is listed on the Galactic Personnel Registry.',
+            'The account — the STO account the answer belongs to, or the one the captain is on.',
+            'The captain — where a captain’s answer is being shown.',
+            'The section, the tab and the field — each marked public in its own right.',
+          ],
+        },
+        {
+          heading: 'Which is why a public field can stay private',
+          paragraphs: [
+            'Marking a field public while the tab or section holding it is private changes nothing publicly, and the form says so as you do it. The field is ready to be published; the thing it sits in has not been.',
+            'That is deliberate. It lets you prepare a whole section without publishing it, and it means turning one switch off hides everything beneath it at once.',
+          ],
+        },
+        {
+          heading: 'What a visitor sees where you have recorded nothing',
+          paragraphs: [
+            'The three choices for an empty field are made separately for you and for the public, because a reminder of what you have not filled in yet is not necessarily something to publish. A field can show you its name and a placeholder while showing a visitor nothing at all.',
+            'Public pages can be indexed by search engines. Treat anything you publish here as something anybody can read and find again later.',
+          ],
+        },
+        {
+          heading: 'What you must not record',
+          paragraphs: [
+            'The content agreement you accepted is short, and the part that matters most is this: what you enter is yours and is your responsibility, and some things must not go in at all.',
+          ],
+          points: [
+            'Personal information about you or anybody else — contact details, financial information, passwords or authentication codes.',
+            'Illegal, threatening, abusive, hateful, discriminatory or sexually explicit material.',
+            'Anything that infringes copyright, trademarks or somebody’s privacy.',
+            'Spam, advertising, scams, impersonation or deliberately misleading content.',
+          ],
+        },
+        {
+          heading: 'When something is hidden for you',
+          paragraphs: [
+            'Public content can be reviewed. A section, tab or field that has been withdrawn from public view carries a “Hidden by a moderator” badge in the builder and stops appearing publicly.',
+            'Nothing you configured is changed and nothing you recorded is removed, so lifting the suppression restores exactly what was there. Serious or repeated breaches can cost you your STO Info account.',
+          ],
+        },
+        {
+          heading: 'Deleting, and the 180 days',
+          paragraphs: [
+            'Deleting a section, tab or field takes the answers recorded against it as well — across every account or captain, not only the one you happen to be looking at. The confirmation counts the tabs, fields and recorded answers that would go before you agree to it, because “delete this section” and “delete this section and sixty-three answers” are different decisions.',
+            'Deleted definitions and answers are kept for 180 days and are then removed for good. None of it can be undone from the page itself, so if you delete something by mistake, ask us within that window.',
+          ],
+        },
+      ],
+      relatedLinks: [
+        CUSTOM_TRACKING_LINK,
+        { label: 'Terms of Use', route: APP_ROUTES.TERMS_OF_USE },
         { label: 'Contact us', route: APP_ROUTES.CONTACT },
       ],
     },
@@ -969,13 +1304,14 @@ const STORYTIME_ADMIN_TOPIC: HelpTopic = {
 /**
  * Every help topic, in the order the help index presents them.
  *
- * Community leads because it is always available, while Storytime waits on its
- * feature switch — a reader with Storytime switched off should still open the
- * help to something rather than to an apology. The guides for running
- * Storytime come last, because almost nobody is shown them.
+ * Community and Custom Tracking lead because they are always available, while
+ * Storytime waits on its feature switch — a reader with Storytime switched off
+ * should still open the help to something rather than to an apology. The
+ * guides for running Storytime come last, because almost nobody is shown them.
  */
 export const HELP_TOPICS: HelpTopic[] = [
   COMMUNITY_TOPIC,
+  CUSTOM_TRACKING_TOPIC,
   STORYTIME_TOPIC,
   STORYTIME_ADMIN_TOPIC,
 ];

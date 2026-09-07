@@ -182,6 +182,7 @@ describe('HelpComponent', () => {
 
     expect(component.topics.map(topic => topic.id)).toEqual([
       'community',
+      'custom-tracking',
       'storytime',
     ]);
   });
