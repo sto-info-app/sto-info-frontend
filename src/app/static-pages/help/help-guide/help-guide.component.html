@@ -1,3 +1,23 @@
+@if (unavailableReason) {
+  <article id="help-guide-page">
+    <p class="help-guide__breadcrumb">
+      <a [routerLink]="getRouteLink(appRoutes.HELP)">Help</a>
+    </p>
+
+    <app-feature-unavailable
+      [featureName]="storytimeFeatureName"
+      [reason]="unavailableReason" />
+
+    <div class="buttons-row">
+      <a
+        [routerLink]="getRouteLink(appRoutes.HELP)"
+        class="violet"
+        >All guides</a
+      >
+    </div>
+  </article>
+}
+
 @if (guide) {
   <article id="help-guide-page">
     <p class="help-guide__breadcrumb">

@@ -12,8 +12,15 @@ import { catchError, combineLatest, map, of } from 'rxjs';
 import {
   STORYTIME_AVAILABILITY_ENABLED,
   STORYTIME_AVAILABILITY_UNAVAILABLE,
+  StorytimeAvailability,
 } from 'src/app/models/storytime.models';
+import { FeatureUnavailableComponent } from 'src/app/shared/components/feature-unavailable/feature-unavailable.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  FEATURE_UNAVAILABLE_DISABLED,
+  FEATURE_UNAVAILABLE_OFFLINE,
+  FeatureUnavailableReason,
+} from 'src/app/shared/constants/feature-availability.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
@@ -31,22 +38,25 @@ import { HelpGuide, HelpGuideLocation } from '../help.models';
  * only in their words, so giving each one a component would be seven copies of
  * the same template kept in step by hand.
  *
- * A slug that names no guide, one whose topic this visitor may not be shown, or
- * one asking for a permission they do not hold, goes to the not-found page.
- * Refusing quietly matters for the Storytime guides: while the feature is off
- * it is meant to look like a feature that does not exist, and a help page
- * explaining it would say otherwise.
+ * A slug that names no guide, and one asking for a permission the visitor does
+ * not hold, go to the not-found page: neither page is something to advertise to
+ * somebody who cannot open it.
  *
- * A Storytime guide asked for while the backend cannot be reached is a
- * different case, and goes to the service interruption page: the feature was
- * never said to be off, so answering with a 404 would blame the address for an
- * outage.
+ * A Storytime guide asked for while Storytime is out of reach is a different
+ * case, and is answered with a notice saying why rather than a 404. The switch
+ * being off and the backend not answering are both temporary, and neither is a
+ * wrong address — a visitor told their address is wrong will not come back
+ * when the feature returns.
  */
 @Component({
   selector: 'app-help-guide',
   templateUrl: './help-guide.component.html',
   standalone: true,
-  imports: [RouterModule, CollapsibleSectionComponent],
+  imports: [
+    RouterModule,
+    CollapsibleSectionComponent,
+    FeatureUnavailableComponent,
+  ],
 })
 export class HelpGuideComponent implements OnInit {
   /** Route constants, for the links out of this page. */
@@ -60,6 +70,15 @@ export class HelpGuideComponent implements OnInit {
 
   /** The topic heading, shown above the guide's title. */
   topicTitle = '';
+
+  /**
+   * Why Storytime is out of reach, when a Storytime guide was asked for and
+   * the feature is not there. Null whenever the guide itself is shown.
+   */
+  unavailableReason: FeatureUnavailableReason | null = null;
+
+  /** The feature the notice is about. */
+  readonly storytimeFeatureName = 'Storytime';
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
@@ -101,19 +120,13 @@ export class HelpGuideComponent implements OnInit {
 
         if (
           location.topic.requiresStorytime &&
-          storytimeAvailability === STORYTIME_AVAILABILITY_UNAVAILABLE
+          storytimeAvailability !== STORYTIME_AVAILABILITY_ENABLED
         ) {
-          this.sendToServiceInterruption();
+          this.showUnavailable(storytimeAvailability);
           return;
         }
 
-        if (
-          !this.isVisible(
-            location,
-            storytimeAvailability === STORYTIME_AVAILABILITY_ENABLED,
-            permissions,
-          )
-        ) {
+        if (!isGuidePermitted(location.guide, permissions)) {
           this.sendToNotFound();
           return;
         }
@@ -143,31 +156,6 @@ export class HelpGuideComponent implements OnInit {
   }
 
   /**
-   * Determines whether a guide may be shown to this visitor.
-   *
-   * A guide asking for a permission is refused the same way a missing one is,
-   * rather than with a message: the pages those guides describe are not
-   * something to advertise to somebody who cannot open them.
-   *
-   * @param location The guide and the topic it belongs to.
-   * @param isStorytimeEnabled Whether Storytime is switched on.
-   * @param permissions The permission codes the visitor holds.
-   * @returns `true` when the guide's topic is available and the visitor holds
-   *   whatever the guide asks for.
-   */
-  private isVisible(
-    location: HelpGuideLocation,
-    isStorytimeEnabled: boolean,
-    permissions: ReadonlySet<string>,
-  ): boolean {
-    if (location.topic.requiresStorytime && !isStorytimeEnabled) {
-      return false;
-    }
-
-    return isGuidePermitted(location.guide, permissions);
-  }
-
-  /**
    * Puts a resolved guide on screen.
    *
    * The title is set here rather than from route data because one route serves
@@ -186,6 +174,7 @@ export class HelpGuideComponent implements OnInit {
     location: HelpGuideLocation,
     permissions: ReadonlySet<string>,
   ): void {
+    this.unavailableReason = null;
     this.guide = location.guide;
     this.topicTitle = location.topic.title;
     this.otherGuides = location.topic.guides.filter(
@@ -197,20 +186,32 @@ export class HelpGuideComponent implements OnInit {
   }
 
   /**
+   * Says why a Storytime guide cannot be read, in place of the guide.
+   *
+   * The page title is set to the topic rather than the guide's, because the
+   * guide is not what is being shown and naming it in the tab would advertise
+   * exactly what the notice is declining to open.
+   *
+   * @param availability Why Storytime is out of reach.
+   * @returns void
+   */
+  private showUnavailable(availability: StorytimeAvailability): void {
+    this.guide = null;
+    this.otherGuides = [];
+    this.topicTitle = '';
+    this.unavailableReason =
+      availability === STORYTIME_AVAILABILITY_UNAVAILABLE
+        ? FEATURE_UNAVAILABLE_OFFLINE
+        : FEATURE_UNAVAILABLE_DISABLED;
+    this._pageTitleService.setTitle(this.storytimeFeatureName);
+  }
+
+  /**
    * Sends the visitor to the not-found page.
    *
    * @returns void
    */
   private sendToNotFound(): void {
     void this._router.navigate([`/${this.appRoutes.PAGE_NOT_FOUND}`]);
-  }
-
-  /**
-   * Sends the visitor to the service interruption page.
-   *
-   * @returns void
-   */
-  private sendToServiceInterruption(): void {
-    void this._router.navigate([`/${this.appRoutes.SERVICE_INTERRUPTION}`]);
   }
 }
