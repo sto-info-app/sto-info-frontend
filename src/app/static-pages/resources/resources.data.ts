@@ -14,14 +14,14 @@ export const RESOURCE_LINKS: ResourceSection[] = [
     heading: 'Play Star Trek Online',
     links: [
       {
-        label: 'Steam',
-        url: 'https://store.steampowered.com/app/9900/Star_Trek_Online/',
-        description: 'Download and play STO via Steam',
-      },
-      {
         label: 'Arc Games',
         url: 'https://www.playstartrekonline.com/en/download',
         description: 'Download and play STO via the Arc Games client',
+      },
+      {
+        label: 'Steam',
+        url: 'https://store.steampowered.com/app/9900/Star_Trek_Online/',
+        description: 'Download and play STO via Steam',
       },
       {
         label: 'Epic Games Store',
