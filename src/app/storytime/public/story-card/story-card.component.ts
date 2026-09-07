@@ -46,6 +46,19 @@ export class StoryCardComponent {
   }
 
   /**
+   * Where the Story is read.
+   *
+   * Held once because both the heading and the control that says the panel
+   * can be opened point at it, and two copies of a route are two chances for
+   * them to drift apart.
+   *
+   * @returns The router link to the Story.
+   */
+  get storyLink(): unknown[] {
+    return ['/', this.appRoutes.STORYTIME, 'stories', this.story.slug];
+  }
+
+  /**
    * What to call the Arcs a Story belongs to.
    *
    * @returns The singular or plural label, to suit how many there are.

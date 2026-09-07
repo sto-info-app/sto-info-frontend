@@ -171,6 +171,17 @@ describe('StoryCardComponent', () => {
     expect(element.querySelector('.info-item .label')?.textContent).toBe(label);
   });
 
+  // The whole panel opens the Story, but a heading that happens to be a link
+  // is not obviously a way in. The control says so.
+  it('offers a control that says the panel can be opened', () => {
+    const element = render(buildStory());
+    const cta = element.querySelector('.storytime-panel-card__controls a');
+
+    expect(cta?.getAttribute('href')).toBe('/storytime/stories/a-story');
+    expect(cta?.getAttribute('aria-label')).toBe('Read A Story');
+    expect(cta?.querySelector('.fa-book-open')).not.toBeNull();
+  });
+
   // What a Story does not have renders as nothing at all rather than an empty
   // frame, a warning nobody needs, or a bare row: artwork, the Mature warning
   // and the tag row are each optional throughout Storytime.
