@@ -102,6 +102,13 @@
           class="full-width-btn-link sunflower"
           >View record</a
         >
+        @if (publicProfileLink) {
+          <a
+            [routerLink]="publicProfileLink"
+            class="full-width-btn-link african-violet"
+            >View Public Profile</a
+          >
+        }
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
           class="full-width-btn-link sunflower"
