@@ -1788,6 +1788,10 @@ $storytime-landing-colours: (
 );
 
 .storytime-landing {
+  &__beta {
+    font-size: 50%;
+  }
+
   // Storytime's own navigation, which used to be a row of sidebar buttons.
   // Each entry gets a line saying what it is, which is the whole reason for
   // moving it here: "Arcs" alone tells a first-time reader nothing.
