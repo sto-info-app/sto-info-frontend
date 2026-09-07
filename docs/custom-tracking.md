@@ -4,9 +4,14 @@ Custom Tracking lets a signed-in user define their own sections, tabs and
 fields once for all of their STO Accounts, or once for all of their STO
 Characters, and then record a separate value for each Account or Character.
 
-Everything is managed from **Settings**. Account and Character detail pages
-display what has been recorded and offer nothing to edit — there is no
-per-field write path on those pages at all.
+Definitions are built in **Settings** and nowhere else: what to record, in what
+order and who may see it are decisions about every record at once.
+
+Values may be recorded from two places, using one editor. Settings offers the
+editor with a chooser for picking a record; an Account or Character detail page
+offers the same editor with the record it is already about handed in, so the
+fields, the required check and the whole-record save behave identically either
+way.
 
 The backend contract, including the field catalogue, the limits and the
 visibility rules, lives in `docs/custom-tracking.md` in the backend repository.
@@ -40,7 +45,8 @@ src/app/dashboard/settings/custom-tracking/
     ├── custom-tracking-options-editor/         the answers a choice offers
     └── custom-tracking-reorder-controls/       move up and move down
 src/app/dashboard/custom-tracking/
-└── custom-tracking-owner-display/         the block on an owner's own pages
+└── custom-tracking-owner-panel/           the block on an owner's own pages:
+                                           what is recorded, or the editor
 src/app/shared/custom-tracking/
 ├── custom-tracking-configuration.service  the served configuration, cached
 ├── custom-tracking-display.models         one shape both audiences are drawn from

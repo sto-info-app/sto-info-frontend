@@ -253,8 +253,8 @@ describe('CharacterDetailComponent', () => {
 
   describe('the owner’s own tracking', () => {
     // Beneath the STO data on the overview tab, and pointed at this captain.
-    // Nothing here can edit it: values are managed from Settings alone.
-    it('shows the block for this captain, with nothing to edit', fakeAsync(() => {
+    // What the block then shows is its own business.
+    it('shows the block for this captain', fakeAsync(() => {
       mockStoAccountService.getAccounts.mockReturnValue(of([mockAccount]));
       mockCharacterService.getCharactersByAccount.mockReturnValue(
         of([mockCharacter]),
@@ -270,9 +270,7 @@ describe('CharacterDetailComponent', () => {
       fixture.detectChanges();
 
       expect(
-        fixture.nativeElement.querySelector(
-          'app-custom-tracking-owner-display',
-        ),
+        fixture.nativeElement.querySelector('app-custom-tracking-owner-panel'),
       ).not.toBeNull();
       expect(component.characterScope).toBe(
         CustomTrackingTargetScope.CHARACTER,

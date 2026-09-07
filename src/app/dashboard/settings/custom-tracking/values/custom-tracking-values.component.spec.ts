@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
+import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import {
@@ -105,6 +106,7 @@ describe('CustomTrackingValuesComponent', () => {
     await TestBed.configureTestingModule({
       imports: [CustomTrackingValuesComponent],
       providers: [
+        provideRouter([]),
         { provide: MatDialog, useValue: { open } },
         {
           provide: CustomTrackingService,
@@ -678,6 +680,76 @@ describe('CustomTrackingValuesComponent', () => {
       component.onBeforeUnload(noisy);
 
       expect(noisy.defaultPrevented).toBe(true);
+    });
+  });
+
+  describe('filling in a record the host has already chosen', () => {
+    const buildFixed = (targetId = 'target-1'): void => {
+      fixture = TestBed.createComponent(CustomTrackingValuesComponent);
+      component = fixture.componentInstance;
+      component.configuration = aConfiguration();
+      component.fixedTarget = {
+        scope: CustomTrackingTargetScope.ACCOUNT,
+        targetId,
+      };
+      fixture.detectChanges();
+    };
+
+    it('opens that record without listing anything to choose from', () => {
+      buildFixed();
+
+      expect(getTargets).not.toHaveBeenCalled();
+      expect(getRecord).toHaveBeenCalledWith(
+        CustomTrackingTargetScope.ACCOUNT,
+        'target-1',
+      );
+      expect(text()).toContain('Ship name');
+    });
+
+    // A chooser that could be moved off the record the surrounding page is
+    // showing would be offering to edit something the reader is not looking
+    // at.
+    it('offers neither hierarchy nor record to move to', () => {
+      buildFixed();
+
+      expect(query('#custom-tracking-target')).toBeNull();
+      expect(query('#custom-tracking-target-search')).toBeNull();
+      expect(buttonSaying('Accounts')).toBeUndefined();
+    });
+
+    it('saves against the record it was handed', () => {
+      buildFixed();
+      typeInto('input[type="text"]', 'Adamant');
+      buttonSaying('Save this record').click();
+
+      expect(saveRecord).toHaveBeenCalledWith(
+        CustomTrackingTargetScope.ACCOUNT,
+        'target-1',
+        [{ fieldId: 'field-1', value: { text: 'Adamant' } }],
+      );
+    });
+
+    it('reads the record again when the panel comes back to the front', () => {
+      buildFixed();
+      getRecord.mockClear();
+
+      component.active = true;
+
+      expect(getRecord).toHaveBeenCalledWith(
+        CustomTrackingTargetScope.ACCOUNT,
+        'target-1',
+      );
+    });
+
+    // The builder is a page away rather than the panel next door, so the way
+    // to it has to be a link somebody can follow.
+    it('points at Custom Tracking when nothing is defined yet', () => {
+      getRecord.mockReturnValue(of(record({ sections: [] })));
+      buildFixed();
+
+      expect(query<HTMLAnchorElement>('a').getAttribute('href')).toContain(
+        'custom-tracking',
+      );
     });
   });
 });

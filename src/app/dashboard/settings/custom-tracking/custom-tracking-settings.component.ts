@@ -35,10 +35,12 @@ export type CustomTrackingPanel = 'definitions' | 'values' | 'about';
 /**
  * Custom Tracking, as Settings presents it.
  *
- * Everything about the feature is managed from here. Account and character
- * detail pages display what has been recorded and offer nothing to edit, so
- * this page is the only place any of it can be changed — which is what keeps
- * "where do I change this?" from having two answers.
+ * The hierarchy is built here and nowhere else: what to record, in what order
+ * and who may see it are decisions about every record at once, which is not
+ * something one account's page has any business settling. Values may also be
+ * filled in here, against any record — but the same editor is offered on each
+ * account and captain page, handed the record that page is about, so somebody
+ * changing one value need not come looking for it.
  *
  * Nothing may be created until the content agreement has been accepted, and a
  * material change to the wording pauses creating and editing until it is

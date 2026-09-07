@@ -8,23 +8,30 @@
     </p>
   }
 
-  <nav
-    class="lcars-tabs custom-tracking-scope-tabs"
-    aria-label="What to record against">
-    @for (choice of scopes; track choice.scope) {
-      <button
-        type="button"
-        class="lcars-tab"
-        [class.active]="scope === choice.scope"
-        [attr.aria-pressed]="scope === choice.scope"
-        (click)="chooseScope(choice.scope)">
-        {{ choice.label }}
-      </button>
-    }
-    <span
-      class="lcars-tabs-filler"
-      aria-hidden="true"></span>
-  </nav>
+  <!--
+    The choosers, and only where there is a choice. A detail page hands in the
+    one record it is about, so a strip offering to move to the other hierarchy
+    would be offering to leave the page somebody is reading.
+  -->
+  @if (!fixedTarget) {
+    <nav
+      class="lcars-tabs custom-tracking-scope-tabs"
+      aria-label="What to record against">
+      @for (choice of scopes; track choice.scope) {
+        <button
+          type="button"
+          class="lcars-tab"
+          [class.active]="scope === choice.scope"
+          [attr.aria-pressed]="scope === choice.scope"
+          (click)="chooseScope(choice.scope)">
+          {{ choice.label }}
+        </button>
+      }
+      <span
+        class="lcars-tabs-filler"
+        aria-hidden="true"></span>
+    </nav>
+  }
 
   @if (isLoading) {
     <app-loading-bar loadingText="Loading"></app-loading-bar>
@@ -40,14 +47,14 @@
       [message]="successMessage"></app-lcars-success-message>
   }
 
-  @if (!isLoading && targets.length === 0) {
+  @if (!fixedTarget && !isLoading && targets.length === 0) {
     <p class="custom-tracking-empty">
       You have no {{ scopeNoun }} to record against yet. Add one from your
       dashboard and it will appear here.
     </p>
   }
 
-  @if (targets.length > 0) {
+  @if (!fixedTarget && targets.length > 0) {
     <div class="lcars-input-container bluey custom-tracking-search">
       <label for="custom-tracking-target-search">Find a record</label>
       <input
@@ -101,7 +108,13 @@
     @if (record.sections.length === 0) {
       <p class="custom-tracking-empty">
         You have not defined anything to record against {{ scopeNoun }} yet.
-        Build it in "What you track" and it will appear here.
+        @if (fixedTarget) {
+          Build it in
+          <a [routerLink]="customTrackingLink">Custom Tracking</a> and it will
+          appear here.
+        } @else {
+          Build it in "What you track" and it will appear here.
+        }
       </p>
     } @else if (shownSections.length === 0) {
       <p class="custom-tracking-empty">

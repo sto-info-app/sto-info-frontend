@@ -168,15 +168,15 @@ describe('AccountDetailComponent', () => {
   });
 
   describe('the owner’s own tracking', () => {
-    // Beneath the STO data on the page, and pointed at this account. Nothing
-    // here can edit it: values are managed from Settings alone.
-    it('shows the block for this account, with nothing to edit', () => {
+    // Beneath the STO data on the page, and pointed at this account. What the
+    // block then shows, and whether it offers to edit, is its own business.
+    it('shows the block for this account', () => {
       fixture.detectChanges();
       routeParamsSubject.next({ handle: encodeStoHandle(mockAccount.handle) });
       fixture.detectChanges();
 
       const block = fixture.nativeElement.querySelector(
-        'app-custom-tracking-owner-display',
+        'app-custom-tracking-owner-panel',
       ) as HTMLElement | null;
 
       expect(block).not.toBeNull();

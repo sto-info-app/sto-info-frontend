@@ -32,10 +32,11 @@ import { CustomTrackingDisplayFieldComponent } from '../custom-tracking-display-
  * behind closed headings looks empty, and this sits at the bottom of a page
  * somebody has already scrolled.
  *
- * Nothing here can edit anything. Values are managed from Settings alone, and
- * that is the whole reason this component is separate from the one there
- * rather than a read-only mode of it — a mode is a flag somebody can get
- * wrong, and this way there is no control to hide.
+ * Nothing here can edit anything. This is what a page shows a visitor, and it
+ * is what an owner sees until they ask to edit — at which point the block
+ * around it puts the editor in its place. Separate components rather than a
+ * read-only mode of the editor, because a mode is a flag somebody can get
+ * wrong, and this way there is no control to hide from a stranger.
  *
  * The served configuration is fetched rather than passed in, because every
  * host would otherwise have to fetch it and remember why. A failure to get it

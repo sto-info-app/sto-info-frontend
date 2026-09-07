@@ -50,12 +50,15 @@
 // panels of the settings page, the two hierarchies inside two of them, and the
 // tabs of a section wherever a section is drawn. One shape, whether the strip
 // swaps a whole panel or one tab's worth of fields.
-// Emitted here rather than globally, and once for the two places the feature
-// puts a strip: the settings page, and the block a detail page shows a
-// visitor. Nothing else on the site is inside either, so nothing else picks
-// these up.
+// Emitted here rather than globally, and once for each of the three places the
+// feature puts a strip: the settings page, the block a detail page shows a
+// visitor, and the owner's own block on their account or captain page — which
+// needs its own because the editor it opens replaces the read-only display
+// that would otherwise have carried these rules. Nothing else on the site is
+// inside any of them, so nothing else picks these up.
 .custom-tracking-page,
-.custom-tracking-display {
+.custom-tracking-display,
+.custom-tracking-owner {
   @include tabs.lcars-tab-strip($min-width: 0);
 }
 
@@ -914,10 +917,32 @@
   gap: 0.5rem;
 }
 
-// ─── Showing values on a detail page ─────────────────────────────────────────
+// ─── Showing and editing values on a detail page ─────────────────────────────
 
 .custom-tracking-display {
   margin-top: 1.5rem;
+}
+
+// The owner's own block: what is recorded, or the editor in its place. The gap
+// above belongs to the block rather than to the display inside it, so that
+// swapping one for the other does not move the whole thing up the page.
+.custom-tracking-owner {
+  margin-top: 1.5rem;
+
+  .custom-tracking-display,
+  .custom-tracking-values {
+    margin-top: 0;
+  }
+}
+
+// The one control the block adds to the editor's own row of them, and the one
+// that opens it. Sits apart from the answers above it, because it acts on all
+// of them rather than on the last.
+.custom-tracking-owner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
 // What a section holds sits on a surface of its own beneath the heading bar,

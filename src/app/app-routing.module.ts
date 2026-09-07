@@ -493,6 +493,10 @@ export const routes: Routes = [
       ),
     data: { title: APP_ROUTE_TITLES.STO_ACCOUNT_DETAIL, requiresApi: true },
     canActivate: [AuthGuard, ApiRequiredGuard],
+    // The tracked-information block on this page can be opened for editing,
+    // and a half-filled record is work. A stray click on a navigation link
+    // should not be able to throw it away without a word.
+    canDeactivate: [unsavedChangesGuard],
   },
   {
     path: APP_ROUTES.STO_ACCOUNT_ENDEAVOURS,
@@ -511,6 +515,9 @@ export const routes: Routes = [
       ),
     data: { title: APP_ROUTE_TITLES.STO_CHARACTER_DETAIL, requiresApi: true },
     canActivate: [AuthGuard, ApiRequiredGuard],
+    // As on the account page: the tracked-information block edits in place,
+    // and leaving would throw away whatever is half-filled in it.
+    canDeactivate: [unsavedChangesGuard],
   },
   {
     path: APP_ROUTES.STO_CHARACTER_ADD,

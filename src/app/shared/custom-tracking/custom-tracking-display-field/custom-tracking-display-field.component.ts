@@ -35,9 +35,11 @@ import {
  * has no answer, were both settled before it was called: by the server for a
  * visitor, and by the owner's own empty rule for the owner.
  *
- * There is nothing here to edit with, deliberately. Values are managed from
- * Settings alone, so a detail page offering a control would be offering one
- * that has nowhere to send what it collected.
+ * There is nothing here to edit with, deliberately. An owner who wants to
+ * change something opens the editor, which replaces this block rather than
+ * growing controls inside it — three of the four surfaces are read by people
+ * who may not touch the data at all, and a control drawn on all four would be
+ * a control hidden on three.
  */
 @Component({
   selector: 'app-custom-tracking-display-field',

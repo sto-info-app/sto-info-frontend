@@ -13,6 +13,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { RouterModule } from '@angular/router';
 import { take } from 'rxjs';
 
 import {
@@ -30,6 +31,7 @@ import {
 } from 'src/app/models/custom-tracking.models';
 import { nextTabIndex } from 'src/app/shared/a11y/roving-tabs.utility';
 import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -57,6 +59,18 @@ type CustomTrackingRecordForm = FormGroup<
 >;
 
 /**
+ * The one record to fill in, where the host has already settled which.
+ *
+ * An account or captain page is about one record and nothing else, so the
+ * chooser that belongs on the Settings page would be offering to wander off
+ * the page somebody is looking at.
+ */
+export interface CustomTrackingFixedTarget {
+  scope: CustomTrackingTargetScope;
+  targetId: string;
+}
+
+/**
  * Recording values against one account or character.
  *
  * The record is chosen first and then filled in. A record is loaded whole —
@@ -76,9 +90,12 @@ type CustomTrackingRecordForm = FormGroup<
  * checked as bytes before anything is stored, so it lands when it is uploaded
  * and the record save neither adds one nor takes one away.
  *
- * Nothing here is offered on an account or character detail page. Values are
- * managed from Settings only, which is what keeps "where do I change this?"
- * from having two answers.
+ * The same editor serves the Settings page and the account and captain pages.
+ * Settings chooses which record to fill in, so it draws the two choosers;
+ * a detail page is already about one record and hands that record in, so it
+ * gets the same fields, the same required check and the same whole-record save
+ * with nothing to choose. One editor rather than two is what stops "where do I
+ * change this?" from having two answers that behave differently.
  */
 @Component({
   selector: 'app-custom-tracking-values',
@@ -87,6 +104,7 @@ type CustomTrackingRecordForm = FormGroup<
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
+    RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
@@ -98,6 +116,17 @@ type CustomTrackingRecordForm = FormGroup<
 export class CustomTrackingValuesComponent implements OnInit {
   /** Everything the server published about the feature. */
   @Input({ required: true }) configuration!: CustomTrackingConfiguration;
+
+  /**
+   * The record to fill in, where the host has already settled which.
+   *
+   * Given by an account or captain page, which is about one record and nothing
+   * else; left null by Settings, which offers the choice. Set, it replaces the
+   * two choosers rather than pre-selecting them — a chooser that could be moved
+   * off the record the surrounding page is showing would be offering to edit
+   * something the reader is not looking at.
+   */
+  @Input() fixedTarget: CustomTrackingFixedTarget | null = null;
 
   /**
    * Whether this panel is the one on screen.
@@ -165,6 +194,15 @@ export class CustomTrackingValuesComponent implements OnInit {
   /** Narrows the hierarchy to what matches. */
   readonly search = new FormControl('', { nonNullable: true });
 
+  /**
+   * Where the hierarchy is built.
+   *
+   * Only ever followed from a detail page. On Settings the builder is the
+   * panel next door, and a link out to the page somebody is already on would
+   * be the least helpful direction available.
+   */
+  readonly customTrackingLink = `/${APP_ROUTES.STO_DASHBOARD_CUSTOM_TRACKING}`;
+
   /** Whether the page is waiting on the server. */
   isLoading = true;
 
@@ -210,10 +248,18 @@ export class CustomTrackingValuesComponent implements OnInit {
     'That record could not be saved. Please try again shortly.',
   );
 
-  /** Loads the records this scope may be filled in against. */
+  /**
+   * Opens the record handed in, or lists the ones that may be chosen from.
+   */
   ngOnInit(): void {
     this._hasLoaded = true;
-    this.loadTargets();
+
+    if (this.fixedTarget) {
+      this.scope = this.fixedTarget.scope;
+      this.open(this.fixedTarget.targetId);
+    } else {
+      this.loadTargets();
+    }
 
     this.search.valueChanges
       .pipe(takeUntilDestroyed(this._destroyRef))
@@ -569,8 +615,10 @@ export class CustomTrackingValuesComponent implements OnInit {
    * account somebody had chosen is its own small annoyance.
    */
   private refresh(): void {
-    if (this.targetId) {
-      this.open(this.targetId);
+    const open = this.targetId || this.fixedTarget?.targetId;
+
+    if (open) {
+      this.open(open);
 
       return;
     }

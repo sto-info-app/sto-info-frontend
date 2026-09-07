@@ -134,11 +134,8 @@
         </div>
       </div>
 
-      <!--
-        Beneath the STO data, and nothing to edit with. Values are managed
-        from Settings alone.
-      -->
-      <app-custom-tracking-owner-display
+      <!-- Beneath the STO data: what is tracked, and the way to change it. -->
+      <app-custom-tracking-owner-panel
         [scope]="accountScope"
         [targetId]="account.id" />
     } @else if (!isLoading && errorMessage) {
