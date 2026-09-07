@@ -185,4 +185,42 @@ describe('StorytimeService', () => {
       await expect(second).resolves.toBe(STORYTIME_AVAILABILITY_ENABLED);
     });
   });
+
+  describe('whether to offer Storytime', () => {
+    it('offers Storytime when the server says it is on', async () => {
+      const offered = firstValueFrom(service.isOffered());
+
+      httpMock
+        .expectOne(API_URLS.STORYTIME_CONFIGURATION)
+        .flush(enabledConfiguration);
+
+      await expect(offered).resolves.toBe(true);
+    });
+
+    // The one thing that takes the entry out of the navigation is the server
+    // actually saying the feature is off.
+    it('withdraws Storytime when the server says it is off', async () => {
+      const offered = firstValueFrom(service.isOffered());
+
+      httpMock.expectOne(API_URLS.STORYTIME_CONFIGURATION).flush({
+        ...enabledConfiguration,
+        features: { ...enabledConfiguration.features, isEnabled: false },
+      });
+
+      await expect(offered).resolves.toBe(false);
+    });
+
+    // A backend that could not be asked has said nothing. Dropping the entry
+    // on that basis takes Storytime out of the navigation for the length of an
+    // outage, leaving nobody a way to reach the page explaining it.
+    it('keeps offering Storytime when the configuration could not be loaded', async () => {
+      const offered = firstValueFrom(service.isOffered());
+
+      httpMock
+        .expectOne(API_URLS.STORYTIME_CONFIGURATION)
+        .flush('failed', { status: 503, statusText: 'Service Unavailable' });
+
+      await expect(offered).resolves.toBe(true);
+    });
+  });
 });

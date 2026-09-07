@@ -69,7 +69,7 @@ export class HelpComponent implements OnInit {
    */
   ngOnInit(): void {
     combineLatest([
-      this._storytimeService.isEnabled(),
+      this._storytimeService.isOffered(),
       this._accessControlService
         .getMyPermissions()
         .pipe(catchError(() => of(new Set<string>() as ReadonlySet<string>))),
@@ -78,8 +78,8 @@ export class HelpComponent implements OnInit {
         takeUntilDestroyed(this._destroyRef),
         observeInZone(this._ngZone, this._cdr),
       )
-      .subscribe(([isStorytimeEnabled, permissions]) => {
-        this.topics = visibleHelpTopics(isStorytimeEnabled, permissions);
+      .subscribe(([isStorytimeOffered, permissions]) => {
+        this.topics = visibleHelpTopics(isStorytimeOffered, permissions);
       });
   }
 

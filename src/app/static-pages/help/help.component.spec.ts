@@ -16,11 +16,11 @@ describe('HelpComponent', () => {
   /**
    * Builds the page with Storytime switched on or off.
    *
-   * @param isStorytimeEnabled Whether the Storytime feature is available.
+   * @param isStorytimeOffered Whether the Storytime feature is available.
    * @param permissions The permission codes the reader holds.
    */
   const createComponent = (
-    isStorytimeEnabled: boolean,
+    isStorytimeOffered: boolean,
     permissions: string[] = [],
   ): void => {
     TestBed.resetTestingModule();
@@ -30,7 +30,7 @@ describe('HelpComponent', () => {
         provideRouter([]),
         {
           provide: StorytimeService,
-          useValue: { isEnabled: () => of(isStorytimeEnabled) },
+          useValue: { isOffered: () => of(isStorytimeOffered) },
         },
         {
           provide: AccessControlService,
@@ -50,15 +50,15 @@ describe('HelpComponent', () => {
   /**
    * The topics a reader in that position should be offered.
    *
-   * @param isStorytimeEnabled Whether the Storytime feature is available.
+   * @param isStorytimeOffered Whether the Storytime feature is available.
    * @param permissions The permission codes the reader holds.
    * @returns The topics expected on the page.
    */
   const expectedTopics = (
-    isStorytimeEnabled: boolean,
+    isStorytimeOffered: boolean,
     permissions: string[] = [],
   ): HelpTopic[] =>
-    visibleHelpTopics(isStorytimeEnabled, new Set<string>(permissions));
+    visibleHelpTopics(isStorytimeOffered, new Set<string>(permissions));
 
   /**
    * Reads the page's text.
@@ -165,7 +165,7 @@ describe('HelpComponent', () => {
         provideRouter([]),
         {
           provide: StorytimeService,
-          useValue: { isEnabled: () => of(true) },
+          useValue: { isOffered: () => of(true) },
         },
         {
           provide: AccessControlService,

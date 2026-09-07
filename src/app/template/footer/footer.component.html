@@ -25,7 +25,7 @@
             routerLinkActive="active"
           >{{ appRouteTitles.COMMUNITY }}</a>
         </li>
-        @if (isStorytimeEnabled) {
+        @if (isStorytimeOffered) {
           <li>
             <a
               [routerLink]="getRouteLink(appRoutes.STORYTIME)"
@@ -143,7 +143,7 @@
       the footer, and a rights holder checking what is claimed about their
       property will not first go hunting through a fan-fiction section.
     -->
-    @if (isStorytimeEnabled) {
+    @if (isStorytimeOffered) {
       <li>
         <a
           [routerLink]="getRouteLink(appRoutes.STORYTIME_CONTENT_POLICY)"

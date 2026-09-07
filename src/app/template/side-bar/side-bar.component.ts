@@ -50,8 +50,12 @@ export class SideBarComponent {
    * Defaults to hidden so the link never flickers into view before the feature
    * state is known — a link that appears and then disappears is worse than one
    * that arrives a moment late.
+   *
+   * Offered is not the same as working. Only the server saying the feature is
+   * off takes the entry away; a backend that could not be reached leaves it,
+   * because following it is how a visitor learns there is an outage at all.
    */
-  @Input() isStorytimeEnabled = false;
+  @Input() isStorytimeOffered = false;
 
   appRoutes = APP_ROUTES;
   appRouteTitles = APP_ROUTE_TITLES;

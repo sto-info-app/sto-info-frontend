@@ -44,12 +44,12 @@ describe('FooterComponent', () => {
     // A link that appears and then disappears is worse than one that arrives
     // a moment late, so the default has to be hidden.
     it('should stay hidden before the feature state is known', () => {
-      expect(component.isStorytimeEnabled).toBe(false);
+      expect(component.isStorytimeOffered).toBe(false);
       expect(linkLabels()).not.toContain('Storytime');
     });
 
     it('should appear once the feature is switched on', () => {
-      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.componentRef.setInput('isStorytimeOffered', true);
       fixture.detectChanges();
 
       expect(linkLabels()).toContain('Storytime');
@@ -63,7 +63,7 @@ describe('FooterComponent', () => {
       'Storytime Terms of Use',
       'Fan Content & IP Notice',
     ])('should link to the %s once the feature is switched on', label => {
-      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.componentRef.setInput('isStorytimeOffered', true);
       fixture.detectChanges();
 
       expect(linkLabels()).toContain(label);
@@ -88,7 +88,7 @@ describe('FooterComponent', () => {
 
     expect(linkLabels()).toContain('Help');
 
-    fixture.componentRef.setInput('isStorytimeEnabled', true);
+    fixture.componentRef.setInput('isStorytimeOffered', true);
     fixture.detectChanges();
 
     expect(linkLabels()).toContain('Help');
@@ -129,7 +129,7 @@ describe('FooterComponent', () => {
       'Storytime Terms of Use',
       'Fan Content & IP Notice',
     ])('should show %s below the small print once Storytime is on', label => {
-      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.componentRef.setInput('isStorytimeOffered', true);
       fixture.detectChanges();
 
       expect(legalLinkLabels()).toContain(label);

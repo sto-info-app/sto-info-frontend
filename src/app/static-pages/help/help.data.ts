@@ -984,24 +984,28 @@ export const HELP_TOPICS: HelpTopic[] = [
  * The topics a visitor may be offered.
  *
  * Two filters, for two different reasons. Storytime’s guides wait on the
- * feature switch because while Storytime is off it is meant to look like a
- * feature that does not exist. A guide with a permission on it waits on that
- * permission because it describes a page its reader would be turned away
- * from, and help for a door somebody cannot open is not help.
+ * feature switch, because there is nothing to explain about a feature nobody
+ * can reach. A guide with a permission on it waits on that permission because
+ * it describes a page its reader would be turned away from, and help for a
+ * door somebody cannot open is not help.
+ *
+ * The switch is read as "should this be offered", not "is it on": while the
+ * backend cannot be asked the guides stay, since a reader with the feature in
+ * front of them and no idea why it will not open is exactly who help is for.
  *
  * A topic whose guides have all been filtered away is dropped rather than
  * shown as a heading with nothing under it.
  *
- * @param isStorytimeEnabled Whether Storytime is switched on.
+ * @param isStorytimeOffered Whether Storytime is being offered at all.
  * @param permissions The permission codes the visitor holds.
  * @returns The topics to show, each carrying only the guides on offer.
  */
 export function visibleHelpTopics(
-  isStorytimeEnabled: boolean,
+  isStorytimeOffered: boolean,
   permissions: ReadonlySet<string>,
 ): HelpTopic[] {
   return HELP_TOPICS.filter(
-    topic => isStorytimeEnabled || !topic.requiresStorytime,
+    topic => isStorytimeOffered || !topic.requiresStorytime,
   )
     .map(topic => ({
       ...topic,

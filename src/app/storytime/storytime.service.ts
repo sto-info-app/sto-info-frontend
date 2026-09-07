@@ -88,6 +88,30 @@ export class StorytimeService {
   }
 
   /**
+   * Determines whether Storytime should be offered in the navigation.
+   *
+   * True unless the server actually said the feature is off. A backend that
+   * could not be asked has said nothing about it, and dropping the entry on
+   * that basis takes Storytime out of the site's navigation for the length of
+   * an outage — leaving a visitor with no way to reach the page that would
+   * explain the outage to them.
+   *
+   * Offering the entry is safe because it does not promise the feature works:
+   * every Storytime route sits behind a guard, and the guard sends anybody it
+   * turns away to a notice saying which of the two things happened.
+   *
+   * Distinct from {@link isEnabled}, which answers what the server actually
+   * said. A caller deciding whether the feature *works* wants that one.
+   *
+   * @returns An observable emitting true while the feature should be offered.
+   */
+  isOffered(): Observable<boolean> {
+    return this.getAvailability().pipe(
+      map(availability => availability !== STORYTIME_AVAILABILITY_DISABLED),
+    );
+  }
+
+  /**
    * Reports whether Storytime may be reached, and why not when it may not.
    *
    * @returns An observable of the availability.

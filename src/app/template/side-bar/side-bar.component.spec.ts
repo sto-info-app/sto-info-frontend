@@ -119,12 +119,12 @@ describe('SideBarComponent', () => {
     // A link that appears and then disappears is worse than one that arrives
     // a moment late, so the default has to be hidden.
     it('should default to hidden before the feature state is known', () => {
-      expect(component.isStorytimeEnabled).toBe(false);
+      expect(component.isStorytimeOffered).toBe(false);
       expect(linkLabels()).not.toContain('Storytime');
     });
 
     it('should offer Storytime once the feature is switched on', () => {
-      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.componentRef.setInput('isStorytimeOffered', true);
       fixture.detectChanges();
 
       expect(linkLabels()).toContain('Storytime');
@@ -141,7 +141,7 @@ describe('SideBarComponent', () => {
       'Your Arcs',
       'Invitations',
     ])('should not offer the %s link to a signed-out visitor', label => {
-      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.componentRef.setInput('isStorytimeOffered', true);
       fixture.detectChanges();
 
       expect(linkLabels()).not.toContain(label);
@@ -155,7 +155,7 @@ describe('SideBarComponent', () => {
       'Your Arcs',
       'Invitations',
     ])('should not offer the %s link to a signed-in member', label => {
-      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.componentRef.setInput('isStorytimeOffered', true);
       fixture.componentRef.setInput('isLoggedIn', true);
       fixture.detectChanges();
 
@@ -163,7 +163,7 @@ describe('SideBarComponent', () => {
     });
 
     it('should offer exactly one Storytime entry to a signed-in member', () => {
-      fixture.componentRef.setInput('isStorytimeEnabled', true);
+      fixture.componentRef.setInput('isStorytimeOffered', true);
       fixture.componentRef.setInput('isLoggedIn', true);
       fixture.detectChanges();
 
@@ -213,7 +213,7 @@ describe('SideBarComponent', () => {
      */
     const visit = async (url: string, isLoggedIn = true): Promise<void> => {
       routedFixture.componentRef.setInput('isLoggedIn', isLoggedIn);
-      routedFixture.componentRef.setInput('isStorytimeEnabled', true);
+      routedFixture.componentRef.setInput('isStorytimeOffered', true);
       routedFixture.detectChanges();
 
       await router.navigateByUrl(url);
