@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
@@ -102,6 +103,57 @@ describe('CustomTrackingSettingsComponent', () => {
     expect(text()).toContain('Unable to load Custom Tracking.');
   });
 
+  // A request that never arrived says nothing about the switch. Telling
+  // somebody the feature is off — or worse, showing them an empty page — when
+  // the site simply could not be reached is the mistake worth avoiding.
+  it('says the site could not be reached when the request never arrived', () => {
+    service['getConfiguration'].mockReturnValue(
+      throwError(
+        () => new HttpErrorResponse({ status: 0, statusText: 'Unknown Error' }),
+      ),
+    );
+
+    build();
+
+    expect(component.unavailableReason).toBe('OFFLINE');
+    expect(text()).toContain('systems are not answering');
+    expect(text()).not.toContain('switched off at the moment');
+  });
+
+  // Anything the server did answer is a genuine fault rather than an outage,
+  // and saying "try again shortly" about one would be misleading.
+  it('keeps the error panel for a failure the server answered', () => {
+    service['getConfiguration'].mockReturnValue(
+      throwError(
+        () => new HttpErrorResponse({ status: 404, statusText: 'Not Found' }),
+      ),
+    );
+
+    build();
+
+    expect(component.unavailableReason).toBeNull();
+    expect(text()).toContain('Unable to load Custom Tracking.');
+  });
+
+  // A database the server cannot reach looks like this from the browser, and
+  // it is the same situation: nobody has said anything about the switch.
+  it('says the site could not be reached when the server failed to answer', () => {
+    service['getConfiguration'].mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 503,
+            statusText: 'Service Unavailable',
+          }),
+      ),
+    );
+
+    build();
+
+    expect(component.unavailableReason).toBe('OFFLINE');
+    expect(text()).toContain('systems are not answering');
+  });
+
   // Switched off is not the same as gone, and a user seeing an empty page
   // deserves to be told which.
   it('says when the feature is switched off, and that nothing is lost', () => {
@@ -115,6 +167,7 @@ describe('CustomTrackingSettingsComponent', () => {
     build();
 
     expect(component.isEnabled).toBe(false);
+    expect(component.unavailableReason).toBe('DISABLED');
     expect(text()).toContain('switched off at the moment');
     expect(text()).toContain('untouched');
     expect(tabs()).toEqual([]);

@@ -9,6 +9,7 @@ import {
   ViewChild,
   inject,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { forkJoin, take } from 'rxjs';
@@ -17,10 +18,16 @@ import {
   CustomTrackingConfiguration,
   CustomTrackingPolicyStatus,
 } from 'src/app/models/custom-tracking.models';
+import { FeatureUnavailableComponent } from 'src/app/shared/components/feature-unavailable/feature-unavailable.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { nextTabIndex } from 'src/app/shared/a11y/roving-tabs.utility';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  FEATURE_UNAVAILABLE_DISABLED,
+  FEATURE_UNAVAILABLE_OFFLINE,
+  FeatureUnavailableReason,
+} from 'src/app/shared/constants/feature-availability.constants';
 import { HasUnsavedChanges } from 'src/app/shared/guards/unsaved-changes.guard';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 
@@ -57,6 +64,7 @@ export type CustomTrackingPanel = 'definitions' | 'values' | 'about';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    FeatureUnavailableComponent,
     CustomTrackingAgreementComponent,
     CustomTrackingDefinitionsComponent,
     CustomTrackingValuesComponent,
@@ -93,6 +101,20 @@ export class CustomTrackingSettingsComponent
   /** What to tell the user when something failed. */
   errorMessage = '';
 
+  /** The feature's name, as the rest of the site writes it. */
+  readonly featureName = 'Custom Tracking';
+
+  /**
+   * Why the feature is out of reach, when it is.
+   *
+   * Two situations that look identical from an empty page and are not: the
+   * master switch in `app_setting` is off, or the backend holding that switch
+   * did not answer. Telling somebody their own records are gone when the
+   * server is merely unreachable is the mistake worth going out of the way to
+   * avoid, so the two are separated here and worded separately.
+   */
+  unavailableReason: FeatureUnavailableReason | null = null;
+
   private readonly _customTracking = inject(CustomTrackingService);
   private readonly _host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly _ngZone = inject(NgZone);
@@ -120,10 +142,22 @@ export class CustomTrackingSettingsComponent
         next: ({ configuration, status }) => {
           this.configuration = configuration;
           this.status = status;
+          this.unavailableReason = configuration.features.isEnabled
+            ? null
+            : FEATURE_UNAVAILABLE_DISABLED;
           this.isLoading = false;
         },
-        error: () => {
-          this.errorMessage = 'Unable to load Custom Tracking.';
+        error: (error: unknown) => {
+          // A request that never arrived, or one the server failed to answer,
+          // says nothing about the switch — so it is reported as the site
+          // being unreachable rather than as the feature being off. Anything
+          // else is a genuine fault and keeps the error panel.
+          if (this.isConnectivityFailure(error)) {
+            this.unavailableReason = FEATURE_UNAVAILABLE_OFFLINE;
+          } else {
+            this.errorMessage = 'Unable to load Custom Tracking.';
+          }
+
           this.isLoading = false;
         },
       });
@@ -136,6 +170,24 @@ export class CustomTrackingSettingsComponent
    */
   get isEnabled(): boolean {
     return this.configuration?.features.isEnabled === true;
+  }
+
+  /**
+   * Whether a failed load means the site could not be reached.
+   *
+   * A status of zero is a request that never arrived at all; a 5xx is one the
+   * server could not answer, which is what a database it cannot reach looks
+   * like from here. Neither is a statement about the feature switch.
+   *
+   * @param error - Whatever the request failed with.
+   * @returns True when the failure is a connectivity problem.
+   */
+  private isConnectivityFailure(error: unknown): boolean {
+    if (!(error instanceof HttpErrorResponse)) {
+      return false;
+    }
+
+    return error.status === 0 || error.status >= 500;
   }
 
   /**
