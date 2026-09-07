@@ -1,11 +1,26 @@
+@use 'sass:color';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 
 // The help section.
 // Two pages — the index and a guide — that are mostly text, so there is very
-// little here: enough to make a list of guides read as a list of cards, and
-// enough to keep a wall of prose comfortable to read. Everything is scoped by
-// the `help-` prefix its templates use.
+// little here: enough to make the index read as a set of panels the reader
+// chooses between, and enough to keep a wall of prose comfortable to read.
+// Everything is scoped by the `help-` prefix its templates use.
+
+// What each topic's guides are coloured, keyed by the topic's id.
+// ---
+// The values are the ones the rest of the site already uses for the same
+// subjects — crew's sky for Community, a Story's sunflower for Storytime, and
+// the moderation card's red for the guides to running it — so a guide and the
+// pages it describes agree about what colour a thing is. Every one of them
+// carries black text at 4.5:1 or better, which is what lets a guide's title
+// sit on the block.
+$help-topic-colours: (
+  'community': vars.$lcars-sky,
+  'storytime': vars.$lcars-sunflower,
+  'storytime-admin': vars.$lcars-bluey,
+);
 
 #help-page {
   .help-topic__intro {
@@ -14,27 +29,89 @@
 
   .help-guide-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1rem;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .help-guide-list__item {
-    @include mixins.lcars-card;
+  // The shape a Storytime panel takes, drawn by the shared mixins rather than
+  // here, in a colour that stands in until the loop below says which topic
+  // this is. A guide belonging to a topic nobody has chosen a colour for is
+  // still a panel rather than an unstyled row.
+  .help-panel-card {
+    @include mixins.lcars-panel-card(vars.$lcars-perano);
 
-    padding: 1rem;
+    // The grid's gap is the space between panels; the margin a panel brings
+    // with it would add a second one under every row.
+    margin-bottom: 0;
   }
 
-  .help-guide-list__title {
-    margin: 0 0 0.5rem;
-    font-family: vars.$font-antonio;
-    font-size: 1.15rem;
+  // The anchor fills the panel, so the padding belongs to the pieces inside
+  // it: the title sits on a block of colour that has to run the panel's full
+  // width.
+  .help-panel-card__link {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    text-decoration: none;
+
+    &:focus-visible {
+      outline: 2px solid vars.$lcars-perano;
+      outline-offset: 2px;
+    }
   }
 
-  .help-guide-list__summary {
+  .help-panel-card__heading {
+    @include mixins.lcars-panel-card-heading(vars.$lcars-perano);
+  }
+
+  .help-panel-card__name {
+    @include mixins.lcars-panel-card-name;
+
+    // A Storytime panel ellipsises its name so a row of them keeps one height.
+    // A guide's title is the only thing on this page that says what the guide
+    // is, so here it wraps instead: a title the reader can finish is worth
+    // more than a tidy row.
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .help-panel-card__marks {
+    @include mixins.lcars-panel-card-marks;
+  }
+
+  .help-panel-card__summary {
+    @include mixins.lcars-panel-card-body;
+
     margin: 0;
+  }
+
+  // The panel lifts on hover from the shared card mixin; the block brightens
+  // with it, so the thing under the pointer is the thing that answers.
+  .help-panel-card__link:hover .help-panel-card__heading,
+  .help-panel-card__link:focus-visible .help-panel-card__heading {
+    filter: brightness(1.08);
+  }
+}
+
+// Each topic in its own colour. Written after the block above rather than
+// inside it: the two selectors weigh the same, so source order is what decides
+// whether a topic's colour is heard over the stand-in.
+@each $id, $colour in $help-topic-colours {
+  #help-page .help-panel-card--#{$id} {
+    @include mixins.lcars-panel-card($colour);
+
+    margin-bottom: 0;
+
+    > .help-panel-card__link > .help-panel-card__heading {
+      @include mixins.lcars-panel-card-heading($colour);
+    }
+
+    > .help-panel-card__link:focus-visible {
+      outline-color: $colour;
+    }
   }
 }
 
@@ -52,7 +129,7 @@
   }
 
   .collapsible-section__content {
-    max-width: 70ch;
+    max-width: 92%;
   }
 
   .help-guide__other-summary {
