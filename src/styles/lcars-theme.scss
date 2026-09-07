@@ -1647,6 +1647,71 @@ footer::after {
     opacity: 0.8;
   }
 
+  // The terms and policies read as one more line of small print rather than a
+  // fourth navigation column: muted grey at the fan-made text's size, laid out
+  // inline and centred under the copyright. Deliberately not a <nav> in the
+  // template — the theme's own nav rule would turn each one into a full LCARS
+  // pill, which is far louder than anything down here should be.
+  #footer-legal-links {
+    margin-top: 40px;
+
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: center;
+      gap: 2px 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    // A clear step down from the 0.8rem small print above, so the row reads as
+    // subordinate to it rather than as another paragraph.
+    li {
+      margin: 0;
+      padding: 0;
+      font-size: 0.7rem;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    // A separator after each entry but the last, carried by the entry it
+    // follows so that a row wrapping on a narrow screen never opens with a
+    // dot floating ahead of the first label. It is a drawn dot rather than a
+    // punctuation character so it cannot pick up a fallback glyph from a font
+    // that is missing one.
+    li:not(:last-child)::after {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 3px;
+      margin-left: 12px;
+      border-radius: 50%;
+      background-color: vars.$lcars-grey-light;
+      opacity: 0.5;
+      vertical-align: middle;
+    }
+
+    a {
+      color: vars.$lcars-grey-light;
+      text-decoration: none;
+      opacity: 0.8;
+    }
+
+    a.active {
+      color: vars.$lcars-sunflower;
+      opacity: 1;
+    }
+
+    a:hover,
+    a.active:hover {
+      color: vars.$lcars-perano;
+      opacity: 1;
+      text-decoration: underline;
+    }
+  }
+
   #footer-links-container {
     display: block;
     margin-bottom: 25px;
