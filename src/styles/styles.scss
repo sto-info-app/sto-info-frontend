@@ -121,6 +121,13 @@ button.lcars-btn,
   // long enough to fill the pill used to run out through the rounded edge.
   padding: 0 25px 8px 30px !important;
   font-size: 1rem !important;
+
+  // The theme only gives the bold weight and the tight tracking to `button`,
+  // so an anchor wearing the same pill would otherwise draw its label in the
+  // body's lighter, letter-spaced text. State both here so the pill looks the
+  // same whichever element it is on.
+  font-weight: 700 !important;
+  letter-spacing: normal !important;
   text-transform: uppercase !important;
   text-align: right !important;
   display: inline-flex !important;
