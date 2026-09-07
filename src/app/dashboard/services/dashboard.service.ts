@@ -52,10 +52,15 @@ export class DashboardService {
   updatePersonalDetails(
     userPersonalDetails: EditPersonalDetailsFormValues,
   ): Observable<UserProfileUpdateResult> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
     return this._http
       .post<UserProfileUpdateResult>(
         API_URLS.UPDATE_USER_PROFILE,
         userPersonalDetails,
+        httpOptions,
       )
       .pipe(
         catchError(error => {
