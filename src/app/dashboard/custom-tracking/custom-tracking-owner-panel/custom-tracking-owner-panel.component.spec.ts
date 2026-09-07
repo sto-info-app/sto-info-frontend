@@ -131,6 +131,21 @@ describe('CustomTrackingOwnerPanelComponent', () => {
   });
 
   describe('showing what was recorded', () => {
+    it.each(['isEnabled', 'publicReadEnabled'] as const)(
+      'does not request records or policy status when %s is disabled',
+      feature => {
+        const configuration = aConfiguration();
+        configuration.features[feature] = false;
+        getConfiguration.mockReturnValue(of(configuration));
+
+        build();
+
+        expect(getRecord).not.toHaveBeenCalled();
+        expect(getPolicyStatus).not.toHaveBeenCalled();
+        expect(text().trim()).toBe('');
+      },
+    );
+
     it('shows what the owner recorded against this record', () => {
       build();
 

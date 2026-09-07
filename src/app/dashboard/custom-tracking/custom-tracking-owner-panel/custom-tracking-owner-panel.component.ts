@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
-import { catchError, forkJoin, of, take } from 'rxjs';
+import { catchError, forkJoin, of, switchMap, take } from 'rxjs';
 
 import { CustomTrackingService } from 'src/app/dashboard/settings/custom-tracking/custom-tracking.service';
 import {
@@ -117,29 +117,43 @@ export class CustomTrackingOwnerPanelComponent
   /**
    * Loads the record whenever the page settles on which one it is showing.
    *
-   * The configuration and the acceptance status travel with it, because all
-   * three are needed before the block can decide what to draw and fetching
-   * them one after another would draw it twice — once as a read-only block and
-   * again with a control that had appeared from nowhere.
+   * Check availability before requesting protected records. The backend
+   * deliberately returns 404 when reading custom tracking is disabled.
+   * Render only after the record and acceptance status have both arrived.
    */
   ngOnChanges(): void {
     this.sections = [];
     this.isEditing = false;
     this._hasDefinitions = false;
+    this.configuration = null;
+    this._status = null;
 
     if (this.targetId === null) {
       return;
     }
 
-    forkJoin({
-      record: this._customTracking
-        .getRecord(this.scope, this.targetId)
-        .pipe(take(1)),
-      configuration: this._customTracking.getConfiguration().pipe(take(1)),
-      status: this._customTracking.getPolicyStatus().pipe(take(1)),
-    })
+    const scope = this.scope;
+    const targetId = this.targetId;
+    this._customTracking
+      .getConfiguration()
       .pipe(
         take(1),
+        switchMap(configuration => {
+          if (
+            !configuration.features.isEnabled ||
+            !configuration.features.publicReadEnabled
+          ) {
+            return of(null);
+          }
+
+          return forkJoin({
+            record: this._customTracking
+              .getRecord(scope, targetId)
+              .pipe(take(1)),
+            configuration: of(configuration),
+            status: this._customTracking.getPolicyStatus().pipe(take(1)),
+          });
+        }),
         catchError(() => of(null)),
         observeInZone(this._ngZone, this._cdr),
       )
