@@ -33,10 +33,58 @@
 
     <div class="storytime-panel-card__body storytime-story-card__body">
       @if (story.shortDescription) {
-        <p class="storytime-story-card__summary">{{ story.shortDescription }}</p>
+        <p class="storytime-story-card__summary">
+          {{ story.shortDescription }}
+        </p>
       }
 
       <div class="info-grid storytime-story-card__facts">
+        <!--
+          Whose it is and where it sits lead the facts. A reader scanning a
+          listing is choosing what to open, and both answer that before the
+          rating or the Chapter count do.
+        -->
+        @if (story.author) {
+          <div class="info-item">
+            <span class="label">Author</span>
+            <span class="value">
+              <!--
+                A name only leads somewhere when its owner has chosen to be
+                listed in the registry. Everybody else is credited by name and
+                left alone, which is what that setting is for.
+              -->
+              @if (story.author.publiclyVisible) {
+                <a
+                  class="storytime-facts__author"
+                  [routerLink]="[
+                    '/',
+                    appRoutes.COMMUNITY,
+                    'registry',
+                    'profiles',
+                    story.author.username,
+                  ]"
+                  >{{ story.author.username }}</a
+                >
+              } @else {
+                {{ story.author.username }}
+              }
+            </span>
+          </div>
+        }
+        @if (story.arcs.length > 0) {
+          <div class="info-item">
+            <span class="label">{{ arcLabel }}</span>
+            <span class="value storytime-story-card__arcs">
+              @for (arc of story.arcs; track arc.id) {
+                <a
+                  class="storytime-facts__author"
+                  [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]"
+                  >{{ arc.title }}</a
+                >
+              }
+            </span>
+          </div>
+        }
         <div class="info-item">
           <span class="label">Content rating</span>
           <span class="value">{{ ratingLabels[story.contentRating] }}</span>

@@ -152,6 +152,19 @@ export interface StorytimeAuthor {
   publiclyVisible: boolean;
 }
 
+/**
+ * An Arc named alongside a Story, as a reader is shown it.
+ *
+ * Only enough to say what the Arc is and where it leads. A listing that
+ * carried whole Arcs would repeat a second work's description, tags and
+ * artwork under every title.
+ */
+export interface StorytimeArcReference {
+  id: string;
+  title: string;
+  slug: string;
+}
+
 export interface Story {
   id: string;
   slug: string;
@@ -181,6 +194,14 @@ export interface Story {
    * through the tag routes rather than carrying them alongside the Story.
    */
   tags: StorytimeTag[];
+  /**
+   * The Arcs it is read as part of, by title.
+   *
+   * Only the Arcs anybody may browse: an unlisted one is not advertised on a
+   * Story's behalf. Empty where a Story is already being shown inside an Arc,
+   * and on the creator's own management views.
+   */
+  arcs: StorytimeArcReference[];
 }
 
 /**

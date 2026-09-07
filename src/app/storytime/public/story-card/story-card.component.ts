@@ -44,4 +44,13 @@ export class StoryCardComponent {
   get needsRatingWarning(): boolean {
     return this.story.contentRating !== ContentRating.GENERAL;
   }
+
+  /**
+   * What to call the Arcs a Story belongs to.
+   *
+   * @returns The singular or plural label, to suit how many there are.
+   */
+  get arcLabel(): string {
+    return this.story.arcs.length === 1 ? 'Arc' : 'Arcs';
+  }
 }

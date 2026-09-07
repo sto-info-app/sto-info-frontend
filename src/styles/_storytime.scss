@@ -895,13 +895,22 @@ p.storytime-fan-notice,
     max-width: 80ch;
   }
 
-  // The facts wrap rather than holding a fixed two columns: there are three of
-  // them and they are short, and a Story panel is the full width of the page.
-  // Named alongside the grid it varies, because the site's own two-column rule
-  // is written after this file and would otherwise win on source order.
+  // The facts wrap rather than holding a fixed two columns: they are short and
+  // a Story panel is the full width of the page. Named alongside the grid it
+  // varies, because the site's own two-column rule is written after this file
+  // and would otherwise win on source order.
   &__facts.info-grid {
     grid-template-columns: repeat(auto-fit, minmax(120px, max-content));
     gap: 0.75rem 2.5rem;
+  }
+
+  // A Story may be read as part of more than one Arc. The names sit on as many
+  // lines as they need rather than stretching that one fact's column past the
+  // rest of them.
+  &__arcs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
   }
 }
 
