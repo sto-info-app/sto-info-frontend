@@ -1,21 +1,59 @@
+// `main` gives the page a left gutter but no right one, and the two columns
+// here sit directly against each other. Both gaps are the column stack's to
+// supply: without them a heading bar drawn to its column's full width would
+// run into the side menu and then into the window edge, which is what the old
+// `width: 85%` on every bar was quietly working around.
 .settings-container {
   display: flex;
+  gap: clamp(20px, 3vw, 50px);
+  padding-right: clamp(20px, 3vw, 50px);
 
   .settings-main-column {
     flex: 2;
+
+    // A flex item will not shrink below the width its content claims to want,
+    // and the long descriptions below are enough to hold this column open.
+    min-width: 0;
   }
 
   .settings-side-column {
+    flex: 1;
     max-width: 400px;
   }
 
   .settings-bar {
-    width: 85%;
     margin-top: 60px;
   }
 
+  // An LCARS bar carries its name on a black cut-out that starts after the
+  // 28px end cap and pads its text a further 10px in. Everything a section
+  // says lines up with that name rather than with the cap, so a heading and
+  // its content read as one left edge.
   .settings-content {
-    margin: 24px 20px;
+    margin: 24px 0 24px 38px;
+  }
+
+  // Both the form's Save and the link out to Custom Tracking are the same
+  // shape: a row of LCARS pills on the section's own left edge. The theme
+  // gives a bare `button` side and bottom margins that `.lcars-btn` never
+  // undoes, so a button and an anchor beside it would otherwise start in
+  // different places; spacing in the row comes from its `gap` instead.
+  .settings-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 24px 0 0 38px;
+
+    .lcars-btn {
+      margin: 0;
+    }
+
+    // An anchor wearing a button's clothes is still an anchor, and the global
+    // underline would show through the pill.
+    a.lcars-btn,
+    a.lcars-btn:hover {
+      text-decoration: none;
+    }
   }
 
   .settings-row {
@@ -26,7 +64,6 @@
 
   .settings-field {
     display: flex;
-    max-width: 360px;
     flex-direction: column;
     gap: 8px;
 
@@ -37,6 +74,7 @@
     }
 
     select {
+      max-width: 360px;
       padding: 8px 10px;
       border: 1px solid #9de0ff;
       border-radius: 4px;
@@ -45,7 +83,11 @@
     }
   }
 
+  // One measure for every explanatory line on the page, so the note under the
+  // timeout chooser and the note under Custom Tracking wrap alike instead of
+  // one being squeezed to the width of the control above it.
   .settings-description {
+    max-width: 70ch;
     margin: 0;
     color: #b8e8ff;
     font-size: 0.9rem;
