@@ -230,6 +230,45 @@ describe('CustomTrackingOwnerPanelComponent', () => {
   });
 
   describe('editing in place', () => {
+    it('uses an empty target before a record is selected', () => {
+      build(null);
+      expect(component.fixedTarget).toEqual({
+        scope: CustomTrackingTargetScope.ACCOUNT,
+        targetId: '',
+      });
+    });
+
+    it('has nothing to lose before the opened editor is rendered', () => {
+      build();
+      component.startEditing();
+      expect(component.values).toBeUndefined();
+      expect(component.hasUnsavedChanges()).toBe(false);
+    });
+
+    it('closes without fetching when the target has been cleared', () => {
+      build();
+      edit();
+      component.targetId = null;
+      getRecord.mockClear();
+      component.stopEditing();
+      expect(component.isEditing).toBe(false);
+      expect(component.sections).toEqual([]);
+      expect(getRecord).not.toHaveBeenCalled();
+      expect(open).not.toHaveBeenCalled();
+    });
+
+    it('clears stale values when refreshing after closing fails', () => {
+      build();
+      edit();
+      getRecord.mockReturnValue(throwError(() => new Error('unavailable')));
+      buttonSaying('Done editing').click();
+      fixture.detectChanges();
+      expect(component.isEditing).toBe(false);
+      expect(component.sections).toEqual([]);
+      expect(text()).not.toContain('Bellerophon');
+      expect(open).not.toHaveBeenCalled();
+    });
+
     it('opens the editor on this record, with nothing else to choose', () => {
       build();
       edit();

@@ -1,3 +1,4 @@
+import { CustomTrackingOwnerPanelComponent } from 'src/app/dashboard/custom-tracking/custom-tracking-owner-panel/custom-tracking-owner-panel.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {
   ComponentFixture,
@@ -114,6 +115,20 @@ describe('CharacterDetailComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CharacterDetailComponent);
     component = fixture.componentInstance;
+  });
+
+  it('allows leaving when the tracking panel is absent', () => {
+    expect(component.hasUnsavedChanges()).toBe(false);
+  });
+
+  it.each([true, false])('reports unsaved tracking changes as %s', dirty => {
+    const hasUnsavedChanges = jest.fn(() => dirty);
+    component.customTracking = {
+      hasUnsavedChanges,
+    } as unknown as CustomTrackingOwnerPanelComponent;
+
+    expect(component.hasUnsavedChanges()).toBe(dirty);
+    expect(hasUnsavedChanges).toHaveBeenCalledTimes(1);
   });
 
   it('should create', () => {
