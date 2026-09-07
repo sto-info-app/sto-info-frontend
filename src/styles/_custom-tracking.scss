@@ -1,4 +1,5 @@
 @use 'sass:color';
+@use 'sass:list';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 @use 'lcars-tabs' as tabs;
@@ -920,59 +921,148 @@
 }
 
 // What a section holds sits on a surface of its own beneath the heading bar,
-// the way a Storytime panel does: the bar names the thing and the panel is the
-// thing, and without it the captions and answers float loose on the page
-// background with nothing marking where one section ends.
+// drawn as the section bar of the builder is: the coloured spine down its left
+// and the wash falling away beneath it. The bar names the thing and the panel
+// is the thing, and without it the captions and answers float loose on the
+// page background with nothing marking where one section ends.
+// ---
+// Blue, the colour Custom Tracking draws a thing that reports in. The fields
+// inside are warm for the reason they are warm in the builder: a field is a
+// thing inside the section rather than another statement about it, and a stack
+// of blue inside blue would read as one list.
 .custom-tracking-display-panel {
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1rem 1rem;
   border: 1px solid vars.$lcars-grey-border;
-  border-radius: 8px;
-  background: vars.$lcars-grey-bg;
+  border-left: 10px solid color.adjust(vars.$lcars-bluey, $lightness: -18%);
+  border-radius: 6px;
+  background: linear-gradient(
+    180deg,
+    rgba(vars.$lcars-bluey, 0.16) 0%,
+    vars.$lcars-grey-bg 100%
+  );
 }
 
+// The colours a field's panel is drawn in, taken in turn: a section is one
+// kind of thing all the way down, so a colour cannot say what a field is the
+// way it says what a Storytime panel is. It marks where one field ends and the
+// next begins instead, the way a run of comments does over there.
+// ---
+// Nothing blue, which is the section's own colour and would read as another
+// statement about the section rather than as a thing inside it. Nothing red,
+// which the site keeps for what has gone wrong, and nothing green, which it
+// keeps for what makes something — a field reporting an answer is neither.
+// ---
+// Every one of them carries black at 4.5:1 or better, which is what lets the
+// name sit on the block. Violet will not at this size, so it is taken a shade
+// lighter here, exactly as a Storytime Arc takes it.
+$custom-tracking-field-colours: (
+  vars.$lcars-tangerine,
+  vars.$lcars-sunflower,
+  color.adjust(vars.$lcars-violet, $lightness: 10%),
+  vars.$lcars-orange,
+  vars.$lcars-gold
+);
+
+// Each field is a panel in its own right, so what separates two of them is air
+// rather than a rule drawn between them.
+// ---
+// The first colour is set here rather than on the field, so that the position
+// in the list below — which is set on the element between the two — is what
+// decides. A field reaching a page some other way than from this list still
+// has a colour to draw itself in.
 .custom-tracking-display-fields {
+  --custom-tracking-field-surface: #{list.nth(
+      $custom-tracking-field-colours,
+      1
+    )};
+  --custom-tracking-field-edge: #{color.adjust(
+      list.nth($custom-tracking-field-colours, 1),
+      $lightness: -20%
+    )};
+  --custom-tracking-field-wash: #{rgba(
+      list.nth($custom-tracking-field-colours, 1),
+      0.14
+    )};
+
   display: flex;
   flex-direction: column;
+  gap: 0.6rem;
 }
 
-// The caption sits above what was recorded under it, at every width. An answer
-// here may be a paragraph of Markdown, a picture or a video, none of which
-// leaves room for a column of names beside it.
+// Which colour each field takes, by where it sits among its neighbours. Asked
+// of the position rather than of a class on the element, because the colour
+// says nothing about the field itself: two fields side by side have to differ,
+// and the same field on another page has no reason to look the same.
+@each $colour in $custom-tracking-field-colours {
+  $index: list.index($custom-tracking-field-colours, $colour);
+  $count: list.length($custom-tracking-field-colours);
+
+  .custom-tracking-display-fields
+    > app-custom-tracking-display-field:nth-child(#{$count}n + #{$index}) {
+    --custom-tracking-field-surface: #{$colour};
+    --custom-tracking-field-edge: #{color.adjust($colour, $lightness: -20%)};
+    --custom-tracking-field-wash: #{rgba($colour, 0.14)};
+  }
+}
+
+// One field, in the shape a captain card, a Storytime chapter and the
+// builder's own field list all take: a spine down the left, the name on a
+// solid block across the top and what was recorded beneath it. A reader who
+// has learnt that shape on the dashboard has learnt this one, and a page of
+// values stops reading as a plain list of lines.
+// ---
+// The caption stays above the answer at every width. An answer here may be a
+// paragraph of Markdown, a picture or a video, none of which leaves room for a
+// column of names beside it.
 .custom-tracking-display-field {
-  padding: 0.6rem 0;
-  border-bottom: 1px solid vars.$lcars-grey-border;
-  gap: 0.15rem;
+  overflow: hidden;
+  border-left: 6px solid var(--custom-tracking-field-edge);
+  border-radius: 4px;
+  background: linear-gradient(
+    180deg,
+    var(--custom-tracking-field-wash) 0%,
+    rgb(0 0 0 / 28%) 100%
+  );
 }
 
-// The rule belongs between two fields, and there is nothing under the last
-// one to divide it from. Asked of the host element rather than of the field
-// inside it, because each field is the only child of its own component and
-// would otherwise every one of them be the last.
-app-custom-tracking-display-field:last-child .custom-tracking-display-field {
-  border-bottom: none;
-}
-
-// The colour, size and capitals come from `.label`, which this shares with
-// every other caption on the site. What is left here is the room for a hint
-// under the name.
-.custom-tracking-display-name {
+// The name on that block, in the lettering and the black ink every other LCARS
+// heading block carries. It gives up the blue `.label` lends every other
+// caption on the site — the block is a colour of its own now, and blue
+// lettering on any of them is neither readable nor LCARS — but keeps the
+// capitals, which are what makes it a caption in the first place.
+.custom-tracking-display-field .label.custom-tracking-display-name {
   display: flex;
   flex-direction: column;
+  padding: 0.3rem 0.75rem;
   margin: 0;
+  gap: 0.1rem;
+  border-bottom: 2px solid var(--custom-tracking-field-edge);
+  background: var(--custom-tracking-field-surface);
+  color: vars.$lcars-black;
+  font-family: vars.$font-antonio;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
 }
 
 // A hint is a sentence somebody wrote, so it keeps the case they wrote it in
-// rather than taking the capitals of the caption it hangs beneath.
-.custom-tracking-display-hint {
+// rather than taking the capitals of the caption it hangs beneath. Dark, like
+// everything else on the block, at the weight of an aside rather than of the
+// name above it.
+.custom-tracking-display-field .custom-tracking-display-hint {
   max-width: 60ch;
-  color: vars.$lcars-grey-light;
-  font-size: 0.8rem;
+  color: rgb(0 0 0 / 72%);
+  font-size: 0.75rem;
   font-weight: 400;
+  letter-spacing: 0;
   text-transform: none;
 }
 
+// What was recorded, in the body of the panel under the name.
 .custom-tracking-display-value {
   min-width: 0;
+  padding: 0.5rem 0.75rem 0.55rem;
   overflow-wrap: anywhere;
 }
 
@@ -1002,10 +1092,16 @@ app-custom-tracking-display-field:last-child .custom-tracking-display-field {
   list-style: none;
 }
 
+// One of several answers, as a badge in the colour the site marks a reading
+// in — the same yellow the stars and the progress bar are drawn in, so
+// everything that reports a value on this panel reports it in one colour. The
+// label keeps the case it was written in: these are words somebody chose.
 .custom-tracking-display-choice {
-  padding: 0.15rem 0.6rem;
+  padding: 0.15rem 0.65rem;
+  border: 1px solid rgba(vars.$lcars-sunflower, 0.5);
   border-radius: 10px;
-  background: vars.$lcars-card-surface;
+  background: rgba(vars.$lcars-sunflower, 0.16);
+  color: vars.$lcars-white;
   font-size: 0.85rem;
 }
 
@@ -1024,15 +1120,19 @@ app-custom-tracking-display-field:last-child .custom-tracking-display-field {
   color: vars.$lcars-grey-light;
 }
 
+// The track is cut out of the panel rather than laid on it, so the filled part
+// reads as a reading taken against a scale instead of as a second coloured
+// bar among the panel's own.
 .custom-tracking-display-progress-bar {
   display: block;
   overflow: hidden;
   width: 100%;
   max-width: 22rem;
   height: 10px;
+  border: 1px solid rgba(vars.$lcars-sunflower, 0.35);
   border-radius: 5px;
   margin-top: 0.35rem;
-  background: vars.$lcars-card-surface;
+  background: rgb(0 0 0 / 45%);
 }
 
 .custom-tracking-display-progress-fill {
