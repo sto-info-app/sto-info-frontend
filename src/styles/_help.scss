@@ -11,13 +11,14 @@
 // What each topic's guides are coloured, keyed by the topic's id.
 // ---
 // The values are the ones the rest of the site already uses for the same
-// subjects — crew's sky for Community, a Story's sunflower for Storytime, and
-// the moderation card's red for the guides to running it — so a guide and the
-// pages it describes agree about what colour a thing is. Every one of them
-// carries black text at 4.5:1 or better, which is what lets a guide's title
-// sit on the block.
+// subjects — crew's sky for Community, the builder's perano for Custom
+// Tracking, a Story's sunflower for Storytime, and the moderation card's red
+// for the guides to running it — so a guide and the pages it describes agree
+// about what colour a thing is. Every one of them carries black text at 4.5:1
+// or better, which is what lets a guide's title sit on the block.
 $help-topic-colours: (
   'community': vars.$lcars-sky,
+  'custom-tracking': vars.$lcars-perano,
   'storytime': vars.$lcars-sunflower,
   'storytime-admin': vars.$lcars-bluey,
 );
