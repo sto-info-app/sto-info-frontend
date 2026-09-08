@@ -36,6 +36,30 @@ describe('the value codecs', () => {
   });
 
   describe('text and Markdown', () => {
+    it.each([
+      ['a string', 'Recorded', 'Recorded'],
+      ['a number', 42, '42'],
+      ['a true value', true, 'true'],
+      ['a false value', false, 'false'],
+      ['an object', { unexpected: 'data' }, ''],
+      ['an array', ['unexpected'], ''],
+      ['null', null, ''],
+      ['an absent property', undefined, ''],
+    ])(
+      'reads %s without stringifying objects',
+      (_description, held, expected) => {
+        expect(
+          valueFormFor(aField(), anAnswer({ value: { text: held } })),
+        ).toEqual({ text: expected });
+      },
+    );
+
+    it('leaves text blank when the stored fragment is absent', () => {
+      expect(valueFormFor(aField(), anAnswer({ value: null }))).toEqual({
+        text: '',
+      });
+    });
+
     it('carries a line of text both ways', () => {
       const field = aField({
         fieldType: CustomTrackingFieldType.TEXT_SINGLE_LINE,

@@ -241,6 +241,19 @@ describe('custom tracking field settings', () => {
   });
 
   describe('what an existing field opens with', () => {
+    it.each([{}, [], true, null, undefined].map(stored => ({ stored })))(
+      'leaves an unsupported numeric setting blank: %p',
+      ({ stored }) => {
+        expect(
+          settingsFormValues(
+            CustomTrackingFieldType.INTEGER,
+            { minimum: stored },
+            fieldBounds,
+          ),
+        ).toEqual({ minimum: '', maximum: '', step: '' });
+      },
+    );
+
     it('shows the stored settings as they were saved', () => {
       const values = settingsFormValues(
         CustomTrackingFieldType.DECIMAL,

@@ -347,6 +347,16 @@ describe('the display formatter', () => {
       ).toBe('45s');
     });
 
+    it('writes an unconfigured zero duration in seconds', () => {
+      expect(
+        written(
+          CustomTrackingFieldType.DURATION,
+          { days: 0, hours: 0, minutes: 0, seconds: 0 },
+          { durationFormat: CustomTrackingDurationFormat.COMPACT },
+        ),
+      ).toBe('0s');
+    });
+
     it.each([
       [CustomTrackingFieldType.TOGGLE, true, 'Yes'],
       [CustomTrackingFieldType.TOGGLE, false, 'No'],

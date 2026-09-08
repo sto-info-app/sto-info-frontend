@@ -27,6 +27,7 @@ describe('the YouTube embed guard', () => {
       'https://www.youtube.com/embed/abcdefghijk/extra',
       'https://www.youtube.com:8443/embed/abcdefghijk',
       'https://user:password@www.youtube.com/embed/abcdefghijk',
+      'https://:password@www.youtube.com/embed/abcdefghijk',
       'https://www.youtube.com.example.com/embed/abcdefghijk',
     ])('refuses a URL outside the permitted embed shape: %s', address => {
       expect(trustedYouTubeEmbedUrl(sanitizer, address, false)).toBeNull();
