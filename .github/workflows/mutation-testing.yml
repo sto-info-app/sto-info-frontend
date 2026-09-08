@@ -23,7 +23,7 @@ jobs:
     # what lets that dry run fit on a 16GB ubuntu-latest runner; it is slower
     # than concurrency 4, so this budget stays high so a slow week is a slow
     # run rather than a lost one.
-    timeout-minutes: 240
+    timeout-minutes: 480
     permissions:
       contents: read
 
