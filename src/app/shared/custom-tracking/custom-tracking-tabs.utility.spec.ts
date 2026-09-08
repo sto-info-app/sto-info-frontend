@@ -35,7 +35,7 @@ describe('custom tracking tab navigation', () => {
     );
   });
 
-  it.each([{}, { section: 'filtered-out' }])(
+  it.each<Record<string, string>>([{}, { section: 'filtered-out' }])(
     'falls back to the first visible tab for %p',
     selections => {
       expect(activeTrackingTab(section, selections)).toBe(section.tabs[0]);

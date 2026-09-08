@@ -2,8 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import {
   ActivatedRouteSnapshot,
+  GuardResult,
+  MaybeAsync,
   RouterStateSnapshot,
-  UrlTree,
 } from '@angular/router';
 import { Observable, firstValueFrom, of } from 'rxjs';
 
@@ -17,9 +18,7 @@ import {
 describe('unsavedChangesGuard', () => {
   let open: jest.Mock;
 
-  const run = (
-    hasUnsavedChanges: boolean,
-  ): boolean | Observable<boolean> | UrlTree =>
+  const run = (hasUnsavedChanges: boolean): MaybeAsync<GuardResult> =>
     TestBed.runInInjectionContext(() =>
       unsavedChangesGuard(
         { hasUnsavedChanges: () => hasUnsavedChanges } as HasUnsavedChanges,

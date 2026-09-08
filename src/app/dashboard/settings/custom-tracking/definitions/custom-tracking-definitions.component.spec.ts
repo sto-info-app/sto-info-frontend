@@ -13,6 +13,7 @@ import {
   CustomTrackingSectionTree,
   CustomTrackingTargetScope,
 } from 'src/app/models/custom-tracking.models';
+import { aConfiguration } from 'src/app/shared/custom-tracking/custom-tracking.testing';
 
 import { CustomTrackingService } from '../custom-tracking.service';
 import { CustomTrackingDefinitionsComponent } from './custom-tracking-definitions.component';
@@ -36,15 +37,7 @@ describe('CustomTrackingDefinitionsComponent', () => {
     allowsRequired,
   });
 
-  const configuration: CustomTrackingConfiguration = {
-    features: {
-      isEnabled: true,
-      publicReadEnabled: true,
-      definitionEditingEnabled: true,
-      valueEditingEnabled: true,
-      imagesEnabled: true,
-      youTubeEnabled: true,
-    },
+  const configuration: CustomTrackingConfiguration = aConfiguration({
     fieldTypes: [
       describedType(
         CustomTrackingFieldType.TEXT_SINGLE_LINE,
@@ -78,7 +71,7 @@ describe('CustomTrackingDefinitionsComponent', () => {
       MAX_YEAR: 9999,
       MAX_PATTERN_LENGTH: 200,
     },
-  };
+  });
 
   const field = (
     id: string,

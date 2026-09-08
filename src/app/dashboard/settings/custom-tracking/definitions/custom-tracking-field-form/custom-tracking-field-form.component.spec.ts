@@ -8,6 +8,7 @@ import {
   CustomTrackingFieldCategory,
   CustomTrackingFieldType,
 } from 'src/app/models/custom-tracking.models';
+import { aConfiguration } from 'src/app/shared/custom-tracking/custom-tracking.testing';
 
 import { CustomTrackingFieldInput } from '../../custom-tracking.service';
 import {
@@ -35,15 +36,7 @@ describe('CustomTrackingFieldFormComponent', () => {
     allowsRequired,
   });
 
-  const configuration: CustomTrackingConfiguration = {
-    features: {
-      isEnabled: true,
-      publicReadEnabled: true,
-      definitionEditingEnabled: true,
-      valueEditingEnabled: true,
-      imagesEnabled: true,
-      youTubeEnabled: true,
-    },
+  const configuration: CustomTrackingConfiguration = aConfiguration({
     fieldTypes: [
       describedType(
         CustomTrackingFieldType.TEXT_SINGLE_LINE,
@@ -98,7 +91,7 @@ describe('CustomTrackingFieldFormComponent', () => {
       MAX_YEAR: 9999,
       MAX_PATTERN_LENGTH: 200,
     },
-  };
+  });
 
   const field: CustomTrackingField = {
     id: 'field-1',
