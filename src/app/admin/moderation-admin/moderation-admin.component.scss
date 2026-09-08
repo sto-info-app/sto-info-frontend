@@ -2,11 +2,13 @@
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 
-// The moderation screens reuse the shared admin record styles, with a
-// red-tinted header so a queue of complaints does not read as the same routine
-// content list as news or banners.
-#report-admin-page,
-#user-admin-page {
+// The report queue reuses the shared admin record styles, with a red-tinted
+// header so a queue of complaints does not read as the same routine content
+// list as news or banners. The member directory deliberately does not take
+// that tint: an account is not a complaint, and its card is coloured by the
+// member's role instead, the same way Manage Permissions colours the same
+// account.
+#report-admin-page {
   .admin-record-card {
     border-left-color: color.adjust(vars.$lcars-cardinal, $lightness: -10%);
   }
@@ -24,7 +26,10 @@
     background: rgb(0 0 0 / 28%);
     color: vars.$lcars-white;
   }
+}
 
+#report-admin-page,
+#user-admin-page {
   // The report body stacks a free-text account above the detail grid, so the
   // grid must not also try to sit beside it.
   .moderation-record-main {

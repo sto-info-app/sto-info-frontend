@@ -5,6 +5,24 @@
 // `.go-rarity-*` utility classes for reuse across modules and components.
 @use 'sto-rarity-colours';
 
+// Emits the LCARS palette as custom properties, so a colour can be named at
+// runtime. Custom Tracking colour values store a palette token rather than a
+// hexadecimal, and this is what resolves one.
+@use 'lcars-palette-properties';
+
+// Emits the styles for every STO Storytime page. Held in one partial rather
+// than per component because the feature's pages are built from the same
+// handful of shapes, and that is what keeps them recognisably one thing.
+@use 'storytime';
+
+// Emits the styles for the help section's index and guide pages.
+@use 'help';
+
+// Emits the styles for every Custom Tracking panel. One partial for the whole
+// feature, for the same reason Storytime has one: the builder, the value
+// editor and the detail pages are built from the same handful of shapes.
+@use 'custom-tracking';
+
 /* You can add global styles to this file, and also import other style files */
 
 html {
@@ -97,8 +115,19 @@ button.lcars-btn,
 .submit-button {
   height: 60px !important;
   border-radius: 30px !important;
-  padding: 0 25px 8px 0 !important;
+
+  // The left gutter matches the pill's own radius, which is the least that
+  // keeps a label clear of the curve: the text is right-aligned, so anything
+  // long enough to fill the pill used to run out through the rounded edge.
+  padding: 0 25px 8px 30px !important;
   font-size: 1rem !important;
+
+  // The theme only gives the bold weight and the tight tracking to `button`,
+  // so an anchor wearing the same pill would otherwise draw its label in the
+  // body's lighter, letter-spaced text. State both here so the pill looks the
+  // same whichever element it is on.
+  font-weight: 700 !important;
+  letter-spacing: normal !important;
   text-transform: uppercase !important;
   text-align: right !important;
   display: inline-flex !important;
@@ -129,7 +158,13 @@ button.lcars-btn,
   }
 }
 
-.lcars-btn-auto {
+// A pill sized to its own label, with the wide left gutter the LCARS look
+// wants. `button` is named as well as the class because the base rule above
+// reaches a button by element and class at once, and would otherwise outrank
+// this one and leave every LCARS button with no left gutter at all while the
+// anchors beside them kept theirs.
+.lcars-btn-auto,
+button.lcars-btn-auto {
   width: auto !important;
   min-width: 0 !important;
   padding-left: 65px !important;
@@ -172,12 +207,38 @@ button.lcars-btn,
   margin-top: 5px !important;
   padding-top: 5px !important;
 
+  // A row of links to other pages is navigation, so it is sometimes a `nav`
+  // rather than a `div`. The LCARS frame caps every `nav` at the sidebar's
+  // 660px and would silently wrap the row onto a second line once it holds
+  // more than two buttons.
+  &:is(nav) {
+    max-width: none;
+  }
+
   a {
-    display: block;
+    // The label sits at the bottom-right of the pill, which is where the LCARS
+    // look wants it. A top padding put it there while every label was one line
+    // and stopped working the moment one wrapped: the pill held its 60px and
+    // the second line drew outside the rounded edge, under the button.
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
     margin: 0 8px 16px;
     width: 200px;
-    height: 60px;
-    padding: 24px 25px 0 0;
+
+    // The pill grows with its label rather than clipping it. 60px is what a
+    // one-line label needs, so it stays the floor and a row of short labels is
+    // the height it always was. A row is a flex container that stretches its
+    // items, so one long label takes its whole line with it and the row stays
+    // one shape rather than becoming a ragged mix of heights.
+    min-height: 60px;
+
+    // The left gutter matches the pill's radius, for the reason the LCARS
+    // button above wants one: the label is right-aligned, so anything long
+    // enough to fill the pill runs out through the rounded edge without it.
+    // The 9.6px above and below is what the old 24px top padding left under a
+    // single line in a 60px pill, so a one-line pill is unchanged to the pixel.
+    padding: 9.6px 25px 9.6px 26px;
     background-color: #58e;
     border-radius: 26px;
     text-align: right;
@@ -670,6 +731,26 @@ button.lcars-btn,
 }
 
 /* LCARS Standard Layouts */
+
+// An LCARS heading bar and the content it folds away. The bar carries a title
+// and a caret button, so the title has to give up the margin and weight a
+// heading normally brings or it pushes the caret off the bar.
+.collapsible-section {
+  margin-bottom: 1.75rem;
+
+  .collapsible-section__title {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+  }
+
+  .collapsible-section__content {
+    min-width: 0;
+    margin-top: 0.35rem;
+  }
+}
+
 .info-grid {
   @include mixins.lcars-info-grid;
 }
@@ -711,6 +792,18 @@ button.lcars-btn,
   &:is(button):focus,
   &:is(button):active {
     filter: none;
+  }
+
+  // A disabled icon control has to look disabled: this is a bare `button` with
+  // no state of its own, so without this an action that cannot run still
+  // invites a press and still grows under the pointer.
+  &:is(button):disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  &:is(button):disabled:hover {
+    transform: none;
   }
 
   &.delete-icon:hover {
@@ -833,6 +926,9 @@ button.lcars-btn,
   gap: 0.8rem;
 }
 
+// One or two digits keep the round badge the design started with; three or
+// more grow it sideways into a pill instead of overflowing a fixed-width
+// circle, which is what a member or story count in the hundreds used to do.
 .lcars-text-bar .header-count-badge {
   position: relative;
   display: inline-flex;
@@ -840,12 +936,14 @@ button.lcars-btn,
   justify-content: center;
   background-color: vars.$lcars-tangerine;
   color: #000;
-  width: 26px;
+  min-width: 26px;
   height: 26px;
-  border-radius: 50%;
+  padding: 0 0.45rem;
+  border-radius: 999px;
   font-size: 0.95rem;
   font-weight: 900;
   line-height: 1;
+  white-space: nowrap;
   flex-shrink: 0;
   margin-top: 8px;
 }
@@ -900,4 +998,63 @@ button.lcars-btn,
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+// ─── Field Picker ─────────────────────────────────────────────────────────────
+
+// A field whose value is chosen in a dialog rather than typed: a recipient, a
+// featured work. It sits inside a `.lcars-input-container` where an input
+// would, and reads as one — the same dark body under the same coloured label.
+// What it shows is the name of the thing chosen. The identifier behind it
+// stays in the form and out of sight: it tells an editor nothing they can act
+// on, and a screen of them is a screen nobody can read.
+.field-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.75rem 1rem;
+  background: #1c1c1c;
+  border-top: 1px solid rgb(255 255 255 / 8%);
+}
+
+.field-picker__identity {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.field-picker__name {
+  margin: 0;
+  font-family: vars.$font-antonio;
+  font-size: 1.1rem;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+.field-picker__meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: vars.$lcars-grey-light;
+  overflow-wrap: anywhere;
+}
+
+.field-picker__empty {
+  flex: 1 1 12rem;
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: vars.$lcars-grey-light;
+}
+
+// The button keeps its words on one line: "Search and select" broken across
+// two lines in a narrow column was most of what made these fields look cramped.
+.field-picker__btn {
+  flex: 0 0 auto;
+  margin: 0 !important;
+  white-space: nowrap;
 }

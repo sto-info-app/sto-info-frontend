@@ -91,7 +91,104 @@ describe('DashboardService', () => {
     });
   });
 
+  describe('getUserSettings', () => {
+    it('should fetch user settings successfully', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue({
+        headers: new HttpHeaders().set('Authorization', 'Bearer fake-token'),
+      });
+
+      service.getUserSettings().subscribe(settings => {
+        expect(settings).toEqual({
+          privacyMode: true,
+          sessionTimeoutMinutes: 30,
+        });
+      });
+
+      const req = httpMock.expectOne(API_URLS.USER_SETTINGS);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('Authorization')).toBe(
+        'Bearer fake-token',
+      );
+      req.flush({ privacyMode: true, sessionTimeoutMinutes: 30 });
+    });
+
+    it('should return error if no token found', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      service.getUserSettings().subscribe({
+        next: () => {
+          throw new Error('should have failed');
+        },
+        error: error => {
+          expect(error.message).toBe('No token found');
+        },
+      });
+
+      httpMock.expectNone(API_URLS.USER_SETTINGS);
+    });
+  });
+
+  describe('updateUserSettings', () => {
+    it('should update user settings successfully', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue({
+        headers: new HttpHeaders().set('Authorization', 'Bearer fake-token'),
+      });
+
+      service
+        .updateUserSettings({ privacyMode: true, sessionTimeoutMinutes: 30 })
+        .subscribe(settings => {
+          expect(settings).toEqual({
+            privacyMode: true,
+            sessionTimeoutMinutes: 30,
+          });
+        });
+
+      const req = httpMock.expectOne(API_URLS.USER_SETTINGS);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual({
+        privacyMode: true,
+        sessionTimeoutMinutes: 30,
+      });
+      expect(req.request.headers.get('Authorization')).toBe(
+        'Bearer fake-token',
+      );
+      req.flush({ privacyMode: true, sessionTimeoutMinutes: 30 });
+    });
+
+    it('should return error if no token found', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      service
+        .updateUserSettings({ privacyMode: false, sessionTimeoutMinutes: 30 })
+        .subscribe({
+          next: () => {
+            throw new Error('should have failed');
+          },
+          error: error => {
+            expect(error.message).toBe('No token found');
+          },
+        });
+
+      httpMock.expectNone(API_URLS.USER_SETTINGS);
+    });
+  });
+
   describe('updatePersonalDetails', () => {
+    beforeEach(() => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue({
+        headers: new HttpHeaders({ Authorization: 'Bearer test-token' }),
+      });
+    });
+    it('does not submit personal details without a token', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+      service.updatePersonalDetails(details).subscribe({
+        next: () => {
+          throw new Error('Expected authentication error');
+        },
+        error: (error: Error) => expect(error.message).toBe('No token found'),
+      });
+      httpMock.expectNone(API_URLS.UPDATE_USER_PROFILE);
+    });
     const details: EditPersonalDetailsFormValues = {
       firstName: 'Updated',
       lastName: 'User',
@@ -105,6 +202,9 @@ describe('DashboardService', () => {
       const req = httpMock.expectOne(API_URLS.UPDATE_USER_PROFILE);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(details);
+      expect(req.request.headers.get('Authorization')).toBe(
+        'Bearer test-token',
+      );
       req.flush({ success: true });
     });
 

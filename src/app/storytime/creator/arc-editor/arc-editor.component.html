@@ -1,0 +1,209 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Arc"></app-loading-bar>
+}
+
+<div
+  id="storytime-arc-editor-page"
+  class="storytime-page"
+>
+  <h1>{{ isNew ? "Create an Arc" : "Edit Arc" }}</h1>
+
+  <!--
+    Reached from here as well as from the list, for the same reason a Story's
+    Chapters are: what an Arc is for is the Stories in it, and that is the next
+    thing anybody wants after describing one.
+  -->
+  @if (arc) {
+    <nav class="storytime-page-actions">
+      <a
+        class="lcars-btn lcars-btn-auto green"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "arcs",
+  arc.id,
+  "stories",
+]'
+      >Stories</a>
+      <a
+        class="lcars-btn lcars-btn-auto bluey"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "arcs",
+  arc.id,
+  "collaborators",
+]'
+      >Collaborators</a>
+      <a
+        class="lcars-btn lcars-btn-auto sky"
+        [routerLink]='["/", appRoutes.STORYTIME, "manage", "arcs"]'
+      >Back to your Arcs</a>
+    </nav>
+  }
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Could not save"
+      [message]="errorMessage"
+    ></app-lcars-error-message>
+  }
+
+  <form
+    [formGroup]="form"
+    class="storytime-form"
+    (ngSubmit)="save()"
+  >
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Arc Details</span>
+      </div>
+
+      <div class="storytime-panel">
+        <div class="form-row">
+          <div class="lcars-input-container perano storytime-field-full">
+            <label for="arc-title">Title</label>
+            <input
+              id="arc-title"
+              type="text"
+              formControlName="title"
+              maxlength="200"
+              required
+            />
+            @if (form.controls["title"].touched && form.controls["title"].invalid) {
+              <small class="field-error">A title is required.</small>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container bluey">
+            <label for="arc-slug">URL slug</label>
+            <input
+              id="arc-slug"
+              type="text"
+              formControlName="slug"
+              maxlength="220"
+            />
+            <p class="field-hint">
+              Leave blank to build one from the title. Changing it keeps the old
+              address working.
+            </p>
+          </div>
+
+          <div class="lcars-input-container gold">
+            <label for="arc-short-description">Short description</label>
+            <input
+              id="arc-short-description"
+              type="text"
+              formControlName="shortDescription"
+              maxlength="500"
+            />
+            <p class="field-hint">
+              Shown in listings. Required before publishing.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container perano storytime-field-full">
+            <label for="arc-description">Description</label>
+            <textarea
+              id="arc-description"
+              formControlName="description"
+              rows="8"
+            ></textarea>
+          </div>
+
+          <app-storytime-markdown-hint />
+        </div>
+      </div>
+    </section>
+
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Arc Settings</span>
+      </div>
+
+      <div class="storytime-panel">
+        <div class="form-row">
+          <app-storytime-setting-select
+            fieldId="arc-visibility"
+            label="Visibility"
+            controlName="visibility"
+            colour="bluey"
+            [options]="visibilityOptions"
+          />
+
+          <app-storytime-setting-select
+            fieldId="arc-language"
+            label="Language"
+            controlName="languageCode"
+            colour="sunflower"
+            [options]="languageOptions"
+          >
+            <p>
+              The language of your own writing about the Arc. The Stories in it
+              keep their own.
+            </p>
+          </app-storytime-setting-select>
+        </div>
+      </div>
+    </section>
+
+    <!--
+      Artwork waits for the Arc to exist. A picture is set against a saved Arc
+      rather than staged into this form, so offering it before the first save
+      would mean holding a file with nowhere to put it.
+    -->
+    @if (arc) {
+      <section class="storytime-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Artwork</span>
+        </div>
+
+        <div class="storytime-panel">
+          <p class="field-hint">
+            Both are optional. An Arc without them shows no gap where they would
+            have been.
+          </p>
+
+          <app-storytime-image-manager
+            [slot]="imageSlots.ARC_BANNER"
+            [targetId]="arc.id"
+            [imageUrl]="arc.bannerImageUrl"
+            [imageAlt]="arc.bannerImageAlt"
+            altControlName="bannerImageAlt"
+            (changed)="onImageChanged($event)"
+          ></app-storytime-image-manager>
+
+          <app-storytime-image-manager
+            [slot]="imageSlots.ARC_PROFILE"
+            [targetId]="arc.id"
+            [imageUrl]="arc.profileImageUrl"
+            [imageAlt]="arc.profileImageAlt"
+            altControlName="profileImageAlt"
+            (changed)="onImageChanged($event)"
+          ></app-storytime-image-manager>
+        </div>
+      </section>
+    }
+
+    <app-storytime-editor-actions
+      [isSaving]="isSaving"
+      [canPublish]="canPublish"
+      [cancelLink]='["/", appRoutes.STORYTIME, "manage", "arcs"]'
+      (publish)="publish()"
+    />
+  </form>
+
+  @if (arc) {
+    <!-- Tagging needs something to tag, so it appears once the Arc exists. -->
+    <app-tag-picker
+      targetType="ARC"
+      [targetId]="arc.id"
+    ></app-tag-picker>
+  }
+</div>

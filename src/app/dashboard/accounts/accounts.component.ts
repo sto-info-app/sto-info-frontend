@@ -30,6 +30,7 @@ import {
 import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
 import { StoAccountService } from '../services/sto-account.service';
+import { PrivacyModeService } from '../services/privacy-mode.service';
 
 /**
  * View model for a single STO account card, with all display values precomputed at load time.
@@ -91,6 +92,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
   isLoading = true;
 
   private readonly _stoAccountService = inject(StoAccountService);
+  readonly privacyMode = inject(PrivacyModeService);
   private readonly _routingService = inject(RoutingService);
   private readonly _dialog = inject(MatDialog);
   private readonly _router = inject(Router);
@@ -101,6 +103,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * Initialises the component by fetching STO accounts.
    */
   ngOnInit(): void {
+    this.privacyMode.load().pipe(takeUntil(this._destroy$)).subscribe();
     this.loadAccounts();
   }
 
@@ -361,6 +364,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
         icon: 'fas fa-user',
         text: account.username,
         label: 'Username',
+        private: true,
       });
     }
 
@@ -370,6 +374,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
         text: account.email,
         label: 'Email',
         variant: 'secondary',
+        private: true,
       });
     }
 

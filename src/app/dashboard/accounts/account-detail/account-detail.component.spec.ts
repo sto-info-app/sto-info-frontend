@@ -1,3 +1,4 @@
+import { CustomTrackingOwnerPanelComponent } from 'src/app/dashboard/custom-tracking/custom-tracking-owner-panel/custom-tracking-owner-panel.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -13,6 +14,7 @@ import {
   CLOUDFLARE_VARIANT_SQUARE_100PX_NAME,
   SRC_PHOTO_UNAVAILABLE_100PX,
 } from 'src/app/shared/constants/app-image-assets.constants';
+import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
 import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { AccountDetailComponent } from './account-detail.component';
 
@@ -143,6 +145,20 @@ describe('AccountDetailComponent', () => {
     // Do not auto detect changes to control params emission
   });
 
+  it('allows leaving when the tracking panel is absent', () => {
+    expect(component.hasUnsavedChanges()).toBe(false);
+  });
+
+  it.each([true, false])('reports unsaved tracking changes as %s', dirty => {
+    const hasUnsavedChanges = jest.fn(() => dirty);
+    component.customTracking = {
+      hasUnsavedChanges,
+    } as unknown as CustomTrackingOwnerPanelComponent;
+
+    expect(component.hasUnsavedChanges()).toBe(dirty);
+    expect(hasUnsavedChanges).toHaveBeenCalledTimes(1);
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -163,6 +179,23 @@ describe('AccountDetailComponent', () => {
       expect(mockStoAccountService.getAccounts).not.toHaveBeenCalled();
       expect(component.isLoading).toBe(false);
       expect(component.errorMessage).toBe('Invalid account link');
+    });
+  });
+
+  describe('the owner’s own tracking', () => {
+    // Beneath the STO data on the page, and pointed at this account. What the
+    // block then shows, and whether it offers to edit, is its own business.
+    it('shows the block for this account', () => {
+      fixture.detectChanges();
+      routeParamsSubject.next({ handle: encodeStoHandle(mockAccount.handle) });
+      fixture.detectChanges();
+
+      const block = fixture.nativeElement.querySelector(
+        'app-custom-tracking-owner-panel',
+      ) as HTMLElement | null;
+
+      expect(block).not.toBeNull();
+      expect(component.accountScope).toBe(CustomTrackingTargetScope.ACCOUNT);
     });
   });
 

@@ -43,6 +43,17 @@
           </div>
 
           <div
+            class="dashboard-tile gold"
+            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_SETTINGS)">
+            <div class="tile-icon">
+              <i class="fas fa-gear"></i>
+            </div>
+            <div class="tile-content">
+              <span class="tile-stat">Settings</span>
+            </div>
+          </div>
+
+          <div
             class="dashboard-tile atomic"
             [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)">
             <div class="tile-icon">
@@ -91,10 +102,22 @@
           class="full-width-btn-link sunflower"
           >View record</a
         >
+        @if (publicProfileLink) {
+          <a
+            [routerLink]="publicProfileLink"
+            class="full-width-btn-link african-violet"
+            >View Public Profile</a
+          >
+        }
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
           class="full-width-btn-link sunflower"
           >Manage STO Accounts</a
+        >
+        <a
+          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_SETTINGS)"
+          class="full-width-btn-link gold"
+          >Settings</a
         >
       </div>
     </div>

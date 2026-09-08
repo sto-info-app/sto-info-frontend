@@ -1,3 +1,13 @@
+/** Config for a breakdown category tile on the stats hub. */
+export interface StatTile {
+  label: string;
+  breakdownId: string;
+  icon: string;
+  colour: string;
+  /** Precomputed router link for this tile's detail page. */
+  link: string;
+}
+
 /** Represents a name-count pair used for breakdown stats. */
 export interface CountItem {
   name: string;

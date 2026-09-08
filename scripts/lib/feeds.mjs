@@ -19,11 +19,32 @@ export const STATIC_SITEMAP_PATHS = [
   { path: '/about/developers', changefreq: 'monthly', priority: '0.4' },
   { path: '/about/volunteers', changefreq: 'monthly', priority: '0.4' },
   { path: '/about/supporters', changefreq: 'monthly', priority: '0.4' },
+  { path: '/help', changefreq: 'monthly', priority: '0.5' },
+  { path: '/roadmap', changefreq: 'monthly', priority: '0.5' },
+  { path: '/resources', changefreq: 'monthly', priority: '0.5' },
   { path: '/contact', changefreq: 'yearly', priority: '0.5' },
   { path: '/terms-of-use', changefreq: 'yearly', priority: '0.3' },
   { path: '/privacy-policy', changefreq: 'yearly', priority: '0.3' },
   { path: '/credits', changefreq: 'yearly', priority: '0.3' },
 ];
+
+/**
+ * Turns help guide slugs into sitemap entries.
+ *
+ * Separate from `STATIC_SITEMAP_PATHS` because the slugs are read from the
+ * application at build time rather than written here, and this module stays
+ * free of file access.
+ *
+ * @param {string[]} slugs - The guide slugs.
+ * @returns {{ path: string, changefreq: string, priority: string }[]} The entries.
+ */
+export function helpGuideSitemapPaths(slugs) {
+  return slugs.map(slug => ({
+    path: `/help/${slug}`,
+    changefreq: 'monthly',
+    priority: '0.4',
+  }));
+}
 
 /**
  * Escapes XML-significant characters.

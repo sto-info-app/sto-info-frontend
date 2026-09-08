@@ -28,6 +28,7 @@
           @for (vm of accountVms; track vm.id) {
             <app-account-card
               [vm]="vm.card"
+              [privacyMode]="privacyMode.isEnabled()"
               (action)="onAccountCardAction(vm.account, $event)" />
           }
         </div>

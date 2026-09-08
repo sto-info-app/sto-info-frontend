@@ -37,7 +37,6 @@
   margin-bottom: 1rem;
 }
 
-
 // ── Summary bar ──────────────────────────────────────────────────────────────
 
 .endeavour-summary-bar {
@@ -80,7 +79,6 @@
   color: vars.$lcars-tangerine;
 }
 
-
 // ── Perk list ─────────────────────────────────────────────────────────────────
 
 .sr-only {
@@ -109,7 +107,9 @@
   border-radius: 4px;
   background: var(--lcars-panel-bg, #1a1a2e);
   border-left: 4px solid transparent;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 
   &.space-row {
     border-left-color: vars.$lcars-perano;

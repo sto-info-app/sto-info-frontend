@@ -1,4 +1,11 @@
-import { Component, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import {
   MatDialog,
   MatDialogModule,
@@ -10,7 +17,9 @@ import { filter } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
 import { NotificationService } from './notifications/notification.service';
+import { StorytimeService } from './storytime/storytime.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
+import { observeInZone } from './shared/rxjs/observe-in-zone.operator';
 import { CookieService } from './shared/services/cookie.service';
 import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
@@ -33,6 +42,17 @@ export class AppComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
   autoLogoutCountdown = 0;
 
+  /**
+   * Whether Storytime should be offered in the navigation.
+   *
+   * Resolved once here and passed down, so the feature state costs one request
+   * for the whole application rather than one per component that needs it.
+   *
+   * Starts false because nothing is known yet, and an entry that appears and
+   * then vanishes is worse than one that arrives a moment late.
+   */
+  isStorytimeOffered = false;
+
   destroy$ = new Subject<void>();
 
   private intervalId: ReturnType<typeof setInterval> | null = null;
@@ -42,11 +62,13 @@ export class AppComponent implements OnInit, OnDestroy {
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
   private readonly _authService = inject(AuthService);
   private readonly _notificationService = inject(NotificationService);
+  private readonly _storytimeService = inject(StorytimeService);
   private readonly _logRocketService = inject(LogRocketService);
   private readonly _pageTitleService = inject(PageTitleService);
   private readonly _seoService = inject(SeoService);
   private readonly _cookieService = inject(CookieService);
   private readonly _zone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _router = inject(Router);
   private readonly _scriptLoader = inject(ScriptLoaderService);
   public readonly dialog = inject(MatDialog);
@@ -73,6 +95,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscribeToAuthenticationState();
     this.subscribeToWarningAnnouncements();
     this.subscribeToExpiryAnnouncements();
+    this.subscribeToStorytimeAvailability();
 
     // Poll banners + unread count on a single cadence for the whole app.
     // Skip in lighthouse-audit mode to avoid non-critical network noise.
@@ -158,6 +181,30 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Resolves whether Storytime is available, for the navigation to act on.
+   *
+   * Fetched once at the root rather than by the sidebar itself: the sidebar
+   * renders on every page and in most component tests, so giving it an HTTP
+   * dependency would make it expensive to render and awkward to test
+   * everywhere it appears.
+   *
+   * Asks whether the feature should be offered rather than whether it is on,
+   * so a backend that could not be reached leaves the navigation alone: the
+   * entry stays, and following it reaches the notice explaining the outage.
+   * Only the server saying the feature is off takes the entry away.
+   *
+   * @returns void
+   */
+  private subscribeToStorytimeAvailability() {
+    this._storytimeService
+      .isOffered()
+      .pipe(takeUntil(this.destroy$), observeInZone(this._zone, this._cdr))
+      .subscribe(isOffered => {
+        this.isStorytimeOffered = isOffered;
+      });
+  }
+
+  /**
    * Subscribes to authentication state changes from AuthService to manage auto-logout countdown timer
    *
    * @returns void
@@ -165,7 +212,7 @@ export class AppComponent implements OnInit, OnDestroy {
    */
   private subscribeToAuthenticationState() {
     this._authService.isAuthenticated$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.destroy$), observeInZone(this._zone, this._cdr))
       .subscribe(loggedIn => {
         this.isLoggedIn = loggedIn;
         if (this.isLoggedIn) {
@@ -279,6 +326,11 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((stayLoggedIn = false) => {
         if (stayLoggedIn) {
+          // Answering the dialog is the clearest sign of the user there is.
+          // Activity is otherwise ignored once the warning is due, so without
+          // this the renewed session would keep the deadline it was warning
+          // about and warn again immediately.
+          this._authService.markActivity();
           this._authService
             .refreshToken()
             .pipe(takeUntil(this.destroy$))
@@ -309,6 +361,10 @@ export class AppComponent implements OnInit, OnDestroy {
       this._zone.run(() => {
         this.autoLogoutCountdown =
           this._authService.getSecondsUntilLoginSessionExpiry();
+        // The countdown is read through an input binding on the header, and
+        // this component is `OnPush` like every other. Re-entering the zone
+        // gets a tick; only the mark gets this view included in it.
+        this._cdr.markForCheck();
         if (this.autoLogoutCountdown <= 0) {
           this.stopCountdown();
 

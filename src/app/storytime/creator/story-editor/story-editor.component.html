@@ -1,0 +1,257 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Story"></app-loading-bar>
+}
+
+<div
+  id="storytime-story-editor-page"
+  class="storytime-page"
+>
+  <h1>{{ isNew ? "Create a Story" : "Edit Story" }}</h1>
+
+  @if (isJoiningArc) {
+    <p class="storytime-intro">
+      This Story joins the Arc you came from as soon as you save it, and you
+      will be taken straight to its Chapters.
+    </p>
+  }
+
+  <!--
+    The rest of a Story is reached from here rather than only from the list a
+    creator came through. Saving a new Story leaves them on this page, and a
+    Story with nothing in it is exactly the point at which somebody wants to
+    start writing a Chapter — sending them back to the list first is a step for
+    its own sake.
+  -->
+  @if (story) {
+    <nav class="storytime-page-actions">
+      <a
+        class="lcars-btn lcars-btn-auto green"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "stories",
+  story.id,
+  "chapters",
+]'
+      >Chapters</a>
+      <a
+        class="lcars-btn lcars-btn-auto bluey"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "stories",
+  story.id,
+  "characters",
+]'
+      >Cast</a>
+      <a
+        class="lcars-btn lcars-btn-auto bluey"
+        [routerLink]='[
+  "/",
+  appRoutes.STORYTIME,
+  "manage",
+  "stories",
+  story.id,
+  "collaborators",
+]'
+      >Collaborators</a>
+      <a
+        class="lcars-btn lcars-btn-auto sky"
+        [routerLink]='["/", appRoutes.STORYTIME, "manage", "stories"]'
+      >Back to your Stories</a>
+    </nav>
+  }
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Could not save"
+      [message]="errorMessage"
+    ></app-lcars-error-message>
+  }
+
+  <form
+    [formGroup]="form"
+    class="storytime-form"
+    (ngSubmit)="save()"
+  >
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Story Details</span>
+      </div>
+
+      <div class="storytime-panel">
+        <div class="form-row">
+          <div class="lcars-input-container perano storytime-field-full">
+            <label for="story-title">Title</label>
+            <input
+              id="story-title"
+              type="text"
+              formControlName="title"
+              maxlength="200"
+              required
+            />
+            @if (form.controls["title"].touched && form.controls["title"].invalid) {
+              <small class="field-error">A title is required.</small>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container bluey">
+            <label for="story-slug">URL slug</label>
+            <input
+              id="story-slug"
+              type="text"
+              formControlName="slug"
+              maxlength="220"
+            />
+            <p class="field-hint">
+              Leave blank to build one from the title. Changing it keeps the old
+              address working.
+            </p>
+          </div>
+
+          <div class="lcars-input-container gold">
+            <label for="story-short-description">Short description</label>
+            <input
+              id="story-short-description"
+              type="text"
+              formControlName="shortDescription"
+              maxlength="500"
+            />
+            <p class="field-hint">
+              Shown in listings. Required before publishing.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="lcars-input-container perano storytime-field-full">
+            <label for="story-description">Description</label>
+            <textarea
+              id="story-description"
+              formControlName="description"
+              rows="8"
+            ></textarea>
+          </div>
+
+          <app-storytime-markdown-hint />
+        </div>
+      </div>
+    </section>
+
+    <section class="storytime-section">
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Story Settings</span>
+      </div>
+
+      <div class="storytime-panel">
+        <div class="form-row">
+          <app-storytime-setting-select
+            fieldId="story-rating"
+            label="Content rating"
+            controlName="contentRating"
+            colour="gold"
+            [options]="ratingOptions"
+          />
+
+          <app-storytime-setting-select
+            fieldId="story-completion"
+            label="Status"
+            controlName="completionState"
+            colour="tangerine"
+            [options]="completionOptions"
+          />
+        </div>
+
+        <div class="form-row">
+          <app-storytime-setting-select
+            fieldId="story-visibility"
+            label="Visibility"
+            controlName="visibility"
+            colour="bluey"
+            [options]="visibilityOptions"
+          />
+
+          <app-storytime-setting-select
+            fieldId="story-language"
+            label="Language"
+            controlName="languageCode"
+            colour="sunflower"
+            [options]="languageOptions"
+          >
+            <p>
+              The language the Story is written in. A Chapter written in another
+              language can say so on its own.
+            </p>
+          </app-storytime-setting-select>
+        </div>
+      </div>
+    </section>
+
+    <!--
+      Artwork waits for the Story to exist. A picture is set against a saved
+      Story rather than staged into this form, so offering it before the first
+      save would mean holding a file with nowhere to put it.
+    -->
+    @if (story) {
+      <section class="storytime-section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Artwork</span>
+        </div>
+
+        <div class="storytime-panel">
+          <p class="field-hint">
+            Both are optional. A Story without them shows no gap where they
+            would have been.
+          </p>
+
+          <app-storytime-image-manager
+            [slot]="imageSlots.STORY_BANNER"
+            [targetId]="story.id"
+            [imageUrl]="story.bannerImageUrl"
+            [imageAlt]="story.bannerImageAlt"
+            altControlName="bannerImageAlt"
+            (changed)="onImageChanged($event)"
+          ></app-storytime-image-manager>
+
+          <app-storytime-image-manager
+            [slot]="imageSlots.STORY_PROFILE"
+            [targetId]="story.id"
+            [imageUrl]="story.profileImageUrl"
+            [imageAlt]="story.profileImageAlt"
+            altControlName="profileImageAlt"
+            (changed)="onImageChanged($event)"
+          ></app-storytime-image-manager>
+        </div>
+      </section>
+    }
+
+    <app-storytime-editor-actions
+      [isSaving]="isSaving"
+      [canPublish]="canPublish"
+      [cancelLink]='["/", appRoutes.STORYTIME, "manage", "stories"]'
+      (publish)="publish()"
+    />
+  </form>
+
+  @if (story) {
+    <!--
+      The terms are confirmed here as well as on the list, because this is
+      where the publish that needs them is pressed.
+    -->
+    <app-storytime-content-policy-panel
+      heading="Publishing Terms"
+      [story]="story"
+      (accepted)="onPolicyAccepted($event)"
+    ></app-storytime-content-policy-panel>
+
+    <!-- Tagging needs something to tag, so it waits for the Story too. -->
+    <app-tag-picker
+      targetType="STORY"
+      [targetId]="story.id"
+    ></app-tag-picker>
+  }
+</div>

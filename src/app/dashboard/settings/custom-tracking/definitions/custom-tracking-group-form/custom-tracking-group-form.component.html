@@ -1,0 +1,87 @@
+<form
+  class="custom-tracking-form"
+  [formGroup]="groupForm"
+  (ngSubmit)="submit()">
+  <h3>
+    {{ isNew ? 'New ' + kind : 'Edit ' + kind
+    }}{{ context ? ' ' + context : '' }}
+  </h3>
+
+  <div class="lcars-input-container perano">
+    <label [attr.for]="formId + '-name'">Name</label>
+    <input
+      type="text"
+      formControlName="name"
+      [id]="formId + '-name'"
+      [attr.maxlength]="limits.MAX_LABEL_LENGTH"
+      [attr.aria-describedby]="formId + '-name-help'"
+      [attr.aria-invalid]="
+        groupForm.controls.name.touched && groupForm.controls.name.invalid
+      " />
+    @if (groupForm.controls.name.touched && groupForm.controls.name.invalid) {
+      <small class="field-error">
+        Give this {{ kind }} a name of {{ limits.MAX_LABEL_LENGTH }} characters
+        or fewer.
+      </small>
+    }
+  </div>
+  <p
+    class="field-hint"
+    [id]="formId + '-name-help'">
+    Two {{ kind }}s in the same place cannot share a name.
+  </p>
+
+  <div class="lcars-input-container bluey">
+    <label [attr.for]="formId + '-description'">Description</label>
+    <textarea
+      rows="2"
+      formControlName="description"
+      [id]="formId + '-description'"
+      [attr.maxlength]="limits.MAX_DESCRIPTION_LENGTH"
+      [attr.aria-describedby]="formId + '-description-help'"></textarea>
+  </div>
+  <p
+    class="field-hint"
+    [id]="formId + '-description-help'">
+    Optional. Up to {{ limits.MAX_DESCRIPTION_LENGTH }} characters.
+  </p>
+
+  <div class="custom-tracking-form-toggle">
+    <app-lcars-toggle
+      formControlName="publiclyVisible"
+      [label]="'Show this ' + kind + ' publicly'"
+      [ariaLabel]="'Show this ' + kind + ' publicly'">
+    </app-lcars-toggle>
+    <p class="field-hint">
+      Off unless you turn it on. Nothing appears publicly until every level
+      above it is public as well.
+    </p>
+  </div>
+
+  @if (isPublicBeneathPrivate) {
+    <output class="custom-tracking-notice">
+      This {{ kind }} will stay private for now, because the section it belongs
+      to is private. Make the section public as well for it to appear.
+    </output>
+  }
+
+  @if (errorMessage) {
+    <app-lcars-error-message [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <div class="custom-tracking-form-actions">
+    <button
+      type="submit"
+      class="lcars-btn lcars-btn-auto sunflower"
+      [disabled]="isSaving || groupForm.invalid">
+      {{ isNew ? 'Create' : 'Save' }}
+    </button>
+    <button
+      type="button"
+      class="lcars-btn lcars-btn-auto bluey"
+      [disabled]="isSaving"
+      (click)="cancelled.emit()">
+      Cancel
+    </button>
+  </div>
+</form>

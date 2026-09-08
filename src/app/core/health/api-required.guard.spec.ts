@@ -31,8 +31,8 @@ describe('ApiRequiredGuard', () => {
   beforeEach(() => {
     const spy = {
       checkOnce: jest.fn(),
-      markDown: jest.fn(),
-      markUp: jest.fn(),
+      recordFailure: jest.fn(),
+      recordSuccess: jest.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -49,24 +49,24 @@ describe('ApiRequiredGuard', () => {
     expect(guard).toBeTruthy();
   });
 
-  it('should call markDown if checkOnce returns DOWN', done => {
+  it('should record a failure if checkOnce returns DOWN', done => {
     healthServiceSpy.checkOnce.mockReturnValue(of(API_HEALTH_STATE_DOWN));
 
     guard.canActivate().subscribe(result => {
       expect(result).toBe(true);
-      expect(healthServiceSpy.markDown).toHaveBeenCalled();
-      expect(healthServiceSpy.markUp).not.toHaveBeenCalled();
+      expect(healthServiceSpy.recordFailure).toHaveBeenCalled();
+      expect(healthServiceSpy.recordSuccess).not.toHaveBeenCalled();
       done();
     });
   });
 
-  it('should call markUp if checkOnce returns UP', done => {
+  it('should record a success if checkOnce returns UP', done => {
     healthServiceSpy.checkOnce.mockReturnValue(of(API_HEALTH_STATE_UP));
 
     guard.canActivate().subscribe(result => {
       expect(result).toBe(true);
-      expect(healthServiceSpy.markUp).toHaveBeenCalled();
-      expect(healthServiceSpy.markDown).not.toHaveBeenCalled();
+      expect(healthServiceSpy.recordSuccess).toHaveBeenCalled();
+      expect(healthServiceSpy.recordFailure).not.toHaveBeenCalled();
       done();
     });
   });
@@ -81,8 +81,8 @@ describe('ApiRequiredGuard', () => {
         done.fail('Guard should not emit when health check errors');
       },
       error: () => {
-        expect(healthServiceSpy.markDown).not.toHaveBeenCalled();
-        expect(healthServiceSpy.markUp).not.toHaveBeenCalled();
+        expect(healthServiceSpy.recordFailure).not.toHaveBeenCalled();
+        expect(healthServiceSpy.recordSuccess).not.toHaveBeenCalled();
         done();
       },
     });

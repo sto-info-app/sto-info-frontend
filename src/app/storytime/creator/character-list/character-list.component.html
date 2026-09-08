@@ -1,0 +1,103 @@
+<section
+  id="storytime-character-list-page"
+  class="storytime-page">
+  <h1>Cast</h1>
+
+  <nav class="storytime-page-actions">
+    <a
+      class="lcars-btn lcars-btn-auto green"
+      [routerLink]="[
+        '/',
+        appRoutes.STORYTIME,
+        'manage',
+        'stories',
+        storyId,
+        'characters',
+        'new',
+      ]">
+      Add a Character
+    </a>
+    <a
+      class="lcars-btn lcars-btn-auto bluey"
+      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', storyId]">
+      Back to the Story
+    </a>
+  </nav>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Cast unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading cast"></app-loading-bar>
+  } @else if (entries.length === 0) {
+    <p class="storytime-empty">
+      This Story has no Characters yet. Add the first one.
+    </p>
+  } @else {
+    <ol class="storytime-character-list">
+      @for (entry of entries; track entry.character.id; let index = $index) {
+        <li
+          appStorytimeCastEntry
+          [entry]="entry"
+          [link]="[
+            '/',
+            appRoutes.STORYTIME,
+            'manage',
+            'characters',
+            entry.character.id,
+          ]">
+          <a
+            class="cta-icon"
+            title="Edit this Character"
+            aria-label="Edit this Character"
+            [routerLink]="[
+              '/',
+              appRoutes.STORYTIME,
+              'manage',
+              'characters',
+              entry.character.id,
+            ]">
+            <i
+              class="fa-solid fa-user-pen"
+              aria-hidden="true"></i>
+          </a>
+          <button
+            class="cta-icon"
+            type="button"
+            title="Move up"
+            aria-label="Move up"
+            [disabled]="index === 0"
+            (click)="moveUp(index)">
+            <i
+              class="fa-solid fa-circle-caret-up"
+              aria-hidden="true"></i>
+          </button>
+          <button
+            class="cta-icon"
+            type="button"
+            title="Move down"
+            aria-label="Move down"
+            [disabled]="index === entries.length - 1"
+            (click)="moveDown(index)">
+            <i
+              class="fa-solid fa-circle-caret-down"
+              aria-hidden="true"></i>
+          </button>
+          <button
+            class="cta-icon delete-icon"
+            type="button"
+            title="Delete Character"
+            aria-label="Delete Character"
+            (click)="remove(entry.character)">
+            <i
+              class="fa-solid fa-trash"
+              aria-hidden="true"></i>
+          </button>
+        </li>
+      }
+    </ol>
+  }
+</section>

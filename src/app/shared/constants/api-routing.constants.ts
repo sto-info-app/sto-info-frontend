@@ -29,6 +29,7 @@ export const API_URLS = {
 
   // User
   USER: apiUrl + '/user',
+  USER_SETTINGS: apiUrl + '/user/settings',
   CLOSE_ACCOUNT: apiUrl + '/user/close-account',
   UPDATE_USER_PROFILE: apiUrl + '/user/update-profile',
   UPDATE_USER_PROFILE_PIC: apiUrl + '/user/update-profile-pic',
@@ -54,6 +55,12 @@ export const API_URLS = {
 
   // Reputations
   REPUTATION: apiUrl + '/reputation',
+
+  // Admiralty campaigns
+  ADMIRALTY: apiUrl + '/admiralty',
+
+  // Commendation categories
+  COMMENDATION: apiUrl + '/commendation',
 
   // Research & Development
   RD: apiUrl + '/rd',
@@ -81,6 +88,47 @@ export const API_URLS = {
   MODERATION_ADMIN_REPORTS: apiUrl + '/admin/moderation/reports',
   MODERATION_ADMIN_USERS: apiUrl + '/admin/moderation/users',
 
+  // Access control (what the signed-in user is permitted to do, and the admin
+  // side that grants or withholds it per user)
+  ACCESS_CONTROL_ME: apiUrl + '/access-control/me',
+  ACCESS_CONTROL_ADMIN_PERMISSIONS:
+    apiUrl + '/admin/access-control/permissions',
+  ACCESS_CONTROL_ADMIN_USERS: apiUrl + '/admin/access-control/users',
+
+  // Storytime
+  STORYTIME_CONFIGURATION: apiUrl + '/storytime/configuration',
+  STORYTIME_ADMIN_CONFIGURATION: apiUrl + '/admin/storytime/configuration',
+  STORYTIME_STORIES: apiUrl + '/storytime/stories',
+  STORYTIME_MANAGE_STORIES: apiUrl + '/storytime/manage/stories',
+  STORYTIME_MANAGE_CHAPTERS: apiUrl + '/storytime/manage/chapters',
+  STORYTIME_MANAGE_CHARACTERS: apiUrl + '/storytime/manage/characters',
+  STORYTIME_MANAGE_COLLABORATORS: apiUrl + '/storytime/manage/collaborators',
+  STORYTIME_MANAGE_COLLABORATIONS: apiUrl + '/storytime/manage/collaborations',
+  STORYTIME_MANAGE_CREDITS: apiUrl + '/storytime/manage/credits',
+  STORYTIME_CREW_ROLES: apiUrl + '/storytime/crew-roles',
+  STORYTIME_MANAGE_MEDIA: apiUrl + '/storytime/manage/media',
+  STORYTIME_ARCS: apiUrl + '/storytime/arcs',
+  STORYTIME_MANAGE_ARCS: apiUrl + '/storytime/manage/arcs',
+  STORYTIME_ARC_MEMBERSHIPS: apiUrl + '/storytime/manage/arc-memberships',
+  STORYTIME_ARC_COLLABORATORS: apiUrl + '/storytime/manage/arc-collaborators',
+  STORYTIME_SPOTLIGHT: apiUrl + '/storytime/spotlight',
+  STORYTIME_TAGS: apiUrl + '/storytime/tags',
+  STORYTIME_ADMIN_TAGS: apiUrl + '/storytime/admin/tags',
+  STORYTIME_SEARCH: apiUrl + '/storytime/search',
+  STORYTIME_CREATORS: apiUrl + '/storytime/creators',
+  STORYTIME_REPORTS: apiUrl + '/storytime/reports',
+  STORYTIME_APPEALS: apiUrl + '/storytime/appeals',
+  STORYTIME_ADMIN_MODERATION: apiUrl + '/admin/storytime',
+  STORYTIME_ADMIN_SPOTLIGHT: apiUrl + '/admin/storytime/spotlight',
+  STORYTIME_ARC_COLLABORATION_INVITATIONS:
+    apiUrl + '/storytime/manage/arc-collaborations/invitations',
+  STORYTIME_PROGRESS: apiUrl + '/storytime/progress',
+  STORYTIME_REACTIONS: apiUrl + '/storytime/reactions',
+  STORYTIME_COMMENTS: apiUrl + '/storytime/comments',
+  STORYTIME_FOLLOWS: apiUrl + '/storytime/follows',
+  STORYTIME_FEED: apiUrl + '/storytime/feed',
+  STORYTIME_READING_LISTS: apiUrl + '/storytime/reading-lists',
+
   // News
   NEWS: apiUrl + '/news',
   NEWS_ADMIN: apiUrl + '/news/admin',
@@ -92,4 +140,18 @@ export const API_URLS = {
   NOTIFICATIONS_READ_ALL: apiUrl + '/notifications/read-all',
   NOTIFICATIONS_ADMIN: apiUrl + '/notifications/admin',
   NOTIFICATIONS_ADMIN_BANNERS: apiUrl + '/notifications/admin/banners',
+
+  // Custom Tracking
+  CUSTOM_TRACKING: apiUrl + '/custom-tracking',
+  CUSTOM_TRACKING_CONFIGURATION: apiUrl + '/custom-tracking/configuration',
+  CUSTOM_TRACKING_AGREEMENT: apiUrl + '/custom-tracking/agreement',
+  CUSTOM_TRACKING_AGREEMENT_STATUS:
+    apiUrl + '/custom-tracking/agreement/status',
+  CUSTOM_TRACKING_AGREEMENT_ACCEPTANCE:
+    apiUrl + '/custom-tracking/agreement/acceptance',
+  CUSTOM_TRACKING_SCOPES: apiUrl + '/custom-tracking/scopes',
+  CUSTOM_TRACKING_SECTIONS: apiUrl + '/custom-tracking/sections',
+  CUSTOM_TRACKING_TABS: apiUrl + '/custom-tracking/tabs',
+  CUSTOM_TRACKING_FIELDS: apiUrl + '/custom-tracking/fields',
+  CUSTOM_TRACKING_OPTIONS: apiUrl + '/custom-tracking/options',
 };

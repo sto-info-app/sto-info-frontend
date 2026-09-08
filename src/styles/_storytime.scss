@@ -1,0 +1,2830 @@
+@use 'sass:color';
+@use 'sass:list';
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// STO Storytime.
+// One partial for the whole feature rather than a stylesheet per component:
+// every page is built from the same handful of shapes — a panel, a list of
+// works, a row of controls, a form — and holding them together is what keeps a
+// Story page and an Arc page recognisably the same site.
+// Everything here is scoped by the `storytime-` prefix its templates use, so
+// nothing leaks into the rest of the application.
+// ---
+// Storytime does not define its own buttons or fields. A button is
+// `.lcars-btn` with a colour class, a text field is `.lcars-input-container`,
+// a chooser is `.lcars-select-container` and a switch is `<app-lcars-toggle>` —
+// the same controls the dashboard, the admin pages and the registry are built
+// from. What is left here is layout: where those controls sit and how far
+// apart, plus the shapes the rest of the site has no equivalent for.
+
+// The panel a block of Storytime sits in. Deliberately the same surface the
+// admin pages use for theirs, so a form on a Story page and a form on the news
+// admin page read as the same kind of thing.
+@mixin storytime-panel-surface {
+  @include mixins.lcars-panel-surface;
+}
+
+// A row in any of the feature's lists.
+@mixin storytime-row {
+  @include mixins.lcars-card;
+
+  list-style: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+// The shape every Storytime panel takes, drawn by the shared mixins rather
+// than here: it is also the shape a captain card on the dashboard takes and
+// the shape a field takes in the Custom Tracking builder, so it belongs to the
+// theme rather than to this feature. What is left here is the one part that is
+// Storytime's own — the class its name is carried in.
+@mixin storytime-panel-card($colour) {
+  @include mixins.lcars-panel-card($colour);
+}
+
+// The block across the top, carrying the name.
+@mixin storytime-panel-heading($colour) {
+  @include mixins.lcars-panel-card-heading($colour);
+
+  .storytime-panel-card__name {
+    @include mixins.lcars-panel-card-name;
+  }
+}
+
+// A heading that names a work, wherever one appears.
+@mixin storytime-work-title {
+  font-family: vars.$font-antonio;
+  font-size: 1.15rem;
+  color: vars.$lcars-sunflower;
+  text-decoration: none;
+}
+
+@mixin storytime-work-title-active {
+  color: vars.$lcars-gold;
+  text-decoration: underline;
+}
+
+// The small print under a title: word counts, dates, ratings.
+@mixin storytime-meta {
+  font-size: 0.8rem;
+  color: vars.$lcars-grey-light;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// The same, when it is a list. Several of these are `ul`s — the facts are a
+// list and the markup says so — and left alone they arrive with disc bullets
+// and the global left indent, which reads as content rather than as a caption.
+@mixin storytime-meta-list {
+  @include storytime-meta;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+// The label on a field or a group of them.
+@mixin storytime-label-colour {
+  color: vars.$lcars-perano;
+  font-family: vars.$font-antonio;
+  text-transform: uppercase;
+}
+
+// Anything the reader is told: an error, a status, a note.
+@mixin storytime-message($colour) {
+  font-size: 0.9rem;
+  color: $colour;
+  margin: 0.5rem 0;
+}
+
+// How far through something a reader is.
+// ---
+// A `progress` element is inline and carries a default width of its own, so
+// left alone it renders as a short bar the width of a text field with whatever
+// follows it sitting on the same line — which is how an Arc's "continue
+// reading" link ended up welded to the end of its own progress bar.
+// ---
+// A class rather than a mixin, because the parts of the bar are pseudo-elements
+// and have nothing to attach to until a mixin is used. Every bar in the feature
+// wears this and adds only its own spacing.
+.storytime-progress {
+  display: block;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: vars.$lcars-grey-border;
+  overflow: hidden;
+  appearance: none;
+
+  &::-webkit-progress-bar {
+    background: vars.$lcars-grey-border;
+  }
+
+  &::-webkit-progress-value,
+  &::-moz-progress-bar {
+    background: vars.$lcars-green;
+  }
+}
+
+// Page furniture
+// -----------------------------------------------------------------------------
+
+// The LCARS frame styles every `nav` as part of the sidebar: capped at 660px,
+// right-aligned, with each `nav a` a 210px violet button. That is right for the
+// frame and wrong for a row of links inside a page, so Storytime's own
+// navigation blocks start from a clean slate and then say what they are. The
+// reset is here rather than in the theme because the frame's rule is load
+// bearing everywhere else.
+// `:where()` keeps the reset at one class of specificity: enough to outrank
+// the frame's `nav a`, low enough that a nav's own rules below still outrank
+// the reset without having to repeat themselves.
+// `max-width` is safe to reset from here because nothing inside the feature
+// sets one. Alignment is not: `.storytime-chapter__navigation` wants its two
+// links pushed apart, so `justify-content` is left to each row's own class,
+// which outranks the frame's element rule without having to outrank this one.
+nav[class^='storytime-'] {
+  max-width: none;
+}
+
+nav[class^='storytime-'] :where(a, [aria-current='page']) {
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  text-align: inherit;
+}
+
+// Every Storytime page gets the same gutter and measure as the rest of the
+// site's full-width pages, so moving between a Story and the dashboard does
+// not move the content sideways.
+.storytime-page {
+  max-width: 1200px;
+  padding: 2rem;
+  margin: 0 auto;
+}
+
+// An anchor wearing a button's clothes is still an anchor, and the global
+// underline would show through the pill.
+.storytime-page a.lcars-btn,
+.storytime-page a.lcars-btn:hover {
+  text-decoration: none;
+}
+
+// The theme gives a bare `button` a 16px bottom margin and 8px sides, which
+// `.lcars-btn` never undoes. An anchor in the same row has no such margin, so a
+// centred row aligns the button's margin box against the anchor's border box
+// and stands the two 8px apart — Save above Cancel. Spacing in these rows comes
+// from their own `gap`, so the margin has nothing to contribute.
+.storytime-page .lcars-btn {
+  margin: 0;
+}
+
+// The line under a page's heading saying what the page is for, and the one-line
+// summaries that sit under a title in a list. Same voice, same colour.
+.storytime-intro,
+.storytime-landing__summary,
+.storytime-arc-list__intro,
+.storytime-reading-lists__intro,
+.storytime-feed__intro,
+.storytime-policy__intro,
+.storytime-report__intro {
+  color: vars.$lcars-grey-light;
+  margin-bottom: 1rem;
+}
+
+// An intro runs the full width of the page. It sits directly under a
+// full-width heading and above full-width content, and a measure-capped line
+// between the two reads as a column that has lost its other half. The summaries
+// keep a measure, because they are read as a list of short lines rather than as
+// prose and are already held by whatever panel or row they sit in.
+.storytime-landing__summary {
+  max-width: 60ch;
+}
+
+// Every "there is nothing here" line in the feature. One rule, because an
+// empty Story list and an empty reading list should not look like different
+// kinds of absence.
+.storytime-empty {
+  @include storytime-panel-surface;
+
+  color: vars.$lcars-grey-light;
+  font-style: italic;
+}
+
+// An empty state already sitting in a panel does not need a panel of its own;
+// a box inside a box reads as something having gone wrong.
+.storytime-panel > .storytime-empty {
+  margin-top: 0;
+  padding: 0;
+  background: none;
+}
+
+// A heading bar and the block it introduces.
+.storytime-section {
+  margin-top: 1.5rem;
+}
+
+// A heading that opens a row sits at the top of it. The row's own padding is
+// the space it needs, and the heading's leading margin on top of that drops the
+// title a line and a half into a box it is supposed to be naming.
+.storytime-chapter-list__item > h2:first-child,
+.storytime-spotlight-admin__entry > h2:first-child {
+  margin-top: 0;
+}
+
+// What each kind of thing is coloured, everywhere it appears in a panel.
+// Keyed by what the panel is rather than what state it is in, so a reader
+// learns a colour once. Every one of them carries black text at 4.5:1 or
+// better, which is what allows the name to sit on the block.
+$storytime-panel-colours: (
+  'story': vars.$lcars-sunflower,
+  'chapter': vars.$lcars-perano,
+  // Violet will not carry black text at this size, so the Arc takes it a shade
+  // lighter — the same shade its card on the landing page wears.
+  'arc': color.adjust(vars.$lcars-violet, $lightness: 10%),
+  'character': vars.$lcars-green,
+  'crew': vars.$lcars-sky,
+  'spotlight': vars.$lcars-gold,
+  'list': vars.$lcars-tangerine,
+  'activity': vars.$lcars-orange,
+  'invitation': vars.$lcars-cool,
+  'moderation': vars.$lcars-red,
+  // A video embedded in a Chapter. Its own colour rather than the Chapter's,
+  // because it is somebody else's work sitting inside the writing and should
+  // not be read as part of it.
+  'video': vars.$lcars-c47,
+  // The reader's own record of their reading, rather than a thing in a list.
+  // Takes the frame's own cyan, which no kind of content uses, so it is never
+  // read as one of them.
+  'progress': vars.$lcars-c48,
+);
+
+// A conversation is one kind of thing all the way down, so a colour cannot
+// mean what a comment is the way it does elsewhere. It marks where one comment
+// ends and the next begins instead: each in turn from this list, with a reply
+// taking its parent's so a thread reads as one block rather than as a run of
+// unrelated panels.
+// ---
+// Every one of them carries black at 4.5:1 or better, which is what lets the
+// name sit on the bar. Kept clear of the colours a moderation notice uses, so
+// a comment is never mistaken for a warning about one.
+$storytime-comment-colours: (
+  vars.$lcars-bluey,
+  vars.$lcars-perano,
+  vars.$lcars-tangerine,
+  vars.$lcars-sky,
+  vars.$lcars-gold,
+  vars.$lcars-green
+);
+
+@each $colour in $storytime-comment-colours {
+  $index: list.index($storytime-comment-colours, $colour) - 1;
+
+  .storytime-panel-card--comment-#{$index} {
+    @include storytime-panel-card($colour);
+
+    > .storytime-panel-card__heading {
+      @include storytime-panel-heading($colour);
+    }
+  }
+}
+
+@each $kind, $colour in $storytime-panel-colours {
+  .storytime-panel-card--#{$kind} {
+    @include storytime-panel-card($colour);
+
+    > .storytime-panel-card__heading {
+      @include storytime-panel-heading($colour);
+    }
+  }
+}
+
+// How a panel answers the pointer. Neither of these varies with the colour, so
+// both are written once against the classes every panel carries rather than
+// from inside the mixins — which would put them behind a `&` with no selector
+// to resolve against until the mixin is used.
+// ---
+// This has to follow the loop above: `.lcars-card` sets its own lift on hover
+// at the same specificity, and a panel is meant to stay still.
+.storytime-panel-card:hover {
+  transform: none;
+}
+
+.storytime-panel-card__heading:hover,
+.storytime-panel-card__heading:focus-visible {
+  filter: brightness(1.08);
+  text-decoration: none;
+}
+
+// What a panel holds under its name.
+.storytime-panel-card__body {
+  @include mixins.lcars-panel-card-body;
+}
+
+// A panel that can be acted on puts the body and the controls side by side.
+.storytime-panel-card__main {
+  @include mixins.lcars-panel-card-main;
+}
+
+.storytime-panel-card__main > .storytime-panel-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+// The controls live in their own darkened strip at the end of the row.
+.storytime-panel-card__controls {
+  @include mixins.lcars-panel-card-controls;
+}
+
+// What the bar says besides the name, at its right-hand end.
+.storytime-panel-card__marks {
+  @include mixins.lcars-panel-card-marks;
+}
+
+.storytime-panel-card__badge {
+  @include mixins.lcars-panel-card-badge;
+}
+
+// A panel stacks what it holds on the same rhythm a form uses between its
+// sections. Without this its rows are plain blocks carrying no margin, and two
+// fields end up flush against one another.
+.storytime-panel {
+  @include storytime-panel-surface;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  // The gap is the rhythm. The block margins these elements bring with them
+  // would only add to it, and unevenly.
+  > * {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+// Forms
+// -----------------------------------------------------------------------------
+
+.storytime-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// Fields sit side by side until there is no room for them, at which point they
+// wrap rather than shrinking into something too narrow to type in.
+.storytime-form .form-row,
+.storytime-panel .form-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.storytime-form .form-row > .lcars-input-container,
+.storytime-form .form-row > .lcars-select-container,
+.storytime-panel .form-row > .lcars-input-container,
+.storytime-panel .form-row > .lcars-select-container {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 0;
+}
+
+// A field that has no business sharing its line: a title, a Chapter's body.
+.storytime-field-full {
+  flex-basis: 100%;
+}
+
+// The heading over a group of switches. A `legend` would need a `fieldset`
+// around it, and a fieldset's border cuts across the panel it sits in.
+.storytime-form__legend {
+  @include storytime-label-colour;
+
+  margin: 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+}
+
+// What a field means, under the field. Inside the input's own container, where
+// the background is dark enough to read it — never inside a select's, which is
+// a solid colour. A chooser that needs explaining gets a help popup instead.
+.storytime-page .field-hint,
+.storytime-report__form .field-hint,
+#storytime-image-dialog-container .field-hint {
+  color: vars.$lcars-grey-light;
+  box-sizing: border-box;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin: 0.35rem 0 0;
+
+  // Padded on all four sides: the container's coloured bottom rule closes the
+  // field off directly under this line, and text sitting on it reads as an
+  // overflow rather than as part of the field.
+  padding: 0 1rem 0.5rem;
+}
+
+.storytime-page .field-error,
+.storytime-report__form .field-error {
+  color: vars.$lcars-orange;
+  font-size: 0.8rem;
+}
+
+// A row of switches, in a form or against a record.
+.storytime-toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+
+  // A switch keeps its label on one line, so a flex item allowed to shrink
+  // below its content runs that label straight through the switch next to it.
+  > * {
+    flex: 0 0 auto;
+  }
+
+  // The theme styles a bare `button` as a fixed 200px LCARS pill, and the
+  // switch is a button whose own stylesheet never says otherwise. Everywhere
+  // else it is used the labels are a word or two and fit; Storytime's say what
+  // a collaborator may do, and at 200px they run out of the switch and through
+  // the one beside it.
+  .lcars-toggle {
+    width: auto;
+    height: auto;
+    margin: 0;
+  }
+}
+
+// One trait and the button that removes it.
+.storytime-trait-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+
+  .lcars-input-container {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+
+  .lcars-btn {
+    flex: 0 0 auto;
+  }
+}
+
+// Button rows
+// -----------------------------------------------------------------------------
+// Three of them, because a form's Save is not the same thing as a list row's
+// Publish. All three stop their pills from shrinking: a flex item may shrink
+// below its content, and a label spilling out of its pill is the one way an
+// LCARS button can look broken.
+
+// The shared actions component wraps the row in a host element, which a form
+// laying its sections out as a flex column would otherwise treat as the
+// section rather than the row. Making it a block hands the row the full width
+// the plain `div` had before it was lifted into a component of its own.
+app-storytime-editor-actions {
+  display: block;
+}
+
+// What a form ends with, against the right-hand edge like every other form on
+// the site.
+.storytime-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+
+  .lcars-btn {
+    flex: 0 0 auto;
+    min-width: 10rem;
+  }
+}
+
+// What a page opens with: create a Story, add a Chapter, go back.
+.storytime-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  .lcars-btn {
+    flex: 0 0 auto;
+  }
+}
+
+// What one record in a list offers.
+.storytime-actions,
+.storytime-character-list__controls,
+.storytime-arc-stories__order,
+.storytime-tag-admin__actions,
+.storytime-comments__actions,
+.storytime-reading-list__controls,
+.storytime-reading-list__item-controls,
+.storytime-library__filters,
+.storytime-search__kinds,
+.storytime-removed__actions,
+.storytime-story__progress-actions,
+.storytime-spotlight__actions,
+.storytime-story__social,
+.storytime-story__report,
+.storytime-arc__social,
+.storytime-chapter__social,
+.storytime-chapter__progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+
+  .lcars-btn {
+    flex: 0 0 auto;
+  }
+}
+
+// The conversation stands off whatever it follows. A Story, a Chapter and an
+// Arc all put the row of reactions directly above it, and on that row's own
+// margin the heading bar read as part of the row rather than as the start of
+// the next thing.
+// ---
+// A block host as well, because a bare custom element is inline, and an inline
+// box has no top margin to give.
+.storytime-page app-comment-thread {
+  display: block;
+  margin-top: 2rem;
+}
+
+// A count on a button that opens what it counts. The badge rule in `styles.scss`
+// is scoped to `.lcars-text-bar`, so inside a pill the number would render as
+// bare text tacked onto the label; the crew page restates it for its side-menu
+// buttons for the same reason. A dark pill reads on every button colour the
+// feature uses.
+.storytime-page .lcars-btn .header-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  margin-left: 0.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: vars.$lcars-black;
+  color: vars.$lcars-white;
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+// A row of icon-only controls is tighter than a row of pills: the icons carry
+// their meaning in a tooltip, not in a label that needs room.
+.storytime-character-list__controls,
+.storytime-arc-stories__order,
+.storytime-tag-admin__actions,
+.storytime-reading-list__item-controls {
+  gap: 1rem;
+  font-size: 1.1rem;
+}
+
+// The controls on a list row belong at its right-hand end, where the eye
+// arrives after reading the row.
+.storytime-character-list__controls,
+.storytime-tag-admin__actions {
+  margin-left: auto;
+}
+
+// A disabled icon control has to look disabled: `.cta-icon` is a bare `button`
+// with no state of its own, and an arrow that cannot move anything still
+// invites a press.
+.storytime-page .cta-icon:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+
+  &:hover {
+    color: vars.$lcars-perano;
+    transform: none;
+  }
+}
+
+// A chooser and its explanation
+// -----------------------------------------------------------------------------
+// A `.lcars-select-container` is a solid block of colour, so hint text inside
+// one cannot be read. Anything that needs explaining says so through the mark
+// beside it instead, which also keeps a row of choosers the same height
+// whether or not they have anything to explain.
+
+.storytime-setting-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.storytime-setting-field .lcars-select-container {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.storytime-setting-help {
+  position: relative;
+  flex: 0 0 24px;
+}
+
+.storytime-setting-help[open] .storytime-setting-help__trigger {
+  background-color: vars.$lcars-green;
+  color: #000;
+}
+
+.storytime-setting-help__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: #b8e8ff;
+  background: #1d2d3e;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 700;
+  list-style: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background-color 120ms ease;
+}
+
+.storytime-setting-help__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.storytime-setting-help__trigger::marker {
+  display: none;
+}
+
+.storytime-setting-help__trigger:hover {
+  background-color: #263e54;
+}
+
+.storytime-setting-help__trigger:focus-visible {
+  outline: 2px solid #6cf;
+  outline-offset: 2px;
+}
+
+.storytime-setting-help__popup {
+  display: block;
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 10;
+  width: min(360px, calc(100vw - 80px));
+  padding: 10px 12px;
+  border: 1px solid #9de0ff;
+  border-radius: 8px;
+  background: #1d2d3e;
+  color: #f2f8ff;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.storytime-setting-help__popup p {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0 0 0.65rem;
+}
+
+.storytime-setting-help__popup p:last-child {
+  margin-bottom: 0;
+}
+
+.storytime-setting-help__popup strong {
+  color: vars.$lcars-perano;
+  font-family: vars.$font-antonio;
+  text-transform: uppercase;
+}
+
+// A reference is read rather than glanced at, so it gets the width a chooser's
+// one-line explanations do not need, and a ceiling with a scroll behind it so
+// a long list cannot run off the bottom of the window.
+.storytime-setting-help__popup--wide {
+  width: min(560px, calc(100vw - 80px));
+  max-height: min(60vh, 30rem);
+  overflow-y: auto;
+}
+
+// Markdown, and the reference behind it
+// -----------------------------------------------------------------------------
+
+// The note under a field that takes Markdown, with the mark that opens the
+// whole reference beside it. A row rather than two lines, so the mark belongs
+// to the note rather than floating under the field.
+// ---
+// It sits below its field rather than inside it, unlike every other field
+// hint. A `.lcars-input-container` clips its contents so the coloured label
+// follows the container's rounded corner, and anything opening out of one is
+// cut off at the edge of the box — which is the whole of a reference popup.
+// Below the field it opens over the form, which is where it can be read.
+.storytime-form app-storytime-markdown-hint,
+.storytime-panel app-storytime-markdown-hint {
+  display: block;
+  flex-basis: 100%;
+
+  // Closes the row's own gap, so the note reads as belonging to the field
+  // above it rather than as a line of its own.
+  margin-top: -0.85rem;
+}
+
+.storytime-markdown-hint {
+  display: flex;
+  align-items: flex-start;
+}
+
+.storytime-page .storytime-markdown-hint .field-hint {
+  flex: 1;
+  min-width: 0;
+}
+
+// Lined up with the note's first line rather than the container's edge: the
+// note carries the field's own padding, and the mark has none.
+.storytime-markdown-hint .storytime-setting-help {
+  margin: 0.35rem 1rem 0.5rem 0;
+}
+
+// What you type, and what it does underneath it. A description list because
+// that is the shape of the thing; a table would want a header row to say the
+// same, and this is read a pair at a time rather than scanned across.
+// ---
+// Scoped to the popup it is shown in rather than named on its own. Two rules
+// already reach this content two selectors deep — the popup styles its own
+// paragraphs into the label-above-explanation pairs a chooser needs, and
+// Material's typography claims every `h2` on the page — so a single class
+// naming this content is not heard over either of them, and the reference
+// comes out with headings half again the size of the panel around it.
+.storytime-setting-help__popup .storytime-markdown-reference {
+  &__heading {
+    @include storytime-label-colour;
+
+    // A step above the popup's own text rather than a page heading: this sits
+    // inside a panel, and the labels it is grouping are already at body size.
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    margin: 1rem 0 0.4rem;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  // One sentence of prose, so it wants none of the popup's column layout —
+  // and the popup's own text size rather than the theme's paragraph size.
+  &__intro {
+    display: block;
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  &__list {
+    margin: 0;
+    padding: 0;
+
+    dt {
+      margin-top: 0.5rem;
+    }
+
+    // The syntax has to survive being read literally, so it sits on its own
+    // surface rather than relying on the theme's colour alone.
+    dt code {
+      display: inline-block;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      background: rgb(0 0 0 / 35%);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    dd {
+      margin: 0.15rem 0 0;
+    }
+  }
+
+  &__notes {
+    margin: 1rem 0 0;
+    padding-left: 1.1rem;
+
+    li {
+      margin-top: 0.4rem;
+    }
+  }
+}
+
+// Notes and asides
+// -----------------------------------------------------------------------------
+
+p.storytime-fan-notice,
+.storytime-fan-notice {
+  font-size: 0.7rem;
+  color: vars.$lcars-grey-light;
+  line-height: 1.5;
+  font-style: italic;
+  margin: 0;
+}
+
+// Stories and Arcs
+// -----------------------------------------------------------------------------
+
+// One Story to a row, each the full width of the page, so a reader compares
+// them down a column rather than across a grid of cards.
+.storytime-story-list {
+  padding: 0;
+  margin: 0 0 1rem;
+  list-style: none;
+}
+
+// The component renders into an element of its own, which is inline until
+// told otherwise and would leave every panel sharing a line.
+.storytime-story-list app-story-card {
+  display: block;
+}
+
+// A Story summarised for a listing. The shape and the colour come from the
+// shared panel; what is left is the picture at the left and the facts beside
+// it, laid out as a captain card lays out the same two things.
+.storytime-story-card {
+  // The frame the picture sits in, sized and bordered as a captain's is.
+  &__image {
+    flex: 0 0 auto;
+    width: 100px;
+    height: 100px;
+    margin: 0.75rem 0 0.75rem 1rem;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border: 2px solid vars.$lcars-c47;
+      background: rgb(0 0 0 / 40%);
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__summary {
+    margin: 0;
+    color: vars.$lcars-white;
+    font-size: 0.95rem;
+    max-width: 80ch;
+  }
+
+  // The facts wrap rather than holding a fixed two columns: they are short and
+  // a Story panel is the full width of the page. Named alongside the grid it
+  // varies, because the site's own two-column rule is written after this file
+  // and would otherwise win on source order.
+  &__facts.info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, max-content));
+    gap: 0.75rem 2.5rem;
+  }
+
+  // A Story may be read as part of more than one Arc. The names sit on as many
+  // lines as they need rather than stretching that one fact's column past the
+  // rest of them.
+  &__arcs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+  }
+}
+
+// The facts under a work's title — a Story's rating and status, a Chapter's
+// length — set as the site sets a fact and its name everywhere else. Wrapping
+// rather than a fixed two columns, because there are only a few of them and
+// they are short. Named alongside the grid it varies, because the site's own
+// rule is written after this file and would otherwise win on source order.
+.storytime-facts.info-grid {
+  grid-template-columns: repeat(auto-fit, minmax(140px, max-content));
+  gap: 1rem 2.5rem;
+  margin-bottom: 1rem;
+}
+
+// The author's name, when it leads to their profile. A value is set in white,
+// so a link inside one has to say it is a link rather than relying on the
+// colour it inherits.
+.storytime-facts__author {
+  color: vars.$lcars-perano;
+
+  &:hover,
+  &:focus-visible {
+    color: vars.$lcars-sky;
+  }
+}
+
+// A fact whose name needs explaining carries the same help control a setting
+// does, beside the name rather than above the value.
+.storytime-facts__label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  // The control is sized for a form row, where it sits alone at the end of a
+  // line. Here it stands next to a caption a third of its height, and full
+  // size would make the row about the question mark rather than the fact.
+  .storytime-setting-help {
+    flex: 0 0 18px;
+  }
+
+  .storytime-setting-help__trigger {
+    width: 18px;
+    height: 18px;
+    font-size: 13px;
+  }
+
+  // Elsewhere the trigger sits at the right-hand end of its row and the popup
+  // hangs back to the left of it. These are at the left of the page, so it
+  // opens the other way or it opens off the edge.
+  // The explanation is sentences, and it is inside a label that puts its
+  // caption in capitals — which the sentences inherit, and three paragraphs
+  // shouted at a reader is not an explanation.
+  .storytime-setting-help__popup {
+    right: auto;
+    left: 0;
+    text-transform: none;
+  }
+}
+
+.storytime-story {
+  &__banner,
+  &__description,
+  &__summary {
+    margin-bottom: 1rem;
+  }
+
+  &__banner {
+    width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+  }
+
+  &__summary {
+    font-size: 1.05rem;
+    color: vars.$lcars-white;
+  }
+
+  &__progress {
+    margin-bottom: 2rem;
+  }
+
+  // Where the reading stands, set apart from what to do with it next.
+  &__progress-marks {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid vars.$lcars-grey-border;
+
+    > .label {
+      @include mixins.lcars-label;
+
+      display: block;
+    }
+
+    // The row above already spaces itself from what precedes it; a second
+    // margin here would double the gap under the rule.
+    .storytime-story__progress-actions {
+      margin-top: 0.35rem;
+    }
+  }
+
+  &__new-chapters {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-orange;
+    color: vars.$lcars-black;
+  }
+
+  &__report-message {
+    @include storytime-message(vars.$lcars-green);
+  }
+}
+
+.storytime-arc {
+  &__banner {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+  }
+
+  &__summary,
+  &__description {
+    color: vars.$lcars-white;
+    margin-bottom: 1rem;
+  }
+
+  &__progress {
+    @include storytime-panel-surface;
+  }
+
+  &__progress-summary {
+    @include storytime-meta;
+  }
+
+  &__continue {
+    display: inline-block;
+    margin-top: 0.75rem;
+    text-decoration: none;
+  }
+
+  &__stories {
+    padding: 0;
+    margin: 0;
+    counter-reset: storytime-arc-order;
+  }
+
+  &__story {
+    @include storytime-row;
+
+    counter-increment: storytime-arc-order;
+
+    a {
+      @include storytime-work-title;
+
+      &:hover,
+      &:focus {
+        @include storytime-work-title-active;
+      }
+    }
+
+    &::before {
+      content: counter(storytime-arc-order) '.';
+      color: vars.$lcars-perano;
+      font-family: vars.$font-antonio;
+      margin-right: 0.5rem;
+    }
+  }
+
+  &__note,
+  &__story-summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+}
+
+.storytime-arc-list {
+  padding: 0;
+  margin: 0;
+
+  &__entry {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  &__image {
+    width: 120px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  &__summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+// Chapters
+// -----------------------------------------------------------------------------
+
+.storytime-chapter-list {
+  padding: 0;
+  margin: 0;
+
+  &__synopsis {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  &__meta {
+    @include storytime-meta-list;
+
+    margin: 0.5rem 0;
+  }
+
+  &__removed {
+    color: vars.$lcars-cardinal;
+    font-size: 0.85rem;
+  }
+}
+
+.storytime-chapter {
+  &__cover {
+    width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+  }
+
+  &__synopsis {
+    color: vars.$lcars-grey-light;
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
+
+  // The Chapter itself. Wider line height and a capped measure, because this
+  // is the one part of Storytime somebody reads for half an hour at a time.
+  &__body {
+    color: vars.$lcars-white;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 70ch;
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    h2,
+    h3 {
+      font-family: vars.$font-antonio;
+      color: vars.$lcars-sunflower;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    blockquote {
+      border-left: 3px solid vars.$lcars-perano;
+      padding-left: 1rem;
+      color: vars.$lcars-grey-light;
+      margin: 1rem 0;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+  }
+
+  // The way on and the way back, one pushed to each end so the pair reads as
+  // a direction rather than a list. Both are LCARS buttons, as every other way
+  // out of a Storytime page is.
+  // The way on and the way back, one pushed to each end so the pair reads as a
+  // direction rather than a list. Both are LCARS buttons, as every other way
+  // out of a Storytime page is.
+  // ---
+  // A first Chapter has no way back and a last one has no way on, so the
+  // alignment is done by pushing rather than by spacing between: the row ends
+  // right, and Back claims the space to its own right when it is there. That
+  // puts a lone Next at the right and a lone Back at the left without the row
+  // having to know which of them it has.
+  &__navigation {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin: 2rem 0 1rem;
+
+    // A Chapter title can be long, and a pill sized to its own label would
+    // otherwise take the whole row and push the other one off the end. The
+    // label shortens instead, which is what the pair is for.
+    .lcars-btn {
+      flex: 0 1 auto;
+      max-width: calc(50% - 0.5rem);
+      overflow: hidden;
+    }
+
+    // Named through the row rather than on its own, because the feature zeroes
+    // the margin on every LCARS button it draws and would otherwise take this
+    // one back off again.
+    .storytime-chapter__previous {
+      margin-right: auto;
+    }
+  }
+
+  &__story-progress {
+    @include storytime-meta;
+
+    margin: 0;
+  }
+
+  &__resume {
+    margin: 1rem 0;
+  }
+
+  &__media {
+    margin: 1rem 0;
+  }
+}
+
+// Characters and Crew
+// -----------------------------------------------------------------------------
+
+// One panel per row rather than a grid of narrow cards: a Character's name and
+// the line under it read across, and three to a row left every one of them
+// wrapping in a column too narrow for either.
+.storytime-cast {
+  padding: 0;
+  margin: 0 0 1rem;
+  list-style: none;
+}
+
+// What a cast panel holds under the name: the portrait beside what has been
+// recorded about the Character, the way a captain card sets its picture beside
+// its rank and species. Shared by the reader's cast tab and the creator's own
+// list, because the two describe the same thing and a reader who has read one
+// should not have to learn the other.
+.storytime-cast-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+
+  &__portrait {
+    flex: 0 0 auto;
+    width: 96px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border: 2px solid vars.$lcars-perano;
+    border-radius: 6px;
+    background: rgb(0 0 0 / 40%);
+  }
+
+  &__identity {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+
+  // The headline of the panel, set the way a captain card sets a rank.
+  &__rank {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    color: vars.$lcars-white;
+    font-size: 0.95rem;
+    font-weight: bold;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+
+    i {
+      color: vars.$lcars-sunflower;
+      font-size: 0.85rem;
+    }
+  }
+
+  // The rest of what is recorded. A list, because that is what it is, so it
+  // needs the indent and the bullets taken off it.
+  &__facts {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.25rem 1rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+      min-width: 0;
+      color: vars.$lcars-white;
+      font-size: 0.85rem;
+    }
+
+    i {
+      color: vars.$lcars-perano;
+      font-size: 0.8rem;
+    }
+  }
+
+  // The label says which fact it is; the value is what the eye is after, so
+  // the label is the quieter of the two.
+  &__fact-label {
+    color: vars.$lcars-grey-light;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.75rem;
+  }
+
+  &__fact-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__bio {
+    margin: 0;
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+  }
+
+  // The same chips the Character's own page uses for their traits.
+  &__traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    li {
+      @include mixins.lcars-badge;
+
+      background: vars.$lcars-bluey;
+      color: vars.$lcars-black;
+    }
+  }
+}
+
+@media (width <= 900px) {
+  .storytime-character__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.storytime-character {
+  // What the Character is down the main column, their picture and the ways out
+  // beside it — the shape a captain's own details page uses. Below a certain
+  // width the side column has nowhere to be, so it falls under the main one.
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  &__main,
+  &__side {
+    min-width: 0;
+  }
+
+  // The ways out, stacked so each pill is the full width of the column, which
+  // is how the captain page stacks its own.
+  &__navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+
+    .lcars-btn {
+      width: 100% !important;
+    }
+  }
+
+  &__portrait {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+  }
+
+  &__summary,
+  &__biography {
+    color: vars.$lcars-white;
+    max-width: 70ch;
+  }
+
+  &__summary {
+    margin-bottom: 1rem;
+  }
+
+  &__traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+
+    li {
+      @include mixins.lcars-badge;
+
+      background: vars.$lcars-bluey;
+      color: vars.$lcars-black;
+    }
+  }
+
+  &__billing,
+  &__appearance-billing {
+    @include storytime-meta;
+  }
+
+  &__appearances {
+    padding: 0;
+    margin: 0;
+
+    li {
+      @include storytime-row;
+    }
+  }
+}
+
+.storytime-character-list,
+.storytime-collaborators,
+.storytime-credits,
+.storytime-invitations,
+.storytime-arc-stories,
+.storytime-spotlight-admin {
+  padding: 0;
+  margin: 0;
+}
+
+.storytime-credits {
+  &__notes {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+  }
+}
+
+// Collaboration
+// -----------------------------------------------------------------------------
+
+.storytime-collaborators,
+.storytime-invitations,
+.storytime-arc-stories {
+  &__entry {
+    @include storytime-row;
+  }
+
+  &__identity,
+  &__member,
+  &__title,
+  &__summary,
+  &__role {
+    color: vars.$lcars-white;
+  }
+
+  &__status,
+  &__pending,
+  &__grants-label,
+  &__note {
+    @include storytime-meta;
+  }
+
+  &__grants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+    margin: 0.5rem 0;
+
+    li {
+      @include mixins.lcars-badge;
+
+      background: vars.$lcars-bluey;
+      color: vars.$lcars-black;
+    }
+  }
+}
+
+// Creator dashboard and editors
+// -----------------------------------------------------------------------------
+
+// A work in a creator's own list, built to the same plan as a captain card on
+// the dashboard: a coloured spine down the left, a title bar carrying the name
+// in black, a body, and a strip of controls at the right-hand end. What the
+// colour stands for here is publication status rather than faction, because
+// that is what a creator scanning their own list is looking for.
+$storytime-record-statuses: (
+  'draft': vars.$lcars-sunflower,
+  'in_review': vars.$lcars-tangerine,
+  'scheduled': vars.$lcars-perano,
+  'published': vars.$lcars-green,
+  'unpublished': vars.$lcars-cardinal,
+  'archived': vars.$lcars-grey-light,
+);
+
+.storytime-record {
+  @include mixins.lcars-card;
+
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  border-left: 10px solid vars.$faction-undecided;
+
+  // A Chapter list is an `ol`, because reading order is part of what it says.
+  // The record is the same shape whether it is a list item or an article.
+  list-style: none;
+
+  // The card as a whole lifts on hover, which would fight with a title bar
+  // that lifted again on its own.
+  &:hover {
+    transform: none;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 1rem;
+    background: #333;
+    border-bottom: 2px solid rgb(255 255 255 / 10%);
+    color: vars.$lcars-white;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      filter: brightness(1.1);
+      text-decoration: none;
+    }
+  }
+
+  &__name {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: vars.$lcars-white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // What state the work is in, said again in the bar so a creator scanning a
+  // column of cards does not have to trust the colour alone.
+  // What the bar says about the work besides its name, at its right-hand end
+  // the way a captain card carries its recruit type.
+  &__marks {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  // Dark chip rather than a tint of the bar: the bar is a different colour for
+  // every state, and only a solid ground reads on all six of them.
+  &__badge {
+    @include mixins.lcars-badge;
+
+    flex: 0 0 auto;
+    background: rgb(0 0 0 / 55%);
+    color: vars.$lcars-white;
+    letter-spacing: 0.05em;
+  }
+
+  // Who can reach the work, as a mark rather than a word. On the same dark
+  // ground as the badge beside it so the two read as one set, and paired with
+  // its label for anyone not reading the screen.
+  &__visibility {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 55%);
+    color: vars.$lcars-white;
+    font-size: 0.9rem;
+  }
+
+  &__body {
+    display: flex;
+    align-items: stretch;
+    min-height: 90px;
+    background: rgb(255 255 255 / 3%);
+  }
+
+  &__details {
+    flex: 1;
+    min-width: 0;
+    padding: 0.75rem 1rem;
+  }
+
+  &__meta {
+    @include storytime-meta-list;
+  }
+
+  &__removed {
+    color: vars.$lcars-cardinal;
+    margin: 0.5rem 0 0;
+  }
+
+  // The controls live in their own darkened strip at the end of the row, the
+  // way a captain card's do, so pressing one is never mistaken for opening the
+  // work.
+  &__controls {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 0.8rem;
+    font-size: 1.2rem;
+    background: rgb(0 0 0 / 40%);
+    border-left: 1px solid rgb(255 255 255 / 10%);
+
+    .cta-icon {
+      color: rgb(255 255 255 / 50%);
+
+      &:hover {
+        color: vars.$lcars-sunflower;
+      }
+    }
+  }
+}
+
+@each $status, $colour in $storytime-record-statuses {
+  .storytime-record--#{$status} {
+    border-left-color: color.adjust($colour, $lightness: -16%);
+    background: linear-gradient(
+      180deg,
+      rgba($colour, 0.18) 0%,
+      vars.$lcars-grey-bg 100%
+    );
+
+    .storytime-record__header {
+      background-color: $colour;
+      border-bottom-color: color.adjust($colour, $lightness: -20%);
+    }
+  }
+}
+
+// A removed work is not in any of the ordinary states, and reads as its own.
+.storytime-record--removed {
+  border-left-color: color.adjust(vars.$lcars-cardinal, $lightness: -16%);
+  background: linear-gradient(
+    180deg,
+    rgba(vars.$lcars-cardinal, 0.25) 0%,
+    vars.$lcars-grey-bg 100%
+  );
+
+  .storytime-record__header {
+    background-color: vars.$lcars-cardinal;
+    border-bottom-color: color.adjust(vars.$lcars-cardinal, $lightness: -20%);
+  }
+}
+
+.storytime-dashboard {
+  &__removed-reason,
+  &__appeal-message {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+// Accepting the publishing terms for one Story. Shown in two places — the
+// creator's own list and the editor they publish from — so it is a block of
+// its own rather than a piece of either.
+.storytime-policy-acceptance {
+  // The three documents, reachable from the point of acceptance. A creator
+  // asked to agree to something needs it one click away, not one search away.
+  &__links {
+    font-size: 0.85rem;
+
+    a {
+      color: vars.$lcars-sunflower;
+    }
+  }
+}
+
+.storytime-editor {
+  &__media-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    padding: 0;
+    margin: 1rem 0 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+  }
+
+  &__media-thumbnail {
+    width: 120px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+}
+
+// Reading: library, search, landing, Spotlight
+// -----------------------------------------------------------------------------
+
+.storytime-library {
+  padding: 0;
+  margin: 0;
+
+  &__status {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-perano;
+    color: vars.$lcars-black;
+  }
+
+  &__bar {
+    margin: 0.5rem 0;
+  }
+
+  &__new {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-orange;
+    color: vars.$lcars-black;
+  }
+
+  // A Story that has gone private or been removed still belongs in a reader's
+  // history, so it is dimmed rather than dropped.
+  &__gone {
+    color: vars.$lcars-grey-light;
+    font-style: italic;
+  }
+}
+
+// What each way into Storytime is coloured. Keyed by what the card leads to
+// rather than by its position, so a card keeps its colour when the one beside
+// it is switched off — the Spotlight card comes and goes with its feature flag,
+// and a row that reshuffled its colours every time would be no landmark at all.
+// ---
+// This is the page a reader meets Storytime on, and a grid of identical grey
+// boxes on a site built out of colour reads as a page nobody finished. Each
+// card is built to the same plan as a work in a creator's list and a field in
+// a form: a solid LCARS block carrying the name in black, over a dark body
+// carrying the line that explains it.
+$storytime-landing-colours: (
+  'stories': vars.$lcars-sunflower,
+  // Violet is the one colour here that will not carry black text at the size
+  // these names are set in: 4.3:1, against the 4.5 the rest of the site holds
+  // to. Taken a shade lighter it clears it and is still recognisably violet.
+  'arcs': color.adjust(vars.$lcars-violet, $lightness: 10%),
+  'spotlight': vars.$lcars-gold,
+  'search': vars.$lcars-perano,
+  'feed': vars.$lcars-orange,
+  'lists': vars.$lcars-sky,
+  'library': vars.$lcars-bluey,
+  'own-stories': vars.$lcars-green,
+  'own-arcs': vars.$lcars-tangerine,
+  'invitations': vars.$lcars-cool,
+  // The management cards. Red for the queue because it is the one with
+  // somebody waiting on it, taken light enough to carry black text the way
+  // every other name block here does. The Spotlight keeps the colour it has on
+  // the card that reads it: the same thing seen from the other side.
+  'moderation': color.adjust(vars.$lcars-red, $lightness: 10%),
+  'manage-spotlight': vars.$lcars-gold,
+  'tags': vars.$lcars-c48,
+);
+
+.storytime-landing {
+  &__beta {
+    font-size: 50%;
+  }
+
+  // Storytime's own navigation, which used to be a row of sidebar buttons.
+  // Each entry gets a line saying what it is, which is the whole reason for
+  // moving it here: "Arcs" alone tells a first-time reader nothing.
+  &__browse,
+  &__yours,
+  &__running {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    list-style: none;
+
+    // Each way in gets its own panel. Four headings with a line under each
+    // reads as one paragraph of links; four panels reads as four things to
+    // choose between, which is what this section is for.
+    li {
+      @include mixins.lcars-card;
+
+      display: flex;
+      padding: 0;
+      list-style: none;
+
+      // The spine, in the card's own colour. Named here so a card without one
+      // still has an edge rather than a gap where an edge should be.
+      border-left: 4px solid vars.$lcars-grey-border;
+    }
+
+    // The panel is the link rather than something with a link in it. Somebody
+    // reaching for "Arcs" aims at the box, so the anchor fills the box; the
+    // padding belongs to the pieces inside it, because the name is a block of
+    // colour that has to run the full width of the card.
+    a {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      padding: 0;
+      text-decoration: none;
+
+      &:focus-visible {
+        outline: 2px solid vars.$lcars-perano;
+        outline-offset: 2px;
+      }
+    }
+
+    .storytime-landing__browse-name {
+      display: block;
+      padding: 0.4rem 1rem;
+      font-family: vars.$font-antonio;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+
+      // Until a card says which colour it is. A name is unreadable on a
+      // background that never arrived, so the fallback is a real block.
+      background: vars.$lcars-grey-border;
+      color: vars.$lcars-white;
+    }
+
+    .storytime-landing__summary {
+      margin: 0;
+      padding: 0.6rem 1rem 0.75rem;
+      max-width: none;
+      font-size: 0.9rem;
+    }
+
+    .storytime-landing__unread {
+      margin: 0.6rem 1rem 0;
+      align-self: flex-start;
+    }
+  }
+
+  &__unread {
+    @include mixins.lcars-badge;
+
+    background: vars.$lcars-orange;
+    color: vars.$lcars-black;
+    margin-left: 0.5rem;
+  }
+}
+
+// Scoped to the lists rather than named on their own: the card's shape is set
+// at `.storytime-landing__browse li`, which is a class and an element, and a
+// lone modifier class is not heard over it.
+@each $name, $colour in $storytime-landing-colours {
+  .storytime-landing__browse .storytime-landing__card--#{$name},
+  .storytime-landing__yours .storytime-landing__card--#{$name},
+  .storytime-landing__running .storytime-landing__card--#{$name} {
+    border-left-color: color.adjust($colour, $lightness: -18%);
+
+    .storytime-landing__browse-name {
+      background: $colour;
+
+      // Black on the block, the way every other LCARS label is set. The
+      // palette is built for it: these are all light enough to carry it.
+      color: vars.$lcars-black;
+    }
+
+    // The card lifts on hover from the shared card mixin; the block brightens
+    // with it, so the thing under the pointer is the thing that answers.
+    a:hover .storytime-landing__browse-name,
+    a:focus-visible .storytime-landing__browse-name {
+      background: color.adjust($colour, $lightness: 10%);
+    }
+
+    a:focus-visible {
+      outline-color: $colour;
+    }
+  }
+}
+
+.storytime-search {
+  &__form {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 1rem;
+    align-items: flex-start;
+
+    .lcars-input-container {
+      flex: 1;
+      min-width: 220px;
+      margin-bottom: 0;
+    }
+
+    .lcars-btn {
+      flex: 0 0 auto;
+    }
+  }
+
+  // The count on a filter chip, inside a pill whose label is already
+  // right-aligned and uppercase.
+  &__count {
+    margin-left: 0.4rem;
+    font-weight: 900;
+  }
+
+  &__results {
+    padding: 0;
+    margin: 0;
+  }
+
+  &__summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+  }
+
+  &__prompt {
+    @include storytime-meta;
+  }
+}
+
+.storytime-spotlight {
+  // A list of panels rather than a panel of rows. Each selection is already a
+  // card, and wrapping the list in a surface of its own drew a box around a
+  // box — most visibly on the landing page, where there is one selection.
+  padding: 0;
+  margin: 0 0 1rem;
+  list-style: none;
+
+  &__image {
+    width: 100%;
+    max-height: 260px;
+    object-fit: cover;
+  }
+
+  &__work {
+    @include storytime-work-title;
+
+    &:hover,
+    &:focus {
+      @include storytime-work-title-active;
+    }
+  }
+
+  // On the landing page the work's title is the link itself rather than a
+  // paragraph about it, and an anchor arrives inline with none of the block
+  // flow a paragraph gets for nothing.
+  &__work-link {
+    display: block;
+  }
+
+  &__reason,
+  &__summary {
+    color: vars.$lcars-white;
+  }
+
+  // A captioned part of the panel, borrowing the caption a fact carries. The
+  // paragraph inside it brings the margin every paragraph has, which would put
+  // the next caption a line and a half below the last answer.
+  &__field {
+    margin-bottom: 0.75rem;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__dates {
+    @include storytime-meta;
+  }
+
+  // A past selection is history rather than news, and reads as such.
+  &--past {
+    opacity: 0.75;
+  }
+}
+
+// The row is a component, and its host element sits between the panel and the
+// strip. Left inline it would not fill the panel it is closing off.
+app-storytime-tag-row {
+  display: block;
+}
+
+// What a work is about, closing a panel off in a strip of its own the way a
+// panel's controls do — darkened rather than a colour, because the ground
+// behind it is a different colour on every kind of panel. One block rather
+// than one per panel, so the Spotlight selection, a Story in a listing and an
+// Arc in a listing all say it the same way.
+.storytime-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgb(0 0 0 / 25%);
+  border-top: 1px solid rgb(255 255 255 / 10%);
+
+  // The icon says what the row is instead of a caption.
+  &__icon {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    color: vars.$lcars-perano;
+  }
+
+  // Words rather than pills: a pill on this site is something you press, and
+  // nothing public browses by tag yet. Set apart by spacing and by the caption
+  // vocabulary the rest of the feature uses for small print.
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__tag {
+    @include storytime-meta;
+
+    color: vars.$lcars-white;
+  }
+}
+
+.storytime-spotlight-admin {
+  &__entry {
+    @include storytime-row;
+  }
+
+  &__meta {
+    @include storytime-meta-list;
+
+    margin: 0.5rem 0;
+  }
+}
+
+// Moderation and policy
+// -----------------------------------------------------------------------------
+
+.storytime-policy {
+  &__rule {
+    @include storytime-panel-surface;
+
+    h2,
+    h3 {
+      font-family: vars.$font-antonio;
+      color: vars.$lcars-sunflower;
+    }
+
+    // The rule name carries the weight; the definition list markup is what
+    // makes a screen reader pair it with its explanation.
+    dt {
+      font-family: vars.$font-antonio;
+      color: vars.$lcars-sunflower;
+      margin-bottom: 0.25rem;
+    }
+
+    dd {
+      margin: 0;
+      color: vars.$lcars-grey-light;
+      line-height: 1.5;
+    }
+  }
+
+  &__version {
+    font-size: 0.8rem;
+    color: vars.$lcars-grey-light;
+    margin-bottom: 0.5rem;
+  }
+}
+
+// The report dialog is a Material dialog rather than a page, so it carries its
+// own padding and its own form spacing; everything inside it is the same
+// container, pill and help popup the pages use.
+#storytime-report-dialog-container {
+  padding: 10px;
+
+  .mat-mdc-dialog-actions {
+    gap: 1rem;
+    padding: 1rem 3rem;
+  }
+}
+
+.storytime-report {
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  &__policy {
+    margin: 1rem 0 0;
+    font-size: 0.85rem;
+  }
+}
+
+.storytime-removed {
+  &__summary {
+    color: vars.$lcars-grey-light;
+    max-width: 60ch;
+  }
+}
+
+.storytime-moderation {
+  &__reports,
+  &__appeals {
+    padding: 0;
+    margin: 0;
+  }
+
+  &__report,
+  &__appeal {
+    @include storytime-row;
+  }
+
+  &__meta {
+    @include storytime-meta-list;
+
+    margin: 0.5rem 0;
+  }
+
+  &__description {
+    color: vars.$lcars-white;
+    font-size: 0.9rem;
+  }
+}
+
+// Tags
+// -----------------------------------------------------------------------------
+
+.storytime-tag-picker {
+  &__group {
+    margin-bottom: 1.25rem;
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .storytime-form__legend {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+
+  &__saved {
+    @include storytime-message(vars.$lcars-green);
+  }
+
+  &__loading {
+    @include storytime-meta;
+  }
+}
+
+.storytime-tag-admin {
+  &__tags {
+    padding: 0;
+    margin: 0;
+
+    li {
+      @include storytime-row;
+
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+  }
+
+  &__name {
+    color: vars.$lcars-white;
+    font-family: vars.$font-antonio;
+  }
+
+  &__slug {
+    @include storytime-meta;
+  }
+
+  &__description {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+    flex-basis: 100%;
+  }
+}
+
+// Media
+// -----------------------------------------------------------------------------
+
+// A video takes the same shape as every other panel in the feature — a
+// coloured spine, a bar across the top naming it, and the body beneath — so it
+// reads as a thing in its own right rather than as a picture that happened to
+// land in the middle of the writing. Its colour is on the panel itself, from
+// the map every panel colour comes from.
+.storytime-media {
+  // The still, the player that replaces it and the button holding the still
+  // are all one size, so pressing play swaps a picture for a video rather than
+  // resizing the page around it. That size is the width of the Chapter around
+  // it, which is why the reader page asks YouTube for its full-size still
+  // rather than the 480-wide one every video has.
+  &__thumbnail,
+  &__poster,
+  &__player {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  // The still is a picture, not one of the site's buttons. The element rule
+  // that shapes every LCARS button fixes them all at 200 by 60, which left the
+  // still overflowing its own button and lying across the caption beneath it,
+  // so the sizing is taken back here.
+  &__poster {
+    display: block;
+    position: relative;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+
+    // Nothing but the picture rides in this button, so the line box a
+    // baseline-aligned image sits on has nothing to align to and only adds a
+    // strip of panel under the still.
+    line-height: 0;
+    cursor: pointer;
+  }
+
+  &__thumbnail {
+    display: block;
+  }
+
+  &__player {
+    border: none;
+  }
+
+  &__play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: vars.$lcars-white;
+    text-shadow: 0 2px 8px rgb(0 0 0 / 70%);
+  }
+
+  // What the creator wrote about the video, under it. The video's own name is
+  // on the bar above rather than here, which is where every other panel in the
+  // feature carries the name of what it holds.
+  &__notes {
+    margin: 0.75rem 0 0;
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+  }
+}
+
+// Ratings, follows and comments
+// ----------------------------------------------------------------------------
+// The three inline controls that sit in a reader's way rather than at the end
+// of a form. They are toggles reporting a count, not actions, so they stay the
+// bordered chip they have always been rather than becoming full LCARS pills.
+
+// Rating a work. Both are LCARS buttons carrying the thumb and its count, so
+// the two things a reader can do to a Story look like the other things they
+// can do to it rather than like a pair of chips.
+.storytime-reactions {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+
+  // Nothing but the thumb rides in the pill now, so there is nothing for a gap
+  // to hold apart — the name beside it is there for a screen reader and is
+  // taken out of the flow.
+  &__button i {
+    font-size: 1.1rem;
+  }
+
+  // The score the two buttons add up to, and the only number here: what each
+  // of them was pressed separately is not something a reader acts on, and two
+  // more numbers beside this one only invite the score to be read off the
+  // wrong one.
+  &__rating {
+    display: flex;
+    flex-direction: column;
+
+    .label {
+      @include mixins.lcars-label;
+    }
+
+    .value {
+      @include mixins.lcars-value;
+
+      font-family: vars.$font-antonio;
+      font-size: 1.2rem;
+    }
+  }
+
+  &__note {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+// Following a work. The count rides inside the button, because it is what the
+// button is about rather than a separate fact beside it.
+.storytime-follow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &__button {
+    gap: 0.5rem;
+  }
+
+  // A dark chip on the button's own colour, so it reads on every state the
+  // button takes.
+  &__count {
+    @include mixins.lcars-badge;
+
+    background: rgb(0 0 0 / 55%);
+    color: vars.$lcars-white;
+    font-family: vars.$font-antonio;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+.storytime-comments {
+  &__list,
+  &__replies {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  // Each comment is a panel like every other thing the feature lists. The
+  // surface, the spine and the bar come from there; what is left is the room
+  // between one comment and the next.
+  &__comment {
+    list-style: none;
+    margin-bottom: 0.75rem;
+  }
+
+  // Replies are indented once and never again: the thread is one level deep,
+  // and the rule says so. The spine down the left of each panel already marks
+  // them, so the indent needs no rule of its own beside it.
+  &__replies {
+    margin: 0 0 0 1.5rem;
+  }
+
+  &__reply {
+    list-style: none;
+  }
+
+  // A captain card stacks its controls down the side because the row beside
+  // them is a portrait and a biography. A comment is a line or two, and four
+  // controls stacked against one line make a panel four times taller than what
+  // it holds — so they run across the end of the row instead.
+  &__controls {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  // The name sits on the bar in black like every other panel's does, so it
+  // says it is a link by underlining rather than by changing colour.
+  a.storytime-comments__author {
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+
+  // When it was said, in the corner a panel keeps for what it is rather than
+  // what it says.
+  &__body time {
+    font-family: vars.$font-antonio;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  &__text {
+    color: vars.$lcars-white;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    margin: 0;
+  }
+
+  // A comment that has lost its words keeps its place in the thread, and says
+  // so plainly rather than pretending to be missing.
+  &__silenced {
+    color: vars.$lcars-grey-light;
+    font-style: italic;
+    margin: 0;
+  }
+
+  &__edited {
+    @include storytime-meta;
+
+    margin: 0.25rem 0 0;
+  }
+
+  &__form {
+    margin-top: 0.75rem;
+  }
+
+  &__note,
+  &__loading {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+// The feed and reading lists
+// -----------------------------------------------------------------------------
+
+.storytime-feed {
+  &__list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__what {
+    @include storytime-meta;
+
+    margin: 0;
+  }
+
+  &__when {
+    @include storytime-meta;
+
+    display: block;
+    margin-top: 0.25rem;
+  }
+
+  &__more {
+    display: block;
+    margin: 1.5rem auto 0;
+  }
+}
+
+.storytime-reading-lists {
+  &__summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  &__list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__count,
+  &__visibility,
+  &__loading {
+    @include storytime-meta;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+.storytime-reading-list {
+  &__description {
+    color: vars.$lcars-white;
+    max-width: 70ch;
+  }
+
+  &__visibility,
+  &__kind,
+  &__loading {
+    @include storytime-meta;
+  }
+
+  &__items {
+    padding: 0;
+    margin: 0;
+    counter-reset: storytime-list-order;
+  }
+
+  &__item {
+    @include storytime-row;
+
+    counter-increment: storytime-list-order;
+
+    &::before {
+      content: counter(storytime-list-order) '.';
+      color: vars.$lcars-perano;
+      font-family: vars.$font-antonio;
+      margin-right: 0.5rem;
+    }
+  }
+
+  &__title {
+    @include storytime-work-title;
+
+    &:hover,
+    &:focus {
+      @include storytime-work-title-active;
+    }
+  }
+
+  &__summary,
+  &__note {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+
+  &__note {
+    font-style: italic;
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+.storytime-add-to-list {
+  display: inline-block;
+  position: relative;
+
+  &__panel {
+    position: absolute;
+    z-index: 20;
+    min-width: 260px;
+    margin-top: 0.5rem;
+    background: #1d2d3e;
+    border: 1px solid vars.$lcars-grey-border;
+    box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
+  }
+
+  &__lists {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__list {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__already,
+  &__empty {
+    @include storytime-meta;
+  }
+
+  &__empty {
+    max-width: 30ch;
+  }
+
+  &__status {
+    @include storytime-message(vars.$lcars-green);
+  }
+
+  &__error {
+    @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+// The creator page
+// -----------------------------------------------------------------------------
+
+.storytime-creator {
+  &__stories,
+  &__arcs,
+  &__lists {
+    padding: 0;
+    margin: 0 0 1.5rem;
+    list-style: none;
+
+    li {
+      @include storytime-row;
+    }
+
+    a {
+      @include storytime-work-title;
+
+      &:hover,
+      &:focus {
+        @include storytime-work-title-active;
+      }
+    }
+  }
+
+  &__summary {
+    color: vars.$lcars-grey-light;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+
+  &__list-count {
+    @include storytime-meta;
+
+    margin-left: 0.5rem;
+  }
+}
+
+// Artwork
+// -----------------------------------------------------------------------------
+// A work's pictures are set against the saved work rather than staged into the
+// form around them, so each slot is its own block with its own controls. The
+// description is the exception and belongs to the editor's form, which is why
+// it sits inside the same panel rather than in a dialog the creator has closed.
+
+.storytime-image-manager {
+  &__guidance {
+    color: vars.$lcars-grey-light;
+    font-size: 0.85rem;
+    margin: 0 0 0.75rem;
+    max-width: 70ch;
+  }
+
+  &__body {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  // Sized by its own picture rather than by a fixed frame: an empty slot
+  // renders nothing at all, so there is no box here to leave standing.
+  &__preview {
+    flex: 0 1 240px;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 2px solid vars.$lcars-sunflower;
+      border-radius: 4px;
+    }
+
+    // A 5:1 banner at 240px wide is 48px tall and shows nothing. It gets the
+    // width of the row instead, which is the shape it is actually seen in.
+    &--wide {
+      flex: 1 1 100%;
+    }
+  }
+
+  &__controls {
+    flex: 1 1 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__buttons {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.5rem;
+  }
+
+  .lcars-input-container {
+    margin-top: 1rem;
+  }
+}
+
+// The crop dialog. A Material dialog rather than a page, so it carries its own
+// padding; everything inside it is the same bar, field and button the editors
+// behind it are built from.
+#storytime-image-dialog-container {
+  padding: 10px;
+
+  .mat-mdc-dialog-actions {
+    gap: 1rem;
+    padding: 1rem 3rem;
+  }
+}
+
+.storytime-image-crop {
+  &__guidance {
+    margin: 0 0 0.35rem;
+    max-width: 70ch;
+  }
+
+  &__layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 1rem;
+
+    // Only once a picture has been chosen is there a second column worth
+    // reserving room for.
+    &.has-image {
+      flex-flow: row nowrap;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+  }
+
+  &__main {
+    flex: 2;
+    min-width: 0;
+
+    --cropper-overlay-color: transparent;
+
+    image-cropper {
+      width: 100%;
+      max-height: 55vh;
+
+      div,
+      div img {
+        max-height: 55vh;
+        width: auto;
+      }
+    }
+  }
+
+  &__side {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  &__preview img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    border: 2px solid vars.$lcars-sunflower;
+  }
+
+  &__alt {
+    margin-top: 1rem;
+  }
+
+  &__actions {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.5rem;
+  }
+}
+
+// Narrow screens
+// -----------------------------------------------------------------------------
+
+@media (width <= 768px) {
+  .storytime-page {
+    padding: 1rem;
+  }
+
+  .storytime-arc-list__entry,
+  .storytime-cast-entry {
+    flex-direction: column;
+  }
+
+  .storytime-arc-list__image,
+  .storytime-cast-entry__portrait {
+    width: 100%;
+    max-width: 240px;
+  }
+
+  .storytime-chapter__navigation {
+    flex-direction: column;
+  }
+
+  // With the row stacked there is nothing left of the controls to push them
+  // against, so they go back to the start of their own line.
+  .storytime-character-list__controls,
+  .storytime-tag-admin__actions,
+  .storytime-reading-lists__item .cta-icon {
+    margin-left: 0;
+  }
+
+  // A form's buttons stop being an afterthought at the end of a line and
+  // become the width of the form.
+  .storytime-form-actions {
+    justify-content: stretch;
+
+    .lcars-btn {
+      flex: 1 1 auto;
+    }
+  }
+
+  // With no room for a preview beside the cropper, it goes under it.
+  .storytime-image-crop__layout.has-image {
+    flex-flow: column nowrap;
+    gap: 1rem;
+  }
+}

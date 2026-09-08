@@ -1,0 +1,104 @@
+<section
+  id="storytime-creator-page"
+  class="storytime-page">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Storytime</span>
+  </div>
+
+  <app-follow-button
+    [kind]="followKinds.CREATOR"
+    [targetId]="userId"
+    label="this writer" />
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Creator unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading published work"></app-loading-bar>
+  } @else if (isEmpty) {
+    <p class="storytime-empty">
+      This member has not published anything in Storytime yet.
+    </p>
+  } @else {
+    @if (stories.length > 0) {
+      <h2>Stories</h2>
+      <ul class="storytime-creator__stories">
+        @for (story of stories; track story.id) {
+          <li class="storytime-panel-card storytime-panel-card--story">
+            <a
+              class="storytime-panel-card__heading"
+              [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]"
+              [title]="story.title">
+              <span class="storytime-panel-card__name">{{ story.title }}</span>
+            </a>
+
+            @if (story.shortDescription) {
+              <div class="storytime-panel-card__body">
+                <p class="storytime-creator__summary">
+                  {{ story.shortDescription }}
+                </p>
+              </div>
+            }
+
+            <app-storytime-tag-row [tags]="story.tags"></app-storytime-tag-row>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (arcs.length > 0) {
+      <h2>Arcs</h2>
+      <ul class="storytime-creator__arcs">
+        @for (arc of arcs; track arc.id) {
+          <li class="storytime-panel-card storytime-panel-card--arc">
+            <a
+              class="storytime-panel-card__heading"
+              [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]"
+              [title]="arc.title">
+              <span class="storytime-panel-card__name">{{ arc.title }}</span>
+            </a>
+
+            @if (arc.shortDescription) {
+              <div class="storytime-panel-card__body">
+                <p class="storytime-creator__summary">
+                  {{ arc.shortDescription }}
+                </p>
+              </div>
+            }
+
+            <app-storytime-tag-row [tags]="arc.tags"></app-storytime-tag-row>
+          </li>
+        }
+      </ul>
+    }
+    @if (readingLists.length > 0) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Reading lists</span>
+      </div>
+
+      <ul class="storytime-creator__lists">
+        @for (list of readingLists; track list.id) {
+          <li class="storytime-creator__list">
+            <a
+              [routerLink]="[
+                '/storytime',
+                'creators',
+                userId,
+                'reading-lists',
+                list.slug,
+              ]">
+              {{ list.name }}
+            </a>
+            <span class="storytime-creator__list-count">
+              {{ list.itemCount }}
+              {{ list.itemCount === 1 ? 'thing' : 'things' }}
+            </span>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  OnInit,
   inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +15,7 @@ import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcar
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { FORM_ERROR_INVALID_EMAIL_FORMAT } from 'src/app/shared/constants/error-messages.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
+import { PrivacyModeService } from 'src/app/dashboard/services/privacy-mode.service';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -30,7 +32,7 @@ import { AuthService } from '../auth.service';
     LcarsInformationMessageComponent,
   ],
 })
-export class ResetPasswordRequestComponent {
+export class ResetPasswordRequestComponent implements OnInit {
   /** Precomputed router link to the dashboard. */
   readonly dashboardLink = `/${APP_ROUTES.STO_DASHBOARD}`;
 
@@ -56,8 +58,15 @@ export class ResetPasswordRequestComponent {
   errorTextInvalidEmailFormat: string = FORM_ERROR_INVALID_EMAIL_FORMAT;
 
   protected readonly _authService = inject(AuthService);
+  readonly privacyMode = inject(PrivacyModeService);
   private readonly _routingService = inject(RoutingService);
   private readonly _cdr = inject(ChangeDetectorRef);
+
+  ngOnInit(): void {
+    if (this._authService.isLoggedIn()) {
+      this.privacyMode.load().subscribe();
+    }
+  }
 
   /**
    * Validates an email address using the shared helper.

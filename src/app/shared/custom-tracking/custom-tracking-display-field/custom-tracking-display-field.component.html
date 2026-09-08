@@ -1,0 +1,172 @@
+<!--
+  A name and what was recorded under it, in that order, so a screen reader
+  reaches them together. Not a description list: the fields are drawn by a
+  component each, and a custom element between the list and its terms is
+  markup no assistive technology is obliged to make sense of.
+
+  The site's own caption-above-answer pair, so a field somebody invented reads
+  like the facts printed beside it rather than like a second kind of readout.
+-->
+<div class="info-item custom-tracking-display-field">
+  <p class="label custom-tracking-display-name">
+    {{ field.name }}
+    @if (field.description) {
+      <span class="custom-tracking-display-hint">{{ field.description }}</span>
+    }
+  </p>
+
+  <div class="value custom-tracking-display-value">
+    @if (isEmpty) {
+      @if (placeholder) {
+        <span class="custom-tracking-display-empty">{{ placeholder }}</span>
+      } @else {
+        <span
+          class="custom-tracking-display-empty"
+          aria-label="Nothing recorded"
+          >—</span
+        >
+      }
+    } @else {
+      @switch (shape) {
+        @case ('markdown') {
+          <div
+            class="custom-tracking-display-markdown"
+            [innerHTML]="markdown | markdown"></div>
+        }
+
+        @case ('choices') {
+          <ul class="custom-tracking-display-choices">
+            @for (choice of field.chosen; track choice.id) {
+              <li class="custom-tracking-display-choice">{{ choice.label }}</li>
+            }
+          </ul>
+        }
+
+        @case ('rating') {
+          @if (rating; as score) {
+            <span
+              class="custom-tracking-display-rating"
+              [attr.aria-label]="score.score + ' out of ' + score.maximum">
+              @for (mark of score.marks; track $index) {
+                <span
+                  class="custom-tracking-display-mark"
+                  [class.custom-tracking-display-mark--filled]="mark"
+                  aria-hidden="true"
+                  >{{ mark ? '★' : '☆' }}</span
+                >
+              }
+            </span>
+          }
+        }
+
+        @case ('progress') {
+          @if (progress; as reading) {
+            <span class="custom-tracking-display-progress-figures">
+              {{ reading.current }} of {{ reading.maximum }}
+              @if (reading.percentage !== null) {
+                <span class="custom-tracking-display-progress-percentage"
+                  >({{ reading.percentage }}%)</span
+                >
+              }
+            </span>
+
+            @if (reading.showBar) {
+              <!--
+                The figures above are the answer; the bar repeats them for
+                anybody reading the page rather than listening to it, which is
+                why it is hidden from the accessibility tree instead of being
+                given a label that would be read out twice.
+              -->
+              <span
+                class="custom-tracking-display-progress-bar"
+                aria-hidden="true">
+                <span
+                  class="custom-tracking-display-progress-fill"
+                  [style.width.%]="reading.fraction"></span>
+              </span>
+            }
+          }
+        }
+
+        @case ('colour') {
+          @if (colour; as swatch) {
+            <span class="custom-tracking-display-colour">
+              @if (swatch.css) {
+                <span
+                  class="custom-tracking-display-swatch"
+                  [style.background]="swatch.css"
+                  aria-hidden="true"></span>
+              }
+              <span>{{ swatch.label }}</span>
+            </span>
+          }
+        }
+
+        @case ('image') {
+          @if (imageUrl && field.image) {
+            <figure class="custom-tracking-display-image">
+              <img
+                [src]="imageUrl"
+                [alt]="field.image.altText"
+                loading="lazy" />
+              <figcaption>{{ field.image.altText }}</figcaption>
+            </figure>
+          }
+        }
+
+        @case ('video') {
+          @if (video; as reading) {
+            <div class="custom-tracking-display-video">
+              @if (embedSource) {
+                <iframe
+                  class="custom-tracking-display-player"
+                  [src]="embedSource"
+                  [title]="field.name"
+                  allow="
+                    accelerometer;
+                    autoplay;
+                    clipboard-write;
+                    encrypted-media;
+                    gyroscope;
+                    picture-in-picture;
+                  "
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  allowfullscreen></iframe>
+              } @else {
+                <button
+                  type="button"
+                  class="custom-tracking-display-poster"
+                  (click)="play()">
+                  <img
+                    [src]="reading.thumbnailUrl"
+                    alt=""
+                    loading="lazy" />
+                  <span
+                    class="custom-tracking-display-play"
+                    aria-hidden="true">
+                    <i class="fa-solid fa-play"></i>
+                  </span>
+                  <span class="sr-only"
+                    >Play the video for {{ field.name }}</span
+                  >
+                </button>
+              }
+
+              <a
+                class="custom-tracking-display-watch"
+                [href]="reading.watchUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Watch on YouTube</a
+              >
+            </div>
+          }
+        }
+
+        @default {
+          <span class="custom-tracking-display-text">{{ text }}</span>
+        }
+      }
+    }
+  </div>
+</div>

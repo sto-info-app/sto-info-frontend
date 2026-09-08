@@ -53,7 +53,9 @@
                 <span class="sr-only">{{ detail.label }}:</span>
               }
             }
-            <span class="account-detail-value">
+            <span
+              class="account-detail-value"
+              [class.privacy-blur]="privacyMode && detail.private">
               @if (!detail.showLabel) {
                 <i [class]="detail.icon"></i>
               }

@@ -1,0 +1,137 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading your Arcs"></app-loading-bar>
+}
+
+<div
+  id="storytime-arc-dashboard-page"
+  class="storytime-page">
+  <h1>Your Arcs</h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Action failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <p class="storytime-intro">
+    An Arc is a reading order across several Stories. The Stories stay with
+    whoever wrote them: anything you did not write joins only once its author
+    agrees.
+  </p>
+
+  <div class="storytime-page-actions">
+    <a
+      class="lcars-btn lcars-btn-auto green"
+      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', 'new']">
+      Create an Arc
+    </a>
+  </div>
+
+  @if (!isLoading && arcs.length === 0) {
+    <p class="storytime-empty">
+      You are not curating an Arc yet. Create one to gather Stories into a
+      reading order.
+    </p>
+  }
+
+  @for (arc of arcs; track arc.id) {
+    <article
+      class="storytime-record"
+      [ngClass]="'storytime-record--' + arc.status.toLowerCase()">
+      <a
+        class="storytime-record__header"
+        [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', arc.id]">
+        <span class="storytime-record__name">{{ arc.title }}</span>
+        <span class="storytime-record__marks">
+          <span class="storytime-record__badge">{{
+            statusLabels[arc.status]
+          }}</span>
+          <span
+            class="storytime-record__visibility"
+            [title]="visibilityLabels[arc.visibility]">
+            <i
+              class="fa-solid"
+              [ngClass]="visibilityIcons[arc.visibility]"
+              aria-hidden="true"></i>
+            <span class="sr-only">
+              Visibility: {{ visibilityLabels[arc.visibility] }}
+            </span>
+          </span>
+        </span>
+      </a>
+
+      <div class="storytime-record__body">
+        <div class="storytime-record__details">
+          <nav class="storytime-actions">
+            <a
+              class="lcars-btn lcars-btn-auto bluey"
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'manage',
+                'arcs',
+                arc.id,
+                'stories',
+              ]"
+              >Stories</a
+            >
+            <a
+              class="lcars-btn lcars-btn-auto bluey"
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'manage',
+                'arcs',
+                arc.id,
+                'collaborators',
+              ]"
+              >Collaborators</a
+            >
+            @if (arc.publishedAt) {
+              <a
+                class="lcars-btn lcars-btn-auto sky"
+                [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]"
+                >View as a reader</a
+              >
+            }
+          </nav>
+        </div>
+
+        <div class="storytime-record__controls">
+          <a
+            class="cta-icon"
+            title="Edit this Arc"
+            aria-label="Edit this Arc"
+            [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', arc.id]">
+            <i
+              class="fa-solid fa-user-pen"
+              aria-hidden="true"></i>
+          </a>
+          @if (canPublish(arc)) {
+            <button
+              type="button"
+              class="cta-icon"
+              title="Publish this Arc"
+              aria-label="Publish this Arc"
+              (click)="publish(arc)">
+              <i
+                class="fa-solid fa-rocket-launch"
+                aria-hidden="true"></i>
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="cta-icon delete-icon"
+              title="Unpublish this Arc"
+              aria-label="Unpublish this Arc"
+              (click)="unpublish(arc)">
+              <i
+                class="fa-solid fa-box-archive"
+                aria-hidden="true"></i>
+            </button>
+          }
+        </div>
+      </div>
+    </article>
+  }
+</div>

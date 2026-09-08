@@ -1,0 +1,516 @@
+import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { finalize, of, switchMap } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { AuthService } from 'src/app/core/auth/auth.service';
+import { AddToListComponent } from '../../shared/add-to-list/add-to-list.component';
+import { StorytimeCastEntryComponent } from '../../shared/cast-entry/cast-entry.component';
+import { CommentThreadComponent } from '../../shared/comment-thread/comment-thread.component';
+import { SettingHelpComponent } from '../../shared/setting-help/setting-help.component';
+import { FollowButtonComponent } from '../../shared/follow-button/follow-button.component';
+import { ReactionControlComponent } from '../../shared/reaction-control/reaction-control.component';
+import {
+  Character,
+  ChapterSummary,
+  CrewCredit,
+  CONTENT_RATING_DESCRIPTIONS,
+  CONTENT_RATING_LABELS,
+  ContentRating,
+  DELIBERATE_READER_STATUSES,
+  FollowTargetKind,
+  ReaderStoryStatus,
+  Story,
+  StoryProgress,
+  StorytimeTargetType,
+} from 'src/app/models/storytime.models';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { ChapterService } from '../../chapter.service';
+import { CharacterService } from '../../character.service';
+import {
+  CharacterPanelVm,
+  buildCharacterPanelVm,
+} from '../../character-panel.utility';
+import { CrewService } from '../../crew.service';
+import { ProgressService } from '../../progress.service';
+import {
+  COMPLETION_STATE_LABELS,
+  COMPLETION_STATE_OPTIONS,
+  CONTENT_RATING_OPTIONS,
+  READER_STORY_STATUS_LABELS,
+} from '../../storytime.constants';
+import { StorytimeModerationService } from '../../storytime-moderation.service';
+import { StoryService } from '../../story.service';
+import {
+  ReportContentDialogComponent,
+  ReportContentDialogResult,
+} from '../report-content-dialog/report-content-dialog.component';
+
+/** The views a Story offers of itself. */
+export type StoryTab = 'chapters' | 'cast' | 'credits';
+
+/**
+ * A published Story's own page.
+ *
+ * The description arrives as HTML the server has already rendered and
+ * sanitised. It is trusted here rather than re-sanitised, because Angular's
+ * sanitiser would strip the block anchors reading progress depends on — and
+ * because the server, not the client, is the security boundary for Storytime
+ * content.
+ */
+@Component({
+  selector: 'app-story-detail',
+  templateUrl: './story-detail.component.html',
+  styleUrls: ['./story-detail.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    LoadingBarComponent,
+    LcarsErrorMessageComponent,
+    LcarsWarningMessageComponent,
+    ReactionControlComponent,
+    FollowButtonComponent,
+    AddToListComponent,
+    CommentThreadComponent,
+    SettingHelpComponent,
+    StorytimeCastEntryComponent,
+  ],
+})
+export class StoryDetailComponent implements OnInit {
+  /** The Story being read. */
+  story: Story | null = null;
+
+  /** The readable Chapters of this Story, in reading order. */
+  chapters: ChapterSummary[] = [];
+
+  /** The slug from the route, for building Chapter links. */
+  storySlug = '';
+
+  /** The rendered description, ready to insert. */
+  descriptionHtml: string | null = null;
+
+  /** Whether the Story is still loading. */
+  isLoading = true;
+
+  /** A message to show when the Story could not be loaded. */
+  errorMessage = '';
+
+  /** A message to show when the Chapter list could not be loaded. */
+  chapterErrorMessage = '';
+
+  /** What to say after a reader reports the Story. */
+  reportMessage = '';
+
+  /** Rating labels, so a raw enum value is never shown. */
+  readonly ratingLabels = CONTENT_RATING_LABELS;
+
+  /** Rating explanations for the warning banner. */
+  readonly ratingDescriptions = CONTENT_RATING_DESCRIPTIONS;
+
+  /** Completion labels. */
+  readonly completionLabels = COMPLETION_STATE_LABELS;
+
+  /**
+   * What every rating and every status means.
+   *
+   * Both facts are a single word standing for a decision the creator made
+   * about somebody else's reading, and a reader meeting one has no way to know
+   * what it covers. The same explanations the editor shows the creator are
+   * offered here, so the two can never say different things about the same
+   * word.
+   */
+  readonly ratingOptions = CONTENT_RATING_OPTIONS;
+
+  /** The same, for how far along the Story is. */
+  readonly completionOptions = COMPLETION_STATE_OPTIONS;
+
+  /** The Story's cast, in display order. */
+  characters: Character[] = [];
+
+  /**
+   * The same cast as the panels render them.
+   *
+   * Built when the cast lands rather than read off each Character in the
+   * template, so a page with a long cast does not work the same facts out
+   * again on every check.
+   */
+  cast: CharacterPanelVm[] = [];
+
+  /** The Story's credits, in credits-roll order. */
+  credits: CrewCredit[] = [];
+
+  /** The reader's own progress, once known. */
+  progress: StoryProgress | null = null;
+
+  /** Reader status labels, so a raw enum value is never shown. */
+  readonly readerStatusLabels = READER_STORY_STATUS_LABELS;
+
+  /** The statuses a reader may set for themselves. */
+  readonly deliberateStatuses = DELIBERATE_READER_STATUSES;
+
+  /** Route constants. */
+  readonly appRoutes = APP_ROUTES;
+
+  /**
+   * Which of the two views of the work is showing.
+   *
+   * Chapters leads, because that is what somebody arriving at a Story came
+   * for; the cast is who they will meet once they start.
+   */
+  activeTab: StoryTab = 'chapters';
+
+  /**
+   * The tabs this Story has.
+   *
+   * Only the ones with something behind them: a Story with nobody in it and
+   * nobody to thank offers Chapters alone, rather than tabs that open on empty
+   * lists.
+   *
+   * @returns The tabs, in the order they are shown.
+   */
+  get tabs(): { id: StoryTab; label: string }[] {
+    const tabs: { id: StoryTab; label: string }[] = [
+      { id: 'chapters', label: 'Chapters' },
+    ];
+
+    if (this.characters.length > 0) {
+      tabs.push({ id: 'cast', label: 'Cast' });
+    }
+
+    if (this.credits.length > 0) {
+      tabs.push({ id: 'credits', label: 'Credits' });
+    }
+
+    return tabs;
+  }
+
+  /**
+   * Shows one of the tabs.
+   *
+   * @param tab - The tab to show.
+   * @returns void
+   */
+  selectTab(tab: StoryTab): void {
+    this.activeTab = tab;
+  }
+
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _storyService = inject(StoryService);
+  private readonly _chapterService = inject(ChapterService);
+  private readonly _characterService = inject(CharacterService);
+  private readonly _crewService = inject(CrewService);
+  private readonly _progressService = inject(ProgressService);
+  private readonly _authService = inject(AuthService);
+  private readonly _moderationService = inject(StorytimeModerationService);
+  private readonly _dialog = inject(MatDialog);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
+
+  /**
+   * Loads the Story named in the route.
+   */
+  ngOnInit(): void {
+    this._route.paramMap
+      .pipe(
+        switchMap(params => {
+          this.storySlug = params.get('storySlug') ?? '';
+          return this._storyService.getStory(this.storySlug);
+        }),
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+        finalize(() => {
+          this.isLoading = false;
+        }),
+      )
+      .subscribe({
+        next: story => {
+          this.story = story;
+          // Assigned as a plain string (not SafeHtml) so Angular's built-in
+          // sanitizer still runs on it before it reaches [innerHTML].
+          this.descriptionHtml = story.descriptionHtml;
+          this.isLoading = false;
+          this.loadChapters();
+          this.loadCharacters();
+          this.loadCredits();
+          this.loadProgress();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage =
+            error.status === 404
+              ? 'That Story could not be found. It may have been removed or made private.'
+              : 'This Story could not be read. Please try again shortly.';
+          this.isLoading = false;
+        },
+      });
+  }
+
+  /**
+   * Loads the Story's readable Chapters.
+   *
+   * Fetched separately from the Story so a failure to list Chapters leaves the
+   * Story itself readable rather than taking the whole page down.
+   */
+  private loadChapters(): void {
+    this._chapterService
+      .getChapters(this.storySlug)
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: chapters => {
+          this.chapters = chapters;
+        },
+        error: () => {
+          this.chapterErrorMessage =
+            'The Chapter list could not be loaded. Please try again shortly.';
+        },
+      });
+  }
+
+  /**
+   * Loads the Story's cast.
+   *
+   * Fetched separately, and silently: not every Story has a cast, and a
+   * failure to list one must leave the Story readable rather than taking the
+   * page down over a section that may well be empty anyway.
+   */
+  private loadCharacters(): void {
+    this._characterService
+      .getCharacters(this.storySlug)
+      .pipe(
+        catchError(() => of([] as Character[])),
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(characters => {
+        this.characters = characters;
+        this.cast = characters.map(buildCharacterPanelVm);
+      });
+  }
+
+  /**
+   * Loads the Story's credits.
+   *
+   * Silently, for the same reason as the cast: most Stories are written by one
+   * person and have no credits roll at all, and a failure here must not take
+   * the Story down with it.
+   */
+  private loadCredits(): void {
+    this._crewService
+      .getCredits(this.storySlug)
+      .pipe(
+        catchError(() => of([] as CrewCredit[])),
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(credits => {
+        this.credits = credits;
+      });
+  }
+
+  /**
+   * Whether the Story's rating warrants a warning banner.
+   *
+   * @returns True for Mature and Adults Only.
+   */
+  get needsRatingWarning(): boolean {
+    return (
+      this.story !== null && this.story.contentRating !== ContentRating.GENERAL
+    );
+  }
+
+  /**
+   * Whether the reader has progress worth showing.
+   *
+   * @returns True when a signed-in reader has started this Story.
+   */
+  get hasProgress(): boolean {
+    return (
+      this.progress !== null &&
+      this.progress.status !== ReaderStoryStatus.NOT_STARTED
+    );
+  }
+
+  /**
+   * The Chapter Continue Reading should open, if any.
+   *
+   * @returns The Chapter, or null when there is nothing to continue to.
+   */
+  get continueChapter(): ChapterSummary | null {
+    const chapterId = this.progress?.continueChapterId;
+
+    return chapterId
+      ? (this.chapters.find(chapter => chapter.id === chapterId) ?? null)
+      : null;
+  }
+
+  /**
+   * Whether the reader is signed in, and so has progress at all.
+   *
+   * @returns True when progress applies.
+   */
+  get isTrackingProgress(): boolean {
+    return this._authService.isLoggedIn();
+  }
+
+  /**
+   * Whether the reader owns this Story.
+   *
+   * Decides whether the comment thread offers its hide control. The server
+   * decides whether it works.
+   *
+   * @returns True when the Story is theirs.
+   */
+  get isOwner(): boolean {
+    return (
+      this.story !== null &&
+      this.story.ownerUserId === this._authService.getUserId()
+    );
+  }
+
+  /**
+   * The kinds of thing the social controls act on.
+   */
+  readonly targetTypes = StorytimeTargetType;
+
+  /**
+   * The kinds of thing that may be followed.
+   */
+  readonly followKinds = FollowTargetKind;
+
+  /**
+   * Opens the report dialog, and sends whatever the reader chose.
+   *
+   * Only offered to a signed-in reader, because an anonymous report cannot be
+   * followed up or answered.
+   *
+   * The outcome is deliberately quiet: a reporter is told their report
+   * arrived, and nothing else. What an administrator decides about somebody
+   * else's Story is not theirs to read, and a failure is not worth taking the
+   * Story off the screen for.
+   */
+  report(): void {
+    if (!this.story) {
+      return;
+    }
+
+    this._dialog
+      .open(ReportContentDialogComponent, {
+        data: {
+          targetType: StorytimeTargetType.STORY,
+          targetId: this.story.id,
+          label: 'Story',
+        },
+      })
+      .afterClosed()
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe((result?: ReportContentDialogResult) => {
+        if (!result || !this.story) {
+          return;
+        }
+
+        this._moderationService
+          .report({
+            targetType: StorytimeTargetType.STORY,
+            targetId: this.story.id,
+            reasonCode: result.reasonCode,
+            description: result.description,
+          })
+          .pipe(
+            takeUntilDestroyed(this._destroyRef),
+            observeInZone(this._ngZone, this._cdr),
+          )
+          .subscribe({
+            next: () => {
+              this.reportMessage =
+                'Thank you. An administrator will look at this.';
+            },
+            error: (error: HttpErrorResponse) => {
+              this.reportMessage =
+                (error.error as { message?: string } | undefined)?.message ??
+                'That report could not be sent. Please try again shortly.';
+            },
+          });
+      });
+  }
+
+  /**
+   * Sets the reader's own status for this Story.
+   *
+   * @param status - The chosen status.
+   */
+  setStatus(status: ReaderStoryStatus): void {
+    this.withStory(storyId =>
+      this._progressService.setStoryStatus(storyId, status),
+    );
+  }
+
+  /**
+   * Marks the whole Story as read.
+   */
+  completeStory(): void {
+    this.withStory(storyId => this._progressService.completeStory(storyId));
+  }
+
+  /**
+   * Discards the reader's progress and starts the Story again.
+   */
+  resetStory(): void {
+    this.withStory(storyId => this._progressService.resetStory(storyId));
+  }
+
+  /**
+   * Loads the reader's progress through this Story.
+   *
+   * Best effort throughout: a failure here leaves the Story readable without
+   * progress rather than taking the page down over bookkeeping.
+   */
+  private loadProgress(): void {
+    this.withStory(storyId => this._progressService.getStoryProgress(storyId));
+  }
+
+  /**
+   * Runs a progress request for the loaded Story and keeps what comes back.
+   *
+   * @param request - Builds the request from the Story identifier.
+   */
+  private withStory(
+    request: (storyId: string) => ReturnType<ProgressService['resetStory']>,
+  ): void {
+    if (!this.isTrackingProgress || !this.story) {
+      return;
+    }
+
+    request(this.story.id)
+      .pipe(
+        catchError(() => of(null)),
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(progress => {
+        if (progress) {
+          this.progress = progress;
+        }
+      });
+  }
+}

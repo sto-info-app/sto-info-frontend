@@ -22,6 +22,7 @@ import { JwtModule } from '@auth0/angular-jwt';
 import * as Sentry from '@sentry/angular';
 import { routes } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
+import { authTokenInterceptor } from './app/core/auth/auth-token.interceptor';
 import { apiHealthInterceptor } from './app/core/health/api-health.interceptor';
 import { API_URLS } from './app/shared/constants/api-routing.constants';
 import { environment } from './environments/environment';
@@ -100,7 +101,7 @@ export const appConfig: ApplicationConfig = {
     },
     { provide: LocationStrategy, useClass: PathLocationStrategy },
     provideHttpClient(
-      withInterceptors([apiHealthInterceptor]),
+      withInterceptors([authTokenInterceptor, apiHealthInterceptor]),
       withInterceptorsFromDi(),
     ),
   ],

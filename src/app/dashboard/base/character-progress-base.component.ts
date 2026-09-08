@@ -51,6 +51,12 @@ export abstract class CharacterProgressBaseComponent<
   readonly summary = signal<TSummary | null>(null);
   /** The captain's recorded level, or null until the character resolves. */
   readonly characterLevel = signal<number | null>(null);
+  /**
+   * The captain's recorded general allegiance, or null until the character
+   * resolves (or where none was ever recorded). Trackers whose catalogue
+   * differs by faction gate on it via {@link isFeatureLocked}.
+   */
+  readonly characterGeneralFaction = signal<string | null>(null);
   readonly savingItemId = signal<string | null>(null);
   readonly searchText = signal('');
   readonly hideComplete = signal(false);
@@ -69,6 +75,14 @@ export abstract class CharacterProgressBaseComponent<
     const level = this.characterLevel();
     return typeof level === 'number' && level < this.unlockLevel;
   });
+
+  /**
+   * Whether any gate withholds the tracker: the shared level gate, or a
+   * tracker-specific one a subclass adds.
+   */
+  readonly isGated = computed(
+    () => this.isLevelLocked() || this.isFeatureLocked(),
+  );
 
   readonly accountLink = computed(
     () =>
@@ -107,6 +121,18 @@ export abstract class CharacterProgressBaseComponent<
 
   /** The in-game level at which this tracker's feature unlocks. */
   abstract readonly unlockLevel: number;
+
+  /**
+   * A gate beyond the level one, for trackers that need something else of the
+   * captain before their catalogue means anything. Read inside a computed, so
+   * an override may read signals freely. Nothing is gated by default.
+   *
+   * @returns Whether the tracker is withheld for a reason of its own.
+   */
+  protected isFeatureLocked(): boolean {
+    return false;
+  }
+
   /** Display name of the gated feature, used by the level-lock notice. */
   abstract readonly featureName: string;
 
@@ -170,10 +196,13 @@ export abstract class CharacterProgressBaseComponent<
         next: character => {
           this.characterId = character.id;
           this.characterLevel.set(character.level ?? null);
+          this.characterGeneralFaction.set(
+            character.generalFaction?.name ?? null,
+          );
           this.errorMessage = '';
-          // Below the unlock level there is nothing to show or track, so the
-          // catalog and progress requests are skipped entirely.
-          if (this.isLevelLocked()) {
+          // Behind a gate there is nothing to show or track, so the catalog
+          // and progress requests are skipped entirely.
+          if (this.isGated()) {
             this.progress.set([]);
             this.summary.set(null);
             this.isLoading = false;
@@ -307,6 +336,37 @@ export abstract class CharacterProgressBaseComponent<
       return 'transparent';
     }
     return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+  }
+
+  /**
+   * Ink that stays legible where the accent is used as a solid ground rather
+   * than a tint - the heading bar of a panel, say.
+   * ---
+   * Accents come from the catalogue rather than from a curated palette, so
+   * which of black and white carries cannot be settled once in a stylesheet.
+   * It is decided per colour from WCAG relative luminance, at the point where
+   * the two contrast equally against the ground: either side of it the winner
+   * clears 4.5:1, so any accent an editor saves is readable.
+   *
+   * @param item - The progress row whose accent is being set on.
+   * @returns A CSS colour: near-black on a light accent, white on a dark one.
+   */
+  accentTextColor(item: TProgress): string {
+    const rgb = this.hexToRgb(this.accent(item));
+    if (!rgb) {
+      return '#fff';
+    }
+    const luminance =
+      0.2126 * this.linearise(rgb.r) +
+      0.7152 * this.linearise(rgb.g) +
+      0.0722 * this.linearise(rgb.b);
+    return luminance > 0.179 ? '#0d0d0d' : '#fff';
+  }
+
+  /** One 0-255 sRGB channel as the linear value a luminance sum wants. */
+  private linearise(channel: number): number {
+    const ratio = channel / 255;
+    return ratio <= 0.04045 ? ratio / 12.92 : ((ratio + 0.055) / 1.055) ** 2.4;
   }
 
   private hexToRgb(hex: string): { r: number; g: number; b: number } | null {

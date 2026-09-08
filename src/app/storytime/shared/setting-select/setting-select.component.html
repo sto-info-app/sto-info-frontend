@@ -1,0 +1,23 @@
+<div class="storytime-setting-field">
+  <div class="lcars-select-container {{ colour }}">
+    <label
+      class="select-label"
+      [attr.for]="fieldId"
+    >{{ label }}</label>
+    <select
+      [id]="fieldId"
+      [title]="label"
+      [formControlName]="controlName"
+    >
+      @for (option of options; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </div>
+  <app-storytime-setting-help
+    [label]="label"
+    [options]="options"
+  >
+    <ng-content />
+  </app-storytime-setting-help>
+</div>

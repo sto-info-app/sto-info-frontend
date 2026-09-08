@@ -78,6 +78,7 @@ describe('AuthGuard', () => {
       access_token: 'new',
       refresh_token: 'new',
       expires_in: 3600,
+      session_timeout_minutes: 240,
       user_id: '1',
     };
     authServiceSpy.refreshToken.mockReturnValue(of(mockResponse));

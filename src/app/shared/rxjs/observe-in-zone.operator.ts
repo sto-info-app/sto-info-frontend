@@ -42,10 +42,20 @@ export function observeInZone<T>(
   /**
    * Forces a change-detection pass, swallowing the error a destroyed view would
    * throw so a late notification can never crash the caller.
+   *
+   * `markForCheck` follows the pass rather than replacing it. Angular 22 made
+   * `OnPush` the strategy a component gets when it declares none, so a view is
+   * only re-rendered while it is dirty — and `detectChanges` marks it checked
+   * again on its way out. Leaving it dirty means the next traversal to reach it
+   * renders it too, which is what covers a notification arriving *during* the
+   * view's creation pass: `detectChanges` has nothing to render at that point,
+   * and without the mark the first real pass would skip the view and leave a
+   * loading state on screen with the data already in hand.
    */
   const detect = (): void => {
     try {
       cdr.detectChanges();
+      cdr.markForCheck();
     } catch {
       // The view was already destroyed; nothing to render.
     }

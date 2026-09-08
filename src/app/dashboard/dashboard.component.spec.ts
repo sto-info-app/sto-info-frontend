@@ -163,6 +163,40 @@ describe('DashboardComponent', () => {
     });
   });
 
+  describe('publicProfileLink', () => {
+    it('should link to the member registry profile when listed publicly', () => {
+      fixture.detectChanges();
+
+      expect(component.publicProfileLink).toEqual([
+        '/community/registry/profiles',
+        'testuser',
+      ]);
+      expect(fixture.nativeElement.textContent).toContain(
+        'View Public Profile',
+      );
+    });
+
+    it('should offer no public profile link when not listed publicly', () => {
+      mockDashboardService.getUser.mockReturnValue(
+        of({
+          ...mockUser,
+          profile: { ...mockUser.profile!, publiclyVisible: false },
+        }),
+      );
+
+      fixture.detectChanges();
+
+      expect(component.publicProfileLink).toBeNull();
+      expect(fixture.nativeElement.textContent).not.toContain(
+        'View Public Profile',
+      );
+    });
+
+    it('should offer no public profile link before the user has loaded', () => {
+      expect(component.publicProfileLink).toBeNull();
+    });
+  });
+
   it('should return route link from routing service', () => {
     const link = component.getRouteLink('some-route');
     expect(mockRoutingService.getLink).toHaveBeenCalledWith('some-route');

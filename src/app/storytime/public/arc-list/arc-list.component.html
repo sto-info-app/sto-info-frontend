@@ -1,0 +1,59 @@
+<section
+  id="storytime-arc-list-page"
+  class="storytime-page">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Arcs</span>
+  </div>
+
+  <p class="storytime-arc-list__intro">
+    Reading orders assembled across several Stories, each with the agreement of
+    the people who wrote them.
+  </p>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Arcs unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading Arcs"></app-loading-bar>
+  } @else if (arcs.length === 0) {
+    <p class="storytime-empty">
+      There are no published Arcs yet. Check back soon, or curate the first one.
+    </p>
+  } @else {
+    <ul class="storytime-arc-list">
+      @for (arc of arcs; track arc.id) {
+        <li class="storytime-panel-card storytime-panel-card--arc">
+          <a
+            class="storytime-panel-card__heading"
+            [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]"
+            [title]="arc.title">
+            <span class="storytime-panel-card__name">{{ arc.title }}</span>
+          </a>
+
+          <div class="storytime-panel-card__body storytime-arc-list__entry">
+            @if (arc.profileImageUrl) {
+              <img
+                class="storytime-arc-list__image"
+                [src]="arc.profileImageUrl"
+                [alt]="arc.profileImageAlt ?? ''" />
+            }
+            @if (arc.shortDescription) {
+              <p class="storytime-arc-list__summary">
+                {{ arc.shortDescription }}
+              </p>
+            }
+          </div>
+
+          <!--
+            What the Arc is about, closing the panel off the way the Spotlight
+            panel and the Story listing close theirs.
+          -->
+          <app-storytime-tag-row [tags]="arc.tags"></app-storytime-tag-row>
+        </li>
+      }
+    </ul>
+  }
+</section>

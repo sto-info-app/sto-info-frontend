@@ -6,7 +6,9 @@ import {
   Observable,
   ReplaySubject,
   catchError,
+  finalize,
   map,
+  shareReplay,
   tap,
   throwError,
 } from 'rxjs';
@@ -18,7 +20,28 @@ import {
 } from 'src/app/models/user-auth.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { DEFAULT_SESSION_TIMEOUT_MINUTES } from 'src/app/shared/constants/session-timeout.constants';
 import { environment } from 'src/environments/environment';
+
+/**
+ * The browser events taken as a sign the user is still there.
+ */
+const ACTIVITY_EVENTS = [
+  'click',
+  'keydown',
+  'pointerdown',
+  'mousemove',
+  'wheel',
+  'scroll',
+  'touchstart',
+] as const;
+
+/**
+ * How often activity is allowed to move the inactivity deadline. Mouse
+ * movement alone can fire hundreds of times a second, and the deadline is
+ * measured in hours, so once every half a minute is plenty.
+ */
+const ACTIVITY_THROTTLE_MS = 30_000;
 
 @Injectable({
   providedIn: 'root',
@@ -47,6 +70,12 @@ export class AuthService {
   private warningTimeout: ReturnType<typeof setTimeout> | null = null;
   private logoutTimeout: ReturnType<typeof setTimeout> | null = null;
 
+  /** The last activity that was allowed through the throttle. */
+  private lastActivityHandledAt = 0;
+
+  /** The refresh in progress, so that concurrent callers share one exchange. */
+  private inFlightRefresh: Observable<string> | null = null;
+
   private readonly _http = inject(HttpClient);
   private readonly _router = inject(Router);
   private readonly _zone = inject(NgZone);
@@ -60,6 +89,10 @@ export class AuthService {
 
     // Load any valid token expiry from localStorage and create a timer
     this.createAutoLogoutTimer();
+
+    // Watch for the user working, so the session follows them rather than the
+    // access token's own, much shorter, life.
+    this.watchForActivity();
   }
 
   /**
@@ -89,7 +122,12 @@ export class AuthService {
             response.access_token,
             response.refresh_token,
             response.expires_in,
+            response.session_timeout_minutes,
           );
+
+          // Signing in is the user, so the window starts from here rather than
+          // from whatever a previous session left behind.
+          this.markActivity();
         }),
       );
   }
@@ -109,26 +147,177 @@ export class AuthService {
   }
 
   /**
-   * Persists access and refresh tokens and updates expiry notifications.
+   * Persists access and refresh tokens and re-derives the session deadline.
+   *
+   * Two clocks are stored, and they are not the same thing. `access_expires_at`
+   * is when the access token stops being accepted, which is short and fixed by
+   * the deployment; `expires_at` is when the login session ends, which is the
+   * user's own inactivity window and is what the warning and logout timers run
+   * to. New tokens move the first and leave the second where the user's own
+   * activity has put it.
    *
    * @param accessToken The access token.
    * @param refreshToken The refresh token.
-   * @param expiresIn The token lifetime in seconds.
+   * @param expiresIn The access token lifetime in seconds.
+   * @param sessionTimeoutMinutes The user's inactivity window in minutes.
    */
-  saveToken(accessToken: string, refreshToken: string, expiresIn: number) {
-    const expiresAt = this.getNewExpiresMilliseconds(expiresIn);
-    const warningAt = expiresAt - this.autoLogoutWarningMilliSecs;
-
+  saveToken(
+    accessToken: string,
+    refreshToken: string,
+    expiresIn: number,
+    sessionTimeoutMinutes: number = this.getSessionTimeoutMinutes(),
+  ) {
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
-    localStorage.setItem('expires_at', expiresAt.toString());
-    localStorage.setItem('warning_at', warningAt.toString());
+    localStorage.setItem(
+      'session_timeout_mins',
+      sessionTimeoutMinutes.toString(),
+    );
+    localStorage.setItem(
+      'access_expires_at',
+      this.getNewExpiresMilliseconds(expiresIn).toString(),
+    );
 
     this._isAuthenticatedSubject.next(true);
-    this._expiryAnnouncedSubject.next(expiresAt);
-    // Don't announce warning here - let the timer announce it when it fires
 
+    // Deliberately measured from the last sign of the user rather than from
+    // now: a token exchange the user did not ask for - the interceptor
+    // replacing a rejected token, say - must not pass for them still being
+    // here, or an abandoned tab could hold a session open indefinitely.
+    this.refreshSessionDeadline();
+  }
+
+  /**
+   * Returns the inactivity window the current session runs to.
+   *
+   * @returns The window in minutes, defaulting when nothing is stored.
+   */
+  getSessionTimeoutMinutes(): number {
+    const stored = Number(localStorage.getItem('session_timeout_mins'));
+    return Number.isFinite(stored) && stored > 0
+      ? stored
+      : DEFAULT_SESSION_TIMEOUT_MINUTES;
+  }
+
+  /**
+   * Slides the inactivity window forward from the given moment and re-arms the
+   * warning and logout timers to match.
+   *
+   * Does nothing when there is no session to extend.
+   *
+   * @param at The moment the activity happened. Defaults to now.
+   */
+  markActivity(at: number = Date.now()): void {
+    if (!localStorage.getItem('access_token')) {
+      return;
+    }
+
+    this.lastActivityHandledAt = at;
+    localStorage.setItem('last_activity_at', at.toString());
+    this.refreshSessionDeadline();
+  }
+
+  /**
+   * Recomputes the session deadline from the last sign of activity, re-arms the
+   * warning and logout timers, and announces the new expiry.
+   *
+   * Only called where a session is known to exist: straight after storing new
+   * tokens, or from markActivity once it has checked.
+   */
+  private refreshSessionDeadline(): void {
+    const lastActivityAt =
+      Number(localStorage.getItem('last_activity_at')) || Date.now();
+    const expiresAt =
+      lastActivityAt + this.getSessionTimeoutMinutes() * 60 * 1000;
+
+    localStorage.setItem('last_activity_at', lastActivityAt.toString());
+    localStorage.setItem('expires_at', expiresAt.toString());
+    localStorage.setItem(
+      'warning_at',
+      (expiresAt - this.autoLogoutWarningMilliSecs).toString(),
+    );
+
+    this._expiryAnnouncedSubject.next(expiresAt);
     this.createAutoLogoutTimer();
+  }
+
+  /**
+   * Listens for the user working so that the session follows them.
+   *
+   * The listeners sit outside Angular's zone: mouse movement alone would
+   * otherwise trigger change detection continuously for the whole session.
+   */
+  private watchForActivity(): void {
+    this._zone.runOutsideAngular(() => {
+      for (const eventName of ACTIVITY_EVENTS) {
+        document.addEventListener(eventName, () => this.handleActivity(), {
+          passive: true,
+          capture: true,
+        });
+      }
+
+      // Coming back to a tab that was left in the background counts too.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          this.handleActivity();
+        }
+      });
+    });
+  }
+
+  /**
+   * Handles one sign of activity, subject to the throttle.
+   *
+   * Activity is ignored once the warning dialog is due: at that point the user
+   * is being asked, deliberately, whether they are still there, and a stray
+   * mouse movement should not answer on their behalf.
+   */
+  private handleActivity(): void {
+    const now = Date.now();
+    if (now - this.lastActivityHandledAt < ACTIVITY_THROTTLE_MS) {
+      return;
+    }
+
+    if (!this.isTokenValid()) {
+      return;
+    }
+
+    const warningAt = Number(localStorage.getItem('warning_at'));
+    if (warningAt && now >= warningAt) {
+      return;
+    }
+
+    this._zone.run(() => {
+      this.markActivity(now);
+
+      // Keep the access token ahead of the session, so that working through
+      // the window never lands on a request the API will reject.
+      if (this.isTokenExpiringSoon()) {
+        this.ensureFreshAccessToken().subscribe({
+          error: () => undefined,
+        });
+      }
+    });
+  }
+
+  /**
+   * Exchanges the refresh token for a new access token, sharing one exchange
+   * between everything that asks for it at the same time.
+   *
+   * @returns An observable of the new access token.
+   */
+  ensureFreshAccessToken(): Observable<string> {
+    if (this.inFlightRefresh) {
+      return this.inFlightRefresh;
+    }
+
+    this.inFlightRefresh = this.refreshToken().pipe(
+      map(response => response.access_token),
+      finalize(() => (this.inFlightRefresh = null)),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+
+    return this.inFlightRefresh;
   }
 
   /**
@@ -158,6 +347,9 @@ export class AuthService {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('expires_at');
     localStorage.removeItem('warning_at');
+    localStorage.removeItem('access_expires_at');
+    localStorage.removeItem('session_timeout_mins');
+    localStorage.removeItem('last_activity_at');
     this._isAuthenticatedSubject.next(false);
 
     // Notify subscribers that the token has expired
@@ -178,14 +370,13 @@ export class AuthService {
     const body = { refresh_token: refreshToken };
     return this._http.post<LoginResponse>(API_URLS.AUTH_REFRESH, body).pipe(
       tap(response => {
+        // saveToken announces the new session expiry and re-arms the timers.
         this.saveToken(
           response.access_token,
           response.refresh_token,
           response.expires_in,
+          response.session_timeout_minutes,
         );
-
-        const expiresAt = this.getNewExpiresMilliseconds(response.expires_in);
-        this._expiryAnnouncedSubject.next(expiresAt); // Notify subscribers of the new expiry time
       }),
       catchError(error => {
         this._router.navigate([APP_ROUTES.LOGIN]);
@@ -478,6 +669,18 @@ export class AuthService {
   }
 
   /**
+   * Calculates how many seconds remain before the access token stops being
+   * accepted, which is a shorter and separate clock from the session's.
+   *
+   * @returns The remaining access token lifetime in seconds.
+   */
+  getSecondsUntilAccessTokenExpiry(): number {
+    const expiresAt = Number(localStorage.getItem('access_expires_at'));
+    const now = Date.now();
+    return Math.max(0, expiresAt - now) / 1000; // Convert to seconds
+  }
+
+  /**
    * Converts a lifetime in seconds into an absolute expiry timestamp.
    *
    * @param seconds The number of seconds to add to the current time.
@@ -548,16 +751,22 @@ export class AuthService {
   }
 
   /**
-   * Determines whether the current session is close to expiring.
+   * Determines whether the access token is close to expiring and should be
+   * exchanged for a new one.
    *
-   * @returns `true` when the remaining session time is below the refresh threshold.
+   * This asks about the access token rather than the session: the session runs
+   * to the user's inactivity window and is renewed by them still being here,
+   * whereas the access token has to be replaced periodically for as long as
+   * that session lasts.
+   *
+   * @returns `true` when the remaining access token life is below the refresh threshold.
    */
   isTokenExpiringSoon(): boolean {
     const thresholdMins =
-      environment.minsBeforeLogoutExpiryToRefreshToken || 15; // Minutes before login session expires if not set in environment settings
+      environment.minsBeforeLogoutExpiryToRefreshToken || 15; // Minutes before the access token expires if not set in environment settings
     const thresholdSecs = thresholdMins * 60;
 
-    const secondsUntilExpiry = this.getSecondsUntilLoginSessionExpiry();
+    const secondsUntilExpiry = this.getSecondsUntilAccessTokenExpiry();
 
     return secondsUntilExpiry < thresholdSecs;
   }

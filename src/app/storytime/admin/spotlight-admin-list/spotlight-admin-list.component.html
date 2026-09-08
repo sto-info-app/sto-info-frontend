@@ -1,0 +1,87 @@
+<section
+  id="storytime-spotlight-admin-page"
+  class="storytime-page">
+  <h1>Spotlight</h1>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Action failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <div class="storytime-page-actions">
+    <a
+      class="lcars-btn lcars-btn-auto green"
+      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'spotlight', 'new']">
+      Draft a selection
+    </a>
+  </div>
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading Spotlight entries"></app-loading-bar>
+  } @else if (entries.length === 0) {
+    <p class="storytime-empty">
+      Nothing has been chosen for the Spotlight yet.
+    </p>
+  } @else {
+    <ul class="storytime-spotlight-admin">
+      @for (entry of entries; track entry.id) {
+        <li class="storytime-spotlight-admin__entry">
+          <h2>
+            <a
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'manage',
+                'spotlight',
+                entry.id,
+              ]"
+              >{{ entry.headline }}</a
+            >
+          </h2>
+
+          <ul class="storytime-spotlight-admin__meta">
+            <li>
+              <span class="sr-only">State: </span>
+              {{ stateOf(entry) }}
+            </li>
+            <li>{{ titleFor(entry) }}</li>
+            <li>
+              {{ entry.startsAt | date: 'longDate' }}
+              @if (entry.endsAt) {
+                – {{ entry.endsAt | date: 'longDate' }}
+              } @else {
+                onwards
+              }
+            </li>
+            <li>Priority {{ entry.displayPriority }}</li>
+          </ul>
+
+          <div class="storytime-actions">
+            @if (entry.isPublished) {
+              <button
+                class="lcars-btn lcars-btn-auto cardinal"
+                type="button"
+                (click)="unpublish(entry)">
+                Withdraw
+              </button>
+            } @else {
+              <button
+                class="lcars-btn lcars-btn-auto green"
+                type="button"
+                (click)="publish(entry)">
+                Publish
+              </button>
+            }
+            <button
+              class="lcars-btn lcars-btn-auto red"
+              type="button"
+              (click)="remove(entry)">
+              Delete
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

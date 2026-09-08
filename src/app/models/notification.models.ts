@@ -98,3 +98,27 @@ export const NOTIFICATION_SEVERITY_LABELS: Record<
   [NotificationSeverity.WARNING]: 'Warning',
   [NotificationSeverity.CRITICAL]: 'Critical',
 };
+
+/**
+ * One user returned by the admin user-search endpoint.
+ */
+export interface UserSearchResult {
+  id: string;
+  username: string;
+  /** The member's real name, or null when they have given none. */
+  fullName: string | null;
+  /** What the account is allowed to do, e.g. `ADMIN`. */
+  role: string;
+  /** When the member last signed in, or null when they never have. */
+  lastLoginAt: string | null;
+}
+
+/**
+ * A paginated page of user-search results.
+ */
+export interface UserSearchPage {
+  items: UserSearchResult[];
+  total: number;
+  page: number;
+  pageSize: number;
+}

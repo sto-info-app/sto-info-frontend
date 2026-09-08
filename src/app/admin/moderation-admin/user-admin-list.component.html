@@ -10,7 +10,7 @@
     <p class="admin-page-intro">
       Find an account and disable or restore it. Disabling signs the member out
       immediately, keeps them from signing in again and closes every open report
-      about them.
+      about them. Roles and permissions are changed on Manage Permissions.
     </p>
 
     @if (errorMessage) {
@@ -62,6 +62,7 @@
               id="user-search-input"
               type="search"
               maxlength="255"
+              [class.privacy-blur]="privacyMode.isEnabled()"
               [(ngModel)]="search"
               (keyup.enter)="applyFilters()" />
           </div>
@@ -85,11 +86,17 @@
       @if (users.length > 0) {
         <div class="admin-records">
           @for (user of users; track user.id) {
-            <article class="admin-record-card">
+            <article
+              class="admin-record-card member-card"
+              [ngClass]="'role-' + roleModifier(user)">
               <header class="admin-record-header">
                 <div class="admin-record-title">
-                  <strong>{{ displayName(user) }}</strong>
-                  <span>{{ user.email }}</span>
+                  <strong
+                    [class.privacy-blur]="
+                      isNameAnEmail(user) && privacyMode.isEnabled()
+                    "
+                    >{{ displayName(user) }}</strong
+                  >
                 </div>
                 <div class="admin-record-meta">
                   @if (user.openReportCount > 0) {
@@ -99,10 +106,12 @@
                       }}
                     </span>
                   }
-                  <span
-                    class="status-pill"
-                    [ngClass]="user.isAccountDisabled ? 'draft' : 'success'">
+                  <span class="member-status">
                     {{ user.isAccountDisabled ? 'Disabled' : 'Active' }}
+                    <span
+                      class="status-light"
+                      [ngClass]="user.isAccountDisabled ? 'off' : 'on'"
+                      aria-hidden="true"></span>
                   </span>
                 </div>
               </header>
@@ -112,12 +121,24 @@
                   <dl class="admin-record-details">
                     <div class="admin-record-detail">
                       <span class="label">Role</span>
-                      <span class="value">{{ user.role }}</span>
+                      <span
+                        class="value member-role"
+                        [ngClass]="'role-' + roleModifier(user)"
+                        >{{ roleLabel(user) }}</span
+                      >
+                    </div>
+                    <div class="admin-record-detail">
+                      <span class="label">Email</span>
+                      <span
+                        class="value member-email"
+                        [class.privacy-blur]="privacyMode.isEnabled()"
+                        >{{ user.email }}</span
+                      >
                     </div>
                     <div class="admin-record-detail">
                       <span class="label">Registered</span>
                       <span class="value">
-                        {{ user.createdAt | date: 'mediumDate' }}
+                        {{ user.createdAt | date: dateTimeFormat }}
                       </span>
                     </div>
                     <div class="admin-record-detail">
@@ -125,7 +146,7 @@
                       <span class="value">
                         {{
                           user.lastLoginAt
-                            ? (user.lastLoginAt | date: 'medium')
+                            ? (user.lastLoginAt | date: dateTimeFormat)
                             : 'Never'
                         }}
                       </span>
@@ -134,7 +155,7 @@
                       <div class="admin-record-detail">
                         <span class="label">Disabled</span>
                         <span class="value">
-                          {{ user.disabledAt | date: 'medium' }}
+                          {{ user.disabledAt | date: dateTimeFormat }}
                         </span>
                       </div>
                       <div class="admin-record-detail">
@@ -185,6 +206,11 @@
         class="full-width-btn-link sunflower"
         [routerLink]="'/' + appRoutes.ADMIN_REPORTS"
         >Reported officers</a
+      >
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN_PERMISSIONS"
+        >Manage permissions</a
       >
       <a
         class="full-width-btn-link sunflower"

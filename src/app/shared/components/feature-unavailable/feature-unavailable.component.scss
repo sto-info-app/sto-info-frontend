@@ -1,0 +1,37 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+// Sunflower rather than the error panel's red: nothing here is broken from the
+// visitor's side, and the two situations this notice covers are both temporary.
+.feature-unavailable {
+  width: 100%;
+  margin: 1rem auto;
+
+  .lcars-text-bar {
+    background-color: vars.$lcars-sunflower;
+    border-right: 28px solid vars.$lcars-gold;
+    border-left: 28px solid vars.$lcars-gold;
+  }
+
+  .lcars-bar {
+    border-right: 28px solid vars.$lcars-gold;
+    border-left: 28px solid vars.$lcars-gold;
+
+    .lcars-bar-inner {
+      background-color: vars.$lcars-sunflower;
+    }
+  }
+}
+
+.feature-unavailable__message {
+  display: block;
+  max-width: 70ch;
+  padding: 0.75rem 40px;
+  margin: 0;
+  color: vars.$lcars-grey-light;
+  text-align: left;
+}

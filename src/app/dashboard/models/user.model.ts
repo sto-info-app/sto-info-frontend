@@ -28,3 +28,8 @@ export interface UserProfileUpdateResult {
   affected: number;
   userProfileData: UserProfile | null;
 }
+
+export interface UserSettings {
+  privacyMode: boolean;
+  sessionTimeoutMinutes: number;
+}

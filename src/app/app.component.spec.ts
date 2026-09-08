@@ -46,6 +46,7 @@ describe('AppComponent', () => {
     expiryAnnounced$: Subject<number>;
     performLogout: jest.Mock<void, []>;
     refreshToken: jest.Mock<Observable<boolean>, []>;
+    markActivity: jest.Mock<void, []>;
     getSecondsUntilLoginSessionExpiry: jest.Mock<number, []>;
   };
 
@@ -141,6 +142,7 @@ describe('AppComponent', () => {
       expiryAnnounced$: new Subject<number>(),
       performLogout: jest.fn(),
       refreshToken: jest.fn().mockReturnValue(of(true)),
+      markActivity: jest.fn(),
       getSecondsUntilLoginSessionExpiry: jest.fn().mockReturnValue(10),
     };
 
@@ -334,6 +336,7 @@ describe('AppComponent', () => {
     ).openRefreshSessionDialog();
 
     expect(dialogOpenSpy).toHaveBeenCalled();
+    expect(mockAuthService.markActivity).toHaveBeenCalled();
     expect(mockAuthService.refreshToken).toHaveBeenCalled();
   });
   it('should handle stayLoggedIn = undefined in afterClosed', () => {

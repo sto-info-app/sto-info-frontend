@@ -49,6 +49,7 @@ describe('ProfileComponent', () => {
   beforeEach(async () => {
     mockDashboardService = {
       getUser: jest.fn().mockReturnValue(of(mockUser)),
+      getUserSettings: jest.fn().mockReturnValue(of({ privacyMode: false })),
       closeAccount: jest.fn().mockReturnValue(of({ success: true })),
     } as unknown as jest.Mocked<DashboardService>;
 
@@ -139,6 +140,50 @@ describe('ProfileComponent', () => {
     expect(fixture.nativeElement.textContent).toContain(
       'Everything in your profile is hidden from the Galactic Personnel Registry.',
     );
+  });
+
+  describe('Public profile link', () => {
+    it('should link to the member registry profile when listed publicly', () => {
+      fixture.detectChanges();
+
+      expect(component.publicProfileLink).toEqual([
+        '/community/registry/profiles',
+        'testuser',
+      ]);
+      const publicProfileButton = Array.from(
+        fixture.nativeElement.querySelectorAll('.buttons a'),
+      ).find(link =>
+        (link as HTMLAnchorElement).textContent?.includes(
+          'View Public Profile',
+        ),
+      ) as HTMLAnchorElement | undefined;
+      expect(publicProfileButton?.getAttribute('href')).toBe(
+        '/community/registry/profiles/testuser',
+      );
+    });
+
+    it('should offer no public profile link when not listed publicly', () => {
+      mockDashboardService.getUser.mockReturnValue(
+        of({
+          ...mockUser,
+          profile: {
+            ...mockUser.profile!,
+            publiclyVisible: false,
+          },
+        }),
+      );
+
+      fixture.detectChanges();
+
+      expect(component.publicProfileLink).toBeNull();
+      expect(fixture.nativeElement.textContent).not.toContain(
+        'View Public Profile',
+      );
+    });
+
+    it('should offer no public profile link before the user has loaded', () => {
+      expect(component.publicProfileLink).toBeNull();
+    });
   });
 
   it('should logout if account is disabled', () => {

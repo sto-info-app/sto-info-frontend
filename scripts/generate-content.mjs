@@ -17,15 +17,30 @@
  *
  * @module
  */
-import { mkdir, writeFile } from 'node:fs/promises';
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildJsonFeed, buildRssFeed, buildSitemap } from './lib/feeds.mjs';
+import {
+  STATIC_SITEMAP_PATHS,
+  buildJsonFeed,
+  buildRssFeed,
+  buildSitemap,
+  helpGuideSitemapPaths,
+} from './lib/feeds.mjs';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(SCRIPT_DIR, '..');
 const OUTPUT_DIR = join(PROJECT_ROOT, 'generated');
 const OUTPUT_DIR_RESOLVED = resolve(OUTPUT_DIR);
+
+const HELP_GUIDE_SLUGS_FILE = join(
+  PROJECT_ROOT,
+  'src',
+  'app',
+  'static-pages',
+  'help',
+  'help-guide-slugs.json',
+);
 
 const PAGE_SIZE = 50;
 const MAX_PAGES = 500;
@@ -148,6 +163,32 @@ async function generateOgImages(posts) {
 }
 
 /**
+ * Reads the help guide slugs the application publishes.
+ *
+ * Read from the application rather than repeated here, so a guide added or
+ * renamed reaches the sitemap without anybody remembering to update it. A
+ * matching test in `help.data.spec.ts` fails if the list and the guides
+ * themselves ever disagree.
+ *
+ * A missing or unreadable file costs the guide entries rather than the whole
+ * sitemap: this script must never block a build.
+ *
+ * @param {string} [file=HELP_GUIDE_SLUGS_FILE] - The manifest to read.
+ * @returns {Promise<string[]>} The slugs, or an empty list if unavailable.
+ */
+export async function readHelpGuideSlugs(file = HELP_GUIDE_SLUGS_FILE) {
+  try {
+    const { slugs } = JSON.parse(await readFile(file, 'utf8'));
+    return Array.isArray(slugs) ? slugs : [];
+  } catch (error) {
+    console.warn(
+      `[generate-content] Could not read help guide slugs (${error.message}). Listing the help index only.`,
+    );
+    return [];
+  }
+}
+
+/**
  * Runs the generator.
  *
  * @returns {Promise<void>}
@@ -173,7 +214,17 @@ async function main() {
     posts,
   };
 
-  await writeOutput('sitemap.xml', buildSitemap({ siteUrl: SITE_URL, posts }));
+  await writeOutput(
+    'sitemap.xml',
+    buildSitemap({
+      siteUrl: SITE_URL,
+      posts,
+      staticPaths: [
+        ...STATIC_SITEMAP_PATHS,
+        ...helpGuideSitemapPaths(await readHelpGuideSlugs()),
+      ],
+    }),
+  );
   await writeOutput('feed.xml', buildRssFeed(feedOptions));
   await writeOutput('feed.json', buildJsonFeed(feedOptions));
   console.log(

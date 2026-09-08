@@ -1,0 +1,864 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { of, throwError } from 'rxjs';
+import {
+  CompletionState,
+  ContentRating,
+  CONTENT_RATING_LABELS,
+  Spotlight,
+  SpotlightEntityType,
+  StorySort,
+  STORYTIME_DISABLED_STATE,
+} from 'src/app/models/storytime.models';
+import { PERMISSIONS } from 'src/app/models/access-control.models';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { AccessControlService } from 'src/app/shared/services/access-control.service';
+import { AuthService } from 'src/app/core/auth/auth.service';
+import { FollowService } from '../follow.service';
+import { SpotlightService } from '../spotlight.service';
+import { StoryService } from '../story.service';
+import {
+  COMPLETION_STATE_LABELS,
+  STORYTIME_COPY,
+} from '../storytime.constants';
+import { StorytimeService } from '../storytime.service';
+import { StorytimeLandingComponent } from './storytime-landing.component';
+
+describe('StorytimeLandingComponent', () => {
+  let fixture: ComponentFixture<StorytimeLandingComponent>;
+  let spotlightService: { getSpotlight: jest.Mock };
+  let storytimeService: { getFeatureState: jest.Mock };
+  let storyService: { getStories: jest.Mock };
+  let followService: { getUnreadCount: jest.Mock };
+  let authService: { isLoggedIn: jest.Mock };
+  let accessControlService: { getMyPermissions: jest.Mock };
+
+  /**
+   * Builds a Spotlight selection.
+   *
+   * @param overrides - Fields to change.
+   * @returns The selection.
+   */
+  const buildEntry = (overrides: Partial<Spotlight> = {}): Spotlight =>
+    ({
+      id: 'spotlight-1',
+      slug: 'a-fine-story',
+      entityType: SpotlightEntityType.STORY,
+      headline: 'Start here',
+      summary: 'Worth your evening.',
+      selectionReason: null,
+      overrideImageUrl: null,
+      overrideImageMobileUrl: null,
+      overrideImageAlt: null,
+      startsAt: '2026-06-01T00:00:00.000Z',
+      endsAt: null,
+      story: {
+        id: 'story-1',
+        slug: 'a-fine-story',
+        title: 'A Fine Story',
+        bannerImageUrl: null,
+        bannerImageAlt: null,
+        completionState: CompletionState.COMPLETED,
+        contentRating: ContentRating.MATURE,
+        publishedChapterCount: 12,
+        rating: 7,
+      },
+      arc: null,
+      author: { username: 'Kira', publiclyVisible: true },
+      tags: [
+        {
+          id: 'tag-1',
+          slug: 'slow-burn',
+          name: 'Slow burn',
+          description: 'Takes its time.',
+        },
+      ],
+      ...overrides,
+    }) as Spotlight;
+
+  /**
+   * Builds and renders the component.
+   *
+   * @returns The rendered element.
+   */
+  const render = (): HTMLElement => {
+    fixture = TestBed.createComponent(StorytimeLandingComponent);
+    fixture.detectChanges();
+    return fixture.nativeElement as HTMLElement;
+  };
+
+  beforeEach(() => {
+    spotlightService = {
+      getSpotlight: jest.fn().mockReturnValue(of([buildEntry()])),
+    };
+    storytimeService = {
+      getFeatureState: jest.fn().mockReturnValue(
+        of({
+          ...STORYTIME_DISABLED_STATE,
+          isEnabled: true,
+          spotlightEnabled: true,
+        }),
+      ),
+    };
+
+    // Signed in by default, so the reader's own corner of the page is there
+    // to be asserted about; the signed-out case is its own test.
+    authService = { isLoggedIn: jest.fn().mockReturnValue(true) };
+    // Nobody runs Storytime unless a test says so: the management cards are
+    // the exception on this page, not the rule.
+    accessControlService = {
+      getMyPermissions: jest
+        .fn()
+        .mockReturnValue(of(new Set<string>() as ReadonlySet<string>)),
+    };
+    followService = {
+      getUnreadCount: jest.fn().mockReturnValue(of({ unread: 3 })),
+    };
+
+    storyService = {
+      getStories: jest.fn().mockReturnValue(
+        of({
+          items: [
+            {
+              id: 'story-1',
+              slug: 'a-story',
+              title: 'A Story',
+              shortDescription: 'Where it begins.',
+              arcs: [],
+              tags: [],
+            },
+          ],
+          total: 1,
+          page: 1,
+          pageSize: 6,
+        }),
+      ),
+    };
+
+    TestBed.configureTestingModule({
+      imports: [StorytimeLandingComponent],
+      providers: [
+        provideRouter([]),
+        { provide: SpotlightService, useValue: spotlightService },
+        { provide: StoryService, useValue: storyService },
+        { provide: StorytimeService, useValue: storytimeService },
+        { provide: FollowService, useValue: followService },
+        { provide: AuthService, useValue: authService },
+        { provide: AccessControlService, useValue: accessControlService },
+      ],
+    });
+  });
+
+  it('is created', () => {
+    render();
+
+    expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('shows the feature title and introduction', () => {
+    const text = render().textContent ?? '';
+
+    expect(text).toContain(STORYTIME_COPY.LANDING_TITLE);
+    expect(text).toContain(STORYTIME_COPY.LANDING_INTRO);
+  });
+
+  // Required wherever fan-created Star Trek content is published.
+  it('shows the fan content notice', () => {
+    const text = render().textContent ?? '';
+
+    expect(text).toContain(STORYTIME_COPY.FAN_CONTENT_NOTICE);
+  });
+
+  describe('the Spotlight', () => {
+    it('leads with what has been chosen', () => {
+      const text = render().textContent ?? '';
+
+      expect(text).toContain('Start here');
+      expect(text).toContain('A Fine Story');
+      expect(text).toContain('Worth your evening.');
+    });
+
+    it('sends a reader to the featured Story', () => {
+      const link = render().querySelector(
+        '.storytime-panel-card--spotlight .storytime-panel-card__heading',
+      );
+
+      expect(link?.getAttribute('href')).toContain('stories/a-fine-story');
+    });
+
+    it('sends a reader to the featured Arc', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([
+          buildEntry({
+            entityType: SpotlightEntityType.ARC,
+            story: null,
+            arc: {
+              id: 'arc-1',
+              slug: 'the-long-war',
+              title: 'The Long War',
+            } as never,
+          }),
+        ]),
+      );
+
+      const link = render().querySelector(
+        '.storytime-panel-card--spotlight .storytime-panel-card__heading',
+      );
+
+      expect(link?.getAttribute('href')).toContain('arcs/the-long-war');
+    });
+
+    // Somebody who recognises the Story rather than the editor's headline
+    // should be able to click the name they recognise.
+    it('sends a reader to the featured Story from its title', () => {
+      const link = render().querySelector(
+        '.storytime-panel-card--spotlight .storytime-spotlight__work-link',
+      );
+
+      expect(link?.textContent).toContain('A Fine Story');
+      expect(link?.getAttribute('href')).toContain('stories/a-fine-story');
+    });
+
+    it('offers a button that opens the featured Story', () => {
+      const button = render().querySelector(
+        '.storytime-spotlight__actions .lcars-btn',
+      );
+
+      expect(button?.textContent).toContain('Read the Story');
+      expect(button?.getAttribute('href')).toContain('stories/a-fine-story');
+    });
+
+    it('offers a button that opens the featured Arc', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([
+          buildEntry({
+            entityType: SpotlightEntityType.ARC,
+            story: null,
+            arc: {
+              id: 'arc-1',
+              slug: 'the-long-war',
+              title: 'The Long War',
+            } as never,
+          }),
+        ]),
+      );
+
+      const button = render().querySelector(
+        '.storytime-spotlight__actions .lcars-btn',
+      );
+
+      expect(button?.textContent).toContain('Read the Arc');
+      expect(button?.getAttribute('href')).toContain('arcs/the-long-war');
+    });
+
+    // The same facts the Story page opens with: a reader choosing whether to
+    // start something wants them before they click, not after.
+    it('shows what the featured Story is', () => {
+      const text = render().textContent ?? '';
+
+      expect(text).toContain(
+        COMPLETION_STATE_LABELS[CompletionState.COMPLETED],
+      );
+      expect(text).toContain(CONTENT_RATING_LABELS[ContentRating.MATURE]);
+      expect(text).toContain('12');
+      expect(text).toContain('Kira');
+      expect(text).toContain('Slow burn');
+    });
+
+    it('links a listed author to their profile', () => {
+      const link = render().querySelector(
+        '.storytime-panel-card--spotlight .storytime-facts__author',
+      );
+
+      expect(link?.getAttribute('href')).toContain('registry/profiles/Kira');
+    });
+
+    // Publishing credits somebody by name whatever they have chosen about
+    // being found, but an unlisted profile has no page to open.
+    it('credits an unlisted author without linking to them', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([
+          buildEntry({
+            author: { username: 'Kira', publiclyVisible: false },
+          }),
+        ]),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain('Kira');
+      expect(
+        element.querySelector(
+          '.storytime-panel-card--spotlight .storytime-facts__author',
+        ),
+      ).toBeNull();
+    });
+
+    // An Arc is a reading order rather than a text, so the facts a Story has
+    // and it has not are left out instead of shown empty.
+    it('shows an Arc only the facts an Arc has', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([
+          buildEntry({
+            entityType: SpotlightEntityType.ARC,
+            story: null,
+            arc: {
+              id: 'arc-1',
+              slug: 'the-long-war',
+              title: 'The Long War',
+              rating: 4,
+            } as never,
+            tags: [],
+          }),
+        ]),
+      );
+
+      // Scoped to the panel: the Story lists further down the page carry
+      // captions of their own with the same words on them.
+      const panel = render().querySelector('.storytime-panel-card--spotlight');
+
+      expect(panel?.textContent).toContain('Curator');
+      expect(panel?.textContent).not.toContain('Chapters');
+      expect(panel?.textContent).not.toContain('Content rating');
+    });
+
+    it('shows no tags when the featured work carries none', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([buildEntry({ tags: [] })]),
+      );
+
+      expect(render().querySelector('.storytime-tag-row')).toBeNull();
+    });
+
+    // The editor's own words for these, so the caption on the panel and the
+    // caption on the form that filled it in say the same thing.
+    it('captions the work, the summary and the reason', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([buildEntry({ selectionReason: 'It stayed with us.' })]),
+      );
+
+      const captions = [
+        ...render().querySelectorAll(
+          '.storytime-panel-card--spotlight .storytime-spotlight__field .label',
+        ),
+      ].map(label => label.textContent?.trim());
+
+      expect(captions).toEqual([
+        'Featured Story',
+        'Summary',
+        'Why it was chosen',
+      ]);
+    });
+
+    it('captions an Arc as an Arc', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([
+          buildEntry({
+            entityType: SpotlightEntityType.ARC,
+            story: null,
+            arc: { id: 'arc-1', slug: 'the-long-war' } as never,
+          }),
+        ]),
+      );
+
+      expect(render().textContent).toContain('Featured Arc');
+    });
+
+    // The star marks the selection itself, so it belongs on the bar carrying
+    // the editor's headline rather than beside the work's own title.
+    it('marks the panel with a star on its heading', () => {
+      const star = render().querySelector(
+        '.storytime-panel-card--spotlight .storytime-panel-card__heading .fa-star',
+      );
+
+      expect(star).not.toBeNull();
+    });
+
+    it('shows why the work was chosen when an editor said', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([buildEntry({ selectionReason: 'It stayed with us.' })]),
+      );
+
+      expect(render().textContent).toContain('It stayed with us.');
+    });
+
+    // The editor's override wins; otherwise the work's own banner, which is
+    // what a reader sees when they arrive.
+    it('prefers the override image to the work’s banner', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([
+          buildEntry({
+            overrideImageUrl: 'https://cdn.test/override',
+            overrideImageAlt: 'A fleet',
+          }),
+        ]),
+      );
+
+      const image = render().querySelector('.storytime-spotlight__image');
+
+      expect(image?.getAttribute('src')).toBe('https://cdn.test/override');
+      expect(image?.getAttribute('alt')).toBe('A fleet');
+    });
+
+    it('falls back to the work’s own banner', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([
+          buildEntry({
+            story: {
+              slug: 'a-fine-story',
+              title: 'A Fine Story',
+              bannerImageUrl: 'https://cdn.test/banner',
+              bannerImageAlt: 'A ship',
+            } as never,
+          }),
+        ]),
+      );
+
+      const image = render().querySelector('.storytime-spotlight__image');
+
+      expect(image?.getAttribute('src')).toBe('https://cdn.test/banner');
+      expect(image?.getAttribute('alt')).toBe('A ship');
+    });
+
+    it('shows no image when neither has one', () => {
+      expect(render().querySelector('.storytime-spotlight__image')).toBeNull();
+    });
+
+    it('treats an image with no description as decorative', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        of([buildEntry({ overrideImageUrl: 'https://cdn.test/override' })]),
+      );
+
+      expect(
+        render()
+          .querySelector('.storytime-spotlight__image')
+          ?.getAttribute('alt'),
+      ).toBe('');
+    });
+
+    it('offers the archive', () => {
+      expect(render().textContent).toContain('Past Spotlight selections');
+    });
+
+    it('shows no Spotlight when nothing is chosen', () => {
+      spotlightService.getSpotlight.mockReturnValue(of([]));
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-spotlight')).toBeNull();
+      expect(element.textContent).not.toContain('Past Spotlight selections');
+    });
+
+    // Asking for something the environment has switched off would only be a
+    // refusal.
+    it('asks for nothing when the Spotlight is switched off', () => {
+      storytimeService.getFeatureState.mockReturnValue(
+        of({ ...STORYTIME_DISABLED_STATE, isEnabled: true }),
+      );
+
+      const element = render();
+
+      expect(spotlightService.getSpotlight).not.toHaveBeenCalled();
+      expect(element.querySelector('.storytime-spotlight')).toBeNull();
+    });
+
+    // The Spotlight is the best of the page, not the whole of it.
+    it('still shows the page when the Spotlight cannot be loaded', () => {
+      spotlightService.getSpotlight.mockReturnValue(
+        throwError(() => new Error('unavailable')),
+      );
+
+      const text = render().textContent ?? '';
+
+      expect(text).toContain(STORYTIME_COPY.LANDING_TITLE);
+      expect(fixture.componentInstance.spotlight).toEqual([]);
+    });
+  });
+
+  // Two different questions: what is new to read, and what is being written
+  // now. One "recent" list would serve neither reader.
+  describe('the Story lists', () => {
+    it('asks for both orderings', () => {
+      render();
+
+      expect(storyService.getStories).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: StorySort.RECENTLY_PUBLISHED }),
+      );
+      expect(storyService.getStories).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: StorySort.RECENTLY_UPDATED }),
+      );
+    });
+
+    it('shows what has just been published', () => {
+      const element = render();
+
+      expect(element.textContent).toContain('New Stories');
+      expect(element.textContent).toContain('A Story');
+      expect(element.textContent).toContain('Where it begins.');
+    });
+
+    it('shows what has just been updated', () => {
+      const element = render();
+
+      expect(element.textContent).toContain('Recently Updated');
+    });
+
+    // The same card the Stories archive uses, so a Story looks the same
+    // wherever a reader meets one, and both lists end their rows level.
+    it('presents both lists as the shared Story card', () => {
+      const element = render();
+
+      expect(element.querySelectorAll('.storytime-story-list')).toHaveLength(2);
+      expect(
+        element.querySelectorAll('.storytime-story-list app-story-card').length,
+      ).toBeGreaterThan(0);
+    });
+
+    // Signed in, the page runs to five sections. A reader who comes back for
+    // one of them should be able to put the rest away.
+    it('lets a reader fold every section away', () => {
+      const element = render();
+      const headings = [
+        ...element.querySelectorAll('app-collapsible-section'),
+      ].map(section => section.querySelector('.lcars-text-bar')?.textContent);
+
+      expect(headings).toEqual([
+        'Spotlight',
+        'Browse',
+        'Yours',
+        'New Stories',
+        'Recently Updated',
+      ]);
+    });
+
+    it('hides a section when its heading bar is collapsed', () => {
+      const element = render();
+      const stories = [
+        ...element.querySelectorAll('app-collapsible-section'),
+      ].find(section =>
+        section
+          .querySelector('.lcars-text-bar')
+          ?.textContent?.includes('New Stories'),
+      );
+
+      stories?.querySelector('button')?.click();
+      fixture.detectChanges();
+
+      expect(stories?.querySelector('.storytime-story-list')).toBeNull();
+    });
+
+    it('offers search', () => {
+      const element = render();
+
+      expect(element.textContent).toContain('Search Storytime');
+    });
+
+    it('falls back to the empty message when nothing is published', () => {
+      storyService.getStories.mockReturnValue(
+        of({ items: [], total: 0, page: 1, pageSize: 6 }),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain(STORYTIME_COPY.LANDING_EMPTY);
+      expect(element.textContent).not.toContain('Recently Updated');
+    });
+
+    // A landing page missing a list is a smaller failure than one replaced by
+    // an apology.
+    it('still shows the page when the lists cannot be loaded', () => {
+      storyService.getStories.mockReturnValue(
+        throwError(() => new Error('unavailable')),
+      );
+
+      const element = render();
+
+      expect(element.textContent).toContain(STORYTIME_COPY.LANDING_TITLE);
+      expect(fixture.componentInstance.newest).toEqual([]);
+      expect(fixture.componentInstance.updated).toEqual([]);
+    });
+  });
+
+  // These used to be sidebar buttons. The landing page is where they belong,
+  // because here each one can say what it is.
+  describe('the browse links', () => {
+    /**
+     * Reads the browse block's destinations.
+     *
+     * @returns The href of every browse link, in order.
+     */
+    const browseLinks = (): (string | null)[] =>
+      [...render().querySelectorAll('.storytime-landing__browse a')].map(link =>
+        link.getAttribute('href'),
+      );
+
+    it('offers Stories, Arcs, the Spotlight and search', () => {
+      expect(browseLinks()).toEqual([
+        '/storytime/stories',
+        '/storytime/arcs',
+        '/storytime/spotlight',
+        '/storytime/search',
+      ]);
+    });
+
+    it('says what each of them is', () => {
+      const summaries = [
+        ...render().querySelectorAll('.storytime-landing__browse p'),
+      ].map(summary => summary.textContent?.trim());
+
+      expect(summaries).toHaveLength(4);
+      expect(summaries.every(summary => (summary?.length ?? 0) > 0)).toBe(true);
+    });
+
+    // Each card wears an LCARS colour, and which one it wears is decided by
+    // where it leads rather than by where it sits. The Spotlight card comes
+    // and goes with its feature flag, and a row that reshuffled its colours
+    // whenever that happened would be no landmark at all.
+    it('gives every card a colour of its own, keyed to where it leads', () => {
+      const element = render();
+      const cards = [
+        ...element.querySelectorAll(
+          '.storytime-landing__browse li, .storytime-landing__yours li',
+        ),
+      ].map(card => card.className);
+
+      expect(cards).toEqual([
+        'storytime-landing__card--stories',
+        'storytime-landing__card--arcs',
+        'storytime-landing__card--spotlight',
+        'storytime-landing__card--search',
+        'storytime-landing__card--feed',
+        'storytime-landing__card--lists',
+        'storytime-landing__card--library',
+        'storytime-landing__card--own-stories',
+        'storytime-landing__card--own-arcs',
+        'storytime-landing__card--invitations',
+      ]);
+    });
+
+    // The colour follows the card, so the ones that remain keep theirs.
+    it('leaves the other cards their colours when the Spotlight goes', () => {
+      storytimeService.getFeatureState.mockReturnValue(
+        of({ ...STORYTIME_DISABLED_STATE, isEnabled: true }),
+      );
+
+      const cards = [
+        ...render().querySelectorAll('.storytime-landing__browse li'),
+      ].map(card => card.className);
+
+      expect(cards).toEqual([
+        'storytime-landing__card--stories',
+        'storytime-landing__card--arcs',
+        'storytime-landing__card--search',
+      ]);
+    });
+
+    // A link to a feature the environment has switched off would only lead to
+    // an empty page.
+    it('omits the Spotlight when it is switched off', () => {
+      storytimeService.getFeatureState.mockReturnValue(
+        of({ ...STORYTIME_DISABLED_STATE, isEnabled: true }),
+      );
+
+      expect(browseLinks()).toEqual([
+        '/storytime/stories',
+        '/storytime/arcs',
+        '/storytime/search',
+      ]);
+    });
+  });
+
+  describe('the Spotlight', () => {
+    it('presents each selection as a panel of its own', () => {
+      const element = render();
+      const list = element.querySelector('.storytime-spotlight');
+
+      expect(
+        list?.querySelectorAll('.storytime-panel-card--spotlight').length,
+      ).toBe(1);
+    });
+
+    // The way into the archive is an action, so it is dressed as one rather
+    // than left as a line of text under the selection.
+    it('offers the archive as a button', () => {
+      const archive = [...render().querySelectorAll('a.lcars-btn')].find(link =>
+        link.textContent?.includes('Past Spotlight selections'),
+      );
+
+      expect(archive?.getAttribute('href')).toBe('/storytime/spotlight');
+    });
+  });
+
+  describe('the reader’s own corner of the page', () => {
+    it('links to everything that is theirs, reading and writing alike', () => {
+      const element = render();
+      const links = [
+        ...element.querySelectorAll('.storytime-landing__yours a'),
+      ].map(a => a.getAttribute('href'));
+
+      expect(links).toEqual([
+        '/storytime/feed',
+        '/storytime/reading-lists',
+        '/storytime/library',
+        '/storytime/manage/stories',
+        '/storytime/manage/arcs',
+        '/storytime/manage/invitations',
+      ]);
+    });
+
+    it('presents each destination as a panel with a description', () => {
+      const element = render();
+      const panels = [
+        ...element.querySelectorAll('.storytime-landing__yours a'),
+      ];
+
+      expect(panels).toHaveLength(6);
+      expect(
+        panels.every(
+          panel =>
+            panel.querySelector('.storytime-landing__browse-name') &&
+            (panel
+              .querySelector('.storytime-landing__summary')
+              ?.textContent?.trim().length ?? 0) > 0,
+        ),
+      ).toBe(true);
+    });
+
+    it('says how much of the feed is new', () => {
+      const element = render();
+
+      expect(
+        element.querySelector('.storytime-landing__unread')?.textContent,
+      ).toContain('3 new');
+    });
+
+    it('says nothing when the feed holds nothing new', () => {
+      followService.getUnreadCount.mockReturnValue(of({ unread: 0 }));
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-landing__unread')).toBeNull();
+    });
+
+    // An unread badge is a convenience, and a landing page that apologises for
+    // not having one is worse than a landing page without one.
+    it('shows the page even when the count cannot be read', () => {
+      followService.getUnreadCount.mockReturnValue(
+        throwError(() => new Error('nope')),
+      );
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-landing__unread')).toBeNull();
+      expect(element.querySelector('.storytime-landing__yours')).not.toBeNull();
+    });
+
+    // A feed and a reading list only exist for somebody with an account.
+    it('shows nothing of the kind to a signed-out reader', () => {
+      authService.isLoggedIn.mockReturnValue(false);
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-landing__yours')).toBeNull();
+      expect(followService.getUnreadCount).not.toHaveBeenCalled();
+    });
+  });
+
+  // This section is the only way into Storytime's management pages. The
+  // sidebar and the site's Admin page both know only whether somebody is an
+  // administrator, and these jobs are given out by permission instead.
+  describe('running Storytime', () => {
+    /**
+     * Renders the page for somebody holding the given permissions.
+     *
+     * @param permissions - The permission codes the reader holds.
+     * @returns The rendered element.
+     */
+    const renderHolding = (permissions: string[]): HTMLElement => {
+      accessControlService.getMyPermissions.mockReturnValue(
+        of(new Set<string>(permissions) as ReadonlySet<string>),
+      );
+
+      return render();
+    };
+
+    it('offers nothing of the kind to a reader given none of it', () => {
+      const element = renderHolding([]);
+
+      expect(element.querySelector('.storytime-landing__running')).toBeNull();
+      expect(element.textContent).not.toContain('Running Storytime');
+    });
+
+    it('offers the moderation queue to a moderator', () => {
+      const element = renderHolding([PERMISSIONS.STORYTIME_MODERATE]);
+      const hrefs = Array.from(element.querySelectorAll('a')).map(link =>
+        link.getAttribute('href'),
+      );
+
+      expect(element.textContent).toContain('Running Storytime');
+      expect(hrefs).toContain(`/${APP_ROUTES.STORYTIME_MODERATION}`);
+    });
+
+    // Each job is given out on its own, so holding one shows one card. A card
+    // for a page the route would refuse is worse than no card at all.
+    it('offers only the pages the reader holds the permission for', () => {
+      const element = renderHolding([PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE]);
+      const hrefs = Array.from(element.querySelectorAll('a')).map(link =>
+        link.getAttribute('href'),
+      );
+
+      expect(hrefs).toContain(`/${APP_ROUTES.STORYTIME_MANAGE_SPOTLIGHT}`);
+      expect(hrefs).not.toContain(`/${APP_ROUTES.STORYTIME_MODERATION}`);
+      expect(hrefs).not.toContain(`/${APP_ROUTES.STORYTIME_MANAGE_TAGS}`);
+    });
+
+    it('offers all three to somebody who runs the whole of it', () => {
+      const element = renderHolding([
+        PERMISSIONS.STORYTIME_MODERATE,
+        PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE,
+        PERMISSIONS.STORYTIME_TAG_MANAGE,
+      ]);
+
+      expect(
+        element.querySelectorAll('.storytime-landing__running li'),
+      ).toHaveLength(3);
+    });
+
+    it('asks nothing of the API for a signed-out reader', () => {
+      authService.isLoggedIn.mockReturnValue(false);
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-landing__running')).toBeNull();
+      expect(accessControlService.getMyPermissions).not.toHaveBeenCalled();
+    });
+
+    // The rest of the page is worth more than these three cards, so a lookup
+    // that fails costs the cards rather than the page.
+    it('shows the page when the permissions cannot be read', () => {
+      accessControlService.getMyPermissions.mockReturnValue(
+        throwError(() => new Error('nope')),
+      );
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-landing__running')).toBeNull();
+      expect(
+        element.querySelector('.storytime-landing__browse'),
+      ).not.toBeNull();
+    });
+  });
+
+  // The landing page is where most readers meet Storytime, so the documents
+  // governing it have to be reachable from it rather than only from a Story.
+  // One link rather than three: the documents are one tabbed set, and this
+  // entry opens it.
+  it('links to the publishing documents', () => {
+    const element = render();
+    const hrefs = Array.from(element.querySelectorAll('a')).map(link =>
+      link.getAttribute('href'),
+    );
+
+    expect(hrefs).toContain(`/${APP_ROUTES.STORYTIME_POLICIES}`);
+  });
+});

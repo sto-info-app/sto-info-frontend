@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, of, throwError } from 'rxjs';
+import { ActivatedRoute, Params } from '@angular/router';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { HealthService } from 'src/app/core/health/health.service';
 import { NotificationService } from 'src/app/notifications/notification.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { HeaderComponent } from './header.component';
@@ -16,6 +17,12 @@ describe('HeaderComponent', () => {
   let notificationServiceSpy: jest.Mocked<
     Pick<NotificationService, 'refreshUnreadCount'>
   > & { unreadCount$: BehaviorSubject<number> };
+  let healthServiceSpy: { degraded$: BehaviorSubject<boolean> };
+  let activatedRouteStub: {
+    snapshot: { paramMap: Map<string, string>; data: Record<string, unknown> };
+    queryParams: Observable<Params>;
+    firstChild: null;
+  };
 
   beforeEach(() => {
     routingServiceSpy = {
@@ -32,19 +39,24 @@ describe('HeaderComponent', () => {
       unreadCount$: new BehaviorSubject<number>(0),
     };
 
+    healthServiceSpy = {
+      degraded$: new BehaviorSubject<boolean>(false),
+    };
+
+    activatedRouteStub = {
+      snapshot: { paramMap: new Map(), data: {} },
+      queryParams: of({}),
+      firstChild: null,
+    };
+
     TestBed.configureTestingModule({
       imports: [HeaderComponent],
       providers: [
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: { paramMap: new Map(), data: {} },
-            queryParams: of({}),
-          },
-        },
+        { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: RoutingService, useValue: routingServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy },
+        { provide: HealthService, useValue: healthServiceSpy },
       ],
     });
     fixture = TestBed.createComponent(HeaderComponent);
@@ -152,5 +164,68 @@ describe('HeaderComponent', () => {
     );
 
     expect(navTexts).toEqual(['Home', 'About', 'Dashboard', 'News']);
+  });
+  describe('API degraded alert', () => {
+    // The route gate and the health stream are both read when the template
+    // first subscribes, so they have to be arranged before the initial
+    // detectChanges rather than after it.
+    const renderWith = (requiresApi: boolean, degraded: boolean) => {
+      activatedRouteStub.snapshot.data = requiresApi
+        ? { requiresApi: true }
+        : {};
+      healthServiceSpy.degraded$.next(degraded);
+
+      fixture = TestBed.createComponent(HeaderComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    };
+
+    const degradedAlert = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('#header-api-degraded-alert');
+
+    it('should show the connection warning in the cascade area when the API is degraded', () => {
+      renderWith(true, true);
+
+      const alert = degradedAlert();
+      expect(alert).toBeTruthy();
+      expect(alert?.textContent).toContain('Connection Unstable');
+    });
+
+    it('should offer nothing to click, since the warning clears itself', () => {
+      renderWith(true, true);
+
+      expect(degradedAlert()?.querySelectorAll('a, button')).toHaveLength(0);
+    });
+
+    it('should take the cascade area over from the data cascade', () => {
+      renderWith(true, true);
+
+      expect(fixture.nativeElement.querySelector('#default')).toBeNull();
+    });
+
+    it('should take precedence over the unread notifications alert', () => {
+      notificationServiceSpy.unreadCount$.next(5);
+
+      renderWith(true, true);
+
+      expect(degradedAlert()).toBeTruthy();
+      expect(
+        fixture.nativeElement.querySelector('#header-comms-alert'),
+      ).toBeNull();
+    });
+
+    it('should stay hidden on routes that do not need the API', () => {
+      renderWith(false, true);
+
+      expect(degradedAlert()).toBeNull();
+      expect(fixture.nativeElement.querySelector('#default')).toBeTruthy();
+    });
+
+    it('should stay hidden while the API is healthy', () => {
+      renderWith(true, false);
+
+      expect(degradedAlert()).toBeNull();
+      expect(fixture.nativeElement.querySelector('#default')).toBeTruthy();
+    });
   });
 });

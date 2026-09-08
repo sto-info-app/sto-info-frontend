@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, NgZone, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EMPTY, switchMap, takeUntil } from 'rxjs';
@@ -8,6 +8,7 @@ import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcar
 import { SmartChartComponent } from 'src/app/shared/components/smart-chart/smart-chart.component';
 import { StatInfoCardComponent } from 'src/app/shared/components/stat-info-card/stat-info-card.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { StatsBaseComponent } from '../stats-base.component';
 import { CountItem, StatsData } from '../stats.models';
 
@@ -185,6 +186,9 @@ export class StatDetailComponent extends StatsBaseComponent implements OnInit {
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
+  private readonly _ngZone = inject(NgZone);
+  // No `_cdr` here: StatsBaseComponent already provides one, and redeclaring
+  // it would shadow the instance the base class marks for check.
 
   /** Reports in the same section, sorted alphabetically, for the navigation dropdown. */
   get sectionEntries(): { id: string; label: string }[] {
@@ -250,6 +254,7 @@ export class StatDetailComponent extends StatsBaseComponent implements OnInit {
             this.selectedAccountId === 'all' ? null : this.selectedAccountId;
           return this._statsService.getStats(accountId);
         }),
+        observeInZone(this._ngZone, this._cdr),
       )
       .subscribe({
         next: stats => {

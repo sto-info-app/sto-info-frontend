@@ -330,20 +330,20 @@ html {
     0px 9px 12px -6px rgb(0 0 0 / 20%), 0px 19px 29px 2px rgb(0 0 0 / 14%),
     0px 7px 36px 6px rgb(0 0 0 / 12%);
   --mat-app-elevation-shadow-level-20:
-    0px 10px 13px -6px rgb(0 0 0 / 20%),
-    0px 20px 31px 3px rgb(0 0 0 / 14%), 0px 8px 38px 7px rgb(0 0 0 / 12%);
+    0px 10px 13px -6px rgb(0 0 0 / 20%), 0px 20px 31px 3px rgb(0 0 0 / 14%),
+    0px 8px 38px 7px rgb(0 0 0 / 12%);
   --mat-app-elevation-shadow-level-21:
-    0px 10px 13px -6px rgb(0 0 0 / 20%),
-    0px 21px 33px 3px rgb(0 0 0 / 14%), 0px 8px 40px 7px rgb(0 0 0 / 12%);
+    0px 10px 13px -6px rgb(0 0 0 / 20%), 0px 21px 33px 3px rgb(0 0 0 / 14%),
+    0px 8px 40px 7px rgb(0 0 0 / 12%);
   --mat-app-elevation-shadow-level-22:
-    0px 10px 14px -6px rgb(0 0 0 / 20%),
-    0px 22px 35px 3px rgb(0 0 0 / 14%), 0px 8px 42px 7px rgb(0 0 0 / 12%);
+    0px 10px 14px -6px rgb(0 0 0 / 20%), 0px 22px 35px 3px rgb(0 0 0 / 14%),
+    0px 8px 42px 7px rgb(0 0 0 / 12%);
   --mat-app-elevation-shadow-level-23:
-    0px 11px 14px -7px rgb(0 0 0 / 20%),
-    0px 23px 36px 3px rgb(0 0 0 / 14%), 0px 9px 44px 8px rgb(0 0 0 / 12%);
+    0px 11px 14px -7px rgb(0 0 0 / 20%), 0px 23px 36px 3px rgb(0 0 0 / 14%),
+    0px 9px 44px 8px rgb(0 0 0 / 12%);
   --mat-app-elevation-shadow-level-24:
-    0px 11px 15px -7px rgb(0 0 0 / 20%),
-    0px 24px 38px 3px rgb(0 0 0 / 14%), 0px 9px 46px 8px rgb(0 0 0 / 12%);
+    0px 11px 15px -7px rgb(0 0 0 / 20%), 0px 24px 38px 3px rgb(0 0 0 / 14%),
+    0px 9px 46px 8px rgb(0 0 0 / 12%);
 }
 
 html {
@@ -669,12 +669,7 @@ html {
     white 38%,
     transparent
   );
-  --mat-form-field-filled-input-text-placeholder-color: rgb(
-    255
-    255
-    255 /
-    70%
-  );
+  --mat-form-field-filled-input-text-placeholder-color: rgb(255 255 255 / 70%);
   --mat-form-field-filled-error-hover-label-text-color: #f44336;
   --mat-form-field-filled-error-focus-label-text-color: #f44336;
   --mat-form-field-filled-error-label-text-color: #f44336;
@@ -703,10 +698,7 @@ html {
     transparent
   );
   --mat-form-field-outlined-input-text-placeholder-color: rgb(
-    255
-    255
-    255 /
-    70%
+    255 255 255 / 70%
   );
   --mat-form-field-outlined-error-caret-color: #f44336;
   --mat-form-field-outlined-error-focus-label-text-color: #f44336;
@@ -875,8 +867,8 @@ html {
 html {
   --mat-dialog-container-shape: 4px;
   --mat-dialog-container-elevation-shadow:
-    0px 11px 15px -7px rgb(0 0 0 / 20%),
-    0px 24px 38px 3px rgb(0 0 0 / 14%), 0px 9px 46px 8px rgb(0 0 0 / 12%);
+    0px 11px 15px -7px rgb(0 0 0 / 20%), 0px 24px 38px 3px rgb(0 0 0 / 14%),
+    0px 9px 46px 8px rgb(0 0 0 / 12%);
   --mat-dialog-container-max-width: 80vw;
   --mat-dialog-container-small-max-width: 80vw;
   --mat-dialog-container-min-width: 0;
@@ -1013,12 +1005,7 @@ html {
   --mat-chip-with-icon-disabled-icon-color: rgb(0 0 0 / 87%);
   --mat-chip-with-icon-icon-color: rgb(0 0 0 / 87%);
   --mat-chip-with-icon-selected-icon-color: rgb(0 0 0 / 87%);
-  --mat-chip-with-trailing-icon-disabled-trailing-icon-color: rgb(
-    0
-    0
-    0 /
-    87%
-  );
+  --mat-chip-with-trailing-icon-disabled-trailing-icon-color: rgb(0 0 0 / 87%);
   --mat-chip-with-trailing-icon-trailing-icon-color: rgb(0 0 0 / 87%);
 }
 
@@ -2614,8 +2601,8 @@ html {
     0px 2px 4px -1px rgb(0 0 0 / 20%), 0px 4px 5px 0px rgb(0 0 0 / 14%),
     0px 1px 10px 0px rgb(0 0 0 / 12%);
   --mat-datepicker-calendar-container-touch-elevation-shadow:
-    0px 11px 15px -7px rgb(0 0 0 / 20%),
-    0px 24px 38px 3px rgb(0 0 0 / 14%), 0px 9px 46px 8px rgb(0 0 0 / 12%);
+    0px 11px 15px -7px rgb(0 0 0 / 20%), 0px 24px 38px 3px rgb(0 0 0 / 14%),
+    0px 9px 46px 8px rgb(0 0 0 / 12%);
 }
 
 html {
@@ -2631,9 +2618,7 @@ html {
   );
   --mat-datepicker-calendar-date-in-overlap-range-state-background-color: #a8dab5;
   --mat-datepicker-calendar-date-in-overlap-range-selected-state-background-color: rgb(
-    69.5242
-    163.4758
-    93.9516
+    69.5242 163.4758 93.9516
   );
   --mat-datepicker-calendar-date-selected-state-text-color: white;
   --mat-datepicker-calendar-date-selected-state-background-color: #7b1fa2;
@@ -2659,10 +2644,7 @@ html {
   --mat-datepicker-calendar-period-button-text-color: white;
   --mat-datepicker-calendar-period-button-icon-color: rgb(255 255 255 / 70%);
   --mat-datepicker-calendar-navigation-button-icon-color: rgb(
-    255
-    255
-    255 /
-    70%
+    255 255 255 / 70%
   );
   --mat-datepicker-calendar-header-divider-color: rgb(255 255 255 / 12%);
   --mat-datepicker-calendar-header-text-color: rgb(255 255 255 / 70%);
@@ -2680,10 +2662,7 @@ html {
     transparent
   );
   --mat-datepicker-calendar-date-preview-state-outline-color: rgb(
-    255
-    255
-    255 /
-    70%
+    255 255 255 / 70%
   );
   --mat-datepicker-range-input-separator-color: white;
   --mat-datepicker-range-input-disabled-state-separator-color: color-mix(
@@ -2714,9 +2693,7 @@ html {
   );
   --mat-datepicker-calendar-date-in-overlap-range-state-background-color: #a8dab5;
   --mat-datepicker-calendar-date-in-overlap-range-selected-state-background-color: rgb(
-    69.5242
-    163.4758
-    93.9516
+    69.5242 163.4758 93.9516
   );
   --mat-datepicker-calendar-date-selected-state-text-color: rgb(0 0 0 / 87%);
   --mat-datepicker-calendar-date-selected-state-background-color: #69f0ae;
@@ -2726,10 +2703,7 @@ html {
     transparent
   );
   --mat-datepicker-calendar-date-today-selected-state-outline-color: rgb(
-    0
-    0
-    0 /
-    87%
+    0 0 0 / 87%
   );
   --mat-datepicker-calendar-date-focus-state-background-color: color-mix(
     in srgb,
@@ -2747,10 +2721,7 @@ html {
   --mat-datepicker-calendar-period-button-text-color: white;
   --mat-datepicker-calendar-period-button-icon-color: rgb(255 255 255 / 70%);
   --mat-datepicker-calendar-navigation-button-icon-color: rgb(
-    255
-    255
-    255 /
-    70%
+    255 255 255 / 70%
   );
   --mat-datepicker-calendar-header-divider-color: rgb(255 255 255 / 12%);
   --mat-datepicker-calendar-header-text-color: rgb(255 255 255 / 70%);
@@ -2768,10 +2739,7 @@ html {
     transparent
   );
   --mat-datepicker-calendar-date-preview-state-outline-color: rgb(
-    255
-    255
-    255 /
-    70%
+    255 255 255 / 70%
   );
   --mat-datepicker-range-input-separator-color: white;
   --mat-datepicker-range-input-disabled-state-separator-color: color-mix(
@@ -2802,9 +2770,7 @@ html {
   );
   --mat-datepicker-calendar-date-in-overlap-range-state-background-color: #a8dab5;
   --mat-datepicker-calendar-date-in-overlap-range-selected-state-background-color: rgb(
-    69.5242
-    163.4758
-    93.9516
+    69.5242 163.4758 93.9516
   );
   --mat-datepicker-calendar-date-selected-state-text-color: white;
   --mat-datepicker-calendar-date-selected-state-background-color: #f44336;
@@ -2830,10 +2796,7 @@ html {
   --mat-datepicker-calendar-period-button-text-color: white;
   --mat-datepicker-calendar-period-button-icon-color: rgb(255 255 255 / 70%);
   --mat-datepicker-calendar-navigation-button-icon-color: rgb(
-    255
-    255
-    255 /
-    70%
+    255 255 255 / 70%
   );
   --mat-datepicker-calendar-header-divider-color: rgb(255 255 255 / 12%);
   --mat-datepicker-calendar-header-text-color: rgb(255 255 255 / 70%);
@@ -2851,10 +2814,7 @@ html {
     transparent
   );
   --mat-datepicker-calendar-date-preview-state-outline-color: rgb(
-    255
-    255
-    255 /
-    70%
+    255 255 255 / 70%
   );
   --mat-datepicker-range-input-separator-color: white;
   --mat-datepicker-range-input-disabled-state-separator-color: color-mix(
@@ -3031,12 +2991,7 @@ html {
 .mat-step-header.mat-accent {
   --mat-stepper-header-icon-foreground-color: rgb(0 0 0 / 87%);
   --mat-stepper-header-selected-state-icon-background-color: #69f0ae;
-  --mat-stepper-header-selected-state-icon-foreground-color: rgb(
-    0
-    0
-    0 /
-    87%
-  );
+  --mat-stepper-header-selected-state-icon-foreground-color: rgb(0 0 0 / 87%);
   --mat-stepper-header-done-state-icon-background-color: #69f0ae;
   --mat-stepper-header-done-state-icon-foreground-color: rgb(0 0 0 / 87%);
   --mat-stepper-header-edit-state-icon-background-color: #69f0ae;

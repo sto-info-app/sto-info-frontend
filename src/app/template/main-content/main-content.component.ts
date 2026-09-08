@@ -1,21 +1,20 @@
 import { AsyncPipe } from '@angular/common';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { Component, inject, Input, OnDestroy } from '@angular/core';
 import {
-  ActivatedRoute,
-  NavigationEnd,
-  Router,
-  RouterOutlet,
-} from '@angular/router';
-import {
-  combineLatest,
-  distinctUntilChanged,
-  filter,
-  map,
-  startWith,
-  Subscription,
-} from 'rxjs';
+  ChangeDetectorRef,
+  Component,
+  Input,
+  NgZone,
+  OnDestroy,
+  inject,
+} from '@angular/core';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
+import { combineLatest, distinctUntilChanged, map, Subscription } from 'rxjs';
 import { HealthService } from 'src/app/core/health/health.service';
+import {
+  createRequiresApiStream,
+  routeRequiresApi,
+} from 'src/app/core/health/requires-api';
 import { ServiceInterruptionContentComponent } from 'src/app/error-pages/service-interruption/service-interruption-content/service-interruption-content.component';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -28,6 +27,7 @@ import { GeneralThemeService } from 'src/app/shared/services/general-theme.servi
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 import { BannerComponent } from 'src/app/notifications/banner/banner.component';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { FooterComponent } from '../footer/footer.component';
 import { MainContentBarPanelComponent } from '../main-content-bar-panel/main-content-bar-panel.component';
 import { SideBarComponent } from '../side-bar/side-bar.component';
@@ -50,6 +50,15 @@ import { SideBarComponent } from '../side-bar/side-bar.component';
 export class MainContentComponent implements OnDestroy {
   @Input() isLoggedIn!: boolean;
 
+  /**
+   * Whether Storytime should be offered in the navigation.
+   *
+   * Passed straight through to the sidebar and the footer. Resolved once at
+   * the application root rather than here, so the feature state is fetched a
+   * single time however often this component is rendered in tests.
+   */
+  @Input() isStorytimeOffered = false;
+
   appTitle = environment.appTitle;
   frontendAppVersion = environment.version || '';
   backendAppVersion = '';
@@ -63,14 +72,11 @@ export class MainContentComponent implements OnDestroy {
   private readonly _generalThemeService = inject(GeneralThemeService);
   private readonly _http = inject(HttpClient);
   private readonly _backendHealth = inject(HealthService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   // True only when the currently activated deepest route has data.requiresApi === true
-  readonly requiresApi$ = this._router.events.pipe(
-    filter(e => e instanceof NavigationEnd),
-    startWith(null),
-    map(() => this.getDeepestRouteRequiresApi(this._route)),
-    distinctUntilChanged(),
-  );
+  readonly requiresApi$ = createRequiresApiStream(this._router, this._route);
 
   //NOTE: Show warning only when:
   //NOTE: - current route requires API, AND
@@ -100,6 +106,7 @@ export class MainContentComponent implements OnDestroy {
           observe: 'response',
           responseType: HTTP_RESPONSE_TYPE_TEXT,
         })
+        .pipe(observeInZone(this._ngZone, this._cdr))
         .subscribe({
           next: response => this.updateBackendVersion(response),
           error: err => {
@@ -113,6 +120,8 @@ export class MainContentComponent implements OnDestroy {
 
     // Start/stop polling only while on API-required routes
     this._subs.add(
+      // No `observeInZone` here: this drives the health poller and touches
+      // nothing the template reads.
       this.requiresApi$.subscribe(requiresApi => {
         if (requiresApi) {
           this._backendHealth.startPolling();
@@ -126,10 +135,15 @@ export class MainContentComponent implements OnDestroy {
   /**
    * Determines whether the current route is the service interruption route.
    *
+   * Compares against the router's own form of the address — leading slash,
+   * without any query string or fragment — so a visitor sent here by a guard
+   * still gets the interruption panel before the route's component activates.
+   *
    * @returns True if the current route is the service interruption route, false otherwise.
    */
   get isServiceInterruptionRoute(): boolean {
-    return this._router.url === this.appRoutes.SERVICE_INTERRUPTION;
+    const path = this._router.url.split(/[?#]/)[0];
+    return path === `/${this.appRoutes.SERVICE_INTERRUPTION}`;
   }
 
   /**
@@ -147,11 +161,7 @@ export class MainContentComponent implements OnDestroy {
    * @returns True if the deepest route requires API, false otherwise.
    */
   private getDeepestRouteRequiresApi(route: ActivatedRoute): boolean {
-    let activeRoute: ActivatedRoute = route;
-    while (activeRoute.firstChild) {
-      activeRoute = activeRoute.firstChild;
-    }
-    return activeRoute.snapshot.data?.['requiresApi'] === true;
+    return routeRequiresApi(route);
   }
 
   /**

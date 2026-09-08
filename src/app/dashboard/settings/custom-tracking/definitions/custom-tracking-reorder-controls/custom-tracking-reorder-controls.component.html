@@ -1,0 +1,29 @@
+<span class="custom-tracking-reorder-controls">
+  <button
+    class="cta-icon"
+    type="button"
+    [title]="earlierLabel"
+    [attr.aria-label]="earlierLabel"
+    [disabled]="isFirst"
+    (click)="moveUp.emit()">
+    <i
+      class="fa-solid"
+      [class.fa-circle-caret-up]="!isHorizontal"
+      [class.fa-circle-caret-left]="isHorizontal"
+      aria-hidden="true"></i>
+  </button>
+
+  <button
+    class="cta-icon"
+    type="button"
+    [title]="laterLabel"
+    [attr.aria-label]="laterLabel"
+    [disabled]="isLast"
+    (click)="moveDown.emit()">
+    <i
+      class="fa-solid"
+      [class.fa-circle-caret-down]="!isHorizontal"
+      [class.fa-circle-caret-right]="isHorizontal"
+      aria-hidden="true"></i>
+  </button>
+</span>

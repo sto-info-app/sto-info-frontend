@@ -1,0 +1,354 @@
+<div
+  id="storytime-landing-page"
+  class="storytime-page">
+  <h1>
+    {{ copy.LANDING_TITLE }}
+    <sup class="storytime-landing__beta"
+      ><i
+        class="fa-solid fa-rectangle-beta"
+        aria-hidden="true"></i
+    ></sup>
+  </h1>
+
+  <p class="storytime-intro">{{ copy.LANDING_INTRO }}</p>
+
+  @if (spotlight.length > 0) {
+    <app-collapsible-section
+      heading="Spotlight"
+      barClass="small-lcars-bar-gap">
+      <ul class="storytime-spotlight">
+        @for (entry of spotlight; track entry.id) {
+          <li class="storytime-panel-card storytime-panel-card--spotlight">
+            <a
+              class="storytime-panel-card__heading"
+              [routerLink]="linkFor(entry)"
+              [title]="entry.headline">
+              <span class="storytime-panel-card__name">{{
+                entry.headline
+              }}</span>
+              <span class="storytime-panel-card__marks">
+                <i
+                  class="fa-solid fa-star"
+                  aria-hidden="true"></i>
+              </span>
+            </a>
+
+            @if (imageFor(entry)) {
+              <img
+                class="storytime-spotlight__image"
+                [src]="imageFor(entry)"
+                [alt]="imageAltFor(entry)" />
+            }
+
+            <div class="storytime-panel-card__body">
+              <!--
+                Captioned the way the facts below them are, and in the words
+                the editor who wrote them saw on their own form: the headline
+                on the bar is the editor talking, and these say which part of
+                the panel is which.
+              -->
+              <div class="info-item storytime-spotlight__field">
+                <span class="label">{{ targetLabelFor(entry) }}</span>
+                <!--
+                  The work's own title is a second way in, for a reader who
+                  recognises the Story rather than the editor's headline.
+                -->
+                <a
+                  class="storytime-spotlight__work storytime-spotlight__work-link"
+                  [routerLink]="linkFor(entry)"
+                  [title]="titleFor(entry)"
+                  >{{ titleFor(entry) }}</a
+                >
+              </div>
+
+              <div class="info-item storytime-spotlight__field">
+                <span class="label">Summary</span>
+                <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
+              </div>
+
+              @if (entry.selectionReason) {
+                <div class="info-item storytime-spotlight__field">
+                  <span class="label">Why it was chosen</span>
+                  <p class="storytime-spotlight__reason">
+                    {{ entry.selectionReason }}
+                  </p>
+                </div>
+              }
+
+              <!--
+                The same facts the Story page opens with. A reader choosing
+                whether to start something wants to know how long it is, how
+                finished it is and who wrote it before they click, not after.
+                An Arc has none of the first three — it is a reading order
+                rather than a text — so it shows what it has.
+              -->
+              <div class="info-grid storytime-facts">
+                @if (entry.story) {
+                  <div class="info-item">
+                    <span class="label">Status</span>
+                    <span class="value">{{
+                      completionLabels[entry.story.completionState]
+                    }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="label">Content rating</span>
+                    <span class="value">{{
+                      ratingLabels[entry.story.contentRating]
+                    }}</span>
+                  </div>
+                }
+
+                @if (entry.author) {
+                  <div class="info-item">
+                    <span class="label">{{
+                      entry.story ? 'Author' : 'Curator'
+                    }}</span>
+                    <span class="value">
+                      <!--
+                        A name only leads somewhere when its owner has chosen
+                        to be listed in the registry. Everybody else is
+                        credited by name and left alone.
+                      -->
+                      @if (entry.author.publiclyVisible) {
+                        <a
+                          class="storytime-facts__author"
+                          [routerLink]="[
+                            '/',
+                            appRoutes.COMMUNITY,
+                            'registry',
+                            'profiles',
+                            entry.author.username,
+                          ]"
+                          >{{ entry.author.username }}</a
+                        >
+                      } @else {
+                        {{ entry.author.username }}
+                      }
+                    </span>
+                  </div>
+                }
+
+                @if (entry.story) {
+                  <div class="info-item">
+                    <span class="label">Chapters</span>
+                    <span class="value">{{
+                      entry.story.publishedChapterCount
+                    }}</span>
+                  </div>
+                }
+
+                <div class="info-item">
+                  <span class="label">Rating</span>
+                  <span class="value">{{ ratingFor(entry) }}</span>
+                </div>
+              </div>
+
+              <div class="storytime-spotlight__actions">
+                <a
+                  class="lcars-btn lcars-btn-auto green"
+                  [routerLink]="linkFor(entry)">
+                  <i
+                    class="fa-solid fa-book-open"
+                    aria-hidden="true"></i>
+                  {{ readLabelFor(entry) }}
+                </a>
+              </div>
+            </div>
+
+            <!--
+              What the work is about, closing the panel off on a ground of its
+              own: a row of chips is not a paragraph, and left in the body it
+              read as one more thing the editor had written. The same row the
+              Story and Arc listings close their panels with.
+            -->
+            <app-storytime-tag-row [tags]="entry.tags"></app-storytime-tag-row>
+          </li>
+        }
+      </ul>
+
+      <nav
+        class="storytime-page-actions"
+        aria-label="Spotlight archive">
+        <a
+          class="lcars-btn lcars-btn-auto gold"
+          [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']"
+          >Past Spotlight selections</a
+        >
+      </nav>
+    </app-collapsible-section>
+  }
+
+  <!--
+    Storytime's own navigation lives here rather than in the site sidebar. The
+    landing page can say what each of these is in a line; a sidebar button can
+    only say "Arcs", which means nothing to somebody who has not met one yet.
+  -->
+  <app-collapsible-section
+    heading="Browse"
+    barClass="small-lcars-bar-gap">
+    <ul class="storytime-landing__browse">
+      <li class="storytime-landing__card--stories">
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'stories']">
+          <span class="storytime-landing__browse-name">All Stories</span>
+          <p class="storytime-landing__summary">
+            Everything published, newest first.
+          </p>
+        </a>
+      </li>
+      <li class="storytime-landing__card--arcs">
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'arcs']">
+          <span class="storytime-landing__browse-name">Arcs</span>
+          <p class="storytime-landing__summary">
+            Reading orders assembled across several Stories.
+          </p>
+        </a>
+      </li>
+      @if (isSpotlightEnabled) {
+        <li class="storytime-landing__card--spotlight">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'spotlight']">
+            <span class="storytime-landing__browse-name">Spotlight</span>
+            <p class="storytime-landing__summary">
+              What we have chosen to feature, and everything chosen before.
+            </p>
+          </a>
+        </li>
+      }
+      <li class="storytime-landing__card--search">
+        <a [routerLink]="['/', appRoutes.STORYTIME, 'search']">
+          <span class="storytime-landing__browse-name">Search Storytime</span>
+          <p class="storytime-landing__summary">
+            Find a Story by title, author or tag.
+          </p>
+        </a>
+      </li>
+    </ul>
+  </app-collapsible-section>
+
+  @if (isSignedIn) {
+    <app-collapsible-section
+      heading="Yours"
+      barClass="small-lcars-bar-gap">
+      <ul class="storytime-landing__yours">
+        <li class="storytime-landing__card--feed">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'feed']">
+            <span class="storytime-landing__browse-name">Your feed</span>
+            @if (unreadCount > 0) {
+              <span class="storytime-landing__unread"
+                >{{ unreadCount }} new</span
+              >
+            }
+            <p class="storytime-landing__summary">
+              Follow the latest activity from writers and readers.
+            </p>
+          </a>
+        </li>
+        <li class="storytime-landing__card--lists">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'reading-lists']">
+            <span class="storytime-landing__browse-name"
+              >Your reading lists</span
+            >
+            <p class="storytime-landing__summary">
+              Keep Stories together for later or read them in order.
+            </p>
+          </a>
+        </li>
+        <li class="storytime-landing__card--library">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'library']">
+            <span class="storytime-landing__browse-name">Your library</span>
+            <p class="storytime-landing__summary">
+              Find the Stories and Arcs you have saved.
+            </p>
+          </a>
+        </li>
+        <li class="storytime-landing__card--own-stories">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories']">
+            <span class="storytime-landing__browse-name">Your Stories</span>
+            <p class="storytime-landing__summary">
+              Write, edit and publish your own Stories.
+            </p>
+          </a>
+        </li>
+        <li class="storytime-landing__card--own-arcs">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']">
+            <span class="storytime-landing__browse-name">Your Arcs</span>
+            <p class="storytime-landing__summary">
+              Arrange your Stories into connected reading orders.
+            </p>
+          </a>
+        </li>
+        <li class="storytime-landing__card--invitations">
+          <a [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'invitations']">
+            <span class="storytime-landing__browse-name">Invitations</span>
+            <p class="storytime-landing__summary">
+              See collaboration invitations waiting for your response.
+            </p>
+          </a>
+        </li>
+      </ul>
+    </app-collapsible-section>
+  }
+
+  <!--
+    The way into Storytime's own management pages, for somebody who came to
+    Storytime rather than to the Admin page, which offers the same cards. They
+    are reached by permission rather than by role, so the sidebar — which knows
+    only whether somebody is an administrator — could not offer them to the
+    right people.
+  -->
+  @if (adminLinks.length > 0) {
+    <app-collapsible-section
+      heading="Running Storytime"
+      barClass="small-lcars-bar-gap">
+      <ul class="storytime-landing__running">
+        @for (link of adminLinks; track link.permission) {
+          <li class="storytime-landing__card--{{ link.cardKey }}">
+            <a [routerLink]="adminLinkFor(link)">
+              <span class="storytime-landing__browse-name">{{
+                link.label
+              }}</span>
+              <p class="storytime-landing__summary">{{ link.summary }}</p>
+            </a>
+          </li>
+        }
+      </ul>
+    </app-collapsible-section>
+  }
+
+  <app-collapsible-section
+    heading="New Stories"
+    barClass="small-lcars-bar-gap">
+    @if (newest.length === 0) {
+      <p class="storytime-empty">{{ copy.LANDING_EMPTY }}</p>
+    } @else {
+      <div class="storytime-story-list">
+        @for (story of newest; track story.id) {
+          <app-story-card [story]="story"></app-story-card>
+        }
+      </div>
+    }
+  </app-collapsible-section>
+
+  @if (updated.length > 0) {
+    <app-collapsible-section
+      heading="Recently Updated"
+      barClass="small-lcars-bar-gap">
+      <div class="storytime-story-list">
+        @for (story of updated; track story.id) {
+          <app-story-card [story]="story"></app-story-card>
+        }
+      </div>
+    </app-collapsible-section>
+  }
+
+  <nav
+    class="storytime-page-actions"
+    aria-label="Storytime publishing documents">
+    <a
+      class="lcars-btn lcars-btn-auto sky"
+      [routerLink]="['/', appRoutes.STORYTIME, 'policies']"
+      >Policies &amp; Terms</a
+    >
+  </nav>
+
+  <p class="storytime-fan-notice">{{ copy.FAN_CONTENT_NOTICE }}</p>
+</div>

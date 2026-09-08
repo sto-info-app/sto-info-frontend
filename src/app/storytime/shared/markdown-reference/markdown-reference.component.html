@@ -1,0 +1,25 @@
+<div class="storytime-markdown-reference">
+  @for (group of groups; track group.heading) {
+    <h2 class="storytime-markdown-reference__heading">{{ group.heading }}</h2>
+
+    <p class="storytime-markdown-reference__intro">{{ group.intro }}</p>
+
+    <!--
+      A description list, because that is what this is: a thing you type and
+      what it does. A table would need a header row to say the same, and this
+      is read a row at a time rather than scanned across.
+    -->
+    <dl class="storytime-markdown-reference__list">
+      @for (construct of group.constructs; track construct.syntax) {
+        <dt><code>{{ construct.syntax }}</code></dt>
+        <dd>{{ construct.meaning }}</dd>
+      }
+    </dl>
+  }
+
+  <ul class="storytime-markdown-reference__notes">
+    @for (note of notes; track note) {
+      <li>{{ note }}</li>
+    }
+  </ul>
+</div>

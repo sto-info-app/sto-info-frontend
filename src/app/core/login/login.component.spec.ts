@@ -139,6 +139,7 @@ describe('LoginComponent', () => {
         access_token: 'access123',
         refresh_token: 'refresh123',
         expires_in: 3600,
+        session_timeout_minutes: 240,
         user_id: 'user123',
       };
       authServiceSpy.login.mockReturnValue(of(mockResponse));
@@ -152,6 +153,7 @@ describe('LoginComponent', () => {
         'access123',
         'refresh123',
         3600,
+        240,
       );
       expect(sharedDataServiceSpy.updateUserId).toHaveBeenCalledWith('user123');
       expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/dashboard');
@@ -168,6 +170,7 @@ describe('LoginComponent', () => {
         access_token: 'access123',
         refresh_token: 'refresh123',
         expires_in: 3600,
+        session_timeout_minutes: 240,
         user_id: 'user123',
       };
       authServiceSpy.login.mockReturnValue(of(mockResponse));
@@ -271,6 +274,7 @@ describe('LoginComponent', () => {
         access_token: 'access123',
         refresh_token: 'refresh123',
         expires_in: 3600,
+        session_timeout_minutes: 240,
         user_id: 'user123',
       };
       authServiceSpy.login.mockReturnValue(of(mockResponse));

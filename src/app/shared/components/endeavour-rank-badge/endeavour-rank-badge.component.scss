@@ -36,7 +36,9 @@
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: vars.$lcars-sunflower;
-  text-shadow: 0 1px 6px #000, 0 0 12px #000;
+  text-shadow:
+    0 1px 6px #000,
+    0 0 12px #000;
 }
 
 .rank-hero-number {

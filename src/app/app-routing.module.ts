@@ -19,6 +19,7 @@ import {
   APP_ROUTE_TITLES,
   APP_ROUTES,
 } from './shared/constants/app-routing.constants';
+import { unsavedChangesGuard } from './shared/guards/unsaved-changes.guard';
 import { AboutComponent } from './static-pages/about/about.component';
 import { ContactComponent } from './static-pages/contact/contact.component';
 import { CreditsComponent } from './static-pages/credits/credits.component';
@@ -95,6 +96,20 @@ export const routes: Routes = [
     path: APP_ROUTES.RESOURCES,
     component: ResourcesComponent,
     data: { title: APP_ROUTE_TITLES.RESOURCES },
+  },
+  {
+    path: APP_ROUTES.HELP,
+    loadComponent: () =>
+      import('./static-pages/help/help.component').then(m => m.HelpComponent),
+    data: { title: APP_ROUTE_TITLES.HELP },
+  },
+  {
+    path: APP_ROUTES.HELP_GUIDE,
+    loadComponent: () =>
+      import('./static-pages/help/help-guide/help-guide.component').then(
+        m => m.HelpGuideComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.HELP_GUIDE },
   },
   {
     path: APP_ROUTES.ABOUT_DEVELOPERS,
@@ -397,6 +412,15 @@ export const routes: Routes = [
     data: { title: APP_ROUTE_TITLES.ADMIN_USERS, requiresApi: true },
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
+  {
+    path: APP_ROUTES.ADMIN_PERMISSIONS,
+    loadComponent: () =>
+      import('./admin/access-control-admin/permission-admin.component').then(
+        m => m.PermissionAdminComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_PERMISSIONS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
 
   // *****************************************
   // * STO App routes
@@ -411,6 +435,31 @@ export const routes: Routes = [
     component: ProfileComponent,
     data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_PROFILE, requiresApi: true },
     canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_SETTINGS,
+    loadComponent: () =>
+      import('./dashboard/settings/settings.component').then(
+        m => m.SettingsComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_SETTINGS, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_CUSTOM_TRACKING,
+    loadComponent: () =>
+      import('./dashboard/settings/custom-tracking/custom-tracking-settings.component').then(
+        m => m.CustomTrackingSettingsComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.STO_DASHBOARD_CUSTOM_TRACKING,
+      requiresApi: true,
+    },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+    // A half-filled record is work. Leaving the page would throw it away, and
+    // a stray click on a navigation link should not be able to do that
+    // without a word.
+    canDeactivate: [unsavedChangesGuard],
   },
   {
     path: APP_ROUTES.STO_DASHBOARD_ACCOUNTS,
@@ -444,6 +493,10 @@ export const routes: Routes = [
       ),
     data: { title: APP_ROUTE_TITLES.STO_ACCOUNT_DETAIL, requiresApi: true },
     canActivate: [AuthGuard, ApiRequiredGuard],
+    // The tracked-information block on this page can be opened for editing,
+    // and a half-filled record is work. A stray click on a navigation link
+    // should not be able to throw it away without a word.
+    canDeactivate: [unsavedChangesGuard],
   },
   {
     path: APP_ROUTES.STO_ACCOUNT_ENDEAVOURS,
@@ -462,6 +515,9 @@ export const routes: Routes = [
       ),
     data: { title: APP_ROUTE_TITLES.STO_CHARACTER_DETAIL, requiresApi: true },
     canActivate: [AuthGuard, ApiRequiredGuard],
+    // As on the account page: the tracked-information block edits in place,
+    // and leaving would throw away whatever is half-filled in it.
+    canDeactivate: [unsavedChangesGuard],
   },
   {
     path: APP_ROUTES.STO_CHARACTER_ADD,
@@ -499,6 +555,16 @@ export const routes: Routes = [
       requiresApi: true,
     },
     canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+
+  // *****************************************
+  // * Storytime
+  {
+    path: APP_ROUTES.STORYTIME,
+    loadChildren: () =>
+      import('./storytime/storytime.routes').then(m => m.STORYTIME_ROUTES),
+    data: { title: APP_ROUTE_TITLES.STORYTIME, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
   },
 
   // *****************************************

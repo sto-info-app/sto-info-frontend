@@ -16,7 +16,14 @@ jobs:
     name: Full Mutation Analysis
     if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    # This run has been creeping towards its budget for months (89m, 75m, 120m,
+    # 121m, 118m) and was cancelled at the 180 minute mark on 2026-08-30. Full
+    # analysis then started OOMing the dry run (~12k mutants) at concurrency 4.
+    # --concurrency 2 (1 checker + 1 test runner) plus an 8GB worker heap is
+    # what lets that dry run fit on a 16GB ubuntu-latest runner; it is slower
+    # than concurrency 4, so this budget stays high so a slow week is a slow
+    # run rather than a lost one.
+    timeout-minutes: 480
     permissions:
       contents: read
 
@@ -62,7 +69,13 @@ jobs:
           EOF
 
       - name: Run Stryker (Full)
-        run: npx stryker run
+        # concurrency 2 => 1 TypeScript checker + 1 test runner, so the dry run
+        # does not start two instrumented Jest processes on a 16GB runner.
+        # NODE_OPTIONS raises the parent Stryker process; testRunnerNodeArgs in
+        # stryker.config.json raises the child workers to the same 8GB ceiling.
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: npx stryker run --concurrency 2
 
       - name: Upload Mutation Report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

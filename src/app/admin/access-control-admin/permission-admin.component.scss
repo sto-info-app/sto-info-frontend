@@ -1,0 +1,163 @@
+@use 'lcars-variables' as vars;
+
+// The permission list is denser than the news, banner or moderation record
+// lists: thirteen or more rows are read at once to answer "what can this person
+// do", so each row is a compact strip rather than a full record card.
+#permission-admin-page {
+  // Two fixed columns rather than the shared auto-fit track, so who the member
+  // is sits on the first line and what they may do sits on the second: the
+  // role and the count of permissions held answer the same question and are
+  // read together.
+  .selected-member .admin-record-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+  }
+
+  .permission-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+  }
+
+  .permission-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: start;
+    padding: 0.9rem 1rem;
+    border-left: 10px solid vars.$lcars-grey-light;
+    border-radius: 0 6px 6px 0;
+    background: vars.$lcars-grey-bg;
+  }
+
+  // The left edge repeats the pill, so a scan down the list reads as one
+  // stripe of colour rather than thirteen separate badges.
+  .permission-row.status-role {
+    border-left-color: vars.$lcars-perano;
+  }
+
+  .permission-row.status-granted {
+    border-left-color: vars.$lcars-green;
+  }
+
+  .permission-row.status-denied {
+    border-left-color: vars.$lcars-cardinal;
+  }
+
+  .permission-row-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .permission-row-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .permission-code {
+    font-size: 0.78rem;
+    color: rgb(255 255 255 / 62%);
+    word-break: break-all;
+  }
+
+  .permission-description {
+    margin: 0;
+    color: rgb(255 255 255 / 82%);
+    line-height: 1.45;
+  }
+
+  .override-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0.35rem 0 0;
+    padding: 0.6rem 0.75rem;
+    border-radius: 4px;
+    background: rgb(255 255 255 / 6%);
+  }
+
+  .permission-row-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .lcars-btn {
+      min-width: 8rem !important;
+    }
+  }
+
+  // "Held via role" and "granted by override" mean different things to whoever
+  // is deciding whether to change something, so they must not share a colour.
+  .status-pill.permission-role {
+    background: vars.$lcars-perano;
+    color: #000;
+  }
+
+  .status-pill.permission-granted {
+    background: vars.$lcars-green;
+    color: #000;
+  }
+
+  .status-pill.permission-denied {
+    background: vars.$lcars-cardinal;
+    color: vars.$lcars-white;
+  }
+
+  .status-pill.permission-none {
+    background: rgb(255 255 255 / 12%);
+    color: rgb(255 255 255 / 78%);
+  }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: rgb(255 255 255 / 60%);
+  }
+
+  // The role picker is a decision about the whole account rather than one
+  // capability, so what the chosen role means is spelled out beside it instead
+  // of being left to the name in the list.
+  .role-note {
+    margin: 0.25rem 0 0;
+    font-size: 0.8rem;
+    color: rgb(255 255 255 / 72%);
+  }
+
+  // An administrator's role is read here and set elsewhere, so the panel says
+  // so in the colour the rest of the page uses for a role that is held.
+  .role-locked {
+    margin: 0;
+    font-size: 0.85rem;
+    color: vars.$lcars-tangerine;
+  }
+
+  // This page's member card carries two details, not the five the Manage
+  // Members list has, so the shared auto-fit track would strand them at
+  // opposite ends of the row. Role takes what it needs and the address takes
+  // the rest.
+  .member-card .admin-record-details {
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    gap: 0.75rem 1.5rem;
+    align-items: start;
+  }
+}
+
+@media (width <= 700px) {
+  #permission-admin-page {
+    .permission-row {
+      grid-template-columns: 1fr;
+    }
+
+    .permission-row-actions {
+      flex-flow: row wrap;
+    }
+
+    .selected-member .admin-record-details {
+      grid-template-columns: 1fr;
+    }
+  }
+}

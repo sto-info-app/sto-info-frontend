@@ -1,0 +1,31 @@
+<div
+  class="custom-tracking-info-bar"
+  [class.custom-tracking-info-bar--section]="isSection">
+  <p class="custom-tracking-info-bar__scope">
+    <i
+      class="fa-solid fa-circle-info"
+      aria-hidden="true"></i>
+    <span class="custom-tracking-info-bar__name">{{ name }}</span>
+    {{ kind }}
+  </p>
+
+  <span class="custom-tracking-info-bar__meta">
+    @if (publiclyVisible) {
+      <span class="custom-tracking-badge">Public</span>
+    } @else {
+      <span class="custom-tracking-badge muted">Private</span>
+    }
+
+    @if (suppressed) {
+      <span class="custom-tracking-badge warning">Hidden by a moderator</span>
+    }
+
+    @if (summary) {
+      <span class="custom-tracking-count">{{ summary }}</span>
+    }
+  </span>
+
+  <span class="custom-tracking-info-bar__actions">
+    <ng-content select="[infoActions]"></ng-content>
+  </span>
+</div>

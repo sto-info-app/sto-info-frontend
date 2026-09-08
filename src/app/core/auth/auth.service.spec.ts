@@ -74,6 +74,7 @@ describe('AuthService', () => {
         access_token: 'access123',
         refresh_token: 'refresh123',
         expires_in: 3600,
+        session_timeout_minutes: 240,
         user_id: 'user1',
       };
 
@@ -257,6 +258,7 @@ describe('AuthService', () => {
         access_token: 'new_access',
         refresh_token: 'new_refresh',
         expires_in: 3600,
+        session_timeout_minutes: 240,
         user_id: 'user1',
       };
 
@@ -707,18 +709,30 @@ describe('AuthService', () => {
   });
 
   describe('isTokenExpiringSoon', () => {
-    it('should return true when token expires within threshold', () => {
+    it('should return true when the access token expires within threshold', () => {
       const expiresAt = Date.now() + 30000; // 30 seconds
-      localStorage.setItem('expires_at', expiresAt.toString());
+      localStorage.setItem('access_expires_at', expiresAt.toString());
 
       expect(service.isTokenExpiringSoon()).toBe(true);
     });
 
-    it('should return false when token has plenty of time', () => {
+    it('should return false when the access token has plenty of time', () => {
       const expiresAt = Date.now() + 3600000; // 60 minutes
-      localStorage.setItem('expires_at', expiresAt.toString());
+      localStorage.setItem('access_expires_at', expiresAt.toString());
 
       expect(service.isTokenExpiringSoon()).toBe(false);
+    });
+
+    it('should ignore the session expiry, which is a separate clock', () => {
+      // A long session with an access token that is nearly out still needs a
+      // refresh; the two expiries are not the same thing.
+      localStorage.setItem('expires_at', (Date.now() + 8 * 3600000).toString());
+      localStorage.setItem(
+        'access_expires_at',
+        (Date.now() + 30000).toString(),
+      );
+
+      expect(service.isTokenExpiringSoon()).toBe(true);
     });
 
     it('should use default values for timings when not in environment', () => {
@@ -736,7 +750,7 @@ describe('AuthService', () => {
       // We can't easily re-instantiate the service to test property initializers
       // because they are already set. But we can test isTokenExpiringSoon calls.
       const getSecondsSpy = jest
-        .spyOn(service, 'getSecondsUntilLoginSessionExpiry')
+        .spyOn(service, 'getSecondsUntilAccessTokenExpiry')
         .mockReturnValue(800);
 
       // threshold 15 mins = 900 secs. 800 < 900 => true.
@@ -748,7 +762,7 @@ describe('AuthService', () => {
     });
 
     it('should return true when no token (0 seconds remaining)', () => {
-      // When there's no token, getSecondsUntilLoginSessionExpiry returns 0
+      // When there's no token, getSecondsUntilAccessTokenExpiry returns 0
       // which is less than the threshold
       expect(service.isTokenExpiringSoon()).toBe(true);
     });
@@ -761,7 +775,7 @@ describe('AuthService', () => {
       ).minsBeforeLogoutExpiryToRefreshToken = 20;
 
       jest
-        .spyOn(service, 'getSecondsUntilLoginSessionExpiry')
+        .spyOn(service, 'getSecondsUntilAccessTokenExpiry')
         .mockReturnValue(1100);
 
       // 20 mins = 1200 secs. 1100 < 1200 => true.
@@ -772,6 +786,340 @@ describe('AuthService', () => {
           minsBeforeLogoutExpiryToRefreshToken: number | undefined;
         }
       ).minsBeforeLogoutExpiryToRefreshToken = undefined;
+    });
+  });
+
+  describe('inactivity window', () => {
+    /**
+     * Saves a session with the given clocks.
+     *
+     * @param expiresIn - Access token lifetime in seconds.
+     * @param timeoutMinutes - The inactivity window in minutes.
+     */
+    const saveSession = (expiresIn = 3600, timeoutMinutes = 60) => {
+      service.saveToken('access', 'refresh', expiresIn, timeoutMinutes);
+    };
+
+    it('should store the access and session clocks separately', () => {
+      const before = Date.now();
+      saveSession(3600, 480);
+
+      const accessExpiresAt = Number(localStorage.getItem('access_expires_at'));
+      const expiresAt = Number(localStorage.getItem('expires_at'));
+
+      expect(localStorage.getItem('session_timeout_mins')).toBe('480');
+      expect(accessExpiresAt).toBeGreaterThanOrEqual(before + 3600 * 1000);
+      expect(expiresAt).toBeGreaterThanOrEqual(before + 480 * 60 * 1000);
+      expect(expiresAt).toBeGreaterThan(accessExpiresAt);
+    });
+
+    it('should set the warning ahead of the session expiry', () => {
+      saveSession();
+
+      const expiresAt = Number(localStorage.getItem('expires_at'));
+      const warningAt = Number(localStorage.getItem('warning_at'));
+
+      expect(expiresAt - warningAt).toBe(service.autoLogoutWarningMilliSecs);
+    });
+
+    it('should default the window when none is stored', () => {
+      expect(service.getSessionTimeoutMinutes()).toBe(240);
+
+      localStorage.setItem('session_timeout_mins', '480');
+      expect(service.getSessionTimeoutMinutes()).toBe(480);
+    });
+
+    it('should ignore a nonsense stored window', () => {
+      localStorage.setItem('session_timeout_mins', 'not-a-number');
+      expect(service.getSessionTimeoutMinutes()).toBe(240);
+    });
+
+    it('should carry the stored window when saveToken is not told one', () => {
+      localStorage.setItem('session_timeout_mins', '60');
+      const before = Date.now();
+
+      service.saveToken('access', 'refresh', 3600);
+
+      expect(Number(localStorage.getItem('expires_at'))).toBeLessThanOrEqual(
+        before + 61 * 60 * 1000,
+      );
+    });
+
+    it('should slide the window forward on activity', () => {
+      saveSession(3600, 60);
+      const firstExpiry = Number(localStorage.getItem('expires_at'));
+
+      service.markActivity(Date.now() + 5 * 60 * 1000);
+
+      expect(Number(localStorage.getItem('expires_at'))).toBeGreaterThan(
+        firstExpiry,
+      );
+    });
+
+    it('should not open a window when there is no session', () => {
+      service.markActivity();
+
+      expect(localStorage.getItem('expires_at')).toBeNull();
+    });
+
+    it('should not extend the window for a token exchange alone', () => {
+      saveSession(3600, 60);
+      const idleSince = Date.now() - 30 * 60 * 1000;
+      localStorage.setItem('last_activity_at', idleSince.toString());
+
+      // The interceptor replacing a rejected access token, with nobody there.
+      service.saveToken('access2', 'refresh2', 3600, 60);
+
+      expect(Number(localStorage.getItem('expires_at'))).toBe(
+        idleSince + 60 * 60 * 1000,
+      );
+    });
+
+    it('should announce the new expiry so the countdown follows it', () => {
+      const announced: number[] = [];
+      service.expiryAnnounced$.subscribe(value => announced.push(value));
+
+      saveSession(3600, 60);
+
+      expect(announced.at(-1)).toBe(Number(localStorage.getItem('expires_at')));
+    });
+
+    it('should clear both clocks on logout', () => {
+      saveSession();
+
+      service.removeToken();
+
+      expect(localStorage.getItem('access_expires_at')).toBeNull();
+      expect(localStorage.getItem('session_timeout_mins')).toBeNull();
+      expect(localStorage.getItem('last_activity_at')).toBeNull();
+    });
+  });
+
+  describe('handleActivity', () => {
+    /**
+     * Calls the private activity handler.
+     */
+    const fireActivity = () =>
+      (
+        service as unknown as { handleActivity: () => void }
+      ).handleActivity.call(service);
+
+    /**
+     * Lets the next activity through the throttle.
+     */
+    const clearThrottle = () => {
+      (
+        service as unknown as { lastActivityHandledAt: number }
+      ).lastActivityHandledAt = 0;
+    };
+
+    it('should extend the session when the user is working', () => {
+      service.saveToken('access', 'refresh', 3600, 60);
+      const before = Number(localStorage.getItem('expires_at'));
+      clearThrottle();
+      const nowSpy = jest
+        .spyOn(Date, 'now')
+        .mockReturnValue(Date.now() + 5 * 60 * 1000);
+
+      fireActivity();
+
+      expect(Number(localStorage.getItem('expires_at'))).toBeGreaterThan(
+        before,
+      );
+      nowSpy.mockRestore();
+    });
+
+    it('should ignore activity inside the throttle window', () => {
+      service.saveToken('access', 'refresh', 3600, 60);
+      const before = Number(localStorage.getItem('expires_at'));
+      // Something already came through a moment ago, so this one is swallowed.
+      (
+        service as unknown as { lastActivityHandledAt: number }
+      ).lastActivityHandledAt = Date.now();
+      const nowSpy = jest
+        .spyOn(Date, 'now')
+        .mockReturnValue(Date.now() + 5 * 1000);
+
+      fireActivity();
+
+      expect(Number(localStorage.getItem('expires_at'))).toBe(before);
+      nowSpy.mockRestore();
+    });
+
+    it('should let activity through once the throttle has elapsed', () => {
+      service.saveToken('access', 'refresh', 3600, 60);
+      const before = Number(localStorage.getItem('expires_at'));
+      (
+        service as unknown as { lastActivityHandledAt: number }
+      ).lastActivityHandledAt = Date.now();
+      const nowSpy = jest
+        .spyOn(Date, 'now')
+        .mockReturnValue(Date.now() + 60 * 1000);
+
+      fireActivity();
+
+      expect(Number(localStorage.getItem('expires_at'))).toBeGreaterThan(
+        before,
+      );
+      nowSpy.mockRestore();
+    });
+
+    it('should ignore activity once the warning is due', () => {
+      service.saveToken('access', 'refresh', 3600, 60);
+      const before = Number(localStorage.getItem('expires_at'));
+      clearThrottle();
+      localStorage.setItem('warning_at', (Date.now() - 1000).toString());
+
+      fireActivity();
+
+      expect(Number(localStorage.getItem('expires_at'))).toBe(before);
+    });
+
+    it('should ignore activity when there is no live session', () => {
+      clearThrottle();
+
+      fireActivity();
+
+      expect(localStorage.getItem('expires_at')).toBeNull();
+    });
+
+    it('should renew an access token that is nearly out', () => {
+      service.saveToken('access', 'refresh', 3600, 60);
+      // Age the access token past the refresh threshold without touching the
+      // session, which is the case this whole mechanism exists for.
+      localStorage.setItem(
+        'access_expires_at',
+        (Date.now() + 60 * 1000).toString(),
+      );
+      clearThrottle();
+
+      fireActivity();
+
+      const req = httpMock.expectOne(API_URLS.AUTH_REFRESH);
+      req.flush({
+        access_token: 'renewed',
+        refresh_token: 'refresh2',
+        expires_in: 3600,
+        session_timeout_minutes: 60,
+        user_id: 'user1',
+      });
+
+      expect(localStorage.getItem('access_token')).toBe('renewed');
+    });
+
+    it('should swallow a failed renewal rather than throwing at the user', () => {
+      service.saveToken('access', 'refresh', 3600, 60);
+      localStorage.setItem(
+        'access_expires_at',
+        (Date.now() + 60 * 1000).toString(),
+      );
+      clearThrottle();
+
+      expect(() => {
+        fireActivity();
+        httpMock
+          .expectOne(API_URLS.AUTH_REFRESH)
+          .flush(null, { status: 401, statusText: 'Unauthorized' });
+      }).not.toThrow();
+
+      // The failed exchange sends the user to the login page; the session the
+      // activity extended is left for that navigation to clear up.
+      expect(routerSpy.navigate).toHaveBeenCalledWith([APP_ROUTES.LOGIN]);
+    });
+  });
+
+  describe('activity listeners', () => {
+    it('should treat a tab coming back to the foreground as activity', () => {
+      service.saveToken('access', 'refresh', 3600, 60);
+      const before = Number(localStorage.getItem('expires_at'));
+      const handleActivity = jest.spyOn(
+        service as unknown as { handleActivity: () => void },
+        'handleActivity',
+      );
+
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'visible',
+        configurable: true,
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+
+      expect(handleActivity).toHaveBeenCalled();
+      expect(Number(localStorage.getItem('expires_at'))).toBeGreaterThanOrEqual(
+        before,
+      );
+    });
+
+    it('should ignore a tab being hidden', () => {
+      service.saveToken('access', 'refresh', 3600, 60);
+      const handleActivity = jest.spyOn(
+        service as unknown as { handleActivity: () => void },
+        'handleActivity',
+      );
+
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'hidden',
+        configurable: true,
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+
+      expect(handleActivity).not.toHaveBeenCalled();
+    });
+
+    it('should treat a click in the page as activity', () => {
+      service.saveToken('access', 'refresh', 3600, 60);
+      const handleActivity = jest.spyOn(
+        service as unknown as { handleActivity: () => void },
+        'handleActivity',
+      );
+
+      document.dispatchEvent(new Event('click'));
+
+      expect(handleActivity).toHaveBeenCalled();
+    });
+  });
+
+  describe('ensureFreshAccessToken', () => {
+    it('should share one exchange between concurrent callers', () => {
+      localStorage.setItem('refresh_token', 'old');
+      const tokens: string[] = [];
+
+      service.ensureFreshAccessToken().subscribe(token => tokens.push(token));
+      service.ensureFreshAccessToken().subscribe(token => tokens.push(token));
+
+      const req = httpMock.expectOne(API_URLS.AUTH_REFRESH);
+      req.flush({
+        access_token: 'renewed',
+        refresh_token: 'refresh2',
+        expires_in: 3600,
+        session_timeout_minutes: 240,
+        user_id: 'user1',
+      });
+
+      expect(tokens).toEqual(['renewed', 'renewed']);
+    });
+
+    it('should start a new exchange once the last one has finished', () => {
+      localStorage.setItem('refresh_token', 'old');
+
+      service.ensureFreshAccessToken().subscribe();
+      httpMock.expectOne(API_URLS.AUTH_REFRESH).flush({
+        access_token: 'first',
+        refresh_token: 'refresh2',
+        expires_in: 3600,
+        session_timeout_minutes: 240,
+        user_id: 'user1',
+      });
+
+      service.ensureFreshAccessToken().subscribe();
+      httpMock.expectOne(API_URLS.AUTH_REFRESH).flush({
+        access_token: 'second',
+        refresh_token: 'refresh3',
+        expires_in: 3600,
+        session_timeout_minutes: 240,
+        user_id: 'user1',
+      });
+
+      expect(localStorage.getItem('access_token')).toBe('second');
     });
   });
 

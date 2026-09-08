@@ -1,0 +1,5 @@
+@use 'lcars-tabs' as tabs;
+
+// The strip that switches between a Story's Chapters and its cast. Two short
+// labels, so the default minimum would pad both out to a width neither needs.
+@include tabs.lcars-tab-strip($min-width: 0);

@@ -1,0 +1,530 @@
+import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import {
+  ChapterAppearance,
+  ChapterMedia,
+  ChapterStatus,
+  ManagedChapter,
+  ManagedCharacter,
+  StorytimeLanguage,
+} from 'src/app/models/storytime.models';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { ChapterService } from '../../chapter.service';
+import { CharacterService } from '../../character.service';
+import { MediaService } from '../../media.service';
+import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
+import { ImageManagerComponent } from '../../shared/image-manager/image-manager.component';
+import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
+import { SettingOption } from '../../shared/setting-help/setting-help.component';
+import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
+import {
+  StorytimeEditorSupport,
+  syncImageDescription,
+  toLanguageOptions,
+} from '../../shared/storytime-editor.support';
+import { StorytimeImageSlot } from '../../storytime-image.constants';
+
+/**
+ * Writing and editing a Chapter.
+ *
+ * The same form serves creating and editing, because the fields are identical
+ * and keeping two would guarantee they drift.
+ */
+@Component({
+  selector: 'app-chapter-editor',
+  templateUrl: './chapter-editor.component.html',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    LoadingBarComponent,
+    LcarsErrorMessageComponent,
+    LcarsToggleComponent,
+    SettingSelectComponent,
+    MarkdownHintComponent,
+    EditorActionsComponent,
+    ImageManagerComponent,
+  ],
+})
+export class ChapterEditorComponent implements OnInit {
+  /** The form backing the editor. */
+  form!: FormGroup;
+
+  /** The Chapter being edited, or null when writing a new one. */
+  chapter: ManagedChapter | null = null;
+
+  /** The Story this Chapter belongs to. */
+  storyId = '';
+
+  /** Whether an existing Chapter is still loading. */
+  isLoading = false;
+
+  /** Whether a save is in flight. */
+  isSaving = false;
+
+  /** A message to show when saving failed. */
+  errorMessage = '';
+
+  /** Languages the server will accept. */
+  languages: StorytimeLanguage[] = [];
+
+  /** The Story's whole cast, to choose from. */
+  cast: ManagedCharacter[] = [];
+
+  /** The Characters ticked as appearing in this Chapter. */
+  appearingCharacterIds = new Set<string>();
+
+  /** Whether the cast is being saved. */
+  isSavingCast = false;
+
+  /** A message to show when the cast could not be saved. */
+  castErrorMessage = '';
+
+  /** The videos embedded in this Chapter, in order. */
+  media: ChapterMedia[] = [];
+
+  /** The share URL a creator has pasted but not yet added. */
+  mediaUrl = '';
+
+  /** A message to show when a video could not be added. */
+  mediaErrorMessage = '';
+
+  /** Route constants. */
+  readonly appRoutes = APP_ROUTES;
+
+  /** The artwork slots a Chapter carries. */
+  readonly imageSlots = StorytimeImageSlot;
+
+  /**
+   * The languages, as the chooser shows them.
+   *
+   * The Story's own language leads, because a Chapter written in something
+   * else is the exception rather than a choice every writer has to make.
+   *
+   * @returns The choices, starting with deferring to the Story.
+   */
+  get languageOptions(): SettingOption[] {
+    return [
+      { value: '', label: 'Same as the Story' },
+      ...toLanguageOptions(this.languages),
+    ];
+  }
+
+  private readonly _formBuilder = inject(FormBuilder);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
+  private readonly _chapterService = inject(ChapterService);
+  private readonly _characterService = inject(CharacterService);
+  private readonly _mediaService = inject(MediaService);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _editor = new StorytimeEditorSupport(this);
+
+  /**
+   * Builds the form and loads the Chapter when editing an existing one.
+   */
+  ngOnInit(): void {
+    this.form = this._formBuilder.group({
+      title: ['', [Validators.required, Validators.maxLength(200)]],
+      slug: ['', Validators.maxLength(220)],
+      synopsis: ['', Validators.maxLength(1000)],
+      contentSource: [''],
+      languageCode: [''],
+    });
+
+    this._editor.loadLanguages();
+
+    this.storyId = this._route.snapshot.paramMap.get('storyId') ?? '';
+    const chapterId = this._route.snapshot.paramMap.get('chapterId');
+
+    if (chapterId) {
+      this.loadChapter(chapterId);
+      this.loadAppearances(chapterId);
+      this.loadMedia(chapterId);
+    }
+
+    this.loadCast();
+  }
+
+  /**
+   * Takes the Chapter back from a cover change.
+   *
+   * The whole Chapter is kept rather than only the new picture, because
+   * setting one moves the version on: an editor still holding the old one
+   * would have its next save refused as stale.
+   *
+   * @param updated - The Chapter as the server now holds it.
+   */
+  onImageChanged(updated: unknown): void {
+    const chapter = updated as ManagedChapter;
+
+    this.chapter = chapter;
+    this.syncCoverDescription(chapter);
+  }
+
+  /**
+   * Takes the Chapter back from a save.
+   *
+   * An existing Chapter is edited at the address it is saved to, so the
+   * navigation that follows a save leaves the creator here. Without this the
+   * editor would still be holding the version it loaded, and a second save —
+   * from a page showing no sign of anything having changed — would be refused
+   * as stale.
+   *
+   * @param saved - The Chapter as the server now holds it.
+   */
+  onSaved(saved: ManagedChapter): void {
+    this.chapter = saved;
+    this.syncCoverDescription(saved);
+  }
+
+  /**
+   * Matches the description field to the cover the Chapter actually has.
+   *
+   * @param chapter - The Chapter as the server holds it.
+   */
+  private syncCoverDescription(chapter: ManagedChapter): void {
+    syncImageDescription(
+      this.form,
+      'coverImageAlt',
+      chapter.coverImageUrl,
+      chapter.coverImageAlt,
+    );
+  }
+
+  /**
+   * Adds or removes a Character from this Chapter's cast.
+   *
+   * @param characterId - The Character ticked or unticked.
+   */
+  toggleAppearance(characterId: string): void {
+    if (this.appearingCharacterIds.has(characterId)) {
+      this.appearingCharacterIds.delete(characterId);
+    } else {
+      this.appearingCharacterIds.add(characterId);
+    }
+  }
+
+  /**
+   * Whether a Character is ticked as appearing.
+   *
+   * @param characterId - The Character.
+   * @returns True when they appear in this Chapter.
+   */
+  isAppearing(characterId: string): boolean {
+    return this.appearingCharacterIds.has(characterId);
+  }
+
+  /**
+   * Saves this Chapter's cast.
+   *
+   * Saved separately from the Chapter itself, because a Chapter has to exist
+   * before anybody can appear in it: there is nothing to attach a cast to
+   * until the first save has happened.
+   */
+  saveCast(): void {
+    const chapterId = this.chapter?.id;
+
+    if (!chapterId || this.isSavingCast) {
+      return;
+    }
+
+    this.isSavingCast = true;
+    this.castErrorMessage = '';
+
+    this._characterService
+      .setAppearances(
+        chapterId,
+        // Sent in cast order rather than tick order, so the Chapter's cast
+        // list reads the same way as the Story's.
+        this.cast
+          .filter(character => this.appearingCharacterIds.has(character.id))
+          .map(character => ({ characterId: character.id })),
+      )
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => {
+          this.isSavingCast = false;
+        },
+        error: () => {
+          this.castErrorMessage =
+            'The cast could not be saved. Please try again shortly.';
+          this.isSavingCast = false;
+        },
+      });
+  }
+
+  /**
+   * Adds the pasted video to this Chapter.
+   *
+   * The URL is sent whole and parsed on the server, so a creator can paste
+   * whatever the Share button gave them and the client never has to guess at
+   * what a valid YouTube link looks like.
+   */
+  addMedia(): void {
+    const chapterId = this.chapter?.id;
+    const url = this.mediaUrl.trim();
+
+    if (!chapterId || url.length === 0) {
+      return;
+    }
+
+    this.mediaErrorMessage = '';
+
+    this._mediaService
+      .addMedia(chapterId, { url })
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: media => {
+          this.media = [...this.media, media];
+          this.mediaUrl = '';
+        },
+        error: (error: HttpErrorResponse) => {
+          this.mediaErrorMessage =
+            (error.error as { message?: string } | undefined)?.message ??
+            'That video could not be added. Please try again shortly.';
+        },
+      });
+  }
+
+  /**
+   * Removes a video from this Chapter.
+   *
+   * @param media - The video to remove.
+   */
+  removeMedia(media: ChapterMedia): void {
+    this._mediaService
+      .removeMedia(media.id)
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => {
+          this.media = this.media.filter(entry => entry.id !== media.id);
+        },
+        error: () => {
+          this.mediaErrorMessage =
+            'That video could not be removed. Please try again shortly.';
+        },
+      });
+  }
+
+  /**
+   * Loads the videos already on this Chapter.
+   *
+   * Silently: a Chapter with no videos is the normal case, and a failure here
+   * must leave the writing editable.
+   *
+   * @param chapterId - The Chapter.
+   */
+  private loadMedia(chapterId: string): void {
+    this._mediaService
+      .getMyChapterMedia(chapterId)
+      .pipe(
+        catchError(() => of([] as ChapterMedia[])),
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(media => {
+        this.media = media;
+      });
+  }
+
+  /**
+   * Loads the Story's cast to choose from.
+   *
+   * Silently: not every Story has a cast, and a failure here must leave the
+   * Chapter editable rather than blocking the writing over a section that may
+   * well be empty anyway.
+   */
+  private loadCast(): void {
+    if (!this.storyId) {
+      return;
+    }
+
+    this._characterService
+      .getMyCharacters(this.storyId)
+      .pipe(
+        catchError(() => of([] as ManagedCharacter[])),
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(cast => {
+        this.cast = cast;
+      });
+  }
+
+  /**
+   * Loads who already appears in this Chapter.
+   *
+   * @param chapterId - The Chapter.
+   */
+  private loadAppearances(chapterId: string): void {
+    this._characterService
+      .getAppearances(chapterId)
+      .pipe(
+        catchError(() => of([] as ChapterAppearance[])),
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(appearances => {
+        this.appearingCharacterIds = new Set(
+          appearances
+            .map(appearance => appearance.character?.id)
+            .filter((id): id is string => id !== undefined),
+        );
+      });
+  }
+
+  /**
+   * Whether the editor is writing a new Chapter rather than editing one.
+   *
+   * @returns True when there is no Chapter loaded.
+   */
+  get isNew(): boolean {
+    return this.chapter === null;
+  }
+
+  /**
+   * Whether publishing is a sensible next action from here.
+   *
+   * Offered once the Chapter exists and is not already published. A Chapter
+   * may be published while its Story is still a draft — it becomes readable
+   * when the Story does — so there is nothing else to wait for.
+   *
+   * @returns True when the Chapter can be published.
+   */
+  get canPublish(): boolean {
+    return (
+      this.chapter !== null && this.chapter.status !== ChapterStatus.PUBLISHED
+    );
+  }
+
+  /**
+   * Saves the Chapter, creating it when new and updating it otherwise.
+   */
+  save(): void {
+    this.submit(savedId => ['manage', 'chapters', savedId]);
+  }
+
+  /**
+   * Saves what is on the screen, publishes it, and returns to the Chapters.
+   *
+   * Back to the list rather than staying here, because the list is where a
+   * writer sees the Chapter take its new state alongside the others — and
+   * where they publish the Story once its first Chapter is out.
+   */
+  publish(): void {
+    this.submit(
+      () => ['manage', 'stories', this.storyId, 'chapters'],
+      saved => this._chapterService.publishChapter(saved.id),
+    );
+  }
+
+  /**
+   * Sends the form, then goes where the caller asked.
+   *
+   * @param destination - The route under Storytime to go to, from the saved id.
+   * @param then - Anything to do with the saved Chapter before leaving.
+   */
+  private submit(
+    destination: (savedId: string) => string[],
+    then?: (saved: ManagedChapter) => Observable<unknown>,
+  ): void {
+    const payload = this._editor.beginSave(this.form, this.chapter?.version);
+
+    if (!payload) {
+      return;
+    }
+
+    // An empty language means "the same as the Story", which the server
+    // expects as an absent field rather than an empty string.
+    if (!payload['languageCode']) {
+      delete payload['languageCode'];
+    }
+
+    const request: Observable<ManagedChapter> = this.chapter
+      ? this._chapterService.updateChapter(this.chapter.id, payload)
+      : this._chapterService.createChapter(this.storyId, payload);
+
+    this._editor.save(
+      request,
+      destination,
+      'This Chapter could not be saved. Please try again shortly.',
+      then,
+    );
+  }
+
+  /**
+   * Loads an existing Chapter into the form.
+   *
+   * @param chapterId - The Chapter to load.
+   */
+  private loadChapter(chapterId: string): void {
+    this.isLoading = true;
+
+    this._chapterService
+      .getMyChapter(chapterId)
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: chapter => {
+          this.chapter = chapter;
+          this.storyId = chapter.storyId;
+          this.form.patchValue({
+            title: chapter.title,
+            slug: chapter.slug,
+            synopsis: chapter.synopsis ?? '',
+            contentSource: chapter.contentSource,
+            // The creator's own setting, not the resolved one, so leaving
+            // the field alone keeps the Chapter following its Story.
+            languageCode: chapter.ownLanguageCode ?? '',
+          });
+          this.syncCoverDescription(chapter);
+          this.isLoading = false;
+          // Only now is the Story known, when editing an existing Chapter
+          // reached by its own identifier rather than through its Story.
+          this.loadCast();
+        },
+        error: () => {
+          this.errorMessage = 'That Chapter could not be loaded.';
+          this.isLoading = false;
+        },
+      });
+  }
+}

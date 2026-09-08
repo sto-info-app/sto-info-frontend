@@ -4,6 +4,9 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { EntityAvatarComponent } from 'src/app/shared/components/entity-avatar/entity-avatar.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { displayFromPublic } from 'src/app/shared/custom-tracking/custom-tracking-display.builder';
+import { CustomTrackingDisplaySection } from 'src/app/shared/custom-tracking/custom-tracking-display.models';
+import { CustomTrackingDisplayComponent } from 'src/app/shared/custom-tracking/custom-tracking-display/custom-tracking-display.component';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
 import { decodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
@@ -35,6 +38,7 @@ import { RegistryService } from '../registry.service';
     LcarsErrorMessageComponent,
     EntityAvatarComponent,
     CommunityTabsComponent,
+    CustomTrackingDisplayComponent,
   ],
 })
 export class RegistryCharacterComponent
@@ -50,6 +54,17 @@ export class RegistryCharacterComponent
   accountSlug = '';
   characterSlug = '';
   character: RegistryCharacter | null = null;
+
+  /**
+   * Whatever of the owner's own tracking this visitor may read.
+   *
+   * It arrives with the captain rather than being asked for separately. The
+   * route that served the captain has already resolved the member, the
+   * account, the captain and the blocks between them and this visitor, and a
+   * second request would be a second set of gates that would have to agree
+   * with the first.
+   */
+  customSections: CustomTrackingDisplaySection[] = [];
 
   /**
    * Reads all three slugs from the route and loads the captain.
@@ -70,6 +85,7 @@ export class RegistryCharacterComponent
       ),
       character => {
         this.character = character;
+        this.customSections = displayFromPublic(character.customSections);
         this.applyCharacterMeta(character);
       },
       'Something went wrong loading this captain.',

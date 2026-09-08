@@ -1,0 +1,106 @@
+<div id="lcars-search-dialog">
+  <div
+    class="lcars-text-bar small-lcars-bar-gap"
+    mat-dialog-title>
+    <span>{{ data.title }}</span>
+  </div>
+
+  <div mat-dialog-content>
+    <div class="lcars-input-container perano">
+      <label for="lcars-search-dialog-input">Search</label>
+      <input
+        id="lcars-search-dialog-input"
+        type="search"
+        [class.privacy-blur]="isTermBlurred"
+        [formControl]="searchControl"
+        placeholder="Type to search..." />
+    </div>
+
+    <div class="lcars-search-dialog__results-area">
+      @if (isSearching) {
+        <app-loading-bar loadingText="Searching"></app-loading-bar>
+      } @else if (results !== null) {
+        @if (results.items.length === 0) {
+          <p class="lcars-search-dialog__empty">
+            Nothing matched. Try a different term.
+          </p>
+        } @else {
+          <ol class="lcars-search-dialog__results">
+            @for (item of results.items; track $index) {
+              <li class="lcars-search-dialog__result">
+                <button
+                  type="button"
+                  class="lcars-search-dialog__result-btn"
+                  (click)="select(item)">
+                  <span class="lcars-search-dialog__result-name">{{
+                    labelFor(item)
+                  }}</span>
+                  @if (sublabelFor(item)) {
+                    <span
+                      class="lcars-search-dialog__result-detail"
+                      [class.privacy-blur]="isSublabelBlurred"
+                      >{{ sublabelFor(item) }}</span
+                    >
+                  }
+                  @if (factsFor(item).length) {
+                    <span class="lcars-search-dialog__result-facts">
+                      @for (fact of factsFor(item); track fact.label) {
+                        <span class="lcars-search-dialog__fact">
+                          <span class="lcars-search-dialog__fact-label">{{
+                            fact.label
+                          }}</span>
+                          <span class="lcars-search-dialog__fact-value">{{
+                            fact.value
+                          }}</span>
+                        </span>
+                      }
+                    </span>
+                  }
+                </button>
+              </li>
+            }
+          </ol>
+
+          <nav
+            class="lcars-search-dialog__paging"
+            aria-label="Search result pages">
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto bluey"
+              [disabled]="!hasPreviousPage || null"
+              (click)="previousPage()">
+              Previous
+            </button>
+            <span class="lcars-search-dialog__page-info">
+              Page {{ currentPage }} of
+              {{ results ? Math.ceil(results.total / data.pageSize) : 1 }}
+            </span>
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto bluey"
+              [disabled]="!hasNextPage || null"
+              (click)="nextPage()">
+              Next
+            </button>
+          </nav>
+        }
+      } @else {
+        <p class="lcars-search-dialog__prompt">
+          Type at least two characters to search.
+        </p>
+      }
+    </div>
+  </div>
+
+  <div
+    class="buttons-container lcars-flex-right"
+    mat-dialog-actions>
+    <button
+      type="button"
+      class="lcars-btn red"
+      mat-button
+      (click)="cancel()">
+      Cancel
+    </button>
+  </div>
+</div>

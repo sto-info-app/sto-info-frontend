@@ -9,7 +9,6 @@
       @if (!isLoggedIn) {
         <a
           [routerLink]="getRouteLink(appRoutes.REGISTER)"
-          [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="peach"
           >{{ appRouteTitles.REGISTER }}</a
         >
@@ -19,34 +18,58 @@
         routerLinkActive="peach"
         >{{ appRouteTitles.COMMUNITY }}</a
       >
+      <!--
+        One entry only. Storytime is a section of the site rather than a set of
+        peers to Community and Help, and its own pages — Stories, Arcs, the
+        Spotlight, and a member's writing — are reached from its landing page,
+        where they can be described. A sidebar that listed them all would push
+        the rest of the site off the bottom of the frame to no one's benefit.
+      -->
+      @if (isStorytimeOffered) {
+        <a
+          [routerLink]="getRouteLink(appRoutes.STORYTIME)"
+          routerLinkActive="peach"
+          >{{ appRouteTitles.STORYTIME }}</a
+        >
+      }
       @if (isLoggedIn) {
+        <!--
+          Lit by hand rather than by `routerLinkActive`. Every other entry can
+          match on the start of the address, but Your Accounts and Stats sit
+          underneath the dashboard, so a plain prefix match would light this
+          entry as well as theirs and leave two buttons on at once. The
+          component pushes this class off the router's own events, because a
+          binding alone would go stale on an `OnPush` view that the navigation
+          did not dirty.
+        -->
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
-          [routerLinkActiveOptions]="{ exact: true }"
-          routerLinkActive="peach"
+          [class.peach]="isDashboardActive"
           >{{ appRouteTitles.STO_DASHBOARD }}</a
         >
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
-          [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="peach"
           >{{ appRouteTitles.STO_DASHBOARD_ACCOUNTS }}</a
         >
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)"
-          [routerLinkActiveOptions]="{ exact: true }"
           routerLinkActive="peach"
           >{{ appRouteTitles.STO_DASHBOARD_STATS }}</a
         >
         @if (isAdmin) {
           <a
             [routerLink]="getRouteLink(appRoutes.ADMIN)"
-            [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="peach"
             >{{ appRouteTitles.ADMIN }}</a
           >
         }
       }
+      <a
+        [routerLink]="getRouteLink(appRoutes.HELP)"
+        routerLinkActive="peach"
+        >{{ appRouteTitles.HELP }}</a
+      >
     </div>
     <div class="panel panel-4"></div>
     @if (isPanel5Hidden) {

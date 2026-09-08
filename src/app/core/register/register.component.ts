@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
+  NgZone,
   OnDestroy,
   OnInit,
   Renderer2,
@@ -57,6 +59,7 @@ import {
   USERNAME_PATTERN,
 } from 'src/app/shared/constants/regex-patterns.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { MustMatch } from '../../shared/_helpers/must-match.validator';
@@ -109,6 +112,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private readonly _renderer = inject(Renderer2);
   private readonly _el = inject(ElementRef);
   private readonly _alertThemeService = inject(AlertThemeService);
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Builds the registration form and its validators.
@@ -184,40 +189,43 @@ export class RegisterComponent implements OnInit, OnDestroy {
     const registrationFormValues: RegistrationFormValues =
       this.registerForm.value;
 
-    this._authService.register(registrationFormValues).subscribe({
-      next: () => {
-        this._router.navigate(['/register/complete']);
-        this.isSubmitting = false;
-      },
-      error: error => {
-        let errMessage = '';
-        if (error.status === 0) {
-          console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
-          errMessage = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;
-        } else if (error.status === 400) {
-          console.error(MSG_ERROR_HTTP_STATUS_400_CONSOLE_TEXT);
-          errMessage = MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT;
-        } else if (error.status === 409) {
-          console.error('Registration Conflict Exception error:', error);
-          if (error.error?.message?.includes('Email')) {
-            this.registerForm.controls['email'].setErrors({
-              uniqueEmail: true,
-            });
-          } else if (error.error?.message?.includes('Username')) {
-            this.registerForm.controls['username'].setErrors({
-              uniqueUsername: true,
-            });
+    this._authService
+      .register(registrationFormValues)
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe({
+        next: () => {
+          this._router.navigate(['/register/complete']);
+          this.isSubmitting = false;
+        },
+        error: error => {
+          let errMessage = '';
+          if (error.status === 0) {
+            console.error(MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT);
+            errMessage = MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT;
+          } else if (error.status === 400) {
+            console.error(MSG_ERROR_HTTP_STATUS_400_CONSOLE_TEXT);
+            errMessage = MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT;
+          } else if (error.status === 409) {
+            console.error('Registration Conflict Exception error:', error);
+            if (error.error?.message?.includes('Email')) {
+              this.registerForm.controls['email'].setErrors({
+                uniqueEmail: true,
+              });
+            } else if (error.error?.message?.includes('Username')) {
+              this.registerForm.controls['username'].setErrors({
+                uniqueUsername: true,
+              });
+            }
+          } else {
+            console.error('Registration error:', error);
           }
-        } else {
-          console.error('Registration error:', error);
-        }
-        this.displayErrorMessage(errMessage, error?.status);
-        this.isSubmitting = false;
-      },
-      complete: () => {
-        this.isSubmitting = false;
-      },
-    });
+          this.displayErrorMessage(errMessage, error?.status);
+          this.isSubmitting = false;
+        },
+        complete: () => {
+          this.isSubmitting = false;
+        },
+      });
   }
 
   /**

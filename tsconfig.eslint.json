@@ -1,8 +1,14 @@
 {
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
-    "types": ["jest"]
+    "types": ["jest", "node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "setup-jest.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "setup-jest.ts",
+    "e2e/**/*.ts",
+    "playwright.config.ts"
+  ],
   "exclude": []
 }

@@ -6,7 +6,13 @@ export interface LoginCredentials {
 export interface LoginResponse {
   access_token: string;
   refresh_token: string;
+  /** Access token lifetime in seconds. */
   expires_in: number;
+  /**
+   * The user's chosen inactivity window in minutes. The session ends this long
+   * after their last sign of activity, whatever the access token's own life.
+   */
+  session_timeout_minutes: number;
   user_id: string;
 }
 

@@ -14,6 +14,7 @@ import {
 } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 import { finalize, Subject, takeUntil } from 'rxjs';
+import { buildRegistryProfileLink } from 'src/app/community/registry/registry-card.builders';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -26,6 +27,7 @@ import { DatesTimeHelperService } from 'src/app/shared/services/dates-time-helpe
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { User } from '../models/user.model';
 import { DashboardService } from '../services/dashboard.service';
+import { PrivacyModeService } from '../services/privacy-mode.service';
 import { EditPersonalDetailsComponent } from './dialogs/edit-personal-details/edit-personal-details.component';
 import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component';
 
@@ -49,6 +51,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   /** Precomputed router link to the reset-password page. */
   readonly resetPasswordLink = `/${APP_ROUTES.RESET_PASSWORD}`;
 
+  /** Precomputed router link to the settings page. */
+  readonly settingsLink = `/${APP_ROUTES.STO_DASHBOARD_SETTINGS}`;
+
   readonly appRouteTitles = APP_ROUTE_TITLES;
   unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
@@ -70,6 +75,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private profilePicDialogRef: MatDialogRef<ProfilePicComponent> | null = null;
 
   private readonly _dashboardService = inject(DashboardService);
+  readonly privacyMode = inject(PrivacyModeService);
   private readonly _authService = inject(AuthService);
   private readonly _routingService = inject(RoutingService);
   private readonly _dateTimeHelper = inject(DatesTimeHelperService);
@@ -81,6 +87,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
    * Angular lifecycle hook that initialises the component by loading user data.
    */
   ngOnInit() {
+    this.privacyMode.load().subscribe();
     this.getUserData();
   }
 
@@ -115,6 +122,23 @@ export class ProfileComponent implements OnInit, OnDestroy {
         },
       });
     return this.user;
+  }
+
+  /**
+   * Router link to the member's own entry in the Galactic Personnel Registry.
+   *
+   * Null while the user is loading, and null for a member who is not listed
+   * publicly: the registry only serves publicly visible profiles, so a link
+   * offered then would lead to a "member not found" page.
+   *
+   * @returns The profile router link segments, or null when there is no
+   *   public profile to view.
+   */
+  get publicProfileLink(): string[] | null {
+    const profile = this.user?.profile;
+    if (!profile?.publiclyVisible) return null;
+
+    return buildRegistryProfileLink(profile.username);
   }
 
   /**

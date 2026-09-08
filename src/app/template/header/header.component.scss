@@ -65,3 +65,22 @@
     animation: none;
   }
 }
+
+// Same shape as the comms alert, in warning gold: shown while the API has
+// failed several health checks in a row but is not yet considered down. It
+// carries no button because there is nothing for the user to do; it clears
+// itself the moment a check succeeds.
+.comms-alert-warning {
+  .comms-alert-heading {
+    color: vars.$lcars-gold;
+  }
+
+  .comms-alert-detail {
+    max-width: 22rem;
+    color: vars.$lcars-white;
+    font-size: clamp(0.72rem, 0.5rem + 0.6vw, 0.9rem);
+    line-height: 1.25;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+}

@@ -1,0 +1,186 @@
+@if (isLoading) {
+  <app-loading-bar></app-loading-bar>
+}
+
+<div id="commendations-container">
+  <div
+    id="commendations-main-column"
+    class="col"
+  >
+    <app-character-progress-state
+      [isLoading]="isLoading"
+      [errorMessage]="errorMessage"
+      [accountsLink]="accountsLink"
+      [embedded]="embedded"
+      title="Commendations"
+      [characterHandle]="characterHandle"
+      [accountHandle]="accountHandle"
+      [levelLocked]="isLevelLocked()"
+      [allegianceLocked]="isAllegianceLocked()"
+      [characterAllegiance]="characterGeneralFaction()"
+      [featureName]="featureName"
+      [unlockLevel]="unlockLevel"
+      [characterLevel]="characterLevel()"
+      [characterEditLink]="characterEditLink()"
+    ></app-character-progress-state>
+
+    @if (!isLoading && !errorMessage && !isGated()) {
+      <!-- Summary -->
+      @if (summary()) {
+        <div class="commendation-summary-bar">
+          <div class="summary-stat">
+            <span class="summary-value">{{ summary()!.totalRanks }} /
+              {{ summary()!.maxPossibleRanks }}</span>
+            <span class="summary-label">Ranks Earnt</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-value">{{
+                summary()!.overallCompletionPercentage
+              }}%</span>
+            <span class="summary-label">Overall</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-value">{{
+                summary()!.completedCommendations
+              }} /
+              {{ summary()!.totalCommendations }}</span>
+            <span class="summary-label">Completed</span>
+          </div>
+        </div>
+      }
+
+      <!-- Commendation list -->
+      <div class="commendation-list">
+        @for (item of filteredProgress(); track item.commendationId) {
+          <div
+            class="commendation-row"
+            [style.border-left-color]="accent(item)"
+            [style.background]="accentTint(item)"
+          >
+            <div class="commendation-row-header">
+              <span class="commendation-name">
+                @if (showIcon(item)) {
+                  <img
+                    class="commendation-icon"
+                    [src]="iconUrl(item)"
+                    [alt]='item.commendation.name + " icon"'
+                    (error)="onIconError(item.commendationId)"
+                  />
+                }
+                {{ item.commendation.name }}
+                @if (item.commendation.description) {
+                  <button
+                    type="button"
+                    class="commendation-info-btn"
+                    [class.active]="expandedDescriptions().has(item.commendationId)"
+                    title="Toggle description"
+                    [attr.aria-expanded]="expandedDescriptions().has(item.commendationId)"
+                    (click)="toggleDescription(item.commendationId)"
+                  >
+                    <i class="fas fa-circle-info"></i>
+                  </button>
+                }
+              </span>
+              <div class="commendation-header-right">
+                <span class="commendation-rank-value">{{
+                    formatRank(item)
+                  }}</span>
+                <span class="sr-only">{{ item.currentRank }} of {{ maxRank }}
+                  ranks</span>
+              </div>
+            </div>
+            @if (expandedDescriptions().has(item.commendationId)) {
+              <span class="commendation-description">
+                {{ item.commendation.description }}
+                @if (item.commendation.factionRestriction) {
+                  <span class="commendation-restricted">{{
+                      item.commendation.factionRestriction
+                    }}
+                    captains only</span>
+                }
+              </span>
+            }
+
+            <div class="commendation-segments">
+              @if (savingItemId() === item.commendationId) {
+                <span class="segments-saving">
+                  <i class="fas fa-spinner fa-spin saving-spinner"></i>
+                </span>
+              } @else {
+                @for (j of rangeArray(maxRank); track j) {
+                  <button
+                    type="button"
+                    class="commendation-segment"
+                    [class.filled]="j < item.currentRank"
+                    [style.background-color]="j < item.currentRank
+  ? accent(item)
+  : accentTint(item, 0.2)"
+                    [attr.aria-label]='rankTitle(j) + " for " + item.commendation.name'
+                    [title]="rankTitle(j)"
+                    (click)="selectRank(item, j)"
+                  >
+                    <span class="sr-only">{{ j + 1 }}</span>
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        }
+
+        @if (filteredProgress().length === 0 && !isLoading) {
+          <p class="go-center">No commendations found.</p>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Side column -->
+  <div
+    id="commendations-side-column"
+    class="col"
+  >
+    <!-- Filters are pointless while the tracker is gated. -->
+    @if (!isGated()) {
+      <app-character-progress-filters
+        searchId="commendation-search"
+        searchLabel="Search commendations"
+        [filtersCollapsed]="filtersCollapsed"
+        [searchText]="searchText()"
+        [hideComplete]="hideComplete()"
+        [completeCount]="completeCount()"
+        [activeFilterCount]="activeFilterCount()"
+        (filtersCollapsedChange)="filtersCollapsed = $event"
+        (searchTextChange)="searchText.set($event)"
+        (hideCompleteChange)="hideComplete.set($event)"
+        (clearFilters)="clearFilters()"
+        (refresh)="loadProgress()"
+      ></app-character-progress-filters>
+    }
+
+    <!-- Host-projected content (e.g. character photo) shown below the filters. -->
+    <ng-content select="[commendationAsidePhoto]"></ng-content>
+
+    <!-- Host-projected navigation shown below the photo. -->
+    <ng-content select="[commendationAsideNav]"></ng-content>
+
+    @if (!embedded) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Navigation</span>
+      </div>
+      <div class="buttons">
+        <a
+          [routerLink]="characterLink()"
+          class="full-width-btn-link peach"
+        >Character</a>
+        <a
+          [routerLink]="accountLink()"
+          class="full-width-btn-link sunflower"
+        >Account</a>
+        <a
+          [routerLink]="accountsLink"
+          class="full-width-btn-link bluey"
+        >Accounts</a>
+      </div>
+    }
+  </div>
+</div>

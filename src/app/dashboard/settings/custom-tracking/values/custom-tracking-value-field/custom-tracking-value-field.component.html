@@ -1,0 +1,665 @@
+<div
+  class="custom-tracking-value-field"
+  [formGroup]="group">
+  @switch (field.fieldType) {
+    @case (fieldType.TEXT_SINGLE_LINE) {
+      <div class="lcars-input-container perano">
+        <label [attr.for]="controlId('text')">{{ field.name }}</label>
+        <input
+          type="text"
+          formControlName="text"
+          [id]="controlId('text')"
+          [attr.placeholder]="placeholder"
+          [attr.maxlength]="maxLength"
+          [attr.aria-describedby]="errorId"
+          [attr.aria-invalid]="isInvalid" />
+      </div>
+    }
+
+    @case (fieldType.MARKDOWN) {
+      <div class="lcars-input-container perano">
+        <label [attr.for]="controlId('markdown')">{{ field.name }}</label>
+        <textarea
+          rows="6"
+          formControlName="markdown"
+          [id]="controlId('markdown')"
+          [attr.placeholder]="placeholder"
+          [attr.maxlength]="maxLength"
+          [attr.aria-describedby]="errorId"
+          [attr.aria-invalid]="isInvalid"></textarea>
+      </div>
+      <app-storytime-markdown-hint></app-storytime-markdown-hint>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto bluey"
+        [attr.aria-expanded]="isPreviewing"
+        (click)="togglePreview()">
+        {{ isPreviewing ? 'Back to writing' : 'Preview' }}
+      </button>
+      @if (isPreviewing) {
+        <div
+          class="custom-tracking-value-preview"
+          [innerHTML]="held('markdown') | markdown"></div>
+      }
+    }
+
+    @case (fieldType.INTEGER) {
+      <div class="lcars-input-container gold">
+        <label [attr.for]="controlId('integer')">{{ field.name }}</label>
+        <input
+          type="number"
+          formControlName="integer"
+          [id]="controlId('integer')"
+          [attr.min]="setting('minimum')"
+          [attr.max]="setting('maximum')"
+          [attr.step]="setting('step')"
+          [attr.aria-describedby]="errorId"
+          [attr.aria-invalid]="isInvalid" />
+      </div>
+    }
+
+    @case (fieldType.YEAR) {
+      <div class="lcars-input-container gold">
+        <label [attr.for]="controlId('year')">{{ field.name }}</label>
+        <input
+          type="number"
+          formControlName="year"
+          [id]="controlId('year')"
+          [attr.min]="setting('minimumYear')"
+          [attr.max]="setting('maximumYear')"
+          [attr.aria-describedby]="errorId"
+          [attr.aria-invalid]="isInvalid" />
+      </div>
+    }
+
+    @case (fieldType.DECIMAL) {
+      <div class="lcars-input-container gold">
+        <label [attr.for]="controlId('decimal')">{{ field.name }}</label>
+        <input
+          type="text"
+          inputmode="decimal"
+          formControlName="decimal"
+          [id]="controlId('decimal')"
+          [attr.aria-describedby]="errorId"
+          [attr.aria-invalid]="isInvalid" />
+      </div>
+    }
+
+    @case (fieldType.PERCENTAGE) {
+      <div class="lcars-input-container gold">
+        <label [attr.for]="controlId('decimal')">{{ field.name }} (%)</label>
+        <input
+          type="text"
+          inputmode="decimal"
+          formControlName="decimal"
+          [id]="controlId('decimal')"
+          [attr.aria-describedby]="errorId"
+          [attr.aria-invalid]="isInvalid" />
+      </div>
+    }
+
+    @case (fieldType.RANGE) {
+      <fieldset class="custom-tracking-value-group">
+        <legend>{{ field.name }}</legend>
+        <input
+          type="range"
+          formControlName="number"
+          [id]="controlId('number')"
+          [attr.min]="setting('minimum')"
+          [attr.max]="setting('maximum')"
+          [attr.step]="setting('step')"
+          [attr.aria-label]="field.name"
+          [attr.aria-describedby]="errorId" />
+        <div class="lcars-input-container gold">
+          <label [attr.for]="controlId('number-exact')">Exact value</label>
+          <input
+            type="number"
+            formControlName="number"
+            [id]="controlId('number-exact')"
+            [attr.min]="setting('minimum')"
+            [attr.max]="setting('maximum')"
+            [attr.step]="setting('step')"
+            [attr.aria-describedby]="errorId"
+            [attr.aria-invalid]="isInvalid" />
+        </div>
+        <p class="field-hint">
+          Empty the exact value to leave this unanswered.
+        </p>
+      </fieldset>
+    }
+
+    @case (fieldType.RATING) {
+      <fieldset class="custom-tracking-value-group">
+        <legend>{{ field.name }}</legend>
+        <div class="custom-tracking-value-choices">
+          <label class="custom-tracking-value-choice">
+            <input
+              type="radio"
+              [name]="controlId('rating')"
+              [checked]="held('rating') === ''"
+              [attr.aria-describedby]="errorId"
+              (change)="chooseRating(null)" />
+            No rating
+          </label>
+          @for (score of ratings; track score) {
+            <label class="custom-tracking-value-choice">
+              <input
+                type="radio"
+                [name]="controlId('rating')"
+                [checked]="isRating(score)"
+                (change)="chooseRating(score)" />
+              {{ score }}
+            </label>
+          }
+        </div>
+      </fieldset>
+    }
+
+    @case (fieldType.PROGRESS) {
+      <fieldset class="custom-tracking-value-group">
+        <legend>{{ field.name }}</legend>
+        <div class="lcars-input-container gold">
+          <label [attr.for]="controlId('current')">How far along</label>
+          <input
+            type="number"
+            formControlName="current"
+            [id]="controlId('current')"
+            [attr.min]="setting('minimum')"
+            [attr.aria-describedby]="errorId"
+            [attr.aria-invalid]="isInvalid" />
+        </div>
+        <div class="lcars-input-container gold">
+          <label [attr.for]="controlId('maximum')">Out of</label>
+          <input
+            type="number"
+            formControlName="maximum"
+            [id]="controlId('maximum')"
+            [attr.max]="setting('maximum')"
+            [attr.aria-describedby]="errorId"
+            [attr.aria-invalid]="isInvalid" />
+        </div>
+        <p class="field-hint">
+          Both figures are stored. Changing what the field allows later never
+          restates what you recorded here.
+        </p>
+      </fieldset>
+    }
+
+    @case (fieldType.DATE) {
+      <div class="lcars-input-container bluey">
+        <label [attr.for]="controlId('date')">{{ field.name }}</label>
+        <input
+          type="date"
+          formControlName="date"
+          [id]="controlId('date')"
+          [attr.min]="setting('minimumDate')"
+          [attr.max]="setting('maximumDate')"
+          [attr.aria-describedby]="errorId"
+          [attr.aria-invalid]="isInvalid" />
+      </div>
+    }
+
+    @case (fieldType.MONTH_YEAR) {
+      <div class="lcars-input-container bluey">
+        <label [attr.for]="controlId('monthYear')">{{ field.name }}</label>
+        <input
+          type="month"
+          formControlName="monthYear"
+          [id]="controlId('monthYear')"
+          [attr.aria-describedby]="errorId"
+          [attr.aria-invalid]="isInvalid" />
+      </div>
+    }
+
+    @case (fieldType.TIME) {
+      <fieldset class="custom-tracking-value-group">
+        <legend>{{ field.name }}</legend>
+        <div class="lcars-input-container bluey">
+          <label [attr.for]="controlId('time')">Time</label>
+          <input
+            type="time"
+            formControlName="time"
+            [id]="controlId('time')"
+            [attr.aria-describedby]="errorId"
+            [attr.aria-invalid]="isInvalid" />
+        </div>
+        <div class="lcars-select-container gold">
+          <label
+            class="select-label"
+            [attr.for]="controlId('timezone')"
+            >Timezone</label
+          >
+          <select
+            formControlName="timezone"
+            [id]="controlId('timezone')">
+            @for (zone of timezones; track zone) {
+              <option [value]="zone">{{ zone }}</option>
+            }
+          </select>
+        </div>
+        <p class="field-hint">
+          A time of day is never converted. It is kept as written, in the
+          timezone chosen here.
+        </p>
+      </fieldset>
+    }
+
+    @case (fieldType.DATE_TIME) {
+      <fieldset class="custom-tracking-value-group">
+        <legend>{{ field.name }}</legend>
+        <div class="lcars-input-container bluey">
+          <label [attr.for]="controlId('localDateTime')">Date and time</label>
+          <input
+            type="datetime-local"
+            formControlName="localDateTime"
+            [id]="controlId('localDateTime')"
+            [attr.aria-describedby]="errorId"
+            [attr.aria-invalid]="isInvalid" />
+        </div>
+        <div class="lcars-select-container gold">
+          <label
+            class="select-label"
+            [attr.for]="controlId('timezone')"
+            >Timezone</label
+          >
+          <select
+            formControlName="timezone"
+            [id]="controlId('timezone')">
+            @for (zone of timezones; track zone) {
+              <option [value]="zone">{{ zone }}</option>
+            }
+          </select>
+        </div>
+        <p class="field-hint">
+          Entered here and stored as a moment in time, so the timezone is what
+          says which moment you meant.
+        </p>
+      </fieldset>
+    }
+
+    @case (fieldType.DATE_RANGE) {
+      <fieldset class="custom-tracking-value-group">
+        <legend>{{ field.name }}</legend>
+        <div class="lcars-input-container bluey">
+          <label [attr.for]="controlId('startDate')">From</label>
+          <input
+            type="date"
+            formControlName="startDate"
+            [id]="controlId('startDate')"
+            [attr.min]="setting('minimumDate')"
+            [attr.max]="setting('maximumDate')"
+            [attr.aria-describedby]="errorId"
+            [attr.aria-invalid]="isInvalid" />
+        </div>
+        <div class="lcars-input-container bluey">
+          <label [attr.for]="controlId('endDate')">To</label>
+          <input
+            type="date"
+            formControlName="endDate"
+            [id]="controlId('endDate')"
+            [attr.min]="setting('minimumDate')"
+            [attr.max]="setting('maximumDate')"
+            [attr.aria-describedby]="errorId"
+            [attr.aria-invalid]="isInvalid" />
+        </div>
+      </fieldset>
+    }
+
+    @case (fieldType.DATE_TIME_RANGE) {
+      <fieldset class="custom-tracking-value-group">
+        <legend>{{ field.name }}</legend>
+        <div class="lcars-input-container bluey">
+          <label [attr.for]="controlId('startLocalDateTime')">From</label>
+          <input
+            type="datetime-local"
+            formControlName="startLocalDateTime"
+            [id]="controlId('startLocalDateTime')"
+            [attr.aria-describedby]="errorId"
+            [attr.aria-invalid]="isInvalid" />
+        </div>
+        <div class="lcars-input-container bluey">
+          <label [attr.for]="controlId('endLocalDateTime')">To</label>
+          <input
+            type="datetime-local"
+            formControlName="endLocalDateTime"
+            [id]="controlId('endLocalDateTime')"
+            [attr.aria-describedby]="errorId"
+            [attr.aria-invalid]="isInvalid" />
+        </div>
+        <div class="lcars-select-container gold">
+          <label
+            class="select-label"
+            [attr.for]="controlId('timezone')"
+            >Timezone</label
+          >
+          <select
+            formControlName="timezone"
+            [id]="controlId('timezone')">
+            @for (zone of timezones; track zone) {
+              <option [value]="zone">{{ zone }}</option>
+            }
+          </select>
+        </div>
+      </fieldset>
+    }
+
+    @case (fieldType.DURATION) {
+      <fieldset class="custom-tracking-value-group">
+        <legend>{{ field.name }}</legend>
+        @for (part of durationParts; track part.key) {
+          <div class="lcars-input-container gold">
+            <label [attr.for]="controlId(part.key)">{{ part.label }}</label>
+            <input
+              type="number"
+              min="0"
+              [formControlName]="part.key"
+              [id]="controlId(part.key)"
+              [attr.aria-describedby]="errorId"
+              [attr.aria-invalid]="isInvalid" />
+          </div>
+        }
+      </fieldset>
+    }
+
+    @case (fieldType.TOGGLE) {
+      <div class="custom-tracking-value-switch">
+        <app-lcars-toggle
+          formControlName="boolean"
+          [label]="field.name"
+          [ariaLabel]="field.name">
+        </app-lcars-toggle>
+        <p class="field-hint">
+          @if (!isAnswered) {
+            Not answered yet.
+          } @else if (booleanAnswer) {
+            Recorded as yes.
+          } @else {
+            Recorded as no.
+          }
+        </p>
+        @if (isAnswered) {
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto bluey"
+            (click)="clearAnswer()">
+            Leave unanswered
+          </button>
+        }
+      </div>
+    }
+
+    @case (fieldType.CHECKBOX) {
+      <div class="custom-tracking-value-switch">
+        <label class="custom-tracking-value-choice">
+          <input
+            type="checkbox"
+            formControlName="boolean"
+            [id]="controlId('boolean')"
+            [attr.aria-describedby]="errorId" />
+          {{ field.name }}
+        </label>
+        <p class="field-hint">
+          @if (!isAnswered) {
+            Not answered yet.
+          } @else if (booleanAnswer) {
+            Recorded as ticked.
+          } @else {
+            Recorded as unticked.
+          }
+        </p>
+        @if (isAnswered) {
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto bluey"
+            (click)="clearAnswer()">
+            Leave unanswered
+          </button>
+        }
+      </div>
+    }
+
+    @case (fieldType.YES_NO_UNKNOWN) {
+      <div class="lcars-select-container bluey">
+        <span class="select-label">{{ field.name }}</span>
+        <select
+          formControlName="triState"
+          [id]="controlId('triState')"
+          [attr.aria-label]="field.name"
+          [attr.aria-describedby]="errorId">
+          <option value="">No answer</option>
+          @for (choice of triStateChoices; track choice.value) {
+            <option [value]="choice.value">{{ choice.label }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    @case (fieldType.RADIO) {
+      <fieldset class="custom-tracking-value-group">
+        <legend>{{ field.name }}</legend>
+        <div class="custom-tracking-value-choices">
+          <label class="custom-tracking-value-choice">
+            <input
+              type="radio"
+              [name]="controlId('optionIds')"
+              [checked]="chosen.length === 0"
+              [attr.aria-describedby]="errorId"
+              (change)="chooseOnly('')" />
+            No answer
+          </label>
+          @for (option of options; track option.id) {
+            <label class="custom-tracking-value-choice">
+              <input
+                type="radio"
+                [name]="controlId('optionIds')"
+                [checked]="isChosen(option.id)"
+                [disabled]="option.withdrawn"
+                (change)="chooseOnly(option.id)" />
+              {{ option.label }}
+              @if (option.withdrawn) {
+                <span class="custom-tracking-badge muted">Withdrawn</span>
+              }
+            </label>
+          }
+        </div>
+      </fieldset>
+    }
+
+    @case (fieldType.DROPDOWN) {
+      <div class="lcars-select-container bluey">
+        <span class="select-label">{{ field.name }}</span>
+        <select
+          [id]="controlId('optionIds')"
+          [attr.aria-label]="field.name"
+          [attr.aria-describedby]="errorId"
+          (change)="chooseOnly($any($event.target).value)">
+          <option value="">No answer</option>
+          @for (option of options; track option.id) {
+            <option
+              [value]="option.id"
+              [selected]="isChosen(option.id)"
+              [disabled]="option.withdrawn">
+              {{ option.label }}{{ option.withdrawn ? ' (withdrawn)' : '' }}
+            </option>
+          }
+        </select>
+      </div>
+    }
+
+    @case (fieldType.CHECKBOX_LIST) {
+      <fieldset class="custom-tracking-value-group">
+        <legend>{{ field.name }}</legend>
+        <div class="custom-tracking-value-choices">
+          @for (option of options; track option.id) {
+            <label class="custom-tracking-value-choice">
+              <input
+                type="checkbox"
+                [checked]="isChosen(option.id)"
+                [disabled]="option.withdrawn && !isChosen(option.id)"
+                [attr.aria-describedby]="errorId"
+                (change)="toggleOption(option.id)" />
+              {{ option.label }}
+              @if (option.withdrawn) {
+                <span class="custom-tracking-badge muted">Withdrawn</span>
+              }
+            </label>
+          }
+        </div>
+      </fieldset>
+    }
+
+    @case (fieldType.MULTI_SELECT) {
+      <div class="lcars-select-container bluey">
+        <span class="select-label">{{ field.name }}</span>
+        <select
+          multiple
+          formControlName="optionIds"
+          [id]="controlId('optionIds')"
+          [attr.aria-label]="field.name"
+          [attr.aria-describedby]="errorId">
+          @for (option of options; track option.id) {
+            <option
+              [value]="option.id"
+              [disabled]="option.withdrawn && !isChosen(option.id)">
+              {{ option.label }}{{ option.withdrawn ? ' (withdrawn)' : '' }}
+            </option>
+          }
+        </select>
+      </div>
+      <p class="field-hint">Choose as many as apply.</p>
+    }
+
+    @case (fieldType.TAGS) {
+      <fieldset class="custom-tracking-value-group">
+        <legend>{{ field.name }}</legend>
+        <div class="custom-tracking-value-tags">
+          @for (option of options; track option.id) {
+            <button
+              type="button"
+              class="custom-tracking-value-tag"
+              [class.chosen]="isChosen(option.id)"
+              [disabled]="option.withdrawn && !isChosen(option.id)"
+              [attr.aria-pressed]="isChosen(option.id)"
+              [attr.aria-describedby]="errorId"
+              (click)="toggleOption(option.id)">
+              {{ option.label }}
+            </button>
+          }
+        </div>
+        <p class="field-hint">
+          The tags you defined for this field. Add another by editing the field
+          in "What you track".
+        </p>
+      </fieldset>
+    }
+
+    @case (fieldType.COLOUR) {
+      <fieldset class="custom-tracking-value-group">
+        <legend>{{ field.name }}</legend>
+        <div class="lcars-select-container bluey">
+          <span class="select-label">Colour</span>
+          <select
+            formControlName="colourMode"
+            [id]="controlId('colourMode')"
+            aria-label="How to choose a colour"
+            [attr.aria-describedby]="errorId">
+            <option [value]="colourModes.NONE">No answer</option>
+            <option [value]="colourModes.TOKEN">
+              One of the site's colours
+            </option>
+            <option [value]="colourModes.LITERAL">A colour of your own</option>
+          </select>
+        </div>
+
+        @if (held('colourMode') === colourModes.TOKEN) {
+          <div class="lcars-select-container gold">
+            <label
+              class="select-label"
+              [attr.for]="controlId('token')"
+              >Which one</label
+            >
+            <select
+              formControlName="token"
+              [id]="controlId('token')">
+              <option value="">Choose a colour</option>
+              @for (colour of palette; track colour.token) {
+                <option [value]="colour.token">{{ colour.label }}</option>
+              }
+            </select>
+          </div>
+          @if (held('token')) {
+            <p class="custom-tracking-value-colour">
+              <span
+                class="custom-tracking-value-swatch"
+                aria-hidden="true"
+                [style.background]="swatchFor(held('token'))"></span>
+              {{ labelFor(held('token')) }}
+            </p>
+          }
+        }
+
+        @if (held('colourMode') === colourModes.LITERAL) {
+          <div class="lcars-input-container gold">
+            <label [attr.for]="controlId('literal')">Colour value</label>
+            <input
+              type="text"
+              formControlName="literal"
+              [id]="controlId('literal')"
+              placeholder="#336699"
+              [attr.aria-describedby]="errorId"
+              [attr.aria-invalid]="isInvalid" />
+          </div>
+          <p class="custom-tracking-value-colour">
+            <span
+              class="custom-tracking-value-swatch"
+              aria-hidden="true"
+              [style.background]="held('literal')"></span>
+            {{ held('literal') || 'Nothing entered yet' }}
+          </p>
+          <p class="field-hint">
+            A hexadecimal colour such as #336699, or an rgba value. The value is
+            written out beside the swatch, so it reads the same to somebody who
+            cannot see the colour.
+          </p>
+        }
+      </fieldset>
+    }
+
+    @case (fieldType.YOUTUBE) {
+      <div class="lcars-input-container perano">
+        <label [attr.for]="controlId('url')">{{ field.name }}</label>
+        <input
+          type="url"
+          formControlName="url"
+          [id]="controlId('url')"
+          placeholder="https://www.youtube.com/watch?v=..."
+          [attr.aria-describedby]="errorId"
+          [attr.aria-invalid]="isInvalid" />
+      </div>
+      <p class="field-hint">
+        Paste a YouTube address. Only the video it names is kept, never the
+        address itself.
+      </p>
+    }
+  }
+
+  @if (field.required) {
+    <p class="custom-tracking-value-required">
+      <span class="custom-tracking-badge">Required</span>
+      Every record has to answer this one.
+    </p>
+  }
+
+  @if (field.description) {
+    <p class="field-hint">{{ field.description }}</p>
+  }
+
+  @if (errorMessage) {
+    <small
+      class="field-error"
+      role="alert"
+      [id]="errorId">
+      {{ errorMessage }}
+    </small>
+  }
+</div>

@@ -1,0 +1,153 @@
+@if (isLoading) {
+  <app-loading-bar loadingText="Loading Character"></app-loading-bar>
+}
+
+@if (errorMessage) {
+  <app-lcars-error-message
+    title="Character unavailable"
+    [message]="errorMessage"></app-lcars-error-message>
+}
+
+@if (character) {
+  <article
+    id="storytime-character-detail-page"
+    class="storytime-page">
+    <h1>{{ character.name }}</h1>
+
+    @if (character.shortBio) {
+      <p class="storytime-character__summary">{{ character.shortBio }}</p>
+    }
+
+    <!--
+      Built to the plan a captain's own details page uses: what the Character
+      is down the main column, their picture and the ways out beside it. The
+      two pages describe the same kind of thing, so a reader who has met one
+      already knows where to look on the other.
+    -->
+    <div class="storytime-character__layout">
+      <div class="storytime-character__main">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Character Data</span>
+        </div>
+
+        <div class="storytime-panel">
+          @if (character.isPrimary) {
+            <p class="storytime-character__billing">Main Character</p>
+          }
+
+          @if (profileFields.length > 0) {
+            <div class="info-grid">
+              @for (field of profileFields; track field.label) {
+                <div class="info-item">
+                  <span class="label">{{ field.label }}</span>
+                  <span class="value">{{ field.value }}</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="storytime-empty">
+              Nothing has been recorded about them yet.
+            </p>
+          }
+        </div>
+
+        @if (character.traits && character.traits.length > 0) {
+          <div class="lcars-text-bar small-lcars-bar-gap">
+            <span>Traits</span>
+          </div>
+
+          <div class="storytime-panel">
+            <ul class="storytime-character__traits">
+              @for (trait of character.traits; track trait) {
+                <li>{{ trait }}</li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (biographyHtml) {
+          <div class="lcars-text-bar small-lcars-bar-gap">
+            <span>Biography</span>
+          </div>
+
+          <div class="storytime-panel">
+            <div
+              class="storytime-character__biography"
+              [innerHTML]="biographyHtml"></div>
+          </div>
+        }
+      </div>
+
+      <div class="storytime-character__side">
+        @if (character.portraitImageUrl) {
+          <div class="lcars-text-bar small-lcars-bar-gap">
+            <span>Portrait</span>
+          </div>
+
+          <div class="storytime-panel">
+            <img
+              class="storytime-character__portrait"
+              [src]="character.portraitImageUrl"
+              [alt]="character.portraitImageAlt ?? ''" />
+          </div>
+        }
+
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Navigation</span>
+        </div>
+
+        <nav
+          class="storytime-character__navigation"
+          aria-label="Character navigation">
+          <a
+            class="lcars-btn lcars-btn-auto sunflower"
+            [routerLink]="['/', appRoutes.STORYTIME, 'stories', storySlug]"
+            >Back to the Story</a
+          >
+          <a
+            class="lcars-btn lcars-btn-auto bluey"
+            [routerLink]="['/', appRoutes.STORYTIME, 'stories']"
+            >All Stories</a
+          >
+        </nav>
+      </div>
+    </div>
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Appears In</span>
+    </div>
+
+    @if (appearsIn.length === 0) {
+      <p class="storytime-empty">
+        They have not appeared in any published Chapters yet.
+      </p>
+    } @else {
+      <ul class="storytime-character__appearances">
+        @for (appearance of appearsIn; track appearance.chapterId) {
+          <li class="storytime-panel-card storytime-panel-card--chapter">
+            <a
+              class="storytime-panel-card__heading"
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'stories',
+                storySlug,
+                'chapters',
+                appearance.chapterSlug,
+              ]"
+              [title]="appearance.chapterTitle">
+              <span class="storytime-panel-card__name">{{
+                appearance.chapterTitle
+              }}</span>
+              @if (appearance.isPrimary) {
+                <span class="storytime-panel-card__marks">
+                  <span class="storytime-panel-card__badge">Central</span>
+                </span>
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    }
+  </article>
+}

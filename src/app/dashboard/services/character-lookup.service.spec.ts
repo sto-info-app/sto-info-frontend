@@ -1,4 +1,5 @@
-import { provideHttpClient } from '@angular/common/http';
+import { AuthService } from 'src/app/core/auth/auth.service';
+import { HttpHeaders, provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -19,12 +20,17 @@ describe('CharacterLookupService', () => {
   let service: CharacterLookupService;
   let httpMock: HttpTestingController;
 
+  const auth = { getHttpOptionsWithAccessToken: jest.fn() };
   beforeEach(() => {
+    auth.getHttpOptionsWithAccessToken.mockReturnValue({
+      headers: new HttpHeaders({ Authorization: 'Bearer test-token' }),
+    });
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         CharacterLookupService,
+        { provide: AuthService, useValue: auth },
       ],
     });
     service = TestBed.inject(CharacterLookupService);
@@ -35,6 +41,23 @@ describe('CharacterLookupService', () => {
     httpMock.verify();
   });
 
+  it.each([
+    'getGeneralFactions',
+    'getFactions',
+    'getSexes',
+    'getClasses',
+    'getRecruitTypes',
+    'getSpecies',
+  ] as const)('does not send %s without a token', method => {
+    auth.getHttpOptionsWithAccessToken.mockReturnValue(null);
+    service[method]().subscribe({
+      next: () => {
+        throw new Error('Expected authentication error');
+      },
+      error: (error: Error) => expect(error.message).toBe('No token found'),
+    });
+    httpMock.expectNone(() => true);
+  });
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
@@ -46,6 +69,7 @@ describe('CharacterLookupService', () => {
     });
     const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_GENERAL_FACTIONS);
     expect(req.request.method).toBe('GET');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer test-token');
     req.flush(dummy);
   });
 
@@ -60,6 +84,7 @@ describe('CharacterLookupService', () => {
         req.params.get('factionId') === 'fed',
     );
     expect(req.request.method).toBe('GET');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer test-token');
     req.flush(dummy);
   });
 
@@ -70,6 +95,7 @@ describe('CharacterLookupService', () => {
     });
     const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_FACTIONS);
     expect(req.request.method).toBe('GET');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer test-token');
     req.flush(dummy);
   });
 
@@ -80,6 +106,7 @@ describe('CharacterLookupService', () => {
     });
     const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_SEXES);
     expect(req.request.method).toBe('GET');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer test-token');
     req.flush(dummy);
   });
 
@@ -90,6 +117,7 @@ describe('CharacterLookupService', () => {
     });
     const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_CLASSES);
     expect(req.request.method).toBe('GET');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer test-token');
     req.flush(dummy);
   });
 
@@ -101,6 +129,9 @@ describe('CharacterLookupService', () => {
       });
       const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_RECRUIT_TYPES);
       expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('Authorization')).toBe(
+        'Bearer test-token',
+      );
       expect(req.request.params.keys()).toHaveLength(0);
       req.flush(dummy);
     });
@@ -116,6 +147,9 @@ describe('CharacterLookupService', () => {
           req.params.get('factionId') === 'fed',
       );
       expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('Authorization')).toBe(
+        'Bearer test-token',
+      );
       req.flush(dummy);
     });
   });
@@ -128,6 +162,9 @@ describe('CharacterLookupService', () => {
       });
       const req = httpMock.expectOne(API_URLS.CHARACTER_LOOKUP_SPECIES);
       expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('Authorization')).toBe(
+        'Bearer test-token',
+      );
       expect(req.request.params.keys()).toHaveLength(0);
       req.flush(dummy);
     });
@@ -144,6 +181,9 @@ describe('CharacterLookupService', () => {
           req.params.get('recruitTypeId') === 'std',
       );
       expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('Authorization')).toBe(
+        'Bearer test-token',
+      );
       req.flush(dummy);
     });
   });

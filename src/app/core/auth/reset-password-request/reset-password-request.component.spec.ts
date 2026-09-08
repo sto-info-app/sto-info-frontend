@@ -4,6 +4,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { RoutingService } from 'src/app/shared/services/routing.service';
+import { PrivacyModeService } from 'src/app/dashboard/services/privacy-mode.service';
 import { AuthService } from '../auth.service';
 import { ResetPasswordRequestComponent } from './reset-password-request.component';
 
@@ -17,6 +18,10 @@ describe('ResetPasswordRequestComponent', () => {
   let routingServiceSpy: {
     getLink: jest.Mock;
   };
+  let privacyModeServiceSpy: {
+    load: jest.Mock;
+    isEnabled: jest.Mock;
+  };
 
   beforeEach(async () => {
     authServiceSpy = {
@@ -26,12 +31,17 @@ describe('ResetPasswordRequestComponent', () => {
     routingServiceSpy = {
       getLink: jest.fn(),
     };
+    privacyModeServiceSpy = {
+      load: jest.fn().mockReturnValue(of({ privacyMode: false })),
+      isEnabled: jest.fn().mockReturnValue(false),
+    };
 
     await TestBed.configureTestingModule({
       imports: [ResetPasswordRequestComponent, FormsModule], // Standalone
       providers: [
         { provide: AuthService, useValue: authServiceSpy },
         { provide: RoutingService, useValue: routingServiceSpy },
+        { provide: PrivacyModeService, useValue: privacyModeServiceSpy },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: { get: () => null } } },
@@ -165,6 +175,23 @@ describe('ResetPasswordRequestComponent', () => {
       );
       expect(texts).toContain('Dashboard');
       expect(texts).toContain('Accounts');
+    });
+  });
+
+  describe('Privacy mode', () => {
+    it('should not load privacy settings when logged out', () => {
+      expect(privacyModeServiceSpy.load).not.toHaveBeenCalled();
+    });
+
+    it('should load privacy settings when logged in', () => {
+      authServiceSpy.isLoggedIn.mockReturnValue(true);
+
+      const loggedInFixture = TestBed.createComponent(
+        ResetPasswordRequestComponent,
+      );
+      loggedInFixture.detectChanges();
+
+      expect(privacyModeServiceSpy.load).toHaveBeenCalled();
     });
   });
 });

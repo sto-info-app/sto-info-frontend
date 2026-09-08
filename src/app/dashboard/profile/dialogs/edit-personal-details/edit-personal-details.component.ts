@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -38,6 +44,7 @@ import {
 } from 'src/app/shared/constants/forms.constants';
 import { USERNAME_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.constants';
+import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 
 @Component({
@@ -78,6 +85,8 @@ export class EditPersonalDetailsComponent implements OnInit {
   private readonly _dialogRef = inject(
     MatDialogRef<EditPersonalDetailsComponent>,
   );
+  private readonly _ngZone = inject(NgZone);
+  private readonly _cdr = inject(ChangeDetectorRef);
   public data = inject(MAT_DIALOG_DATA, { optional: true }) as {
     user: User;
   } | null;
@@ -120,6 +129,7 @@ export class EditPersonalDetailsComponent implements OnInit {
 
     this._dashboardService
       .updatePersonalDetails(editPersonalDetailsFormValues)
+      .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe({
         next: response => {
           this._dialogRef?.close({

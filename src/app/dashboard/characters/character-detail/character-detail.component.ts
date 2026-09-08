@@ -5,6 +5,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  ViewChild,
   inject,
   signal,
 } from '@angular/core';
@@ -13,13 +14,18 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EMPTY, Subject, catchError, map, switchMap, takeUntil } from 'rxjs';
 import { CharacterRdComponent } from 'src/app/dashboard/character-rd/character-rd.component';
+import { CharacterAdmiraltyComponent } from 'src/app/dashboard/character-admiralty/character-admiralty.component';
+import { CharacterCommendationsComponent } from 'src/app/dashboard/character-commendations/character-commendations.component';
 import { CharacterReputationsComponent } from 'src/app/dashboard/character-reputations/character-reputations.component';
 import { CharacterSpecializationComponent } from 'src/app/dashboard/character-specialization/character-specialization.component';
+import { CustomTrackingOwnerPanelComponent } from 'src/app/dashboard/custom-tracking/custom-tracking-owner-panel/custom-tracking-owner-panel.component';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
+import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { HasUnsavedChanges } from 'src/app/shared/guards/unsaved-changes.guard';
 import {
   BASE_CLOUDFLARE_IMAGES_URL,
   CLOUDFLARE_R2_PUBLIC_URL,
@@ -35,7 +41,12 @@ import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.co
 
 /** Identifiers for the tabs available on the character detail page. */
 export type CharacterTab =
-  'overview' | 'reputations' | 'rd' | 'specializations';
+  | 'overview'
+  | 'reputations'
+  | 'rd'
+  | 'specializations'
+  | 'admiralty'
+  | 'commendations';
 
 @Component({
   selector: 'app-character-detail',
@@ -50,11 +61,36 @@ export type CharacterTab =
     LcarsErrorMessageComponent,
     MatButtonModule,
     CharacterReputationsComponent,
+    CharacterAdmiraltyComponent,
+    CharacterCommendationsComponent,
     CharacterRdComponent,
     CharacterSpecializationComponent,
+    CustomTrackingOwnerPanelComponent,
   ],
 })
-export class CharacterDetailComponent implements OnInit, OnDestroy {
+export class CharacterDetailComponent
+  implements OnInit, OnDestroy, HasUnsavedChanges
+{
+  /** The scope the owner's own tracking is recorded against on this page. */
+  readonly characterScope = CustomTrackingTargetScope.CHARACTER;
+
+  /** The tracked-information block, which is the only thing here that edits. */
+  @ViewChild(CustomTrackingOwnerPanelComponent)
+  customTracking?: CustomTrackingOwnerPanelComponent;
+
+  /**
+   * Whether leaving now would lose something.
+   *
+   * Nothing else on this page holds unsaved work — the captain itself is
+   * edited on its own page — so the answer is whatever the tracked-information
+   * editor says, and "no" until somebody opens it.
+   *
+   * @returns True while that editor holds changes nobody has saved.
+   */
+  hasUnsavedChanges(): boolean {
+    return this.customTracking?.hasUnsavedChanges() === true;
+  }
+
   character: Character | null = null;
   accountHandle = '';
   isLoading = true;
@@ -67,6 +103,8 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
     { id: 'reputations', label: 'Reputations' },
     { id: 'rd', label: 'R&D' },
     { id: 'specializations', label: 'Specializations' },
+    { id: 'admiralty', label: 'Admiralty' },
+    { id: 'commendations', label: 'Commendations' },
   ];
 
   /** Currently selected tab. */
@@ -92,6 +130,12 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
    * so its data is only fetched once rather than on every tab switch.
    */
   readonly specializationsOpened = signal(false);
+
+  /** Whether the Admiralty tab has been opened at least once. */
+  readonly admiraltyOpened = signal(false);
+
+  /** Whether the Commendations tab has been opened at least once. */
+  readonly commendationsOpened = signal(false);
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
@@ -311,6 +355,12 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
     }
     if (tab === 'specializations') {
       this.specializationsOpened.set(true);
+    }
+    if (tab === 'admiralty') {
+      this.admiraltyOpened.set(true);
+    }
+    if (tab === 'commendations') {
+      this.commendationsOpened.set(true);
     }
     this.activeTab.set(tab);
     this._cdr.markForCheck();

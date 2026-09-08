@@ -19,6 +19,8 @@ export interface AccountCardDetail {
    * dimmest and clamps to three lines for long free text such as notes.
    */
   variant?: 'primary' | 'secondary' | 'muted';
+  /** Whether this detail is obscured while Privacy Mode is enabled. */
+  private?: boolean;
 }
 
 /**

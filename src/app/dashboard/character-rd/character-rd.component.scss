@@ -90,7 +90,9 @@
   // border-left colour and background tint are bound inline per school
   border-left: 4px solid vars.$lcars-gold;
   background: rgba(vars.$lcars-gold, 0.07);
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 // -- School header row --------------------------------------------------------
@@ -190,7 +192,9 @@
   background: rgb(255 255 255 / 12%);
   overflow: visible;
   cursor: pointer;
-  transition: filter 0.12s ease, box-shadow 0.12s ease;
+  transition:
+    filter 0.12s ease,
+    box-shadow 0.12s ease;
 
   &:hover {
     filter: brightness(1.15);
