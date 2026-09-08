@@ -24,7 +24,10 @@ import {
   CustomTrackingTabTree,
   CustomTrackingTargetScope,
 } from 'src/app/models/custom-tracking.models';
-import { nextTabIndex } from 'src/app/shared/a11y/roving-tabs.utility';
+import {
+  activeTrackingTab,
+  navigateTrackingTabs,
+} from 'src/app/shared/custom-tracking/custom-tracking-tabs.utility';
 import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -347,11 +350,7 @@ export class CustomTrackingDefinitionsComponent implements OnInit {
    * @returns The tab to draw, or null where the section has none.
    */
   activeTab(section: CustomTrackingSectionTree): CustomTrackingTabTree | null {
-    const chosen = section.tabs.find(
-      tab => tab.id === this.activeTabs[section.id],
-    );
-
-    return chosen ?? section.tabs[0] ?? null;
+    return activeTrackingTab(section, this.activeTabs);
   }
 
   /**
@@ -374,21 +373,9 @@ export class CustomTrackingDefinitionsComponent implements OnInit {
    * @param section - The section whose tabs are being moved through.
    */
   onTabKeydown(event: KeyboardEvent, section: CustomTrackingSectionTree): void {
-    const current = section.tabs.findIndex(
-      tab => tab.id === this.activeTab(section)?.id,
+    navigateTrackingTabs(event, section, this.activeTabs, tabId =>
+      this.focusTab(tabId),
     );
-    const moved = nextTabIndex(event.key, current, section.tabs.length);
-
-    if (moved === null) {
-      return;
-    }
-
-    event.preventDefault();
-
-    const tab = section.tabs[moved];
-
-    this.showTab(section.id, tab.id);
-    this.focusTab(tab.id);
   }
 
   /**
