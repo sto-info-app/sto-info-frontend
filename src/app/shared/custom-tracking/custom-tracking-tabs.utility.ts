@@ -27,7 +27,7 @@ export function navigateTrackingTabs(
     return;
   }
 
-  const selected = activeTrackingTab(section, activeTabs) ?? section.tabs[0];
+  const selected = activeTrackingTab(section, activeTabs)!;
   const current = section.tabs.indexOf(selected);
   const moved = nextTabIndex(event.key, current, section.tabs.length);
   if (moved === null) {

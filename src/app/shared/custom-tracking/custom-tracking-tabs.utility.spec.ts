@@ -62,6 +62,22 @@ describe('custom tracking tab navigation', () => {
     expect(event.defaultPrevented).toBe(true);
   });
 
+  it('navigates from the first tab when there is no saved selection', () => {
+    const selections: Record<string, string> = { other: 'untouched' };
+    const focus = jest.fn();
+    const event = new KeyboardEvent('keydown', {
+      key: 'ArrowRight',
+      cancelable: true,
+    });
+
+    navigateTrackingTabs(event, section, selections, focus);
+
+    expect(selections).toEqual({ section: 'second', other: 'untouched' });
+    expect(focus).toHaveBeenCalledTimes(1);
+    expect(focus).toHaveBeenCalledWith('second');
+    expect(event.defaultPrevented).toBe(true);
+  });
+
   it('leaves an unrelated key to the browser', () => {
     const selections = { section: 'second' };
     const focus = jest.fn();
