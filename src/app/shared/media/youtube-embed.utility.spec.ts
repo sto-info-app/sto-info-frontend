@@ -20,6 +20,29 @@ describe('the YouTube embed guard', () => {
   });
 
   describe('trustedYouTubeEmbedUrl', () => {
+    it.each([
+      'https://www.youtube.com/watch?v=abcdefghijk',
+      'https://www.youtube.com/redirect?q=https://example.com',
+      'https://www.youtube.com/embed/short',
+      'https://www.youtube.com/embed/abcdefghijk/extra',
+      'https://www.youtube.com:8443/embed/abcdefghijk',
+      'https://user:password@www.youtube.com/embed/abcdefghijk',
+      'https://www.youtube.com.example.com/embed/abcdefghijk',
+    ])('refuses a URL outside the permitted embed shape: %s', address => {
+      expect(trustedYouTubeEmbedUrl(sanitizer, address, false)).toBeNull();
+      expect(trusted).toEqual([]);
+    });
+
+    it('sets autoplay before the fragment and replaces an existing value', () => {
+      expect(
+        trustedYouTubeEmbedUrl(
+          sanitizer,
+          'https://www.youtube.com/embed/abcdefghijk?autoplay=0#player',
+          true,
+        ),
+      ).toBe('https://www.youtube.com/embed/abcdefghijk?autoplay=1#player');
+    });
+
     it('trusts an embed on a YouTube host', () => {
       const result = trustedYouTubeEmbedUrl(
         sanitizer,

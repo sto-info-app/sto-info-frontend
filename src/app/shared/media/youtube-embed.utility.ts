@@ -12,11 +12,11 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
  */
 
 /** The hosts an embed may be loaded from, and no others. */
-const EMBED_HOSTS = [
+const EMBED_HOSTS = new Set([
   'www.youtube.com',
   'youtube-nocookie.com',
   'www.youtube-nocookie.com',
-];
+]);
 
 /** The host an embed is built for, which sets no cookies until playback. */
 const NO_COOKIE_HOST = 'https://www.youtube-nocookie.com';
@@ -55,17 +55,22 @@ export function trustedYouTubeEmbedUrl(
 
   if (
     embedUrl.protocol !== 'https:' ||
-    !EMBED_HOSTS.includes(embedUrl.hostname)
+    !EMBED_HOSTS.has(embedUrl.hostname) ||
+    embedUrl.port !== '' ||
+    embedUrl.username !== '' ||
+    embedUrl.password !== '' ||
+    !/^\/embed\/[\w-]{11}$/.test(embedUrl.pathname)
   ) {
     return null;
   }
 
-  const url = autoplay
-    ? `${embedUrl}${embedUrl.search ? '&' : '?'}autoplay=1`
-    : `${embedUrl}`;
+  if (autoplay) {
+    embedUrl.searchParams.set('autoplay', '1');
+  }
 
-  // NOSONAR - the address is restricted to HTTPS YouTube origins above.
-  return sanitizer.bypassSecurityTrustResourceUrl(url);
+  // Angular requires a trusted resource URL for iframe sources. The checks above
+  // restrict the origin, credentials, port and path to a YouTube video embed.
+  return sanitizer.bypassSecurityTrustResourceUrl(embedUrl.toString()); // NOSONAR: validated HTTPS YouTube embed only.
 }
 
 /**
@@ -97,10 +102,11 @@ export function trustedYouTubeEmbed(
   }
 
   const query = parameters.toString();
+  const suffix = query ? '?' + query : '';
 
   return trustedYouTubeEmbedUrl(
     sanitizer,
-    `${NO_COOKIE_HOST}/embed/${videoId}${query ? `?${query}` : ''}`,
+    `${NO_COOKIE_HOST}/embed/${videoId}${suffix}`,
     options.autoplay === true,
   );
 }
