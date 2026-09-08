@@ -97,12 +97,10 @@
   </div>
 
   @if (isPublicBeneathPrivate) {
-    <p
-      class="custom-tracking-notice"
-      role="status">
+    <output class="custom-tracking-notice">
       This field will stay private for now, because the section or tab it
       belongs to is private.
-    </p>
+    </output>
   }
 
   @if (settingDescriptors.length) {
@@ -202,11 +200,14 @@
     <legend>When this field has no value</legend>
 
     <div class="lcars-select-container bluey">
-      <span class="select-label">You see</span>
+      <label
+        class="select-label"
+        [attr.for]="formId + '-owner-empty'"
+        >You see</label
+      >
       <select
         formControlName="ownerEmptyMode"
-        [id]="formId + '-owner-empty'"
-        aria-label="What you see when this field has no value">
+        [id]="formId + '-owner-empty'">
         @for (choice of emptyModeChoices; track choice.value) {
           <option [value]="choice.value">{{ choice.label }}</option>
         }
@@ -214,11 +215,14 @@
     </div>
 
     <div class="lcars-select-container bluey">
-      <span class="select-label">The public sees</span>
+      <label
+        class="select-label"
+        [attr.for]="formId + '-public-empty'"
+        >The public sees</label
+      >
       <select
         formControlName="publicEmptyMode"
-        [id]="formId + '-public-empty'"
-        aria-label="What the public sees when this field has no value">
+        [id]="formId + '-public-empty'">
         @for (choice of emptyModeChoices; track choice.value) {
           <option [value]="choice.value">{{ choice.label }}</option>
         }

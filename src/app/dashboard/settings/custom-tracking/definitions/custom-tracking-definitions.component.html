@@ -192,11 +192,9 @@
           </div>
 
           @if (!canAddTab(section.id)) {
-            <p
-              class="custom-tracking-notice"
-              role="status">
+            <output class="custom-tracking-notice">
               This section already holds as many tabs as it may.
-            </p>
+            </output>
           }
 
           @if (section.tabs.length === 0) {
@@ -235,10 +233,18 @@
                   [index]="tabPosition(tab)"
                   [count]="tabCount(section.id)"
                   (moveUp)="
-                    reorderTabs(section.id, tabPosition(tab), tabPosition(tab) - 1)
+                    reorderTabs(
+                      section.id,
+                      tabPosition(tab),
+                      tabPosition(tab) - 1
+                    )
                   "
                   (moveDown)="
-                    reorderTabs(section.id, tabPosition(tab), tabPosition(tab) + 1)
+                    reorderTabs(
+                      section.id,
+                      tabPosition(tab),
+                      tabPosition(tab) + 1
+                    )
                   ">
                 </app-custom-tracking-reorder-controls>
 
@@ -376,11 +382,9 @@
                   Add a field to {{ tab.name }}
                 </button>
               } @else {
-                <p
-                  class="custom-tracking-notice"
-                  role="status">
+                <output class="custom-tracking-notice">
                   This tab already holds as many fields as it may.
-                </p>
+                </output>
               }
             </div>
           }
@@ -398,20 +402,16 @@
       Add a section
     </button>
   } @else {
-    <p
-      class="custom-tracking-notice"
-      role="status">
+    <output class="custom-tracking-notice">
       You already have as many sections as this scope allows. Delete one before
       adding another.
-    </p>
+    </output>
   }
 
   @if (isScopeFull) {
-    <p
-      class="custom-tracking-notice"
-      role="status">
+    <output class="custom-tracking-notice">
       You already have as many fields as this scope allows, so no more can be
       added anywhere in it.
-    </p>
+    </output>
   }
 </section>

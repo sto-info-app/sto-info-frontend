@@ -59,12 +59,10 @@
   </div>
 
   @if (isPublicBeneathPrivate) {
-    <p
-      class="custom-tracking-notice"
-      role="status">
+    <output class="custom-tracking-notice">
       This {{ kind }} will stay private for now, because the section it belongs
       to is private. Make the section public as well for it to appear.
-    </p>
+    </output>
   }
 
   @if (errorMessage) {

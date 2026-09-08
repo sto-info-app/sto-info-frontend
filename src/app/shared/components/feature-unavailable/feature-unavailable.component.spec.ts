@@ -52,8 +52,6 @@ describe('FeatureUnavailableComponent', () => {
 
     fixture.detectChanges();
 
-    expect(
-      fixture.nativeElement.querySelector('[role="status"]'),
-    ).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('output')).not.toBeNull();
   });
 });

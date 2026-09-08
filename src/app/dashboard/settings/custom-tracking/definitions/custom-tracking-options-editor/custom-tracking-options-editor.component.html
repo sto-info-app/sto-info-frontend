@@ -116,12 +116,10 @@
   }
 
   @if (isFull) {
-    <p
-      class="custom-tracking-notice"
-      role="status">
+    <output class="custom-tracking-notice">
       This field is already offering the most
       {{ optionNoun }}s allowed. Withdraw one before adding another.
-    </p>
+    </output>
   } @else {
     <div class="custom-tracking-option-add">
       <div class="lcars-input-container gold">

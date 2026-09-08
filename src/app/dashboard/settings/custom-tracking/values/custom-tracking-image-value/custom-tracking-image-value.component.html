@@ -13,12 +13,10 @@
   }
 
   @if (!isAvailable) {
-    <p
-      class="custom-tracking-notice"
-      role="status">
+    <output class="custom-tracking-notice">
       Pictures are switched off at the moment. Anything already uploaded is
       untouched and will be here when they come back.
-    </p>
+    </output>
   } @else {
     @if (image) {
       <figure class="custom-tracking-value-picture">

@@ -224,11 +224,14 @@
             [attr.aria-invalid]="isInvalid" />
         </div>
         <div class="lcars-select-container gold">
-          <span class="select-label">Timezone</span>
+          <label
+            class="select-label"
+            [attr.for]="controlId('timezone')"
+            >Timezone</label
+          >
           <select
             formControlName="timezone"
-            [id]="controlId('timezone')"
-            aria-label="Timezone">
+            [id]="controlId('timezone')">
             @for (zone of timezones; track zone) {
               <option [value]="zone">{{ zone }}</option>
             }
@@ -254,11 +257,14 @@
             [attr.aria-invalid]="isInvalid" />
         </div>
         <div class="lcars-select-container gold">
-          <span class="select-label">Timezone</span>
+          <label
+            class="select-label"
+            [attr.for]="controlId('timezone')"
+            >Timezone</label
+          >
           <select
             formControlName="timezone"
-            [id]="controlId('timezone')"
-            aria-label="Timezone">
+            [id]="controlId('timezone')">
             @for (zone of timezones; track zone) {
               <option [value]="zone">{{ zone }}</option>
             }
@@ -321,11 +327,14 @@
             [attr.aria-invalid]="isInvalid" />
         </div>
         <div class="lcars-select-container gold">
-          <span class="select-label">Timezone</span>
+          <label
+            class="select-label"
+            [attr.for]="controlId('timezone')"
+            >Timezone</label
+          >
           <select
             formControlName="timezone"
-            [id]="controlId('timezone')"
-            aria-label="Timezone">
+            [id]="controlId('timezone')">
             @for (zone of timezones; track zone) {
               <option [value]="zone">{{ zone }}</option>
             }
@@ -564,11 +573,14 @@
 
         @if (held('colourMode') === colourModes.TOKEN) {
           <div class="lcars-select-container gold">
-            <span class="select-label">Which one</span>
+            <label
+              class="select-label"
+              [attr.for]="controlId('token')"
+              >Which one</label
+            >
             <select
               formControlName="token"
-              [id]="controlId('token')"
-              aria-label="Which of the site's colours">
+              [id]="controlId('token')">
               <option value="">Choose a colour</option>
               @for (colour of palette; track colour.token) {
                 <option [value]="colour.token">{{ colour.label }}</option>

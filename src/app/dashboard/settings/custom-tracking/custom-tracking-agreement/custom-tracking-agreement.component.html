@@ -17,13 +17,11 @@
     </p>
 
     @if (isReacceptance) {
-      <p
-        class="custom-tracking-agreement-notice"
-        role="status">
+      <output class="custom-tracking-agreement-notice">
         This agreement has changed since you last accepted it. Everything you
         have already recorded is still here and still readable — only creating
         and editing are paused until you accept the new wording.
-      </p>
+      </output>
     }
 
     @for (part of agreement.sections; track $index) {

@@ -1,11 +1,9 @@
 <section class="custom-tracking-values">
   @if (!canEdit) {
-    <p
-      class="custom-tracking-notice"
-      role="status">
+    <output class="custom-tracking-notice">
       Recording values is paused at the moment. Everything already recorded is
       untouched and still shown below.
-    </p>
+    </output>
   }
 
   <!--
@@ -65,10 +63,13 @@
     </div>
 
     <div class="lcars-select-container perano">
-      <span class="select-label">Recording against</span>
+      <label
+        class="select-label"
+        [attr.for]="'custom-tracking-target'"
+        >Recording against</label
+      >
       <select
         id="custom-tracking-target"
-        aria-label="Which record to fill in"
         (change)="chooseTarget($any($event.target).value)">
         @for (target of shownTargets; track target.id) {
           <option
@@ -238,11 +239,7 @@
           Undo my changes
         </button>
         @if (hasUnsavedChanges()) {
-          <span
-            class="custom-tracking-count"
-            role="status">
-            Unsaved changes
-          </span>
+          <output class="custom-tracking-count"> Unsaved changes </output>
         }
       </div>
 
