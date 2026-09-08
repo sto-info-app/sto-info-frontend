@@ -50,15 +50,13 @@ function describeImpact(impact: CustomTrackingDeletionImpact): string {
     parts.push(counted(impact.values, 'recorded answer'));
   }
 
-  if (parts.length === 0) {
+  const last = parts.pop();
+
+  if (last === undefined) {
     return '';
   }
 
-  const last = parts.at(-1) ?? '';
-
-  return parts.length === 1
-    ? last
-    : `${parts.slice(0, -1).join(', ')} and ${last}`;
+  return parts.length === 0 ? last : `${parts.join(', ')} and ${last}`;
 }
 
 /**

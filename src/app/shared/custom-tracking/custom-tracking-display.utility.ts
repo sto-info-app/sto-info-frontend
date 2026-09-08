@@ -445,7 +445,7 @@ function writeDuration(
     return written.join(long ? ', ' : ' ');
   }
 
-  const smallest = asked.at(-1) ?? DURATION_UNITS[3];
+  const smallest = included.at(-1) ?? DURATION_UNITS[3];
 
   return writeDurationPart(0, smallest, long);
 }

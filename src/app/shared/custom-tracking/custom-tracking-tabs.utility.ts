@@ -23,8 +23,12 @@ export function navigateTrackingTabs(
   activeTabs: Record<string, string>,
   focus: (tabId: string) => void,
 ): void {
+  if (section.tabs.length === 0) {
+    return;
+  }
+
   const selected = activeTrackingTab(section, activeTabs);
-  const current = section.tabs.findIndex(tab => tab.id === selected?.id);
+  const current = section.tabs.findIndex(tab => tab === selected);
   const moved = nextTabIndex(event.key, current, section.tabs.length);
   if (moved === null) {
     return;
