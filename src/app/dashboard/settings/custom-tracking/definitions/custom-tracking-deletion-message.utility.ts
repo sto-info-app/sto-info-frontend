@@ -13,9 +13,9 @@ import { CustomTrackingDeletionImpact } from 'src/app/models/custom-tracking.mod
  */
 export function escapeForMarkup(text: string): string {
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
 }
 
 /**
@@ -54,7 +54,7 @@ function describeImpact(impact: CustomTrackingDeletionImpact): string {
     return '';
   }
 
-  const last = parts[parts.length - 1];
+  const last = parts.at(-1) ?? '';
 
   return parts.length === 1
     ? last

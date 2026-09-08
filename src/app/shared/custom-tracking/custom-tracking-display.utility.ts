@@ -95,13 +95,13 @@ const TRI_STATE_WORDS: Record<CustomTrackingTriState, string> = {
 };
 
 /** The types whose answer is a list of labels rather than a line of text. */
-const CHOICE_TYPES: readonly CustomTrackingFieldType[] = [
+const CHOICE_TYPES = new Set<CustomTrackingFieldType>([
   CustomTrackingFieldType.RADIO,
   CustomTrackingFieldType.DROPDOWN,
   CustomTrackingFieldType.CHECKBOX_LIST,
   CustomTrackingFieldType.MULTI_SELECT,
   CustomTrackingFieldType.TAGS,
-];
+]);
 
 /** The shape each type that is not a line of text is drawn as. */
 const SHAPES: Partial<
@@ -124,7 +124,7 @@ const SHAPES: Partial<
 export function answerShape(
   field: CustomTrackingDisplayField,
 ): CustomTrackingAnswerShape {
-  if (CHOICE_TYPES.includes(field.fieldType)) {
+  if (CHOICE_TYPES.has(field.fieldType)) {
     return 'choices';
   }
 
@@ -330,7 +330,7 @@ function textFrom(held: unknown): string {
  * @returns The name, capitalised once.
  */
 function sentenceCase(token: string): string {
-  const words = token.toLowerCase().replace(/_/g, ' ');
+  const words = token.toLowerCase().replaceAll('_', ' ');
 
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
@@ -445,7 +445,7 @@ function writeDuration(
     return written.join(long ? ', ' : ' ');
   }
 
-  const smallest = asked[asked.length - 1];
+  const smallest = asked.at(-1) ?? DURATION_UNITS[3];
 
   return writeDurationPart(0, smallest, long);
 }
@@ -465,9 +465,8 @@ function writeDurationPart(
   unit: { short: string; long: string },
   long: boolean,
 ): string {
-  return long
-    ? `${amount} ${unit.long}${amount === 1 ? '' : 's'}`
-    : `${amount}${unit.short}`;
+  const suffix = amount === 1 ? '' : 's';
+  return long ? `${amount} ${unit.long}${suffix}` : `${amount}${unit.short}`;
 }
 
 /**

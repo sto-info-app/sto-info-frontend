@@ -334,8 +334,8 @@ describe('CustomTrackingFieldFormComponent', () => {
       expect(
         component.settingChoices(
           descriptorFor(CustomTrackingFieldType.TIME, 'timeFormat'),
-        ).length,
-      ).toBe(3);
+        ),
+      ).toHaveLength(3);
     });
 
     it('offers nothing for a setting that is not a choice', () => {

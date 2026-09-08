@@ -95,7 +95,11 @@ function fragmentText(answer: CustomTrackingStoredAnswer, key: string): string {
   const fragment = answer.value as StoredFragment | null;
   const held = fragment?.[key];
 
-  return held === null || held === undefined ? '' : String(held);
+  return typeof held === 'string' ||
+    typeof held === 'number' ||
+    typeof held === 'boolean'
+    ? String(held)
+    : '';
 }
 
 /**
@@ -400,14 +404,10 @@ const youTubeCodec: CustomTrackingValueCodec = {
     const videoId = fragmentText(answer, 'videoId');
     const startSeconds = fragmentText(answer, 'startSeconds');
 
+    const start = startSeconds === '' ? null : Number(startSeconds);
+
     return {
-      url:
-        videoId === ''
-          ? ''
-          : youTubeAddress(
-              videoId,
-              startSeconds === '' ? null : Number(startSeconds),
-            ),
+      url: videoId === '' ? '' : youTubeAddress(videoId, start),
     };
   },
   submit: value => {

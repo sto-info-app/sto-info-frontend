@@ -223,7 +223,9 @@ function storedSettingValue(
     return stored === true;
   }
 
-  return stored === null || stored === undefined ? '' : String(stored);
+  return typeof stored === 'string' || typeof stored === 'number'
+    ? String(stored)
+    : '';
 }
 
 /**
