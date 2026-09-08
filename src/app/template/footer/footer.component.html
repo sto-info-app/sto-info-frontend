@@ -1,57 +1,38 @@
 <div id="footer-links-container">
   <div
     id="footer-list-container"
-    class="flexbox">
+    class="flexbox"
+  >
     <div class="col footer-list-col">
       <ul class="lcars-list">
         <li>
           <a
-            [routerLink]="getRouteLink('HOME')"
+            [routerLink]='getRouteLink("HOME")'
             [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="active"
-            >{{ appRouteTitles.HOME }}</a
-          >
+          >{{ appRouteTitles.HOME }}</a>
         </li>
         <li>
           <a
             [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
             [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="active"
-            >{{ appRouteTitles.STO_DASHBOARD }}</a
-          >
-        </li>
-        <li>
-          <a
-            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="active"
-            >{{ appRouteTitles.STO_DASHBOARD_STATS }}</a
-          >
+          >{{ appRouteTitles.STO_DASHBOARD }}</a>
         </li>
         <li>
           <a
             [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
             routerLinkActive="active"
-            >{{ appRouteTitles.COMMUNITY }}</a
-          >
+          >{{ appRouteTitles.COMMUNITY }}</a>
         </li>
-        @if (isStorytimeEnabled) {
+        @if (isStorytimeOffered) {
           <li>
             <a
               [routerLink]="getRouteLink(appRoutes.STORYTIME)"
               routerLinkActive="active"
-              >{{ appRouteTitles.STORYTIME }}</a
-            >
+            >{{ appRouteTitles.STORYTIME }}</a>
           </li>
         }
-        <li>
-          <a
-            [routerLink]="getRouteLink(appRoutes.RESOURCES)"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="active"
-            >{{ appRouteTitles.RESOURCES }}</a
-          >
-        </li>
       </ul>
     </div>
     <div class="col footer-list-col">
@@ -61,39 +42,27 @@
             [routerLink]="getRouteLink(appRoutes.NEWS)"
             [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="active"
-            >{{ appRouteTitles.NEWS }}</a
-          >
+          >{{ appRouteTitles.NEWS }}</a>
         </li>
         <li>
           <a
             [routerLink]="getRouteLink(appRoutes.NOTIFICATIONS)"
             [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="active"
-            >{{ appRouteTitles.NOTIFICATIONS }}</a
-          >
+          >{{ appRouteTitles.NOTIFICATIONS }}</a>
+        </li>
+        <li>
+          <a
+            [routerLink]="getRouteLink(appRoutes.RESOURCES)"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="active"
+          >{{ appRouteTitles.RESOURCES }}</a>
         </li>
         <li>
           <a
             [routerLink]="getRouteLink(appRoutes.HELP)"
             routerLinkActive="active"
-            >{{ appRouteTitles.HELP }}</a
-          >
-        </li>
-        <li>
-          <a
-            [routerLink]="getRouteLink(appRoutes.CONTACT)"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="active"
-            >{{ appRouteTitles.CONTACT }}</a
-          >
-        </li>
-        <li>
-          <a
-            [routerLink]="getRouteLink(appRoutes.ROADMAP)"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="active"
-            >{{ appRouteTitles.ROADMAP }}</a
-          >
+          >{{ appRouteTitles.HELP }}</a>
         </li>
       </ul>
     </div>
@@ -104,74 +73,98 @@
             [routerLink]="getRouteLink(appRoutes.ABOUT)"
             [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="active"
-            >{{ appRouteTitles.ABOUT }}</a
-          >
+          >{{ appRouteTitles.ABOUT }}</a>
+        </li>
+        <li>
+          <a
+            [routerLink]="getRouteLink(appRoutes.ROADMAP)"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="active"
+          >{{ appRouteTitles.ROADMAP }}</a>
+        </li>
+        <li>
+          <a
+            [routerLink]="getRouteLink(appRoutes.CONTACT)"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="active"
+          >{{ appRouteTitles.CONTACT }}</a>
         </li>
         <li>
           <a
             [routerLink]="getRouteLink(appRoutes.CREDITS)"
             [routerLinkActiveOptions]="{ exact: true }"
             routerLinkActive="active"
-            >{{ appRouteTitles.CREDITS }}</a
-          >
+          >{{ appRouteTitles.CREDITS }}</a>
         </li>
-        <li>
-          <a
-            [routerLink]="getRouteLink(appRoutes.PRIVACY_POLICY)"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="active"
-            >{{ appRouteTitles.PRIVACY_POLICY }}</a
-          >
-        </li>
-        <li>
-          <a
-            [routerLink]="getRouteLink(appRoutes.TERMS_OF_USE)"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="active"
-            >{{ appRouteTitles.TERMS_OF_USE }}</a
-          >
-        </li>
-        <!--
-          The Storytime documents sit with the site-wide ones rather than only
-          inside the feature: somebody looking for what a site permits looks in
-          the footer, and a rights holder checking what is claimed about their
-          property will not first go hunting through a fan-fiction section.
-        -->
-        @if (isStorytimeEnabled) {
-          <li>
-            <a
-              [routerLink]="getRouteLink(appRoutes.STORYTIME_CONTENT_POLICY)"
-              [routerLinkActiveOptions]="{ exact: true }"
-              routerLinkActive="active"
-              >{{ appRouteTitles.STORYTIME_CONTENT_POLICY }}</a
-            >
-          </li>
-          <li>
-            <a
-              [routerLink]="getRouteLink(appRoutes.STORYTIME_TERMS)"
-              [routerLinkActiveOptions]="{ exact: true }"
-              routerLinkActive="active"
-              >{{ appRouteTitles.STORYTIME_TERMS }}</a
-            >
-          </li>
-          <li>
-            <a
-              [routerLink]="getRouteLink(appRoutes.STORYTIME_FAN_CONTENT)"
-              [routerLinkActiveOptions]="{ exact: true }"
-              routerLinkActive="active"
-              >{{ appRouteTitles.STORYTIME_FAN_CONTENT }}</a
-            >
-          </li>
-        }
       </ul>
     </div>
   </div>
 </div>
 <div id="copyright-text">
-  <p>Copyright &#169; {{ currentYear }} {{ appTitle }}. All rights reserved.</p>
+  <p>
+    Copyright &#169; {{ currentYear }}
+    {{ appTitle }}. All rights reserved.
+  </p>
   <p class="fan-made">
     This app is a fan-made project and is not affiliated with or sponsored by
     Cryptic Studios, CBS Studios, or Paramount Global. Star Trek Online and
     related marks are the property of their respective owners.
   </p>
+</div>
+<!--
+  The terms and policies sit below the small print rather than among the
+  navigation links: they answer the questions the small print raises, so a
+  visitor who has just read what the app disclaims finds the documents that
+  spell it out in the same place.
+
+  A plain div, not a <nav>: the vendored theme styles the nav element itself as
+  a row of large LCARS pills, which is the opposite of the small print these
+  are meant to read as. The footer's other link columns are plain divs too.
+-->
+<div id="footer-legal-links">
+  <ul>
+    <li>
+      <a
+        [routerLink]="getRouteLink(appRoutes.PRIVACY_POLICY)"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="active"
+      >{{ appRouteTitles.PRIVACY_POLICY }}</a>
+    </li>
+    <li>
+      <a
+        [routerLink]="getRouteLink(appRoutes.TERMS_OF_USE)"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="active"
+      >{{ appRouteTitles.TERMS_OF_USE }}</a>
+    </li>
+    <!--
+      The Storytime documents sit with the site-wide ones rather than only
+      inside the feature: somebody looking for what a site permits looks in
+      the footer, and a rights holder checking what is claimed about their
+      property will not first go hunting through a fan-fiction section.
+    -->
+    @if (isStorytimeOffered) {
+      <li>
+        <a
+          [routerLink]="getRouteLink(appRoutes.STORYTIME_CONTENT_POLICY)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="active"
+        >{{ appRouteTitles.STORYTIME_CONTENT_POLICY }}</a>
+      </li>
+      <li>
+        <a
+          [routerLink]="getRouteLink(appRoutes.STORYTIME_TERMS)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="active"
+        >{{ appRouteTitles.STORYTIME_TERMS }}</a>
+      </li>
+      <li>
+        <a
+          [routerLink]="getRouteLink(appRoutes.STORYTIME_FAN_CONTENT)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="active"
+        >{{ appRouteTitles.STORYTIME_FAN_CONTENT }}</a>
+      </li>
+    }
+  </ul>
 </div>

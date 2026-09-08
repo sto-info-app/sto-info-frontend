@@ -1,0 +1,21 @@
+<section
+  id="storytime-unavailable-page"
+  class="storytime-page">
+  <h1>{{ copy.LANDING_TITLE }}</h1>
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Checking Storytime"></app-loading-bar>
+  } @else {
+    <app-feature-unavailable
+      [featureName]="copy.FEATURE_NAME"
+      [reason]="reason" />
+
+    <nav class="storytime-page-actions">
+      <a
+        class="lcars-btn lcars-btn-auto bluey"
+        [routerLink]="['/']">
+        Back to the bridge
+      </a>
+    </nav>
+  }
+</section>

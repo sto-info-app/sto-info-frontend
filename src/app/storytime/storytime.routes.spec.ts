@@ -5,10 +5,12 @@ import { PERMISSIONS } from 'src/app/models/access-control.models';
 import { APP_ROUTE_TITLES } from 'src/app/shared/constants/app-routing.constants';
 import { StorytimeLandingComponent } from './landing/storytime-landing.component';
 import { StorytimeEnabledGuard } from './storytime-enabled.guard';
+import { StorytimeUnavailableComponent } from './unavailable/storytime-unavailable.component';
 import { STORYTIME_ROUTES } from './storytime.routes';
 
 describe('STORYTIME_ROUTES', () => {
-  const parentRoute: Route = STORYTIME_ROUTES[0];
+  const unavailableRoute: Route = STORYTIME_ROUTES[0];
+  const parentRoute: Route = STORYTIME_ROUTES[1];
   const children = parentRoute.children ?? [];
 
   /**
@@ -20,9 +22,21 @@ describe('STORYTIME_ROUTES', () => {
   const childAt = (path: string): Route | undefined =>
     children.find(child => child.path === path);
 
-  it('declares a single parent route', () => {
-    expect(STORYTIME_ROUTES).toHaveLength(1);
+  it('declares one guarded parent route and the page the guard falls back to', () => {
+    expect(STORYTIME_ROUTES).toHaveLength(2);
     expect(parentRoute.path).toBe('');
+  });
+
+  // The guard sends everybody it turns away here, so it cannot sit behind the
+  // guard — and it has to be matched before the parent, whose empty path would
+  // otherwise claim the address first.
+  it('declares the unavailable page ahead of the guarded parent, unguarded', () => {
+    expect(unavailableRoute.path).toBe('unavailable');
+    expect(unavailableRoute.component).toBe(StorytimeUnavailableComponent);
+    expect(unavailableRoute.canActivate).toBeUndefined();
+    expect(unavailableRoute.data?.['title']).toBe(
+      APP_ROUTE_TITLES.STORYTIME_UNAVAILABLE,
+    );
   });
 
   // Guarding the parent rather than each child is what stops a route added

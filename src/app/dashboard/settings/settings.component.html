@@ -57,14 +57,27 @@
             </p>
           </div>
         </div>
-        <button
-          type="submit"
-          class="lcars-btn sunflower"
-          [disabled]="isSaving || !settingsForm.dirty"
-        >
-          Save
-        </button>
+        <div class="settings-actions">
+          <button
+            type="submit"
+            class="lcars-btn sunflower"
+            [disabled]="isSaving || !settingsForm.dirty"
+          >
+            Save
+          </button>
+        </div>
       </form>
+      <div class="lcars-text-bar settings-bar"><span>Custom Tracking</span></div>
+      <div class="settings-content">
+        <p class="settings-description">
+          Decide what else to record about your own accounts and characters, and
+          fill it in. Everything you add is private until you say otherwise.
+        </p>
+      </div>
+      <div class="settings-actions">
+        <a [routerLink]="customTrackingLink" class="lcars-btn lcars-btn-auto gold"
+        >Configure Custom Tracking</a>
+      </div>
     }
     @if (errorMessage) {
       <app-lcars-error-message

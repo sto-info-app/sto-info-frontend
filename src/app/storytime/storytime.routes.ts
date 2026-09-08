@@ -5,6 +5,7 @@ import { PERMISSIONS } from 'src/app/models/access-control.models';
 import { APP_ROUTE_TITLES } from 'src/app/shared/constants/app-routing.constants';
 import { StorytimeLandingComponent } from './landing/storytime-landing.component';
 import { StorytimeEnabledGuard } from './storytime-enabled.guard';
+import { StorytimeUnavailableComponent } from './unavailable/storytime-unavailable.component';
 
 /**
  * Storytime's routes, loaded on demand.
@@ -17,8 +18,18 @@ import { StorytimeEnabledGuard } from './storytime-enabled.guard';
  * a route added later cannot accidentally escape the feature switch. Creator
  * routes add authentication and a permission on top, and each component is
  * loaded only when its route is reached.
+ *
+ * The one exception is `unavailable`, which is where that guard sends everybody
+ * it turns away and so cannot sit behind it. It is declared first because the
+ * guarded parent matches an empty path and would otherwise claim the address
+ * before it is reached.
  */
 export const STORYTIME_ROUTES: Routes = [
+  {
+    path: 'unavailable',
+    component: StorytimeUnavailableComponent,
+    data: { title: APP_ROUTE_TITLES.STORYTIME_UNAVAILABLE },
+  },
   {
     path: '',
     canActivate: [StorytimeEnabledGuard],

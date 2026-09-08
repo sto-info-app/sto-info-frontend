@@ -28,6 +28,8 @@ describe('StoryCardComponent', () => {
       publishedChapterCount: 3,
       profileImageThumbnailUrl: null,
       profileImageAlt: null,
+      author: null,
+      arcs: [],
       tags: [],
       ...overrides,
     }) as Story;
@@ -83,6 +85,103 @@ describe('StoryCardComponent', () => {
     ]);
   });
 
+  // Whose it is and where it sits lead the facts: a reader scanning a listing
+  // is choosing what to open, and both answer that before the rating does.
+  it('names the author and the Arc ahead of the rest', () => {
+    const element = render(
+      buildStory({
+        author: { username: 'midniteshadow7', publiclyVisible: true },
+        arcs: [{ id: 'arc-1', title: 'The Dominion Trilogy', slug: 'trilogy' }],
+      }),
+    );
+    const labels = [...element.querySelectorAll('.info-item .label')].map(
+      label => label.textContent,
+    );
+
+    expect(labels).toEqual([
+      'Author',
+      'Arc',
+      'Content rating',
+      'Status',
+      'Chapters',
+    ]);
+  });
+
+  // A name only leads somewhere when its owner has chosen to be listed. A
+  // profile that is not listed has no page to open.
+  it('links a listed author to their profile', () => {
+    const element = render(
+      buildStory({
+        author: { username: 'midniteshadow7', publiclyVisible: true },
+      }),
+    );
+    const link = element.querySelector('.storytime-facts__author');
+
+    expect(link?.getAttribute('href')).toBe(
+      '/community/registry/profiles/midniteshadow7',
+    );
+  });
+
+  it('credits an unlisted author by name without a link', () => {
+    const element = render(
+      buildStory({
+        author: { username: 'midniteshadow7', publiclyVisible: false },
+      }),
+    );
+
+    expect(element.textContent).toContain('midniteshadow7');
+    expect(element.querySelector('.storytime-facts__author')).toBeNull();
+  });
+
+  it('links each Arc the Story is read as part of', () => {
+    const element = render(
+      buildStory({
+        arcs: [
+          { id: 'arc-1', title: 'The Dominion Trilogy', slug: 'trilogy' },
+          { id: 'arc-2', title: 'The Long Watch', slug: 'long-watch' },
+        ],
+      }),
+    );
+    const links = [
+      ...element.querySelectorAll('.storytime-story-card__arcs a'),
+    ];
+
+    expect(links.map(link => link.textContent?.trim())).toEqual([
+      'The Dominion Trilogy',
+      'The Long Watch',
+    ]);
+    expect(links[0].getAttribute('href')).toBe('/storytime/arcs/trilogy');
+  });
+
+  // Singular and plural, because "Arcs: The Long Watch" reads as a mistake.
+  it.each([
+    [1, 'Arc'],
+    [2, 'Arcs'],
+  ])('labels %i Arc as %s', (count, label) => {
+    const element = render(
+      buildStory({
+        arcs: Array.from({ length: count }, (_unused, index) => ({
+          id: `arc-${index}`,
+          title: `Arc ${index}`,
+          slug: `arc-${index}`,
+        })),
+      }),
+    );
+
+    expect(element.querySelector('.info-item .label')?.textContent).toBe(label);
+  });
+
+  // The whole panel opens the Story, but a heading that happens to be a link
+  // is not obviously a way in. The control says so.
+  it('offers a control that says the panel can be opened', () => {
+    const element = render(buildStory());
+    const cta = element.querySelector('.storytime-panel-card__controls a');
+
+    expect(cta?.getAttribute('href')).toBe('/storytime/stories/a-story');
+    expect(cta?.getAttribute('aria-label')).toBe('Read A Story');
+    expect(cta?.querySelector('.fa-book-open')).not.toBeNull();
+  });
+
   // What a Story does not have renders as nothing at all rather than an empty
   // frame, a warning nobody needs, or a bare row: artwork, the Mature warning
   // and the tag row are each optional throughout Storytime.
@@ -90,6 +189,8 @@ describe('StoryCardComponent', () => {
     ['no image when the Story has none', 'img'],
     ['no warning icon for a General rating', '.fa-triangle-exclamation'],
     ['no tag row for an untagged Story', '.storytime-tag-row'],
+    ['no author when nobody is named', '.storytime-facts__author'],
+    ['no Arc row for a Story in none', '.storytime-story-card__arcs'],
   ])('renders %s', (_case, selector) => {
     const element = render(buildStory());
 

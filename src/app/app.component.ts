@@ -47,8 +47,11 @@ export class AppComponent implements OnInit, OnDestroy {
    *
    * Resolved once here and passed down, so the feature state costs one request
    * for the whole application rather than one per component that needs it.
+   *
+   * Starts false because nothing is known yet, and an entry that appears and
+   * then vanishes is worse than one that arrives a moment late.
    */
-  isStorytimeEnabled = false;
+  isStorytimeOffered = false;
 
   destroy$ = new Subject<void>();
 
@@ -185,14 +188,19 @@ export class AppComponent implements OnInit, OnDestroy {
    * dependency would make it expensive to render and awkward to test
    * everywhere it appears.
    *
+   * Asks whether the feature should be offered rather than whether it is on,
+   * so a backend that could not be reached leaves the navigation alone: the
+   * entry stays, and following it reaches the notice explaining the outage.
+   * Only the server saying the feature is off takes the entry away.
+   *
    * @returns void
    */
   private subscribeToStorytimeAvailability() {
     this._storytimeService
-      .isEnabled()
+      .isOffered()
       .pipe(takeUntil(this.destroy$), observeInZone(this._zone, this._cdr))
-      .subscribe(isEnabled => {
-        this.isStorytimeEnabled = isEnabled;
+      .subscribe(isOffered => {
+        this.isStorytimeOffered = isOffered;
       });
   }
 

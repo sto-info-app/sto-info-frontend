@@ -159,6 +159,13 @@
           class="full-width-btn-link sunflower"
           >{{ appRouteTitles.STO_DASHBOARD }}</a
         >
+        @if (publicProfileLink) {
+          <a
+            [routerLink]="publicProfileLink"
+            class="full-width-btn-link african-violet"
+            >View Public Profile</a
+          >
+        }
         <a
           [routerLink]="resetPasswordLink"
           class="full-width-btn-link gold"

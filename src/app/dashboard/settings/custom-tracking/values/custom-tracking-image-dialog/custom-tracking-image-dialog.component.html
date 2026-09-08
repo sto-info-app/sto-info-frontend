@@ -1,0 +1,102 @@
+@if (isSubmitting) {
+  <app-loading-bar loadingText="Uploading"></app-loading-bar>
+}
+
+<div class="custom-tracking-image-dialog">
+  <div mat-dialog-content>
+    <div class="lcars-text-bar">
+      <span>{{ data.fieldName }}</span>
+    </div>
+
+    <p class="field-hint">
+      The selection is locked to {{ requirement }} Larger pictures are welcome —
+      only the area you select is kept.
+    </p>
+
+    <input
+      type="file"
+      title="Choose a picture"
+      aria-label="Choose a picture"
+      accept="image/jpg, image/jpeg, image/png"
+      class="file-input"
+      [disabled]="isSubmitting"
+      (change)="onFileChangeEvent($event)" />
+
+    @if (imageChangedEvent) {
+      <image-cropper
+        [imageChangedEvent]="imageChangedEvent"
+        [maintainAspectRatio]="true"
+        [aspectRatio]="aspectRatio"
+        [output]="'blob'"
+        [format]="spec.outputFormat"
+        (imageCropped)="onImageCropped($event)"
+        (loadImageFailed)="loadImageFailed()"></image-cropper>
+    }
+
+    @if (errorMessage) {
+      <app-lcars-error-message
+        title="Transmission Error"
+        [message]="errorMessage"></app-lcars-error-message>
+    }
+
+    @if (croppedImage && !errorMessage) {
+      <div class="custom-tracking-image-preview">
+        <div class="lcars-text-bar">
+          <span>Preview</span>
+        </div>
+        <img
+          [src]="croppedImage"
+          alt="Your cropped selection"
+          title="Your cropped selection" />
+        <p class="field-hint">
+          {{ croppedImageWidth }} &times; {{ croppedImageHeight }} pixels
+        </p>
+      </div>
+    }
+
+    <!--
+      Asked for here rather than on the editor behind, because this is the one
+      moment somebody is certainly looking at the picture. An image nobody has
+      described is simply absent to a reader using a screen reader.
+    -->
+    <div class="lcars-input-container perano">
+      <label for="custom-tracking-image-alt">
+        What does this picture show?
+      </label>
+      <input
+        id="custom-tracking-image-alt"
+        type="text"
+        name="altText"
+        required
+        [(ngModel)]="altText"
+        [maxlength]="altMaxLength"
+        [disabled]="isSubmitting" />
+      <p class="field-hint">
+        Read out to anybody who cannot see the picture, so describe it rather
+        than repeating the field's name.
+      </p>
+    </div>
+  </div>
+
+  <div
+    mat-dialog-actions
+    class="custom-tracking-image-dialog-actions">
+    <button
+      type="button"
+      mat-button
+      class="lcars-btn sunflower"
+      [disabled]="!canUpload"
+      (click)="onUploadImageClick()">
+      Upload
+    </button>
+    <button
+      type="button"
+      mat-button
+      mat-dialog-close
+      class="lcars-btn red"
+      [disabled]="isSubmitting"
+      (click)="onCloseClick()">
+      Cancel
+    </button>
+  </div>
+</div>

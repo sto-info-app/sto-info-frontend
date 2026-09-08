@@ -8,6 +8,7 @@ import {
   OnDestroy,
   OnInit,
   signal,
+  ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,6 +18,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { EndeavourSummary } from 'src/app/dashboard/models/endeavour.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
+import { CustomTrackingOwnerPanelComponent } from 'src/app/dashboard/custom-tracking/custom-tracking-owner-panel/custom-tracking-owner-panel.component';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { EndeavourService } from 'src/app/dashboard/services/endeavour.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
@@ -35,11 +37,13 @@ import {
   SRC_PHOTO_UNAVAILABLE_100PX,
 } from 'src/app/shared/constants/app-image-assets.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { HasUnsavedChanges } from 'src/app/shared/guards/unsaved-changes.guard';
 import {
   getClassCategory,
   getFactionClass,
   getSexIcon,
 } from 'src/app/shared/utils/card-theme.utils';
+import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
 import {
   decodeStoHandle,
   encodeStoHandle,
@@ -84,9 +88,32 @@ interface CharacterFilterOptionsVm {
     MatDialogModule,
     EndeavourRankBadgeComponent,
     CharacterCardComponent,
+    CustomTrackingOwnerPanelComponent,
   ],
 })
-export class AccountDetailComponent implements OnInit, OnDestroy {
+export class AccountDetailComponent
+  implements OnInit, OnDestroy, HasUnsavedChanges
+{
+  /** The scope the owner's own tracking is recorded against on this page. */
+  readonly accountScope = CustomTrackingTargetScope.ACCOUNT;
+
+  /** The tracked-information block, which is the only thing here that edits. */
+  @ViewChild(CustomTrackingOwnerPanelComponent)
+  customTracking?: CustomTrackingOwnerPanelComponent;
+
+  /**
+   * Whether leaving now would lose something.
+   *
+   * Nothing else on this page holds unsaved work — the account itself is
+   * edited on its own page — so the answer is whatever the tracked-information
+   * editor says, and "no" until somebody opens it.
+   *
+   * @returns True while that editor holds changes nobody has saved.
+   */
+  hasUnsavedChanges(): boolean {
+    return this.customTracking?.hasUnsavedChanges() === true;
+  }
+
   readonly privacyMode = inject(PrivacyModeService);
   // ── Non-signal state (changed infrequently via HTTP callbacks) ────────────
   account: StoAccount | null = null;

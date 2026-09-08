@@ -198,13 +198,15 @@ describe('HelpGuideComponent', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/page-not-found']);
   });
 
-  // A guide describing a feature that is switched off would announce the
-  // feature exists, which is exactly what the switch is there to prevent.
-  it('should refuse a Storytime guide while the feature is switched off', () => {
+  // A switch somebody turned off is not a wrong address, and a reader told
+  // "page not found" has no reason to look again once it is back on.
+  it('should say a Storytime guide is switched off rather than refuse it', () => {
     createComponent(firstGuide.slug, STORYTIME_AVAILABILITY_DISABLED);
 
     expect(component.guide).toBeNull();
-    expect(navigateSpy).toHaveBeenCalledWith(['/page-not-found']);
+    expect(component.unavailableReason).toBe('DISABLED');
+    expect(navigateSpy).not.toHaveBeenCalled();
+    expect(pageText()).toContain('switched off at the moment');
   });
 
   // Only Storytime waits on a switch. A Community guide is help for a feature
@@ -218,13 +220,15 @@ describe('HelpGuideComponent', () => {
     expect(navigateSpy).not.toHaveBeenCalled();
   });
 
-  // An outage is not a missing page: the feature was never said to be off, so
-  // a 404 would tell the reader their address is wrong when it is not.
-  it('should send a Storytime guide to the service interruption page when the backend cannot be reached', () => {
+  // An outage is not a missing page either, and it is not the same thing as
+  // the switch being off — so it gets its own wording on the same notice.
+  it('should say the systems are not answering when the backend cannot be reached', () => {
     createComponent(firstGuide.slug, STORYTIME_AVAILABILITY_UNAVAILABLE);
 
     expect(component.guide).toBeNull();
-    expect(navigateSpy).toHaveBeenCalledWith(['/service-interruption']);
+    expect(component.unavailableReason).toBe('OFFLINE');
+    expect(navigateSpy).not.toHaveBeenCalled();
+    expect(pageText()).toContain('systems are not answering');
   });
 
   // Only the gated topic waits on the backend. A Community guide is words on a

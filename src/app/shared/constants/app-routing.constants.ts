@@ -43,6 +43,8 @@ export const APP_ROUTES = {
   STO_DASHBOARD: ROOT_ROUTES.DASHBOARD,
   STO_DASHBOARD_PROFILE: ROOT_ROUTES.DASHBOARD + '/profile',
   STO_DASHBOARD_SETTINGS: ROOT_ROUTES.DASHBOARD + '/settings',
+  STO_DASHBOARD_CUSTOM_TRACKING:
+    ROOT_ROUTES.DASHBOARD + '/settings/custom-tracking',
   STO_DASHBOARD_ACCOUNTS: ROOT_ROUTES.DASHBOARD + '/accounts',
   STO_ACCOUNT_ADD: ROOT_ROUTES.DASHBOARD + '/accounts/add',
   STO_ACCOUNT_EDIT: ROOT_ROUTES.DASHBOARD + '/accounts/:handle/edit',
@@ -146,6 +148,10 @@ export const APP_ROUTES = {
   STORYTIME_READING_LIST: ROOT_ROUTES.STORYTIME + '/reading-lists/:listId',
   STORYTIME_PUBLIC_READING_LIST:
     ROOT_ROUTES.STORYTIME + '/creators/:userId/reading-lists/:slug',
+  // Where the Storytime guard sends everybody it turns away. Reachable while
+  // the feature is switched off or the backend is not answering, which is the
+  // whole point of it: it is the page that says which of the two happened.
+  STORYTIME_UNAVAILABLE: ROOT_ROUTES.STORYTIME + '/unavailable',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'service-interruption',
@@ -189,6 +195,7 @@ export const APP_ROUTE_TITLES = {
   STO_DASHBOARD: 'Dashboard',
   STO_DASHBOARD_PROFILE: 'Profile',
   STO_DASHBOARD_SETTINGS: 'Settings',
+  STO_DASHBOARD_CUSTOM_TRACKING: 'Custom Tracking',
   STO_DASHBOARD_ACCOUNTS: 'Your Accounts',
   STO_ACCOUNT_ADD: 'Add Account',
   STO_ACCOUNT_EDIT: 'Edit Account',
@@ -276,6 +283,7 @@ export const APP_ROUTE_TITLES = {
   STORYTIME_READING_LISTS: 'Your Reading Lists',
   STORYTIME_READING_LIST: 'Reading List',
   STORYTIME_PUBLIC_READING_LIST: 'Reading List',
+  STORYTIME_UNAVAILABLE: 'Storytime Unavailable',
 
   // Error Pages
   SERVICE_INTERRUPTION: 'Service Interruption',

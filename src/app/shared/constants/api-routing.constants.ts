@@ -140,4 +140,18 @@ export const API_URLS = {
   NOTIFICATIONS_READ_ALL: apiUrl + '/notifications/read-all',
   NOTIFICATIONS_ADMIN: apiUrl + '/notifications/admin',
   NOTIFICATIONS_ADMIN_BANNERS: apiUrl + '/notifications/admin/banners',
+
+  // Custom Tracking
+  CUSTOM_TRACKING: apiUrl + '/custom-tracking',
+  CUSTOM_TRACKING_CONFIGURATION: apiUrl + '/custom-tracking/configuration',
+  CUSTOM_TRACKING_AGREEMENT: apiUrl + '/custom-tracking/agreement',
+  CUSTOM_TRACKING_AGREEMENT_STATUS:
+    apiUrl + '/custom-tracking/agreement/status',
+  CUSTOM_TRACKING_AGREEMENT_ACCEPTANCE:
+    apiUrl + '/custom-tracking/agreement/acceptance',
+  CUSTOM_TRACKING_SCOPES: apiUrl + '/custom-tracking/scopes',
+  CUSTOM_TRACKING_SECTIONS: apiUrl + '/custom-tracking/sections',
+  CUSTOM_TRACKING_TABS: apiUrl + '/custom-tracking/tabs',
+  CUSTOM_TRACKING_FIELDS: apiUrl + '/custom-tracking/fields',
+  CUSTOM_TRACKING_OPTIONS: apiUrl + '/custom-tracking/options',
 };

@@ -5,6 +5,11 @@
 // `.go-rarity-*` utility classes for reuse across modules and components.
 @use 'sto-rarity-colours';
 
+// Emits the LCARS palette as custom properties, so a colour can be named at
+// runtime. Custom Tracking colour values store a palette token rather than a
+// hexadecimal, and this is what resolves one.
+@use 'lcars-palette-properties';
+
 // Emits the styles for every STO Storytime page. Held in one partial rather
 // than per component because the feature's pages are built from the same
 // handful of shapes, and that is what keeps them recognisably one thing.
@@ -12,6 +17,11 @@
 
 // Emits the styles for the help section's index and guide pages.
 @use 'help';
+
+// Emits the styles for every Custom Tracking panel. One partial for the whole
+// feature, for the same reason Storytime has one: the builder, the value
+// editor and the detail pages are built from the same handful of shapes.
+@use 'custom-tracking';
 
 /* You can add global styles to this file, and also import other style files */
 
@@ -111,6 +121,13 @@ button.lcars-btn,
   // long enough to fill the pill used to run out through the rounded edge.
   padding: 0 25px 8px 30px !important;
   font-size: 1rem !important;
+
+  // The theme only gives the bold weight and the tight tracking to `button`,
+  // so an anchor wearing the same pill would otherwise draw its label in the
+  // body's lighter, letter-spaced text. State both here so the pill looks the
+  // same whichever element it is on.
+  font-weight: 700 !important;
+  letter-spacing: normal !important;
   text-transform: uppercase !important;
   text-align: right !important;
   display: inline-flex !important;
@@ -199,15 +216,29 @@ button.lcars-btn-auto {
   }
 
   a {
-    display: block;
+    // The label sits at the bottom-right of the pill, which is where the LCARS
+    // look wants it. A top padding put it there while every label was one line
+    // and stopped working the moment one wrapped: the pill held its 60px and
+    // the second line drew outside the rounded edge, under the button.
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
     margin: 0 8px 16px;
     width: 200px;
-    height: 60px;
+
+    // The pill grows with its label rather than clipping it. 60px is what a
+    // one-line label needs, so it stays the floor and a row of short labels is
+    // the height it always was. A row is a flex container that stretches its
+    // items, so one long label takes its whole line with it and the row stays
+    // one shape rather than becoming a ragged mix of heights.
+    min-height: 60px;
 
     // The left gutter matches the pill's radius, for the reason the LCARS
     // button above wants one: the label is right-aligned, so anything long
     // enough to fill the pill runs out through the rounded edge without it.
-    padding: 24px 25px 0 26px;
+    // The 9.6px above and below is what the old 24px top padding left under a
+    // single line in a 60px pill, so a one-line pill is unchanged to the pixel.
+    padding: 9.6px 25px 9.6px 26px;
     background-color: #58e;
     border-radius: 26px;
     text-align: right;

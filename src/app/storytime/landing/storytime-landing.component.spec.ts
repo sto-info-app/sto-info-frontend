@@ -124,6 +124,8 @@ describe('StorytimeLandingComponent', () => {
               slug: 'a-story',
               title: 'A Story',
               shortDescription: 'Where it begins.',
+              arcs: [],
+              tags: [],
             },
           ],
           total: 1,

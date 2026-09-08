@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
+import { buildRegistryProfileLink } from '../community/registry/registry-card.builders';
 import { AuthService } from '../core/auth/auth.service';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { SRC_PHOTO_UNAVAILABLE_300PX } from '../shared/constants/app-image-assets.constants';
@@ -107,6 +108,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   getRouteLink(route: string): string {
     return this._routingService.getLink(route);
+  }
+
+  /**
+   * Router link to the member's own entry in the Galactic Personnel Registry.
+   *
+   * Null while the user is loading, and null for a member who is not listed
+   * publicly: the registry only serves publicly visible profiles, so a link
+   * offered then would lead to a "member not found" page.
+   *
+   * @returns The profile router link segments, or null when there is no
+   *   public profile to view.
+   */
+  get publicProfileLink(): string[] | null {
+    const profile = this.user?.profile;
+    if (!profile?.publiclyVisible) return null;
+
+    return buildRegistryProfileLink(profile.username);
   }
 
   onProfileImageError(event: Event): void {

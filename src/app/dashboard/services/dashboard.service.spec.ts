@@ -174,6 +174,21 @@ describe('DashboardService', () => {
   });
 
   describe('updatePersonalDetails', () => {
+    beforeEach(() => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue({
+        headers: new HttpHeaders({ Authorization: 'Bearer test-token' }),
+      });
+    });
+    it('does not submit personal details without a token', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+      service.updatePersonalDetails(details).subscribe({
+        next: () => {
+          throw new Error('Expected authentication error');
+        },
+        error: (error: Error) => expect(error.message).toBe('No token found'),
+      });
+      httpMock.expectNone(API_URLS.UPDATE_USER_PROFILE);
+    });
     const details: EditPersonalDetailsFormValues = {
       firstName: 'Updated',
       lastName: 'User',
@@ -187,6 +202,9 @@ describe('DashboardService', () => {
       const req = httpMock.expectOne(API_URLS.UPDATE_USER_PROFILE);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(details);
+      expect(req.request.headers.get('Authorization')).toBe(
+        'Bearer test-token',
+      );
       req.flush({ success: true });
     });
 

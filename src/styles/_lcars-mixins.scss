@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'lcars-variables' as vars;
 
 @mixin lcars-card {
@@ -64,4 +65,134 @@
   padding: 2px 8px;
   border-radius: 10px;
   font-weight: bold;
+}
+
+// ─── The panel card ──────────────────────────────────────────────────────────
+// The shape a captain card on the dashboard takes, and every panel in
+// Storytime, and every field in the Custom Tracking builder: a coloured spine
+// down the left, a solid block across the top carrying the name in black, and
+// the body beneath it — with the controls, where a panel has any, in their own
+// darkened strip at the end of the row.
+// ---
+// Held here rather than in one feature's partial because three features now
+// draw it. One shape learned once, wherever a reader meets it.
+// ---
+// The colour says what kind of thing the panel is rather than what state it is
+// in, so it means the same on every page.
+
+@mixin lcars-panel-card($colour) {
+  @include lcars-card;
+
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin-bottom: 0.75rem;
+  border-left: 10px solid color.adjust($colour, $lightness: -18%);
+  background: linear-gradient(
+    180deg,
+    rgba($colour, 0.14) 0%,
+    vars.$lcars-grey-bg 100%
+  );
+
+  // A list of these is still a list; the bullet and the indent are not wanted.
+  list-style: none;
+}
+
+// The block across the top, carrying the name.
+@mixin lcars-panel-card-heading($colour) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: $colour;
+  border-bottom: 2px solid color.adjust($colour, $lightness: -20%);
+  color: vars.$lcars-black;
+  text-decoration: none;
+}
+
+// The name on that block. Every colour a panel is drawn in carries black at
+// 4.5:1 or better, which is what lets the name sit on the block rather than
+// beside it.
+@mixin lcars-panel-card-name {
+  font-family: vars.$font-antonio;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: vars.$lcars-black;
+
+  // The name is a heading element where the panel is a section of the page
+  // rather than a row in a list, and `.mat-typography` gives a heading 30px
+  // above and 10px below. Left alone that stands the bar half as tall again as
+  // every other panel's.
+  margin: 0;
+  line-height: 1.2;
+
+  // A long title shortens rather than growing the bar, so a row of panels
+  // keeps one height and the marks stay where the eye expects them.
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// What a panel holds under its name.
+@mixin lcars-panel-card-body {
+  padding: 0.75rem 1rem;
+}
+
+// A panel that can be acted on puts the body and the controls side by side.
+@mixin lcars-panel-card-main {
+  display: flex;
+  flex: 1;
+}
+
+// The controls live in their own darkened strip at the end of the row, the way
+// a captain card's do, so pressing one is never mistaken for opening the thing
+// the panel is about.
+@mixin lcars-panel-card-controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.8rem;
+  padding: 0.8rem;
+  font-size: 1.2rem;
+  background: rgb(0 0 0 / 40%);
+  border-left: 1px solid rgb(255 255 255 / 10%);
+
+  .cta-icon {
+    color: rgb(255 255 255 / 50%);
+
+    &:hover {
+      color: vars.$lcars-sunflower;
+    }
+  }
+}
+
+// What the bar says besides the name, at its right-hand end, the way a captain
+// card carries its recruit type.
+@mixin lcars-panel-card-marks {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+// One of those marks. On a dark ground rather than a tint, because the bar is
+// a different colour for every kind of thing.
+@mixin lcars-panel-card-badge {
+  @include lcars-badge;
+
+  flex: 0 0 auto;
+  background: rgb(0 0 0 / 55%);
+  color: vars.$lcars-white;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+// The surface a block of a feature sits on, beneath its heading bar.
+@mixin lcars-panel-surface {
+  margin-top: 0.5rem;
+  padding: 1.25rem;
+  border-radius: 6px;
+  background: vars.$lcars-grey-bg;
 }

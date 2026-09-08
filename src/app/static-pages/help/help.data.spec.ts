@@ -1,3 +1,7 @@
+import {
+  CUSTOM_TRACKING_CATEGORY_LABELS,
+  CUSTOM_TRACKING_EMPTY_MODE_CHOICES,
+} from 'src/app/dashboard/settings/custom-tracking/definitions/custom-tracking-field-settings.constants';
 import { REPORT_REASON_LABELS } from 'src/app/models/moderation.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 
@@ -167,6 +171,68 @@ describe('help data', () => {
     });
   });
 
+  describe('the Custom Tracking topic', () => {
+    const customTrackingTopic = HELP_TOPICS.find(
+      topic => topic.id === 'custom-tracking',
+    );
+
+    /** Every word of the topic, headings aside. */
+    const copy = (): string =>
+      (customTrackingTopic?.guides ?? [])
+        .flatMap(guide => guide.sections)
+        .flatMap(section => [...section.paragraphs, ...(section.points ?? [])])
+        .join(' ');
+
+    it('should be present', () => {
+      expect(customTrackingTopic).toBeDefined();
+    });
+
+    // Custom Tracking is offered from Settings whether or not it is switched
+    // on, and its own page says which. There is nothing for gating the guides
+    // to keep quiet, and a reader who cannot open the page is exactly who the
+    // guides are for.
+    it('should not wait on any feature switch', () => {
+      expect(customTrackingTopic?.requiresStorytime).toBe(false);
+    });
+
+    it('should cover building, filling in and publishing', () => {
+      const slugs = customTrackingTopic?.guides.map(guide => guide.slug) ?? [];
+
+      expect(slugs).toContain('what-custom-tracking-is');
+      expect(slugs).toContain('building-what-you-track');
+      expect(slugs).toContain('filling-in-your-records');
+      expect(slugs).toContain('who-can-see-what-you-track');
+    });
+
+    // The guide sends somebody to a picker that groups its kinds under these
+    // headings. Naming a group differently would leave them looking for one
+    // the picker does not offer.
+    it.each(Object.values(CUSTOM_TRACKING_CATEGORY_LABELS))(
+      'should name the %s grouping the field picker offers',
+      label => {
+        expect(copy()).toContain(label);
+      },
+    );
+
+    // Three choices in a menu, described in the menu's own words for the same
+    // reason.
+    it.each(CUSTOM_TRACKING_EMPTY_MODE_CHOICES.map(choice => choice.label))(
+      'should offer the %s choice the field form offers',
+      label => {
+        expect(copy()).toContain(label);
+      },
+    );
+
+    // The chain is the thing people get wrong, and getting it wrong means
+    // publishing something they meant to keep to themselves. The retention
+    // window is the other, because it is the only window in which a deletion
+    // can still be put right.
+    it('should explain the visibility chain and the retention window', () => {
+      expect(copy()).toContain('all of these are public at the same time');
+      expect(copy()).toContain('kept for 180 days');
+    });
+  });
+
   describe('the Running Storytime topic', () => {
     const adminTopic = HELP_TOPICS.find(
       topic => topic.id === 'storytime-admin',
@@ -236,7 +302,7 @@ describe('help data', () => {
         topic => topic.id,
       );
 
-      expect(ids).toEqual(['community']);
+      expect(ids).toEqual(['community', 'custom-tracking']);
     });
 
     // A heading with nothing under it tells a reader there is something here

@@ -1,3 +1,4 @@
+import { CustomTrackingOwnerPanelComponent } from 'src/app/dashboard/custom-tracking/custom-tracking-owner-panel/custom-tracking-owner-panel.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {
   ComponentFixture,
@@ -16,6 +17,7 @@ import {
 } from '@angular/router';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
+import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
@@ -113,6 +115,20 @@ describe('CharacterDetailComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CharacterDetailComponent);
     component = fixture.componentInstance;
+  });
+
+  it('allows leaving when the tracking panel is absent', () => {
+    expect(component.hasUnsavedChanges()).toBe(false);
+  });
+
+  it.each([true, false])('reports unsaved tracking changes as %s', dirty => {
+    const hasUnsavedChanges = jest.fn(() => dirty);
+    component.customTracking = {
+      hasUnsavedChanges,
+    } as unknown as CustomTrackingOwnerPanelComponent;
+
+    expect(component.hasUnsavedChanges()).toBe(dirty);
+    expect(hasUnsavedChanges).toHaveBeenCalledTimes(1);
   });
 
   it('should create', () => {
@@ -247,6 +263,33 @@ describe('CharacterDetailComponent', () => {
       expect(component.errorMessage).toBe('Failed to load character details');
       expect(component.isLoading).toBe(false);
       consoleSpy.mockRestore();
+    }));
+  });
+
+  describe('the owner’s own tracking', () => {
+    // Beneath the STO data on the overview tab, and pointed at this captain.
+    // What the block then shows is its own business.
+    it('shows the block for this captain', fakeAsync(() => {
+      mockStoAccountService.getAccounts.mockReturnValue(of([mockAccount]));
+      mockCharacterService.getCharactersByAccount.mockReturnValue(
+        of([mockCharacter]),
+      );
+      mockCharacterService.getCharacter.mockReturnValue(of(mockCharacter));
+
+      fixture.detectChanges();
+      routeParamsSubject.next({
+        handle: 'TestAccount',
+        characterHandle: 'TestChar',
+      });
+      tick();
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector('app-custom-tracking-owner-panel'),
+      ).not.toBeNull();
+      expect(component.characterScope).toBe(
+        CustomTrackingTargetScope.CHARACTER,
+      );
     }));
   });
 

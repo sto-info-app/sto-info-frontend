@@ -1447,6 +1447,50 @@ button:hover {
   color: #fc6;
 }
 
+/* A group of controls at the right-hand end of an LCARS bar, for a heading
+   that carries more than one of them: reorder arrows, an edit pen, a bin and
+   the caret that folds the section away. It sits on the same black cut-out a
+   lone `.cta-icon` gets, so a bar with one action and a bar with five read as
+   the same shape rather than as two different components. */
+.lcars-text-bar .lcars-bar-actions {
+  position: absolute;
+  right: 1px;
+  top: -4px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 40px;
+  padding: 0 15px;
+  background-color: #0d0d0d;
+  color: #9bf;
+  font-size: 1rem;
+  line-height: 1.7rem;
+}
+
+/* The bar lays out every span and icon it holds as a label of its own, pinned
+   to an edge and drawn on the page's black. Inside the actions group they are
+   ordinary inline content again, laid out by the group. */
+.lcars-text-bar .lcars-bar-actions .cta-icon {
+  position: static;
+  top: auto;
+  right: auto;
+  height: auto;
+  padding: 0;
+  background: none;
+}
+
+.lcars-text-bar .lcars-bar-actions span {
+  position: static;
+  top: auto;
+  height: auto;
+  padding: 0;
+  background: none;
+  font-size: 1rem;
+  font-weight: normal;
+  line-height: 1.7rem;
+  text-transform: none;
+}
+
 .lcars-text-bar::before {
   content: '';
   background-color: #0d0d0d;
@@ -1601,6 +1645,71 @@ footer::after {
     padding: 0 15%;
     font-size: 0.8rem;
     opacity: 0.8;
+  }
+
+  // The terms and policies read as one more line of small print rather than a
+  // fourth navigation column: muted grey at the fan-made text's size, laid out
+  // inline and centred under the copyright. Deliberately not a <nav> in the
+  // template — the theme's own nav rule would turn each one into a full LCARS
+  // pill, which is far louder than anything down here should be.
+  #footer-legal-links {
+    margin-top: 40px;
+
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: center;
+      gap: 2px 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    // A clear step down from the 0.8rem small print above, so the row reads as
+    // subordinate to it rather than as another paragraph.
+    li {
+      margin: 0;
+      padding: 0;
+      font-size: 0.7rem;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    // A separator after each entry but the last, carried by the entry it
+    // follows so that a row wrapping on a narrow screen never opens with a
+    // dot floating ahead of the first label. It is a drawn dot rather than a
+    // punctuation character so it cannot pick up a fallback glyph from a font
+    // that is missing one.
+    li:not(:last-child)::after {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 3px;
+      margin-left: 12px;
+      border-radius: 50%;
+      background-color: vars.$lcars-grey-light;
+      opacity: 0.5;
+      vertical-align: middle;
+    }
+
+    a {
+      color: vars.$lcars-grey-light;
+      text-decoration: none;
+      opacity: 0.8;
+    }
+
+    a.active {
+      color: vars.$lcars-sunflower;
+      opacity: 1;
+    }
+
+    a:hover,
+    a.active:hover {
+      color: vars.$lcars-perano;
+      opacity: 1;
+      text-decoration: underline;
+    }
   }
 
   #footer-links-container {
@@ -2426,6 +2535,14 @@ button.gold {
     height: 30px;
     line-height: 32px;
     padding: 0 10px;
+  }
+
+  .lcars-text-bar .lcars-bar-actions {
+    top: -6px;
+    height: 30px;
+    gap: 10px;
+    padding: 0 10px;
+    line-height: 32px;
   }
 
   .lcars-text-bar::before,

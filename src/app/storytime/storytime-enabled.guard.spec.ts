@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { Router, UrlTree } from '@angular/router';
 import { firstValueFrom, of } from 'rxjs';
 import {
   STORYTIME_AVAILABILITY_DISABLED,
@@ -12,15 +12,17 @@ import { StorytimeService } from './storytime.service';
 describe('StorytimeEnabledGuard', () => {
   let guard: StorytimeEnabledGuard;
   let storytimeService: { getAvailability: jest.Mock };
-  let router: { navigate: jest.Mock };
+  let router: { parseUrl: jest.Mock };
+  let urlTree: UrlTree;
 
   beforeEach(() => {
+    urlTree = new UrlTree();
     storytimeService = {
       getAvailability: jest
         .fn()
         .mockReturnValue(of(STORYTIME_AVAILABILITY_ENABLED)),
     };
-    router = { navigate: jest.fn() };
+    router = { parseUrl: jest.fn().mockReturnValue(urlTree) };
 
     TestBed.configureTestingModule({
       providers: [
@@ -39,28 +41,29 @@ describe('StorytimeEnabledGuard', () => {
 
   it('allows the route when Storytime is enabled', async () => {
     await expect(firstValueFrom(guard.canActivate())).resolves.toBe(true);
-    expect(router.navigate).not.toHaveBeenCalled();
+    expect(router.parseUrl).not.toHaveBeenCalled();
   });
 
-  // A feature that is off should look like one that does not exist, so a
-  // staged rollout does not advertise what is coming.
-  it('sends the visitor to the not-found page when Storytime is disabled', async () => {
+  // A switch somebody deliberately turned off is not a wrong address, and a
+  // visitor told "page not found" has no reason to come back once it is on.
+  it('sends the visitor to the unavailable page when Storytime is switched off', async () => {
     storytimeService.getAvailability.mockReturnValue(
       of(STORYTIME_AVAILABILITY_DISABLED),
     );
 
-    await expect(firstValueFrom(guard.canActivate())).resolves.toBe(false);
-    expect(router.navigate).toHaveBeenCalledWith(['/page-not-found']);
+    await expect(firstValueFrom(guard.canActivate())).resolves.toBe(urlTree);
+    expect(router.parseUrl).toHaveBeenCalledWith('/storytime/unavailable');
   });
 
   // A backend that could not be asked never said the feature was off, so the
-  // visitor is owed an outage page rather than a 404 blaming their address.
-  it('sends the visitor to the service interruption page when the configuration could not be loaded', async () => {
+  // visitor is owed an explanation rather than a 404 blaming their address.
+  // The same page says so; it is the page that tells the two apart.
+  it('sends the visitor to the unavailable page when the configuration could not be loaded', async () => {
     storytimeService.getAvailability.mockReturnValue(
       of(STORYTIME_AVAILABILITY_UNAVAILABLE),
     );
 
-    await expect(firstValueFrom(guard.canActivate())).resolves.toBe(false);
-    expect(router.navigate).toHaveBeenCalledWith(['/service-interruption']);
+    await expect(firstValueFrom(guard.canActivate())).resolves.toBe(urlTree);
+    expect(router.parseUrl).toHaveBeenCalledWith('/storytime/unavailable');
   });
 });

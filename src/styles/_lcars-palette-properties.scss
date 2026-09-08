@@ -1,0 +1,41 @@
+@use 'lcars-variables' as vars;
+
+// The LCARS palette, published as CSS custom properties.
+
+// The SCSS variables in `_lcars-variables.scss` remain the single place any
+// LCARS colour is written down; this exposes the subset a user may choose from
+// so a colour can be named at runtime rather than compiled in.
+
+// Custom Tracking colour fields are why this exists. A value there stores a
+// token such as `LCARS_SUNFLOWER` rather than a hexadecimal, so that adjusting
+// the palette adjusts every value already recorded against it. That only works
+// if the token can be resolved to a colour in the browser, which is what these
+// properties are for. The backend serves the token and the property name and
+// never a colour of its own, so the two applications cannot drift apart.
+
+// Structural colours — borders, card surfaces, the page background — are
+// deliberately absent. They hold the interface together, and offering them as
+// content colours would let a user make their own content invisible.
+
+$lcars-palette: (
+  'sunflower': vars.$lcars-sunflower,
+  'gold': vars.$lcars-gold,
+  'orange': vars.$lcars-orange,
+  'tangerine': vars.$lcars-tangerine,
+  'cardinal': vars.$lcars-cardinal,
+  'red': vars.$lcars-red,
+  'green': vars.$lcars-green,
+  'cool': vars.$lcars-cool,
+  'bluey': vars.$lcars-bluey,
+  'perano': vars.$lcars-perano,
+  'sky': vars.$lcars-sky,
+  'violet': vars.$lcars-violet,
+  'white': vars.$lcars-white,
+  'grey-light': vars.$lcars-grey-light,
+);
+
+:root {
+  @each $slug, $colour in $lcars-palette {
+    --lcars-#{$slug}: #{$colour};
+  }
+}

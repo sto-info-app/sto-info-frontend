@@ -1,0 +1,88 @@
+<!--
+  Nothing at all where nothing is permitted. A visitor who has published none
+  of their own information and one who has published some and kept it private
+  have to look identical, so an empty state here would be the one difference
+  that told them apart.
+-->
+@if (sections.length > 0) {
+  <section class="custom-tracking-display">
+    <!--
+      A section is an LCARS heading bar like every other foldable heading on
+      the site, drawn by the shared component rather than by a bar of this
+      one's own: a reader who has learnt what the caret does on the guides and
+      on the Storytime pages should not have to learn a second control here.
+      There is no bar above them naming the block, because a section already
+      says what it holds and a second bar saying so only pushes the answers
+      further down a page somebody has already scrolled.
+
+      The builder in Settings keeps its own panel chrome, because there a
+      section is a thing being arranged — with a handle, arrows and a bin on
+      its bar — and this is only a thing being read.
+    -->
+    @for (section of sections; track section.id) {
+      <app-collapsible-section
+        [heading]="section.name"
+        barClass="small-lcars-bar-gap">
+        <div class="custom-tracking-display-panel">
+          @if (section.description) {
+            <p class="custom-tracking-panel-description">
+              {{ section.description }}
+            </p>
+          }
+
+          @if (section.tabs.length > 1) {
+            <div
+              class="lcars-tabs custom-tracking-section-tabs"
+              role="tablist"
+              [attr.aria-label]="section.name">
+              @for (tab of section.tabs; track tab.id) {
+                <button
+                  type="button"
+                  role="tab"
+                  class="lcars-tab"
+                  [id]="elementId('tab', tab.id)"
+                  [class.active]="activeTab(section)?.id === tab.id"
+                  [attr.aria-selected]="activeTab(section)?.id === tab.id"
+                  [attr.tabindex]="activeTab(section)?.id === tab.id ? 0 : -1"
+                  [attr.aria-controls]="elementId('panel', tab.id)"
+                  (keydown)="onTabKeydown($event, section)"
+                  (click)="showTab(section.id, tab.id)">
+                  {{ tab.name }}
+                </button>
+              }
+              <span
+                class="lcars-tabs-filler"
+                aria-hidden="true"></span>
+            </div>
+          }
+
+          @for (tab of section.tabs; track tab.id) {
+            <div
+              class="custom-tracking-tab-panel"
+              role="tabpanel"
+              tabindex="0"
+              [id]="elementId('panel', tab.id)"
+              [attr.aria-labelledby]="
+                section.tabs.length > 1 ? elementId('tab', tab.id) : null
+              "
+              [hidden]="activeTab(section)?.id !== tab.id">
+              @if (tab.description) {
+                <p class="custom-tracking-panel-description">
+                  {{ tab.description }}
+                </p>
+              }
+
+              <div class="custom-tracking-display-fields">
+                @for (field of tab.fields; track field.id) {
+                  <app-custom-tracking-display-field
+                    [field]="field"
+                    [configuration]="configuration" />
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </app-collapsible-section>
+    }
+  </section>
+}

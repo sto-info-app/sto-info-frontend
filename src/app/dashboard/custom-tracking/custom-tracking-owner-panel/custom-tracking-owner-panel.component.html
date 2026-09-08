@@ -1,0 +1,56 @@
+<!--
+  Nothing at all where there is nothing to show and nothing to offer. A page
+  whose owner tracks nothing reads exactly as it did before the feature
+  existed, which is what an addition to a complete page should do.
+-->
+@if (isShown) {
+  <section class="custom-tracking-owner">
+    @if (isEditing) {
+      <!--
+        The editor Settings uses, handed the record this page is about. It
+        keeps its own Save and its own "Undo my changes"; the only control
+        added here is the one that puts the page back to reading.
+      -->
+      <app-custom-tracking-values
+        [configuration]="configuration!"
+        [fixedTarget]="fixedTarget" />
+
+      <div class="custom-tracking-owner-actions">
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto bluey"
+          (click)="stopEditing()">
+          Done editing
+        </button>
+      </div>
+    } @else {
+      <app-custom-tracking-display
+        [sections]="sections"
+        idPrefix="custom-tracking-owner" />
+
+      @if (canEdit) {
+        <div class="custom-tracking-owner-actions">
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto sunflower"
+            (click)="startEditing()">
+            Edit tracked data
+          </button>
+        </div>
+      } @else if (needsAgreement) {
+        <!--
+          The one reason editing is withheld that the user can do something
+          about, so the only one worth saying out loud. Where the feature is
+          off or values are paused there is nothing to act on, and a notice
+          would only be an apology on somebody's captain page.
+        -->
+        <p class="custom-tracking-notice">
+          The Custom Tracking content agreement has changed. Accept it in
+          <a [routerLink]="customTrackingLink">Custom Tracking</a> and these
+          values can be edited here again. Nothing already recorded has been
+          touched.
+        </p>
+      }
+    }
+  </section>
+}

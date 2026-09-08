@@ -37,6 +37,7 @@ import {
 export class SettingsComponent implements OnInit {
   readonly profileLink = `/${APP_ROUTES.STO_DASHBOARD_PROFILE}`;
   readonly dashboardLink = `/${APP_ROUTES.STO_DASHBOARD}`;
+  readonly customTrackingLink = `/${APP_ROUTES.STO_DASHBOARD_CUSTOM_TRACKING}`;
   readonly settingsForm = inject(FormBuilder).nonNullable.group({
     privacyMode: false,
     sessionTimeoutMinutes: DEFAULT_SESSION_TIMEOUT_MINUTES,

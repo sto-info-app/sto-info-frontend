@@ -22,7 +22,7 @@ import {
   buildCharacterPanelVm,
 } from '../../character-panel.utility';
 import { StorytimeCastEntryComponent } from '../../shared/cast-entry/cast-entry.component';
-import { StorytimeActionRunner } from '../../shared/storytime-action.runner';
+import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
 
 /**
  * The cast of one of the creator's Stories, with the actions on each.
@@ -69,9 +69,7 @@ export class CharacterListComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
-  private readonly _actions = new StorytimeActionRunner(this, () =>
-    this.load(),
-  );
+  private readonly _actions = new ManagedActionRunner(this, () => this.load());
 
   /**
    * Loads the cast of the Story named in the route.

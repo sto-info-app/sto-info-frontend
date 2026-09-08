@@ -5,6 +5,9 @@ import { CharacterCardComponent } from 'src/app/shared/components/character-card
 import { CharacterCardVm } from 'src/app/shared/components/character-card/character-card.model';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { displayFromPublic } from 'src/app/shared/custom-tracking/custom-tracking-display.builder';
+import { CustomTrackingDisplaySection } from 'src/app/shared/custom-tracking/custom-tracking-display.models';
+import { CustomTrackingDisplayComponent } from 'src/app/shared/custom-tracking/custom-tracking-display/custom-tracking-display.component';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
 import { CommunityTabsComponent } from '../../community-tabs/community-tabs.component';
@@ -31,6 +34,7 @@ import { RegistryService } from '../registry.service';
     LcarsErrorMessageComponent,
     CharacterCardComponent,
     CommunityTabsComponent,
+    CustomTrackingDisplayComponent,
   ],
 })
 export class RegistryAccountComponent
@@ -48,6 +52,16 @@ export class RegistryAccountComponent
 
   /** Presentation models for the account's public captains. */
   characterCards: CharacterCardVm[] = [];
+
+  /**
+   * Whatever of the owner's own tracking this visitor may read.
+   *
+   * It arrives with the account rather than being asked for separately. The
+   * route that served the account has already resolved the member, the
+   * account and the blocks between them and this visitor, and a second request
+   * would be a second set of gates that would have to agree with the first.
+   */
+  customSections: CustomTrackingDisplaySection[] = [];
 
   /**
    * Reads the username and account slug from the route and loads the account.
@@ -68,6 +82,7 @@ export class RegistryAccountComponent
             this.accountSlug,
           ),
         );
+        this.customSections = displayFromPublic(account.customSections);
         this.applyAccountMeta(account);
       },
       'Something went wrong loading this account.',

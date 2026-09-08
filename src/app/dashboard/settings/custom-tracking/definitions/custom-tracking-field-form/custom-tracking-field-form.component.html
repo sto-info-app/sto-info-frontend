@@ -1,0 +1,285 @@
+<form
+  class="custom-tracking-form"
+  [formGroup]="fieldForm"
+  (ngSubmit)="submit()">
+  <h3>{{ isNew ? 'New field' : 'Edit field' }}</h3>
+
+  @if (isNew) {
+    <div class="lcars-select-container perano">
+      <span class="select-label">What this field asks for</span>
+      <select
+        formControlName="fieldType"
+        [id]="formId + '-type'"
+        [attr.aria-label]="'What this field asks for'"
+        (change)="onTypeChange()">
+        @for (group of typeGroups; track group.label) {
+          <optgroup [label]="group.label">
+            @for (type of group.types; track type.fieldType) {
+              <option [value]="type.fieldType">{{ type.label }}</option>
+            }
+          </optgroup>
+        }
+      </select>
+    </div>
+    @if (chosenType) {
+      <p class="field-hint">{{ chosenType.description }}</p>
+    }
+    <p class="field-hint">
+      Chosen once. It decides how every value recorded against this field is
+      stored and read back, so it cannot be changed afterwards.
+    </p>
+  } @else {
+    <p class="custom-tracking-fixed-type">
+      <span class="custom-tracking-badge">{{
+        chosenType ? chosenType.label : fieldType
+      }}</span>
+      This field asks the same question it always did. A field cannot change
+      what it asks, because every value already recorded against it was stored
+      and checked as this kind of answer — to ask something else, make a new
+      field and retire this one.
+    </p>
+  }
+
+  <div class="lcars-input-container perano">
+    <label [attr.for]="formId + '-name'">Name</label>
+    <input
+      type="text"
+      formControlName="name"
+      [id]="formId + '-name'"
+      [attr.maxlength]="configuration.limits.MAX_LABEL_LENGTH"
+      [attr.aria-invalid]="
+        fieldForm.controls.name.touched && fieldForm.controls.name.invalid
+      " />
+    @if (fieldForm.controls.name.touched && fieldForm.controls.name.invalid) {
+      <small class="field-error">
+        Give this field a name of
+        {{ configuration.limits.MAX_LABEL_LENGTH }} characters or fewer.
+      </small>
+    }
+  </div>
+
+  <div class="lcars-input-container bluey">
+    <label [attr.for]="formId + '-description'">Description</label>
+    <textarea
+      rows="2"
+      formControlName="description"
+      [id]="formId + '-description'"
+      [attr.maxlength]="configuration.limits.MAX_DESCRIPTION_LENGTH"></textarea>
+  </div>
+  <p class="field-hint">
+    Optional. Shown beneath the name wherever this field appears.
+  </p>
+
+  @if (allowsRequired) {
+    <div class="custom-tracking-form-toggle">
+      <app-lcars-toggle
+        formControlName="required"
+        label="Every record must answer this"
+        ariaLabel="Every record must answer this">
+      </app-lcars-toggle>
+      <p class="field-hint">
+        A record with this left empty cannot be saved. Records saved before you
+        turned this on are untouched until you next edit them.
+      </p>
+    </div>
+  }
+
+  <div class="custom-tracking-form-toggle">
+    <app-lcars-toggle
+      formControlName="publiclyVisible"
+      label="Show this field publicly"
+      ariaLabel="Show this field publicly">
+    </app-lcars-toggle>
+    <p class="field-hint">
+      Off unless you turn it on. Nothing appears publicly until the section, the
+      tab and the record itself are all public as well.
+    </p>
+  </div>
+
+  @if (isPublicBeneathPrivate) {
+    <output class="custom-tracking-notice">
+      This field will stay private for now, because the section or tab it
+      belongs to is private.
+    </output>
+  }
+
+  @if (settingDescriptors.length) {
+    <fieldset
+      class="custom-tracking-settings"
+      [formGroup]="settingsGroup">
+      <legend>Settings for this kind of field</legend>
+
+      @for (setting of settingDescriptors; track setting.key) {
+        @switch (setting.kind) {
+          @case (settingKind.BOOLEAN) {
+            <div class="custom-tracking-form-toggle">
+              <app-lcars-toggle
+                [formControlName]="setting.key"
+                [label]="setting.label"
+                [ariaLabel]="setting.label">
+              </app-lcars-toggle>
+              @if (setting.hint) {
+                <p class="field-hint">{{ setting.hint }}</p>
+              }
+            </div>
+          }
+          @case (settingKind.CHOICE) {
+            <div class="lcars-select-container gold">
+              <span class="select-label">{{ setting.label }}</span>
+              <select
+                [formControlName]="setting.key"
+                [id]="formId + '-' + setting.key"
+                [attr.aria-label]="setting.label">
+                @for (choice of settingChoices(setting); track choice.value) {
+                  <option [value]="choice.value">{{ choice.label }}</option>
+                }
+              </select>
+            </div>
+            @if (setting.hint) {
+              <p class="field-hint">{{ setting.hint }}</p>
+            }
+          }
+          @case (settingKind.TIMEZONE) {
+            <div class="lcars-select-container gold">
+              <span class="select-label">{{ setting.label }}</span>
+              <select
+                [formControlName]="setting.key"
+                [id]="formId + '-' + setting.key"
+                [attr.aria-label]="setting.label">
+                @for (zone of timezones; track zone) {
+                  <option [value]="zone">{{ zone }}</option>
+                }
+              </select>
+            </div>
+            @if (setting.hint) {
+              <p class="field-hint">{{ setting.hint }}</p>
+            }
+          }
+          @default {
+            <div class="lcars-input-container gold">
+              <label [attr.for]="formId + '-' + setting.key">
+                {{ setting.label }}
+              </label>
+              <input
+                [type]="setting.kind === settingKind.DATE ? 'date' : 'text'"
+                [attr.inputmode]="
+                  setting.kind === settingKind.NUMBER ? 'numeric' : 'text'
+                "
+                [formControlName]="setting.key"
+                [id]="formId + '-' + setting.key"
+                [attr.aria-describedby]="formId + '-' + setting.key + '-help'"
+                [attr.aria-invalid]="
+                  settingControl(setting).touched &&
+                  settingControl(setting).invalid
+                " />
+              @if (
+                settingControl(setting).touched &&
+                settingControl(setting).invalid
+              ) {
+                <small class="field-error">
+                  {{ boundDescription(setting) || 'Check this setting.' }}
+                </small>
+              }
+            </div>
+            <p
+              class="field-hint"
+              [id]="formId + '-' + setting.key + '-help'">
+              {{ setting.hint ? setting.hint + ' ' : ''
+              }}{{ boundDescription(setting) }}
+              @if (!setting.required) {
+                Leave it empty for no limit.
+              }
+            </p>
+          }
+        }
+      }
+    </fieldset>
+  }
+
+  <fieldset class="custom-tracking-empty-modes">
+    <legend>When this field has no value</legend>
+
+    <div class="lcars-select-container bluey">
+      <label
+        class="select-label"
+        [attr.for]="formId + '-owner-empty'"
+        >You see</label
+      >
+      <select
+        formControlName="ownerEmptyMode"
+        [id]="formId + '-owner-empty'">
+        @for (choice of emptyModeChoices; track choice.value) {
+          <option [value]="choice.value">{{ choice.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="lcars-select-container bluey">
+      <label
+        class="select-label"
+        [attr.for]="formId + '-public-empty'"
+        >The public sees</label
+      >
+      <select
+        formControlName="publicEmptyMode"
+        [id]="formId + '-public-empty'">
+        @for (choice of emptyModeChoices; track choice.value) {
+          <option [value]="choice.value">{{ choice.label }}</option>
+        }
+      </select>
+    </div>
+
+    <p class="field-hint">
+      Chosen separately, because a reminder of what you have not filled in yet
+      is not necessarily something to publish.
+    </p>
+
+    <div class="custom-tracking-empty-preview">
+      <p class="field-hint">What that looks like:</p>
+      <p>
+        <span class="custom-tracking-badge muted">You</span>
+        {{ ownerEmptyPreview }}
+      </p>
+      <p>
+        <span class="custom-tracking-badge muted">Public</span>
+        {{ publicEmptyPreview }}
+      </p>
+    </div>
+
+    @if (needsPlaceholder) {
+      <div class="lcars-input-container gold">
+        <label [attr.for]="formId + '-placeholder'">Placeholder</label>
+        <input
+          type="text"
+          formControlName="emptyPlaceholder"
+          [id]="formId + '-placeholder'"
+          [attr.maxlength]="configuration.limits.MAX_PLACEHOLDER_LENGTH" />
+      </div>
+      <p class="field-hint">
+        Shown wherever the placeholder is chosen above, to you and to the public
+        alike. Up to
+        {{ configuration.limits.MAX_PLACEHOLDER_LENGTH }} characters.
+      </p>
+    }
+  </fieldset>
+
+  @if (errorMessage) {
+    <app-lcars-error-message [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <div class="custom-tracking-form-actions">
+    <button
+      type="submit"
+      class="lcars-btn lcars-btn-auto sunflower"
+      [disabled]="isSaving || fieldForm.invalid">
+      {{ isNew ? 'Create' : 'Save' }}
+    </button>
+    <button
+      type="button"
+      class="lcars-btn lcars-btn-auto bluey"
+      [disabled]="isSaving"
+      (click)="cancelled.emit()">
+      Cancel
+    </button>
+  </div>
+</form>

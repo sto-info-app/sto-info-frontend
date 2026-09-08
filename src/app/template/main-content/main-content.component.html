@@ -3,7 +3,7 @@
   id="lcars-body-container">
   <app-side-bar
     [isLoggedIn]="isLoggedIn"
-    [isStorytimeEnabled]="isStorytimeEnabled"></app-side-bar>
+    [isStorytimeOffered]="isStorytimeOffered"></app-side-bar>
 
   <div class="right-frame">
     <app-main-content-bar-panel></app-main-content-bar-panel>
@@ -28,7 +28,7 @@
         <div id="footer-text">
           @defer (on viewport) {
             <app-footer
-              [isStorytimeEnabled]="isStorytimeEnabled"></app-footer>
+              [isStorytimeOffered]="isStorytimeOffered"></app-footer>
           } @placeholder {
             <span class="footer-placeholder">Loading footer…</span>
           }

@@ -53,11 +53,11 @@ export class MainContentComponent implements OnDestroy {
   /**
    * Whether Storytime should be offered in the navigation.
    *
-   * Passed straight through to the sidebar. Resolved once at the application
-   * root rather than here, so the feature state is fetched a single time
-   * however often this component is rendered in tests.
+   * Passed straight through to the sidebar and the footer. Resolved once at
+   * the application root rather than here, so the feature state is fetched a
+   * single time however often this component is rendered in tests.
    */
-  @Input() isStorytimeEnabled = false;
+  @Input() isStorytimeOffered = false;
 
   appTitle = environment.appTitle;
   frontendAppVersion = environment.version || '';

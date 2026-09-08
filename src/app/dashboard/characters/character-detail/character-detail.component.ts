@@ -5,6 +5,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  ViewChild,
   inject,
   signal,
 } from '@angular/core';
@@ -17,11 +18,14 @@ import { CharacterAdmiraltyComponent } from 'src/app/dashboard/character-admiral
 import { CharacterCommendationsComponent } from 'src/app/dashboard/character-commendations/character-commendations.component';
 import { CharacterReputationsComponent } from 'src/app/dashboard/character-reputations/character-reputations.component';
 import { CharacterSpecializationComponent } from 'src/app/dashboard/character-specialization/character-specialization.component';
+import { CustomTrackingOwnerPanelComponent } from 'src/app/dashboard/custom-tracking/custom-tracking-owner-panel/custom-tracking-owner-panel.component';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
+import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { HasUnsavedChanges } from 'src/app/shared/guards/unsaved-changes.guard';
 import {
   BASE_CLOUDFLARE_IMAGES_URL,
   CLOUDFLARE_R2_PUBLIC_URL,
@@ -61,9 +65,32 @@ export type CharacterTab =
     CharacterCommendationsComponent,
     CharacterRdComponent,
     CharacterSpecializationComponent,
+    CustomTrackingOwnerPanelComponent,
   ],
 })
-export class CharacterDetailComponent implements OnInit, OnDestroy {
+export class CharacterDetailComponent
+  implements OnInit, OnDestroy, HasUnsavedChanges
+{
+  /** The scope the owner's own tracking is recorded against on this page. */
+  readonly characterScope = CustomTrackingTargetScope.CHARACTER;
+
+  /** The tracked-information block, which is the only thing here that edits. */
+  @ViewChild(CustomTrackingOwnerPanelComponent)
+  customTracking?: CustomTrackingOwnerPanelComponent;
+
+  /**
+   * Whether leaving now would lose something.
+   *
+   * Nothing else on this page holds unsaved work — the captain itself is
+   * edited on its own page — so the answer is whatever the tracked-information
+   * editor says, and "no" until somebody opens it.
+   *
+   * @returns True while that editor holds changes nobody has saved.
+   */
+  hasUnsavedChanges(): boolean {
+    return this.customTracking?.hasUnsavedChanges() === true;
+  }
+
   character: Character | null = null;
   accountHandle = '';
   isLoading = true;

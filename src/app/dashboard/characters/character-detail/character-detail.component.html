@@ -179,6 +179,13 @@
                 </div>
               }
             </div>
+
+            <!--
+              Beneath the STO data: what is tracked, and the way to change it.
+            -->
+            <app-custom-tracking-owner-panel
+              [scope]="characterScope"
+              [targetId]="character.id" />
           </div>
 
           <div
