@@ -33,6 +33,19 @@ strong {
   font-weight: bold !important;
 }
 
+// The global `font: inherit` reset in lcars-theme.scss wipes the browser's
+// default italic on these, the same way it wipes the bold on <strong> above.
+// Antonio has no italic face either, so synthesis has to be allowed back on
+// or the slant never renders. <i> is excluded when it carries a class,
+// because that is a Font Awesome icon rather than prose.
+em,
+cite,
+dfn,
+i:not([class]) {
+  font-style: italic;
+  font-synthesis-style: auto;
+}
+
 ul {
   margin-left: 25px;
 }
