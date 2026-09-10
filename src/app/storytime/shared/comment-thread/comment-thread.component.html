@@ -280,9 +280,7 @@
         beside the others so the row reads as one set of controls, and its own
         icon so the two are never mistaken for each other.
       -->
-          @if (
-            canModerate && comment.status !== statuses.REMOVED_BY_ADMIN
-          ) {
+          @if (canModerate && comment.status !== statuses.REMOVED_BY_ADMIN) {
             <button
               class="cta-icon delete-icon"
               type="button"

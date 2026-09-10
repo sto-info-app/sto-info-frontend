@@ -3,12 +3,12 @@
     <label
       class="select-label"
       [attr.for]="fieldId"
-    >{{ label }}</label>
+      >{{ label }}</label
+    >
     <select
       [id]="fieldId"
       [title]="label"
-      [formControlName]="controlName"
-    >
+      [formControlName]="controlName">
       @for (option of options; track option.value) {
         <option [value]="option.value">{{ option.label }}</option>
       }
@@ -16,8 +16,7 @@
   </div>
   <app-storytime-setting-help
     [label]="label"
-    [options]="options"
-  >
+    [options]="options">
     <ng-content />
   </app-storytime-setting-help>
 </div>
