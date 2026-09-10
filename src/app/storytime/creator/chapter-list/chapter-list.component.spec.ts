@@ -3,6 +3,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ChapterStatus, ManagedChapter } from 'src/app/models/storytime.models';
+import {
+  ConfirmPromptDouble,
+  stubConfirmPrompt,
+} from 'src/app/shared/actions/confirm-prompt.testing';
 import { ChapterService } from '../../chapter.service';
 import { ChapterListComponent } from './chapter-list.component';
 
@@ -12,7 +16,9 @@ describe('ChapterListComponent', () => {
     getMyChapters: jest.Mock;
     publishChapter: jest.Mock;
     unpublishChapter: jest.Mock;
+    deleteChapter: jest.Mock;
   };
+  let confirm: ConfirmPromptDouble;
 
   /**
    * Builds a managed Chapter.
@@ -50,12 +56,16 @@ describe('ChapterListComponent', () => {
       getMyChapters: jest.fn().mockReturnValue(of([buildChapter()])),
       publishChapter: jest.fn().mockReturnValue(of(buildChapter())),
       unpublishChapter: jest.fn().mockReturnValue(of(buildChapter())),
+      deleteChapter: jest.fn().mockReturnValue(of(undefined)),
     };
+
+    confirm = stubConfirmPrompt();
 
     TestBed.configureTestingModule({
       imports: [ChapterListComponent],
       providers: [
         provideRouter([]),
+        confirm.provider,
         { provide: ChapterService, useValue: chapterService },
         {
           provide: ActivatedRoute,
@@ -124,6 +134,70 @@ describe('ChapterListComponent', () => {
     fixture.componentInstance.unpublish(buildChapter());
 
     expect(chapterService.unpublishChapter).toHaveBeenCalledWith('chapter-1');
+  });
+
+  describe('deleting a Chapter', () => {
+    it('deletes it and reloads', () => {
+      render();
+      fixture.componentInstance.remove(buildChapter());
+
+      expect(chapterService.deleteChapter).toHaveBeenCalledWith('chapter-1');
+      expect(chapterService.getMyChapters).toHaveBeenCalledTimes(2);
+    });
+
+    it('asks first, naming the Chapter', () => {
+      render();
+      fixture.componentInstance.remove(buildChapter());
+
+      expect(confirm.lastAsked()?.title).toBe('Delete Chapter');
+      expect(confirm.lastAsked()?.message).toContain('Chapter One');
+    });
+
+    it('leaves the Chapter alone when the creator says no', () => {
+      confirm.answer(false);
+      render();
+      fixture.componentInstance.remove(buildChapter());
+
+      expect(chapterService.deleteChapter).not.toHaveBeenCalled();
+    });
+
+    // A published Chapter is part of what readers are already following, so
+    // the reversible step — unpublishing — comes first.
+    it('is offered for a draft', () => {
+      render();
+
+      expect(fixture.componentInstance.canDelete(buildChapter())).toBe(true);
+    });
+
+    it('is not offered for a published Chapter', () => {
+      render();
+
+      expect(
+        fixture.componentInstance.canDelete(
+          buildChapter({ status: ChapterStatus.PUBLISHED }),
+        ),
+      ).toBe(false);
+    });
+
+    it('shows no delete control while the Chapter is published', () => {
+      chapterService.getMyChapters.mockReturnValue(
+        of([buildChapter({ status: ChapterStatus.PUBLISHED })]),
+      );
+
+      const element = render();
+
+      expect(
+        element.querySelector('[aria-label="Delete this Chapter"]'),
+      ).toBeNull();
+    });
+
+    it('shows a delete control for a draft', () => {
+      const element = render();
+
+      expect(
+        element.querySelector('[aria-label="Delete this Chapter"]'),
+      ).not.toBeNull();
+    });
   });
 
   it('shows a pending schedule', () => {

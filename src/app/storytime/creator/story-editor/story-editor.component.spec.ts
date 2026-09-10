@@ -3,6 +3,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ManagedStory, StoryStatus } from 'src/app/models/storytime.models';
+import {
+  ConfirmPromptDouble,
+  stubConfirmPrompt,
+} from 'src/app/shared/actions/confirm-prompt.testing';
 import { ArcService } from '../../arc.service';
 import { STORYTIME_COPY } from '../../storytime.constants';
 import { StorytimeService } from '../../storytime.service';
@@ -17,7 +21,9 @@ describe('StoryEditorComponent', () => {
     updateStory: jest.Mock;
     publishStory: jest.Mock;
     acceptContentPolicy: jest.Mock;
+    deleteStory: jest.Mock;
   };
+  let confirm: ConfirmPromptDouble;
   let storytimeService: { getLanguages: jest.Mock };
   let arcService: { inviteStory: jest.Mock };
   let router: { navigate: jest.Mock };
@@ -62,6 +68,7 @@ describe('StoryEditorComponent', () => {
         .mockReturnValue(
           of({ ...existingStory, contentPolicyCurrent: true } as ManagedStory),
         ),
+      deleteStory: jest.fn().mockReturnValue(of(undefined)),
     };
     storytimeService = {
       getLanguages: jest
@@ -73,10 +80,13 @@ describe('StoryEditorComponent', () => {
     };
     router = { navigate: jest.fn() };
 
+    confirm = stubConfirmPrompt();
+
     TestBed.configureTestingModule({
       imports: [StoryEditorComponent],
       providers: [
         provideRouter([]),
+        confirm.provider,
         { provide: StoryService, useValue: storyService },
         { provide: StorytimeService, useValue: storytimeService },
         { provide: ArcService, useValue: arcService },
@@ -509,6 +519,110 @@ describe('StoryEditorComponent', () => {
       fixture.componentInstance.save();
 
       expect(arcService.inviteStory).not.toHaveBeenCalled();
+    });
+  });
+
+  // Offered here as well as on the list, so a creator who has decided the
+  // Story is a false start does not have to navigate back out to act on it.
+  describe('deleting from the editor', () => {
+    /**
+     * Renders the editor with an existing Story loaded.
+     *
+     * @param story - The Story to load, or the default draft.
+     * @returns The rendered fixture.
+     */
+    const renderExisting = (
+      story: ManagedStory = existingStory,
+    ): ComponentFixture<StoryEditorComponent> => {
+      routeParams.set('storyId', 'story-1');
+      storyService.getMyStory.mockReturnValue(of(story));
+      return render();
+    };
+
+    it('deletes the Story and returns to the list', () => {
+      renderExisting();
+      fixture.componentInstance.remove();
+
+      expect(storyService.deleteStory).toHaveBeenCalledWith('story-1');
+      expect(router.navigate).toHaveBeenCalledWith([
+        '/',
+        'storytime',
+        'manage',
+        'stories',
+      ]);
+    });
+
+    it('asks first, naming the Story', () => {
+      renderExisting();
+      fixture.componentInstance.remove();
+
+      expect(confirm.lastAsked()?.title).toBe('Delete Story');
+      expect(confirm.lastAsked()?.message).toContain('A Story');
+    });
+
+    it('leaves the Story alone when the creator says no', () => {
+      renderExisting();
+      confirm.answer(false);
+      fixture.componentInstance.remove();
+
+      expect(storyService.deleteStory).not.toHaveBeenCalled();
+    });
+
+    it('explains a deletion that failed, and stays put', () => {
+      storyService.deleteStory.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+      renderExisting();
+      fixture.componentInstance.remove();
+
+      expect(fixture.componentInstance.errorMessage).toContain(
+        'could not be deleted',
+      );
+      expect(fixture.componentInstance.isSaving).toBe(false);
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    // There is nothing to delete before the first save.
+    it('is not offered while the Story is new', () => {
+      render();
+
+      expect(fixture.componentInstance.canDelete).toBe(false);
+    });
+
+    it('is offered for a saved draft', () => {
+      renderExisting();
+
+      expect(fixture.componentInstance.canDelete).toBe(true);
+    });
+
+    // Unpublishing is reversible and deleting is not, so the reversible step
+    // comes first.
+    it('is not offered while the Story is published', () => {
+      renderExisting({ ...existingStory, status: StoryStatus.PUBLISHED });
+
+      expect(fixture.componentInstance.canDelete).toBe(false);
+    });
+
+    it('shows the danger zone only once there is a Story to delete', () => {
+      render();
+      const whenNew = fixture.nativeElement as HTMLElement;
+
+      expect(whenNew.querySelector('.storytime-danger')).toBeNull();
+
+      renderExisting();
+      const whenSaved = fixture.nativeElement as HTMLElement;
+
+      expect(whenSaved.querySelector('.storytime-danger')).not.toBeNull();
+    });
+
+    // A guard for a state the template already prevents, kept because the
+    // method is public and nothing stops it being called first.
+    it('does nothing when there is no Story loaded', () => {
+      render();
+      fixture.componentInstance.remove();
+
+      expect(confirm.dialog.open).not.toHaveBeenCalled();
+      expect(storyService.deleteStory).not.toHaveBeenCalled();
     });
   });
 });

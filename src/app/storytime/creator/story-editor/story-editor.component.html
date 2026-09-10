@@ -241,5 +241,36 @@
     <app-tag-picker
       targetType="STORY"
       [targetId]="story.id"></app-tag-picker>
+
+    <!--
+      Deleting is offered here as well as on the list, so a creator who has
+      decided the Story is a false start does not have to navigate back out to
+      act on it. It sits last, apart from the form, and is not offered while
+      the Story is published.
+    -->
+    @if (canDelete) {
+      <section class="storytime-section storytime-danger">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span class="go-october-sunset">Delete this Story</span>
+        </div>
+
+        <div class="storytime-panel">
+          <p>
+            Deleting this Story removes its Chapters, cast and credits with it.
+            There is no undo.
+          </p>
+
+          <div class="storytime-form-actions">
+            <button
+              class="lcars-btn red"
+              type="button"
+              [disabled]="isSaving"
+              (click)="remove()">
+              Delete this Story
+            </button>
+          </div>
+        </div>
+      </section>
+    }
   }
 </div>

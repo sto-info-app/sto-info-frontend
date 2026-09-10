@@ -228,6 +228,18 @@ nav[class^='storytime-'] :where(a, [aria-current='page']) {
   margin-top: 1.5rem;
 }
 
+// The last thing on an editor: the irreversible action, set apart from the
+// form above it so it cannot be mistaken for one more field. The extra space
+// is the separation — a red border around it would compete with the red
+// button that does the work.
+.storytime-danger {
+  margin-top: 3rem;
+
+  > .storytime-panel > p {
+    margin-top: 0;
+  }
+}
+
 // A heading that opens a row sits at the top of it. The row's own padding is
 // the space it needs, and the heading's leading margin on top of that drops the
 // title a line and a half into a box it is supposed to be naming.

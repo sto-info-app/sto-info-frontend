@@ -11,13 +11,14 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { Observable, catchError, finalize, forkJoin, of } from 'rxjs';
 import {
   ManagedStory,
   StorytimeModerationStatus,
   StorytimeTargetType,
   StoryStatus,
 } from 'src/app/models/storytime.models';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -108,6 +109,7 @@ export class StoryDashboardComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _confirm = new ConfirmPrompt();
 
   /** The appeal a creator is writing, if any. */
   readonly appealForm = this._formBuilder.nonNullable.group({ body: [''] });
@@ -204,6 +206,32 @@ export class StoryDashboardComponent implements OnInit {
   }
 
   /**
+   * Deletes a Story, once the creator has agreed to lose it.
+   *
+   * A Story is the largest thing a creator owns, and deleting one takes its
+   * Chapters and cast out of reach with it, so the question names the Story
+   * back to them rather than asking about "this Story".
+   *
+   * @param story - The Story to delete.
+   */
+  remove(story: ManagedStory): void {
+    this._confirm
+      .askToDestroy({
+        title: 'Delete Story',
+        question: 'Are you sure you want to delete this Story?',
+        subject: story.title,
+        consequence:
+          'Its Chapters, cast and credits go with it, and this cannot be undone.',
+        confirmText: 'Delete Story',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.runAction(this._storyService.deleteStory(story.id));
+        }
+      });
+  }
+
+  /**
    * What a Story holds, for the buttons that open each part of it.
    *
    * @param story - The Story.
@@ -220,6 +248,22 @@ export class StoryDashboardComponent implements OnInit {
    * @returns True when publishing is a sensible next action.
    */
   canPublish(story: ManagedStory): boolean {
+    return story.status !== StoryStatus.PUBLISHED;
+  }
+
+  /**
+   * Whether a Story may be deleted from its current state.
+   *
+   * A published Story is readable by anybody who has found it, and deleting it
+   * out from under them is not something to offer beside an edit button. The
+   * creator unpublishes first, which is reversible, and only then is the
+   * irreversible action on the table. The server allows either; this is the
+   * order the interface asks for them in.
+   *
+   * @param story - The Story to test.
+   * @returns True when deleting is an action to offer.
+   */
+  canDelete(story: ManagedStory): boolean {
     return story.status !== StoryStatus.PUBLISHED;
   }
 
@@ -306,7 +350,7 @@ export class StoryDashboardComponent implements OnInit {
    *
    * @param action - The action observable.
    */
-  private runAction(action: ReturnType<StoryService['publishStory']>): void {
+  private runAction<T>(action: Observable<T>): void {
     action
       .pipe(
         takeUntilDestroyed(this._destroyRef),

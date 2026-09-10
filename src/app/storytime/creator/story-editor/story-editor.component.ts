@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import {
   CompletionState,
@@ -19,6 +19,7 @@ import {
   StorytimeLanguage,
   StorytimeVisibility,
 } from 'src/app/models/storytime.models';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -123,10 +124,12 @@ export class StoryEditorComponent implements OnInit {
   private readonly _route = inject(ActivatedRoute);
   private readonly _storyService = inject(StoryService);
   private readonly _arcService = inject(ArcService);
+  private readonly _router = inject(Router);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _editor = new StorytimeEditorSupport(this);
+  private readonly _confirm = new ConfirmPrompt();
 
   /**
    * Builds the form and loads the Story when editing an existing one.
@@ -185,6 +188,48 @@ export class StoryEditorComponent implements OnInit {
    */
   get canPublish(): boolean {
     return this.story !== null && this.story.status !== StoryStatus.PUBLISHED;
+  }
+
+  /**
+   * Whether deleting is an action to offer from here.
+   *
+   * Only for a Story that exists and is not published: there is nothing to
+   * delete before the first save, and a published Story is unpublished first
+   * so that the reversible step comes before the irreversible one.
+   *
+   * @returns True when the Story can be deleted.
+   */
+  get canDelete(): boolean {
+    return this.story !== null && this.story.status !== StoryStatus.PUBLISHED;
+  }
+
+  /**
+   * Deletes the Story being edited, once the creator has agreed to lose it.
+   *
+   * Returns to the list afterwards, because the page they are on describes a
+   * Story that no longer exists.
+   */
+  remove(): void {
+    const story = this.story;
+
+    if (!story) {
+      return;
+    }
+
+    this._confirm
+      .askToDestroy({
+        title: 'Delete Story',
+        question: 'Are you sure you want to delete this Story?',
+        subject: story.title,
+        consequence:
+          'Its Chapters, cast and credits go with it, and this cannot be undone.',
+        confirmText: 'Delete Story',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.deleteStory(story.id);
+        }
+      });
   }
 
   /**
@@ -261,6 +306,39 @@ export class StoryEditorComponent implements OnInit {
   onSaved(saved: ManagedStory): void {
     this.story = saved;
     this.syncImageDescriptions(saved);
+  }
+
+  /**
+   * Asks the server to delete the Story, then leaves the page.
+   *
+   * @param storyId - The Story to delete.
+   */
+  private deleteStory(storyId: string): void {
+    this.isSaving = true;
+    this.errorMessage = '';
+
+    this._storyService
+      .deleteStory(storyId)
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: () => {
+          this.isSaving = false;
+          void this._router.navigate([
+            '/',
+            APP_ROUTES.STORYTIME,
+            'manage',
+            'stories',
+          ]);
+        },
+        error: () => {
+          this.isSaving = false;
+          this.errorMessage =
+            'That Story could not be deleted. Please try again shortly.';
+        },
+      });
   }
 
   /**
