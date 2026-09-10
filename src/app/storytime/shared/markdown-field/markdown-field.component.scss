@@ -1,0 +1,41 @@
+@use 'lcars-tabs' as tabs;
+@use 'lcars-variables' as vars;
+
+// Two short labels, so the default minimum would pad both out to a width
+// neither needs.
+@include tabs.lcars-tab-strip($min-width: 0);
+
+:host {
+  display: block;
+}
+
+// The container is no longer a row member, so the row rule that zeroes its
+// bottom margin no longer reaches it. Zeroed here instead, because the note
+// below it is positioned by a pull upwards that assumes no margin beneath the
+// field — left in, the two add up and the note drifts away from its field.
+.storytime-markdown-field .lcars-input-container {
+  margin-bottom: 0;
+}
+
+// The note's shared rule pulls it up by 0.85rem to close the 1rem gap of the
+// row it used to sit in. There is no row here and so no gap to close, and left
+// alone the pull drags the note over the bottom edge of the field it describes.
+// Restated as the small step the row's gap and pull worked out to, so the note
+// sits where it does in every other editor.
+.storytime-markdown-field app-storytime-markdown-hint {
+  margin-top: 0.15rem;
+}
+
+// Keeps the panel at roughly the height of the writing it replaced, so
+// switching tabs does not jump everything below the field up the page. The
+// preview may grow past it; it must not collapse below it.
+.storytime-markdown-field__preview,
+.storytime-markdown-field__status {
+  min-height: 6rem;
+}
+
+.storytime-markdown-field__status {
+  color: vars.$lcars-grey-light;
+  font-style: italic;
+  margin: 0;
+}
