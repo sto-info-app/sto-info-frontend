@@ -147,6 +147,26 @@ describe('ArcEditorComponent', () => {
       routeParams.set('arcId', 'arc-1');
     });
 
+    // The description is Markdown, and the field that takes it carries the
+    // preview. Named with the reader's own class so the preview looks like the
+    // Arc page rather than approximating it.
+    it('offers the description with a preview beside it', () => {
+      const element = render().nativeElement as HTMLElement;
+      const field = element.querySelector('app-storytime-markdown-field');
+
+      expect(field?.getAttribute('previewclass')).toBe(
+        'storytime-arc__description',
+      );
+      expect(element.querySelector('#arc-description')).toBeTruthy();
+      expect(
+        [
+          ...element.querySelectorAll<HTMLButtonElement>(
+            'app-storytime-markdown-field .lcars-tab',
+          ),
+        ].map(tab => tab.textContent?.trim()),
+      ).toEqual(['Edit', 'Preview']);
+    });
+
     it('loads the Arc into the form', () => {
       render();
 

@@ -154,6 +154,26 @@ describe('StoryEditorComponent', () => {
       routeParams.set('storyId', 'story-1');
     });
 
+    // A Story description is Markdown, and the field that takes it carries the preview.
+    // Named with the reader's own class so the preview looks like the published
+    // page rather than approximating it.
+    it('offers the writing with a preview beside it', () => {
+      const element = render().nativeElement as HTMLElement;
+      const field = element.querySelector('app-storytime-markdown-field');
+
+      expect(field?.getAttribute('previewclass')).toBe(
+        'storytime-story__description',
+      );
+      expect(element.querySelector('#story-description')).toBeTruthy();
+      expect(
+        [
+          ...element.querySelectorAll<HTMLButtonElement>(
+            'app-storytime-markdown-field .lcars-tab',
+          ),
+        ].map(tab => tab.textContent?.trim()),
+      ).toEqual(['Edit', 'Preview']);
+    });
+
     it('loads the Story into the form', () => {
       render();
 

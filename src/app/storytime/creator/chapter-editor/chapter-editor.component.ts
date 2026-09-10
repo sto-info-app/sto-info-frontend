@@ -37,7 +37,7 @@ import { CharacterService } from '../../character.service';
 import { MediaService } from '../../media.service';
 import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
 import { ImageManagerComponent } from '../../shared/image-manager/image-manager.component';
-import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
+import { MarkdownFieldComponent } from '../../shared/markdown-field/markdown-field.component';
 import { SettingOption } from '../../shared/setting-help/setting-help.component';
 import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
 import {
@@ -66,7 +66,7 @@ import { StorytimeImageSlot } from '../../storytime-image.constants';
     LcarsErrorMessageComponent,
     LcarsToggleComponent,
     SettingSelectComponent,
-    MarkdownHintComponent,
+    MarkdownFieldComponent,
     EditorActionsComponent,
     ImageManagerComponent,
   ],

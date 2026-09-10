@@ -167,6 +167,26 @@ describe('CharacterEditorComponent', () => {
       params.set('characterId', 'character-1');
     });
 
+    // A biography is Markdown, and the field that takes it carries the preview.
+    // Named with the reader's own class so the preview looks like the published
+    // page rather than approximating it.
+    it('offers the writing with a preview beside it', () => {
+      const element = render();
+      const field = element.querySelector('app-storytime-markdown-field');
+
+      expect(field?.getAttribute('previewclass')).toBe(
+        'storytime-character__biography',
+      );
+      expect(element.querySelector('#character-biography')).toBeTruthy();
+      expect(
+        [
+          ...element.querySelectorAll<HTMLButtonElement>(
+            'app-storytime-markdown-field .lcars-tab',
+          ),
+        ].map(tab => tab.textContent?.trim()),
+      ).toEqual(['Edit', 'Preview']);
+    });
+
     it('fills the form from the Character', () => {
       render();
       const value = fixture.componentInstance.form.getRawValue();

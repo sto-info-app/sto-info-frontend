@@ -4,9 +4,8 @@
 
 <div
   id="storytime-arc-editor-page"
-  class="storytime-page"
->
-  <h1>{{ isNew ? "Create an Arc" : "Edit Arc" }}</h1>
+  class="storytime-page">
+  <h1>{{ isNew ? 'Create an Arc' : 'Edit Arc' }}</h1>
 
   <!--
     Reached from here as well as from the list, for the same reason a Story's
@@ -17,45 +16,46 @@
     <nav class="storytime-page-actions">
       <a
         class="lcars-btn lcars-btn-auto green"
-        [routerLink]='[
-  "/",
-  appRoutes.STORYTIME,
-  "manage",
-  "arcs",
-  arc.id,
-  "stories",
-]'
-      >Stories</a>
+        [routerLink]="[
+          '/',
+          appRoutes.STORYTIME,
+          'manage',
+          'arcs',
+          arc.id,
+          'stories',
+        ]"
+        >Stories</a
+      >
       <a
         class="lcars-btn lcars-btn-auto bluey"
-        [routerLink]='[
-  "/",
-  appRoutes.STORYTIME,
-  "manage",
-  "arcs",
-  arc.id,
-  "collaborators",
-]'
-      >Collaborators</a>
+        [routerLink]="[
+          '/',
+          appRoutes.STORYTIME,
+          'manage',
+          'arcs',
+          arc.id,
+          'collaborators',
+        ]"
+        >Collaborators</a
+      >
       <a
         class="lcars-btn lcars-btn-auto sky"
-        [routerLink]='["/", appRoutes.STORYTIME, "manage", "arcs"]'
-      >Back to your Arcs</a>
+        [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']"
+        >Back to your Arcs</a
+      >
     </nav>
   }
 
   @if (errorMessage) {
     <app-lcars-error-message
       title="Could not save"
-      [message]="errorMessage"
-    ></app-lcars-error-message>
+      [message]="errorMessage"></app-lcars-error-message>
   }
 
   <form
     [formGroup]="form"
     class="storytime-form"
-    (ngSubmit)="save()"
-  >
+    (ngSubmit)="save()">
     <section class="storytime-section">
       <div class="lcars-text-bar small-lcars-bar-gap">
         <span>Arc Details</span>
@@ -70,9 +70,10 @@
               type="text"
               formControlName="title"
               maxlength="200"
-              required
-            />
-            @if (form.controls["title"].touched && form.controls["title"].invalid) {
+              required />
+            @if (
+              form.controls['title'].touched && form.controls['title'].invalid
+            ) {
               <small class="field-error">A title is required.</small>
             }
           </div>
@@ -85,8 +86,7 @@
               id="arc-slug"
               type="text"
               formControlName="slug"
-              maxlength="220"
-            />
+              maxlength="220" />
             <p class="field-hint">
               Leave blank to build one from the title. Changing it keeps the old
               address working.
@@ -99,26 +99,20 @@
               id="arc-short-description"
               type="text"
               formControlName="shortDescription"
-              maxlength="500"
-            />
+              maxlength="500" />
             <p class="field-hint">
               Shown in listings. Required before publishing.
             </p>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="lcars-input-container perano storytime-field-full">
-            <label for="arc-description">Description</label>
-            <textarea
-              id="arc-description"
-              formControlName="description"
-              rows="8"
-            ></textarea>
-          </div>
-
-          <app-storytime-markdown-hint />
-        </div>
+        <app-storytime-markdown-field
+          fieldId="arc-description"
+          label="Description"
+          controlName="description"
+          colour="perano"
+          previewClass="storytime-arc__description"
+          [rows]="8" />
       </div>
     </section>
 
@@ -134,16 +128,14 @@
             label="Visibility"
             controlName="visibility"
             colour="bluey"
-            [options]="visibilityOptions"
-          />
+            [options]="visibilityOptions" />
 
           <app-storytime-setting-select
             fieldId="arc-language"
             label="Language"
             controlName="languageCode"
             colour="sunflower"
-            [options]="languageOptions"
-          >
+            [options]="languageOptions">
             <p>
               The language of your own writing about the Arc. The Stories in it
               keep their own.
@@ -176,8 +168,7 @@
             [imageUrl]="arc.bannerImageUrl"
             [imageAlt]="arc.bannerImageAlt"
             altControlName="bannerImageAlt"
-            (changed)="onImageChanged($event)"
-          ></app-storytime-image-manager>
+            (changed)="onImageChanged($event)"></app-storytime-image-manager>
 
           <app-storytime-image-manager
             [slot]="imageSlots.ARC_PROFILE"
@@ -185,8 +176,7 @@
             [imageUrl]="arc.profileImageUrl"
             [imageAlt]="arc.profileImageAlt"
             altControlName="profileImageAlt"
-            (changed)="onImageChanged($event)"
-          ></app-storytime-image-manager>
+            (changed)="onImageChanged($event)"></app-storytime-image-manager>
         </div>
       </section>
     }
@@ -194,16 +184,14 @@
     <app-storytime-editor-actions
       [isSaving]="isSaving"
       [canPublish]="canPublish"
-      [cancelLink]='["/", appRoutes.STORYTIME, "manage", "arcs"]'
-      (publish)="publish()"
-    />
+      [cancelLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']"
+      (publish)="publish()" />
   </form>
 
   @if (arc) {
     <!-- Tagging needs something to tag, so it appears once the Arc exists. -->
     <app-tag-picker
       targetType="ARC"
-      [targetId]="arc.id"
-    ></app-tag-picker>
+      [targetId]="arc.id"></app-tag-picker>
   }
 </div>
