@@ -8,8 +8,13 @@ import {
 } from 'src/app/models/storytime.models';
 import { SpotlightService } from '../../spotlight.service';
 import { SpotlightAdminListComponent } from './spotlight-admin-list.component';
+import {
+  ConfirmPromptDouble,
+  stubConfirmPrompt,
+} from 'src/app/shared/actions/confirm-prompt.testing';
 
 describe('SpotlightAdminListComponent', () => {
+  let confirm: ConfirmPromptDouble;
   let fixture: ComponentFixture<SpotlightAdminListComponent>;
   let spotlightService: {
     getAll: jest.Mock;
@@ -74,9 +79,12 @@ describe('SpotlightAdminListComponent', () => {
       remove: jest.fn().mockReturnValue(of(undefined)),
     };
 
+    confirm = stubConfirmPrompt();
+
     TestBed.configureTestingModule({
       imports: [SpotlightAdminListComponent],
       providers: [
+        confirm.provider,
         provideRouter([]),
         { provide: SpotlightService, useValue: spotlightService },
       ],
@@ -160,6 +168,30 @@ describe('SpotlightAdminListComponent', () => {
     fixture.componentInstance.remove(buildEntry());
 
     expect(spotlightService.remove).toHaveBeenCalledWith('spotlight-1');
+  });
+
+  it('asks before deleting an entry, naming it', () => {
+    render();
+    fixture.componentInstance.remove(buildEntry());
+
+    expect(confirm.lastAsked()?.title).toBe('Delete spotlight');
+    expect(confirm.lastAsked()?.message).toContain('Start here');
+  });
+
+  // The entry is the wording and artwork around a Story, not the Story.
+  it('says the work it points at is kept', () => {
+    render();
+    fixture.componentInstance.remove(buildEntry());
+
+    expect(confirm.lastAsked()?.message).toContain('work it points at is kept');
+  });
+
+  it('keeps the entry when the administrator says no', () => {
+    confirm.answer(false);
+    render();
+    fixture.componentInstance.remove(buildEntry());
+
+    expect(spotlightService.remove).not.toHaveBeenCalled();
   });
 
   // A refused publish names exactly why, most often that the work has since

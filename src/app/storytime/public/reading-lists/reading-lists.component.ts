@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { ReadingList } from 'src/app/models/storytime.models';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ReadingListService } from '../../reading-list.service';
@@ -51,6 +52,7 @@ export class ReadingListsComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _confirm = new ConfirmPrompt();
 
   /**
    * Loads the reader's lists.
@@ -94,7 +96,7 @@ export class ReadingListsComponent implements OnInit {
   }
 
   /**
-   * Deletes a list.
+   * Deletes a list, once the reader has agreed to lose it.
    *
    * @param list - The list.
    */
@@ -103,6 +105,28 @@ export class ReadingListsComponent implements OnInit {
       return;
     }
 
+    this._confirm
+      .askToDestroy({
+        title: 'Delete list',
+        question: 'Are you sure you want to delete this reading list?',
+        subject: list.name,
+        consequence:
+          'Everything on it is taken off, and this cannot be undone. The Stories themselves are kept.',
+        confirmText: 'Delete list',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.deleteList(list);
+        }
+      });
+  }
+
+  /**
+   * Asks the server to delete the list.
+   *
+   * @param list - The list.
+   */
+  private deleteList(list: ReadingList): void {
     this.isSaving = true;
     this.errorMessage = '';
 

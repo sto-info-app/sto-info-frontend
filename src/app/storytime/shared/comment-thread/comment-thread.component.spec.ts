@@ -12,6 +12,10 @@ import {
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { CommentService } from '../../comment.service';
 import { CommentThreadComponent } from './comment-thread.component';
+import {
+  ConfirmPromptDouble,
+  stubConfirmPrompt,
+} from 'src/app/shared/actions/confirm-prompt.testing';
 
 const STORY_ID = 'story-1';
 const READER_ID = 'reader-1';
@@ -38,6 +42,7 @@ const buildComment = (
 });
 
 describe('CommentThreadComponent', () => {
+  let confirm: ConfirmPromptDouble;
   let component: CommentThreadComponent;
   let fixture: ComponentFixture<CommentThreadComponent>;
   let commentService: {
@@ -103,9 +108,12 @@ describe('CommentThreadComponent', () => {
       hasPermission: jest.fn().mockReturnValue(of(false)),
     };
 
+    confirm = stubConfirmPrompt();
+
     await TestBed.configureTestingModule({
       imports: [CommentThreadComponent],
       providers: [
+        confirm.provider,
         { provide: CommentService, useValue: commentService },
         { provide: AuthService, useValue: authService },
         { provide: AccessControlService, useValue: accessControlService },
@@ -624,6 +632,36 @@ describe('CommentThreadComponent', () => {
     component.deleteOwn(buildComment());
 
     expect(commentService.deleteComment).toHaveBeenCalledWith('comment-1');
+  });
+
+  describe('taking back a comment', () => {
+    it('asks first', () => {
+      create();
+
+      component.deleteOwn(buildComment());
+
+      expect(confirm.lastAsked()?.title).toBe('Delete comment');
+      expect(confirm.lastAsked()?.message).toContain('cannot be undone');
+    });
+
+    // The comment is on the screen behind the dialog, and a long one would
+    // fill the prompt with the very thing the reader is trying to be rid of.
+    it('does not quote the comment back', () => {
+      create();
+
+      component.deleteOwn(buildComment());
+
+      expect(confirm.lastAsked()?.message).not.toContain('A fine chapter');
+    });
+
+    it('keeps the comment when the reader says no', () => {
+      confirm.answer(false);
+      create();
+
+      component.deleteOwn(buildComment());
+
+      expect(commentService.deleteComment).not.toHaveBeenCalled();
+    });
   });
 
   describe('an owner tidying their own page', () => {

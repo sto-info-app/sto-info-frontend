@@ -8,8 +8,13 @@ import {
 } from 'src/app/models/storytime.models';
 import { TagService } from '../../tag.service';
 import { TagAdminComponent } from './tag-admin.component';
+import {
+  ConfirmPromptDouble,
+  stubConfirmPrompt,
+} from 'src/app/shared/actions/confirm-prompt.testing';
 
 describe('TagAdminComponent', () => {
+  let confirm: ConfirmPromptDouble;
   let fixture: ComponentFixture<TagAdminComponent>;
   let tagService: {
     getTags: jest.Mock;
@@ -53,9 +58,12 @@ describe('TagAdminComponent', () => {
       deleteTag: jest.fn().mockReturnValue(of(undefined)),
     };
 
+    confirm = stubConfirmPrompt();
+
     TestBed.configureTestingModule({
       imports: [TagAdminComponent],
       providers: [
+        confirm.provider,
         provideRouter([]),
         { provide: TagService, useValue: tagService },
       ],
@@ -153,6 +161,25 @@ describe('TagAdminComponent', () => {
 
     expect(tagService.deleteTag).toHaveBeenCalledWith('tag-1');
     expect(tagService.getTags).toHaveBeenCalledTimes(2);
+  });
+
+  // A tag is shared across every Story carrying it, so the question says what
+  // deleting one does to work that is not the administrator's own.
+  it('asks before removing a tag, naming it and its reach', () => {
+    render();
+    fixture.componentInstance.remove(buildTag());
+
+    expect(confirm.lastAsked()?.title).toBe('Delete tag');
+    expect(confirm.lastAsked()?.message).toContain('Klingon');
+    expect(confirm.lastAsked()?.message).toContain('every Story');
+  });
+
+  it('keeps the tag when the administrator says no', () => {
+    confirm.answer(false);
+    render();
+    fixture.componentInstance.remove(buildTag());
+
+    expect(tagService.deleteTag).not.toHaveBeenCalled();
   });
 
   // Leaving a deleted tag loaded in the form would invite an edit that could

@@ -4,6 +4,10 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ManagedCharacter } from 'src/app/models/storytime.models';
 import { CharacterService } from '../../character.service';
+import {
+  ConfirmPromptDouble,
+  stubConfirmPrompt,
+} from 'src/app/shared/actions/confirm-prompt.testing';
 import { CharacterListComponent } from './character-list.component';
 
 describe('CharacterListComponent', () => {
@@ -13,6 +17,7 @@ describe('CharacterListComponent', () => {
     reorderCharacters: jest.Mock;
     deleteCharacter: jest.Mock;
   };
+  let confirm: ConfirmPromptDouble;
 
   /**
    * Builds a Character.
@@ -57,10 +62,13 @@ describe('CharacterListComponent', () => {
       deleteCharacter: jest.fn().mockReturnValue(of(undefined)),
     };
 
+    confirm = stubConfirmPrompt();
+
     TestBed.configureTestingModule({
       imports: [CharacterListComponent],
       providers: [
         provideRouter([]),
+        confirm.provider,
         { provide: CharacterService, useValue: characterService },
         {
           provide: ActivatedRoute,
@@ -210,6 +218,26 @@ describe('CharacterListComponent', () => {
 
       expect(characterService.deleteCharacter).toHaveBeenCalledWith('a');
       expect(characterService.getMyCharacters).toHaveBeenCalledTimes(2);
+    });
+
+    // Deleting a Character takes their portrait, biography and every Chapter
+    // appearance with them, and none of it comes back.
+    it('asks first, naming the Character', () => {
+      render();
+
+      fixture.componentInstance.remove(buildCharacter('a', 'Shran'));
+
+      expect(confirm.lastAsked()?.title).toBe('Delete Character');
+      expect(confirm.lastAsked()?.message).toContain('Shran');
+    });
+
+    it('leaves the Character alone when the creator says no', () => {
+      confirm.answer(false);
+      render();
+
+      fixture.componentInstance.remove(buildCharacter('a', 'Shran'));
+
+      expect(characterService.deleteCharacter).not.toHaveBeenCalled();
     });
 
     it('explains a deletion that failed', () => {

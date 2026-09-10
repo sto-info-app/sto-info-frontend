@@ -12,8 +12,13 @@ import { AccessControlService } from 'src/app/shared/services/access-control.ser
 import { ArcService } from '../../arc.service';
 import { StoryService } from '../../story.service';
 import { ArcStoryListComponent } from './arc-story-list.component';
+import {
+  ConfirmPromptDouble,
+  stubConfirmPrompt,
+} from 'src/app/shared/actions/confirm-prompt.testing';
 
 describe('ArcStoryListComponent', () => {
+  let confirm: ConfirmPromptDouble;
   let fixture: ComponentFixture<ArcStoryListComponent>;
   let arcService: {
     getArcStories: jest.Mock;
@@ -80,9 +85,12 @@ describe('ArcStoryListComponent', () => {
       hasPermission: jest.fn().mockReturnValue(of(true)),
     };
 
+    confirm = stubConfirmPrompt();
+
     TestBed.configureTestingModule({
       imports: [ArcStoryListComponent],
       providers: [
+        confirm.provider,
         provideRouter([]),
         { provide: ArcService, useValue: arcService },
         { provide: StoryService, useValue: storyService },
@@ -297,6 +305,48 @@ describe('ArcStoryListComponent', () => {
       fixture.componentInstance.remove(buildMembership());
 
       expect(arcService.leaveArc).toHaveBeenCalledWith('membership-1');
+    });
+
+    // A curator removing somebody else's writing from their reading order
+    // should not have to wonder what they have just done to it.
+    it('asks first, and says the Story itself is kept', () => {
+      render();
+      fixture.componentInstance.remove(buildMembership());
+
+      expect(confirm.lastAsked()?.title).toBe('Remove from Arc');
+      expect(confirm.lastAsked()?.message).toContain('Story itself is kept');
+    });
+
+    // Withdrawing an invitation takes away something nobody accepted; removing
+    // an agreed Story takes it out of a reading order people may be following.
+    it('words a withdrawn invitation differently', () => {
+      render();
+      fixture.componentInstance.remove(
+        buildMembership({
+          membershipStatus: ArcMembershipStatus.INVITED,
+        }),
+      );
+
+      expect(confirm.lastAsked()?.title).toBe('Withdraw invitation');
+    });
+
+    it('treats a Story that asked to join as pending too', () => {
+      render();
+      fixture.componentInstance.remove(
+        buildMembership({
+          membershipStatus: ArcMembershipStatus.REQUESTED,
+        }),
+      );
+
+      expect(confirm.lastAsked()?.title).toBe('Withdraw invitation');
+    });
+
+    it('leaves the Story in the Arc when the curator says no', () => {
+      confirm.answer(false);
+      render();
+      fixture.componentInstance.remove(buildMembership());
+
+      expect(arcService.leaveArc).not.toHaveBeenCalled();
     });
   });
 

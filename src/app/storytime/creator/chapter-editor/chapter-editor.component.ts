@@ -27,6 +27,7 @@ import {
   ManagedCharacter,
   StorytimeLanguage,
 } from 'src/app/models/storytime.models';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -144,6 +145,7 @@ export class ChapterEditorComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _confirm = new ConfirmPrompt();
   private readonly _editor = new StorytimeEditorSupport(this);
 
   /**
@@ -320,11 +322,34 @@ export class ChapterEditorComponent implements OnInit {
   }
 
   /**
-   * Removes a video from this Chapter.
+   * Removes a video from this Chapter, once the creator has agreed.
    *
    * @param media - The video to remove.
    */
   removeMedia(media: ChapterMedia): void {
+    this._confirm
+      .askToDestroy({
+        title: 'Remove video',
+        question: 'Are you sure you want to remove this video?',
+        subject: media.title ?? media.embedUrl,
+        consequence:
+          'Putting it back means finding the video and adding it again.',
+        confirmText: 'Remove',
+        cancelText: 'Keep it',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.deleteMedia(media);
+        }
+      });
+  }
+
+  /**
+   * Asks the server to take the video off the Chapter.
+   *
+   * @param media - The video to remove.
+   */
+  private deleteMedia(media: ChapterMedia): void {
     this._mediaService
       .removeMedia(media.id)
       .pipe(

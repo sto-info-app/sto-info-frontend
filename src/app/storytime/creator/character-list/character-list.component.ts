@@ -22,6 +22,7 @@ import {
   buildCharacterPanelVm,
 } from '../../character-panel.utility';
 import { StorytimeCastEntryComponent } from '../../shared/cast-entry/cast-entry.component';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
 
 /**
@@ -70,6 +71,7 @@ export class CharacterListComponent implements OnInit {
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _actions = new ManagedActionRunner(this, () => this.load());
+  private readonly _confirm = new ConfirmPrompt();
 
   /**
    * Loads the cast of the Story named in the route.
@@ -98,12 +100,28 @@ export class CharacterListComponent implements OnInit {
   }
 
   /**
-   * Deletes a Character and refreshes the list.
+   * Deletes a Character, once the creator has agreed to lose them.
    *
    * @param character - The Character to delete.
    */
   remove(character: ManagedCharacter): void {
-    this._actions.run(this._characterService.deleteCharacter(character.id));
+    this._confirm
+      .askToDestroy({
+        title: 'Delete Character',
+        question:
+          'Are you sure you want to delete this Character from the cast?',
+        subject: character.name,
+        consequence:
+          'Their portrait, biography and Chapter appearances go with them, and this cannot be undone.',
+        confirmText: 'Delete Character',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this._actions.run(
+            this._characterService.deleteCharacter(character.id),
+          );
+        }
+      });
   }
 
   /**
