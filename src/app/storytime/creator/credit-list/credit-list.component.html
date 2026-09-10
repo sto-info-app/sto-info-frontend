@@ -1,0 +1,300 @@
+<section
+  id="storytime-credit-list-page"
+  class="storytime-page">
+  <h1>Credits</h1>
+
+  <nav class="storytime-page-actions">
+    <a
+      class="lcars-btn lcars-btn-auto bluey"
+      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', storyId]">
+      Back to the Story
+    </a>
+  </nav>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Credits unavailable"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
+
+  <p class="storytime-intro">
+    Crediting somebody is public thanks. It gives them no access to the Story at
+    all — that is what a collaborator is.
+  </p>
+
+  <section class="storytime-section">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Credit somebody</span>
+    </div>
+
+    <form
+      class="storytime-panel storytime-form"
+      [formGroup]="form"
+      (ngSubmit)="add()">
+      <div class="form-row">
+        <div class="lcars-input-container perano">
+          <label for="credit-username">Member</label>
+          <input
+            id="credit-username"
+            type="text"
+            autocomplete="off"
+            formControlName="username"
+            maxlength="50" />
+          <p class="field-hint">
+            Their username. Start typing to search the people on this Story and
+            anybody with a public profile.
+          </p>
+          @if (
+            form.controls['username'].touched &&
+            form.controls['username'].invalid
+          ) {
+            <small class="field-error"
+              >Name the member you want to credit.</small
+            >
+          }
+        </div>
+
+        <div class="lcars-input-container gold">
+          <label for="credit-role">Role</label>
+          <select
+            id="credit-role"
+            formControlName="roleId">
+            <option value="">Choose a role</option>
+            @for (role of roles; track role.id) {
+              <option [value]="role.id">{{ role.name }}</option>
+            }
+          </select>
+          @if (
+            form.controls['roleId'].touched && form.controls['roleId'].invalid
+          ) {
+            <small class="field-error"
+              >Choose the role to credit them in.</small
+            >
+          }
+        </div>
+      </div>
+
+      @if (matches.length > 0) {
+        <ul class="storytime-credits__matches">
+          @for (member of matches; track member.username) {
+            <li>
+              <button
+                class="lcars-btn lcars-btn-auto bluey"
+                type="button"
+                (click)="choose(member)">
+                {{ member.username }}
+                @if (member.isCollaborator) {
+                  <span class="header-count-badge">On this Story</span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      <p class="storytime-form__legend">What the credit is for</p>
+      <div class="form-row">
+        <div class="lcars-input-container bluey">
+          <label for="credit-chapter">A single Chapter</label>
+          <select
+            id="credit-chapter"
+            formControlName="chapterId">
+            <option value="">The whole Story</option>
+            @for (chapter of chapters; track chapter.id) {
+              <option [value]="chapter.id">{{ chapter.title }}</option>
+            }
+          </select>
+          <p class="field-hint">Leave this alone to credit the Story itself.</p>
+        </div>
+
+        <div class="lcars-input-container green">
+          <label for="credit-character">A single Character</label>
+          <select
+            id="credit-character"
+            formControlName="characterId">
+            <option value="">Nobody in particular</option>
+            @for (character of cast; track character.id) {
+              <option [value]="character.id">{{ character.name }}</option>
+            }
+          </select>
+          <p class="field-hint">
+            For a credit that belongs to one of the cast, such as a voice.
+          </p>
+        </div>
+      </div>
+
+      <p class="storytime-form__legend">How long it applies for</p>
+      <div class="form-row">
+        <div class="lcars-input-container perano">
+          <label for="credit-valid-from">From this Chapter</label>
+          <select
+            id="credit-valid-from"
+            formControlName="validFromChapterId">
+            <option value="">The whole run</option>
+            @for (chapter of chapters; track chapter.id) {
+              <option [value]="chapter.id">{{ chapter.title }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="lcars-input-container perano">
+          <label for="credit-valid-to">Until this Chapter</label>
+          <select
+            id="credit-valid-to"
+            formControlName="validToChapterId">
+            <option value="">The end</option>
+            @for (chapter of chapters; track chapter.id) {
+              <option [value]="chapter.id">{{ chapter.title }}</option>
+            }
+          </select>
+          @if (needsStartingChapter) {
+            <small class="field-error">
+              Say which Chapter this credit starts from as well.
+            </small>
+          }
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="lcars-input-container tangerine">
+          <label for="credit-label">Wording</label>
+          <input
+            id="credit-label"
+            type="text"
+            formControlName="creditLabel"
+            maxlength="100" />
+          <p class="field-hint">
+            Used instead of the role name, for a credit the roles do not word
+            well.
+          </p>
+        </div>
+
+        <div class="lcars-input-container tangerine storytime-field-full">
+          <label for="credit-notes">Notes</label>
+          <textarea
+            id="credit-notes"
+            formControlName="notes"
+            rows="3"
+            maxlength="500"></textarea>
+          <p class="field-hint">Shown with the credit on the Story page.</p>
+        </div>
+      </div>
+
+      <div class="storytime-form-actions">
+        <button
+          class="lcars-btn green"
+          type="submit">
+          Add credit
+        </button>
+      </div>
+    </form>
+  </section>
+
+  @if (isLoading) {
+    <app-loading-bar loadingText="Loading the credits"></app-loading-bar>
+  } @else if (credits.length === 0) {
+    <p class="storytime-empty">Nobody is credited on this Story yet.</p>
+  } @else {
+    <ol class="storytime-credits">
+      @for (credit of credits; track credit.id) {
+        <li class="storytime-panel-card storytime-panel-card--crew">
+          <div class="storytime-panel-card__heading">
+            <span class="storytime-panel-card__name">{{
+              describe(credit)
+            }}</span>
+          </div>
+
+          <div class="storytime-panel-card__body">
+            <p class="storytime-credits__scope">{{ scopeOf(credit) }}</p>
+
+            @if (credit.username === null) {
+              <p class="storytime-credits__missing">
+                <i
+                  class="fa-solid fa-user-slash"
+                  aria-hidden="true"></i>
+                The member this credits is no longer here. The credit stays
+                until you remove it.
+              </p>
+            }
+
+            @if (editingCreditId === credit.id) {
+              <form
+                class="storytime-form"
+                [formGroup]="editForm"
+                (ngSubmit)="saveEdit()">
+                <div class="form-row">
+                  <div class="lcars-input-container tangerine">
+                    <label [attr.for]="'edit-label-' + credit.id">
+                      Wording
+                    </label>
+                    <input
+                      [id]="'edit-label-' + credit.id"
+                      type="text"
+                      formControlName="creditLabel"
+                      maxlength="100" />
+                  </div>
+
+                  <div
+                    class="lcars-input-container tangerine storytime-field-full">
+                    <label [attr.for]="'edit-notes-' + credit.id">Notes</label>
+                    <textarea
+                      [id]="'edit-notes-' + credit.id"
+                      formControlName="notes"
+                      rows="3"
+                      maxlength="500"></textarea>
+                  </div>
+                </div>
+
+                <p class="field-hint">
+                  Who is credited, in what role, and for what cannot be changed.
+                  Remove the credit and add it again instead.
+                </p>
+
+                <div class="storytime-form-actions">
+                  <button
+                    class="lcars-btn green"
+                    type="submit">
+                    Save wording
+                  </button>
+                  <button
+                    class="lcars-btn red"
+                    type="button"
+                    (click)="cancelEdit()">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            } @else {
+              @if (credit.notes) {
+                <p class="storytime-credits__notes">{{ credit.notes }}</p>
+              }
+
+              <div class="storytime-actions">
+                <button
+                  class="cta-icon"
+                  type="button"
+                  title="Reword this credit"
+                  aria-label="Reword this credit"
+                  (click)="startEdit(credit)">
+                  <i
+                    class="fa-solid fa-user-pen"
+                    aria-hidden="true"></i>
+                </button>
+                <button
+                  class="cta-icon delete-icon"
+                  type="button"
+                  title="Remove this credit"
+                  aria-label="Remove this credit"
+                  (click)="remove(credit)">
+                  <i
+                    class="fa-solid fa-trash"
+                    aria-hidden="true"></i>
+                </button>
+              </div>
+            }
+          </div>
+        </li>
+      }
+    </ol>
+  }
+</section>

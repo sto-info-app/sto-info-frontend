@@ -37,7 +37,7 @@ describe('StoryDashboardComponent', () => {
   let moderationService: { appeal: jest.Mock };
   let chapterService: { getMyChapters: jest.Mock };
   let characterService: { getMyCharacters: jest.Mock };
-  let crewService: { getCollaborators: jest.Mock };
+  let crewService: { getCollaborators: jest.Mock; getMyCredits: jest.Mock };
 
   /**
    * Builds a managed Story.
@@ -92,6 +92,7 @@ describe('StoryDashboardComponent', () => {
     };
     crewService = {
       getCollaborators: jest.fn().mockReturnValue(of([])),
+      getMyCredits: jest.fn().mockReturnValue(of([])),
     };
 
     confirm = stubConfirmPrompt();
@@ -133,6 +134,7 @@ describe('StoryDashboardComponent', () => {
         chapters: 2,
         cast: 1,
         collaborators: 0,
+        credits: 0,
       });
       expect(
         element.querySelector('.header-count-badge')?.textContent,
@@ -146,6 +148,7 @@ describe('StoryDashboardComponent', () => {
       ['Chapters', () => chapterService.getMyChapters, 'chapters'],
       ['the cast', () => characterService.getMyCharacters, 'cast'],
       ['collaborators', () => crewService.getCollaborators, 'collaborators'],
+      ['credits', () => crewService.getMyCredits, 'credits'],
     ] as const)(
       'says nothing when %s cannot be counted',
       (_what, mock, key) => {
@@ -165,7 +168,7 @@ describe('StoryDashboardComponent', () => {
 
       expect(
         fixture.componentInstance.countsFor(buildStory({ id: 'other' })),
-      ).toEqual({ chapters: 0, cast: 0, collaborators: 0 });
+      ).toEqual({ chapters: 0, cast: 0, collaborators: 0, credits: 0 });
     });
   });
 

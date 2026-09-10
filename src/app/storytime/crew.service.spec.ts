@@ -142,10 +142,12 @@ describe('CrewService', () => {
   });
 
   describe('credits', () => {
-    it('credits somebody', async () => {
+    // Named rather than identified: the server resolves the username, and no
+    // user identifier ever has to reach the client for crediting to work.
+    it('credits somebody by their username', async () => {
       const credit = firstValueFrom(
         service.addCredit(STORY_ID, {
-          userId: 'member-1',
+          username: 'captain.picard',
           roleId: 'role-1',
         }),
       );
@@ -154,12 +156,54 @@ describe('CrewService', () => {
         `${API_URLS.STORYTIME_MANAGE_STORIES}/${STORY_ID}/credits`,
       );
       expect(request.request.body).toEqual({
-        userId: 'member-1',
+        username: 'captain.picard',
         roleId: 'role-1',
       });
       request.flush({ id: CREDIT_ID });
 
       await expect(credit).resolves.toBeDefined();
+    });
+
+    // The published roll is read by slug and only once a Story is out, which
+    // is no use to a creator assembling the credits on a draft.
+    it('reads the credits on a Story being managed', async () => {
+      const credits = firstValueFrom(service.getMyCredits(STORY_ID));
+
+      const request = httpMock.expectOne(
+        `${API_URLS.STORYTIME_MANAGE_STORIES}/${STORY_ID}/credits`,
+      );
+      expect(request.request.method).toBe('GET');
+      request.flush([{ id: CREDIT_ID }]);
+
+      await expect(credits).resolves.toHaveLength(1);
+    });
+
+    it('searches for members to credit', async () => {
+      const members = firstValueFrom(
+        service.findCreditableMembers(STORY_ID, 'pic'),
+      );
+
+      const request = httpMock.expectOne(
+        request =>
+          request.url ===
+          `${API_URLS.STORYTIME_MANAGE_STORIES}/${STORY_ID}/creditable-members`,
+      );
+      expect(request.request.params.get('search')).toBe('pic');
+      request.flush([{ username: 'captain.picard' }]);
+
+      await expect(members).resolves.toHaveLength(1);
+    });
+
+    it('sends no search when there is nothing to search for', async () => {
+      const members = firstValueFrom(service.findCreditableMembers(STORY_ID));
+
+      const request = httpMock.expectOne(
+        `${API_URLS.STORYTIME_MANAGE_STORIES}/${STORY_ID}/creditable-members`,
+      );
+      expect(request.request.params.has('search')).toBe(false);
+      request.flush([]);
+
+      await expect(members).resolves.toEqual([]);
     });
 
     it('rewords a credit', async () => {
@@ -209,10 +253,15 @@ describe('CrewService', () => {
       ['revoke', () => service.revoke(COLLABORATOR_ID)],
       [
         'addCredit',
-        () => service.addCredit(STORY_ID, { userId: 'm', roleId: 'r' }),
+        () => service.addCredit(STORY_ID, { username: 'picard', roleId: 'r' }),
       ],
       ['updateCredit', () => service.updateCredit(CREDIT_ID, {})],
       ['removeCredit', () => service.removeCredit(CREDIT_ID)],
+      ['getMyCredits', () => service.getMyCredits(STORY_ID)],
+      [
+        'findCreditableMembers',
+        () => service.findCreditableMembers(STORY_ID, 'pic'),
+      ],
     ])('refuses %s', async (_name, act) => {
       await expect(firstValueFrom(act())).rejects.toThrow('No token found');
       httpMock.expectNone(() => true);

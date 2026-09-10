@@ -173,6 +173,23 @@
                 }}</span>
               }
             </a>
+            <a
+              class="lcars-btn lcars-btn-auto bluey"
+              [routerLink]="[
+                '/',
+                appRoutes.STORYTIME,
+                'manage',
+                'stories',
+                story.id,
+                'credits',
+              ]"
+              >Credits
+              @if (countsFor(story).credits > 0) {
+                <span class="header-count-badge">{{
+                  countsFor(story).credits
+                }}</span>
+              }
+            </a>
           </nav>
 
           <app-storytime-content-policy-panel

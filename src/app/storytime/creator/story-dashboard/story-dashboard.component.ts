@@ -45,6 +45,7 @@ export interface StoryCounts {
   chapters: number;
   cast: number;
   collaborators: number;
+  credits: number;
 }
 
 /**
@@ -54,7 +55,12 @@ export interface StoryCounts {
  * Story's counts on every check, and a new object each time would be a new
  * value each time.
  */
-const NO_COUNTS: StoryCounts = { chapters: 0, cast: 0, collaborators: 0 };
+const NO_COUNTS: StoryCounts = {
+  chapters: 0,
+  cast: 0,
+  collaborators: 0,
+  credits: 0,
+};
 
 /**
  * A creator's own Stories, with the actions available on each.
@@ -327,6 +333,9 @@ export class StoryDashboardComponent implements OnInit {
         collaborators: this._crewService
           .getCollaborators(story.id)
           .pipe(catchError(() => of([]))),
+        credits: this._crewService
+          .getMyCredits(story.id)
+          .pipe(catchError(() => of([]))),
       })
         .pipe(
           takeUntilDestroyed(this._destroyRef),
@@ -337,6 +346,7 @@ export class StoryDashboardComponent implements OnInit {
             chapters: held.chapters.length,
             cast: held.cast.length,
             collaborators: held.collaborators.length,
+            credits: held.credits.length,
           };
         });
     }
