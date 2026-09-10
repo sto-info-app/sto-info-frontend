@@ -193,7 +193,14 @@ behind an edge is a section nobody knows is there. Mark the current tab
 `active`.
 
 Used by the character detail page, the community tabs, the Storytime policy
-header and story detail, and Custom Tracking.
+header and story detail, the Storytime Markdown field, and Custom Tracking.
+
+A strip does not have to switch whole sections: `app-storytime-markdown-field`
+uses one to put Edit and Preview over a single textarea, which is the smallest
+thing the mixin is worth reaching for. Keep the hidden panel in the page
+(`[hidden]`) rather than removing it when it holds something a person is part way
+through — a textarea taken out of the page loses its caret, its scroll position
+and every undo step behind it.
 
 ### Cards and panels
 
