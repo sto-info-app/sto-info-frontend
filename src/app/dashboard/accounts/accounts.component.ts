@@ -5,8 +5,11 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
   inject,
+  signal,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router, RouterModule } from '@angular/router';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
@@ -22,6 +25,18 @@ import {
   APP_ROUTE_TITLES,
 } from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
+import {
+  AccountFilterFields,
+  AccountFilters,
+  AccountSortBy,
+  AccountSortOption,
+  AccountSortOrder,
+  DEFAULT_ACCOUNT_SORT_BY,
+  DEFAULT_ACCOUNT_SORT_ORDER,
+  buildAccountSearchHaystack,
+  countActiveAccountFilters,
+  matchesAccountFilters,
+} from 'src/app/shared/utils/account-list.utils';
 import {
   getAccountBgImagePath,
   getLauncherClass,
@@ -46,11 +61,26 @@ export interface AccountVm {
   launcherIcon: string | null;
   /** Presentation model handed to the shared account card. */
   card: AccountCardVm;
+  /** Precomputed values the side-column filters match against. */
+  filterFields: AccountFilterFields;
 }
 
 /** Action keys emitted by the account cards on this page. */
 export const ACCOUNT_CARD_EDIT = 'edit';
 export const ACCOUNT_CARD_DELETE = 'delete';
+export const ACCOUNT_CARD_PIN = 'pin';
+
+/**
+ * The orderings offered for the account list.
+ *
+ * The values are the API's own, so they are sent to it unchanged.
+ */
+export const ACCOUNT_SORT_OPTIONS: readonly AccountSortOption[] = [
+  { value: 'handle', label: 'Handle' },
+  { value: 'characterCount', label: 'Captains' },
+  { value: 'endeavourTotalNodes', label: 'Endeavour Nodes' },
+  { value: 'accountCreatedDate', label: 'Account Created' },
+];
 
 /**
  * Component to list and manage STO accounts.
@@ -65,6 +95,7 @@ export const ACCOUNT_CARD_DELETE = 'delete';
     CommonModule,
     MatDialogModule,
     RouterModule,
+    FormsModule,
     LoadingBarComponent,
     AccountCardComponent,
   ],
@@ -85,11 +116,92 @@ export class AccountsComponent implements OnInit, OnDestroy {
   /** List of available launchers. */
   launchers: Launcher[] = [];
 
-  /** Precomputed view-model rows for the account cards. */
-  accountVms: AccountVm[] = [];
+  /** Precomputed view-model rows for the account cards, in the API's order. */
+  readonly accountVms = signal<AccountVm[]>([]);
 
   /** Flag to indicate if data is being loaded. */
   isLoading = true;
+
+  /** The orderings offered in the Sort panel. */
+  readonly sortOptions = ACCOUNT_SORT_OPTIONS;
+
+  /** Field the list is ordered by. Applied by the API, not here. */
+  readonly sortBy = signal<AccountSortBy>(DEFAULT_ACCOUNT_SORT_BY);
+
+  /** Direction the list is ordered in. Applied by the API, not here. */
+  readonly sortOrder = signal<AccountSortOrder>(DEFAULT_ACCOUNT_SORT_ORDER);
+
+  /** Free-text search over handle, username, email and notes. */
+  readonly searchText = signal('');
+
+  /** Platform ID to filter by, or an empty string for all platforms. */
+  readonly platformFilter = signal('');
+
+  /** Launcher ID to filter by, or an empty string for all launchers. */
+  readonly launcherFilter = signal('');
+
+  /** Whether to show only accounts with a lifetime subscription. */
+  readonly lifetimeOnly = signal(false);
+
+  /** Whether to show only pinned accounts. */
+  readonly pinnedOnly = signal(false);
+
+  /** Whether the Filters panel is collapsed. */
+  filtersCollapsed = false;
+
+  /** Whether the Sort panel is collapsed. */
+  sortCollapsed = false;
+
+  /** The filters currently applied, as the shared filter helpers expect them. */
+  readonly filters = computed<AccountFilters>(() => ({
+    searchText: this.searchText(),
+    platformKey: this.platformFilter(),
+    launcherKey: this.launcherFilter(),
+    lifetimeOnly: this.lifetimeOnly(),
+    pinnedOnly: this.pinnedOnly(),
+  }));
+
+  /**
+   * The cards to render: the API's ordering, narrowed by the filters.
+   *
+   * Filtering happens here rather than at the API because the whole list is
+   * already loaded, so hiding a card needs no round trip.
+   */
+  readonly filteredAccountVms = computed(() => {
+    const filters = this.filters();
+
+    return this.accountVms().filter(vm =>
+      matchesAccountFilters(vm.filterFields, filters),
+    );
+  });
+
+  /** How many filters are narrowing the list. */
+  readonly activeFilterCount = computed(() =>
+    countActiveAccountFilters(this.filters()),
+  );
+
+  /**
+   * Whether to offer sorting and filtering at all.
+   *
+   * With a single account there is nothing to order and nothing to narrow, so
+   * the panels would only be clutter. Pinning stays available regardless: it is
+   * a per-account choice that keeps its meaning once a second account arrives.
+   */
+  readonly showListControls = computed(() => this.accountVms().length > 1);
+
+  /** Whether every loaded account has been filtered out of the list. */
+  readonly allAccountsFilteredOut = computed(
+    () =>
+      this.accountVms().length > 0 && this.filteredAccountVms().length === 0,
+  );
+
+  /**
+   * How many accounts are pinned, so the controls that only make sense with a
+   * pin in play stay hidden until there is one.
+   */
+  readonly pinnedCount = computed(
+    () => this.accountVms().filter(vm => vm.filterFields.pinned).length,
+  );
 
   private readonly _stoAccountService = inject(StoAccountService);
   readonly privacyMode = inject(PrivacyModeService);
@@ -114,7 +226,10 @@ export class AccountsComponent implements OnInit, OnDestroy {
   loadAccounts(): void {
     this.isLoading = true;
     forkJoin({
-      accounts: this._stoAccountService.getAccounts(),
+      accounts: this._stoAccountService.getAccounts(
+        this.sortBy(),
+        this.sortOrder(),
+      ),
       platforms: this._stoAccountService.getPlatforms(),
       launchers: this._stoAccountService.getLaunchers(),
     })
@@ -124,8 +239,8 @@ export class AccountsComponent implements OnInit, OnDestroy {
           this.accounts = accounts;
           this.platforms = platforms;
           this.launchers = launchers;
-          this.accountVms = accounts.map(account =>
-            this._buildAccountVm(account),
+          this.accountVms.set(
+            accounts.map(account => this._buildAccountVm(account)),
           );
           this.isLoading = false;
           this._cdr.detectChanges();
@@ -133,6 +248,62 @@ export class AccountsComponent implements OnInit, OnDestroy {
         error: () => {
           this.isLoading = false;
           this._cdr.detectChanges();
+        },
+      });
+  }
+
+  /**
+   * Changes the field the list is ordered by and reloads it.
+   *
+   * @param sortBy The field to order by.
+   */
+  setSortBy(sortBy: AccountSortBy): void {
+    this.sortBy.set(sortBy);
+    this.loadAccounts();
+  }
+
+  /**
+   * Changes the direction the list is ordered in and reloads it.
+   *
+   * @param sortOrder The direction to order in.
+   */
+  setSortOrder(sortOrder: AccountSortOrder): void {
+    this.sortOrder.set(sortOrder);
+    this.loadAccounts();
+  }
+
+  /**
+   * Clears every filter, leaving the ordering alone.
+   */
+  clearFilters(): void {
+    this.searchText.set('');
+    this.platformFilter.set('');
+    this.launcherFilter.set('');
+    this.lifetimeOnly.set(false);
+    this.pinnedOnly.set(false);
+  }
+
+  /**
+   * Pins or unpins an account, then reloads the list so its new position comes
+   * from the API rather than being guessed at here.
+   *
+   * @param account The account to pin or unpin.
+   */
+  togglePin(account: StoAccount): void {
+    const pinned = !account.pinnedAt;
+
+    this.isLoading = true;
+    this._cdr.markForCheck();
+
+    this._stoAccountService
+      .setAccountPinned(account.id, pinned)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: () => this.loadAccounts(),
+        error: err => {
+          this.isLoading = false;
+          this._cdr.markForCheck();
+          console.error('Failed to update the STO account pin:', err);
         },
       });
   }
@@ -300,6 +471,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
     const accountLink = `/${APP_ROUTES.STO_DASHBOARD_ACCOUNTS}/${handleSegment}`;
     const platformClass = this.getPlatformClass(account.platformId);
     const launcherName = this.getLauncher(account.launcherId)?.name;
+    const isPinned = !!account.pinnedAt;
 
     return {
       id: account.id,
@@ -330,6 +502,12 @@ export class AccountsComponent implements OnInit, OnDestroy {
         },
         actions: [
           {
+            key: ACCOUNT_CARD_PIN,
+            icon: 'fas fa-thumbtack',
+            title: isPinned ? 'Unpin Account' : 'Pin Account to Top',
+            active: isPinned,
+          },
+          {
             key: ACCOUNT_CARD_EDIT,
             icon: 'fas fa-user-pen',
             title: 'Edit Account',
@@ -341,6 +519,18 @@ export class AccountsComponent implements OnInit, OnDestroy {
             destructive: true,
           },
         ],
+      },
+      filterFields: {
+        searchHaystack: buildAccountSearchHaystack([
+          account.handle,
+          account.username,
+          account.email,
+          account.notes,
+        ]),
+        platformKey: account.platformId ?? null,
+        launcherKey: account.launcherId ?? null,
+        lifetimeSubscription: !!account.lifetimeSubscription,
+        pinned: isPinned,
       },
     };
   }
@@ -397,6 +587,11 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * @param actionKey The key emitted by the card.
    */
   onAccountCardAction(account: StoAccount, actionKey: string): void {
+    if (actionKey === ACCOUNT_CARD_PIN) {
+      this.togglePin(account);
+      return;
+    }
+
     if (actionKey === ACCOUNT_CARD_EDIT) {
       this.editAccount(account);
       return;

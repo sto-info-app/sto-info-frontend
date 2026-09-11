@@ -33,6 +33,13 @@
   background-color: vars.$lcars-sunflower;
 }
 
+// Explains why pinned accounts ignore the ordering just chosen above.
+.sort-note {
+  margin: 0;
+  font-size: 0.75rem;
+  color: vars.$lcars-perano;
+}
+
 @media (width <= 768px) {
   #accounts-container {
     flex-direction: column;
