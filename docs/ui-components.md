@@ -26,6 +26,7 @@ Two rules run through all of it:
 | App globals | `src/styles/styles.scss` | Forms, buttons, list-page patterns, badges, utilities — anything more than one feature uses. |
 | Shared SCSS API | `src/styles/_lcars-variables.scss`, `_lcars-mixins.scss`, `_lcars-tabs.scss`, `_registry-layout.scss`, `_news-colours.scss`, `_notification-card.scss`, `_sto-rarity-colours.scss`, `_lcars-palette-properties.scss` | Variables and mixins. No output of their own except where noted. |
 | Feature partials | `src/styles/_storytime.scss`, `_custom-tracking.scss`, `_help.scss` | One partial per feature whose pages are built from the same handful of shapes. Every rule scoped by the feature's class prefix (`storytime-`, `custom-tracking-`, `help-`). |
+| Rendered Markdown | `src/styles/_markdown.scss` | The classes both Markdown renderers emit for the site's own constructs (`.sto-indent`, `.sto-spacer`). Global rather than per feature: the same writing is shown on a News post, in a Chapter and in the editor preview beside it, and `[innerHTML]` content never carries a component's encapsulation attribute anyway. |
 | Component SCSS | `<component>/<component>.component.scss` | Everything else — one component's own layout. |
 
 Global stylesheets load in the order set by `angular.json`:
