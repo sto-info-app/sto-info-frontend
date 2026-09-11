@@ -98,6 +98,23 @@ export const MARKDOWN_REFERENCE: readonly MarkdownReferenceGroup[] = [
     ],
   },
   {
+    heading: 'This site’s own',
+    intro:
+      'Two marks that are not Markdown anywhere else. They exist because prose wants them and Markdown has no spelling for either. Both are exact and lower case — {Indent} and { indent } are shown as the text they are — and both are recognised only in the one place described below, so writing either anywhere else needs nothing special done to it.',
+    constructs: [
+      {
+        syntax: '{indent}A paragraph',
+        meaning:
+          'Indents the paragraph’s first line, the way a printed novel does. Has to be the very first thing in the paragraph, and only works on an ordinary paragraph — not a heading, a list or a quotation.',
+      },
+      {
+        syntax: '{spacer}',
+        meaning:
+          'Leaves a gap between one passage and the next, for a change of scene that wants air rather than a dividing line. Has to stand as a block of its own, with a blank line above and below.',
+      },
+    ],
+  },
+  {
     heading: 'Links',
     intro:
       'A link may point at another page on this site, or at a numbered block on the page it is already on. Nothing published in Storytime links off the site — an address that leaves it is not refused, it simply never becomes a link.',
