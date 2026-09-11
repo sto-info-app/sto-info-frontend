@@ -28,7 +28,10 @@ describe('AccountDetailComponent', () => {
     Pick<StoAccountService, 'getAccounts' | 'getAccount'>
   >;
   let mockCharacterService: jest.Mocked<
-    Pick<CharacterService, 'getCharactersByAccount' | 'deleteCharacter'>
+    Pick<
+      CharacterService,
+      'getCharactersByAccount' | 'deleteCharacter' | 'setCharacterPinned'
+    >
   >;
   let mockEndeavourService: jest.Mocked<Pick<EndeavourService, 'getSummary'>>;
   let mockDialog: jest.Mocked<
@@ -89,6 +92,7 @@ describe('AccountDetailComponent', () => {
     mockCharacterService = {
       getCharactersByAccount: jest.fn().mockReturnValue(of([mockCharacter])),
       deleteCharacter: jest.fn().mockReturnValue(of(void 0)),
+      setCharacterPinned: jest.fn().mockReturnValue(of(mockCharacter)),
     };
 
     mockEndeavourService = {
@@ -224,6 +228,8 @@ describe('AccountDetailComponent', () => {
       component.loadCharacters('acc1');
       expect(mockCharacterService.getCharactersByAccount).toHaveBeenCalledWith(
         'acc1',
+        'handle',
+        'ASC',
       );
       expect(component.characters()).toEqual([mockCharacter]);
       expect(component.isLoading).toBe(false);
@@ -334,6 +340,8 @@ describe('AccountDetailComponent', () => {
       // Should reload characters
       expect(mockCharacterService.getCharactersByAccount).toHaveBeenCalledWith(
         mockAccount.id,
+        'handle',
+        'ASC',
       );
     });
 
@@ -697,6 +705,7 @@ describe('AccountDetailComponent', () => {
       component.filterSex.set('');
       component.filterClass.set('');
       component.filterRecruitType.set('');
+      component.pinnedOnly.set(false);
     });
 
     it('should return 0 when no filters active', () => {
@@ -720,6 +729,8 @@ describe('AccountDetailComponent', () => {
       expect(component.activeFilterCount()).toBe(7);
       component.filterRecruitType.set('x');
       expect(component.activeFilterCount()).toBe(8);
+      component.pinnedOnly.set(true);
+      expect(component.activeFilterCount()).toBe(9);
     });
   });
 
@@ -733,6 +744,7 @@ describe('AccountDetailComponent', () => {
       component.filterSex.set('Male');
       component.filterClass.set('Tactical');
       component.filterRecruitType.set('Normal');
+      component.pinnedOnly.set(true);
 
       component.clearFilters();
 
@@ -744,6 +756,7 @@ describe('AccountDetailComponent', () => {
       expect(component.filterSex()).toBe('');
       expect(component.filterClass()).toBe('');
       expect(component.filterRecruitType()).toBe('');
+      expect(component.pinnedOnly()).toBe(false);
     });
   });
 
@@ -768,6 +781,16 @@ describe('AccountDetailComponent', () => {
       expect(deleteSpy).toHaveBeenCalledWith(mockCharacter);
     });
 
+    it('should pin or unpin for the pin action', () => {
+      const pinSpy = jest
+        .spyOn(component, 'togglePin')
+        .mockImplementation(() => undefined);
+
+      component.onCharacterCardAction(mockCharacter, 'pin');
+
+      expect(pinSpy).toHaveBeenCalledWith(mockCharacter);
+    });
+
     it('should ignore an unknown action', () => {
       const editSpy = jest
         .spyOn(component, 'editCharacter')
@@ -780,6 +803,158 @@ describe('AccountDetailComponent', () => {
 
       expect(editSpy).not.toHaveBeenCalled();
       expect(deleteSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('pinning', () => {
+    const pinnedCharacter: Character = {
+      ...mockCharacter,
+      id: 'char2',
+      handle: 'Char2',
+      pinnedAt: '2026-01-01T00:00:00Z',
+    };
+
+    /**
+     * Loads the page with the given captains already on screen.
+     *
+     * @param characters - The captains the API should return.
+     */
+    function loadWith(characters: Character[]): void {
+      mockCharacterService.getCharactersByAccount.mockReturnValue(
+        of(characters),
+      );
+      fixture.detectChanges();
+      routeParamsSubject.next({ handle: encodeStoHandle(mockAccount.handle) });
+      fixture.detectChanges();
+    }
+
+    it('should count the pinned captains', () => {
+      loadWith([mockCharacter, pinnedCharacter]);
+
+      expect(component.pinnedCount()).toBe(1);
+    });
+
+    it('should mark a pinned captain on its card', () => {
+      loadWith([mockCharacter, pinnedCharacter]);
+
+      const cards = component.filteredVms();
+
+      expect(cards.find(vm => vm.id === pinnedCharacter.id)?.card.pinned).toBe(
+        true,
+      );
+      expect(cards.find(vm => vm.id === mockCharacter.id)?.card.pinned).toBe(
+        false,
+      );
+    });
+
+    it('should offer the pin action in the state it is in', () => {
+      loadWith([mockCharacter, pinnedCharacter]);
+
+      const cards = component.filteredVms();
+      const pinAction = (id: string) =>
+        cards
+          .find(vm => vm.id === id)
+          ?.card.actions.find(action => action.key === 'pin');
+
+      expect(pinAction(pinnedCharacter.id)).toEqual(
+        expect.objectContaining({ title: 'Unpin Captain', active: true }),
+      );
+      expect(pinAction(mockCharacter.id)).toEqual(
+        expect.objectContaining({ title: 'Pin Captain to Top', active: false }),
+      );
+    });
+
+    it('should narrow the list to pinned captains', () => {
+      loadWith([mockCharacter, pinnedCharacter]);
+
+      component.pinnedOnly.set(true);
+
+      expect(component.filteredCharacters()).toEqual([pinnedCharacter]);
+    });
+
+    it('should pin an unpinned captain and reload the list', () => {
+      loadWith([mockCharacter]);
+      mockCharacterService.getCharactersByAccount.mockClear();
+
+      component.togglePin(mockCharacter);
+
+      expect(mockCharacterService.setCharacterPinned).toHaveBeenCalledWith(
+        mockCharacter.id,
+        true,
+      );
+      expect(mockCharacterService.getCharactersByAccount).toHaveBeenCalled();
+      expect(component.isLoading).toBe(false);
+    });
+
+    it('should unpin a pinned captain', () => {
+      loadWith([pinnedCharacter]);
+
+      component.togglePin(pinnedCharacter);
+
+      expect(mockCharacterService.setCharacterPinned).toHaveBeenCalledWith(
+        pinnedCharacter.id,
+        false,
+      );
+    });
+
+    it('should stop loading and report a failed pin', () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      loadWith([mockCharacter]);
+      mockCharacterService.setCharacterPinned.mockReturnValue(
+        throwError(() => new Error('nope')),
+      );
+
+      component.togglePin(mockCharacter);
+
+      expect(component.isLoading).toBe(false);
+      expect(spy).toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    // Nothing to pin against before the account resolves, so a reload would
+    // ask the API for the captains of no account at all.
+    it('should not reload the list before an account is loaded', () => {
+      component.setSortBy('level');
+
+      expect(
+        mockCharacterService.getCharactersByAccount,
+      ).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ordering', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+      routeParamsSubject.next({ handle: encodeStoHandle(mockAccount.handle) });
+      fixture.detectChanges();
+      mockCharacterService.getCharactersByAccount.mockClear();
+    });
+
+    it('should default to captain name ascending', () => {
+      expect(component.sortBy()).toBe('handle');
+      expect(component.sortOrder()).toBe('ASC');
+    });
+
+    it('should reload with the chosen field', () => {
+      component.setSortBy('level');
+
+      expect(component.sortBy()).toBe('level');
+      expect(mockCharacterService.getCharactersByAccount).toHaveBeenCalledWith(
+        'acc1',
+        'level',
+        'ASC',
+      );
+    });
+
+    it('should reload with the chosen direction', () => {
+      component.setSortOrder('DESC');
+
+      expect(component.sortOrder()).toBe('DESC');
+      expect(mockCharacterService.getCharactersByAccount).toHaveBeenCalledWith(
+        'acc1',
+        'handle',
+        'DESC',
+      );
     });
   });
 });
