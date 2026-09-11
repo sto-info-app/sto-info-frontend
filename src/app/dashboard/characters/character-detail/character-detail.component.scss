@@ -36,6 +36,24 @@
         0 2px 4px rgb(0 0 0 / 40%);
     }
   }
+
+  // The pin follows the captain rather than any one tab, so it sits in the
+  // identity header and stays put as the tabs change beneath it.
+  .header-actions {
+    margin-left: auto;
+
+    .cta-icon {
+      @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);
+
+      font-size: 1.4rem;
+    }
+
+    // A pinned captain's pin is a state, not one more action going spare, so
+    // it holds the lit colour instead of only reaching it on hover.
+    .cta-icon--active {
+      color: vars.$lcars-sunflower;
+    }
+  }
 }
 
 // ─── LCARS Tab Strip ─────────────────────────────────────────────────────────

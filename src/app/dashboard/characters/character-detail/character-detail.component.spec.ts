@@ -71,6 +71,7 @@ describe('CharacterDetailComponent', () => {
     mockCharacterService = {
       getCharactersByAccount: jest.fn(),
       getCharacter: jest.fn(),
+      setCharacterPinned: jest.fn(),
     } as unknown as jest.Mocked<CharacterService>;
 
     mockStoAccountService = {
@@ -516,6 +517,81 @@ describe('CharacterDetailComponent', () => {
 
       expect(component.activeTab()).toBe('overview');
     }));
+  });
+
+  describe('Pinning', () => {
+    beforeEach(() => {
+      component.character = mockCharacter;
+    });
+
+    it('should pin an unpinned captain', () => {
+      mockCharacterService.setCharacterPinned.mockReturnValue(
+        of({ ...mockCharacter, pinnedAt: '2026-01-01T00:00:00Z' }),
+      );
+
+      component.togglePin();
+
+      expect(mockCharacterService.setCharacterPinned).toHaveBeenCalledWith(
+        'char-1',
+        true,
+      );
+      expect(component.character?.pinnedAt).toBe('2026-01-01T00:00:00Z');
+    });
+
+    it('should unpin a pinned captain', () => {
+      component.character = {
+        ...mockCharacter,
+        pinnedAt: '2026-01-01T00:00:00Z',
+      };
+      mockCharacterService.setCharacterPinned.mockReturnValue(
+        of({ ...mockCharacter, pinnedAt: null }),
+      );
+
+      component.togglePin();
+
+      expect(mockCharacterService.setCharacterPinned).toHaveBeenCalledWith(
+        'char-1',
+        false,
+      );
+      expect(component.character?.pinnedAt).toBeNull();
+    });
+
+    // The API omits the field when there is no pin, which must read as unpinned
+    // rather than leaving the header showing the state it had before.
+    it('should treat an omitted pin as unpinned', () => {
+      component.character = {
+        ...mockCharacter,
+        pinnedAt: '2026-01-01T00:00:00Z',
+      };
+      mockCharacterService.setCharacterPinned.mockReturnValue(
+        of({ ...mockCharacter }),
+      );
+
+      component.togglePin();
+
+      expect(component.character?.pinnedAt).toBeNull();
+    });
+
+    it('should do nothing when no captain is loaded', () => {
+      component.character = null;
+
+      component.togglePin();
+
+      expect(mockCharacterService.setCharacterPinned).not.toHaveBeenCalled();
+    });
+
+    it('should report a failed pin and leave the captain alone', () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      mockCharacterService.setCharacterPinned.mockReturnValue(
+        throwError(() => new Error('nope')),
+      );
+
+      component.togglePin();
+
+      expect(component.character?.pinnedAt).toBeUndefined();
+      expect(spy).toHaveBeenCalled();
+      spy.mockRestore();
+    });
   });
 
   describe('Photo Dialog', () => {

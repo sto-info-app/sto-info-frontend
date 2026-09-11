@@ -274,6 +274,32 @@ export class CharacterDetailComponent
       });
   }
 
+  /**
+   * Pins or unpins this captain, so that it leads the account's captain list.
+   *
+   * The reply carries the new pin state, so the header updates without a
+   * reload of the captain.
+   */
+  togglePin(): void {
+    const character = this.character;
+    if (!character) return;
+
+    const pinned = !character.pinnedAt;
+
+    this._characterService
+      .setCharacterPinned(character.id, pinned)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: updated => {
+          this.character = { ...character, pinnedAt: updated.pinnedAt ?? null };
+          this._cdr.markForCheck();
+        },
+        error: err => {
+          console.error('Failed to update the captain pin:', err);
+        },
+      });
+  }
+
   onProfileImageError(): void {
     this.imageFailed = true;
   }
