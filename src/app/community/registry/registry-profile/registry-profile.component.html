@@ -90,8 +90,14 @@
             </p>
           }
 
+          @if (allAccountsFilteredOut()) {
+            <p class="lcars-empty-state">
+              No accounts match the current filters.
+            </p>
+          }
+
           <div class="accounts-grid">
-            @for (card of accountCards; track card.id) {
+            @for (card of accountCards(); track card.id) {
               <app-account-card [vm]="card" />
             }
           </div>
@@ -100,105 +106,251 @@
     }
   </div>
 
-  <!-- Rendered only when there is an action to offer: with the section's
-       navigation now in the tab strip, an officer with no available action
-       would otherwise leave an empty column beside the record. -->
-  @if (profile && isLoggedIn && relationship !== relationshipStatus.SELF) {
+  <!-- Rendered only when there is something to put in it: with the section's
+       navigation now in the tab strip, an officer with no available action and
+       no list worth sorting would otherwise leave an empty column beside the
+       record. The list controls are offered to every visitor, signed in or not,
+       so they are gated separately from the officer actions. -->
+  @if (profile && (showListControls() || canActOnMember)) {
     <div
       id="registry-profile-side-column"
       class="col">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Officer Actions</span>
-      </div>
-      <div class="buttons">
-        @switch (relationship) {
-          @case (relationshipStatus.FRIENDS) {
-            <p class="registry-relationship-state">
-              {{ profile.username }} is on your friends list.
-            </p>
-            <button
-              type="button"
-              class="full-width-btn-link african-violet"
-              [disabled]="isActing"
-              (click)="removeFriend()">
-              Unfriend
-            </button>
-          }
-          @case (relationshipStatus.REQUEST_SENT) {
-            <p class="registry-relationship-state">
-              Your friend request is awaiting a reply.
-            </p>
-            <button
-              type="button"
-              class="full-width-btn-link gold"
-              [disabled]="isActing"
-              (click)="cancelRequest()">
-              Withdraw Request
-            </button>
-          }
-          @case (relationshipStatus.REQUEST_RECEIVED) {
-            <p class="registry-relationship-state">
-              {{ profile.username }} would like to add you as a friend.
-            </p>
-            <button
-              type="button"
-              class="full-width-btn-link green"
-              [disabled]="isActing"
-              (click)="acceptRequest()">
-              Accept Request
-            </button>
-            <button
-              type="button"
-              class="full-width-btn-link red"
-              [disabled]="isActing"
-              (click)="declineRequest()">
-              Decline Request
-            </button>
-          }
-          @case (relationshipStatus.BLOCKED) {
-            <p class="registry-relationship-state">
-              You have blocked {{ profile.username }}.
-            </p>
-            <button
-              type="button"
-              class="full-width-btn-link green"
-              [disabled]="isActing"
-              (click)="unblockMember()">
-              Unblock
-            </button>
-          }
-          @default {
-            <button
-              type="button"
-              class="full-width-btn-link sunflower"
-              [disabled]="isActing"
-              (click)="addFriend()">
-              Add Friend
-            </button>
-          }
-        }
-
-        @if (relationship !== relationshipStatus.BLOCKED) {
+      @if (showListControls()) {
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Filters</span>
           <button
             type="button"
-            class="full-width-btn-link cardinal"
-            [disabled]="isActing"
-            (click)="blockMember()">
-            Block
+            class="cta-icon"
+            (click)="filtersCollapsed = !filtersCollapsed"
+            [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
+            <i
+              class="fas"
+              [class.fa-caret-down]="filtersCollapsed"
+              [class.fa-caret-up]="!filtersCollapsed"></i>
           </button>
+        </div>
+        @if (!filtersCollapsed) {
+          <div class="filter-section">
+            <label
+              class="select-label"
+              for="registry-account-search-input"
+              >Search accounts</label
+            >
+            <input
+              id="registry-account-search-input"
+              type="text"
+              class="filter-input"
+              placeholder="Search accounts..."
+              [ngModel]="searchText()"
+              (ngModelChange)="searchText.set($event)" />
+
+            @if (platformOptions().length > 1) {
+              <div class="lcars-select-container perano">
+                <label
+                  class="select-label"
+                  for="registry-account-platform-select"
+                  >Platform</label
+                >
+                <select
+                  id="registry-account-platform-select"
+                  title="Platform"
+                  [ngModel]="platformFilter()"
+                  (ngModelChange)="platformFilter.set($event)">
+                  <option value="">All</option>
+                  @for (option of platformOptions(); track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+              </div>
+            }
+
+            @if (launcherOptions().length > 1) {
+              <div class="lcars-select-container perano">
+                <label
+                  class="select-label"
+                  for="registry-account-launcher-select"
+                  >Launcher</label
+                >
+                <select
+                  id="registry-account-launcher-select"
+                  title="Launcher"
+                  [ngModel]="launcherFilter()"
+                  (ngModelChange)="launcherFilter.set($event)">
+                  <option value="">All</option>
+                  @for (option of launcherOptions(); track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+              </div>
+            }
+
+            @if (hasLifetimeAccounts()) {
+              <button
+                type="button"
+                class="full-width-btn-link"
+                [class.tangerine]="lifetimeOnly()"
+                [class.perano]="!lifetimeOnly()"
+                (click)="lifetimeOnly.set(!lifetimeOnly())"
+                [attr.aria-pressed]="lifetimeOnly()">
+                {{ lifetimeOnly() ? 'All Subscriptions' : 'Lifetime Only' }}
+              </button>
+            }
+
+            @if (activeFilterCount() > 0) {
+              <button
+                type="button"
+                class="full-width-btn-link clear-filters-btn"
+                (click)="clearFilters()">
+                Clear Filters
+              </button>
+            }
+          </div>
         }
 
-        <!-- Offered even to a viewer who has already blocked this officer:
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Sort</span>
+          <button
+            type="button"
+            class="cta-icon"
+            (click)="sortCollapsed = !sortCollapsed"
+            [title]="sortCollapsed ? 'Show Sort' : 'Hide Sort'">
+            <i
+              class="fas"
+              [class.fa-caret-down]="sortCollapsed"
+              [class.fa-caret-up]="!sortCollapsed"></i>
+          </button>
+        </div>
+        @if (!sortCollapsed) {
+          <div class="filter-section">
+            <div class="lcars-select-container tangerine">
+              <label
+                class="select-label"
+                for="registry-account-sort-by-select"
+                >Sort by</label
+              >
+              <select
+                id="registry-account-sort-by-select"
+                title="Sort by"
+                [ngModel]="sortBy()"
+                (ngModelChange)="sortBy.set($event)">
+                @for (option of sortOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="lcars-select-container gold">
+              <label
+                class="select-label"
+                for="registry-account-sort-order-select"
+                >Direction</label
+              >
+              <select
+                id="registry-account-sort-order-select"
+                title="Sort direction"
+                [ngModel]="sortOrder()"
+                (ngModelChange)="sortOrder.set($event)">
+                <option value="ASC">Ascending</option>
+                <option value="DESC">Descending</option>
+              </select>
+            </div>
+          </div>
+        }
+      }
+
+      @if (canActOnMember) {
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>Officer Actions</span>
+        </div>
+        <div class="buttons">
+          @switch (relationship) {
+            @case (relationshipStatus.FRIENDS) {
+              <p class="registry-relationship-state">
+                {{ profile.username }} is on your friends list.
+              </p>
+              <button
+                type="button"
+                class="full-width-btn-link african-violet"
+                [disabled]="isActing"
+                (click)="removeFriend()">
+                Unfriend
+              </button>
+            }
+            @case (relationshipStatus.REQUEST_SENT) {
+              <p class="registry-relationship-state">
+                Your friend request is awaiting a reply.
+              </p>
+              <button
+                type="button"
+                class="full-width-btn-link gold"
+                [disabled]="isActing"
+                (click)="cancelRequest()">
+                Withdraw Request
+              </button>
+            }
+            @case (relationshipStatus.REQUEST_RECEIVED) {
+              <p class="registry-relationship-state">
+                {{ profile.username }} would like to add you as a friend.
+              </p>
+              <button
+                type="button"
+                class="full-width-btn-link green"
+                [disabled]="isActing"
+                (click)="acceptRequest()">
+                Accept Request
+              </button>
+              <button
+                type="button"
+                class="full-width-btn-link red"
+                [disabled]="isActing"
+                (click)="declineRequest()">
+                Decline Request
+              </button>
+            }
+            @case (relationshipStatus.BLOCKED) {
+              <p class="registry-relationship-state">
+                You have blocked {{ profile.username }}.
+              </p>
+              <button
+                type="button"
+                class="full-width-btn-link green"
+                [disabled]="isActing"
+                (click)="unblockMember()">
+                Unblock
+              </button>
+            }
+            @default {
+              <button
+                type="button"
+                class="full-width-btn-link sunflower"
+                [disabled]="isActing"
+                (click)="addFriend()">
+                Add Friend
+              </button>
+            }
+          }
+
+          @if (relationship !== relationshipStatus.BLOCKED) {
+            <button
+              type="button"
+              class="full-width-btn-link cardinal"
+              [disabled]="isActing"
+              (click)="blockMember()">
+              Block
+            </button>
+          }
+
+          <!-- Offered even to a viewer who has already blocked this officer:
              blocking is a private preference, reporting asks an administrator
              to look, and someone worth blocking is often worth reporting. -->
-        <button
-          type="button"
-          class="full-width-btn-link red"
-          [disabled]="isActing"
-          (click)="reportMember()">
-          Report
-        </button>
-      </div>
+          <button
+            type="button"
+            class="full-width-btn-link red"
+            [disabled]="isActing"
+            (click)="reportMember()">
+            Report
+          </button>
+        </div>
+      }
     </div>
   }
 </div>

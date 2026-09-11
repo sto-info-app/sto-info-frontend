@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, take } from 'rxjs';
@@ -16,6 +17,21 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ModerationService } from 'src/app/shared/services/moderation.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
+import {
+  AccountFilterFields,
+  AccountFilters,
+  AccountSortBy,
+  AccountSortOption,
+  AccountSortOrder,
+  AccountSortFields,
+  DEFAULT_ACCOUNT_SORT_BY,
+  DEFAULT_ACCOUNT_SORT_ORDER,
+  buildAccountFilterOptions,
+  buildAccountSearchHaystack,
+  countActiveAccountFilters,
+  matchesAccountFilters,
+  sortAccounts,
+} from 'src/app/shared/utils/account-list.utils';
 import { CommunityService } from '../../community.service';
 import { CommunityTabsComponent } from '../../community-tabs/community-tabs.component';
 import { RelationshipStatus } from '../../models/community.models';
@@ -30,6 +46,31 @@ import {
 import { buildRegistryAccountCard } from '../registry-card.builders';
 import { RegistryPageBaseDirective } from '../registry-page-base.directive';
 import { RegistryService } from '../registry.service';
+
+/**
+ * One public account, with the card and the values the controls work on.
+ *
+ * The sort fields sit on the view model itself so the ordered list can be
+ * mapped straight to cards, without wrapping each account a second time on
+ * every keystroke.
+ */
+interface RegistryAccountVm extends AccountSortFields {
+  id: string;
+  card: AccountCardVm;
+  filterFields: AccountFilterFields;
+}
+
+/**
+ * The orderings offered for a member's public account list.
+ *
+ * Endeavour progress is never published, so — unlike the owner's own dashboard
+ * — there is no ordering by it here.
+ */
+export const REGISTRY_ACCOUNT_SORT_OPTIONS: readonly AccountSortOption[] = [
+  { value: 'handle', label: 'Handle' },
+  { value: 'characterCount', label: 'Captains' },
+  { value: 'accountCreatedDate', label: 'Account Created' },
+];
 
 /**
  * A registry member's public profile: their identity, the STO accounts they
@@ -49,6 +90,7 @@ import { RegistryService } from '../registry.service';
     EntityAvatarComponent,
     AccountCardComponent,
     CommunityTabsComponent,
+    FormsModule,
   ],
 })
 export class RegistryProfileComponent
@@ -69,8 +111,99 @@ export class RegistryProfileComponent
   username = '';
   profile: RegistryProfile | null = null;
 
-  /** Presentation models for the member's public accounts. */
-  accountCards: AccountCardVm[] = [];
+  /** The member's public accounts, in the order the API returned them. */
+  private readonly _accountVms = signal<RegistryAccountVm[]>([]);
+
+  /** The orderings offered in the Sort panel. */
+  readonly sortOptions = REGISTRY_ACCOUNT_SORT_OPTIONS;
+
+  /** Field the list is ordered by. */
+  readonly sortBy = signal<AccountSortBy>(DEFAULT_ACCOUNT_SORT_BY);
+
+  /** Direction the list is ordered in. */
+  readonly sortOrder = signal<AccountSortOrder>(DEFAULT_ACCOUNT_SORT_ORDER);
+
+  /** Free-text search over the handle, platform and launcher. */
+  readonly searchText = signal('');
+
+  /** Platform name to filter by, or an empty string for all platforms. */
+  readonly platformFilter = signal('');
+
+  /** Launcher name to filter by, or an empty string for all launchers. */
+  readonly launcherFilter = signal('');
+
+  /** Whether to show only accounts with a lifetime subscription. */
+  readonly lifetimeOnly = signal(false);
+
+  /** Whether the Filters panel is collapsed. */
+  filtersCollapsed = false;
+
+  /** Whether the Sort panel is collapsed. */
+  sortCollapsed = false;
+
+  /** The platforms present among the accounts on show. */
+  readonly platformOptions = computed(() =>
+    buildAccountFilterOptions(
+      this._accountVms().map(vm => vm.filterFields.platformKey),
+    ),
+  );
+
+  /** The launchers present among the accounts on show. */
+  readonly launcherOptions = computed(() =>
+    buildAccountFilterOptions(
+      this._accountVms().map(vm => vm.filterFields.launcherKey),
+    ),
+  );
+
+  /** Whether any account on show has a lifetime subscription. */
+  readonly hasLifetimeAccounts = computed(() =>
+    this._accountVms().some(vm => vm.filterFields.lifetimeSubscription),
+  );
+
+  /** The filters currently applied, as the shared filter helpers expect them. */
+  readonly filters = computed<AccountFilters>(() => ({
+    searchText: this.searchText(),
+    platformKey: this.platformFilter(),
+    launcherKey: this.launcherFilter(),
+    lifetimeOnly: this.lifetimeOnly(),
+    pinnedOnly: false,
+  }));
+
+  /**
+   * Presentation models for the member's public accounts, narrowed and ordered.
+   *
+   * Both happen here rather than at the API: the accounts arrive inside the
+   * profile payload, so ordering them server-side would mean refetching the
+   * whole profile to move a few cards.
+   */
+  readonly accountCards = computed<AccountCardVm[]>(() => {
+    const filters = this.filters();
+    const visible = this._accountVms().filter(vm =>
+      matchesAccountFilters(vm.filterFields, filters),
+    );
+
+    return sortAccounts(visible, this.sortBy(), this.sortOrder()).map(
+      vm => vm.card,
+    );
+  });
+
+  /** How many filters are narrowing the list. */
+  readonly activeFilterCount = computed(() =>
+    countActiveAccountFilters(this.filters()),
+  );
+
+  /**
+   * Whether to offer sorting and filtering at all.
+   *
+   * With a single public account there is nothing to order and nothing to
+   * narrow, so the panels would only be clutter.
+   */
+  readonly showListControls = computed(() => this._accountVms().length > 1);
+
+  /** Whether every public account has been filtered out of the list. */
+  readonly allAccountsFilteredOut = computed(
+    () => this._accountVms().length > 0 && this.accountCards().length === 0,
+  );
 
   /** Copy shown after a friend or block action succeeds. */
   actionMessage = '';
@@ -101,8 +234,8 @@ export class RegistryProfileComponent
       this._registryService.getProfile(this.username),
       profile => {
         this.profile = profile;
-        this.accountCards = profile.accounts.map(account =>
-          this.buildAccountCard(account),
+        this._accountVms.set(
+          profile.accounts.map(account => this.buildAccountVm(account)),
         );
         this.applyProfileMeta(profile);
       },
@@ -128,6 +261,18 @@ export class RegistryProfileComponent
    */
   get relationship(): RelationshipStatus | null {
     return this.profile?.relationship?.status ?? null;
+  }
+
+  /**
+   * Whether there is any officer action to offer against this member.
+   *
+   * An anonymous visitor has none to take, and nobody befriends or blocks
+   * themselves.
+   *
+   * @returns True when the officer actions should be shown.
+   */
+  get canActOnMember(): boolean {
+    return this.isLoggedIn && this.relationship !== RelationshipStatus.SELF;
   }
 
   /**
@@ -392,8 +537,42 @@ export class RegistryProfileComponent
    * @param account - The public account summary.
    * @returns The card presentation model.
    */
-  private buildAccountCard(account: RegistryAccountSummary): AccountCardVm {
-    return buildRegistryAccountCard(account, this.username);
+  private buildAccountVm(account: RegistryAccountSummary): RegistryAccountVm {
+    const card = buildRegistryAccountCard(account, this.username);
+
+    return {
+      id: card.id,
+      card,
+      handle: account.handle,
+      characterCount: account.publicCharacterCount,
+      // Endeavour progress is never published, so there is nothing to order by;
+      // the option is not offered and the value never consulted.
+      endeavourTotalNodes: 0,
+      accountCreatedDate: account.accountCreatedDate,
+      // Pinning is the owner's private curation and is not published.
+      pinned: false,
+      filterFields: {
+        searchHaystack: buildAccountSearchHaystack([
+          account.handle,
+          account.platformName,
+          account.launcherName,
+        ]),
+        platformKey: account.platformName,
+        launcherKey: account.launcherName,
+        lifetimeSubscription: account.lifetimeSubscription,
+        pinned: false,
+      },
+    };
+  }
+
+  /**
+   * Clears every filter, leaving the ordering alone.
+   */
+  clearFilters(): void {
+    this.searchText.set('');
+    this.platformFilter.set('');
+    this.launcherFilter.set('');
+    this.lifetimeOnly.set(false);
   }
 
   /**
