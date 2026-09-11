@@ -319,6 +319,35 @@ The view-model interfaces (`account-card.model.ts`, `character-card.model.ts`,
 contexts such as the registry, which is the whole mechanism by which one card
 serves both an owner and a visitor.
 
+An `AccountCardAction` may set `active` when it toggles rather than fires once,
+as the account pin does. The card then adds `.cta-icon--active` and sets
+`aria-pressed`, so the state is conveyed by more than colour. Leave `active`
+unset for a one-shot action: no `aria-pressed` attribute is rendered at all,
+rather than a misleading `false`.
+
+### Sorting and filtering an account list
+
+Two pages list STO accounts — the owner's dashboard and a member's public
+registry profile — and both offer the same side-column Filters and Sort panels,
+shown only once the list holds more than one account. The rules live in
+`shared/utils/account-list.utils.ts`: each page projects its own model onto the
+neutral `AccountSortFields` and `AccountFilterFields` shapes, then shares
+`matchesAccountFilters`, `sortAccounts`, `countActiveAccountFilters`,
+`buildAccountSearchHaystack` and `buildAccountFilterOptions`.
+
+Where the ordering happens differs, and deliberately so:
+
+| Page | Ordering | Filtering | Why |
+|---|---|---|---|
+| Dashboard accounts | API (`sortBy` / `sortOrder` query parameters) | Client | The accounts are their own request, so the API can order them without refetching anything else. |
+| Registry profile | Client | Client | The accounts arrive embedded in the profile payload, so ordering them server-side would mean refetching the whole public profile to move a few cards. |
+
+The registry offers a reduced set of controls, because it is told less: no
+ordering by endeavour nodes and no pinned-only filter, since neither endeavour
+progress nor an owner's pins are ever published. Its platform and launcher
+options are derived from the names present on the accounts on show, as it has no
+lookup table to draw on.
+
 **`<app-stat-info-card>`** (2) — a split stat tile: label and value on the left,
 a large watermark icon bleeding off the bottom-right, optional CTA link along
 the bottom.
