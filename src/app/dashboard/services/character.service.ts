@@ -4,6 +4,10 @@ import { Observable, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import {
+  CharacterSortBy,
+  CharacterSortOrder,
+} from 'src/app/shared/utils/character-list.utils';
+import {
   Character,
   CreateCharacterRequest,
   UpdateCharacterRequest,
@@ -30,19 +34,55 @@ export class CharacterService {
 
   /**
    * Fetches all characters for a specific account.
+   *
+   * Pinned captains lead the list whichever ordering is asked for.
+   *
    * @param accountId The account ID.
+   * @param sortBy Field to order by. Omit to take the API's default of handle.
+   * @param sortOrder Direction to order in. Omit to take the API's default of
+   * ascending.
    * @returns An observable of character array.
    */
-  getCharactersByAccount(accountId: string): Observable<Character[]> {
+  getCharactersByAccount(
+    accountId: string,
+    sortBy?: CharacterSortBy,
+    sortOrder?: CharacterSortOrder,
+  ): Observable<Character[]> {
     const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    const params = new HttpParams().set('accountId', accountId);
+    let params = new HttpParams().set('accountId', accountId);
+    if (sortBy) {
+      params = params.set('sortBy', sortBy);
+    }
+    if (sortOrder) {
+      params = params.set('sortOrder', sortOrder);
+    }
     return this._http.get<Character[]>(API_URLS.CHARACTER, {
       ...httpOptions,
       params,
     });
+  }
+
+  /**
+   * Pins or unpins one of the current user's captains, so that it leads the
+   * account's own captain list.
+   *
+   * @param id The character ID.
+   * @param pinned True to pin the captain, false to unpin it.
+   * @returns An observable of the updated character.
+   */
+  setCharacterPinned(id: string, pinned: boolean): Observable<Character> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+    return this._http.put<Character>(
+      `${API_URLS.CHARACTER}/${id}/pin`,
+      { pinned },
+      httpOptions,
+    );
   }
 
   /**
