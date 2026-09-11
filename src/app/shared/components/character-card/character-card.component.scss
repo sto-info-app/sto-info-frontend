@@ -227,9 +227,12 @@
 
       .faction-icon-watermark {
         position: absolute;
-        right: 10px;
-        top: 25%;
-        transform: translateY(-50%) translateX(5px);
+
+        // Pinned to the top of the detail area rather than a percentage of it:
+        // the action column sets the card's height, so a relative offset drifts
+        // the watermark down the taller a card gets.
+        right: 5px;
+        top: 10px;
         width: 100px;
         height: 100px;
         object-fit: contain;
