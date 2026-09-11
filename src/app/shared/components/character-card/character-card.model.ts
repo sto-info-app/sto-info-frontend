@@ -10,6 +10,12 @@ export interface CharacterCardAction {
   title: string;
   /** Renders the button in the destructive style. */
   destructive?: boolean;
+  /**
+   * Renders the button as engaged, for an action that toggles rather than fires
+   * once — pinning, for instance. Also announced to assistive technology as the
+   * button's pressed state.
+   */
+  active?: boolean;
 }
 
 /**
@@ -50,6 +56,11 @@ export interface CharacterCardVm {
   recruitTypeName: string | null;
   /** The captain's recruit type icon. */
   recruitTypeIconUrl: string | null;
+  /**
+   * Marks the captain as pinned to the top of its list, which the card shows
+   * in its header. Owner-facing only: the registry is never told about pins.
+   */
+  pinned?: boolean;
   /** Action buttons, empty for read-only contexts such as the registry. */
   actions: CharacterCardAction[];
 }

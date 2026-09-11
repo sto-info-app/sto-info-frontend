@@ -5,6 +5,12 @@
     class="character-header-row"
     [ngClass]="vm.classCategory"
     [routerLink]="vm.link">
+    @if (vm.pinned) {
+      <i
+        class="fas fa-thumbtack pinned-badge"
+        title="Pinned to the top of the list"
+        aria-label="Pinned to the top of the list"></i>
+    }
     <span class="character-name">{{ headerLabel }}</span>
     @if (vm.recruitTypeIconUrl) {
       <img
@@ -64,6 +70,10 @@
             type="button"
             class="cta-icon"
             [class.delete-icon]="cardAction.destructive"
+            [class.cta-icon--active]="cardAction.active"
+            [attr.aria-pressed]="
+              cardAction.active === undefined ? null : cardAction.active
+            "
             (click)="onAction(cardAction.key, $event)"
             [title]="cardAction.title">
             <i [class]="cardAction.icon"></i>

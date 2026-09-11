@@ -192,6 +192,71 @@ describe('CharacterCardComponent', () => {
     expect(buttons[1].classList.contains('delete-icon')).toBe(true);
   });
 
+  it('should show the pinned badge only when the captain is pinned', () => {
+    render(buildVm());
+
+    expect(fixture.nativeElement.querySelector('.pinned-badge')).toBeNull();
+
+    fixture.componentRef.setInput('vm', buildVm({ pinned: true }));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.pinned-badge')).toBeTruthy();
+  });
+
+  // A toggling action reads as engaged rather than as one more thing to press,
+  // which assistive technology learns from the pressed state.
+  it('should mark an active action as pressed', () => {
+    render(
+      buildVm({
+        actions: [
+          {
+            key: 'pin',
+            icon: 'fas fa-thumbtack',
+            title: 'Unpin Captain',
+            active: true,
+          },
+        ],
+      }),
+    );
+
+    const button = fixture.nativeElement.querySelector(
+      '.character-actions button',
+    );
+    expect(button.classList.contains('cta-icon--active')).toBe(true);
+    expect(button.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('should mark an inactive toggle as not pressed', () => {
+    render(
+      buildVm({
+        actions: [
+          {
+            key: 'pin',
+            icon: 'fas fa-thumbtack',
+            title: 'Pin Captain to Top',
+            active: false,
+          },
+        ],
+      }),
+    );
+
+    const button = fixture.nativeElement.querySelector(
+      '.character-actions button',
+    );
+    expect(button.classList.contains('cta-icon--active')).toBe(false);
+    expect(button.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  // A one-shot action has no pressed state to report, so it must not claim one.
+  it('should leave one-shot actions without a pressed state', () => {
+    render(buildVm());
+
+    const button = fixture.nativeElement.querySelector(
+      '.character-actions button',
+    );
+    expect(button.hasAttribute('aria-pressed')).toBe(false);
+  });
+
   it('should emit the action key and stop the click from navigating', () => {
     render(buildVm());
     const emitted: string[] = [];

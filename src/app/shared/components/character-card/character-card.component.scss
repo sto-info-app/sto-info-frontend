@@ -140,7 +140,17 @@
       filter: drop-shadow(0 4px 8px rgb(0 0 0 / 60%));
     }
 
+    // The pin sits with the name rather than being spaced away from it, so the
+    // name takes the free width and leaves the recruit icon on the right.
+    .pinned-badge {
+      color: #000;
+      font-size: 0.9rem;
+      margin-right: 0.5rem;
+      flex: none;
+    }
+
     .character-name {
+      flex: 1;
       font-weight: bold;
       font-size: 1.15rem;
       color: #000;
@@ -206,7 +216,11 @@
       cursor: pointer;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+
+      // Topped rather than centred: the action column sets the card's height,
+      // so centring would drift the rank and species down as actions are added
+      // and leave them sitting level with nothing in particular.
+      justify-content: flex-start;
       position: relative;
       z-index: 1;
       overflow: hidden;
@@ -214,7 +228,7 @@
       .faction-icon-watermark {
         position: absolute;
         right: 10px;
-        top: 50%;
+        top: 25%;
         transform: translateY(-50%) translateX(5px);
         width: 100px;
         height: 100px;
@@ -302,6 +316,12 @@
 
         &.delete-icon:hover {
           color: vars.$lcars-red;
+        }
+
+        // A pinned captain's pin is a state, not one more action going spare,
+        // so it holds the lit colour instead of only reaching it on hover.
+        &.cta-icon--active {
+          color: vars.$lcars-sunflower;
         }
       }
     }
