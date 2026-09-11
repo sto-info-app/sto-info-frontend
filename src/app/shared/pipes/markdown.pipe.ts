@@ -16,12 +16,14 @@ import {
   MARKDOWN_FENCED_CODE_BLOCK_PATTERN,
   MARKDOWN_HEADING_PATTERN,
   MARKDOWN_HORIZONTAL_RULE_PATTERN,
+  MARKDOWN_INDENT_MARKER_PATTERN,
   MARKDOWN_INLINE_CODE_PATTERN,
   MARKDOWN_ITALIC_ASTERISK_PATTERN,
   MARKDOWN_ITALIC_UNDERSCORE_PATTERN,
   MARKDOWN_LEADING_NEWLINE_PATTERN,
   MARKDOWN_LINK_OR_BARE_URL_PATTERN,
   MARKDOWN_ORDERED_LIST_ITEM_PATTERN,
+  MARKDOWN_SPACER_BLOCK_PATTERN,
   MARKDOWN_UNORDERED_LIST_ITEM_PATTERN,
   URL_TRAILING_PUNCTUATION_PATTERN,
   YOUTUBE_URL_ID_PATTERN,
@@ -37,6 +39,11 @@ import {
  *
  * Supported: headings, bold, italic, inline code, fenced code blocks, links,
  * unordered/ordered lists, blockquotes, horizontal rules and paragraphs.
+ *
+ * Two constructs are this site's own rather than Markdown's: `{indent}` opening
+ * a paragraph indents its first line, and `{spacer}` alone in a block leaves a
+ * gap. Both are kept in step with `StorytimeMarkdownService` on the server, so
+ * the same writing reads the same way wherever it is rendered.
  */
 @Pipe({
   name: 'markdown',
@@ -124,6 +131,12 @@ export class MarkdownPipe implements PipeTransform {
       return '<hr />';
     }
 
+    // A gap the author asked for, holding nothing a reader needs to hear, so it
+    // is hidden from assistive technology rather than announced as an element.
+    if (MARKDOWN_SPACER_BLOCK_PATTERN.test(block)) {
+      return '<div class="sto-spacer" aria-hidden="true"></div>';
+    }
+
     const heading = MARKDOWN_HEADING_PATTERN.exec(block);
     if (heading) {
       const level = heading[1].length;
@@ -156,7 +169,29 @@ export class MarkdownPipe implements PipeTransform {
       return `<blockquote>${this.renderInline(quote)}</blockquote>`;
     }
 
-    return `<p>${this.renderInline(lines.join('<br />'))}</p>`;
+    return this.renderParagraph(lines);
+  }
+
+  /**
+   * Renders a paragraph block, honouring an opening `{indent}` marker.
+   *
+   * `{indent}` counts as a marker only here, as the very first thing in a
+   * paragraph. Keeping it that narrow means the rule fits in a sentence, and
+   * that a literal `{indent}` written anywhere else survives without needing
+   * an escape the rest of this renderer does not offer.
+   *
+   * @param lines - The block's already-escaped lines.
+   * @returns The rendered paragraph HTML.
+   */
+  private renderParagraph(lines: string[]): string {
+    const [first, ...rest] = lines;
+    const indented = MARKDOWN_INDENT_MARKER_PATTERN.test(first);
+    const body = indented
+      ? [first.replace(MARKDOWN_INDENT_MARKER_PATTERN, ''), ...rest]
+      : lines;
+    const attributes = indented ? ' class="sto-indent"' : '';
+
+    return `<p${attributes}>${this.renderInline(body.join('<br />'))}</p>`;
   }
 
   /**
