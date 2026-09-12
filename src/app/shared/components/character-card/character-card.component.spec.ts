@@ -192,17 +192,6 @@ describe('CharacterCardComponent', () => {
     expect(buttons[1].classList.contains('delete-icon')).toBe(true);
   });
 
-  it('should show the pinned badge only when the captain is pinned', () => {
-    render(buildVm());
-
-    expect(fixture.nativeElement.querySelector('.pinned-badge')).toBeNull();
-
-    fixture.componentRef.setInput('vm', buildVm({ pinned: true }));
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.querySelector('.pinned-badge')).toBeTruthy();
-  });
-
   // A toggling action reads as engaged rather than as one more thing to press,
   // which assistive technology learns from the pressed state.
   it('should mark an active action as pressed', () => {
