@@ -18,6 +18,11 @@
 // Emits the styles for the help section's index and guide pages.
 @use 'help';
 
+// Emits the styles for this site's own Markdown constructs. Held globally
+// because two renderers produce them and four surfaces show them, and the same
+// writing has to look the same in all of them.
+@use 'markdown';
+
 // Emits the styles for every Custom Tracking panel. One partial for the whole
 // feature, for the same reason Storytime has one: the builder, the value
 // editor and the detail pages are built from the same handful of shapes.

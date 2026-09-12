@@ -14,8 +14,13 @@ import { CharacterService } from '../../character.service';
 import { MediaService } from '../../media.service';
 import { StorytimeService } from '../../storytime.service';
 import { ChapterEditorComponent } from './chapter-editor.component';
+import {
+  ConfirmPromptDouble,
+  stubConfirmPrompt,
+} from 'src/app/shared/actions/confirm-prompt.testing';
 
 describe('ChapterEditorComponent', () => {
+  let confirm: ConfirmPromptDouble;
   let fixture: ComponentFixture<ChapterEditorComponent>;
   let chapterService: {
     getMyChapter: jest.Mock;
@@ -89,9 +94,12 @@ describe('ChapterEditorComponent', () => {
     };
     router = { navigate: jest.fn() };
 
+    confirm = stubConfirmPrompt();
+
     TestBed.configureTestingModule({
       imports: [ChapterEditorComponent],
       providers: [
+        confirm.provider,
         provideRouter([]),
         { provide: ChapterService, useValue: chapterService },
         { provide: CharacterService, useValue: characterService },
@@ -247,6 +255,26 @@ describe('ChapterEditorComponent', () => {
   describe('editing an existing Chapter', () => {
     beforeEach(() => {
       routeParams.set('chapterId', 'chapter-1');
+    });
+
+    // A Chapter body is Markdown, and the field that takes it carries the preview.
+    // Named with the reader's own class so the preview looks like the published
+    // page rather than approximating it.
+    it('offers the writing with a preview beside it', () => {
+      const element = render().nativeElement as HTMLElement;
+      const field = element.querySelector('app-storytime-markdown-field');
+
+      expect(field?.getAttribute('previewclass')).toBe(
+        'storytime-chapter__body',
+      );
+      expect(element.querySelector('#chapter-content')).toBeTruthy();
+      expect(
+        [
+          ...element.querySelectorAll<HTMLButtonElement>(
+            'app-storytime-markdown-field .lcars-tab',
+          ),
+        ].map(tab => tab.textContent?.trim()),
+      ).toEqual(['Edit', 'Preview']);
     });
 
     it('loads the Chapter into the form', () => {
@@ -566,6 +594,42 @@ describe('ChapterEditorComponent', () => {
       fixture.componentInstance.removeMedia(buildMedia('media-1'));
 
       expect(fixture.componentInstance.media).toHaveLength(1);
+    });
+
+    // The video comes off for good; putting it back means finding it again.
+    it('asks before removing a video, naming it', () => {
+      mediaService.getMyChapterMedia.mockReturnValue(of([buildMedia()]));
+      renderExisting();
+
+      fixture.componentInstance.removeMedia(buildMedia());
+
+      expect(confirm.lastAsked()?.title).toBe('Remove video');
+      expect(confirm.lastAsked()?.message).toContain('The escape');
+    });
+
+    it('leaves the video alone when the creator says no', () => {
+      mediaService.getMyChapterMedia.mockReturnValue(of([buildMedia()]));
+      renderExisting();
+      confirm.answer(false);
+
+      fixture.componentInstance.removeMedia(buildMedia());
+
+      expect(mediaService.removeMedia).not.toHaveBeenCalled();
+      expect(fixture.componentInstance.media).toHaveLength(1);
+    });
+
+    // A video nobody titled still has to be identifiable in the question.
+    it('falls back to the address when a video has no title', () => {
+      mediaService.getMyChapterMedia.mockReturnValue(of([buildMedia()]));
+      renderExisting();
+
+      fixture.componentInstance.removeMedia({
+        ...buildMedia(),
+        title: null,
+        embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      } as ChapterMedia);
+
+      expect(confirm.lastAsked()?.message).toContain('youtube.com/embed');
     });
 
     it('explains a video that could not be removed', () => {

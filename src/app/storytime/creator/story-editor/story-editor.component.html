@@ -4,9 +4,8 @@
 
 <div
   id="storytime-story-editor-page"
-  class="storytime-page"
->
-  <h1>{{ isNew ? "Create a Story" : "Edit Story" }}</h1>
+  class="storytime-page">
+  <h1>{{ isNew ? 'Create a Story' : 'Edit Story' }}</h1>
 
   @if (isJoiningArc) {
     <p class="storytime-intro">
@@ -26,56 +25,58 @@
     <nav class="storytime-page-actions">
       <a
         class="lcars-btn lcars-btn-auto green"
-        [routerLink]='[
-  "/",
-  appRoutes.STORYTIME,
-  "manage",
-  "stories",
-  story.id,
-  "chapters",
-]'
-      >Chapters</a>
+        [routerLink]="[
+          '/',
+          appRoutes.STORYTIME,
+          'manage',
+          'stories',
+          story.id,
+          'chapters',
+        ]"
+        >Chapters</a
+      >
       <a
         class="lcars-btn lcars-btn-auto bluey"
-        [routerLink]='[
-  "/",
-  appRoutes.STORYTIME,
-  "manage",
-  "stories",
-  story.id,
-  "characters",
-]'
-      >Cast</a>
+        [routerLink]="[
+          '/',
+          appRoutes.STORYTIME,
+          'manage',
+          'stories',
+          story.id,
+          'characters',
+        ]"
+        >Cast</a
+      >
       <a
         class="lcars-btn lcars-btn-auto bluey"
-        [routerLink]='[
-  "/",
-  appRoutes.STORYTIME,
-  "manage",
-  "stories",
-  story.id,
-  "collaborators",
-]'
-      >Collaborators</a>
+        [routerLink]="[
+          '/',
+          appRoutes.STORYTIME,
+          'manage',
+          'stories',
+          story.id,
+          'collaborators',
+        ]"
+        >Collaborators</a
+      >
       <a
         class="lcars-btn lcars-btn-auto sky"
-        [routerLink]='["/", appRoutes.STORYTIME, "manage", "stories"]'
-      >Back to your Stories</a>
+        [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories']"
+        >Back to your Stories</a
+      >
     </nav>
   }
 
   @if (errorMessage) {
     <app-lcars-error-message
       title="Could not save"
-      [message]="errorMessage"
-    ></app-lcars-error-message>
+      [message]="errorMessage"></app-lcars-error-message>
   }
 
   <form
     [formGroup]="form"
     class="storytime-form"
-    (ngSubmit)="save()"
-  >
+    (ngSubmit)="save()">
     <section class="storytime-section">
       <div class="lcars-text-bar small-lcars-bar-gap">
         <span>Story Details</span>
@@ -90,9 +91,10 @@
               type="text"
               formControlName="title"
               maxlength="200"
-              required
-            />
-            @if (form.controls["title"].touched && form.controls["title"].invalid) {
+              required />
+            @if (
+              form.controls['title'].touched && form.controls['title'].invalid
+            ) {
               <small class="field-error">A title is required.</small>
             }
           </div>
@@ -105,8 +107,7 @@
               id="story-slug"
               type="text"
               formControlName="slug"
-              maxlength="220"
-            />
+              maxlength="220" />
             <p class="field-hint">
               Leave blank to build one from the title. Changing it keeps the old
               address working.
@@ -119,26 +120,20 @@
               id="story-short-description"
               type="text"
               formControlName="shortDescription"
-              maxlength="500"
-            />
+              maxlength="500" />
             <p class="field-hint">
               Shown in listings. Required before publishing.
             </p>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="lcars-input-container perano storytime-field-full">
-            <label for="story-description">Description</label>
-            <textarea
-              id="story-description"
-              formControlName="description"
-              rows="8"
-            ></textarea>
-          </div>
-
-          <app-storytime-markdown-hint />
-        </div>
+        <app-storytime-markdown-field
+          fieldId="story-description"
+          label="Description"
+          controlName="description"
+          colour="perano"
+          previewClass="storytime-story__description"
+          [rows]="8" />
       </div>
     </section>
 
@@ -154,16 +149,14 @@
             label="Content rating"
             controlName="contentRating"
             colour="gold"
-            [options]="ratingOptions"
-          />
+            [options]="ratingOptions" />
 
           <app-storytime-setting-select
             fieldId="story-completion"
             label="Status"
             controlName="completionState"
             colour="tangerine"
-            [options]="completionOptions"
-          />
+            [options]="completionOptions" />
         </div>
 
         <div class="form-row">
@@ -172,16 +165,14 @@
             label="Visibility"
             controlName="visibility"
             colour="bluey"
-            [options]="visibilityOptions"
-          />
+            [options]="visibilityOptions" />
 
           <app-storytime-setting-select
             fieldId="story-language"
             label="Language"
             controlName="languageCode"
             colour="sunflower"
-            [options]="languageOptions"
-          >
+            [options]="languageOptions">
             <p>
               The language the Story is written in. A Chapter written in another
               language can say so on its own.
@@ -214,8 +205,7 @@
             [imageUrl]="story.bannerImageUrl"
             [imageAlt]="story.bannerImageAlt"
             altControlName="bannerImageAlt"
-            (changed)="onImageChanged($event)"
-          ></app-storytime-image-manager>
+            (changed)="onImageChanged($event)"></app-storytime-image-manager>
 
           <app-storytime-image-manager
             [slot]="imageSlots.STORY_PROFILE"
@@ -223,8 +213,7 @@
             [imageUrl]="story.profileImageUrl"
             [imageAlt]="story.profileImageAlt"
             altControlName="profileImageAlt"
-            (changed)="onImageChanged($event)"
-          ></app-storytime-image-manager>
+            (changed)="onImageChanged($event)"></app-storytime-image-manager>
         </div>
       </section>
     }
@@ -232,9 +221,8 @@
     <app-storytime-editor-actions
       [isSaving]="isSaving"
       [canPublish]="canPublish"
-      [cancelLink]='["/", appRoutes.STORYTIME, "manage", "stories"]'
-      (publish)="publish()"
-    />
+      [cancelLink]="['/', appRoutes.STORYTIME, 'manage', 'stories']"
+      (publish)="publish()" />
   </form>
 
   @if (story) {
@@ -245,13 +233,44 @@
     <app-storytime-content-policy-panel
       heading="Publishing Terms"
       [story]="story"
-      (accepted)="onPolicyAccepted($event)"
-    ></app-storytime-content-policy-panel>
+      (accepted)="
+        onPolicyAccepted($event)
+      "></app-storytime-content-policy-panel>
 
     <!-- Tagging needs something to tag, so it waits for the Story too. -->
     <app-tag-picker
       targetType="STORY"
-      [targetId]="story.id"
-    ></app-tag-picker>
+      [targetId]="story.id"></app-tag-picker>
+
+    <!--
+      Deleting is offered here as well as on the list, so a creator who has
+      decided the Story is a false start does not have to navigate back out to
+      act on it. It sits last, apart from the form, and is not offered while
+      the Story is published.
+    -->
+    @if (canDelete) {
+      <section class="storytime-section storytime-danger">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span class="go-october-sunset">Delete this Story</span>
+        </div>
+
+        <div class="storytime-panel">
+          <p>
+            Deleting this Story removes its Chapters, cast and credits with it.
+            There is no undo.
+          </p>
+
+          <div class="storytime-form-actions">
+            <button
+              class="lcars-btn red"
+              type="button"
+              [disabled]="isSaving"
+              (click)="remove()">
+              Delete this Story
+            </button>
+          </div>
+        </div>
+      </section>
+    }
   }
 </div>

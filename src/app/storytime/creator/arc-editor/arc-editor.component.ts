@@ -24,7 +24,7 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
 import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
 import { ImageManagerComponent } from '../../shared/image-manager/image-manager.component';
-import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
+import { MarkdownFieldComponent } from '../../shared/markdown-field/markdown-field.component';
 import { SettingOption } from '../../shared/setting-help/setting-help.component';
 import { SettingSelectComponent } from '../../shared/setting-select/setting-select.component';
 import {
@@ -58,7 +58,7 @@ import {
     LcarsErrorMessageComponent,
     TagPickerComponent,
     SettingSelectComponent,
-    MarkdownHintComponent,
+    MarkdownFieldComponent,
     ImageManagerComponent,
     EditorActionsComponent,
   ],

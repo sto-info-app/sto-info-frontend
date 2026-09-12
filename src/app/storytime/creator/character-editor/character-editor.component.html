@@ -58,17 +58,13 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="lcars-input-container perano storytime-field-full">
-              <label for="character-biography">Biography</label>
-              <textarea
-                id="character-biography"
-                rows="10"
-                formControlName="biographySource"></textarea>
-            </div>
-
-            <app-storytime-markdown-hint />
-          </div>
+          <app-storytime-markdown-field
+            fieldId="character-biography"
+            label="Biography"
+            controlName="biographySource"
+            colour="perano"
+            previewClass="storytime-character__biography"
+            [rows]="10" />
 
           <div class="storytime-toggle-row">
             <app-lcars-toggle
@@ -159,8 +155,7 @@
               [imageUrl]="character.portraitImageUrl"
               [imageAlt]="character.portraitImageAlt"
               altControlName="portraitImageAlt"
-              (changed)="onImageChanged($event)"
-            ></app-storytime-image-manager>
+              (changed)="onImageChanged($event)"></app-storytime-image-manager>
           </div>
         </section>
       }

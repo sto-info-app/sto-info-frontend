@@ -9,6 +9,12 @@ export interface Character {
   notes?: string;
   /** Whether this captain appears in the public Galactic Personnel Registry. */
   publiclyVisible: boolean;
+  /**
+   * When the owner pinned this captain to the top of the account's own list,
+   * or null when it is not pinned. Private to the owner; never published to
+   * the registry.
+   */
+  pinnedAt?: string | null;
   createdDate?: string;
   generalFactionId: string;
   factionId: string;

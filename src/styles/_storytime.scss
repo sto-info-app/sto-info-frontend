@@ -228,6 +228,18 @@ nav[class^='storytime-'] :where(a, [aria-current='page']) {
   margin-top: 1.5rem;
 }
 
+// The last thing on an editor: the irreversible action, set apart from the
+// form above it so it cannot be mistaken for one more field. The extra space
+// is the separation — a red border around it would compete with the red
+// button that does the work.
+.storytime-danger {
+  margin-top: 3rem;
+
+  > .storytime-panel > p {
+    margin-top: 0;
+  }
+}
+
 // A heading that opens a row sits at the top of it. The row's own padding is
 // the space it needs, and the heading's leading margin on top of that drops the
 // title a line and a half into a box it is supposed to be naming.
@@ -1450,6 +1462,43 @@ p.storytime-fan-notice,
   &__notes {
     color: vars.$lcars-grey-light;
     font-size: 0.85rem;
+  }
+
+  // Who the credit is for, set against the role it is given in. Brighter than
+  // the notes because the name is the point of a credit and the notes are the
+  // detail underneath it.
+  &__member {
+    color: vars.$lcars-white;
+    margin: 0.25rem 0 0;
+  }
+
+  &__scope {
+    @include storytime-meta;
+
+    margin: 0 0 0.25rem;
+  }
+
+  // A credit whose member has closed their account. Said plainly rather than
+  // hidden: the creator has to be the one who decides it comes off.
+  &__missing {
+    @include storytime-meta;
+
+    color: vars.$lcars-tangerine;
+
+    > i {
+      margin-right: 0.35rem;
+    }
+  }
+
+  // Members matching what has been typed into the credit form, offered as
+  // buttons because choosing one fills the field rather than navigating.
+  &__matches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 0 0 1rem;
+    list-style: none;
   }
 }
 

@@ -6,29 +6,28 @@
   <form
     class="storytime-panel storytime-form"
     [formGroup]="form"
-    (ngSubmit)="invited.emit()"
-  >
+    (ngSubmit)="invited.emit()">
     <div class="form-row">
       <div class="lcars-input-container perano">
-        <label [attr.for]='idPrefix + "-user"'>Member ID</label>
+        <label [attr.for]="idPrefix + '-user'">Member ID</label>
         <input
-          [id]='idPrefix + "-user"'
+          [id]="idPrefix + '-user'"
           type="text"
-          formControlName="userId"
-        />
-        @if (form.controls["userId"].touched && form.controls["userId"].invalid) {
+          formControlName="userId" />
+        @if (
+          form.controls['userId'].touched && form.controls['userId'].invalid
+        ) {
           <small class="field-error">Name the member you want to invite.</small>
         }
       </div>
 
       <div class="lcars-input-container gold">
-        <label [attr.for]='idPrefix + "-role"'>What you call them</label>
+        <label [attr.for]="idPrefix + '-role'">What you call them</label>
         <input
-          [id]='idPrefix + "-role"'
+          [id]="idPrefix + '-role'"
           type="text"
           formControlName="collaborationRole"
-          maxlength="100"
-        />
+          maxlength="100" />
         <p class="field-hint">Shown in the credits, not a permission.</p>
       </div>
     </div>
@@ -39,16 +38,14 @@
         <app-lcars-toggle
           [formControlName]="capability.key"
           [label]="capability.label"
-          [ariaLabel]="capability.label"
-        ></app-lcars-toggle>
+          [ariaLabel]="capability.label"></app-lcars-toggle>
       }
     </div>
 
     <div class="storytime-form-actions">
       <button
         class="lcars-btn green"
-        type="submit"
-      >
+        type="submit">
         Send invitation
       </button>
     </div>
@@ -65,11 +62,11 @@
       <li class="storytime-collaborators__entry">
         <p class="storytime-collaborators__identity">
           <span class="storytime-collaborators__member">{{
-              collaborator.collaborationRole ?? collaborator.userId
-            }}</span>
+            collaborator.collaborationRole ?? collaborator.userId
+          }}</span>
           <span class="storytime-collaborators__status">{{
-              statusLabels[collaborator.invitationStatus]
-            }}</span>
+            statusLabels[collaborator.invitationStatus]
+          }}</span>
         </p>
 
         @if (isPending(collaborator)) {
@@ -85,12 +82,13 @@
               [ariaLabel]="capability.label"
               [ngModel]="isGranted(collaborator, capability.key)"
               [ngModelOptions]="{ standalone: true }"
-              (ngModelChange)="capabilityChanged.emit({
-  collaborator: collaborator,
-  capability: capability.key,
-  granted: $event,
-})"
-            ></app-lcars-toggle>
+              (ngModelChange)="
+                capabilityChanged.emit({
+                  collaborator: collaborator,
+                  capability: capability.key,
+                  granted: $event,
+                })
+              "></app-lcars-toggle>
           }
         </div>
 
@@ -98,9 +96,8 @@
           <button
             type="button"
             class="lcars-btn lcars-btn-auto cardinal"
-            (click)="revoked.emit(collaborator)"
-          >
-            {{ isPending(collaborator) ? "Withdraw invitation" : "Remove" }}
+            (click)="confirmRevoke(collaborator)">
+            {{ isPending(collaborator) ? 'Withdraw invitation' : 'Remove' }}
           </button>
         </div>
       </li>

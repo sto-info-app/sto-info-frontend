@@ -377,6 +377,16 @@
               </div>
 
               <!--
+                Who the credit is for. A credits roll that never names anybody
+                thanks nobody. The member is named rather than linked: the
+                server returns the username and deliberately not the identifier
+                a profile link would need.
+              -->
+              @if (credit.username) {
+                <p class="storytime-credits__member">{{ credit.username }}</p>
+              }
+
+              <!--
                 What the creator said about this credit, or failing that what
                 the role itself means. A credit with neither used to render as
                 a heading bar with nothing under it, which read as unfinished

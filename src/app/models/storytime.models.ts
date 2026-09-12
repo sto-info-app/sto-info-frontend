@@ -983,7 +983,13 @@ export interface CrewCredit {
   storyId: string;
   chapterId: string | null;
   characterId: string | null;
-  userId: string;
+  /**
+   * Who is credited, by the name they display.
+   *
+   * Null when they are no longer a member. The server deliberately does not
+   * return their identifier — a username is the only identity it exposes.
+   */
+  username: string | null;
   scope: CrewCreditScope;
   role: CrewRole | null;
   /** How the credit reads — its own wording, or the role name. */
@@ -994,14 +1000,30 @@ export interface CrewCredit {
 
 /**
  * The fields a creator may send when adding a credit.
+ *
+ * The member is named rather than identified, and the server resolves them.
  */
 export interface CrewCreditRequest {
-  userId: string;
+  username: string;
   roleId: string;
   chapterId?: string;
   characterId?: string;
   creditLabel?: string;
   notes?: string;
+  /** The Chapter the credit starts applying from. */
+  validFromChapterId?: string;
+  /** The Chapter the credit stops applying after. */
+  validToChapterId?: string;
+}
+
+/**
+ * A member who may be named in a Story's credits.
+ */
+export interface CreditableMember {
+  username: string;
+  profilePicture100: string | null;
+  /** Whether they are already working on this Story. */
+  isCollaborator: boolean;
 }
 
 /**

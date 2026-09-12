@@ -28,6 +28,13 @@ export const MARKDOWN_BLOCK_SPLIT_PATTERN = /\n{2,}/;
 export const MARKDOWN_CODE_PLACEHOLDER_PATTERN = /CODE(\d+)/g;
 export const MARKDOWN_CODE_PLACEHOLDER_BLOCK_PATTERN = /^CODE\d+$/;
 export const MARKDOWN_HORIZONTAL_RULE_PATTERN = /^(-{3,}|\*{3,}|_{3,})$/;
+// This site's own additions to Markdown, matched exactly and in lower case so
+// nothing an author writes changes meaning by accident. `{indent}` is only a
+// marker at the very start of a paragraph and `{spacer}` only when it is a
+// block on its own, so a literal one written anywhere else survives untouched
+// and no escape syntax is needed.
+export const MARKDOWN_INDENT_MARKER_PATTERN = /^\{indent\}[ \t]{0,64}/;
+export const MARKDOWN_SPACER_BLOCK_PATTERN = /^\{spacer\}$/;
 // Bound whitespace/title spans to avoid super-linear backtracking on
 // pathological long input while preserving supported Markdown heading shapes.
 export const MARKDOWN_HEADING_PATTERN = /^(#{1,6})[ \t]{1,64}([^\n]{0,4096})$/;

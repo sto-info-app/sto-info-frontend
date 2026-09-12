@@ -24,8 +24,15 @@
           <p>No STO accounts found. Click the + icon above to add one.</p>
         }
 
+        @if (allAccountsFilteredOut()) {
+          <p>
+            No STO accounts match the current filters. Use Clear Filters to see
+            your accounts again.
+          </p>
+        }
+
         <div class="accounts-grid">
-          @for (vm of accountVms; track vm.id) {
+          @for (vm of filteredAccountVms(); track vm.id) {
             <app-account-card
               [vm]="vm.card"
               [privacyMode]="privacyMode.isEnabled()"
@@ -39,6 +46,163 @@
   <div
     id="accounts-side-column"
     class="col">
+    @if (showListControls()) {
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Filters</span>
+        <button
+          type="button"
+          class="cta-icon"
+          (click)="filtersCollapsed = !filtersCollapsed"
+          [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
+          <i
+            class="fas"
+            [class.fa-caret-down]="filtersCollapsed"
+            [class.fa-caret-up]="!filtersCollapsed"></i>
+        </button>
+      </div>
+      @if (!filtersCollapsed) {
+        <div class="filter-section">
+          <label
+            class="select-label"
+            for="account-search-input"
+            >Search accounts</label
+          >
+          <input
+            id="account-search-input"
+            type="text"
+            class="filter-input"
+            placeholder="Search accounts…"
+            [ngModel]="searchText()"
+            (ngModelChange)="searchText.set($event)" />
+
+          @if (platforms.length > 0) {
+            <div class="lcars-select-container perano">
+              <label
+                class="select-label"
+                for="account-platform-select"
+                >Platform</label
+              >
+              <select
+                id="account-platform-select"
+                title="Platform"
+                [ngModel]="platformFilter()"
+                (ngModelChange)="platformFilter.set($event)">
+                <option value="">All</option>
+                @for (platform of platforms; track platform.id) {
+                  <option [value]="platform.id">{{ platform.name }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          @if (launchers.length > 0) {
+            <div class="lcars-select-container perano">
+              <label
+                class="select-label"
+                for="account-launcher-select"
+                >Launcher</label
+              >
+              <select
+                id="account-launcher-select"
+                title="Launcher"
+                [ngModel]="launcherFilter()"
+                (ngModelChange)="launcherFilter.set($event)">
+                <option value="">All</option>
+                @for (launcher of launchers; track launcher.id) {
+                  <option [value]="launcher.id">{{ launcher.name }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <button
+            type="button"
+            class="full-width-btn-link"
+            [class.tangerine]="lifetimeOnly()"
+            [class.perano]="!lifetimeOnly()"
+            (click)="lifetimeOnly.set(!lifetimeOnly())"
+            [attr.aria-pressed]="lifetimeOnly()">
+            {{ lifetimeOnly() ? 'All Subscriptions' : 'Lifetime Only' }}
+          </button>
+
+          @if (pinnedCount() > 0) {
+            <button
+              type="button"
+              class="full-width-btn-link"
+              [class.tangerine]="pinnedOnly()"
+              [class.perano]="!pinnedOnly()"
+              (click)="pinnedOnly.set(!pinnedOnly())"
+              [attr.aria-pressed]="pinnedOnly()">
+              {{ pinnedOnly() ? 'All Accounts' : 'Pinned Only' }}
+            </button>
+          }
+
+          @if (activeFilterCount() > 0) {
+            <button
+              type="button"
+              class="full-width-btn-link clear-filters-btn"
+              (click)="clearFilters()">
+              Clear Filters
+            </button>
+          }
+        </div>
+      }
+
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Sort</span>
+        <button
+          type="button"
+          class="cta-icon"
+          (click)="sortCollapsed = !sortCollapsed"
+          [title]="sortCollapsed ? 'Show Sort' : 'Hide Sort'">
+          <i
+            class="fas"
+            [class.fa-caret-down]="sortCollapsed"
+            [class.fa-caret-up]="!sortCollapsed"></i>
+        </button>
+      </div>
+      @if (!sortCollapsed) {
+        <div class="filter-section">
+          <div class="lcars-select-container tangerine">
+            <label
+              class="select-label"
+              for="account-sort-by-select"
+              >Sort by</label
+            >
+            <select
+              id="account-sort-by-select"
+              title="Sort by"
+              [ngModel]="sortBy()"
+              (ngModelChange)="setSortBy($event)">
+              @for (option of sortOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="lcars-select-container gold">
+            <label
+              class="select-label"
+              for="account-sort-order-select"
+              >Direction</label
+            >
+            <select
+              id="account-sort-order-select"
+              title="Sort direction"
+              [ngModel]="sortOrder()"
+              (ngModelChange)="setSortOrder($event)">
+              <option value="ASC">Ascending</option>
+              <option value="DESC">Descending</option>
+            </select>
+          </div>
+          @if (pinnedCount() > 0) {
+            <p class="sort-note">
+              Pinned accounts stay at the top, sorted the same way.
+            </p>
+          }
+        </div>
+      }
+    }
+
     <div class="lcars-text-bar small-lcars-bar-gap">
       <span>Navigation</span>
     </div>

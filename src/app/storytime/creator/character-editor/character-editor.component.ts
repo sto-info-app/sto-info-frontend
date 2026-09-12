@@ -31,7 +31,7 @@ import { CharacterService } from '../../character.service';
 import { ImageManagerComponent } from '../../shared/image-manager/image-manager.component';
 import { StorytimeImageSlot } from '../../storytime-image.constants';
 import { EditorActionsComponent } from '../../shared/editor-actions/editor-actions.component';
-import { MarkdownHintComponent } from '../../shared/markdown-hint/markdown-hint.component';
+import { MarkdownFieldComponent } from '../../shared/markdown-field/markdown-field.component';
 
 /** How many traits one Character may carry, matching the server. */
 export const MAX_CHARACTER_TRAITS = 20;
@@ -54,7 +54,7 @@ export const MAX_CHARACTER_TRAITS = 20;
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsToggleComponent,
-    MarkdownHintComponent,
+    MarkdownFieldComponent,
     EditorActionsComponent,
     ImageManagerComponent,
   ],

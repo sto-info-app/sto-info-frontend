@@ -130,6 +130,18 @@
                 aria-hidden="true"></i>
             </button>
           }
+          @if (canDelete(arc)) {
+            <button
+              type="button"
+              class="cta-icon delete-icon"
+              title="Delete this Arc"
+              aria-label="Delete this Arc"
+              (click)="remove(arc)">
+              <i
+                class="fa-solid fa-trash"
+                aria-hidden="true"></i>
+            </button>
+          }
         </div>
       </div>
     </article>

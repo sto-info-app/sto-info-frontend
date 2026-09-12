@@ -100,6 +100,8 @@ export const API_URLS = {
   STORYTIME_ADMIN_CONFIGURATION: apiUrl + '/admin/storytime/configuration',
   STORYTIME_STORIES: apiUrl + '/storytime/stories',
   STORYTIME_MANAGE_STORIES: apiUrl + '/storytime/manage/stories',
+  STORYTIME_MANAGE_CONTENT_PREVIEW:
+    apiUrl + '/storytime/manage/content/preview',
   STORYTIME_MANAGE_CHAPTERS: apiUrl + '/storytime/manage/chapters',
   STORYTIME_MANAGE_CHARACTERS: apiUrl + '/storytime/manage/characters',
   STORYTIME_MANAGE_COLLABORATORS: apiUrl + '/storytime/manage/collaborators',

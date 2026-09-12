@@ -1,0 +1,95 @@
+<div class="storytime-markdown-field">
+  <!--
+    The strip names the field rather than the modes, because a page can carry
+    more than one of these and "Edit and preview" twice over tells a screen
+    reader nothing about which field it has reached.
+    ---
+    One stop in the tab order rather than one per tab, with the arrows moving
+    between them, which is what anything announcing itself as a tab list is
+    expected to do.
+  -->
+  <div
+    class="lcars-tabs"
+    role="tablist"
+    [attr.aria-label]="label + ': writing and preview'">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        role="tab"
+        class="lcars-tab"
+        [id]="tabId(tab.id)"
+        [class.active]="activeTab === tab.id"
+        [attr.aria-selected]="activeTab === tab.id"
+        [attr.tabindex]="activeTab === tab.id ? 0 : -1"
+        [attr.aria-controls]="panelId(tab.id)"
+        (keydown)="onTabKeydown($event)"
+        (click)="selectTab(tab.id)">
+        {{ tab.label }}
+      </button>
+    }
+    <span
+      class="lcars-tabs-filler"
+      aria-hidden="true"></span>
+  </div>
+
+  <!--
+    Hidden rather than removed: the textarea holds the creator's work, and
+    taking it out of the page to show a preview would discard the caret, the
+    scroll position and every undo step behind it.
+  -->
+  <div
+    [id]="panelId('edit')"
+    role="tabpanel"
+    tabindex="0"
+    [attr.aria-labelledby]="tabId('edit')"
+    [hidden]="activeTab !== 'edit'">
+    <div class="lcars-input-container {{ colour }}">
+      <label [attr.for]="fieldId">{{ label }}</label>
+      <textarea
+        [id]="fieldId"
+        [rows]="rows"
+        [formControlName]="controlName"></textarea>
+    </div>
+
+    <app-storytime-markdown-hint>
+      <ng-content />
+    </app-storytime-markdown-hint>
+  </div>
+
+  <div
+    [id]="panelId('preview')"
+    role="tabpanel"
+    tabindex="0"
+    [attr.aria-labelledby]="tabId('preview')"
+    [attr.aria-busy]="isRendering"
+    [hidden]="activeTab !== 'preview'">
+    @if (isRendering) {
+      <p
+        class="storytime-markdown-field__status"
+        aria-live="polite">
+        Rendering…
+      </p>
+    } @else if (previewErrorMessage) {
+      <app-lcars-error-message
+        title="Preview unavailable"
+        [message]="previewErrorMessage"></app-lcars-error-message>
+
+      <div class="storytime-form-actions">
+        <button
+          class="lcars-btn lcars-btn-auto sunflower"
+          type="button"
+          (click)="retryPreview()">
+          Try again
+        </button>
+      </div>
+    } @else if (previewHtml) {
+      <div
+        class="storytime-markdown-field__preview {{ previewClass }}"
+        [innerHTML]="previewHtml"></div>
+    } @else {
+      <p class="storytime-markdown-field__status">
+        There is nothing written here yet.
+      </p>
+    }
+  </div>
+</div>

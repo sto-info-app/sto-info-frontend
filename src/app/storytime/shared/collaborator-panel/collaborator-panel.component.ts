@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CollaborationInvitationStatus } from 'src/app/models/storytime.models';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { COLLABORATION_STATUS_LABELS } from '../../storytime.constants';
@@ -95,11 +96,52 @@ export class CollaboratorPanelComponent<T extends CollaborationSummary> {
     CapabilityChange<T>
   >();
 
-  /** Asks for an invitation to be withdrawn, or a collaborator removed. */
+  /**
+   * Asks for an invitation to be withdrawn, or a collaborator removed.
+   *
+   * Emitted only once whoever pressed the button has confirmed it. The
+   * question is asked here rather than by each caller, so a Story's crew and
+   * an Arc's curators cannot come to ask it differently — or, as they did
+   * before, not ask it at all.
+   */
   @Output() readonly revoked = new EventEmitter<T>();
 
   /** Status labels, so a raw enum value is never shown. */
   readonly statusLabels = COLLABORATION_STATUS_LABELS;
+
+  private readonly _confirm = new ConfirmPrompt();
+
+  /**
+   * Asks before withdrawing an invitation or removing a collaborator.
+   *
+   * The two are different enough to be worth wording separately: withdrawing
+   * an invitation takes away something nobody has accepted yet, while removing
+   * a collaborator takes access away from somebody who has been using it.
+   *
+   * @param collaborator - The collaboration to end.
+   */
+  confirmRevoke(collaborator: T): void {
+    const pending = this.isPending(collaborator);
+
+    this._confirm
+      .askToDestroy({
+        title: pending ? 'Withdraw invitation' : 'Remove collaborator',
+        question: pending
+          ? 'Are you sure you want to withdraw this invitation?'
+          : 'Are you sure you want to remove this collaborator?',
+        subject: collaborator.collaborationRole ?? collaborator.userId,
+        consequence: pending
+          ? 'They will not be able to accept it, and inviting them again means sending a new one.'
+          : 'They lose access straight away, and getting them back means inviting them again.',
+        confirmText: pending ? 'Withdraw' : 'Remove',
+        cancelText: 'Keep it',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.revoked.emit(collaborator);
+        }
+      });
+  }
 
   /**
    * Whether a collaboration is waiting on an answer.

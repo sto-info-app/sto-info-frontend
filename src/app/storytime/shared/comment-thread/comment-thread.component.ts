@@ -15,6 +15,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, catchError, of } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { PERMISSIONS } from 'src/app/models/access-control.models';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
@@ -141,6 +142,7 @@ export class CommentThreadComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _confirm = new ConfirmPrompt();
 
   /**
    * Whether the reader may join in.
@@ -333,12 +335,26 @@ export class CommentThreadComponent implements OnInit {
   }
 
   /**
-   * Takes back one of the reader's own comments.
+   * Takes back one of the reader's own comments, once they have agreed.
+   *
+   * The comment is not quoted back in the question. It is on the screen behind
+   * the dialog, and a long one would fill the prompt with the very thing the
+   * reader is trying to be rid of.
    *
    * @param comment - The comment.
    */
   deleteOwn(comment: StorytimeComment): void {
-    this.send(this._commentService.deleteComment(comment.id));
+    this._confirm
+      .askToDestroy({
+        title: 'Delete comment',
+        question: 'Are you sure you want to delete your comment?',
+        consequence: 'This cannot be undone.',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.send(this._commentService.deleteComment(comment.id));
+        }
+      });
   }
 
   /**

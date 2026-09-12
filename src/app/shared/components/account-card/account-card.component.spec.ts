@@ -255,6 +255,52 @@ describe('AccountCardComponent', () => {
     expect(buttons[1].classList.contains('delete-icon')).toBe(true);
   });
 
+  describe('toggling actions', () => {
+    const toggleVm = (active: boolean): AccountCardVm =>
+      buildVm({
+        actions: [
+          {
+            key: 'pin',
+            icon: 'fas fa-thumbtack',
+            title: active ? 'Unpin Account' : 'Pin Account to Top',
+            active,
+          },
+        ],
+      });
+
+    it('should mark an engaged toggle and announce it as pressed', () => {
+      render(toggleVm(true));
+
+      const button = fixture.nativeElement.querySelector(
+        '.account-body-actions button',
+      );
+      expect(button.classList.contains('cta-icon--active')).toBe(true);
+      expect(button.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('should announce a toggle that is off as not pressed', () => {
+      render(toggleVm(false));
+
+      const button = fixture.nativeElement.querySelector(
+        '.account-body-actions button',
+      );
+      expect(button.classList.contains('cta-icon--active')).toBe(false);
+      expect(button.getAttribute('aria-pressed')).toBe('false');
+    });
+
+    // An action that fires once rather than toggling has no pressed state, and
+    // claiming one would mislead a screen reader.
+    it('should leave a one-shot action without a pressed state', () => {
+      render(buildVm());
+
+      const button = fixture.nativeElement.querySelector(
+        '.account-body-actions button',
+      );
+      expect(button.hasAttribute('aria-pressed')).toBe(false);
+      expect(button.classList.contains('cta-icon--active')).toBe(false);
+    });
+  });
+
   it('should emit the action key and stop the click from navigating', () => {
     render(buildVm());
     const emitted: string[] = [];

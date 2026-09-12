@@ -93,8 +93,8 @@
             @if (isNew) {
               @if (!selectedTitle) {
                 <p class="field-hint">
-                  The work must be published and public. What a selection features
-                  cannot be changed once it exists.
+                  The work must be published and public. What a selection
+                  features cannot be changed once it exists.
                 </p>
               }
             } @else {
@@ -181,7 +181,6 @@
               old address working.
             </p>
           </div>
-
         </div>
       </div>
     </section>
@@ -200,8 +199,7 @@
             [imageUrl]="entry.overrideImageUrl"
             [imageAlt]="entry.overrideImageAlt"
             altControlName="overrideImageAlt"
-            (changed)="onImageChanged($event)"
-          ></app-storytime-image-manager>
+            (changed)="onImageChanged($event)"></app-storytime-image-manager>
         </div>
       </section>
     }

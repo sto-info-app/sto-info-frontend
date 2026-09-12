@@ -5,6 +5,7 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   Collaborator,
   CollaboratorCapabilities,
+  CreditableMember,
   CrewCredit,
   CrewCreditRequest,
   CrewRole,
@@ -151,6 +152,46 @@ export class CrewService {
   }
 
   // ----- Credits -----
+
+  /**
+   * Lists the credits on a Story the caller manages.
+   *
+   * Separate from {@link getCredits}, which reads the published roll by slug:
+   * a creator assembling the credits on a draft has no published slug to read.
+   *
+   * @param storyId - The Story.
+   * @returns An observable of the credits, in credits-roll order.
+   */
+  getMyCredits(storyId: string): Observable<CrewCredit[]> {
+    return this.authenticated(options =>
+      this._http.get<CrewCredit[]>(
+        `${API_URLS.STORYTIME_MANAGE_STORIES}/${storyId}/credits`,
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Finds members who could be credited on a Story.
+   *
+   * @param storyId - The Story.
+   * @param search - Part of a username to match, if any.
+   * @returns An observable of the members worth offering.
+   */
+  findCreditableMembers(
+    storyId: string,
+    search?: string,
+  ): Observable<CreditableMember[]> {
+    return this.authenticated(options =>
+      this._http.get<CreditableMember[]>(
+        `${API_URLS.STORYTIME_MANAGE_STORIES}/${storyId}/creditable-members`,
+        {
+          ...options,
+          params: search ? { search } : {},
+        },
+      ),
+    );
+  }
 
   /**
    * Credits somebody on a Story.

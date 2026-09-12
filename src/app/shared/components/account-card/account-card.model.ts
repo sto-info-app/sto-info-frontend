@@ -43,6 +43,12 @@ export interface AccountCardAction {
   title: string;
   /** Renders the button in the destructive style. */
   destructive?: boolean;
+  /**
+   * Renders the button as engaged, for an action that toggles rather than fires
+   * once — pinning, for instance. Also announced to assistive technology as the
+   * button's pressed state.
+   */
+  active?: boolean;
 }
 
 /**

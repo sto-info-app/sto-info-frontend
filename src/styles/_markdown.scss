@@ -1,0 +1,23 @@
+// The two constructs this site adds to Markdown.
+// `{indent}` opening a paragraph and `{spacer}` alone in a block are rendered
+// by two separate renderers — `MarkdownPipe` on the client for News and Custom
+// Tracking, `StorytimeMarkdownService` on the server for Storytime — and both
+// emit these class names. The styling lives here rather than beside either of
+// them, because the same writing has to look the same on a News post, in a
+// Chapter, and in the editor preview beside it. It is also why these rules are
+// global: content injected with `[innerHTML]` never carries a component's
+// view-encapsulation attribute.
+
+// A paragraph opened with `{indent}`: the first line only, which is what a
+// prose indent is. Indenting the whole paragraph would read as a quotation
+// instead, and Markdown already has one of those.
+.sto-indent {
+  text-indent: 2em;
+}
+
+// A gap the author asked for, between one passage and the next. Empty by
+// design and hidden from assistive technology, so it is a pause on the page
+// and nothing at all to a screen reader.
+.sto-spacer {
+  height: 2rem;
+}

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 import { catchError, Observable, shareReplay, throwError } from 'rxjs';
@@ -14,6 +14,10 @@ import {
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import {
+  AccountSortBy,
+  AccountSortOrder,
+} from 'src/app/shared/utils/account-list.utils';
 
 /**
  * Service to manage STO accounts, platforms, and launchers.
@@ -31,14 +35,56 @@ export class StoAccountService {
 
   /**
    * Fetches the current user's STO accounts.
+   *
+   * The API orders the list, putting pinned accounts first whichever ordering
+   * is asked for.
+   *
+   * @param sortBy Field to order by. Omit to take the API's default of handle.
+   * @param sortOrder Direction to order in. Omit to take the API's default of
+   * ascending.
    * @returns An observable of STO account array.
    */
-  getAccounts(): Observable<StoAccount[]> {
+  getAccounts(
+    sortBy?: AccountSortBy,
+    sortOrder?: AccountSortOrder,
+  ): Observable<StoAccount[]> {
     const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
     }
-    return this._http.get<StoAccount[]>(API_URLS.STO_ACCOUNT, httpOptions);
+
+    let params = new HttpParams();
+    if (sortBy) {
+      params = params.set('sortBy', sortBy);
+    }
+    if (sortOrder) {
+      params = params.set('sortOrder', sortOrder);
+    }
+
+    return this._http.get<StoAccount[]>(API_URLS.STO_ACCOUNT, {
+      ...httpOptions,
+      params,
+    });
+  }
+
+  /**
+   * Pins or unpins one of the current user's STO accounts, so that it leads
+   * their own account list.
+   *
+   * @param id The account ID.
+   * @param pinned True to pin the account, false to unpin it.
+   * @returns An observable of the updated STO account.
+   */
+  setAccountPinned(id: string, pinned: boolean): Observable<StoAccount> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+    return this._http.put<StoAccount>(
+      `${API_URLS.STO_ACCOUNT}/${id}/pin`,
+      { pinned },
+      httpOptions,
+    );
   }
 
   /**

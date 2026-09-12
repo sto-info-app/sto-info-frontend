@@ -811,6 +811,7 @@ const STORYTIME_TOPIC: HelpTopic = {
         guideSection('What Markdown is doing here', [
           'Chapters, Story and Arc descriptions and Character biographies are all written as plain text with a few marks in it. Two asterisks around a word make it bold; a line starting with a hash is a heading. That is Markdown, and Storytime understands a deliberately small amount of it.',
           'Small on purpose. Everything published here is written by a member rather than by an administrator, so the writing is turned into a page by a set of rules narrow enough to be certain about. Nothing you type can become part of the page itself — which also means anything outside the list below is shown exactly as you typed it, rather than doing something you did not intend.',
+          'Two of the marks below are this site’s own rather than Markdown’s: {indent} to indent a paragraph’s first line, and {spacer} to leave a gap between passages. Prose wants both and Markdown has a spelling for neither, so Storytime added them. They will mean nothing anywhere else you write Markdown.',
           'The same reference is a click away while you write: the mark beside "Markdown is supported" under any of those fields opens it.',
         ]),
         ...MARKDOWN_SECTIONS,

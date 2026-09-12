@@ -48,6 +48,19 @@
         }
         <h1>{{ character.handle }}</h1>
       </div>
+      <div class="header-actions">
+        <button
+          type="button"
+          class="cta-icon"
+          [class.cta-icon--active]="!!character.pinnedAt"
+          [attr.aria-pressed]="!!character.pinnedAt"
+          (click)="togglePin()"
+          [title]="
+            character.pinnedAt ? 'Unpin Captain' : 'Pin Captain to Top'
+          ">
+          <i class="fas fa-thumbtack"></i>
+        </button>
+      </div>
     </div>
 
     <!-- LCARS tab strip -->

@@ -94,6 +94,10 @@
             type="button"
             class="cta-icon"
             [class.delete-icon]="cardAction.destructive"
+            [class.cta-icon--active]="cardAction.active"
+            [attr.aria-pressed]="
+              cardAction.active === undefined ? null : cardAction.active
+            "
             (click)="onAction(cardAction.key, $event)"
             [title]="cardAction.title">
             <i [class]="cardAction.icon"></i>

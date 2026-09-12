@@ -8,6 +8,12 @@ export interface StoAccount {
   accountCreatedDate?: string;
   publiclyVisible: boolean;
   lifetimeSubscription: boolean;
+  /**
+   * When the owner pinned this account to the top of their own list, or null
+   * when it is not pinned. Private to the owner; never published to the
+   * registry.
+   */
+  pinnedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;
