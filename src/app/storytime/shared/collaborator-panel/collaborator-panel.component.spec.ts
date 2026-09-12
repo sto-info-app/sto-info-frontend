@@ -9,7 +9,7 @@ import {
   ConfirmPromptDouble,
   stubConfirmPrompt,
 } from 'src/app/shared/actions/confirm-prompt.testing';
-import { STORY_COLLABORATOR_CAPABILITIES } from '../../storytime.constants';
+import { COLLABORATOR_CAPABILITIES } from '../../storytime.constants';
 import { CollaboratorPanelComponent } from './collaborator-panel.component';
 
 /**
@@ -31,7 +31,7 @@ import { CollaboratorPanelComponent } from './collaborator-panel.component';
     (revoked)="revoked = revoked.concat($event)" />`,
 })
 class HostComponent {
-  readonly capabilities = STORY_COLLABORATOR_CAPABILITIES;
+  readonly capabilities = COLLABORATOR_CAPABILITIES;
   collaborators: Collaborator[] = [];
   revoked: Collaborator[] = [];
   form!: FormGroup;
@@ -75,9 +75,18 @@ describe('CollaboratorPanelComponent', () => {
    */
   const render = (collaborators: Collaborator[]): HTMLElement => {
     fixture = TestBed.createComponent(HostComponent);
-    fixture.componentInstance.form = TestBed.inject(
-      FormBuilder,
-    ).nonNullable.group({ userId: [''], collaborationRole: [''] });
+    const fb = TestBed.inject(FormBuilder).nonNullable;
+    const capabilityControls = Object.fromEntries(
+      fixture.componentInstance.capabilities.map(capability => [
+        capability.key,
+        [false],
+      ]),
+    );
+    fixture.componentInstance.form = fb.group({
+      userId: [''],
+      collaborationRole: [''],
+      ...capabilityControls,
+    });
     fixture.componentInstance.collaborators = collaborators;
     fixture.detectChanges();
     return fixture.nativeElement as HTMLElement;
