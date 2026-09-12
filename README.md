@@ -49,14 +49,20 @@
 [![Licence](https://img.shields.io/github/license/sto-info-app/sto-info-frontend?branch=development&label=licence)](https://github.com/sto-info-app/sto-info-frontend/blob/development/LICENSE)
 [![Contributors](https://img.shields.io/github/contributors/sto-info-app/sto-info-frontend?label=all%20contributors)](CONTRIBUTORS.md)
 [![Angular](https://img.shields.io/github/package-json/dependency-version/sto-info-app/sto-info-frontend/@angular/core?label=angular&branch=development)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
-[![Node](https://img.shields.io/badge/node->=24%20<25-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
+[![Node](https://img.shields.io/badge/node-24.21.0-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
 [![Written language](https://img.shields.io/badge/written%20language-en--GB-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/README.md)
 
 ## Project overview
 
 The `sto-info-frontend` is a frontend static site to provide information related to STO (Star Trek Online) player's accounts, characters and fleets. It is built using modern web technologies and follows best practices.
 
-This project uses [Angular CLI](https://github.com/angular/angular-cli) (see `package.json` devDependency `@angular/cli`, currently `^21.1.5`).
+This project uses [Angular CLI](https://github.com/angular/angular-cli) (see `package.json` devDependency `@angular/cli`, currently `^22.1.8`).
+
+### Runtime and dependency versions
+
+Development and CI use Node.js `24.21.0`, selected by `.nvmrc` and enforced by the `package.json` engine range (`>=24.21.0 <25`). The dependency lockfile is refreshed with the compatible Angular 22.1.6/22.1.8 patch releases and current compatible tooling versions.
+
+The `package.json` overrides are intentional security pins for transitive dependencies: `@puppeteer/browsers` and `tmp` are used by Lighthouse CI, `uuid` is used by Lighthouse CI and Jest JUnit, and `qs` is used by Angular CLI, Lighthouse CI, and Stryker. They are retained at the audited versions `3.2.1`, `0.2.7`, `14.0.0`, and `6.16.0` respectively.
 
 ## Development server
 
