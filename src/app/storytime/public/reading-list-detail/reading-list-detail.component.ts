@@ -18,6 +18,7 @@ import {
   StorytimeTargetType,
 } from 'src/app/models/storytime.models';
 import { ReadingListService } from '../../reading-list.service';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 
 /**
@@ -61,6 +62,7 @@ export class ReadingListDetailComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _confirm = new ConfirmPrompt();
 
   /**
    * Loads whichever list the route names.
@@ -110,7 +112,7 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   /**
-   * Takes something off the list.
+   * Takes something off the list, once the reader has agreed.
    *
    * @param item - The item.
    */
@@ -119,7 +121,23 @@ export class ReadingListDetailComponent implements OnInit {
       return;
     }
 
-    this.replace(this._readingListService.removeItem(this.list.id, item.id));
+    const listId = this.list.id;
+
+    this._confirm
+      .askToDestroy({
+        title: 'Remove from list',
+        question: 'Are you sure you want to take this off the list?',
+        subject: item.title,
+        consequence:
+          'Any note you wrote about it goes too. The Story itself is kept.',
+        confirmText: 'Remove',
+        cancelText: 'Keep it',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.replace(this._readingListService.removeItem(listId, item.id));
+        }
+      });
   }
 
   /**

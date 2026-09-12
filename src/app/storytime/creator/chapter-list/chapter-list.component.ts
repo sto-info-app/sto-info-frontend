@@ -10,12 +10,13 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { finalize } from 'rxjs';
+import { Observable, finalize } from 'rxjs';
 import {
   ChapterStatus,
   ManagedChapter,
   StorytimeModerationStatus,
 } from 'src/app/models/storytime.models';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -61,6 +62,7 @@ export class ChapterListComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _confirm = new ConfirmPrompt();
 
   /**
    * Loads the Chapters of the Story named in the route.
@@ -109,6 +111,44 @@ export class ChapterListComponent implements OnInit {
   }
 
   /**
+   * Whether a Chapter may be deleted from its current state.
+   *
+   * A published Chapter is part of what readers are already following, and
+   * taking one out of the middle of a Story is not something to offer beside
+   * an edit button. Unpublishing first is reversible; only then is the
+   * irreversible action on the table. The server allows either; this is the
+   * order the interface asks for them in.
+   *
+   * @param chapter - The Chapter to test.
+   * @returns True when deleting is an action to offer.
+   */
+  canDelete(chapter: ManagedChapter): boolean {
+    return chapter.status !== ChapterStatus.PUBLISHED;
+  }
+
+  /**
+   * Deletes a Chapter, once the creator has agreed to lose it.
+   *
+   * @param chapter - The Chapter to delete.
+   */
+  remove(chapter: ManagedChapter): void {
+    this._confirm
+      .askToDestroy({
+        title: 'Delete Chapter',
+        question: 'Are you sure you want to delete this Chapter?',
+        subject: chapter.title,
+        consequence:
+          'Its text, artwork and cast appearances go with it, and this cannot be undone.',
+        confirmText: 'Delete Chapter',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.runAction(this._chapterService.deleteChapter(chapter.id));
+        }
+      });
+  }
+
+  /**
    * Loads the Chapters.
    */
   private load(): void {
@@ -143,9 +183,7 @@ export class ChapterListComponent implements OnInit {
    *
    * @param action - The action observable.
    */
-  private runAction(
-    action: ReturnType<ChapterService['publishChapter']>,
-  ): void {
+  private runAction<T>(action: Observable<T>): void {
     action
       .pipe(
         takeUntilDestroyed(this._destroyRef),

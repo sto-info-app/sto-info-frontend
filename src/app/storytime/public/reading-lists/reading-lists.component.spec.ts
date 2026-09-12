@@ -5,6 +5,10 @@ import { of, throwError } from 'rxjs';
 import { ReadingList } from 'src/app/models/storytime.models';
 import { ReadingListService } from '../../reading-list.service';
 import { ReadingListsComponent } from './reading-lists.component';
+import {
+  ConfirmPromptDouble,
+  stubConfirmPrompt,
+} from 'src/app/shared/actions/confirm-prompt.testing';
 
 /**
  * Builds a list.
@@ -25,6 +29,7 @@ const buildList = (overrides: Partial<ReadingList> = {}): ReadingList => ({
 });
 
 describe('ReadingListsComponent', () => {
+  let confirm: ConfirmPromptDouble;
   let component: ReadingListsComponent;
   let fixture: ComponentFixture<ReadingListsComponent>;
   let readingListService: {
@@ -49,9 +54,12 @@ describe('ReadingListsComponent', () => {
       deleteList: jest.fn().mockReturnValue(of(undefined)),
     };
 
+    confirm = stubConfirmPrompt();
+
     await TestBed.configureTestingModule({
       imports: [ReadingListsComponent, RouterTestingModule],
       providers: [
+        confirm.provider,
         { provide: ReadingListService, useValue: readingListService },
       ],
     }).compileComponents();
@@ -242,6 +250,27 @@ describe('ReadingListsComponent', () => {
     it('ignores a second attempt while one is in flight', () => {
       create();
       component.isSaving = true;
+
+      component.remove(buildList());
+
+      expect(readingListService.deleteList).not.toHaveBeenCalled();
+    });
+
+    // Everything on the list goes with it. The Stories themselves are kept,
+    // and the question says so.
+    it('asks first, naming the list', () => {
+      create();
+
+      component.remove(buildList());
+
+      expect(confirm.lastAsked()?.title).toBe('Delete list');
+      expect(confirm.lastAsked()?.message).toContain('Klingon favourites');
+      expect(confirm.lastAsked()?.message).toContain('Stories themselves');
+    });
+
+    it('leaves the list alone when the reader says no', () => {
+      confirm.answer(false);
+      create();
 
       component.remove(buildList());
 

@@ -42,6 +42,7 @@ describe('AccountsComponent', () => {
       getPlatforms: jest.fn().mockReturnValue(of([])),
       getLaunchers: jest.fn().mockReturnValue(of([])),
       deleteAccount: jest.fn().mockReturnValue(of(undefined)),
+      setAccountPinned: jest.fn().mockReturnValue(of(undefined)),
     } as unknown as jest.Mocked<StoAccountService>;
 
     routingServiceSpy = {
@@ -104,8 +105,8 @@ describe('AccountsComponent', () => {
     expect(component.accounts[0].characterCount).toBe(2);
     expect(component.isLoading).toBe(false);
 
-    expect(component.accountVms).toHaveLength(1);
-    const vm: AccountVm = component.accountVms[0];
+    expect(component.accountVms()).toHaveLength(1);
+    const vm: AccountVm = component.accountVms()[0];
     expect(vm.id).toBe(mockAccount.id);
     expect(vm.account).toBe(accounts[0]);
     expect(vm.card.link).toBe('/dashboard/accounts/Test~1234');
@@ -130,7 +131,7 @@ describe('AccountsComponent', () => {
 
     component.ngOnInit();
 
-    const vm: AccountVm = component.accountVms[0];
+    const vm: AccountVm = component.accountVms()[0];
     expect(vm.platformIcon).toBeNull();
     expect(vm.card.platformName).toBe('Platform');
     expect(vm.launcherIcon).toBe('fab fa-steam');
@@ -167,7 +168,7 @@ describe('AccountsComponent', () => {
 
     component.ngOnInit();
 
-    const details = component.accountVms[0].card.details;
+    const details = component.accountVms()[0].card.details;
     expect(details).toEqual([
       expect.objectContaining({
         label: 'Email',
@@ -190,7 +191,7 @@ describe('AccountsComponent', () => {
 
     component.ngOnInit();
 
-    expect(component.accountVms[0].card.launcherName).toBe('Launcher');
+    expect(component.accountVms()[0].card.launcherName).toBe('Launcher');
   });
 
   describe('onAccountCardAction', () => {
@@ -410,7 +411,7 @@ describe('AccountsComponent', () => {
 
     component.ngOnInit();
 
-    const vm = component.accountVms[0];
+    const vm = component.accountVms()[0];
     expect(vm.card.details.some(detail => detail.label === 'Username')).toBe(
       true,
     );
@@ -436,8 +437,8 @@ describe('AccountsComponent', () => {
     );
 
     component.ngOnInit();
-    expect(component.accountVms[0].card.themeClass).toBe('platform-xbox');
-    expect(component.accountVms[0].card.bgImagePath).toBe(
+    expect(component.accountVms()[0].card.themeClass).toBe('platform-xbox');
+    expect(component.accountVms()[0].card.bgImagePath).toBe(
       '/assets/account-types/account_type_xbox.jpg',
     );
   });
@@ -485,7 +486,7 @@ describe('AccountsComponent', () => {
 
     component.ngOnInit();
 
-    expect(component.accountVms[0].card.bgImagePath).toBe(cloudflareUrl);
+    expect(component.accountVms()[0].card.bgImagePath).toBe(cloudflareUrl);
   });
 
   it('should use default windows background for pc account without launcher', () => {
@@ -501,7 +502,7 @@ describe('AccountsComponent', () => {
     stoAccountServiceSpy.getLaunchers.mockReturnValue(of([]));
 
     component.ngOnInit();
-    expect(component.accountVms[0].card.bgImagePath).toBe(
+    expect(component.accountVms()[0].card.bgImagePath).toBe(
       '/assets/account-types/account_type_windows_default.jpg',
     );
   });
@@ -523,7 +524,7 @@ describe('AccountsComponent', () => {
       ]),
     );
     component.ngOnInit();
-    expect(component.accountVms[0].card.bgImagePath).toBe(
+    expect(component.accountVms()[0].card.bgImagePath).toBe(
       '/assets/account-types/account_type_windows_epic.jpg',
     );
 
@@ -533,7 +534,7 @@ describe('AccountsComponent', () => {
       ]),
     );
     component.loadAccounts();
-    expect(component.accountVms[0].card.bgImagePath).toBe(
+    expect(component.accountVms()[0].card.bgImagePath).toBe(
       '/assets/account-types/account_type_windows_steam.jpg',
     );
   });
@@ -551,7 +552,7 @@ describe('AccountsComponent', () => {
     stoAccountServiceSpy.getLaunchers.mockReturnValue(of([]));
 
     component.ngOnInit();
-    expect(component.accountVms[0].card.bgImagePath).toBe(
+    expect(component.accountVms()[0].card.bgImagePath).toBe(
       '/assets/account-types/account_type_default.jpg',
     );
   });
@@ -570,9 +571,9 @@ describe('AccountsComponent', () => {
 
     component.ngOnInit();
     expect(
-      component.accountVms[0].card.details.some(
-        detail => detail.label === 'Username',
-      ),
+      component
+        .accountVms()[0]
+        .card.details.some(detail => detail.label === 'Username'),
     ).toBe(false);
   });
 
@@ -584,5 +585,417 @@ describe('AccountsComponent', () => {
 
     expect(nextSpy).toHaveBeenCalled();
     expect(completeSpy).toHaveBeenCalled();
+  });
+
+  describe('sorting, filtering and pinning', () => {
+    const platforms: Platform[] = [
+      {
+        id: 'p1',
+        name: 'Windows',
+        createdAt: '2023-01-01',
+        updatedAt: '2023-01-01',
+      },
+      {
+        id: 'p2',
+        name: 'Xbox',
+        createdAt: '2023-01-01',
+        updatedAt: '2023-01-01',
+      },
+    ];
+
+    const launchers: Launcher[] = [
+      {
+        id: 'l1',
+        name: 'Steam',
+        createdAt: '2023-01-01',
+        updatedAt: '2023-01-01',
+      },
+      {
+        id: 'l2',
+        name: 'Epic',
+        createdAt: '2023-01-01',
+        updatedAt: '2023-01-01',
+      },
+    ];
+
+    const account = (overrides: Partial<StoAccount>): StoAccount => ({
+      ...mockAccount,
+      lifetimeSubscription: false,
+      ...overrides,
+    });
+
+    /**
+     * Loads the given accounts through the component, as the API would return
+     * them.
+     */
+    const load = (accounts: StoAccount[]): void => {
+      stoAccountServiceSpy.getAccounts.mockReturnValue(of(accounts));
+      stoAccountServiceSpy.getPlatforms.mockReturnValue(of(platforms));
+      stoAccountServiceSpy.getLaunchers.mockReturnValue(of(launchers));
+
+      fixture.detectChanges();
+    };
+
+    const visibleHandles = (): string[] =>
+      component.filteredAccountVms().map(vm => vm.account.handle);
+
+    describe('the list controls', () => {
+      it('should be offered once there is more than one account', () => {
+        load([
+          account({ id: '1', handle: 'Archer' }),
+          account({ id: '2', handle: 'Sisko' }),
+        ]);
+
+        expect(component.showListControls()).toBe(true);
+      });
+
+      // Ordering one account and narrowing a list of one are both no-ops, so
+      // the panels would only be clutter.
+      it('should be withheld for a single account', () => {
+        load([account({ id: '1', handle: 'Archer' })]);
+
+        expect(component.showListControls()).toBe(false);
+      });
+
+      it('should be withheld when there are no accounts at all', () => {
+        load([]);
+
+        expect(component.showListControls()).toBe(false);
+      });
+
+      it('should render the filter and sort panels when offered', () => {
+        load([
+          account({ id: '1', handle: 'Archer' }),
+          account({ id: '2', handle: 'Sisko' }),
+        ]);
+
+        expect(
+          fixture.nativeElement.querySelector('#account-search-input'),
+        ).toBeTruthy();
+        expect(
+          fixture.nativeElement.querySelector('#account-sort-by-select'),
+        ).toBeTruthy();
+      });
+
+      it('should not render the panels for a single account', () => {
+        load([account({ id: '1', handle: 'Archer' })]);
+
+        expect(
+          fixture.nativeElement.querySelector('#account-search-input'),
+        ).toBeNull();
+        expect(
+          fixture.nativeElement.querySelector('#account-sort-by-select'),
+        ).toBeNull();
+      });
+    });
+
+    describe('sorting', () => {
+      // The API does the ordering, so changing it has to go back for the list.
+      it('should reload the list with the chosen field', () => {
+        load([
+          account({ id: '1', handle: 'Archer' }),
+          account({ id: '2', handle: 'Sisko' }),
+        ]);
+
+        component.setSortBy('characterCount');
+
+        expect(component.sortBy()).toBe('characterCount');
+        expect(stoAccountServiceSpy.getAccounts).toHaveBeenLastCalledWith(
+          'characterCount',
+          'ASC',
+        );
+      });
+
+      it('should reload the list with the chosen direction', () => {
+        load([
+          account({ id: '1', handle: 'Archer' }),
+          account({ id: '2', handle: 'Sisko' }),
+        ]);
+
+        component.setSortOrder('DESC');
+
+        expect(component.sortOrder()).toBe('DESC');
+        expect(stoAccountServiceSpy.getAccounts).toHaveBeenLastCalledWith(
+          'handle',
+          'DESC',
+        );
+      });
+
+      it('should ask for the default ordering on first load', () => {
+        load([account({ id: '1', handle: 'Archer' })]);
+
+        expect(stoAccountServiceSpy.getAccounts).toHaveBeenCalledWith(
+          'handle',
+          'ASC',
+        );
+      });
+
+      // Ordering is the API's job, so the component must not reorder the rows
+      // it is handed.
+      it('should keep the order the API returned', () => {
+        load([
+          account({ id: '1', handle: 'Sisko' }),
+          account({ id: '2', handle: 'Archer' }),
+        ]);
+
+        expect(visibleHandles()).toEqual(['Sisko', 'Archer']);
+      });
+    });
+
+    describe('filtering', () => {
+      beforeEach(() => {
+        load([
+          account({
+            id: '1',
+            handle: 'Archer',
+            username: 'jonathan',
+            platformId: 'p1',
+            launcherId: 'l1',
+            lifetimeSubscription: true,
+          }),
+          account({
+            id: '2',
+            handle: 'Sisko',
+            email: 'ben@ds9.com',
+            notes: 'baseball',
+            platformId: 'p2',
+            launcherId: 'l2',
+          }),
+        ]);
+      });
+
+      it('should match the handle', () => {
+        component.searchText.set('arch');
+
+        expect(visibleHandles()).toEqual(['Archer']);
+      });
+
+      it('should match the username', () => {
+        component.searchText.set('jonathan');
+
+        expect(visibleHandles()).toEqual(['Archer']);
+      });
+
+      it('should match the email', () => {
+        component.searchText.set('ds9');
+
+        expect(visibleHandles()).toEqual(['Sisko']);
+      });
+
+      it('should match the notes', () => {
+        component.searchText.set('baseball');
+
+        expect(visibleHandles()).toEqual(['Sisko']);
+      });
+
+      it('should filter by platform', () => {
+        component.platformFilter.set('p2');
+
+        expect(visibleHandles()).toEqual(['Sisko']);
+      });
+
+      it('should filter by launcher', () => {
+        component.launcherFilter.set('l1');
+
+        expect(visibleHandles()).toEqual(['Archer']);
+      });
+
+      it('should filter by lifetime subscription', () => {
+        component.lifetimeOnly.set(true);
+
+        expect(visibleHandles()).toEqual(['Archer']);
+      });
+
+      it('should count the filters that are narrowing the list', () => {
+        component.searchText.set('a');
+        component.platformFilter.set('p1');
+
+        expect(component.activeFilterCount()).toBe(2);
+      });
+
+      it('should clear every filter', () => {
+        component.searchText.set('arch');
+        component.platformFilter.set('p1');
+        component.launcherFilter.set('l1');
+        component.lifetimeOnly.set(true);
+        component.pinnedOnly.set(true);
+
+        component.clearFilters();
+
+        expect(component.activeFilterCount()).toBe(0);
+        expect(visibleHandles()).toEqual(['Archer', 'Sisko']);
+      });
+
+      // Filtering is local, so narrowing the list must not go back to the API.
+      it('should not reload the list when a filter changes', () => {
+        stoAccountServiceSpy.getAccounts.mockClear();
+
+        component.searchText.set('arch');
+
+        expect(stoAccountServiceSpy.getAccounts).not.toHaveBeenCalled();
+      });
+
+      it('should report when every account has been filtered out', () => {
+        component.searchText.set('nobody');
+
+        expect(component.allAccountsFilteredOut()).toBe(true);
+      });
+
+      it('should not report an empty account list as filtered out', () => {
+        load([]);
+
+        expect(component.allAccountsFilteredOut()).toBe(false);
+      });
+    });
+
+    // An account can be saved without a platform or launcher, and must then
+    // simply fall outside a filter that names one.
+    it('should exclude an account with no platform or launcher recorded', () => {
+      load([
+        account({ id: '1', handle: 'Archer', platformId: 'p1' }),
+        account({
+          id: '2',
+          handle: 'Sisko',
+          platformId: undefined,
+          launcherId: undefined,
+        }),
+      ]);
+
+      component.platformFilter.set('p1');
+      expect(visibleHandles()).toEqual(['Archer']);
+
+      component.clearFilters();
+      component.launcherFilter.set('l1');
+      expect(visibleHandles()).toEqual([]);
+    });
+
+    describe('pinning', () => {
+      const pinnedAccount = account({
+        id: '1',
+        handle: 'Archer',
+        pinnedAt: '2026-01-01T00:00:00Z',
+      });
+      const unpinnedAccount = account({ id: '2', handle: 'Sisko' });
+
+      it('should offer a pin action on every card', () => {
+        load([unpinnedAccount]);
+
+        const pin = component
+          .accountVms()[0]
+          .card.actions.find(action => action.key === 'pin');
+
+        expect(pin).toEqual({
+          key: 'pin',
+          icon: 'fas fa-thumbtack',
+          title: 'Pin Account to Top',
+          active: false,
+        });
+      });
+
+      // Pinning stays available with one account: the choice keeps its meaning
+      // as soon as a second account arrives.
+      it('should offer the pin action even for a single account', () => {
+        load([unpinnedAccount]);
+
+        expect(component.showListControls()).toBe(false);
+        expect(
+          component
+            .accountVms()[0]
+            .card.actions.some(action => action.key === 'pin'),
+        ).toBe(true);
+      });
+
+      it('should show a pinned account as engaged, offering to unpin it', () => {
+        load([pinnedAccount]);
+
+        const pin = component
+          .accountVms()[0]
+          .card.actions.find(action => action.key === 'pin');
+
+        expect(pin?.active).toBe(true);
+        expect(pin?.title).toBe('Unpin Account');
+      });
+
+      it('should pin an unpinned account', () => {
+        load([pinnedAccount, unpinnedAccount]);
+
+        component.onAccountCardAction(unpinnedAccount, 'pin');
+
+        expect(stoAccountServiceSpy.setAccountPinned).toHaveBeenCalledWith(
+          '2',
+          true,
+        );
+      });
+
+      it('should unpin a pinned account', () => {
+        load([pinnedAccount, unpinnedAccount]);
+
+        component.onAccountCardAction(pinnedAccount, 'pin');
+
+        expect(stoAccountServiceSpy.setAccountPinned).toHaveBeenCalledWith(
+          '1',
+          false,
+        );
+      });
+
+      // The new position comes from the API rather than being guessed at here.
+      it('should reload the list after pinning', () => {
+        load([pinnedAccount, unpinnedAccount]);
+        stoAccountServiceSpy.getAccounts.mockClear();
+
+        component.togglePin(unpinnedAccount);
+
+        expect(stoAccountServiceSpy.getAccounts).toHaveBeenCalledTimes(1);
+      });
+
+      it('should stop loading and log when pinning fails', () => {
+        load([pinnedAccount, unpinnedAccount]);
+        const consoleSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation(() => undefined);
+        stoAccountServiceSpy.setAccountPinned.mockReturnValue(
+          throwError(() => new Error('nope')),
+        );
+
+        component.togglePin(unpinnedAccount);
+
+        expect(component.isLoading).toBe(false);
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Failed to update the STO account pin:',
+          expect.any(Error),
+        );
+
+        consoleSpy.mockRestore();
+      });
+
+      it('should count the pinned accounts', () => {
+        load([pinnedAccount, unpinnedAccount]);
+
+        expect(component.pinnedCount()).toBe(1);
+      });
+
+      it('should filter down to the pinned accounts', () => {
+        load([pinnedAccount, unpinnedAccount]);
+
+        component.pinnedOnly.set(true);
+
+        expect(visibleHandles()).toEqual(['Archer']);
+      });
+
+      it('should offer the pinned-only filter only once something is pinned', () => {
+        load([unpinnedAccount, account({ id: '3', handle: 'Picard' })]);
+
+        expect(component.pinnedCount()).toBe(0);
+      });
+    });
+
+    it('should ignore an unrecognised card action', () => {
+      load([account({ id: '1', handle: 'Archer' })]);
+
+      component.onAccountCardAction(mockAccount, 'beam-up');
+
+      expect(stoAccountServiceSpy.setAccountPinned).not.toHaveBeenCalled();
+      expect(stoAccountServiceSpy.deleteAccount).not.toHaveBeenCalled();
+    });
   });
 });

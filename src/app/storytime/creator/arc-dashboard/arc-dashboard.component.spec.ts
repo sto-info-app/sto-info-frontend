@@ -7,6 +7,10 @@ import {
   ManagedArc,
   StorytimeVisibility,
 } from 'src/app/models/storytime.models';
+import {
+  ConfirmPromptDouble,
+  stubConfirmPrompt,
+} from 'src/app/shared/actions/confirm-prompt.testing';
 import { ArcService } from '../../arc.service';
 import { ArcDashboardComponent } from './arc-dashboard.component';
 
@@ -16,7 +20,9 @@ describe('ArcDashboardComponent', () => {
     getMyArcs: jest.Mock;
     publishArc: jest.Mock;
     unpublishArc: jest.Mock;
+    deleteArc: jest.Mock;
   };
+  let confirm: ConfirmPromptDouble;
 
   /**
    * Builds a curated Arc.
@@ -51,12 +57,16 @@ describe('ArcDashboardComponent', () => {
       getMyArcs: jest.fn().mockReturnValue(of([buildArc()])),
       publishArc: jest.fn().mockReturnValue(of(buildArc())),
       unpublishArc: jest.fn().mockReturnValue(of(buildArc())),
+      deleteArc: jest.fn().mockReturnValue(of(undefined)),
     };
+
+    confirm = stubConfirmPrompt();
 
     TestBed.configureTestingModule({
       imports: [ArcDashboardComponent],
       providers: [
         provideRouter([]),
+        confirm.provider,
         { provide: ArcService, useValue: arcService },
       ],
     });
@@ -112,6 +122,72 @@ describe('ArcDashboardComponent', () => {
     fixture.componentInstance.unpublish(buildArc());
 
     expect(arcService.unpublishArc).toHaveBeenCalledWith('arc-1');
+  });
+
+  describe('deleting an Arc', () => {
+    it('deletes it and reloads', () => {
+      render();
+      fixture.componentInstance.remove(buildArc());
+
+      expect(arcService.deleteArc).toHaveBeenCalledWith('arc-1');
+      expect(arcService.getMyArcs).toHaveBeenCalledTimes(2);
+    });
+
+    // An Arc is a reading order rather than the writing itself. A curator
+    // should not be left wondering whether deleting the collection deletes
+    // the collected.
+    it('asks first, and says the Stories are kept', () => {
+      render();
+      fixture.componentInstance.remove(buildArc());
+
+      expect(confirm.lastAsked()?.title).toBe('Delete Arc');
+      expect(confirm.lastAsked()?.message).toContain('The Long War');
+      expect(confirm.lastAsked()?.message).toContain('Stories in it are kept');
+    });
+
+    it('leaves the Arc alone when the curator says no', () => {
+      confirm.answer(false);
+      render();
+      fixture.componentInstance.remove(buildArc());
+
+      expect(arcService.deleteArc).not.toHaveBeenCalled();
+    });
+
+    it('is offered for a draft', () => {
+      render();
+
+      expect(fixture.componentInstance.canDelete(buildArc())).toBe(true);
+    });
+
+    it('is not offered for a published Arc', () => {
+      render();
+
+      expect(
+        fixture.componentInstance.canDelete(
+          buildArc({ status: ArcStatus.PUBLISHED }),
+        ),
+      ).toBe(false);
+    });
+
+    it('shows no delete control while the Arc is published', () => {
+      arcService.getMyArcs.mockReturnValue(
+        of([buildArc({ status: ArcStatus.PUBLISHED })]),
+      );
+
+      const element = render();
+
+      expect(
+        element.querySelector('[aria-label="Delete this Arc"]'),
+      ).toBeNull();
+    });
+
+    it('shows a delete control for a draft', () => {
+      const element = render();
+
+      expect(
+        element.querySelector('[aria-label="Delete this Arc"]'),
+      ).not.toBeNull();
+    });
   });
 
   // Only a published Arc has anything for a reader to look at.

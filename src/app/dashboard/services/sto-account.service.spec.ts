@@ -90,6 +90,89 @@ describe('StoAccountService', () => {
         },
       });
     });
+
+    it('should send the requested ordering as query parameters', () => {
+      authServiceSpy.getHttpOptionsWithAccessToken.mockReturnValue(
+        mockHttpOptions,
+      );
+
+      service.getAccounts('characterCount', 'DESC').subscribe();
+
+      const req = httpMock.expectOne(
+        `${API_URLS.STO_ACCOUNT}?sortBy=characterCount&sortOrder=DESC`,
+      );
+      expect(req.request.params.get('sortBy')).toBe('characterCount');
+      expect(req.request.params.get('sortOrder')).toBe('DESC');
+      req.flush([]);
+    });
+
+    // Omitting the parameters entirely lets the API apply its own defaults,
+    // rather than this service having to restate them.
+    it('should send no ordering parameters when none are given', () => {
+      authServiceSpy.getHttpOptionsWithAccessToken.mockReturnValue(
+        mockHttpOptions,
+      );
+
+      service.getAccounts().subscribe();
+
+      const req = httpMock.expectOne(API_URLS.STO_ACCOUNT);
+      expect(req.request.params.keys()).toEqual([]);
+      req.flush([]);
+    });
+
+    it('should send only the field when no direction is given', () => {
+      authServiceSpy.getHttpOptionsWithAccessToken.mockReturnValue(
+        mockHttpOptions,
+      );
+
+      service.getAccounts('handle').subscribe();
+
+      const req = httpMock.expectOne(`${API_URLS.STO_ACCOUNT}?sortBy=handle`);
+      expect(req.request.params.has('sortOrder')).toBe(false);
+      req.flush([]);
+    });
+  });
+
+  describe('setAccountPinned', () => {
+    it('should pin an account', () => {
+      authServiceSpy.getHttpOptionsWithAccessToken.mockReturnValue(
+        mockHttpOptions,
+      );
+      const pinned = { ...mockAccount, pinnedAt: '2026-01-01T00:00:00Z' };
+
+      service.setAccountPinned('1', true).subscribe(account => {
+        expect(account).toEqual(pinned);
+      });
+
+      const req = httpMock.expectOne(`${API_URLS.STO_ACCOUNT}/1/pin`);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual({ pinned: true });
+      req.flush(pinned);
+    });
+
+    it('should unpin an account', () => {
+      authServiceSpy.getHttpOptionsWithAccessToken.mockReturnValue(
+        mockHttpOptions,
+      );
+
+      service.setAccountPinned('1', false).subscribe();
+
+      const req = httpMock.expectOne(`${API_URLS.STO_ACCOUNT}/1/pin`);
+      expect(req.request.body).toEqual({ pinned: false });
+      req.flush({ ...mockAccount, pinnedAt: null });
+    });
+
+    it('should throw error when token is missing', (done: jest.DoneCallback) => {
+      authServiceSpy.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      service.setAccountPinned('1', true).subscribe({
+        next: () => done.fail('Should have failed'),
+        error: error => {
+          expect(error.message).toBe('No token found');
+          done();
+        },
+      });
+    });
   });
 
   describe('getAccount', () => {

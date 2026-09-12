@@ -156,6 +156,7 @@ describe('STORYTIME_ROUTES', () => {
       'manage/stories/:storyId/characters/new',
       'manage/characters/:characterId',
       'manage/stories/:storyId/collaborators',
+      'manage/stories/:storyId/credits',
     ];
 
     it.each(creatorPaths)('requires sign-in and a permission for %s', path => {

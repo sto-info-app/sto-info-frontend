@@ -137,6 +137,18 @@
                   aria-hidden="true"></i>
               </button>
             }
+            @if (canDelete(chapter)) {
+              <button
+                type="button"
+                class="cta-icon delete-icon"
+                title="Delete this Chapter"
+                aria-label="Delete this Chapter"
+                (click)="remove(chapter)">
+                <i
+                  class="fa-solid fa-trash"
+                  aria-hidden="true"></i>
+              </button>
+            }
           </div>
         </div>
       </li>

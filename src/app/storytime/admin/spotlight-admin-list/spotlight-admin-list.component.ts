@@ -15,6 +15,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
 import { SpotlightService } from '../../spotlight.service';
 
@@ -55,6 +56,7 @@ export class SpotlightAdminListComponent implements OnInit {
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _actions = new ManagedActionRunner(this, () => this.load());
+  private readonly _confirm = new ConfirmPrompt();
 
   /**
    * Loads the entries.
@@ -120,12 +122,25 @@ export class SpotlightAdminListComponent implements OnInit {
   }
 
   /**
-   * Deletes an entry.
+   * Deletes an entry, once the administrator has agreed to lose it.
    *
    * @param entry - The entry.
    */
   remove(entry: ManagedSpotlight): void {
-    this._actions.run(this._spotlightService.remove(entry.id));
+    this._confirm
+      .askToDestroy({
+        title: 'Delete spotlight',
+        question: 'Are you sure you want to delete this spotlight entry?',
+        subject: entry.headline,
+        consequence:
+          'Its wording and artwork go with it, and this cannot be undone. The work it points at is kept.',
+        confirmText: 'Delete entry',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this._actions.run(this._spotlightService.remove(entry.id));
+        }
+      });
   }
 
   /**

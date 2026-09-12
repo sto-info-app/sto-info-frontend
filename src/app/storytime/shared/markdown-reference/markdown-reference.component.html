@@ -11,7 +11,9 @@
     -->
     <dl class="storytime-markdown-reference__list">
       @for (construct of group.constructs; track construct.syntax) {
-        <dt><code>{{ construct.syntax }}</code></dt>
+        <dt>
+          <code>{{ construct.syntax }}</code>
+        </dt>
         <dd>{{ construct.meaning }}</dd>
       }
     </dl>

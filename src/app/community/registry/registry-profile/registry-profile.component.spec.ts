@@ -14,6 +14,7 @@ import {
   Relationship,
   RelationshipStatus,
 } from '../../models/community.models';
+import { RegistryAccountSummary } from '../../models/registry.models';
 import { buildAccountSummary, buildProfile } from '../registry-test-fixtures';
 import { RegistryService } from '../registry.service';
 import { RegistryProfileComponent } from './registry-profile.component';
@@ -206,10 +207,10 @@ describe('RegistryProfileComponent', () => {
     await setup();
     fixture.detectChanges();
 
-    expect(component.accountCards).toHaveLength(1);
-    expect(component.accountCards[0].actions).toEqual([]);
-    expect(component.accountCards[0].endeavour).toBeNull();
-    expect(component.accountCards[0].link).toEqual([
+    expect(component.accountCards()).toHaveLength(1);
+    expect(component.accountCards()[0].actions).toEqual([]);
+    expect(component.accountCards()[0].endeavour).toBeNull();
+    expect(component.accountCards()[0].link).toEqual([
       '/community/registry/profiles',
       'captain.picard',
       'SteveX~1234',
@@ -220,7 +221,7 @@ describe('RegistryProfileComponent', () => {
     await setup();
     fixture.detectChanges();
 
-    const details = component.accountCards[0].details;
+    const details = component.accountCards()[0].details;
     expect(details.map(detail => detail.label)).toEqual([
       'Platform',
       'Launcher',
@@ -260,11 +261,11 @@ describe('RegistryProfileComponent', () => {
     );
     fixture.detectChanges();
 
-    const labels = component.accountCards[0].details.map(
-      detail => detail.label,
-    );
+    const labels = component
+      .accountCards()[0]
+      .details.map(detail => detail.label);
     expect(labels).toEqual(['Lifetime Subscription']);
-    expect(component.accountCards[0].lifetimeSubscription).toBe(false);
+    expect(component.accountCards()[0].lifetimeSubscription).toBe(false);
   });
 
   it('should hide the last-seen line for a member who never signed in', async () => {
@@ -309,7 +310,7 @@ describe('RegistryProfileComponent', () => {
     );
     fixture.detectChanges();
 
-    expect(component.accountCards[0].link).toEqual([
+    expect(component.accountCards()[0].link).toEqual([
       '/community/registry/profiles',
       'a b',
       'c/d',
@@ -629,6 +630,335 @@ describe('RegistryProfileComponent', () => {
       expect(
         fixture.nativeElement.querySelector('app-lcars-success-message'),
       ).toBeTruthy();
+    });
+  });
+
+  describe('sorting and filtering the account list', () => {
+    /**
+     * Loads the profile with the given public accounts.
+     *
+     * @param accounts - The public account summaries the API reports.
+     */
+    function loadWithAccounts(
+      accounts: Partial<RegistryAccountSummary>[],
+    ): void {
+      registryServiceSpy.getProfile.mockReturnValue(
+        of(
+          buildProfile({
+            accounts: accounts.map(account => buildAccountSummary(account)),
+          }),
+        ),
+      );
+      fixture.detectChanges();
+    }
+
+    const visibleHandles = (): string[] =>
+      component.accountCards().map(card => card.handle);
+
+    describe('the list controls', () => {
+      it('should be offered once more than one account is public', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer' },
+          { handle: 'Sisko', slug: 'sisko' },
+        ]);
+
+        expect(component.showListControls()).toBe(true);
+        expect(
+          fixture.nativeElement.querySelector('#registry-account-search-input'),
+        ).toBeTruthy();
+      });
+
+      it('should be withheld for a single public account', async () => {
+        await setup();
+        loadWithAccounts([{ handle: 'Archer', slug: 'archer' }]);
+
+        expect(component.showListControls()).toBe(false);
+        expect(
+          fixture.nativeElement.querySelector('#registry-account-search-input'),
+        ).toBeNull();
+      });
+
+      // The controls belong to every visitor, not only a signed-in one, so the
+      // side column has to appear for an anonymous viewer too.
+      it('should render the side column for an anonymous visitor', async () => {
+        await setup();
+        authServiceSpy.isLoggedIn.mockReturnValue(false);
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer' },
+          { handle: 'Sisko', slug: 'sisko' },
+        ]);
+
+        expect(component.canActOnMember).toBe(false);
+        expect(
+          fixture.nativeElement.querySelector('#registry-profile-side-column'),
+        ).toBeTruthy();
+      });
+
+      it('should leave out the side column with nothing to put in it', async () => {
+        await setup();
+        authServiceSpy.isLoggedIn.mockReturnValue(false);
+        loadWithAccounts([{ handle: 'Archer', slug: 'archer' }]);
+
+        expect(
+          fixture.nativeElement.querySelector('#registry-profile-side-column'),
+        ).toBeNull();
+      });
+
+      it('should offer no officer actions against the viewer themselves', async () => {
+        await setup();
+        signedInWith(RelationshipStatus.SELF);
+
+        expect(component.canActOnMember).toBe(false);
+      });
+
+      it('should offer officer actions against another member', async () => {
+        await setup();
+        signedInWith(RelationshipStatus.NONE);
+
+        expect(component.canActOnMember).toBe(true);
+      });
+    });
+
+    describe('sorting', () => {
+      it('should order by handle ascending by default', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Sisko', slug: 'sisko' },
+          { handle: 'Archer', slug: 'archer' },
+        ]);
+
+        expect(visibleHandles()).toEqual(['Archer', 'Sisko']);
+      });
+
+      it('should order by handle descending', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer' },
+          { handle: 'Sisko', slug: 'sisko' },
+        ]);
+
+        component.sortOrder.set('DESC');
+
+        expect(visibleHandles()).toEqual(['Sisko', 'Archer']);
+      });
+
+      it('should order by public captain count', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer', publicCharacterCount: 1 },
+          { handle: 'Sisko', slug: 'sisko', publicCharacterCount: 9 },
+        ]);
+
+        component.sortBy.set('characterCount');
+        component.sortOrder.set('DESC');
+
+        expect(visibleHandles()).toEqual(['Sisko', 'Archer']);
+      });
+
+      it('should order by account created date', async () => {
+        await setup();
+        loadWithAccounts([
+          {
+            handle: 'Archer',
+            slug: 'archer',
+            accountCreatedDate: '2015-01-01T00:00:00.000Z',
+          },
+          {
+            handle: 'Sisko',
+            slug: 'sisko',
+            accountCreatedDate: '2010-01-01T00:00:00.000Z',
+          },
+        ]);
+
+        component.sortBy.set('accountCreatedDate');
+
+        expect(visibleHandles()).toEqual(['Sisko', 'Archer']);
+      });
+
+      // The accounts arrive inside the profile payload, so reordering them must
+      // not send the page back for the whole profile again.
+      it('should not refetch the profile when the ordering changes', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer' },
+          { handle: 'Sisko', slug: 'sisko' },
+        ]);
+        registryServiceSpy.getProfile.mockClear();
+
+        component.sortBy.set('characterCount');
+
+        expect(registryServiceSpy.getProfile).not.toHaveBeenCalled();
+      });
+
+      // Endeavour progress is never published, so it is not on offer here.
+      it('should not offer ordering by endeavour nodes', async () => {
+        await setup();
+
+        expect(component.sortOptions.map(option => option.value)).not.toContain(
+          'endeavourTotalNodes',
+        );
+      });
+    });
+
+    describe('filtering', () => {
+      it('should match the handle', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer' },
+          { handle: 'Sisko', slug: 'sisko' },
+        ]);
+
+        component.searchText.set('arch');
+
+        expect(visibleHandles()).toEqual(['Archer']);
+      });
+
+      it('should match the platform and launcher names', async () => {
+        await setup();
+        loadWithAccounts([
+          {
+            handle: 'Archer',
+            slug: 'archer',
+            platformName: 'Xbox',
+            launcherName: null,
+          },
+          {
+            handle: 'Sisko',
+            slug: 'sisko',
+            platformName: 'Windows',
+            launcherName: 'Steam',
+          },
+        ]);
+
+        component.searchText.set('steam');
+
+        expect(visibleHandles()).toEqual(['Sisko']);
+      });
+
+      it('should filter by platform', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer', platformName: 'Xbox' },
+          { handle: 'Sisko', slug: 'sisko', platformName: 'Windows' },
+        ]);
+
+        component.platformFilter.set('Windows');
+
+        expect(visibleHandles()).toEqual(['Sisko']);
+      });
+
+      it('should filter by launcher', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer', launcherName: 'Epic' },
+          { handle: 'Sisko', slug: 'sisko', launcherName: 'Steam' },
+        ]);
+
+        component.launcherFilter.set('Steam');
+
+        expect(visibleHandles()).toEqual(['Sisko']);
+      });
+
+      it('should filter by lifetime subscription', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer', lifetimeSubscription: false },
+          { handle: 'Sisko', slug: 'sisko', lifetimeSubscription: true },
+        ]);
+
+        component.lifetimeOnly.set(true);
+
+        expect(visibleHandles()).toEqual(['Sisko']);
+      });
+
+      it('should clear every filter', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer', platformName: 'Xbox' },
+          { handle: 'Sisko', slug: 'sisko', platformName: 'Windows' },
+        ]);
+
+        component.searchText.set('arch');
+        component.platformFilter.set('Xbox');
+        component.launcherFilter.set('Arc');
+        component.lifetimeOnly.set(true);
+
+        component.clearFilters();
+
+        expect(component.activeFilterCount()).toBe(0);
+        expect(visibleHandles()).toEqual(['Archer', 'Sisko']);
+      });
+
+      it('should count the filters that are narrowing the list', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer' },
+          { handle: 'Sisko', slug: 'sisko' },
+        ]);
+
+        component.searchText.set('a');
+        component.lifetimeOnly.set(true);
+
+        expect(component.activeFilterCount()).toBe(2);
+      });
+
+      it('should report when every account has been filtered out', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer' },
+          { handle: 'Sisko', slug: 'sisko' },
+        ]);
+
+        component.searchText.set('nobody');
+
+        expect(component.allAccountsFilteredOut()).toBe(true);
+      });
+
+      it('should not report a member with no public accounts as filtered out', async () => {
+        await setup();
+        loadWithAccounts([]);
+
+        expect(component.allAccountsFilteredOut()).toBe(false);
+      });
+    });
+
+    describe('the filter options', () => {
+      it('should offer the platforms and launchers actually on show', async () => {
+        await setup();
+        loadWithAccounts([
+          {
+            handle: 'Archer',
+            slug: 'archer',
+            platformName: 'Xbox',
+            launcherName: null,
+          },
+          {
+            handle: 'Sisko',
+            slug: 'sisko',
+            platformName: 'Windows',
+            launcherName: 'Steam',
+          },
+        ]);
+
+        expect(component.platformOptions().map(o => o.value)).toEqual([
+          'Windows',
+          'Xbox',
+        ]);
+        expect(component.launcherOptions().map(o => o.value)).toEqual([
+          'Steam',
+        ]);
+      });
+
+      it('should report whether any account is a lifetime subscription', async () => {
+        await setup();
+        loadWithAccounts([
+          { handle: 'Archer', slug: 'archer', lifetimeSubscription: false },
+          { handle: 'Sisko', slug: 'sisko', lifetimeSubscription: false },
+        ]);
+
+        expect(component.hasLifetimeAccounts()).toBe(false);
+      });
     });
   });
 });

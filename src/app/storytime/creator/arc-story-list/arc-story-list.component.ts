@@ -24,6 +24,7 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { HasPermissionDirective } from 'src/app/shared/directives/has-permission.directive';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ArcService } from '../../arc.service';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
 import { StoryService } from '../../story.service';
 import { ARC_MEMBERSHIP_STATUS_LABELS } from '../../storytime.constants';
@@ -89,6 +90,7 @@ export class ArcStoryListComponent implements OnInit {
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _actions = new ManagedActionRunner(this, () => this.load());
+  private readonly _confirm = new ConfirmPrompt();
 
   /** The form for inviting a Story by its identifier. */
   readonly form = this._formBuilder.nonNullable.group({
@@ -219,10 +221,37 @@ export class ArcStoryListComponent implements OnInit {
   /**
    * Takes a Story out of the Arc, or withdraws an invitation.
    *
+   * The Story itself is untouched either way, and the warning says so: a
+   * curator removing somebody else's writing from their reading order should
+   * not have to wonder what they have just done to it.
+   *
    * @param membership - The membership.
    */
   remove(membership: ArcMembership): void {
-    this._actions.run(this._arcService.leaveArc(membership.id));
+    // Read from the membership's own status rather than by looking it up in
+    // the pending list: a caller holding an equal-but-separate object would
+    // otherwise be told it was agreed when it is still an invitation.
+    const pending =
+      membership.membershipStatus === ArcMembershipStatus.INVITED ||
+      membership.membershipStatus === ArcMembershipStatus.REQUESTED;
+
+    this._confirm
+      .askToDestroy({
+        title: pending ? 'Withdraw invitation' : 'Remove from Arc',
+        question: pending
+          ? 'Are you sure you want to withdraw this invitation?'
+          : 'Are you sure you want to take this Story out of the Arc?',
+        subject: this.describe(membership),
+        consequence:
+          'The Story itself is kept, but its place in the reading order is lost.',
+        confirmText: pending ? 'Withdraw' : 'Remove',
+        cancelText: 'Keep it',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this._actions.run(this._arcService.leaveArc(membership.id));
+        }
+      });
   }
 
   /**

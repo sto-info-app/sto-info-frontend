@@ -19,6 +19,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
 import {
   TAG_CATEGORY_DESCRIPTIONS,
@@ -89,6 +90,7 @@ export class TagAdminComponent implements OnInit {
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _actions = new ManagedActionRunner(this, () => this.load());
+  private readonly _confirm = new ConfirmPrompt();
 
   /** The form for adding a tag, or editing the one selected. */
   readonly form = this._formBuilder.nonNullable.group({
@@ -160,16 +162,32 @@ export class TagAdminComponent implements OnInit {
   }
 
   /**
-   * Removes a tag from the vocabulary.
+   * Removes a tag from the vocabulary, once the administrator has agreed.
+   *
+   * A tag is shared across every Story that carries it, so the warning says
+   * what deleting one does to work that is not the administrator's own.
    *
    * @param tag - The tag.
    */
   remove(tag: StorytimeTag): void {
-    this._actions.run(this._tagService.deleteTag(tag.id), () => {
-      if (this.editingTagId === tag.id) {
-        this.cancelEdit();
-      }
-    });
+    this._confirm
+      .askToDestroy({
+        title: 'Delete tag',
+        question: 'Are you sure you want to delete this tag?',
+        subject: tag.name,
+        consequence:
+          'It is taken off every Story, Chapter and Character carrying it, and this cannot be undone.',
+        confirmText: 'Delete tag',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this._actions.run(this._tagService.deleteTag(tag.id), () => {
+            if (this.editingTagId === tag.id) {
+              this.cancelEdit();
+            }
+          });
+        }
+      });
   }
 
   /**

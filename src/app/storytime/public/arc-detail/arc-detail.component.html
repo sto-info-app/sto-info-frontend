@@ -43,8 +43,7 @@
           class="storytime-progress storytime-arc__progress-bar"
           [value]="progress.percentComplete"
           max="100"
-          [attr.aria-label]="'Progress through ' + arc.title">
-        </progress>
+          [attr.aria-label]="'Progress through ' + arc.title"></progress>
 
         @if (continueStory && continueStory.story) {
           <a
@@ -89,7 +88,9 @@
               }}</span>
             </a>
 
-            @if (membership.introductoryNote || membership.story?.shortDescription) {
+            @if (
+              membership.introductoryNote || membership.story?.shortDescription
+            ) {
               <div class="storytime-panel-card__body">
                 @if (membership.introductoryNote) {
                   <p class="storytime-arc__note">

@@ -394,6 +394,12 @@ $steam-dark: color.adjust(#4c8db5, $lightness: -18%);
   .delete-icon {
     @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-red);
   }
+
+  // A pinned account's pin is a state, not one more action going spare, so it
+  // holds the lit colour instead of only reaching it on hover.
+  .cta-icon--active {
+    color: vars.$lcars-sunflower;
+  }
 }
 
 @media (width <= 768px) {

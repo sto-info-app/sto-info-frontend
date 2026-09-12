@@ -19,19 +19,25 @@ import {
 import { StorytimeModerationService } from '../../storytime-moderation.service';
 import { StoryService } from '../../story.service';
 import { StoryDashboardComponent } from './story-dashboard.component';
+import {
+  ConfirmPromptDouble,
+  stubConfirmPrompt,
+} from 'src/app/shared/actions/confirm-prompt.testing';
 
 describe('StoryDashboardComponent', () => {
+  let confirm: ConfirmPromptDouble;
   let fixture: ComponentFixture<StoryDashboardComponent>;
   let storyService: {
     getMyStories: jest.Mock;
     publishStory: jest.Mock;
     unpublishStory: jest.Mock;
     acceptContentPolicy: jest.Mock;
+    deleteStory: jest.Mock;
   };
   let moderationService: { appeal: jest.Mock };
   let chapterService: { getMyChapters: jest.Mock };
   let characterService: { getMyCharacters: jest.Mock };
-  let crewService: { getCollaborators: jest.Mock };
+  let crewService: { getCollaborators: jest.Mock; getMyCredits: jest.Mock };
 
   /**
    * Builds a managed Story.
@@ -71,6 +77,7 @@ describe('StoryDashboardComponent', () => {
       publishStory: jest.fn().mockReturnValue(of(buildStory())),
       unpublishStory: jest.fn().mockReturnValue(of(buildStory())),
       acceptContentPolicy: jest.fn().mockReturnValue(of(buildStory())),
+      deleteStory: jest.fn().mockReturnValue(of(undefined)),
     };
     moderationService = {
       appeal: jest.fn().mockReturnValue(of({ id: 'appeal-1' })),
@@ -85,11 +92,15 @@ describe('StoryDashboardComponent', () => {
     };
     crewService = {
       getCollaborators: jest.fn().mockReturnValue(of([])),
+      getMyCredits: jest.fn().mockReturnValue(of([])),
     };
+
+    confirm = stubConfirmPrompt();
 
     TestBed.configureTestingModule({
       imports: [StoryDashboardComponent],
       providers: [
+        confirm.provider,
         provideRouter([]),
         { provide: StoryService, useValue: storyService },
         { provide: StorytimeModerationService, useValue: moderationService },
@@ -123,6 +134,7 @@ describe('StoryDashboardComponent', () => {
         chapters: 2,
         cast: 1,
         collaborators: 0,
+        credits: 0,
       });
       expect(
         element.querySelector('.header-count-badge')?.textContent,
@@ -136,6 +148,7 @@ describe('StoryDashboardComponent', () => {
       ['Chapters', () => chapterService.getMyChapters, 'chapters'],
       ['the cast', () => characterService.getMyCharacters, 'cast'],
       ['collaborators', () => crewService.getCollaborators, 'collaborators'],
+      ['credits', () => crewService.getMyCredits, 'credits'],
     ] as const)(
       'says nothing when %s cannot be counted',
       (_what, mock, key) => {
@@ -155,7 +168,7 @@ describe('StoryDashboardComponent', () => {
 
       expect(
         fixture.componentInstance.countsFor(buildStory({ id: 'other' })),
-      ).toEqual({ chapters: 0, cast: 0, collaborators: 0 });
+      ).toEqual({ chapters: 0, cast: 0, collaborators: 0, credits: 0 });
     });
   });
 
@@ -196,6 +209,92 @@ describe('StoryDashboardComponent', () => {
     fixture.componentInstance.unpublish(buildStory());
 
     expect(storyService.unpublishStory).toHaveBeenCalledWith('story-1');
+  });
+
+  describe('deleting a Story', () => {
+    it('deletes it and reloads', () => {
+      render();
+      fixture.componentInstance.remove(buildStory());
+
+      expect(storyService.deleteStory).toHaveBeenCalledWith('story-1');
+      expect(storyService.getMyStories).toHaveBeenCalledTimes(2);
+    });
+
+    // A Story is the largest thing a creator owns, and its Chapters and cast
+    // go out of reach with it.
+    it('asks first, naming the Story and what goes with it', () => {
+      render();
+      fixture.componentInstance.remove(buildStory());
+
+      expect(confirm.lastAsked()?.title).toBe('Delete Story');
+      expect(confirm.lastAsked()?.message).toContain('A Story');
+      expect(confirm.lastAsked()?.message).toContain('Chapters, cast');
+    });
+
+    it('leaves the Story alone when the creator says no', () => {
+      confirm.answer(false);
+      render();
+      fixture.componentInstance.remove(buildStory());
+
+      expect(storyService.deleteStory).not.toHaveBeenCalled();
+    });
+
+    it('explains a deletion the server refused', () => {
+      storyService.deleteStory.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 409,
+              error: { message: 'That Story is in an Arc.' },
+            }),
+        ),
+      );
+      render();
+      fixture.componentInstance.remove(buildStory());
+
+      expect(fixture.componentInstance.errorMessage).toBe(
+        'That Story is in an Arc.',
+      );
+    });
+
+    // Unpublishing is reversible and deleting is not, so the reversible step
+    // comes first. The server allows either; this is the order the interface
+    // asks for them in.
+    it('is offered for a draft', () => {
+      render();
+
+      expect(fixture.componentInstance.canDelete(buildStory())).toBe(true);
+    });
+
+    it('is not offered for a published Story', () => {
+      render();
+
+      expect(
+        fixture.componentInstance.canDelete(
+          buildStory({ status: StoryStatus.PUBLISHED }),
+        ),
+      ).toBe(false);
+    });
+
+    it('shows no delete control while the Story is published', () => {
+      storyService.getMyStories.mockReturnValue(
+        of([buildStory({ status: StoryStatus.PUBLISHED })]),
+      );
+
+      const element = render();
+
+      expect(
+        element.querySelector('[aria-label="Delete this Story"]'),
+      ).toBeNull();
+    });
+
+    it('shows a delete control for a draft', () => {
+      const element = render();
+
+      expect(
+        element.querySelector('[aria-label="Delete this Story"]'),
+      ).not.toBeNull();
+    });
   });
 
   // A refused publish explains exactly what the Story is still missing, which

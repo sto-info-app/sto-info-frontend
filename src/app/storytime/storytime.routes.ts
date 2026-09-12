@@ -141,6 +141,19 @@ export const STORYTIME_ROUTES: Routes = [
       },
 
       {
+        path: 'manage/stories/:storyId/credits',
+        loadComponent: () =>
+          import('./creator/credit-list/credit-list.component').then(
+            m => m.CreditListComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.STORYTIME_CREDITS,
+          permission: PERMISSIONS.STORYTIME_STORY_EDIT_OWN,
+        },
+        canActivate: [AuthGuard, PermissionGuard],
+      },
+
+      {
         path: 'manage/stories/:storyId/collaborators',
         loadComponent: () =>
           import('./creator/collaborator-list/collaborator-list.component').then(

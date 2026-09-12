@@ -45,6 +45,13 @@ import {
 } from 'src/app/shared/utils/card-theme.utils';
 import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
 import {
+  CHARACTER_SORT_OPTIONS,
+  CharacterSortBy,
+  CharacterSortOrder,
+  DEFAULT_CHARACTER_SORT_BY,
+  DEFAULT_CHARACTER_SORT_ORDER,
+} from 'src/app/shared/utils/character-list.utils';
+import {
   decodeStoHandle,
   encodeStoHandle,
 } from 'src/app/shared/utils/sto-handle.utils';
@@ -58,6 +65,7 @@ interface CharacterVm {
 }
 
 /** Action keys emitted by the captain cards on this page. */
+export const CHARACTER_CARD_PIN = 'pin';
 const CHARACTER_CARD_EDIT = 'edit';
 const CHARACTER_CARD_DELETE = 'delete';
 
@@ -146,6 +154,20 @@ export class AccountDetailComponent
   readonly filterClass = signal('');
   /** Recruit-type filter. */
   readonly filterRecruitType = signal('');
+  /** Whether to show only pinned captains. */
+  readonly pinnedOnly = signal(false);
+
+  /** Whether the Sort panel is collapsed. */
+  sortCollapsed = false;
+
+  /** The orderings offered for the captain list. */
+  readonly sortOptions = CHARACTER_SORT_OPTIONS;
+
+  /** The field the captain list is ordered by. */
+  readonly sortBy = signal<CharacterSortBy>(DEFAULT_CHARACTER_SORT_BY);
+
+  /** The direction the captain list is ordered in. */
+  readonly sortOrder = signal<CharacterSortOrder>(DEFAULT_CHARACTER_SORT_ORDER);
 
   // ── Injected services ─────────────────────────────────────────────────────
 
@@ -255,8 +277,17 @@ export class AccountDetailComponent
     if (this.filterSex()) count++;
     if (this.filterClass()) count++;
     if (this.filterRecruitType()) count++;
+    if (this.pinnedOnly()) count++;
     return count;
   });
+
+  /**
+   * How many captains are pinned, so the controls that only make sense with a
+   * pin in play stay hidden until there is one.
+   */
+  readonly pinnedCount = computed(
+    () => this.characters().filter(character => !!character.pinnedAt).length,
+  );
 
   // ── Computed character view-model and filtered views ─────────────────────
 
@@ -271,6 +302,7 @@ export class AccountDetailComponent
       id: c.id,
       character: c,
       card: {
+        pinned: !!c.pinnedAt,
         id: c.id,
         handle: c.handle,
         level: c.level ?? null,
@@ -287,6 +319,12 @@ export class AccountDetailComponent
         recruitTypeName: c.recruitType?.name ?? null,
         recruitTypeIconUrl: c.recruitType?.iconUrl ?? null,
         actions: [
+          {
+            key: CHARACTER_CARD_PIN,
+            icon: 'fas fa-thumbtack',
+            title: c.pinnedAt ? 'Unpin Captain' : 'Pin Captain to Top',
+            active: !!c.pinnedAt,
+          },
           {
             key: CHARACTER_CARD_EDIT,
             icon: 'fas fa-user-pen',
@@ -310,6 +348,11 @@ export class AccountDetailComponent
    * @param actionKey - The key emitted by the card.
    */
   onCharacterCardAction(character: Character, actionKey: string): void {
+    if (actionKey === CHARACTER_CARD_PIN) {
+      this.togglePin(character);
+      return;
+    }
+
     if (actionKey === CHARACTER_CARD_EDIT) {
       this.editCharacter(character);
       return;
@@ -342,6 +385,8 @@ export class AccountDetailComponent
 
   private _characterMatchesFilters(c: Character): boolean {
     if (this.searchText() && !this._matchesSearch(c)) return false;
+
+    if (this.pinnedOnly() && !c.pinnedAt) return false;
 
     return (
       [
@@ -377,6 +422,59 @@ export class AccountDetailComponent
     this.filterSex.set('');
     this.filterClass.set('');
     this.filterRecruitType.set('');
+    this.pinnedOnly.set(false);
+  }
+
+  /**
+   * Changes the field the captain list is ordered by and reloads it.
+   *
+   * @param sortBy The field to order by.
+   */
+  setSortBy(sortBy: CharacterSortBy): void {
+    this.sortBy.set(sortBy);
+    this._reloadCharacters();
+  }
+
+  /**
+   * Changes the direction the captain list is ordered in and reloads it.
+   *
+   * @param sortOrder The direction to order in.
+   */
+  setSortOrder(sortOrder: CharacterSortOrder): void {
+    this.sortOrder.set(sortOrder);
+    this._reloadCharacters();
+  }
+
+  /**
+   * Pins or unpins a captain, then reloads the list so its new position comes
+   * from the API rather than being guessed at here.
+   *
+   * @param character The captain to pin or unpin.
+   */
+  togglePin(character: Character): void {
+    const pinned = !character.pinnedAt;
+
+    this.isLoading = true;
+    this._cdr.markForCheck();
+
+    this._characterService
+      .setCharacterPinned(character.id, pinned)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: () => this._reloadCharacters(),
+        error: err => {
+          this.isLoading = false;
+          this._cdr.markForCheck();
+          console.error('Failed to update the captain pin:', err);
+        },
+      });
+  }
+
+  /** Reloads the captain list for the account currently on screen. */
+  private _reloadCharacters(): void {
+    if (this.account) {
+      this.loadCharacters(this.account.id);
+    }
   }
 
   ngOnInit(): void {
@@ -424,7 +522,7 @@ export class AccountDetailComponent
   /** Fetches all characters for the given account ID. */
   loadCharacters(accountId: string): void {
     this._characterService
-      .getCharactersByAccount(accountId)
+      .getCharactersByAccount(accountId, this.sortBy(), this.sortOrder())
       .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: characters => {

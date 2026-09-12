@@ -738,6 +738,44 @@ describe('StoryDetailComponent', () => {
   });
 
   describe('the credits', () => {
+    // A credits roll that never names anybody thanks nobody.
+    it('names who each credit is for', () => {
+      crewService.getCredits.mockReturnValue(
+        of([
+          {
+            id: 'credit-1',
+            displayLabel: 'Narrator',
+            username: 'captain.picard',
+          },
+        ] as CrewCredit[]),
+      );
+
+      const element = render();
+
+      expect(
+        element.querySelector('.storytime-credits__member')?.textContent,
+      ).toContain('captain.picard');
+    });
+
+    // Somebody who has closed their account is not there to be pointed at, so
+    // the credit survives them without a name rather than an empty line.
+    it('leaves out the name when the member has gone', () => {
+      crewService.getCredits.mockReturnValue(
+        of([
+          {
+            id: 'credit-1',
+            displayLabel: 'Narrator',
+            username: null,
+          },
+        ] as CrewCredit[]),
+      );
+
+      const element = render();
+
+      expect(element.querySelector('.storytime-credits__member')).toBeNull();
+      expect(element.textContent).toContain('Narrator');
+    });
+
     it('lists them as they should read', () => {
       crewService.getCredits.mockReturnValue(
         of([

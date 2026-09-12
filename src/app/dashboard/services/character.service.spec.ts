@@ -133,6 +133,91 @@ describe('CharacterService', () => {
       });
       httpMock.expectNone(API_URLS.CHARACTER);
     });
+
+    it('should send the requested ordering', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(mockHeader);
+
+      service.getCharactersByAccount('acc1', 'level', 'DESC').subscribe();
+
+      const req = httpMock.expectOne(
+        req =>
+          req.url === API_URLS.CHARACTER &&
+          req.params.get('accountId') === 'acc1',
+      );
+      expect(req.request.params.get('sortBy')).toBe('level');
+      expect(req.request.params.get('sortOrder')).toBe('DESC');
+      req.flush([]);
+    });
+
+    // Omitting the parameters entirely lets the API apply its own defaults,
+    // rather than this service having to restate them.
+    it('should send no ordering parameters when none are given', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(mockHeader);
+
+      service.getCharactersByAccount('acc1').subscribe();
+
+      const req = httpMock.expectOne(
+        req =>
+          req.url === API_URLS.CHARACTER &&
+          req.params.get('accountId') === 'acc1',
+      );
+      expect(req.request.params.keys()).toEqual(['accountId']);
+      req.flush([]);
+    });
+
+    it('should send only the field when no direction is given', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(mockHeader);
+
+      service.getCharactersByAccount('acc1', 'species').subscribe();
+
+      const req = httpMock.expectOne(
+        req =>
+          req.url === API_URLS.CHARACTER &&
+          req.params.get('accountId') === 'acc1',
+      );
+      expect(req.request.params.get('sortBy')).toBe('species');
+      expect(req.request.params.has('sortOrder')).toBe(false);
+      req.flush([]);
+    });
+  });
+
+  describe('setCharacterPinned', () => {
+    it('should pin a captain', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(mockHeader);
+      const pinned = createMockCharacter({
+        id: '1',
+        pinnedAt: '2026-01-01T00:00:00Z',
+      });
+
+      service.setCharacterPinned('1', true).subscribe(character => {
+        expect(character).toEqual(pinned);
+      });
+
+      const req = httpMock.expectOne(`${API_URLS.CHARACTER}/1/pin`);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual({ pinned: true });
+      req.flush(pinned);
+    });
+
+    it('should unpin a captain', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(mockHeader);
+
+      service.setCharacterPinned('1', false).subscribe();
+
+      const req = httpMock.expectOne(`${API_URLS.CHARACTER}/1/pin`);
+      expect(req.request.body).toEqual({ pinned: false });
+      req.flush(createMockCharacter({ id: '1', pinnedAt: null }));
+    });
+
+    it('should throw error when no token', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      service.setCharacterPinned('1', true).subscribe({
+        error: err => expect(err.message).toBe('No token found'),
+      });
+
+      httpMock.expectNone(`${API_URLS.CHARACTER}/1/pin`);
+    });
   });
 
   describe('getCharacter', () => {

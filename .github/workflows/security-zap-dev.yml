@@ -22,7 +22,7 @@ on:
 permissions: {}
 
 env:
-  NODE_VERSION: 24.15.0
+  NODE_VERSION: 24.21.0
   DEV_FRONTEND_BASE_URL: 'https://dev.startrekonline.info'
   DEV_FRONTEND_VERSION_URL: 'https://dev.startrekonline.info/version.json'
 
@@ -39,8 +39,11 @@ jobs:
       github.repository_owner == 'sto-info-app' &&
       (github.event_name != 'push' || 
         startsWith(github.event.head_commit.message, 'chore: bump version to ') ||
+        startsWith(github.event.head_commit.message, 'chore: sync version to ') ||
         contains(github.event.head_commit.message, 'Automated version bump from') ||
-        (contains(github.event.head_commit.message, 'Merge pull request') && contains(github.event.head_commit.message, 'chore/bump-version-to'))
+        contains(github.event.head_commit.message, 'Automated version sync from') ||
+        (contains(github.event.head_commit.message, 'Merge pull request') && contains(github.event.head_commit.message, 'chore/bump-version-to')) ||
+        (contains(github.event.head_commit.message, 'Merge pull request') && contains(github.event.head_commit.message, 'chore/sync-version-to'))
       )
     permissions:
       contents: read

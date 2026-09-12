@@ -4,28 +4,25 @@
 
 <div
   id="storytime-chapter-editor-page"
-  class="storytime-page"
->
-  <h1>{{ isNew ? "Write a Chapter" : "Edit Chapter" }}</h1>
+  class="storytime-page">
+  <h1>{{ isNew ? 'Write a Chapter' : 'Edit Chapter' }}</h1>
 
   <nav class="storytime-page-actions">
     <a
       class="lcars-btn lcars-btn-auto bluey"
-      [routerLink]='[
-  "/",
-  appRoutes.STORYTIME,
-  "manage",
-  "stories",
-  storyId,
-  "chapters",
-]'
-    >
+      [routerLink]="[
+        '/',
+        appRoutes.STORYTIME,
+        'manage',
+        'stories',
+        storyId,
+        'chapters',
+      ]">
       Back to the Chapters
     </a>
     <a
       class="lcars-btn lcars-btn-auto sky"
-      [routerLink]='["/", appRoutes.STORYTIME, "manage", "stories", storyId]'
-    >
+      [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', storyId]">
       Back to the Story
     </a>
   </nav>
@@ -33,16 +30,14 @@
   @if (errorMessage) {
     <app-lcars-error-message
       title="Could not save"
-      [message]="errorMessage"
-    ></app-lcars-error-message>
+      [message]="errorMessage"></app-lcars-error-message>
   }
 
   <form
     id="chapter-editor-form"
     [formGroup]="form"
     class="storytime-form"
-    (ngSubmit)="save()"
-  >
+    (ngSubmit)="save()">
     <section class="storytime-section">
       <div class="lcars-text-bar small-lcars-bar-gap">
         <span>Chapter Details</span>
@@ -57,9 +52,10 @@
               type="text"
               formControlName="title"
               maxlength="200"
-              required
-            />
-            @if (form.controls["title"].touched && form.controls["title"].invalid) {
+              required />
+            @if (
+              form.controls['title'].touched && form.controls['title'].invalid
+            ) {
               <small class="field-error">A title is required.</small>
             }
           </div>
@@ -72,8 +68,7 @@
               id="chapter-slug"
               type="text"
               formControlName="slug"
-              maxlength="220"
-            />
+              maxlength="220" />
             <p class="field-hint">
               Leave blank to build one from the title. Changing it keeps the old
               address working.
@@ -85,8 +80,7 @@
             label="Language"
             controlName="languageCode"
             colour="sunflower"
-            [options]="languageOptions"
-          >
+            [options]="languageOptions">
             <p>
               Only set this when the Chapter is written in a different language
               from the rest of the Story.
@@ -101,26 +95,20 @@
               id="chapter-synopsis"
               formControlName="synopsis"
               rows="3"
-              maxlength="1000"
-            ></textarea>
+              maxlength="1000"></textarea>
             <p class="field-hint">Shown in the Chapter list.</p>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="lcars-input-container perano storytime-field-full">
-            <label for="chapter-content">Chapter</label>
-            <textarea
-              id="chapter-content"
-              formControlName="contentSource"
-              rows="24"
-            ></textarea>
-          </div>
-
-          <app-storytime-markdown-hint>
-            A Chapter needs some content before it can be published.
-          </app-storytime-markdown-hint>
-        </div>
+        <app-storytime-markdown-field
+          fieldId="chapter-content"
+          label="Chapter"
+          controlName="contentSource"
+          colour="perano"
+          previewClass="storytime-chapter__body"
+          [rows]="24">
+          A Chapter needs some content before it can be published.
+        </app-storytime-markdown-field>
       </div>
     </section>
 
@@ -142,8 +130,7 @@
             [imageUrl]="chapter.coverImageUrl"
             [imageAlt]="chapter.coverImageAlt"
             altControlName="coverImageAlt"
-            (changed)="onImageChanged($event)"
-          ></app-storytime-image-manager>
+            (changed)="onImageChanged($event)"></app-storytime-image-manager>
         </div>
       </section>
     }
@@ -158,8 +145,7 @@
       @if (mediaErrorMessage) {
         <app-lcars-error-message
           title="Video unavailable"
-          [message]="mediaErrorMessage"
-        ></app-lcars-error-message>
+          [message]="mediaErrorMessage"></app-lcars-error-message>
       }
 
       <div class="form-row">
@@ -171,8 +157,7 @@
             [(ngModel)]="mediaUrl"
             [ngModelOptions]="{ standalone: true }"
             [disabled]="isNew"
-            placeholder="https://www.youtube.com/watch?v=..."
-          />
+            placeholder="https://www.youtube.com/watch?v=..." />
           @if (isNew) {
             <p class="field-hint">
               A video hangs off the Chapter it plays in, so save the Chapter
@@ -192,8 +177,7 @@
           class="lcars-btn sunflower"
           type="button"
           [disabled]="isNew"
-          (click)="addMedia()"
-        >
+          (click)="addMedia()">
           Add video
         </button>
       </div>
@@ -205,14 +189,12 @@
               <img
                 class="storytime-editor__media-thumbnail"
                 [src]="video.thumbnailUrl"
-                alt=""
-              />
+                alt="" />
               <span>{{ video.title ?? video.externalId }}</span>
               <button
                 class="lcars-btn lcars-btn-auto red"
                 type="button"
-                (click)="removeMedia(video)"
-              >
+                (click)="removeMedia(video)">
                 Remove
               </button>
             </li>
@@ -232,8 +214,7 @@
         @if (castErrorMessage) {
           <app-lcars-error-message
             title="Cast unavailable"
-            [message]="castErrorMessage"
-          ></app-lcars-error-message>
+            [message]="castErrorMessage"></app-lcars-error-message>
         }
 
         <div class="storytime-toggle-row">
@@ -243,8 +224,7 @@
               [ariaLabel]="character.name"
               [ngModel]="isAppearing(character.id)"
               [ngModelOptions]="{ standalone: true }"
-              (ngModelChange)="toggleAppearance(character.id)"
-            />
+              (ngModelChange)="toggleAppearance(character.id)" />
           }
         </div>
 
@@ -253,9 +233,8 @@
             class="lcars-btn green"
             type="button"
             [disabled]="isSavingCast"
-            (click)="saveCast()"
-          >
-            {{ isSavingCast ? "Saving…" : "Save who appears" }}
+            (click)="saveCast()">
+            {{ isSavingCast ? 'Saving…' : 'Save who appears' }}
           </button>
         </div>
       </div>
@@ -273,14 +252,13 @@
     formId="chapter-editor-form"
     [isSaving]="isSaving"
     [canPublish]="canPublish"
-    [cancelLink]='[
-  "/",
-  appRoutes.STORYTIME,
-  "manage",
-  "stories",
-  storyId,
-  "chapters",
-]'
-    (publish)="publish()"
-  />
+    [cancelLink]="[
+      '/',
+      appRoutes.STORYTIME,
+      'manage',
+      'stories',
+      storyId,
+      'chapters',
+    ]"
+    (publish)="publish()" />
 </div>

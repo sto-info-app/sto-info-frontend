@@ -26,6 +26,7 @@ Two rules run through all of it:
 | App globals | `src/styles/styles.scss` | Forms, buttons, list-page patterns, badges, utilities — anything more than one feature uses. |
 | Shared SCSS API | `src/styles/_lcars-variables.scss`, `_lcars-mixins.scss`, `_lcars-tabs.scss`, `_registry-layout.scss`, `_news-colours.scss`, `_notification-card.scss`, `_sto-rarity-colours.scss`, `_lcars-palette-properties.scss` | Variables and mixins. No output of their own except where noted. |
 | Feature partials | `src/styles/_storytime.scss`, `_custom-tracking.scss`, `_help.scss` | One partial per feature whose pages are built from the same handful of shapes. Every rule scoped by the feature's class prefix (`storytime-`, `custom-tracking-`, `help-`). |
+| Rendered Markdown | `src/styles/_markdown.scss` | The classes both Markdown renderers emit for the site's own constructs (`.sto-indent`, `.sto-spacer`). Global rather than per feature: the same writing is shown on a News post, in a Chapter and in the editor preview beside it, and `[innerHTML]` content never carries a component's encapsulation attribute anyway. |
 | Component SCSS | `<component>/<component>.component.scss` | Everything else — one component's own layout. |
 
 Global stylesheets load in the order set by `angular.json`:
@@ -193,7 +194,14 @@ behind an edge is a section nobody knows is there. Mark the current tab
 `active`.
 
 Used by the character detail page, the community tabs, the Storytime policy
-header and story detail, and Custom Tracking.
+header and story detail, the Storytime Markdown field, and Custom Tracking.
+
+A strip does not have to switch whole sections: `app-storytime-markdown-field`
+uses one to put Edit and Preview over a single textarea, which is the smallest
+thing the mixin is worth reaching for. Keep the hidden panel in the page
+(`[hidden]`) rather than removing it when it holds something a person is part way
+through — a textarea taken out of the page loses its caret, its scroll position
+and every undo step behind it.
 
 ### Cards and panels
 
@@ -311,6 +319,35 @@ The view-model interfaces (`account-card.model.ts`, `character-card.model.ts`,
 `member-card.model.ts`) are the contract — `actions` is empty for read-only
 contexts such as the registry, which is the whole mechanism by which one card
 serves both an owner and a visitor.
+
+An `AccountCardAction` may set `active` when it toggles rather than fires once,
+as the account pin does. The card then adds `.cta-icon--active` and sets
+`aria-pressed`, so the state is conveyed by more than colour. Leave `active`
+unset for a one-shot action: no `aria-pressed` attribute is rendered at all,
+rather than a misleading `false`.
+
+### Sorting and filtering an account list
+
+Two pages list STO accounts — the owner's dashboard and a member's public
+registry profile — and both offer the same side-column Filters and Sort panels,
+shown only once the list holds more than one account. The rules live in
+`shared/utils/account-list.utils.ts`: each page projects its own model onto the
+neutral `AccountSortFields` and `AccountFilterFields` shapes, then shares
+`matchesAccountFilters`, `sortAccounts`, `countActiveAccountFilters`,
+`buildAccountSearchHaystack` and `buildAccountFilterOptions`.
+
+Where the ordering happens differs, and deliberately so:
+
+| Page | Ordering | Filtering | Why |
+|---|---|---|---|
+| Dashboard accounts | API (`sortBy` / `sortOrder` query parameters) | Client | The accounts are their own request, so the API can order them without refetching anything else. |
+| Registry profile | Client | Client | The accounts arrive embedded in the profile payload, so ordering them server-side would mean refetching the whole public profile to move a few cards. |
+
+The registry offers a reduced set of controls, because it is told less: no
+ordering by endeavour nodes and no pinned-only filter, since neither endeavour
+progress nor an owner's pins are ever published. Its platform and launcher
+options are derived from the names present on the accounts on show, as it has no
+lookup table to draw on.
 
 **`<app-stat-info-card>`** (2) — a split stat tile: label and value on the left,
 a large watermark icon bleeding off the bottom-right, optional CTA link along

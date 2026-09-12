@@ -18,6 +18,10 @@ describe('MarkdownPipe', () => {
   const render = (input: string): string =>
     sanitizer.sanitize(SecurityContext.HTML, pipe.transform(input)) ?? '';
 
+  // The pipe's own output, before the sanitiser has a view on it: these
+  // constructs are about the markup this class emits.
+  const transform = (input: string): string => pipe.transform(input) as string;
+
   it('renders headings', () => {
     expect(render('# Hello')).toContain('<h1>Hello</h1>');
   });
@@ -172,5 +176,70 @@ describe('MarkdownPipe', () => {
 
   it('replaces unknown CODE placeholders with an empty string', () => {
     expect(render('CODE999')).toBe('');
+  });
+
+  describe('indents and spacers', () => {
+    it('indents a paragraph opened with the marker', () => {
+      expect(transform('{indent}A sentence.')).toBe(
+        '<p class="sto-indent">A sentence.</p>',
+      );
+    });
+
+    it('swallows the space between the marker and the first word', () => {
+      expect(transform('{indent}   A sentence.')).toBe(
+        '<p class="sto-indent">A sentence.</p>',
+      );
+    });
+
+    it('still renders the rest of the paragraph as Markdown', () => {
+      expect(transform('{indent}A **bold** word.')).toBe(
+        '<p class="sto-indent">A <strong>bold</strong> word.</p>',
+      );
+    });
+
+    // The marker means something in one place only, which is what saves the
+    // renderer from needing an escape syntax it does not otherwise have.
+    it('leaves the marker as text anywhere but the start of a paragraph', () => {
+      expect(transform('A sentence {indent} interrupted.')).toBe(
+        '<p>A sentence {indent} interrupted.</p>',
+      );
+      expect(transform('First line.\n{indent}Second line.')).toBe(
+        '<p>First line.<br />{indent}Second line.</p>',
+      );
+    });
+
+    it('matches the marker exactly, so a capital or a space is just text', () => {
+      expect(transform('{Indent}A sentence.')).toBe(
+        '<p>{Indent}A sentence.</p>',
+      );
+      expect(transform('{ indent }A sentence.')).toBe(
+        '<p>{ indent }A sentence.</p>',
+      );
+    });
+
+    it('renders a spacer block with nothing for a reader to hear', () => {
+      expect(transform('{spacer}')).toBe(
+        '<div class="sto-spacer" aria-hidden="true"></div>',
+      );
+    });
+
+    it('leaves the blocks around a spacer alone', () => {
+      expect(transform('First.\n\n{spacer}\n\nThird.')).toBe(
+        [
+          '<p>First.</p>',
+          '<div class="sto-spacer" aria-hidden="true"></div>',
+          '<p>Third.</p>',
+        ].join('\n'),
+      );
+    });
+
+    it('leaves the spacer as text when it is not a block of its own', () => {
+      expect(transform('Before {spacer} after.')).toBe(
+        '<p>Before {spacer} after.</p>',
+      );
+      expect(transform('A line.\n{spacer}')).toBe(
+        '<p>A line.<br />{spacer}</p>',
+      );
+    });
   });
 });

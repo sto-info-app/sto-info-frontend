@@ -10,6 +10,10 @@ import {
 } from 'src/app/models/storytime.models';
 import { ReadingListService } from '../../reading-list.service';
 import { ReadingListDetailComponent } from './reading-list-detail.component';
+import {
+  ConfirmPromptDouble,
+  stubConfirmPrompt,
+} from 'src/app/shared/actions/confirm-prompt.testing';
 
 const LIST_ID = 'list-1';
 
@@ -55,6 +59,7 @@ const buildList = (
 });
 
 describe('ReadingListDetailComponent', () => {
+  let confirm: ConfirmPromptDouble;
   let component: ReadingListDetailComponent;
   let fixture: ComponentFixture<ReadingListDetailComponent>;
   let readingListService: {
@@ -87,9 +92,12 @@ describe('ReadingListDetailComponent', () => {
       reorder: jest.fn().mockReturnValue(of(buildList())),
     };
 
+    confirm = stubConfirmPrompt();
+
     await TestBed.configureTestingModule({
       imports: [ReadingListDetailComponent, RouterTestingModule],
       providers: [
+        confirm.provider,
         { provide: ReadingListService, useValue: readingListService },
         {
           provide: ActivatedRoute,
@@ -320,6 +328,26 @@ describe('ReadingListDetailComponent', () => {
   });
 
   describe('taking something off', () => {
+    // Any note the reader wrote about it goes too; the Story is kept.
+    it('asks first, naming what comes off', () => {
+      create();
+
+      component.removeItem(buildItem());
+
+      expect(confirm.lastAsked()?.title).toBe('Remove from list');
+      expect(confirm.lastAsked()?.message).toContain('The Long Patrol');
+      expect(confirm.lastAsked()?.message).toContain('Story itself is kept');
+    });
+
+    it('leaves it on the list when the reader says no', () => {
+      confirm.answer(false);
+      create();
+
+      component.removeItem(buildItem());
+
+      expect(readingListService.removeItem).not.toHaveBeenCalled();
+    });
+
     it('removes it and keeps what comes back', () => {
       create();
 

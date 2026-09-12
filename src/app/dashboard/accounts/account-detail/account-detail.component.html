@@ -311,6 +311,18 @@
             </select>
           </div>
 
+          @if (pinnedCount() > 0) {
+            <button
+              type="button"
+              class="full-width-btn-link"
+              [class.tangerine]="pinnedOnly()"
+              [class.perano]="!pinnedOnly()"
+              (click)="pinnedOnly.set(!pinnedOnly())"
+              [attr.aria-pressed]="pinnedOnly()">
+              {{ pinnedOnly() ? 'All Captains' : 'Pinned Only' }}
+            </button>
+          }
+
           @if (activeFilterCount() > 0) {
             <button
               type="button"
@@ -318,6 +330,60 @@
               (click)="clearFilters()">
               Clear Filters
             </button>
+          }
+        </div>
+      }
+
+      <div class="lcars-text-bar small-lcars-bar-gap">
+        <span>Sort</span>
+        <button
+          type="button"
+          class="cta-icon"
+          (click)="sortCollapsed = !sortCollapsed"
+          [title]="sortCollapsed ? 'Show Sort' : 'Hide Sort'">
+          <i
+            class="fas"
+            [class.fa-caret-down]="sortCollapsed"
+            [class.fa-caret-up]="!sortCollapsed"></i>
+        </button>
+      </div>
+      @if (!sortCollapsed) {
+        <div class="filter-section">
+          <div class="lcars-select-container tangerine">
+            <label
+              class="select-label"
+              for="captain-sort-by-select"
+              >Sort by</label
+            >
+            <select
+              id="captain-sort-by-select"
+              title="Sort by"
+              [ngModel]="sortBy()"
+              (ngModelChange)="setSortBy($event)">
+              @for (option of sortOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="lcars-select-container gold">
+            <label
+              class="select-label"
+              for="captain-sort-order-select"
+              >Direction</label
+            >
+            <select
+              id="captain-sort-order-select"
+              title="Sort direction"
+              [ngModel]="sortOrder()"
+              (ngModelChange)="setSortOrder($event)">
+              <option value="ASC">Ascending</option>
+              <option value="DESC">Descending</option>
+            </select>
+          </div>
+          @if (pinnedCount() > 0) {
+            <p class="sort-note">
+              Pinned captains stay at the top, sorted the same way.
+            </p>
           }
         </div>
       }
