@@ -259,6 +259,7 @@ anything new.
 | `.sr-only` | Visually hidden, still read by screen readers. |
 | `.lcars-flex-left` / `-center` / `-right` | `justify-content`. |
 | `.lcars-self-left` / `-center` / `-right` | `align-self`. |
+| `.page-subject-row` | The line under a page heading that names the account or captain the page is about, with the quick-switch control at the end of it. |
 | `.go-center` / `.go-left` / `.go-right` | Text alignment (vendored theme). |
 | `.lcars-number-highlight` | Bold sunflower readout for a number. Inherits its colour inside a stat card, where the ground is light. |
 | `.privacy-blur` | Blurs personal data while Privacy Mode is on. |
@@ -414,6 +415,35 @@ Callers supply `LcarsSearchDialogData<T>`:
 
 Selecting a row closes with that item; Cancel closes with `undefined`. Pairs
 with the `.field-picker` styling above.
+
+**`StoSwitcherDialogComponent`** — the quick switcher: every account the owner
+has with every captain on it, in one flat list, and one click to any of them.
+It fetches its own list (`StoAccountService.getSwitcherList()`, backed by
+`GET /account/switcher`) each time it opens rather than holding one, so it
+never offers a roster the dashboard behind it has already left behind. Takes
+`StoSwitcherDialogData` (`currentAccountId`, `currentCharacterId`) and closes
+with a `StoSwitcherSelection` (`accountHandle`, `characterHandle`) or
+`undefined`.
+
+Rows are ordered the way the dashboard's own lists order them — pinned first,
+then by handle. An account with no captains is still listed: it is somewhere to
+switch to. The entry being read is marked and disabled; on a captain's page the
+captain is that entry and the account above them stays reachable.
+
+A host that sizes `.cta-icon` in its **own** scoped stylesheet will not size
+the switcher: view encapsulation stops that rule at the component boundary, so
+the control keeps whatever it inherits and ends up visibly smaller than the
+icons beside it. Size the `app-sto-switcher-button` host element instead —
+it belongs to the host's template, and `font-size` inherits through the
+boundary. Hosts that rely on the global `.cta-icon` rules need nothing.
+
+Do not open it directly. **`StoSwitcherButtonComponent`**
+(`<app-sto-switcher-button>`) is the control every page uses: it takes
+`currentAccountId` / `currentCharacterId`, opens the dialog and navigates to
+whatever comes back. It is on the account and captain detail pages, the
+endeavour page, every progress tracker, and the Your Accounts list — and
+deliberately not on the add/edit forms, where switching away would fight the
+unsaved-changes guard.
 
 **`RefreshSessionDialogComponent`** — the pre-expiry session warning, with a
 countdown recomputed from the stored expiry each tick rather than decremented,

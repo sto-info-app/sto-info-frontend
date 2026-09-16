@@ -36,6 +36,10 @@ export const API_URLS = {
 
   // STO Account
   STO_ACCOUNT: apiUrl + '/account',
+  // Every account the user owns with its captains, reduced to what the quick
+  // switcher draws. One call, because the switcher offers any-to-any jumps and
+  // so needs the whole set before it can show anything.
+  STO_ACCOUNT_SWITCHER: apiUrl + '/account/switcher',
   STO_PLATFORM: apiUrl + '/platform',
   STO_LAUNCHER: apiUrl + '/launcher',
   STO_PLATFORM_LAUNCHER: apiUrl + '/platform-launcher',

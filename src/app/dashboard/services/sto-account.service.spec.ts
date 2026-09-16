@@ -7,6 +7,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { SwitcherAccount } from '../models/account-switcher.model';
 import {
   CreateStoAccountRequest,
   StoAccount,
@@ -130,6 +131,69 @@ describe('StoAccountService', () => {
       const req = httpMock.expectOne(`${API_URLS.STO_ACCOUNT}?sortBy=handle`);
       expect(req.request.params.has('sortOrder')).toBe(false);
       req.flush([]);
+    });
+  });
+
+  describe('getSwitcherList', () => {
+    const mockSwitcherAccount: SwitcherAccount = {
+      id: '1',
+      handle: 'Test#1234',
+      platformName: 'Windows',
+      launcherName: 'Steam',
+      lifetimeSubscription: false,
+      pinnedAt: null,
+      characters: [
+        {
+          id: 'c1',
+          handle: 'Kaelith',
+          profilePicture100: null,
+          factionName: 'TOS Starfleet',
+          factionIconUrl: null,
+          generalFactionName: 'Federation',
+          pinnedAt: null,
+        },
+      ],
+    };
+
+    it('should fetch every account with its captains when token is present', () => {
+      authServiceSpy.getHttpOptionsWithAccessToken.mockReturnValue(
+        mockHttpOptions,
+      );
+      const mockList = [mockSwitcherAccount];
+
+      service.getSwitcherList().subscribe(accounts => {
+        expect(accounts).toEqual(mockList);
+      });
+
+      const req = httpMock.expectOne(API_URLS.STO_ACCOUNT_SWITCHER);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockList);
+    });
+
+    it('should throw error when token is missing', (done: jest.DoneCallback) => {
+      authServiceSpy.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      service.getSwitcherList().subscribe({
+        next: () => done.fail('Should have failed'),
+        error: error => {
+          expect(error.message).toBe('No token found');
+          done();
+        },
+      });
+    });
+
+    // The switcher is opened to act on what is there now, so a second opening
+    // has to ask again rather than replay a held copy.
+    it('should request the list again on every call', () => {
+      authServiceSpy.getHttpOptionsWithAccessToken.mockReturnValue(
+        mockHttpOptions,
+      );
+
+      service.getSwitcherList().subscribe();
+      httpMock.expectOne(API_URLS.STO_ACCOUNT_SWITCHER).flush([]);
+
+      service.getSwitcherList().subscribe();
+      httpMock.expectOne(API_URLS.STO_ACCOUNT_SWITCHER).flush([]);
     });
   });
 

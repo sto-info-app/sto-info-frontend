@@ -48,6 +48,7 @@ import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
 import { StoAccountService } from '../services/sto-account.service';
 import { PrivacyModeService } from '../services/privacy-mode.service';
+import { StoSwitcherButtonComponent } from '../switcher/sto-switcher-button.component';
 
 /**
  * View model for a single STO account card, with all display values precomputed at load time.
@@ -100,6 +101,7 @@ export const ACCOUNT_SORT_OPTIONS: readonly AccountSortOption[] = [
     FormsModule,
     LoadingBarComponent,
     AccountCardComponent,
+    StoSwitcherButtonComponent,
   ],
 })
 export class AccountsComponent implements OnInit, OnDestroy {

@@ -7,7 +7,11 @@
     id="account-detail-main-column"
     class="col">
     @if (account) {
-      <h1>Account: {{ account.handle }}</h1>
+      <div class="page-subject-row">
+        <h1>Account: {{ account.handle }}</h1>
+        <app-sto-switcher-button
+          [currentAccountId]="account.id"></app-sto-switcher-button>
+      </div>
 
       <div id="account-info-section">
         <div class="lcars-text-bar small-lcars-bar-gap">
