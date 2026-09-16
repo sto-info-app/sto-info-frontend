@@ -40,7 +40,9 @@ import {
 import {
   getAccountBgImagePath,
   getLauncherClass,
+  getLauncherIconClass,
   getPlatformClass,
+  getPlatformIconClass,
 } from 'src/app/shared/utils/card-theme.utils';
 import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { Launcher, Platform, StoAccount } from '../models/sto-account.model';
@@ -383,20 +385,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * @returns A Font Awesome icon class string, or null if not found.
    */
   getPlatformIcon(platformId?: string): string | null {
-    if (!platformId) return null;
-
-    const platform = this.platforms.find(p => p.id === platformId);
-    if (!platform) return null;
-
-    const name = platform.name.toLowerCase();
-    if (name === 'arc') return 'fak fa-arc-games';
-    if (name === 'epic') return 'fak fa-epic-games';
-    if (name === 'steam') return 'fab fa-steam';
-    if (name === 'windows' || name === 'pc') return 'fab fa-windows';
-    if (name === 'playstation' || name === 'ps') return 'fab fa-playstation';
-    if (name === 'xbox') return 'fab fa-xbox';
-
-    return null;
+    return getPlatformIconClass(this.getPlatform(platformId)?.name);
   }
 
   /**
@@ -417,17 +406,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * @returns A Font Awesome icon class string, or null if not found.
    */
   getLauncherIcon(launcherId?: string): string | null {
-    if (!launcherId) return null;
-
-    const launcher = this.launchers.find(l => l.id === launcherId);
-    if (!launcher) return null;
-
-    const name = launcher.name.toLowerCase();
-    if (name === 'arc') return 'fak fa-arc-games';
-    if (name === 'epic') return 'fak fa-epic-games';
-    if (name === 'steam') return 'fab fa-steam';
-
-    return null;
+    return getLauncherIconClass(this.getLauncher(launcherId)?.name);
   }
 
   /**

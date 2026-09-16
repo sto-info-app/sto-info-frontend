@@ -3,7 +3,9 @@ import {
   getClassCategory,
   getFactionClass,
   getLauncherClass,
+  getLauncherIconClass,
   getPlatformClass,
+  getPlatformIconClass,
   getSexIcon,
 } from './card-theme.utils';
 
@@ -52,6 +54,57 @@ describe('cardThemeUtils', () => {
     it('should return an empty string when no launcher is supplied', () => {
       expect(getLauncherClass('platform-pc')).toBe('');
       expect(getLauncherClass('platform-pc', null)).toBe('');
+    });
+  });
+
+  describe('getPlatformIconClass', () => {
+    it.each([
+      ['PlayStation', 'fab fa-playstation'],
+      ['ps', 'fab fa-playstation'],
+      ['Xbox', 'fab fa-xbox'],
+      ['Steam', 'fab fa-steam'],
+      ['Windows', 'fab fa-windows'],
+      ['PC', 'fab fa-windows'],
+      ['Arc', 'fak fa-arc-games'],
+      ['Epic', 'fak fa-epic-games'],
+    ])('should map %s onto %s', (name, expected) => {
+      expect(getPlatformIconClass(name)).toBe(expected);
+    });
+
+    it('should ignore surrounding whitespace on a recorded name', () => {
+      expect(getPlatformIconClass('  Steam  ')).toBe('fab fa-steam');
+    });
+
+    it('should return null for a platform with no icon', () => {
+      expect(getPlatformIconClass('Amiga')).toBeNull();
+    });
+
+    it('should return null when no platform is supplied', () => {
+      expect(getPlatformIconClass()).toBeNull();
+      expect(getPlatformIconClass(null)).toBeNull();
+    });
+  });
+
+  describe('getLauncherIconClass', () => {
+    it.each([
+      ['Arc', 'fak fa-arc-games'],
+      ['Epic', 'fak fa-epic-games'],
+      ['Steam', 'fab fa-steam'],
+    ])('should map %s onto %s', (name, expected) => {
+      expect(getLauncherIconClass(name)).toBe(expected);
+    });
+
+    it('should ignore surrounding whitespace on a recorded name', () => {
+      expect(getLauncherIconClass('  Epic  ')).toBe('fak fa-epic-games');
+    });
+
+    it('should return null for a launcher with no icon', () => {
+      expect(getLauncherIconClass('Origin')).toBeNull();
+    });
+
+    it('should return null when no launcher is supplied', () => {
+      expect(getLauncherIconClass()).toBeNull();
+      expect(getLauncherIconClass(null)).toBeNull();
     });
   });
 
