@@ -57,6 +57,142 @@
             </p>
           </div>
         </div>
+        <div class="lcars-text-bar settings-bar"><span>Dates and times</span></div>
+        <div class="settings-content">
+          <div class="settings-field">
+            <label for="display-timezone">Show dates and times in</label>
+            <select
+              id="display-timezone"
+              formControlName="displayTimezone"
+              aria-describedby="display-timezone-description"
+            >
+              <option [ngValue]="null">
+                Automatically &mdash; {{ deviceTimezoneLabel }}
+              </option>
+              @for (zone of timezones; track zone) {
+                <option [ngValue]="zone">{{ describe(zone) }}</option>
+              }
+            </select>
+            <p id="display-timezone-description" class="settings-description">
+              Every date and time in STO Info is shown in this zone. Left
+              automatic, it follows whichever device you are using, which is
+              what most people want. Choose a zone if you would rather your
+              dates stayed put when you travel.
+            </p>
+          </div>
+        </div>
+        @if (isFleetOffered) {
+          <div class="lcars-text-bar settings-bar"><span>Fleet</span></div>
+          <div class="settings-content">
+            <div class="settings-field">
+              <label for="export-timezone">Read Fleet roster exports as</label>
+              <select
+                id="export-timezone"
+                formControlName="stoExportTimezone"
+                aria-describedby="export-timezone-description"
+              >
+                <option [ngValue]="null">Ask me each time</option>
+                @for (zone of timezones; track zone) {
+                  <option [ngValue]="zone">{{ describe(zone) }}</option>
+                }
+              </select>
+              <p id="export-timezone-description" class="settings-description">
+                Star Trek Online writes the times in a roster export using the
+                clock of the computer it was exported from, without saying which
+                zone that was. This is the zone we assume. It is separate from
+                the setting above, and you can change it for a single import.
+              </p>
+            </div>
+            <div class="settings-field">
+              <label for="presence-visibility">Who can see when I am online</label>
+              <select
+                id="presence-visibility"
+                formControlName="presenceVisibility"
+                aria-describedby="presence-visibility-description"
+              >
+                @for (option of presenceOptions; track option.value) {
+                  <option [ngValue]="option.value">{{ option.label }}</option>
+                }
+              </select>
+              <p id="presence-visibility-description" class="settings-description">
+                Only people who can already see your profile are ever included.
+              </p>
+            </div>
+            <div class="settings-row">
+              <app-lcars-toggle
+                formControlName="appearOffline"
+                label="Appear offline"
+                ariaLabel="Appear offline"
+              ></app-lcars-toggle>
+            </div>
+            <p class="settings-description">
+              Hides you from everybody for now, whatever you chose above. Your
+              choice is remembered for when you switch this back off.
+            </p>
+            <div class="settings-row">
+              <app-lcars-toggle
+                formControlName="typingIndicatorsEnabled"
+                label="Show when I am typing"
+                ariaLabel="Show when I am typing"
+              ></app-lcars-toggle>
+            </div>
+            <p class="settings-description">
+              Lets other people in a conversation see that you are composing a
+              message. Off unless you turn it on.
+            </p>
+          </div>
+          <div class="lcars-text-bar settings-bar"><span>Notifications</span></div>
+          <div class="settings-content">
+            <p class="settings-description">
+              These arrive in STO Info only. Everything else a Fleet does
+              &mdash; news, imports, events being scheduled &mdash; stays in the
+              activity feed rather than your inbox.
+            </p>
+            <div class="settings-row">
+              <app-lcars-toggle
+                formControlName="notifyMention"
+                label="Mentions"
+                ariaLabel="Notify me about mentions"
+              ></app-lcars-toggle>
+            </div>
+            <div class="settings-row">
+              <app-lcars-toggle
+                formControlName="notifyReply"
+                label="Replies"
+                ariaLabel="Notify me about replies"
+              ></app-lcars-toggle>
+            </div>
+            <div class="settings-row">
+              <app-lcars-toggle
+                formControlName="notifyDirectMessage"
+                label="Direct messages"
+                ariaLabel="Notify me about direct messages"
+              ></app-lcars-toggle>
+            </div>
+            <div class="settings-row">
+              <app-lcars-toggle
+                formControlName="notifyRosterAssociation"
+                label="Roster association proposals"
+                ariaLabel="Notify me about roster association proposals"
+              ></app-lcars-toggle>
+            </div>
+            <p class="settings-description">
+              Someone proposing that a character on an imported roster is yours.
+              You always decide; switching this off means we stop telling you,
+              and an unanswered proposal eventually expires.
+            </p>
+            <div class="settings-row">
+              <app-lcars-toggle
+                formControlName="notifyEventReminder"
+                label="Event reminders"
+                ariaLabel="Notify me about event reminders"
+              ></app-lcars-toggle>
+            </div>
+            <p class="settings-description">
+              Only for events you have asked to be reminded about.
+            </p>
+          </div>
+        }
         <div class="settings-actions">
           <button
             type="submit"

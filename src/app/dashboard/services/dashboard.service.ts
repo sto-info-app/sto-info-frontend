@@ -7,6 +7,7 @@ import {
   User,
   UserProfileUpdateResult,
   UserSettings,
+  UserSettingsUpdate,
 } from '../models/user.model';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
@@ -37,7 +38,7 @@ export class DashboardService {
     return this._http.get<UserSettings>(API_URLS.USER_SETTINGS, httpOptions);
   }
 
-  updateUserSettings(settings: UserSettings): Observable<UserSettings> {
+  updateUserSettings(settings: UserSettingsUpdate): Observable<UserSettings> {
     const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));

@@ -16,6 +16,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
+import { UserSettingsService } from './dashboard/services/user-settings.service';
 import { NotificationService } from './notifications/notification.service';
 import { StorytimeService } from './storytime/storytime.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
@@ -61,6 +62,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
   private readonly _authService = inject(AuthService);
+  private readonly _userSettingsService = inject(UserSettingsService);
   private readonly _notificationService = inject(NotificationService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _logRocketService = inject(LogRocketService);
@@ -216,6 +218,13 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe(loggedIn => {
         this.isLoggedIn = loggedIn;
         if (this.isLoggedIn) {
+          // Loaded here rather than by the settings page, because the timezone
+          // these carry governs every date in the application and a preference
+          // that only applied on the page where it is edited would be no
+          // preference at all. Quietly, because nothing on any page should
+          // break without them: the fallback is the reader's own device.
+          this._userSettingsService.loadQuietly();
+
           if (this.intervalId === null) {
             this.startCountdown();
           }

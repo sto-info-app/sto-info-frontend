@@ -12,6 +12,7 @@ import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
 import { ScriptLoaderService } from './shared/services/script-loader.service';
 import { SeoService } from './shared/services/seo.service';
+import { UserSettingsService } from './dashboard/services/user-settings.service';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -65,6 +66,8 @@ describe('AppComponent', () => {
     stopAppStatePolling: jest.Mock<void, []>;
   };
   let mockPageTitleService: { init: jest.Mock<void, []> };
+  // The settings load is fire-and-forget; the component only has to ask.
+  let mockUserSettingsService: { loadQuietly: jest.Mock<void, []> };
   let mockSeoService: { init: jest.Mock<void, []> };
   let mockScriptLoaderService: {
     loadScript: jest.Mock<
@@ -162,6 +165,7 @@ describe('AppComponent', () => {
       stopAppStatePolling: jest.fn(),
     };
 
+    mockUserSettingsService = { loadQuietly: jest.fn() };
     mockPageTitleService = {
       init: jest.fn(),
     };
@@ -199,6 +203,7 @@ describe('AppComponent', () => {
         { provide: SeoService, useValue: mockSeoService },
         { provide: ScriptLoaderService, useValue: mockScriptLoaderService },
         { provide: MatDialog, useValue: mockDialog },
+        { provide: UserSettingsService, useValue: mockUserSettingsService },
       ],
     })
       .overrideComponent(AppComponent, {
@@ -242,6 +247,29 @@ describe('AppComponent', () => {
       expect(component.isLoggedIn).toBe(true);
       expect(closeAllSpy).toHaveBeenCalled();
       expect(mockAuthService.performLogout).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * The timezone these carry governs every date in the application, so they are
+   * loaded once at the root rather than by the settings page. A preference that
+   * only applied on the page where it is edited would be no preference at all.
+   */
+  it('should load the account settings once the user is signed in', () => {
+    runWithPatchedTimer('setInterval', () => {
+      component.ngOnInit();
+      mockAuthService.isAuthenticated$.next(true);
+
+      expect(mockUserSettingsService.loadQuietly).toHaveBeenCalled();
+    });
+  });
+
+  it('should not load the account settings for a signed-out visitor', () => {
+    runWithPatchedTimer('setInterval', () => {
+      component.ngOnInit();
+      mockAuthService.isAuthenticated$.next(false);
+
+      expect(mockUserSettingsService.loadQuietly).not.toHaveBeenCalled();
     });
   });
 

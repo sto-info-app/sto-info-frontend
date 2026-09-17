@@ -101,6 +101,7 @@ export const API_URLS = {
 
   // Storytime
   STORYTIME_CONFIGURATION: apiUrl + '/storytime/configuration',
+  FLEET_CONFIGURATION: apiUrl + '/fleet/configuration',
   STORYTIME_ADMIN_CONFIGURATION: apiUrl + '/admin/storytime/configuration',
   STORYTIME_STORIES: apiUrl + '/storytime/stories',
   STORYTIME_MANAGE_STORIES: apiUrl + '/storytime/manage/stories',
