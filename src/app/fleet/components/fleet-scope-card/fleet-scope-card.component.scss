@@ -1,0 +1,94 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+// The base card shape, so a Fleet in a directory is the same surface as an
+// account on the dashboard. Full height, so a row of cards carrying different
+// numbers of lines still reads as one row.
+.fleet-scope-card {
+  @include mixins.lcars-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  padding: 1rem;
+}
+
+.fleet-scope-card__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: flex-start;
+  color: inherit;
+  text-decoration: none;
+}
+
+// The name is the whole point of the card and comes from a CSV, so it is given
+// room to be long: it wraps rather than being clipped, because a Fleet whose
+// name is cut off is a Fleet somebody cannot be sure they have found.
+.fleet-scope-card__name {
+  font-family: vars.$font-antonio;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  color: vars.$lcars-sunflower;
+  overflow-wrap: anywhere;
+}
+
+a.fleet-scope-card__identity:hover .fleet-scope-card__name,
+a.fleet-scope-card__identity:focus-visible .fleet-scope-card__name {
+  color: vars.$lcars-sky;
+  text-decoration: underline;
+}
+
+.fleet-scope-card__community {
+  font-size: 0.85rem;
+  color: vars.$lcars-grey-light;
+}
+
+// The state pill. Its colours carry meaning, which is why the card itself does
+// not: sky is the feature, and these say what is happening inside it.
+.fleet-scope-card__status {
+  @include mixins.lcars-badge;
+
+  align-self: flex-start;
+  color: vars.$lcars-black;
+  background: vars.$lcars-grey-light;
+
+  &--recruiting {
+    background: vars.$lcars-green;
+  }
+
+  &--closed {
+    background: vars.$lcars-grey-light;
+  }
+
+  &--disputed {
+    background: vars.$lcars-tangerine;
+  }
+}
+
+.fleet-scope-card__observed,
+.fleet-scope-card__meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: vars.$lcars-grey-light;
+}
+
+.fleet-scope-card__observed i {
+  margin-right: 0.35rem;
+}
+
+// Pushed to the bottom, so the buttons line up across a row whatever each card
+// says above them.
+.fleet-scope-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}

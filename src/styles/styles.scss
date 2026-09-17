@@ -28,6 +28,12 @@
 // editor and the detail pages are built from the same handful of shapes.
 @use 'custom-tracking';
 
+// Emits the layout every Fleet Community page is built from — the listing
+// grid, the empty state and the feature's own form conventions. The Fleet
+// components style themselves; what is here is what a page writes in its own
+// template, which a component's encapsulated styles cannot reach.
+@use 'fleet-community';
+
 /* You can add global styles to this file, and also import other style files */
 
 html {

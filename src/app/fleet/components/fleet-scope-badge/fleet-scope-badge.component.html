@@ -1,0 +1,15 @@
+<span
+  class="fleet-scope-badge"
+  [attr.aria-label]="ariaLabel">
+  <i
+    [class]="iconClass"
+    aria-hidden="true"></i>
+  <span class="fleet-scope-badge__label">{{ label }}</span>
+  @if (platform) {
+    <span
+      class="fleet-scope-badge__platform"
+      aria-hidden="true"
+      >{{ platform }}</span
+    >
+  }
+</span>

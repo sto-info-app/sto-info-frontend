@@ -1,0 +1,69 @@
+<div class="fleet-scope-card">
+  @if (vm.link) {
+    <a
+      class="fleet-scope-card__identity"
+      [routerLink]="vm.link">
+      <ng-container [ngTemplateOutlet]="identity"></ng-container>
+    </a>
+  } @else {
+    <div
+      class="fleet-scope-card__identity"
+      [title]="vm.unlinkedTitle">
+      <ng-container [ngTemplateOutlet]="identity"></ng-container>
+    </div>
+  }
+
+  @if (vm.status) {
+    <span
+      class="fleet-scope-card__status"
+      [ngClass]="'fleet-scope-card__status--' + vm.status.modifier">
+      {{ vm.status.label }}
+    </span>
+  }
+
+  @if (vm.lastObservedLabel) {
+    <p class="fleet-scope-card__observed">
+      <i
+        class="fa-solid fa-clock"
+        aria-hidden="true"></i>
+      {{ vm.lastObservedLabel }}
+    </p>
+  }
+
+  @for (line of vm.meta; track $index) {
+    <p class="fleet-scope-card__meta">{{ line }}</p>
+  }
+
+  @if (vm.actions.length > 0) {
+    <div class="fleet-scope-card__actions">
+      @for (cardAction of vm.actions; track cardAction.key) {
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto"
+          [ngClass]="cardAction.colourClass"
+          [disabled]="isActing"
+          [attr.aria-label]="cardAction.ariaLabel"
+          (click)="action.emit(cardAction.key)">
+          {{ cardAction.label }}
+        </button>
+      }
+    </div>
+  }
+</div>
+
+<!--
+  The badge, name and parent Community read the same whether or not the record
+  can be opened; only the element wrapping them changes, so they are declared
+  once here rather than repeated in both branches.
+-->
+<ng-template #identity>
+  <app-fleet-scope-badge
+    [scope]="vm.scope"
+    [platform]="vm.platform" />
+
+  <span class="fleet-scope-card__name">{{ vm.name }}</span>
+
+  @if (vm.communityName) {
+    <span class="fleet-scope-card__community">{{ vm.communityName }}</span>
+  }
+</ng-template>

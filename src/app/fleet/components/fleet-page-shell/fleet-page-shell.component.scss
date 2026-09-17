@@ -1,0 +1,25 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-tabs' as tabs;
+
+:host {
+  display: block;
+}
+
+// The strip is emitted here rather than in the feature partial because the
+// shell is the only thing in the Fleet system that draws one, and the mixin
+// already carries every decision about how a strip wraps and closes.
+@include tabs.lcars-tab-strip($min-width: 140px);
+
+.fleet-page-shell {
+  padding: 1rem;
+}
+
+// The Community or Fleet the page is about, under its heading. Sky, so the
+// line reads as part of the Fleet system rather than as another heading.
+.fleet-page-shell__subject {
+  font-family: vars.$font-antonio;
+  font-size: 1.1rem;
+  color: vars.$lcars-sky;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

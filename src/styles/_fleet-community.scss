@@ -1,0 +1,97 @@
+@use 'lcars-variables' as vars;
+
+// ─── Fleet Community ─────────────────────────────────────────────────────────
+// The layout the Fleet system's pages are built from, held in one partial for
+// the same reason Storytime and Custom Tracking have one: the directory, a
+// Community's page, the roster and the import wizard are made of the same
+// handful of shapes, and that is what keeps them recognisably one thing.
+// ---
+// What is here and what is not:
+// ---
+// - A shape a *page* writes in its own template lives here, because a
+//   component's encapsulated styles cannot reach a class a page wrote.
+// - A shape that belongs to a Fleet component lives with that component.
+// - A shape the whole application already has — `.lcars-btn`,
+//   `.lcars-input-container`, `.lcars-text-bar`, the tab strip, the card
+//   mixins — is used, not restated. Nothing here replaces a shared control.
+// ---
+// Every class is prefixed `fleet-community-`, so a rule from this partial can
+// be traced to it from the browser's inspector without searching.
+// ---
+// Colour: the Fleet system is sky throughout. The palette is named from
+// `lcars-variables`, never written out as a literal, and the colours that
+// carry meaning — a Fleet's recruitment state, an upload's scan state — are
+// left to the components that say those things.
+
+// The page's own column. Matches the padding the shell puts around a heading,
+// so a page that uses one and a page that uses both line up.
+.fleet-community-page {
+  padding: 1rem;
+}
+
+// A listing of Communities, Fleets or Armadas. Cards stretch, so a row is one
+// height whatever mix of status pills and actions the cards in it carry.
+.fleet-community-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  align-items: stretch;
+  padding: 0;
+  margin: 1rem 0;
+  list-style: none;
+}
+
+// A single column below the point at which two cards stop having room for a
+// Fleet name and a Community name side by side.
+@media (width <= 480px) {
+  .fleet-community-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// What a listing says when it has nothing in it. Italic and dimmed, matching
+// `.lcars-empty-state`, with room for the sentence that says what to do next —
+// an empty directory is a normal state here, not a fault.
+.fleet-community-empty {
+  max-width: 70ch;
+  padding: 1rem 0;
+  margin: 1rem 0;
+  font-style: italic;
+  color: vars.$lcars-grey-light;
+}
+
+// ─── Forms ───────────────────────────────────────────────────────────────────
+// `.form-row`, `.field-hint` and `.compact` are a convention rather than a
+// global rule: each feature declares its own. These are the Fleet system's,
+// declared once for every Fleet form rather than once per page.
+
+// A row of fields that becomes a column when there is no longer room for two.
+.fleet-community-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  > * {
+    flex: 1 1 260px;
+    min-width: 0;
+  }
+}
+
+// The sentence under a field saying what it means. Not an error: errors are
+// `.field-error`, which the input container already styles.
+.fleet-community-field-hint {
+  max-width: 60ch;
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: vars.$lcars-grey-light;
+}
+
+// The row a form's buttons sit in. Wraps rather than shrinking the buttons,
+// because a pill narrower than its label loses the label.
+.fleet-community-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}

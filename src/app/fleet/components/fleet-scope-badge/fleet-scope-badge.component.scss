@@ -1,0 +1,42 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+:host {
+  display: inline-flex;
+}
+
+// Sky is the Fleet system's colour throughout, so the badge says which feature
+// this is; the label and icon inside say which level of it.
+// ---
+// No right-hand padding, because the platform half runs to the badge's own
+// edge. `overflow: hidden` is what lets a square-ended half sit inside a fully
+// rounded pill without a second radius to keep in step with the first.
+.fleet-scope-badge {
+  @include mixins.lcars-badge;
+
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 2px 0 2px 10px;
+  overflow: hidden;
+  color: vars.$lcars-black;
+  background: vars.$lcars-sky;
+
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+.fleet-scope-badge__label {
+  padding-right: 10px;
+}
+
+// The platform sits in its own darkened half, so a Fleet's name on PC and the
+// same name on Xbox are told apart by a shape rather than by reading to the end
+// of a line.
+.fleet-scope-badge__platform {
+  align-self: stretch;
+  padding: 2px 10px;
+  color: vars.$lcars-sky;
+  background: vars.$lcars-black;
+}
