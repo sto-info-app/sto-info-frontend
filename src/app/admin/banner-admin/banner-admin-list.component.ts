@@ -22,6 +22,7 @@ import {
 } from 'src/app/models/notification.models';
 import { SEVERITY_META } from 'src/app/shared/constants/notifications.constants';
 import { NotificationService } from 'src/app/notifications/notification.service';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 const LOAD_TIMEOUT_MS = 12000;
 
@@ -37,6 +38,7 @@ const LOAD_TIMEOUT_MS = 12000;
   ],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     MatDialogModule,
     RouterModule,

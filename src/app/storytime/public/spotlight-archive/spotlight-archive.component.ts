@@ -16,6 +16,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { SpotlightService } from '../../spotlight.service';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
  * The Spotlight: what is showing now, and everything that has shown before.
@@ -29,6 +30,7 @@ import { SpotlightService } from '../../spotlight.service';
   templateUrl: './spotlight-archive.component.html',
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     RouterModule,
     LoadingBarComponent,

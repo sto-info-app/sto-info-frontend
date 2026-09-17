@@ -26,6 +26,7 @@ import {
 } from 'src/app/models/storytime.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { CommentService } from '../../comment.service';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
  * How many colours a thread cycles through before starting again.
@@ -68,6 +69,7 @@ export const SILENCED_TEXT: Record<StorytimeCommentStatus, string> = {
   templateUrl: './comment-thread.component.html',
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     FormsModule,
     RouterModule,

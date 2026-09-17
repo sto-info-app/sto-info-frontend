@@ -24,6 +24,7 @@ import {
   NewsPost,
 } from 'src/app/models/news.models';
 import { NewsService } from '../news.service';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 const LOAD_TIMEOUT_MS = 12000;
 
@@ -37,6 +38,7 @@ const LOAD_TIMEOUT_MS = 12000;
   styleUrls: ['./news-detail.component.scss'],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     RouterModule,
     LoadingBarComponent,

@@ -51,12 +51,12 @@
 
             <dl class="registry-detail-grid">
               <dt>Joined</dt>
-              <dd>{{ profile.joinedAt | date: 'longDate' }}</dd>
+              <dd>{{ profile.joinedAt | appDate: 'longDate' }}</dd>
               <dt>Last Seen</dt>
               <dd>
                 {{
                   profile.lastActiveAt
-                    ? (profile.lastActiveAt | date: 'longDate')
+                    ? (profile.lastActiveAt | appDate: 'longDate')
                     : 'Never'
                 }}
               </dd>

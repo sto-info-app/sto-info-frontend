@@ -34,6 +34,8 @@ import {
   FriendsTab,
 } from '../../models/community.models';
 import { buildRegistryProfileLink } from '../../registry/registry-card.builders';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 
 const PAGE_SIZE = 12;
 
@@ -84,6 +86,7 @@ const TAB_CONFIG: Record<FriendsTab, { heading: string; empty: string }> = {
   styleUrls: ['./friends-page.component.scss'],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     FormsModule,
     RouterModule,
@@ -95,6 +98,7 @@ const TAB_CONFIG: Record<FriendsTab, { heading: string; empty: string }> = {
   ],
 })
 export class FriendsPageComponent implements OnInit {
+  private readonly _userSettingsService = inject(UserSettingsService);
   private readonly _communityService = inject(CommunityService);
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
@@ -225,7 +229,10 @@ export class FriendsPageComponent implements OnInit {
         this.friendVms = this.friends.map(friend => ({
           id: friend.id,
           friend,
-          card: buildFriendMemberCard(friend),
+          card: buildFriendMemberCard(
+            friend,
+            this._userSettingsService.displayTimezone(),
+          ),
         }));
       },
       'Something went wrong loading your friends.',

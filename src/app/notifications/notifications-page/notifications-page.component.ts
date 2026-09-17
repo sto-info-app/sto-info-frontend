@@ -23,6 +23,7 @@ import {
   SEVERITY_META,
   SeverityMeta,
 } from 'src/app/shared/constants/notifications.constants';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
  * Full-page, paginated list of the current user's inbox notifications.
@@ -36,6 +37,7 @@ import {
   styleUrls: ['./notifications-page.component.scss'],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     RouterModule,
     LoadingBarComponent,

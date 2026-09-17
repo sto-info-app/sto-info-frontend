@@ -26,6 +26,7 @@ import {
   SeverityMeta,
   SEVERITY_META,
 } from 'src/app/shared/constants/notifications.constants';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
  * Admin listing of previously sent notifications, rendered with the same card
@@ -40,6 +41,7 @@ import {
   ],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     MatDialogModule,
     RouterModule,

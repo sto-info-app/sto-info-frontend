@@ -77,7 +77,7 @@
                       <div class="admin-record-detail">
                         <span class="label">Window Start At</span>
                         <span class="value">
-                            {{ banner.startsAt | date: 'full'}}
+                            {{ banner.startsAt | appDate: 'full'}}
                         </span>
                       </div>
                     }
@@ -85,7 +85,7 @@
                       <div class="admin-record-detail">
                         <span class="label">Window Ends At</span>
                         <span class="value">
-                            {{ banner.endsAt | date: 'full'}}
+                            {{ banner.endsAt | appDate: 'full'}}
                         </span>
                       </div>
                     }

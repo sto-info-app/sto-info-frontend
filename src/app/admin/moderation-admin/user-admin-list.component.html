@@ -138,7 +138,7 @@
                     <div class="admin-record-detail">
                       <span class="label">Registered</span>
                       <span class="value">
-                        {{ user.createdAt | date: dateTimeFormat }}
+                        {{ user.createdAt | appDate: dateTimeFormat }}
                       </span>
                     </div>
                     <div class="admin-record-detail">
@@ -146,7 +146,7 @@
                       <span class="value">
                         {{
                           user.lastLoginAt
-                            ? (user.lastLoginAt | date: dateTimeFormat)
+                            ? (user.lastLoginAt | appDate: dateTimeFormat)
                             : 'Never'
                         }}
                       </span>
@@ -155,7 +155,7 @@
                       <div class="admin-record-detail">
                         <span class="label">Disabled</span>
                         <span class="value">
-                          {{ user.disabledAt | date: dateTimeFormat }}
+                          {{ user.disabledAt | appDate: dateTimeFormat }}
                         </span>
                       </div>
                       <div class="admin-record-detail">

@@ -35,7 +35,7 @@
             <time
               class="storytime-feed__when"
               [attr.datetime]="entry.occurredAt">
-              {{ entry.occurredAt | date: 'medium' }}
+              {{ entry.occurredAt | appDate: 'medium' }}
             </time>
           </div>
         </li>

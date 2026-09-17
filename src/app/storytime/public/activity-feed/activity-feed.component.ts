@@ -18,6 +18,7 @@ import { FollowService } from '../../follow.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /** What each kind of activity says in a feed. */
 export const ACTIVITY_WORDING: Record<StorytimeActivityType, string> = {
@@ -46,6 +47,7 @@ const PAGE_SIZE = 30;
   templateUrl: './activity-feed.component.html',
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     RouterLink,
     LcarsErrorMessageComponent,

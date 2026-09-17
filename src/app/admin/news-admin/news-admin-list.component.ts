@@ -22,6 +22,7 @@ import {
   NewsStatus,
 } from 'src/app/models/news.models';
 import { NewsService } from 'src/app/news/news.service';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 const PAGE_SIZE = 20;
 const LOAD_TIMEOUT_MS = 12000;
@@ -36,6 +37,7 @@ const LOAD_TIMEOUT_MS = 12000;
   styleUrls: ['./news-admin.component.scss'],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     MatDialogModule,
     RouterModule,

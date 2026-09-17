@@ -24,6 +24,7 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { StorytimeModerationService } from '../../storytime-moderation.service';
 import { REPORT_REASON_LABELS } from '../../storytime.constants';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
  * The Storytime moderation queue: what has been reported, and who has appealed.
@@ -41,6 +42,7 @@ import { REPORT_REASON_LABELS } from '../../storytime.constants';
   templateUrl: './moderation-queue.component.html',
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     ReactiveFormsModule,
     RouterModule,

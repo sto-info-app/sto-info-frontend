@@ -118,7 +118,7 @@
                     <div class="admin-record-detail">
                       <span class="label">Raised</span>
                       <span class="value">
-                        {{ report.createdAt | date: 'medium' }}
+                        {{ report.createdAt | appDate: 'medium' }}
                       </span>
                     </div>
                     @if (report.reviewedBy) {
@@ -127,7 +127,7 @@
                         <span class="value">
                           {{ report.reviewedBy }}
                           @if (report.reviewedAt) {
-                            — {{ report.reviewedAt | date: 'medium' }}
+                            — {{ report.reviewedAt | appDate: 'medium' }}
                           }
                         </span>
                       </div>

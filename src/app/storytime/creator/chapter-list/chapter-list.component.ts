@@ -23,6 +23,7 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ChapterService } from '../../chapter.service';
 import { PUBLICATION_STATUS_LABELS } from '../../storytime.constants';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
  * The Chapters of one of the creator's Stories, with the actions on each.
@@ -32,6 +33,7 @@ import { PUBLICATION_STATUS_LABELS } from '../../storytime.constants';
   templateUrl: './chapter-list.component.html',
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     RouterModule,
     LoadingBarComponent,

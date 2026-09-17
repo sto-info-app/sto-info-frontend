@@ -46,6 +46,7 @@ import {
 import { buildRegistryAccountCard } from '../registry-card.builders';
 import { RegistryPageBaseDirective } from '../registry-page-base.directive';
 import { RegistryService } from '../registry.service';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
  * One public account, with the card and the values the controls work on.
@@ -83,6 +84,7 @@ export const REGISTRY_ACCOUNT_SORT_OPTIONS: readonly AccountSortOption[] = [
   styleUrls: ['./registry-profile.component.scss'],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,

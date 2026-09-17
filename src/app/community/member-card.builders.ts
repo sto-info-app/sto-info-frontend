@@ -57,11 +57,13 @@ const RELATIONSHIP_BADGES: Partial<
  *
  * @param profile - The public member summary.
  * @param canAct - Whether the viewer is signed in, and so may act on them.
+ * @param timezone - The zone to render instants in; the browser's when absent.
  * @returns The card presentation model.
  */
 export function buildRegistryMemberCard(
   profile: RegistryProfileSummary,
   canAct: boolean,
+  timezone?: string,
 ): MemberCardVm {
   const status = profile.relationship?.status ?? null;
 
@@ -77,7 +79,7 @@ export function buildRegistryMemberCard(
     // for an anonymous visitor, where no card can ever have one and the
     // reserved row would just be a gap.
     reserveBadgeSlot: status !== null,
-    meta: buildActivityMeta(profile),
+    meta: buildActivityMeta(profile, timezone),
     actions: buildRegistryActions(profile.username, status, canAct),
   };
 }
@@ -90,9 +92,13 @@ export function buildRegistryMemberCard(
  * pill the registry listing carries would say the same thing on every one.
  *
  * @param friend - The accepted friendship.
+ * @param timezone - The zone to render instants in; the browser's when absent.
  * @returns The card presentation model.
  */
-export function buildFriendMemberCard(friend: Friend): MemberCardVm {
+export function buildFriendMemberCard(
+  friend: Friend,
+  timezone?: string,
+): MemberCardVm {
   const member = friend.member;
 
   return {
@@ -105,7 +111,7 @@ export function buildFriendMemberCard(friend: Friend): MemberCardVm {
     ),
     badge: null,
     reserveBadgeSlot: false,
-    meta: buildFriendMeta(friend),
+    meta: buildFriendMeta(friend, timezone),
     actions: [buildUnfriendAction(member.username)],
   };
 }
@@ -141,15 +147,24 @@ function buildMemberCardBase(
  * card.
  *
  * @param member - The member the card represents.
+ * @param timezone - The zone to render instants in; the browser's when absent.
  * @returns The meta lines.
  */
-function buildActivityMeta(member: MemberCardSource): string[] {
-  const meta = [`Joined ${formatMemberDate(member.joinedAt)}`];
+function buildActivityMeta(
+  member: MemberCardSource,
+  timezone?: string,
+): string[] {
+  const meta = [`Joined ${formatMemberDate(member.joinedAt, timezone)}`];
 
   if (member.lastActiveAt) {
-    meta.push(`Last seen ${formatMemberDate(member.lastActiveAt)}`);
+    meta.push(`Last seen ${formatMemberDate(member.lastActiveAt, timezone)}`);
   }
 
+  // Playing since is a day the member typed, stored as midnight UTC. Rendering
+  // it in another zone would move it to the day before, so it keeps the
+  // browser's zone rather than the reader's chosen one — the two agree for
+  // everybody at or east of UTC, and neither is right for a value that should
+  // not have a time at all.
   if (member.playingSince) {
     meta.push(`Playing since ${formatMemberDate(member.playingSince)}`);
   }
@@ -161,13 +176,16 @@ function buildActivityMeta(member: MemberCardSource): string[] {
  * Builds the meta lines for a friend, adding when the friendship began.
  *
  * @param friend - The accepted friendship.
+ * @param timezone - The zone to render instants in; the browser's when absent.
  * @returns The meta lines.
  */
-function buildFriendMeta(friend: Friend): string[] {
-  const meta = buildActivityMeta(friend.member);
+function buildFriendMeta(friend: Friend, timezone?: string): string[] {
+  const meta = buildActivityMeta(friend.member, timezone);
 
   if (friend.friendsSince) {
-    meta.push(`Friends since ${formatMemberDate(friend.friendsSince)}`);
+    meta.push(
+      `Friends since ${formatMemberDate(friend.friendsSince, timezone)}`,
+    );
   }
 
   return meta;
@@ -178,10 +196,11 @@ function buildFriendMeta(friend: Friend): string[] {
  * rest of the app.
  *
  * @param value - The ISO date to format.
+ * @param timezone - The zone to render in; the browser's when absent.
  * @returns The formatted date.
  */
-function formatMemberDate(value: string): string {
-  return formatDate(value, 'longDate', 'en-US');
+function formatMemberDate(value: string, timezone?: string): string {
+  return formatDate(value, 'longDate', 'en-US', timezone);
 }
 
 /**

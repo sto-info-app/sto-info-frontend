@@ -46,6 +46,7 @@ import {
   memberRoleLabel,
   memberRoleModifier,
 } from 'src/app/shared/utils/member-role.utils';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 const PAGE_SIZE = 5;
 const LOAD_TIMEOUT_MS = 12000;
@@ -114,6 +115,7 @@ const STATUS_PILL_CLASSES: Record<PermissionStatus, string> = {
   ],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

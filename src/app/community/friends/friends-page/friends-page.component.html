@@ -124,7 +124,7 @@
                     </span>
                   }
                   <span class="member-row__meta">
-                    Sent {{ request.requestedAt | date: 'longDate' }}
+                    Sent {{ request.requestedAt | appDate: 'longDate' }}
                   </span>
                 </div>
 
@@ -166,7 +166,7 @@
                     {{ blockedMember.member.username }}
                   </span>
                   <span class="member-row__meta">
-                    Blocked {{ blockedMember.blockedAt | date: 'longDate' }}
+                    Blocked {{ blockedMember.blockedAt | appDate: 'longDate' }}
                   </span>
                   @if (blockedMember.reason) {
                     <span

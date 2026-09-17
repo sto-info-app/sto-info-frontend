@@ -82,7 +82,7 @@
 
                 <ul class="storytime-moderation__meta">
                   <li>{{ report.status }}</li>
-                  <li>{{ report.createdAt | date: 'short' }}</li>
+                  <li>{{ report.createdAt | appDate: 'short' }}</li>
                   @if (report.resolution) {
                     <li>{{ report.resolution }}</li>
                   }
@@ -144,7 +144,7 @@
                   {{ appeal.body }}
                 </p>
                 <p class="storytime-moderation__meta">
-                  {{ appeal.createdAt | date: 'short' }}
+                  {{ appeal.createdAt | appDate: 'short' }}
                 </p>
 
                 <div class="storytime-actions">

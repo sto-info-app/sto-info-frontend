@@ -47,9 +47,9 @@
             </li>
             <li>{{ titleFor(entry) }}</li>
             <li>
-              {{ entry.startsAt | date: 'longDate' }}
+              {{ entry.startsAt | appDate: 'longDate' }}
               @if (entry.endsAt) {
-                – {{ entry.endsAt | date: 'longDate' }}
+                – {{ entry.endsAt | appDate: 'longDate' }}
               } @else {
                 onwards
               }

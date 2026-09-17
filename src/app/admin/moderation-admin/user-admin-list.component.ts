@@ -27,6 +27,7 @@ import {
   memberRoleLabel,
   memberRoleModifier,
 } from 'src/app/shared/utils/member-role.utils';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 const PAGE_SIZE = 20;
 const LOAD_TIMEOUT_MS = 12000;
@@ -58,6 +59,7 @@ const DISABLED_FILTER_LABELS: Record<DisabledFilter, string> = {
   ],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     FormsModule,
     MatDialogModule,

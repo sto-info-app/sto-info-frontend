@@ -28,6 +28,7 @@ import {
 } from '../../models/registry.models';
 import { RegistryPageBaseDirective } from '../registry-page-base.directive';
 import { RegistryService } from '../registry.service';
+import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 
 const PAGE_SIZE = 12;
 
@@ -100,6 +101,7 @@ export class RegistryListComponent
   extends RegistryPageBaseDirective
   implements OnInit
 {
+  private readonly _userSettingsService = inject(UserSettingsService);
   private readonly _registryService = inject(RegistryService);
   private readonly _communityService = inject(CommunityService);
   private readonly _authService = inject(AuthService);
@@ -163,7 +165,11 @@ export class RegistryListComponent
         this.profileVms = this.profiles.map(profile => ({
           id: profile.username,
           profile,
-          card: buildRegistryMemberCard(profile, this.canAct),
+          card: buildRegistryMemberCard(
+            profile,
+            this.canAct,
+            this._userSettingsService.displayTimezone(),
+          ),
         }));
       },
       'Something went wrong loading the registry.',

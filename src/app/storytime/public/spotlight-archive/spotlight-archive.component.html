@@ -66,8 +66,8 @@
               <p class="storytime-spotlight__work">{{ titleFor(entry) }}</p>
               <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
               <p class="storytime-spotlight__dates">
-                {{ entry.startsAt | date: 'longDate' }} –
-                {{ entry.endsAt | date: 'longDate' }}
+                {{ entry.startsAt | appDate: 'longDate' }} –
+                {{ entry.endsAt | appDate: 'longDate' }}
               </p>
             </div>
           </li>

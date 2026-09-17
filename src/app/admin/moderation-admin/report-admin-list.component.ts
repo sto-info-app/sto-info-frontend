@@ -25,6 +25,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { ModerationService } from 'src/app/shared/services/moderation.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 const PAGE_SIZE = 20;
 const LOAD_TIMEOUT_MS = 12000;
@@ -49,6 +50,7 @@ type StatusFilter = ReportStatus | 'ALL';
   ],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     FormsModule,
     MatDialogModule,

@@ -300,14 +300,14 @@
                       <div class="admin-record-detail">
                         <span class="label">Applied</span>
                         <span class="value">{{
-                          row.override.createdAt | date: dateTimeFormat
+                          row.override.createdAt | appDate: dateTimeFormat
                         }}</span>
                       </div>
                       <div class="admin-record-detail">
                         <span class="label">Expires</span>
                         <span class="value">{{
                           row.override.expiresAt
-                            ? (row.override.expiresAt | date: dateTimeFormat)
+                            ? (row.override.expiresAt | appDate: dateTimeFormat)
                             : 'Never'
                         }}</span>
                       </div>

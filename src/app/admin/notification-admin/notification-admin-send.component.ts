@@ -32,6 +32,7 @@ import {
 } from 'src/app/models/notification.models';
 import { NotificationService } from 'src/app/notifications/notification.service';
 import { AdminUserSearchService } from '../admin-user-search.service';
+import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 
 /**
  * Admin compose form for broadcast or per-user notifications. Sent notifications
@@ -55,6 +56,7 @@ import { AdminUserSearchService } from '../admin-user-search.service';
   ],
 })
 export class NotificationAdminSendComponent implements OnInit {
+  private readonly _userSettingsService = inject(UserSettingsService);
   private readonly _fb = inject(FormBuilder);
   private readonly _notificationService = inject(NotificationService);
   private readonly _userSearchService = inject(AdminUserSearchService);
@@ -147,7 +149,12 @@ export class NotificationAdminSendComponent implements OnInit {
    */
   private lastSignedIn(user: UserSearchResult): string {
     return user.lastLoginAt
-      ? formatDate(user.lastLoginAt, DATE_TIME_WITH_ZONE_FORMAT, 'en-US')
+      ? formatDate(
+          user.lastLoginAt,
+          DATE_TIME_WITH_ZONE_FORMAT,
+          'en-US',
+          this._userSettingsService.displayTimezone(),
+        )
       : 'Never';
   }
 
