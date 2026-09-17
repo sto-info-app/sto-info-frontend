@@ -25,7 +25,7 @@ Two rules run through all of it:
 | Angular Material base | `src/styles/angular-mat-base.scss` | Material's generated theme. Overrides for it sit at the top of `lcars-theme.scss`. |
 | App globals | `src/styles/styles.scss` | Forms, buttons, list-page patterns, badges, utilities — anything more than one feature uses. |
 | Shared SCSS API | `src/styles/_lcars-variables.scss`, `_lcars-mixins.scss`, `_lcars-tabs.scss`, `_registry-layout.scss`, `_news-colours.scss`, `_notification-card.scss`, `_sto-rarity-colours.scss`, `_lcars-palette-properties.scss` | Variables and mixins. No output of their own except where noted. |
-| Feature partials | `src/styles/_storytime.scss`, `_custom-tracking.scss`, `_help.scss` | One partial per feature whose pages are built from the same handful of shapes. Every rule scoped by the feature's class prefix (`storytime-`, `custom-tracking-`, `help-`). |
+| Feature partials | `src/styles/_storytime.scss`, `_custom-tracking.scss`, `_help.scss`, `_fleet-community.scss` | One partial per feature whose pages are built from the same handful of shapes. Every rule scoped by the feature's class prefix (`storytime-`, `custom-tracking-`, `help-`, `fleet-community-`). |
 | Rendered Markdown | `src/styles/_markdown.scss` | The classes both Markdown renderers emit for the site's own constructs (`.sto-indent`, `.sto-spacer`). Global rather than per feature: the same writing is shown on a News post, in a Chapter and in the editor preview beside it, and `[innerHTML]` content never carries a component's encapsulation attribute anyway. |
 | Component SCSS | `<component>/<component>.component.scss` | Everything else — one component's own layout. |
 
@@ -597,14 +597,144 @@ Notes:
 
 ---
 
+## Fleet Community
+
+The Fleet system is built from the vocabulary above rather than from a language
+of its own: `.lcars-btn` for every button, `.lcars-input-container` for every
+field, `lcars-tab-strip` for every strip of sections, `ConfirmDialogComponent`
+for every destructive confirmation, and the four alert components for state.
+What follows is only what Fleet adds.
+
+### Colour
+
+**The whole feature is sky**, the way Custom Tracking is tangerine and the help
+section is perano. Community, Fleet and Armada are *not* three colours: they
+are told apart by a label and an icon, which leaves the palette free to mean
+something — a Fleet that is recruiting, closed or disputed, an upload that has
+passed or been refused — and keeps the distinction legible to a reader who
+cannot separate two mid-tone blues.
+
+`_fleet-community.scss` names every colour from `lcars-variables`. No Fleet
+stylesheet writes a hexadecimal.
+
+### Layout
+
+`src/styles/_fleet-community.scss`, scoped `fleet-community-`. It holds what a
+*page* writes in its own template, which a component's encapsulated styles
+cannot reach:
+
+| Class | What it is |
+|---|---|
+| `.fleet-community-page` | The page column, matching the shell's own padding. |
+| `.fleet-community-grid` | The listing grid for scope cards. Cards stretch, so a row is one height; one column below 480px. |
+| `.fleet-community-empty` | What a listing says when it holds nothing. An empty directory is a normal state here, not a fault. |
+| `.fleet-community-form-row` | A row of fields that becomes a column when two no longer fit. |
+| `.fleet-community-field-hint` | The sentence under a field saying what it means. Not an error — that is `.field-error`, which the input container already styles. |
+| `.fleet-community-form-actions` | The row a form's buttons sit in; wraps rather than shrinking a pill below its label. |
+
+`.form-row`, `.field-hint` and `.compact` are a per-feature convention rather
+than a global rule, which is why Fleet declares its own rather than assuming
+one exists.
+
+### Components
+
+Fleet's own components live in `src/app/fleet/components/`. All are standalone
+and OnPush, and the cards emit an action rather than performing one.
+
+**`<app-fleet-page-shell>`** — the chrome every Fleet page sits in: its tab
+strip, its heading, the line naming what the page is about, and whichever of
+loading, failed or ready it is in.
+
+| Input | Type | Notes |
+|---|---|---|
+| `heading` | `string` (required) | Rendered as the page's `<h1>`. |
+| `subject` | `string \| null` | The Community or Fleet the page is about, under the heading. A name, never an identifier. |
+| `tabs` | `readonly FleetShellTab[]` | `{ link, label, exact }`. Link tabs, because each Fleet section is its own route. Omit for a page with no sections — a strip of one tab says nothing. |
+| `tabsAriaLabel` | `string` | Default `'Fleet sections'`. |
+| `isLoading`, `loadingText` | `boolean`, `string` | Swaps the content for `<app-loading-bar>`, keeping the heading. |
+| `errorMessage` | `string \| null` | Swaps the content for `<app-lcars-error-message>`, which renders **text**. |
+
+Holding the three states here is the point: a dozen Fleet pages each writing
+their own `@if (isLoading)` is a dozen chances for one to show a heading above
+an empty page, or leave a stale list under an error.
+
+The projected content is instantiated by the page whether or not the shell is
+showing it, so do not rely on the shell to delay a child's initialisation —
+only its rendering.
+
+**`<app-fleet-scope-badge>`** — says whether something is a Community, a Fleet
+or an Armada, and on which platform.
+
+| Input | Type | Notes |
+|---|---|---|
+| `scope` | `FleetScopeType` (required) | `COMMUNITY`, `FLEET` or `ARMADA`. |
+| `platform` | `string \| null` | Sits in its own darkened half. A Community spans every platform and so has none. |
+
+**`<app-fleet-scope-card>`** — a Community, Fleet or Armada in a listing. Takes
+`FleetScopeCardVm`, emits `action: string`, and disables every button while
+`isActing`.
+
+The card exists to make two registrations of one name tellable apart. Anybody
+may register a Fleet and nothing proves they run it, so the card shows the
+Community that registered it, the platform, the exact name and when its roster
+was last seen. **The name is rendered exactly as recorded** — two Fleets whose
+names differ only in their spacing are two Fleets, and a directory that tidies
+them is a directory in which one cannot be found.
+
+Every field of the view model is text the card renders as text. A Fleet name
+comes from a CSV somebody uploaded, so nothing in it may reach a component that
+renders HTML.
+
+`FleetScopeCardStatus` is its own field rather than a colour on the card: the
+card's colour says which feature this is, and the pill says what state the
+Fleet is in (`recruiting` green, `closed` grey, `disputed` tangerine).
+
+`lastObservedLabel` is a formatted string, not a date. Deciding which timezone
+a moment is written in belongs to the page, which knows whether it holds an
+instant — rendered through `AppDatePipe` — or a day somebody typed, which is
+never re-zoned at all.
+
+### Upload and scan state
+
+**`<app-asset-scan-status>`** lives in `src/app/shared/components/`, not in the
+Fleet folder, because every upload in the application moves onto these states:
+a Fleet roster CSV, a captain's portrait and a Storytime cover are the same
+five states and a reader should not learn them twice.
+
+| Input | Type | Notes |
+|---|---|---|
+| `state` | `AssetScanState` (required) | `UPLOADING`, `AWAITING_SCAN`, `SCANNING`, `AVAILABLE`, `REJECTED`. |
+| `fileName` | `string \| null` | Rendered as text; a filename is something somebody chose. |
+
+The wording lives in `shared/constants/asset-scan.constants.ts`. Each state
+carries a label, an icon, a colour and — while it is still moving — a progress
+bar, so the state is said four ways and never by colour alone. The bar stops
+sweeping under `prefers-reduced-motion` rather than disappearing, because it
+still means the upload has not finished.
+
+**A rejection never says what was found.** Naming the signature that matched
+tells somebody probing the scanner exactly what got through; the copy says the
+file was refused, that nothing already in place has changed, and stops.
+
+### Warnings and user text
+
+`<app-lcars-warning-message>` renders its message as HTML. Fleet text — a Fleet
+name, a filename, an import error, a chat report — comes from somebody else, so
+it goes to the error or information components, which render text. This is the
+one rule in the feature that a reviewer should check by reading rather than by
+looking.
+
+---
+
 ## Conventions
 
 Every shared component:
 
-- Is **standalone**. Seven declare `ChangeDetectionStrategy.OnPush` — the three
-  toggles, `endeavour-rank-badge`, `smart-chart`, `lcars-search-dialog` and
-  `alert-panel`. The rest still run default change detection; new components
-  should use OnPush.
+- Is **standalone**. Ten declare `ChangeDetectionStrategy.OnPush` — the three
+  toggles, `endeavour-rank-badge`, `smart-chart`, `lcars-search-dialog`,
+  `alert-panel`, `refresh-session-dialog`, `feature-unavailable` and
+  `asset-scan-status`. The rest still run default change detection; new
+  components should use OnPush, as every Fleet component does.
 - Keeps presentation and action apart — a card emits which action was pressed
   and the page performs it.
 - Imports SCSS by name (`@use 'lcars-variables' as vars;`), never by relative
