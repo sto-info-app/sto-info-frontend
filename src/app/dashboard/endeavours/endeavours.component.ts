@@ -29,6 +29,7 @@ import {
 } from '../models/endeavour.model';
 import { EndeavourService } from '../services/endeavour.service';
 import { HandleResolverService } from '../services/handle-resolver.service';
+import { StoSwitcherButtonComponent } from '../switcher/sto-switcher-button.component';
 
 @Component({
   selector: 'app-endeavours',
@@ -43,6 +44,7 @@ import { HandleResolverService } from '../services/handle-resolver.service';
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     EndeavourRankBadgeComponent,
+    StoSwitcherButtonComponent,
   ],
 })
 export class EndeavoursComponent implements OnInit, OnDestroy {

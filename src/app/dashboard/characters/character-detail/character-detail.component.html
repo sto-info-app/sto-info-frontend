@@ -49,6 +49,9 @@
         <h1>{{ character.handle }}</h1>
       </div>
       <div class="header-actions">
+        <app-sto-switcher-button
+          [currentAccountId]="character.accountId"
+          [currentCharacterId]="character.id"></app-sto-switcher-button>
         <button
           type="button"
           class="cta-icon"

@@ -10,13 +10,25 @@
     <div id="accounts-main-content">
       <div class="lcars-text-bar accounts-lcars-text-bar">
         <span>Account List</span>
-        <button
-          type="button"
-          class="cta-icon"
-          (click)="addAccount()"
-          title="Add STO Account">
-          <i class="fas fa-plus"></i>
-        </button>
+        <!--
+          Two controls on one bar, so they go in the actions group: a lone
+          `.cta-icon` is pinned to the right-hand end of the bar by the theme,
+          and a second one would be laid on top of the first.
+
+          The switcher earns its place here as well as on the pages below: it
+          reaches a captain in one step, where this page reaches the account
+          they are on and leaves the captain a second click away.
+        -->
+        <div class="lcars-bar-actions">
+          <app-sto-switcher-button></app-sto-switcher-button>
+          <button
+            type="button"
+            class="cta-icon"
+            (click)="addAccount()"
+            title="Add STO Account">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
       </div>
 
       <div class="accounts-inner-content">

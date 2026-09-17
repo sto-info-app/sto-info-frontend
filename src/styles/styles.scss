@@ -721,6 +721,25 @@ button.lcars-btn-auto {
   justify-content: flex-end !important;
 }
 
+/* The line under a page heading that says which account or captain the page is
+   about, with the quick-switch control sitting at the end of it. Held here
+   because the dashboard, the endeavour page and every progress tracker draw
+   the same line, and a reader should find the switch in the same place on all
+   of them. */
+.page-subject-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  /* A flex item will not shrink below its longest word by default, so a
+     heading in this row would push out of a narrow column instead of wrapping
+     inside it the way it did as a plain block. */
+  > * {
+    min-width: 0;
+  }
+}
+
 /* LCARS Self Alignment Utilities */
 .lcars-self-left {
   align-self: flex-start !important;

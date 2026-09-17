@@ -23,7 +23,12 @@
 
     @if (!isLoading && !errorMessage) {
       <h1>Endeavour Perks</h1>
-      <p class="account-subtitle">Account: {{ accountHandle }}</p>
+      <div class="page-subject-row account-subtitle">
+        <span>Account: {{ accountHandle }}</span>
+        <app-sto-switcher-button
+          [currentAccountId]="accountId"
+        ></app-sto-switcher-button>
+      </div>
 
       <!-- Rank + Stats -->
       <div class="rank-stats-row">

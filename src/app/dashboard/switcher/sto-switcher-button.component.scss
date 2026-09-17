@@ -1,0 +1,50 @@
+@use 'lcars-variables' as vars;
+
+// Where the switcher stands on its own beside a heading, a bare glyph reads as
+// decoration rather than as something to press: there is nothing to say where
+// the control starts and ends. The outline gives it an edge.
+
+// Only there. Everywhere else the switcher sits in a row of other icon controls
+// — the pin on a captain's page, the add button in an LCARS bar — and those are
+// plain glyphs on the same ground. An outline on one of them would not make the
+// switcher clearer, only make it the odd one out.
+
+// Hence `:host-context` rather than a plain rule: what the control needs here
+// is decided by where the page put it, which is outside this component.
+
+// Both class names are needed. The global `.cta-icon:is(button)` rule strips a
+// button back to a bare glyph — no border, no radius, no box — so the outline
+// has to be specific enough to put those back.
+:host-context(.page-subject-row) .cta-icon.sto-switcher-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  // Sized in `em` so the outline keeps its proportion to the glyph at whatever
+  // size the line it sits on is set in.
+  width: 1.85em;
+  height: 1.85em;
+  border: 2px solid currentcolor;
+  border-radius: 50%;
+
+  // The glyph is centred by the flex box above rather than by the line box,
+  // which sat it low in the circle.
+  line-height: 1;
+
+  // The colour comes from the global icon-button rule and changes on hover, so
+  // the outline follows it without restating either value.
+  transition:
+    color 0.2s,
+    transform 0.1s,
+    background-color 0.2s;
+
+  &:hover,
+  &:focus-visible {
+    background-color: rgb(255 255 255 / 10%);
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-sunflower;
+    outline-offset: 2px;
+  }
+}

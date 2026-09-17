@@ -1,0 +1,169 @@
+<div id="sto-switcher-dialog">
+  <div
+    class="lcars-text-bar small-lcars-bar-gap"
+    mat-dialog-title>
+    <!--
+      Short by necessity. An LCARS bar sets its label in a fixed-height block
+      pinned to the bar, so a heading long enough to wrap on a narrow screen
+      spills out of the bar and over the field beneath it.
+    -->
+    <span>Quick Switch</span>
+  </div>
+
+  <div mat-dialog-content>
+    @if (isLoading()) {
+      <app-loading-bar loadingText="Reading Crew Manifest"></app-loading-bar>
+    } @else if (hasFailed()) {
+      <app-lcars-error-message
+        message="The crew manifest could not be read. Close this and try again."></app-lcars-error-message>
+    } @else if (hasNoAccounts()) {
+      <p class="sto-switcher__empty">
+        No accounts on record. Add one from Your Accounts.
+      </p>
+    } @else {
+      <div class="lcars-input-container perano">
+        <label for="sto-switcher-filter">Filter</label>
+        <input
+          id="sto-switcher-filter"
+          type="search"
+          [value]="filterTerm()"
+          (input)="onFilterInput($event)"
+          placeholder="Type an account or captain name..." />
+      </div>
+
+      @if (hasNoMatches()) {
+        <p class="sto-switcher__empty">
+          Nothing matched. Try a different name.
+        </p>
+      } @else {
+        <ul class="sto-switcher__accounts">
+          @for (account of visibleAccounts(); track account.id) {
+            <li class="sto-switcher__account">
+              <!--
+                The account itself, as a jump of its own. A disabled bar is the
+                one being read: it is marked rather than dropped, so the list
+                still says where the reader is standing.
+              -->
+              <button
+                type="button"
+                class="sto-switcher__account-bar"
+                [class.sto-switcher__account-bar--current]="account.isCurrent"
+                [disabled]="account.isCurrent || null"
+                [attr.aria-current]="account.isCurrent ? 'page' : null"
+                (click)="selectAccount(account)">
+                <span class="sto-switcher__account-name">
+                  @if (account.pinned) {
+                    <i
+                      class="fas fa-thumbtack sto-switcher__pin"
+                      title="Pinned"
+                      aria-hidden="true"></i>
+                    <span class="sr-only">Pinned.</span>
+                  }
+                  {{ account.handle }}
+                  @if (account.lifetimeSubscription) {
+                    <i
+                      class="fas fa-badge-check lifetime-icon"
+                      title="Lifetime Subscription"
+                      aria-hidden="true"></i>
+                    <span class="sr-only">Lifetime subscription.</span>
+                  }
+                </span>
+                <span class="sto-switcher__account-meta">
+                  @if (account.platformIconClass) {
+                    <i
+                      [class]="account.platformIconClass"
+                      [title]="'Platform: ' + account.platformName"
+                      aria-hidden="true"></i>
+                  }
+                  @if (account.launcherIconClass) {
+                    <i
+                      [class]="account.launcherIconClass"
+                      [title]="'Launcher: ' + account.launcherName"
+                      aria-hidden="true"></i>
+                  }
+                  <span
+                    class="sto-switcher__count"
+                    [title]="'Total Captains: ' + account.totalCharacterCount">
+                    <i
+                      class="fas fa-user-visor"
+                      aria-hidden="true"></i>
+                    {{ account.totalCharacterCount }}
+                  </span>
+                  @if (account.isCurrent) {
+                    <span class="sto-switcher__here">Viewing</span>
+                  }
+                </span>
+              </button>
+
+              @if (account.characters.length === 0) {
+                <p class="sto-switcher__no-captains">
+                  No captains yet on this account.
+                </p>
+              } @else {
+                <ul class="sto-switcher__captains">
+                  @for (character of account.characters; track character.id) {
+                    <li>
+                      <button
+                        type="button"
+                        class="sto-switcher__captain"
+                        [ngClass]="character.factionClass"
+                        [class.sto-switcher__captain--current]="
+                          character.isCurrent
+                        "
+                        [disabled]="character.isCurrent || null"
+                        [attr.aria-current]="
+                          character.isCurrent ? 'page' : null
+                        "
+                        (click)="selectCharacter(account, character)">
+                        <app-entity-avatar
+                          class="sto-switcher__avatar"
+                          [src]="character.avatarUrl"
+                          [alt]="character.handle"
+                          [size]="100"></app-entity-avatar>
+                        <span class="sto-switcher__captain-name">
+                          @if (character.pinned) {
+                            <i
+                              class="fas fa-thumbtack sto-switcher__pin"
+                              title="Pinned"
+                              aria-hidden="true"></i>
+                            <span class="sr-only">Pinned.</span>
+                          }
+                          {{ character.handle }}
+                        </span>
+                        @if (character.isCurrent) {
+                          <span class="sto-switcher__here">Viewing</span>
+                        }
+                        @if (character.factionIconUrl) {
+                          <img
+                            class="sto-switcher__faction-icon"
+                            [src]="character.factionIconUrl"
+                            [alt]="'Faction: ' + character.factionName"
+                            [title]="'Faction: ' + character.factionName"
+                            width="28"
+                            height="28"
+                            loading="lazy" />
+                        }
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </li>
+          }
+        </ul>
+      }
+    }
+  </div>
+
+  <div
+    class="buttons-container lcars-flex-right"
+    mat-dialog-actions>
+    <button
+      type="button"
+      class="lcars-btn red"
+      mat-button
+      (click)="cancel()">
+      Cancel
+    </button>
+  </div>
+</div>

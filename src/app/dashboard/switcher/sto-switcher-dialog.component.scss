@@ -1,0 +1,279 @@
+@use 'sass:color';
+@use 'lcars-variables' as vars;
+
+// The switcher wears the shapes the dashboard behind it wears. An account is a
+// solid bar with its name in black, the way an account card heads itself; a
+// captain is a panel with a coloured spine, the way a captain card is drawn.
+// Nothing here is a new shape to learn — the list reads as the pages it jumps
+// between, only denser.
+$account-colour: vars.$lcars-sunflower;
+$captain-colour: vars.$lcars-perano;
+
+#sto-switcher-dialog {
+  display: flex;
+  flex-direction: column;
+
+  // Wide enough for a captain's name beside an avatar and a faction icon
+  // without any of the three shortening. Material caps the panel at 80vw, and
+  // this dialog carries its own padding rather than the surface's, so 80vw is
+  // the whole of what a narrow screen has to give.
+  width: min(560px, 80vw);
+  box-sizing: border-box;
+  padding: 0.25rem 0.5rem 0.5rem;
+}
+
+// Material reserves 40px of leading above a dialog title for its own
+// typography, which only pushes the LCARS bar down onto the field below it.
+.mat-mdc-dialog-title {
+  padding: 0;
+  margin-bottom: 0.75rem;
+
+  &::before {
+    display: none;
+  }
+}
+
+.mat-mdc-dialog-content {
+  // The wrapper holds the side padding, so the content keeps only enough of
+  // its own to clear the scrollbar.
+  padding: 0 0.25rem;
+  max-height: 62vh;
+}
+
+.mat-mdc-dialog-actions {
+  padding: 1rem 0.25rem 0.25rem;
+}
+
+.sto-switcher__empty,
+.sto-switcher__no-captains {
+  padding: 0.75rem 0 0.25rem;
+  margin: 0;
+  color: vars.$lcars-grey-light;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sto-switcher__no-captains {
+  padding: 0.5rem 0 0.25rem 1rem;
+}
+
+.sto-switcher__accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+// ── The account bar ──────────────────────────────────────────────────────────
+
+.sto-switcher__account-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+
+  // On a narrow screen the platform glyphs, the captain count and the Viewing
+  // marker together leave the handle almost nothing, and an account shortened
+  // to four letters is no longer an account anybody recognises. They drop to a
+  // line of their own instead.
+  flex-wrap: wrap;
+
+  // A button on this site is a 200 by 60 pixel LCARS pill by default, which is
+  // a shape a full-width bar is not. Everything that shape carries is undone
+  // here, or the bar is cut to sixty pixels with its contents inside the part
+  // nobody sees.
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0.4rem 0.9rem;
+  border: none;
+  border-radius: 10px 10px 0 0;
+  background: $account-colour;
+  border-bottom: 2px solid color.adjust($account-colour, $lightness: -20%);
+  color: vars.$lcars-black;
+  font-family: vars.$font-antonio;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    // The default button darkens itself on hover, which on a block of colour
+    // this size reads as the bar going out rather than as the pointer being on
+    // it.
+    filter: none;
+    outline: none;
+    background: color.adjust($account-colour, $lightness: 12%);
+  }
+}
+
+// The bar for the account being read. Marked rather than dropped, so the list
+// still says where the reader is standing, and unclickable because there is
+// nowhere for it to go.
+.sto-switcher__account-bar--current {
+  background: vars.$lcars-grey-light;
+  cursor: default;
+}
+
+.sto-switcher__account-name {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  // Takes the room it needs before the meta group is given any, so the handle
+  // is the last thing to be shortened rather than the first.
+  flex: 1 1 auto;
+
+  // A long handle shortens rather than wrapping, so every bar in the list is
+  // the same height and the eye can run down them.
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sto-switcher__account-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.sto-switcher__count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+// The word that names the entry being read, on the account bar and on a
+// captain row alike.
+.sto-switcher__here {
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: vars.$lcars-black;
+  color: vars.$lcars-sunflower;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.sto-switcher__pin {
+  font-size: 0.75rem;
+}
+
+.lifetime-icon {
+  color: vars.$lcars-cardinal;
+  font-size: 0.9rem;
+}
+
+// ── Captain rows ─────────────────────────────────────────────────────────────
+
+.sto-switcher__captains {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sto-switcher__captain {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  // As on the account bar: the site's default button shape is undone so the
+  // row can be as tall as its own contents.
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0.3rem 0.9rem;
+  border: none;
+  border-left: 8px solid #555;
+  border-radius: 0;
+  background: vars.$lcars-grey-bg;
+  color: vars.$lcars-white;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    filter: none;
+    outline: none;
+    background: vars.$lcars-card-surface-hover;
+  }
+
+  &:last-child {
+    border-radius: 0 0 10px 10px;
+  }
+
+  // Allegiance colours the spine, matching the captain cards these rows stand
+  // in for. Starfleet's era variants all read as Federation.
+  &.federation,
+  &.starfleet,
+  &.starfleet-2409,
+  &.starfleet-tos,
+  &.starfleet-discovery {
+    border-left-color: vars.$faction-federation;
+  }
+
+  &.klingon,
+  &.klingon-empire {
+    border-left-color: vars.$faction-klingon;
+  }
+
+  &.undecided,
+  &.unknown {
+    border-left-color: vars.$faction-undecided;
+  }
+}
+
+// The row for the captain being read: marked, and unclickable for the same
+// reason the current account bar is.
+.sto-switcher__captain--current {
+  background: vars.$lcars-card-surface;
+  cursor: default;
+}
+
+.sto-switcher__captain-name {
+  flex: 1;
+
+  // A long captain name shortens rather than pushing the faction icon off the
+  // end of the row.
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: vars.$font-antonio;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: $captain-colour;
+}
+
+// The avatar component renders at its natural 100px, which is a portrait
+// rather than a list row. Sizing the host brings it down to the height of the
+// text beside it: the image inside is `max-width: 100%` with an automatic
+// height, so it follows without reaching past the component's own styles.
+.sto-switcher__avatar {
+  display: block;
+  flex: 0 0 auto;
+  width: 2rem;
+  line-height: 0;
+}
+
+.sto-switcher__faction-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
