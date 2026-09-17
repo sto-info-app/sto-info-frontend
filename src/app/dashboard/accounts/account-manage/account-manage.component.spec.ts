@@ -21,7 +21,7 @@ describe('AccountManageComponent', () => {
   const mockAccount: StoAccount = {
     id: 'acc1',
     handle: 'Test#1234',
-    accountCreatedDate: '2023-01-01T00:00:00.000Z',
+    accountCreatedDate: '2023-01-01',
     publiclyVisible: true,
     lifetimeSubscription: false,
     platformId: 'p1',

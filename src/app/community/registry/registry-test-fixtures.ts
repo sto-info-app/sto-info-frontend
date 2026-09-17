@@ -23,7 +23,7 @@ export function buildProfileSummary(
     profilePicture300: 'https://cdn.example.com/pic/square300',
     joinedAt: '2026-01-14T09:21:00.000Z',
     lastActiveAt: '2026-08-01T12:00:00.000Z',
-    playingSince: '2015-03-04T00:00:00.000Z',
+    playingSince: '2015-03-04',
     publicAccountCount: 2,
     publicCharacterCount: 11,
     relationship: null,
@@ -47,7 +47,7 @@ export function buildAccountSummary(
     launcherName: 'Arc',
     accountTypeImageUrl: 'https://cdn.example.com/bg/public',
     lifetimeSubscription: true,
-    accountCreatedDate: '2015-03-04T00:00:00.000Z',
+    accountCreatedDate: '2015-03-04',
     publicCharacterCount: 4,
     ...overrides,
   };
@@ -131,7 +131,7 @@ export function buildCharacter(
     middleName: null,
     lastName: 'Sorek',
     biography: 'A long and storied career.',
-    createdDate: '2020-06-01T00:00:00.000Z',
+    createdDate: '2020-06-01',
     customSections: [],
     ...overrides,
   };

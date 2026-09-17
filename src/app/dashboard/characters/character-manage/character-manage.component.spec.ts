@@ -66,7 +66,7 @@ describe('CharacterManageComponent', () => {
     recruitTypeId: 'std',
     speciesId: 'human',
     level: 65,
-    createdDate: '2023-01-01T00:00:00.000Z',
+    createdDate: '2023-01-01',
   } as Character;
 
   beforeEach(async () => {

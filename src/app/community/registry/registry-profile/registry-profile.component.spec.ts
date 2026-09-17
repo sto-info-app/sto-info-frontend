@@ -762,12 +762,12 @@ describe('RegistryProfileComponent', () => {
           {
             handle: 'Archer',
             slug: 'archer',
-            accountCreatedDate: '2015-01-01T00:00:00.000Z',
+            accountCreatedDate: '2015-01-01',
           },
           {
             handle: 'Sisko',
             slug: 'sisko',
-            accountCreatedDate: '2010-01-01T00:00:00.000Z',
+            accountCreatedDate: '2010-01-01',
           },
         ]);
 

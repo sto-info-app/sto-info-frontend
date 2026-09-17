@@ -25,7 +25,7 @@ describe('StoAccountService', () => {
     username: 'testuser',
     email: 'test@example.com',
     notes: 'Some notes',
-    accountCreatedDate: '2023-01-01T00:00:00Z',
+    accountCreatedDate: '2023-01-01',
     publiclyVisible: true,
     lifetimeSubscription: false,
     createdAt: '2023-01-01T00:00:00Z',

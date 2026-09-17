@@ -48,7 +48,7 @@ describe('AccountDialogComponent', () => {
     username: 'user',
     email: 'test@test.com',
     notes: 'notes',
-    accountCreatedDate: '2023-01-01T00:00:00.000Z',
+    accountCreatedDate: '2023-01-01',
     publiclyVisible: true,
     lifetimeSubscription: true,
     platformId: 'p1',
