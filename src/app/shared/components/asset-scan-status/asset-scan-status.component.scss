@@ -1,0 +1,121 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+// A left-hand spine carrying the state's colour, the same anatomy the
+// notification card uses, so a strip that changes colour four times during one
+// upload changes in a way the reader has already learned.
+.asset-scan-status {
+  @include mixins.lcars-card;
+
+  display: block;
+  padding: 0.75rem 1rem;
+  border-left: 6px solid vars.$lcars-grey-light;
+
+  // Nothing here is a hover target, so the card's lift would promise an action
+  // the strip does not have.
+  &:hover {
+    transform: none;
+    background: vars.$lcars-grey-bg;
+  }
+}
+
+.asset-scan-status__heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.asset-scan-status__label {
+  font-family: vars.$font-antonio;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// The filename is something somebody chose and may be long; it wraps rather
+// than pushing the strip sideways.
+.asset-scan-status__file {
+  font-size: 0.85rem;
+  color: vars.$lcars-grey-light;
+  overflow-wrap: anywhere;
+}
+
+.asset-scan-status__description {
+  display: block;
+  max-width: 70ch;
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  color: vars.$lcars-grey-light;
+}
+
+// The moving bar under a state that is still going. Every state also carries a
+// label, an icon and a colour, so the animation is the fourth way of saying so
+// rather than the only one.
+.asset-scan-status__progress {
+  display: block;
+  height: 4px;
+  margin-top: 0.6rem;
+  overflow: hidden;
+  background: rgb(255 255 255 / 10%);
+  border-radius: 2px;
+
+  &::after {
+    display: block;
+    width: 35%;
+    height: 100%;
+    content: '';
+    background: currentcolor;
+    animation: asset-scan-sweep 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes asset-scan-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(340%);
+  }
+}
+
+// Each state colours its spine and its icon. The body text stays grey: the
+// colour is there to be glanced at, not read through.
+.asset-scan-status--uploading {
+  border-left-color: vars.$lcars-perano;
+  color: vars.$lcars-perano;
+}
+
+.asset-scan-status--awaiting {
+  border-left-color: vars.$lcars-sunflower;
+  color: vars.$lcars-sunflower;
+}
+
+.asset-scan-status--scanning {
+  border-left-color: vars.$lcars-sky;
+  color: vars.$lcars-sky;
+}
+
+.asset-scan-status--available {
+  border-left-color: vars.$lcars-green;
+  color: vars.$lcars-green;
+}
+
+.asset-scan-status--rejected {
+  border-left-color: vars.$lcars-red;
+  color: vars.$lcars-red;
+}
+
+// A reader who has asked for less movement still gets the bar, because it says
+// the upload has not finished; it simply stops sweeping.
+@media (prefers-reduced-motion: reduce) {
+  .asset-scan-status__progress::after {
+    width: 100%;
+    animation: none;
+  }
+}

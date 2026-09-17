@@ -1,0 +1,23 @@
+<output
+  class="asset-scan-status"
+  [ngClass]="'asset-scan-status--' + presentation.modifier">
+  <span class="asset-scan-status__heading">
+    <i
+      [class]="presentation.iconClass"
+      aria-hidden="true"></i>
+    <span class="asset-scan-status__label">{{ presentation.label }}</span>
+    @if (fileName) {
+      <span class="asset-scan-status__file">{{ fileName }}</span>
+    }
+  </span>
+
+  <span class="asset-scan-status__description">{{
+    presentation.description
+  }}</span>
+
+  @if (presentation.isInProgress) {
+    <span
+      class="asset-scan-status__progress"
+      aria-hidden="true"></span>
+  }
+</output>
