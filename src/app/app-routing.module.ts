@@ -278,6 +278,20 @@ export const routes: Routes = [
   },
 
   // *****************************************
+  // * Fleet Community
+  // The page answers whether the feature is switched on, so it is not
+  // behind the readiness guard: a visitor who followed a link here is
+  // told why it is empty rather than being redirected away from it.
+  {
+    path: APP_ROUTES.FLEETS,
+    loadComponent: () =>
+      import('./fleet/fleet-home/fleet-home.component').then(
+        m => m.FleetHomeComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.FLEETS },
+  },
+
+  // *****************************************
   // * News
   {
     path: APP_ROUTES.NEWS,

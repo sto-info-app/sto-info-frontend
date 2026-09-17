@@ -1,0 +1,23 @@
+@if (state$ | async; as state) {
+  <app-fleet-page-shell
+    heading="Fleets"
+    loadingText="Reading Fleet status"
+    [isLoading]="state === 'LOADING'">
+    @if (state === 'OFFLINE' || state === 'DISABLED') {
+      <app-feature-unavailable
+        [featureName]="featureName"
+        [reason]="reasonFor(state)" />
+    } @else if (state === 'EMPTY') {
+      <div class="lcars-text-bar">
+        <span>Fleet Directory</span>
+      </div>
+
+      <p class="fleet-community-empty">
+        No Fleets have been registered yet. When they have, this is where they
+        will be listed — each one showing the Community that registered it, the
+        platform it is on and when its roster was last seen, so that two Fleets
+        sharing a name can be told apart.
+      </p>
+    }
+  </app-fleet-page-shell>
+}

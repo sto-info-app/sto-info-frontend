@@ -2,6 +2,7 @@ export const ROOT_ROUTES = {
   ABOUT: 'about',
   COMMUNITY: 'community',
   DASHBOARD: 'dashboard',
+  FLEETS: 'fleets',
   HELP: 'help',
   NEWS: 'news',
   ADMIN: 'admin',
@@ -73,6 +74,9 @@ export const APP_ROUTES = {
 
   // Community - Friends and blocking (authenticated)
   COMMUNITY_FRIENDS: ROOT_ROUTES.COMMUNITY + '/friends',
+
+  // Fleet Community
+  FLEETS: ROOT_ROUTES.FLEETS,
 
   // News
   NEWS: ROOT_ROUTES.NEWS,
@@ -221,6 +225,9 @@ export const APP_ROUTE_TITLES = {
 
   // Community - Friends and blocking (authenticated)
   COMMUNITY_FRIENDS: 'Friends',
+
+  // Fleet Community
+  FLEETS: 'Fleets',
 
   // News
   NEWS: 'News',
