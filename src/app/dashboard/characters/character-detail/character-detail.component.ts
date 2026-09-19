@@ -18,6 +18,7 @@ import { CharacterAdmiraltyComponent } from 'src/app/dashboard/character-admiral
 import { CharacterCommendationsComponent } from 'src/app/dashboard/character-commendations/character-commendations.component';
 import { CharacterReputationsComponent } from 'src/app/dashboard/character-reputations/character-reputations.component';
 import { CharacterSpecializationComponent } from 'src/app/dashboard/character-specialization/character-specialization.component';
+import { StoSwitcherButtonComponent } from 'src/app/dashboard/switcher/sto-switcher-button.component';
 import { CustomTrackingOwnerPanelComponent } from 'src/app/dashboard/custom-tracking/custom-tracking-owner-panel/custom-tracking-owner-panel.component';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
@@ -66,6 +67,7 @@ export type CharacterTab =
     CharacterRdComponent,
     CharacterSpecializationComponent,
     CustomTrackingOwnerPanelComponent,
+    StoSwitcherButtonComponent,
   ],
 })
 export class CharacterDetailComponent

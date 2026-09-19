@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 
 import { catchError, Observable, shareReplay, throwError } from 'rxjs';
 
+import { SwitcherAccount } from '../models/account-switcher.model';
 import {
   CreateStoAccountRequest,
   Launcher,
@@ -65,6 +66,29 @@ export class StoAccountService {
       ...httpOptions,
       params,
     });
+  }
+
+  /**
+   * Fetches every account the user owns with its captains, reduced to what the
+   * quick switcher draws.
+   *
+   * Not cached. The switcher is opened to act on what is there now — a captain
+   * created a moment ago, a pin just moved, an account just renamed — and a
+   * held copy would offer a list the dashboard behind it has already left
+   * behind. It is one small request, so it is made each time.
+   *
+   * @returns An observable of the user's accounts, each with its captains.
+   */
+  getSwitcherList(): Observable<SwitcherAccount[]> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+
+    return this._http.get<SwitcherAccount[]>(
+      API_URLS.STO_ACCOUNT_SWITCHER,
+      httpOptions,
+    );
   }
 
   /**

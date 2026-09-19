@@ -38,6 +38,31 @@ const PC_LAUNCHER_CLASSES: Record<string, string> = {
 };
 
 /**
+ * Font Awesome classes for the platforms an account can sit on, keyed by the
+ * lower-cased platform name.
+ *
+ * `fak` entries come from the site's own icon kit rather than a Font Awesome
+ * family, which is why Arc and Epic are prefixed differently from the rest.
+ */
+const PLATFORM_ICON_CLASSES: Record<string, string> = {
+  arc: 'fak fa-arc-games',
+  epic: 'fak fa-epic-games',
+  steam: 'fab fa-steam',
+  windows: 'fab fa-windows',
+  pc: 'fab fa-windows',
+  playstation: 'fab fa-playstation',
+  ps: 'fab fa-playstation',
+  xbox: 'fab fa-xbox',
+};
+
+/** Font Awesome classes for the launchers a PC account can be played through. */
+const LAUNCHER_ICON_CLASSES: Record<string, string> = {
+  arc: 'fak fa-arc-games',
+  epic: 'fak fa-epic-games',
+  steam: 'fab fa-steam',
+};
+
+/**
  * Maps a platform name onto its account-card theme class.
  *
  * @param platformName - The platform's display name.
@@ -93,6 +118,32 @@ export function getAccountBgImagePath(
     PLATFORM_BG_IMAGES[platformClass] ??
     `${ACCOUNT_BG_ROOT}/account_type_default.jpg`
   );
+}
+
+/**
+ * Maps a platform name onto its Font Awesome icon class.
+ *
+ * @param platformName - The platform's display name.
+ * @returns The icon class, or null when the platform has no icon.
+ */
+export function getPlatformIconClass(
+  platformName?: string | null,
+): string | null {
+  const name = platformName?.trim().toLowerCase() ?? '';
+  return PLATFORM_ICON_CLASSES[name] ?? null;
+}
+
+/**
+ * Maps a launcher name onto its Font Awesome icon class.
+ *
+ * @param launcherName - The launcher's display name.
+ * @returns The icon class, or null when the launcher has no icon.
+ */
+export function getLauncherIconClass(
+  launcherName?: string | null,
+): string | null {
+  const name = launcherName?.trim().toLowerCase() ?? '';
+  return LAUNCHER_ICON_CLASSES[name] ?? null;
 }
 
 /**

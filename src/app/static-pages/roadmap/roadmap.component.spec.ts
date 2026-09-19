@@ -24,11 +24,11 @@ describe('RoadmapComponent', () => {
     expect(component.complete.length).toBeGreaterThan(0);
   });
 
-  it('should initialise all sections as expanded', () => {
+  it('should initialise sections using the configured expansion defaults', () => {
     expect(component.sectionExpanded.complete).toBe(true);
     expect(component.sectionExpanded.inProgress).toBe(true);
     expect(component.sectionExpanded.planned).toBe(true);
-    expect(component.sectionExpanded.futureIdeas).toBe(true);
+    expect(component.sectionExpanded.futureIdeas).toBe(false);
   });
 
   it('should toggle section expansion state', () => {

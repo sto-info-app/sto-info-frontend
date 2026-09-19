@@ -1,34 +1,35 @@
 <div
   class="wrap gap"
-  id="lcars-body-container">
+  id="lcars-body-container"
+>
   <app-side-bar
     [isLoggedIn]="isLoggedIn"
-    [isStorytimeOffered]="isStorytimeOffered"></app-side-bar>
+    [isStorytimeOffered]="isStorytimeOffered"
+  ></app-side-bar>
 
   <div class="right-frame">
     <app-main-content-bar-panel></app-main-content-bar-panel>
     <main>
       <app-banner></app-banner>
-      @if (
-        (!hasActiveRoute && isServiceInterruptionRoute) ||
-        (showBackendWarning$ | async)
-      ) {
+      @if ((!hasActiveRoute && isServiceInterruptionRoute)
+  || (showBackendWarning$ | async)) {
         <app-service-interruption-content></app-service-interruption-content>
       } @else {
         <router-outlet
           (activate)="onRouteActivate()"
-          (deactivate)="onRouteDeactivate()"></router-outlet>
+          (deactivate)="onRouteDeactivate()"
+        ></router-outlet>
       }
     </main>
 
     <footer>
       <div
         id="footer-inside"
-        aria-live="polite">
+        aria-live="polite"
+      >
         <div id="footer-text">
           @defer (on viewport) {
-            <app-footer
-              [isStorytimeOffered]="isStorytimeOffered"></app-footer>
+            <app-footer [isStorytimeOffered]="isStorytimeOffered"></app-footer>
           } @placeholder {
             <span class="footer-placeholder">Loading footer…</span>
           }
@@ -36,14 +37,18 @@
       </div>
       <div id="footer-panel-container">
         <div id="footer-panel">
-          @if (frontendAppVersion) {
-            FV-{{ frontendAppVersion }}
-          }
-          @if (frontendAppVersion && backendAppVersion) {
-            <br />
-          }
-          @if (backendAppVersion) {
-            BV-{{ backendAppVersion }}
+          @if (frontendAppVersion === backendAppVersion) {
+            v{{ frontendAppVersion }}
+          } @else {
+            @if (frontendAppVersion) {
+              FV-{{ frontendAppVersion }}
+            }
+            @if (frontendAppVersion && backendAppVersion) {
+              <br />
+            }
+            @if (backendAppVersion) {
+              BV-{{ backendAppVersion }}
+            }
           }
         </div>
       </div>

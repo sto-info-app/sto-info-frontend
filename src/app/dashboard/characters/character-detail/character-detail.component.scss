@@ -41,10 +41,23 @@
   // identity header and stays put as the tabs change beneath it.
   .header-actions {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 
     .cta-icon {
       @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);
 
+      font-size: 1.4rem;
+    }
+
+    // The switcher is a component of its own, so the rule above stops at its
+    // boundary and cannot size the button inside it — which left it noticeably
+    // smaller than the pin beside it. Its host element is part of this
+    // template, and font-size inherits through the boundary, so sizing the
+    // host sizes the control within it.
+    app-sto-switcher-button {
+      display: inline-flex;
       font-size: 1.4rem;
     }
 
