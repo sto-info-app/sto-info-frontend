@@ -8,6 +8,7 @@ import {
 } from '@angular/material/dialog';
 import { ImageCropperComponent } from 'ngx-image-cropper';
 import { ImageCropperBaseComponent } from 'src/app/shared/base/image-cropper-base.component';
+import { AssetScanStatusComponent } from 'src/app/shared/components/asset-scan-status/asset-scan-status.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -59,6 +60,7 @@ export interface StorytimeImageCropData {
     MatDialogModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    AssetScanStatusComponent,
     LcarsWarningMessageComponent,
   ],
 })
@@ -115,6 +117,27 @@ export class StorytimeImageCropDialogComponent extends ImageCropperBaseComponent
   /**
    * Sends the crop and its description, closing with the updated work.
    */
+  /**
+   * Fetches the work and closes with it, now that the picture is in use.
+   *
+   * The editor behind expects the work rather than a signal, so that it can
+   * show the picture the server actually stored instead of guessing at the
+   * address Cloudflare will serve it from. That address only came into
+   * existence when the scan cleared, so it is fetched here rather than
+   * taken from the upload's response.
+   */
+  protected override closeWithPublished(): void {
+    this._imageService
+      .reload(this.data.slot, this.data.targetId)
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe({
+        next: updated => this._dialogRef.close(updated),
+        // The picture is published either way, so the editor is told to
+        // reload rather than told the upload failed.
+        error: () => this._dialogRef.close(true),
+      });
+  }
+
   onUploadImageClick(): void {
     if (!this.validateCroppedImage()) {
       return;
@@ -138,13 +161,10 @@ export class StorytimeImageCropDialogComponent extends ImageCropperBaseComponent
       )
       .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe({
-        next: updated => {
-          this.isSubmitting = false;
-          // Closed with the work rather than with `true`, so the editor behind
-          // shows the picture the server actually stored instead of guessing
-          // at the address Cloudflare will serve it from.
-          this._dialogRef.close(updated);
-        },
+        // The work has not changed yet. The picture is held privately and
+        // scanned first, and this dialogue reports where it has got to
+        // until it is in use or was refused — FC-012.
+        next: accepted => this.watchUpload(accepted),
         error: (error: { status: number; error?: { message?: string } }) => {
           this.isSubmitting = false;
           // The server names the specific problem — a crop below the size the

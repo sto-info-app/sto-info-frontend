@@ -139,6 +139,42 @@ describe('StorytimeImageService', () => {
     });
   });
 
+  describe('reloading', () => {
+    // The address Cloudflare gave the picture came into existence when the
+    // scan cleared, so the work is fetched rather than guessed at.
+    it('fetches the work the slot belongs to', async () => {
+      const reloaded = firstValueFrom(
+        service.reload(StorytimeImageSlot.STORY_PROFILE, TARGET_ID),
+      );
+
+      const request = httpMock.expectOne(
+        `${API_URLS.STORYTIME_MANAGE_STORIES}/${TARGET_ID}`,
+      );
+
+      expect(request.request.method).toBe('GET');
+      expect(request.request.headers.get('Authorization')).toBe(AUTH_HEADER);
+
+      request.flush({ id: TARGET_ID, profileImageId: 'cf-image-1' });
+
+      await expect(reloaded).resolves.toEqual({
+        id: TARGET_ID,
+        profileImageId: 'cf-image-1',
+      });
+    });
+
+    it('asks the collection the slot lives in', async () => {
+      const reloaded = firstValueFrom(
+        service.reload(StorytimeImageSlot.CHARACTER_PORTRAIT, TARGET_ID),
+      );
+
+      httpMock
+        .expectOne(`${API_URLS.STORYTIME_MANAGE_CHARACTERS}/${TARGET_ID}`)
+        .flush({ id: TARGET_ID });
+
+      await expect(reloaded).resolves.toEqual({ id: TARGET_ID });
+    });
+  });
+
   // Every artwork change is somebody's own work being altered, so a request
   // with no token is refused here rather than sent and turned away.
   describe('without a token', () => {
@@ -160,6 +196,10 @@ describe('StorytimeImageService', () => {
       [
         'remove',
         () => service.remove(StorytimeImageSlot.STORY_BANNER, TARGET_ID),
+      ],
+      [
+        'reload',
+        () => service.reload(StorytimeImageSlot.STORY_BANNER, TARGET_ID),
       ],
     ])('refuses %s', async (_name, act) => {
       await expect(firstValueFrom(act())).rejects.toThrow('No token found');

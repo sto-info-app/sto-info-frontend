@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { AcceptedAsset } from 'src/app/shared/services/asset-scan.service';
 import {
   STORYTIME_IMAGE_SPECS,
   StorytimeImageSlot,
@@ -29,9 +30,12 @@ const SLOT_COLLECTIONS: Record<StorytimeImageSlot, string> = {
  * Setting and removing the artwork on Storytime works.
  *
  * One service for every slot, because they differ only in where they post to.
- * Each call returns the work as the server now holds it, so the editor that
- * asked can show the new picture without guessing at the URL Cloudflare will
- * serve it from.
+ *
+ * **An upload no longer answers with the work.** Since FC-012 a picture is
+ * held privately and scanned before anything points at it, so the answer is
+ * an asset to ask about; the work is fetched again once the scan clears,
+ * which is what {@link reload} is for. Removal still answers with the work,
+ * because taking a picture away happens immediately.
  */
 @Injectable({
   providedIn: 'root',
@@ -50,14 +54,14 @@ export class StorytimeImageService {
    * @param targetId - The work the artwork belongs to.
    * @param image - The cropped image.
    * @param altText - What the image shows.
-   * @returns An observable of the work, carrying its new artwork.
+   * @returns An observable of the upload to ask about.
    */
-  upload<T>(
+  upload(
     slot: StorytimeImageSlot,
     targetId: string,
     image: Blob,
     altText: string,
-  ): Observable<T> {
+  ): Observable<AcceptedAsset> {
     const spec = STORYTIME_IMAGE_SPECS[slot];
     const formData = new FormData();
 
@@ -65,7 +69,28 @@ export class StorytimeImageService {
     formData.append('altText', altText);
 
     return this.authenticated(options =>
-      this._http.post<T>(this.urlFor(slot, targetId), formData, options),
+      this._http.post<AcceptedAsset>(
+        this.urlFor(slot, targetId),
+        formData,
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Fetches the work as the server now holds it.
+   *
+   * Asked once a scanner has cleared an upload, because that is the moment
+   * the work acquired the picture and nothing on this side knows what
+   * address Cloudflare gave it.
+   *
+   * @param slot - Which slot was set, which says where the work lives.
+   * @param targetId - The work.
+   * @returns An observable of the work.
+   */
+  reload<T>(slot: StorytimeImageSlot, targetId: string): Observable<T> {
+    return this.authenticated(options =>
+      this._http.get<T>(this.workUrlFor(slot, targetId), options),
     );
   }
 
@@ -90,7 +115,18 @@ export class StorytimeImageService {
    * @returns The endpoint to call.
    */
   private urlFor(slot: StorytimeImageSlot, targetId: string): string {
-    return `${SLOT_COLLECTIONS[slot]}/${targetId}/${STORYTIME_IMAGE_SPECS[slot].endpoint}`;
+    return `${this.workUrlFor(slot, targetId)}/${STORYTIME_IMAGE_SPECS[slot].endpoint}`;
+  }
+
+  /**
+   * Builds the address of the work itself.
+   *
+   * @param slot - The slot, which says which collection the work is in.
+   * @param targetId - The work.
+   * @returns The endpoint to call.
+   */
+  private workUrlFor(slot: StorytimeImageSlot, targetId: string): string {
+    return `${SLOT_COLLECTIONS[slot]}/${targetId}`;
   }
 
   /**
