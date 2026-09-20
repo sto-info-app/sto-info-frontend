@@ -7,6 +7,8 @@ import {
 import { ImageCropperComponent } from 'ngx-image-cropper';
 import { User } from 'src/app/dashboard/models/user.model';
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
+import { AssetScanStatusComponent } from 'src/app/shared/components/asset-scan-status/asset-scan-status.component';
+import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { ImageCropperBaseComponent } from 'src/app/shared/base/image-cropper-base.component';
@@ -23,6 +25,8 @@ import { EditPersonalDetailsComponent } from '../edit-personal-details/edit-pers
     MatDialogModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    AssetScanStatusComponent,
+    LcarsWarningMessageComponent,
   ],
 })
 export class ProfilePicComponent extends ImageCropperBaseComponent {
@@ -53,10 +57,10 @@ export class ProfilePicComponent extends ImageCropperBaseComponent {
         .updateProfilePic(formData)
         .pipe(observeInZone(this._ngZone, this._cdr))
         .subscribe({
-          next: () => {
-            this.isSubmitting = false;
-            this._dialogRef?.close(true);
-          },
+          // The picture is not on the account yet. It is held privately
+          // and scanned first, and this dialogue stays open saying so
+          // until it is in use or was refused — FC-012.
+          next: accepted => this.watchUpload(accepted),
           error: error => {
             this.handleHttpError(error);
             this.isSubmitting = false;

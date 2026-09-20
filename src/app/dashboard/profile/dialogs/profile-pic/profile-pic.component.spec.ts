@@ -15,6 +15,7 @@ import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { of, throwError } from 'rxjs';
 
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
+import { AssetScanService } from 'src/app/shared/services/asset-scan.service';
 import {
   MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
   MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT,
@@ -27,6 +28,7 @@ describe('ProfilePicComponent', () => {
   let mockDashboardService: jest.Mocked<DashboardService>;
   let mockDialogRef: jest.Mocked<MatDialogRef<ProfilePicComponent>>;
   let mockSanitizer: jest.Mocked<DomSanitizer>;
+  let mockAssetScan: jest.Mocked<AssetScanService>;
 
   beforeEach(async () => {
     mockDashboardService = {
@@ -41,6 +43,11 @@ describe('ProfilePicComponent', () => {
       bypassSecurityTrustUrl: jest.fn().mockImplementation(val => val),
     } as unknown as jest.Mocked<DomSanitizer>;
 
+    mockAssetScan = {
+      watch: jest.fn(),
+      status: jest.fn(),
+    } as unknown as jest.Mocked<AssetScanService>;
+
     await TestBed.configureTestingModule({
       imports: [ProfilePicComponent, MatDialogModule, NoopAnimationsModule],
       providers: [
@@ -48,6 +55,7 @@ describe('ProfilePicComponent', () => {
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: DomSanitizer, useValue: mockSanitizer },
+        { provide: AssetScanService, useValue: mockAssetScan },
       ],
     }).compileComponents();
 
@@ -181,16 +189,74 @@ describe('ProfilePicComponent', () => {
       );
     });
 
-    it('should upload image successfully', () => {
+    it('closes once the scanner has cleared the picture', () => {
       component.croppedImageBlob = new Blob(['test'], { type: 'image/png' });
       mockDashboardService.updateProfilePic.mockReturnValue(
-        of({ affected: 1, userProfileData: null }),
+        of({ assetId: 'asset-1', status: 'AWAITING_SCAN' as const }),
+      );
+      mockAssetScan.watch.mockReturnValue(
+        of({ state: 'AVAILABLE' as const, settled: true, gaveUp: false }),
       );
 
       component.onUploadImageClick();
 
       expect(mockDashboardService.updateProfilePic).toHaveBeenCalled();
-      expect(mockDialogRef.close).toHaveBeenCalled();
+      expect(mockAssetScan.watch).toHaveBeenCalledWith(
+        'asset-1',
+        'AWAITING_SCAN',
+      );
+      expect(mockDialogRef.close).toHaveBeenCalledWith(true);
+    });
+
+    // The account keeps the picture it had, so the dialogue stays open
+    // saying what happened rather than closing as though it worked.
+    it('stays open, showing the refusal, when the picture is rejected', () => {
+      component.croppedImageBlob = new Blob(['test'], { type: 'image/png' });
+      mockDashboardService.updateProfilePic.mockReturnValue(
+        of({ assetId: 'asset-1', status: 'SCANNING' as const }),
+      );
+      mockAssetScan.watch.mockReturnValue(
+        of({ state: 'REJECTED' as const, settled: true, gaveUp: false }),
+      );
+
+      component.onUploadImageClick();
+
+      expect(component.scanState).toBe('REJECTED');
+      expect(component.isSubmitting).toBe(false);
+      expect(mockDialogRef.close).not.toHaveBeenCalled();
+    });
+
+    // Not a failure: the scan will finish and the picture will appear.
+    it('says so when the check is taking longer than usual', () => {
+      component.croppedImageBlob = new Blob(['test'], { type: 'image/png' });
+      mockDashboardService.updateProfilePic.mockReturnValue(
+        of({ assetId: 'asset-1', status: 'SCANNING' as const }),
+      );
+      mockAssetScan.watch.mockReturnValue(
+        of({ state: 'SCANNING' as const, settled: false, gaveUp: true }),
+      );
+
+      component.onUploadImageClick();
+
+      expect(component.scanTookTooLong).toBe(true);
+      expect(component.isSubmitting).toBe(false);
+      expect(mockDialogRef.close).not.toHaveBeenCalled();
+    });
+
+    it('keeps waiting while the scan is still running', () => {
+      component.croppedImageBlob = new Blob(['test'], { type: 'image/png' });
+      mockDashboardService.updateProfilePic.mockReturnValue(
+        of({ assetId: 'asset-1', status: 'AWAITING_SCAN' as const }),
+      );
+      mockAssetScan.watch.mockReturnValue(
+        of({ state: 'SCANNING' as const, settled: false, gaveUp: false }),
+      );
+
+      component.onUploadImageClick();
+
+      expect(component.scanState).toBe('SCANNING');
+      expect(component.isSubmitting).toBe(true);
+      expect(mockDialogRef.close).not.toHaveBeenCalled();
     });
 
     it('should handle upload error 400', () => {

@@ -13,6 +13,7 @@ import {
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { AcceptedAsset } from 'src/app/shared/services/asset-scan.service';
 
 @Injectable({
   providedIn: 'root',
@@ -71,9 +72,7 @@ export class DashboardService {
       );
   }
 
-  updateProfilePic(
-    profilePicForm: FormData,
-  ): Observable<UserProfileUpdateResult> {
+  updateProfilePic(profilePicForm: FormData): Observable<AcceptedAsset> {
     const httpOptions = this._authService.getHttpOptionsWithAccessToken();
 
     // Remove the Content-Type header if it exists
@@ -86,7 +85,7 @@ export class DashboardService {
     }
 
     return this._http
-      .post<UserProfileUpdateResult>(
+      .post<AcceptedAsset>(
         API_URLS.UPDATE_USER_PROFILE_PIC,
         profilePicForm,
         httpOptions,

@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { AcceptedAsset } from 'src/app/shared/services/asset-scan.service';
 import {
   CharacterSortBy,
   CharacterSortOrder,
@@ -148,7 +149,7 @@ export class CharacterService {
   updateCharacterProfilePic(
     characterId: string,
     profilePicForm: FormData,
-  ): Observable<Character> {
+  ): Observable<AcceptedAsset> {
     const httpOptions = this._authService.getHttpOptionsWithAccessToken();
 
     // Remove the Content-Type header if it exists
@@ -160,7 +161,7 @@ export class CharacterService {
       return throwError(() => new Error('No token found'));
     }
 
-    return this._http.post<Character>(
+    return this._http.post<AcceptedAsset>(
       `${API_URLS.CHARACTER}/${characterId}/profile-image`,
       profilePicForm,
       httpOptions,

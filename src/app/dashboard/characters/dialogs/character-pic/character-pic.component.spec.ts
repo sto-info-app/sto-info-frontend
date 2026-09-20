@@ -12,6 +12,7 @@ import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { of, throwError } from 'rxjs';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
+import { AssetScanService } from 'src/app/shared/services/asset-scan.service';
 import {
   MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
   MSG_ERROR_HTTP_STATUS_400_DISPLAY_TEXT,
@@ -38,6 +39,7 @@ describe('CharacterPicComponent', () => {
     Pick<MatDialogRef<CharacterPicComponent>, 'close'>
   >;
   let mockSanitizer: jest.Mocked<Pick<DomSanitizer, 'bypassSecurityTrustUrl'>>;
+  let mockAssetScan: jest.Mocked<Pick<AssetScanService, 'watch'>>;
 
   const mockCharacter = {
     id: 'char1',
@@ -46,7 +48,17 @@ describe('CharacterPicComponent', () => {
 
   beforeEach(async () => {
     mockCharacterService = {
-      updateCharacterProfilePic: jest.fn().mockReturnValue(of({})),
+      updateCharacterProfilePic: jest
+        .fn()
+        .mockReturnValue(of({ assetId: 'asset-1', status: 'SCANNING' })),
+    };
+
+    mockAssetScan = {
+      watch: jest
+        .fn()
+        .mockReturnValue(
+          of({ state: 'AVAILABLE', settled: true, gaveUp: false }),
+        ),
     };
 
     mockDialogRef = {
@@ -66,6 +78,7 @@ describe('CharacterPicComponent', () => {
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: { character: mockCharacter } },
         { provide: DomSanitizer, useValue: mockSanitizer },
+        { provide: AssetScanService, useValue: mockAssetScan },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
@@ -237,14 +250,32 @@ describe('CharacterPicComponent', () => {
       );
     });
 
-    it('should upload valid png blob', () => {
+    it('closes once the scanner has cleared the portrait', () => {
       const blob = new Blob(['data'], { type: 'image/png' });
       Object.defineProperty(blob, 'size', { value: 100 });
       component.croppedImageBlob = blob;
 
       component.onUploadImageClick();
+
       expect(mockCharacterService.updateCharacterProfilePic).toHaveBeenCalled();
+      expect(mockAssetScan.watch).toHaveBeenCalledWith('asset-1', 'SCANNING');
       expect(mockDialogRef.close).toHaveBeenCalledWith(true);
+    });
+
+    // The Character keeps the portrait it had, so the dialogue says what
+    // happened rather than closing as though the upload worked.
+    it('stays open, showing the refusal, when the portrait is rejected', () => {
+      const blob = new Blob(['data'], { type: 'image/png' });
+      Object.defineProperty(blob, 'size', { value: 100 });
+      component.croppedImageBlob = blob;
+      mockAssetScan.watch.mockReturnValue(
+        of({ state: 'REJECTED', settled: true, gaveUp: false }),
+      );
+
+      component.onUploadImageClick();
+
+      expect(component.scanState).toBe('REJECTED');
+      expect(mockDialogRef.close).not.toHaveBeenCalled();
     });
 
     it('should handle blob empty size', () => {
