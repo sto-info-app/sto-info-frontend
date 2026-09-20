@@ -34,6 +34,12 @@ export const API_URLS = {
   UPDATE_USER_PROFILE: apiUrl + '/user/update-profile',
   UPDATE_USER_PROFILE_PIC: apiUrl + '/user/update-profile-pic',
 
+  // Uploads. Every picture the site accepts is scanned before it is
+  // published, so a page that has just sent one asks this until it is told
+  // the file is in use or was refused.
+  FILE_ASSET_STATUS: (assetId: string): string =>
+    apiUrl + '/file-assets/' + assetId + '/status',
+
   // STO Account
   STO_ACCOUNT: apiUrl + '/account',
   // Every account the user owns with its captains, reduced to what the quick
