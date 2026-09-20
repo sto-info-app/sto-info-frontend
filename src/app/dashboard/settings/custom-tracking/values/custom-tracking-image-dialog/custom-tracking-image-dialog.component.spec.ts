@@ -9,6 +9,7 @@ import {
   CustomTrackingTargetScope,
 } from 'src/app/models/custom-tracking.models';
 import { MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT } from 'src/app/shared/constants/error-messages.constants';
+import { AssetScanService } from 'src/app/shared/services/asset-scan.service';
 
 import { CustomTrackingService } from '../../custom-tracking.service';
 import { aConfiguration } from 'src/app/shared/custom-tracking/custom-tracking.testing';
@@ -29,6 +30,8 @@ describe('CustomTrackingImageDialogComponent', () => {
   let component: CustomTrackingImageDialogComponent;
   let dialogRef: { close: jest.Mock };
   let uploadImage: jest.Mock;
+  let findImage: jest.Mock;
+  let assetScan: { watch: jest.Mock };
 
   const render = (currentAlt: string | null = null): HTMLElement => {
     const data: CustomTrackingImageDialogData = {
@@ -63,13 +66,27 @@ describe('CustomTrackingImageDialogComponent', () => {
 
   beforeEach(() => {
     dialogRef = { close: jest.fn() };
-    uploadImage = jest.fn().mockReturnValue(of(stored));
+    uploadImage = jest
+      .fn()
+      .mockReturnValue(of({ assetId: 'asset-1', status: 'SCANNING' }));
+    findImage = jest.fn().mockReturnValue(of(stored));
+    assetScan = {
+      watch: jest
+        .fn()
+        .mockReturnValue(
+          of({ state: 'AVAILABLE', settled: true, gaveUp: false }),
+        ),
+    };
 
     TestBed.configureTestingModule({
       imports: [CustomTrackingImageDialogComponent, NoopAnimationsModule],
       providers: [
         { provide: MatDialogRef, useValue: dialogRef },
-        { provide: CustomTrackingService, useValue: { uploadImage } },
+        {
+          provide: CustomTrackingService,
+          useValue: { uploadImage, findImage },
+        },
+        { provide: AssetScanService, useValue: assetScan },
         { provide: MAT_DIALOG_DATA, useValue: {} },
       ],
       schemas: [NO_ERRORS_SCHEMA],
@@ -137,14 +154,58 @@ describe('CustomTrackingImageDialogComponent', () => {
   });
 
   // Closed with what the server stored rather than with `true`, so the editor
-  // behind shows the picture that actually landed.
-  it('closes with the picture the server stored', () => {
+  // behind shows the picture that actually landed. The answer row is written
+  // at publication, so it is read after the scan rather than returned by the
+  // upload — FC-012.
+  it('closes with the picture the server stored, once it is in use', () => {
     render();
     withCrop(300, 300);
     component.altText = 'A ship';
     component.onUploadImageClick();
 
+    expect(assetScan.watch).toHaveBeenCalledWith('asset-1', 'SCANNING');
+    expect(findImage).toHaveBeenCalledWith(
+      'field-1',
+      CustomTrackingTargetScope.ACCOUNT,
+      'target-1',
+    );
     expect(dialogRef.close).toHaveBeenCalledWith(stored);
+  });
+
+  it('closes for a reload when the stored picture cannot be read', () => {
+    render();
+    withCrop(300, 300);
+    component.altText = 'A ship';
+    findImage.mockReturnValue(throwError(() => ({ status: 500 })));
+    component.onUploadImageClick();
+
+    expect(dialogRef.close).toHaveBeenCalledWith(true);
+  });
+
+  it('closes for a reload when there is somehow no picture to read', () => {
+    render();
+    withCrop(300, 300);
+    component.altText = 'A ship';
+    findImage.mockReturnValue(of(null));
+    component.onUploadImageClick();
+
+    expect(dialogRef.close).toHaveBeenCalledWith(true);
+  });
+
+  // Nothing was written, so the record still answers with whatever picture
+  // it had, and the dialogue says why the new one did not take.
+  it('stays open, showing the refusal, when the picture is rejected', () => {
+    render();
+    withCrop(300, 300);
+    component.altText = 'A ship';
+    assetScan.watch.mockReturnValue(
+      of({ state: 'REJECTED', settled: true, gaveUp: false }),
+    );
+    component.onUploadImageClick();
+
+    expect(component.scanState).toBe('REJECTED');
+    expect(findImage).not.toHaveBeenCalled();
+    expect(dialogRef.close).not.toHaveBeenCalled();
   });
 
   it('refuses a crop smaller than the picture is delivered at', () => {

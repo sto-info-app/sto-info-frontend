@@ -578,6 +578,41 @@ describe('CustomTrackingService', () => {
       await expect(result).resolves.toMatchObject({ imageId: 'image-1' });
     });
 
+    // The answer row is written at publication, so a dialogue that has
+    // just uploaded asks for it once the scan clears rather than being
+    // told at upload time about a picture nobody had checked.
+    it('reads the picture answering a field and record', async () => {
+      const result = firstValueFrom(
+        service.findImage(
+          FIELD_ID,
+          CustomTrackingTargetScope.ACCOUNT,
+          TARGET_ID,
+        ),
+      );
+
+      const request = httpMock.expectOne(imageUrl);
+
+      expect(request.request.method).toBe('GET');
+
+      request.flush({ imageId: 'image-1', altText: 'A ship' });
+
+      await expect(result).resolves.toMatchObject({ imageId: 'image-1' });
+    });
+
+    it('reports nothing when the record has no picture', async () => {
+      const result = firstValueFrom(
+        service.findImage(
+          FIELD_ID,
+          CustomTrackingTargetScope.ACCOUNT,
+          TARGET_ID,
+        ),
+      );
+
+      httpMock.expectOne(imageUrl).flush(null);
+
+      await expect(result).resolves.toBeNull();
+    });
+
     it('removes the picture', async () => {
       const result = firstValueFrom(
         service.removeImage(
