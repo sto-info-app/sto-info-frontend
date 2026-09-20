@@ -1,7 +1,16 @@
-import { inject } from '@angular/core';
+import { DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialogRef } from '@angular/material/dialog';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
+import {
+  ASSET_SCAN_AVAILABLE,
+  AssetScanState,
+} from 'src/app/shared/constants/asset-scan.constants';
+import {
+  AcceptedAsset,
+  AssetScanService,
+} from 'src/app/shared/services/asset-scan.service';
 import {
   MSG_ERROR_HTTP_STATUS_0_CONSOLE_TEXT,
   MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT,
@@ -14,10 +23,31 @@ export abstract class ImageCropperBaseComponent {
   protected abstract readonly _dialogRef: MatDialogRef<unknown>;
 
   protected readonly _sanitizer = inject(DomSanitizer);
+  protected readonly _assetScan = inject(AssetScanService);
+  protected readonly _destroyRef = inject(DestroyRef);
 
   errorMessage = '';
   isSubmitting = false;
   uploadedInvalidImageType = false;
+
+  /**
+   * Where the upload has got to, once there is one to follow.
+   *
+   * Null before anything is sent. An upload no longer finishes when the
+   * request does: the file is held privately, scanned, and only then
+   * published, and somebody looking at a dialogue that says nothing for
+   * those seconds concludes it failed and uploads it again.
+   */
+  scanState: AssetScanState | null = null;
+
+  /**
+   * Whether the watch stopped before the scan finished.
+   *
+   * Not a failure. The scan will finish and the picture will appear; this
+   * page simply stopped asking, which is what stops a tab left open all
+   * afternoon polling all afternoon.
+   */
+  scanTookTooLong = false;
 
   imageChangedEvent: Event | null = null;
   croppedImage: SafeUrl = '';
@@ -178,6 +208,59 @@ export abstract class ImageCropperBaseComponent {
 
   onCloseClick(): void {
     this._dialogRef?.close();
+  }
+
+  /**
+   * Follows an accepted upload until it is in use or refused.
+   *
+   * The dialogue stays open while it runs, because the picture the reader
+   * chose is not on their profile, Story or Character yet and closing would
+   * say that it was. It closes itself when the scan clears, which is what
+   * tells the page behind it to fetch the record again.
+   *
+   * @param accepted - What the upload endpoint answered.
+   */
+  protected watchUpload(accepted: AcceptedAsset): void {
+    this.isSubmitting = true;
+    this.scanTookTooLong = false;
+    this.scanState = accepted.status;
+
+    this._assetScan
+      .watch(accepted.assetId, accepted.status)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(progress => {
+        this.scanState = progress.state;
+        this.scanTookTooLong = progress.gaveUp;
+
+        if (progress.gaveUp) {
+          this.isSubmitting = false;
+
+          return;
+        }
+
+        if (!progress.settled) {
+          return;
+        }
+
+        this.isSubmitting = false;
+
+        if (progress.state === ASSET_SCAN_AVAILABLE) {
+          this.closeWithPublished();
+        }
+      });
+  }
+
+  /**
+   * Closes the dialogue now that the picture is in use.
+   *
+   * Closes with `true`, which is all most callers need: the page behind
+   * knows what it asked for and reloads. A dialogue whose caller expects the
+   * record itself overrides this and fetches it, because the record only
+   * became true of the picture a moment ago and nothing local knows what
+   * the server stored.
+   */
+  protected closeWithPublished(): void {
+    this._dialogRef?.close(true);
   }
 
   displayErrorMessage(message: string): void {
