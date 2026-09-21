@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(9);
+    expect(children).toHaveLength(10);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -51,6 +51,7 @@ describe('FLEET_ROUTES', () => {
   // Community slug: a scope's address always names its collection first.
   it.each([
     ['register', APP_ROUTE_TITLES.FLEET_REGISTER],
+    ['register-standalone', APP_ROUTE_TITLES.FLEET_REGISTER_STANDALONE],
     [
       'communities/:communitySlug/fleets/register',
       APP_ROUTE_TITLES.FLEET_REGISTER_FLEET,
@@ -122,6 +123,7 @@ describe('FLEET_ROUTES', () => {
     ['communities', 'CommunitiesDirectoryComponent'],
     ['armadas', 'ArmadasDirectoryComponent'],
     ['register', 'CommunityRegisterComponent'],
+    ['register-standalone', 'StandaloneRegisterComponent'],
     ['communities/:communitySlug/fleets/register', 'FleetRegisterComponent'],
     ['communities/:communitySlug/armadas/register', 'ArmadaRegisterComponent'],
     ['communities/:communitySlug', 'CommunityPageComponent'],

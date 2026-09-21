@@ -133,6 +133,25 @@ describe('FleetRegistrationService', () => {
     });
   });
 
+  // No Community to register into, so the address is its own.
+  it('posts a standalone confirmation to the Fleet collection', () => {
+    service
+      .confirmStandaloneFleet({
+        exactGameName: 'Starfleet Command ',
+        platformId: 'platform-1',
+        confirmUnregistered: true,
+      })
+      .subscribe();
+
+    const request = httpMock.expectOne(`${API_URLS.FLEETS}/unregistered`);
+
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body.confirmUnregistered).toBe(true);
+    expect(request.request.headers.get('Authorization')).toBe('Bearer token-1');
+
+    request.flush({});
+  });
+
   describe('asking what already answers to a name', () => {
     const community = `${API_URLS.FLEET_COMMUNITIES}/community-1`;
 

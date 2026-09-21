@@ -9,6 +9,7 @@ import {
   CreateFleetCommunity,
   CreateStoArmada,
   CreateStoFleet,
+  CreateUnregisteredFleet,
   FleetCommunity,
   FleetDuplicate,
   RegisteredStoArmada,
@@ -77,6 +78,26 @@ export class FleetRegistrationService {
     return this._http.post<RegisteredStoArmada>(
       this.childUrl(communityId, 'armadas'),
       armada,
+      this.callerOptions(),
+    );
+  }
+
+  /**
+   * Confirms a Fleet that belongs to no Community.
+   *
+   * Needs an account and nothing else: there is no scope to hold a
+   * capability at, and no owner to hold one either, which is the whole
+   * nature of the record.
+   *
+   * @param fleet - The name, the platform and the caller's confirmation.
+   * @returns The record, and anything that already answered to its name.
+   */
+  confirmStandaloneFleet(
+    fleet: CreateUnregisteredFleet,
+  ): Observable<RegisteredStoFleet> {
+    return this._http.post<RegisteredStoFleet>(
+      `${API_URLS.FLEETS}/unregistered`,
+      fleet,
       this.callerOptions(),
     );
   }

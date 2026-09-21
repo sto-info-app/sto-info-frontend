@@ -1,6 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ParamMap } from '@angular/router';
+import { ParamMap, RouterModule } from '@angular/router';
 
 import { map, Observable } from 'rxjs';
 
@@ -13,6 +13,8 @@ import {
 import { FleetDirectoryResultsComponent } from 'src/app/fleet/directory/fleet-directory-results/fleet-directory-results.component';
 import { buildFleetCardVm } from 'src/app/fleet/fleet-card.builders';
 import { FleetDirectoryService } from 'src/app/fleet/fleet-directory.service';
+import { AuthService } from 'src/app/core/auth/auth.service';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
@@ -30,6 +32,7 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 @Component({
   selector: 'app-fleets-directory',
   templateUrl: './fleets-directory.component.html',
+  styleUrls: ['./fleets-directory.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   // The date pipe is not provided at the root, and this page calls it rather
@@ -38,12 +41,30 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
   providers: [AppDatePipe],
   imports: [
     AsyncPipe,
+    RouterModule,
     FleetDirectoryFiltersComponent,
     FleetDirectoryResultsComponent,
   ],
 })
 export class FleetsDirectoryComponent extends FleetDirectoryPageDirective {
   private readonly _directory = inject(FleetDirectoryService);
+  private readonly _authService = inject(AuthService);
+
+  /** Where confirming a Fleet nobody here runs starts. */
+  readonly confirmStandaloneLink = '/' + APP_ROUTES.FLEET_REGISTER_STANDALONE;
+
+  /**
+   * Whether to offer confirming one at all.
+   *
+   * Signed in is the only condition. The record has no owner and no
+   * capability held at it, so having an account is the whole of the gate
+   * the server applies too.
+   *
+   * @returns True when somebody is signed in.
+   */
+  get canConfirmStandalone(): boolean {
+    return this._authService.isLoggedIn();
+  }
 
   readonly sortOptions = FLEET_SORTS_WITH_FRESHNESS;
 

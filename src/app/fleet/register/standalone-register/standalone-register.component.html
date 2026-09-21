@@ -1,0 +1,110 @@
+<div class="lcars-text-bar">
+  <span>Confirm a Fleet nobody here runs</span>
+</div>
+
+<p class="register-page__intro">
+  Use this only for a Fleet that belongs to no Community on this site — a record
+  so that an imported roster has something to attach to, and so anybody looking
+  for that Fleet finds it. If the Fleet is yours, register a Community first and
+  register the Fleet into it.
+</p>
+
+<p class="register-page__intro standalone-register__consequences">
+  A record with no Community has no owner. <strong>Nobody</strong> will be able
+  to change it or close it afterwards, and two confirmations of one name make
+  two records. Please check what already exists before confirming.
+</p>
+
+@if (errorMessage) {
+  <app-lcars-error-message
+    title="Confirmation failed"
+    [message]="errorMessage" />
+}
+
+<form
+  class="register-page__form"
+  [formGroup]="form"
+  (ngSubmit)="onSubmit()">
+  <div class="form-row">
+    <div class="lcars-input-container sky">
+      <label for="standalone-name">Name, exactly as in game</label>
+      <input
+        id="standalone-name"
+        type="text"
+        autocomplete="off"
+        formControlName="exactGameName"
+        [maxlength]="nameMaxLength" />
+    </div>
+
+    <div class="lcars-input-container sky">
+      <label for="standalone-platform">Platform</label>
+      <select
+        id="standalone-platform"
+        formControlName="platformId">
+        <option value="">Choose a platform</option>
+        @for (platform of platforms$ | async; track platform.id) {
+          <option [value]="platform.id">{{ platform.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (
+    form.controls.exactGameName.touched && form.controls.exactGameName.invalid
+  ) {
+    <p class="register-page__field-error">Please give the Fleet its name.</p>
+  }
+
+  @if (form.controls.platformId.touched && form.controls.platformId.invalid) {
+    <p class="register-page__field-error">
+      Please say which platform the Fleet is on.
+    </p>
+  }
+
+  <div class="form-actions">
+    <button
+      type="button"
+      class="lcars-btn gold"
+      [disabled]="isChecking"
+      (click)="onCheck()">
+      Check for existing records
+    </button>
+  </div>
+
+  <app-scope-duplicate-warning
+    scopeLabel="Fleet"
+    [duplicates]="duplicates" />
+
+  <div class="standalone-register__confirm">
+    <label for="standalone-confirm">
+      <input
+        id="standalone-confirm"
+        type="checkbox"
+        formControlName="confirmUnregistered" />
+      I understand that this record will belong to no Community, and that nobody
+      will be able to change or close it afterwards.
+    </label>
+  </div>
+
+  @if (
+    form.controls.confirmUnregistered.touched &&
+    form.controls.confirmUnregistered.invalid
+  ) {
+    <p class="register-page__field-error">
+      Please confirm that you understand what this record is.
+    </p>
+  }
+
+  @if (isSaving) {
+    <app-loading-bar loadingText="Confirming the record" />
+  }
+
+  <div class="form-actions">
+    <button
+      type="submit"
+      class="lcars-btn green"
+      [disabled]="isSaving">
+      Confirm
+    </button>
+  </div>
+</form>

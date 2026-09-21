@@ -554,3 +554,21 @@ export interface RegisteredStoArmada {
   armada: StoArmada;
   duplicates: ArmadaDuplicate[];
 }
+
+/**
+ * Confirms a Fleet that belongs to no Community.
+ *
+ * The confirmation flag is not a checkbox for its own sake. Creating one of
+ * these is almost always a mistake by somebody who meant to register their
+ * own Fleet, and the record has no owner: nobody will be able to change or
+ * close it afterwards. An explicit flag is the difference between a
+ * considered act and a mis-posted form, and the server refuses a request
+ * that does not carry it rather than assuming the caller meant it.
+ */
+export interface CreateUnregisteredFleet {
+  exactGameName: string;
+  platformId: string;
+
+  /** Must be true. */
+  confirmUnregistered: boolean;
+}

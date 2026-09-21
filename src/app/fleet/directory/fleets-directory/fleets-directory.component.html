@@ -1,3 +1,13 @@
+@if (canConfirmStandalone) {
+  <p class="fleets-directory__confirm">
+    <a
+      class="lcars-btn lcars-btn-auto sky"
+      [routerLink]="confirmStandaloneLink">
+      Confirm a Fleet nobody here runs
+    </a>
+  </p>
+}
+
 <app-fleet-directory-filters
   searchLabel="Fleet name"
   searchPlaceholder="e.g. Starfleet Command"

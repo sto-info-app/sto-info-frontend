@@ -16,6 +16,7 @@ import {
   FleetScopeStatus,
   StoFleetCard,
 } from 'src/app/models/fleet.models';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { FleetDirectoryService } from 'src/app/fleet/fleet-directory.service';
 import { FLEET_DIRECTORY_ERROR } from 'src/app/fleet/directory/fleet-directory-page.directive';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
@@ -72,6 +73,7 @@ describe('FleetsDirectoryComponent', () => {
   let router: { navigate: jest.Mock };
   let route: { queryParamMap: Observable<ParamMap>; snapshot: unknown };
   let formatted: string | null;
+  let isLoggedIn: boolean;
 
   /**
    * Puts a question in the URL.
@@ -88,6 +90,7 @@ describe('FleetsDirectoryComponent', () => {
   beforeEach(async () => {
     params$ = new BehaviorSubject<ParamMap>(convertToParamMap({}));
     formatted = '4 March 2015';
+    isLoggedIn = true;
     directory = { listFleets: jest.fn(() => of(page())) };
     router = { navigate: jest.fn() };
     route = {
@@ -101,6 +104,10 @@ describe('FleetsDirectoryComponent', () => {
         { provide: FleetDirectoryService, useValue: directory },
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: route },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: (): boolean => isLoggedIn },
+        },
       ],
     })
       .overrideComponent(FleetsDirectoryComponent, {
@@ -390,6 +397,36 @@ describe('FleetsDirectoryComponent', () => {
       expect(
         fixture.componentInstance.sortOptions.map(option => option.value),
       ).toContain(FleetDirectorySort.FRESHNESS);
+    });
+  });
+  describe('confirming a Fleet nobody here runs', () => {
+    /**
+     * The link offering it.
+     *
+     * @returns The link, or null.
+     */
+    const confirmLink = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '.fleets-directory__confirm a',
+      ) as HTMLElement | null;
+
+    it('offers it to somebody signed in', () => {
+      render();
+
+      expect(confirmLink()).not.toBeNull();
+      expect(fixture.componentInstance.confirmStandaloneLink).toBe(
+        '/fleets/register-standalone',
+      );
+    });
+
+    // The record has no owner and no capability held at it, so having an
+    // account is the whole of the gate the server applies too.
+    it('offers nothing to a signed-out visitor', () => {
+      isLoggedIn = false;
+
+      render();
+
+      expect(confirmLink()).toBeNull();
     });
   });
 });

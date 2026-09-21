@@ -1,0 +1,26 @@
+@use 'lcars-variables' as vars;
+
+// The consequences are set apart from the introduction rather than folded
+// into it. They are the reason the confirmation box exists, and a reader
+// who skims one paragraph should skim the one that matters least.
+.standalone-register__consequences {
+  padding: 0.75rem 1rem;
+  border-left: 4px solid vars.$lcars-red;
+  background: vars.$lcars-grey-bg;
+}
+
+.standalone-register__confirm {
+  margin: 1rem 0;
+
+  label {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    max-width: 70ch;
+    cursor: pointer;
+  }
+
+  input {
+    margin-top: 0.2rem;
+  }
+}

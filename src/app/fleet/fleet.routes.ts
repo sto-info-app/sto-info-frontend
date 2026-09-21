@@ -65,6 +65,16 @@ export const FLEET_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
 
+      {
+        path: 'register-standalone',
+        loadComponent: () =>
+          import('./register/standalone-register/standalone-register.component').then(
+            m => m.StandaloneRegisterComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_REGISTER_STANDALONE },
+        canActivate: [AuthGuard],
+      },
+
       // Registering into a Community sits inside the collection it adds to,
       // and `register` is a literal where the deeper routes have a platform
       // segment — four segments against five, so neither can claim the
