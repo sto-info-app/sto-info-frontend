@@ -48,12 +48,12 @@
   <ng-content />
 
   <div class="form-actions">
-    @if (searchTerm) {
+    @if (searchTerm || filtersApplied) {
       <button
         type="button"
         class="lcars-btn red"
         (click)="onClear()">
-        Clear
+        Clear all
       </button>
     }
     <button

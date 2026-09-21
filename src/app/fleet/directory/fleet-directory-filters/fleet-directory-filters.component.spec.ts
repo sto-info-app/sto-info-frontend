@@ -30,10 +30,12 @@ describe('FleetDirectoryFiltersComponent', () => {
    *
    * @param search - What the URL is holding as a search.
    * @param sortOptions - The orderings this listing offers.
+   * @param filtersApplied - Whether the URL narrows the listing at all.
    */
   function render(
     search = '',
     sortOptions = FLEET_SORTS_WITHOUT_FRESHNESS,
+    filtersApplied = false,
   ): void {
     fixture = TestBed.createComponent(FleetDirectoryFiltersComponent);
     fixture.componentRef.setInput('search', search);
@@ -42,6 +44,7 @@ describe('FleetDirectoryFiltersComponent', () => {
     fixture.componentRef.setInput('status', FleetDirectoryStatusFilter.ACTIVE);
     fixture.componentRef.setInput('sort', FleetDirectorySort.NAME);
     fixture.componentRef.setInput('sortOptions', sortOptions);
+    fixture.componentRef.setInput('filtersApplied', filtersApplied);
     fixture.detectChanges();
     // `ngModel` writes the control's value on a microtask, so nothing the
     // reader would see is in the DOM until the queue has drained.
@@ -131,17 +134,28 @@ describe('FleetDirectoryFiltersComponent', () => {
     expect(find('.lcars-btn.red')).toBeNull();
   }));
 
-  it('empties the box and stops searching when Clear is pressed', fakeAsync(() => {
+  /*
+   * Somebody who has narrowed by platform, posture, allegiance and roster and
+   * wants to start again would otherwise have to undo four controls one at a
+   * time, or edit the address bar.
+   */
+  it('offers to clear when a filter is in force and the box is empty', fakeAsync(() => {
+    render('', FLEET_SORTS_WITHOUT_FRESHNESS, true);
+
+    expect(find('.lcars-btn.red')).not.toBeNull();
+  }));
+
+  it('empties the box and asks for the listing back when Clear is pressed', fakeAsync(() => {
     render('starfleet');
 
-    let asked: string | undefined;
-    fixture.componentInstance.searchChange.subscribe(value => (asked = value));
+    let cleared = 0;
+    fixture.componentInstance.cleared.subscribe(() => (cleared += 1));
 
     find<HTMLButtonElement>('.lcars-btn.red').click();
     fixture.detectChanges();
     tick();
 
-    expect(asked).toBe('');
+    expect(cleared).toBe(1);
     expect(find<HTMLInputElement>('#fleet-directory-search').value).toBe('');
   }));
 

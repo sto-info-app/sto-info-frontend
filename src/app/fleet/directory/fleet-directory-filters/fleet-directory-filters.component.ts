@@ -85,6 +85,15 @@ export class FleetDirectoryFiltersComponent {
   /** The orderings this listing offers. */
   @Input({ required: true }) sortOptions!: readonly FleetDirectorySortOption[];
 
+  /**
+   * Whether the URL is currently narrowing the listing in any way.
+   *
+   * Asked of the page rather than worked out here, because the filters this
+   * bar knows about are the three every listing shares and the ones that
+   * matter most are projected into it by whichever listing this is.
+   */
+  @Input() filtersApplied = false;
+
   /** Emits the name to search for, or an empty string to stop searching. */
   @Output() readonly searchChange = new EventEmitter<string>();
 
@@ -95,6 +104,9 @@ export class FleetDirectoryFiltersComponent {
   /** Emits the ordering the reader picked. */
   @Output() readonly sortChange = new EventEmitter<FleetDirectorySort>();
 
+  /** Emits when the reader asked for the listing back as it started. */
+  @Output() readonly cleared = new EventEmitter<void>();
+
   /**
    * Searches for what is in the box.
    */
@@ -103,12 +115,18 @@ export class FleetDirectoryFiltersComponent {
   }
 
   /**
-   * Stops searching, and says so straight away rather than waiting for a
-   * submit the reader has no reason to expect.
+   * Puts the listing back to the question it starts on.
+   *
+   * Everything, not just the search. Somebody who has narrowed by platform,
+   * posture, allegiance and roster and wants to start again would otherwise
+   * have to undo four controls one at a time, or edit the address bar.
+   *
+   * The box is emptied here as well as in the URL, and said straight away
+   * rather than waiting for a submit the reader has no reason to expect.
    */
   onClear(): void {
     this.searchTerm = '';
-    this.searchChange.emit('');
+    this.cleared.emit();
   }
 
   /**

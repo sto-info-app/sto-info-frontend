@@ -15,9 +15,27 @@
   [status]="status"
   [sort]="sort"
   [sortOptions]="sortOptions"
+  [filtersApplied]="anyFilterApplied"
   (searchChange)="onSearch($event)"
   (statusChange)="onStatus($event)"
-  (sortChange)="onSort($event)" />
+  (sortChange)="onSort($event)"
+  (cleared)="onClearAll()">
+  <div class="fleet-community-filter-row">
+    <div class="lcars-input-container sky">
+      <label for="communities-directory-recruitment">Recruiting</label>
+      <select
+        id="communities-directory-recruitment"
+        name="recruitmentState"
+        [ngModel]="filterValue('recruitmentState')"
+        (change)="onFilter('recruitmentState', $any($event.target).value)">
+        <option value="">Any posture</option>
+        @for (option of recruitmentOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+</app-fleet-directory-filters>
 
 @if (state$ | async; as state) {
   <app-fleet-directory-results

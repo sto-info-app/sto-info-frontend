@@ -15,9 +15,84 @@
   [status]="status"
   [sort]="sort"
   [sortOptions]="sortOptions"
+  [filtersApplied]="anyFilterApplied"
   (searchChange)="onSearch($event)"
   (statusChange)="onStatus($event)"
-  (sortChange)="onSort($event)" />
+  (sortChange)="onSort($event)"
+  (cleared)="onClearAll()">
+  <div class="fleet-community-filter-row">
+    <!--
+      Platform first, because it is the one that changes what the other three
+      mean: two records with one name on Windows and on Xbox are different
+      Fleets, not duplicates.
+    -->
+    <div class="lcars-input-container sky">
+      <label for="fleets-directory-platform">Platform</label>
+      <select
+        id="fleets-directory-platform"
+        name="platformId"
+        [ngModel]="filterValue('platformId')"
+        (change)="onFilter('platformId', $any($event.target).value)">
+        <option value="">Any platform</option>
+        @for (platform of platforms$ | async; track platform.id) {
+          <option [value]="platform.id">{{ platform.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="lcars-input-container sky">
+      <label for="fleets-directory-recruitment">Recruiting</label>
+      <select
+        id="fleets-directory-recruitment"
+        name="recruitmentState"
+        [ngModel]="filterValue('recruitmentState')"
+        (change)="onFilter('recruitmentState', $any($event.target).value)">
+        <option value="">Any posture</option>
+        @for (option of recruitmentOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="lcars-input-container sky">
+      <label for="fleets-directory-allegiance">Allegiance</label>
+      <select
+        id="fleets-directory-allegiance"
+        name="allegianceFactionId"
+        [ngModel]="filterValue('allegianceFactionId')"
+        (change)="onFilter('allegianceFactionId', $any($event.target).value)">
+        <option value="">Any allegiance</option>
+        @for (allegiance of allegiances$ | async; track allegiance.id) {
+          <option [value]="allegiance.id">{{ allegiance.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="lcars-input-container sky">
+      <label for="fleets-directory-roster">Roster</label>
+      <select
+        id="fleets-directory-roster"
+        name="roster"
+        [ngModel]="filterValue('roster')"
+        (change)="onFilter('roster', $any($event.target).value)">
+        @for (option of rosterOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!--
+    Said rather than left to be discovered. The server never guesses a Fleet's
+    allegiance, so narrowing by one silently drops every Fleet nobody has
+    stated a faction for — which is how somebody concludes a Fleet is not
+    listed when it is.
+  -->
+  <p class="fleet-community-field-hint">
+    A Fleet whose allegiance nobody has stated is not shown by the allegiance
+    filter. It is never guessed from a roster.
+  </p>
+</app-fleet-directory-filters>
 
 @if (state$ | async; as state) {
   <app-fleet-directory-results

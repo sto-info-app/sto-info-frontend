@@ -77,6 +77,22 @@
   }
 }
 
+// The row a listing's own filters sit in, below the three every listing
+// shares. Global rather than encapsulated because these controls are written
+// by the listing and projected into the filter bar, which puts them outside
+// the filter bar's own styles however the two are nested on screen.
+// ---
+// Matches the row above it deliberately: a platform control that sat a little
+// differently from the ordering control would read as belonging to something
+// else.
+.fleet-community-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-top: 1rem;
+}
+
 // The sentence under a field saying what it means. Not an error: errors are
 // `.field-error`, which the input container already styles.
 .fleet-community-field-hint {

@@ -92,12 +92,28 @@ describe('CommunitiesDirectoryComponent', () => {
   });
 
   /**
+   * Puts a question in the URL.
+   *
+   * @param query - The query string, as key and value.
+   */
+  function setParams(query: Record<string, string>): void {
+    const map = convertToParamMap(query);
+
+    route.snapshot = { queryParamMap: map };
+    params$.next(map);
+  }
+
+  /**
    * Renders the listing.
    */
   function render(): void {
     fixture = TestBed.createComponent(CommunitiesDirectoryComponent);
     fixture.detectChanges();
   }
+
+  /** The question the service was last asked. */
+  const lastQuery = (): Record<string, unknown> =>
+    directory.listCommunities.mock.calls.at(-1)?.[0] as Record<string, unknown>;
 
   it('asks the Community listing, not one of the other two', () => {
     render();
@@ -169,6 +185,55 @@ describe('CommunitiesDirectoryComponent', () => {
       render();
 
       expect(registerLink()).toBeNull();
+    });
+  });
+  describe('its own filter', () => {
+    it('narrows by recruitment posture when the URL says so', () => {
+      setParams({ recruitmentState: FleetRecruitmentState.APPLICATION });
+
+      render();
+
+      expect(lastQuery()['recruitmentState']).toBe(
+        FleetRecruitmentState.APPLICATION,
+      );
+    });
+
+    it('narrows by no posture when the URL asks for none', () => {
+      render();
+
+      expect(lastQuery()['recruitmentState']).toBeUndefined();
+    });
+
+    it('ignores a posture it does not offer', () => {
+      setParams({ recruitmentState: 'BANANAS' });
+
+      render();
+
+      expect(lastQuery()['recruitmentState']).toBeUndefined();
+    });
+
+    /*
+     * Labelled from the cards rather than from the registration form, so
+     * picking "Applications open" returns cards reading "Applications open".
+     */
+    it('words the choices as the cards word them', () => {
+      render();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '#communities-directory-recruitment',
+        ).textContent,
+      ).toContain('Applications open');
+    });
+
+    /*
+     * A Community is a group of people, and the Fleets it registers can be on
+     * several platforms; nothing imports a roster for one.
+     */
+    it('offers no platform or roster filter', () => {
+      render();
+
+      expect(fixture.nativeElement.querySelectorAll('select')).toHaveLength(3);
     });
   });
 });

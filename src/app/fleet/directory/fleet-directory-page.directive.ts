@@ -105,6 +105,39 @@ export abstract class FleetDirectoryPageDirective {
   }
 
   /**
+   * Whether the URL narrows the listing in any way at all.
+   *
+   * Read off the query string rather than compared against defaults one
+   * parameter at a time, because a default here is expressed by a parameter's
+   * absence: what is written down is what the reader asked for. That also
+   * means a listing which grows a fourth filter needs nothing changed here.
+   *
+   * The page is not a narrowing. Somebody on page three has not filtered
+   * anything, and offering them a Clear button would be offering to undo
+   * something they did not do.
+   *
+   * @returns True when there is anything to clear.
+   */
+  get anyFilterApplied(): boolean {
+    const params = this._route.snapshot.queryParamMap;
+
+    return params.keys.some(key => key !== 'page' && params.get(key) !== '');
+  }
+
+  /**
+   * Reads one of the filters a particular listing has of its own.
+   *
+   * Generic because the three listings ask four different questions between
+   * them and a getter apiece would be the same line written seven times.
+   *
+   * @param key - The query-string parameter.
+   * @returns What the URL holds for it, or an empty string for nothing.
+   */
+  filterValue(key: string): string {
+    return this._route.snapshot.queryParamMap.get(key) ?? '';
+  }
+
+  /**
    * Reads the name being searched for.
    *
    * @param params - The query string.
@@ -175,6 +208,33 @@ export abstract class FleetDirectoryPageDirective {
    */
   onSort(sort: FleetDirectorySort): void {
     this.navigate({ sort });
+  }
+
+  /**
+   * Narrows by one of the filters this listing has of its own.
+   *
+   * An empty value drops the parameter rather than sending it empty, because
+   * `?platformId=` is a search for a platform whose id is the empty string
+   * and the server would rightly refuse it.
+   *
+   * @param key - The query-string parameter.
+   * @param value - What the control now holds.
+   */
+  onFilter(key: string, value: string): void {
+    this.navigate({ [key]: value === '' ? null : value });
+  }
+
+  /**
+   * Puts the listing back to the question it starts on.
+   *
+   * Replaces the query string rather than merging into it, so a filter added
+   * later is dropped without this having to be told about it.
+   */
+  onClearAll(): void {
+    void this._router.navigate([], {
+      relativeTo: this._route,
+      queryParams: {},
+    });
   }
 
   /**

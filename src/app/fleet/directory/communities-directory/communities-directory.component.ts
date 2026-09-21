@@ -1,5 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ParamMap, RouterModule } from '@angular/router';
 
 import { map, Observable } from 'rxjs';
@@ -10,6 +11,10 @@ import {
   FLEET_SORTS_WITHOUT_FRESHNESS,
   FleetDirectoryResults,
 } from 'src/app/fleet/directory/fleet-directory-page.models';
+import {
+  FLEET_RECRUITMENT_FILTER_OPTIONS,
+  recruitmentFilterOf,
+} from 'src/app/fleet/directory/fleet-directory-filters.constants';
 import { FleetDirectoryResultsComponent } from 'src/app/fleet/directory/fleet-directory-results/fleet-directory-results.component';
 import { buildCommunityCardVm } from 'src/app/fleet/fleet-card.builders';
 import { FleetDirectoryService } from 'src/app/fleet/fleet-directory.service';
@@ -37,6 +42,7 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
   providers: [AppDatePipe],
   imports: [
     AsyncPipe,
+    FormsModule,
     RouterModule,
     FleetDirectoryFiltersComponent,
     FleetDirectoryResultsComponent,
@@ -65,6 +71,14 @@ export class CommunitiesDirectoryComponent extends FleetDirectoryPageDirective {
 
   readonly sortOptions = FLEET_SORTS_WITHOUT_FRESHNESS;
 
+  /**
+   * The recruitment postures offered.
+   *
+   * The one filter a Community has of its own. No platform: a Community is a
+   * group of people, and the Fleets it registers can be on several.
+   */
+  readonly recruitmentOptions = FLEET_RECRUITMENT_FILTER_OPTIONS;
+
   readonly emptyMessage =
     'No Community answers to that. Anybody signed in can register one, and ' +
     'a Fleet does not need a Community to be listed here.';
@@ -81,6 +95,7 @@ export class CommunitiesDirectoryComponent extends FleetDirectoryPageDirective {
         search: this.searchOf(params),
         status: this.statusOf(params),
         sort: this.sortOf(params),
+        recruitmentState: recruitmentFilterOf(params.get('recruitmentState')),
         ...this.paging(params),
       })
       .pipe(

@@ -1,8 +1,9 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ParamMap } from '@angular/router';
 
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 
 import { FleetDirectoryFiltersComponent } from 'src/app/fleet/directory/fleet-directory-filters/fleet-directory-filters.component';
 import { FleetDirectoryPageDirective } from 'src/app/fleet/directory/fleet-directory-page.directive';
@@ -13,6 +14,7 @@ import {
 import { FleetDirectoryResultsComponent } from 'src/app/fleet/directory/fleet-directory-results/fleet-directory-results.component';
 import { buildArmadaCardVm } from 'src/app/fleet/fleet-card.builders';
 import { FleetDirectoryService } from 'src/app/fleet/fleet-directory.service';
+import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
@@ -34,12 +36,28 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
   providers: [AppDatePipe],
   imports: [
     AsyncPipe,
+    FormsModule,
     FleetDirectoryFiltersComponent,
     FleetDirectoryResultsComponent,
   ],
 })
 export class ArmadasDirectoryComponent extends FleetDirectoryPageDirective {
   private readonly _directory = inject(FleetDirectoryService);
+  private readonly _accounts = inject(StoAccountService);
+
+  /**
+   * The platforms an Armada can be narrowed to.
+   *
+   * The one filter an Armada has of its own. It recruits nobody and nothing
+   * imports a roster for it, so the other three would each be asking about
+   * something an Armada does not have.
+   *
+   * A catalogue that could not be read leaves the control empty rather than
+   * failing the listing.
+   */
+  readonly platforms$ = this._accounts
+    .getPlatforms()
+    .pipe(catchError(() => of([])));
 
   readonly sortOptions = FLEET_SORTS_WITHOUT_FRESHNESS;
 
@@ -59,6 +77,7 @@ export class ArmadasDirectoryComponent extends FleetDirectoryPageDirective {
         search: this.searchOf(params),
         status: this.statusOf(params),
         sort: this.sortOf(params),
+        platformId: params.get('platformId') || undefined,
         ...this.paging(params),
       })
       .pipe(

@@ -6,8 +6,9 @@ import {
   Router,
 } from '@angular/router';
 
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 
+import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { FleetDirectoryService } from 'src/app/fleet/fleet-directory.service';
 import {
   FleetDirectorySort,
@@ -51,6 +52,7 @@ describe('ArmadasDirectoryComponent', () => {
   let params$: BehaviorSubject<ParamMap>;
   let directory: { listArmadas: jest.Mock };
   let route: { queryParamMap: Observable<ParamMap>; snapshot: unknown };
+  let accounts: { getPlatforms: jest.Mock };
 
   beforeEach(async () => {
     params$ = new BehaviorSubject<ParamMap>(convertToParamMap({}));
@@ -58,6 +60,9 @@ describe('ArmadasDirectoryComponent', () => {
       listArmadas: jest.fn(() =>
         of({ items: [armadaCard()], total: 1, page: 1, pageSize: 12 }),
       ),
+    };
+    accounts = {
+      getPlatforms: jest.fn(() => of([{ id: 'platform-1', name: 'PC' }])),
     };
     route = {
       queryParamMap: params$,
@@ -70,6 +75,7 @@ describe('ArmadasDirectoryComponent', () => {
         { provide: FleetDirectoryService, useValue: directory },
         { provide: Router, useValue: { navigate: jest.fn() } },
         { provide: ActivatedRoute, useValue: route },
+        { provide: StoAccountService, useValue: accounts },
       ],
     })
       .overrideComponent(ArmadasDirectoryComponent, {
@@ -86,12 +92,28 @@ describe('ArmadasDirectoryComponent', () => {
   });
 
   /**
+   * Puts a question in the URL.
+   *
+   * @param query - The query string, as key and value.
+   */
+  function setParams(query: Record<string, string>): void {
+    const map = convertToParamMap(query);
+
+    route.snapshot = { queryParamMap: map };
+    params$.next(map);
+  }
+
+  /**
    * Renders the listing.
    */
   function render(): void {
     fixture = TestBed.createComponent(ArmadasDirectoryComponent);
     fixture.detectChanges();
   }
+
+  /** The question the service was last asked. */
+  const lastQuery = (): Record<string, unknown> =>
+    directory.listArmadas.mock.calls.at(-1)?.[0] as Record<string, unknown>;
 
   it('asks the Armada listing, not one of the other two', () => {
     render();
@@ -137,5 +159,51 @@ describe('ArmadasDirectoryComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Ninth Fleet Armada');
     expect(fixture.nativeElement.textContent).toContain('Known as “The Ninth”');
+  });
+
+  describe('its own filter', () => {
+    it('narrows by platform when the URL says so', () => {
+      setParams({ platformId: 'platform-1' });
+
+      render();
+
+      expect(lastQuery()['platformId']).toBe('platform-1');
+    });
+
+    it('narrows by no platform when the URL asks for none', () => {
+      render();
+
+      expect(lastQuery()['platformId']).toBeUndefined();
+    });
+
+    it('offers the platforms to pick from', () => {
+      render();
+
+      expect(
+        fixture.nativeElement.querySelector('#armadas-directory-platform')
+          .textContent,
+      ).toContain('PC');
+    });
+
+    /*
+     * An Armada recruits nobody and nothing imports a roster for one, so the
+     * other three filters would each be asking about something it does not
+     * have.
+     */
+    it('offers no posture, allegiance or roster filter', () => {
+      render();
+
+      expect(fixture.nativeElement.querySelectorAll('select')).toHaveLength(3);
+    });
+
+    it('still lists the Armadas when the catalogue could not be read', () => {
+      accounts.getPlatforms.mockReturnValue(throwError(() => new Error('no')));
+
+      render();
+
+      expect(
+        fixture.nativeElement.querySelectorAll('app-fleet-scope-card'),
+      ).toHaveLength(1);
+    });
   });
 });

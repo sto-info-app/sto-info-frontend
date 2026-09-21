@@ -33,8 +33,14 @@ import {
  */
 export type InstantFormatter = (value: string) => string;
 
-/** What the pill says, and the colour it says it in. */
-const RECRUITMENT_PILLS: Readonly<
+/**
+ * What the pill says, and the colour it says it in.
+ *
+ * Exported because the directory's recruitment filter is labelled from it. A
+ * reader picking "Applications open" should get cards reading "Applications
+ * open", and two lists of the same four words drift.
+ */
+export const FLEET_RECRUITMENT_PILLS: Readonly<
   Record<FleetRecruitmentState, FleetScopeCardStatus>
 > = {
   [FleetRecruitmentState.OPEN]: {
@@ -106,7 +112,7 @@ export function scopeStatusPill(
     return lifecycle;
   }
 
-  return recruitment === null ? null : RECRUITMENT_PILLS[recruitment];
+  return recruitment === null ? null : FLEET_RECRUITMENT_PILLS[recruitment];
 }
 
 /**
