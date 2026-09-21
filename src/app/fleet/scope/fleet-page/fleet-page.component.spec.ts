@@ -14,6 +14,7 @@ import {
   FleetAudience,
   FleetRecruitmentState,
   FleetScopeStatus,
+  FleetScopeViewer,
   ResolvedStoFleet,
   StoFleet,
 } from 'src/app/models/fleet.models';
@@ -54,6 +55,20 @@ function fleet(overrides: Partial<StoFleet> = {}): StoFleet {
   };
 }
 
+/** A viewer who may look and change nothing, which is most of them. */
+const READER: FleetScopeViewer = {
+  capabilities: [],
+  mayManageBanner: false,
+  mayManageEmblem: false,
+};
+
+/** A viewer who may change the artwork. */
+const ARTWORK_KEEPER: FleetScopeViewer = {
+  capabilities: ['scope.images.manage'],
+  mayManageBanner: true,
+  mayManageEmblem: true,
+};
+
 /**
  * Builds the server's answer for a Fleet address.
  *
@@ -67,6 +82,7 @@ function resolved(overrides: Partial<ResolvedStoFleet> = {}): ResolvedStoFleet {
     communityName: 'United Federation Alliance',
     platformSegment: 'pc',
     redirected: false,
+    viewer: READER,
     ...overrides,
   };
 }
@@ -271,6 +287,33 @@ describe('FleetPageComponent', () => {
       expect(drawn.kind === 'READY' && drawn.header.communityLink).toBeNull();
     });
 
+    /*
+     * Its artwork is addressed outside the Community collection, because
+     * there is no Community to nest it under and the rule it is held to is
+     * a different one.
+     */
+    it('addresses its artwork as a record nobody registered', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ communityId: null }),
+            communitySlug: 'standalone',
+            communityName: null,
+            viewer: ARTWORK_KEEPER,
+          }),
+        ),
+      );
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork?.target).toEqual({
+        kind: 'STANDALONE_FLEET',
+        fleetId: 'fleet-1',
+      });
+    });
+
     it('keeps the reserved segment when it corrects the address', () => {
       scopes.resolveFleet.mockReturnValue(
         of(
@@ -296,6 +339,55 @@ describe('FleetPageComponent', () => {
         ],
         { replaceUrl: true, queryParamsHandling: 'preserve' },
       );
+    });
+  });
+
+  describe('its artwork', () => {
+    /*
+     * A page is read far more often than it is edited, so a row of buttons
+     * nobody can press would be the ordinary case rather than the exception.
+     */
+    it('offers nothing to somebody who may change nothing', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork).toBeNull();
+    });
+
+    it('addresses a registered Fleet inside its Community', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(resolved({ viewer: ARTWORK_KEEPER })),
+      );
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork?.target).toEqual({
+        kind: 'FLEET',
+        communityId: 'community-1',
+        fleetId: 'fleet-1',
+      });
+      expect(drawn.kind === 'READY' && drawn.artwork?.scopeName).toBe(
+        'Starfleet Command ',
+      );
+    });
+
+    /*
+     * Reading the record again is what turns a published picture into one
+     * the page can draw: its delivery address only came into existence when
+     * the scan cleared.
+     */
+    it('asks for the record again when something changes', () => {
+      render();
+
+      fixture.componentInstance.state$.subscribe();
+      const before = scopes.resolveFleet.mock.calls.length;
+
+      fixture.componentInstance.reload();
+
+      expect(scopes.resolveFleet.mock.calls.length).toBeGreaterThan(before);
     });
   });
 

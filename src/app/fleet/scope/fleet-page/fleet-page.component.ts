@@ -16,6 +16,7 @@ import {
 import { scopeStatusPill } from 'src/app/fleet/fleet-card.builders';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
+import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
   FleetScopeFact,
@@ -162,6 +163,21 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
       // A Fleet has no description of its own; what a Community writes about
       // it belongs to the Community.
       description: null,
+      // Two addresses, because there are two rules. A registered Fleet's
+      // artwork is a capability held at it; an unregistered one's is a
+      // question about who filled the slot, answered a slot at a time.
+      artwork: buildScopeArtworkVm(
+        isStandalone || fleet.communityId === null
+          ? { kind: 'STANDALONE_FLEET', fleetId: fleet.id }
+          : {
+              kind: 'FLEET',
+              communityId: fleet.communityId,
+              fleetId: fleet.id,
+            },
+        fleet.exactGameName,
+        fleet,
+        resolved.viewer,
+      ),
     };
   }
 }

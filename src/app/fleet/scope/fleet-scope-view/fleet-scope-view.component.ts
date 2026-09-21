@@ -1,5 +1,12 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 
+import { FleetScopeArtworkComponent } from 'src/app/fleet/scope/fleet-scope-artwork/fleet-scope-artwork.component';
 import { FleetScopeHeaderComponent } from 'src/app/fleet/scope/fleet-scope-header/fleet-scope-header.component';
 import { FleetScopePageState } from 'src/app/fleet/scope/fleet-scope-page.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -23,6 +30,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FleetScopeArtworkComponent,
     FleetScopeHeaderComponent,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,
@@ -38,4 +46,12 @@ export class FleetScopeViewComponent {
 
   /** What is said when nothing answers to the address. */
   @Input({ required: true }) missingMessage!: string;
+
+  /**
+   * Raised when the record should be read again.
+   *
+   * Passed straight up rather than acted on here. This component knows what
+   * a page is showing and nothing about how it was asked for.
+   */
+  @Output() readonly changed = new EventEmitter<void>();
 }

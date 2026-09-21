@@ -13,6 +13,7 @@ import {
 import { scopeStatusPill } from 'src/app/fleet/fleet-card.builders';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
+import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
   FleetScopeFact,
@@ -135,6 +136,16 @@ export class ArmadaPageComponent extends FleetScopePageDirective<ResolvedStoArma
       },
       notice: null,
       description: null,
+      artwork: buildScopeArtworkVm(
+        {
+          kind: 'ARMADA',
+          communityId: armada.communityId,
+          armadaId: armada.id,
+        },
+        armada.exactGameName,
+        armada,
+        resolved.viewer,
+      ),
     };
   }
 }

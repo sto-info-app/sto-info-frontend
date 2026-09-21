@@ -12,6 +12,7 @@ import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { FleetScopePageState } from 'src/app/fleet/scope/fleet-scope-page.models';
 import {
   FleetScopeStatus,
+  FleetScopeViewer,
   ResolvedStoArmada,
   StoArmada,
 } from 'src/app/models/fleet.models';
@@ -49,6 +50,20 @@ function armada(overrides: Partial<StoArmada> = {}): StoArmada {
   };
 }
 
+/** A viewer who may look and change nothing, which is most of them. */
+const READER: FleetScopeViewer = {
+  capabilities: [],
+  mayManageBanner: false,
+  mayManageEmblem: false,
+};
+
+/** A viewer who may change the artwork. */
+const ARTWORK_KEEPER: FleetScopeViewer = {
+  capabilities: ['scope.images.manage'],
+  mayManageBanner: true,
+  mayManageEmblem: true,
+};
+
 /**
  * Builds the server's answer for an Armada address.
  *
@@ -64,6 +79,7 @@ function resolved(
     communityName: 'United Federation Alliance',
     platformSegment: 'pc',
     redirected: false,
+    viewer: READER,
     ...overrides,
   };
 }
@@ -213,6 +229,59 @@ describe('ArmadaPageComponent', () => {
     expect(drawn.kind === 'READY' && drawn.header.facts[0]).toEqual({
       label: 'Platform',
       value: 'PC',
+    });
+  });
+
+  describe('its artwork', () => {
+    /*
+     * A page is read far more often than it is edited, so a row of buttons
+     * nobody can press would be the ordinary case rather than the exception.
+     */
+    it('offers nothing to somebody who may change nothing', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork).toBeNull();
+    });
+
+    it('addresses it inside the Community holding it', () => {
+      scopes.resolveArmada.mockReturnValue(
+        of(resolved({ viewer: ARTWORK_KEEPER })),
+      );
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork?.target).toEqual({
+        kind: 'ARMADA',
+        communityId: 'community-1',
+        armadaId: 'armada-1',
+      });
+    });
+
+    /*
+     * The name the game holds, not the one a Community prefers: the
+     * dialogue is about the record, and the record is that name.
+     */
+    it('heads the dialogue with the name the game holds', () => {
+      scopes.resolveArmada.mockReturnValue(
+        of(
+          resolved({
+            armada: armada({ displayName: 'The Ninth' }),
+            viewer: ARTWORK_KEEPER,
+          }),
+        ),
+      );
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork?.scopeName).toBe(
+        armada().exactGameName,
+      );
     });
   });
 

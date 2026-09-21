@@ -3,7 +3,9 @@ import { Directive, inject } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 
 import {
+  BehaviorSubject,
   catchError,
+  combineLatest,
   map,
   Observable,
   of,
@@ -55,10 +57,23 @@ export abstract class FleetScopePageDirective<TResolved> {
   abstract readonly missingMessage: string;
 
   /**
-   * The record, reloaded whenever the address changes.
+   * Asks for the record again without the address having changed.
+   *
+   * What a picture is delivered from only comes into existence when its scan
+   * clears, so nothing on this side knows the new address until the server
+   * is asked. A page that guessed at it would show a broken image for as
+   * long as the guess was wrong.
    */
-  readonly state$: Observable<FleetScopePageState> = this._route.paramMap.pipe(
-    switchMap(params =>
+  private readonly _reload = new BehaviorSubject<void>(undefined);
+
+  /**
+   * The record, reloaded whenever the address changes or it is asked for.
+   */
+  readonly state$: Observable<FleetScopePageState> = combineLatest([
+    this._route.paramMap,
+    this._reload,
+  ]).pipe(
+    switchMap(([params]) =>
       this.resolve(params).pipe(
         tap(resolved => this.replaceMovedAddress(resolved)),
         map(resolved => this.present(resolved)),
@@ -77,6 +92,16 @@ export abstract class FleetScopePageDirective<TResolved> {
       ),
     ),
   );
+
+  /**
+   * Reads the record again, keeping the address.
+   *
+   * The loading bar comes back while it runs, because the page is genuinely
+   * not showing the record as it now stands.
+   */
+  reload(): void {
+    this._reload.next();
+  }
 
   /**
    * Asks the server for whatever the address names.

@@ -365,6 +365,35 @@ export interface StoArmada extends FleetScopeArtwork {
 }
 
 /**
+ * What the caller looking at a scope may do to it.
+ *
+ * Answered with the record rather than fetched beside it, so a scope page
+ * stays one request: a control that arrived after a second round trip would
+ * appear once the reader had decided there was not one.
+ *
+ * **Never an access decision.** It says what the page should offer; the
+ * server still says what may happen. The two can disagree — a role withdrawn
+ * while somebody had the page open — and when they do the server wins and
+ * the reader is told why.
+ */
+export interface FleetScopeViewer {
+  /**
+   * The scoped capabilities held here.
+   *
+   * Empty when signed out, when the scope admits the viewer nothing, and at
+   * a Fleet nobody has registered — that has no Community, so there is no
+   * scope at which to hold one.
+   */
+  capabilities: string[];
+
+  /** Whether to offer setting or replacing the banner. */
+  mayManageBanner: boolean;
+
+  /** Whether to offer setting or replacing the emblem. */
+  mayManageEmblem: boolean;
+}
+
+/**
  * A Community reached by URL segment, and whether that segment is still its.
  *
  * Answered as a body rather than as a `301`, because the caller is a
@@ -380,6 +409,9 @@ export interface ResolvedFleetCommunity {
    * Non-null means the address shown should be replaced.
    */
   redirectedFrom: string | null;
+
+  /** What the caller looking at it may do to it. */
+  viewer: FleetScopeViewer;
 }
 
 /**
@@ -407,6 +439,9 @@ export interface ResolvedStoFleet {
 
   /** True when the address asked for is no longer the canonical one. */
   redirected: boolean;
+
+  /** What the caller looking at it may do to it. */
+  viewer: FleetScopeViewer;
 }
 
 /**
@@ -430,6 +465,9 @@ export interface ResolvedStoArmada {
 
   /** True when the address asked for is no longer the canonical one. */
   redirected: boolean;
+
+  /** What the caller looking at it may do to it. */
+  viewer: FleetScopeViewer;
 }
 
 /**

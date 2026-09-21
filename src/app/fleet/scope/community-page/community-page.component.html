@@ -2,7 +2,8 @@
   <app-fleet-scope-view
     loadingText="Reading the Community"
     [state]="state"
-    [missingMessage]="missingMessage" />
+    [missingMessage]="missingMessage"
+    (changed)="reload()" />
 
   @if (state.kind === 'READY' && canRegisterChildren) {
     <div class="community-page__actions">

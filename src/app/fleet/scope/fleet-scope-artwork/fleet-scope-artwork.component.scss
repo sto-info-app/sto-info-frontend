@@ -1,0 +1,44 @@
+@use 'lcars-variables' as vars;
+
+.fleet-scope-artwork {
+  &__slots {
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  // One line per picture, folding to a block when the buttons no longer fit
+  // beside what they act on.
+  &__slot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    padding: 0.5rem 0;
+
+    & + & {
+      border-top: 1px solid vars.$lcars-grey-border;
+    }
+  }
+
+  &__label {
+    flex: 0 0 6rem;
+    font-weight: 700;
+    color: vars.$lcars-sunflower;
+  }
+
+  // What is in the slot: its description where it has one, which is the only
+  // thing distinguishing two pictures in a list of words.
+  &__state {
+    flex: 1 1 14rem;
+    min-width: 0;
+    color: vars.$lcars-grey-light;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+}

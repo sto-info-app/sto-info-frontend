@@ -1,0 +1,43 @@
+<div class="lcars-text-bar">
+  <span>Artwork</span>
+</div>
+
+@if (errorMessage) {
+  <app-lcars-error-message
+    title="Transmission Error"
+    [message]="errorMessage" />
+}
+
+<ul class="fleet-scope-artwork__slots">
+  @for (slot of offered; track trackSlot($index, slot)) {
+    <li class="fleet-scope-artwork__slot">
+      <span class="fleet-scope-artwork__label">{{ slot.label }}</span>
+
+      <span class="fleet-scope-artwork__state">
+        @if (slot.picture) {
+          {{ slot.picture.alt || 'Set, with no description' }}
+        } @else {
+          Not set
+        }
+      </span>
+
+      <span class="fleet-scope-artwork__actions">
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto sunflower"
+          (click)="onChangeClick(slot)">
+          {{ actionLabel(slot) }}
+        </button>
+
+        @if (slot.picture) {
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto red"
+            (click)="onRemoveClick(slot)">
+            Remove
+          </button>
+        }
+      </span>
+    </li>
+  }
+</ul>

@@ -24,6 +24,12 @@
 
     <app-fleet-scope-header [vm]="state.header" />
 
+    @if (state.artwork) {
+      <app-fleet-scope-artwork
+        [vm]="state.artwork"
+        (changed)="changed.emit()" />
+    }
+
     @if (state.description) {
       <div class="lcars-text-bar">
         <span>About</span>

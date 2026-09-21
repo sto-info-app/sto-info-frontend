@@ -18,6 +18,7 @@ import {
   FleetCommunity,
   FleetRecruitmentState,
   FleetScopeStatus,
+  FleetScopeViewer,
   ResolvedFleetCommunity,
 } from 'src/app/models/fleet.models';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
@@ -54,6 +55,20 @@ function community(overrides: Partial<FleetCommunity> = {}): FleetCommunity {
   };
 }
 
+/** A viewer who may look and change nothing, which is most of them. */
+const READER: FleetScopeViewer = {
+  capabilities: [],
+  mayManageBanner: false,
+  mayManageEmblem: false,
+};
+
+/** A viewer who may change the artwork. */
+const ARTWORK_KEEPER: FleetScopeViewer = {
+  capabilities: ['scope.images.manage'],
+  mayManageBanner: true,
+  mayManageEmblem: true,
+};
+
 describe('CommunityPageComponent', () => {
   let fixture: ComponentFixture<CommunityPageComponent>;
   let params$: BehaviorSubject<ParamMap>;
@@ -72,6 +87,7 @@ describe('CommunityPageComponent', () => {
         of<ResolvedFleetCommunity>({
           community: community(),
           redirectedFrom: null,
+          viewer: READER,
         }),
       ),
     };
@@ -235,6 +251,7 @@ describe('CommunityPageComponent', () => {
             closedAt: '2026-05-06T07:08:09.000Z',
           }),
           redirectedFrom: null,
+          viewer: READER,
         }),
       );
 
@@ -278,6 +295,7 @@ describe('CommunityPageComponent', () => {
             emblemImageAlt: 'A crossed-sabres badge',
           }),
           redirectedFrom: null,
+          viewer: READER,
         }),
       );
 
@@ -294,10 +312,76 @@ describe('CommunityPageComponent', () => {
     });
   });
 
+  describe('its artwork', () => {
+    /*
+     * A page is read far more often than it is edited, so a row of buttons
+     * nobody can press would be the ordinary case rather than the exception.
+     */
+    it('offers nothing to somebody who may change nothing', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork).toBeNull();
+    });
+
+    it('addresses the Community directly', () => {
+      scopes.resolveCommunity.mockReturnValue(
+        of<ResolvedFleetCommunity>({
+          community: community(),
+          redirectedFrom: null,
+          viewer: ARTWORK_KEEPER,
+        }),
+      );
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork?.target).toEqual({
+        kind: 'COMMUNITY',
+        communityId: 'community-1',
+      });
+    });
+
+    /*
+     * Offered one slot at a time, because at a Fleet nobody has registered
+     * they are two different answers and one shape covers both.
+     */
+    it('offers only the slots the viewer may change', () => {
+      scopes.resolveCommunity.mockReturnValue(
+        of<ResolvedFleetCommunity>({
+          community: community(),
+          redirectedFrom: null,
+          viewer: {
+            capabilities: [],
+            mayManageBanner: false,
+            mayManageEmblem: true,
+          },
+        }),
+      );
+
+      render();
+
+      const drawn = state();
+      const offered =
+        drawn.kind === 'READY'
+          ? (drawn.artwork?.slots ?? []).filter(slot => slot.mayManage)
+          : [];
+
+      expect(offered).toHaveLength(1);
+      expect(offered[0].label).toBe('Emblem');
+    });
+  });
+
   describe('when the address is out of date', () => {
     beforeEach(() => {
       scopes.resolveCommunity.mockReturnValue(
-        of({ community: community(), redirectedFrom: 'the-old-name' }),
+        of({
+          community: community(),
+          redirectedFrom: 'the-old-name',
+          viewer: READER,
+        }),
       );
     });
 

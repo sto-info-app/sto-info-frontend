@@ -2,5 +2,6 @@
   <app-fleet-scope-view
     loadingText="Reading the Armada"
     [state]="state"
-    [missingMessage]="missingMessage" />
+    [missingMessage]="missingMessage"
+    (changed)="reload()" />
 }

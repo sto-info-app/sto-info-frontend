@@ -1,6 +1,8 @@
 import { FleetScopeCardStatus } from 'src/app/fleet/components/fleet-scope-card/fleet-scope-card.model';
 import { FleetScopeType } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetPicture } from 'src/app/fleet/fleet-artwork';
+import { FleetImageSlot } from 'src/app/fleet/fleet-image.constants';
+import { FleetArtworkTarget } from 'src/app/fleet/fleet-image.service';
 
 /** One labelled line in the block of facts beneath a scope's name. */
 export interface FleetScopeFact {
@@ -48,6 +50,39 @@ export interface FleetScopeHeaderVm {
   facts: FleetScopeFact[];
 }
 
+/** One of the two artwork slots, as the page offers it. */
+export interface FleetScopeArtworkSlotVm {
+  /** Which picture this is. */
+  readonly slot: FleetImageSlot;
+
+  /** What it is called where somebody is offered it. */
+  readonly label: string;
+
+  /** What is in the slot now, or null when it is empty. */
+  readonly picture: FleetPicture | null;
+
+  /**
+   * Whether to offer changing it.
+   *
+   * Per slot rather than per record, because at a Fleet nobody has
+   * registered they are two different answers: an empty slot is open to
+   * anybody signed in, and a filled one belongs to whoever filled it.
+   */
+  readonly mayManage: boolean;
+}
+
+/** The artwork controls a scope page offers, and what they act on. */
+export interface FleetScopeArtworkVm {
+  /** Where an upload for this record is sent. */
+  readonly target: FleetArtworkTarget;
+
+  /** The record's name, for the dialogue's heading. */
+  readonly scopeName: string;
+
+  /** The banner and the emblem, in that order. */
+  readonly slots: readonly FleetScopeArtworkSlotVm[];
+}
+
 /**
  * What a scope page can currently show.
  *
@@ -87,4 +122,13 @@ export interface FleetScopeReadyState {
 
   /** What was written about it, where anything was. */
   readonly description: string | null;
+
+  /**
+   * The artwork controls, where the viewer may use any of them.
+   *
+   * Null rather than a set of disabled controls for somebody who may not
+   * change anything: a row of buttons nobody can press is a page telling a
+   * reader about a permission they do not have and did not ask about.
+   */
+  readonly artwork: FleetScopeArtworkVm | null;
 }
