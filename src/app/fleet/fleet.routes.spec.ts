@@ -18,10 +18,10 @@ describe('FLEET_ROUTES', () => {
   const childAt = (path: string): Route | undefined =>
     children.find(child => child.path === path);
 
-  it('declares one parent holding the three listings', () => {
+  it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(3);
+    expect(children).toHaveLength(6);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -52,10 +52,54 @@ describe('FLEET_ROUTES', () => {
     ).toBe(true);
   });
 
+  // A Community's canonical address spells out the collection it belongs
+  // to, which is what keeps a Community slug from ever being mistaken for a
+  // page of the directory's own, however the directory grows.
+  it.each([
+    ['communities/:communitySlug', APP_ROUTE_TITLES.FLEET_COMMUNITY],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug',
+      APP_ROUTE_TITLES.FLEET_SCOPE_FLEET,
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug',
+      APP_ROUTE_TITLES.FLEET_SCOPE_ARMADA,
+    ],
+  ])('addresses a scope at %s', (path, title) => {
+    expect(childAt(path)?.data?.['title']).toBe(title);
+  });
+
+  /**
+   * A Community's own page is declared last of the three, so
+   * `communities/x/fleets/pc/y` is never read as a Community called `x`
+   * with three segments of nonsense after it.
+   */
+  it('matches the deeper scope addresses before the Community’s own', () => {
+    const paths = children.map(child => child.path);
+
+    expect(paths.indexOf('communities/:communitySlug')).toBeGreaterThan(
+      paths.indexOf('communities/:communitySlug/fleets/:platformSegment/:slug'),
+    );
+    expect(paths.indexOf('communities/:communitySlug')).toBeGreaterThan(
+      paths.indexOf(
+        'communities/:communitySlug/armadas/:platformSegment/:slug',
+      ),
+    );
+  });
+
   it.each([
     ['', 'FleetsDirectoryComponent'],
     ['communities', 'CommunitiesDirectoryComponent'],
     ['armadas', 'ArmadasDirectoryComponent'],
+    ['communities/:communitySlug', 'CommunityPageComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug',
+      'FleetPageComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug',
+      'ArmadaPageComponent',
+    ],
   ])('loads the right component for %s', async (path, expected) => {
     const loaded = await (
       childAt(path)?.loadComponent as () => Promise<{ name: string }>

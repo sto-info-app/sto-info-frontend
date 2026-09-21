@@ -1,0 +1,6 @@
+@if (state$ | async; as state) {
+  <app-fleet-scope-view
+    loadingText="Reading the Community"
+    [state]="state"
+    [missingMessage]="missingMessage" />
+}

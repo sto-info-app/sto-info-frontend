@@ -1,0 +1,29 @@
+@switch (state.kind) {
+  @case ('LOADING') {
+    <app-loading-bar [loadingText]="loadingText" />
+  }
+
+  @case ('MISSING') {
+    <app-lcars-information-message
+      title="No such record"
+      [message]="missingMessage" />
+  }
+
+  @case ('ERROR') {
+    <app-lcars-error-message
+      title="Transmission failed"
+      [message]="state.message" />
+  }
+
+  @case ('READY') {
+    <app-fleet-scope-header [vm]="state.header" />
+
+    @if (state.description) {
+      <div class="lcars-text-bar">
+        <span>About</span>
+      </div>
+
+      <p class="fleet-scope-view__description">{{ state.description }}</p>
+    }
+  }
+}

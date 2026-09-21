@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+// Pre-wrap, so the paragraphs somebody typed stay paragraphs. The text is
+// bound rather than rendered as markup: a description is somebody's writing,
+// and nothing here may reach a component that renders HTML.
+.fleet-scope-view__description {
+  margin: 1rem 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

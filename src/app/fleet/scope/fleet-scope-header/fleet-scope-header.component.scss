@@ -1,0 +1,112 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+:host {
+  display: block;
+}
+
+// Five to one, which is the shape the cropper asks for, so a banner never
+// arrives at a ratio the page then has to crop again. Fixed by aspect-ratio
+// rather than by height, so it keeps its shape at every width.
+.fleet-scope-header__banner {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 1;
+  border: 2px solid vars.$lcars-sky;
+  border-radius: 8px;
+  object-fit: cover;
+  background: vars.$lcars-black;
+}
+
+.fleet-scope-header__identity {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-top: 1rem;
+}
+
+// Square, because an emblem is a badge rather than a portrait.
+.fleet-scope-header__emblem {
+  flex: 0 0 auto;
+  width: 96px;
+  height: 96px;
+  border: 2px solid vars.$lcars-sky;
+  border-radius: 8px;
+  object-fit: cover;
+  background: vars.$lcars-black;
+}
+
+.fleet-scope-header__naming {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-start;
+}
+
+// Wraps rather than being clipped: a name that is cut off is a record
+// somebody cannot be sure they have found.
+.fleet-scope-header__name {
+  margin: 0;
+  font-family: vars.$font-antonio;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: vars.$lcars-sunflower;
+  overflow-wrap: anywhere;
+}
+
+.fleet-scope-header__community {
+  margin: 0;
+  font-size: 0.9rem;
+  color: vars.$lcars-grey-light;
+
+  a {
+    color: vars.$lcars-sky;
+  }
+}
+
+.fleet-scope-header__status {
+  @include mixins.lcars-badge;
+
+  color: vars.$lcars-black;
+  background: vars.$lcars-grey-light;
+
+  &--recruiting {
+    background: vars.$lcars-green;
+  }
+
+  &--application,
+  &--invite {
+    background: vars.$lcars-gold;
+  }
+
+  &--closed {
+    background: vars.$lcars-grey-light;
+  }
+
+  &--suspended {
+    background: vars.$lcars-red;
+  }
+}
+
+// A grid rather than a list, so the labels line up down the page and a
+// reader comparing two records in two tabs is comparing the same rows.
+.fleet-scope-header__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+}
+
+.fleet-scope-header__fact {
+  dt {
+    font-size: 0.8rem;
+    color: vars.$lcars-grey-light;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0;
+    color: vars.$lcars-white;
+    overflow-wrap: anywhere;
+  }
+}

@@ -48,3 +48,16 @@ export const FLEET_SCOPE_ICONS: Readonly<Record<FleetScopeType, string>> = {
   [FLEET_SCOPE_FLEET]: 'fa-solid fa-rocket-launch',
   [FLEET_SCOPE_ARMADA]: 'fa-solid fa-layer-group',
 };
+
+/**
+ * How each visibility setting is worded on a scope's page.
+ *
+ * Written as who can see it rather than as the value's name, because
+ * "FLEET_MEMBERS" is a column and "Approved Fleet members" is an answer.
+ */
+export const FLEET_AUDIENCE_LABELS: Readonly<Record<string, string>> = {
+  PUBLIC: 'Anyone, including signed-out visitors',
+  COMMUNITY: 'Subscribers and members of the Community',
+  FLEET_MEMBERS: 'Approved members of the Fleet',
+  PRIVATE: 'The owner alone',
+};

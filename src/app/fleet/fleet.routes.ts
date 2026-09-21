@@ -50,6 +50,34 @@ export const FLEET_ROUTES: Routes = [
           ),
         data: { title: APP_ROUTE_TITLES.FLEET_ARMADAS },
       },
+
+      // The two deeper addresses come before the Community's own, so
+      // `communities/x/fleets/pc/y` is never read as a Community called `x`
+      // with three segments of nonsense after it.
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug',
+        loadComponent: () =>
+          import('./scope/fleet-page/fleet-page.component').then(
+            m => m.FleetPageComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_SCOPE_FLEET },
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug',
+        loadComponent: () =>
+          import('./scope/armada-page/armada-page.component').then(
+            m => m.ArmadaPageComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_SCOPE_ARMADA },
+      },
+      {
+        path: 'communities/:communitySlug',
+        loadComponent: () =>
+          import('./scope/community-page/community-page.component').then(
+            m => m.CommunityPageComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_COMMUNITY },
+      },
     ],
   },
 ];

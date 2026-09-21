@@ -266,3 +266,160 @@ export interface StoArmadaDirectoryQuery extends FleetDirectoryQuery {
   sort?: FleetDirectorySort;
   platformId?: string;
 }
+
+/**
+ * Who may see a scope record.
+ *
+ * A Fleet and a Community each carry one of these; an Armada does not, and
+ * is seen exactly as far as the Community holding it.
+ */
+export enum FleetAudience {
+  /** Anyone, including signed-out visitors. */
+  PUBLIC = 'PUBLIC',
+  /** Subscribers to and members of the owning Community. */
+  COMMUNITY = 'COMMUNITY',
+  /** Approved members of the Fleet itself. */
+  FLEET_MEMBERS = 'FLEET_MEMBERS',
+  /** The owning user alone. */
+  PRIVATE = 'PRIVATE',
+}
+
+/** The artwork every scope can carry, and what each picture shows. */
+export interface FleetScopeArtwork {
+  bannerImageId: string | null;
+  bannerImageAlt: string | null;
+  emblemImageId: string | null;
+  emblemImageAlt: string | null;
+}
+
+/**
+ * A Fleet Community as a reader sees it.
+ */
+export interface FleetCommunity extends FleetScopeArtwork {
+  id: string;
+  ownerUserId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  recruitmentState: FleetRecruitmentState;
+  visibility: FleetAudience;
+  preferredTimezone: string;
+  status: FleetScopeStatus;
+  closedAt: string | null;
+
+  /**
+   * The authorisation revision, which is a hint that a cached view is stale
+   * and never an access decision of its own.
+   */
+  revision: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * A Fleet as a reader sees it.
+ *
+ * `exactGameName` is held exactly as the game writes it, edge spaces
+ * included, and those spaces must stay visible wherever the name is shown.
+ */
+export interface StoFleet extends FleetScopeArtwork {
+  id: string;
+  communityId: string | null;
+  platformId: string;
+  platformName: string;
+  platformSegment: string;
+  exactGameName: string;
+  allegianceFactionId: string | null;
+  slug: string;
+  recruitmentState: FleetRecruitmentState;
+  visibility: FleetAudience;
+  lastEffectiveImportAt: string | null;
+  status: FleetScopeStatus;
+  closedAt: string | null;
+  revision: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * An Armada as a reader sees it.
+ *
+ * No visibility of its own, and nothing here says which Fleets are in it:
+ * membership is a temporal record with its own route, so a Fleet can leave
+ * without this shape changing at all.
+ */
+export interface StoArmada extends FleetScopeArtwork {
+  id: string;
+  communityId: string;
+  platformId: string;
+  platformName: string;
+  platformSegment: string;
+  exactGameName: string;
+  displayName: string | null;
+  slug: string;
+  status: FleetScopeStatus;
+  closedAt: string | null;
+  revision: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * A Community reached by URL segment, and whether that segment is still its.
+ *
+ * Answered as a body rather than as a `301`, because the caller is a
+ * single-page application resolving a route it is about to render: it has to
+ * replace the address in the history stack, which a transparent HTTP
+ * redirect would have already followed without telling it (ADR-0022).
+ */
+export interface ResolvedFleetCommunity {
+  community: FleetCommunity;
+
+  /**
+   * The retired segment that was asked for, when it was not the current one.
+   * Non-null means the address shown should be replaced.
+   */
+  redirectedFrom: string | null;
+}
+
+/**
+ * A Fleet reached by its canonical URL.
+ *
+ * The three segments are answered separately rather than as a path, because
+ * the caller is a resolver assembling its own route and a string it has to
+ * take apart again helps nobody.
+ */
+export interface ResolvedStoFleet {
+  fleet: StoFleet;
+  communitySlug: string;
+
+  /**
+   * The holding Community's display name, carried here rather than fetched
+   * beside it: a page names the Community holding a record, and a slug is a
+   * URL read aloud rather than a name.
+   */
+  communityName: string;
+  platformSegment: string;
+
+  /** True when the address asked for is no longer the canonical one. */
+  redirected: boolean;
+}
+
+/**
+ * An Armada reached by its canonical URL.
+ */
+export interface ResolvedStoArmada {
+  armada: StoArmada;
+  communitySlug: string;
+
+  /**
+   * The holding Community's display name, carried here rather than fetched
+   * beside it: a page names the Community holding a record, and a slug is a
+   * URL read aloud rather than a name.
+   */
+  communityName: string;
+  platformSegment: string;
+
+  /** True when the address asked for is no longer the canonical one. */
+  redirected: boolean;
+}

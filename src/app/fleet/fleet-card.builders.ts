@@ -8,6 +8,10 @@ import {
   FleetScopeCardStatus,
   FleetScopeCardVm,
 } from 'src/app/fleet/components/fleet-scope-card/fleet-scope-card.model';
+import {
+  emblemOf as pictureEmblemOf,
+  FLEET_EMBLEM_SIZES,
+} from 'src/app/fleet/fleet-artwork';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import {
   FleetCommunityCard,
@@ -18,10 +22,6 @@ import {
   StoArmadaCard,
   StoFleetCard,
 } from 'src/app/models/fleet.models';
-import {
-  BASE_CLOUDFLARE_IMAGES_URL,
-  CLOUDFLARE_VARIANT_SQUARE_100PX_NAME,
-} from 'src/app/shared/constants/app-image-assets.constants';
 
 /**
  * Writes an instant out for a reader.
@@ -64,26 +64,28 @@ const LIFECYCLE_PILLS: Readonly<
 };
 
 /**
- * Turns an image reference into somewhere to fetch the picture from.
+ * The emblem at card size.
+ *
+ * A directory card carries no banner, so only half of the shared artwork
+ * helper is reached from here. A card is a row in a list and the emblem is
+ * what a list draws; a banner belongs across the top of the scope's own page.
  *
  * @param card - The card as the server sent it.
  * @returns The emblem to draw, or null when the scope has none.
  */
 function emblemOf(card: FleetDirectoryCard): FleetScopeCardEmblem | null {
-  if (card.emblemImageId === null) {
-    return null;
-  }
-
-  return {
-    url: `${BASE_CLOUDFLARE_IMAGES_URL}/${card.emblemImageId}/${CLOUDFLARE_VARIANT_SQUARE_100PX_NAME}`,
-    // An empty description is the right markup for a picture nobody described,
-    // and reads as decoration rather than as a missing sentence.
-    alt: card.emblemImageAlt ?? '',
-  };
+  return pictureEmblemOf(
+    { ...card, bannerImageId: null, bannerImageAlt: null },
+    FLEET_EMBLEM_SIZES.CARD,
+  );
 }
 
 /**
- * Picks the one thing the pill should say about this record's state.
+ * Picks the one thing the pill should say about a record's state.
+ *
+ * Exported because a scope's own page says the same thing in the same words
+ * as its card does, and two copies would be two chances for a page to call a
+ * suspended Community "recruiting".
  *
  * A closed record's recruitment posture is not worth a reader's attention —
  * nothing can be joined — so the lifecycle wins whenever there is one to
@@ -94,7 +96,7 @@ function emblemOf(card: FleetDirectoryCard): FleetScopeCardEmblem | null {
  * @param recruitment - Its recruitment posture, where it has one.
  * @returns The pill, or null when there is nothing to say.
  */
-function pillFor(
+export function scopeStatusPill(
   status: FleetScopeStatus,
   recruitment: FleetRecruitmentState | null,
 ): FleetScopeCardStatus | null {
@@ -148,7 +150,7 @@ export function buildCommunityCardVm(
     platform: null,
     link: FLEET_LINKS.community(card.slug),
     unlinkedTitle: null,
-    status: pillFor(card.status, card.recruitmentState),
+    status: scopeStatusPill(card.status, card.recruitmentState),
     lastObservedLabel: null,
     meta: card.description === null ? [] : [card.description],
     actions: [],
@@ -186,7 +188,7 @@ export function buildFleetCardVm(
       communitySlug === null
         ? 'Nobody has registered this Fleet to a Community, so it has no page of its own.'
         : null,
-    status: pillFor(card.status, card.recruitmentState),
+    status: scopeStatusPill(card.status, card.recruitmentState),
     lastObservedLabel:
       card.lastEffectiveImportAt === null
         ? 'No roster has ever been imported'
@@ -234,7 +236,7 @@ export function buildArmadaCardVm(card: StoArmadaCard): FleetScopeCardVm {
         : null,
     // An Armada recruits nobody: it groups Fleets. So the pill speaks only
     // when the record itself has stopped operating.
-    status: pillFor(card.status, null),
+    status: scopeStatusPill(card.status, null),
     // Nothing imports a roster for an Armada, so there is nothing to be fresh.
     lastObservedLabel: null,
     meta: [alias, duplicateLine(card)].filter(
