@@ -12,6 +12,7 @@ import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { FleetScopePageState } from 'src/app/fleet/scope/fleet-scope-page.models';
 import {
   FleetScopeStatus,
+  FleetScopeRelationship,
   FleetScopeViewer,
   ResolvedStoArmada,
   StoArmada,
@@ -55,6 +56,9 @@ const READER: FleetScopeViewer = {
   capabilities: [],
   mayManageBanner: false,
   mayManageEmblem: false,
+  relationship: FleetScopeRelationship.NONE,
+  isFollowingCommunity: false,
+  followerCount: 0,
 };
 
 /** A viewer who may change the artwork. */
@@ -62,6 +66,9 @@ const ARTWORK_KEEPER: FleetScopeViewer = {
   capabilities: ['scope.images.manage'],
   mayManageBanner: true,
   mayManageEmblem: true,
+  relationship: FleetScopeRelationship.NONE,
+  isFollowingCommunity: false,
+  followerCount: 0,
 };
 
 /**
@@ -301,5 +308,22 @@ describe('ArmadaPageComponent', () => {
       ],
       { replaceUrl: true, queryParamsHandling: 'preserve' },
     );
+  });
+
+  /*
+   * Armada surfaces are FC-024 to FC-026. Nothing yet decides what following
+   * an Armada would mean, and a control that quietly followed its Community
+   * would be answering a question the reader did not ask.
+   */
+  it('offers nothing to follow', () => {
+    render();
+
+    const drawn = state();
+
+    if (drawn.kind !== 'READY') {
+      throw new Error('expected a ready page');
+    }
+
+    expect(drawn.following).toBeNull();
   });
 });

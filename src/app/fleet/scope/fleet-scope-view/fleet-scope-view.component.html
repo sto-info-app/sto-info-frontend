@@ -24,6 +24,10 @@
 
     <app-fleet-scope-header [vm]="state.header" />
 
+    @if (state.following) {
+      <app-fleet-follow [vm]="state.following" />
+    }
+
     @if (state.artwork) {
       <app-fleet-scope-artwork
         [vm]="state.artwork"

@@ -135,6 +135,11 @@ export class ArmadaPageComponent extends FleetScopePageDirective<ResolvedStoArma
         facts,
       },
       notice: null,
+      // Armada surfaces are FC-024 to FC-026. Nothing here yet decides
+      // what following an Armada would even mean, and a control that
+      // followed its Community from an Armada page would be answering a
+      // question the reader did not ask.
+      following: null,
       description: null,
       artwork: buildScopeArtworkVm(
         {

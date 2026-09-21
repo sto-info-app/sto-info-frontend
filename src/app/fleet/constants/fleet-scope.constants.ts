@@ -89,3 +89,21 @@ export const FLEET_AUDIENCE_CHOICES: Readonly<Record<string, string>> = {
   FLEET_MEMBERS: 'Fleet members',
   PRIVATE: 'Only me',
 };
+
+/**
+ * What a page says about the caller's own standing at a scope.
+ *
+ * Only the states worth a sentence have one. Following says itself through
+ * the control beside it, and somebody with no relationship is told nothing
+ * rather than told they are nobody. `{scope}` is replaced with what the page
+ * is about, because "a member of this Fleet" and "a member of this
+ * Community" are different claims and only one of them is true.
+ */
+export const FLEET_RELATIONSHIP_NOTES: Readonly<Record<string, string | null>> =
+  {
+    NONE: null,
+    FOLLOWER: null,
+    REQUESTED: 'Your request to join this {scope} is waiting for an answer.',
+    MEMBER: 'You are an approved member of this {scope}.',
+    SUSPENDED: 'Your membership of this {scope} is suspended.',
+  };

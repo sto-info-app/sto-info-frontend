@@ -1,11 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { AuthService } from 'src/app/core/auth/auth.service';
+import { CommunitySubscriptionService } from 'src/app/fleet/community-subscription.service';
 import { FLEET_SCOPE_COMMUNITY } from 'src/app/fleet/constants/fleet-scope.constants';
 import {
   FleetScopeHeaderVm,
   FleetScopePageState,
 } from 'src/app/fleet/scope/fleet-scope-page.models';
+
+import { FleetScopeRelationship } from 'src/app/models/fleet.models';
 
 import { FleetScopeViewComponent } from './fleet-scope-view.component';
 
@@ -28,7 +32,11 @@ describe('FleetScopeViewComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FleetScopeViewComponent],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        { provide: CommunitySubscriptionService, useValue: {} },
+        { provide: AuthService, useValue: { isLoggedIn: () => false } },
+      ],
     }).compileComponents();
   });
 
@@ -156,5 +164,38 @@ describe('FleetScopeViewComponent', () => {
     expect(find('.fleet-scope-view__description')?.textContent).toContain(
       '<img src="x"',
     );
+  });
+
+  it('draws the follow control when the page has one', () => {
+    render({
+      kind: 'READY',
+      header: HEADER,
+      notice: null,
+      description: null,
+      artwork: null,
+      following: {
+        communityId: 'community-1',
+        scopeNoun: 'Community',
+        relationship: FleetScopeRelationship.NONE,
+        isFollowing: false,
+        followerCount: 3,
+      },
+    });
+
+    expect(find('app-fleet-follow')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('3 followers');
+  });
+
+  it('draws none where the page has nothing to follow', () => {
+    render({
+      kind: 'READY',
+      header: HEADER,
+      notice: null,
+      description: null,
+      artwork: null,
+      following: null,
+    });
+
+    expect(find('app-fleet-follow')).toBeNull();
   });
 });

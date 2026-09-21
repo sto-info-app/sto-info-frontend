@@ -14,6 +14,7 @@ import {
   FleetAudience,
   FleetRecruitmentState,
   FleetScopeStatus,
+  FleetScopeRelationship,
   FleetScopeViewer,
   ResolvedStoFleet,
   StoFleet,
@@ -61,6 +62,9 @@ const READER: FleetScopeViewer = {
   capabilities: [],
   mayManageBanner: false,
   mayManageEmblem: false,
+  relationship: FleetScopeRelationship.NONE,
+  isFollowingCommunity: false,
+  followerCount: 0,
 };
 
 /** A viewer who may change the artwork. */
@@ -68,6 +72,9 @@ const ARTWORK_KEEPER: FleetScopeViewer = {
   capabilities: ['scope.images.manage'],
   mayManageBanner: true,
   mayManageEmblem: true,
+  relationship: FleetScopeRelationship.NONE,
+  isFollowingCommunity: false,
+  followerCount: 0,
 };
 
 /**
@@ -475,5 +482,25 @@ describe('FleetPageComponent', () => {
     render();
 
     expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  describe('following it', () => {
+    /*
+     * The subscription lives at the Community, so a Fleet page follows the
+     * Community that holds it. The sentence about standing still names the
+     * Fleet, because that is what the page is about.
+     */
+    it('follows the Community that holds the Fleet', () => {
+      render();
+
+      const drawn = state();
+
+      if (drawn.kind !== 'READY') {
+        throw new Error('expected a ready page');
+      }
+
+      expect(drawn.following?.communityId).toBe('community-1');
+      expect(drawn.following?.scopeNoun).toBe('Fleet');
+    });
   });
 });

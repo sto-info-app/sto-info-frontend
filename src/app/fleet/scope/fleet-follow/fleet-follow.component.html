@@ -1,0 +1,55 @@
+<section class="fleet-follow">
+  @if (vm.communityId === null) {
+    <!--
+      Nothing to follow. A Fleet nobody has registered belongs to no
+      Community, so there is no feed to subscribe to and no count to give.
+    -->
+    <p class="fleet-follow__note">
+      Following starts when a Community registers this Fleet.
+    </p>
+  } @else {
+    @if (standingNote) {
+      <p class="fleet-follow__standing">{{ standingNote }}</p>
+    }
+
+    @if (countLabel) {
+      <p class="fleet-follow__count">{{ countLabel }}</p>
+    }
+
+    @if (isSignedIn) {
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto"
+        [class.sky]="!following()"
+        [class.gold]="following()"
+        [disabled]="busy()"
+        (click)="toggle()">
+        @if (following()) {
+          Stop following
+        } @else {
+          Follow this Community
+        }
+      </button>
+
+      <!--
+        Said beside the control rather than after it is pressed. Somebody
+        deciding whether to follow is deciding what it costs them, and
+        finding out afterwards that it granted nothing is the wrong order.
+      -->
+      <p class="fleet-follow__hint">
+        Following shows you what the Community publishes to its followers. It is
+        not a membership, and it opens no roster.
+      </p>
+    } @else {
+      <p class="fleet-follow__note">Sign in to follow this Community.</p>
+    }
+
+    @if (errorMessage()) {
+      <p
+        class="fleet-follow__error"
+        role="alert">
+        {{ errorMessage() }}
+      </p>
+    }
+  }
+</section>

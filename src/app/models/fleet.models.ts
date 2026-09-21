@@ -375,6 +375,27 @@ export interface StoArmada extends FleetScopeArtwork {
 }
 
 /**
+ * How the caller stands to a Community, Fleet or Armada.
+ *
+ * Three separate records answer this — a subscription, an unanswered
+ * request and an approved membership — and the server reduces them to the
+ * one word a page has room for. Display only: following grants no access
+ * anywhere, and nothing here is ever a permission.
+ */
+export enum FleetScopeRelationship {
+  /** Nothing at all. */
+  NONE = 'NONE',
+  /** Follows the owning Community. */
+  FOLLOWER = 'FOLLOWER',
+  /** Has asked to join and has not been answered. */
+  REQUESTED = 'REQUESTED',
+  /** An approved member of this exact scope. */
+  MEMBER = 'MEMBER',
+  /** A member whose access is currently held by an administrator. */
+  SUSPENDED = 'SUSPENDED',
+}
+
+/**
  * What the caller looking at a scope may do to it.
  *
  * Answered with the record rather than fetched beside it, so a scope page
@@ -401,6 +422,34 @@ export interface FleetScopeViewer {
 
   /** Whether to offer setting or replacing the emblem. */
   mayManageEmblem: boolean;
+
+  /**
+   * How the caller stands to the scope, for the page to say plainly.
+   *
+   * What they are, where `capabilities` is what they may do. The two are
+   * different questions and neither answers the other: an administrator
+   * appointed to run a Fleet holds a role rather than a membership, and is
+   * reported as holding no relationship at all.
+   */
+  relationship: FleetScopeRelationship;
+
+  /**
+   * Whether the caller follows the owning Community.
+   *
+   * Separate from the relationship because both can be true at once. A
+   * member who also follows is badged as a member, and the follow control
+   * still has to know which way round to draw itself.
+   */
+  isFollowingCommunity: boolean;
+
+  /**
+   * Live followers of the owning Community, or null when there is none.
+   *
+   * Everything anybody is told about who follows: there is no list. Null is
+   * not zero — a Fleet nobody has registered has no Community, so there is
+   * nobody to follow rather than nobody following.
+   */
+  followerCount: number | null;
 }
 
 /**
@@ -710,4 +759,21 @@ export interface RecordCharacterFleet {
   validFrom: string;
   validTo?: string | null;
   visibility?: FleetAudience;
+}
+
+/**
+ * What following a Community looks like after following or unfollowing it.
+ *
+ * The state rather than the record. Both routes answer with both fields, so
+ * a page can redraw the control and the count from one response.
+ */
+export interface CommunityFollowState {
+  isFollowing: boolean;
+  followerCount: number;
+}
+
+/** A Community the caller follows, with when they started. */
+export interface FollowedCommunity {
+  community: FleetCommunity;
+  followedAt: string;
 }

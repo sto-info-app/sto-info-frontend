@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import {
   FLEET_AUDIENCE_LABELS,
   FLEET_SCOPE_FLEET,
+  FLEET_SCOPE_LABELS,
 } from 'src/app/fleet/constants/fleet-scope.constants';
 import {
   bannerOf,
@@ -196,6 +197,16 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
         facts,
       },
       notice: isStandalone ? STANDALONE_NOTICE : null,
+      // Following is of the Community that holds the Fleet, because that is
+      // where the subscription lives. A Fleet nobody has registered has
+      // none, and the control says so rather than offering nothing.
+      following: {
+        communityId: fleet.communityId,
+        scopeNoun: FLEET_SCOPE_LABELS[FLEET_SCOPE_FLEET],
+        relationship: resolved.viewer.relationship,
+        isFollowing: resolved.viewer.isFollowingCommunity,
+        followerCount: resolved.viewer.followerCount,
+      },
       // A Fleet has no description of its own; what a Community writes about
       // it belongs to the Community.
       description: null,

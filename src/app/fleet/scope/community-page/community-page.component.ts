@@ -17,6 +17,7 @@ import { scopeStatusPill } from 'src/app/fleet/fleet-card.builders';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
+import { FLEET_SCOPE_LABELS } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
   FleetScopeFact,
@@ -170,6 +171,13 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
         facts,
       },
       notice: null,
+      following: {
+        communityId: community.id,
+        scopeNoun: FLEET_SCOPE_LABELS[FLEET_SCOPE_COMMUNITY],
+        relationship: resolved.viewer.relationship,
+        isFollowing: resolved.viewer.isFollowingCommunity,
+        followerCount: resolved.viewer.followerCount,
+      },
       description: community.description,
       artwork: buildScopeArtworkVm(
         { kind: 'COMMUNITY', communityId: community.id },

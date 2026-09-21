@@ -3,6 +3,7 @@ import { FleetScopeType } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetPicture } from 'src/app/fleet/fleet-artwork';
 import { FleetImageSlot } from 'src/app/fleet/fleet-image.constants';
 import { FleetArtworkTarget } from 'src/app/fleet/fleet-image.service';
+import { FleetScopeRelationship } from 'src/app/models/fleet.models';
 
 /** One labelled line in the block of facts beneath a scope's name. */
 export interface FleetScopeFact {
@@ -84,6 +85,31 @@ export interface FleetScopeArtworkVm {
 }
 
 /**
+ * Where the reader stands to the Community a page belongs to.
+ *
+ * Carries the membership standing and the following together because the
+ * page draws them together: the difference between the two is the thing a
+ * reader most often gets wrong, and it is only visible when both are said
+ * at once.
+ */
+export interface FleetFollowVm {
+  /** The Community to follow, or null when the scope has none. */
+  readonly communityId: string | null;
+
+  /** What this page is about, for the standing sentence: Community, Fleet. */
+  readonly scopeNoun: string;
+
+  /** The reader's membership standing at this scope. */
+  readonly relationship: FleetScopeRelationship;
+
+  /** Whether they follow the owning Community. */
+  readonly isFollowing: boolean;
+
+  /** How many follow it, or null when there is no Community. */
+  readonly followerCount: number | null;
+}
+
+/**
  * What a scope page can currently show.
  *
  * Absent has a state of its own rather than sharing the failure's. "No such
@@ -122,6 +148,15 @@ export interface FleetScopeReadyState {
 
   /** What was written about it, where anything was. */
   readonly description: string | null;
+
+  /**
+   * The follow control and the reader's standing, where there is a scope
+   * with a Community behind it to stand in.
+   *
+   * Null on a page where following makes no sense at all, rather than a
+   * control that explains itself away.
+   */
+  readonly following: FleetFollowVm | null;
 
   /**
    * The artwork controls, where the viewer may use any of them.

@@ -18,6 +18,7 @@ import {
   FleetCommunity,
   FleetRecruitmentState,
   FleetScopeStatus,
+  FleetScopeRelationship,
   FleetScopeViewer,
   ResolvedFleetCommunity,
 } from 'src/app/models/fleet.models';
@@ -60,6 +61,9 @@ const READER: FleetScopeViewer = {
   capabilities: [],
   mayManageBanner: false,
   mayManageEmblem: false,
+  relationship: FleetScopeRelationship.NONE,
+  isFollowingCommunity: false,
+  followerCount: 0,
 };
 
 /** A viewer who may change the artwork. */
@@ -67,6 +71,9 @@ const ARTWORK_KEEPER: FleetScopeViewer = {
   capabilities: ['scope.images.manage'],
   mayManageBanner: true,
   mayManageEmblem: true,
+  relationship: FleetScopeRelationship.NONE,
+  isFollowingCommunity: false,
+  followerCount: 0,
 };
 
 describe('CommunityPageComponent', () => {
@@ -485,6 +492,54 @@ describe('CommunityPageComponent', () => {
       render();
 
       expect(actionLinks()).toHaveLength(0);
+    });
+  });
+
+  describe('following it', () => {
+    it('offers the Community itself as the thing to follow', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind).toBe('READY');
+
+      if (drawn.kind !== 'READY') {
+        return;
+      }
+
+      expect(drawn.following).toEqual({
+        communityId: 'community-1',
+        scopeNoun: 'Community',
+        relationship: FleetScopeRelationship.NONE,
+        isFollowing: false,
+        followerCount: 0,
+      });
+    });
+
+    it('passes on the standing the server reported', () => {
+      scopes.resolveCommunity.mockReturnValue(
+        of<ResolvedFleetCommunity>({
+          community: community(),
+          redirectedFrom: null,
+          viewer: {
+            ...READER,
+            relationship: FleetScopeRelationship.MEMBER,
+            isFollowingCommunity: true,
+            followerCount: 12,
+          },
+        }),
+      );
+      render();
+
+      const drawn = state();
+
+      if (drawn.kind !== 'READY') {
+        throw new Error('expected a ready page');
+      }
+
+      expect(drawn.following?.relationship).toBe(FleetScopeRelationship.MEMBER);
+      expect(drawn.following?.isFollowing).toBe(true);
+      expect(drawn.following?.followerCount).toBe(12);
     });
   });
 });

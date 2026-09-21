@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 
 import { FleetScopeArtworkComponent } from 'src/app/fleet/scope/fleet-scope-artwork/fleet-scope-artwork.component';
+import { FleetFollowComponent } from 'src/app/fleet/scope/fleet-follow/fleet-follow.component';
 import { FleetScopeHeaderComponent } from 'src/app/fleet/scope/fleet-scope-header/fleet-scope-header.component';
 import { FleetScopePageState } from 'src/app/fleet/scope/fleet-scope-page.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -32,6 +33,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
   imports: [
     FleetScopeArtworkComponent,
     FleetScopeHeaderComponent,
+    FleetFollowComponent,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,
     LoadingBarComponent,
