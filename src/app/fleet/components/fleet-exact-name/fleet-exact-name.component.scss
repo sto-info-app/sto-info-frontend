@@ -1,0 +1,32 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: inline;
+}
+
+.fleet-exact-name {
+  display: inline;
+}
+
+// Pre-wrap, so a run of spaces inside the name keeps the width it was written
+// with. Without it two Fleets whose names differ only by a double space in the
+// middle draw identically.
+.fleet-exact-name__core {
+  white-space: pre-wrap;
+}
+
+// A space drawn as a mark rather than as a character, because there is no
+// character that reliably renders as a visible space: the kit's fonts are
+// subsetted and a glyph they lack shows as nothing, which is the failure this
+// exists to prevent.
+// ---
+// Sunflower rather than the Fleet system's sky, so the mark reads as something
+// pointed out rather than as part of the name.
+.fleet-exact-name__space {
+  display: inline-block;
+  width: 0.4em;
+  height: 0.85em;
+  margin: 0 1px;
+  vertical-align: baseline;
+  border-bottom: 2px solid vars.$lcars-sunflower;
+}

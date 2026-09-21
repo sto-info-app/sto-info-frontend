@@ -1,0 +1,26 @@
+<!--
+  One element carrying the whole accessible name, with everything inside it
+  hidden from assistive technology. Read piecemeal, a marked space would be
+  announced as an unnamed element between two halves of a name.
+-->
+<span
+  class="fleet-exact-name"
+  [attr.aria-label]="ariaLabel">
+  @for (space of leadingSpaces; track $index) {
+    <span
+      class="fleet-exact-name__space"
+      aria-hidden="true"></span>
+  }
+
+  <span
+    class="fleet-exact-name__core"
+    aria-hidden="true"
+    >{{ core }}</span
+  >
+
+  @for (space of trailingSpaces; track $index) {
+    <span
+      class="fleet-exact-name__space"
+      aria-hidden="true"></span>
+  }
+</span>
