@@ -28,6 +28,14 @@ export interface StoAccount {
 export interface Platform {
   id: string;
   name: string;
+
+  /**
+   * Whether the game provides a fleet roster export on this platform.
+   *
+   * A fact about Star Trek Online rather than about this site, held on the
+   * catalogue because the game may change it.
+   */
+  providesRosterExport: boolean;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;

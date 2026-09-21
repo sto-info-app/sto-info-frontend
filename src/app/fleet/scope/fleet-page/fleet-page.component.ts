@@ -23,7 +23,7 @@ import {
   FleetScopeReadyState,
 } from 'src/app/fleet/scope/fleet-scope-page.models';
 import { FleetScopeViewComponent } from 'src/app/fleet/scope/fleet-scope-view/fleet-scope-view.component';
-import { ResolvedStoFleet } from 'src/app/models/fleet.models';
+import { ResolvedStoFleet, StoFleet } from 'src/app/models/fleet.models';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
@@ -34,6 +34,25 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
  * make it different — nobody stands behind it, and nobody can correct it —
  * are exactly the two a reader would otherwise assume the opposite of.
  */
+/**
+ * What stands where the import date would, on a platform the game exports no
+ * roster from.
+ *
+ * The date line is the strongest thing a reader has for telling a kept record
+ * from an abandoned one, which is exactly why “Never” is the wrong thing to
+ * say to somebody looking at a console Fleet: nobody there has ever been
+ * given a file to import, and a record that could not possibly have one reads
+ * as a record nobody is keeping. Naming the platform matters because the
+ * reader may be the Fleet leader who has spent ten minutes looking for the
+ * menu.
+ *
+ * @param platformName - The platform, as the catalogue names it.
+ * @returns What the line says instead of a date.
+ */
+function rosterUnavailableOn(platformName: string): string {
+  return `The game provides no roster export on ${platformName}`;
+}
+
 const STANDALONE_NOTICE =
   'No Community here has registered this Fleet. The record exists so an ' +
   'imported roster has something to attach to, and so anybody looking for ' +
@@ -113,6 +132,26 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
   }
 
   /**
+   * What the record says about its roster.
+   *
+   * Three answers rather than two. A Fleet that has never imported one and a
+   * Fleet that never could look identical on the line that matters most for
+   * judging a record, and the second is not somebody's neglect.
+   *
+   * @param fleet - The Fleet being drawn.
+   * @returns The line beneath “Roster last imported”.
+   */
+  private rosterFreshness(fleet: StoFleet): string {
+    if (!fleet.platformProvidesRosterExport) {
+      return rosterUnavailableOn(fleet.platformName);
+    }
+
+    return fleet.lastEffectiveImportAt === null
+      ? 'Never'
+      : this.formatInstant(fleet.lastEffectiveImportAt);
+  }
+
+  /**
    * Turns the Fleet into what the page draws.
    *
    * @param resolved - The server's answer.
@@ -125,10 +164,7 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
     const facts: FleetScopeFact[] = [
       {
         label: 'Roster last imported',
-        value:
-          fleet.lastEffectiveImportAt === null
-            ? 'Never'
-            : this.formatInstant(fleet.lastEffectiveImportAt),
+        value: this.rosterFreshness(fleet),
       },
       { label: 'Platform', value: fleet.platformName },
       { label: 'Registered', value: this.formatInstant(fleet.createdAt) },

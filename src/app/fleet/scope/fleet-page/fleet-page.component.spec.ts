@@ -36,6 +36,7 @@ function fleet(overrides: Partial<StoFleet> = {}): StoFleet {
     platformId: 'platform-1',
     platformName: 'PC',
     platformSegment: 'pc',
+    platformProvidesRosterExport: true,
     exactGameName: 'Starfleet Command ',
     allegianceFactionId: null,
     slug: 'starfleet-command',
@@ -217,6 +218,59 @@ describe('FleetPageComponent', () => {
       label: 'Roster last imported',
       value: 'Never',
     });
+  });
+
+  /*
+   * “Never” and “could not possibly” look identical on the line a reader
+   * judges a record by, and only one of them is somebody's neglect.
+   */
+  it('says why a console Fleet has no roster instead of saying Never', () => {
+    scopes.resolveFleet.mockReturnValue(
+      of(
+        resolved({
+          fleet: fleet({
+            platformName: 'Xbox',
+            platformProvidesRosterExport: false,
+          }),
+        }),
+      ),
+    );
+
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.header.facts[0]).toEqual({
+      label: 'Roster last imported',
+      value: 'The game provides no roster export on Xbox',
+    });
+  });
+
+  /*
+   * A Fleet can carry a date from before it moved platform, or from a
+   * console that has since lost the facility. The platform is the reason
+   * there is nothing to show, so it answers first.
+   */
+  it('says so even where a date was recorded before', () => {
+    scopes.resolveFleet.mockReturnValue(
+      of(
+        resolved({
+          fleet: fleet({
+            platformName: 'PlayStation',
+            platformProvidesRosterExport: false,
+            lastEffectiveImportAt: '2015-03-04Z',
+          }),
+        }),
+      ),
+    );
+
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.header.facts[0]?.value).toBe(
+      'The game provides no roster export on PlayStation',
+    );
   });
 
   it('says when a closed Fleet was closed', () => {

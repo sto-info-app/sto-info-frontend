@@ -328,6 +328,16 @@ export interface StoFleet extends FleetScopeArtwork {
   platformId: string;
   platformName: string;
   platformSegment: string;
+
+  /**
+   * Whether the game provides a fleet roster export on this Fleet's
+   * platform.
+   *
+   * False means no roster can ever be imported for it. That is why it has
+   * none, rather than because nobody has got round to it, and the page says
+   * which of the two it is.
+   */
+  platformProvidesRosterExport: boolean;
   exactGameName: string;
   allegianceFactionId: string | null;
   slug: string;
