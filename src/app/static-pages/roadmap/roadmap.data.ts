@@ -83,24 +83,29 @@ export const ROADMAP_COMPLETE: RoadmapEntry[] = [
       'Member reporting and admin moderation tools for the community area.',
     ],
   },
+  {
+    title: 'Storytime and Custom Tracking',
+    details: [
+      'STO Storytime: publish, discover, and track community-created Star Trek Online stories, chapters, characters, and arcs (an out-of-game Foundry).',
+      'Custom account and character tracking options.',
+    ],
+  },
 ];
 
 export const ROADMAP_IN_PROGRESS: string[] = [
-  'STO Storytime: publish, discover, and track community-created Star Trek Online stories, chapters, characters, and arcs (an out-of-game Foundry).',
-  'Custom account and character tracking options.',
+  'Character fleet tracking.',
+  'Fleet-focused tracking and management capabilities.',
+  'Fleet roster management, news and notifications.',
+  'Chat functionality for fleet and friend communication.',
 ];
 
 export const ROADMAP_PLANNED: string[] = [
-  'Character fleet tracking.',
-  'Fleet-focused tracking and management capabilities.',
+  'Space and Ground builds.',
   'Expanded account and character insight views.',
   'More quality-of-life improvements across management workflows.',
 ];
 
-export const ROADMAP_FUTURE_IDEAS: string[] = [
-  'Space and Ground builds.',
-  'Fleet rosters, news and notifications.',
-];
+export const ROADMAP_FUTURE_IDEAS: string[] = [];
 
 export const ROADMAP_SECTION_EXPANDED_DEFAULTS: Record<
   RoadmapSectionKey,
@@ -109,5 +114,5 @@ export const ROADMAP_SECTION_EXPANDED_DEFAULTS: Record<
   complete: true,
   inProgress: true,
   planned: true,
-  futureIdeas: true,
+  futureIdeas: false,
 };

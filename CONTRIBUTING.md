@@ -6,11 +6,11 @@ Thank you for considering contributing to sto-info-frontend! We appreciate your 
 
 ### Reporting Bugs
 
-If you find a bug, please report it by opening an issue on our [GitHub Issues](https://github.com/steverobertsuk/sto-info-frontend/issues) page. Include as much detail as possible to help us understand and reproduce the issue.
+If you find a bug, please report it by opening an issue on our [GitHub Issues](https://github.com/sto-info-app/sto-info-frontend/issues) page. Include as much detail as possible to help us understand and reproduce the issue.
 
 ### Suggesting Enhancements
 
-We welcome suggestions for new features or improvements. Please open an issue on our [GitHub Issues](https://github.com/steverobertsuk/sto-info-frontend/issues) page and describe your idea in detail.
+We welcome suggestions for new features or improvements. Please open an issue on our [GitHub Issues](https://github.com/sto-info-app/sto-info-frontend/issues) page and describe your idea in detail.
 
 ### Submitting Pull Requests
 
@@ -20,7 +20,7 @@ We welcome suggestions for new features or improvements. Please open an issue on
 4. Ensure your code follows our coding standards and passes all tests.
 5. Commit your changes with a descriptive commit message.
 6. Push your branch to your forked repository.
-7. Open a pull request on our [GitHub Pull Requests](https://github.com/steverobertsuk/sto-info-frontend/pulls) page.
+7. Open a pull request on our [GitHub Pull Requests](https://github.com/sto-info-app/sto-info-frontend/pulls) page.
 
 ### Code Style
 

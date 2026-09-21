@@ -1,6 +1,6 @@
 {
   "name": "sto-info-frontend",
-  "version": "1.4.21",
+  "version": "1.4.24",
   "description": "Star Trek Online Information App",
   "author": "Steve Roberts",
   "private": true,
@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/steverobertsuk/sto-info-frontend.git"
+    "url": "https://github.com/sto-info-app/sto-info-frontend.git"
   },
   "scripts": {
     "ng": "ng",
