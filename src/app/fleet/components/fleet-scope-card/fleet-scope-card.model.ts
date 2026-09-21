@@ -37,6 +37,22 @@ export interface FleetScopeCardStatus {
 }
 
 /**
+ * The square emblem drawn at the head of a card.
+ *
+ * A resolved URL rather than the reference the server sends, so the card has
+ * nothing to know about where images are kept. The description arrives with it
+ * rather than beside it: an emblem whose alternative text came from a second
+ * request would render without one for as long as that request took.
+ */
+export interface FleetScopeCardEmblem {
+  /** Where to fetch the picture from. */
+  url: string;
+
+  /** What the picture shows. Empty when nobody said, which is valid markup. */
+  alt: string;
+}
+
+/**
  * Presentation model for a Fleet, Community or Armada card.
  *
  * The directory, a Community's own page and the Armada listings all build one
@@ -53,6 +69,15 @@ export interface FleetScopeCardVm {
 
   /** Which level of the hierarchy this card is. */
   scope: FleetScopeType;
+
+  /**
+   * The scope's emblem, or null when it has none.
+   *
+   * The emblem and not the banner. A card is a row in a list and the emblem is
+   * what a list draws; a banner is five times as wide as it is tall and
+   * belongs across the top of the scope's own page.
+   */
+  emblem: FleetScopeCardEmblem | null;
 
   /**
    * The exact name, as recorded.

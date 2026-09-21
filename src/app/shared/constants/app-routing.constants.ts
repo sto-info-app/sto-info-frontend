@@ -11,6 +11,7 @@ export const ROOT_ROUTES = {
 
 const REGISTRY_ROOT = ROOT_ROUTES.COMMUNITY + '/registry';
 const REGISTRY_PROFILES = REGISTRY_ROOT + '/profiles';
+const FLEET_COMMUNITIES_ROOT = ROOT_ROUTES.FLEETS + '/communities';
 
 export const APP_ROUTES = {
   //Default
@@ -76,7 +77,19 @@ export const APP_ROUTES = {
   COMMUNITY_FRIENDS: ROOT_ROUTES.COMMUNITY + '/friends',
 
   // Fleet Community
+  //
+  // A scope's canonical address spells out the collection it belongs to, so
+  // no Community slug can ever be mistaken for a page of the directory's own:
+  // `communities` and `armadas` are siblings of the Fleet listing at
+  // `/fleets`, and a Community sits one segment below one of them.
   FLEETS: ROOT_ROUTES.FLEETS,
+  FLEET_COMMUNITIES: FLEET_COMMUNITIES_ROOT,
+  FLEET_ARMADAS: ROOT_ROUTES.FLEETS + '/armadas',
+  FLEET_COMMUNITY: FLEET_COMMUNITIES_ROOT + '/:communitySlug',
+  FLEET_SCOPE_FLEET:
+    FLEET_COMMUNITIES_ROOT + '/:communitySlug/fleets/:platformSegment/:slug',
+  FLEET_SCOPE_ARMADA:
+    FLEET_COMMUNITIES_ROOT + '/:communitySlug/armadas/:platformSegment/:slug',
 
   // News
   NEWS: ROOT_ROUTES.NEWS,
@@ -228,6 +241,11 @@ export const APP_ROUTE_TITLES = {
 
   // Fleet Community
   FLEETS: 'Fleets',
+  FLEET_COMMUNITIES: 'Fleet Communities',
+  FLEET_ARMADAS: 'Armadas',
+  FLEET_COMMUNITY: 'Fleet Community',
+  FLEET_SCOPE_FLEET: 'Fleet',
+  FLEET_SCOPE_ARMADA: 'Armada',
 
   // News
   NEWS: 'News',

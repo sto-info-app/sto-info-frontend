@@ -57,11 +57,35 @@
   once here rather than repeated in both branches.
 -->
 <ng-template #identity>
+  <!--
+    Drawn square and dropped entirely when it cannot be fetched. A scope with
+    no emblem gets no placeholder: the badge and the name already say what the
+    row is, and a column of identical grey squares would be furniture.
+  -->
+  @if (vm.emblem && !hasEmblemFailed) {
+    <img
+      class="fleet-scope-card__emblem"
+      loading="lazy"
+      width="48"
+      height="48"
+      [src]="vm.emblem.url"
+      [alt]="vm.emblem.alt"
+      (error)="onEmblemError()" />
+  }
+
   <app-fleet-scope-badge
     [scope]="vm.scope"
     [platform]="vm.platform" />
 
-  <span class="fleet-scope-card__name">{{ vm.name }}</span>
+  <!--
+    Every name goes through the exact-name component, including a Community's,
+    which the server has trimmed and which therefore draws no marks. One path
+    rather than two: the day a name reaches a card from somewhere that did not
+    trim it, it is shown rather than swallowed.
+  -->
+  <span class="fleet-scope-card__name">
+    <app-fleet-exact-name [name]="vm.name" />
+  </span>
 
   @if (vm.communityName) {
     <span class="fleet-scope-card__community">{{ vm.communityName }}</span>

@@ -28,6 +28,18 @@
   text-decoration: none;
 }
 
+// Square, because an emblem is a badge rather than a portrait: the circular
+// crop the profile avatar uses would take the corners off one.
+.fleet-scope-card__emblem {
+  display: block;
+  width: 48px;
+  height: 48px;
+  border: 2px solid vars.$lcars-sky;
+  border-radius: 6px;
+  object-fit: cover;
+  background: vars.$lcars-black;
+}
+
 // The name is the whole point of the card and comes from a CSV, so it is given
 // room to be long: it wraps rather than being clipped, because a Fleet whose
 // name is cut off is a Fleet somebody cannot be sure they have found.
@@ -63,8 +75,21 @@ a.fleet-scope-card__identity:focus-visible .fleet-scope-card__name {
     background: vars.$lcars-green;
   }
 
+  // Applications and invitations are both "the door is shut but there is a
+  // way through", so they share a colour and are told apart by their words.
+  &--application,
+  &--invite {
+    background: vars.$lcars-gold;
+  }
+
   &--closed {
     background: vars.$lcars-grey-light;
+  }
+
+  // An administrative hold, which is not the owner's doing and is not the
+  // same as closed — hence its own colour rather than the grey.
+  &--suspended {
+    background: vars.$lcars-red;
   }
 
   &--disputed {

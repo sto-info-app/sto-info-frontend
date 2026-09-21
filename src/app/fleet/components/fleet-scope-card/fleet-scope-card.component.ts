@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
+import { FleetExactNameComponent } from 'src/app/fleet/components/fleet-exact-name/fleet-exact-name.component';
 import { FleetScopeBadgeComponent } from 'src/app/fleet/components/fleet-scope-badge/fleet-scope-badge.component';
 
 import { FleetScopeCardVm } from './fleet-scope-card.model';
@@ -32,15 +33,45 @@ import { FleetScopeCardVm } from './fleet-scope-card.model';
   styleUrls: ['./fleet-scope-card.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, FleetScopeBadgeComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FleetExactNameComponent,
+    FleetScopeBadgeComponent,
+  ],
 })
 export class FleetScopeCardComponent {
+  private _vm!: FleetScopeCardVm;
+
+  /** Set once this card's emblem has failed to load. */
+  hasEmblemFailed = false;
+
   /** What to draw. */
-  @Input({ required: true }) vm!: FleetScopeCardVm;
+  @Input({ required: true }) set vm(value: FleetScopeCardVm) {
+    this._vm = value;
+    // A card in a list is reused for a different record as the page turns, and
+    // a failure remembered from the last one would hide an emblem that is
+    // perfectly fine.
+    this.hasEmblemFailed = false;
+  }
+
+  get vm(): FleetScopeCardVm {
+    return this._vm;
+  }
 
   /** Set while an action is in flight, so every button on the card disables. */
   @Input() isActing = false;
 
   /** Emits the `key` of the action button the viewer activated. */
   @Output() readonly action = new EventEmitter<string>();
+
+  /**
+   * Drops the emblem when it cannot be fetched.
+   *
+   * A broken-image icon says nothing a reader can act on, and the row reads
+   * perfectly well without a picture.
+   */
+  onEmblemError(): void {
+    this.hasEmblemFailed = true;
+  }
 }

@@ -19,6 +19,7 @@ function buildVm(overrides: Partial<FleetScopeCardVm> = {}): FleetScopeCardVm {
   return {
     id: 'fleet-1',
     scope: FLEET_SCOPE_FLEET,
+    emblem: null,
     name: 'Starfleet Command',
     communityName: 'United Federation Alliance',
     platform: 'PC',
@@ -99,12 +100,18 @@ describe('FleetScopeCardComponent', () => {
   // A name is evidence, not a label: two Fleets whose names differ only in
   // their spacing are two Fleets, and a directory that tidies them is a
   // directory in which one cannot be found.
-  it('renders the name exactly as recorded', () => {
+  it('renders the name exactly as recorded, edge spaces marked', () => {
     render(buildVm({ name: '  Starfleet   Command  ' }));
 
-    expect(find('.fleet-scope-card__name')?.textContent).toBe(
-      '  Starfleet   Command  ',
+    // The spaces between the words stay in the text, where they are visible
+    // as gaps. The four at the ends are drawn as marks instead, because HTML
+    // would otherwise collapse them to nothing.
+    expect(find('.fleet-exact-name__core')?.textContent).toBe(
+      'Starfleet   Command',
     );
+    expect(
+      fixture.nativeElement.querySelectorAll('.fleet-exact-name__space'),
+    ).toHaveLength(4);
   });
 
   // A Fleet name comes from a CSV somebody uploaded.
@@ -218,6 +225,64 @@ describe('FleetScopeCardComponent', () => {
       render(buildVm());
 
       expect(find('.fleet-scope-card__actions')).toBeNull();
+    });
+  });
+  describe('the emblem', () => {
+    /**
+     * The emblem image, when one is drawn.
+     *
+     * @returns The image, or null.
+     */
+    const emblem = (): HTMLImageElement | null =>
+      find('.fleet-scope-card__emblem') as HTMLImageElement | null;
+
+    it('draws the emblem it was given, with its description', () => {
+      render(
+        buildVm({
+          emblem: {
+            url: 'https://images.test/emblem/square100',
+            alt: 'A crossed-sabres badge',
+          },
+        }),
+      );
+
+      expect(emblem()?.getAttribute('src')).toBe(
+        'https://images.test/emblem/square100',
+      );
+      expect(emblem()?.getAttribute('alt')).toBe('A crossed-sabres badge');
+    });
+
+    it('draws nothing where a scope has no emblem', () => {
+      render(buildVm({ emblem: null }));
+
+      expect(emblem()).toBeNull();
+    });
+
+    it('drops the emblem rather than showing a broken image', () => {
+      render(buildVm({ emblem: { url: 'https://images.test/gone', alt: '' } }));
+
+      emblem()?.dispatchEvent(new Event('error'));
+      fixture.detectChanges();
+
+      expect(emblem()).toBeNull();
+    });
+
+    it('tries again when the card is reused for another record', () => {
+      render(buildVm({ emblem: { url: 'https://images.test/gone', alt: '' } }));
+
+      emblem()?.dispatchEvent(new Event('error'));
+      fixture.detectChanges();
+
+      fixture.componentRef.setInput(
+        'vm',
+        buildVm({
+          id: 'fleet-2',
+          emblem: { url: 'https://images.test/other', alt: 'Another badge' },
+        }),
+      );
+      fixture.detectChanges();
+
+      expect(emblem()?.getAttribute('src')).toBe('https://images.test/other');
     });
   });
 });
