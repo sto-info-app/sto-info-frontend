@@ -95,3 +95,100 @@
   justify-content: flex-end;
   margin-top: 1.5rem;
 }
+
+// ─── Artwork dialogue ────────────────────────────────────────────────────────
+// Choosing, cropping and describing a banner or an emblem. Global rather than
+// encapsulated with the component, as Storytime's is, because the rules reach
+// into `image-cropper`'s own template and into the Material dialogue's action
+// row — neither of which a component's scoped styles can see.
+
+#fleet-community-image-dialog-container {
+  padding: 10px;
+
+  .mat-mdc-dialog-actions {
+    gap: 1rem;
+    padding: 1rem 3rem;
+  }
+
+  .field-hint {
+    max-width: 70ch;
+    margin: 0.35rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: vars.$lcars-grey-light;
+  }
+}
+
+.fleet-community-image-crop {
+  &__guidance {
+    max-width: 70ch;
+    margin: 0 0 0.35rem;
+  }
+
+  &__layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 1rem;
+
+    // Only once a picture has been chosen is there a second column worth
+    // reserving room for.
+    &.has-image {
+      flex-flow: row nowrap;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+  }
+
+  &__main {
+    flex: 2;
+    min-width: 0;
+
+    --cropper-overlay-color: transparent;
+
+    image-cropper {
+      width: 100%;
+      max-height: 55vh;
+
+      div,
+      div img {
+        width: auto;
+        max-height: 55vh;
+      }
+    }
+  }
+
+  &__side {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 220px;
+  }
+
+  &__preview img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    border: 2px solid vars.$lcars-sunflower;
+  }
+
+  &__alt {
+    margin-top: 1rem;
+  }
+
+  &__actions {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.5rem;
+  }
+}
+
+@media (width <= 768px) {
+  // With no room for a preview beside the cropper, it goes under it.
+  .fleet-community-image-crop__layout.has-image {
+    flex-flow: column nowrap;
+    gap: 1rem;
+  }
+}
