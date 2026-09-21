@@ -227,7 +227,9 @@ describe('fleet-card.builders', () => {
       expect(vm.unlinkedTitle).toBeNull();
     });
 
-    it('should leave an unregistered Fleet unlinked, and say why', () => {
+    // A Fleet with no Community still has a page, under the reserved
+    // `standalone` segment where a Community's slug would sit.
+    it('should address a Fleet with no Community under the standalone segment', () => {
       const vm = buildFleetCardVm(
         fleetCard({
           communityId: null,
@@ -237,10 +239,16 @@ describe('fleet-card.builders', () => {
         formatInstant,
       );
 
-      expect(vm.link).toBeNull();
-      expect(vm.unlinkedTitle).toBe(
-        'Nobody has registered this Fleet to a Community, so it has no page of its own.',
-      );
+      expect(vm.link).toEqual([
+        '/fleets',
+        'communities',
+        'standalone',
+        'fleets',
+        'pc',
+        'starfleet-command',
+      ]);
+      expect(vm.unlinkedTitle).toBeNull();
+      expect(vm.communityName).toBeNull();
     });
 
     it('should write the last roster import out in the reader’s own words', () => {

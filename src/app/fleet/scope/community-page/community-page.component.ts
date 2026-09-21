@@ -116,6 +116,7 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
         status: scopeStatusPill(community.status, community.recruitmentState),
         facts,
       },
+      notice: null,
       description: community.description,
     };
   }

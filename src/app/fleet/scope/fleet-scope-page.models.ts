@@ -75,6 +75,16 @@ export interface FleetScopeReadyState {
   /** The head of the page: what this is, and the facts telling it apart. */
   readonly header: FleetScopeHeaderVm;
 
+  /**
+   * Something about the record the reader should know before reading it,
+   * where there is anything.
+   *
+   * Above the record rather than among its facts, because it explains what
+   * kind of thing they are looking at rather than stating one more property
+   * of it: a Fleet nobody here runs is the case this exists for.
+   */
+  readonly notice: string | null;
+
   /** What was written about it, where anything was. */
   readonly description: string | null;
 }

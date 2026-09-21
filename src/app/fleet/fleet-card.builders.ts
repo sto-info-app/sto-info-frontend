@@ -168,9 +168,8 @@ export function buildFleetCardVm(
   card: StoFleetCard,
   formatInstant: InstantFormatter,
 ): FleetScopeCardVm {
-  // An unregistered Fleet has no Community, and the slug index and the
-  // canonical address both start from one, so there is nowhere to send a
-  // reader who clicks it. Saying why is better than a link that goes nowhere.
+  // A Fleet with no Community still has a page: it is addressed under the
+  // reserved `standalone` segment, where a Community's slug would sit.
   const communitySlug = card.communitySlug;
 
   return {
@@ -182,12 +181,9 @@ export function buildFleetCardVm(
     platform: card.platformName,
     link:
       communitySlug === null
-        ? null
+        ? FLEET_LINKS.standaloneFleet(card.platformSegment, card.slug)
         : FLEET_LINKS.fleet(communitySlug, card.platformSegment, card.slug),
-    unlinkedTitle:
-      communitySlug === null
-        ? 'Nobody has registered this Fleet to a Community, so it has no page of its own.'
-        : null,
+    unlinkedTitle: null,
     status: scopeStatusPill(card.status, card.recruitmentState),
     lastObservedLabel:
       card.lastEffectiveImportAt === null

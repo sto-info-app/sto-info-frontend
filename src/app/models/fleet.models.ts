@@ -397,8 +397,12 @@ export interface ResolvedStoFleet {
    * The holding Community's display name, carried here rather than fetched
    * beside it: a page names the Community holding a record, and a slug is a
    * URL read aloud rather than a name.
+   *
+   * Null for a standalone Fleet, which has no Community to name. The
+   * segment above still has a value, because the address has that position
+   * filled — by the word standing for its absence.
    */
-  communityName: string;
+  communityName: string | null;
   platformSegment: string;
 
   /** True when the address asked for is no longer the canonical one. */
@@ -416,8 +420,12 @@ export interface ResolvedStoArmada {
    * The holding Community's display name, carried here rather than fetched
    * beside it: a page names the Community holding a record, and a slug is a
    * URL read aloud rather than a name.
+   *
+   * Null for a standalone Fleet, which has no Community to name. The
+   * segment above still has a value, because the address has that position
+   * filled — by the word standing for its absence.
    */
-  communityName: string;
+  communityName: string | null;
   platformSegment: string;
 
   /** True when the address asked for is no longer the canonical one. */

@@ -133,6 +133,7 @@ export class ArmadaPageComponent extends FleetScopePageDirective<ResolvedStoArma
         status: scopeStatusPill(armada.status, null),
         facts,
       },
+      notice: null,
       description: null,
     };
   }

@@ -233,6 +233,80 @@ describe('FleetPageComponent', () => {
     );
   });
 
+  describe('a Fleet no Community has registered', () => {
+    beforeEach(() => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ communityId: null }),
+            communitySlug: 'standalone',
+            communityName: null,
+          }),
+        ),
+      );
+    });
+
+    // The two things that make such a record different — nobody stands
+    // behind it, and nobody can correct it — are the two a reader would
+    // otherwise assume the opposite of.
+    it('says plainly that nobody here runs it', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.notice).toContain(
+        'No Community here has registered this Fleet',
+      );
+      expect(drawn.kind === 'READY' && drawn.notice).toContain(
+        'nobody can change or close it',
+      );
+    });
+
+    it('names no Community and offers nothing to open', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.header.communityName).toBeNull();
+      expect(drawn.kind === 'READY' && drawn.header.communityLink).toBeNull();
+    });
+
+    it('keeps the reserved segment when it corrects the address', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ communityId: null }),
+            communitySlug: 'standalone',
+            communityName: null,
+            redirected: true,
+          }),
+        ),
+      );
+
+      render();
+
+      expect(router.navigate).toHaveBeenCalledWith(
+        [
+          '/fleets',
+          'communities',
+          'standalone',
+          'fleets',
+          'pc',
+          'starfleet-command',
+        ],
+        { replaceUrl: true, queryParamsHandling: 'preserve' },
+      );
+    });
+  });
+
+  it('carries no notice for a Fleet a Community registered', () => {
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.notice).toBeNull();
+  });
+
   it('replaces the address when any segment of it is out of date', () => {
     scopes.resolveFleet.mockReturnValue(of(resolved({ redirected: true })));
 

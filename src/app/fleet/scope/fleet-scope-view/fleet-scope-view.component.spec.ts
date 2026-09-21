@@ -86,7 +86,7 @@ describe('FleetScopeViewComponent', () => {
   });
 
   it('draws the head of the record when it has one', () => {
-    render({ kind: 'READY', header: HEADER, description: null });
+    render({ kind: 'READY', header: HEADER, notice: null, description: null });
 
     expect(find('app-fleet-scope-header')).not.toBeNull();
     expect(fixture.nativeElement.textContent).toContain(
@@ -94,10 +94,39 @@ describe('FleetScopeViewComponent', () => {
     );
   });
 
+  // Above the record rather than among its facts: it explains what kind of
+  // thing the reader is looking at rather than stating one more property.
+  it('puts a notice about the record above the record', () => {
+    render({
+      kind: 'READY',
+      header: HEADER,
+      notice: 'No Community here has registered this Fleet.',
+      description: null,
+    });
+
+    const children = Array.from(
+      (fixture.nativeElement as HTMLElement).children,
+    ).map(child => child.tagName.toLowerCase());
+
+    expect(fixture.nativeElement.textContent).toContain(
+      'No Community here has registered this Fleet.',
+    );
+    expect(children.indexOf('app-lcars-information-message')).toBeLessThan(
+      children.indexOf('app-fleet-scope-header'),
+    );
+  });
+
+  it('draws no notice where there is nothing to say', () => {
+    render({ kind: 'READY', header: HEADER, notice: null, description: null });
+
+    expect(find('app-lcars-information-message')).toBeNull();
+  });
+
   it('shows a description beneath its own bar', () => {
     render({
       kind: 'READY',
       header: HEADER,
+      notice: null,
       description: 'A home for casual PvE fleets.',
     });
 
@@ -108,7 +137,7 @@ describe('FleetScopeViewComponent', () => {
   });
 
   it('draws no About bar where nothing was written', () => {
-    render({ kind: 'READY', header: HEADER, description: null });
+    render({ kind: 'READY', header: HEADER, notice: null, description: null });
 
     expect(find('.lcars-text-bar')).toBeNull();
   });
@@ -119,6 +148,7 @@ describe('FleetScopeViewComponent', () => {
     render({
       kind: 'READY',
       header: HEADER,
+      notice: null,
       description: '<img src="x" onerror="alert(1)">',
     });
 

@@ -16,6 +16,12 @@
   }
 
   @case ('READY') {
+    @if (state.notice) {
+      <app-lcars-information-message
+        title="About this record"
+        [message]="state.notice" />
+    }
+
     <app-fleet-scope-header [vm]="state.header" />
 
     @if (state.description) {

@@ -44,6 +44,20 @@ describe('FLEET_LINKS', () => {
     ]);
   });
 
+  // The same shape as a registered Fleet's, with the reserved segment where
+  // the Community's slug would be, so a link to a Fleet is built the same
+  // way wherever it comes from.
+  it('should address a standalone Fleet under the reserved segment', () => {
+    expect(FLEET_LINKS.standaloneFleet('pc', 'starfleet-command')).toEqual([
+      '/fleets',
+      'communities',
+      'standalone',
+      'fleets',
+      'pc',
+      'starfleet-command',
+    ]);
+  });
+
   it('should address an Armada by Community, platform and slug', () => {
     expect(
       FLEET_LINKS.armada(

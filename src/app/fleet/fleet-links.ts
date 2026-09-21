@@ -4,6 +4,20 @@ import { ROOT_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 const FLEETS = '/' + ROOT_ROUTES.FLEETS;
 
 /**
+ * The segment standing where a Community's slug would, for a Fleet that has
+ * none.
+ *
+ * A standalone Fleet is a record of a Fleet nobody here runs, and it needs
+ * an address for the same reason every other record does: so it can be
+ * linked to, and so the person about to confirm a second one is shown the
+ * first. It has no Community to name, so the position names its absence.
+ *
+ * Reserved against Community slugs by the server, which is what lets one
+ * word mean exactly one thing in that position.
+ */
+export const FLEET_STANDALONE_SEGMENT = 'standalone';
+
+/**
  * Router links to the canonical address of each kind of scope.
  *
  * Built here rather than written out at each call site. A router link is an
@@ -66,6 +80,26 @@ export const FLEET_LINKS = {
     FLEETS,
     'communities',
     communitySlug,
+    'fleets',
+    platformSegment,
+    fleetSlug,
+  ],
+
+  /**
+   * One Fleet's page, where no Community registered it.
+   *
+   * The same shape as a registered Fleet's, with the reserved segment where
+   * the Community's slug would be. One shape rather than two, so a link to
+   * a Fleet is built the same way wherever it comes from.
+   *
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  standaloneFleet: (platformSegment: string, fleetSlug: string): string[] => [
+    FLEETS,
+    'communities',
+    FLEET_STANDALONE_SEGMENT,
     'fleets',
     platformSegment,
     fleetSlug,
