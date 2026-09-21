@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+
+import { BehaviorSubject } from 'rxjs';
+
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { CommunityTabsComponent } from './community-tabs.component';
 
@@ -8,9 +12,11 @@ describe('CommunityTabsComponent', () => {
   let fixture: ComponentFixture<CommunityTabsComponent>;
   let component: CommunityTabsComponent;
   let authServiceSpy: { isLoggedIn: jest.Mock };
+  let fleetOffered$: BehaviorSubject<boolean>;
 
   beforeEach(async () => {
     authServiceSpy = { isLoggedIn: jest.fn(() => false) };
+    fleetOffered$ = new BehaviorSubject<boolean>(true);
 
     await TestBed.configureTestingModule({
       imports: [CommunityTabsComponent],
@@ -20,6 +26,10 @@ describe('CommunityTabsComponent', () => {
         {
           provide: RoutingService,
           useValue: { getLink: jest.fn((route: string) => `/${route}`) },
+        },
+        {
+          provide: FleetConfigurationService,
+          useValue: { isOffered: () => fleetOffered$ },
         },
       ],
     }).compileComponents();
@@ -34,9 +44,11 @@ describe('CommunityTabsComponent', () => {
    * `detectChanges` would not re-evaluate the tabs getter.
    *
    * @param loggedIn - Whether the visitor is signed in.
+   * @param fleetOffered - Whether the Fleet section is being offered.
    */
-  function render(loggedIn = false): void {
+  function render(loggedIn = false, fleetOffered = true): void {
     authServiceSpy.isLoggedIn.mockReturnValue(loggedIn);
+    fleetOffered$.next(fleetOffered);
     fixture.detectChanges();
   }
 
@@ -60,6 +72,7 @@ describe('CommunityTabsComponent', () => {
       'Recently Joined',
       'Recently Active',
       'Profiles',
+      'Fleets',
     ]);
   });
 
@@ -76,6 +89,7 @@ describe('CommunityTabsComponent', () => {
       '/community/registry/recently-joined',
       '/community/registry/recently-active',
       '/community/registry/profiles',
+      '/fleets',
     ]);
   });
 
@@ -106,6 +120,44 @@ describe('CommunityTabsComponent', () => {
     const profiles = component.tabs.find(tab => tab.label === 'Profiles');
 
     expect(profiles?.exact).toBe(false);
+  });
+
+  it('should put Fleets last, after the tabs that stay in the section', () => {
+    render(true);
+
+    const labels = renderedLabels();
+
+    expect(labels[labels.length - 1]).toBe('Fleets');
+    expect(labels[labels.length - 2]).toBe('Friends');
+  });
+
+  it('should drop the Fleets tab when the section is not offered', () => {
+    render(true, false);
+
+    expect(renderedLabels()).not.toContain('Fleets');
+  });
+
+  // The answer arrives after the strip has already rendered, and nothing
+  // else on a community page dirties this view. Without the change-detection
+  // pass the operator forces, the tab would not appear until the reader did
+  // something unrelated.
+  it('should add the Fleets tab when the answer arrives after the first render', () => {
+    render(false, false);
+
+    expect(renderedLabels()).not.toContain('Fleets');
+
+    fleetOffered$.next(true);
+
+    expect(renderedLabels()).toContain('Fleets');
+  });
+
+  it('should match the Fleets tab exactly, since it never lights from here', () => {
+    render();
+
+    const fleets = component.tabs.find(tab => tab.label === 'Fleets');
+
+    expect(fleets?.link).toBe('/fleets');
+    expect(fleets?.exact).toBe(true);
   });
 
   it('should cap the strip with the LCARS end piece', () => {

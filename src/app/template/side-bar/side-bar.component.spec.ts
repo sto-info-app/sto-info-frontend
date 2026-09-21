@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { SideBarComponent } from './side-bar.component';
 
@@ -10,6 +11,7 @@ describe('SideBarComponent', () => {
   let fixture: ComponentFixture<SideBarComponent>;
   let routingServiceSpy: jest.Mocked<RoutingService>;
   let authServiceSpy: Pick<AuthService, 'isLoggedInAsAdmin'>;
+  let fleetOffered$: BehaviorSubject<boolean>;
 
   /**
    * Builds the component with the current provider stubs.
@@ -29,6 +31,8 @@ describe('SideBarComponent', () => {
       isLoggedInAsAdmin: jest.fn().mockReturnValue(false),
     };
 
+    fleetOffered$ = new BehaviorSubject<boolean>(false);
+
     TestBed.configureTestingModule({
       imports: [SideBarComponent],
       providers: [
@@ -41,6 +45,10 @@ describe('SideBarComponent', () => {
         },
         { provide: RoutingService, useValue: routingServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },
+        {
+          provide: FleetConfigurationService,
+          useValue: { isOffered: () => fleetOffered$ },
+        },
       ],
     });
     createComponent();
@@ -101,6 +109,60 @@ describe('SideBarComponent', () => {
 
     (authServiceSpy.isLoggedInAsAdmin as jest.Mock).mockReturnValue(true);
     expect(component.isAdmin).toBe(true);
+  });
+
+  describe('Fleets link', () => {
+    /**
+     * Reads the sidebar's link labels.
+     *
+     * @returns The text of every sidebar link.
+     */
+    const linkLabels = (): string[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.sidebar-buttons a',
+        ),
+      ).map(link => link.textContent?.trim() ?? '');
+
+    // A link that appears and then disappears is worse than one that
+    // arrives a moment late, so nothing is offered until the answer is in.
+    it('should stay hidden before the feature state is known', () => {
+      createComponent();
+
+      expect(linkLabels()).not.toContain('Fleets');
+    });
+
+    it('should offer Fleets once the section is offered', () => {
+      fleetOffered$.next(true);
+      createComponent();
+
+      expect(linkLabels()).toContain('Fleets');
+    });
+
+    // The answer arrives after the sidebar has rendered, and a navigation
+    // elsewhere does not dirty this view. The async pipe is what puts the
+    // entry on screen when it does.
+    it('should offer Fleets when the answer arrives after the first render', () => {
+      createComponent();
+
+      expect(linkLabels()).not.toContain('Fleets');
+
+      fleetOffered$.next(true);
+      fixture.detectChanges();
+
+      expect(linkLabels()).toContain('Fleets');
+    });
+
+    // Beside Community: one is a directory of officers, the other a
+    // directory of the groups they fly with.
+    it('should sit directly after Community', () => {
+      fleetOffered$.next(true);
+      createComponent();
+
+      const labels = linkLabels();
+
+      expect(labels.indexOf('Fleets')).toBe(labels.indexOf('Community') + 1);
+    });
   });
 
   describe('Storytime link', () => {

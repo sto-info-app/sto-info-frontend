@@ -123,4 +123,78 @@ describe('FleetConfigurationService', () => {
       expect(result).toEqual(FLEET_FEATURES_DISABLED);
     });
   });
+
+  describe('isOffered', () => {
+    /**
+     * A link that appears and then disappears is worse than one that
+     * arrives a moment late, so nothing is offered until the answer is in.
+     */
+    it('offers nothing before the server answers', () => {
+      const emitted: boolean[] = [];
+      service.isOffered().subscribe(offered => emitted.push(offered));
+
+      expect(emitted).toEqual([false]);
+
+      httpMock.expectOne(API_URLS.FLEET_CONFIGURATION).flush(CONFIGURATION);
+
+      expect(emitted).toEqual([false, true]);
+    });
+
+    it('offers the section when the server says it is on', () => {
+      let result: boolean | undefined;
+      service.isOffered().subscribe(offered => (result = offered));
+
+      httpMock.expectOne(API_URLS.FLEET_CONFIGURATION).flush(CONFIGURATION);
+
+      expect(result).toBe(true);
+    });
+
+    /**
+     * The one answer that takes an entry away. A switched-off section has
+     * nothing behind its link worth reaching.
+     */
+    it('offers nothing when the server says the feature is off', () => {
+      const emitted: boolean[] = [];
+      service.isOffered().subscribe(offered => emitted.push(offered));
+
+      httpMock.expectOne(API_URLS.FLEET_CONFIGURATION).flush({
+        ...CONFIGURATION,
+        features: { ...CONFIGURATION.features, isEnabled: false },
+      });
+
+      expect(emitted).toEqual([false]);
+    });
+
+    /**
+     * The opposite reading of the same failure from `getFeatures`, and
+     * deliberately so: a link has a page behind it that explains an outage,
+     * where a control that cannot be saved has nothing to explain.
+     */
+    it('keeps offering the section when the request fails', () => {
+      let result: boolean | undefined;
+      service.isOffered().subscribe(offered => (result = offered));
+
+      httpMock
+        .expectOne(API_URLS.FLEET_CONFIGURATION)
+        .error(new ProgressEvent('network error'));
+
+      expect(result).toBe(true);
+    });
+
+    /**
+     * Two identical answers would be two renders of the same navigation,
+     * and the second one has nothing to say.
+     */
+    it('does not repeat an answer it has already given', () => {
+      const emitted: boolean[] = [];
+      service.isOffered().subscribe(offered => emitted.push(offered));
+
+      httpMock.expectOne(API_URLS.FLEET_CONFIGURATION).flush({
+        ...CONFIGURATION,
+        features: { ...CONFIGURATION.features, isEnabled: false },
+      });
+
+      expect(emitted).toHaveLength(1);
+    });
+  });
 });

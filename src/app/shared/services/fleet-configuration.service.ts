@@ -1,7 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
-import { catchError, map, Observable, of, shareReplay, startWith } from 'rxjs';
+import {
+  catchError,
+  distinctUntilChanged,
+  map,
+  Observable,
+  of,
+  shareReplay,
+  startWith,
+} from 'rxjs';
 
 import {
   FLEET_FEATURES_DISABLED,
@@ -43,6 +51,38 @@ export class FleetConfigurationService {
     return this.getConfiguration().pipe(
       map(configuration => configuration?.features ?? FLEET_FEATURES_DISABLED),
       startWith(FLEET_FEATURES_DISABLED),
+    );
+  }
+
+  /**
+   * Whether to offer Fleet Community in the navigation.
+   *
+   * Asks whether the section should be offered rather than whether it is
+   * switched on, so a backend that could not be reached leaves the
+   * navigation alone: the entry stays, and following it reaches the notice
+   * explaining the outage. Only the server saying the feature is off takes
+   * an entry away.
+   *
+   * That is the opposite reading of the same failure from `getFeatures`,
+   * which reports everything off, and deliberately so. A control that
+   * writes has nothing to explain when the write would be refused; a link
+   * has a page behind it that explains itself.
+   *
+   * Starts hidden so an entry never flickers into view before the answer is
+   * known — a link that appears and then disappears is worse than one that
+   * arrives a moment late. The answer is cached for the lifetime of the
+   * application, so only the first page of a visit waits for it.
+   *
+   * @returns An observable of whether to offer the section.
+   */
+  isOffered(): Observable<boolean> {
+    return this.getConfiguration().pipe(
+      map(
+        configuration =>
+          configuration === null || configuration.features.isEnabled,
+      ),
+      startWith(false),
+      distinctUntilChanged(),
     );
   }
 

@@ -25,6 +25,19 @@
             routerLinkActive="active"
           >{{ appRouteTitles.COMMUNITY }}</a>
         </li>
+        <!--
+          Beside Community, as in the sidebar. Present unless the server
+          says the feature is off; an unreachable backend leaves the link,
+          because following it is how a visitor learns there is an outage.
+        -->
+        @if (isFleetOffered$ | async) {
+          <li>
+            <a
+              [routerLink]="getRouteLink(appRoutes.FLEETS)"
+              routerLinkActive="active"
+            >{{ appRouteTitles.FLEETS }}</a>
+          </li>
+        }
         @if (isStorytimeOffered) {
           <li>
             <a

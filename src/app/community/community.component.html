@@ -39,6 +39,72 @@
           records from each other. The other officer is never told.
         </p>
       </div>
+
+      <!--
+        Fleets last, after the two sections that live here. It is a section
+        of its own rather than a part of the registry, and the block says so
+        by describing what the three words mean before handing the reader
+        into any of them: somebody who has never registered a Fleet has no
+        reason to know that a Community, a Fleet and an Armada are three
+        different records.
+      -->
+      @if (isFleetOffered$ | async) {
+        <div class="lcars-text-bar">
+          <span>Fleets</span>
+        </div>
+
+        <div class="community-inner-content">
+          <p>
+            A directory of the fleets players fly with, and of the groups
+            that run them. Find a fleet on your own platform, see whether it
+            is recruiting, and follow a Community to keep up with what it
+            publishes.
+          </p>
+          <p>
+            A <strong>Community</strong> is the group behind one or more
+            fleets, often across several platforms. An
+            <strong>Armada</strong> is a set of fleets that have allied. A
+            <strong>Fleet</strong> can also be listed on its own, so a fleet
+            nobody here runs can still be found and linked to.
+          </p>
+          <p>
+            Following a Community is not membership of it, and opens nobody's
+            roster. Anybody signed in can register a Community of their own.
+          </p>
+
+          <nav
+            class="buttons-row"
+            aria-label="Fleet directories">
+            <a
+              [routerLink]="fleetDirectoryLink"
+              class="perano"
+              >Browse Fleets</a
+            >
+            <a
+              [routerLink]="communityDirectoryLink"
+              class="perano"
+              >Browse Communities</a
+            >
+            <a
+              [routerLink]="armadaDirectoryLink"
+              class="perano"
+              >Browse Armadas</a
+            >
+            <!--
+              Hidden rather than shown and then refused: the page behind it
+              is guarded, and the rest of the navigation hides what a signed
+              out visitor cannot reach.
+            -->
+            @if (canRegister) {
+              <a
+                [routerLink]="registerLink"
+                class="sunflower"
+                >Register a Community</a
+              >
+            }
+          </nav>
+        </div>
+      }
     </div>
   </div>
 </div>

@@ -15,6 +15,7 @@ import { Observable, of, Subject } from 'rxjs';
 import { HealthService } from 'src/app/core/health/health.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { GeneralThemeService } from 'src/app/shared/services/general-theme.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
@@ -112,6 +113,14 @@ describe('MainContentComponent', () => {
         { provide: RoutingService, useValue: mockRoutingService },
         { provide: GeneralThemeService, useValue: mockGeneralThemeService },
         { provide: HealthService, useValue: healthServiceSpy },
+        // Stubbed rather than left to the HTTP mock: the sidebar and the
+        // footer each ask whether the Fleet section is offered, and an
+        // unanswered request would show up as an open one in every test
+        // here without saying anything about this component.
+        {
+          provide: FleetConfigurationService,
+          useValue: { isOffered: () => of(false) },
+        },
       ],
     });
 
