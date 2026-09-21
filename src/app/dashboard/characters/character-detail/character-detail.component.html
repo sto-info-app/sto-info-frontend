@@ -202,6 +202,13 @@
             <app-custom-tracking-owner-panel
               [scope]="characterScope"
               [targetId]="character.id" />
+
+            <!--
+              Which Fleet this Captain is in, and anything a Fleet's roster
+              has suggested about them. Private unless the owner says
+              otherwise.
+            -->
+            <app-character-fleet-panel [characterId]="character.id" />
           </div>
 
           <div

@@ -620,3 +620,94 @@ export interface CreateUnregisteredFleet {
   /** Must be true. */
   confirmUnregistered: boolean;
 }
+
+/**
+ * What established a personal Character-to-Fleet association.
+ *
+ * Worth showing rather than hiding. A membership somebody typed in and one
+ * they confirmed from a Fleet's own roster are worth different amounts, and a
+ * history that presents them identically invites the reader to treat their own
+ * guess as evidence.
+ */
+export enum CharacterFleetMembershipSource {
+  /** The owner recorded it directly. */
+  MANUAL = 'MANUAL',
+  /** It followed an approved Fleet application. */
+  APPLICATION = 'APPLICATION',
+  /** The owner accepted a proposal raised from roster evidence. */
+  CONFIRMED_IMPORT = 'CONFIRMED_IMPORT',
+}
+
+/**
+ * Where a proposal stands, the clock included.
+ *
+ * `EXPIRED` is not a stored status. The server works it out on every read, so
+ * nothing here has to compare a deadline to find out whether the question is
+ * still open.
+ */
+export enum CharacterFleetProposalState {
+  /** Unanswered and still answerable. */
+  PENDING = 'PENDING',
+  /** Accepted by the owner. */
+  ACCEPTED = 'ACCEPTED',
+  /** Declined by the owner. */
+  DECLINED = 'DECLINED',
+  /** Never answered, and too late to answer now. */
+  EXPIRED = 'EXPIRED',
+}
+
+/** The Fleet a personal membership or a proposal names. */
+export interface CharacterFleetSummary {
+  id: string;
+  exactGameName: string;
+  slug: string;
+  platformName: string;
+  platformSegment: string;
+  communityName: string | null;
+  communitySlug: string | null;
+}
+
+/** One entry in a Character's own Fleet history. */
+export interface CharacterFleetMembership {
+  id: string;
+  characterId: string;
+  fleet: CharacterFleetSummary;
+  validFrom: string;
+
+  /** Null while this is the current one. */
+  validTo: string | null;
+  source: CharacterFleetMembershipSource;
+  visibility: FleetAudience;
+
+  /** Set where the owner accepted a proposal to open it. */
+  proposalId: string | null;
+  recordedAt: string;
+}
+
+/** A suggestion, awaiting the owner's answer, that a Character is in a Fleet. */
+export interface CharacterFleetProposal {
+  id: string;
+  characterId: string;
+  fleet: CharacterFleetSummary;
+  state: CharacterFleetProposalState;
+
+  /** When the evidence says the association was true. */
+  observedAt: string | null;
+  raisedAt: string;
+  expiresAt: string;
+  answeredAt: string | null;
+}
+
+/**
+ * Recording that a Character is, or was, in a Fleet.
+ *
+ * Leaving `validTo` out is the only difference between "I am in this Fleet"
+ * and "I was in it until then": the server opens a current membership and
+ * closes whichever one was open.
+ */
+export interface RecordCharacterFleet {
+  fleetId: string;
+  validFrom: string;
+  validTo?: string | null;
+  visibility?: FleetAudience;
+}

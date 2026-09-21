@@ -1,0 +1,256 @@
+<div class="character-fleet">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Fleet</span>
+  </div>
+
+  @if (loading()) {
+    <app-loading-bar loadingText="Reading this Character's Fleet" />
+  } @else {
+    @if (errorMessage()) {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="errorMessage()!" />
+    }
+
+    <!--
+      Proposals first, because they are the only thing here that somebody
+      else is waiting on an answer to.
+    -->
+    @if (pending().length > 0) {
+      <div class="character-fleet__proposals">
+        <h3 class="character-fleet__heading">Awaiting your answer</h3>
+        <p class="character-fleet__note">
+          A Fleet's roster has a Captain on it by this name. Only you can say
+          whether it is this one. Answering one of these leaves the others
+          alone.
+        </p>
+
+        @for (proposal of pending(); track proposal.id) {
+          <div class="character-fleet__proposal">
+            <div class="character-fleet__proposal-name">
+              {{ proposal.fleet.exactGameName }}
+              <span class="character-fleet__muted"
+                >on {{ proposal.fleet.platformName }}</span
+              >
+            </div>
+            <div class="character-fleet__muted">
+              @if (proposal.observedAt) {
+                Seen on that roster {{ instant(proposal.observedAt) }}.
+              }
+              {{ deadline(proposal) }}
+            </div>
+            <div class="character-fleet__actions">
+              <button
+                type="button"
+                class="lcars-btn gold"
+                [disabled]="busy()"
+                (click)="accept(proposal)">
+                Yes, that is this Captain
+              </button>
+              <button
+                type="button"
+                class="lcars-btn bluey"
+                [disabled]="busy()"
+                (click)="decline(proposal)">
+                No
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- The current Fleet, or the absence of one. -->
+    <h3 class="character-fleet__heading">Currently</h3>
+    @if (current(); as entry) {
+      <div class="character-fleet__entry">
+        <div class="character-fleet__proposal-name">
+          {{ entry.fleet.exactGameName }}
+          <span class="character-fleet__muted"
+            >on {{ entry.fleet.platformName }}</span
+          >
+        </div>
+        <div class="character-fleet__muted">
+          Since {{ instant(entry.validFrom) }}. {{ sourceLabel(entry) }}.
+        </div>
+
+        <div class="character-fleet__row">
+          <div class="lcars-input-container sky">
+            <label [attr.for]="'visibility-' + entry.id">Who can see this</label>
+            <select
+              [id]="'visibility-' + entry.id"
+              [value]="entry.visibility"
+              [disabled]="busy()"
+              (change)="
+                changeVisibility(entry, $any($event.target).value)
+              ">
+              @for (choice of audienceChoices; track choice[0]) {
+                <option [value]="choice[0]">{{ choice[1] }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="character-fleet__actions">
+          <button
+            type="button"
+            class="lcars-btn peach"
+            [disabled]="busy()"
+            (click)="leave()">
+            I have left this Fleet
+          </button>
+          <button
+            type="button"
+            class="lcars-btn bluey"
+            [disabled]="busy()"
+            (click)="withdraw(entry)">
+            Remove — this was never right
+          </button>
+        </div>
+      </div>
+    } @else {
+      <p class="character-fleet__note">
+        No Fleet is recorded for this Captain. Nobody sees what you record here
+        unless you say so.
+      </p>
+    }
+
+    <div class="character-fleet__actions">
+      <button
+        type="button"
+        class="lcars-btn gold"
+        [disabled]="busy()"
+        (click)="toggleRecording()">
+        {{ recording() ? 'Cancel' : 'Record a Fleet' }}
+      </button>
+    </div>
+
+    <!-- Recording one. -->
+    @if (recording()) {
+      <form
+        class="character-fleet__form"
+        [formGroup]="form"
+        (ngSubmit)="submit()">
+        <div class="character-fleet__row">
+          <div class="lcars-input-container sky">
+            <label for="character-fleet-search">Find the Fleet</label>
+            <input
+              id="character-fleet-search"
+              type="text"
+              autocomplete="off"
+              formControlName="search" />
+          </div>
+          <button
+            type="button"
+            class="lcars-btn bluey"
+            [disabled]="busy()"
+            (click)="search()">
+            Search
+          </button>
+        </div>
+
+        @if (pickerResults().length > 0) {
+          <ul class="character-fleet__results">
+            @for (result of pickerResults(); track result.id) {
+              <li>
+                <button
+                  type="button"
+                  class="character-fleet__result"
+                  (click)="pick(result)">
+                  {{ result.exactGameName }}
+                  <span class="character-fleet__muted">
+                    on {{ result.platformName }}
+                    @if (result.communityName) {
+                      · {{ result.communityName }}
+                    } @else {
+                      · no Community
+                    }
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else if (pickerSearched() && pickedFleet() === null) {
+          <p class="character-fleet__note">
+            No Fleet here answers to that. A Fleet has to have a record on this
+            site before a Captain can be recorded in it — the Fleet pages are
+            where one is made.
+          </p>
+        }
+
+        @if (pickedFleet(); as picked) {
+          <p class="character-fleet__picked">
+            Recording <strong>{{ picked.exactGameName }}</strong> on
+            {{ picked.platformName }}.
+          </p>
+
+          <div class="character-fleet__row">
+            <div class="lcars-input-container sky">
+              <label for="character-fleet-from">Joined on</label>
+              <input
+                id="character-fleet-from"
+                type="date"
+                formControlName="validFrom" />
+            </div>
+
+            <div class="lcars-input-container sky">
+              <label for="character-fleet-visibility">Who can see this</label>
+              <select
+                id="character-fleet-visibility"
+                formControlName="visibility">
+                @for (choice of audienceChoices; track choice[0]) {
+                  <option [value]="choice[0]">{{ choice[1] }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          @if (
+            form.controls.validFrom.touched && form.controls.validFrom.invalid
+          ) {
+            <p class="character-fleet__field-error">
+              Please say when this Captain joined.
+            </p>
+          }
+
+          <div class="character-fleet__actions">
+            <button
+              type="submit"
+              class="lcars-btn gold"
+              [disabled]="busy()">
+              Record it
+            </button>
+          </div>
+        }
+      </form>
+    }
+
+    <!-- What has ended. -->
+    @if (past().length > 0) {
+      <h3 class="character-fleet__heading">Previously</h3>
+      @for (entry of past(); track entry.id) {
+        <div class="character-fleet__entry">
+          <div class="character-fleet__proposal-name">
+            {{ entry.fleet.exactGameName }}
+            <span class="character-fleet__muted"
+              >on {{ entry.fleet.platformName }}</span
+            >
+          </div>
+          <div class="character-fleet__muted">
+            {{ instant(entry.validFrom) }} to {{ instant(entry.validTo!) }}.
+            {{ sourceLabel(entry) }}. Seen by: {{ audienceLabel(entry) }}.
+          </div>
+          <div class="character-fleet__actions">
+            <button
+              type="button"
+              class="lcars-btn bluey"
+              [disabled]="busy()"
+              (click)="withdraw(entry)">
+              Remove — this was never right
+            </button>
+          </div>
+        </div>
+      }
+    }
+  }
+</div>

@@ -38,6 +38,7 @@ import {
   decodeStoHandle,
   encodeStoHandle,
 } from 'src/app/shared/utils/sto-handle.utils';
+import { CharacterFleetPanelComponent } from 'src/app/fleet/character/character-fleet-panel/character-fleet-panel.component';
 import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.component';
 
 /** Identifiers for the tabs available on the character detail page. */
@@ -67,6 +68,7 @@ export type CharacterTab =
     CharacterRdComponent,
     CharacterSpecializationComponent,
     CustomTrackingOwnerPanelComponent,
+    CharacterFleetPanelComponent,
     StoSwitcherButtonComponent,
   ],
 })

@@ -1,0 +1,93 @@
+@use 'lcars-variables' as vars;
+
+.character-fleet {
+  margin-top: 1rem;
+
+  &__heading {
+    margin: 1rem 0 0.35rem;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  &__note {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+
+  &__muted {
+    font-size: 0.85rem;
+    opacity: 0.75;
+  }
+
+  &__entry,
+  &__proposal {
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.6rem;
+    border-left: 4px solid vars.$lcars-sky;
+    border-radius: 0 0.4rem 0.4rem 0;
+    background: vars.$lcars-grey-bg;
+  }
+
+  // A question somebody else is waiting on reads differently from a record
+  // that is simply there.
+  &__proposal {
+    border-left-color: vars.$lcars-gold;
+  }
+
+  &__proposal-name {
+    font-weight: 600;
+  }
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+  }
+
+  &__results {
+    padding: 0;
+    margin: 0.5rem 0;
+    list-style: none;
+  }
+
+  &__result {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    background: vars.$lcars-card-surface;
+    border: none;
+    border-radius: 0.3rem;
+
+    &:hover,
+    &:focus-visible {
+      background: vars.$lcars-card-surface-hover;
+    }
+  }
+
+  &__picked {
+    margin: 0.75rem 0 0;
+  }
+
+  &__field-error {
+    margin: 0.35rem 0 0;
+    font-size: 0.85rem;
+    color: vars.$lcars-tangerine;
+  }
+
+  &__form {
+    margin-top: 0.75rem;
+  }
+}
