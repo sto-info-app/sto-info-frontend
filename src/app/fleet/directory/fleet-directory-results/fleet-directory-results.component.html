@@ -1,0 +1,52 @@
+<div class="lcars-text-bar">
+  <span class="title-with-badge">
+    {{ heading }}
+    @if (state.kind === 'READY' && state.results.total > 0) {
+      <span class="header-count-badge">{{ state.results.total }}</span>
+    }
+  </span>
+</div>
+
+@switch (state.kind) {
+  @case ('LOADING') {
+    <app-loading-bar [loadingText]="loadingText" />
+  }
+
+  @case ('ERROR') {
+    <div class="error-container">
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="state.message" />
+    </div>
+  }
+
+  @case ('READY') {
+    @if (state.results.cards.length === 0) {
+      <p class="lcars-empty-state">{{ emptyMessage }}</p>
+    } @else {
+      <div class="fleet-directory-results__grid">
+        @for (card of state.results.cards; track card.id) {
+          <app-fleet-scope-card [vm]="card" />
+        }
+      </div>
+
+      @if (totalPages > 1) {
+        <div class="lcars-pagination">
+          <button
+            type="button"
+            [disabled]="state.results.page <= 1"
+            (click)="pageChange.emit(state.results.page - 1)">
+            Previous
+          </button>
+          <span>Page {{ state.results.page }} of {{ totalPages }}</span>
+          <button
+            type="button"
+            [disabled]="state.results.page >= totalPages"
+            (click)="pageChange.emit(state.results.page + 1)">
+            Next
+          </button>
+        </div>
+      }
+    }
+  }
+}

@@ -284,10 +284,8 @@ export const routes: Routes = [
   // told why it is empty rather than being redirected away from it.
   {
     path: APP_ROUTES.FLEETS,
-    loadComponent: () =>
-      import('./fleet/fleet-home/fleet-home.component').then(
-        m => m.FleetHomeComponent,
-      ),
+    loadChildren: () =>
+      import('./fleet/fleet.routes').then(m => m.FLEET_ROUTES),
     data: { title: APP_ROUTE_TITLES.FLEETS },
   },
 

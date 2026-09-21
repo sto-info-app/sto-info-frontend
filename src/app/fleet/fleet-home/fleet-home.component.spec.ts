@@ -82,7 +82,7 @@ describe('FleetHomeComponent', () => {
     render();
 
     expect(find('app-fleet-page-shell')).not.toBeNull();
-    expect(find('h1')?.textContent).toContain('Fleets');
+    expect(find('h1')?.textContent).toContain('Fleet Directory');
   });
 
   // Guessing while the request is in flight means showing a notice and then
@@ -119,31 +119,72 @@ describe('FleetHomeComponent', () => {
     expect(text()).toContain('systems are not answering');
   });
 
-  it('shows the empty directory when the feature is on', () => {
+  it('hands the page over to the listing routes when the feature is on', () => {
     configuration$ = of(buildConfiguration(true));
 
     render();
 
     expect(find('app-feature-unavailable')).toBeNull();
-    expect(find('.fleet-community-empty')).not.toBeNull();
-    expect(text()).toContain('No Fleets have been registered yet');
+    expect(find('router-outlet')).not.toBeNull();
   });
 
-  // An empty directory is a normal state here, not a fault: anybody may
-  // register a Fleet, and before anybody has there is nothing to list.
-  it('does not treat an empty directory as an error', () => {
+  // Each listing is its own route, which is what keeps it bookmarkable and
+  // the back button honest.
+  it('offers the three listings as links', () => {
+    configuration$ = of(buildConfiguration(true));
+
+    render();
+
+    const tabs = Array.from(
+      fixture.nativeElement.querySelectorAll('.lcars-tab'),
+    ) as HTMLAnchorElement[];
+
+    expect(tabs.map(tab => tab.textContent?.trim())).toEqual([
+      'Fleets',
+      'Communities',
+      'Armadas',
+    ]);
+    expect(tabs.map(tab => tab.getAttribute('href'))).toEqual([
+      '/fleets',
+      '/fleets/communities',
+      '/fleets/armadas',
+    ]);
+  });
+
+  // `/fleets` is the prefix of both of the others, so an inexact match would
+  // leave the Fleets tab lit on all three.
+  it('lights the Fleets tab only on an exact match', () => {
+    configuration$ = of(buildConfiguration(true));
+
+    render();
+
+    const component = fixture.componentInstance;
+
+    expect(component.tabsFor('ENABLED').map(tab => tab.exact)).toEqual([
+      true,
+      false,
+      false,
+    ]);
+  });
+
+  // A strip of tabs over a notice saying the feature is off would offer three
+  // addresses that all say the same thing.
+  it.each(['LOADING', 'OFFLINE', 'DISABLED'] as const)(
+    'draws no tab strip while %s',
+    state => {
+      configuration$ = of(buildConfiguration(false));
+
+      render();
+
+      expect(fixture.componentInstance.tabsFor(state)).toEqual([]);
+    },
+  );
+
+  it('does not treat a switched-on directory as an error', () => {
     configuration$ = of(buildConfiguration(true));
 
     render();
 
     expect(find('app-lcars-error-message')).toBeNull();
-  });
-
-  it('uses the shared heading bar rather than a local one', () => {
-    configuration$ = of(buildConfiguration(true));
-
-    render();
-
-    expect(find('.lcars-text-bar')?.textContent).toContain('Fleet Directory');
   });
 });

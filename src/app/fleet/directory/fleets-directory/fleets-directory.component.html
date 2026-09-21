@@ -1,0 +1,19 @@
+<app-fleet-directory-filters
+  searchLabel="Fleet name"
+  searchPlaceholder="e.g. Starfleet Command"
+  [search]="search"
+  [status]="status"
+  [sort]="sort"
+  [sortOptions]="sortOptions"
+  (searchChange)="onSearch($event)"
+  (statusChange)="onStatus($event)"
+  (sortChange)="onSort($event)" />
+
+@if (state$ | async; as state) {
+  <app-fleet-directory-results
+    heading="Fleets"
+    loadingText="Scanning Fleet records"
+    [state]="state"
+    [emptyMessage]="emptyMessage"
+    (pageChange)="onPage($event)" />
+}

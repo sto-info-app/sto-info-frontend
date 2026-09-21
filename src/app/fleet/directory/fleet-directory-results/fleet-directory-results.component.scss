@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+// Cards rather than rows, and as many per line as will fit. A directory is
+// read by scanning for a name, and a minimum of 18rem is what keeps a long
+// Fleet name on two lines rather than five on a narrow screen.
+.fleet-directory-results__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
