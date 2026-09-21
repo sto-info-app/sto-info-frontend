@@ -107,7 +107,6 @@ export const API_URLS = {
 
   // Storytime
   STORYTIME_CONFIGURATION: apiUrl + '/storytime/configuration',
-  FLEET_CONFIGURATION: apiUrl + '/fleet/configuration',
   STORYTIME_ADMIN_CONFIGURATION: apiUrl + '/admin/storytime/configuration',
   STORYTIME_STORIES: apiUrl + '/storytime/stories',
   STORYTIME_MANAGE_STORIES: apiUrl + '/storytime/manage/stories',
@@ -167,4 +166,15 @@ export const API_URLS = {
   CUSTOM_TRACKING_TABS: apiUrl + '/custom-tracking/tabs',
   CUSTOM_TRACKING_FIELDS: apiUrl + '/custom-tracking/fields',
   CUSTOM_TRACKING_OPTIONS: apiUrl + '/custom-tracking/options',
+
+  // Fleet Community
+  //
+  // The three directory listings sit at the top level rather than under a
+  // `/fleet` prefix, because a Community, a Fleet and an Armada are records in
+  // their own right and everything addressed below one hangs off its own
+  // collection: `/fleet-communities/:id/fleets`, and so on.
+  FLEET_CONFIGURATION: apiUrl + '/fleet/configuration',
+  FLEET_COMMUNITIES: apiUrl + '/fleet-communities',
+  FLEETS: apiUrl + '/fleets',
+  ARMADAS: apiUrl + '/armadas',
 };
