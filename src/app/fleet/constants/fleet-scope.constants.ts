@@ -61,3 +61,31 @@ export const FLEET_AUDIENCE_LABELS: Readonly<Record<string, string>> = {
   FLEET_MEMBERS: 'Approved members of the Fleet',
   PRIVATE: 'The owner alone',
 };
+
+/**
+ * How each recruitment posture is offered on a form.
+ *
+ * Worded as the choice being made rather than as the state it produces. A
+ * card's pill says "Applications open", which is what a reader wants to
+ * know; a form asks "how should people join", and "By application" is the
+ * answer to that question.
+ */
+export const FLEET_RECRUITMENT_CHOICES: Readonly<Record<string, string>> = {
+  OPEN: 'Anyone eligible may join',
+  APPLICATION: 'By application',
+  INVITE_ONLY: 'By invitation only',
+  CLOSED: 'Not recruiting',
+};
+
+/**
+ * How each visibility setting is offered on a form.
+ *
+ * Shorter than the labels a page reads back, because a select option is
+ * read while choosing rather than while learning what was chosen.
+ */
+export const FLEET_AUDIENCE_CHOICES: Readonly<Record<string, string>> = {
+  PUBLIC: 'Anyone',
+  COMMUNITY: 'Community members',
+  FLEET_MEMBERS: 'Fleet members',
+  PRIVATE: 'Only me',
+};

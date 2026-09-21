@@ -1,0 +1,117 @@
+@if (isOpen$ | async) {
+  <div class="lcars-text-bar">
+    <span>Register a Community</span>
+  </div>
+
+  <p class="community-register__intro">
+    A Community is your umbrella here: it holds the Fleets and Armadas you
+    register, and it is the thing that tells your record of a Fleet apart from
+    somebody else's record of the same one. Nothing in the game is called a
+    Fleet Community — the name is yours to choose.
+  </p>
+
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Registration failed"
+      [message]="errorMessage" />
+  }
+
+  <form
+    class="community-register__form"
+    [formGroup]="form"
+    (ngSubmit)="onSubmit()">
+    <div class="form-row">
+      <div class="lcars-input-container sky">
+        <label for="community-name">Name</label>
+        <input
+          id="community-name"
+          type="text"
+          autocomplete="off"
+          formControlName="name"
+          [maxlength]="nameMaxLength" />
+      </div>
+    </div>
+
+    @if (form.controls.name.touched && form.controls.name.invalid) {
+      <p class="community-register__field-error">
+        Please give the Community a name.
+      </p>
+    }
+
+    <div class="form-row">
+      <div class="lcars-input-container sky">
+        <label for="community-slug">Web address</label>
+        <input
+          id="community-slug"
+          type="text"
+          autocomplete="off"
+          placeholder="Made from the name when left blank"
+          formControlName="slug"
+          [maxlength]="slugMaxLength" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="lcars-input-container sky">
+        <label for="community-description">What the Community is</label>
+        <textarea
+          id="community-description"
+          rows="4"
+          formControlName="description"
+          [maxlength]="descriptionMaxLength"></textarea>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="lcars-input-container sky">
+        <label for="community-recruitment">How people join</label>
+        <select
+          id="community-recruitment"
+          formControlName="recruitmentState">
+          @for (choice of recruitmentChoices; track choice[0]) {
+            <option [value]="choice[0]">{{ choice[1] }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="lcars-input-container sky">
+        <label for="community-visibility">Who can see it</label>
+        <select
+          id="community-visibility"
+          formControlName="visibility">
+          @for (choice of audienceChoices; track choice[0]) {
+            <option [value]="choice[0]">{{ choice[1] }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="lcars-input-container sky">
+        <label for="community-timezone">Show dates in</label>
+        <select
+          id="community-timezone"
+          formControlName="preferredTimezone">
+          @for (zone of timezones; track zone) {
+            <option [value]="zone">{{ zone }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (isSaving) {
+      <app-loading-bar loadingText="Registering the Community" />
+    }
+
+    <div class="form-actions">
+      <button
+        type="submit"
+        class="lcars-btn green"
+        [disabled]="isSaving">
+        Register
+      </button>
+    </div>
+  </form>
+} @else {
+  <app-feature-unavailable
+    [featureName]="featureName"
+    [reason]="disabledReason" />
+}

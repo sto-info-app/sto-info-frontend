@@ -1,3 +1,13 @@
+@if (canRegister) {
+  <p class="communities-directory__register">
+    <a
+      class="lcars-btn lcars-btn-auto sky"
+      [routerLink]="registerLink">
+      Register a Community
+    </a>
+  </p>
+}
+
 <app-fleet-directory-filters
   searchLabel="Community name"
   searchPlaceholder="e.g. United Federation Alliance"

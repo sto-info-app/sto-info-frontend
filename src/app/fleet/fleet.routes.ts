@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 
+import { AuthGuard } from 'src/app/core/auth/auth.guard';
 import { APP_ROUTE_TITLES } from 'src/app/shared/constants/app-routing.constants';
 
 import { FleetHomeComponent } from './fleet-home/fleet-home.component';
@@ -49,6 +50,19 @@ export const FLEET_ROUTES: Routes = [
             m => m.ArmadasDirectoryComponent,
           ),
         data: { title: APP_ROUTE_TITLES.FLEET_ARMADAS },
+      },
+
+      // A literal, and therefore never a Community slug: a scope's address
+      // always names its collection first, so `register` and `communities`
+      // cannot be confused for one another.
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('./register/community-register/community-register.component').then(
+            m => m.CommunityRegisterComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_REGISTER },
+        canActivate: [AuthGuard],
       },
 
       // The two deeper addresses come before the Community's own, so

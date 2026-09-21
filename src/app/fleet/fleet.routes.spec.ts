@@ -1,5 +1,6 @@
 import { Route } from '@angular/router';
 
+import { AuthGuard } from 'src/app/core/auth/auth.guard';
 import { APP_ROUTE_TITLES } from 'src/app/shared/constants/app-routing.constants';
 
 import { FleetHomeComponent } from './fleet-home/fleet-home.component';
@@ -21,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(6);
+    expect(children).toHaveLength(7);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -44,6 +45,15 @@ describe('FLEET_ROUTES', () => {
     ['armadas', APP_ROUTE_TITLES.FLEET_ARMADAS],
   ])('puts the %s listing on its own address', (path, title) => {
     expect(childAt(path)?.data?.['title']).toBe(title);
+  });
+
+  // Registering needs an account, and a literal segment can never be a
+  // Community slug: a scope's address always names its collection first.
+  it('puts registration behind the sign-in guard', () => {
+    expect(childAt('register')?.canActivate).toEqual([AuthGuard]);
+    expect(childAt('register')?.data?.['title']).toBe(
+      APP_ROUTE_TITLES.FLEET_REGISTER,
+    );
   });
 
   it('loads each listing only when its address is reached', () => {
@@ -91,6 +101,7 @@ describe('FLEET_ROUTES', () => {
     ['', 'FleetsDirectoryComponent'],
     ['communities', 'CommunitiesDirectoryComponent'],
     ['armadas', 'ArmadasDirectoryComponent'],
+    ['register', 'CommunityRegisterComponent'],
     ['communities/:communitySlug', 'CommunityPageComponent'],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug',

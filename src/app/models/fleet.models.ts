@@ -431,3 +431,29 @@ export interface ResolvedStoArmada {
   /** True when the address asked for is no longer the canonical one. */
   redirected: boolean;
 }
+
+/**
+ * What registering a Fleet Community asks for.
+ *
+ * Neither the owner nor the lifecycle state is here. The registrant owns
+ * what they register, and a Community starts operating — accepting either
+ * from a form would make them fields a request could lie about.
+ */
+export interface CreateFleetCommunity {
+  name: string;
+
+  /**
+   * A preferred URL segment. Derived from the name when left out, and
+   * suffixed when something already holds it.
+   */
+  slug?: string;
+  description?: string;
+  recruitmentState?: FleetRecruitmentState;
+  visibility?: FleetAudience;
+
+  /**
+   * The default IANA zone for presenting this Community's dates.
+   * Presentation only — a roster export always carries its own zone.
+   */
+  preferredTimezone?: string;
+}

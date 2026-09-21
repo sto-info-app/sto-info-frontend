@@ -1,6 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ParamMap } from '@angular/router';
+import { ParamMap, RouterModule } from '@angular/router';
 
 import { map, Observable } from 'rxjs';
 
@@ -13,6 +13,8 @@ import {
 import { FleetDirectoryResultsComponent } from 'src/app/fleet/directory/fleet-directory-results/fleet-directory-results.component';
 import { buildCommunityCardVm } from 'src/app/fleet/fleet-card.builders';
 import { FleetDirectoryService } from 'src/app/fleet/fleet-directory.service';
+import { AuthService } from 'src/app/core/auth/auth.service';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
@@ -26,6 +28,7 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 @Component({
   selector: 'app-communities-directory',
   templateUrl: './communities-directory.component.html',
+  styleUrls: ['./communities-directory.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Provided although nothing here formats a date, because the shared base
@@ -34,12 +37,31 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
   providers: [AppDatePipe],
   imports: [
     AsyncPipe,
+    RouterModule,
     FleetDirectoryFiltersComponent,
     FleetDirectoryResultsComponent,
   ],
 })
 export class CommunitiesDirectoryComponent extends FleetDirectoryPageDirective {
   private readonly _directory = inject(FleetDirectoryService);
+  private readonly _authService = inject(AuthService);
+
+  /** Where registering one starts. */
+  readonly registerLink = '/' + APP_ROUTES.FLEET_REGISTER;
+
+  /**
+   * Whether to offer registration at all.
+   *
+   * Signed in is the only condition checked here. Whether the switch is on
+   * is the registration page's own answer, and asking it twice would mean
+   * two places to keep in step — where offering a link that explains itself
+   * costs a reader one click.
+   *
+   * @returns True when somebody is signed in.
+   */
+  get canRegister(): boolean {
+    return this._authService.isLoggedIn();
+  }
 
   readonly sortOptions = FLEET_SORTS_WITHOUT_FRESHNESS;
 

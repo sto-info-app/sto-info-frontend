@@ -85,6 +85,7 @@ export const APP_ROUTES = {
   FLEETS: ROOT_ROUTES.FLEETS,
   FLEET_COMMUNITIES: FLEET_COMMUNITIES_ROOT,
   FLEET_ARMADAS: ROOT_ROUTES.FLEETS + '/armadas',
+  FLEET_REGISTER: ROOT_ROUTES.FLEETS + '/register',
   FLEET_COMMUNITY: FLEET_COMMUNITIES_ROOT + '/:communitySlug',
   FLEET_SCOPE_FLEET:
     FLEET_COMMUNITIES_ROOT + '/:communitySlug/fleets/:platformSegment/:slug',
@@ -243,6 +244,7 @@ export const APP_ROUTE_TITLES = {
   FLEETS: 'Fleets',
   FLEET_COMMUNITIES: 'Fleet Communities',
   FLEET_ARMADAS: 'Armadas',
+  FLEET_REGISTER: 'Register a Community',
   FLEET_COMMUNITY: 'Fleet Community',
   FLEET_SCOPE_FLEET: 'Fleet',
   FLEET_SCOPE_ARMADA: 'Armada',

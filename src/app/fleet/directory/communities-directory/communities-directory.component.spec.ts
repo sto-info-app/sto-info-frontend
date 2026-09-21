@@ -3,11 +3,12 @@ import {
   ActivatedRoute,
   convertToParamMap,
   ParamMap,
-  Router,
+  provideRouter,
 } from '@angular/router';
 
 import { BehaviorSubject, Observable, of } from 'rxjs';
 
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { FleetDirectoryService } from 'src/app/fleet/fleet-directory.service';
 import {
   FleetCommunityCard,
@@ -48,6 +49,7 @@ describe('CommunitiesDirectoryComponent', () => {
   let params$: BehaviorSubject<ParamMap>;
   let directory: { listCommunities: jest.Mock };
   let route: { queryParamMap: Observable<ParamMap>; snapshot: unknown };
+  let isLoggedIn: boolean;
 
   beforeEach(async () => {
     params$ = new BehaviorSubject<ParamMap>(convertToParamMap({}));
@@ -60,13 +62,20 @@ describe('CommunitiesDirectoryComponent', () => {
       queryParamMap: params$,
       snapshot: { queryParamMap: convertToParamMap({}) },
     };
+    isLoggedIn = true;
 
     await TestBed.configureTestingModule({
       imports: [CommunitiesDirectoryComponent],
       providers: [
         { provide: FleetDirectoryService, useValue: directory },
-        { provide: Router, useValue: { navigate: jest.fn() } },
+        // A real router, so the registration link renders the address it
+        // would actually go to.
+        provideRouter([]),
         { provide: ActivatedRoute, useValue: route },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: (): boolean => isLoggedIn },
+        },
       ],
     })
       .overrideComponent(CommunitiesDirectoryComponent, {
@@ -133,5 +142,33 @@ describe('CommunitiesDirectoryComponent', () => {
     expect(directory.listCommunities.mock.calls.at(-1)?.[0]['sort']).toBe(
       FleetDirectorySort.NAME,
     );
+  });
+  describe('registering one', () => {
+    /**
+     * The link offering registration.
+     *
+     * @returns The link, or null.
+     */
+    const registerLink = (): HTMLAnchorElement | null =>
+      fixture.nativeElement.querySelector(
+        '.communities-directory__register a',
+      ) as HTMLAnchorElement | null;
+
+    it('offers registration to somebody signed in', () => {
+      render();
+
+      expect(registerLink()?.getAttribute('href')).toBe('/fleets/register');
+    });
+
+    // Signed in is the only condition checked here. Whether the switch is
+    // on is the registration page's own answer, and asking it twice would
+    // mean two places to keep in step.
+    it('offers nothing to a signed-out visitor', () => {
+      isLoggedIn = false;
+
+      render();
+
+      expect(registerLink()).toBeNull();
+    });
   });
 });

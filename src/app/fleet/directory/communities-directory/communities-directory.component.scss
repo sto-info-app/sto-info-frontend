@@ -1,0 +1,10 @@
+:host {
+  display: block;
+}
+
+// Above the filters rather than beside them. Somebody who has searched and
+// found nothing is exactly who should see this next, and a control that
+// moves depending on the results is a control nobody learns the place of.
+.communities-directory__register {
+  margin: 0 0 1rem;
+}
