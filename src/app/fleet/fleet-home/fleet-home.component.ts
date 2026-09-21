@@ -6,6 +6,7 @@ import { map, Observable, startWith } from 'rxjs';
 
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetShellTab } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.model';
+import { FLEET_FEATURE_NAME } from 'src/app/fleet/constants/fleet-feature.constants';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FeatureUnavailableComponent } from 'src/app/shared/components/feature-unavailable/feature-unavailable.component';
 import {
@@ -17,9 +18,6 @@ import { FleetConfigurationService } from 'src/app/shared/services/fleet-configu
 
 /** What the section is able to show. */
 export type FleetHomeState = 'LOADING' | 'OFFLINE' | 'DISABLED' | 'ENABLED';
-
-/** The feature's name, worded as the rest of the site words it. */
-export const FLEET_FEATURE_NAME = 'Fleet Community';
 
 /** The three listings, in the order the strip offers them. */
 export const FLEET_DIRECTORY_TABS: readonly FleetShellTab[] = [

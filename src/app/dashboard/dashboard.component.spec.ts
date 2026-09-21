@@ -4,6 +4,9 @@ import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import { AuthService } from '../core/auth/auth.service';
+import { CommunitySubscriptionService } from '../fleet/community-subscription.service';
+import { FollowedCommunity } from '../models/fleet.models';
+import { FleetConfigurationService } from '../shared/services/fleet-configuration.service';
 import { RoutingService } from '../shared/services/routing.service';
 import { DashboardComponent } from './dashboard.component';
 import { StoAccount } from './models/sto-account.model';
@@ -18,6 +21,8 @@ describe('DashboardComponent', () => {
   let mockAuthService: jest.Mocked<AuthService>;
   let mockRoutingService: jest.Mocked<RoutingService>;
   let mockStoAccountService: jest.Mocked<StoAccountService>;
+  let mockFleetConfiguration: jest.Mocked<FleetConfigurationService>;
+  let mockSubscriptions: jest.Mocked<CommunitySubscriptionService>;
 
   const mockUser: User = {
     id: '123',
@@ -57,6 +62,17 @@ describe('DashboardComponent', () => {
       getAccounts: jest.fn().mockReturnValue(of([])),
     } as unknown as jest.Mocked<StoAccountService>;
 
+    // Stubbed rather than left to the real service: HttpClient is
+    // provided in this environment, so an unstubbed configuration read
+    // issues a request that fails, and a failure is read as offered.
+    mockFleetConfiguration = {
+      isOffered: jest.fn().mockReturnValue(of(true)),
+    } as unknown as jest.Mocked<FleetConfigurationService>;
+
+    mockSubscriptions = {
+      listFollowed: jest.fn().mockReturnValue(of([])),
+    } as unknown as jest.Mocked<CommunitySubscriptionService>;
+
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
       schemas: [NO_ERRORS_SCHEMA],
@@ -65,6 +81,11 @@ describe('DashboardComponent', () => {
         { provide: AuthService, useValue: mockAuthService },
         { provide: RoutingService, useValue: mockRoutingService },
         { provide: StoAccountService, useValue: mockStoAccountService },
+        {
+          provide: FleetConfigurationService,
+          useValue: mockFleetConfiguration,
+        },
+        { provide: CommunitySubscriptionService, useValue: mockSubscriptions },
         { provide: ActivatedRoute, useValue: {} },
       ],
     }).compileComponents();
@@ -209,6 +230,86 @@ describe('DashboardComponent', () => {
     expect((event.target as HTMLImageElement).src).toBe(
       component.unavailablePhotoSrc,
     );
+  });
+
+  describe('the Fleet tile', () => {
+    const follows = (count: number): FollowedCommunity[] =>
+      Array.from({ length: count }, () => ({}) as FollowedCommunity);
+
+    const tiles = (): HTMLElement[] =>
+      Array.from(fixture.nativeElement.querySelectorAll('.dashboard-tile'));
+
+    // Whether the section is offered is read once, as the component is
+    // constructed, so a test that changes the answer has to build the
+    // component again rather than only draw it again.
+    const rebuild = (): void => {
+      fixture = TestBed.createComponent(DashboardComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    };
+
+    it('should offer the section when it is offered', () => {
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent).toContain('Fleets');
+      expect(fixture.nativeElement.textContent).toContain(
+        'Communities You Follow',
+      );
+    });
+
+    it('should offer nothing when the section is not offered', () => {
+      mockFleetConfiguration.isOffered.mockReturnValue(of(false));
+
+      rebuild();
+
+      expect(fixture.nativeElement.textContent).not.toContain('Fleets');
+      expect(fixture.nativeElement.textContent).not.toContain(
+        'Communities You Follow',
+      );
+    });
+
+    it('should not ask what is followed when it is not offered', () => {
+      mockFleetConfiguration.isOffered.mockReturnValue(of(false));
+
+      fixture.detectChanges();
+
+      expect(mockSubscriptions.listFollowed).not.toHaveBeenCalled();
+    });
+
+    it('should count what is followed', () => {
+      mockSubscriptions.listFollowed.mockReturnValue(of(follows(3)));
+
+      fixture.detectChanges();
+
+      expect(component.followedCommunitiesCount).toBe(3);
+      expect(fixture.nativeElement.textContent).toContain('Following 3');
+    });
+
+    it('should give no count when nothing is followed', () => {
+      fixture.detectChanges();
+
+      expect(component.followedCommunitiesCount).toBe(0);
+      expect(fixture.nativeElement.textContent).not.toContain('Following');
+    });
+
+    it('should leave the count unknown when it cannot be read', () => {
+      mockSubscriptions.listFollowed.mockReturnValue(
+        throwError(() => new Error('offline')),
+      );
+
+      fixture.detectChanges();
+
+      expect(component.followedCommunitiesCount).toBeNull();
+      expect(fixture.nativeElement.textContent).toContain('Fleets');
+      expect(fixture.nativeElement.textContent).not.toContain('Following');
+    });
+
+    it('should make every tile a link a keyboard can reach', () => {
+      fixture.detectChanges();
+
+      expect(tiles()).toHaveLength(5);
+      expect(tiles().every(tile => tile.tagName === 'A')).toBe(true);
+    });
   });
 
   describe('ngOnDestroy', () => {

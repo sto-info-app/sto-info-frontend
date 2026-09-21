@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { LcarsInformationMessageComponent } from '../shared/components/lcars-information-message/lcars-information-message.component';
 import { RouterModule } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Observable, Subject, takeUntil } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../core/auth/auth.service';
 import { NewsPost } from '../models/news.models';
@@ -18,6 +18,7 @@ import {
   APP_ROUTES,
   APP_ROUTE_TITLES,
 } from '../shared/constants/app-routing.constants';
+import { FleetConfigurationService } from '../shared/services/fleet-configuration.service';
 import { observeInZone } from '../shared/rxjs/observe-in-zone.operator';
 import { RoutingService } from '../shared/services/routing.service';
 
@@ -42,9 +43,19 @@ export class HomeComponent implements OnDestroy {
   newsLoading = true;
   newsError = false;
 
+  /**
+   * Whether to offer the Fleet section among the tiles.
+   *
+   * The same question the dashboard and the navigation ask, answered
+   * from the same cached configuration: the tile goes when the server
+   * says the feature is off and stays when nobody could be asked.
+   */
+  readonly isFleetOffered$: Observable<boolean>;
+
   private readonly _authService = inject(AuthService);
   private readonly _newsService = inject(NewsService);
   private readonly _routingService = inject(RoutingService);
+  private readonly _fleetConfiguration = inject(FleetConfigurationService);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _destroy$ = new Subject<void>();
@@ -55,6 +66,8 @@ export class HomeComponent implements OnDestroy {
    * Subscribes to the authentication service to determine if the user is logged in.
    */
   constructor() {
+    this.isFleetOffered$ = this._fleetConfiguration.isOffered();
+
     this._authService.isAuthenticated$
       .pipe(takeUntil(this._destroy$))
       .subscribe(loggedIn => {

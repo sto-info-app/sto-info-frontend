@@ -4,6 +4,7 @@ import { of, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../core/auth/auth.service';
 import { NewsService } from '../news/news.service';
+import { FleetConfigurationService } from '../shared/services/fleet-configuration.service';
 import { RoutingService } from '../shared/services/routing.service';
 import { HomeComponent } from './home.component';
 
@@ -13,6 +14,7 @@ describe('HomeComponent', () => {
   let authServiceMock: Partial<jest.Mocked<AuthService>>;
   let routingServiceMock: jest.Mocked<RoutingService>;
   let newsServiceMock: Partial<jest.Mocked<NewsService>>;
+  let fleetConfigurationMock: Partial<jest.Mocked<FleetConfigurationService>>;
 
   const createComponent = (): void => {
     fixture = TestBed.createComponent(HomeComponent);
@@ -33,12 +35,23 @@ describe('HomeComponent', () => {
         .mockReturnValue(of({ items: [], total: 0, page: 1, pageSize: 5 })),
     };
 
+    // Stubbed rather than left to the real service, which would issue a
+    // request this environment answers with a failure — and a failure is
+    // read as offered, which is a different tile count.
+    fleetConfigurationMock = {
+      isOffered: jest.fn().mockReturnValue(of(true)),
+    };
+
     await TestBed.configureTestingModule({
       imports: [HomeComponent],
       providers: [
         { provide: AuthService, useValue: authServiceMock },
         { provide: RoutingService, useValue: routingServiceMock },
         { provide: NewsService, useValue: newsServiceMock },
+        {
+          provide: FleetConfigurationService,
+          useValue: fleetConfigurationMock,
+        },
         provideRouter([]),
       ],
     }).compileComponents();
@@ -64,9 +77,27 @@ describe('HomeComponent', () => {
     createComponent();
     const cards = fixture.nativeElement.querySelectorAll('a.dashboard-tile');
 
-    expect(cards).toHaveLength(4);
+    expect(cards).toHaveLength(5);
     expect(cards[0].textContent).toContain('Accounts');
     expect(cards[0].classList.contains('sunflower')).toBe(true);
+  });
+
+  it('should offer the Fleet section last when it is offered', () => {
+    createComponent();
+    const cards = fixture.nativeElement.querySelectorAll('a.dashboard-tile');
+
+    expect(cards[4].textContent).toContain('Fleets');
+    expect(cards[4].classList.contains('sky')).toBe(true);
+  });
+
+  it('should drop the Fleet tile when the section is not offered', () => {
+    fleetConfigurationMock.isOffered!.mockReturnValue(of(false));
+
+    createComponent();
+    const cards = fixture.nativeElement.querySelectorAll('a.dashboard-tile');
+
+    expect(cards).toHaveLength(4);
+    expect(fixture.nativeElement.textContent).not.toContain('Fleets');
   });
 
   it('should offer a Community tile to logged-in users', () => {

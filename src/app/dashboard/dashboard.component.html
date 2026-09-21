@@ -20,7 +20,7 @@
         </p>
 
         <div class="dashboard-tiles">
-          <div
+          <a
             class="dashboard-tile sunflower"
             [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)">
             <div class="tile-icon">
@@ -29,9 +29,9 @@
             <div class="tile-content">
               <span class="tile-stat">{{ accountsCount }} Accounts</span>
             </div>
-          </div>
+          </a>
 
-          <div
+          <a
             class="dashboard-tile perano"
             [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_PROFILE)">
             <div class="tile-icon">
@@ -40,9 +40,9 @@
             <div class="tile-content">
               <span class="tile-stat">Personnel Record</span>
             </div>
-          </div>
+          </a>
 
-          <div
+          <a
             class="dashboard-tile gold"
             [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_SETTINGS)">
             <div class="tile-icon">
@@ -51,9 +51,9 @@
             <div class="tile-content">
               <span class="tile-stat">Settings</span>
             </div>
-          </div>
+          </a>
 
-          <div
+          <a
             class="dashboard-tile atomic"
             [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)">
             <div class="tile-icon">
@@ -62,7 +62,31 @@
             <div class="tile-content">
               <span class="tile-stat">Stats</span>
             </div>
-          </div>
+          </a>
+
+          <!--
+            The Fleet section, which goes when the server says the
+            feature is off and stays when the configuration could not
+            be read: the page behind it explains an outage, where a
+            missing tile explains nothing.
+          -->
+          @if (isFleetOffered$ | async) {
+            <a
+              class="dashboard-tile sky"
+              [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_FLEETS)">
+              <div class="tile-icon">
+                <i class="fa-solid fa-people-group"></i>
+              </div>
+              <div class="tile-content">
+                <span class="tile-stat">Fleets</span>
+                @if (followedCommunitiesCount) {
+                  <span class="tile-sub"
+                    >Following {{ followedCommunitiesCount }}</span
+                  >
+                }
+              </div>
+            </a>
+          }
         </div>
       </div>
     }
@@ -114,6 +138,13 @@
           class="full-width-btn-link sunflower"
           >Manage STO Accounts</a
         >
+        @if (isFleetOffered$ | async) {
+          <a
+            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_FLEETS)"
+            class="full-width-btn-link sky"
+            >Communities You Follow</a
+          >
+        }
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_SETTINGS)"
           class="full-width-btn-link gold"

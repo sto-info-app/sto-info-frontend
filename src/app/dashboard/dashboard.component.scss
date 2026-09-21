@@ -31,6 +31,12 @@
           border-radius: 20px;
           min-width: 140px;
           color: #000;
+
+          // The tiles are links, so that a keyboard reaches them and a
+          // middle click opens one in its own tab. Undecorated, because
+          // the whole tile is the target and an underline across a
+          // coloured block says nothing a cursor does not.
+          text-decoration: none;
           cursor: pointer;
           transition:
             transform 0.2s ease,
@@ -64,6 +70,15 @@
               opacity: 0.8;
               text-transform: uppercase;
               letter-spacing: 0.5px;
+            }
+
+            // A second line beneath the name, for a tile that has a
+            // figure to give as well as a destination. Smaller and not
+            // shouted: the name is what is being chosen between.
+            .tile-sub {
+              font-size: 0.9rem;
+              font-weight: 600;
+              opacity: 0.75;
             }
           }
 

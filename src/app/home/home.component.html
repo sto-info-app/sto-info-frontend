@@ -71,6 +71,18 @@
           <span class="tile-stat">{{ appRouteTitles.COMMUNITY }}</span>
         </div>
       </a>
+      @if (isFleetOffered$ | async) {
+        <a
+          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_FLEETS)"
+          class="dashboard-tile sky">
+          <div class="tile-icon">
+            <i class="fa-solid fa-people-group"></i>
+          </div>
+          <div class="tile-content">
+            <span class="tile-stat">Fleets</span>
+          </div>
+        </a>
+      }
     </div>
   }
 

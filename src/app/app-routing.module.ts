@@ -550,6 +550,18 @@ export const routes: Routes = [
     canActivate: [AuthGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.STO_DASHBOARD_FLEETS,
+    loadComponent: () =>
+      import('./dashboard/fleets/dashboard-fleets.component').then(
+        m => m.DashboardFleetsComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_FLEETS, requiresApi: true },
+    // Signed in, because what somebody follows is theirs. The feature
+    // switch is not a guard: a member who arrives while it is off is
+    // told so by the page, which is more use than a redirect.
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.STO_DASHBOARD_STATS,
     loadComponent: () =>
       import('./dashboard/stats/stats.component').then(m => m.StatsComponent),

@@ -1,0 +1,26 @@
+#dashboard-fleets-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+#dashboard-fleets-main-column {
+  flex: 1;
+  min-width: 0;
+}
+
+#dashboard-fleets-discovery {
+  padding: 20px;
+}
+
+// The directory's own grid, for the directory's own cards. A Community a
+// member followed is drawn here exactly as it was where they found it, and a
+// second set of proportions for the same card would be the only thing telling
+// them otherwise.
+#dashboard-fleets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
