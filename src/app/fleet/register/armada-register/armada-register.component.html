@@ -1,0 +1,136 @@
+@if (state$ | async; as state) {
+  @switch (state.kind) {
+    @case ('LOADING') {
+      <app-loading-bar loadingText="Reading the Community" />
+    }
+
+    @case ('MISSING') {
+      <app-lcars-information-message
+        title="No such record"
+        [message]="missingMessage" />
+    }
+
+    @case ('ERROR') {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="state.message" />
+    }
+
+    @case ('READY') {
+      <div class="lcars-text-bar">
+        <span>Register an Armada</span>
+      </div>
+
+      <p class="register-page__intro">
+        Registering an Armada records it under
+        {{ state.context.community.name }}. Type the name exactly as the game
+        shows it, spaces at either end included. An Armada groups Fleets rather
+        than recruiting players, and it is seen exactly as far as the Community
+        holding it, so there is nothing to choose about either.
+      </p>
+
+      @if (errorMessage) {
+        <app-lcars-error-message
+          title="Registration failed"
+          [message]="errorMessage" />
+      }
+
+      <form
+        class="register-page__form"
+        [formGroup]="form"
+        (ngSubmit)="onSubmit(state.context)">
+        <div class="form-row">
+          <div class="lcars-input-container sky">
+            <label for="armada-name">Name, exactly as in game</label>
+            <input
+              id="armada-name"
+              type="text"
+              autocomplete="off"
+              formControlName="exactGameName"
+              [maxlength]="nameMaxLength" />
+          </div>
+
+          <div class="lcars-input-container sky">
+            <label for="armada-platform">Platform</label>
+            <select
+              id="armada-platform"
+              formControlName="platformId">
+              <option value="">Choose a platform</option>
+              @for (platform of state.context.platforms; track platform.id) {
+                <option [value]="platform.id">{{ platform.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        @if (
+          form.controls.exactGameName.touched &&
+          form.controls.exactGameName.invalid
+        ) {
+          <p class="register-page__field-error">
+            Please give the Armada its name.
+          </p>
+        }
+
+        @if (
+          form.controls.platformId.touched && form.controls.platformId.invalid
+        ) {
+          <p class="register-page__field-error">
+            Please say which platform the Armada is on.
+          </p>
+        }
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="lcars-btn gold"
+            [disabled]="isChecking"
+            (click)="onCheck(state.context.community.id)">
+            Check for existing records
+          </button>
+        </div>
+
+        <app-scope-duplicate-warning
+          scopeLabel="Armada"
+          [duplicates]="duplicates" />
+
+        <div class="form-row">
+          <div class="lcars-input-container sky">
+            <label for="armada-display-name">What you call it</label>
+            <input
+              id="armada-display-name"
+              type="text"
+              autocomplete="off"
+              placeholder="Shown beneath the name the game holds"
+              formControlName="displayName"
+              [maxlength]="displayNameMaxLength" />
+          </div>
+
+          <div class="lcars-input-container sky">
+            <label for="armada-slug">Web address</label>
+            <input
+              id="armada-slug"
+              type="text"
+              autocomplete="off"
+              placeholder="Made from the name when left blank"
+              formControlName="slug"
+              [maxlength]="slugMaxLength" />
+          </div>
+        </div>
+
+        @if (isSaving) {
+          <app-loading-bar loadingText="Registering the Armada" />
+        }
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="lcars-btn green"
+            [disabled]="isSaving">
+            Register
+          </button>
+        </div>
+      </form>
+    }
+  }
+}

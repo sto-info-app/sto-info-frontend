@@ -457,3 +457,100 @@ export interface CreateFleetCommunity {
    */
   preferredTimezone?: string;
 }
+
+/**
+ * What registering a Fleet under a Community asks for.
+ *
+ * The name is **not** trimmed anywhere on the way to the server. ADR-0003
+ * applies here in a way it does not to a Community: the field has to hold
+ * what the game shows, character for character, because a roster export's
+ * filename is compared against it and an edge space is used in game
+ * precisely so two Fleets can carry almost the same name.
+ *
+ * The platform is named by identifier rather than by its URL segment. A
+ * segment is derived from the catalogue name, so sending one on a write
+ * path would mean renaming a platform broke registration as well as every
+ * existing link.
+ */
+export interface CreateStoFleet {
+  exactGameName: string;
+  platformId: string;
+
+  /** Allegiance, where it is known. Never guessed from a roster. */
+  allegianceFactionId?: string;
+  slug?: string;
+  recruitmentState?: FleetRecruitmentState;
+  visibility?: FleetAudience;
+}
+
+/**
+ * What registering an Armada under a Community asks for.
+ *
+ * No recruitment posture and no audience: an Armada groups Fleets rather
+ * than recruiting players, and it is seen exactly as far as its Community.
+ */
+export interface CreateStoArmada {
+  exactGameName: string;
+  platformId: string;
+
+  /** What the Community prefers to call it, where that differs. */
+  displayName?: string;
+  slug?: string;
+}
+
+/**
+ * A record that already answers to the name somebody is registering.
+ *
+ * Shown, never enforced. Two Communities may each hold a record for the
+ * same in-game Fleet and neither is authoritative, so this is what tells
+ * them apart: whose it is, and — for a Fleet — how current it is.
+ */
+export interface FleetDuplicate {
+  id: string;
+  exactGameName: string;
+  communityId: string | null;
+  communityName: string | null;
+  communitySlug: string | null;
+  platformId: string;
+  platformName: string;
+  lastEffectiveImportAt: string | null;
+  status: FleetScopeStatus;
+}
+
+/**
+ * A record that already answers to an Armada's name.
+ *
+ * Always has a Community — an Armada cannot exist without one — so the
+ * Community fields are never null here.
+ */
+export interface ArmadaDuplicate {
+  id: string;
+  exactGameName: string;
+  communityId: string;
+  communityName: string;
+  communitySlug: string;
+  platformId: string;
+  platformName: string;
+  status: FleetScopeStatus;
+}
+
+/**
+ * A newly registered Fleet, with anything that already looked like it.
+ *
+ * The matches come back *after* the registration succeeded rather than
+ * instead of it. A registrant who has just been told what already exists
+ * can close their own record; one refused outright has nothing to compare
+ * and no way through.
+ */
+export interface RegisteredStoFleet {
+  fleet: StoFleet;
+  duplicates: FleetDuplicate[];
+}
+
+/**
+ * A newly registered Armada, with anything that already looked like it.
+ */
+export interface RegisteredStoArmada {
+  armada: StoArmada;
+  duplicates: ArmadaDuplicate[];
+}

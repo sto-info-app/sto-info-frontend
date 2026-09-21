@@ -1,0 +1,158 @@
+@if (state$ | async; as state) {
+  @switch (state.kind) {
+    @case ('LOADING') {
+      <app-loading-bar loadingText="Reading the Community" />
+    }
+
+    @case ('MISSING') {
+      <app-lcars-information-message
+        title="No such record"
+        [message]="missingMessage" />
+    }
+
+    @case ('ERROR') {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="state.message" />
+    }
+
+    @case ('READY') {
+      <div class="lcars-text-bar">
+        <span>Register a Fleet</span>
+      </div>
+
+      <p class="register-page__intro">
+        Registering a Fleet records it under
+        {{ state.context.community.name }}. Type the name exactly as the game
+        shows it, spaces at either end included — that spacing may be the only
+        thing telling your Fleet apart from somebody else's.
+      </p>
+
+      @if (errorMessage) {
+        <app-lcars-error-message
+          title="Registration failed"
+          [message]="errorMessage" />
+      }
+
+      <form
+        class="register-page__form"
+        [formGroup]="form"
+        (ngSubmit)="onSubmit(state.context)">
+        <div class="form-row">
+          <div class="lcars-input-container sky">
+            <label for="fleet-name">Name, exactly as in game</label>
+            <input
+              id="fleet-name"
+              type="text"
+              autocomplete="off"
+              formControlName="exactGameName"
+              [maxlength]="nameMaxLength" />
+          </div>
+
+          <div class="lcars-input-container sky">
+            <label for="fleet-platform">Platform</label>
+            <select
+              id="fleet-platform"
+              formControlName="platformId">
+              <option value="">Choose a platform</option>
+              @for (platform of state.context.platforms; track platform.id) {
+                <option [value]="platform.id">{{ platform.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        @if (
+          form.controls.exactGameName.touched &&
+          form.controls.exactGameName.invalid
+        ) {
+          <p class="register-page__field-error">
+            Please give the Fleet its name.
+          </p>
+        }
+
+        @if (
+          form.controls.platformId.touched && form.controls.platformId.invalid
+        ) {
+          <p class="register-page__field-error">
+            Please say which platform the Fleet is on.
+          </p>
+        }
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="lcars-btn gold"
+            [disabled]="isChecking"
+            (click)="onCheck(state.context.community.id)">
+            Check for existing records
+          </button>
+        </div>
+
+        <app-scope-duplicate-warning
+          scopeLabel="Fleet"
+          [duplicates]="duplicates" />
+
+        <div class="form-row">
+          <div class="lcars-input-container sky">
+            <label for="fleet-allegiance">Allegiance</label>
+            <select
+              id="fleet-allegiance"
+              formControlName="allegianceFactionId">
+              <option value="">Not stated</option>
+              @for (faction of allegiances$ | async; track faction.id) {
+                <option [value]="faction.id">{{ faction.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="lcars-input-container sky">
+            <label for="fleet-recruitment">How people join</label>
+            <select
+              id="fleet-recruitment"
+              formControlName="recruitmentState">
+              @for (choice of recruitmentChoices; track choice[0]) {
+                <option [value]="choice[0]">{{ choice[1] }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="lcars-input-container sky">
+            <label for="fleet-visibility">Who can see it</label>
+            <select
+              id="fleet-visibility"
+              formControlName="visibility">
+              @for (choice of audienceChoices; track choice[0]) {
+                <option [value]="choice[0]">{{ choice[1] }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="lcars-input-container sky">
+            <label for="fleet-slug">Web address</label>
+            <input
+              id="fleet-slug"
+              type="text"
+              autocomplete="off"
+              placeholder="Made from the name when left blank"
+              formControlName="slug"
+              [maxlength]="slugMaxLength" />
+          </div>
+        </div>
+
+        @if (isSaving) {
+          <app-loading-bar loadingText="Registering the Fleet" />
+        }
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="lcars-btn green"
+            [disabled]="isSaving">
+            Register
+          </button>
+        </div>
+      </form>
+    }
+  }
+}

@@ -9,6 +9,7 @@ import {
 
 import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { FLEET_SCOPE_ERROR } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import { FleetScopePageState } from 'src/app/fleet/scope/fleet-scope-page.models';
@@ -60,6 +61,7 @@ describe('CommunityPageComponent', () => {
   let router: { navigate: jest.Mock };
   let pageTitle: { setTitle: jest.Mock };
   let formatted: string | null;
+  let isLoggedIn: boolean;
 
   beforeEach(async () => {
     params$ = new BehaviorSubject<ParamMap>(
@@ -76,14 +78,33 @@ describe('CommunityPageComponent', () => {
     router = { navigate: jest.fn() };
     pageTitle = { setTitle: jest.fn() };
     formatted = '2 January 2026';
+    isLoggedIn = true;
 
     await TestBed.configureTestingModule({
       imports: [CommunityPageComponent],
       providers: [
         { provide: FleetScopeService, useValue: scopes },
         { provide: Router, useValue: router },
-        { provide: ActivatedRoute, useValue: { paramMap: params$ } },
+        {
+          provide: ActivatedRoute,
+          // The snapshot as well as the stream: the register links are
+          // built from the address rather than from the record.
+          useValue: {
+            paramMap: params$,
+            snapshot: {
+              // Answers null for a segment that is not there, as the real
+              // one does, so the page's own fallback is the thing tested.
+              paramMap: {
+                get: (): string | null => params$.value.get('communitySlug'),
+              },
+            },
+          },
+        },
         { provide: PageTitleService, useValue: pageTitle },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: (): boolean => isLoggedIn },
+        },
       ],
     })
       .overrideComponent(CommunityPageComponent, {
@@ -311,5 +332,75 @@ describe('CommunityPageComponent', () => {
     render();
 
     expect(scopes.resolveCommunity).toHaveBeenLastCalledWith('');
+  });
+  describe('registering into it', () => {
+    /**
+     * The links offering registration.
+     *
+     * @returns Their addresses, in order.
+     */
+    const actionLinks = (): (string | null)[] =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll('.community-page__actions a'),
+      ).map(link => (link as HTMLAnchorElement).getAttribute('routerLink'));
+
+    it('offers a Fleet and an Armada to somebody signed in', () => {
+      render();
+
+      expect(fixture.componentInstance.registerFleetLink).toEqual([
+        '/fleets',
+        'communities',
+        'united-federation-alliance',
+        'fleets',
+        'register',
+      ]);
+      expect(fixture.componentInstance.registerArmadaLink).toEqual([
+        '/fleets',
+        'communities',
+        'united-federation-alliance',
+        'armadas',
+        'register',
+      ]);
+      expect(actionLinks()).toHaveLength(2);
+    });
+
+    // Whether the viewer holds the capability is the server's answer and
+    // nothing this page is told, so signed in is the only condition it can
+    // check — and a refusal that explains itself costs a click where a
+    // missing control costs a support message.
+    it('offers nothing to a signed-out visitor', () => {
+      isLoggedIn = false;
+
+      render();
+
+      expect(actionLinks()).toHaveLength(0);
+    });
+
+    // The address is always there in practice — the route cannot match
+    // without it — but a link built from nothing should be the directory
+    // rather than a broken path.
+    it('builds a link even from an address with no segment', () => {
+      params$.next(convertToParamMap({}));
+
+      render();
+
+      expect(fixture.componentInstance.registerFleetLink).toEqual([
+        '/fleets',
+        'communities',
+        '',
+        'fleets',
+        'register',
+      ]);
+    });
+
+    it('offers nothing while there is no Community to register into', () => {
+      scopes.resolveCommunity.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 })),
+      );
+
+      render();
+
+      expect(actionLinks()).toHaveLength(0);
+    });
   });
 });

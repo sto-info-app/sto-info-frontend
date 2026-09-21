@@ -1,6 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ParamMap } from '@angular/router';
+import { ParamMap, RouterModule } from '@angular/router';
 
 import { Observable } from 'rxjs';
 
@@ -22,6 +22,7 @@ import {
   FleetScopeReadyState,
 } from 'src/app/fleet/scope/fleet-scope-page.models';
 import { FleetScopeViewComponent } from 'src/app/fleet/scope/fleet-scope-view/fleet-scope-view.component';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { ResolvedFleetCommunity } from 'src/app/models/fleet.models';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -38,10 +39,61 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [AppDatePipe],
-  imports: [AsyncPipe, FleetScopeViewComponent],
+  imports: [AsyncPipe, RouterModule, FleetScopeViewComponent],
 })
 export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFleetCommunity> {
   private readonly _scopes = inject(FleetScopeService);
+  private readonly _authService = inject(AuthService);
+
+  /**
+   * Whether to offer registering a Fleet or an Armada here.
+   *
+   * Signed in is the only condition this page can check. Whether the viewer
+   * holds the capability is the server's answer and nothing this page is
+   * told, so the alternative to offering the link is hiding it from the
+   * people who do — and a refusal that explains itself costs a click where
+   * a missing control costs a support message.
+   *
+   * @returns True when somebody is signed in.
+   */
+  get canRegisterChildren(): boolean {
+    return this._authService.isLoggedIn();
+  }
+
+  /**
+   * Where registering a Fleet into this Community starts.
+   *
+   * Built from the address rather than from the record, because a
+   * registration route is a sibling of this page rather than a property of
+   * the Community. The address is the canonical one by the time anything
+   * is drawn: an out-of-date segment replaces itself first, and it would
+   * resolve to the same Community either way.
+   *
+   * @returns The router link.
+   */
+  get registerFleetLink(): string[] {
+    return [...this.communityLink, 'fleets', 'register'];
+  }
+
+  /**
+   * Where registering an Armada into this Community starts.
+   *
+   * @returns The router link.
+   */
+  get registerArmadaLink(): string[] {
+    return [...this.communityLink, 'armadas', 'register'];
+  }
+
+  /**
+   * This Community's own address.
+   *
+   * @returns The router link.
+   */
+  private get communityLink(): string[] {
+    return FLEET_LINKS.community(
+      this._route.snapshot.paramMap.get('communitySlug') ?? '',
+    );
+  }
 
   readonly missingMessage =
     'No Community answers to that address. It may have been closed, or the ' +

@@ -1,3 +1,10 @@
 :host {
   display: block;
 }
+
+.community-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}

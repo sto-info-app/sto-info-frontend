@@ -84,4 +84,105 @@ describe('FleetRegistrationService', () => {
 
     request.flush({});
   });
+  describe('registering into a Community', () => {
+    const community = `${API_URLS.FLEET_COMMUNITIES}/community-1`;
+
+    it('posts a Fleet to the Community that registers it', () => {
+      service
+        .registerFleet('community-1', {
+          exactGameName: 'Starfleet Command ',
+          platformId: 'platform-1',
+        })
+        .subscribe();
+
+      const request = httpMock.expectOne(`${community}/fleets`);
+
+      expect(request.request.method).toBe('POST');
+      // The edge space survives the whole journey: it is part of the name.
+      expect(request.request.body.exactGameName).toBe('Starfleet Command ');
+
+      request.flush({});
+    });
+
+    it('posts an Armada to the Community that registers it', () => {
+      service
+        .registerArmada('community-1', {
+          exactGameName: 'Ninth Fleet Armada',
+          platformId: 'platform-1',
+        })
+        .subscribe();
+
+      const request = httpMock.expectOne(`${community}/armadas`);
+
+      expect(request.request.method).toBe('POST');
+
+      request.flush({});
+    });
+
+    it('escapes a Community identifier on its way into the address', () => {
+      service
+        .registerFleet('a/b', {
+          exactGameName: 'X',
+          platformId: 'p',
+        })
+        .subscribe();
+
+      httpMock
+        .expectOne(`${API_URLS.FLEET_COMMUNITIES}/a%2Fb/fleets`)
+        .flush({});
+    });
+  });
+
+  describe('asking what already answers to a name', () => {
+    const community = `${API_URLS.FLEET_COMMUNITIES}/community-1`;
+
+    // Matching folds case and nothing else. Trimming here would report a
+    // duplicate that is not one, which is the failure that stops people
+    // trusting the warning at all.
+    it('sends a Fleet name exactly as it was typed', () => {
+      service
+        .findFleetDuplicates('community-1', 'platform-1', ' Starfleet ')
+        .subscribe();
+
+      const request = httpMock.expectOne(
+        candidate => candidate.url === `${community}/fleets/duplicates`,
+      );
+
+      expect(request.request.method).toBe('GET');
+      expect(request.request.params.get('name')).toBe(' Starfleet ');
+      expect(request.request.params.get('platformId')).toBe('platform-1');
+
+      request.flush([]);
+    });
+
+    it('asks the Armada collection for an Armada name', () => {
+      service
+        .findArmadaDuplicates('community-1', 'platform-1', 'Ninth')
+        .subscribe();
+
+      const request = httpMock.expectOne(
+        candidate => candidate.url === `${community}/armadas/duplicates`,
+      );
+
+      expect(request.request.params.get('name')).toBe('Ninth');
+
+      request.flush([]);
+    });
+
+    it('signs the question, the collection being capability-guarded', () => {
+      service
+        .findFleetDuplicates('community-1', 'platform-1', 'Starfleet')
+        .subscribe();
+
+      const request = httpMock.expectOne(
+        candidate => candidate.url === `${community}/fleets/duplicates`,
+      );
+
+      expect(request.request.headers.get('Authorization')).toBe(
+        'Bearer token-1',
+      );
+
+      request.flush([]);
+    });
+  });
 });

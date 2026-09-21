@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(7);
+    expect(children).toHaveLength(9);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -49,11 +49,31 @@ describe('FLEET_ROUTES', () => {
 
   // Registering needs an account, and a literal segment can never be a
   // Community slug: a scope's address always names its collection first.
-  it('puts registration behind the sign-in guard', () => {
-    expect(childAt('register')?.canActivate).toEqual([AuthGuard]);
-    expect(childAt('register')?.data?.['title']).toBe(
-      APP_ROUTE_TITLES.FLEET_REGISTER,
-    );
+  it.each([
+    ['register', APP_ROUTE_TITLES.FLEET_REGISTER],
+    [
+      'communities/:communitySlug/fleets/register',
+      APP_ROUTE_TITLES.FLEET_REGISTER_FLEET,
+    ],
+    [
+      'communities/:communitySlug/armadas/register',
+      APP_ROUTE_TITLES.FLEET_REGISTER_ARMADA,
+    ],
+  ])('puts %s behind the sign-in guard', (path, title) => {
+    expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
+    expect(childAt(path)?.data?.['title']).toBe(title);
+  });
+
+  /**
+   * `register` is a literal where the deeper routes have a platform
+   * segment — four segments against five — so neither can claim the
+   * other's address whatever order they are declared in.
+   */
+  it('registers into a Community inside the collection it adds to', () => {
+    const paths = children.map(child => child.path);
+
+    expect(paths).toContain('communities/:communitySlug/fleets/register');
+    expect(paths).toContain('communities/:communitySlug/armadas/register');
   });
 
   it('loads each listing only when its address is reached', () => {
@@ -102,6 +122,8 @@ describe('FLEET_ROUTES', () => {
     ['communities', 'CommunitiesDirectoryComponent'],
     ['armadas', 'ArmadasDirectoryComponent'],
     ['register', 'CommunityRegisterComponent'],
+    ['communities/:communitySlug/fleets/register', 'FleetRegisterComponent'],
+    ['communities/:communitySlug/armadas/register', 'ArmadaRegisterComponent'],
     ['communities/:communitySlug', 'CommunityPageComponent'],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug',

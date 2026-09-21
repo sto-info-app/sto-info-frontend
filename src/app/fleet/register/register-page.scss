@@ -1,0 +1,27 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.register-page__intro {
+  margin: 1rem 0;
+  max-width: 70ch;
+}
+
+// Wraps rather than scrolls, so the controls sit on one line on a wide
+// screen and stack on a narrow one.
+.register-page__form .form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+// Beneath the field it is about: a reader who has to look elsewhere to find
+// out which field is wrong is a reader who has to look twice.
+.register-page__field-error {
+  margin: -0.5rem 0 1rem;
+  color: vars.$lcars-red;
+}

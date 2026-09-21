@@ -65,6 +65,29 @@ export const FLEET_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
 
+      // Registering into a Community sits inside the collection it adds to,
+      // and `register` is a literal where the deeper routes have a platform
+      // segment — four segments against five, so neither can claim the
+      // other's address.
+      {
+        path: 'communities/:communitySlug/fleets/register',
+        loadComponent: () =>
+          import('./register/fleet-register/fleet-register.component').then(
+            m => m.FleetRegisterComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_REGISTER_FLEET },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/armadas/register',
+        loadComponent: () =>
+          import('./register/armada-register/armada-register.component').then(
+            m => m.ArmadaRegisterComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_REGISTER_ARMADA },
+        canActivate: [AuthGuard],
+      },
+
       // The two deeper addresses come before the Community's own, so
       // `communities/x/fleets/pc/y` is never read as a Community called `x`
       // with three segments of nonsense after it.

@@ -1,0 +1,54 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.scope-duplicate-warning {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-left: 4px solid vars.$lcars-gold;
+  background: vars.$lcars-grey-bg;
+}
+
+.scope-duplicate-warning__lead {
+  margin: 0 0 0.75rem;
+  max-width: 70ch;
+}
+
+.scope-duplicate-warning__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scope-duplicate-warning__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.scope-duplicate-warning__name {
+  font-family: vars.$font-antonio;
+  font-size: 1.05rem;
+  color: vars.$lcars-sunflower;
+  overflow-wrap: anywhere;
+}
+
+// How current the record is, which is the other half of telling two
+// records of one Fleet apart: one kept up to date and one abandoned in
+// 2024 are not equally likely to be the one somebody meant.
+.scope-duplicate-warning__held,
+.scope-duplicate-warning__freshness,
+.scope-duplicate-warning__lifecycle {
+  font-size: 0.85rem;
+  color: vars.$lcars-grey-light;
+}
+
+.scope-duplicate-warning__none {
+  margin: 1rem 0;
+  color: vars.$lcars-green;
+}
