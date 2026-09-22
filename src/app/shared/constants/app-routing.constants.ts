@@ -97,6 +97,9 @@ export const APP_ROUTES = {
     FLEET_COMMUNITIES_ROOT + '/:communitySlug/fleets/:platformSegment/:slug',
   FLEET_SCOPE_ARMADA:
     FLEET_COMMUNITIES_ROOT + '/:communitySlug/armadas/:platformSegment/:slug',
+  FLEET_ROSTER_CHECK:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/check-export',
 
   // News
   NEWS: ROOT_ROUTES.NEWS,
@@ -258,6 +261,7 @@ export const APP_ROUTE_TITLES = {
   FLEET_COMMUNITY: 'Fleet Community',
   FLEET_SCOPE_FLEET: 'Fleet',
   FLEET_SCOPE_ARMADA: 'Armada',
+  FLEET_ROSTER_CHECK: 'Check a Roster Export',
 
   // News
   NEWS: 'News',

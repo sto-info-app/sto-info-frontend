@@ -1,0 +1,293 @@
+@if (state$ | async; as state) {
+  @switch (state.kind) {
+    @case ('LOADING') {
+      <app-loading-bar loadingText="Reading the Fleet" />
+    }
+
+    @case ('MISSING') {
+      <app-lcars-information-message
+        title="No such Fleet"
+        [message]="missingMessage" />
+    }
+
+    @case ('ERROR') {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="readErrorMessage" />
+    }
+
+    @case ('READY') {
+      <div class="lcars-text-bar">
+        <span>Check a roster export</span>
+      </div>
+
+      <p class="roster-check__fleet">
+        <a [routerLink]="state.fleetLink">{{ state.fleet.exactGameName }}</a>
+        on {{ state.fleet.platformName }}
+      </p>
+
+      @if (state.block; as block) {
+        @switch (block.kind) {
+          @case ('NO_COMMUNITY') {
+            <app-lcars-information-message
+              title="Nothing to import into"
+              [message]="noCommunityMessage" />
+          }
+
+          @case ('NO_EXPORT') {
+            <app-lcars-information-message
+              title="No export on this platform"
+              [message]="noExportMessage(block.platformName)" />
+          }
+
+          @case ('NOT_PERMITTED') {
+            <app-lcars-information-message
+              title="Not yours to import"
+              [message]="notPermittedMessage" />
+          }
+        }
+
+        <nav
+          class="buttons-row"
+          aria-label="Fleet directories">
+          <a
+            class="lcars-btn lcars-btn-auto sky"
+            [routerLink]="state.fleetLink"
+            >Back to the Fleet</a
+          >
+          <a
+            class="lcars-btn lcars-btn-auto bluey"
+            [routerLink]="fleetDirectoryLink"
+            >Browse Fleets</a
+          >
+        </nav>
+      } @else {
+        <p class="roster-check__intro">
+          Nothing on this page imports anything. The export is read, you are
+          told how it would be understood, and the file is discarded. Send it
+          as often as you like.
+        </p>
+
+        <form
+          class="roster-check__form"
+          [formGroup]="form"
+          (ngSubmit)="onSubmit(state)">
+          <div class="form-row">
+            <div class="lcars-input-container sky">
+              <label for="roster-file">The export, as the game wrote it</label>
+              <input
+                id="roster-file"
+                type="file"
+                accept=".csv,text/csv"
+                class="file-input"
+                [disabled]="checking"
+                (change)="onFileChosen($event)" />
+            </div>
+
+            <div class="lcars-input-container sky">
+              <label for="roster-timezone">The clock it was taken on</label>
+              <select
+                id="roster-timezone"
+                formControlName="timezone">
+                @for (zone of timezones; track zone) {
+                  <option [value]="zone">{{ label(zone) }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <p class="roster-check__hint">
+            The file records its dates in whatever clock the exporting player
+            was on and never says which. Choosing the wrong one does not fail
+            &mdash; it quietly moves every date by a few hours, which is why
+            the rows below are drawn twice.
+          </p>
+
+          <button
+            type="submit"
+            class="lcars-btn lcars-btn-auto gold"
+            [disabled]="checking || !selectedFile">
+            Check this export
+          </button>
+        </form>
+
+        @if (checking) {
+          <app-loading-bar loadingText="Reading the export" />
+        }
+
+        @if (errorMessage) {
+          <app-lcars-error-message
+            title="Not a roster export"
+            [message]="errorMessage" />
+        }
+
+        @if (preview; as result) {
+          @if (result.canImport) {
+            <app-lcars-success-message
+              title="Ready to import"
+              [message]="readyMessage(result)" />
+          } @else {
+            <app-lcars-warning-message
+              title="Not ready to import"
+              [message]="notReadyMessage" />
+          }
+
+          @if (filenameProblem(result); as problem) {
+            <section class="roster-check__section">
+              <div class="lcars-text-bar small-lcars-bar-gap">
+                <span>The filename</span>
+              </div>
+              <p>{{ problem }}</p>
+            </section>
+          } @else {
+            <section class="roster-check__section">
+              <div class="lcars-text-bar small-lcars-bar-gap">
+                <span>The filename</span>
+              </div>
+              <dl class="roster-check__facts">
+                <dt>Fleet named</dt>
+                <dd>{{ result.filename.fleetLabel }}</dd>
+                <dt>Taken at, on that clock</dt>
+                <dd>{{ result.filename.localStamp }}</dd>
+                <dt>Which is</dt>
+                <dd>
+                  {{ result.filename.exportedAt ?? exportChoiceNeeded }}
+                </dd>
+                @if (result.filename.matchedAlias; as alias) {
+                  <dt>Former name matched</dt>
+                  <dd>{{ alias }}</dd>
+                }
+              </dl>
+
+              @if (result.filename.exportedAtCandidates.length > 1) {
+                <p class="roster-check__hint">
+                  The clocks went back over that hour, so it names two moments:
+                  {{ result.filename.exportedAtCandidates.join(' or ') }}. Which
+                  one it was decides which of two exports is the later, so it
+                  has to be answered before this can be imported.
+                </p>
+              }
+            </section>
+          }
+
+          <section class="roster-check__section">
+            <div class="lcars-text-bar small-lcars-bar-gap">
+              <span>The file</span>
+            </div>
+            <dl class="roster-check__facts">
+              <dt>Rows</dt>
+              <dd>{{ result.source.rowCount }}</dd>
+              <dt>Read into values</dt>
+              <dd>{{ result.readableRowCount }}</dd>
+              @if (hadOfficerColumns(result)) {
+                <dt>Officer notes discarded</dt>
+                <dd>{{ result.source.officerTailRowCount }}</dd>
+              }
+              @if (result.unknownClassCount) {
+                <dt>Classes not recognised</dt>
+                <dd>{{ result.unknownClassCount }}</dd>
+              }
+              @if (result.ambiguousDateCount) {
+                <dt>Rows with an ambiguous date</dt>
+                <dd>{{ result.ambiguousDateCount }}</dd>
+              }
+            </dl>
+
+            @if (hadOfficerColumns(result)) {
+              <p class="roster-check__hint">
+                This is an officer's export. The three officer columns are
+                discarded before anything else reads the file, so nothing
+                written in them reaches this site at all.
+              </p>
+            }
+          </section>
+
+          @if (result.problems.length) {
+            <section class="roster-check__section">
+              <div class="lcars-text-bar small-lcars-bar-gap">
+                <span class="title-with-badge">
+                  Rows that could not be read
+                  <span class="header-count-badge">{{
+                    result.problems.length
+                  }}</span>
+                </span>
+              </div>
+
+              <ul class="roster-check__problems">
+                @for (problem of result.problems; track $index) {
+                  <li>
+                    <span class="roster-check__line">Line {{ problem.line }}</span>
+                    @if (problem.column) {
+                      <span class="roster-check__column">{{
+                        problem.column
+                      }}</span>
+                    }
+                    <span>{{ rowProblem(problem) }}</span>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+
+          @if (result.sample.length) {
+            <section class="roster-check__section">
+              <div class="lcars-text-bar small-lcars-bar-gap">
+                <span>The first rows, as they were read</span>
+              </div>
+
+              <ul class="roster-check__sample">
+                @for (row of result.sample; track row.line) {
+                  <li class="roster-check__row">
+                    <p class="roster-check__member">
+                      <span class="roster-check__name">{{
+                        row.characterName
+                      }}</span>
+                      <span class="roster-check__handle">{{
+                        row.accountHandle
+                      }}</span>
+                    </p>
+                    <dl class="roster-check__facts">
+                      <dt>Class</dt>
+                      <dd>{{ row.className }}</dd>
+                      <dt>Rank</dt>
+                      <dd>{{ row.guildRank }}</dd>
+                      <dt>Contribution</dt>
+                      <dd>{{ row.contributionTotal }}</dd>
+                      <dt>Joined</dt>
+                      <dd>
+                        {{ row.joinedAt.local ?? absent }}
+                        <span class="roster-check__instant">{{
+                          instants(row.joinedAt)
+                        }}</span>
+                      </dd>
+                      <dt>Rank changed</dt>
+                      <dd>
+                        {{ row.rankChangedAt.local ?? absent }}
+                        <span class="roster-check__instant">{{
+                          instants(row.rankChangedAt)
+                        }}</span>
+                      </dd>
+                      <dt>Last active</dt>
+                      <dd>
+                        {{ row.lastActiveAt.local ?? absent }}
+                        <span class="roster-check__instant">{{
+                          instants(row.lastActiveAt)
+                        }}</span>
+                      </dd>
+                    </dl>
+                  </li>
+                }
+              </ul>
+
+              <p class="roster-check__hint">
+                The first line of each date is what the file says. The second is
+                what it was read as, in UTC, through
+                {{ result.timezone }}.
+              </p>
+            </section>
+          }
+        }
+      }
+    }
+  }
+}

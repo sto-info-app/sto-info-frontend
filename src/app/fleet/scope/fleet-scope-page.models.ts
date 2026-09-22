@@ -124,6 +124,29 @@ export type FleetScopePageState =
   | FleetScopeReadyState;
 
 /**
+ * Something the reader may go and do to this record.
+ *
+ * A link rather than a button, because everything offered here happens on a
+ * page of its own: an address somebody can bookmark, share with whoever
+ * actually holds the export, and reach with a keyboard.
+ *
+ * Offered only where the viewer may use it. A row of controls nobody can
+ * press tells a reader about a permission they do not have and did not ask
+ * about — and on a Fleet page, where anybody may look, most readers are
+ * exactly that person.
+ */
+export interface FleetScopeAction {
+  /** What the control says. */
+  readonly label: string;
+
+  /** Where it goes. */
+  readonly link: string[];
+
+  /** What a screen reader is told, where the label alone is not enough. */
+  readonly description: string;
+}
+
+/**
  * A scope page with a record to show.
  *
  * Named separately so that a page building one says so in its signature.
@@ -145,6 +168,15 @@ export interface FleetScopeReadyState {
    * of it: a Fleet nobody here runs is the case this exists for.
    */
   readonly notice: string | null;
+
+  /**
+   * What the reader may go and do here, which may be nothing.
+   *
+   * Empty rather than null: there is no difference between a record with no
+   * actions and a reader offered none, and a page that drew the two
+   * differently would be saying something it cannot know.
+   */
+  readonly actions: FleetScopeAction[];
 
   /** What was written about it, where anything was. */
   readonly description: string | null;

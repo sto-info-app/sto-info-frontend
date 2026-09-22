@@ -5,6 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { FleetScopeArtworkComponent } from 'src/app/fleet/scope/fleet-scope-artwork/fleet-scope-artwork.component';
 import { FleetFollowComponent } from 'src/app/fleet/scope/fleet-follow/fleet-follow.component';
@@ -31,6 +32,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    RouterLink,
     FleetScopeArtworkComponent,
     FleetScopeHeaderComponent,
     FleetFollowComponent,

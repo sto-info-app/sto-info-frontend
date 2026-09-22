@@ -94,7 +94,13 @@ describe('FleetScopeViewComponent', () => {
   });
 
   it('draws the head of the record when it has one', () => {
-    render({ kind: 'READY', header: HEADER, notice: null, description: null });
+    render({
+      kind: 'READY',
+      actions: [],
+      header: HEADER,
+      notice: null,
+      description: null,
+    });
 
     expect(find('app-fleet-scope-header')).not.toBeNull();
     expect(fixture.nativeElement.textContent).toContain(
@@ -107,6 +113,7 @@ describe('FleetScopeViewComponent', () => {
   it('puts a notice about the record above the record', () => {
     render({
       kind: 'READY',
+      actions: [],
       header: HEADER,
       notice: 'No Community here has registered this Fleet.',
       description: null,
@@ -125,7 +132,13 @@ describe('FleetScopeViewComponent', () => {
   });
 
   it('draws no notice where there is nothing to say', () => {
-    render({ kind: 'READY', header: HEADER, notice: null, description: null });
+    render({
+      kind: 'READY',
+      actions: [],
+      header: HEADER,
+      notice: null,
+      description: null,
+    });
 
     expect(find('app-lcars-information-message')).toBeNull();
   });
@@ -133,6 +146,7 @@ describe('FleetScopeViewComponent', () => {
   it('shows a description beneath its own bar', () => {
     render({
       kind: 'READY',
+      actions: [],
       header: HEADER,
       notice: null,
       description: 'A home for casual PvE fleets.',
@@ -145,7 +159,13 @@ describe('FleetScopeViewComponent', () => {
   });
 
   it('draws no About bar where nothing was written', () => {
-    render({ kind: 'READY', header: HEADER, notice: null, description: null });
+    render({
+      kind: 'READY',
+      actions: [],
+      header: HEADER,
+      notice: null,
+      description: null,
+    });
 
     expect(find('.lcars-text-bar')).toBeNull();
   });
@@ -155,6 +175,7 @@ describe('FleetScopeViewComponent', () => {
   it('renders a description containing markup as text', () => {
     render({
       kind: 'READY',
+      actions: [],
       header: HEADER,
       notice: null,
       description: '<img src="x" onerror="alert(1)">',
@@ -166,9 +187,50 @@ describe('FleetScopeViewComponent', () => {
     );
   });
 
+  it('offers what the reader may go and do', () => {
+    render({
+      kind: 'READY',
+      actions: [
+        {
+          label: 'Check a roster export',
+          link: ['/fleets', 'communities', 'ufa', 'fleets', 'pc', 'ninth'],
+          description: 'Check a roster export without importing it',
+        },
+      ],
+      header: HEADER,
+      notice: null,
+      description: null,
+    });
+
+    const action = find('.fleet-scope-view__actions a');
+
+    expect(action?.textContent).toContain('Check a roster export');
+    expect(action?.getAttribute('href')).toBe(
+      '/fleets/communities/ufa/fleets/pc/ninth',
+    );
+    expect(action?.getAttribute('aria-label')).toBe(
+      'Check a roster export without importing it',
+    );
+  });
+
+  // A row of controls nobody can press tells a reader about a permission
+  // they do not have and did not ask about.
+  it('draws no row of controls when there is nothing to offer', () => {
+    render({
+      kind: 'READY',
+      actions: [],
+      header: HEADER,
+      notice: null,
+      description: null,
+    });
+
+    expect(find('.fleet-scope-view__actions')).toBeNull();
+  });
+
   it('draws the follow control when the page has one', () => {
     render({
       kind: 'READY',
+      actions: [],
       header: HEADER,
       notice: null,
       description: null,
@@ -189,6 +251,7 @@ describe('FleetScopeViewComponent', () => {
   it('draws none where the page has nothing to follow', () => {
     render({
       kind: 'READY',
+      actions: [],
       header: HEADER,
       notice: null,
       description: null,

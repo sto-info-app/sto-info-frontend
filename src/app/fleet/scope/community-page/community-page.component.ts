@@ -158,6 +158,9 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
 
     return {
       kind: 'READY',
+      // Nothing yet. A Community's own actions arrive with the tickets that
+      // build them.
+      actions: [],
       header: {
         scope: FLEET_SCOPE_COMMUNITY,
         name: community.name,

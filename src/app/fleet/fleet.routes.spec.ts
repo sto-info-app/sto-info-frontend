@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(10);
+    expect(children).toHaveLength(11);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -59,6 +59,13 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/armadas/register',
       APP_ROUTE_TITLES.FLEET_REGISTER_ARMADA,
+    ],
+    // Checking an export is a thing somebody does to a Fleet they run.
+    // Whether they may is the server's answer, and the page asks it rather
+    // than guarding on a guess, so the guard here is only the sign-in one.
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
+      APP_ROUTE_TITLES.FLEET_ROSTER_CHECK,
     ],
   ])('puts %s behind the sign-in guard', (path, title) => {
     expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
@@ -118,6 +125,23 @@ describe('FLEET_ROUTES', () => {
     );
   });
 
+  /**
+   * Deeper than a Fleet's own page and therefore ahead of it, by the same
+   * rule that puts a Fleet ahead of a Community: the longer address is
+   * matched first so the shorter one never swallows its tail.
+   */
+  it('matches the export check before the Fleet page it sits under', () => {
+    const paths = children.map(child => child.path);
+
+    expect(
+      paths.indexOf('communities/:communitySlug/fleets/:platformSegment/:slug'),
+    ).toBeGreaterThan(
+      paths.indexOf(
+        'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
+      ),
+    );
+  });
+
   it.each([
     ['', 'FleetsDirectoryComponent'],
     ['communities', 'CommunitiesDirectoryComponent'],
@@ -134,6 +158,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/armadas/:platformSegment/:slug',
       'ArmadaPageComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
+      'RosterImportCheckComponent',
     ],
   ])('loads the right component for %s', async (path, expected) => {
     const loaded = await (

@@ -24,6 +24,21 @@
 
     <app-fleet-scope-header [vm]="state.header" />
 
+    @if (state.actions.length) {
+      <nav
+        class="buttons-row fleet-scope-view__actions"
+        aria-label="What you can do here">
+        @for (action of state.actions; track action.link) {
+          <a
+            class="lcars-btn lcars-btn-auto gold"
+            [routerLink]="action.link"
+            [attr.aria-label]="action.description"
+            >{{ action.label }}</a
+          >
+        }
+      </nav>
+    }
+
     @if (state.following) {
       <app-fleet-follow [vm]="state.following" />
     }

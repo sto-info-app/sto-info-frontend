@@ -67,6 +67,12 @@ const READER: FleetScopeViewer = {
   followerCount: 0,
 };
 
+/** A viewer who may put a roster into the Fleet. */
+const ROSTER_IMPORTER: FleetScopeViewer = {
+  ...READER,
+  capabilities: ['roster.import'],
+};
+
 /** A viewer who may change the artwork. */
 const ARTWORK_KEEPER: FleetScopeViewer = {
   capabilities: ['scope.images.manage'],
@@ -501,6 +507,95 @@ describe('FleetPageComponent', () => {
 
       expect(drawn.following?.communityId).toBe('community-1');
       expect(drawn.following?.scopeNoun).toBe('Fleet');
+    });
+  });
+
+  describe('checking a roster export', () => {
+    /**
+     * Reads the actions the page offers.
+     *
+     * @returns Their labels.
+     */
+    function actionLabels(): string[] {
+      const drawn = state();
+
+      if (drawn.kind !== 'READY') {
+        throw new Error('expected a ready page');
+      }
+
+      return drawn.actions.map(action => action.label);
+    }
+
+    it('offers the check to somebody who may import', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(resolved({ viewer: ROSTER_IMPORTER })),
+      );
+      render();
+
+      expect(actionLabels()).toEqual(['Check a roster export']);
+    });
+
+    it('links to the page below the Fleet’s own address', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(resolved({ viewer: ROSTER_IMPORTER })),
+      );
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.actions[0].link).toEqual([
+        '/fleets',
+        'communities',
+        'united-federation-alliance',
+        'fleets',
+        'pc',
+        'starfleet-command',
+        'check-export',
+      ]);
+    });
+
+    // Anybody may read a Fleet page, and most readers have no business
+    // importing anything. A control they cannot use tells them about a
+    // permission they did not ask about.
+    it('offers nothing to a reader who may not import', () => {
+      render();
+
+      expect(actionLabels()).toEqual([]);
+    });
+
+    // Nobody runs a Fleet no Community has registered, so there is nothing
+    // for a roster to be imported into.
+    it('offers nothing where no Community has registered the Fleet', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ communityId: null }),
+            communityName: null,
+            viewer: ROSTER_IMPORTER,
+          }),
+        ),
+      );
+      render();
+
+      expect(actionLabels()).toEqual([]);
+    });
+
+    // The game writes no export on a console, so there is no file to check.
+    it('offers nothing on a platform the game exports no roster from', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({
+              platformProvidesRosterExport: false,
+              platformName: 'PlayStation',
+            }),
+            viewer: ROSTER_IMPORTER,
+          }),
+        ),
+      );
+      render();
+
+      expect(actionLabels()).toEqual([]);
     });
   });
 });

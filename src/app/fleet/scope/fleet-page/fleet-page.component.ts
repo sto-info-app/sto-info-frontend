@@ -20,6 +20,7 @@ import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
+  FleetScopeAction,
   FleetScopeFact,
   FleetScopeReadyState,
 } from 'src/app/fleet/scope/fleet-scope-page.models';
@@ -53,6 +54,9 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 function rosterUnavailableOn(platformName: string): string {
   return `The game provides no roster export on ${platformName}`;
 }
+
+/** The capability that lets somebody put a roster into a Fleet. */
+export const ROSTER_IMPORT_CAPABILITY = 'roster.import';
 
 const STANDALONE_NOTICE =
   'No Community here has registered this Fleet. The record exists so an ' +
@@ -153,6 +157,50 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
   }
 
   /**
+   * What the reader may go and do to this Fleet.
+   *
+   * One thing so far, and three reasons there may be none. A Fleet nobody
+   * has registered has no Community to import into; a console Fleet has no
+   * export to import, because the game writes none there; and anybody may
+   * read this page, so the control appears only for somebody who could use
+   * it. The page behind it explains all three anyway, for whoever arrives by
+   * link — but a Fleet page is mostly read by people with no business
+   * importing anything, and offering them a control is telling them about a
+   * permission they did not ask about.
+   *
+   * @param resolved - The server's answer.
+   * @returns What to offer, which may be nothing.
+   */
+  private actionsFor(resolved: ResolvedStoFleet): FleetScopeAction[] {
+    const { fleet, viewer } = resolved;
+
+    if (
+      fleet.communityId === null ||
+      !fleet.platformProvidesRosterExport ||
+      !viewer.capabilities.includes(ROSTER_IMPORT_CAPABILITY)
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        label: 'Check a roster export',
+        link: [
+          ...FLEET_LINKS.fleet(
+            resolved.communitySlug,
+            resolved.platformSegment,
+            fleet.slug,
+          ),
+          'check-export',
+        ],
+        description:
+          `Check a roster export for ${fleet.exactGameName} without ` +
+          'importing it',
+      },
+    ];
+  }
+
+  /**
    * Turns the Fleet into what the page draws.
    *
    * @param resolved - The server's answer.
@@ -181,6 +229,7 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
 
     return {
       kind: 'READY',
+      actions: this.actionsFor(resolved),
       header: {
         scope: FLEET_SCOPE_FLEET,
         name: fleet.exactGameName,

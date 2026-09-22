@@ -121,6 +121,8 @@ export class ArmadaPageComponent extends FleetScopePageDirective<ResolvedStoArma
 
     return {
       kind: 'READY',
+      // Nothing yet. FC-024 to FC-026 own what may be done to an Armada.
+      actions: [],
       header: {
         scope: FLEET_SCOPE_ARMADA,
         name: armada.exactGameName,

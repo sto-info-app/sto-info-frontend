@@ -98,6 +98,22 @@ export const FLEET_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
 
+      // Deeper than a Fleet's own page and therefore ahead of it, by the
+      // same rule that puts a Fleet ahead of a Community: the longer address
+      // is matched first so the shorter one never swallows its tail.
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
+        loadComponent: () =>
+          import('./imports/roster-import-check/roster-import-check.component').then(
+            m => m.RosterImportCheckComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_ROSTER_CHECK },
+        // Signed in, because checking an export is a thing somebody does to
+        // a Fleet they run. Whether they may is the server's answer, and the
+        // page asks it rather than guarding on a guess.
+        canActivate: [AuthGuard],
+      },
+
       // The two deeper addresses come before the Community's own, so
       // `communities/x/fleets/pc/y` is never read as a Community called `x`
       // with three segments of nonsense after it.
