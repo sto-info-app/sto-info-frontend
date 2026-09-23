@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(11);
+    expect(children).toHaveLength(12);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -66,6 +66,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
       APP_ROUTE_TITLES.FLEET_ROSTER_CHECK,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
+      APP_ROUTE_TITLES.FLEET_ROSTER_IMPORT_DETAIL,
     ],
   ])('puts %s behind the sign-in guard', (path, title) => {
     expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
@@ -130,16 +134,15 @@ describe('FLEET_ROUTES', () => {
    * rule that puts a Fleet ahead of a Community: the longer address is
    * matched first so the shorter one never swallows its tail.
    */
-  it('matches the export check before the Fleet page it sits under', () => {
+  it.each([
+    'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
+  ])('matches %s before the Fleet page it sits under', (path: string) => {
     const paths = children.map(child => child.path);
 
     expect(
       paths.indexOf('communities/:communitySlug/fleets/:platformSegment/:slug'),
-    ).toBeGreaterThan(
-      paths.indexOf(
-        'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
-      ),
-    );
+    ).toBeGreaterThan(paths.indexOf(path));
   });
 
   it.each([
@@ -162,6 +165,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
       'RosterImportCheckComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
+      'RosterImportStatusComponent',
     ],
   ])('loads the right component for %s', async (path, expected) => {
     const loaded = await (

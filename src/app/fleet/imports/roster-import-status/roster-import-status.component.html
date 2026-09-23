@@ -1,0 +1,197 @@
+@if (state$ | async; as state) {
+  @switch (state.kind) {
+    @case ('LOADING') {
+      <app-loading-bar loadingText="Reading the import" />
+    }
+
+    @case ('MISSING') {
+      <app-lcars-information-message
+        title="No such import"
+        [message]="missingMessage" />
+    }
+
+    @case ('ERROR') {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="errorMessage" />
+    }
+
+    @case ('NOT_PERMITTED') {
+      <app-lcars-information-message
+        title="Not yours to read"
+        [message]="notPermittedMessage" />
+
+      <nav
+        class="buttons-row"
+        aria-label="Fleet">
+        <a
+          class="lcars-btn lcars-btn-auto sky"
+          [routerLink]="state.fleetLink"
+          >Back to the Fleet</a
+        >
+      </nav>
+    }
+
+    @case ('READY') {
+      <div class="lcars-text-bar">
+        <span>Roster import</span>
+      </div>
+
+      <p class="roster-status__fleet">
+        <a [routerLink]="state.fleetLink">{{ state.fleet.exactGameName }}</a>
+        on {{ state.fleet.platformName }}
+      </p>
+
+      @if (repeated) {
+        <app-lcars-information-message
+          title="Already imported"
+          [message]="repeatedMessage" />
+      }
+
+      @switch (tone(state.detail.status)) {
+        @case ('SUCCESS') {
+          <app-lcars-success-message
+            [title]="statusLabel(state.detail.status)"
+            [message]="statusMessage(state.detail)" />
+        }
+        @case ('WARNING') {
+          <app-lcars-warning-message
+            [title]="statusLabel(state.detail.status)"
+            [message]="statusMessage(state.detail)" />
+        }
+        @case ('ERROR') {
+          <app-lcars-error-message
+            [title]="statusLabel(state.detail.status)"
+            [message]="statusMessage(state.detail)" />
+        }
+        @default {
+          <app-lcars-information-message
+            [title]="statusLabel(state.detail.status)"
+            [message]="statusMessage(state.detail)" />
+        }
+      }
+
+      @if (state.watching) {
+        <app-loading-bar loadingText="Checking again every few seconds" />
+      } @else if (!settled(state.detail)) {
+        <p class="roster-status__hint">
+          This is taking longer than a scan normally does, so the page has
+          stopped checking by itself.
+        </p>
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto gold"
+          (click)="onCheckAgain()">
+          Check again
+        </button>
+      }
+
+      <section class="roster-status__section">
+        <div class="lcars-text-bar small-lcars-bar-gap">
+          <span>The export</span>
+        </div>
+        <dl class="roster-status__facts">
+          <dt>File</dt>
+          <dd>{{ state.detail.originalFilename }}</dd>
+          <dt>Uploaded by</dt>
+          <dd>{{ state.detail.uploadedByName ?? uploaderGone }}</dd>
+          <dt>Uploaded</dt>
+          <dd>{{ state.detail.uploadedAt | appDate: 'medium' }}</dd>
+          @if (state.detail.exportLocalStamp) {
+            <dt>Taken at, on that clock</dt>
+            <dd>
+              {{ state.detail.exportLocalStamp }}
+              {{ state.detail.exportTimezone }}
+            </dd>
+          }
+          @if (state.detail.exportedAt) {
+            <dt>Which is</dt>
+            <dd>
+              {{ state.detail.exportedAt | appDate: 'medium' }}
+              @if (state.detail.exportedAtAmbiguous) {
+                <span class="roster-status__note"
+                  >chosen from the two moments the stamp names</span
+                >
+              }
+            </dd>
+          }
+          <dt>Rows</dt>
+          <dd>{{ state.detail.rowCount }}</dd>
+          @if (state.detail.officerTailRowCount) {
+            <dt>Officer notes discarded</dt>
+            <dd>{{ state.detail.officerTailRowCount }}</dd>
+          }
+          @if (state.detail.problemCount) {
+            <dt>Rows that could not be read</dt>
+            <dd>{{ state.detail.problemCount }}</dd>
+          }
+        </dl>
+      </section>
+
+      @if (state.detail.problems?.length) {
+        <section class="roster-status__section">
+          <div class="lcars-text-bar small-lcars-bar-gap">
+            <span>Rows that could not be read</span>
+          </div>
+
+          <ul class="roster-status__problems">
+            @for (problem of state.detail.problems; track $index) {
+              <li>
+                <span class="roster-status__line">Line {{ problem.line }}</span>
+                @if (problem.column) {
+                  <span class="roster-status__column">{{ problem.column }}</span>
+                }
+                <span>{{ rowProblem(problem) }}</span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      @if (state.detail.conflictMembers?.length) {
+        <section class="roster-status__section">
+          <div class="lcars-text-bar small-lcars-bar-gap">
+            <span>Other exports of the same moment</span>
+          </div>
+
+          <p class="roster-status__hint">
+            Oldest first. The first of them that was not refused is the version
+            in force.
+          </p>
+
+          <ul class="roster-status__members">
+            @for (member of state.detail.conflictMembers; track member.id) {
+              <li>
+                <a [routerLink]="importLink(state, member.id)">{{
+                  member.originalFilename
+                }}</a>
+                <span class="roster-status__member-status">{{
+                  statusLabel(member.status)
+                }}</span>
+                <span class="roster-status__note"
+                  >uploaded {{ member.uploadedAt | appDate: 'medium' }} by
+                  {{ member.uploadedByName ?? uploaderGone }}</span
+                >
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      <nav
+        class="buttons-row"
+        aria-label="Roster imports">
+        <a
+          class="lcars-btn lcars-btn-auto sky"
+          [routerLink]="state.importsLink"
+          >All imports</a
+        >
+        <a
+          class="lcars-btn lcars-btn-auto bluey"
+          [routerLink]="state.fleetLink"
+          >Back to the Fleet</a
+        >
+      </nav>
+    }
+  }
+}

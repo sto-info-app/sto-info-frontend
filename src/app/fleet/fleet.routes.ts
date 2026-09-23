@@ -113,6 +113,17 @@ export const FLEET_ROUTES: Routes = [
         // page asks it rather than guarding on a guess.
         canActivate: [AuthGuard],
       },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
+        loadComponent: () =>
+          import('./imports/roster-import-status/roster-import-status.component').then(
+            m => m.RosterImportStatusComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_ROSTER_IMPORT_DETAIL },
+        // Signed in for the same reason: an import is read by somebody who
+        // runs the Fleet, and which of them may is the server's answer.
+        canActivate: [AuthGuard],
+      },
 
       // The two deeper addresses come before the Community's own, so
       // `communities/x/fleets/pc/y` is never read as a Community called `x`

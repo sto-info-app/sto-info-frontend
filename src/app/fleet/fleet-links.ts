@@ -86,6 +86,46 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * A Fleet's roster imports, newest first.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRosterImports: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'imports',
+  ],
+
+  /**
+   * One of a Fleet's roster imports, and where it has got to.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @param importId - The import.
+   * @returns The router link.
+   */
+  fleetRosterImport: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+    importId: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetRosterImports(
+      communitySlug,
+      platformSegment,
+      fleetSlug,
+    ),
+    importId,
+  ],
+
+  /**
    * One Fleet's page, where no Community registered it.
    *
    * The same shape as a registered Fleet's, with the reserved segment where

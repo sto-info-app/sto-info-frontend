@@ -1,0 +1,78 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.roster-status__fleet,
+.roster-status__hint {
+  margin: 1rem 0;
+  max-width: 70ch;
+}
+
+// Quieter than the copy around it: it explains rather than asks.
+.roster-status__hint,
+.roster-status__note {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.roster-status__section {
+  margin-top: 2rem;
+}
+
+// Label and value in two columns, as the export check draws them, so the
+// same facts look the same on both pages.
+.roster-status__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1rem;
+  margin: 1rem 0;
+
+  dt {
+    font-weight: 600;
+    opacity: 0.8;
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.roster-status__note {
+  display: block;
+}
+
+.roster-status__problems,
+.roster-status__members {
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: baseline;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgb(255 255 255 / 15%);
+  }
+}
+
+.roster-status__line {
+  font-weight: 700;
+  color: vars.$lcars-red;
+}
+
+.roster-status__column,
+.roster-status__member-status {
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+// A filename is one long word as far as the browser is concerned, and would
+// otherwise push the row wider than a phone.
+.roster-status__members a {
+  overflow-wrap: anywhere;
+}
