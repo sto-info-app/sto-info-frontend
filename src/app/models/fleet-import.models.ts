@@ -159,3 +159,127 @@ export interface RosterImportPreview {
   /** The first rows of the file, as the importer reads them. */
   sample: RosterPreviewRow[];
 }
+
+/** Where an import has got to, as the server works it out. */
+export enum RosterImportStatus {
+  /** Quarantined, and waiting for or undergoing a scan. */
+  SCANNING = 'SCANNING',
+
+  /** Scanned clean, and not yet read into the roster. */
+  PUBLISHING = 'PUBLISHING',
+
+  /** Read into the roster, and in force. */
+  IMPORTED = 'IMPORTED',
+
+  /** Read, and waiting because another export of the moment disagrees. */
+  HELD = 'HELD',
+
+  /** Refused, by the scanner or by the reading. */
+  REFUSED = 'REFUSED',
+
+  /** Given up on, and never read. */
+  ABANDONED = 'ABANDONED',
+}
+
+/** The statuses nothing further happens to on its own. */
+export const SETTLED_ROSTER_IMPORT_STATUSES: readonly RosterImportStatus[] = [
+  RosterImportStatus.IMPORTED,
+  RosterImportStatus.HELD,
+  RosterImportStatus.REFUSED,
+  RosterImportStatus.ABANDONED,
+];
+
+/**
+ * One import, as a listing reports it.
+ *
+ * A report about the file and what became of it, never about its rows. The
+ * problems themselves, and the other imports in a conflict, are only on
+ * {@link RosterImportDetail}, and only for somebody who investigates imports.
+ */
+export interface RosterImportSummary {
+  id: string;
+  assetId: string;
+  fleetId: string;
+  originalFilename: string;
+  sourceSha256: string;
+  sanitisedSha256: string;
+  sourceByteSize: number;
+  sanitisedByteSize: number;
+  sourceHeaderShape: RosterSourceHeaderShape;
+
+  /** The zone the uploader said the export was taken in. */
+  exportTimezone: string | null;
+
+  /** The wall-clock stamp the filename carried, exactly as written. */
+  exportLocalStamp: string | null;
+
+  /** When the export was taken, as that stamp reads in that zone. */
+  exportedAt: string | null;
+
+  /** Whether that instant was chosen between two. */
+  exportedAtAmbiguous: boolean;
+  rowCount: number;
+  officerTailRowCount: number;
+  parserVersion: number;
+
+  /** The stored file's own state, in the asset registry's words. */
+  state: string;
+  retainUntil: string | null;
+
+  /** The conflict this import is in, or null when nothing disagrees. */
+  conflictGroupId: string | null;
+  status: RosterImportStatus;
+
+  /** Why it is HELD or REFUSED, as a code, or null. */
+  statusReason: string | null;
+
+  /** How many row problems stopped it being read. */
+  problemCount: number;
+
+  /** Who uploaded it, or null once that account is gone. */
+  uploadedByName: string | null;
+  uploadedAt: string;
+}
+
+/**
+ * One import, with what only an investigator is shown.
+ *
+ * Null is not empty: null says "not yours to see", an empty list says there
+ * is nothing.
+ */
+export interface RosterImportDetail extends RosterImportSummary {
+  problems: RosterPreviewProblem[] | null;
+
+  /** The other imports claiming the same moment, oldest first. */
+  conflictMembers: RosterImportSummary[] | null;
+}
+
+/** A page of a Fleet's imports, newest first. */
+export interface RosterImportPage {
+  items: RosterImportSummary[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+/** What an upload came back as. */
+export interface RosterImportUploadResult {
+  /** The import, exactly as the listing would report it. */
+  summary: RosterImportSummary;
+
+  /** True when this Fleet had already imported the file, and nothing new was stored. */
+  repeated: boolean;
+}
+
+/**
+ * Why an upload was refused as a repeat read differently.
+ *
+ * Every value is one the server wrote about the earlier import, which stands.
+ */
+export interface RosterImportRepeatConflict {
+  code: 'ALREADY_IMPORTED_DIFFERENTLY';
+  importId: string;
+  exportTimezone: string | null;
+  exportLocalStamp: string | null;
+  exportedAt: string | null;
+}
