@@ -4,23 +4,23 @@
   display: block;
 }
 
-.roster-check__fleet,
-.roster-check__intro,
-.roster-check__hint {
+.roster-import__fleet,
+.roster-import__intro,
+.roster-import__hint {
   margin: 1rem 0;
   max-width: 70ch;
 }
 
 // Quieter than the copy around it: it explains a control rather than saying
 // anything a reader has to act on.
-.roster-check__hint {
+.roster-import__hint {
   font-size: 0.9rem;
   opacity: 0.8;
 }
 
 // Wraps rather than scrolls, so the two controls sit on one line on a wide
 // screen and stack on a narrow one.
-.roster-check__form .form-row {
+.roster-import__form .form-row {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -28,14 +28,39 @@
   margin-bottom: 1rem;
 }
 
-.roster-check__section {
+.roster-import__section {
   margin-top: 2rem;
+}
+
+// The two moments a stamp can name are the same wall-clock time, so each is
+// given a line of its own rather than being run together.
+.roster-import__moments {
+  margin: 1rem 0;
+  padding: 0;
+  border: 0;
+
+  legend {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+}
+
+.roster-import__moment {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.25rem 0;
+  overflow-wrap: anywhere;
+}
+
+.roster-import__earlier {
+  margin: 1rem 0;
 }
 
 // Label and value in two columns on a wide screen, stacked on a narrow one.
 // `auto` rather than a fraction so a long value takes the room it needs
 // instead of wrapping beside a mostly empty label column.
-.roster-check__facts {
+.roster-import__facts {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0.35rem 1rem;
@@ -55,13 +80,13 @@
 // The instant a date was read as, beneath the local time the file wrote. On
 // its own line because the two are the same length and the whole point is
 // that they differ.
-.roster-check__instant {
+.roster-import__instant {
   display: block;
   font-size: 0.9rem;
   opacity: 0.75;
 }
 
-.roster-check__problems {
+.roster-import__problems {
   margin: 1rem 0;
   padding: 0;
   list-style: none;
@@ -75,17 +100,17 @@
   }
 }
 
-.roster-check__line {
+.roster-import__line {
   font-weight: 700;
   color: vars.$lcars-red;
 }
 
-.roster-check__column {
+.roster-import__column {
   font-weight: 600;
   opacity: 0.8;
 }
 
-.roster-check__sample {
+.roster-import__sample {
   margin: 1rem 0;
   padding: 0;
   list-style: none;
@@ -98,13 +123,13 @@
   grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
 }
 
-.roster-check__row {
+.roster-import__row {
   padding: 0.75rem 1rem;
   border-left: 4px solid vars.$lcars-sky;
   background: rgb(255 255 255 / 5%);
 }
 
-.roster-check__member {
+.roster-import__member {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -112,7 +137,7 @@
   margin: 0;
 }
 
-.roster-check__name {
+.roster-import__name {
   font-weight: 700;
 
   // The game lets a name carry an edge space, and that space may be the only
@@ -120,7 +145,7 @@
   white-space: pre-wrap;
 }
 
-.roster-check__handle {
+.roster-import__handle {
   font-size: 0.9rem;
   opacity: 0.75;
 }

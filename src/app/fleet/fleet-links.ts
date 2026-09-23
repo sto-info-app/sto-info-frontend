@@ -86,6 +86,23 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * The page a roster export is checked on and imported from.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRosterImportForm: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'import',
+  ],
+
+  /**
    * A Fleet's roster imports, newest first.
    *
    * @param communitySlug - The holding Community's URL segment.

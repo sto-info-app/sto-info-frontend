@@ -526,13 +526,13 @@ describe('FleetPageComponent', () => {
       return drawn.actions.map(action => action.label);
     }
 
-    it('offers the check to somebody who may import', () => {
+    it('offers the import to somebody who may import', () => {
       scopes.resolveFleet.mockReturnValue(
         of(resolved({ viewer: ROSTER_IMPORTER })),
       );
       render();
 
-      expect(actionLabels()).toEqual(['Check a roster export']);
+      expect(actionLabels()).toEqual(['Import a roster export']);
     });
 
     it('links to the page below the Fleet’s own address', () => {
@@ -550,7 +550,7 @@ describe('FleetPageComponent', () => {
         'fleets',
         'pc',
         'starfleet-command',
-        'check-export',
+        'import',
       ]);
     });
 

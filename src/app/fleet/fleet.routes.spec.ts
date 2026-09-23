@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(12);
+    expect(children).toHaveLength(13);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -60,12 +60,12 @@ describe('FLEET_ROUTES', () => {
       'communities/:communitySlug/armadas/register',
       APP_ROUTE_TITLES.FLEET_REGISTER_ARMADA,
     ],
-    // Checking an export is a thing somebody does to a Fleet they run.
+    // Importing an export is a thing somebody does to a Fleet they run.
     // Whether they may is the server's answer, and the page asks it rather
     // than guarding on a guess, so the guard here is only the sign-in one.
     [
-      'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
-      APP_ROUTE_TITLES.FLEET_ROSTER_CHECK,
+      'communities/:communitySlug/fleets/:platformSegment/:slug/import',
+      APP_ROUTE_TITLES.FLEET_ROSTER_IMPORT,
     ],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
@@ -90,8 +90,23 @@ describe('FLEET_ROUTES', () => {
 
   it('loads each listing only when its address is reached', () => {
     expect(
-      children.every(child => typeof child.loadComponent === 'function'),
+      children
+        .filter(child => child.redirectTo === undefined)
+        .every(child => typeof child.loadComponent === 'function'),
     ).toBe(true);
+  });
+
+  // The page moved when it learnt to import as well as check. A link to its
+  // old address still arrives, at the same Fleet.
+  it('sends the old export check address to the import page', () => {
+    const redirect = childAt(
+      'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
+    );
+
+    expect(redirect?.redirectTo).toBe(
+      'communities/:communitySlug/fleets/:platformSegment/:slug/import',
+    );
+    expect(redirect?.pathMatch).toBe('full');
   });
 
   // A Community's canonical address spells out the collection it belongs
@@ -135,6 +150,7 @@ describe('FLEET_ROUTES', () => {
    * matched first so the shorter one never swallows its tail.
    */
   it.each([
+    'communities/:communitySlug/fleets/:platformSegment/:slug/import',
     'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
     'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
   ])('matches %s before the Fleet page it sits under', (path: string) => {
@@ -163,8 +179,8 @@ describe('FLEET_ROUTES', () => {
       'ArmadaPageComponent',
     ],
     [
-      'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
-      'RosterImportCheckComponent',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/import',
+      'RosterImportComponent',
     ],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',

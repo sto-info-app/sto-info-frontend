@@ -44,6 +44,24 @@ describe('FLEET_LINKS', () => {
     ]);
   });
 
+  it('should address the import page beneath the Fleet', () => {
+    expect(
+      FLEET_LINKS.fleetRosterImportForm(
+        'united-federation-alliance',
+        'pc',
+        'starfleet-command',
+      ),
+    ).toEqual([
+      '/fleets',
+      'communities',
+      'united-federation-alliance',
+      'fleets',
+      'pc',
+      'starfleet-command',
+      'import',
+    ]);
+  });
+
   // Beneath the Fleet they belong to, so an import's address says whose it is.
   it('should address a Fleet’s roster imports beneath the Fleet', () => {
     expect(

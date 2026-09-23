@@ -5,6 +5,7 @@ import {
   convertToParamMap,
   ParamMap,
   provideRouter,
+  Router,
 } from '@angular/router';
 
 import { BehaviorSubject, NEVER, of, throwError } from 'rxjs';
@@ -15,6 +16,8 @@ import {
   RosterDateResolution,
   RosterFilenameRejection,
   RosterImportPreview,
+  RosterImportStatus,
+  RosterImportSummary,
   RosterProfession,
   RosterRowRejection,
   RosterSourceHeaderShape,
@@ -28,12 +31,16 @@ import {
   ResolvedStoFleet,
   StoFleet,
 } from 'src/app/models/fleet.models';
-import { deviceTimezone } from 'src/app/shared/utils/timezone.utils';
+import {
+  describeTimezone,
+  deviceTimezone,
+} from 'src/app/shared/utils/timezone.utils';
 
 import {
   ROSTER_CHECK_FAILED,
-  RosterImportCheckComponent,
-} from './roster-import-check.component';
+  ROSTER_IMPORT_FAILED,
+  RosterImportComponent,
+} from './roster-import.component';
 
 /**
  * Builds a Fleet as the server would send it.
@@ -174,12 +181,12 @@ function preview(
 /** An export, named the way the game names one. */
 const FILE = new File(['bytes'], 'Ninth Fleet_20240101-120000.Csv');
 
-describe('RosterImportCheckComponent', () => {
-  let fixture: ComponentFixture<RosterImportCheckComponent>;
-  let component: RosterImportCheckComponent;
+describe('RosterImportComponent', () => {
+  let fixture: ComponentFixture<RosterImportComponent>;
+  let component: RosterImportComponent;
   let params$: BehaviorSubject<ParamMap>;
   let scopes: { resolveFleet: jest.Mock };
-  let imports: { preview: jest.Mock };
+  let imports: { preview: jest.Mock; upload: jest.Mock };
 
   beforeEach(async () => {
     params$ = new BehaviorSubject<ParamMap>(
@@ -190,10 +197,21 @@ describe('RosterImportCheckComponent', () => {
       }),
     );
     scopes = { resolveFleet: jest.fn(() => of(resolved())) };
-    imports = { preview: jest.fn(() => of(preview())) };
+    imports = {
+      preview: jest.fn(() => of(preview())),
+      upload: jest.fn(() =>
+        of({
+          summary: {
+            id: 'import-9',
+            status: RosterImportStatus.SCANNING,
+          } as RosterImportSummary,
+          repeated: false,
+        }),
+      ),
+    };
 
     await TestBed.configureTestingModule({
-      imports: [RosterImportCheckComponent],
+      imports: [RosterImportComponent],
       providers: [
         provideRouter([]),
         { provide: FleetScopeService, useValue: scopes },
@@ -205,7 +223,7 @@ describe('RosterImportCheckComponent', () => {
 
   /** Renders the page. */
   function render(): void {
-    fixture = TestBed.createComponent(RosterImportCheckComponent);
+    fixture = TestBed.createComponent(RosterImportComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }
@@ -218,6 +236,17 @@ describe('RosterImportCheckComponent', () => {
    */
   const find = (selector: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(selector) as HTMLElement | null;
+
+  /**
+   * Finds every matching element.
+   *
+   * @param selector - The CSS selector.
+   * @returns The elements.
+   */
+  const findAll = (selector: string): HTMLElement[] =>
+    Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(selector),
+    );
 
   /** What the page currently says. */
   const text = (): string =>
@@ -286,7 +315,7 @@ describe('RosterImportCheckComponent', () => {
     it('names the Fleet and links back to it', () => {
       render();
 
-      const link = find('.roster-check__fleet a');
+      const link = find('.roster-import__fleet a');
 
       expect(link?.textContent).toContain('Ninth Fleet');
       expect(link?.getAttribute('href')).toBe(
@@ -510,9 +539,10 @@ describe('RosterImportCheckComponent', () => {
       choose(FILE);
       check();
 
-      expect(find('app-lcars-warning-message')).not.toBeNull();
+      expect(find('app-lcars-success-message')).not.toBeNull();
       expect(text()).toContain('Two moments');
       expect(text()).toContain('The clocks went back over that hour');
+      expect(findAll('input[name="roster-moment"]')).toHaveLength(2);
     });
 
     it('says why a filename is evidence of nothing', () => {
@@ -619,7 +649,351 @@ describe('RosterImportCheckComponent', () => {
       choose(FILE);
       check();
 
-      expect(find('.roster-check__sample')).toBeNull();
+      expect(find('.roster-import__sample')).toBeNull();
+    });
+  });
+
+  describe('importing it', () => {
+    /** An export whose stamp the clock went back over. */
+    const AMBIGUOUS = preview({
+      canImport: false,
+      filename: {
+        ...preview().filename,
+        localStamp: '2026-10-25T01:30:00',
+        exportedAt: null,
+        exportedAtCandidates: [
+          '2026-10-25T00:30:00.000Z',
+          '2026-10-25T01:30:00.000Z',
+        ],
+      },
+    });
+
+    let navigate: jest.SpyInstance;
+
+    beforeEach(() => {
+      navigate = jest
+        .spyOn(TestBed.inject(Router), 'navigate')
+        .mockResolvedValue(true);
+    });
+
+    /** Finds the button that imports, if there is one. */
+    const importButton = (): HTMLButtonElement | undefined =>
+      findAll('button').find(button =>
+        button.textContent?.includes('Import this export'),
+      ) as HTMLButtonElement | undefined;
+
+    /** Checks the chosen file and presses the import button. */
+    function checkAndImport(): void {
+      render();
+      choose(FILE);
+      check();
+      importButton()?.click();
+      fixture.detectChanges();
+    }
+
+    /**
+     * Makes the server refuse the upload.
+     *
+     * @param body - What it answers with.
+     * @param status - The status it answers with.
+     */
+    function refuseUpload(body: unknown, status: number): void {
+      imports.upload.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status, error: body })),
+      );
+    }
+
+    it('says what the page is for', () => {
+      render();
+
+      expect(text()).toContain('Import a roster export');
+      expect(text()).toContain('Nothing is kept until you import it');
+    });
+
+    it('offers nothing to import before an export has been checked', () => {
+      render();
+      choose(FILE);
+
+      expect(importButton()).toBeUndefined();
+    });
+
+    it('offers nothing to import where the check found a fault', () => {
+      imports.preview.mockReturnValue(
+        of(
+          preview({
+            canImport: false,
+            problems: [
+              {
+                code: RosterRowRejection.DATE_MALFORMED,
+                line: 4,
+                column: 'Join Date',
+              },
+            ],
+          }),
+        ),
+      );
+      render();
+      choose(FILE);
+      check();
+
+      expect(importButton()).toBeUndefined();
+      expect(find('app-lcars-warning-message')).not.toBeNull();
+    });
+
+    // Two moments on a stamp the filename cannot vouch for is a fault, not a
+    // question: the name is evidence of nothing.
+    it('offers nothing to import where the filename is evidence of nothing', () => {
+      imports.preview.mockReturnValue(
+        of(
+          preview({
+            ...AMBIGUOUS,
+            filename: {
+              ...AMBIGUOUS.filename,
+              rejection: RosterFilenameRejection.FLEET_NAME_MISMATCH,
+            },
+          }),
+        ),
+      );
+      render();
+      choose(FILE);
+      check();
+
+      expect(importButton()).toBeUndefined();
+    });
+
+    it('sends the checked file through the zone it was checked in', () => {
+      render();
+      component.form.controls.timezone.setValue('America/New_York');
+      imports.preview.mockReturnValue(
+        of(preview({ timezone: 'America/New_York' })),
+      );
+      choose(FILE);
+      check();
+      importButton()?.click();
+
+      expect(imports.upload).toHaveBeenCalledWith(
+        'community-1',
+        'fleet-1',
+        FILE,
+        'America/New_York',
+        null,
+      );
+    });
+
+    it.each([false, true])(
+      'goes to the import it made, saying whether it was a repeat (%s)',
+      (repeated: boolean) => {
+        imports.upload.mockReturnValue(
+          of({ summary: { id: 'import-9' } as RosterImportSummary, repeated }),
+        );
+        checkAndImport();
+
+        expect(navigate).toHaveBeenCalledWith(
+          [
+            '/fleets',
+            'communities',
+            'united-federation-alliance',
+            'fleets',
+            'pc',
+            'ninth-fleet',
+            'imports',
+            'import-9',
+          ],
+          { state: { rosterImportRepeated: repeated } },
+        );
+      },
+    );
+
+    it('says it is sending, and will not send twice at once', () => {
+      imports.upload.mockReturnValue(NEVER);
+      checkAndImport();
+
+      expect(text()).toContain('Sending the export');
+      expect(importButton()?.disabled).toBe(true);
+      expect(
+        (find('button[type="submit"]') as HTMLButtonElement).disabled,
+      ).toBe(true);
+    });
+
+    // A check read through one zone says nothing about another.
+    it('forgets the check when the zone changes', () => {
+      render();
+      choose(FILE);
+      check();
+
+      expect(importButton()).toBeDefined();
+
+      component.form.controls.timezone.setValue('Asia/Tokyo');
+      fixture.detectChanges();
+
+      expect(component.preview).toBeNull();
+      expect(importButton()).toBeUndefined();
+    });
+
+    describe('a stamp the clock went back over', () => {
+      beforeEach(() => {
+        imports.preview.mockReturnValue(of(AMBIGUOUS));
+      });
+
+      it('will not import until a moment has been chosen', () => {
+        render();
+        choose(FILE);
+        check();
+
+        expect(importButton()?.disabled).toBe(true);
+
+        component.onImport({ kind: 'LOADING' });
+        component.onImport({
+          kind: 'READY',
+          fleet: fleet(),
+          communityId: 'community-1',
+          communitySlug: 'united-federation-alliance',
+          platformSegment: 'pc',
+          fleetLink: [],
+          block: null,
+        });
+
+        expect(imports.upload).not.toHaveBeenCalled();
+      });
+
+      it('labels each moment with the offset it was on', () => {
+        render();
+        choose(FILE);
+        check();
+
+        expect(
+          component.momentLabel(AMBIGUOUS, '2026-10-25T00:30:00.000Z'),
+        ).toBe(
+          '2026-10-25T01:30:00 ' +
+            describeTimezone(
+              'Europe/London',
+              new Date('2026-10-25T00:30:00.000Z'),
+            ) +
+            ', which is 2026-10-25T00:30:00.000Z',
+        );
+        expect(
+          findAll('.roster-import__moment').map(label => label.textContent),
+        ).toHaveLength(2);
+      });
+
+      it('sends the moment chosen', () => {
+        render();
+        choose(FILE);
+        check();
+
+        const second = findAll('input[name="roster-moment"]')[1];
+
+        second.dispatchEvent(new Event('change'));
+        fixture.detectChanges();
+
+        expect(component.chosenExportedAt).toBe('2026-10-25T01:30:00.000Z');
+        expect(importButton()?.disabled).toBe(false);
+
+        importButton()?.click();
+
+        expect(imports.upload).toHaveBeenCalledWith(
+          'community-1',
+          'fleet-1',
+          FILE,
+          'Europe/London',
+          '2026-10-25T01:30:00.000Z',
+        );
+      });
+
+      it('forgets the moment chosen with the file', () => {
+        render();
+        choose(FILE);
+        check();
+        component.onChooseMoment('2026-10-25T00:30:00.000Z');
+        choose(FILE);
+
+        expect(component.chosenExportedAt).toBeNull();
+      });
+    });
+
+    describe('when the import is refused', () => {
+      it('points to the earlier import a repeat read differently', () => {
+        refuseUpload(
+          {
+            code: 'ALREADY_IMPORTED_DIFFERENTLY',
+            importId: 'import-1',
+            exportTimezone: 'Europe/Paris',
+            exportLocalStamp: '2024-01-01T12:00:00',
+            exportedAt: '2024-01-01T11:00:00.000Z',
+          },
+          409,
+        );
+        checkAndImport();
+
+        expect(text()).toContain('Already imported');
+        expect(text()).toContain('read as 2024-01-01T12:00:00 Europe/Paris');
+        expect(find('.roster-import__earlier a')?.getAttribute('href')).toBe(
+          '/fleets/communities/united-federation-alliance/fleets/pc/' +
+            'ninth-fleet/imports/import-1',
+        );
+        expect(navigate).not.toHaveBeenCalled();
+        expect(importButton()?.disabled).toBe(false);
+      });
+
+      it('leaves out a reading the earlier import never recorded', () => {
+        refuseUpload(
+          {
+            code: 'ALREADY_IMPORTED_DIFFERENTLY',
+            importId: 'import-1',
+            exportTimezone: null,
+            exportLocalStamp: null,
+            exportedAt: null,
+          },
+          409,
+        );
+        checkAndImport();
+
+        expect(text()).toContain(
+          'This export has already been imported into this Fleet. That',
+        );
+      });
+
+      it.each([
+        [{ code: 'SOMETHING_ELSE', importId: 'import-1' }],
+        [{ code: 'ALREADY_IMPORTED_DIFFERENTLY' }],
+        [null],
+      ])('treats any other conflict as a failure (%j)', body => {
+        refuseUpload(body, 409);
+        checkAndImport();
+
+        expect(text()).toContain(ROSTER_IMPORT_FAILED);
+        expect(find('.roster-import__earlier')).toBeNull();
+      });
+
+      it('says what a structural refusal means', () => {
+        refuseUpload({ code: 'STAMP_CHOICE_REQUIRED', line: null }, 400);
+        checkAndImport();
+
+        expect(text()).toContain('Not imported');
+        expect(text()).toContain('Choose which one before importing');
+      });
+
+      it('falls back where a refusal carries nothing', () => {
+        refuseUpload(null, 400);
+        checkAndImport();
+
+        expect(text()).toContain('could not be read as an STO roster export');
+      });
+
+      it('reports an outage as one', () => {
+        refuseUpload({ code: 'HEADER_UNRECOGNISED' }, 503);
+        checkAndImport();
+
+        expect(text()).toContain(ROSTER_IMPORT_FAILED);
+      });
+
+      it('forgets the failure when the export is checked again', () => {
+        refuseUpload(null, 503);
+        checkAndImport();
+        check();
+
+        expect(component.importError).toBeNull();
+      });
     });
   });
 

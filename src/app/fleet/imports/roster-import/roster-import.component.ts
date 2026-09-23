@@ -6,14 +6,17 @@ import {
   Component,
   inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, ParamMap, RouterLink } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 
 import { catchError, map, Observable, of, startWith, switchMap } from 'rxjs';
 
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
+import { ROSTER_IMPORT_CAPABILITY } from 'src/app/fleet/imports/roster-import.constants';
 import { RosterImportService } from 'src/app/fleet/imports/roster-import.service';
+import { RosterImportNavigationState } from 'src/app/fleet/imports/roster-import-status/roster-import-status.component';
 import {
   describeUploadRefusal,
   ROSTER_FILENAME_REJECTIONS,
@@ -22,6 +25,8 @@ import {
 import {
   RosterDateResolution,
   RosterImportPreview,
+  RosterImportRepeatConflict,
+  RosterImportUploadResult,
   RosterPreviewDate,
   RosterPreviewProblem,
   RosterSourceHeaderShape,
@@ -37,9 +42,6 @@ import {
   describeTimezone,
   deviceTimezone,
 } from 'src/app/shared/utils/timezone.utils';
-
-/** The capability that lets somebody put a roster into a Fleet. */
-export const ROSTER_IMPORT_CAPABILITY = 'roster.import';
 
 /** What to say when the Fleet could not be read for any reason but absence. */
 export const ROSTER_CHECK_ERROR =
@@ -67,6 +69,10 @@ export const ROSTER_CHECK_NOT_PERMITTED =
   'Importing a roster into this Fleet is not something your account may do. ' +
   'Somebody who runs the Fleet can grant it, or import the export themselves.';
 
+/** What to say when the import itself could not be made. */
+export const ROSTER_IMPORT_FAILED =
+  'The export could not be imported. Please try again.';
+
 /** What to say when a file reads but cannot yet be trusted. */
 export const ROSTER_CHECK_NOT_READY =
   'This export was read, and something about it has to be settled before it ' +
@@ -85,7 +91,7 @@ export type RosterImportBlock =
   | { readonly kind: 'NOT_PERMITTED' };
 
 /** What the page is showing. */
-export type RosterImportCheckState =
+export type RosterImportPageState =
   | { readonly kind: 'LOADING' }
   | { readonly kind: 'MISSING' }
   | { readonly kind: 'ERROR' }
@@ -93,19 +99,36 @@ export type RosterImportCheckState =
       readonly kind: 'READY';
       readonly fleet: StoFleet;
       readonly communityId: string | null;
+      readonly communitySlug: string;
+      readonly platformSegment: string;
       readonly fleetLink: string[];
       readonly block: RosterImportBlock | null;
     };
 
+/** An upload refused because the file was imported before, read otherwise. */
+export interface RosterImportRepeatNotice {
+  /** What to tell the reader. */
+  readonly message: string;
+
+  /** Where the earlier import is, which stands. */
+  readonly link: string[];
+}
+
 /**
- * Checking a roster export before importing it.
+ * Checking a roster export, and then importing it.
  *
- * The step before an import rather than the import itself. Nothing on this
- * page writes anything: the file goes to the server, the server reads it as
- * far as it can and says what it found, and the bytes are gone by the time
- * the answer comes back. Whoever is checking can send the same file as often
- * as they like, change the timezone and send it again, and nothing about the
- * Fleet changes.
+ * Two steps, and only the second writes anything. Checking sends the file to
+ * the server, which reads it as far as it can and says what it found; the
+ * bytes are gone by the time the answer comes back. Whoever is checking can
+ * send the same file as often as they like, change the timezone and send it
+ * again, and nothing about the Fleet changes.
+ *
+ * Importing is offered only once a check has said the file can be imported,
+ * and it sends the same file with the same answers. Choosing another file or
+ * another timezone throws the check away, so nothing is ever imported without
+ * the reading of it having been shown first. The server answers with an
+ * address rather than a result — the file is scanned before it is read — and
+ * the page goes there.
  *
  * ## Why there is a timezone to choose at all
  *
@@ -131,9 +154,9 @@ export type RosterImportCheckState =
  * being offered a control the server would refuse.
  */
 @Component({
-  selector: 'app-roster-import-check',
-  templateUrl: './roster-import-check.component.html',
-  styleUrls: ['./roster-import-check.component.scss'],
+  selector: 'app-roster-import',
+  templateUrl: './roster-import.component.html',
+  styleUrls: ['./roster-import.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -147,10 +170,11 @@ export type RosterImportCheckState =
     LoadingBarComponent,
   ],
 })
-export class RosterImportCheckComponent {
+export class RosterImportComponent {
   private readonly _route = inject(ActivatedRoute);
   private readonly _scopeService = inject(FleetScopeService);
   private readonly _importService = inject(RosterImportService);
+  private readonly _router = inject(Router);
   private readonly _cdr = inject(ChangeDetectorRef);
 
   /** Every zone the browser can convert with, UTC first. */
@@ -172,6 +196,21 @@ export class RosterImportCheckComponent {
 
   /** Why the check could not be run, or null when it could. */
   errorMessage: string | null = null;
+
+  /**
+   * Which moment the filename stamp names, for the hour the clock went back
+   * over. Null until the reader has said, and for every other stamp.
+   */
+  chosenExportedAt: string | null = null;
+
+  /** True while the export is being sent to be imported. */
+  importing = false;
+
+  /** Why the import could not be made, or null when nothing has failed. */
+  importError: string | null = null;
+
+  /** The earlier import this file was already made as, read otherwise. */
+  repeatNotice: RosterImportRepeatNotice | null = null;
 
   /** Where to go back to when there is no import to make here. */
   readonly fleetDirectoryLink = FLEET_LINKS.fleetDirectory();
@@ -197,16 +236,27 @@ export class RosterImportCheckComponent {
   /** What stands where a date would, when the column was empty. */
   readonly absent = ROSTER_CHECK_ABSENT;
 
+  constructor() {
+    // A check read through one zone says nothing about another, so changing
+    // the zone throws it away exactly as choosing another file does.
+    this.form.controls.timezone.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.forget();
+        this._cdr.markForCheck();
+      });
+  }
+
   /** The Fleet, and whether it can take an import at all. */
-  readonly state$: Observable<RosterImportCheckState> =
+  readonly state$: Observable<RosterImportPageState> =
     this._route.paramMap.pipe(
       switchMap(params => this.resolve(params)),
       catchError((error: HttpErrorResponse) =>
-        of<RosterImportCheckState>(
+        of<RosterImportPageState>(
           error.status === 404 ? { kind: 'MISSING' } : { kind: 'ERROR' },
         ),
       ),
-      startWith<RosterImportCheckState>({ kind: 'LOADING' }),
+      startWith<RosterImportPageState>({ kind: 'LOADING' }),
     );
 
   /**
@@ -221,8 +271,7 @@ export class RosterImportCheckComponent {
     const input = event.target as HTMLInputElement;
 
     this.selectedFile = input.files?.[0] ?? null;
-    this.preview = null;
-    this.errorMessage = null;
+    this.forget();
   }
 
   /**
@@ -230,7 +279,7 @@ export class RosterImportCheckComponent {
    *
    * @param state - The page, with the Fleet it resolved.
    */
-  onSubmit(state: RosterImportCheckState): void {
+  onSubmit(state: RosterImportPageState): void {
     const file = this.selectedFile;
     const timezone = this.form.controls.timezone.value;
 
@@ -244,8 +293,7 @@ export class RosterImportCheckComponent {
     }
 
     this.checking = true;
-    this.preview = null;
-    this.errorMessage = null;
+    this.forget();
 
     this._importService
       .preview(state.communityId, state.fleet.id, file, timezone)
@@ -258,6 +306,113 @@ export class RosterImportCheckComponent {
         error: (error: HttpErrorResponse) => {
           this.errorMessage = this.describeFailure(error);
           this.checking = false;
+          this._cdr.detectChanges();
+        },
+      });
+  }
+
+  /**
+   * Reports whether a checked export may be imported.
+   *
+   * The server's `canImport` is false for a stamp the clock went back over,
+   * because the file cannot be imported until somebody says which moment it
+   * names. That is a question rather than a fault, and it is answered on this
+   * page, so a file whose only obstacle is that question is importable here.
+   *
+   * @param preview - What the server found.
+   * @returns True when the import may be offered.
+   */
+  importable(preview: RosterImportPreview): boolean {
+    return (
+      preview.canImport ||
+      (preview.filename.rejection === null &&
+        preview.problems.length === 0 &&
+        this.needsMomentChoice(preview))
+    );
+  }
+
+  /**
+   * Reports whether the filename stamp names two moments.
+   *
+   * @param preview - What the server found.
+   * @returns True when somebody has to say which.
+   */
+  needsMomentChoice(preview: RosterImportPreview): boolean {
+    return (
+      preview.filename.exportedAt === null &&
+      preview.filename.exportedAtCandidates.length > 1
+    );
+  }
+
+  /**
+   * Labels one of the two moments a stamp names.
+   *
+   * The stamp is the same for both, so what tells them apart is the offset
+   * the zone was on at each, and the instant it makes.
+   *
+   * @param preview - What the server found.
+   * @param candidate - One of the moments.
+   * @returns The label.
+   */
+  momentLabel(preview: RosterImportPreview, candidate: string): string {
+    return (
+      `${preview.filename.localStamp} ` +
+      `${describeTimezone(preview.timezone, new Date(candidate))}, ` +
+      `which is ${candidate}`
+    );
+  }
+
+  /**
+   * Remembers which moment the reader says the stamp names.
+   *
+   * @param candidate - One of the moments the server offered.
+   */
+  onChooseMoment(candidate: string): void {
+    this.chosenExportedAt = candidate;
+  }
+
+  /**
+   * Sends the checked export to be imported.
+   *
+   * The same file and the same zone as the check, and the moment the reader
+   * chose where there was one to choose. A new import and a repeat of one
+   * already made both go to the import's own page; a repeat read differently
+   * stays here and says which import stands.
+   *
+   * @param state - The page, with the Fleet it resolved.
+   */
+  onImport(state: RosterImportPageState): void {
+    const file = this.selectedFile;
+    const preview = this.preview;
+
+    if (
+      state.kind !== 'READY' ||
+      state.communityId === null ||
+      file === null ||
+      preview === null ||
+      !this.importable(preview) ||
+      (this.needsMomentChoice(preview) && this.chosenExportedAt === null)
+    ) {
+      return;
+    }
+
+    this.importing = true;
+    this.importError = null;
+    this.repeatNotice = null;
+
+    this._importService
+      .upload(
+        state.communityId,
+        state.fleet.id,
+        file,
+        preview.timezone,
+        this.needsMomentChoice(preview) ? this.chosenExportedAt : null,
+      )
+      .subscribe({
+        next: result => this.goToImport(state, result),
+        error: (error: HttpErrorResponse) => {
+          this.importing = false;
+          this.describeImportFailure(state, error);
           this._cdr.detectChanges();
         },
       });
@@ -289,7 +444,7 @@ export class RosterImportCheckComponent {
     return (
       `This export reads as ${preview.readableRowCount} members, taken on ` +
       `${preview.filename.localStamp} ${preview.timezone} time. Nothing has ` +
-      'been kept: importing it is a separate step.'
+      'been kept yet.'
     );
   }
 
@@ -358,7 +513,7 @@ export class RosterImportCheckComponent {
    * @param params - The address, in segments.
    * @returns The page's state.
    */
-  private resolve(params: ParamMap): Observable<RosterImportCheckState> {
+  private resolve(params: ParamMap): Observable<RosterImportPageState> {
     const communitySlug = params.get('communitySlug') ?? '';
     const platformSegment = params.get('platformSegment') ?? '';
     const slug = params.get('slug') ?? '';
@@ -379,13 +534,15 @@ export class RosterImportCheckComponent {
    * @param resolved - The Fleet, as the server resolved it.
    * @returns The page's state.
    */
-  private present(resolved: ResolvedStoFleet): RosterImportCheckState {
+  private present(resolved: ResolvedStoFleet): RosterImportPageState {
     const { fleet, viewer } = resolved;
 
     return {
       kind: 'READY',
       fleet,
       communityId: fleet.communityId,
+      communitySlug: resolved.communitySlug,
+      platformSegment: resolved.platformSegment,
       fleetLink: FLEET_LINKS.fleet(
         resolved.communitySlug,
         resolved.platformSegment,
@@ -417,6 +574,96 @@ export class RosterImportCheckComponent {
     return capabilities.includes(ROSTER_IMPORT_CAPABILITY)
       ? null
       : { kind: 'NOT_PERMITTED' };
+  }
+
+  /**
+   * Throws away everything that described the last file and zone.
+   *
+   * A result drawn beside a different file, or a different reading of the
+   * same one, is worse than no result.
+   */
+  private forget(): void {
+    this.preview = null;
+    this.errorMessage = null;
+    this.chosenExportedAt = null;
+    this.importError = null;
+    this.repeatNotice = null;
+  }
+
+  /**
+   * Goes to the import the upload made, or the one it had already made.
+   *
+   * @param state - The page, with the Fleet it resolved.
+   * @param result - What the server answered.
+   */
+  private goToImport(
+    state: Extract<RosterImportPageState, { kind: 'READY' }>,
+    result: RosterImportUploadResult,
+  ): void {
+    const navigationState: RosterImportNavigationState = {
+      rosterImportRepeated: result.repeated,
+    };
+
+    void this._router.navigate(
+      FLEET_LINKS.fleetRosterImport(
+        state.communitySlug,
+        state.platformSegment,
+        state.fleet.slug,
+        result.summary.id,
+      ),
+      { state: navigationState },
+    );
+  }
+
+  /**
+   * Turns a failed import into something worth reading.
+   *
+   * @param state - The page, with the Fleet it resolved.
+   * @param error - What the server answered.
+   */
+  private describeImportFailure(
+    state: Extract<RosterImportPageState, { kind: 'READY' }>,
+    error: HttpErrorResponse,
+  ): void {
+    const body = error.error as
+      | Partial<RosterImportRepeatConflict>
+      | { code?: string; line?: number | null }
+      | null
+      | undefined;
+
+    if (
+      error.status === 409 &&
+      body?.code === 'ALREADY_IMPORTED_DIFFERENTLY' &&
+      'importId' in body &&
+      typeof body.importId === 'string'
+    ) {
+      const reading = [body.exportLocalStamp, body.exportTimezone]
+        .filter(part => typeof part === 'string')
+        .join(' ');
+
+      this.repeatNotice = {
+        message:
+          'This export has already been imported into this Fleet' +
+          (reading ? `, read as ${reading}` : '') +
+          '. That import was read differently, it stands, and nothing new ' +
+          'has been stored.',
+        link: FLEET_LINKS.fleetRosterImport(
+          state.communitySlug,
+          state.platformSegment,
+          state.fleet.slug,
+          body.importId,
+        ),
+      };
+
+      return;
+    }
+
+    const refusal = body as { code?: string; line?: number | null } | null;
+
+    this.importError =
+      error.status === 400
+        ? describeUploadRefusal(refusal?.code, refusal?.line)
+        : ROSTER_IMPORT_FAILED;
   }
 
   /**

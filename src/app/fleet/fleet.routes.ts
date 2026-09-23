@@ -102,16 +102,24 @@ export const FLEET_ROUTES: Routes = [
       // same rule that puts a Fleet ahead of a Community: the longer address
       // is matched first so the shorter one never swallows its tail.
       {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/import',
         loadComponent: () =>
-          import('./imports/roster-import-check/roster-import-check.component').then(
-            m => m.RosterImportCheckComponent,
+          import('./imports/roster-import/roster-import.component').then(
+            m => m.RosterImportComponent,
           ),
-        data: { title: APP_ROUTE_TITLES.FLEET_ROSTER_CHECK },
-        // Signed in, because checking an export is a thing somebody does to
+        data: { title: APP_ROUTE_TITLES.FLEET_ROSTER_IMPORT },
+        // Signed in, because importing an export is a thing somebody does to
         // a Fleet they run. Whether they may is the server's answer, and the
         // page asks it rather than guarding on a guess.
         canActivate: [AuthGuard],
+      },
+      // Where the page lived while it could only check, kept so a link to
+      // it still arrives somewhere.
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
+        redirectTo:
+          'communities/:communitySlug/fleets/:platformSegment/:slug/import',
+        pathMatch: 'full',
       },
       {
         path: 'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',

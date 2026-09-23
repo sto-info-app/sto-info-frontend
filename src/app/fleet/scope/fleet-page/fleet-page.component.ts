@@ -17,6 +17,7 @@ import {
 import { scopeStatusPill } from 'src/app/fleet/fleet-card.builders';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
+import { ROSTER_IMPORT_CAPABILITY } from 'src/app/fleet/imports/roster-import.constants';
 import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
@@ -54,9 +55,6 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 function rosterUnavailableOn(platformName: string): string {
   return `The game provides no roster export on ${platformName}`;
 }
-
-/** The capability that lets somebody put a roster into a Fleet. */
-export const ROSTER_IMPORT_CAPABILITY = 'roster.import';
 
 const STANDALONE_NOTICE =
   'No Community here has registered this Fleet. The record exists so an ' +
@@ -184,18 +182,15 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
 
     return [
       {
-        label: 'Check a roster export',
-        link: [
-          ...FLEET_LINKS.fleet(
-            resolved.communitySlug,
-            resolved.platformSegment,
-            fleet.slug,
-          ),
-          'check-export',
-        ],
+        label: 'Import a roster export',
+        link: FLEET_LINKS.fleetRosterImportForm(
+          resolved.communitySlug,
+          resolved.platformSegment,
+          fleet.slug,
+        ),
         description:
-          `Check a roster export for ${fleet.exactGameName} without ` +
-          'importing it',
+          `Check a roster export for ${fleet.exactGameName}, and then ` +
+          'import it',
       },
     ];
   }
