@@ -122,6 +122,15 @@ export const FLEET_ROUTES: Routes = [
         pathMatch: 'full',
       },
       {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/imports',
+        loadComponent: () =>
+          import('./imports/roster-import-list/roster-import-list.component').then(
+            m => m.RosterImportListComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_ROSTER_IMPORTS },
+        canActivate: [AuthGuard],
+      },
+      {
         path: 'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
         loadComponent: () =>
           import('./imports/roster-import-status/roster-import-status.component').then(

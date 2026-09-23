@@ -1,0 +1,58 @@
+:host {
+  display: block;
+}
+
+.roster-imports__fleet {
+  margin: 1rem 0;
+  max-width: 70ch;
+}
+
+.roster-imports__list {
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.roster-imports__item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgb(255 255 255 / 15%);
+}
+
+// The filename and where it has got to, on one line where there is room.
+// A filename is one long word as far as the browser is concerned, so it is
+// allowed to break anywhere rather than push the row wider than a phone.
+.roster-imports__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+  margin: 0;
+
+  a {
+    overflow-wrap: anywhere;
+  }
+}
+
+.roster-imports__status {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+// Label and value in two columns, as the import's own page draws them.
+.roster-imports__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 1rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+
+  dt {
+    font-weight: 600;
+    opacity: 0.8;
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}

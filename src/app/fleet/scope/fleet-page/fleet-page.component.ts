@@ -17,7 +17,10 @@ import {
 import { scopeStatusPill } from 'src/app/fleet/fleet-card.builders';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
-import { ROSTER_IMPORT_CAPABILITY } from 'src/app/fleet/imports/roster-import.constants';
+import {
+  ROSTER_IMPORT_CAPABILITY,
+  ROSTER_IMPORT_READERS,
+} from 'src/app/fleet/imports/roster-import.constants';
 import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
@@ -157,7 +160,9 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
   /**
    * What the reader may go and do to this Fleet.
    *
-   * One thing so far, and three reasons there may be none. A Fleet nobody
+   * Importing a roster, and reading what became of the imports: somebody
+   * who investigates imports may do the second without the first. Three
+   * reasons there may be neither. A Fleet nobody
    * has registered has no Community to import into; a console Fleet has no
    * export to import, because the game writes none there; and anybody may
    * read this page, so the control appears only for somebody who could use
@@ -172,16 +177,14 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
   private actionsFor(resolved: ResolvedStoFleet): FleetScopeAction[] {
     const { fleet, viewer } = resolved;
 
-    if (
-      fleet.communityId === null ||
-      !fleet.platformProvidesRosterExport ||
-      !viewer.capabilities.includes(ROSTER_IMPORT_CAPABILITY)
-    ) {
+    if (fleet.communityId === null || !fleet.platformProvidesRosterExport) {
       return [];
     }
 
-    return [
-      {
+    const actions: FleetScopeAction[] = [];
+
+    if (viewer.capabilities.includes(ROSTER_IMPORT_CAPABILITY)) {
+      actions.push({
         label: 'Import a roster export',
         link: FLEET_LINKS.fleetRosterImportForm(
           resolved.communitySlug,
@@ -191,8 +194,28 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
         description:
           `Check a roster export for ${fleet.exactGameName}, and then ` +
           'import it',
-      },
-    ];
+      });
+    }
+
+    if (
+      ROSTER_IMPORT_READERS.some(capability =>
+        viewer.capabilities.includes(capability),
+      )
+    ) {
+      actions.push({
+        label: 'Roster imports',
+        link: FLEET_LINKS.fleetRosterImports(
+          resolved.communitySlug,
+          resolved.platformSegment,
+          fleet.slug,
+        ),
+        description:
+          `See what became of each roster export imported into ` +
+          fleet.exactGameName,
+      });
+    }
+
+    return actions;
   }
 
   /**

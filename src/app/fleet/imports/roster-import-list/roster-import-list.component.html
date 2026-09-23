@@ -1,0 +1,122 @@
+@if (state$ | async; as state) {
+  @switch (state.kind) {
+    @case ('LOADING') {
+      <app-loading-bar loadingText="Reading the imports" />
+    }
+
+    @case ('MISSING') {
+      <app-lcars-information-message
+        title="No such Fleet"
+        [message]="missingMessage" />
+    }
+
+    @case ('ERROR') {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="errorMessage" />
+    }
+
+    @case ('NOT_PERMITTED') {
+      <app-lcars-information-message
+        title="Not yours to read"
+        [message]="notPermittedMessage" />
+
+      <nav
+        class="buttons-row"
+        aria-label="Fleet">
+        <a
+          class="lcars-btn lcars-btn-auto sky"
+          [routerLink]="state.fleetLink"
+          >Back to the Fleet</a
+        >
+      </nav>
+    }
+
+    @case ('READY') {
+      <div class="lcars-text-bar">
+        <span class="title-with-badge">
+          Roster imports
+          <span class="header-count-badge">{{ state.page.total }}</span>
+        </span>
+      </div>
+
+      <p class="roster-imports__fleet">
+        <a [routerLink]="state.fleetLink">{{ state.fleet.exactGameName }}</a>
+        on {{ state.fleet.platformName }}
+      </p>
+
+      @if (state.page.items.length === 0) {
+        <p class="lcars-empty-state">{{ emptyMessage }}</p>
+      } @else {
+        <ul class="roster-imports__list">
+          @for (item of state.page.items; track item.id) {
+            <li class="roster-imports__item">
+              <p class="roster-imports__head">
+                <a [routerLink]="importLink(state, item.id)">{{
+                  item.originalFilename
+                }}</a>
+                <span class="roster-imports__status">{{
+                  statusLabel(item.status)
+                }}</span>
+              </p>
+              <dl class="roster-imports__facts">
+                <dt>Uploaded</dt>
+                <dd>
+                  {{ item.uploadedAt | appDate: 'medium' }} by
+                  {{ item.uploadedByName ?? uploaderGone }}
+                </dd>
+                @if (item.exportedAt) {
+                  <dt>Taken</dt>
+                  <dd>{{ item.exportedAt | appDate: 'medium' }}</dd>
+                }
+                <dt>Rows</dt>
+                <dd>{{ item.rowCount }}</dd>
+                @if (item.problemCount) {
+                  <dt>Rows that could not be read</dt>
+                  <dd>{{ item.problemCount }}</dd>
+                }
+              </dl>
+            </li>
+          }
+        </ul>
+
+        @if (totalPages(state.page) > 1) {
+          <div class="lcars-pagination">
+            <button
+              type="button"
+              [disabled]="state.page.page <= 1"
+              (click)="onPage(state.page.page - 1)">
+              Previous
+            </button>
+            <span
+              >Page {{ state.page.page }} of {{ totalPages(state.page) }}</span
+            >
+            <button
+              type="button"
+              [disabled]="state.page.page >= totalPages(state.page)"
+              (click)="onPage(state.page.page + 1)">
+              Next
+            </button>
+          </div>
+        }
+      }
+
+      <nav
+        class="buttons-row"
+        aria-label="Roster imports">
+        @if (state.importFormLink; as importFormLink) {
+          <a
+            class="lcars-btn lcars-btn-auto gold"
+            [routerLink]="importFormLink"
+            >Import a roster export</a
+          >
+        }
+        <a
+          class="lcars-btn lcars-btn-auto sky"
+          [routerLink]="state.fleetLink"
+          >Back to the Fleet</a
+        >
+      </nav>
+    }
+  }
+}

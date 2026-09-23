@@ -73,6 +73,12 @@ const ROSTER_IMPORTER: FleetScopeViewer = {
   capabilities: ['roster.import'],
 };
 
+/** Somebody who may look into the Fleet's imports, and not make one. */
+const ROSTER_INVESTIGATOR: FleetScopeViewer = {
+  ...READER,
+  capabilities: ['roster.investigate'],
+};
+
 /** A viewer who may change the artwork. */
 const ARTWORK_KEEPER: FleetScopeViewer = {
   capabilities: ['scope.images.manage'],
@@ -532,7 +538,31 @@ describe('FleetPageComponent', () => {
       );
       render();
 
-      expect(actionLabels()).toEqual(['Import a roster export']);
+      expect(actionLabels()).toEqual([
+        'Import a roster export',
+        'Roster imports',
+      ]);
+    });
+
+    // Investigating imports does not include making one.
+    it('offers only the imports to somebody who investigates them', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(resolved({ viewer: ROSTER_INVESTIGATOR })),
+      );
+      render();
+
+      const drawn = state();
+
+      expect(actionLabels()).toEqual(['Roster imports']);
+      expect(drawn.kind === 'READY' && drawn.actions[0].link).toEqual([
+        '/fleets',
+        'communities',
+        'united-federation-alliance',
+        'fleets',
+        'pc',
+        'starfleet-command',
+        'imports',
+      ]);
     });
 
     it('links to the page below the Fleet’s own address', () => {
