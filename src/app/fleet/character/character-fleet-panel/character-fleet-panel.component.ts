@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { Observable, catchError, of } from 'rxjs';
 
@@ -28,6 +29,7 @@ import {
   FLEET_AUDIENCE_LABELS,
 } from '../../constants/fleet-scope.constants';
 import { CharacterFleetService } from '../../character-fleet.service';
+import { FLEET_LINKS } from '../../fleet-links';
 import { FleetDirectoryService } from '../../fleet-directory.service';
 
 /** How many Fleets the picker offers at once. */
@@ -77,6 +79,7 @@ export const CHARACTER_FLEET_SOURCE_LABELS: Readonly<Record<string, string>> = {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterLink,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
   ],
@@ -359,6 +362,19 @@ export class CharacterFleetPanelComponent implements OnInit {
    */
   protected audienceLabel(membership: CharacterFleetMembership): string {
     return FLEET_AUDIENCE_LABELS[membership.visibility];
+  }
+
+  /**
+   * Links to the Community a proposal's Fleet belongs to.
+   *
+   * A proposal is only raised to somebody who can see the Fleet, and so its
+   * Community, which is what makes naming it here safe.
+   *
+   * @param communitySlug - The Community's URL segment.
+   * @returns The router link.
+   */
+  protected communityLink(communitySlug: string): string[] {
+    return FLEET_LINKS.community(communitySlug);
   }
 
   /**

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { of, throwError } from 'rxjs';
 
@@ -169,6 +170,7 @@ describe('CharacterFleetPanelComponent', () => {
     await TestBed.configureTestingModule({
       imports: [CharacterFleetPanelComponent],
       providers: [
+        provideRouter([]),
         { provide: CharacterFleetService, useValue: service },
         { provide: FleetDirectoryService, useValue: directory },
       ],
@@ -326,6 +328,42 @@ describe('CharacterFleetPanelComponent', () => {
       render();
 
       expect(text()).toContain('Seen on that roster');
+    });
+
+    // The acceptance criteria ask for the Community as well as the moment. A
+    // proposal is only raised to somebody who can see the Fleet, so naming
+    // its Community tells them nothing they could not already see.
+    it('names the Fleet’s Community, linking to it', () => {
+      service.proposals.mockReturnValue(of([proposal()]));
+
+      render();
+
+      const link = (
+        fixture.nativeElement as HTMLElement
+      ).querySelector<HTMLAnchorElement>('.character-fleet__proposal-name a');
+
+      expect(link?.textContent).toBe('United Federation Alliance');
+      expect(link?.getAttribute('href')).toBe(
+        '/fleets/communities/united-federation-alliance',
+      );
+    });
+
+    it('names no Community where the Fleet has none', () => {
+      service.proposals.mockReturnValue(
+        of([
+          proposal({
+            fleet: summary({ communityName: null, communitySlug: null }),
+          }),
+        ]),
+      );
+
+      render();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '.character-fleet__proposal-name a',
+        ),
+      ).toBeNull();
     });
 
     it('accepts one privately, whatever else is on the panel', () => {
