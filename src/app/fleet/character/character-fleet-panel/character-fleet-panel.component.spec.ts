@@ -277,6 +277,23 @@ describe('CharacterFleetPanelComponent', () => {
       expect(service.history).toHaveBeenCalledTimes(1);
     });
 
+    // Showing "Anyone" against an entry only its owner sees would tell them
+    // it is public when it is not.
+    it.each([FleetAudience.PRIVATE, FleetAudience.FLEET_MEMBERS])(
+      'shows an entry seen by %s as exactly that',
+      visibility => {
+        service.history.mockReturnValue(of([membership({ visibility })]));
+
+        render();
+
+        const select = (
+          fixture.nativeElement as HTMLElement
+        ).querySelector<HTMLSelectElement>('#visibility-membership-1');
+
+        expect(select?.value).toBe(visibility);
+      },
+    );
+
     it('changes who may see one entry at a time', () => {
       const entry = membership();
 

@@ -92,8 +92,15 @@
               (change)="
                 changeVisibility(entry, $any($event.target).value)
               ">
+              <!-- Each option says whether it is chosen. The select's own
+                   value is bound before these exist, so the browser would
+                   show the first, "Anyone", for an entry only its owner sees. -->
               @for (choice of audienceChoices; track choice[0]) {
-                <option [value]="choice[0]">{{ choice[1] }}</option>
+                <option
+                  [value]="choice[0]"
+                  [selected]="choice[0] === entry.visibility">
+                  {{ choice[1] }}
+                </option>
               }
             </select>
           </div>
