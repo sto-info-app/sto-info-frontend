@@ -20,6 +20,7 @@ import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import {
   ROSTER_IMPORT_CAPABILITY,
   ROSTER_IMPORT_READERS,
+  ROSTER_INVESTIGATE_CAPABILITY,
 } from 'src/app/fleet/imports/roster-import.constants';
 import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
@@ -160,9 +161,10 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
   /**
    * What the reader may go and do to this Fleet.
    *
-   * Importing a roster, and reading what became of the imports: somebody
-   * who investigates imports may do the second without the first. Three
-   * reasons there may be neither. A Fleet nobody
+   * Importing a roster, reading what became of the imports, and deciding the
+   * renames they suggest: somebody who investigates imports may do the last
+   * two without the first, and an importer may not do the last. Three
+   * reasons there may be none. A Fleet nobody
    * has registered has no Community to import into; a console Fleet has no
    * export to import, because the game writes none there; and anybody may
    * read this page, so the control appears only for somebody who could use
@@ -212,6 +214,22 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
         description:
           `See what became of each roster export imported into ` +
           fleet.exactGameName,
+      });
+    }
+
+    // Deciding whether two names are one person is investigating, and only
+    // that capability's: the server refuses importers who do not hold it.
+    if (viewer.capabilities.includes(ROSTER_INVESTIGATE_CAPABILITY)) {
+      actions.push({
+        label: 'Roster identities',
+        link: FLEET_LINKS.fleetRosterIdentities(
+          resolved.communitySlug,
+          resolved.platformSegment,
+          fleet.slug,
+        ),
+        description:
+          `Decide the renames ${fleet.exactGameName}’s rosters suggest ` +
+          'from one export to the next',
       });
     }
 

@@ -120,6 +120,23 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * The renames a Fleet's rosters suggest, for its investigators to decide.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRosterIdentities: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'identities',
+  ],
+
+  /**
    * One of a Fleet's roster imports, and where it has got to.
    *
    * @param communitySlug - The holding Community's URL segment.

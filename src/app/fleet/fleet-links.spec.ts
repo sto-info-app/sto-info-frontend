@@ -81,6 +81,24 @@ describe('FLEET_LINKS', () => {
     ]);
   });
 
+  it('should address a Fleet’s roster identities beneath the Fleet', () => {
+    expect(
+      FLEET_LINKS.fleetRosterIdentities(
+        'united-federation-alliance',
+        'pc',
+        'starfleet-command',
+      ),
+    ).toEqual([
+      '/fleets',
+      'communities',
+      'united-federation-alliance',
+      'fleets',
+      'pc',
+      'starfleet-command',
+      'identities',
+    ]);
+  });
+
   it('should address one roster import beneath the Fleet’s imports', () => {
     expect(
       FLEET_LINKS.fleetRosterImport(

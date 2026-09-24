@@ -1,0 +1,52 @@
+<div id="roster-identity-decision-dialog-container">
+  <div mat-dialog-content>
+    <app-lcars-warning-message
+      [title]="data.title"
+      [message]="data.message" />
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onConfirm()"
+      class="roster-identity-decision__form">
+      <div class="lcars-input-container perano">
+        <label for="roster-identity-reason-input">
+          Why{{ data.reasonRequired ? '' : ' (optional)' }}
+        </label>
+        <textarea
+          id="roster-identity-reason-input"
+          formControlName="reason"
+          rows="3"
+          [attr.maxlength]="maxLength"
+          [attr.aria-required]="data.reasonRequired"></textarea>
+        @if (form.controls.reason.touched && form.controls.reason.invalid) {
+          <small class="field-error">
+            @if (form.controls.reason.hasError('required')) {
+              Say why, so whoever looks at this next knows.
+            } @else {
+              Keep it to {{ maxLength }} characters.
+            }
+          </small>
+        }
+      </div>
+    </form>
+  </div>
+
+  <div
+    class="buttons-container lcars-flex-right"
+    mat-dialog-actions>
+    <button
+      type="button"
+      class="lcars-btn red"
+      mat-button
+      (click)="onCancel()">
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="lcars-btn green"
+      mat-button
+      (click)="onConfirm()">
+      {{ data.confirmText }}
+    </button>
+  </div>
+</div>

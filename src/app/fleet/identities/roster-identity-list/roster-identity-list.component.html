@@ -1,0 +1,248 @@
+@if (state$ | async; as state) {
+  @switch (state.kind) {
+    @case ('LOADING') {
+      <app-loading-bar loadingText="Reading the rename candidates" />
+    }
+
+    @case ('MISSING') {
+      <app-lcars-information-message
+        title="No such Fleet"
+        [message]="missingMessage" />
+    }
+
+    @case ('ERROR') {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="errorMessage" />
+    }
+
+    @case ('NOT_PERMITTED') {
+      <app-lcars-information-message
+        title="Not yours to review"
+        [message]="notPermittedMessage" />
+
+      <nav
+        class="buttons-row"
+        aria-label="Fleet">
+        <a
+          class="lcars-btn lcars-btn-auto sky"
+          [routerLink]="state.fleetLink"
+          >Back to the Fleet</a
+        >
+      </nav>
+    }
+
+    @case ('READY') {
+      <div class="lcars-text-bar">
+        <span class="title-with-badge">
+          Roster identities
+          <span class="header-count-badge">{{ state.page.total }}</span>
+        </span>
+      </div>
+
+      <p class="roster-identities__intro">
+        Renames the rosters of
+        <a [routerLink]="state.fleetLink">{{ state.fleet.exactGameName }}</a>
+        on {{ state.fleet.platformName }} suggest, from one export to the next.
+        Confirming one joins the names into one roster identity; it never links
+        a name to an STO Info account, or changes an account handle.
+      </p>
+
+      <nav
+        class="lcars-tabs"
+        aria-label="Which renames to show">
+        @for (option of filters; track option.value) {
+          <button
+            type="button"
+            class="lcars-tab"
+            [class.active]="state.filter === option.value"
+            [attr.aria-pressed]="state.filter === option.value"
+            (click)="onFilter(option.value)">
+            {{ option.label }}
+          </button>
+        }
+        <span
+          class="lcars-tabs-filler"
+          aria-hidden="true"></span>
+      </nav>
+
+      @if (decisionError(); as refusal) {
+        <app-lcars-error-message
+          title="Not recorded"
+          [message]="refusal" />
+      }
+
+      @if (decisionNotice(); as notice) {
+        <p
+          class="roster-identities__notice"
+          role="status">
+          {{ notice }}
+        </p>
+      }
+
+      @if (state.page.items.length === 0) {
+        <p class="lcars-empty-state">{{ emptyMessage(state.filter) }}</p>
+      } @else {
+        <ul class="roster-identities__list">
+          @for (candidate of state.page.items; track candidate.id) {
+            <li class="roster-identities__item">
+              <p class="roster-identities__head">
+                <span class="roster-identities__kind">{{
+                  kindLabels[candidate.kind]
+                }}</span>
+                <span class="roster-identities__state">{{
+                  stateLabels[candidate.state]
+                }}</span>
+                <span>{{ confidenceLabels[candidate.confidence] }}</span>
+              </p>
+
+              @if (candidate.stale) {
+                <p class="roster-identities__stale">
+                  The evidence has changed since this was decided. Look again,
+                  and undo it if it no longer holds.
+                </p>
+              }
+
+              <ul class="roster-identities__links">
+                @for (link of candidate.links; track link.from.aliasId) {
+                  <li>
+                    <span class="roster-identities__name">{{
+                      link.from.characterName
+                    }}</span>
+                    <span class="roster-identities__handle">{{
+                      link.from.accountHandle
+                    }}</span>
+                    <span
+                      class="roster-identities__arrow"
+                      aria-label="became"
+                      >→</span
+                    >
+                    <span class="roster-identities__name">{{
+                      link.to.characterName
+                    }}</span>
+                    <span class="roster-identities__handle">{{
+                      link.to.accountHandle
+                    }}</span>
+                  </li>
+                }
+              </ul>
+
+              <dl class="roster-identities__facts">
+                <dt>Old name last seen</dt>
+                <dd>
+                  <a [routerLink]="importLink(state, candidate.earlier.importId)"
+                    >Export taken
+                    {{ candidate.earlier.exportedAt | appDate: 'medium' }}</a
+                  >
+                </dd>
+                <dt>New name first seen</dt>
+                <dd>
+                  <a [routerLink]="importLink(state, candidate.later.importId)"
+                    >Export taken
+                    {{ candidate.later.exportedAt | appDate: 'medium' }}</a
+                  >
+                </dd>
+                @for (result of candidate.signals; track result.signal) {
+                  <dt>{{ signalLabels[result.signal] }}</dt>
+                  <dd>{{ signalOutcome(result) }}</dd>
+                }
+              </dl>
+
+              @if (candidate.collisionReasons.length) {
+                <div class="roster-identities__collision">
+                  <p>
+                    The rosters fit this more than one way, so it cannot be
+                    decided:
+                  </p>
+                  <ul>
+                    @for (reason of candidate.collisionReasons; track reason) {
+                      <li>{{ collisionLabels[reason] }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+
+              <div class="roster-identities__actions">
+                @if (candidate.decidable) {
+                  <button
+                    type="button"
+                    class="lcars-btn green"
+                    [disabled]="busy()"
+                    (click)="decide(state, candidate, actions.CONFIRM)">
+                    Confirm
+                  </button>
+                  <button
+                    type="button"
+                    class="lcars-btn red"
+                    [disabled]="busy()"
+                    (click)="decide(state, candidate, actions.REJECT)">
+                    Reject
+                  </button>
+                }
+                @if (candidate.state !== 'OPEN') {
+                  <button
+                    type="button"
+                    class="lcars-btn bluey"
+                    [disabled]="busy()"
+                    (click)="decide(state, candidate, actions.UNDO)">
+                    Undo
+                  </button>
+                }
+              </div>
+
+              @if (candidate.decisions.length) {
+                <details class="roster-identities__history">
+                  <summary>History ({{ candidate.decisions.length }})</summary>
+                  <ol>
+                    @for (decision of candidate.decisions; track decision.revision) {
+                      <li>
+                        {{ actionLabels[decision.action] }} by
+                        {{ decision.actorUsername ?? actorGone }},
+                        {{ decision.decidedAt | appDate: 'medium' }}
+                        @if (decision.reason) {
+                          <q class="roster-identities__reason">{{
+                            decision.reason
+                          }}</q>
+                        }
+                      </li>
+                    }
+                  </ol>
+                </details>
+              }
+            </li>
+          }
+        </ul>
+
+        @if (totalPages(state.page) > 1) {
+          <div class="lcars-pagination">
+            <button
+              type="button"
+              [disabled]="state.page.page <= 1"
+              (click)="onPage(state.page.page - 1)">
+              Previous
+            </button>
+            <span
+              >Page {{ state.page.page }} of {{ totalPages(state.page) }}</span
+            >
+            <button
+              type="button"
+              [disabled]="state.page.page >= totalPages(state.page)"
+              (click)="onPage(state.page.page + 1)">
+              Next
+            </button>
+          </div>
+        }
+      }
+
+      <nav
+        class="buttons-row"
+        aria-label="Roster identities">
+        <a
+          class="lcars-btn lcars-btn-auto sky"
+          [routerLink]="state.fleetLink"
+          >Back to the Fleet</a
+        >
+      </nav>
+    }
+  }
+}

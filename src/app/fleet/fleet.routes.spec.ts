@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(14);
+    expect(children).toHaveLength(15);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -74,6 +74,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
       APP_ROUTE_TITLES.FLEET_ROSTER_IMPORT_DETAIL,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/identities',
+      APP_ROUTE_TITLES.FLEET_ROSTER_IDENTITIES,
     ],
   ])('puts %s behind the sign-in guard', (path, title) => {
     expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
@@ -158,6 +162,7 @@ describe('FLEET_ROUTES', () => {
     'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
     'communities/:communitySlug/fleets/:platformSegment/:slug/imports',
     'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/identities',
   ])('matches %s before the Fleet page it sits under', (path: string) => {
     const paths = children.map(child => child.path);
 
@@ -194,6 +199,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
       'RosterImportStatusComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/identities',
+      'RosterIdentityListComponent',
     ],
   ])('loads the right component for %s', async (path, expected) => {
     const loaded = await (

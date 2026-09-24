@@ -141,6 +141,15 @@ export const FLEET_ROUTES: Routes = [
         // runs the Fleet, and which of them may is the server's answer.
         canActivate: [AuthGuard],
       },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/identities',
+        loadComponent: () =>
+          import('./identities/roster-identity-list/roster-identity-list.component').then(
+            m => m.RosterIdentityListComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_ROSTER_IDENTITIES },
+        canActivate: [AuthGuard],
+      },
 
       // The two deeper addresses come before the Community's own, so
       // `communities/x/fleets/pc/y` is never read as a Community called `x`

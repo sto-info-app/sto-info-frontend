@@ -1,0 +1,22 @@
+@use 'lcars-variables' as vars;
+
+#roster-identity-decision-dialog-container {
+  padding: 10px;
+
+  .mat-mdc-dialog-actions {
+    gap: 1rem;
+    padding: 1rem 3rem;
+  }
+}
+
+.roster-identity-decision__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.field-error {
+  color: vars.$lcars-orange;
+  font-size: 0.8rem;
+}

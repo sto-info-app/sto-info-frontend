@@ -544,8 +544,9 @@ describe('FleetPageComponent', () => {
       ]);
     });
 
-    // Investigating imports does not include making one.
-    it('offers only the imports to somebody who investigates them', () => {
+    // Investigating imports does not include making one, and deciding the
+    // renames they suggest is investigating's alone.
+    it('offers the imports and the identities to somebody who investigates', () => {
       scopes.resolveFleet.mockReturnValue(
         of(resolved({ viewer: ROSTER_INVESTIGATOR })),
       );
@@ -553,7 +554,7 @@ describe('FleetPageComponent', () => {
 
       const drawn = state();
 
-      expect(actionLabels()).toEqual(['Roster imports']);
+      expect(actionLabels()).toEqual(['Roster imports', 'Roster identities']);
       expect(drawn.kind === 'READY' && drawn.actions[0].link).toEqual([
         '/fleets',
         'communities',
@@ -562,6 +563,15 @@ describe('FleetPageComponent', () => {
         'pc',
         'starfleet-command',
         'imports',
+      ]);
+      expect(drawn.kind === 'READY' && drawn.actions[1].link).toEqual([
+        '/fleets',
+        'communities',
+        'united-federation-alliance',
+        'fleets',
+        'pc',
+        'starfleet-command',
+        'identities',
       ]);
     });
 
