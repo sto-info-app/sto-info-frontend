@@ -48,9 +48,20 @@
 .roster-import__moment {
   display: flex;
   gap: 0.5rem;
-  align-items: baseline;
+  align-items: center;
   padding: 0.25rem 0;
   overflow-wrap: anywhere;
+  cursor: pointer;
+
+  // The global input rule is written for text boxes: full width and padded.
+  // A radio under it takes the whole row and pushes its label away.
+  input {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    margin: 0;
+    flex: none;
+  }
 }
 
 .roster-import__earlier {
