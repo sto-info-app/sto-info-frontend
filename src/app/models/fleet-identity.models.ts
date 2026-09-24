@@ -50,6 +50,7 @@ export enum RosterIdentityCollisionReason {
   NEW_HANDLE_ALREADY_PRESENT = 'NEW_HANDLE_ALREADY_PRESENT',
   HANDLE_SPLIT = 'HANDLE_SPLIT',
   HANDLE_MERGE = 'HANDLE_MERGE',
+  LISTED_TOGETHER = 'LISTED_TOGETHER',
 }
 
 /** One exact Character name and handle as a roster listed it. */

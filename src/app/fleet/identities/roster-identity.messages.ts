@@ -72,6 +72,8 @@ export const ROSTER_IDENTITY_COLLISION_LABELS: Record<
     'One handle’s Characters moved to more than one new handle.',
   [RosterIdentityCollisionReason.HANDLE_MERGE]:
     'More than one handle’s Characters moved to the same new handle.',
+  [RosterIdentityCollisionReason.LISTED_TOGETHER]:
+    'A partial roster between the two listed both names at once.',
 };
 
 /** What a reviewer did, in the past tense for the history. */

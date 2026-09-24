@@ -493,6 +493,29 @@ describe('RosterIdentityListComponent', () => {
       expect(findAll('.roster-identities__actions button')).toHaveLength(0);
     });
 
+    it('explains a pair a partial roster listed together', () => {
+      identities.list.mockReturnValue(
+        of(
+          page({
+            items: [
+              candidate({
+                decidable: false,
+                collisionReasons: [
+                  RosterIdentityCollisionReason.LISTED_TOGETHER,
+                ],
+              }),
+            ],
+          }),
+        ),
+      );
+      render();
+
+      expect(find('.roster-identities__collision li')?.textContent).toContain(
+        'A partial roster between the two listed both names at once.',
+      );
+      expect(findAll('.roster-identities__actions button')).toHaveLength(0);
+    });
+
     it('offers only Undo on a decided one, with its history', () => {
       identities.list.mockReturnValue(
         of(
