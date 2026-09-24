@@ -11,7 +11,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -405,17 +405,24 @@ export class CharacterFleetPanelComponent implements OnInit {
   ): void {
     this.busy.set(true);
     this.errorMessage.set(null);
-    work.pipe(catchError(() => of(null))).subscribe(result => {
-      this.busy.set(false);
+    // Success is the request completing, not what it carried back: a
+    // withdrawal is answered 204, which reaches here as a null body.
+    work
+      .pipe(
+        map(() => true),
+        catchError(() => of(false)),
+      )
+      .subscribe(succeeded => {
+        this.busy.set(false);
 
-      if (result === null) {
-        this.errorMessage.set(failure);
+        if (!succeeded) {
+          this.errorMessage.set(failure);
 
-        return;
-      }
+          return;
+        }
 
-      onSuccess?.();
-      this.reload();
-    });
+        onSuccess?.();
+        this.reload();
+      });
   }
 }

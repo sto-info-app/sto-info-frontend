@@ -157,7 +157,8 @@ describe('CharacterFleetPanelComponent', () => {
       history: jest.fn(() => of([] as CharacterFleetMembership[])),
       record: jest.fn(() => of(membership())),
       leave: jest.fn(() => of(membership({ validTo: '2026-06-01Z' }))),
-      retract: jest.fn(() => of(undefined)),
+      // A 204 reaches HttpClient's caller as a null body.
+      retract: jest.fn(() => of(null)),
       setVisibility: jest.fn(() => of(membership())),
       proposals: jest.fn(() => of([] as CharacterFleetProposal[])),
       accept: jest.fn(() => of(membership())),
@@ -258,6 +259,22 @@ describe('CharacterFleetPanelComponent', () => {
         'character-1',
         'membership-1',
       );
+    });
+
+    // The server answers a withdrawal with 204 and no body. Success is the
+    // request completing, not what it carried back.
+    it('treats a withdrawal answered with no body as done', () => {
+      const entry = membership();
+
+      service.history.mockReturnValue(of([entry]));
+      render();
+      service.history.mockClear();
+
+      component['withdraw'](entry);
+      fixture.detectChanges();
+
+      expect(text()).not.toContain('could not be withdrawn');
+      expect(service.history).toHaveBeenCalledTimes(1);
     });
 
     it('changes who may see one entry at a time', () => {
