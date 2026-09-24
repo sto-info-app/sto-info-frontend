@@ -33,8 +33,8 @@
                 >on {{ proposal.fleet.platformName }}</span
               >
               @if (proposal.fleet.communitySlug; as communitySlug) {
-                <span class="character-fleet__muted"
-                  >in
+                <span class="character-fleet__muted">
+                  in
                   <a [routerLink]="communityLink(communitySlug)">{{
                     proposal.fleet.communityName
                   }}</a></span

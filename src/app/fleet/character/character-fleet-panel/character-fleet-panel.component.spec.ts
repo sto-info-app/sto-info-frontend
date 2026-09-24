@@ -348,6 +348,22 @@ describe('CharacterFleetPanelComponent', () => {
       );
     });
 
+    // Angular drops white space that stands alone between two elements, so
+    // the space before "in" has to live inside its span.
+    it('keeps a space between the platform and the Community', () => {
+      service.proposals.mockReturnValue(of([proposal()]));
+
+      render();
+
+      const name = (fixture.nativeElement as HTMLElement).querySelector(
+        '.character-fleet__proposal-name',
+      );
+
+      expect(name?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+        'Sol Defence Force on Windows in United Federation Alliance',
+      );
+    });
+
     it('names no Community where the Fleet has none', () => {
       service.proposals.mockReturnValue(
         of([
