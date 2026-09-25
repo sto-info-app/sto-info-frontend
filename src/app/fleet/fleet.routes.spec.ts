@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(24);
+    expect(children).toHaveLength(25);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -94,6 +94,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
       APP_ROUTE_TITLES.FLEET_ROSTER_IDENTITIES,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/conflicts',
+      APP_ROUTE_TITLES.FLEET_ROSTER_CONFLICTS,
     ],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',
@@ -281,6 +285,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
       'RosterIdentityListComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/conflicts',
+      'RosterConflictsComponent',
     ],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',

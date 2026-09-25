@@ -7,6 +7,8 @@ import { TestBed } from '@angular/core/testing';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
+  RosterImportConflictFilter,
+  RosterImportConflictPage,
   RosterImportDetail,
   RosterImportPage,
   RosterImportPreview,
@@ -288,6 +290,86 @@ describe('RosterImportService', () => {
 
       expect(failure?.message).toBe('No token found');
       httpMock.expectNone(detailUrl);
+    });
+  });
+
+  describe('conflicts', () => {
+    const conflictsUrl =
+      `${API_URLS.FLEET_COMMUNITIES}/${communityId}/fleets/${fleetId}` +
+      '/roster-import-conflicts';
+
+    it('asks for a page of the groups in one state', () => {
+      const page: RosterImportConflictPage = {
+        items: [],
+        total: 0,
+        page: 2,
+        pageSize: 20,
+      };
+      let answered: RosterImportConflictPage | undefined;
+
+      service
+        .conflicts(communityId, fleetId, RosterImportConflictFilter.SETTLED, 2)
+        .subscribe(result => (answered = result));
+
+      const request = httpMock.expectOne(
+        candidate => candidate.url === conflictsUrl,
+      );
+
+      expect(request.request.method).toBe('GET');
+      expect(request.request.params.get('state')).toBe('SETTLED');
+      expect(request.request.params.get('page')).toBe('2');
+      expect(request.request.headers.get('Authorization')).toBe('Bearer token');
+      request.flush(page);
+
+      expect(answered).toEqual(page);
+    });
+
+    it('asks for nothing when there is no token to ask with', () => {
+      authService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      let failure: Error | undefined;
+
+      service
+        .conflicts(communityId, fleetId, RosterImportConflictFilter.OPEN, 1)
+        .subscribe({ error: (error: Error) => (failure = error) });
+
+      expect(failure?.message).toBe('No token found');
+      httpMock.expectNone(candidate => candidate.url === conflictsUrl);
+    });
+  });
+
+  describe('select', () => {
+    const selectionUrl = `${importsUrl}/import-2/selection`;
+
+    it('selects an export for its moment, with the reason', () => {
+      const detail = { id: 'import-2' } as RosterImportDetail;
+      let answered: RosterImportDetail | undefined;
+
+      service
+        .select(communityId, fleetId, 'import-2', 'The complete one')
+        .subscribe(result => (answered = result));
+
+      const request = httpMock.expectOne(selectionUrl);
+
+      expect(request.request.method).toBe('POST');
+      expect(request.request.body).toEqual({ reason: 'The complete one' });
+      expect(request.request.headers.get('Authorization')).toBe('Bearer token');
+      request.flush(detail);
+
+      expect(answered).toEqual(detail);
+    });
+
+    it('asks for nothing when there is no token to ask with', () => {
+      authService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      let failure: Error | undefined;
+
+      service
+        .select(communityId, fleetId, 'import-2', 'The complete one')
+        .subscribe({ error: (error: Error) => (failure = error) });
+
+      expect(failure?.message).toBe('No token found');
+      httpMock.expectNone(selectionUrl);
     });
   });
 });

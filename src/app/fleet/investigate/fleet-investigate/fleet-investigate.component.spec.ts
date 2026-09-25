@@ -144,6 +144,7 @@ describe('FleetInvestigateComponent', () => {
     expect(offered()).toEqual([
       ['Import a roster export', `${FLEET_HREF}/import`],
       ['Roster imports', `${FLEET_HREF}/investigate/imports`],
+      ['Conflicting exports', `${FLEET_HREF}/investigate/conflicts`],
       ['Roster identities', `${FLEET_HREF}/investigate/identities`],
       ['Rank order', `${FLEET_HREF}/investigate/rank-order`],
     ]);
@@ -170,6 +171,7 @@ describe('FleetInvestigateComponent', () => {
 
     expect(offered().map(([label]) => label)).toEqual([
       'Roster imports',
+      'Conflicting exports',
       'Roster identities',
       'Rank order',
     ]);

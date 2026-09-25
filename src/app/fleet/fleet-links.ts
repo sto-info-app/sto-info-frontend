@@ -229,6 +229,24 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * The exports of a Fleet claiming one moment, for its investigators to
+   * choose between.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRosterConflicts: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetInvestigate(communitySlug, platformSegment, fleetSlug),
+    'conflicts',
+  ],
+
+  /**
    * A Fleet's rank order, for its investigators to set.
    *
    * @param communitySlug - The holding Community's URL segment.

@@ -5,6 +5,8 @@ import { map, Observable, throwError } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
+  RosterImportConflictFilter,
+  RosterImportConflictPage,
   RosterImportDetail,
   RosterImportPage,
   RosterImportPreview,
@@ -167,6 +169,66 @@ export class RosterImportService {
 
     return this._http.get<RosterImportDetail>(
       `${this.importsUrl(communityId, fleetId)}/${importId}`,
+      httpOptions,
+    );
+  }
+
+  /**
+   * Reads a page of a Fleet's conflict groups, latest moment first (FC-020).
+   *
+   * @param communityId - The Community holding the Fleet.
+   * @param fleetId - The Fleet.
+   * @param state - Which groups: those waiting, those settled, or every one.
+   * @param page - The page, from 1.
+   * @returns An observable of the page.
+   */
+  conflicts(
+    communityId: string,
+    fleetId: string,
+    state: RosterImportConflictFilter,
+    page: number,
+  ): Observable<RosterImportConflictPage> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+
+    return this._http.get<RosterImportConflictPage>(
+      `${API_URLS.FLEET_COMMUNITIES}/${communityId}/fleets/${fleetId}` +
+        '/roster-import-conflicts',
+      {
+        ...httpOptions,
+        params: new HttpParams().set('state', state).set('page', String(page)),
+      },
+    );
+  }
+
+  /**
+   * Selects the export that stands for a moment several exports claim
+   * (FC-019). Selecting another export of the moment changes it.
+   *
+   * @param communityId - The Community holding the Fleet.
+   * @param fleetId - The Fleet.
+   * @param importId - The export to select.
+   * @param reason - Why, in the investigator's own words.
+   * @returns An observable of the import, as an investigator sees it.
+   */
+  select(
+    communityId: string,
+    fleetId: string,
+    importId: string,
+    reason: string,
+  ): Observable<RosterImportDetail> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+
+    return this._http.post<RosterImportDetail>(
+      `${this.importsUrl(communityId, fleetId)}/${importId}/selection`,
+      { reason },
       httpOptions,
     );
   }

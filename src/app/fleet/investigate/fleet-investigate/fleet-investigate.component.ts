@@ -84,6 +84,17 @@ export class FleetInvestigateComponent extends FleetSectionPageDirective<
     // Deciding renames is investigating, and only that capability's.
     if (capabilities.includes(ROSTER_INVESTIGATE_CAPABILITY)) {
       actions.push({
+        label: 'Conflicting exports',
+        link: FLEET_LINKS.fleetRosterConflicts(
+          communitySlug,
+          platformSegment,
+          fleetSlug,
+        ),
+        description:
+          `Choose which of ${fleet.exactGameName}’s exports stands for a ` +
+          'moment two or more of them claim.',
+      });
+      actions.push({
         label: 'Roster identities',
         link: FLEET_LINKS.fleetRosterIdentities(
           communitySlug,

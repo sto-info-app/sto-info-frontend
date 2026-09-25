@@ -1,0 +1,185 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Conflicting exports"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the conflicts"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+      @let page = data.page;
+
+      <p class="roster-conflicts__intro">
+        Two or more exports claiming the same moment, and listing different
+        rosters. Only one can stand for that moment: select it, and say why.
+      </p>
+
+      <nav
+        class="roster-conflicts__filters"
+        aria-label="Which conflicts">
+        @for (filter of filters; track filter.state) {
+          <a
+            class="lcars-btn lcars-btn-auto"
+            [class.sky]="filter.state !== data.state"
+            [class.gold]="filter.state === data.state"
+            [routerLink]="[]"
+            [queryParams]="queryFor(filter.state)"
+            queryParamsHandling="merge"
+            [attr.aria-current]="filter.state === data.state ? 'page' : null"
+            >{{ filter.label }}</a
+          >
+        }
+      </nav>
+
+      @if (selectNotice(); as notice) {
+        <p
+          class="roster-conflicts__notice"
+          role="status">
+          {{ notice }}
+        </p>
+      }
+      @if (selectError(); as refusal) {
+        <app-lcars-error-message
+          title="Not selected"
+          [message]="refusal" />
+      }
+
+      @if (page.items.length === 0) {
+        <p class="fleet-community-empty">{{ emptyMessage(data) }}</p>
+      }
+
+      @for (group of page.items; track group.id) {
+        <section
+          class="roster-conflicts__group"
+          [attr.aria-labelledby]="'group-' + group.id">
+          <h2
+            class="roster-conflicts__heading"
+            [id]="'group-' + group.id">
+            Exports claiming {{ group.exportedAt | appDate: 'medium' }}
+          </h2>
+          <p class="fleet-report-notice">
+            Found {{ group.openedAt | appDate: 'medium' }}.
+            @if (group.resolvedAt) {
+              Settled {{ group.resolvedAt | appDate: 'medium' }}.
+            } @else if (group.selectedImportId) {
+              Reopened by an export that disagrees with the selection, which
+              stands until it is changed.
+            } @else {
+              Waiting for a selection.
+            }
+          </p>
+
+          <table class="fleet-community-table">
+            <caption>
+              Its exports, in the order they arrived
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Export</th>
+                <th scope="col">Uploaded</th>
+                <th
+                  scope="col"
+                  class="fleet-community-table__number">
+                  Rows
+                </th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="sr-only">Select</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (member of group.members; track member.id) {
+                <tr>
+                  <td data-label="Export">
+                    <a [routerLink]="importLink(data, member)">{{
+                      member.originalFilename
+                    }}</a>
+                    @if (member.id === group.selectedImportId) {
+                      <span class="fleet-report-note roster-conflicts__selected"
+                        >Selected</span
+                      >
+                    }
+                    @if (member.excluded) {
+                      <span class="fleet-report-note">
+                        excluded by an investigator
+                      </span>
+                    }
+                    @if (member.partial) {
+                      <span class="fleet-report-note">partial</span>
+                    }
+                  </td>
+                  <td data-label="Uploaded">
+                    {{ member.uploadedAt | appDate: 'medium' }}
+                    <span class="fleet-report-note">
+                      by
+                      {{ member.uploadedByName ?? 'an account since closed' }}
+                    </span>
+                  </td>
+                  <td
+                    data-label="Rows"
+                    class="fleet-community-table__number">
+                    {{ member.rowCount }}
+                  </td>
+                  <td data-label="Status">
+                    {{ statusLabels[member.status] }}
+                  </td>
+                  <td data-label="Select">
+                    @if (member.id !== group.selectedImportId) {
+                      <button
+                        type="button"
+                        class="lcars-btn lcars-btn-auto sky"
+                        [disabled]="!canSelect(group, member)"
+                        (click)="onSelect(data, group, member)">
+                        {{
+                          busy() === group.id ? 'Selecting' : 'Select this one'
+                        }}
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <div class="lcars-input-container sky">
+            <label [attr.for]="'reason-' + group.id">Why</label>
+            <textarea
+              rows="2"
+              [id]="'reason-' + group.id"
+              [attr.maxlength]="reasonLimit"
+              [value]="reasonOf(group)"
+              [disabled]="busy() !== null"
+              (input)="
+                onReason(group.id, $any($event.target).value)
+              "></textarea>
+          </div>
+          <p class="fleet-community-field-hint">
+            Needed to select an export, and kept with the selection. At most
+            {{ reasonLimit }} characters.
+          </p>
+        </section>
+      }
+
+      @if (totalPages(page) > 1) {
+        <div class="lcars-pagination">
+          <button
+            type="button"
+            [disabled]="page.page <= 1"
+            (click)="onPage(page.page - 1)">
+            Later
+          </button>
+          <span>Page {{ page.page }} of {{ totalPages(page) }}</span>
+          <button
+            type="button"
+            [disabled]="page.page >= totalPages(page)"
+            (click)="onPage(page.page + 1)">
+            Earlier
+          </button>
+        </div>
+      }
+    }
+  </app-fleet-page-shell>
+}

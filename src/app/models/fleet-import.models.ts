@@ -239,6 +239,18 @@ export interface RosterImportSummary {
   /** Who uploaded it, or null once that account is gone. */
   uploadedByName: string | null;
   uploadedAt: string;
+
+  /**
+   * Whether an investigator has taken it out of the Fleet's history. It
+   * stays as evidence and counts for nothing until it is reinstated.
+   */
+  excluded: boolean;
+
+  /**
+   * Whether an investigator has said it may not list everybody, so nobody
+   * missing from it is taken to have left.
+   */
+  partial: boolean;
 }
 
 /**
@@ -257,6 +269,48 @@ export interface RosterImportDetail extends RosterImportSummary {
 /** A page of a Fleet's imports, newest first. */
 export interface RosterImportPage {
   items: RosterImportSummary[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+/** Which of a Fleet's conflict groups to list. */
+export enum RosterImportConflictFilter {
+  /** Waiting for a selection: never settled, or reopened. */
+  OPEN = 'OPEN',
+  SETTLED = 'SETTLED',
+  ALL = 'ALL',
+}
+
+/**
+ * Exports of one Fleet that claim one moment and disagree, and which of them
+ * stands (FC-020).
+ */
+export interface RosterImportConflictGroup {
+  id: string;
+
+  /** The moment every export in it claims. */
+  exportedAt: string;
+
+  /** When the disagreement was found. */
+  openedAt: string;
+
+  /**
+   * When somebody last settled it, or null while it waits: never settled,
+   * or reopened by an export that disagrees with the selection.
+   */
+  resolvedAt: string | null;
+
+  /** The export selected to stand for the moment; a reopened group keeps it. */
+  selectedImportId: string | null;
+
+  /** Its exports, in the order they arrived. */
+  members: RosterImportSummary[];
+}
+
+/** A page of a Fleet's conflict groups, latest moment first. */
+export interface RosterImportConflictPage {
+  items: RosterImportConflictGroup[];
   total: number;
   page: number;
   pageSize: number;

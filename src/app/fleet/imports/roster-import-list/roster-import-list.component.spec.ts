@@ -152,6 +152,8 @@ function summary(
     problemCount: 0,
     uploadedByName: 'jellico',
     uploadedAt: '2024-01-01T12:05:00.000Z',
+    excluded: false,
+    partial: false,
     ...overrides,
   };
 }

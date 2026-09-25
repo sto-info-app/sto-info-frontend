@@ -204,6 +204,15 @@ export const FLEET_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
       {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/conflicts',
+        loadComponent: () =>
+          import('./investigate/roster-conflicts/roster-conflicts.component').then(
+            m => m.RosterConflictsComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_ROSTER_CONFLICTS },
+        canActivate: [AuthGuard],
+      },
+      {
         path: 'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',
         loadComponent: () =>
           import('./investigate/rank-order/rank-order.component').then(
