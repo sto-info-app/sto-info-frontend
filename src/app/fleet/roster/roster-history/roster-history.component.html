@@ -1,0 +1,164 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="History"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the history"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+      @let page = data.page;
+
+      @if (page.revision === 0) {
+        <p class="fleet-community-empty">
+          No roster has been read into this Fleet’s history yet.
+        </p>
+      } @else {
+        @if (page.stale) {
+          <p class="roster-history__notice">
+            A change is being worked into the history. This is how it stood
+            before, and it will catch up by itself.
+          </p>
+        }
+
+        <fieldset class="roster-history__kinds">
+          <legend>Show</legend>
+          @for (kind of kinds; track kind) {
+            <label class="roster-history__kind">
+              <input
+                type="checkbox"
+                [checked]="isShown(data, kind)"
+                [disabled]="isLastShown(data, kind)"
+                (change)="onKind(data, kind, $any($event.target).checked)" />
+              {{ kindLabels[kind] }}
+            </label>
+          }
+        </fieldset>
+
+        @if (page.total === 0) {
+          <p class="fleet-community-empty">
+            The history has only one export so far, so nothing has changed
+            between two.
+          </p>
+        }
+
+        @for (interval of page.items; track interval.to.importId) {
+          <section
+            class="roster-history__interval"
+            [attr.aria-labelledby]="'interval-' + interval.to.importId">
+            <h2
+              class="roster-history__heading"
+              [id]="'interval-' + interval.to.importId">
+              Between {{ interval.from.exportedAt | appDate: 'medium' }} and
+              {{ interval.to.exportedAt | appDate: 'medium' }}
+            </h2>
+            @if (interval.partial) {
+              <p class="roster-history__notice">
+                The later export was partial: somebody missing from it may
+                still have been a member.
+              </p>
+            }
+
+            <table class="fleet-community-table">
+              <caption>
+                What changed between the two exports
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Members</th>
+                  <th scope="col">Joined</th>
+                  <th scope="col">Rejoined</th>
+                  <th scope="col">Left</th>
+                  <th scope="col">Unknown</th>
+                  <th scope="col">Renamed</th>
+                  <th scope="col">Rank changes</th>
+                  <th scope="col">Contributed</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-label="Members">
+                    {{ interval.membersAtStart }} →
+                    {{ interval.membersAtEnd }}
+                  </td>
+                  <td data-label="Joined">{{ interval.joined }}</td>
+                  <td data-label="Rejoined">{{ interval.rejoined }}</td>
+                  <td data-label="Left">{{ interval.left }}</td>
+                  <td data-label="Unknown">{{ interval.unknown }}</td>
+                  <td data-label="Renamed">{{ interval.renamed }}</td>
+                  <td data-label="Rank changes">{{ interval.rankChanged }}</td>
+                  <td data-label="Contributed">
+                    {{ whole(interval.contributionDelta) }}
+                    <span class="roster-history__note">
+                      from {{ interval.contributionKnown }} known;
+                      {{ interval.contributionReset }} reset,
+                      {{ interval.contributionBaseline }} new,
+                      {{ interval.contributionUnknown }} unknown
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            @if (interval.acrossGap > 0) {
+              <p class="roster-history__notice">
+                {{ interval.acrossGap }}
+                {{ interval.acrossGap === 1 ? 'change' : 'changes' }} revealed
+                here happened across a gap, over a longer span, and
+                {{ interval.acrossGap === 1 ? 'is' : 'are' }} in none of these
+                totals.
+              </p>
+            }
+
+            @if (interval.changes.length) {
+              <ul class="roster-history__changes">
+                @for (
+                  change of interval.changes;
+                  track change.identityId + change.kind
+                ) {
+                  <li>
+                    <a [routerLink]="memberLink(data, change.identityId)">{{
+                      change.member
+                        ? change.member.characterName +
+                          change.member.accountHandle
+                        : 'A member'
+                    }}</a>
+                    {{ describe(change) }}
+                    @if (change.acrossGap) {
+                      <span class="roster-history__note">
+                        across a gap: some time after
+                        {{ change.from?.exportedAt | appDate: 'medium' }}
+                      </span>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        }
+
+        @if (totalPages(page) > 1) {
+          <div class="lcars-pagination">
+            <button
+              type="button"
+              [disabled]="page.page <= 1"
+              (click)="onPage(page.page - 1)">
+              Newer
+            </button>
+            <span>Page {{ page.page }} of {{ totalPages(page) }}</span>
+            <button
+              type="button"
+              [disabled]="page.page >= totalPages(page)"
+              (click)="onPage(page.page + 1)">
+              Older
+            </button>
+          </div>
+        }
+      }
+    }
+  </app-fleet-page-shell>
+}

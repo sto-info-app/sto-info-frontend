@@ -1,0 +1,203 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Member"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the member’s history"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+      @let timeline = data.timeline;
+
+      <p class="roster-timeline__member">
+        @if (timeline.member; as member) {
+          <strong
+            >{{ member.characterName }}{{ member.accountHandle }}</strong
+          >
+        } @else {
+          <strong>This member</strong>
+        }
+        @if (timeline.profile; as profile) {
+          <a
+            class="roster-timeline__link"
+            [routerLink]="profileLink(profile)"
+            >Profile</a
+          >
+        }
+        <a
+          class="roster-timeline__link"
+          [routerLink]="historyLink(data)"
+          >Back to the history</a
+        >
+      </p>
+
+      @if (timeline.stale) {
+        <p class="roster-timeline__note">
+          A change is being worked into the history. This is how it stood
+          before, and it will catch up by itself.
+        </p>
+      }
+
+      <div class="lcars-text-bar">
+        <span>Membership</span>
+      </div>
+      <table class="fleet-community-table">
+        <caption>
+          Each stretch of membership, bounded by the exports either side:
+          never dated more exactly than they are
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Began</th>
+            <th scope="col">First listed</th>
+            <th scope="col">Last listed</th>
+            <th scope="col">Ended</th>
+            <th scope="col">Game Join Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (episode of timeline.episodes; track episode.ordinal) {
+            <tr>
+              <td data-label="Began">
+                {{ startOf(episode) }}
+                @if (episode.startedAfter; as after) {
+                  <span class="roster-timeline__note">
+                    after {{ after.exportedAt | appDate: 'medium' }}
+                  </span>
+                }
+              </td>
+              <td data-label="First listed">
+                {{ episode.first.exportedAt | appDate: 'medium' }}
+              </td>
+              <td data-label="Last listed">
+                {{ episode.last.exportedAt | appDate: 'medium' }}
+              </td>
+              <td data-label="Ended">
+                {{ endOf(episode) }}
+                @if (episode.endedBefore) {
+                  <span class="roster-timeline__note">
+                    by {{ episode.endedBefore | appDate: 'medium' }}
+                  </span>
+                }
+              </td>
+              <td data-label="Game Join Date">
+                {{ episode.reportedJoinedAt | appDate }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (timeline.rows.length > 1) {
+        <div class="lcars-text-bar">
+          <span>Contribution total at each export</span>
+        </div>
+        <app-smart-chart
+          mode="bar"
+          [data]="contributionChart(timeline)" />
+      }
+
+      <div class="lcars-text-bar">
+        <span>Changes</span>
+      </div>
+      @if (timeline.changes.length === 0) {
+        <p class="fleet-community-empty">
+          Nothing about them has changed from one export to the next.
+        </p>
+      } @else {
+        <ul class="roster-timeline__changes">
+          @for (
+            change of timeline.changes;
+            track change.kind + change.to.importId
+          ) {
+            <li>
+              <span class="roster-timeline__when">
+                @if (change.from; as from) {
+                  Between {{ from.exportedAt | appDate: 'medium' }} and
+                  {{ change.to.exportedAt | appDate: 'medium' }}:
+                } @else {
+                  By {{ change.to.exportedAt | appDate: 'medium' }}:
+                }
+              </span>
+              {{ describe(change) }}
+              @if (change.acrossGap) {
+                <span class="roster-timeline__note">
+                  across a gap, so in no interval’s totals
+                </span>
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      <div class="lcars-text-bar">
+        <span>On each export</span>
+      </div>
+      <table class="fleet-community-table">
+        <thead>
+          <tr>
+            <th scope="col">Export</th>
+            <th scope="col">Listed as</th>
+            <th scope="col">Rank</th>
+            <th
+              scope="col"
+              class="fleet-community-table__number">
+              Level
+            </th>
+            <th
+              scope="col"
+              class="fleet-community-table__number">
+              Contribution
+            </th>
+            <th scope="col">Last Active</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of timeline.rows; track row.importId + row.line) {
+            <tr>
+              <td data-label="Export">
+                {{ row.exportedAt | appDate: 'medium' }}
+                @if (row.partial) {
+                  <span class="roster-timeline__note">partial</span>
+                }
+                @if (row.excluded) {
+                  <span class="roster-timeline__note"
+                    >row excluded by an investigator</span
+                  >
+                }
+              </td>
+              <td data-label="Listed as">
+                {{ row.characterName }}{{ row.accountHandle }}
+              </td>
+              <td data-label="Rank">
+                {{ row.guildRank }}
+                @if (row.rankTier !== null) {
+                  <span class="roster-timeline__note"
+                    >tier {{ row.rankTier }}</span
+                  >
+                }
+              </td>
+              <td
+                data-label="Level"
+                class="fleet-community-table__number">
+                {{ row.level }}
+              </td>
+              <td
+                data-label="Contribution"
+                class="fleet-community-table__number">
+                {{ whole(row.contributionTotal) }}
+              </td>
+              <td data-label="Last Active">
+                {{ row.lastActiveAt | appDate }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </app-fleet-page-shell>
+}

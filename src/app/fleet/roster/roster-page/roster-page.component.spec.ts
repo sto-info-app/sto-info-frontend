@@ -372,6 +372,28 @@ describe('RosterPageComponent', () => {
       );
     });
 
+    it('links each name to that member’s timeline', () => {
+      render();
+
+      expect(
+        page().querySelector('a.roster-page__name')?.getAttribute('href'),
+      ).toBe(
+        '/fleets/communities/united-federation-alliance/fleets/pc/ninth-fleet/history/members/identity-1',
+      );
+    });
+
+    it('leaves a row with no member found unlinked', () => {
+      roster.roster.mockReturnValue(
+        of(rosterPage({ items: [row({ identityId: null })] })),
+      );
+      render();
+
+      expect(page().querySelector('a.roster-page__name')).toBeNull();
+      expect(page().querySelector('span.roster-page__name')?.textContent).toBe(
+        'Tova Reen',
+      );
+    });
+
     it('links nothing where the rule does not allow', () => {
       render();
 

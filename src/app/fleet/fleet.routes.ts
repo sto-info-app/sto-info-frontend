@@ -133,6 +133,24 @@ export const FLEET_ROUTES: Routes = [
         data: { title: APP_ROUTE_TITLES.FLEET_ROSTER },
         canActivate: [AuthGuard],
       },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/history',
+        loadComponent: () =>
+          import('./roster/roster-history/roster-history.component').then(
+            m => m.RosterHistoryComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_ROSTER_HISTORY },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/history/members/:identityId',
+        loadComponent: () =>
+          import('./roster/roster-timeline/roster-timeline.component').then(
+            m => m.RosterTimelineComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_ROSTER_MEMBER },
+        canActivate: [AuthGuard],
+      },
       // Where a Fleet's roster is looked into (FC-020). The pages below it
       // sit under its address so its tab stays lit while a reader works
       // through them.

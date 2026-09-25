@@ -21,6 +21,10 @@
   margin-right: 0.5rem;
 }
 
+a.roster-page__name {
+  color: vars.$lcars-sky;
+}
+
 // A second line under a cell's value, saying something about it.
 .roster-page__note {
   display: block;

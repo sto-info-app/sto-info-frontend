@@ -159,11 +159,14 @@ export abstract class FleetSectionPageDirective<T> {
    *
    * @param section - The Fleet.
    * @param query - The address's query.
+   * @param params - The address, in segments, for a section naming more
+   *   than the Fleet — a member, say.
    * @returns The section's data.
    */
   protected abstract load(
     section: FleetSection,
     query: ParamMap,
+    params: ParamMap,
   ): Observable<T>;
 
   /**
@@ -213,7 +216,7 @@ export abstract class FleetSectionPageDirective<T> {
             });
           }
 
-          return this.load(section, query).pipe(
+          return this.load(section, query, params).pipe(
             map((data): FleetSectionState<T> => ({
               kind: 'READY',
               section,

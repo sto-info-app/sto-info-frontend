@@ -170,9 +170,17 @@
                 @for (row of page.items; track trackRow(row)) {
                   <tr [class.roster-page__excluded]="row.excluded">
                     <td data-label="Character">
-                      <span class="roster-page__name">{{
-                        row.characterName
-                      }}</span>
+                      @if (row.identityId) {
+                        <a
+                          class="roster-page__name"
+                          [routerLink]="memberLink(data, row.identityId)"
+                          >{{ row.characterName }}</a
+                        >
+                      } @else {
+                        <span class="roster-page__name">{{
+                          row.characterName
+                        }}</span>
+                      }
                       @if (row.profile) {
                         <a
                           class="roster-page__profile"

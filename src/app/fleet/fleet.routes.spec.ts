@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(20);
+    expect(children).toHaveLength(22);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -70,6 +70,14 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/roster',
       APP_ROUTE_TITLES.FLEET_ROSTER,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/history',
+      APP_ROUTE_TITLES.FLEET_ROSTER_HISTORY,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/history/members/:identityId',
+      APP_ROUTE_TITLES.FLEET_ROSTER_MEMBER,
     ],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',
@@ -189,6 +197,8 @@ describe('FLEET_ROUTES', () => {
     'communities/:communitySlug/fleets/:platformSegment/:slug/import',
     'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
     'communities/:communitySlug/fleets/:platformSegment/:slug/roster',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/history',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/history/members/:identityId',
     'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',
     'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
     'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
@@ -228,6 +238,14 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/roster',
       'RosterPageComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/history',
+      'RosterHistoryComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/history/members/:identityId',
+      'RosterTimelineComponent',
     ],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',

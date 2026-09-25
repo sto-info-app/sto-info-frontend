@@ -96,6 +96,16 @@ export class FleetTabsComponent {
         label: 'Roster',
         exact: false,
       });
+      tabs.push({
+        link: FLEET_LINKS.fleetHistory(
+          communitySlug,
+          platformSegment,
+          fleetSlug,
+        ),
+        label: 'History',
+        // Lit on a member's timeline beneath it too.
+        exact: false,
+      });
     }
 
     if (

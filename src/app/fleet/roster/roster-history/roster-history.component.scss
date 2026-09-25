@@ -1,0 +1,67 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.roster-history__notice,
+.roster-history__note {
+  color: vars.$lcars-grey-light;
+}
+
+.roster-history__notice {
+  font-style: italic;
+}
+
+.roster-history__note {
+  display: block;
+  font-size: 0.85rem;
+}
+
+.roster-history__kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  padding: 0.75rem 1rem;
+  margin: 0 0 1rem;
+  border: 1px solid vars.$lcars-grey-border;
+
+  legend {
+    padding: 0 0.5rem;
+    font-family: vars.$font-antonio;
+    text-transform: uppercase;
+    color: vars.$lcars-sky;
+  }
+}
+
+.roster-history__kind {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.roster-history__interval {
+  padding: 0.5rem 0 1rem;
+  border-top: 2px solid vars.$lcars-sky;
+}
+
+.roster-history__heading {
+  margin: 0.5rem 0;
+  font-family: vars.$font-antonio;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  color: vars.$lcars-sky;
+}
+
+.roster-history__changes {
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+
+  li {
+    margin: 0.25rem 0;
+  }
+
+  a {
+    color: vars.$lcars-sky;
+  }
+}

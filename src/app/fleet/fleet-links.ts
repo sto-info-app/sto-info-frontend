@@ -120,6 +120,43 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * A Fleet's roster history, newest interval first.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetHistory: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'history',
+  ],
+
+  /**
+   * One member's history in a Fleet, below its history so that tab stays lit.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @param identityId - The member.
+   * @returns The router link.
+   */
+  fleetMember: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+    identityId: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetHistory(communitySlug, platformSegment, fleetSlug),
+    'members',
+    identityId,
+  ],
+
+  /**
    * Where a Fleet's roster is looked into: the imports, the renames, the
    * conflicts and the rank order, for whoever imports or investigates.
    *

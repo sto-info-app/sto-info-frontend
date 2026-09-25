@@ -67,17 +67,18 @@ describe('FleetTabsComponent', () => {
     },
   );
 
-  it('offers the Roster to a member', () => {
+  it('offers the Roster and its History to a member', () => {
     expect(draw(vm('roster.view'))).toEqual([
       ['Overview', FLEET_HREF],
       ['Roster', `${FLEET_HREF}/roster`],
+      ['History', `${FLEET_HREF}/history`],
     ]);
   });
 
   it('draws every tab in strip order for somebody who may open them all', () => {
     expect(
       draw(vm('roster.investigate', 'roster.view')).map(([label]) => label),
-    ).toEqual(['Overview', 'Roster', 'Investigate']);
+    ).toEqual(['Overview', 'Roster', 'History', 'Investigate']);
   });
 
   it('names itself for a screen reader moving by landmark', () => {

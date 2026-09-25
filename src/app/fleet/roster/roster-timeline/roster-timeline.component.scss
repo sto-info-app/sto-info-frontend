@@ -1,0 +1,35 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.roster-timeline__member {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+}
+
+.roster-timeline__link {
+  color: vars.$lcars-sky;
+}
+
+.roster-timeline__note {
+  display: block;
+  font-size: 0.85rem;
+  color: vars.$lcars-grey-light;
+}
+
+.roster-timeline__changes {
+  padding-left: 1.25rem;
+  margin: 0.5rem 0 1rem;
+
+  li {
+    margin: 0.35rem 0;
+  }
+}
+
+.roster-timeline__when {
+  color: vars.$lcars-sky;
+}

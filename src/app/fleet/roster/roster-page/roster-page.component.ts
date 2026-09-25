@@ -7,6 +7,7 @@ import { map, Observable } from 'rxjs';
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
+import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { ROSTER_VIEW_CAPABILITY } from 'src/app/fleet/roster/roster.constants';
 import { RosterService } from 'src/app/fleet/roster/roster.service';
 import {
@@ -83,6 +84,8 @@ export interface RosterPageData {
   readonly query: RosterQuery;
   /** The reader's display timezone, which days are picked in. */
   readonly timezone: string;
+  /** How the address names the Fleet, for links to its members. */
+  readonly section: FleetSection;
 }
 
 /**
@@ -171,6 +174,24 @@ export class RosterPageComponent extends FleetSectionPageDirective<RosterPageDat
    */
   whole(value: string): string {
     return BigInt(value).toLocaleString('en-GB');
+  }
+
+  /**
+   * Where a member's timeline is.
+   *
+   * @param data - The page, with the Fleet's address.
+   * @param identityId - The member.
+   * @returns The router link.
+   */
+  memberLink(data: RosterPageData, identityId: string): string[] {
+    const { communitySlug, platformSegment, fleetSlug } = data.section.tabs;
+
+    return FLEET_LINKS.fleetMember(
+      communitySlug,
+      platformSegment,
+      fleetSlug,
+      identityId,
+    );
   }
 
   /**
@@ -290,6 +311,7 @@ export class RosterPageComponent extends FleetSectionPageDirective<RosterPageDat
           page,
           query: request,
           timezone: this._settingsService.displayTimezone(),
+          section,
         })),
       );
   }

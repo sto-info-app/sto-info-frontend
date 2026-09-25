@@ -103,6 +103,12 @@ export const APP_ROUTES = {
   FLEET_ROSTER:
     FLEET_COMMUNITIES_ROOT +
     '/:communitySlug/fleets/:platformSegment/:slug/roster',
+  FLEET_ROSTER_HISTORY:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/history',
+  FLEET_ROSTER_MEMBER:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/history/members/:identityId',
   FLEET_INVESTIGATE:
     FLEET_COMMUNITIES_ROOT +
     '/:communitySlug/fleets/:platformSegment/:slug/investigate',
@@ -278,6 +284,8 @@ export const APP_ROUTE_TITLES = {
   FLEET_SCOPE_ARMADA: 'Armada',
   FLEET_ROSTER_IMPORT: 'Import a Roster Export',
   FLEET_ROSTER: 'Roster',
+  FLEET_ROSTER_HISTORY: 'Roster History',
+  FLEET_ROSTER_MEMBER: 'Roster Member',
   FLEET_INVESTIGATE: 'Investigate',
   FLEET_ROSTER_IMPORTS: 'Roster Imports',
   FLEET_ROSTER_IMPORT_DETAIL: 'Roster Import',
