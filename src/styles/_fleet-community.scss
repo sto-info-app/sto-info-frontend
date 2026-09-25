@@ -60,6 +60,106 @@
   color: vars.$lcars-grey-light;
 }
 
+// ─── Tables ──────────────────────────────────────────────────────────────────
+// The roster, its history and the reports are rows of figures, and a table is
+// the honest shape for them: a reader compares a column down, which a grid of
+// cards does not let them do. Header cells are Antonio in sky, figures are
+// right-aligned so their digits line up, and a row lights on hover only as a
+// reading aid.
+// ---
+// Below 720px there is no room for the columns, and a page must never scroll
+// sideways (R29), so each row becomes a block of labelled lines: every cell
+// carries its column's name in `data-label`, and the header row is hidden
+// from sight but kept for a screen reader.
+.fleet-community-table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+
+  caption {
+    padding: 0 0 0.5rem;
+    text-align: left;
+    color: vars.$lcars-grey-light;
+  }
+
+  th {
+    padding: 0.5rem 0.75rem;
+    font-family: vars.$font-antonio;
+    font-weight: normal;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: vars.$lcars-sky;
+    border-bottom: 2px solid vars.$lcars-sky;
+  }
+
+  td {
+    padding: 0.5rem 0.75rem;
+    vertical-align: top;
+    border-bottom: 1px solid vars.$lcars-grey-border;
+  }
+
+  tbody tr:hover {
+    background: vars.$lcars-card-surface-hover;
+  }
+
+  // A figure: right-aligned so a column of them reads as one.
+  .fleet-community-table__number {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // A header cell that sorts: the whole cell is the control.
+  .fleet-community-table__sort {
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+    background: none;
+    border: 0;
+  }
+}
+
+@media (width <= 720px) {
+  .fleet-community-table {
+    thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    tr {
+      display: block;
+      padding: 0.5rem 0;
+      border-bottom: 2px solid vars.$lcars-grey-border;
+    }
+
+    td {
+      display: flex;
+      gap: 1rem;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+      border: 0;
+    }
+
+    td::before {
+      font-family: vars.$font-antonio;
+      text-transform: uppercase;
+      color: vars.$lcars-sky;
+      content: attr(data-label);
+    }
+
+    .fleet-community-table__number {
+      text-align: right;
+    }
+  }
+}
+
 // ─── Forms ───────────────────────────────────────────────────────────────────
 // `.form-row`, `.field-hint` and `.compact` are a convention rather than a
 // global rule: each feature declares its own. These are the Fleet system's,

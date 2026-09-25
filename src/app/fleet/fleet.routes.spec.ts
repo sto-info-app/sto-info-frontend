@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(19);
+    expect(children).toHaveLength(20);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -66,6 +66,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/import',
       APP_ROUTE_TITLES.FLEET_ROSTER_IMPORT,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/roster',
+      APP_ROUTE_TITLES.FLEET_ROSTER,
     ],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',
@@ -184,6 +188,7 @@ describe('FLEET_ROUTES', () => {
   it.each([
     'communities/:communitySlug/fleets/:platformSegment/:slug/import',
     'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/roster',
     'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',
     'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
     'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
@@ -219,6 +224,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/import',
       'RosterImportComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/roster',
+      'RosterPageComponent',
     ],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',

@@ -8,6 +8,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { ROSTER_IMPORT_READERS } from 'src/app/fleet/imports/roster-import.constants';
+import { ROSTER_VIEW_CAPABILITY } from 'src/app/fleet/roster/roster.constants';
 import { ResolvedStoFleet } from 'src/app/models/fleet.models';
 
 /** What the strip needs to know about the Fleet it sits on. */
@@ -83,6 +84,19 @@ export class FleetTabsComponent {
         exact: true,
       },
     ];
+
+    // The private roster: the Fleet's members and up.
+    if (capabilities.includes(ROSTER_VIEW_CAPABILITY)) {
+      tabs.push({
+        link: FLEET_LINKS.fleetRoster(
+          communitySlug,
+          platformSegment,
+          fleetSlug,
+        ),
+        label: 'Roster',
+        exact: false,
+      });
+    }
 
     if (
       ROSTER_IMPORT_READERS.some(capability =>

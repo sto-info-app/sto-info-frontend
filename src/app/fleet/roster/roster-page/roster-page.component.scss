@@ -1,0 +1,39 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.roster-page__as-of {
+  margin: 0 0 0.5rem;
+}
+
+.roster-page__partial,
+.roster-page__notice {
+  color: vars.$lcars-grey-light;
+}
+
+.roster-page__notice {
+  font-style: italic;
+}
+
+.roster-page__name {
+  margin-right: 0.5rem;
+}
+
+// A second line under a cell's value, saying something about it.
+.roster-page__note {
+  display: block;
+  font-size: 0.85rem;
+  color: vars.$lcars-grey-light;
+}
+
+.roster-page__profile {
+  color: vars.$lcars-sky;
+}
+
+// A row an investigator excluded: shown to investigators alone, and said in
+// words as well as dimmed, since dimming alone tells some readers nothing.
+.roster-page__excluded {
+  opacity: 0.6;
+}

@@ -1,0 +1,249 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Roster"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the roster"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+      @let page = data.page;
+
+      @if (page.revision === 0) {
+        <p class="fleet-community-empty">
+          No roster has been read into this Fleet’s history yet. Once an
+          export is imported, it is shown here.
+        </p>
+      } @else {
+        @if (page.stale) {
+          <p class="roster-page__notice">
+            A change is being worked into the history. This is how it stood
+            before, and it will catch up by itself.
+          </p>
+        }
+
+        <section
+          class="roster-page__export"
+          aria-label="Which export">
+          @if (page.export; as shown) {
+            <p class="roster-page__as-of">
+              As listed on
+              <strong>{{ shown.exportedAt | appDate: 'medium' }}</strong>
+              @if (shown.partial) {
+                <span class="roster-page__partial">
+                  — partial: somebody missing from it may still have been a
+                  member
+                </span>
+              }
+            </p>
+          } @else {
+            <p class="roster-page__as-of">
+              No export had been taken by then. The first was on
+              {{ page.coverage.first?.exportedAt | appDate: 'medium' }}.
+            </p>
+          }
+
+          <div class="fleet-community-filter-row">
+            <div class="lcars-input-container sky">
+              <label for="roster-day">Show the roster on</label>
+              <input
+                #day
+                id="roster-day"
+                type="date"
+                [min]="
+                  page.coverage.first
+                    ? dayOf(data, page.coverage.first.exportedAt)
+                    : null
+                "
+                [max]="
+                  page.coverage.latest
+                    ? dayOf(data, page.coverage.latest.exportedAt)
+                    : null
+                "
+                [value]="page.export ? dayOf(data, page.export.exportedAt) : ''"
+                (change)="onDay(data, day.value)" />
+            </div>
+
+            <div class="buttons-row">
+              <button
+                type="button"
+                class="lcars-btn lcars-btn-auto sky"
+                [disabled]="!page.export?.previous"
+                (click)="onExport(page.export?.previous?.exportedAt ?? null)">
+                Earlier export
+              </button>
+              <button
+                type="button"
+                class="lcars-btn lcars-btn-auto sky"
+                [disabled]="!page.export?.next"
+                (click)="onExport(page.export?.next?.exportedAt ?? null)">
+                Later export
+              </button>
+              <button
+                type="button"
+                class="lcars-btn lcars-btn-auto sky"
+                [disabled]="!data.query.asOf"
+                (click)="onExport(null)">
+                Latest
+              </button>
+            </div>
+          </div>
+        </section>
+
+        @if (page.export) {
+          <form
+            class="fleet-community-filter-row"
+            role="search"
+            aria-label="Find in the roster"
+            (submit)="$event.preventDefault(); onFilter(search.value, rank.value)">
+            <div class="lcars-input-container sky">
+              <label for="roster-search">Character or handle</label>
+              <input
+                #search
+                id="roster-search"
+                type="search"
+                maxlength="50"
+                autocomplete="off"
+                [value]="data.query.search ?? ''" />
+            </div>
+
+            <div class="lcars-input-container sky">
+              <label for="roster-rank">Rank</label>
+              <select
+                #rank
+                id="roster-rank"
+                [value]="data.query.rank ?? ''">
+                <option value="">Every rank</option>
+                @for (entry of page.ranks; track entry.label) {
+                  <option
+                    [value]="entry.label"
+                    [selected]="entry.label === data.query.rank">
+                    {{ entry.label }} ({{ entry.members }})
+                  </option>
+                }
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto sky">
+              Find
+            </button>
+          </form>
+
+          @if (page.items.length === 0) {
+            <p class="fleet-community-empty">
+              Nobody on this export matches that.
+            </p>
+          } @else {
+            <table class="fleet-community-table">
+              <caption>
+                {{ page.total }}
+                {{ page.total === 1 ? 'row' : 'rows' }}
+              </caption>
+              <thead>
+                <tr>
+                  @for (column of sorts; track column.sort) {
+                    <th
+                      scope="col"
+                      [attr.aria-sort]="ariaSort(data, column.sort)"
+                      [class.fleet-community-table__number]="
+                        column.sort === 'LEVEL' ||
+                        column.sort === 'CONTRIBUTION'
+                      ">
+                      <button
+                        type="button"
+                        class="fleet-community-table__sort"
+                        (click)="onSort(data, column.sort)">
+                        {{ column.label }}
+                      </button>
+                    </th>
+                  }
+                  <th scope="col">Comment</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of page.items; track trackRow(row)) {
+                  <tr [class.roster-page__excluded]="row.excluded">
+                    <td data-label="Character">
+                      <span class="roster-page__name">{{
+                        row.characterName
+                      }}</span>
+                      @if (row.profile) {
+                        <a
+                          class="roster-page__profile"
+                          [routerLink]="profileLink(row.profile)"
+                          >Profile</a
+                        >
+                      }
+                      @if (row.identityRows > 1) {
+                        <span class="roster-page__note">
+                          one of {{ row.identityRows }} rows for this member
+                        </span>
+                      }
+                      @if (row.excluded) {
+                        <span class="roster-page__note">
+                          excluded by an investigator
+                        </span>
+                      }
+                    </td>
+                    <td data-label="Handle">{{ row.accountHandle }}</td>
+                    <td data-label="Rank">
+                      {{ row.guildRank }}
+                      @if (row.rankTier !== null) {
+                        <span class="roster-page__note"
+                          >tier {{ row.rankTier }}</span
+                        >
+                      }
+                    </td>
+                    <td
+                      data-label="Level"
+                      class="fleet-community-table__number">
+                      {{ row.level }}
+                    </td>
+                    <td data-label="Joined">
+                      {{ row.joinedAt | appDate }}
+                    </td>
+                    <td
+                      data-label="Contribution"
+                      class="fleet-community-table__number">
+                      {{ whole(row.contributionTotal) }}
+                    </td>
+                    <td data-label="Last Active">
+                      {{ row.lastActiveAt | appDate }}
+                    </td>
+                    <td data-label="Comment">
+                      {{ row.publicComment }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            @if (totalPages(page) > 1) {
+              <div class="lcars-pagination">
+                <button
+                  type="button"
+                  [disabled]="page.page <= 1"
+                  (click)="onPage(page.page - 1)">
+                  Previous
+                </button>
+                <span>Page {{ page.page }} of {{ totalPages(page) }}</span>
+                <button
+                  type="button"
+                  [disabled]="page.page >= totalPages(page)"
+                  (click)="onPage(page.page + 1)">
+                  Next
+                </button>
+              </div>
+            }
+          }
+        }
+      }
+    }
+  </app-fleet-page-shell>
+}
