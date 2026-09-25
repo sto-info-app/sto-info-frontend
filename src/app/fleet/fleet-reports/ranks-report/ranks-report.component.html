@@ -1,0 +1,117 @@
+@let shown = report();
+@let cohort = shown.minimumCohort;
+
+@if (latest(); as last) {
+  <div class="lcars-text-bar">
+    <span>Ranks, as of {{ last.export.exportedAt | appDate: 'medium' }}</span>
+  </div>
+  @if (chart().data.length > 0) {
+    <app-smart-chart
+      mode="bar"
+      [data]="chart().data" />
+  }
+  @if (chart().hidden > 0) {
+    <p class="fleet-report-notice">
+      {{ chart().hidden }}
+      {{ chart().hidden === 1 ? 'rank’s count is' : 'ranks’ counts are' }}
+      hidden, so not drawn.
+    </p>
+  }
+
+  <table class="fleet-community-table">
+    <caption>
+      Each export’s members under each rank, and the rank changes it revealed
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Export</th>
+        @for (column of columns(); track column.label) {
+          <th
+            scope="col"
+            class="fleet-community-table__number">
+            {{ column.label }}
+            @if (column.tier !== null) {
+              <span class="fleet-report-note">tier {{ column.tier }}</span>
+            }
+          </th>
+        }
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Promoted
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Demoted
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Changed
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Across a gap
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (entry of shown.exports; track entry.export.importId) {
+        <tr>
+          <td data-label="Export">
+            {{ entry.export.exportedAt | appDate: 'medium' }}
+            @if (entry.partial) {
+              <span class="fleet-report-note">partial</span>
+            }
+          </td>
+          @for (column of columns(); track column.label) {
+            <td
+              class="fleet-community-table__number"
+              [attr.data-label]="column.label">
+              {{ membersUnder(entry, column.label) | reportFigure: cohort }}
+            </td>
+          }
+          @if (entry.changes; as changes) {
+            <td
+              data-label="Promoted"
+              class="fleet-community-table__number">
+              {{ changes.promoted | reportFigure: cohort }}
+            </td>
+            <td
+              data-label="Demoted"
+              class="fleet-community-table__number">
+              {{ changes.demoted | reportFigure: cohort }}
+            </td>
+            <td
+              data-label="Changed"
+              class="fleet-community-table__number">
+              {{ changes.changed | reportFigure: cohort }}
+            </td>
+            <td
+              data-label="Across a gap"
+              class="fleet-community-table__number">
+              {{ changes.acrossGap | reportFigure: cohort }}
+            </td>
+          } @else {
+            <td
+              class="fleet-community-table__number"
+              colspan="4"
+              data-label="Changes">
+              The Fleet’s first export: nothing before it to change from
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <p class="fleet-report-notice">
+    A move between two ranks the Fleet’s rank order places is a promotion or a
+    demotion; any other change of rank is only counted as changed. Across a gap
+    counts changes over a longer span than the interval.
+  </p>
+} @else {
+  <p class="fleet-community-empty">No export was taken in this span.</p>
+}

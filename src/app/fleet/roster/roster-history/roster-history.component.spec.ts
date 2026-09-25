@@ -10,6 +10,7 @@ import {
 import { BehaviorSubject, of } from 'rxjs';
 
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
+import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { RosterService } from 'src/app/fleet/roster/roster.service';
 import {
@@ -152,6 +153,7 @@ describe('RosterHistoryComponent', () => {
     await TestBed.configureTestingModule({
       imports: [RosterHistoryComponent],
       providers: [
+        { provide: FleetReportService, useValue: { visible: () => of([]) } },
         provideRouter([]),
         { provide: FleetScopeService, useValue: scopes },
         { provide: RosterService, useValue: roster },

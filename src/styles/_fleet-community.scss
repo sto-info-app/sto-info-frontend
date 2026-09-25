@@ -160,6 +160,25 @@
   }
 }
 
+// ─── Reports ─────────────────────────────────────────────────────────────────
+// Each report is its own component beneath the reports page, so what they
+// share is declared once here rather than in five encapsulated sheets.
+
+// A sentence about the report as a whole: what it covers, what it hides.
+.fleet-report-notice {
+  max-width: 70ch;
+  margin: 0.5rem 0;
+  font-style: italic;
+  color: vars.$lcars-grey-light;
+}
+
+// A second line under a cell's value, saying something about it.
+.fleet-report-note {
+  display: block;
+  font-size: 0.85rem;
+  color: vars.$lcars-grey-light;
+}
+
 // ─── Forms ───────────────────────────────────────────────────────────────────
 // `.form-row`, `.field-hint` and `.compact` are a convention rather than a
 // global rule: each feature declares its own. These are the Fleet system's,

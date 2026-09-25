@@ -1,0 +1,149 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Reports"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the report"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+
+      @if (data.shown; as shown) {
+        <nav
+          class="fleet-reports__choice"
+          aria-label="Report">
+          @for (report of offered(data); track report) {
+            <a
+              class="lcars-btn lcars-btn-auto"
+              [class.sky]="report !== data.chosen"
+              [class.gold]="report === data.chosen"
+              [routerLink]="[]"
+              [queryParams]="queryFor(report)"
+              queryParamsHandling="merge"
+              [attr.aria-current]="report === data.chosen ? 'page' : null"
+              >{{ reportLabels[report] }}</a
+            >
+          }
+        </nav>
+
+        @if (shown.revision === 0) {
+          <p class="fleet-community-empty">
+            No roster has been read into this Fleet’s history yet, so there is
+            nothing to report.
+          </p>
+        } @else {
+          <section
+            class="fleet-reports__about"
+            aria-label="What the report covers">
+            @if (shown.stale) {
+              <p class="fleet-report-notice">
+                A change is being worked into the history. This is how it stood
+                before, and it will catch up by itself.
+              </p>
+            }
+            <p class="fleet-reports__coverage">
+              From revision {{ shown.revision }} of the history, published
+              {{ shown.publishedAt | appDate: 'medium' }}.
+              @if (shown.coverage.first; as first) {
+                {{ shown.coverage.exports }}
+                {{ shown.coverage.exports === 1 ? 'export' : 'exports' }},
+                {{ first.exportedAt | appDate: 'medium' }} to
+                {{ shown.coverage.latest?.exportedAt | appDate: 'medium' }}.
+              } @else {
+                No export was taken in this span.
+              }
+            </p>
+            @if (shown.view === aggregate) {
+              <p class="fleet-report-notice">
+                You are shown counts and totals only. A figure counting from 1
+                to {{ shown.minimumCohort - 1 }} members is shown as &lt;
+                {{ shown.minimumCohort }}, and so is any figure that would let
+                one be worked out.
+              </p>
+            }
+
+            <form
+              class="fleet-community-filter-row"
+              aria-label="Span"
+              (submit)="
+                $event.preventDefault(); onSpan(data, from.value, to.value)
+              ">
+              <div class="lcars-input-container sky">
+                <label for="report-from">From</label>
+                <input
+                  #from
+                  id="report-from"
+                  type="date"
+                  [value]="dayOf(data, data.query.from)" />
+              </div>
+              <div class="lcars-input-container sky">
+                <label for="report-to">To</label>
+                <input
+                  #to
+                  id="report-to"
+                  type="date"
+                  [value]="dayOf(data, data.query.to)" />
+              </div>
+              <div class="buttons-row">
+                <button
+                  type="submit"
+                  class="lcars-btn lcars-btn-auto sky">
+                  Show
+                </button>
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto sky"
+                  [disabled]="!data.query.from && !data.query.to"
+                  (click)="onEverySpan()">
+                  Every export
+                </button>
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto sky"
+                  [disabled]="csvState() === 'BUSY'"
+                  (click)="onCsv(data)">
+                  {{
+                    csvState() === 'BUSY' ? 'Making the CSV' : 'Download CSV'
+                  }}
+                </button>
+              </div>
+            </form>
+            @if (csvState() === 'FAILED') {
+              <p
+                class="fleet-reports__failed"
+                role="alert">
+                {{ csvFailedMessage }}
+              </p>
+            }
+          </section>
+
+          @if (reportAs(data, reports.GROWTH); as growth) {
+            <app-growth-report [report]="growth" />
+          }
+          @if (reportAs(data, reports.ACTIVITY); as activity) {
+            <app-activity-report [report]="activity" />
+          }
+          @if (reportAs(data, reports.TENURE); as tenure) {
+            <app-tenure-report
+              [report]="tenure"
+              (atChange)="onAt($event)" />
+          }
+          @if (reportAs(data, reports.RANKS); as ranks) {
+            <app-ranks-report [report]="ranks" />
+          }
+          @if (reportAs(data, reports.CONTRIBUTION); as contribution) {
+            <app-contribution-report
+              [report]="contribution"
+              (atChange)="onAt($event)" />
+          }
+        }
+      } @else {
+        <p class="fleet-community-empty">{{ noneMessage }}</p>
+      }
+    }
+  </app-fleet-page-shell>
+}

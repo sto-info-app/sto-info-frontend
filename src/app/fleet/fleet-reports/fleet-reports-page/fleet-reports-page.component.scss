@@ -1,0 +1,26 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+// The reports, as a row of pills: the one being read is gold, as the tab
+// strip's lit tab is.
+.fleet-reports__choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+}
+
+.fleet-reports__about {
+  margin: 0 0 1rem;
+}
+
+.fleet-reports__coverage {
+  margin: 0.5rem 0;
+}
+
+.fleet-reports__failed {
+  color: vars.$lcars-red;
+}

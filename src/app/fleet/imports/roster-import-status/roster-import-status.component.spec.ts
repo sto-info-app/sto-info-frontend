@@ -17,6 +17,7 @@ import {
 import { BehaviorSubject, NEVER, of, throwError } from 'rxjs';
 
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
+import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import {
   ROSTER_IMPORT_POLL_INTERVAL_MS,
@@ -188,6 +189,7 @@ describe('RosterImportStatusComponent', () => {
     await TestBed.configureTestingModule({
       imports: [RosterImportStatusComponent],
       providers: [
+        { provide: FleetReportService, useValue: { visible: () => of([]) } },
         provideRouter([]),
         { provide: FleetScopeService, useValue: scopes },
         { provide: RosterImportService, useValue: imports },

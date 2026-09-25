@@ -151,6 +151,17 @@ export const FLEET_ROUTES: Routes = [
         data: { title: APP_ROUTE_TITLES.FLEET_ROSTER_MEMBER },
         canActivate: [AuthGuard],
       },
+      // A Fleet's reports (FC-020). Not behind the sign-in guard: an Owner
+      // can show a report's counts to anyone, and which reports a reader
+      // sees is the server's answer.
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/reports',
+        loadComponent: () =>
+          import('./fleet-reports/fleet-reports-page/fleet-reports-page.component').then(
+            m => m.FleetReportsPageComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_REPORTS },
+      },
       // Where a Fleet's roster is looked into (FC-020). The pages below it
       // sit under its address so its tab stays lit while a reader works
       // through them.

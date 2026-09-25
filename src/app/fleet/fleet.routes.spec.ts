@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(22);
+    expect(children).toHaveLength(23);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -170,6 +170,17 @@ describe('FLEET_ROUTES', () => {
     expect(childAt(path)?.data?.['title']).toBe(title);
   });
 
+  // An Owner can show a report's counts to anyone, so the page is open to a
+  // signed-out reader, and the server says which reports they see.
+  it('leaves a Fleet’s reports open to a signed-out reader', () => {
+    const reports = childAt(
+      'communities/:communitySlug/fleets/:platformSegment/:slug/reports',
+    );
+
+    expect(reports?.canActivate).toBeUndefined();
+    expect(reports?.data?.['title']).toBe(APP_ROUTE_TITLES.FLEET_REPORTS);
+  });
+
   /**
    * A Community's own page is declared last of the three, so
    * `communities/x/fleets/pc/y` is never read as a Community called `x`
@@ -246,6 +257,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/history/members/:identityId',
       'RosterTimelineComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/reports',
+      'FleetReportsPageComponent',
     ],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',

@@ -2,17 +2,25 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
 } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
+import { catchError, map, of, switchMap } from 'rxjs';
+
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
+import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
 import { ROSTER_IMPORT_READERS } from 'src/app/fleet/imports/roster-import.constants';
 import { ROSTER_VIEW_CAPABILITY } from 'src/app/fleet/roster/roster.constants';
 import { ResolvedStoFleet } from 'src/app/models/fleet.models';
 
 /** What the strip needs to know about the Fleet it sits on. */
 export interface FleetTabsVm {
+  /** The Community holding the Fleet, for asking which reports are shown. */
+  readonly communityId: string;
+  readonly fleetId: string;
   readonly communitySlug: string;
   readonly platformSegment: string;
   readonly fleetSlug: string;
@@ -45,6 +53,8 @@ export function fleetTabsVmOf(resolved: ResolvedStoFleet): FleetTabsVm | null {
   }
 
   return {
+    communityId: resolved.fleet.communityId,
+    fleetId: resolved.fleet.id,
     communitySlug: resolved.communitySlug,
     platformSegment: resolved.platformSegment,
     fleetSlug: resolved.fleet.slug,
@@ -69,8 +79,30 @@ export function fleetTabsVmOf(resolved: ResolvedStoFleet): FleetTabsVm | null {
   imports: [RouterLink, RouterLinkActive],
 })
 export class FleetTabsComponent {
+  private readonly _reportService = inject(FleetReportService);
+
   /** The Fleet the strip sits on. */
   readonly vm = input.required<FleetTabsVm>();
+
+  /**
+   * Whether the reader may see any of the Fleet's reports.
+   *
+   * The server's answer, asked once per Fleet: which reports a reader is
+   * shown depends on each report's audience as well as on who they are, and
+   * a report can be public. A failed answer offers no tab, rather than one
+   * leading to a page that cannot be read.
+   */
+  private readonly _hasReports = toSignal(
+    toObservable(this.vm).pipe(
+      switchMap(vm =>
+        this._reportService.visible(vm.communityId, vm.fleetId).pipe(
+          map(reports => reports.length > 0),
+          catchError(() => of(false)),
+        ),
+      ),
+    ),
+    { initialValue: false },
+  );
 
   /** The tabs the reader is offered, in strip order. */
   readonly tabs = computed<FleetTab[]>(() => {
@@ -104,6 +136,18 @@ export class FleetTabsComponent {
         ),
         label: 'History',
         // Lit on a member's timeline beneath it too.
+        exact: false,
+      });
+    }
+
+    if (this._hasReports()) {
+      tabs.push({
+        link: FLEET_LINKS.fleetReports(
+          communitySlug,
+          platformSegment,
+          fleetSlug,
+        ),
+        label: 'Reports',
         exact: false,
       });
     }

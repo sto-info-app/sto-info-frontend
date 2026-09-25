@@ -8,6 +8,7 @@ import {
 
 import { BehaviorSubject, EMPTY, Observable, of } from 'rxjs';
 
+import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { FleetScopePageState } from 'src/app/fleet/scope/fleet-scope-page.models';
 import {
@@ -140,6 +141,7 @@ describe('FleetPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [FleetPageComponent],
       providers: [
+        { provide: FleetReportService, useValue: { visible: () => of([]) } },
         { provide: FleetScopeService, useValue: scopes },
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: { paramMap: params$ } },
@@ -548,6 +550,8 @@ describe('FleetPageComponent', () => {
       render();
 
       expect(tabs()).toEqual({
+        communityId: 'community-1',
+        fleetId: 'fleet-1',
         communitySlug: 'united-federation-alliance',
         platformSegment: 'pc',
         fleetSlug: 'starfleet-command',

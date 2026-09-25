@@ -1,6 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { of, throwError } from 'rxjs';
+
+import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
+import {
+  FleetReport,
+  FleetReportView,
+} from 'src/app/models/fleet-report.models';
 import { ResolvedStoFleet } from 'src/app/models/fleet.models';
 
 import {
@@ -20,6 +27,8 @@ const FLEET_HREF =
  */
 function vm(...capabilities: string[]): FleetTabsVm {
   return {
+    communityId: 'community-1',
+    fleetId: 'fleet-1',
     communitySlug: 'united-federation-alliance',
     platformSegment: 'pc',
     fleetSlug: 'ninth-fleet',
@@ -29,11 +38,17 @@ function vm(...capabilities: string[]): FleetTabsVm {
 
 describe('FleetTabsComponent', () => {
   let fixture: ComponentFixture<FleetTabsComponent>;
+  let reports: { visible: jest.Mock };
 
   beforeEach(async () => {
+    reports = { visible: jest.fn(() => of([])) };
+
     await TestBed.configureTestingModule({
       imports: [FleetTabsComponent],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        { provide: FleetReportService, useValue: reports },
+      ],
     }).compileComponents();
   });
 
@@ -81,6 +96,42 @@ describe('FleetTabsComponent', () => {
     ).toEqual(['Overview', 'Roster', 'History', 'Investigate']);
   });
 
+  describe('the Reports tab', () => {
+    // A report can be public, so this is the server's answer, not a guess
+    // from the reader's capabilities.
+    it('is offered to anybody the server shows a report to', () => {
+      reports.visible.mockReturnValue(
+        of([{ report: FleetReport.GROWTH, view: FleetReportView.AGGREGATE }]),
+      );
+
+      expect(draw(vm())).toEqual([
+        ['Overview', FLEET_HREF],
+        ['Reports', `${FLEET_HREF}/reports`],
+      ]);
+      expect(reports.visible).toHaveBeenCalledWith('community-1', 'fleet-1');
+    });
+
+    it('is not offered when the server shows no report', () => {
+      expect(draw(vm()).map(([label]) => label)).toEqual(['Overview']);
+    });
+
+    it('is not offered when the answer fails', () => {
+      reports.visible.mockReturnValue(throwError(() => new Error('down')));
+
+      expect(draw(vm()).map(([label]) => label)).toEqual(['Overview']);
+    });
+
+    it('sits between History and Investigate', () => {
+      reports.visible.mockReturnValue(
+        of([{ report: FleetReport.GROWTH, view: FleetReportView.FULL }]),
+      );
+
+      expect(
+        draw(vm('roster.view', 'roster.investigate')).map(([label]) => label),
+      ).toEqual(['Overview', 'Roster', 'History', 'Reports', 'Investigate']);
+    });
+  });
+
   it('names itself for a screen reader moving by landmark', () => {
     draw(vm());
 
@@ -104,6 +155,7 @@ describe('FleetTabsComponent', () => {
       return {
         fleet: {
           slug: 'ninth-fleet',
+          id: 'fleet-1',
           communityId: 'community-1',
           platformProvidesRosterExport: true,
           ...fleet,

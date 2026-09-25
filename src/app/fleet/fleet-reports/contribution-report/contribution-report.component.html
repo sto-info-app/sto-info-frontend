@@ -1,0 +1,206 @@
+@let shown = report();
+@let cohort = shown.minimumCohort;
+
+@if (shown.intervals.length === 0) {
+  <p class="fleet-community-empty">
+    There are not two exports in this span, so there is no interval between them
+    to count.
+  </p>
+} @else {
+  @if (chart().data.length > 0) {
+    <div class="lcars-text-bar">
+      <span>Contributed in each interval</span>
+    </div>
+    <app-smart-chart
+      mode="bar"
+      [data]="chart().data" />
+  }
+  @if (chart().hidden > 0) {
+    <p class="fleet-report-notice">
+      {{ chart().hidden }}
+      {{
+        chart().hidden === 1 ? 'interval’s total is' : 'intervals’ totals are'
+      }}
+      hidden, so not drawn.
+    </p>
+  }
+
+  <table class="fleet-community-table">
+    <caption>
+      Between each export and the next: the rise in contribution, and how many
+      members it rests on
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Between</th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Contributed
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Known
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Reset
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          New
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Unknown
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (interval of shown.intervals; track interval.to.importId) {
+        <tr>
+          <td data-label="Between">
+            {{ interval.from.exportedAt | appDate: 'medium' }} and
+            {{ interval.to.exportedAt | appDate: 'medium' }}
+            @if (interval.partial) {
+              <span class="fleet-report-note">
+                the later export was partial
+              </span>
+            }
+          </td>
+          <td
+            data-label="Contributed"
+            class="fleet-community-table__number">
+            {{ interval.contributionDelta | reportFigure: cohort }}
+          </td>
+          <td
+            data-label="Known"
+            class="fleet-community-table__number">
+            {{ interval.known | reportFigure: cohort }}
+          </td>
+          <td
+            data-label="Reset"
+            class="fleet-community-table__number">
+            {{ interval.reset | reportFigure: cohort }}
+          </td>
+          <td
+            data-label="New"
+            class="fleet-community-table__number">
+            {{ interval.baseline | reportFigure: cohort }}
+          </td>
+          <td
+            data-label="Unknown"
+            class="fleet-community-table__number">
+            {{ interval.unknown | reportFigure: cohort }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <p class="fleet-report-notice">
+    Only the rise between two exports is known: nothing is spread over the days
+    or weeks between them. A fall is a reset, never a negative gift. New counts
+    members first listed at the later export, whose total starts a baseline;
+    unknown, those a partial export did not list.
+  </p>
+
+  @if (shown.members; as members) {
+    <div class="lcars-text-bar">
+      <span>Members</span>
+    </div>
+    <div class="fleet-community-filter-row">
+      <div class="lcars-input-container sky">
+        <label for="contribution-at">Rises between</label>
+        <select
+          #at
+          id="contribution-at"
+          (change)="atChange.emit(at.value)">
+          @for (choice of choices(); track choice.to.importId) {
+            <option
+              [value]="choice.to.importId"
+              [selected]="choice.to.importId === shown.at?.importId">
+              {{ choice.from.exportedAt | appDate: 'medium' }} and
+              {{ choice.to.exportedAt | appDate: 'medium' }}
+            </option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (members.length === 0) {
+      <p class="fleet-community-empty">
+        Nobody’s contribution rose or reset in that interval.
+      </p>
+    } @else {
+      <table class="fleet-community-table">
+        <caption>
+          Each member’s rise in that interval, largest first, then each reset
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Member</th>
+            <th
+              scope="col"
+              class="fleet-community-table__number">
+              Rise
+            </th>
+            <th
+              scope="col"
+              class="fleet-community-table__number">
+              Total before
+            </th>
+            <th
+              scope="col"
+              class="fleet-community-table__number">
+              Total after
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (member of members; track member.identityId) {
+            <tr>
+              <td data-label="Member">
+                {{
+                  member.member
+                    ? member.member.characterName + member.member.accountHandle
+                    : 'A member'
+                }}
+                @if (member.acrossGap) {
+                  <span class="fleet-report-note">
+                    across a gap, since
+                    {{ member.from?.exportedAt | appDate: 'medium' }}: in no
+                    interval’s total
+                  </span>
+                }
+              </td>
+              <td
+                data-label="Rise"
+                class="fleet-community-table__number">
+                @if (member.kind === reset) {
+                  Reset
+                } @else {
+                  {{ member.delta | reportFigure: cohort }}
+                }
+              </td>
+              <td
+                data-label="Total before"
+                class="fleet-community-table__number">
+                {{ member.fromContribution | reportFigure: cohort }}
+              </td>
+              <td
+                data-label="Total after"
+                class="fleet-community-table__number">
+                {{ member.toContribution | reportFigure: cohort }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+}

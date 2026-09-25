@@ -1,0 +1,147 @@
+@let shown = report();
+@let cohort = shown.minimumCohort;
+
+@if (snapshot(); as drawn) {
+  <div class="lcars-text-bar">
+    <span
+      >Listed for, as of {{ drawn.export.exportedAt | appDate: 'medium' }}</span
+    >
+  </div>
+  @if (chart().data.length > 0) {
+    <app-smart-chart
+      mode="bar"
+      [data]="chart().data" />
+  }
+  @if (chart().hidden > 0) {
+    <p class="fleet-report-notice">
+      {{ chart().hidden }}
+      {{ chart().hidden === 1 ? 'band’s count is' : 'bands’ counts are' }}
+      hidden, so not drawn.
+    </p>
+  }
+
+  <table class="fleet-community-table">
+    <caption>
+      Each export’s members, by how long before it their current stretch was
+      first listed
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Export</th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Members
+        </th>
+        @for (band of bands; track band) {
+          <th
+            scope="col"
+            class="fleet-community-table__number">
+            {{ bandLabels[band] }}
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (entry of shown.exports; track entry.export.importId) {
+        <tr>
+          <td data-label="Export">
+            {{ entry.export.exportedAt | appDate: 'medium' }}
+            @if (entry.partial) {
+              <span class="fleet-report-note">partial</span>
+            }
+          </td>
+          <td
+            data-label="Members"
+            class="fleet-community-table__number">
+            {{ entry.members | reportFigure: cohort }}
+          </td>
+          @for (band of bands; track band) {
+            <td
+              class="fleet-community-table__number"
+              [attr.data-label]="bandLabels[band]">
+              {{ entry.bands[band] | reportFigure: cohort }}
+              @if (entry.atLeast[band] !== 0) {
+                <span class="fleet-report-note">
+                  {{ entry.atLeast[band] | reportFigure: cohort }} at least
+                </span>
+              }
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <p class="fleet-report-notice">
+    Tenure is observed: how long the roster has listed somebody, never the
+    game’s Join Date. “At least” counts members no earlier export bounds, who
+    may have been listed longer.
+  </p>
+
+  @if (shown.members; as members) {
+    <div class="lcars-text-bar">
+      <span>Members</span>
+    </div>
+    <div class="fleet-community-filter-row">
+      <div class="lcars-input-container sky">
+        <label for="tenure-at">Members at</label>
+        <select
+          #at
+          id="tenure-at"
+          (change)="atChange.emit(at.value)">
+          @for (choice of choices(); track choice.importId) {
+            <option
+              [value]="choice.importId"
+              [selected]="choice.importId === shown.at?.importId">
+              {{ choice.exportedAt | appDate: 'medium' }}
+            </option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (members.length === 0) {
+      <p class="fleet-community-empty">That export listed nobody.</p>
+    } @else {
+      <table class="fleet-community-table">
+        <caption>
+          The members at that export, longest listed first, as it listed them
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Member</th>
+            <th scope="col">First listed</th>
+            <th
+              scope="col"
+              class="fleet-community-table__number">
+              Days listed
+            </th>
+            <th scope="col">Band</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (member of members; track member.identityId) {
+            <tr>
+              <td data-label="Member">
+                {{ member.characterName }}{{ member.accountHandle }}
+              </td>
+              <td data-label="First listed">
+                {{ member.firstObservedAt | appDate: 'medium' }}
+              </td>
+              <td
+                data-label="Days listed"
+                class="fleet-community-table__number">
+                {{ member.atLeast ? 'at least ' : ''
+                }}{{ member.days | reportFigure: cohort }}
+              </td>
+              <td data-label="Band">{{ bandLabels[member.band] }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+} @else {
+  <p class="fleet-community-empty">No export was taken in this span.</p>
+}

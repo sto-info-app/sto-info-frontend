@@ -1,0 +1,133 @@
+@let shown = report();
+@let cohort = shown.minimumCohort;
+
+@if (shown.intervals.length === 0) {
+  <p class="fleet-community-empty">
+    There are not two exports in this span, so there is no interval between them
+    to count.
+  </p>
+} @else {
+  @if (chart().data.length > 0) {
+    <div class="lcars-text-bar">
+      <span>Members at the end of each interval</span>
+    </div>
+    <app-smart-chart
+      mode="bar"
+      [data]="chart().data" />
+  }
+  @if (chart().hidden > 0) {
+    <p class="fleet-report-notice">
+      {{ chart().hidden }}
+      {{
+        chart().hidden === 1 ? 'interval’s count is' : 'intervals’ counts are'
+      }}
+      hidden, so not drawn.
+    </p>
+  }
+
+  <table class="fleet-community-table">
+    <caption>
+      Between each export and the next: members and account handles at either
+      end, and how many joined, rejoined or left
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Between</th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Members
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Joined
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Rejoined
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Left
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Unknown
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Across a gap
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Account handles
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (interval of shown.intervals; track interval.to.importId) {
+        <tr>
+          <td data-label="Between">
+            {{ interval.from.exportedAt | appDate: 'medium' }} and
+            {{ interval.to.exportedAt | appDate: 'medium' }}
+            @if (interval.partial) {
+              <span class="fleet-report-note">
+                the later export was partial
+              </span>
+            }
+          </td>
+          <td
+            data-label="Members"
+            class="fleet-community-table__number">
+            {{ interval.membersAtStart | reportFigure: cohort }} →
+            {{ interval.membersAtEnd | reportFigure: cohort }}
+          </td>
+          <td
+            data-label="Joined"
+            class="fleet-community-table__number">
+            {{ interval.joined | reportFigure: cohort }}
+          </td>
+          <td
+            data-label="Rejoined"
+            class="fleet-community-table__number">
+            {{ interval.rejoined | reportFigure: cohort }}
+          </td>
+          <td
+            data-label="Left"
+            class="fleet-community-table__number">
+            {{ interval.left | reportFigure: cohort }}
+          </td>
+          <td
+            data-label="Unknown"
+            class="fleet-community-table__number">
+            {{ interval.unknown | reportFigure: cohort }}
+          </td>
+          <td
+            data-label="Across a gap"
+            class="fleet-community-table__number">
+            {{ interval.acrossGap | reportFigure: cohort }}
+          </td>
+          <td
+            data-label="Account handles"
+            class="fleet-community-table__number">
+            {{ interval.accountsAtStart | reportFigure: cohort }} →
+            {{ interval.accountsAtEnd | reportFigure: cohort }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <p class="fleet-report-notice">
+    Unknown counts members a partial export did not list, who may still have
+    been members. Across a gap counts changes the later export revealed that
+    happened over a longer span, and so are in no interval’s other figures.
+    Account handles are those listed, never people.
+  </p>
+}

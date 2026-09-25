@@ -9,6 +9,7 @@ import {
 
 import { BehaviorSubject, of, throwError } from 'rxjs';
 
+import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import {
   FLEET_SECTION_ERROR,
@@ -77,6 +78,7 @@ describe('FleetInvestigateComponent', () => {
     await TestBed.configureTestingModule({
       imports: [FleetInvestigateComponent],
       providers: [
+        { provide: FleetReportService, useValue: { visible: () => of([]) } },
         provideRouter([]),
         { provide: FleetScopeService, useValue: scopes },
         {

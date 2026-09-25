@@ -13,6 +13,7 @@ import {
 import { BehaviorSubject, NEVER, of, Subject, throwError } from 'rxjs';
 
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
+import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { RosterIdentityService } from 'src/app/fleet/identities/roster-identity.service';
 import {
@@ -222,6 +223,7 @@ describe('RosterIdentityListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [RosterIdentityListComponent],
       providers: [
+        { provide: FleetReportService, useValue: { visible: () => of([]) } },
         provideRouter([]),
         { provide: FleetScopeService, useValue: scopes },
         { provide: RosterIdentityService, useValue: identities },

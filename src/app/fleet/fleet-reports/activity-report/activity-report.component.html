@@ -1,0 +1,71 @@
+@let shown = report();
+@let cohort = shown.minimumCohort;
+
+@if (latest(); as last) {
+  <div class="lcars-text-bar">
+    <span
+      >Last active, as of {{ last.export.exportedAt | appDate: 'medium' }}</span
+    >
+  </div>
+  @if (chart().data.length > 0) {
+    <app-smart-chart
+      mode="bar"
+      [data]="chart().data" />
+  }
+  @if (chart().hidden > 0) {
+    <p class="fleet-report-notice">
+      {{ chart().hidden }}
+      {{ chart().hidden === 1 ? 'band’s count is' : 'bands’ counts are' }}
+      hidden, so not drawn.
+    </p>
+  }
+
+  <table class="fleet-community-table">
+    <caption>
+      Each export’s members, by how long before it their Last Active was
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Export</th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Members
+        </th>
+        @for (band of bands; track band) {
+          <th
+            scope="col"
+            class="fleet-community-table__number">
+            {{ bandLabels[band] }}
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (entry of shown.exports; track entry.export.importId) {
+        <tr>
+          <td data-label="Export">
+            {{ entry.export.exportedAt | appDate: 'medium' }}
+            @if (entry.partial) {
+              <span class="fleet-report-note">partial</span>
+            }
+          </td>
+          <td
+            data-label="Members"
+            class="fleet-community-table__number">
+            {{ entry.members | reportFigure: cohort }}
+          </td>
+          @for (band of bands; track band) {
+            <td
+              class="fleet-community-table__number"
+              [attr.data-label]="bandLabels[band]">
+              {{ entry.bands[band] | reportFigure: cohort }}
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+} @else {
+  <p class="fleet-community-empty">No export was taken in this span.</p>
+}

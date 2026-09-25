@@ -157,6 +157,23 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * A Fleet's reports, as much of each as the reader is shown.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetReports: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'reports',
+  ],
+
+  /**
    * Where a Fleet's roster is looked into: the imports, the renames, the
    * conflicts and the rank order, for whoever imports or investigates.
    *
