@@ -1,8 +1,13 @@
 # End-to-end journeys
 
 Eleven journeys through Custom Tracking, driven in a real browser against a
-real backend and a real database, plus an accessibility and a responsive
-review.
+real backend and a real database, plus three reviews: accessibility (three
+cases), responsive layout, and caching headers.
+
+That is sixteen substantive cases. Setup and teardown are not among them.
+The picture journey is one of the sixteen and is omitted unless
+`E2E_IMAGES=on` is set: a default run skips it and says why, and that skip
+is not a pass.
 
 They are kept apart from `npm test`. The unit suites answer whether each piece
 behaves; these answer whether the pieces, the server and the database agree —
@@ -39,13 +44,20 @@ local checkout.
 | `E2E_USERNAME`        | `demo-user-014`             | Their registry name.                |
 | `E2E_PUBLIC_ACCOUNT`  | `demo-014-01`               | An STO account of theirs that is public. |
 | `E2E_PRIVATE_ACCOUNT` | `demo-014-02`               | One that is not.                    |
-| `E2E_BASE_URL`        | `http://localhost:4200`     | Where the site is.                  |
-| `E2E_API_URL`         | `http://localhost:3000`     | Where the API is.                   |
+| `E2E_BASE_URL`        | `http://localhost:4200`     | Where the browser opens the site.   |
+| `E2E_API_URL`         | `http://localhost:3000`     | Where a journey's own requests go.  |
 | `E2E_BACKEND_DIR`     | `../sto-info-backend`       | For the support commands.           |
 | `E2E_IMAGES`          | unset                       | `on` to include the picture journey. |
 
 `npm run e2e:ui` opens Playwright's interactive runner; `npm run e2e:report`
-opens the last report.
+opens the last report. The HTML report is written to
+`reports/playwright/html` on every run, including a run that fails.
+
+`E2E_BASE_URL` does not turn this into a harness for a deployed site. The
+config still starts `npm start` unless a server is already listening, and
+the support commands still use the backend checkout's own database.
+`E2E_API_URL` is only for the requests a journey makes itself. It does not
+change the API address the Angular application was started with.
 
 ## The picture journey is opt-in
 
@@ -62,48 +74,71 @@ already have several STO accounts and captains, which most of these journeys
 need and which would otherwise mean duplicating the seeding migration's
 knowledge of factions, species and classes.
 
-Before the run, the feature is switched on and that member is put back to never
-having used it. Afterwards their data is cleared again and the feature switched
-back off, because off is how it is deployed. Both go through
+Before the run, the feature is switched on and that member's tracking data
+is purged, including any acceptance. Afterwards their data is purged again,
+any pictures queued for deletion are reconciled, and the feature is switched
+off, because off is how it is deployed. The account is enabled again on the
+way out, in case a journey disabled it and did not reach its own recovery.
+
+Neither step restores a snapshot of what was in the database before the run.
+The flag is global, and the retention journey runs the real sweep. Point
+this only at a database set aside for it. Both steps go through
 `sto-info-backend`'s `npm run e2e:support`, which borrows the backend's own
 database connection — this harness never needs credentials of its own, and no
 test-only route exists on the running server for anybody to find.
 
-Three things cannot be done through the browser, and they are the only reason
-that command exists: switching the feature on, making an accepted agreement
-look out of date, and making a deletion look 180 days old.
+A retry does not run setup again. A case that needs the agreement still
+unaccepted, or the account still enabled, or a current acceptance of its
+own, arranges that itself. Running one file still runs setup and teardown,
+because the journeys project depends on them.
+
+A journey cannot, through the browser, switch the feature on, make an
+accepted agreement look out of date, make a deletion look 180 days old,
+disable the account, or run the retention sweep. That command does those,
+and it can say what the member still holds.
 
 ## No test-only attributes
 
 There is not one `data-testid` in the application, and these do not add any.
-Everything is found by role, label or visible text.
+Controls are found by role, label or visible text. The page object also uses
+the feature's own panel ids (`#custom-tracking-panel-definitions` and
+`#custom-tracking-panel-values`), scopes a form by the heading inside it,
+and reads the record picker's `option` elements. Those belong to the screen.
 
-That is a test of its own. If a journey cannot find a control by its accessible
-name, neither can somebody using a screen reader, and the journey failing is
-the right outcome. It also means the interface can be restyled freely: only
-renaming a control breaks these, and renaming a control is a change worth
-noticing.
+Finding a control by its accessible name is still a test of its own. If a
+journey cannot, neither can somebody using a screen reader, and the journey
+failing is the right outcome. Renaming a control breaks these, and renaming
+a control is a change worth noticing.
 
 ## What they cover
 
-| #  | Journey                                                                 |
-| -- | ----------------------------------------------------------------------- |
-| 1  | Accept the terms, build for accounts, and two records that do not share. |
-| 2  | A required answer blocks only the record that is missing it.             |
-| 3  | Nothing is published until every gate above it is open.                  |
-| 4  | A picture in each shape, replaced and removed. _(opt-in)_                |
-| 5  | A withdrawn choice still reads, and cannot be chosen again.              |
-| 6  | Moments either side of a clock change survive the round trip.            |
-| 7  | Only real YouTube addresses are taken, and nothing loads unasked.        |
-| 8  | A new version of the agreement locks editing and nothing else.           |
-| 9  | Deleting hides at once, and the sweep removes for good.                  |
-| 10 | Disabling the account withdraws everything it published.                 |
-| 11 | Public content is served to anybody, and private content to nobody.      |
+Sixteen cases. CT-13 is three tests in one file. CT-04 is omitted unless
+`E2E_IMAGES=on`.
 
-And two reviews: `reviews/accessibility.e2e.ts` runs axe over every state the
-feature has and checks that reordering works from the keyboard;
-`reviews/responsive.e2e.ts` builds a deliberately wide configuration with long
-names and checks that nothing forces the page to scroll sideways on a phone.
+| ID    | Case                                                                                    |
+| ----- | --------------------------------------------------------------------------------------- |
+| CT-01 | Accept the terms, build for accounts, and two records that do not share. Reload keeps them. `journeys/01-account-hierarchy.e2e.ts` |
+| CT-02 | A required answer blocks only the record that is missing it. `journeys/02-character-required.e2e.ts` |
+| CT-03 | Nothing is published until every gate above it is open. `journeys/03-visibility-chain.e2e.ts` |
+| CT-04 | A picture in each shape, replaced and removed. Omitted unless `E2E_IMAGES=on`. `journeys/04-pictures.e2e.ts` |
+| CT-05 | A withdrawn choice still reads, and cannot be chosen again. `journeys/05-withdrawn-option.e2e.ts` |
+| CT-06 | Moments either side of a clock change survive the round trip. `journeys/06-dates-and-timezones.e2e.ts` |
+| CT-07 | Only real YouTube addresses are taken, and nothing loads unasked. `journeys/07-youtube.e2e.ts` |
+| CT-08 | A new version of the agreement locks editing and nothing else. `journeys/08-policy-reacceptance.e2e.ts` |
+| CT-09 | Deleting hides at once, and the sweep removes for good. `journeys/09-retention.e2e.ts` |
+| CT-10 | Disabling the account withdraws everything it published. The account is enabled again. `journeys/10-disabled-account.e2e.ts` |
+| CT-11 | Public content is served to anybody. A private account is not found. `journeys/11-crawler.e2e.ts` |
+| CT-12 | Origin cache headers are `no-store`, and withdrawing a section takes effect at once. `reviews/caching.e2e.ts` |
+| CT-13 | The feature's screens are mechanically accessible. `reviews/accessibility.e2e.ts` |
+| CT-13 | The agreement, including the re-acceptance notice, is mechanically accessible. `reviews/accessibility.e2e.ts` |
+| CT-13 | A hierarchy can be reordered from the keyboard. `reviews/accessibility.e2e.ts` |
+| CT-14 | A wide configuration stays usable on a phone. `reviews/responsive.e2e.ts` |
+
+The accessibility review runs axe over the feature's own markup, not the
+site frame. The responsive review builds a deliberately wide configuration
+with long names and checks that nothing forces the page to scroll sideways
+on a phone. The caching review checks the origin headers. It does not claim
+to prove Render or Cloudflare edge behaviour.
 
 ## Reading a failure
 
