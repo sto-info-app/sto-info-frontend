@@ -58,6 +58,49 @@ export function endOfLocalDay(day: string, timezone: string): string | null {
     : new Date(nextMidnight - 1).toISOString();
 }
 
+/** A wall-clock time as an export's stamp is kept: `YYYY-MM-DDTHH:mm:ss`. */
+const STAMP = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})$/;
+
+/** A day, in milliseconds. */
+const DAY_MS = 86_400_000;
+
+/**
+ * Every instant a wall-clock time names in a timezone.
+ *
+ * Usually one. None for a time the clock skipped when it went forward, and
+ * two for one in the hour it went back over — which is when somebody has to
+ * say which. The offsets either side of the time are each tried, and an
+ * instant kept only if the zone's own clock read that time at it.
+ *
+ * @param stamp - The wall-clock time, `YYYY-MM-DDTHH:mm:ss`.
+ * @param timezone - The IANA zone.
+ * @returns The instants, earliest first, as ISO strings; none for a stamp
+ *   that is not one.
+ */
+export function momentsOf(stamp: string, timezone: string): string[] {
+  const match = STAMP.exec(stamp);
+
+  if (match === null) {
+    return [];
+  }
+
+  const [, year, month, day, hour, minute, second] = match.map(Number);
+  const wall = Date.UTC(year, month - 1, day, hour, minute, second);
+  const found = new Set<number>();
+
+  for (const probe of [wall - DAY_MS, wall + DAY_MS]) {
+    const candidate = wall - offsetMinutes(probe, timezone) * 60_000;
+
+    if (candidate + offsetMinutes(candidate, timezone) * 60_000 === wall) {
+      found.add(candidate);
+    }
+  }
+
+  return [...found]
+    .sort((a, b) => a - b)
+    .map(instant => new Date(instant).toISOString());
+}
+
 /**
  * The instant a day's midnight fell at in a timezone, a number of days on.
  *

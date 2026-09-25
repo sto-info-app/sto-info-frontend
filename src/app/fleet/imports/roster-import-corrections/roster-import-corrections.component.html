@@ -1,0 +1,184 @@
+@let shown = detail();
+
+<section
+  class="import-corrections"
+  aria-labelledby="import-corrections-heading">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span id="import-corrections-heading">Corrections</span>
+  </div>
+
+  @if (!correctable()) {
+    <p class="fleet-report-notice">
+      Only an import in force, or held while another export of its moment
+      disagrees, can be corrected.
+    </p>
+  }
+
+  @if (notice(); as recorded) {
+    <p
+      class="import-corrections__notice"
+      role="status">
+      {{ recorded }}
+    </p>
+  }
+  @if (error(); as refusal) {
+    <app-lcars-error-message
+      title="Not corrected"
+      [message]="refusal" />
+  }
+
+  <div class="lcars-input-container sky">
+    <label for="import-correction-reason">Why</label>
+    <textarea
+      id="import-correction-reason"
+      rows="2"
+      [attr.maxlength]="reasonLimit"
+      [value]="reason()"
+      [disabled]="busy() !== null"
+      (input)="reason.set($any($event.target).value)"></textarea>
+  </div>
+  <p class="fleet-community-field-hint">
+    Needed for every correction, and kept with it. At most
+    {{ reasonLimit }} characters.
+  </p>
+
+  <div class="import-corrections__group">
+    <p>
+      @if (shown.excluded) {
+        This import is <strong>out of the history</strong>: it is kept, and
+        counts for nothing.
+      } @else {
+        This import counts in the Fleet’s history.
+      }
+    </p>
+    <button
+      type="button"
+      class="lcars-btn lcars-btn-auto sky"
+      [disabled]="!canExclude()"
+      (click)="onExcluded()">
+      @if (busy() === 'EXCLUSION') {
+        Saving
+      } @else if (shown.excluded) {
+        Put it back
+      } @else {
+        Take it out
+      }
+    </button>
+  </div>
+
+  <div class="import-corrections__group">
+    <p>
+      @if (shown.partial) {
+        Marked <strong>partial</strong>: nobody missing from it is taken to have
+        left.
+      } @else {
+        Taken as complete: anybody missing from it is taken to have left.
+      }
+    </p>
+    <button
+      type="button"
+      class="lcars-btn lcars-btn-auto sky"
+      [disabled]="!canMarkPartial()"
+      (click)="onPartial()">
+      @if (busy() === 'PARTIAL') {
+        Saving
+      } @else if (shown.partial) {
+        Mark it complete
+      } @else {
+        Mark it partial
+      }
+    </button>
+  </div>
+
+  <div class="import-corrections__group">
+    <p>
+      Read through <strong>{{ shown.exportTimezone ?? 'no zone' }}</strong
+      >. If the export was taken on another clock, read it again through that
+      one.
+    </p>
+    @if (shown.conflictGroupId) {
+      <p class="fleet-report-notice">
+        Another export claims this one’s moment.
+        <a [routerLink]="conflictsLink()">Choose between them</a>, or take one
+        out, before correcting its timezone.
+      </p>
+    } @else if (shown.exportLocalStamp) {
+      <div class="fleet-community-filter-row">
+        <div class="lcars-input-container sky">
+          <label for="import-correction-zone">The clock it was taken on</label>
+          <select
+            #zoneField
+            id="import-correction-zone"
+            [disabled]="busy() !== null"
+            (change)="onZone(zoneField.value)">
+            @for (timezone of timezones; track timezone) {
+              <option
+                [value]="timezone"
+                [selected]="timezone === zone()">
+                {{ zoneLabel(timezone) }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (moments().length === 0) {
+        <p class="fleet-report-notice">
+          Its stamp, {{ shown.exportLocalStamp }}, never happened on that clock:
+          the hour was skipped when it went forward.
+        </p>
+      } @else if (moments().length > 1) {
+        <fieldset class="import-corrections__moments">
+          <legend>
+            On that clock {{ shown.exportLocalStamp }} happened twice. Which?
+          </legend>
+          @for (moment of moments(); track moment) {
+            <label>
+              <input
+                type="radio"
+                name="import-correction-moment"
+                [value]="moment"
+                [checked]="moment === pickedMoment()"
+                [disabled]="busy() !== null"
+                (change)="pickedMoment.set(moment)" />
+              {{ momentLabel(moment) }}
+            </label>
+          }
+        </fieldset>
+      }
+
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto sky"
+        [disabled]="!canCorrectZone()"
+        (click)="onCorrectZone()">
+        {{ busy() === 'TIMEZONE' ? 'Reading it again' : 'Read it again' }}
+      </button>
+    } @else {
+      <p class="fleet-report-notice">It has no export time to read again.</p>
+    }
+  </div>
+
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Corrections made</span>
+  </div>
+  @if (shown.actions?.length) {
+    <ul class="import-corrections__actions">
+      @for (action of shown.actions; track action.id) {
+        <li>
+          <span class="import-corrections__when">
+            {{ action.actedAt | appDate: 'medium' }},
+            {{ action.actorName ?? 'an account since closed' }}
+            {{ verbs[action.action] }}:
+          </span>
+          “{{ action.reason }}”
+          @if (changeOf(action); as change) {
+            <span class="fleet-report-note">{{ change }}</span>
+          }
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="fleet-community-empty">Nobody has corrected this import.</p>
+  }
+</section>

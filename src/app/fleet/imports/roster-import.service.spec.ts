@@ -12,6 +12,7 @@ import {
   RosterImportDetail,
   RosterImportPage,
   RosterImportPreview,
+  RosterImportRowPage,
   RosterImportSummary,
   RosterImportUploadResult,
 } from 'src/app/models/fleet-import.models';
@@ -335,6 +336,154 @@ describe('RosterImportService', () => {
 
       expect(failure?.message).toBe('No token found');
       httpMock.expectNone(candidate => candidate.url === conflictsUrl);
+    });
+  });
+
+  describe('corrections', () => {
+    const detail = { id: 'import-2' } as RosterImportDetail;
+
+    it.each([
+      [
+        'takes an import out',
+        () =>
+          service.setExcluded(
+            communityId,
+            fleetId,
+            'import-2',
+            true,
+            'Wrong Fleet',
+          ),
+        'exclusions',
+        { reason: 'Wrong Fleet' },
+      ],
+      [
+        'puts an import back',
+        () =>
+          service.setExcluded(
+            communityId,
+            fleetId,
+            'import-2',
+            false,
+            'Right Fleet',
+          ),
+        'reinstate',
+        { reason: 'Right Fleet' },
+      ],
+      [
+        'says an export may not list everybody',
+        () =>
+          service.setPartial(
+            communityId,
+            fleetId,
+            'import-2',
+            true,
+            'Cut short',
+          ),
+        'partial',
+        { partial: true, reason: 'Cut short' },
+      ],
+      [
+        'excludes rows',
+        () =>
+          service.setRowsExcluded(
+            communityId,
+            fleetId,
+            'import-2',
+            [2, 5],
+            true,
+            'Duplicates',
+          ),
+        'row-exclusions',
+        { lines: [2, 5], excluded: true, reason: 'Duplicates' },
+      ],
+      [
+        'reads an export through another zone',
+        () =>
+          service.correctTimezone(
+            communityId,
+            fleetId,
+            'import-2',
+            'America/New_York',
+            null,
+            'Taken in New York',
+          ),
+        'timezone-correction',
+        { timezone: 'America/New_York', reason: 'Taken in New York' },
+      ],
+      [
+        'reads an export through another zone, at the moment chosen',
+        () =>
+          service.correctTimezone(
+            communityId,
+            fleetId,
+            'import-2',
+            'America/New_York',
+            '2024-11-03T05:30:00.000Z',
+            'Taken in New York',
+          ),
+        'timezone-correction',
+        {
+          timezone: 'America/New_York',
+          exportedAt: '2024-11-03T05:30:00.000Z',
+          reason: 'Taken in New York',
+        },
+      ],
+    ])('%s, signed, with the reason', (_case, send, path, body) => {
+      let answered: RosterImportDetail | undefined;
+
+      send().subscribe(result => (answered = result));
+
+      const request = httpMock.expectOne(`${importsUrl}/import-2/${path}`);
+
+      expect(request.request.method).toBe('POST');
+      expect(request.request.body).toEqual(body);
+      expect(request.request.headers.get('Authorization')).toBe('Bearer token');
+      request.flush(detail);
+
+      expect(answered).toEqual(detail);
+    });
+  });
+
+  describe('rows', () => {
+    const rowsUrl = `${importsUrl}/import-2/rows`;
+
+    it('asks for a page of an import’s rows', () => {
+      const rows: RosterImportRowPage = {
+        items: [],
+        total: 0,
+        page: 3,
+        pageSize: 50,
+      };
+      let answered: RosterImportRowPage | undefined;
+
+      service
+        .rows(communityId, fleetId, 'import-2', 3, 50)
+        .subscribe(result => (answered = result));
+
+      const request = httpMock.expectOne(
+        candidate => candidate.url === rowsUrl,
+      );
+
+      expect(request.request.method).toBe('GET');
+      expect(request.request.params.get('page')).toBe('3');
+      expect(request.request.params.get('pageSize')).toBe('50');
+      expect(request.request.headers.get('Authorization')).toBe('Bearer token');
+      request.flush(rows);
+
+      expect(answered).toEqual(rows);
+    });
+
+    it('asks for nothing when there is no token to ask with', () => {
+      authService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      let failure: Error | undefined;
+
+      service
+        .rows(communityId, fleetId, 'import-2', 1, 50)
+        .subscribe({ error: (error: Error) => (failure = error) });
+
+      expect(failure?.message).toBe('No token found');
+      httpMock.expectNone(candidate => candidate.url === rowsUrl);
     });
   });
 

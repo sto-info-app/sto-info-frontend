@@ -184,6 +184,15 @@
         </section>
       }
 
+      @if (state.detail.actions !== null) {
+        <app-roster-import-corrections
+          [communityId]="state.communityId"
+          [fleetId]="state.fleet.id"
+          [detail]="state.detail"
+          [conflictsLink]="conflictsLink(state)"
+          (corrected)="onCheckAgain()" />
+      }
+
       <nav
         class="buttons-row"
         aria-label="Roster imports">

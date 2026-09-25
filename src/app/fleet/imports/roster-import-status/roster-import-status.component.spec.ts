@@ -13,6 +13,7 @@ import {
   ParamMap,
   provideRouter,
 } from '@angular/router';
+import { By } from '@angular/platform-browser';
 
 import { BehaviorSubject, NEVER, of, throwError } from 'rxjs';
 
@@ -28,6 +29,7 @@ import {
   ROSTER_IMPORT_STATUS_REASONS,
   ROSTER_ROW_REJECTIONS,
 } from 'src/app/fleet/imports/roster-import.messages';
+import { RosterImportCorrectionsComponent } from 'src/app/fleet/imports/roster-import-corrections/roster-import-corrections.component';
 import { RosterImportService } from 'src/app/fleet/imports/roster-import.service';
 import {
   RosterImportDetail,
@@ -165,6 +167,9 @@ function detail(
     partial: false,
     problems: null,
     conflictMembers: null,
+    selectedImportId: null,
+    excludedLines: null,
+    actions: null,
     ...overrides,
   };
 }
@@ -616,6 +621,49 @@ describe('RosterImportStatusComponent', () => {
       expect(find('app-loading-bar')).not.toBeNull();
       expect(checkAgainButton()).toBeUndefined();
       fixture.destroy();
+    }));
+  });
+
+  describe('corrections', () => {
+    /**
+     * The corrections panel, if drawn.
+     *
+     * @returns It, or null.
+     */
+    const panel = (): RosterImportCorrectionsComponent | null =>
+      fixture.debugElement.query(By.directive(RosterImportCorrectionsComponent))
+        ?.componentInstance ?? null;
+
+    it('offers none to a reader not shown the corrections', fakeAsync(() => {
+      render();
+
+      expect(panel()).toBeNull();
+    }));
+
+    it('offers an investigator the corrections for this import', fakeAsync(() => {
+      const shown = detail({ actions: [] });
+
+      imports.detail.mockReturnValue(of(shown));
+      render();
+
+      expect(panel()?.communityId()).toBe(resolved().fleet.communityId);
+      expect(panel()?.fleetId()).toBe(resolved().fleet.id);
+      expect(panel()?.detail()).toEqual(shown);
+      expect(panel()?.conflictsLink().join('/')).toMatch(
+        /\/investigate\/conflicts$/,
+      );
+    }));
+
+    it('reads the import again once it is corrected', fakeAsync(() => {
+      imports.detail.mockReturnValue(of(detail({ actions: [] })));
+      render();
+
+      const calls = imports.detail.mock.calls.length;
+
+      panel()?.corrected.emit(detail({ actions: [], excluded: true }));
+      wait(0);
+
+      expect(imports.detail).toHaveBeenCalledTimes(calls + 1);
     }));
   });
 

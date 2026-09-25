@@ -39,6 +39,7 @@ import {
   ROSTER_IMPORT_STATUS_LABELS,
   ROSTER_ROW_REJECTIONS,
 } from 'src/app/fleet/imports/roster-import.messages';
+import { RosterImportCorrectionsComponent } from 'src/app/fleet/imports/roster-import-corrections/roster-import-corrections.component';
 import { RosterImportService } from 'src/app/fleet/imports/roster-import.service';
 import {
   RosterImportDetail,
@@ -107,6 +108,7 @@ export type RosterImportStatusState =
       readonly fleet: StoFleet;
       readonly fleetLink: string[];
       readonly importsLink: string[];
+      readonly communityId: string;
       readonly communitySlug: string;
       readonly platformSegment: string;
       readonly detail: RosterImportDetail;
@@ -159,6 +161,7 @@ interface RosterImportContext {
     LcarsSuccessMessageComponent,
     LcarsWarningMessageComponent,
     LoadingBarComponent,
+    RosterImportCorrectionsComponent,
   ],
 })
 export class RosterImportStatusComponent {
@@ -293,6 +296,22 @@ export class RosterImportStatusComponent {
   }
 
   /**
+   * Links to where the Fleet's conflicting exports are chosen between.
+   *
+   * @param state - The page, with the Fleet it resolved.
+   * @returns The router link.
+   */
+  conflictsLink(
+    state: Extract<RosterImportStatusState, { kind: 'READY' }>,
+  ): string[] {
+    return FLEET_LINKS.fleetRosterConflicts(
+      state.communitySlug,
+      state.platformSegment,
+      state.fleet.slug,
+    );
+  }
+
+  /**
    * Resolves the Fleet the address names, and then watches the import.
    *
    * @param params - The address, in segments.
@@ -352,6 +371,7 @@ export class RosterImportStatusComponent {
                 resolved.platformSegment,
                 resolved.fleet.slug,
               ),
+              communityId: context.communityId,
               communitySlug: resolved.communitySlug,
               platformSegment: resolved.platformSegment,
               detail: watch.detail,

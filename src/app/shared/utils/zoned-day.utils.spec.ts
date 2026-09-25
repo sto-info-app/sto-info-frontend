@@ -1,4 +1,9 @@
-import { endOfLocalDay, localDayOf, startOfLocalDay } from './zoned-day.utils';
+import {
+  endOfLocalDay,
+  localDayOf,
+  momentsOf,
+  startOfLocalDay,
+} from './zoned-day.utils';
 
 describe('zoned days', () => {
   describe('localDayOf', () => {
@@ -85,6 +90,39 @@ describe('zoned days', () => {
       } finally {
         spy.mockRestore();
       }
+    });
+  });
+
+  describe('momentsOf', () => {
+    it('names one instant for most wall-clock times', () => {
+      expect(momentsOf('2024-12-01T12:00:00', 'Europe/London')).toEqual([
+        '2024-12-01T12:00:00.000Z',
+      ]);
+      expect(momentsOf('2024-07-01T12:00:00', 'Europe/London')).toEqual([
+        '2024-07-01T11:00:00.000Z',
+      ]);
+      expect(momentsOf('2024-11-03T12:00:00', 'America/New_York')).toEqual([
+        '2024-11-03T17:00:00.000Z',
+      ]);
+    });
+
+    it('names both instants in the hour the clock went back over', () => {
+      expect(momentsOf('2024-11-03T01:30:00', 'America/New_York')).toEqual([
+        '2024-11-03T05:30:00.000Z',
+        '2024-11-03T06:30:00.000Z',
+      ]);
+      expect(momentsOf('2024-10-27T01:30:00', 'Europe/London')).toEqual([
+        '2024-10-27T00:30:00.000Z',
+        '2024-10-27T01:30:00.000Z',
+      ]);
+    });
+
+    it('names none in the hour the clock skipped', () => {
+      expect(momentsOf('2024-03-31T01:30:00', 'Europe/London')).toEqual([]);
+    });
+
+    it('names none for a stamp that is not one', () => {
+      expect(momentsOf('20241201-120000', 'Europe/London')).toEqual([]);
     });
   });
 });

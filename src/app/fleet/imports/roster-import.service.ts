@@ -10,6 +10,7 @@ import {
   RosterImportDetail,
   RosterImportPage,
   RosterImportPreview,
+  RosterImportRowPage,
   RosterImportSummary,
   RosterImportUploadResult,
 } from 'src/app/models/fleet-import.models';
@@ -220,6 +221,170 @@ export class RosterImportService {
     importId: string,
     reason: string,
   ): Observable<RosterImportDetail> {
+    return this.correct(communityId, fleetId, importId, 'selection', {
+      reason,
+    });
+  }
+
+  /**
+   * Takes an import out of the Fleet's history, or puts it back (FC-019).
+   *
+   * @param communityId - The Community holding the Fleet.
+   * @param fleetId - The Fleet.
+   * @param importId - The import.
+   * @param excluded - True to take it out, false to put it back.
+   * @param reason - Why, in the investigator's own words.
+   * @returns An observable of the import, as an investigator sees it.
+   */
+  setExcluded(
+    communityId: string,
+    fleetId: string,
+    importId: string,
+    excluded: boolean,
+    reason: string,
+  ): Observable<RosterImportDetail> {
+    return this.correct(
+      communityId,
+      fleetId,
+      importId,
+      excluded ? 'exclusions' : 'reinstate',
+      { reason },
+    );
+  }
+
+  /**
+   * Says whether an export may not list everybody (FC-019).
+   *
+   * @param communityId - The Community holding the Fleet.
+   * @param fleetId - The Fleet.
+   * @param importId - The import.
+   * @param partial - True when it may not.
+   * @param reason - Why, in the investigator's own words.
+   * @returns An observable of the import, as an investigator sees it.
+   */
+  setPartial(
+    communityId: string,
+    fleetId: string,
+    importId: string,
+    partial: boolean,
+    reason: string,
+  ): Observable<RosterImportDetail> {
+    return this.correct(communityId, fleetId, importId, 'partial', {
+      partial,
+      reason,
+    });
+  }
+
+  /**
+   * Excludes some of an import's rows, or puts them back (FC-019).
+   *
+   * @param communityId - The Community holding the Fleet.
+   * @param fleetId - The Fleet.
+   * @param importId - The import.
+   * @param lines - The rows' lines, the header being line one.
+   * @param excluded - True to exclude them, false to put them back.
+   * @param reason - Why, in the investigator's own words.
+   * @returns An observable of the import, as an investigator sees it.
+   */
+  setRowsExcluded(
+    communityId: string,
+    fleetId: string,
+    importId: string,
+    lines: readonly number[],
+    excluded: boolean,
+    reason: string,
+  ): Observable<RosterImportDetail> {
+    return this.correct(communityId, fleetId, importId, 'row-exclusions', {
+      lines,
+      excluded,
+      reason,
+    });
+  }
+
+  /**
+   * Reads an export again through the timezone it was really taken in
+   * (FC-019).
+   *
+   * @param communityId - The Community holding the Fleet.
+   * @param fleetId - The Fleet.
+   * @param importId - The import.
+   * @param timezone - The IANA zone.
+   * @param exportedAt - Which of two moments the stamp names in that zone,
+   *   or null when it names one.
+   * @param reason - Why, in the investigator's own words.
+   * @returns An observable of the import, as an investigator sees it.
+   */
+  correctTimezone(
+    communityId: string,
+    fleetId: string,
+    importId: string,
+    timezone: string,
+    exportedAt: string | null,
+    reason: string,
+  ): Observable<RosterImportDetail> {
+    return this.correct(
+      communityId,
+      fleetId,
+      importId,
+      'timezone-correction',
+      exportedAt === null
+        ? { timezone, reason }
+        : { timezone, exportedAt, reason },
+    );
+  }
+
+  /**
+   * Reads a page of an import's rows, in line order (FC-020).
+   *
+   * @param communityId - The Community holding the Fleet.
+   * @param fleetId - The Fleet.
+   * @param importId - The import.
+   * @param page - The page, from 1.
+   * @param pageSize - How many to a page.
+   * @returns An observable of the page.
+   */
+  rows(
+    communityId: string,
+    fleetId: string,
+    importId: string,
+    page: number,
+    pageSize: number,
+  ): Observable<RosterImportRowPage> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+
+    return this._http.get<RosterImportRowPage>(
+      `${this.importsUrl(communityId, fleetId)}/${importId}/rows`,
+      {
+        ...httpOptions,
+        params: new HttpParams()
+          .set('page', String(page))
+          .set('pageSize', String(pageSize)),
+      },
+    );
+  }
+
+  /**
+   * Sends one correction to an import. Each is signed, and answers with the
+   * import as an investigator sees it.
+   *
+   * @param communityId - The Community holding the Fleet.
+   * @param fleetId - The Fleet.
+   * @param importId - The import.
+   * @param correction - The correction's own address beneath the import.
+   * @param body - What it says, a reason always among it.
+   * @returns An observable of the import.
+   */
+  private correct(
+    communityId: string,
+    fleetId: string,
+    importId: string,
+    correction: string,
+    body: object,
+  ): Observable<RosterImportDetail> {
     const httpOptions = this._authService.getHttpOptionsWithAccessToken();
 
     if (!httpOptions) {
@@ -227,8 +392,8 @@ export class RosterImportService {
     }
 
     return this._http.post<RosterImportDetail>(
-      `${this.importsUrl(communityId, fleetId)}/${importId}/selection`,
-      { reason },
+      `${this.importsUrl(communityId, fleetId)}/${importId}/${correction}`,
+      body,
       httpOptions,
     );
   }

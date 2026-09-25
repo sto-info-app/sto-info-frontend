@@ -1,0 +1,51 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.import-corrections__notice {
+  color: vars.$lcars-green;
+}
+
+// One correction: what stands now, and the button changing it.
+.import-corrections__group {
+  padding: 0.75rem 0;
+  border-top: 1px solid vars.$lcars-grey-border;
+
+  p {
+    max-width: 70ch;
+    margin: 0 0 0.5rem;
+  }
+
+  a {
+    color: vars.$lcars-sky;
+  }
+}
+
+.import-corrections__moments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.75rem 1rem;
+  margin: 0 0 0.75rem;
+  border: 1px solid vars.$lcars-grey-border;
+
+  legend {
+    padding: 0 0.5rem;
+    color: vars.$lcars-sky;
+  }
+}
+
+.import-corrections__actions {
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+
+  li {
+    margin: 0.5rem 0;
+  }
+}
+
+.import-corrections__when {
+  color: vars.$lcars-sky;
+}

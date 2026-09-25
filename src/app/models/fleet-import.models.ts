@@ -264,6 +264,72 @@ export interface RosterImportDetail extends RosterImportSummary {
 
   /** The other imports claiming the same moment, oldest first. */
   conflictMembers: RosterImportSummary[] | null;
+
+  /** The export selected for this moment, when its group has one. */
+  selectedImportId: string | null;
+
+  /** The lines of the rows an investigator has excluded, in order. */
+  excludedLines: number[] | null;
+
+  /** Every correction made to it, newest first. */
+  actions: RosterImportAction[] | null;
+}
+
+/** What an investigator did to a roster import (FC-019). */
+export enum RosterImportActionKind {
+  EXCLUDED = 'EXCLUDED',
+  REINSTATED = 'REINSTATED',
+  MARKED_PARTIAL = 'MARKED_PARTIAL',
+  UNMARKED_PARTIAL = 'UNMARKED_PARTIAL',
+  ROWS_EXCLUDED = 'ROWS_EXCLUDED',
+  ROWS_REINSTATED = 'ROWS_REINSTATED',
+  TIMEZONE_CORRECTED = 'TIMEZONE_CORRECTED',
+  CONFLICT_SELECTED = 'CONFLICT_SELECTED',
+}
+
+/** What a correction changed, beyond which import and why. */
+export interface RosterImportActionDetail {
+  /** For rows excluded or put back, their lines. */
+  lines?: number[];
+  /** For a timezone correction, the zone and instant either side. */
+  fromTimezone?: string | null;
+  toTimezone?: string;
+  fromExportedAt?: string | null;
+  toExportedAt?: string;
+}
+
+/** One correction to an import, as its history reports it. */
+export interface RosterImportAction {
+  id: string;
+  action: RosterImportActionKind;
+  /** Who made it, by username, or null once that account is gone. */
+  actorName: string | null;
+  reason: string;
+  detail: RosterImportActionDetail | null;
+  actedAt: string;
+}
+
+/** One row of an import, for an investigator choosing rows to exclude. */
+export interface RosterImportRow {
+  /** The sanitised file's line, the header being line one. */
+  line: number;
+  characterName: string;
+  accountHandle: string;
+  guildRank: string;
+  level: number;
+  /** Cumulative contribution, as a decimal string. */
+  contributionTotal: string;
+  joinedAt: string | null;
+  lastActiveAt: string | null;
+  excluded: boolean;
+}
+
+/** A page of an import's rows, in line order. */
+export interface RosterImportRowPage {
+  items: RosterImportRow[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 /** A page of a Fleet's imports, newest first. */
