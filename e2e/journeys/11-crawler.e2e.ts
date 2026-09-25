@@ -80,13 +80,19 @@ test('public content is served to anybody, and private content to nobody', async
     expect(served).not.toContain(PRIVATE_ANSWER);
   });
 
-  await test.step('an account that is not public offers nothing of either', async () => {
+  await test.step('an account that is not public is not found', async () => {
     const response = await request.get(
       `${apiUrl}/registry/profiles/${member.username}/${member.privateAccount}`,
     );
-    const served = response.ok() ? await response.text() : '';
+
+    // A private account is withheld as not found. Any other status, including
+    // a server failure, is not a denial.
+    expect(response.status()).toBe(404);
+
+    const served = await response.text();
 
     expect(served).not.toContain(PUBLIC_ANSWER);
+    expect(served).not.toContain(PRIVATE_FIELD);
     expect(served).not.toContain(PRIVATE_ANSWER);
   });
 });

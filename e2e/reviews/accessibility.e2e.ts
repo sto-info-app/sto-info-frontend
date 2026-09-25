@@ -116,21 +116,23 @@ test('the agreement, which is the first thing anybody sees, is accessible', asyn
   page,
   tracking,
 }) => {
-  // By the time the reviews run this member has accepted, so the agreement is
-  // not on screen. Ageing the acceptance puts it back — as the re-acceptance
-  // panel, which is the same component carrying one extra notice, and is the
-  // version most people will meet more than once.
-  backend.staleAcceptance(member.email);
+  try {
+    // Accept first, so this case does not need an earlier journey to have
+    // done it. Ageing that acceptance brings the agreement back — as the
+    // re-acceptance panel, which is the same component carrying one extra
+    // notice, and is the version most people will meet more than once.
+    await tracking.openReady();
+    backend.staleAcceptance(member.email);
 
-  await tracking.goto();
-  await expect(
-    page.getByText(/This agreement has changed since you last accepted it/),
-  ).toBeVisible();
+    await tracking.goto();
+    await expect(
+      page.getByText(/This agreement has changed since you last accepted it/),
+    ).toBeVisible();
 
-  await noViolations(page, FEATURE);
-
-  // Put it back, or every test after this one is locked out of editing.
-  await tracking.acceptAgreement();
+    await noViolations(page, FEATURE);
+  } finally {
+    await tracking.openReady();
+  }
 });
 
 test('a hierarchy can be reordered without a mouse', async ({

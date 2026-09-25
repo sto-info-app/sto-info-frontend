@@ -62,7 +62,9 @@ export default defineConfig({
       teardown: 'teardown',
     },
     {
-      // Puts the flag and the member's data back as they were found.
+      // Clears this member's tracking data and switches the feature off.
+      // There is no snapshot of what was there before the run: off is how
+      // the feature is deployed, and anything the journeys built is purged.
       name: 'teardown',
       testMatch: /support[\\/]restore\.teardown\.e2e\.ts/,
     },

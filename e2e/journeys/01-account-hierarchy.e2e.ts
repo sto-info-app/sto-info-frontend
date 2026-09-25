@@ -1,3 +1,5 @@
+import { backend } from '../support/backend';
+import { member } from '../support/member';
 import { expect, test } from '../support/fixtures';
 
 /**
@@ -17,6 +19,10 @@ test('accepting the terms, building for accounts, and two records that do not sh
   page,
   tracking,
 }) => {
+  // Setup clears this once for the suite. A retry does not run setup again,
+  // and by then the agreement has been accepted, so the case clears it itself.
+  backend.reset(member.email);
+
   await tracking.goto();
 
   await test.step('the agreement is asked for before anything can be built', async () => {
@@ -70,5 +76,20 @@ test('accepting the terms, building for accounts, and two records that do not sh
   await test.step('the first account still reads 120', async () => {
     await tracking.chooseTarget(targets[0]);
     await expect(answer).toHaveValue('120');
+  });
+
+  await test.step('both answers are still there after a reload', async () => {
+    await page.reload();
+    await expect(
+      page.getByRole('heading', { name: 'Custom Tracking', level: 1 }),
+    ).toBeVisible();
+    await tracking.show('What you have recorded');
+    await tracking.chooseScope(tracking.values, 'Accounts');
+
+    await tracking.chooseTarget(targets[0]);
+    await expect(answer).toHaveValue('120');
+
+    await tracking.chooseTarget(targets[1]);
+    await expect(answer).toHaveValue('45');
   });
 });
