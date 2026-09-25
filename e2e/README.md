@@ -29,13 +29,18 @@ dependencies installed. Set `E2E_BACKEND_DIR` if it is somewhere else.
 ## Running them
 
 ```bash
-E2E_PASSWORD='<the seed password>' npm run e2e
+E2E_PASSWORD='<the seed password>' \
+  E2E_DATABASE_NAME='<the disposable database>' \
+  E2E_REDIS_DB='<the Redis logical database>' \
+  npm run e2e
 ```
 
-`E2E_PASSWORD` is the only thing you have to supply. It is the seed password
-the backend was given — `DATASEED_USER_PASSWORD` in its environment file — and
-it is never written down here. Nothing else needs configuring for a standard
-local checkout.
+`E2E_PASSWORD` is the seed password the backend was given —
+`DATASEED_USER_PASSWORD` in its environment file — and it is never written
+down here. The same password is used for the fixture actors. `E2E_DATABASE_NAME`
+and `E2E_REDIS_DB` have to name the database and Redis logical database the
+backend is actually using. The harness refuses a different database, a
+database that is not on this machine, and any site that is not on localhost.
 
 | Variable              | Default                     | What it is                          |
 | --------------------- | --------------------------- | ----------------------------------- |
@@ -47,7 +52,10 @@ local checkout.
 | `E2E_BASE_URL`        | `http://localhost:4200`     | Where the browser opens the site.   |
 | `E2E_API_URL`         | `http://localhost:3000`     | Where a journey's own requests go.  |
 | `E2E_BACKEND_DIR`     | `../sto-info-backend`       | For the support commands.           |
+| `E2E_DATABASE_NAME`   | _required_                  | The database this run may use.      |
+| `E2E_REDIS_DB`        | _required_                  | The Redis logical database.         |
 | `E2E_IMAGES`          | unset                       | `on` to include the picture journey. |
+| `E2E_OMIT`            | unset                       | Comma-separated ids for a labelled partial run. |
 
 `npm run e2e:ui` opens Playwright's interactive runner; `npm run e2e:report`
 opens the last report. The HTML report is written to
@@ -74,11 +82,22 @@ already have several STO accounts and captains, which most of these journeys
 need and which would otherwise mean duplicating the seeding migration's
 knowledge of factions, species and classes.
 
-Before the run, the feature is switched on and that member's tracking data
-is purged, including any acceptance. Afterwards their data is purged again,
-any pictures queued for deletion are reconciled, and the feature is switched
-off, because off is how it is deployed. The account is enabled again on the
-way out, in case a journey disabled it and did not reach its own recovery.
+Before the Custom Tracking journeys, and not before sign-in, the feature is
+switched on and that member's tracking data is purged, including any
+acceptance. Afterwards their data is purged again, any pictures queued for
+deletion are reconciled, and the feature is switched off, because off is how
+it is deployed. The account is enabled again on the way out, in case a
+journey disabled it and did not reach its own recovery. Signing in does not
+do any of that. A project that only needs a session does not purge tracking
+data.
+
+The other actors are created by the support command if they are missing.
+They are `e2e-member-b@example.com`, an administrator, and three ordinary
+members who each hold one Storytime permission: moderation, Spotlight, or
+the tag vocabulary. The demonstration member is not given any of those
+roles. News, Storytime stories and mail are not created here; the manifest
+records them as deferred. Sessions are kept under `reports/playwright/`,
+which is gitignored, and the manifest written beside them has no passwords.
 
 Neither step restores a snapshot of what was in the database before the run.
 The flag is global, and the retention journey runs the real sweep. Point
@@ -87,10 +106,11 @@ this only at a database set aside for it. Both steps go through
 database connection — this harness never needs credentials of its own, and no
 test-only route exists on the running server for anybody to find.
 
-A retry does not run setup again. A case that needs the agreement still
-unaccepted, or the account still enabled, or a current acceptance of its
-own, arranges that itself. Running one file still runs setup and teardown,
-because the journeys project depends on them.
+A retry does not run preflight or sign-in again. A case that needs the
+agreement still unaccepted, or the account still enabled, or a current
+acceptance of its own, arranges that itself. Running one journey file still
+runs preflight, sign-in, the Custom Tracking setup and teardown, because the
+journeys project depends on them.
 
 A journey cannot, through the browser, switch the feature on, make an
 accepted agreement look out of date, make a deletion look 180 days old,
