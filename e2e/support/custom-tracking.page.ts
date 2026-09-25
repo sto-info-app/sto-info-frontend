@@ -335,18 +335,23 @@ export class CustomTrackingPage {
     await expect(dialog).toBeHidden();
   }
 
+  /** The account or character the values panel is recording against. */
+  private recordSelect(): Locator {
+    return this.values.getByLabel('Recording against');
+  }
+
   /** Choose which account or character is being filled in. */
   async chooseTarget(label: string): Promise<void> {
-    await this.values
-      .getByLabel('Which record to fill in')
-      .selectOption({ label });
+    await this.recordSelect().selectOption({ label });
   }
 
   /** What this member can record against, in the order they are offered. */
   async targetLabels(): Promise<string[]> {
-    const options = this.values
-      .getByLabel('Which record to fill in')
-      .locator('option');
+    const select = this.recordSelect();
+
+    await expect(select).toBeVisible();
+
+    const options = select.locator('option');
 
     return (await options.allTextContents()).map(label => label.trim());
   }
