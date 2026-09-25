@@ -337,7 +337,7 @@ describe('RosterImportStatusComponent', () => {
 
       expect(text()).toContain(ROSTER_IMPORT_STATUS_NOT_PERMITTED);
       expect(imports.detail).not.toHaveBeenCalled();
-      expect(find('nav a')?.getAttribute('href')).toBe(
+      expect(find('nav:not(.lcars-tabs) a')?.getAttribute('href')).toBe(
         '/fleets/communities/united-federation-alliance/fleets/pc/ninth-fleet',
       );
     }));
@@ -358,11 +358,13 @@ describe('RosterImportStatusComponent', () => {
       render();
 
       const fleetLink = find('.roster-status__fleet a');
-      const links = findAll('nav a').map(link => link.getAttribute('href'));
+      const links = findAll('nav:not(.lcars-tabs) a').map(link =>
+        link.getAttribute('href'),
+      );
 
       expect(fleetLink?.textContent).toContain('Ninth Fleet');
       expect(links).toEqual([
-        '/fleets/communities/united-federation-alliance/fleets/pc/ninth-fleet/imports',
+        '/fleets/communities/united-federation-alliance/fleets/pc/ninth-fleet/investigate/imports',
         '/fleets/communities/united-federation-alliance/fleets/pc/ninth-fleet',
       ]);
     }));
@@ -533,7 +535,7 @@ describe('RosterImportStatusComponent', () => {
       const member = find('.roster-status__members li');
 
       expect(member?.querySelector('a')?.getAttribute('href')).toBe(
-        '/fleets/communities/united-federation-alliance/fleets/pc/ninth-fleet/imports/import-0',
+        '/fleets/communities/united-federation-alliance/fleets/pc/ninth-fleet/investigate/imports/import-0',
       );
       expect(member?.textContent).toContain('Imported');
       expect(member?.textContent).toContain(ROSTER_IMPORT_UPLOADER_GONE);

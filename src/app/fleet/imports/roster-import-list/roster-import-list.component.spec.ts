@@ -242,7 +242,7 @@ describe('RosterImportListComponent', () => {
 
   /** Every link in the page's closing row, as it resolves. */
   const navLinks = (): (string | null)[] =>
-    findAll('nav a').map(link => link.getAttribute('href'));
+    findAll('nav:not(.lcars-tabs) a').map(link => link.getAttribute('href'));
 
   /**
    * Finds a pagination button by what it says.
@@ -375,7 +375,7 @@ describe('RosterImportListComponent', () => {
       const item = find('.roster-imports__item');
 
       expect(item?.querySelector('a')?.getAttribute('href')).toBe(
-        `${FLEET_HREF}/imports/import-1`,
+        `${FLEET_HREF}/investigate/imports/import-1`,
       );
       expect(item?.textContent).toContain('Ninth Fleet_20240101-120000.Csv');
       expect(item?.textContent).toContain('Imported');

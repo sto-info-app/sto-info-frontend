@@ -1,0 +1,11 @@
+@use 'lcars-tabs' as tabs;
+
+// Sized by their labels, as the Community strip is: a Fleet carries up to
+// five sections, and padding each out to a fixed width would wrap the strip
+// on a phone sooner than it needs to.
+@include tabs.lcars-tab-strip($min-width: 0);
+
+:host {
+  display: block;
+  margin-bottom: 1rem;
+}

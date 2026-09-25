@@ -21,6 +21,11 @@ import {
   switchMap,
 } from 'rxjs';
 
+import {
+  FleetTabsComponent,
+  FleetTabsVm,
+  fleetTabsVmOf,
+} from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import {
@@ -146,6 +151,8 @@ const DECISION_DIALOGS: Record<
 /** The page, once the Fleet and its candidates are read. */
 export interface RosterIdentityListReady {
   readonly kind: 'READY';
+  /** The Fleet's section tabs, or null for a Fleet with none. */
+  readonly tabs: FleetTabsVm | null;
   readonly fleet: StoFleet;
   readonly communityId: string;
   readonly fleetLink: string[];
@@ -162,6 +169,8 @@ export type RosterIdentityListState =
   | { readonly kind: 'ERROR' }
   | {
       readonly kind: 'NOT_PERMITTED';
+      /** The Fleet's section tabs, or null for a Fleet with none. */
+      readonly tabs: FleetTabsVm | null;
       readonly fleet: StoFleet;
       readonly fleetLink: string[];
     }
@@ -187,6 +196,7 @@ export type RosterIdentityListState =
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FleetTabsComponent,
     AsyncPipe,
     RouterLink,
     AppDatePipe,
@@ -443,6 +453,7 @@ export class RosterIdentityListComponent {
     if (!viewer.capabilities.includes(ROSTER_INVESTIGATE_CAPABILITY)) {
       return of<RosterIdentityListState>({
         kind: 'NOT_PERMITTED',
+        tabs: fleetTabsVmOf(resolved),
         fleet,
         fleetLink,
       });
@@ -453,6 +464,7 @@ export class RosterIdentityListComponent {
       .pipe(
         map((candidates): RosterIdentityListState => ({
           kind: 'READY',
+          tabs: fleetTabsVmOf(resolved),
           fleet,
           communityId,
           fleetLink,

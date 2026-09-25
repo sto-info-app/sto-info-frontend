@@ -359,9 +359,11 @@ describe('RosterIdentityListComponent', () => {
 
       expect(text()).toContain(ROSTER_IDENTITY_LIST_NOT_PERMITTED);
       expect(identities.list).not.toHaveBeenCalled();
-      expect(findAll('nav a').map(link => link.getAttribute('href'))).toEqual([
-        FLEET_HREF,
-      ]);
+      expect(
+        findAll('nav:not(.lcars-tabs) a').map(link =>
+          link.getAttribute('href'),
+        ),
+      ).toEqual([FLEET_HREF]);
     });
 
     it.each([
@@ -436,8 +438,8 @@ describe('RosterIdentityListComponent', () => {
       const links = findAll('.roster-identities__facts a');
 
       expect(links.map(link => link.getAttribute('href'))).toEqual([
-        `${FLEET_HREF}/imports/import-1`,
-        `${FLEET_HREF}/imports/import-2`,
+        `${FLEET_HREF}/investigate/imports/import-1`,
+        `${FLEET_HREF}/investigate/imports/import-2`,
       ]);
       // Intl puts a narrow no-break space before the meridiem.
       expect(links[0].textContent).toMatch(/Nov 1, 2024, 12:00:00\sPM/);

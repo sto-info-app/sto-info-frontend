@@ -13,6 +13,11 @@ import {
   switchMap,
 } from 'rxjs';
 
+import {
+  FleetTabsComponent,
+  FleetTabsVm,
+  fleetTabsVmOf,
+} from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import {
@@ -57,11 +62,15 @@ export type RosterImportListState =
   | { readonly kind: 'ERROR' }
   | {
       readonly kind: 'NOT_PERMITTED';
+      /** The Fleet's section tabs, or null for a Fleet with none. */
+      readonly tabs: FleetTabsVm | null;
       readonly fleet: StoFleet;
       readonly fleetLink: string[];
     }
   | {
       readonly kind: 'READY';
+      /** The Fleet's section tabs, or null for a Fleet with none. */
+      readonly tabs: FleetTabsVm | null;
       readonly fleet: StoFleet;
       readonly fleetLink: string[];
       readonly communitySlug: string;
@@ -88,6 +97,7 @@ export type RosterImportListState =
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FleetTabsComponent,
     AsyncPipe,
     RouterLink,
     AppDatePipe,
@@ -239,6 +249,7 @@ export class RosterImportListComponent {
     ) {
       return of<RosterImportListState>({
         kind: 'NOT_PERMITTED',
+        tabs: fleetTabsVmOf(resolved),
         fleet,
         fleetLink,
       });
@@ -251,6 +262,7 @@ export class RosterImportListComponent {
     return this._importService.list(fleet.communityId, fleet.id, page).pipe(
       map((imports): RosterImportListState => ({
         kind: 'READY',
+        tabs: fleetTabsVmOf(resolved),
         fleet,
         fleetLink,
         communitySlug: resolved.communitySlug,

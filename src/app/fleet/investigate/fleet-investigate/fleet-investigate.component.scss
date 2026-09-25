@@ -1,0 +1,28 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.fleet-investigate__list {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// The button and what it is for side by side where there is room, stacked
+// on a phone.
+.fleet-investigate__item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+
+.fleet-investigate__description {
+  flex: 1 1 18rem;
+  margin: 0;
+  color: vars.$lcars-sky;
+}

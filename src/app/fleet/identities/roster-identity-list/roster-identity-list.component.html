@@ -1,4 +1,10 @@
 @if (state$ | async; as state) {
+  @if (state.kind === 'READY' || state.kind === 'NOT_PERMITTED') {
+    @if (state.tabs) {
+      <app-fleet-tabs [vm]="state.tabs" />
+    }
+  }
+
   @switch (state.kind) {
     @case ('LOADING') {
       <app-loading-bar loadingText="Reading the rename candidates" />

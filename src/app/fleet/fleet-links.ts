@@ -103,7 +103,28 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * Where a Fleet's roster is looked into: the imports, the renames, the
+   * conflicts and the rank order, for whoever imports or investigates.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetInvestigate: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'investigate',
+  ],
+
+  /**
    * A Fleet's roster imports, newest first.
+   *
+   * Below the Investigate section, so its tab stays lit here. The address it
+   * had before still arrives, by a redirect.
    *
    * @param communitySlug - The holding Community's URL segment.
    * @param platformSegment - The platform, as a URL segment.
@@ -115,7 +136,7 @@ export const FLEET_LINKS = {
     platformSegment: string,
     fleetSlug: string,
   ): string[] => [
-    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    ...FLEET_LINKS.fleetInvestigate(communitySlug, platformSegment, fleetSlug),
     'imports',
   ],
 
@@ -132,7 +153,7 @@ export const FLEET_LINKS = {
     platformSegment: string,
     fleetSlug: string,
   ): string[] => [
-    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    ...FLEET_LINKS.fleetInvestigate(communitySlug, platformSegment, fleetSlug),
     'identities',
   ],
 

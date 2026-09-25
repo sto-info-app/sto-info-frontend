@@ -6,7 +6,7 @@ import {
   Router,
 } from '@angular/router';
 
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, of } from 'rxjs';
 
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { FleetScopePageState } from 'src/app/fleet/scope/fleet-scope-page.models';
@@ -111,7 +111,13 @@ describe('FleetPageComponent', () => {
   let fixture: ComponentFixture<FleetPageComponent>;
   let params$: BehaviorSubject<ParamMap>;
   let scopes: { resolveFleet: jest.Mock };
-  let router: { navigate: jest.Mock };
+  let router: {
+    navigate: jest.Mock;
+    events: Observable<unknown>;
+    isActive: jest.Mock;
+    createUrlTree: jest.Mock;
+    serializeUrl: jest.Mock;
+  };
 
   beforeEach(async () => {
     params$ = new BehaviorSubject<ParamMap>(
@@ -122,7 +128,14 @@ describe('FleetPageComponent', () => {
       }),
     );
     scopes = { resolveFleet: jest.fn(() => of(resolved())) };
-    router = { navigate: jest.fn() };
+    // Enough of a Router for the tab strip's links to draw.
+    router = {
+      navigate: jest.fn(),
+      events: EMPTY,
+      isActive: jest.fn(() => false),
+      createUrlTree: jest.fn(() => ({})),
+      serializeUrl: jest.fn(() => '/'),
+    };
 
     await TestBed.configureTestingModule({
       imports: [FleetPageComponent],
@@ -516,6 +529,61 @@ describe('FleetPageComponent', () => {
     });
   });
 
+  describe('its section tabs', () => {
+    /**
+     * Reads the tab strip the page draws.
+     *
+     * @returns The strip's view model.
+     */
+    function tabs(): unknown {
+      const drawn = state();
+
+      return drawn.kind === 'READY' ? drawn.tabs : undefined;
+    }
+
+    it('draws the strip for a Fleet a Community holds, with what the reader may do', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(resolved({ viewer: ROSTER_INVESTIGATOR })),
+      );
+      render();
+
+      expect(tabs()).toEqual({
+        communitySlug: 'united-federation-alliance',
+        platformSegment: 'pc',
+        fleetSlug: 'starfleet-command',
+        capabilities: ROSTER_INVESTIGATOR.capabilities,
+      });
+    });
+
+    // Nobody imports into it, so it has no roster to have sections about.
+    it('draws none for a Fleet no Community has registered', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ communityId: null }),
+            communityName: null,
+          }),
+        ),
+      );
+      render();
+
+      expect(tabs()).toBeNull();
+    });
+
+    it('draws none on a platform the game exports no roster from', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ platformProvidesRosterExport: false }),
+          }),
+        ),
+      );
+      render();
+
+      expect(tabs()).toBeNull();
+    });
+  });
+
   describe('checking a roster export', () => {
     /**
      * Reads the actions the page offers.
@@ -538,41 +606,19 @@ describe('FleetPageComponent', () => {
       );
       render();
 
-      expect(actionLabels()).toEqual([
-        'Import a roster export',
-        'Roster imports',
-      ]);
+      expect(actionLabels()).toEqual(['Import a roster export']);
     });
 
-    // Investigating imports does not include making one, and deciding the
-    // renames they suggest is investigating's alone.
-    it('offers the imports and the identities to somebody who investigates', () => {
+    // FC-020: following the imports and deciding renames moved to the
+    // Investigate tab, so an investigator who does not import is offered
+    // nothing here.
+    it('leaves the imports and renames to the Investigate tab', () => {
       scopes.resolveFleet.mockReturnValue(
         of(resolved({ viewer: ROSTER_INVESTIGATOR })),
       );
       render();
 
-      const drawn = state();
-
-      expect(actionLabels()).toEqual(['Roster imports', 'Roster identities']);
-      expect(drawn.kind === 'READY' && drawn.actions[0].link).toEqual([
-        '/fleets',
-        'communities',
-        'united-federation-alliance',
-        'fleets',
-        'pc',
-        'starfleet-command',
-        'imports',
-      ]);
-      expect(drawn.kind === 'READY' && drawn.actions[1].link).toEqual([
-        '/fleets',
-        'communities',
-        'united-federation-alliance',
-        'fleets',
-        'pc',
-        'starfleet-command',
-        'identities',
-      ]);
+      expect(actionLabels()).toEqual([]);
     });
 
     it('links to the page below the Fleet’s own address', () => {

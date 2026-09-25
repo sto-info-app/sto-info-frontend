@@ -1,0 +1,29 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Investigate"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the Fleet"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      <ul class="fleet-investigate__list">
+        @for (action of state.data; track action.label) {
+          <li class="fleet-investigate__item">
+            <a
+              class="lcars-btn lcars-btn-auto gold"
+              [routerLink]="action.link"
+              >{{ action.label }}</a
+            >
+            <p class="fleet-investigate__description">
+              {{ action.description }}
+            </p>
+          </li>
+        }
+      </ul>
+    }
+  </app-fleet-page-shell>
+}

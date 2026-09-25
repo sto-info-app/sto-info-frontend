@@ -77,6 +77,7 @@ describe('FLEET_LINKS', () => {
       'fleets',
       'pc',
       'starfleet-command',
+      'investigate',
       'imports',
     ]);
   });
@@ -95,6 +96,7 @@ describe('FLEET_LINKS', () => {
       'fleets',
       'pc',
       'starfleet-command',
+      'investigate',
       'identities',
     ]);
   });
@@ -114,6 +116,7 @@ describe('FLEET_LINKS', () => {
       'fleets',
       'pc',
       'starfleet-command',
+      'investigate',
       'imports',
       'import-1',
     ]);

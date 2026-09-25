@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(15);
+    expect(children).toHaveLength(19);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -68,15 +68,19 @@ describe('FLEET_ROUTES', () => {
       APP_ROUTE_TITLES.FLEET_ROSTER_IMPORT,
     ],
     [
-      'communities/:communitySlug/fleets/:platformSegment/:slug/imports',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',
+      APP_ROUTE_TITLES.FLEET_INVESTIGATE,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
       APP_ROUTE_TITLES.FLEET_ROSTER_IMPORTS,
     ],
     [
-      'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
       APP_ROUTE_TITLES.FLEET_ROSTER_IMPORT_DETAIL,
     ],
     [
-      'communities/:communitySlug/fleets/:platformSegment/:slug/identities',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
       APP_ROUTE_TITLES.FLEET_ROSTER_IDENTITIES,
     ],
   ])('puts %s behind the sign-in guard', (path, title) => {
@@ -115,6 +119,26 @@ describe('FLEET_ROUTES', () => {
       'communities/:communitySlug/fleets/:platformSegment/:slug/import',
     );
     expect(redirect?.pathMatch).toBe('full');
+  });
+
+  // FC-020 moved the imports and renames under Investigate, so its tab stays
+  // lit on them. A link to their old addresses still arrives.
+  it.each([
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/imports',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/identities',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
+    ],
+  ])('sends %s where it moved', (path, target) => {
+    expect(childAt(path)?.redirectTo).toBe(target);
+    expect(childAt(path)?.pathMatch).toBe('full');
   });
 
   // A Community's canonical address spells out the collection it belongs
@@ -160,6 +184,10 @@ describe('FLEET_ROUTES', () => {
   it.each([
     'communities/:communitySlug/fleets/:platformSegment/:slug/import',
     'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
     'communities/:communitySlug/fleets/:platformSegment/:slug/imports',
     'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
     'communities/:communitySlug/fleets/:platformSegment/:slug/identities',
@@ -193,15 +221,19 @@ describe('FLEET_ROUTES', () => {
       'RosterImportComponent',
     ],
     [
-      'communities/:communitySlug/fleets/:platformSegment/:slug/imports',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',
+      'FleetInvestigateComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
       'RosterImportListComponent',
     ],
     [
-      'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
       'RosterImportStatusComponent',
     ],
     [
-      'communities/:communitySlug/fleets/:platformSegment/:slug/identities',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
       'RosterIdentityListComponent',
     ],
   ])('loads the right component for %s', async (path, expected) => {

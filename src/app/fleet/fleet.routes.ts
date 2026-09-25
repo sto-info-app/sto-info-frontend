@@ -121,8 +121,20 @@ export const FLEET_ROUTES: Routes = [
           'communities/:communitySlug/fleets/:platformSegment/:slug/import',
         pathMatch: 'full',
       },
+      // Where a Fleet's roster is looked into (FC-020). The pages below it
+      // sit under its address so its tab stays lit while a reader works
+      // through them.
       {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/imports',
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',
+        loadComponent: () =>
+          import('./investigate/fleet-investigate/fleet-investigate.component').then(
+            m => m.FleetInvestigateComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_INVESTIGATE },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
         loadComponent: () =>
           import('./imports/roster-import-list/roster-import-list.component').then(
             m => m.RosterImportListComponent,
@@ -131,7 +143,7 @@ export const FLEET_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
       {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
         loadComponent: () =>
           import('./imports/roster-import-status/roster-import-status.component').then(
             m => m.RosterImportStatusComponent,
@@ -142,13 +154,33 @@ export const FLEET_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
       {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/identities',
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
         loadComponent: () =>
           import('./identities/roster-identity-list/roster-identity-list.component').then(
             m => m.RosterIdentityListComponent,
           ),
         data: { title: APP_ROUTE_TITLES.FLEET_ROSTER_IDENTITIES },
         canActivate: [AuthGuard],
+      },
+      // Where those pages lived before they moved under Investigate, kept so
+      // a link to one still arrives.
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/imports',
+        redirectTo:
+          'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
+        pathMatch: 'full',
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
+        redirectTo:
+          'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
+        pathMatch: 'full',
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/identities',
+        redirectTo:
+          'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
+        pathMatch: 'full',
       },
 
       // The two deeper addresses come before the Community's own, so

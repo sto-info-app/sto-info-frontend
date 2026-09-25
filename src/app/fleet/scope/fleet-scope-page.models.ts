@@ -1,4 +1,5 @@
 import { FleetScopeCardStatus } from 'src/app/fleet/components/fleet-scope-card/fleet-scope-card.model';
+import { FleetTabsVm } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FleetScopeType } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetPicture } from 'src/app/fleet/fleet-artwork';
 import { FleetImageSlot } from 'src/app/fleet/fleet-image.constants';
@@ -198,4 +199,11 @@ export interface FleetScopeReadyState {
    * reader about a permission they do not have and did not ask about.
    */
   readonly artwork: FleetScopeArtworkVm | null;
+
+  /**
+   * The Fleet's section tabs, on a Fleet with a roster to have sections
+   * about. Absent or null on a Community or Armada page, and on a Fleet with
+   * no roster.
+   */
+  readonly tabs?: FleetTabsVm | null;
 }

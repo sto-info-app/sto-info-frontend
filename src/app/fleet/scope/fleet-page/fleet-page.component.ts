@@ -17,11 +17,8 @@ import {
 import { scopeStatusPill } from 'src/app/fleet/fleet-card.builders';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
-import {
-  ROSTER_IMPORT_CAPABILITY,
-  ROSTER_IMPORT_READERS,
-  ROSTER_INVESTIGATE_CAPABILITY,
-} from 'src/app/fleet/imports/roster-import.constants';
+import { fleetTabsVmOf } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
+import { ROSTER_IMPORT_CAPABILITY } from 'src/app/fleet/imports/roster-import.constants';
 import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
@@ -161,10 +158,9 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
   /**
    * What the reader may go and do to this Fleet.
    *
-   * Importing a roster, reading what became of the imports, and deciding the
-   * renames they suggest: somebody who investigates imports may do the last
-   * two without the first, and an importer may not do the last. Three
-   * reasons there may be none. A Fleet nobody
+   * Importing a roster, the importer's everyday task. Reading what became of
+   * the imports and deciding the renames they suggest are on the Investigate
+   * tab (FC-020). Three reasons there may be nothing. A Fleet nobody
    * has registered has no Community to import into; a console Fleet has no
    * export to import, because the game writes none there; and anybody may
    * read this page, so the control appears only for somebody who could use
@@ -196,40 +192,6 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
         description:
           `Check a roster export for ${fleet.exactGameName}, and then ` +
           'import it',
-      });
-    }
-
-    if (
-      ROSTER_IMPORT_READERS.some(capability =>
-        viewer.capabilities.includes(capability),
-      )
-    ) {
-      actions.push({
-        label: 'Roster imports',
-        link: FLEET_LINKS.fleetRosterImports(
-          resolved.communitySlug,
-          resolved.platformSegment,
-          fleet.slug,
-        ),
-        description:
-          `See what became of each roster export imported into ` +
-          fleet.exactGameName,
-      });
-    }
-
-    // Deciding whether two names are one person is investigating, and only
-    // that capability's: the server refuses importers who do not hold it.
-    if (viewer.capabilities.includes(ROSTER_INVESTIGATE_CAPABILITY)) {
-      actions.push({
-        label: 'Roster identities',
-        link: FLEET_LINKS.fleetRosterIdentities(
-          resolved.communitySlug,
-          resolved.platformSegment,
-          fleet.slug,
-        ),
-        description:
-          `Decide the renames ${fleet.exactGameName}’s rosters suggest ` +
-          'from one export to the next',
       });
     }
 
@@ -298,6 +260,7 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
       // Two addresses, because there are two rules. A registered Fleet's
       // artwork is a capability held at it; an unregistered one's is a
       // question about who filled the slot, answered a slot at a time.
+      tabs: fleetTabsVmOf(resolved),
       artwork: buildScopeArtworkVm(
         isStandalone || fleet.communityId === null
           ? { kind: 'STANDALONE_FLEET', fleetId: fleet.id }

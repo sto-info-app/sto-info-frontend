@@ -21,6 +21,11 @@ import {
   timer,
 } from 'rxjs';
 
+import {
+  FleetTabsComponent,
+  FleetTabsVm,
+  fleetTabsVmOf,
+} from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import {
@@ -90,11 +95,15 @@ export type RosterImportStatusState =
   | { readonly kind: 'ERROR' }
   | {
       readonly kind: 'NOT_PERMITTED';
+      /** The Fleet's section tabs, or null for a Fleet with none. */
+      readonly tabs: FleetTabsVm | null;
       readonly fleet: StoFleet;
       readonly fleetLink: string[];
     }
   | {
       readonly kind: 'READY';
+      /** The Fleet's section tabs, or null for a Fleet with none. */
+      readonly tabs: FleetTabsVm | null;
       readonly fleet: StoFleet;
       readonly fleetLink: string[];
       readonly importsLink: string[];
@@ -141,6 +150,7 @@ interface RosterImportContext {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FleetTabsComponent,
     AsyncPipe,
     RouterLink,
     AppDatePipe,
@@ -317,6 +327,7 @@ export class RosterImportStatusComponent {
           ) {
             return of<RosterImportStatusState>({
               kind: 'NOT_PERMITTED',
+              tabs: fleetTabsVmOf(resolved),
               fleet: resolved.fleet,
               fleetLink,
             });
@@ -333,6 +344,7 @@ export class RosterImportStatusComponent {
             switchMap(() => this.watch(context)),
             map((watch): RosterImportStatusState => ({
               kind: 'READY',
+              tabs: fleetTabsVmOf(resolved),
               fleet: resolved.fleet,
               fleetLink,
               importsLink: FLEET_LINKS.fleetRosterImports(

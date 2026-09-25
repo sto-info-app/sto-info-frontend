@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FleetScopeArtworkComponent } from 'src/app/fleet/scope/fleet-scope-artwork/fleet-scope-artwork.component';
 import { FleetFollowComponent } from 'src/app/fleet/scope/fleet-follow/fleet-follow.component';
 import { FleetScopeHeaderComponent } from 'src/app/fleet/scope/fleet-scope-header/fleet-scope-header.component';
@@ -36,6 +37,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
     FleetScopeArtworkComponent,
     FleetScopeHeaderComponent,
     FleetFollowComponent,
+    FleetTabsComponent,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,
     LoadingBarComponent,

@@ -796,6 +796,7 @@ describe('RosterImportComponent', () => {
             'fleets',
             'pc',
             'ninth-fleet',
+            'investigate',
             'imports',
             'import-9',
           ],
@@ -929,7 +930,7 @@ describe('RosterImportComponent', () => {
         expect(text()).toContain('read as 2024-01-01T12:00:00 Europe/Paris');
         expect(find('.roster-import__earlier a')?.getAttribute('href')).toBe(
           '/fleets/communities/united-federation-alliance/fleets/pc/' +
-            'ninth-fleet/imports/import-1',
+            'ninth-fleet/investigate/imports/import-1',
         );
         expect(navigate).not.toHaveBeenCalled();
         expect(importButton()?.disabled).toBe(false);
