@@ -194,7 +194,8 @@ behind an edge is a section nobody knows is there. Mark the current tab
 `active`.
 
 Used by the character detail page, the community tabs, the Storytime policy
-header and story detail, the Storytime Markdown field, and Custom Tracking.
+header and story detail, the Storytime Markdown field, Custom Tracking, and a
+Fleet's sections (`app-fleet-tabs`).
 
 A strip does not have to switch whole sections: `app-storytime-markdown-field`
 uses one to put Edit and Preview over a single textarea, which is the smallest
@@ -631,6 +632,27 @@ cannot reach:
 | `.fleet-community-form-row` | A row of fields that becomes a column when two no longer fit. |
 | `.fleet-community-field-hint` | The sentence under a field saying what it means. Not an error — that is `.field-error`, which the input container already styles. |
 | `.fleet-community-form-actions` | The row a form's buttons sit in; wraps rather than shrinking a pill below its label. |
+| `.fleet-community-filter-row` | The row a listing's own controls sit in — a day, a search, a rank, a zone. |
+| `.fleet-community-table` | A table of figures: the roster, its history, every report, an import's rows. See below. |
+| `.fleet-report-notice` | A sentence about a report or section as a whole: what it covers, what it hides. |
+| `.fleet-report-note` | A second line under a cell's value, saying something about it — partial, excluded, across a gap. |
+
+**Tables.** The roster, its history and the reports are rows of figures, and a
+real table is the honest shape for them: a reader compares a column down, which
+cards do not let them do. Header cells are Antonio in sky; a figure's cells take
+`.fleet-community-table__number`, right-aligned in tabular numerals so the
+digits line up; a sortable header wraps its label in a
+`.fleet-community-table__sort` button, with `aria-sort` on the `th`. Below
+720px there is no room for the columns and a page must never scroll sideways,
+so each row becomes a block of labelled lines: **every `td` carries its
+column's name in `data-label`**, which the narrow layout writes before the
+value, and the header row is hidden from sight but kept for a screen reader. A
+table without `data-label` on every cell reads as a column of unlabelled
+numbers on a phone.
+
+A note in a cell is a `span.fleet-report-note`, which is a block of its own.
+Two sit on separate lines on screen but run together in `textContent`, so a
+spec asserts each note element rather than the cell's text.
 
 `.form-row`, `.field-hint` and `.compact` are a per-feature convention rather
 than a global rule, which is why Fleet declares its own rather than assuming
@@ -661,6 +683,37 @@ an empty page, or leave a stale list under an error.
 The projected content is instantiated by the page whether or not the shell is
 showing it, so do not rely on the shell to delay a child's initialisation —
 only its rendering.
+
+**`<app-fleet-tabs>`** — the strip along the top of every page of a Fleet
+with a roster: Overview for anybody; Roster and History for `roster.view`
+holders; Reports for anybody the server shows a report to; Investigate for
+whoever imports or investigates its rosters. It takes a `FleetTabsVm`, which
+`fleetTabsVmOf(resolved)` builds from the resolved Fleet and returns null for a
+Fleet with no sections — one no Community holds, or on a platform the game
+writes no roster export on — so such a Fleet draws no strip.
+
+Every tab but Reports is decided by the reader's capabilities. Reports asks the
+server once per Fleet which reports the reader sees, because a report's
+audience can make it public, and draws no tab when none is shown or the answer
+fails, rather than one leading to a page that cannot be read. Pages beneath a
+section — an import under Investigate, a member under History — sit beneath
+its address, so its tab stays lit on them.
+
+**`FleetSectionPageDirective<T>`** (`src/app/fleet/scope/`) — the half of a
+section page that every one repeats. It resolves the Fleet the address names,
+tells a Fleet that does not answer (`MISSING`), a request that failed
+(`ERROR`) and a section the reader may not open (`NOT_PERMITTED`) apart, and
+only then calls the page's `load(section, query, params)`. A page declares
+`_requiredCapabilities`, any one of which opens it — empty where the server
+decides, as on Reports — and its `notPermittedMessage`. Each navigation is
+caught on its own, so a failure on one address does not leave the page unable
+to show the next, and `reload()` reads the section again at the same address.
+
+What a reader chooses on a section page — an export, a page, an ordering, a
+span, a filter — **lives in the address**, so a view can be bookmarked, shared
+with another member and reached with the back button. A page changes the
+query with `queryParamsHandling: 'merge'`, dropping what the change makes
+stale: a new span drops the export the detail was drawn at.
 
 **`<app-fleet-scope-badge>`** — says whether something is a Community, a Fleet
 or an Armada, and on which platform.
@@ -715,6 +768,47 @@ still means the upload has not finished.
 **A rejection never says what was found.** Naming the signature that matched
 tells somebody probing the scanner exactly what got through; the copy says the
 file was refused, that nothing already in place has changed, and stops.
+
+### Reports
+
+Each of a Fleet's reports is its own view component under
+`src/app/fleet/fleet-reports/`, fed the report the page read. The page draws
+the choice of report, the span in whole days of the reader's own timezone, the
+revision and exports the report covers, and the CSV download; the view draws
+the report's tables and its chart.
+
+- **A hidden figure is `< 5`.** In an aggregate view the server sends null for
+  a count or total it hid, and `reportFigure` writes it as the CSV does, by the
+  report's `minimumCohort`. A contribution total arrives as a decimal string and
+  is written through `BigInt`, since it can exceed what a number holds.
+- **A hidden figure is not drawn.** `reportChartOf` leaves it out of the
+  `SmartChart` — a bar of nought would say there was nothing, and a bar of any
+  height would say how much — and the view says how many it left out.
+- **Nothing is dated more exactly than its exports.** An interval is written as
+  the two exports it lies between, and nothing is spread over the days between.
+- **The CSV is fetched, then saved.** It is read with the reader's token, which
+  a plain link cannot carry, and handed over with `saveFile`, named by the
+  Fleet, the report and the day, since the browser cannot read the
+  `Content-Disposition` the server set across origins.
+
+### Corrections
+
+The pages an investigator changes the roster from — rank order, conflicting
+exports, an import's corrections and rows — share a shape:
+
+- **A reason, given once** for whichever change it is, capped at the server's
+  500 characters, with the button disabled until it is given.
+- **No confirmation dialog.** Each change can be undone by another and is
+  logged with who made it and why (Steve's decision of 25 September 2026).
+  Deleting is different, and still takes `ConfirmDialogComponent`.
+- **The server's own words** for a refusal it understood — a 409, or a 400
+  naming what it would not take — through `app-lcars-error-message`, and a
+  general sentence for anything else. A refusal keeps what was typed.
+- **Read again afterwards**, recorded or refused: either way, what the page
+  showed is no longer how things stand. A change made to something another
+  investigator changed meanwhile is refused and the page reads it again.
+- **The history of changes** is listed beneath, newest first, naming an
+  account since closed as such.
 
 ### Warnings and user text
 
