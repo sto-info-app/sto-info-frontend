@@ -14,6 +14,7 @@ import {
   FLEET_REPORT_AUDIENCE_LABELS,
   FLEET_REPORT_AUDIENCES,
   FLEET_REPORT_LABELS,
+  FLEET_REPORTS,
 } from 'src/app/fleet/fleet-reports/fleet-report.text';
 import { FleetAudience } from 'src/app/models/fleet.models';
 import {
@@ -36,6 +37,23 @@ export type ReportAudiencesState =
   | { readonly kind: 'LOADING' }
   | { readonly kind: 'ERROR' }
   | { readonly kind: 'READY'; readonly audiences: FleetReportAudiences };
+
+/**
+ * A Fleet's audiences, with the reports in the order the page offers them, so
+ * the panel reads down as the choice of report reads across.
+ *
+ * @param audiences - The audiences, as the server sent them.
+ * @returns The same, reordered.
+ */
+function inPageOrder(audiences: FleetReportAudiences): FleetReportAudiences {
+  return {
+    ...audiences,
+    reports: [...audiences.reports].sort(
+      (a, b) =>
+        FLEET_REPORTS.indexOf(a.report) - FLEET_REPORTS.indexOf(b.report),
+    ),
+  };
+}
 
 /**
  * Who sees each of a Fleet's reports, and every change to it (FC-020).
@@ -93,7 +111,8 @@ export class ReportAudiencesComponent implements OnInit {
       .audiences(this.communityId(), this.fleetId())
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe({
-        next: audiences => this.state.set({ kind: 'READY', audiences }),
+        next: audiences =>
+          this.state.set({ kind: 'READY', audiences: inPageOrder(audiences) }),
         error: () => this.state.set({ kind: 'ERROR' }),
       });
   }
@@ -146,7 +165,10 @@ export class ReportAudiencesComponent implements OnInit {
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe({
         next: audiences => {
-          this.state.set({ kind: 'READY', audiences });
+          this.state.set({
+            kind: 'READY',
+            audiences: inPageOrder(audiences),
+          });
           this.drafts.update(drafts => {
             const rest = { ...drafts };
 

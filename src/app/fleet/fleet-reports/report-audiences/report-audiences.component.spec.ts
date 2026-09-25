@@ -175,6 +175,28 @@ describe('ReportAudiencesComponent', () => {
     expect(find('select')).toBeNull();
   });
 
+  it('lists the reports in the order the page offers them', () => {
+    reports.audiences.mockReturnValue(
+      of({
+        reports: [
+          AUDIENCES.reports[1],
+          {
+            report: FleetReport.ACTIVITY,
+            audience: FleetAudience.PRIVATE,
+            updatedAt: null,
+          },
+          AUDIENCES.reports[0],
+        ],
+        changes: [],
+      }),
+    );
+    render();
+
+    expect(
+      cellsOf(find('table') as HTMLTableElement).map(([report]) => report),
+    ).toEqual(['Growth', 'Activity', 'Tenure']);
+  });
+
   it('keeps every change, newest first, naming who made it', () => {
     render();
 
