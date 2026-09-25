@@ -94,6 +94,17 @@ export class FleetInvestigateComponent extends FleetSectionPageDirective<
           `Decide the renames ${fleet.exactGameName}’s rosters suggest from ` +
           'one export to the next.',
       });
+      actions.push({
+        label: 'Rank order',
+        link: FLEET_LINKS.fleetRankOrder(
+          communitySlug,
+          platformSegment,
+          fleetSlug,
+        ),
+        description:
+          `Order ${fleet.exactGameName}’s ranks, so a move between two reads ` +
+          'as a promotion or a demotion.',
+      });
     }
 
     return of(actions);

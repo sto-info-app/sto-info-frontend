@@ -1,0 +1,159 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Rank order"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the rank order"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+      @let labels = labelsOf(data);
+      @let tiers = proposed(data);
+
+      <p class="rank-order__intro">
+        Give each rank a tier, 1 the highest, or leave it blank. A move between
+        two tiers is shown as a promotion or a demotion; any other change of
+        rank is shown only as a change. Ranks sharing a tier are equal, as a
+        renamed rank is to its old name.
+        <a [routerLink]="investigateLink(data)">Back to Investigate</a>
+      </p>
+
+      <p class="rank-order__current">
+        Now: <strong>{{ describe(data.order.tiers) }}</strong>
+      </p>
+
+      @if (saveNotice(); as notice) {
+        <p
+          class="rank-order__notice"
+          role="status">
+          {{ notice }}
+        </p>
+      }
+      @if (saveError(); as refusal) {
+        <app-lcars-error-message
+          title="Not saved"
+          [message]="refusal" />
+      }
+
+      @if (labels.length === 0) {
+        <p class="fleet-community-empty">
+          No export of this Fleet has listed a rank yet, so there is nothing to
+          order.
+        </p>
+      } @else {
+        <form
+          aria-label="Rank order"
+          (submit)="$event.preventDefault(); onSubmit(data)">
+          <table class="fleet-community-table">
+            <caption>
+              Every rank this Fleet’s exports have listed
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Rank</th>
+                <th scope="col">Tier</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (label of labels; track label.label) {
+                <tr>
+                  <td data-label="Rank">
+                    <label [attr.for]="'tier-' + $index">{{
+                      label.label
+                    }}</label>
+                  </td>
+                  <td data-label="Tier">
+                    <input
+                      class="rank-order__tier"
+                      type="text"
+                      inputmode="numeric"
+                      autocomplete="off"
+                      maxlength="3"
+                      [id]="'tier-' + $index"
+                      [value]="tierShown(label)"
+                      [disabled]="busy()"
+                      [attr.aria-invalid]="isInvalid(label)"
+                      [attr.aria-describedby]="
+                        isInvalid(label) ? 'tier-error-' + $index : null
+                      "
+                      (input)="
+                        onTier(label.label, $any($event.target).value)
+                      " />
+                    @if (isInvalid(label)) {
+                      <span
+                        class="field-error"
+                        [id]="'tier-error-' + $index">
+                        A tier is a whole number from 1, or blank.
+                      </span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <p class="rank-order__current">
+            @if (tiers) {
+              Will be: <strong>{{ describe(tiers) }}</strong>
+            } @else {
+              Correct the tiers marked to see the order they make.
+            }
+          </p>
+
+          <div class="lcars-input-container sky">
+            <label for="rank-order-reason">Why</label>
+            <textarea
+              id="rank-order-reason"
+              rows="3"
+              [attr.maxlength]="reasonLimit"
+              [value]="reason()"
+              [disabled]="busy()"
+              (input)="reason.set($any($event.target).value)"></textarea>
+          </div>
+          <p class="fleet-community-field-hint">
+            Kept with the change, for whoever looks into the order later. At
+            most {{ reasonLimit }} characters.
+          </p>
+
+          <div class="fleet-community-form-actions">
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto sky"
+              [disabled]="!canSave(data)">
+              {{ busy() ? 'Saving' : 'Save the order' }}
+            </button>
+          </div>
+        </form>
+      }
+
+      <div class="lcars-text-bar">
+        <span>Changes</span>
+      </div>
+      @if (data.order.actions?.length) {
+        <ul class="rank-order__actions">
+          @for (action of data.order.actions; track action.id) {
+            <li>
+              <span class="rank-order__when">
+                {{ action.actedAt | appDate: 'medium' }},
+                {{ action.actorName ?? 'an account since closed' }}:
+              </span>
+              “{{ action.reason }}”
+              <span class="rank-order__note">
+                from {{ describe(action.tiersBefore) }} to
+                {{ describe(action.tiersAfter) }}
+              </span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="fleet-community-empty">
+          Nobody has ordered this Fleet’s ranks yet.
+        </p>
+      }
+    }
+  </app-fleet-page-shell>
+}

@@ -1,0 +1,55 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.rank-order__intro {
+  max-width: 70ch;
+
+  a {
+    color: vars.$lcars-sky;
+  }
+}
+
+.rank-order__current {
+  margin: 0.75rem 0;
+}
+
+.rank-order__notice {
+  color: vars.$lcars-green;
+}
+
+// Wide enough for three digits, and no wider: a tier is a small number.
+.rank-order__tier {
+  width: 5rem;
+  padding: 0.35rem 0.5rem;
+  font: inherit;
+  color: inherit;
+  background: vars.$lcars-black;
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 6px;
+
+  &[aria-invalid='true'] {
+    border-color: vars.$lcars-red;
+  }
+}
+
+.rank-order__actions {
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+
+  li {
+    margin: 0.5rem 0;
+  }
+}
+
+.rank-order__when {
+  color: vars.$lcars-sky;
+}
+
+.rank-order__note {
+  display: block;
+  font-size: 0.85rem;
+  color: vars.$lcars-grey-light;
+}

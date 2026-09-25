@@ -203,6 +203,15 @@ export const FLEET_ROUTES: Routes = [
         data: { title: APP_ROUTE_TITLES.FLEET_ROSTER_IDENTITIES },
         canActivate: [AuthGuard],
       },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',
+        loadComponent: () =>
+          import('./investigate/rank-order/rank-order.component').then(
+            m => m.RankOrderComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_RANK_ORDER },
+        canActivate: [AuthGuard],
+      },
       // Where those pages lived before they moved under Investigate, kept so
       // a link to one still arrives.
       {

@@ -124,6 +124,9 @@ export const APP_ROUTES = {
   FLEET_ROSTER_IDENTITIES:
     FLEET_COMMUNITIES_ROOT +
     '/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
+  FLEET_RANK_ORDER:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',
 
   // News
   NEWS: ROOT_ROUTES.NEWS,
@@ -294,6 +297,7 @@ export const APP_ROUTE_TITLES = {
   FLEET_ROSTER_IMPORTS: 'Roster Imports',
   FLEET_ROSTER_IMPORT_DETAIL: 'Roster Import',
   FLEET_ROSTER_IDENTITIES: 'Roster Identities',
+  FLEET_RANK_ORDER: 'Rank Order',
 
   // News
   NEWS: 'News',

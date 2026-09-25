@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(23);
+    expect(children).toHaveLength(24);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -94,6 +94,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
       APP_ROUTE_TITLES.FLEET_ROSTER_IDENTITIES,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',
+      APP_ROUTE_TITLES.FLEET_RANK_ORDER,
     ],
   ])('puts %s behind the sign-in guard', (path, title) => {
     expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
@@ -277,6 +281,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
       'RosterIdentityListComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',
+      'RankOrderComponent',
     ],
   ])('loads the right component for %s', async (path, expected) => {
     const loaded = await (

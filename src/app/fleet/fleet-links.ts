@@ -229,6 +229,23 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * A Fleet's rank order, for its investigators to set.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRankOrder: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetInvestigate(communitySlug, platformSegment, fleetSlug),
+    'rank-order',
+  ],
+
+  /**
    * One of a Fleet's roster imports, and where it has got to.
    *
    * @param communitySlug - The holding Community's URL segment.
