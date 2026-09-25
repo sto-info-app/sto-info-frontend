@@ -40,6 +40,7 @@ import {
   ROSTER_ROW_REJECTIONS,
 } from 'src/app/fleet/imports/roster-import.messages';
 import { RosterImportCorrectionsComponent } from 'src/app/fleet/imports/roster-import-corrections/roster-import-corrections.component';
+import { RosterImportRowsComponent } from 'src/app/fleet/imports/roster-import-rows/roster-import-rows.component';
 import { RosterImportService } from 'src/app/fleet/imports/roster-import.service';
 import {
   RosterImportDetail,
@@ -162,6 +163,7 @@ interface RosterImportContext {
     LcarsWarningMessageComponent,
     LoadingBarComponent,
     RosterImportCorrectionsComponent,
+    RosterImportRowsComponent,
   ],
 })
 export class RosterImportStatusComponent {
@@ -196,6 +198,9 @@ export class RosterImportStatusComponent {
 
   /** Who uploaded an import, once their account is gone. */
   readonly uploaderGone = ROSTER_IMPORT_UPLOADER_GONE;
+
+  /** The status whose rows are in force, and so can be excluded. */
+  readonly imported = RosterImportStatus.IMPORTED;
 
   /** The import, and whether the page is still asking after it. */
   readonly state$: Observable<RosterImportStatusState> =

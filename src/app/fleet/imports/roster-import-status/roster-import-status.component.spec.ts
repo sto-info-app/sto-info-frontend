@@ -30,6 +30,7 @@ import {
   ROSTER_ROW_REJECTIONS,
 } from 'src/app/fleet/imports/roster-import.messages';
 import { RosterImportCorrectionsComponent } from 'src/app/fleet/imports/roster-import-corrections/roster-import-corrections.component';
+import { RosterImportRowsComponent } from 'src/app/fleet/imports/roster-import-rows/roster-import-rows.component';
 import { RosterImportService } from 'src/app/fleet/imports/roster-import.service';
 import {
   RosterImportDetail,
@@ -179,7 +180,7 @@ describe('RosterImportStatusComponent', () => {
   let component: RosterImportStatusComponent;
   let params$: BehaviorSubject<ParamMap>;
   let scopes: { resolveFleet: jest.Mock };
-  let imports: { detail: jest.Mock };
+  let imports: { detail: jest.Mock; rows: jest.Mock };
 
   beforeEach(async () => {
     params$ = new BehaviorSubject<ParamMap>(
@@ -191,7 +192,10 @@ describe('RosterImportStatusComponent', () => {
       }),
     );
     scopes = { resolveFleet: jest.fn(() => of(resolved())) };
-    imports = { detail: jest.fn(() => of(detail())) };
+    imports = {
+      detail: jest.fn(() => of(detail())),
+      rows: jest.fn(() => of({ items: [], total: 0, page: 1, pageSize: 50 })),
+    };
 
     await TestBed.configureTestingModule({
       imports: [RosterImportStatusComponent],
@@ -652,6 +656,50 @@ describe('RosterImportStatusComponent', () => {
       expect(panel()?.conflictsLink().join('/')).toMatch(
         /\/investigate\/conflicts$/,
       );
+    }));
+
+    /**
+     * The rows list, if drawn.
+     *
+     * @returns It, or null.
+     */
+    const rowsList = (): RosterImportRowsComponent | null =>
+      fixture.debugElement.query(By.directive(RosterImportRowsComponent))
+        ?.componentInstance ?? null;
+
+    it('lists an import’s rows to an investigator while it is in force', fakeAsync(() => {
+      imports.detail.mockReturnValue(
+        of(detail({ actions: [], status: RosterImportStatus.IMPORTED })),
+      );
+      render();
+
+      expect(rowsList()?.communityId()).toBe(resolved().fleet.communityId);
+      expect(rowsList()?.fleetId()).toBe(resolved().fleet.id);
+      expect(rowsList()?.importId()).toBe(detail().id);
+    }));
+
+    it('lists no rows of an import not in force', fakeAsync(() => {
+      imports.detail.mockReturnValue(
+        of(detail({ actions: [], status: RosterImportStatus.HELD })),
+      );
+      render();
+
+      expect(panel()).not.toBeNull();
+      expect(rowsList()).toBeNull();
+    }));
+
+    it('reads the import again once its rows change', fakeAsync(() => {
+      imports.detail.mockReturnValue(
+        of(detail({ actions: [], status: RosterImportStatus.IMPORTED })),
+      );
+      render();
+
+      const calls = imports.detail.mock.calls.length;
+
+      rowsList()?.corrected.emit(detail({ actions: [] }));
+      wait(0);
+
+      expect(imports.detail).toHaveBeenCalledTimes(calls + 1);
     }));
 
     it('reads the import again once it is corrected', fakeAsync(() => {

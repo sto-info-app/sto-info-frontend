@@ -191,6 +191,14 @@
           [detail]="state.detail"
           [conflictsLink]="conflictsLink(state)"
           (corrected)="onCheckAgain()" />
+
+        @if (state.detail.status === imported) {
+          <app-roster-import-rows
+            [communityId]="state.communityId"
+            [fleetId]="state.fleet.id"
+            [importId]="state.detail.id"
+            (corrected)="onCheckAgain()" />
+        }
       }
 
       <nav

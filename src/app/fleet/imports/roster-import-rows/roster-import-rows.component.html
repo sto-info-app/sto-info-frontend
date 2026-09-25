@@ -1,0 +1,185 @@
+<section
+  class="import-rows"
+  aria-labelledby="import-rows-heading">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span id="import-rows-heading">Rows</span>
+  </div>
+
+  <p class="fleet-report-notice">
+    Excluding a row leaves its member unknown at this export, not gone. Tick
+    rows on this page, give a reason, then exclude them or put them back.
+    Turning the page clears the ticks.
+  </p>
+
+  @if (notice(); as recorded) {
+    <p
+      class="import-rows__notice"
+      role="status">
+      {{ recorded }}
+    </p>
+  }
+  @if (error(); as refusal) {
+    <app-lcars-error-message
+      title="Not changed"
+      [message]="refusal" />
+  }
+
+  @let current = state();
+  @switch (current.kind) {
+    @case ('LOADING') {
+      <p class="fleet-report-notice">Reading the rows…</p>
+    }
+    @case ('ERROR') {
+      <p class="fleet-community-empty">{{ errorMessage }}</p>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto sky"
+        (click)="onRetry()">
+        Try again
+      </button>
+    }
+  }
+
+  @if (current.kind === 'READY') {
+    @let rows = current.rows;
+
+    @if (rows.items.length === 0) {
+      <p class="fleet-community-empty">
+        None of this import’s rows is in force.
+      </p>
+    } @else {
+      <table class="fleet-community-table">
+        <caption>
+          The export’s rows, in the order it listed them
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">
+              <input
+                type="checkbox"
+                aria-label="Tick every row on this page"
+                [checked]="allTicked(rows)"
+                [disabled]="busy()"
+                (change)="onTickAll(rows, $any($event.target).checked)" />
+            </th>
+            <th
+              scope="col"
+              class="fleet-community-table__number">
+              Line
+            </th>
+            <th scope="col">Character</th>
+            <th scope="col">Rank</th>
+            <th
+              scope="col"
+              class="fleet-community-table__number">
+              Level
+            </th>
+            <th
+              scope="col"
+              class="fleet-community-table__number">
+              Contribution
+            </th>
+            <th scope="col">Joined</th>
+            <th scope="col">Last Active</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows.items; track row.line) {
+            <tr [class.import-rows__excluded]="row.excluded">
+              <td data-label="Tick">
+                <input
+                  type="checkbox"
+                  [attr.aria-label]="
+                    'Line ' +
+                    row.line +
+                    ': ' +
+                    row.characterName +
+                    row.accountHandle
+                  "
+                  [checked]="ticked().has(row.line)"
+                  [disabled]="busy()"
+                  (change)="onTick(row.line, $any($event.target).checked)" />
+              </td>
+              <td
+                data-label="Line"
+                class="fleet-community-table__number">
+                {{ row.line }}
+              </td>
+              <td data-label="Character">
+                {{ row.characterName }}{{ row.accountHandle }}
+                @if (row.excluded) {
+                  <span class="fleet-report-note">excluded</span>
+                }
+              </td>
+              <td data-label="Rank">{{ row.guildRank }}</td>
+              <td
+                data-label="Level"
+                class="fleet-community-table__number">
+                {{ row.level }}
+              </td>
+              <td
+                data-label="Contribution"
+                class="fleet-community-table__number">
+                {{ whole(row.contributionTotal) }}
+              </td>
+              <td data-label="Joined">{{ row.joinedAt | appDate }}</td>
+              <td data-label="Last Active">
+                {{ row.lastActiveAt | appDate }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (totalPages(rows) > 1) {
+        <div class="lcars-pagination">
+          <button
+            type="button"
+            [disabled]="rows.page <= 1 || busy()"
+            (click)="onPage(rows.page - 1)">
+            Earlier rows
+          </button>
+          <span>Page {{ rows.page }} of {{ totalPages(rows) }}</span>
+          <button
+            type="button"
+            [disabled]="rows.page >= totalPages(rows) || busy()"
+            (click)="onPage(rows.page + 1)">
+            Later rows
+          </button>
+        </div>
+      }
+
+      <div class="lcars-input-container sky">
+        <label for="import-rows-reason">Why</label>
+        <textarea
+          id="import-rows-reason"
+          rows="2"
+          [attr.maxlength]="reasonLimit"
+          [value]="reason()"
+          [disabled]="busy()"
+          (input)="reason.set($any($event.target).value)"></textarea>
+      </div>
+      <p class="fleet-community-field-hint">
+        {{ tickedRows().length }} ticked. Rows are excluded only when every one
+        ticked counts, and put back only when every one is excluded.
+      </p>
+
+      <div class="fleet-community-form-actions">
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto sky"
+          [disabled]="!canExclude()"
+          (click)="onChange(true)">
+          Exclude ticked
+        </button>
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto sky"
+          [disabled]="!canReinstate()"
+          (click)="onChange(false)">
+          Put back ticked
+        </button>
+      </div>
+    }
+  }
+</section>
