@@ -1,31 +1,44 @@
-import { expect, test as setup } from '@playwright/test';
+import { test as setup } from '@playwright/test';
 
-import { SIGNED_IN_STATE } from '../../playwright.config';
-import { backend } from './backend';
+import { storageStateFor } from './actors';
+import { signIn } from './login';
+import { readManifest } from './manifest';
 import { member } from './member';
 
 /**
- * Runs once, before any journey.
+ * Signs in once per actor and keeps each session apart.
  *
- * Custom Tracking ships switched off, so the first thing to do is switch it
- * on. The second is to put this member back to never having used it: a journey
- * that finds last night's sections still there would be testing whatever state
- * the previous run happened to leave, which is not a test.
- *
- * Signing in happens through the login form rather than by writing a token
- * into storage, because a token written by hand is a guess at what the
- * application stores, and a guess that goes stale silently.
+ * This does not switch Custom Tracking on. Journeys that need the feature
+ * depend on that setup separately, so a project that only needs a session
+ * does not purge anybody's tracking data.
  */
 
-setup('sign in and start from nothing', async ({ page }) => {
-  backend.begin(member.email);
+setup('sign in each actor', async ({ browser }) => {
+  const manifest = readManifest();
 
-  await page.goto('/login');
-  await page.getByLabel('Email').fill(member.email);
-  await page.getByLabel('Password').fill(member.password);
-  await page.getByRole('button', { name: 'Login' }).click();
+  if (manifest.demo.email.toLowerCase() !== member.email.toLowerCase()) {
+    throw new Error(
+      'The manifest member is not the member this run signs in as.',
+    );
+  }
 
-  await expect(page).toHaveURL(/\/dashboard/);
+  const actors = [
+    { code: 'M', email: member.email },
+    ...manifest.actors.map(actor => ({
+      code: actor.code,
+      email: actor.email,
+    })),
+  ];
 
-  await page.context().storageState({ path: SIGNED_IN_STATE });
+  for (const actor of actors) {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    try {
+      await signIn(page, actor.email, member.password);
+      await context.storageState({ path: storageStateFor(actor.code) });
+    } finally {
+      await context.close();
+    }
+  }
 });

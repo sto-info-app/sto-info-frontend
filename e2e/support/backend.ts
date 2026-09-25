@@ -39,6 +39,21 @@ function parseLastJson<T>(output: string, command: string): T {
   );
 }
 
+/**
+ * Node 24 does not use the operating system's certificate store unless asked.
+ * The backend looks up its database password over TLS, so the support command
+ * needs that flag even when the shell that started Playwright did not set it.
+ */
+function nodeOptions(): string {
+  const current = process.env['NODE_OPTIONS'] ?? '';
+
+  if (current.includes('--use-system-ca')) {
+    return current;
+  }
+
+  return `${current} --use-system-ca`.trim();
+}
+
 export function backendSupport<T>(...args: string[]): T {
   const command = args.join(' ');
 
@@ -53,8 +68,13 @@ export function backendSupport<T>(...args: string[]): T {
         encoding: 'utf8',
         // npm is a shell script on this platform, and the backend repository is
         // a sibling rather than a dependency, so there is no binary to spawn
-        // directly.
+        // directly. Node 24 verifies TLS with its own store unless told to
+        // use the system one, which is what the backend's secret lookup needs.
         shell: true,
+        env: {
+          ...process.env,
+          NODE_OPTIONS: nodeOptions(),
+        },
         stdio: ['ignore', 'pipe', 'pipe'],
       },
     );
@@ -73,6 +93,51 @@ export interface CustomTrackingCounts {
   live: Record<string, number>;
   deleted: Record<string, number>;
   imageCleanupQueue: number;
+}
+
+/** A fixture actor. The password is never part of this. */
+export interface KnownActor {
+  code: string;
+  email: string;
+  username: string;
+  role: string;
+  emailVerified: boolean;
+  isAccountDisabled: boolean;
+  grants: string[];
+}
+
+/**
+ * What the backend support command can see of the database it is connected to.
+ * Connection strings and passwords are not included.
+ */
+export interface EnvironmentReport {
+  databaseName: string;
+  databaseHost: string;
+  schema: string;
+  nodeEnv: string;
+  redisDatabase: number;
+  migration: string;
+  backendSha: string;
+  features: {
+    customTracking: boolean;
+    storytime: boolean;
+  };
+  metadata: {
+    factions: number;
+    species: number;
+    classes: number;
+  };
+  demo: {
+    email: string;
+    username: string;
+    role: string;
+    emailVerified: boolean;
+    isAccountDisabled: boolean;
+    publicAccount: boolean;
+    privateAccount: boolean;
+    characters: number;
+  };
+  actors: KnownActor[];
 }
 
 export const backend = {
@@ -119,5 +184,32 @@ export const backend = {
   /** What the member still holds, live and deleted. */
   counts(email: string): CustomTrackingCounts {
     return backendSupport<CustomTrackingCounts>('counts', email);
+  },
+
+  /**
+   * The database, feature switches and fixture actors.
+   * Passwords are not in the answer.
+   */
+  preflight(
+    email: string,
+    publicAccount: string,
+    privateAccount: string,
+  ): EnvironmentReport {
+    return backendSupport<EnvironmentReport>(
+      'preflight',
+      email,
+      publicAccount,
+      privateAccount,
+    );
+  },
+
+  /** Enable one fixture actor again. The demonstration member is refused. */
+  prepareActor(email: string): KnownActor {
+    return backendSupport<KnownActor>('prepare', email);
+  },
+
+  /** One fixture actor's role and grants. */
+  actor(email: string): KnownActor {
+    return backendSupport<KnownActor>('actor', email);
   },
 };

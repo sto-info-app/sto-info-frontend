@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+import { MEMBER_STORAGE_STATE } from './e2e/support/actors';
+
 /**
  * The end-to-end journeys drive a real browser against a real backend and a
  * real database. They are deliberately not mocked: the questions they answer —
@@ -16,10 +18,10 @@ import { defineConfig, devices } from '@playwright/test';
 const baseURL = process.env['E2E_BASE_URL'] ?? 'http://localhost:4200';
 
 /**
- * Where the signed-in session is kept between the sign-in step and the
- * journeys, so that ten journeys do not each spend a page load logging in.
+ * Where the demonstration member's signed-in session is kept, so the journeys
+ * do not each spend a page load logging in. Other actors have their own files.
  */
-export const SIGNED_IN_STATE = 'reports/playwright/.signed-in.json';
+export const SIGNED_IN_STATE = MEMBER_STORAGE_STATE;
 
 export default defineConfig({
   testDir: './e2e',
@@ -55,10 +57,24 @@ export default defineConfig({
 
   projects: [
     {
-      // Switches the feature on, clears anything a previous run left behind,
-      // and signs in once.
-      name: 'setup',
+      // Names the database, the actors and the capabilities. Does not purge
+      // anybody's tracking data.
+      name: 'preflight',
+      testMatch: /support[\\/]preflight\.setup\.e2e\.ts/,
+    },
+    {
+      // Signs in each actor. Still does not touch Custom Tracking.
+      name: 'authenticate',
       testMatch: /support[\\/]sign-in\.setup\.e2e\.ts/,
+      dependencies: ['preflight'],
+    },
+    {
+      // Switches Custom Tracking on and clears the demonstration member.
+      // Only the journeys depend on this, so another project can sign in
+      // without purging that data.
+      name: 'custom-tracking',
+      testMatch: /support[\\/]custom-tracking\.setup\.e2e\.ts/,
+      dependencies: ['authenticate'],
       teardown: 'teardown',
     },
     {
@@ -69,9 +85,18 @@ export default defineConfig({
       testMatch: /support[\\/]restore\.teardown\.e2e\.ts/,
     },
     {
+      // Proves the fixtures reset between cases. Does not switch the feature on.
+      name: 'infrastructure',
+      testMatch: /infrastructure[\\/].*\.e2e\.ts/,
+      dependencies: ['authenticate'],
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
+    {
       name: 'journeys',
       testMatch: /(journeys|reviews)[\\/].*\.e2e\.ts/,
-      dependencies: ['setup'],
+      dependencies: ['custom-tracking'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: SIGNED_IN_STATE,
