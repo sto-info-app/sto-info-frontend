@@ -96,7 +96,9 @@ module.exports = {
   coveragePathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
-    '/reports/',
+    // The coverage output folder only: unanchored, this would also hide any
+    // source folder named `reports` from the coverage threshold.
+    '<rootDir>/reports/',
     '/src/environments/',
     '/src/main.ts',
     '/src/polyfills.ts',
