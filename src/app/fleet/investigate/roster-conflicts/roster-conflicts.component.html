@@ -39,7 +39,15 @@
         <p
           class="roster-conflicts__notice"
           role="status">
-          {{ notice }}
+          {{ notice.filename }}, uploaded
+          {{ notice.uploadedAt | appDate: 'medium' }}, now stands for its
+          moment.
+          @if (notice.held) {
+            It had not been read into the history, so it is read now, and the
+            history is rebuilt after.
+          } @else {
+            The history is rebuilt to match.
+          }
         </p>
       }
       @if (selectError(); as refusal) {

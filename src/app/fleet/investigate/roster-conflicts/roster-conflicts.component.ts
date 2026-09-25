@@ -67,6 +67,18 @@ export const ROSTER_CONFLICT_FILTERS: readonly {
   },
 ];
 
+/**
+ * The export a selection made stand, as the notice names it: by its file and
+ * when it was uploaded, since every export in a group is named for the same
+ * moment and often has the same file name.
+ */
+export interface RosterConflictNotice {
+  readonly filename: string;
+  readonly uploadedAt: string;
+  /** Whether it had been held, and so is read into the history now. */
+  readonly held: boolean;
+}
+
 /** A page of conflict groups, and which the reader asked for. */
 export interface RosterConflictsData {
   readonly page: RosterImportConflictPage;
@@ -122,7 +134,7 @@ export class RosterConflictsComponent extends FleetSectionPageDirective<RosterCo
   readonly selectError = signal<string | null>(null);
 
   /** What the last selection came to, if it was recorded. */
-  readonly selectNotice = signal<string | null>(null);
+  readonly selectNotice = signal<RosterConflictNotice | null>(null);
 
   /**
    * What to say when the reader's list is empty.
@@ -255,12 +267,11 @@ export class RosterConflictsComponent extends FleetSectionPageDirective<RosterCo
 
             return rest;
           });
-          this.selectNotice.set(
-            `${member.originalFilename} now stands for its moment.` +
-              (member.status === RosterImportStatus.HELD
-                ? ' It had not been read into the history, so it is read now, and the history is rebuilt after.'
-                : ' The history is rebuilt to match.'),
-          );
+          this.selectNotice.set({
+            filename: member.originalFilename,
+            uploadedAt: member.uploadedAt,
+            held: member.status === RosterImportStatus.HELD,
+          });
           this.reload();
         },
         error: (error: HttpErrorResponse) => {

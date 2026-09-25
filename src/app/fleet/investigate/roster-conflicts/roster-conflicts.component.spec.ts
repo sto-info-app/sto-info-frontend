@@ -407,8 +407,8 @@ describe('RosterConflictsComponent', () => {
       'The complete one',
     );
     expect(imports.conflicts).toHaveBeenCalledTimes(2);
-    expect(find('[role="status"]')?.textContent?.trim()).toBe(
-      'Ninth Fleet_20241101-120000 (import-1).csv now stands for its moment. The history is rebuilt to match.',
+    expect(textOf(find('[role="status"]') as HTMLElement).trim()).toBe(
+      'Ninth Fleet_20241101-120000 (import-1).csv, uploaded Nov 1, 2024, 12:30:00 PM, now stands for its moment. The history is rebuilt to match.',
     );
     expect((find('#reason-group-1') as HTMLTextAreaElement).value).toBe('');
   });
@@ -419,8 +419,8 @@ describe('RosterConflictsComponent', () => {
     selects()[1].click();
     fixture.detectChanges();
 
-    expect(find('[role="status"]')?.textContent).toContain(
-      'It had not been read into the history, so it is read now',
+    expect(textOf(find('[role="status"]') as HTMLElement).trim()).toBe(
+      'Ninth Fleet_20241101-120000 (import-2).csv, uploaded Nov 1, 2024, 12:30:00 PM, now stands for its moment. It had not been read into the history, so it is read now, and the history is rebuilt after.',
     );
   });
 
