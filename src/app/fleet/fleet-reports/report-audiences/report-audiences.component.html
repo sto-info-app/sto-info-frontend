@@ -1,0 +1,117 @@
+<section
+  class="report-audiences"
+  aria-labelledby="report-audiences-heading">
+  <div class="lcars-text-bar">
+    <span id="report-audiences-heading">Who sees each report</span>
+  </div>
+
+  @switch (state().kind) {
+    @case ('LOADING') {
+      <p class="fleet-report-notice">Reading who sees each report…</p>
+    }
+    @case ('ERROR') {
+      <p class="fleet-community-empty">{{ errorMessage }}</p>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto sky"
+        (click)="load()">
+        Try again
+      </button>
+    }
+  }
+
+  @let current = state();
+  @if (current.kind === 'READY') {
+    <p class="fleet-report-notice">
+      The Owner and Admins see every report in full. The Fleet’s members see a
+      report in full once it is shown to them; the Community’s followers and
+      anyone else see its counts only, never a name.
+    </p>
+
+    <table class="fleet-community-table">
+      <thead>
+        <tr>
+          <th scope="col">Report</th>
+          <th scope="col">Shown to</th>
+          <th scope="col">Last changed</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (entry of current.audiences.reports; track entry.report) {
+          <tr>
+            <td data-label="Report">{{ reportLabels[entry.report] }}</td>
+            <td data-label="Shown to">
+              @if (canEdit()) {
+                <div class="fleet-community-filter-row">
+                  <div class="lcars-input-container sky">
+                    <label [attr.for]="'audience-' + entry.report"
+                      >Shown to</label
+                    >
+                    <select
+                      #audience
+                      [id]="'audience-' + entry.report"
+                      [disabled]="saving() !== null"
+                      (change)="onPick(entry.report, audience.value)">
+                      @for (choice of audienceChoices; track choice) {
+                        <option
+                          [value]="choice"
+                          [selected]="choice === shownAudience(entry)">
+                          {{ audienceLabels[choice] }}
+                        </option>
+                      }
+                    </select>
+                  </div>
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto sky"
+                    [disabled]="!isChanged(entry) || saving() !== null"
+                    (click)="onSave(entry)">
+                    {{ saving() === entry.report ? 'Saving' : 'Save' }}
+                  </button>
+                </div>
+              } @else {
+                {{ audienceLabels[entry.audience] }}
+              }
+            </td>
+            <td data-label="Last changed">
+              @if (entry.updatedAt) {
+                {{ entry.updatedAt | appDate: 'medium' }}
+              } @else {
+                Never
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (saveFailed()) {
+      <p
+        class="report-audiences__failed"
+        role="alert">
+        {{ saveFailedMessage }}
+      </p>
+    }
+
+    <details class="report-audiences__changes">
+      <summary>Changes ({{ current.audiences.changes.length }})</summary>
+      @if (current.audiences.changes.length === 0) {
+        <p class="fleet-report-notice">
+          No report has been shown to anybody but the Owner and Admins yet.
+        </p>
+      } @else {
+        <ul>
+          @for (change of current.audiences.changes; track change.id) {
+            <li>
+              {{ change.changedAt | appDate: 'medium' }}:
+              {{ change.actorName ?? 'An account since closed' }} showed
+              {{ reportLabels[change.report] }} to
+              {{ audienceLabels[change.audienceAfter] }}, not
+              {{ audienceLabels[change.audienceBefore] }}
+            </li>
+          }
+        </ul>
+      }
+    </details>
+  }
+</section>

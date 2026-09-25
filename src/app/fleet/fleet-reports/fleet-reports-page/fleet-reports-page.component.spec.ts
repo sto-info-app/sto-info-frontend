@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import {
   ActivatedRoute,
   convertToParamMap,
@@ -17,6 +18,7 @@ import {
   reportHeader,
   textOf,
 } from 'src/app/fleet/fleet-reports/fleet-report.testing';
+import { ReportAudiencesComponent } from 'src/app/fleet/fleet-reports/report-audiences/report-audiences.component';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { FLEET_SECTION_MISSING } from 'src/app/fleet/scope/fleet-section-page.directive';
 import {
@@ -103,7 +105,12 @@ describe('FleetReportsPageComponent', () => {
   let fixture: ComponentFixture<FleetReportsPageComponent>;
   let query$: BehaviorSubject<ParamMap>;
   let scopes: { resolveFleet: jest.Mock };
-  let reports: { visible: jest.Mock; report: jest.Mock; csv: jest.Mock };
+  let reports: {
+    visible: jest.Mock;
+    report: jest.Mock;
+    csv: jest.Mock;
+    audiences: jest.Mock;
+  };
   let navigate: jest.SpyInstance;
 
   beforeEach(async () => {
@@ -117,6 +124,7 @@ describe('FleetReportsPageComponent', () => {
         of(empty(kind)),
       ),
       csv: jest.fn(() => of(new Blob(['# Growth']))),
+      audiences: jest.fn(() => of({ reports: [], changes: [] })),
     };
     (saveFile as jest.Mock).mockReset();
 
@@ -341,6 +349,43 @@ describe('FleetReportsPageComponent', () => {
     render();
 
     expect(text()).toContain(FLEET_SECTION_MISSING);
+  });
+
+  describe('who sees each report', () => {
+    /**
+     * The audience panel, if drawn.
+     *
+     * @returns It, or null.
+     */
+    const panel = (): ReportAudiencesComponent | null =>
+      fixture.debugElement.query(By.directive(ReportAudiencesComponent))
+        ?.componentInstance ?? null;
+
+    it('is not drawn for a reader without reports.view', () => {
+      scopes.resolveFleet.mockReturnValue(of(resolved(['roster.view'])));
+      render();
+
+      expect(panel()).toBeNull();
+      expect(reports.audiences).not.toHaveBeenCalled();
+    });
+
+    it('is drawn for an Admin, who may not change it', () => {
+      scopes.resolveFleet.mockReturnValue(of(resolved(['reports.view'])));
+      render();
+
+      expect(panel()?.communityId()).toBe('community-1');
+      expect(panel()?.fleetId()).toBe('fleet-1');
+      expect(panel()?.canEdit()).toBe(false);
+    });
+
+    it('is changeable by the Owner', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(resolved(['reports.view', 'scope.settings.manage'])),
+      );
+      render();
+
+      expect(panel()?.canEdit()).toBe(true);
+    });
   });
 
   describe('the span', () => {

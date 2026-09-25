@@ -1,0 +1,30 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+  margin-top: 2rem;
+}
+
+.report-audiences__failed {
+  color: vars.$lcars-red;
+}
+
+.report-audiences__changes {
+  margin: 1rem 0;
+
+  summary {
+    font-family: vars.$font-antonio;
+    text-transform: uppercase;
+    color: vars.$lcars-sky;
+    cursor: pointer;
+  }
+
+  ul {
+    padding-left: 1.25rem;
+    margin: 0.5rem 0;
+  }
+
+  li {
+    margin: 0.25rem 0;
+  }
+}

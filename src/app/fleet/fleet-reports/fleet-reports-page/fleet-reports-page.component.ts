@@ -26,7 +26,12 @@ import {
 } from 'src/app/fleet/fleet-reports/fleet-report.text';
 import { GrowthReportComponent } from 'src/app/fleet/fleet-reports/growth-report/growth-report.component';
 import { RanksReportComponent } from 'src/app/fleet/fleet-reports/ranks-report/ranks-report.component';
+import { ReportAudiencesComponent } from 'src/app/fleet/fleet-reports/report-audiences/report-audiences.component';
 import { TenureReportComponent } from 'src/app/fleet/fleet-reports/tenure-report/tenure-report.component';
+import {
+  REPORTS_VIEW_CAPABILITY,
+  SCOPE_SETTINGS_MANAGE_CAPABILITY,
+} from 'src/app/fleet/roster/roster.constants';
 import {
   FleetSection,
   FleetSectionPageDirective,
@@ -109,6 +114,7 @@ export type FleetReportsCsvState = 'IDLE' | 'BUSY' | 'FAILED';
     TenureReportComponent,
     RanksReportComponent,
     ContributionReportComponent,
+    ReportAudiencesComponent,
   ],
 })
 export class FleetReportsPageComponent extends FleetSectionPageDirective<FleetReportsData> {
@@ -123,12 +129,26 @@ export class FleetReportsPageComponent extends FleetSectionPageDirective<FleetRe
   readonly reports = FleetReport;
   readonly reportLabels = FLEET_REPORT_LABELS;
   readonly aggregate = FleetReportView.AGGREGATE;
+  readonly reportsView = REPORTS_VIEW_CAPABILITY;
+  readonly settingsManage = SCOPE_SETTINGS_MANAGE_CAPABILITY;
 
   /** How the CSV download stands. */
   readonly csvState = signal<FleetReportsCsvState>('IDLE');
 
   /** Anybody who can see the Fleet may open the page. */
   protected readonly _requiredCapabilities: readonly string[] = [];
+
+  /**
+   * Whether the reader holds a capability on the Fleet: `reports.view` to
+   * see who sees each report, `scope.settings.manage` to change it.
+   *
+   * @param data - The page.
+   * @param capability - The capability.
+   * @returns True when they hold it.
+   */
+  holds(data: FleetReportsData, capability: string): boolean {
+    return data.section.resolved.viewer.capabilities.includes(capability);
+  }
 
   /**
    * The reports the reader may see, in the order they are offered.

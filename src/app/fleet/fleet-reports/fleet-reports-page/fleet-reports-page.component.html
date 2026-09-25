@@ -144,6 +144,13 @@
       } @else {
         <p class="fleet-community-empty">{{ noneMessage }}</p>
       }
+
+      @if (holds(data, reportsView)) {
+        <app-report-audiences
+          [communityId]="data.section.communityId"
+          [fleetId]="data.section.fleetId"
+          [canEdit]="holds(data, settingsManage)" />
+      }
     }
   </app-fleet-page-shell>
 }
