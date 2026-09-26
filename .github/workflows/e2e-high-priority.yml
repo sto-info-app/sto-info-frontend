@@ -1,0 +1,385 @@
+name: High-priority end-to-end
+
+# Started by hand. The six-hour schedule stays out until ten clean runs exist.
+
+on:
+  workflow_dispatch:
+    inputs:
+      backend_ref:
+        description: Backend git ref to check out beside this frontend
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: e2e-high-priority
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 24.21.0
+
+jobs:
+  e2e:
+    name: High-priority scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - name: Require secrets
+        env:
+          GH_PAT_REPO_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SECRET_NAME: ${{ secrets.AWS_SECRET_NAME }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DATASEED_USER_EMAIL: ${{ secrets.DATASEED_USER_EMAIL }}
+          DATASEED_USER_USERNAME: ${{ secrets.DATASEED_USER_USERNAME }}
+          DATASEED_USER_FIRSTNAME: ${{ secrets.DATASEED_USER_FIRSTNAME }}
+          DATASEED_USER_LASTNAME: ${{ secrets.DATASEED_USER_LASTNAME }}
+          DATASEED_USER_PASSWORD: ${{ secrets.DATASEED_USER_PASSWORD }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in \
+            GH_PAT_REPO_TOKEN \
+            AWS_ACCESS_KEY_ID \
+            AWS_SECRET_ACCESS_KEY \
+            AWS_SECRET_NAME \
+            AWS_REGION \
+            DATASEED_USER_EMAIL \
+            DATASEED_USER_USERNAME \
+            DATASEED_USER_FIRSTNAME \
+            DATASEED_USER_LASTNAME \
+            DATASEED_USER_PASSWORD
+          do
+            if [ -z "${!name}" ]; then
+              echo "Missing required secret: ${name}"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Checkout frontend
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Checkout backend
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: sto-info-app/sto-info-backend
+          ref: ${{ inputs.backend_ref }}
+          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
+          path: sto-info-backend
+          persist-credentials: false
+
+      - name: Use Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install frontend dependencies
+        uses: ./.github/actions/cached-dependencies
+        with:
+          use-cache: true
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install backend dependencies
+        working-directory: sto-info-backend
+        env:
+          HUSKY: '0'
+        run: npm ci
+
+      - name: Typecheck the end-to-end tests
+        run: npm run e2e:typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Read the application secret
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          AWS_SECRET_NAME: ${{ secrets.AWS_SECRET_NAME }}
+        run: |
+          set -euo pipefail
+          python3 << 'PY'
+          import json, os, subprocess, sys
+
+          raw = subprocess.check_output(
+              [
+                  "aws",
+                  "secretsmanager",
+                  "get-secret-value",
+                  "--secret-id",
+                  os.environ["AWS_SECRET_NAME"],
+                  "--query",
+                  "SecretString",
+                  "--output",
+                  "text",
+              ],
+              text=True,
+          )
+          try:
+              secret = json.loads(raw)
+          except json.JSONDecodeError:
+              print("AWS secret is not JSON")
+              sys.exit(1)
+
+          missing = [
+              key
+              for key in ("dbPassword", "jwtSecret", "sendGridApiKey")
+              if not secret.get(key)
+          ]
+          if missing:
+              print("AWS secret is missing: " + ", ".join(missing))
+              sys.exit(1)
+
+          path = os.path.join(os.environ["RUNNER_TEMP"], "e2e-db-password")
+          with open(path, "w", encoding="utf-8") as handle:
+              handle.write(secret["dbPassword"])
+          os.chmod(path, 0o600)
+          PY
+
+      - name: Start Postgres and Redis
+        run: |
+          set -euo pipefail
+          password="$(cat "$RUNNER_TEMP/e2e-db-password")"
+          docker run -d --name e2e-postgres \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD="$password" \
+            -e POSTGRES_DB=sto_info_e2e \
+            -p 5432:5432 \
+            postgres:18
+          unset password
+          docker run -d --name e2e-redis -p 6379:6379 redis:7
+          ready=0
+          for _ in $(seq 1 30); do
+            if docker exec e2e-postgres pg_isready -U postgres; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            echo "Postgres did not become ready"
+            exit 1
+          fi
+          docker exec \
+            -e PGPASSWORD="$(cat "$RUNNER_TEMP/e2e-db-password")" \
+            e2e-postgres \
+            psql -U postgres -d sto_info_e2e -v ON_ERROR_STOP=1 \
+            -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";' \
+            -c 'CREATE SCHEMA IF NOT EXISTS sto_info_app;'
+
+      - name: Write the backend environment
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_SECRET_NAME: ${{ secrets.AWS_SECRET_NAME }}
+          DATASEED_USER_EMAIL: ${{ secrets.DATASEED_USER_EMAIL }}
+          DATASEED_USER_USERNAME: ${{ secrets.DATASEED_USER_USERNAME }}
+          DATASEED_USER_FIRSTNAME: ${{ secrets.DATASEED_USER_FIRSTNAME }}
+          DATASEED_USER_LASTNAME: ${{ secrets.DATASEED_USER_LASTNAME }}
+          DATASEED_USER_PASSWORD: ${{ secrets.DATASEED_USER_PASSWORD }}
+        run: |
+          set -euo pipefail
+          python3 << 'PY'
+          import os, shlex
+          from pathlib import Path
+
+          values = {
+              "NODE_ENV": "local",
+              "LOG_LEVEL": "error",
+              "APP_PORT": "3000",
+              "APP_FRONTEND_URL": "http://localhost:4200",
+              "APP_TITLE": "STO Info (E2E)",
+              "AUTH_SALT_ROUNDS": "10",
+              "AUTH_TOKEN_EXPIRES_IN": "3600",
+              "AUTH_REFRESH_TOKEN_EXPIRES_IN": "14400",
+              "DB_TYPE": "postgres",
+              "DB_HOST": "localhost",
+              "DB_PORT": "5432",
+              "DB_NAME": "sto_info_e2e",
+              "DB_SCHEMA": "sto_info_app",
+              "DB_USERNAME": "postgres",
+              "DB_SSL_REJECT_UNAUTHORIZED": "false",
+              "TYPEORM_SYNCHRONIZE": "false",
+              "TYPEORM_LOGGING": "false",
+              "TYPEORM_ENTITIES": "src/**/*.entity.{js,ts}",
+              "TYPEORM_MIGRATIONS": "src/database/migrations/*.{js,ts}",
+              "EMAIL_NOREPLY_SENDER": "no-reply@example.com",
+              "AWS_ACCESS_KEY_ID": os.environ["AWS_ACCESS_KEY_ID"],
+              "AWS_SECRET_ACCESS_KEY": os.environ["AWS_SECRET_ACCESS_KEY"],
+              "AWS_REGION": os.environ["AWS_REGION"],
+              "AWS_SECRET_NAME": os.environ["AWS_SECRET_NAME"],
+              "AWS_SNS_TOPIC_ARN": "arn:aws:sns:eu-west-2:000000000000:e2e-unused",
+              "AWS_SES_CONFIGURATION_SET": "e2e-unused",
+              "REDIS_URL": "redis://127.0.0.1:6379/1",
+              "CLOUDFLARE_R2_ENDPOINT": "https://example.invalid",
+              "CLOUDFLARE_R2_BUCKET_NAME": "e2e-unused",
+              "CLOUDFLARE_CDN_ROOT_URL": "https://example.invalid",
+              "CLOUDFLARE_IMAGES_HASH": "e2e",
+              "MAX_IMAGE_SIZE_IN_BYTES": "10485760",
+              "AUDIT_DATA_NUKE_THRESHOLD_DAYS": "3",
+              "AUDIT_IP_NUKE_THRESHOLD_DAYS": "1",
+              "CONTACT_REQUEST_EMAIL_MASK_RETENTION_DAYS": "21",
+              "CONTACT_REQUEST_RECORD_RETENTION_DAYS": "90",
+              "CLOSED_ACCOUNT_RETENTION_DAYS": "180",
+              "SES_AUDIT_RETENTION_DAYS": "180",
+              "SES_SUPPRESSION_RETENTION_DAYS": "2557",
+              "DATASEED_USER_EMAIL": os.environ["DATASEED_USER_EMAIL"],
+              "DATASEED_USER_USERNAME": os.environ["DATASEED_USER_USERNAME"],
+              "DATASEED_USER_FIRSTNAME": os.environ["DATASEED_USER_FIRSTNAME"],
+              "DATASEED_USER_LASTNAME": os.environ["DATASEED_USER_LASTNAME"],
+              "DATASEED_USER_PASSWORD": os.environ["DATASEED_USER_PASSWORD"],
+              "STORYTIME_PUBLIC_READ_ENABLED": "true",
+              "STORYTIME_CREATION_ENABLED": "true",
+              "STORYTIME_YOUTUBE_ENABLED": "true",
+              "STORYTIME_SPOTLIGHT_ENABLED": "true",
+          }
+          path = Path("sto-info-backend/config/environments/.env")
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_text(
+              "\n".join(f"{key}={shlex.quote(value)}" for key, value in values.items())
+              + "\n",
+              encoding="utf-8",
+          )
+          os.chmod(path, 0o600)
+          PY
+
+      - name: Migrate and start the backend
+        working-directory: sto-info-backend
+        env:
+          NODE_OPTIONS: --use-system-ca
+          HUSKY: '0'
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/reports/playwright"
+          npm run migration:run
+          npm run build
+          npm run start:prod > "$GITHUB_WORKSPACE/reports/playwright/backend.log" 2>&1 &
+          echo $! > "$GITHUB_WORKSPACE/reports/playwright/backend.pid"
+          for _ in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:3000/health/live >/dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "The backend did not become ready"
+          exit 1
+
+      - name: Write the frontend environment
+        run: |
+          mkdir -p src/environments
+          cat << 'EOF' > src/environments/environment.ts
+          import packageJson from '../../package.json';
+          import type { Environment } from './models/environment.model';
+
+          export const environment: Environment = {
+            production: false,
+            version: packageJson.version,
+            env_name: 'ci',
+            env_label: 'CI',
+            apiUrl: 'http://localhost:3000',
+            appTitle: 'STO Info (E2E)',
+            appLoggedInHome: '/dashboard',
+            allowDebugging: false,
+            minsBeforeLogoutExpiryToShowWarning: 5,
+            minsBeforeLogoutExpiryToRefreshToken: 2,
+            cookieYesUrl: 'https://cdn-cookieyes.com/client_data/test/script.js',
+            gaMeasurementId: 'G-XXXXXXX',
+            logRocketAppId: 'test/appid',
+          };
+          EOF
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the high-priority scan
+        env:
+          CI: 'true'
+          NODE_OPTIONS: --use-system-ca
+          E2E_PASSWORD: ${{ secrets.DATASEED_USER_PASSWORD }}
+          E2E_DATABASE_NAME: sto_info_e2e
+          E2E_REDIS_DB: '1'
+          E2E_BASE_URL: http://localhost:4200
+          E2E_API_URL: http://localhost:3000
+          E2E_BACKEND_DIR: ${{ github.workspace }}/sto-info-backend
+          E2E_SCAN: high
+        run: npm run e2e:high
+
+      - name: Reject a flaky or skipped scan
+        if: always() && hashFiles('reports/playwright/results.json') != ''
+        run: |
+          node --input-type=commonjs << 'EOF'
+          const { readFileSync } = require('node:fs');
+
+          const report = JSON.parse(
+            readFileSync('reports/playwright/results.json', 'utf8'),
+          );
+          const stats = report.stats ?? {};
+          const expected = stats.expected ?? 0;
+          const unexpected = stats.unexpected ?? 0;
+          const flaky = stats.flaky ?? 0;
+          const skipped = stats.skipped ?? 0;
+
+          console.log(
+            `expected=${expected} unexpected=${unexpected} flaky=${flaky} skipped=${skipped}`,
+          );
+
+          if (expected + unexpected + flaky === 0) {
+            console.error('No tests ran');
+            process.exit(1);
+          }
+
+          if (unexpected || flaky || skipped) {
+            console.error('The scan is not a clean pass');
+            process.exit(1);
+          }
+          EOF
+
+      - name: Record the revisions
+        if: always()
+        run: |
+          {
+            echo "### High-priority end-to-end scan"
+            echo ""
+            echo "- Frontend: \`$(git rev-parse HEAD)\`"
+            echo "- Backend: \`$(git -C sto-info-backend rev-parse HEAD 2>/dev/null || echo unavailable)\`"
+            echo "- Schedule: not installed"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-high-priority
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            reports/playwright/html
+            reports/playwright/artifacts
+            reports/playwright/junit.xml
+            reports/playwright/results.json
+            reports/playwright/manifest.json
+            reports/playwright/backend.log
+
+      - name: Stop the services
+        if: always()
+        run: |
+          if [ -f reports/playwright/backend.pid ]; then
+            kill "$(cat reports/playwright/backend.pid)" || true
+          fi
+          docker rm -f e2e-postgres e2e-redis >/dev/null 2>&1 || true
+          rm -f sto-info-backend/config/environments/.env "$RUNNER_TEMP/e2e-db-password"
