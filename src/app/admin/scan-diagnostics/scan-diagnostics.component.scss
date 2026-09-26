@@ -1,0 +1,132 @@
+@use 'lcars-variables' as vars;
+
+// The page's colour is the one its card carries on the Admin landing page, so
+// the card and the page it opens read as the same thing.
+$scan-diagnostics-colour: vars.$lcars-sunflower;
+
+.scan-diagnostics__read {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 1rem;
+
+  p {
+    margin: 0;
+    color: vars.$lcars-grey-light;
+  }
+}
+
+.scan-diagnostics__note,
+.scan-diagnostics__unavailable {
+  color: vars.$lcars-grey-light;
+}
+
+// Figures across three windows: a table is the honest shape, because a reader
+// compares a row across. The same conventions as the Fleet tables — Antonio
+// headings, figures right-aligned so their digits line up — in this page's
+// own colour.
+.scan-diagnostics-table {
+  width: 100%;
+  margin: 1rem 0 1.5rem;
+  border-collapse: collapse;
+
+  caption {
+    padding: 0 0 0.5rem;
+    font-family: vars.$font-antonio;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $scan-diagnostics-colour;
+  }
+
+  th {
+    padding: 0.5rem 0.75rem;
+    font-family: vars.$font-antonio;
+    font-weight: normal;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  thead th {
+    color: $scan-diagnostics-colour;
+    border-bottom: 2px solid $scan-diagnostics-colour;
+  }
+
+  tbody th,
+  td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid vars.$lcars-grey-border;
+  }
+
+  tbody tr:hover {
+    background: vars.$lcars-card-surface-hover;
+  }
+
+  .scan-diagnostics-table__number {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// Below 720px the three columns do not fit, and a page must never scroll
+// sideways, so each row becomes its heading over three labelled lines.
+@media (width <= 720px) {
+  .scan-diagnostics-table {
+    thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    tr {
+      display: block;
+      padding: 0.5rem 0;
+      border-bottom: 2px solid vars.$lcars-grey-border;
+    }
+
+    tbody th {
+      display: block;
+      padding: 0.25rem 0;
+      color: $scan-diagnostics-colour;
+      border: 0;
+    }
+
+    td {
+      display: flex;
+      gap: 1rem;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+      border: 0;
+    }
+
+    td::before {
+      color: vars.$lcars-grey-light;
+      content: attr(data-label);
+    }
+  }
+}
+
+.scan-diagnostics__details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem 1.5rem;
+  margin: 1rem 0 1.5rem;
+
+  dt {
+    font-family: vars.$font-antonio;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $scan-diagnostics-colour;
+  }
+
+  dd {
+    margin: 0.25rem 0 0;
+    font-variant-numeric: tabular-nums;
+  }
+}

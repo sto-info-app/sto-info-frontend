@@ -64,6 +64,15 @@ describe('AdminComponent', () => {
     expect(link?.textContent).toContain('Manage Permissions');
   });
 
+  it('links to the scan diagnostics page', () => {
+    fixture.detectChanges();
+
+    const link: HTMLAnchorElement | null = fixture.nativeElement.querySelector(
+      'a[href="/admin/scan-diagnostics"]',
+    );
+    expect(link?.textContent).toContain('Scan Diagnostics');
+  });
+
   // The same cards the Storytime landing page offers. Everything else on this
   // page comes with the administrator role; these three are given out one at a
   // time by permission, so they are filtered rather than assumed.

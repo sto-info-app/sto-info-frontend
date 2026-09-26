@@ -1,0 +1,261 @@
+@if (state().kind === 'LOADING') {
+  <app-loading-bar loadingText="Reading scan diagnostics"></app-loading-bar>
+}
+
+<div
+  id="scan-diagnostics-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Scan Diagnostics</h1>
+    <p class="admin-page-intro">
+      What the file scan worker has done, what it is running on, and what is
+      waiting for it. Every figure is a total: nothing here names a file, an
+      uploader or a signature.
+    </p>
+
+    @if (state().kind === 'ERROR') {
+      <app-lcars-error-message
+        title="Unavailable"
+        [message]="errorMessage"></app-lcars-error-message>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto sunflower"
+        (click)="load()">
+        Try again
+      </button>
+    }
+
+    @let current = state();
+    @if (current.kind === 'READY') {
+      @let diagnostics = current.diagnostics;
+
+      <div class="scan-diagnostics__read">
+        <p>Read {{ diagnostics.generatedAt | appDate: 'medium' }}</p>
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto sunflower"
+          (click)="load()">
+          Refresh
+        </button>
+      </div>
+
+      <section
+        class="admin-section"
+        aria-labelledby="scan-usage-heading">
+        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+          <span id="scan-usage-heading">Usage</span>
+        </div>
+
+        @if (diagnostics.usage === null) {
+          <p class="scan-diagnostics__unavailable">
+            The worker’s usage figures could not be read. Its migrations may not
+            have run here yet.
+          </p>
+        } @else {
+          <p class="scan-diagnostics__note">
+            A re-scan is a campaign’s, or any scan of a file scanned before. A
+            retry is a claim beyond the first.
+          </p>
+
+          <table class="scan-diagnostics-table">
+            <caption>
+              Scans
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Measure</th>
+                @for (window of diagnostics.usage; track window.window) {
+                  <th
+                    scope="col"
+                    class="scan-diagnostics-table__number">
+                    {{ windowLabels[window.window] }}
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of activityRows; track row.key) {
+                <tr>
+                  <th scope="row">{{ row.label }}</th>
+                  @for (window of diagnostics.usage; track window.window) {
+                    <td
+                      class="scan-diagnostics-table__number"
+                      [attr.data-label]="windowLabels[window.window]">
+                      {{ countOf(window, row.key) }}
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <table class="scan-diagnostics-table">
+            <caption>
+              Outcomes
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Outcome</th>
+                @for (window of diagnostics.usage; track window.window) {
+                  <th
+                    scope="col"
+                    class="scan-diagnostics-table__number">
+                    {{ windowLabels[window.window] }}
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of outcomeRows; track row.key) {
+                <tr>
+                  <th scope="row">{{ row.label }}</th>
+                  @for (window of diagnostics.usage; track window.window) {
+                    <td
+                      class="scan-diagnostics-table__number"
+                      [attr.data-label]="windowLabels[window.window]">
+                      {{ countOf(window, row.key) }}
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <table class="scan-diagnostics-table">
+            <caption>
+              Latency
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Measure</th>
+                @for (window of diagnostics.usage; track window.window) {
+                  <th
+                    scope="col"
+                    class="scan-diagnostics-table__number">
+                    {{ windowLabels[window.window] }}
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of latencyRows; track row.key) {
+                <tr>
+                  <th scope="row">{{ row.label }}</th>
+                  @for (window of diagnostics.usage; track window.window) {
+                    <td
+                      class="scan-diagnostics-table__number"
+                      [attr.data-label]="windowLabels[window.window]">
+                      {{ durationOf(window, row.key) }}
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </section>
+
+      <section
+        class="admin-section"
+        aria-labelledby="scan-engine-heading">
+        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+          <span id="scan-engine-heading">Engine</span>
+        </div>
+
+        @if (diagnostics.engine; as engine) {
+          <dl class="scan-diagnostics__details">
+            <div>
+              <dt>Scanner</dt>
+              <dd>{{ engine.engine }} {{ engine.engineVersion ?? '' }}</dd>
+            </div>
+            <div>
+              <dt>Signature version</dt>
+              <dd>{{ engine.signatureVersion ?? 'Not reported' }}</dd>
+            </div>
+            <div>
+              <dt>Signatures built</dt>
+              <dd>
+                @if (engine.definitionsBuiltAt; as builtAt) {
+                  {{ builtAt | appDate: 'medium' }}
+                } @else {
+                  Not reported
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>Signature age</dt>
+              <dd>
+                @if (engine.signatureAgeHours !== null) {
+                  {{ engine.signatureAgeHours }} hours
+                } @else {
+                  Unknown
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>Reported</dt>
+              <dd>{{ engine.reportedAt | appDate: 'medium' }}</dd>
+            </div>
+          </dl>
+        } @else {
+          <p class="scan-diagnostics__unavailable">
+            No scan has reported an engine yet, or the worker’s figures could
+            not be read.
+          </p>
+        }
+      </section>
+
+      <section
+        class="admin-section"
+        aria-labelledby="scan-backlog-heading">
+        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+          <span id="scan-backlog-heading">Backlog</span>
+        </div>
+
+        @if (diagnostics.queue; as queue) {
+          <dl class="scan-diagnostics__details">
+            <div>
+              <dt>Waiting to be picked up</dt>
+              <dd>{{ queue.waiting }}</dd>
+            </div>
+            <div>
+              <dt>Put back until the scanner is fit</dt>
+              <dd>{{ queue.delayed }}</dd>
+            </div>
+            <div>
+              <dt>Being scanned now</dt>
+              <dd>{{ queue.active }}</dd>
+            </div>
+            <div>
+              <dt>Given up on by the queue</dt>
+              <dd>{{ queue.failed }}</dd>
+            </div>
+          </dl>
+        } @else {
+          <p class="scan-diagnostics__unavailable">
+            The scan queue could not be reached.
+          </p>
+        }
+
+        <dl class="scan-diagnostics__details">
+          <div>
+            <dt>Stored, not yet sent to scan</dt>
+            <dd>{{ diagnostics.awaiting.quarantined }}</dd>
+          </div>
+          <div>
+            <dt>Sent to scan, no verdict yet</dt>
+            <dd>{{ diagnostics.awaiting.scanning }}</dd>
+          </div>
+          <div>
+            <dt>Waiting to be sent again</dt>
+            <dd>{{ diagnostics.awaiting.retryPending }}</dd>
+          </div>
+        </dl>
+      </section>
+    }
+
+    <p>
+      <a [routerLink]="adminLink">Back to Admin</a>
+    </p>
+  </div>
+</div>

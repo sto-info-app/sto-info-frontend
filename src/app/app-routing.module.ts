@@ -433,6 +433,15 @@ export const routes: Routes = [
     data: { title: APP_ROUTE_TITLES.ADMIN_PERMISSIONS, requiresApi: true },
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
+  {
+    path: APP_ROUTES.ADMIN_SCAN_DIAGNOSTICS,
+    loadComponent: () =>
+      import('./admin/scan-diagnostics/scan-diagnostics.component').then(
+        m => m.ScanDiagnosticsComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_SCAN_DIAGNOSTICS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
 
   // *****************************************
   // * STO App routes

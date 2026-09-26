@@ -97,6 +97,7 @@ export const API_URLS = {
   REPORTS: apiUrl + '/reports',
   MODERATION_ADMIN_REPORTS: apiUrl + '/admin/moderation/reports',
   MODERATION_ADMIN_USERS: apiUrl + '/admin/moderation/users',
+  FILE_SCANNING_ADMIN_DIAGNOSTICS: apiUrl + '/admin/file-scanning/diagnostics',
 
   // Access control (what the signed-in user is permitted to do, and the admin
   // side that grants or withholds it per user)

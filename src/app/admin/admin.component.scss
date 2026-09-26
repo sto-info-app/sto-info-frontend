@@ -27,6 +27,9 @@ $admin-landing-colours: (
   // in both places, and the colour is part of what says it is the same card.
   'manage-spotlight': vars.$lcars-gold,
   'tags': vars.$lcars-c48,
+  // Operations, which has a band of its own. Sunflower is taken by nothing
+  // else here and carries black text.
+  'scan-diagnostics': vars.$lcars-sunflower,
 );
 
 #admin-page {

@@ -72,6 +72,22 @@
     </ul>
   </app-collapsible-section>
 
+  <app-collapsible-section
+    heading="Operations"
+    barClass="small-lcars-bar-gap">
+    <ul class="admin-landing__panels">
+      <li class="admin-landing__card--scan-diagnostics">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_SCAN_DIAGNOSTICS)">
+          <span class="admin-landing__name">Scan Diagnostics</span>
+          <p class="admin-landing__summary">
+            See what the file scanner has done, what it runs on and what is
+            waiting for it.
+          </p>
+        </a>
+      </li>
+    </ul>
+  </app-collapsible-section>
+
   <!--
     Storytime's own management pages, for administrators who hold them. Filtered
     by permission rather than by role, so this section is empty for an
