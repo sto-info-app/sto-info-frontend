@@ -41,10 +41,17 @@ export default defineConfig({
   timeout: 180_000,
   expect: { timeout: 15_000 },
 
-  reporter: [
-    ['list'],
-    ['html', { outputFolder: 'reports/playwright/html', open: 'never' }],
-  ],
+  reporter: process.env['CI']
+    ? [
+        ['list'],
+        ['html', { outputFolder: 'reports/playwright/html', open: 'never' }],
+        ['junit', { outputFile: 'reports/playwright/junit.xml' }],
+        ['json', { outputFile: 'reports/playwright/results.json' }],
+      ]
+    : [
+        ['list'],
+        ['html', { outputFolder: 'reports/playwright/html', open: 'never' }],
+      ],
 
   outputDir: 'reports/playwright/artifacts',
 
@@ -53,6 +60,10 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'off',
+    // A control that never becomes clickable should fail here, not consume
+    // the whole test. A document that never finishes loading should too.
+    actionTimeout: 20_000,
+    navigationTimeout: 45_000,
   },
 
   projects: [
@@ -94,8 +105,73 @@ export default defineConfig({
       },
     },
     {
+      // Frequent cases. They sign in through the authenticate project and do
+      // not switch Custom Tracking on, so they neither purge it nor require it.
+      name: 'frequent',
+      testMatch: /frequent[\\/].*\.e2e\.ts/,
+      dependencies: ['authenticate'],
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
+    {
+      // Weekly cases. They do not purge Custom Tracking. Storytime is switched
+      // on only by the cases that read it.
+      name: 'weekly',
+      testMatch: /weekly[\\/].*\.e2e\.ts/,
+      dependencies: ['authenticate'],
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
+    {
+      // Storytime is off for this case, and only this case. The next project
+      // is what switches it on.
+      name: 'storytime-off',
+      testMatch: /storytime[\\/]offline\.e2e\.ts/,
+      dependencies: ['authenticate'],
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
+    {
+      // Switches Storytime on and publishes the voyage the on-cases read.
+      name: 'storytime-prepare',
+      testMatch: /storytime[\\/]prepare\.setup\.e2e\.ts/,
+      dependencies: ['storytime-off'],
+      teardown: 'storytime-finish',
+    },
+    {
+      // Removes the voyage and switches Storytime off again.
+      name: 'storytime-finish',
+      testMatch: /storytime[\\/]finish\.teardown\.e2e\.ts/,
+    },
+    {
+      name: 'storytime',
+      testMatch: /storytime[\\/]stories\.e2e\.ts/,
+      dependencies: ['storytime-prepare'],
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
+    {
+      // Mail and picture cases. Weekly does not depend on this project, so it
+      // stays green when the picture flag is unset. The picture journey lives
+      // here rather than in journeys, so a full run does not upload it twice.
+      name: 'external',
+      testMatch: [
+        /external[\\/].*\.e2e\.ts/,
+        /journeys[\\/]04-pictures\.e2e\.ts/,
+      ],
+      dependencies: ['custom-tracking'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: SIGNED_IN_STATE,
+      },
+    },
+    {
       name: 'journeys',
-      testMatch: /(journeys|reviews)[\\/].*\.e2e\.ts/,
+      testMatch: /(journeys|reviews)[\\/](?!04-pictures).*\.e2e\.ts/,
       dependencies: ['custom-tracking'],
       use: {
         ...devices['Desktop Chrome'],

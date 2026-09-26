@@ -16,3 +16,19 @@ export function storageStateFor(code: string): string {
 
 /** The demonstration member. Custom Tracking journeys sign in as them. */
 export const MEMBER_STORAGE_STATE = storageStateFor('M');
+
+/**
+ * Fixture actors created by the backend support command.
+ *
+ * The password is the seed password and is not recorded here.
+ */
+export const fixtureActors = {
+  B: {
+    code: 'B',
+    email: 'e2e-member-b@example.com',
+  },
+  ADM: {
+    code: 'ADM',
+    email: 'e2e-admin@example.com',
+  },
+} as const;
