@@ -21,52 +21,53 @@ const TAB = 'Open';
 const FIELD = 'Motto';
 const ANSWER = 'Ex Astris, Scientia';
 
-test('disabling the account withdraws everything it published', async ({
-  browser,
-  tracking,
-}) => {
-  backend.setDisabled(member.email, 'off');
-
-  try {
-    await tracking.openReady();
-
-    await test.step('publish something', async () => {
-      await tracking.buildOneField({
-        section: SECTION,
-        tab: TAB,
-        field: FIELD,
-        type: 'TEXT_SINGLE_LINE',
-        publiclyVisible: true,
-      });
-      await tracking.recordAnswer(member.publicAccount, FIELD, ANSWER);
-    });
-
-    await test.step('a visitor can read it', async () => {
-      await anonymously(browser, async page => {
-        await page.goto(publicAccountPath(member.publicAccount));
-        await expect(page.getByText(SECTION, { exact: true })).toBeVisible();
-      });
-    });
-
-    await test.step('the account is disabled, and it is all gone', async () => {
-      backend.setDisabled(member.email, 'on');
-
-      await anonymously(browser, async page => {
-        await page.goto(publicAccountPath(member.publicAccount));
-        await expect(page.getByText(SECTION, { exact: true })).toHaveCount(0);
-        await expect(page.getByText(ANSWER)).toHaveCount(0);
-      });
-    });
-
-    await test.step('enabling it again puts it back', async () => {
-      backend.setDisabled(member.email, 'off');
-
-      await anonymously(browser, async page => {
-        await page.goto(publicAccountPath(member.publicAccount));
-        await expect(page.getByText(SECTION, { exact: true })).toBeVisible();
-      });
-    });
-  } finally {
+test(
+  'CT-10 disabling the account withdraws everything it published',
+  { tag: '@high' },
+  async ({ browser, tracking }) => {
     backend.setDisabled(member.email, 'off');
-  }
-});
+
+    try {
+      await tracking.openReady();
+
+      await test.step('publish something', async () => {
+        await tracking.buildOneField({
+          section: SECTION,
+          tab: TAB,
+          field: FIELD,
+          type: 'TEXT_SINGLE_LINE',
+          publiclyVisible: true,
+        });
+        await tracking.recordAnswer(member.publicAccount, FIELD, ANSWER);
+      });
+
+      await test.step('a visitor can read it', async () => {
+        await anonymously(browser, async page => {
+          await page.goto(publicAccountPath(member.publicAccount));
+          await expect(page.getByText(SECTION, { exact: true })).toBeVisible();
+        });
+      });
+
+      await test.step('the account is disabled, and it is all gone', async () => {
+        backend.setDisabled(member.email, 'on');
+
+        await anonymously(browser, async page => {
+          await page.goto(publicAccountPath(member.publicAccount));
+          await expect(page.getByText(SECTION, { exact: true })).toHaveCount(0);
+          await expect(page.getByText(ANSWER)).toHaveCount(0);
+        });
+      });
+
+      await test.step('enabling it again puts it back', async () => {
+        backend.setDisabled(member.email, 'off');
+
+        await anonymously(browser, async page => {
+          await page.goto(publicAccountPath(member.publicAccount));
+          await expect(page.getByText(SECTION, { exact: true })).toBeVisible();
+        });
+      });
+    } finally {
+      backend.setDisabled(member.email, 'off');
+    }
+  },
+);
