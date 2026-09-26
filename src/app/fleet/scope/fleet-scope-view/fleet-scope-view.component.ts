@@ -8,6 +8,7 @@ import {
 import { RouterLink } from '@angular/router';
 
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
+import { FleetRecruitmentPanelComponent } from 'src/app/fleet/recruitment/fleet-recruitment-panel/fleet-recruitment-panel.component';
 import { FleetScopeArtworkComponent } from 'src/app/fleet/scope/fleet-scope-artwork/fleet-scope-artwork.component';
 import { FleetFollowComponent } from 'src/app/fleet/scope/fleet-follow/fleet-follow.component';
 import { FleetScopeHeaderComponent } from 'src/app/fleet/scope/fleet-scope-header/fleet-scope-header.component';
@@ -37,6 +38,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
     FleetScopeArtworkComponent,
     FleetScopeHeaderComponent,
     FleetFollowComponent,
+    FleetRecruitmentPanelComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,

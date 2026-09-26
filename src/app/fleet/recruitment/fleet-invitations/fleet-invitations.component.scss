@@ -1,0 +1,23 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.fleet-invitations {
+  &__form {
+    max-width: 32rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  &__muted {
+    display: block;
+    font-size: 0.85rem;
+    color: vars.$lcars-grey-light;
+  }
+}

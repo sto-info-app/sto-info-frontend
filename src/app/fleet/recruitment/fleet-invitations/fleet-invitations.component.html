@@ -1,0 +1,127 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Invitations"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the invitations"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+
+      @if (actionNotice(); as notice) {
+        <p
+          class="fleet-invitations__notice"
+          role="status">
+          {{ notice }}
+        </p>
+      }
+      @if (actionError(); as refusal) {
+        <app-lcars-error-message
+          title="Not done"
+          [message]="refusal" />
+      }
+
+      @if (mayInvite(data)) {
+        <form
+          class="fleet-invitations__form"
+          aria-label="Invite somebody"
+          (submit)="$event.preventDefault(); onInvite(data)">
+          <div class="lcars-input-container sky">
+            <label for="invitation-username">STO Info username</label>
+            <input
+              id="invitation-username"
+              type="text"
+              autocomplete="off"
+              [attr.maxlength]="usernameLimit"
+              [value]="username()"
+              [disabled]="busy()"
+              (input)="username.set($any($event.target).value)" />
+          </div>
+          <p class="fleet-community-field-hint">
+            An invitation skips the Fleet’s requirements, works whether or not
+            it is recruiting, and lapses after 14 days. It cannot invite anybody
+            in game.
+          </p>
+          <div class="fleet-community-form-actions">
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto sky"
+              [disabled]="busy() || username().trim() === ''">
+              Send the invitation
+            </button>
+          </div>
+        </form>
+      }
+
+      @if (data.invitations.length === 0) {
+        <p class="fleet-community-empty">
+          Nobody has been invited to this Fleet yet.
+        </p>
+      } @else {
+        <table class="fleet-community-table">
+          <caption>
+            Invitations, newest first
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Invited</th>
+              <th scope="col">By</th>
+              <th scope="col">Sent</th>
+              <th scope="col">State</th>
+              @if (mayInvite(data)) {
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (invitation of data.invitations; track invitation.id) {
+              <tr>
+                <td data-label="Invited">
+                  {{ invitation.invitedUsername ?? 'An account since closed' }}
+                </td>
+                <td data-label="By">
+                  {{
+                    invitation.invitedByUsername ?? 'An account since closed'
+                  }}
+                </td>
+                <td data-label="Sent">
+                  {{ invitation.sentAt | appDate: 'medium' }}
+                </td>
+                <td data-label="State">
+                  {{ stateLabels[invitation.state] }}
+                  @if (isOpen(invitation)) {
+                    <span class="fleet-invitations__muted"
+                      >until
+                      {{ invitation.expiresAt | appDate: 'medium' }}</span
+                    >
+                  } @else if (invitation.answeredAt) {
+                    <span class="fleet-invitations__muted">{{
+                      invitation.answeredAt | appDate: 'medium'
+                    }}</span>
+                  }
+                </td>
+                @if (mayInvite(data)) {
+                  <td data-label="Actions">
+                    @if (isOpen(invitation)) {
+                      <button
+                        type="button"
+                        class="lcars-btn lcars-btn-auto bluey"
+                        [disabled]="busy()"
+                        (click)="onWithdraw(data, invitation)">
+                        Withdraw
+                      </button>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    }
+  </app-fleet-page-shell>
+}

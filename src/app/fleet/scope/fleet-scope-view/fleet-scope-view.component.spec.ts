@@ -2,8 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { Subject } from 'rxjs';
+
 import { CommunitySubscriptionService } from 'src/app/fleet/community-subscription.service';
 import { FLEET_SCOPE_COMMUNITY } from 'src/app/fleet/constants/fleet-scope.constants';
+import { FleetRecruitmentService } from 'src/app/fleet/recruitment/fleet-recruitment.service';
 import {
   FleetScopeHeaderVm,
   FleetScopePageState,
@@ -28,14 +31,21 @@ const HEADER: FleetScopeHeaderVm = {
 
 describe('FleetScopeViewComponent', () => {
   let fixture: ComponentFixture<FleetScopeViewComponent>;
+  let recruitmentView: Subject<unknown>;
 
   beforeEach(async () => {
+    recruitmentView = new Subject<unknown>();
+
     await TestBed.configureTestingModule({
       imports: [FleetScopeViewComponent],
       providers: [
         provideRouter([]),
         { provide: CommunitySubscriptionService, useValue: {} },
         { provide: AuthService, useValue: { isLoggedIn: () => false } },
+        {
+          provide: FleetRecruitmentService,
+          useValue: { view: () => recruitmentView, leave: () => new Subject() },
+        },
       ],
     }).compileComponents();
   });
@@ -260,5 +270,56 @@ describe('FleetScopeViewComponent', () => {
     });
 
     expect(find('app-fleet-follow')).toBeNull();
+  });
+
+  describe('the recruitment panel', () => {
+    const RECRUITMENT = {
+      communityId: 'community-1',
+      fleetId: 'fleet-1',
+      fleetName: 'Starfleet Command',
+      platformName: 'PC',
+      communitySlug: 'united-federation-alliance',
+      platformSegment: 'pc',
+      fleetSlug: 'starfleet-command',
+    };
+
+    it('is drawn when the page has one, and a change it makes is passed up', () => {
+      render({
+        kind: 'READY',
+        actions: [],
+        header: HEADER,
+        notice: null,
+        description: null,
+        artwork: null,
+        following: null,
+        recruitment: RECRUITMENT,
+      });
+      const changed = jest.fn();
+      fixture.componentInstance.changed.subscribe(changed);
+
+      const panel = find('app-fleet-recruitment-panel');
+      expect(panel).not.toBeNull();
+
+      fixture.debugElement
+        .query(node => node.name === 'app-fleet-recruitment-panel')
+        .triggerEventHandler('changed');
+
+      expect(changed).toHaveBeenCalledTimes(1);
+    });
+
+    it('is not drawn where the page has none', () => {
+      render({
+        kind: 'READY',
+        actions: [],
+        header: HEADER,
+        notice: null,
+        description: null,
+        artwork: null,
+        following: null,
+        recruitment: null,
+      });
+
+      expect(find('app-fleet-recruitment-panel')).toBeNull();
+    });
   });
 });

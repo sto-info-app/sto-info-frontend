@@ -81,6 +81,7 @@ function proposal(
     raisedAt: '2026-01-01T00:00:00.000Z',
     expiresAt: '2026-04-01T00:00:00.000Z',
     answeredAt: null,
+    fromApplication: false,
     ...overrides,
   };
 }
@@ -362,6 +363,24 @@ describe('CharacterFleetPanelComponent', () => {
       render();
 
       expect(text()).toContain('Seen on that roster');
+    });
+
+    it('says when an accepted application raised it', () => {
+      service.proposals.mockReturnValue(
+        of([proposal({ fromApplication: true })]),
+      );
+
+      render();
+
+      expect(text()).toContain('From your accepted application');
+    });
+
+    it('says nothing of an application when a roster raised it', () => {
+      service.proposals.mockReturnValue(of([proposal()]));
+
+      render();
+
+      expect(text()).not.toContain('From your accepted application');
     });
 
     // The acceptance criteria ask for the Community as well as the moment. A

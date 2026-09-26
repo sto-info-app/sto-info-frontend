@@ -1,0 +1,126 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Members"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the members"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+
+      <p class="fleet-members__intro">
+        Membership here opens the Fleet’s private pages. It is not the game’s
+        roster, and removing somebody here does not take them out of the Fleet
+        in game.
+      </p>
+
+      @if (removalNotice(); as notice) {
+        <p
+          class="fleet-members__notice"
+          role="status">
+          {{ notice }}
+        </p>
+      }
+      @if (removalError(); as refusal) {
+        <app-lcars-error-message
+          title="Not removed"
+          [message]="refusal" />
+      }
+
+      @if (removing(); as member) {
+        <form
+          class="fleet-members__remove"
+          aria-label="Remove a member"
+          (submit)="$event.preventDefault(); onConfirm(data)">
+          <p class="fleet-members__asking">
+            Remove
+            {{ member.username ?? 'this account' }}
+            from this Fleet?
+          </p>
+          <div class="lcars-input-container tangerine">
+            <label for="member-removal-reason">Reason</label>
+            <textarea
+              id="member-removal-reason"
+              rows="3"
+              [attr.maxlength]="reasonLimit"
+              [value]="reason()"
+              [disabled]="busy()"
+              (input)="reason.set($any($event.target).value)"></textarea>
+          </div>
+          <p class="fleet-community-field-hint">
+            Kept with the removal. Any role they hold here ends with it.
+          </p>
+          <div class="fleet-community-form-actions">
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto bluey"
+              [disabled]="busy()"
+              (click)="onCancel()">
+              Keep them
+            </button>
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto red"
+              [disabled]="busy() || reason().trim() === ''">
+              Remove
+            </button>
+          </div>
+        </form>
+      }
+
+      @if (data.members.length === 0) {
+        <p class="fleet-community-empty">
+          Nobody is a member of this Fleet here yet.
+        </p>
+      } @else {
+        <table class="fleet-community-table">
+          <caption>
+            Members, newest first
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Member</th>
+              <th scope="col">Character</th>
+              <th scope="col">How</th>
+              <th scope="col">Since</th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (member of data.members; track member.membershipId) {
+              <tr>
+                <td data-label="Member">
+                  {{ member.username ?? 'An account with no username' }}
+                </td>
+                <td data-label="Character">
+                  {{ member.characterName ?? '—' }}
+                </td>
+                <td data-label="How">
+                  {{ member.route ? routeLabels[member.route] : '—' }}
+                </td>
+                <td data-label="Since">
+                  {{ (member.memberSince | appDate: 'medium') ?? '—' }}
+                </td>
+                <td data-label="Status">{{ statusLabels[member.status] }}</td>
+                <td data-label="Actions">
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto red"
+                    [disabled]="busy()"
+                    (click)="onRemove(member)">
+                    Remove…
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    }
+  </app-fleet-page-shell>
+}

@@ -4,6 +4,7 @@ import { FleetScopeType } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetPicture } from 'src/app/fleet/fleet-artwork';
 import { FleetImageSlot } from 'src/app/fleet/fleet-image.constants';
 import { FleetArtworkTarget } from 'src/app/fleet/fleet-image.service';
+import { FleetRecruitmentPanelVm } from 'src/app/fleet/recruitment/fleet-recruitment-panel/fleet-recruitment-panel.component';
 import { FleetScopeRelationship } from 'src/app/models/fleet.models';
 
 /** One labelled line in the block of facts beneath a scope's name. */
@@ -206,4 +207,11 @@ export interface FleetScopeReadyState {
    * no roster.
    */
   readonly tabs?: FleetTabsVm | null;
+
+  /**
+   * How the Fleet recruits and what the reader may do about it (FC-021), on
+   * an active Fleet a Community holds. Absent or null everywhere else:
+   * nobody joins a record nobody runs, or a Fleet that has closed.
+   */
+  readonly recruitment?: FleetRecruitmentPanelVm | null;
 }

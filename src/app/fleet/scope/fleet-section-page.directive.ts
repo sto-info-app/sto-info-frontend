@@ -61,7 +61,9 @@ export type FleetSectionState<T> =
  * before asking for the section itself. Absent, failed and not permitted are
  * three different things to tell a reader: a Fleet that does not answer, a
  * request that did not, and a section that is not theirs to read. A Fleet no
- * Community holds has no roster, so none of its sections answers either.
+ * Community holds has no sections, so none of them answers; a Fleet on a
+ * platform with no roster export has only those that need no roster, which
+ * is its recruitment (FC-021).
  *
  * Each navigation is resolved and caught on its own, so a failure on one
  * address does not leave the page unable to show the next.
@@ -85,6 +87,12 @@ export abstract class FleetSectionPageDirective<T> {
    * who can see the Fleet may open it, and the server decides the rest.
    */
   protected abstract readonly _requiredCapabilities: readonly string[];
+
+  /**
+   * Whether the section is about the Fleet's roster, and so answers only on
+   * a platform the game writes a roster export on.
+   */
+  protected readonly _needsRoster: boolean = true;
 
   /** The Fleet and the section, reloaded whenever the address changes. */
   readonly state$: Observable<FleetSectionState<T>> = combineLatest([
@@ -191,7 +199,11 @@ export abstract class FleetSectionPageDirective<T> {
           const tabs = fleetTabsVmOf(resolved);
           const communityId = resolved.fleet.communityId;
 
-          if (tabs === null || communityId === null) {
+          if (
+            tabs === null ||
+            communityId === null ||
+            (this._needsRoster && !tabs.providesRoster)
+          ) {
             return of<FleetSectionState<T>>({ kind: 'MISSING' });
           }
 

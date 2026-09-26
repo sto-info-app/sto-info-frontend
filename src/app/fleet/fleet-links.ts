@@ -307,6 +307,135 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * The signed-in person's own Fleet applications and invitations (FC-021).
+   *
+   * @returns The router link.
+   */
+  myApplications: (): string[] => [FLEETS, 'applications'],
+
+  /**
+   * The page for applying to a Fleet whose recruitment state is APPLICATION.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetApply: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'apply',
+  ],
+
+  /**
+   * Where a Fleet's officers run its recruitment: applications, invitations,
+   * members and settings (FC-021).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRecruitment: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'recruitment',
+  ],
+
+  /**
+   * A Fleet's applications, for its deciders.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetApplications: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetRecruitment(communitySlug, platformSegment, fleetSlug),
+    'applications',
+  ],
+
+  /**
+   * One application to a Fleet, in full.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @param applicationId - The application.
+   * @returns The router link.
+   */
+  fleetApplication: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+    applicationId: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetApplications(communitySlug, platformSegment, fleetSlug),
+    applicationId,
+  ],
+
+  /**
+   * A Fleet's invitations.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetInvitations: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetRecruitment(communitySlug, platformSegment, fleetSlug),
+    'invitations',
+  ],
+
+  /**
+   * A Fleet's members, for whoever may remove one.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetMembers: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetRecruitment(communitySlug, platformSegment, fleetSlug),
+    'members',
+  ],
+
+  /**
+   * How a Fleet recruits: its state, requirements and application form.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRecruitmentSettings: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetRecruitment(communitySlug, platformSegment, fleetSlug),
+    'settings',
+  ],
+
+  /**
    * One Armada's page, below the Community that registered it.
    *
    * @param communitySlug - The holding Community's URL segment.

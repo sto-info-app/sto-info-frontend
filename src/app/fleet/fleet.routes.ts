@@ -52,6 +52,18 @@ export const FLEET_ROUTES: Routes = [
         data: { title: APP_ROUTE_TITLES.FLEET_ARMADAS },
       },
 
+      // The signed-in person's own applications and invitations (FC-021).
+      // A literal, like `register` below, so never a Community slug.
+      {
+        path: 'applications',
+        loadComponent: () =>
+          import('./recruitment/my-fleet-applications/my-fleet-applications.component').then(
+            m => m.MyFleetApplicationsComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_MY_APPLICATIONS },
+        canActivate: [AuthGuard],
+      },
+
       // A literal, and therefore never a Community slug: a scope's address
       // always names its collection first, so `register` and `communities`
       // cannot be confused for one another.
@@ -221,6 +233,74 @@ export const FLEET_ROUTES: Routes = [
         data: { title: APP_ROUTE_TITLES.FLEET_RANK_ORDER },
         canActivate: [AuthGuard],
       },
+      // Applying to a Fleet, and where its officers run its recruitment
+      // (FC-021). Signed in, because each is somebody acting on a Fleet;
+      // whether they may is the server's answer, and each page asks it. The
+      // pages below Recruitment sit under its address so its tab stays lit.
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/apply',
+        loadComponent: () =>
+          import('./recruitment/fleet-apply/fleet-apply.component').then(
+            m => m.FleetApplyComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_APPLY },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment',
+        loadComponent: () =>
+          import('./recruitment/fleet-recruitment-hub/fleet-recruitment-hub.component').then(
+            m => m.FleetRecruitmentHubComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_RECRUITMENT },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications',
+        loadComponent: () =>
+          import('./recruitment/fleet-applications/fleet-applications.component').then(
+            m => m.FleetApplicationsComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_APPLICATIONS },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications/:applicationId',
+        loadComponent: () =>
+          import('./recruitment/fleet-application-detail/fleet-application-detail.component').then(
+            m => m.FleetApplicationDetailComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_APPLICATION },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/invitations',
+        loadComponent: () =>
+          import('./recruitment/fleet-invitations/fleet-invitations.component').then(
+            m => m.FleetInvitationsComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_INVITATIONS },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/members',
+        loadComponent: () =>
+          import('./recruitment/fleet-members/fleet-members.component').then(
+            m => m.FleetMembersComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_MEMBERS },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/settings',
+        loadComponent: () =>
+          import('./recruitment/fleet-recruitment-settings/fleet-recruitment-settings.component').then(
+            m => m.FleetRecruitmentSettingsComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_RECRUITMENT_SETTINGS },
+        canActivate: [AuthGuard],
+      },
+
       // Where those pages lived before they moved under Investigate, kept so
       // a link to one still arrives.
       {

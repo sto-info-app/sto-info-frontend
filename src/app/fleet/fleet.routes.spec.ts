@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(25);
+    expect(children).toHaveLength(33);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -102,6 +102,37 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',
       APP_ROUTE_TITLES.FLEET_RANK_ORDER,
+    ],
+    // Recruitment (FC-021): each is somebody acting on a Fleet, or on their
+    // own applications.
+    ['applications', APP_ROUTE_TITLES.FLEET_MY_APPLICATIONS],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/apply',
+      APP_ROUTE_TITLES.FLEET_APPLY,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment',
+      APP_ROUTE_TITLES.FLEET_RECRUITMENT,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications',
+      APP_ROUTE_TITLES.FLEET_APPLICATIONS,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications/:applicationId',
+      APP_ROUTE_TITLES.FLEET_APPLICATION,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/invitations',
+      APP_ROUTE_TITLES.FLEET_INVITATIONS,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/members',
+      APP_ROUTE_TITLES.FLEET_MEMBERS,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/settings',
+      APP_ROUTE_TITLES.FLEET_RECRUITMENT_SETTINGS,
     ],
   ])('puts %s behind the sign-in guard', (path, title) => {
     expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
@@ -293,6 +324,35 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',
       'RankOrderComponent',
+    ],
+    ['applications', 'MyFleetApplicationsComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/apply',
+      'FleetApplyComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment',
+      'FleetRecruitmentHubComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications',
+      'FleetApplicationsComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications/:applicationId',
+      'FleetApplicationDetailComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/invitations',
+      'FleetInvitationsComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/members',
+      'FleetMembersComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/settings',
+      'FleetRecruitmentSettingsComponent',
     ],
   ])('loads the right component for %s', async (path, expected) => {
     const loaded = await (

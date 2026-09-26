@@ -684,13 +684,19 @@ The projected content is instantiated by the page whether or not the shell is
 showing it, so do not rely on the shell to delay a child's initialisation —
 only its rendering.
 
-**`<app-fleet-tabs>`** — the strip along the top of every page of a Fleet
-with a roster: Overview for anybody; Roster and History for `roster.view`
+**`<app-fleet-tabs>`** — the strip along the top of every page of a Fleet a
+Community holds: Overview for anybody; Roster and History for `roster.view`
 holders; Reports for anybody the server shows a report to; Investigate for
-whoever imports or investigates its rosters. It takes a `FleetTabsVm`, which
-`fleetTabsVmOf(resolved)` builds from the resolved Fleet and returns null for a
-Fleet with no sections — one no Community holds, or on a platform the game
-writes no roster export on — so such a Fleet draws no strip.
+whoever imports or investigates its rosters; Recruitment for whoever holds
+`applications.view`, `applications.decide`, `recruitment.manage` or
+`members.manage`. It takes a `FleetTabsVm`, which `fleetTabsVmOf(resolved)`
+builds from the resolved Fleet and returns null for a Fleet no Community holds,
+so such a Fleet draws no strip.
+
+On a platform the game writes no roster export on, `providesRoster` is false:
+the roster, history, report and investigation tabs are not offered, and only
+Recruitment can be (FC-021). A strip holding the Overview alone is not drawn at
+all, because a single tab is not a choice.
 
 Every tab but Reports is decided by the reader's capabilities. Reports asks the
 server once per Fleet which reports the reader sees, because a report's
@@ -705,7 +711,9 @@ tells a Fleet that does not answer (`MISSING`), a request that failed
 (`ERROR`) and a section the reader may not open (`NOT_PERMITTED`) apart, and
 only then calls the page's `load(section, query, params)`. A page declares
 `_requiredCapabilities`, any one of which opens it — empty where the server
-decides, as on Reports — and its `notPermittedMessage`. Each navigation is
+decides, as on Reports — and its `notPermittedMessage`. A section about the
+roster answers `MISSING` on a Fleet with no roster export; a recruitment page
+sets `_needsRoster = false`, since a console Fleet recruits too. Each navigation is
 caught on its own, so a failure on one address does not leave the page unable
 to show the next, and `reload()` reads the section again at the same address.
 
@@ -746,6 +754,41 @@ Fleet is in (`recruiting` green, `closed` grey, `disputed` tangerine).
 a moment is written in belongs to the page, which knows whether it holds an
 instant — rendered through `AppDatePipe` — or a day somebody typed, which is
 never re-zoned at all.
+
+### Recruitment
+
+Recruitment (FC-021) lives in `src/app/fleet/recruitment/`. Every request goes
+through `FleetRecruitmentService`, and every refusal is shown with
+`recruitmentRefusalOf(error, fallback)`: the server's own sentence for a 400,
+403, 404 or 409 — a requirement not met, a form that changed, somebody already
+a member — and the page's words for anything else.
+
+**`<app-fleet-recruitment-panel>`** — on a Fleet's page, beneath the follow
+control, for an active Fleet a Community holds. It reads how the Fleet recruits
+itself, says what the state means, lists the requirements, and offers the
+reader what they may do: join an `OPEN` Fleet with one of their Characters on
+its platform, apply to an `APPLICATION` one on a page of its own, accept or
+decline an open invitation, or leave. It raises `changed` after anything that
+changes the reader's membership, so the page reads their standing and tabs
+again.
+
+A Character is chosen from the reader's own accounts on the Fleet's platform
+(`recruitmentCharactersOf`). Level and faction are the server's to check.
+Whenever somebody joins or is accepted, the page says the site cannot invite
+anybody in game (`IN_GAME_INVITE_NOTE`).
+
+The **Recruitment** tab is a hub like Investigate: Applications and Invitations
+for `applications.view`, Members for `members.manage`, Settings for
+`recruitment.manage`, each its own address below `…/recruitment`. Deciding an
+application and sending an invitation take `applications.decide`. A decision
+and a settings save send the revision or version they read, and a refusal
+because somebody else got there first reads the page again beneath the
+server's message.
+
+The applicant's side is **`/fleets/applications`**: their applications with
+each decision and its reason, their open invitations, and withdrawing one
+still waiting. It is linked from the dashboard and from a Fleet's page while an
+application waits.
 
 ### Upload and scan state
 

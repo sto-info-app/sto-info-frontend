@@ -27,7 +27,11 @@ import {
   FleetScopeReadyState,
 } from 'src/app/fleet/scope/fleet-scope-page.models';
 import { FleetScopeViewComponent } from 'src/app/fleet/scope/fleet-scope-view/fleet-scope-view.component';
-import { ResolvedStoFleet, StoFleet } from 'src/app/models/fleet.models';
+import {
+  FleetScopeStatus,
+  ResolvedStoFleet,
+  StoFleet,
+} from 'src/app/models/fleet.models';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
@@ -261,6 +265,18 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
       // artwork is a capability held at it; an unregistered one's is a
       // question about who filled the slot, answered a slot at a time.
       tabs: fleetTabsVmOf(resolved),
+      recruitment:
+        fleet.communityId !== null && fleet.status === FleetScopeStatus.ACTIVE
+          ? {
+              communityId: fleet.communityId,
+              fleetId: fleet.id,
+              fleetName: fleet.exactGameName,
+              platformName: fleet.platformName,
+              communitySlug: resolved.communitySlug,
+              platformSegment: resolved.platformSegment,
+              fleetSlug: fleet.slug,
+            }
+          : null,
       artwork: buildScopeArtworkVm(
         isStandalone || fleet.communityId === null
           ? { kind: 'STANDALONE_FLEET', fleetId: fleet.id }

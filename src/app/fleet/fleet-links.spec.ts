@@ -125,6 +125,49 @@ describe('FLEET_LINKS', () => {
   // The same shape as a registered Fleet's, with the reserved segment where
   // the Community's slug would be, so a link to a Fleet is built the same
   // way wherever it comes from.
+  it('should put the person’s own applications below the directory', () => {
+    expect(FLEET_LINKS.myApplications()).toEqual(['/fleets', 'applications']);
+  });
+
+  it('should address applying beneath the Fleet', () => {
+    expect(FLEET_LINKS.fleetApply('ufa', 'pc', 'starfleet-command')).toEqual([
+      ...FLEET_LINKS.fleet('ufa', 'pc', 'starfleet-command'),
+      'apply',
+    ]);
+  });
+
+  it('should address each recruitment page beneath the Fleet’s recruitment', () => {
+    const recruitment = [
+      ...FLEET_LINKS.fleet('ufa', 'pc', 'starfleet-command'),
+      'recruitment',
+    ];
+
+    expect(
+      FLEET_LINKS.fleetRecruitment('ufa', 'pc', 'starfleet-command'),
+    ).toEqual(recruitment);
+    expect(
+      FLEET_LINKS.fleetApplications('ufa', 'pc', 'starfleet-command'),
+    ).toEqual([...recruitment, 'applications']);
+    expect(
+      FLEET_LINKS.fleetApplication(
+        'ufa',
+        'pc',
+        'starfleet-command',
+        'application-1',
+      ),
+    ).toEqual([...recruitment, 'applications', 'application-1']);
+    expect(
+      FLEET_LINKS.fleetInvitations('ufa', 'pc', 'starfleet-command'),
+    ).toEqual([...recruitment, 'invitations']);
+    expect(FLEET_LINKS.fleetMembers('ufa', 'pc', 'starfleet-command')).toEqual([
+      ...recruitment,
+      'members',
+    ]);
+    expect(
+      FLEET_LINKS.fleetRecruitmentSettings('ufa', 'pc', 'starfleet-command'),
+    ).toEqual([...recruitment, 'settings']);
+  });
+
   it('should address a standalone Fleet under the reserved segment', () => {
     expect(FLEET_LINKS.standaloneFleet('pc', 'starfleet-command')).toEqual([
       '/fleets',

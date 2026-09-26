@@ -10,6 +10,7 @@ import { BehaviorSubject, EMPTY, Observable, of } from 'rxjs';
 
 import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
+import { FleetRecruitmentService } from 'src/app/fleet/recruitment/fleet-recruitment.service';
 import { FleetScopePageState } from 'src/app/fleet/scope/fleet-scope-page.models';
 import {
   FleetAudience,
@@ -143,6 +144,8 @@ describe('FleetPageComponent', () => {
       providers: [
         { provide: FleetReportService, useValue: { visible: () => of([]) } },
         { provide: FleetScopeService, useValue: scopes },
+        // The recruitment panel reads its own answer; its spec covers it.
+        { provide: FleetRecruitmentService, useValue: { view: () => EMPTY } },
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: { paramMap: params$ } },
         { provide: PageTitleService, useValue: { setTitle: jest.fn() } },
@@ -555,6 +558,7 @@ describe('FleetPageComponent', () => {
         communitySlug: 'united-federation-alliance',
         platformSegment: 'pc',
         fleetSlug: 'starfleet-command',
+        providesRoster: true,
         capabilities: ROSTER_INVESTIGATOR.capabilities,
       });
     });
@@ -574,7 +578,8 @@ describe('FleetPageComponent', () => {
       expect(tabs()).toBeNull();
     });
 
-    it('draws none on a platform the game exports no roster from', () => {
+    // A console Fleet still recruits, so it keeps a strip for that (FC-021).
+    it('draws one with no roster on a platform the game exports none from', () => {
       scopes.resolveFleet.mockReturnValue(
         of(
           resolved({
@@ -584,8 +589,68 @@ describe('FleetPageComponent', () => {
       );
       render();
 
-      expect(tabs()).toBeNull();
+      expect(tabs()).toEqual(
+        expect.objectContaining({ providesRoster: false }),
+      );
     });
+  });
+
+  describe('its recruitment panel', () => {
+    /**
+     * Reads the recruitment panel the page draws.
+     *
+     * @returns The panel's view model.
+     */
+    function recruitment(): unknown {
+      const drawn = state();
+
+      return drawn.kind === 'READY' ? drawn.recruitment : undefined;
+    }
+
+    it('draws one for an active Fleet a Community holds', () => {
+      render();
+
+      expect(recruitment()).toEqual({
+        communityId: 'community-1',
+        fleetId: 'fleet-1',
+        fleetName: 'Starfleet Command ',
+        platformName: 'PC',
+        communitySlug: 'united-federation-alliance',
+        platformSegment: 'pc',
+        fleetSlug: 'starfleet-command',
+      });
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          'app-fleet-recruitment-panel',
+        ),
+      ).not.toBeNull();
+    });
+
+    it('draws none for a Fleet no Community has registered', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ communityId: null }),
+            communityName: null,
+          }),
+        ),
+      );
+      render();
+
+      expect(recruitment()).toBeNull();
+    });
+
+    it.each([FleetScopeStatus.CLOSED, FleetScopeStatus.SUSPENDED])(
+      'draws none for a Fleet that is %s',
+      status => {
+        scopes.resolveFleet.mockReturnValue(
+          of(resolved({ fleet: fleet({ status }) })),
+        );
+        render();
+
+        expect(recruitment()).toBeNull();
+      },
+    );
   });
 
   describe('checking a roster export', () => {

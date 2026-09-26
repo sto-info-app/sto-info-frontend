@@ -1,0 +1,188 @@
+@if (state$ | async; as state) {
+  <app-fleet-page-shell
+    heading="Your Fleet applications"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading your applications"
+    [errorMessage]="state.kind === 'ERROR' ? errorMessage : null">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+
+      @if (actionNotice(); as notice) {
+        <p
+          class="my-fleet-applications__notice"
+          role="status">
+          {{ notice }}
+        </p>
+      }
+      @if (actionError(); as refusal) {
+        <app-lcars-error-message
+          title="Not done"
+          [message]="refusal" />
+      }
+
+      <div class="lcars-text-bar">
+        <span>Invitations</span>
+      </div>
+      @if (data.invitations.length === 0) {
+        <p class="fleet-community-empty">No invitation is waiting for you.</p>
+      } @else {
+        <ul class="my-fleet-applications__invitations">
+          @for (invitation of data.invitations; track invitation.id) {
+            @let characters = charactersFor(data, invitation);
+            @let chosenId = chosenFor(data, invitation);
+            <li class="my-fleet-applications__invitation">
+              <p class="my-fleet-applications__fleet">
+                @if (fleetLink(invitation.fleet); as link) {
+                  <a [routerLink]="link">{{
+                    invitation.fleet.exactGameName
+                  }}</a>
+                } @else {
+                  {{ invitation.fleet.exactGameName }}
+                }
+                <span class="my-fleet-applications__muted"
+                  >on {{ invitation.fleet.platformName }}</span
+                >
+              </p>
+              <p class="my-fleet-applications__muted">
+                Invited by
+                {{ invitation.invitedByUsername ?? 'an account since closed' }}
+                {{ invitation.sentAt | appDate: 'medium' }}. Stands until
+                {{ invitation.expiresAt | appDate: 'medium' }}.
+              </p>
+
+              @if (characters.length === 0) {
+                <p class="fleet-community-empty">
+                  You have no Character on
+                  {{ invitation.fleet.platformName }} to accept with. Add one
+                  from your dashboard first.
+                </p>
+              } @else {
+                <div
+                  class="lcars-select-container gold my-fleet-applications__select">
+                  <label
+                    class="select-label"
+                    [attr.for]="'invitation-character-' + invitation.id"
+                    >Your Character in this Fleet</label
+                  >
+                  <select
+                    [id]="'invitation-character-' + invitation.id"
+                    [disabled]="busy()"
+                    (change)="
+                      onChoose(invitation.id, $any($event.target).value)
+                    ">
+                    <option
+                      value=""
+                      disabled
+                      [selected]="chosenId === ''">
+                      Choose a Character
+                    </option>
+                    @for (character of characters; track character.id) {
+                      <option
+                        [value]="character.id"
+                        [selected]="chosenId === character.id">
+                        {{ character.label }}
+                      </option>
+                    }
+                  </select>
+                </div>
+              }
+
+              <div class="buttons-row">
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto gold"
+                  [disabled]="busy() || chosenId === ''"
+                  (click)="onAccept(data, invitation)">
+                  Accept
+                </button>
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto bluey"
+                  [disabled]="busy()"
+                  (click)="onDecline(invitation)">
+                  Decline
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+        <p class="fleet-community-field-hint">{{ inGameNote }}</p>
+      }
+
+      <div class="lcars-text-bar">
+        <span>Applications</span>
+      </div>
+      @if (data.applications.length === 0) {
+        <p class="fleet-community-empty">
+          You have not applied to or joined a Fleet here yet.
+        </p>
+      } @else {
+        <table class="fleet-community-table">
+          <caption>
+            Newest first
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Fleet</th>
+              <th scope="col">Character</th>
+              <th scope="col">How</th>
+              <th scope="col">Sent</th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (application of data.applications; track application.id) {
+              <tr>
+                <td data-label="Fleet">
+                  @if (fleetLink(application.fleet); as link) {
+                    <a [routerLink]="link">{{
+                      application.fleet.exactGameName
+                    }}</a>
+                  } @else {
+                    {{ application.fleet.exactGameName }}
+                  }
+                </td>
+                <td data-label="Character">{{ application.characterName }}</td>
+                <td data-label="How">{{ routeLabels[application.route] }}</td>
+                <td data-label="Sent">
+                  {{ application.submittedAt | appDate: 'medium' }}
+                </td>
+                <td data-label="Status">
+                  {{ statusLabels[application.status] }}
+                  @if (application.decidedAt) {
+                    <span class="my-fleet-applications__muted">{{
+                      application.decidedAt | appDate: 'medium'
+                    }}</span>
+                  }
+                  @if (application.decisionNote) {
+                    <span class="my-fleet-applications__note"
+                      >“{{ application.decisionNote }}”</span
+                    >
+                  }
+                  @if (isAccepted(application)) {
+                    <span class="my-fleet-applications__muted"
+                      >Confirm the Fleet on your Character’s page once you have
+                      been invited in game.</span
+                    >
+                  }
+                </td>
+                <td data-label="Actions">
+                  @if (isPending(application)) {
+                    <button
+                      type="button"
+                      class="lcars-btn lcars-btn-auto bluey"
+                      [disabled]="busy()"
+                      (click)="onWithdraw(application)">
+                      Withdraw
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    }
+  </app-fleet-page-shell>
+}

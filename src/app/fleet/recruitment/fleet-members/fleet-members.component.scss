@@ -1,0 +1,28 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.fleet-members {
+  &__intro {
+    max-width: 70ch;
+    margin: 0 0 1rem;
+  }
+
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  // Asked above the list, so the reason is typed where it can be seen
+  // whichever row was chosen.
+  &__remove {
+    max-width: 32rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__asking {
+    font-weight: 600;
+  }
+}

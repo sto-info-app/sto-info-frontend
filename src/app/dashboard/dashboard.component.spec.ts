@@ -255,6 +255,9 @@ describe('DashboardComponent', () => {
       expect(fixture.nativeElement.textContent).toContain(
         'Communities You Follow',
       );
+      expect(fixture.nativeElement.textContent).toContain(
+        'Your Fleet Applications',
+      );
     });
 
     it('should offer nothing when the section is not offered', () => {
@@ -265,6 +268,9 @@ describe('DashboardComponent', () => {
       expect(fixture.nativeElement.textContent).not.toContain('Fleets');
       expect(fixture.nativeElement.textContent).not.toContain(
         'Communities You Follow',
+      );
+      expect(fixture.nativeElement.textContent).not.toContain(
+        'Your Fleet Applications',
       );
     });
 

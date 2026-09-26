@@ -391,6 +391,16 @@ describe('FleetRegisterComponent', () => {
       expect(sent()['platformId']).toBe('platform-1');
     });
 
+    // Joining at once is the looser choice, and its officers' to make.
+    it('takes applications unless told otherwise', () => {
+      render();
+
+      fillRequired();
+      submit();
+
+      expect(sent()['recruitmentState']).toBe('APPLICATION');
+    });
+
     it('leaves an unstated allegiance and web address out altogether', () => {
       render();
 

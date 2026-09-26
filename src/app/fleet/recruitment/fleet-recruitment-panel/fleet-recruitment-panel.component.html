@@ -1,0 +1,179 @@
+<section
+  class="fleet-recruitment"
+  aria-labelledby="fleet-recruitment-heading">
+  <h2
+    id="fleet-recruitment-heading"
+    class="fleet-recruitment__heading">
+    Recruitment
+  </h2>
+
+  @if (loadFailed()) {
+    <p
+      class="fleet-recruitment__error"
+      role="alert">
+      {{ loadError }}
+    </p>
+  } @else if (view(); as view) {
+    <p class="fleet-recruitment__state">
+      {{ summaries[view.settings.recruitmentState] }}
+    </p>
+
+    @if (showsRequirements()) {
+      <div class="fleet-recruitment__requirements">
+        <h3 class="fleet-recruitment__subheading">Requirements</h3>
+        <ul class="fleet-recruitment__list">
+          @if (view.settings.minimumLevel !== null) {
+            <li>Level {{ view.settings.minimumLevel }} or above</li>
+          }
+          @if (view.settings.factions.length > 0) {
+            <li>Faction: {{ factionListOf(view.settings) }}</li>
+          }
+        </ul>
+        @if (view.settings.requirementsText) {
+          <p class="fleet-recruitment__text">
+            {{ view.settings.requirementsText }}
+          </p>
+        }
+      </div>
+    }
+
+    @if (view.viewer === null) {
+      @if (
+        view.settings.recruitmentState === 'OPEN' ||
+        view.settings.recruitmentState === 'APPLICATION'
+      ) {
+        <p class="fleet-recruitment__note">
+          Sign in to
+          {{ view.settings.recruitmentState === 'OPEN' ? 'join' : 'apply' }}
+          with one of your Characters.
+        </p>
+      }
+    } @else {
+      @if (view.viewer.pendingApplications.length > 0) {
+        <ul class="fleet-recruitment__list">
+          @for (
+            application of view.viewer.pendingApplications;
+            track application.id
+          ) {
+            <li>
+              Your application with {{ application.characterName }}, sent
+              {{ application.submittedAt | appDate: 'medium' }}, is waiting for
+              a decision.
+            </li>
+          }
+        </ul>
+        <a
+          class="fleet-recruitment__link"
+          [routerLink]="myApplicationsLink"
+          >See your Fleet applications</a
+        >
+      }
+
+      @if (view.viewer.openInvitation; as invitation) {
+        <p class="fleet-recruitment__invited">
+          You have been invited to join this Fleet. The invitation stands until
+          {{ invitation.expiresAt | appDate: 'medium' }}.
+        </p>
+      }
+
+      @if (mayJoin() || view.viewer.openInvitation) {
+        @if (charactersFailed()) {
+          <p
+            class="fleet-recruitment__error"
+            role="alert">
+            {{ charactersError }}
+          </p>
+        } @else if (characters(); as characters) {
+          @if (characters.length === 0) {
+            <p class="fleet-recruitment__note">
+              You have no Character on {{ vm.platformName }} to
+              {{ view.viewer.openInvitation ? 'accept' : 'join' }} with. Add one
+              from your dashboard first.
+            </p>
+          } @else {
+            <div class="lcars-select-container gold fleet-recruitment__select">
+              <label
+                class="select-label"
+                for="fleet-recruitment-character"
+                >Your Character in this Fleet</label
+              >
+              <select
+                id="fleet-recruitment-character"
+                [ngModel]="characterId()"
+                (ngModelChange)="choose($event)"
+                [disabled]="busy()">
+                <option
+                  value=""
+                  disabled>
+                  Choose a Character
+                </option>
+                @for (character of characters; track character.id) {
+                  <option [value]="character.id">{{ character.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="buttons-row fleet-recruitment__actions">
+              @if (view.viewer.openInvitation) {
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto gold"
+                  [disabled]="busy() || characterId() === ''"
+                  (click)="accept()">
+                  Accept the invitation
+                </button>
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto bluey"
+                  [disabled]="busy()"
+                  (click)="decline()">
+                  Decline
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto gold"
+                  [disabled]="busy() || characterId() === ''"
+                  (click)="join()">
+                  Join this Fleet
+                </button>
+              }
+            </div>
+            <p class="fleet-recruitment__hint">{{ inGameNote }}</p>
+          }
+        }
+      }
+
+      @if (mayApply()) {
+        <div class="buttons-row fleet-recruitment__actions">
+          <a
+            class="lcars-btn lcars-btn-auto gold"
+            [routerLink]="applyLink"
+            >Apply to join</a
+          >
+        </div>
+      }
+
+      @if (isMember()) {
+        <div class="buttons-row fleet-recruitment__actions">
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto tangerine"
+            [disabled]="busy()"
+            (click)="leave()">
+            Leave this Fleet
+          </button>
+        </div>
+        <p class="fleet-recruitment__hint">{{ inGameNote }}</p>
+      }
+    }
+
+    @if (errorMessage()) {
+      <p
+        class="fleet-recruitment__error"
+        role="alert">
+        {{ errorMessage() }}
+      </p>
+    }
+  }
+</section>

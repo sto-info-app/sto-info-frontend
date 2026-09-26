@@ -1,0 +1,109 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Applications"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the applications"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+
+      <nav
+        class="lcars-tabs"
+        aria-label="Which applications to show">
+        @for (filter of filters; track filter) {
+          <button
+            type="button"
+            class="lcars-tab"
+            [class.active]="data.status === filter"
+            [attr.aria-pressed]="data.status === filter"
+            (click)="onFilter(filter)">
+            {{ filterLabels[filter] }}
+          </button>
+        }
+        <span
+          class="lcars-tabs-filler"
+          aria-hidden="true"></span>
+      </nav>
+
+      @if (data.page.items.length === 0) {
+        <p class="fleet-community-empty">
+          No application to this Fleet is
+          {{ filterLabels[data.status].toLowerCase() }}.
+        </p>
+      } @else {
+        <table class="fleet-community-table">
+          <caption>
+            {{
+              statusLabels[data.status]
+            }}:
+            {{
+              data.page.total
+            }}
+            in all
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Character</th>
+              <th scope="col">Applicant</th>
+              <th scope="col">Level</th>
+              <th scope="col">Faction</th>
+              <th scope="col">How</th>
+              <th scope="col">Sent</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (application of data.page.items; track application.id) {
+              <tr>
+                <td data-label="Character">
+                  <a [routerLink]="applicationLink(data, application.id)">{{
+                    application.characterName
+                  }}</a>
+                </td>
+                <td data-label="Applicant">
+                  {{
+                    application.applicantUsername ?? 'An account since closed'
+                  }}
+                </td>
+                <td data-label="Level">
+                  {{ application.characterLevel ?? '—' }}
+                </td>
+                <td data-label="Faction">
+                  {{ application.factionName ?? '—' }}
+                </td>
+                <td data-label="How">{{ routeLabels[application.route] }}</td>
+                <td data-label="Sent">
+                  {{ application.submittedAt | appDate: 'medium' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (totalPages(data.page) > 1) {
+          <div class="lcars-pagination">
+            <button
+              type="button"
+              [disabled]="data.page.page <= 1"
+              (click)="onPage(data.page.page - 1)">
+              Previous
+            </button>
+            <span
+              >Page {{ data.page.page }} of {{ totalPages(data.page) }}</span
+            >
+            <button
+              type="button"
+              [disabled]="data.page.page >= totalPages(data.page)"
+              (click)="onPage(data.page.page + 1)">
+              Next
+            </button>
+          </div>
+        }
+      }
+    }
+  </app-fleet-page-shell>
+}

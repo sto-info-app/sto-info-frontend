@@ -96,7 +96,9 @@ export class FleetRegisterComponent extends ScopeRegisterPageDirective {
     platformId: ['', [Validators.required]],
     allegianceFactionId: [''],
     slug: ['', [Validators.maxLength(FLEET_SLUG_MAX_LENGTH)]],
-    recruitmentState: [FleetRecruitmentState.OPEN],
+    // A new Fleet takes applications until its officers choose otherwise
+    // (FC-021): joining at once is the looser choice, and theirs to make.
+    recruitmentState: [FleetRecruitmentState.APPLICATION],
     visibility: [FleetAudience.PUBLIC],
   });
 

@@ -13,6 +13,7 @@ import { catchError, map, of, switchMap } from 'rxjs';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
 import { ROSTER_IMPORT_READERS } from 'src/app/fleet/imports/roster-import.constants';
+import { RECRUITMENT_TAB_CAPABILITIES } from 'src/app/fleet/recruitment/recruitment.constants';
 import { ROSTER_VIEW_CAPABILITY } from 'src/app/fleet/roster/roster.constants';
 import { ResolvedStoFleet } from 'src/app/models/fleet.models';
 
@@ -24,6 +25,11 @@ export interface FleetTabsVm {
   readonly communitySlug: string;
   readonly platformSegment: string;
   readonly fleetSlug: string;
+  /**
+   * Whether the game writes a roster export on the Fleet's platform. Without
+   * one there is no roster, history, report or investigation to offer.
+   */
+  readonly providesRoster: boolean;
   /** What the reader may do here, which decides the tabs they are offered. */
   readonly capabilities: readonly string[];
 }
@@ -40,15 +46,13 @@ export interface FleetTab {
  * Works out the strip for a resolved Fleet.
  *
  * @param resolved - The Fleet, as the server resolved it.
- * @returns The strip's view model, or null for a Fleet with no roster to
- *   have sections about: one no Community holds, which nobody imports into,
- *   and one on a platform the game writes no roster export on.
+ * @returns The strip's view model, or null for a Fleet no Community holds,
+ *   which has no sections: nobody imports into it or recruits to it. A Fleet
+ *   on a platform with no roster export still has one, for its recruitment
+ *   (FC-021).
  */
 export function fleetTabsVmOf(resolved: ResolvedStoFleet): FleetTabsVm | null {
-  if (
-    resolved.fleet.communityId === null ||
-    !resolved.fleet.platformProvidesRosterExport
-  ) {
+  if (resolved.fleet.communityId === null) {
     return null;
   }
 
@@ -58,6 +62,7 @@ export function fleetTabsVmOf(resolved: ResolvedStoFleet): FleetTabsVm | null {
     communitySlug: resolved.communitySlug,
     platformSegment: resolved.platformSegment,
     fleetSlug: resolved.fleet.slug,
+    providesRoster: resolved.fleet.platformProvidesRosterExport,
     capabilities: resolved.viewer.capabilities,
   };
 }
@@ -68,7 +73,8 @@ export function fleetTabsVmOf(resolved: ResolvedStoFleet): FleetTabsVm | null {
  * Every section is a route of its own, so a tab is a link: bookmarkable, and
  * honest to the back button. A tab is offered only to a reader who may use
  * it, as the Overview's actions are — a strip of sections somebody cannot
- * open tells them about permissions they did not ask about.
+ * open tells them about permissions they did not ask about. For the same
+ * reason a strip holding the Overview alone is not drawn at all.
  */
 @Component({
   selector: 'app-fleet-tabs',
@@ -95,10 +101,13 @@ export class FleetTabsComponent {
   private readonly _hasReports = toSignal(
     toObservable(this.vm).pipe(
       switchMap(vm =>
-        this._reportService.visible(vm.communityId, vm.fleetId).pipe(
-          map(reports => reports.length > 0),
-          catchError(() => of(false)),
-        ),
+        // Reports are counted from rosters, so a Fleet with none has none.
+        vm.providesRoster
+          ? this._reportService.visible(vm.communityId, vm.fleetId).pipe(
+              map(reports => reports.length > 0),
+              catchError(() => of(false)),
+            )
+          : of(false),
       ),
     ),
     { initialValue: false },
@@ -106,8 +115,13 @@ export class FleetTabsComponent {
 
   /** The tabs the reader is offered, in strip order. */
   readonly tabs = computed<FleetTab[]>(() => {
-    const { communitySlug, platformSegment, fleetSlug, capabilities } =
-      this.vm();
+    const {
+      communitySlug,
+      platformSegment,
+      fleetSlug,
+      providesRoster,
+      capabilities,
+    } = this.vm();
     const tabs: FleetTab[] = [
       {
         link: FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
@@ -118,7 +132,7 @@ export class FleetTabsComponent {
     ];
 
     // The private roster: the Fleet's members and up.
-    if (capabilities.includes(ROSTER_VIEW_CAPABILITY)) {
+    if (providesRoster && capabilities.includes(ROSTER_VIEW_CAPABILITY)) {
       tabs.push({
         link: FLEET_LINKS.fleetRoster(
           communitySlug,
@@ -153,6 +167,7 @@ export class FleetTabsComponent {
     }
 
     if (
+      providesRoster &&
       ROSTER_IMPORT_READERS.some(capability =>
         capabilities.includes(capability),
       )
@@ -165,6 +180,25 @@ export class FleetTabsComponent {
         ),
         label: 'Investigate',
         // Lit on the imports, renames and conflicts beneath it too.
+        exact: false,
+      });
+    }
+
+    // Where officers run recruitment (FC-021): on every registered Fleet,
+    // console ones included, for whoever holds any part of it.
+    if (
+      RECRUITMENT_TAB_CAPABILITIES.some(capability =>
+        capabilities.includes(capability),
+      )
+    ) {
+      tabs.push({
+        link: FLEET_LINKS.fleetRecruitment(
+          communitySlug,
+          platformSegment,
+          fleetSlug,
+        ),
+        label: 'Recruitment',
+        // Lit on the applications, invitations, members and settings too.
         exact: false,
       });
     }

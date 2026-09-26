@@ -1,0 +1,81 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.fleet-application {
+  &__intro {
+    margin: 0 0 1rem;
+  }
+
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  // Label and value side by side where there is room, stacked on a phone.
+  &__facts,
+  &__answers {
+    display: grid;
+    grid-template-columns: minmax(8rem, max-content) 1fr;
+    gap: 0.35rem 1rem;
+    margin: 0 0 1rem;
+
+    dt {
+      font-weight: 700;
+      color: vars.$lcars-sky;
+    }
+
+    dd {
+      margin: 0;
+      min-width: 0;
+    }
+
+    @media (width <= 600px) {
+      grid-template-columns: 1fr;
+
+      dd {
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+
+  // What somebody wrote, with their own line breaks, and long words broken
+  // rather than widening the page.
+  &__text {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  &__evidence,
+  &__history {
+    margin: 0 0 0.5rem;
+    padding-left: 1.25rem;
+  }
+
+  &__when {
+    color: vars.$lcars-grey-light;
+  }
+
+  &__decision {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    border: 0;
+
+    legend {
+      margin-bottom: 0.35rem;
+      font-weight: 700;
+    }
+
+    label {
+      display: inline-flex;
+      gap: 0.4rem;
+      align-items: center;
+      cursor: pointer;
+    }
+  }
+}

@@ -1,0 +1,50 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.my-fleet-applications {
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  &__invitations {
+    display: grid;
+    gap: 1rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__invitation {
+    padding: 0.75rem;
+    border-left: 4px solid vars.$lcars-gold;
+    border-radius: 0 0.4rem 0.4rem 0;
+    background: vars.$lcars-grey-bg;
+  }
+
+  &__fleet {
+    margin: 0 0 0.25rem;
+    font-weight: 700;
+  }
+
+  &__select {
+    max-width: 28rem;
+  }
+
+  &__muted {
+    display: block;
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    color: vars.$lcars-grey-light;
+  }
+
+  // The reason a decider gave, in their own words and line breaks.
+  &__note {
+    display: block;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+}

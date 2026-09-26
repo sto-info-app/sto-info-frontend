@@ -1,0 +1,75 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.recruitment-settings {
+  &__intro {
+    max-width: 70ch;
+    margin: 0 0 1rem;
+  }
+
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  &__level {
+    max-width: 16rem;
+  }
+
+  &__factions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin: 1rem 0;
+    padding: 0;
+    border: 0;
+
+    legend {
+      margin-bottom: 0.25rem;
+      font-weight: 700;
+    }
+
+    // The hint takes a line of its own above the boxes.
+    .fleet-community-field-hint {
+      flex-basis: 100%;
+      margin-top: 0;
+    }
+  }
+
+  &__check {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  &__questions {
+    display: grid;
+    gap: 1rem;
+    margin: 0 0 1rem;
+    padding-left: 1.5rem;
+  }
+
+  &__question {
+    padding: 0.75rem;
+    border-left: 4px solid vars.$lcars-sky;
+    border-radius: 0 0.4rem 0.4rem 0;
+    background: vars.$lcars-grey-bg;
+  }
+
+  &__question-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+  }
+
+  &__problem {
+    margin: 0 0 0.5rem;
+    color: vars.$lcars-tangerine;
+    font-size: 0.9rem;
+  }
+}

@@ -1,0 +1,69 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+// Framed like the follow control above it, in gold, because this is the
+// part of the page that asks something of the reader.
+.fleet-recruitment {
+  padding: 0.75rem;
+  margin-top: 1rem;
+  border-left: 4px solid vars.$lcars-gold;
+  border-radius: 0 0.4rem 0.4rem 0;
+  background: vars.$lcars-grey-bg;
+
+  &__heading {
+    margin: 0 0 0.35rem;
+    font-size: 1.1rem;
+    color: vars.$lcars-gold;
+    text-transform: uppercase;
+  }
+
+  &__subheading {
+    margin: 0.5rem 0 0.25rem;
+    font-size: 0.95rem;
+  }
+
+  &__state,
+  &__invited {
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+  }
+
+  &__list {
+    margin: 0 0 0.5rem;
+    padding-left: 1.25rem;
+  }
+
+  // What the Fleet wrote, in its own words and line breaks.
+  &__text {
+    margin: 0 0 0.5rem;
+    white-space: pre-line;
+  }
+
+  &__select {
+    max-width: 28rem;
+  }
+
+  &__actions {
+    margin-top: 0.5rem;
+  }
+
+  &__link {
+    color: vars.$lcars-sky;
+  }
+
+  &__hint,
+  &__note {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  &__error {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    color: vars.$lcars-tangerine;
+  }
+}

@@ -1,0 +1,210 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Application"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the application"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+      @let application = data.application;
+
+      <p class="fleet-application__intro">
+        <a [routerLink]="applicationsLink(data)">Back to the applications</a>
+      </p>
+
+      @if (decisionNotice(); as notice) {
+        <p
+          class="fleet-application__notice"
+          role="status">
+          {{ notice }}
+        </p>
+      }
+      @if (decisionError(); as refusal) {
+        <app-lcars-error-message
+          title="Not recorded"
+          [message]="refusal" />
+      }
+
+      <dl class="fleet-application__facts">
+        <dt>Character</dt>
+        <dd>{{ application.characterName }}</dd>
+        <dt>Applicant</dt>
+        <dd>
+          {{ application.applicantUsername ?? 'An account since closed' }}
+        </dd>
+        <dt>Level</dt>
+        <dd>{{ application.characterLevel ?? 'Not recorded' }}</dd>
+        <dt>Faction</dt>
+        <dd>{{ application.factionName ?? 'Not recorded' }}</dd>
+        <dt>How</dt>
+        <dd>{{ routeLabels[application.route] }}</dd>
+        <dt>Sent</dt>
+        <dd>{{ application.submittedAt | appDate: 'medium' }}</dd>
+        <dt>Status</dt>
+        <dd>{{ statusLabels[application.status] }}</dd>
+        @if (application.decidedAt) {
+          <dt>Decided</dt>
+          <dd>
+            {{ application.decidedAt | appDate: 'medium' }}, by
+            {{ application.decidedByUsername ?? 'an account since closed' }}
+          </dd>
+        }
+        @if (application.decisionNote) {
+          <dt>
+            {{ application.status === 'REJECTED' ? 'Reason' : 'Note' }}
+          </dt>
+          <dd class="fleet-application__text">
+            {{ application.decisionNote }}
+          </dd>
+        }
+      </dl>
+
+      <div class="lcars-text-bar">
+        <span>Answers</span>
+      </div>
+      @if (application.answers.length === 0) {
+        <p class="fleet-community-empty">
+          The form asked nothing when this was sent.
+        </p>
+      } @else {
+        <dl class="fleet-application__answers">
+          @for (answer of application.answers; track answer.questionId) {
+            <dt>{{ answer.prompt }}</dt>
+            <dd class="fleet-application__text">{{ answerOf(answer) }}</dd>
+          }
+        </dl>
+        <p class="fleet-community-field-hint">
+          As the form asked them when this was sent (version
+          {{ application.settingsVersion }}).
+        </p>
+      }
+
+      <div class="lcars-text-bar">
+        <span>What the roster says</span>
+      </div>
+      @let evidence = application.evidence;
+      @if (evidence.latestExportAt === null) {
+        <p class="fleet-community-empty">
+          No roster export of this Fleet has been imported yet.
+        </p>
+      } @else {
+        <ul class="fleet-application__evidence">
+          @if (evidence.listed) {
+            <li>
+              Listed on the latest export, of
+              {{ evidence.latestExportAt | appDate: 'medium' }}.
+            </li>
+            @if (evidence.rank) {
+              <li>Rank on it: {{ evidence.rank }}.</li>
+            }
+            @if (evidence.listedSince) {
+              <li>
+                Listed on every export since
+                {{ evidence.listedSince | appDate: 'medium' }}.
+              </li>
+            }
+          } @else {
+            <li>
+              Not listed on the latest export, of
+              {{ evidence.latestExportAt | appDate: 'medium' }}.
+            </li>
+            <li>
+              @if (evidence.everListed) {
+                Listed on an earlier export.
+              } @else {
+                Not listed on any export imported.
+              }
+            </li>
+          }
+        </ul>
+      }
+      <p class="fleet-community-field-hint">
+        Matched by the Character’s exact name and handle. A roster shows who the
+        game listed, not who plays them: it proves nothing, and nothing here
+        decides for you.
+      </p>
+
+      <div class="lcars-text-bar">
+        <span>History</span>
+      </div>
+      <ul class="fleet-application__history">
+        @for (step of application.history; track $index) {
+          <li>
+            <span class="fleet-application__when"
+              >{{ step.at | appDate: 'medium' }}:</span
+            >
+            {{ actionLabels[step.action] }} by
+            {{ step.actorUsername ?? 'an account since closed' }}
+            @if (step.note) {
+              <span class="fleet-application__text">“{{ step.note }}”</span>
+            }
+          </li>
+        }
+      </ul>
+
+      @if (mayDecide(data)) {
+        <div class="lcars-text-bar">
+          <span>Decide</span>
+        </div>
+        <form
+          aria-label="Decide this application"
+          (submit)="$event.preventDefault(); onSubmit(data)">
+          <fieldset class="fleet-application__decision">
+            <legend>Decision</legend>
+            <label>
+              <input
+                type="radio"
+                name="decision"
+                value="ACCEPT"
+                [checked]="decision() === 'ACCEPT'"
+                [disabled]="busy()"
+                (change)="onDecision('ACCEPT')" />
+              Accept
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="decision"
+                value="REJECT"
+                [checked]="decision() === 'REJECT'"
+                [disabled]="busy()"
+                (change)="onDecision('REJECT')" />
+              Reject
+            </label>
+          </fieldset>
+
+          <div class="lcars-input-container sky">
+            <label for="application-note">{{
+              decision() === 'REJECT' ? 'Reason' : 'Note (optional)'
+            }}</label>
+            <textarea
+              id="application-note"
+              rows="3"
+              [attr.maxlength]="noteLimit"
+              [value]="note()"
+              [disabled]="busy()"
+              (input)="note.set($any($event.target).value)"></textarea>
+          </div>
+          <p class="fleet-community-field-hint">
+            The applicant is shown this. A rejection needs a reason. Accepting
+            makes them a member here at once; it cannot invite them in game.
+          </p>
+
+          <div class="fleet-community-form-actions">
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto sky"
+              [disabled]="!canDecide()">
+              {{ busy() ? 'Recording' : 'Record the decision' }}
+            </button>
+          </div>
+        </form>
+      }
+    }
+  </app-fleet-page-shell>
+}

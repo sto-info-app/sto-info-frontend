@@ -1,0 +1,233 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Apply"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the application form"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+      @let settings = data.view.settings;
+
+      @if (sent()) {
+        <p
+          class="fleet-apply__notice"
+          role="status">
+          {{ sentMessage }}
+        </p>
+        <p class="fleet-community-field-hint">{{ inGameNote }}</p>
+        <nav
+          class="buttons-row"
+          aria-label="Where next">
+          <a
+            class="lcars-btn lcars-btn-auto gold"
+            [routerLink]="myApplicationsLink"
+            >Your Fleet applications</a
+          >
+          <a
+            class="lcars-btn lcars-btn-auto sky"
+            [routerLink]="fleetLink(data)"
+            >Back to the Fleet</a
+          >
+        </nav>
+      } @else if (whyNot(data); as reason) {
+        <p class="fleet-community-empty">{{ reason }}</p>
+        <nav
+          class="buttons-row"
+          aria-label="Where next">
+          <a
+            class="lcars-btn lcars-btn-auto sky"
+            [routerLink]="fleetLink(data)"
+            >Back to the Fleet</a
+          >
+        </nav>
+      } @else {
+        @if (
+          settings.minimumLevel !== null ||
+          settings.factions.length > 0 ||
+          settings.requirementsText
+        ) {
+          <div class="lcars-text-bar">
+            <span>Requirements</span>
+          </div>
+          <ul class="fleet-apply__requirements">
+            @if (settings.minimumLevel !== null) {
+              <li>Level {{ settings.minimumLevel }} or above</li>
+            }
+            @if (settings.factions.length > 0) {
+              <li>
+                Faction:
+                @for (faction of settings.factions; track faction.id) {
+                  {{ faction.name }}{{ $last ? '' : ', ' }}
+                }
+              </li>
+            }
+          </ul>
+          @if (settings.requirementsText) {
+            <p class="fleet-apply__text">{{ settings.requirementsText }}</p>
+          }
+        }
+
+        @if (sendError(); as refusal) {
+          <app-lcars-error-message
+            title="Not sent"
+            [message]="refusal" />
+        }
+
+        @if (data.characters.length === 0) {
+          <p class="fleet-community-empty">
+            You have no Character on
+            {{ data.section.resolved.fleet.platformName }} to apply with. Add
+            one from your dashboard first.
+          </p>
+        } @else {
+          <form
+            aria-label="Your application"
+            (submit)="$event.preventDefault(); onSubmit(data)">
+            <div class="lcars-select-container gold fleet-apply__character">
+              <label
+                class="select-label"
+                for="apply-character"
+                >Your Character</label
+              >
+              <select
+                id="apply-character"
+                [disabled]="busy()"
+                (change)="characterId.set($any($event.target).value)">
+                <option
+                  value=""
+                  disabled
+                  [selected]="characterId() === ''">
+                  Choose a Character
+                </option>
+                @for (character of data.characters; track character.id) {
+                  <option
+                    [value]="character.id"
+                    [selected]="characterId() === character.id">
+                    {{ character.label }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            @for (question of settings.questions; track question.id) {
+              @let fieldId = 'answer-' + question.id;
+              @switch (question.kind) {
+                @case (kinds.SHORT_TEXT) {
+                  <div class="lcars-input-container sky">
+                    <label [attr.for]="fieldId"
+                      >{{ question.prompt
+                      }}{{ question.required ? '' : ' (optional)' }}</label
+                    >
+                    <input
+                      type="text"
+                      autocomplete="off"
+                      [id]="fieldId"
+                      [attr.maxlength]="limitOf(question)"
+                      [value]="answerTo(question.id) ?? ''"
+                      [disabled]="busy()"
+                      (input)="
+                        onAnswer(question.id, $any($event.target).value)
+                      " />
+                  </div>
+                }
+                @case (kinds.LONG_TEXT) {
+                  <div class="lcars-input-container sky">
+                    <label [attr.for]="fieldId"
+                      >{{ question.prompt
+                      }}{{ question.required ? '' : ' (optional)' }}</label
+                    >
+                    <textarea
+                      rows="5"
+                      [id]="fieldId"
+                      [attr.maxlength]="limitOf(question)"
+                      [value]="answerTo(question.id) ?? ''"
+                      [disabled]="busy()"
+                      (input)="
+                        onAnswer(question.id, $any($event.target).value)
+                      "></textarea>
+                  </div>
+                }
+                @case (kinds.SINGLE_CHOICE) {
+                  <div class="lcars-select-container sky">
+                    <label
+                      class="select-label"
+                      [attr.for]="fieldId"
+                      >{{ question.prompt
+                      }}{{ question.required ? '' : ' (optional)' }}</label
+                    >
+                    <select
+                      [id]="fieldId"
+                      [disabled]="busy()"
+                      (change)="
+                        onAnswer(question.id, $any($event.target).value)
+                      ">
+                      <option
+                        value=""
+                        [selected]="(answerTo(question.id) ?? '') === ''">
+                        Choose one
+                      </option>
+                      @for (option of question.options; track option) {
+                        <option
+                          [value]="option"
+                          [selected]="answerTo(question.id) === option">
+                          {{ option }}
+                        </option>
+                      }
+                    </select>
+                  </div>
+                }
+                @case (kinds.YES_NO) {
+                  <fieldset class="fleet-apply__yes-no">
+                    <legend>
+                      {{ question.prompt
+                      }}{{ question.required ? '' : ' (optional)' }}
+                    </legend>
+                    <label>
+                      <input
+                        type="radio"
+                        value="yes"
+                        [name]="fieldId"
+                        [checked]="answerTo(question.id) === true"
+                        [disabled]="busy()"
+                        (change)="onAnswer(question.id, true)" />
+                      Yes
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        value="no"
+                        [name]="fieldId"
+                        [checked]="answerTo(question.id) === false"
+                        [disabled]="busy()"
+                        (change)="onAnswer(question.id, false)" />
+                      No
+                    </label>
+                  </fieldset>
+                }
+              }
+            }
+
+            <p class="fleet-community-field-hint">
+              The Fleet’s recruiters see your answers, your Character’s level
+              and faction, and what the Fleet’s roster says about the Character.
+            </p>
+
+            <div class="fleet-community-form-actions">
+              <button
+                type="submit"
+                class="lcars-btn lcars-btn-auto gold"
+                [disabled]="!canSend(data)">
+                {{ busy() ? 'Sending' : 'Send the application' }}
+              </button>
+            </div>
+          </form>
+        }
+      }
+    }
+  </app-fleet-page-shell>
+}

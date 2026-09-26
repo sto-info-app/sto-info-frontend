@@ -130,6 +130,28 @@ export const APP_ROUTES = {
   FLEET_RANK_ORDER:
     FLEET_COMMUNITIES_ROOT +
     '/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',
+  FLEET_MY_APPLICATIONS: ROOT_ROUTES.FLEETS + '/applications',
+  FLEET_APPLY:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/apply',
+  FLEET_RECRUITMENT:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/recruitment',
+  FLEET_APPLICATIONS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications',
+  FLEET_APPLICATION:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications/:applicationId',
+  FLEET_INVITATIONS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/recruitment/invitations',
+  FLEET_MEMBERS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/recruitment/members',
+  FLEET_RECRUITMENT_SETTINGS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/recruitment/settings',
 
   // News
   NEWS: ROOT_ROUTES.NEWS,
@@ -303,6 +325,14 @@ export const APP_ROUTE_TITLES = {
   FLEET_ROSTER_IDENTITIES: 'Roster Identities',
   FLEET_ROSTER_CONFLICTS: 'Conflicting Exports',
   FLEET_RANK_ORDER: 'Rank Order',
+  FLEET_MY_APPLICATIONS: 'Your Fleet Applications',
+  FLEET_APPLY: 'Apply to a Fleet',
+  FLEET_RECRUITMENT: 'Recruitment',
+  FLEET_APPLICATIONS: 'Fleet Applications',
+  FLEET_APPLICATION: 'Fleet Application',
+  FLEET_INVITATIONS: 'Fleet Invitations',
+  FLEET_MEMBERS: 'Fleet Members',
+  FLEET_RECRUITMENT_SETTINGS: 'Recruitment Settings',
 
   // News
   NEWS: 'News',

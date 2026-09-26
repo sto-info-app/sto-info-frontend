@@ -32,8 +32,19 @@ function vm(...capabilities: string[]): FleetTabsVm {
     communitySlug: 'united-federation-alliance',
     platformSegment: 'pc',
     fleetSlug: 'ninth-fleet',
+    providesRoster: true,
     capabilities,
   };
+}
+
+/**
+ * The same, for a Fleet on a platform the game writes no roster export on.
+ *
+ * @param capabilities - What they hold.
+ * @returns The view model.
+ */
+function consoleVm(...capabilities: string[]): FleetTabsVm {
+  return { ...vm(...capabilities), providesRoster: false };
 }
 
 describe('FleetTabsComponent', () => {
@@ -68,8 +79,11 @@ describe('FleetTabsComponent', () => {
     ).map(tab => [tab.textContent?.trim() ?? '', tab.getAttribute('href')]);
   }
 
-  it('offers anybody the Overview', () => {
-    expect(draw(vm())).toEqual([['Overview', FLEET_HREF]]);
+  it('draws no strip when the Overview is all there is', () => {
+    expect(draw(vm())).toEqual([]);
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('nav'),
+    ).toBeNull();
   });
 
   it.each(['roster.import', 'roster.investigate'])(
@@ -112,13 +126,31 @@ describe('FleetTabsComponent', () => {
     });
 
     it('is not offered when the server shows no report', () => {
-      expect(draw(vm()).map(([label]) => label)).toEqual(['Overview']);
+      expect(draw(vm('roster.view')).map(([label]) => label)).toEqual([
+        'Overview',
+        'Roster',
+        'History',
+      ]);
     });
 
     it('is not offered when the answer fails', () => {
       reports.visible.mockReturnValue(throwError(() => new Error('down')));
 
-      expect(draw(vm()).map(([label]) => label)).toEqual(['Overview']);
+      expect(draw(vm('roster.view')).map(([label]) => label)).toEqual([
+        'Overview',
+        'Roster',
+        'History',
+      ]);
+    });
+
+    it('is not asked about on a Fleet with no roster', () => {
+      reports.visible.mockReturnValue(
+        of([{ report: FleetReport.GROWTH, view: FleetReportView.FULL }]),
+      );
+
+      draw(consoleVm('applications.view'));
+
+      expect(reports.visible).not.toHaveBeenCalled();
     });
 
     it('sits between History and Investigate', () => {
@@ -132,8 +164,58 @@ describe('FleetTabsComponent', () => {
     });
   });
 
+  describe('the Recruitment tab', () => {
+    it.each([
+      'applications.view',
+      'applications.decide',
+      'recruitment.manage',
+      'members.manage',
+    ])('is offered to a reader holding %s', capability => {
+      expect(draw(vm(capability))).toEqual([
+        ['Overview', FLEET_HREF],
+        ['Recruitment', `${FLEET_HREF}/recruitment`],
+      ]);
+    });
+
+    it('comes last', () => {
+      expect(
+        draw(vm('roster.view', 'roster.investigate', 'recruitment.manage')).map(
+          ([label]) => label,
+        ),
+      ).toEqual([
+        'Overview',
+        'Roster',
+        'History',
+        'Investigate',
+        'Recruitment',
+      ]);
+    });
+  });
+
+  describe('on a Fleet with no roster', () => {
+    it('offers Recruitment and nothing about a roster', () => {
+      expect(
+        draw(
+          consoleVm(
+            'roster.view',
+            'roster.import',
+            'roster.investigate',
+            'applications.view',
+          ),
+        ),
+      ).toEqual([
+        ['Overview', FLEET_HREF],
+        ['Recruitment', `${FLEET_HREF}/recruitment`],
+      ]);
+    });
+
+    it('draws no strip for a reader with no recruitment to run', () => {
+      expect(draw(consoleVm('roster.view'))).toEqual([]);
+    });
+  });
+
   it('names itself for a screen reader moving by landmark', () => {
-    draw(vm());
+    draw(vm('roster.view'));
 
     expect(
       (fixture.nativeElement as HTMLElement)
@@ -174,10 +256,10 @@ describe('FleetTabsComponent', () => {
       expect(fleetTabsVmOf(resolved({ communityId: null }))).toBeNull();
     });
 
-    it('draws none for a Fleet on a platform with no roster export', () => {
+    it('draws one without a roster for a Fleet on a platform with no export', () => {
       expect(
         fleetTabsVmOf(resolved({ platformProvidesRosterExport: false })),
-      ).toBeNull();
+      ).toEqual(consoleVm('roster.view'));
     });
   });
 });

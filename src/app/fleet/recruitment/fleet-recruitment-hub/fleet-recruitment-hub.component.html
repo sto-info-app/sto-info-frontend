@@ -1,0 +1,36 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Recruitment"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the Fleet"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @if (state.data.length === 0) {
+        <p class="fleet-community-empty">
+          Nothing here is yours to run. Invitations are sent by whoever may
+          decide applications.
+        </p>
+      } @else {
+        <ul class="fleet-recruitment-hub__list">
+          @for (action of state.data; track action.label) {
+            <li class="fleet-recruitment-hub__item">
+              <a
+                class="lcars-btn lcars-btn-auto gold"
+                [routerLink]="action.link"
+                >{{ action.label }}</a
+              >
+              <p class="fleet-recruitment-hub__description">
+                {{ action.description }}
+              </p>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </app-fleet-page-shell>
+}

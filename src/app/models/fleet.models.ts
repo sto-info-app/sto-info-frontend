@@ -745,6 +745,9 @@ export interface CharacterFleetProposal {
   raisedAt: string;
   expiresAt: string;
   answeredAt: string | null;
+
+  /** Whether an accepted application to the Fleet raised it (FC-021). */
+  fromApplication: boolean;
 }
 
 /**
