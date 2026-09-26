@@ -66,7 +66,9 @@ export class CustomTrackingPage {
   }
 
   async goto(): Promise<void> {
-    await this._page.goto('/dashboard/settings/custom-tracking');
+    await this._page.goto('/dashboard/settings/custom-tracking', {
+      waitUntil: 'domcontentloaded',
+    });
     await expect(
       this._page.getByRole('heading', { name: 'Custom Tracking', level: 1 }),
     ).toBeVisible();
@@ -103,7 +105,9 @@ export class CustomTrackingPage {
     // happen before asking which one it was. Asking straight away found
     // neither, decided the agreement was not needed, and then waited out the
     // clock for a builder that was never going to be shown.
-    await expect(consent.or(builder).first()).toBeVisible();
+    // The agreement and the builder both come from the API. While the header
+    // is still reporting an unstable connection, neither is on the page yet.
+    await expect(consent.or(builder).first()).toBeVisible({ timeout: 45_000 });
 
     if (await consent.isVisible()) {
       await this.acceptAgreement();
@@ -119,7 +123,13 @@ export class CustomTrackingPage {
   /** Choose Accounts or Characters, in whichever half is on screen. */
   async chooseScope(within: Locator, scope: Scope): Promise<void> {
     this._scope = scope;
-    await within.getByRole('button', { name: scope, exact: true }).click();
+    const button = within.getByRole('button', { name: scope, exact: true });
+
+    if ((await button.getAttribute('aria-pressed')) === 'true') {
+      return;
+    }
+
+    await button.click();
   }
 
   /**
@@ -164,9 +174,11 @@ export class CustomTrackingPage {
   }
 
   async addSection(name: string, options: GroupOptions = {}): Promise<void> {
-    await this.definitions
-      .getByRole('button', { name: 'Add a section' })
-      .click();
+    const add = this.definitions.getByRole('button', { name: 'Add a section' });
+    await expect(add).toBeEnabled();
+    // The LCARS frame can leave this control outside the viewport. A DOM click
+    // still reaches the handler.
+    await add.evaluate((element: HTMLElement) => element.click());
     await this._fillGroupForm(/^New section/, name, options);
     await expect(this.panelToggle(name)).toBeVisible();
     this._created.push({ scope: this._scope, name });
