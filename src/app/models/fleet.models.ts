@@ -705,6 +705,8 @@ export enum CharacterFleetProposalState {
   DECLINED = 'DECLINED',
   /** Never answered, and too late to answer now. */
   EXPIRED = 'EXPIRED',
+  /** Never answered, and taken back when the Fleet membership ended. */
+  WITHDRAWN = 'WITHDRAWN',
 }
 
 /** The Fleet a personal membership or a proposal names. */

@@ -797,7 +797,12 @@ named without a link.
 A Fleet proposal that recruitment raised on a Character's page says how the
 Character came in — an application, an invitation or a join
 (`RECRUITED_BY_LINES`) — before asking the owner to confirm it once they are
-in the Fleet in game.
+in the Fleet in game. The panel's note and the Yes button follow what raised
+the proposals waiting: a roster match asks whether the listed Captain is this
+one, while a recruited one asks whether the Character is in the Fleet in game
+(`PROPOSALS_ROSTER_NOTE`, `PROPOSALS_RECRUITED_NOTE`, `PROPOSALS_MIXED_NOTE`).
+A recruited proposal the server withdrew when the Fleet membership ended
+(`WITHDRAWN`) is not shown.
 
 ### Upload and scan state
 

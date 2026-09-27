@@ -19,11 +19,7 @@
     @if (pending().length > 0) {
       <div class="character-fleet__proposals">
         <h3 class="character-fleet__heading">Awaiting your answer</h3>
-        <p class="character-fleet__note">
-          A Fleet's roster has a Captain on it by this name. Only you can say
-          whether it is this one. Answering one of these leaves the others
-          alone.
-        </p>
+        <p class="character-fleet__note">{{ pendingNote() }}</p>
 
         @for (proposal of pending(); track proposal.id) {
           <div class="character-fleet__proposal">
@@ -57,7 +53,11 @@
                 class="lcars-btn gold"
                 [disabled]="busy()"
                 (click)="accept(proposal)">
-                Yes, that is this Captain
+                {{
+                  proposal.recruitedBy
+                    ? 'Yes, I am in this Fleet'
+                    : 'Yes, that is this Captain'
+                }}
               </button>
               <button
                 type="button"

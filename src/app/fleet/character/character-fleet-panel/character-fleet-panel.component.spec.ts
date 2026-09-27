@@ -18,7 +18,12 @@ import {
 } from 'src/app/models/fleet.models';
 import { FleetApplicationRoute } from 'src/app/models/fleet-recruitment.models';
 
-import { CharacterFleetPanelComponent } from './character-fleet-panel.component';
+import {
+  CharacterFleetPanelComponent,
+  PROPOSALS_MIXED_NOTE,
+  PROPOSALS_RECRUITED_NOTE,
+  PROPOSALS_ROSTER_NOTE,
+} from './character-fleet-panel.component';
 
 /**
  * Builds the Fleet a record names.
@@ -386,6 +391,58 @@ describe('CharacterFleetPanelComponent', () => {
       render();
 
       expect(text()).not.toContain('Say yes once you have been invited');
+    });
+
+    it('asks about the roster when a roster raised it', () => {
+      service.proposals.mockReturnValue(of([proposal()]));
+
+      render();
+
+      expect(text()).toContain(PROPOSALS_ROSTER_NOTE);
+      expect(text()).toContain('Yes, that is this Captain');
+    });
+
+    // A console Fleet has no roster, and an accepted application is not a
+    // roster match, so the roster wording would be wrong.
+    it('asks about the game when recruitment raised it', () => {
+      service.proposals.mockReturnValue(
+        of([proposal({ recruitedBy: FleetApplicationRoute.APPLICATION })]),
+      );
+
+      render();
+
+      expect(text()).toContain(PROPOSALS_RECRUITED_NOTE);
+      expect(text()).not.toContain("A Fleet's roster has a Captain");
+      expect(text()).toContain('Yes, I am in this Fleet');
+      expect(text()).not.toContain('Yes, that is this Captain');
+    });
+
+    it('asks about both when both are waiting', () => {
+      service.proposals.mockReturnValue(
+        of([
+          proposal({ id: 'proposal-1' }),
+          proposal({
+            id: 'proposal-2',
+            recruitedBy: FleetApplicationRoute.INVITATION,
+          }),
+        ]),
+      );
+
+      render();
+
+      expect(text()).toContain(PROPOSALS_MIXED_NOTE);
+      expect(text()).toContain('Yes, that is this Captain');
+      expect(text()).toContain('Yes, I am in this Fleet');
+    });
+
+    it('leaves out one the Fleet membership took back', () => {
+      service.proposals.mockReturnValue(
+        of([proposal({ state: CharacterFleetProposalState.WITHDRAWN })]),
+      );
+
+      render();
+
+      expect(text()).not.toContain('Awaiting your answer');
     });
 
     // The acceptance criteria ask for the Community as well as the moment. A

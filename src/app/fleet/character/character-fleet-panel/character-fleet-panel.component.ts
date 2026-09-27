@@ -43,6 +43,22 @@ export const CHARACTER_FLEET_SOURCE_LABELS: Readonly<Record<string, string>> = {
   CONFIRMED_IMPORT: 'You confirmed this from a Fleet roster',
 };
 
+/** What a roster match asks. */
+export const PROPOSALS_ROSTER_NOTE =
+  "A Fleet's roster has a Captain on it by this name. Only you can say " +
+  'whether it is this one. Answering one of these leaves the others alone.';
+
+/** What a proposal raised by recruitment asks. */
+export const PROPOSALS_RECRUITED_NOTE =
+  'Only you can say whether this Character is in the Fleet in game. ' +
+  'Answering one of these leaves the others alone.';
+
+/** What both kinds ask, when both are waiting. */
+export const PROPOSALS_MIXED_NOTE =
+  "A Fleet's roster has a Captain on it by this name, or a Fleet has " +
+  'accepted you. Only you can say whether this Character is in it in ' +
+  'game. Answering one of these leaves the others alone.';
+
 /**
  * What a user says about one Character's Fleet, on the Character's own page.
  *
@@ -141,6 +157,25 @@ export class CharacterFleetPanelComponent implements OnInit {
       proposal => proposal.state === CharacterFleetProposalState.PENDING,
     ),
   );
+
+  /**
+   * What the unanswered proposals are asking, by what raised them.
+   *
+   * A roster match asks whether a Captain listed by this name is this one; a
+   * recruited one asks whether the in-game invitation has happened. A console
+   * Fleet has no roster at all, so the roster wording would be wrong there.
+   */
+  protected pendingNote = computed(() => {
+    const pending = this.pending();
+    const recruited = pending.some(proposal => proposal.recruitedBy !== null);
+    const matched = pending.some(proposal => proposal.recruitedBy === null);
+
+    if (recruited && matched) {
+      return PROPOSALS_MIXED_NOTE;
+    }
+
+    return recruited ? PROPOSALS_RECRUITED_NOTE : PROPOSALS_ROSTER_NOTE;
+  });
 
   /** How each audience is offered on the form. */
   protected audienceChoices = Object.entries(FLEET_AUDIENCE_CHOICES);
