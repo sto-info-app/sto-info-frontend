@@ -107,3 +107,6 @@ export const FLEET_RELATIONSHIP_NOTES: Readonly<Record<string, string | null>> =
     MEMBER: 'You are an approved member of this {scope}.',
     SUSPENDED: 'Your membership of this {scope} is suspended.',
   };
+
+/** The capability that lets somebody register a Fleet or Armada into a Community. */
+export const SCOPE_CHILDREN_REGISTER_CAPABILITY = 'scope.children.register';

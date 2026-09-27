@@ -1,12 +1,13 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ParamMap, RouterModule } from '@angular/router';
+import { ParamMap } from '@angular/router';
 
 import { Observable } from 'rxjs';
 
 import {
   FLEET_AUDIENCE_LABELS,
   FLEET_SCOPE_COMMUNITY,
+  SCOPE_CHILDREN_REGISTER_CAPABILITY,
 } from 'src/app/fleet/constants/fleet-scope.constants';
 import {
   bannerOf,
@@ -20,11 +21,11 @@ import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.bui
 import { FLEET_SCOPE_LABELS } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
+  FleetScopeAction,
   FleetScopeFact,
   FleetScopeReadyState,
 } from 'src/app/fleet/scope/fleet-scope-page.models';
 import { FleetScopeViewComponent } from 'src/app/fleet/scope/fleet-scope-view/fleet-scope-view.component';
-import { AuthService } from 'src/app/core/auth/auth.service';
 import { ResolvedFleetCommunity } from 'src/app/models/fleet.models';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -41,61 +42,10 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [AppDatePipe],
-  imports: [AsyncPipe, RouterModule, FleetScopeViewComponent],
+  imports: [AsyncPipe, FleetScopeViewComponent],
 })
 export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFleetCommunity> {
   private readonly _scopes = inject(FleetScopeService);
-  private readonly _authService = inject(AuthService);
-
-  /**
-   * Whether to offer registering a Fleet or an Armada here.
-   *
-   * Signed in is the only condition this page can check. Whether the viewer
-   * holds the capability is the server's answer and nothing this page is
-   * told, so the alternative to offering the link is hiding it from the
-   * people who do — and a refusal that explains itself costs a click where
-   * a missing control costs a support message.
-   *
-   * @returns True when somebody is signed in.
-   */
-  get canRegisterChildren(): boolean {
-    return this._authService.isLoggedIn();
-  }
-
-  /**
-   * Where registering a Fleet into this Community starts.
-   *
-   * Built from the address rather than from the record, because a
-   * registration route is a sibling of this page rather than a property of
-   * the Community. The address is the canonical one by the time anything
-   * is drawn: an out-of-date segment replaces itself first, and it would
-   * resolve to the same Community either way.
-   *
-   * @returns The router link.
-   */
-  get registerFleetLink(): string[] {
-    return [...this.communityLink, 'fleets', 'register'];
-  }
-
-  /**
-   * Where registering an Armada into this Community starts.
-   *
-   * @returns The router link.
-   */
-  get registerArmadaLink(): string[] {
-    return [...this.communityLink, 'armadas', 'register'];
-  }
-
-  /**
-   * This Community's own address.
-   *
-   * @returns The router link.
-   */
-  private get communityLink(): string[] {
-    return FLEET_LINKS.community(
-      this._route.snapshot.paramMap.get('communitySlug') ?? '',
-    );
-  }
 
   readonly missingMessage =
     'No Community answers to that address. It may have been closed, or the ' +
@@ -132,6 +82,37 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
   }
 
   /**
+   * What the reader may do here: register a Fleet or an Armada into the
+   * Community, offered only to whoever the server says holds
+   * `scope.children.register` here.
+   *
+   * @param resolved - The server's answer.
+   * @returns What to offer, which may be nothing.
+   */
+  private actionsFor(resolved: ResolvedFleetCommunity): FleetScopeAction[] {
+    const { community, viewer } = resolved;
+
+    if (!viewer.capabilities.includes(SCOPE_CHILDREN_REGISTER_CAPABILITY)) {
+      return [];
+    }
+
+    const communityLink = FLEET_LINKS.community(community.slug);
+
+    return [
+      {
+        label: 'Register a Fleet here',
+        link: [...communityLink, 'fleets', 'register'],
+        description: `Register a Fleet into ${community.name}`,
+      },
+      {
+        label: 'Register an Armada here',
+        link: [...communityLink, 'armadas', 'register'],
+        description: `Register an Armada into ${community.name}`,
+      },
+    ];
+  }
+
+  /**
    * Turns the Community into what the page draws.
    *
    * @param resolved - The server's answer.
@@ -158,9 +139,7 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
 
     return {
       kind: 'READY',
-      // Nothing yet. A Community's own actions arrive with the tickets that
-      // build them.
-      actions: [],
+      actions: this.actionsFor(resolved),
       header: {
         scope: FLEET_SCOPE_COMMUNITY,
         name: community.name,

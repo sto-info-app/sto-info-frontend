@@ -9,10 +9,12 @@ import {
 
 import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 
-import { AuthService } from 'src/app/core/auth/auth.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { FLEET_SCOPE_ERROR } from 'src/app/fleet/scope/fleet-scope-page.directive';
-import { FleetScopePageState } from 'src/app/fleet/scope/fleet-scope-page.models';
+import {
+  FleetScopeAction,
+  FleetScopePageState,
+} from 'src/app/fleet/scope/fleet-scope-page.models';
 import {
   FleetAudience,
   FleetCommunity,
@@ -83,7 +85,6 @@ describe('CommunityPageComponent', () => {
   let router: { navigate: jest.Mock };
   let pageTitle: { setTitle: jest.Mock };
   let formatted: string | null;
-  let isLoggedIn: boolean;
 
   beforeEach(async () => {
     params$ = new BehaviorSubject<ParamMap>(
@@ -101,7 +102,6 @@ describe('CommunityPageComponent', () => {
     router = { navigate: jest.fn() };
     pageTitle = { setTitle: jest.fn() };
     formatted = '2 January 2026';
-    isLoggedIn = true;
 
     await TestBed.configureTestingModule({
       imports: [CommunityPageComponent],
@@ -110,8 +110,7 @@ describe('CommunityPageComponent', () => {
         { provide: Router, useValue: router },
         {
           provide: ActivatedRoute,
-          // The snapshot as well as the stream: the register links are
-          // built from the address rather than from the record.
+          // The snapshot as well as the stream, as the real one has.
           useValue: {
             paramMap: params$,
             snapshot: {
@@ -124,10 +123,6 @@ describe('CommunityPageComponent', () => {
           },
         },
         { provide: PageTitleService, useValue: pageTitle },
-        {
-          provide: AuthService,
-          useValue: { isLoggedIn: (): boolean => isLoggedIn },
-        },
       ],
     })
       .overrideComponent(CommunityPageComponent, {
@@ -425,73 +420,72 @@ describe('CommunityPageComponent', () => {
     expect(scopes.resolveCommunity).toHaveBeenLastCalledWith('');
   });
   describe('registering into it', () => {
+    /** Somebody who may register Fleets and Armadas here. */
+    const REGISTRAR: FleetScopeViewer = {
+      ...READER,
+      capabilities: ['scope.children.register'],
+    };
+
     /**
-     * The links offering registration.
+     * What the page offers.
      *
-     * @returns Their addresses, in order.
+     * @returns Its actions, or none while it is not ready.
      */
-    const actionLinks = (): (string | null)[] =>
-      Array.from(
-        fixture.nativeElement.querySelectorAll('.community-page__actions a'),
-      ).map(link => (link as HTMLAnchorElement).getAttribute('routerLink'));
+    const actions = (): FleetScopeAction[] => {
+      const drawn = state();
 
-    it('offers a Fleet and an Armada to somebody signed in', () => {
-      render();
+      return drawn.kind === 'READY' ? drawn.actions : [];
+    };
 
-      expect(fixture.componentInstance.registerFleetLink).toEqual([
-        '/fleets',
-        'communities',
-        'united-federation-alliance',
-        'fleets',
-        'register',
-      ]);
-      expect(fixture.componentInstance.registerArmadaLink).toEqual([
-        '/fleets',
-        'communities',
-        'united-federation-alliance',
-        'armadas',
-        'register',
-      ]);
-      expect(actionLinks()).toHaveLength(2);
-    });
-
-    // Whether the viewer holds the capability is the server's answer and
-    // nothing this page is told, so signed in is the only condition it can
-    // check — and a refusal that explains itself costs a click where a
-    // missing control costs a support message.
-    it('offers nothing to a signed-out visitor', () => {
-      isLoggedIn = false;
-
-      render();
-
-      expect(actionLinks()).toHaveLength(0);
-    });
-
-    // The address is always there in practice — the route cannot match
-    // without it — but a link built from nothing should be the directory
-    // rather than a broken path.
-    it('builds a link even from an address with no segment', () => {
-      params$.next(convertToParamMap({}));
-
-      render();
-
-      expect(fixture.componentInstance.registerFleetLink).toEqual([
-        '/fleets',
-        'communities',
-        '',
-        'fleets',
-        'register',
-      ]);
-    });
-
-    it('offers nothing while there is no Community to register into', () => {
+    it('offers a Fleet and an Armada to whoever may register them here', () => {
       scopes.resolveCommunity.mockReturnValue(
-        throwError(() => new HttpErrorResponse({ status: 404 })),
+        of<ResolvedFleetCommunity>({
+          community: community(),
+          redirectedFrom: null,
+          viewer: REGISTRAR,
+        }),
       );
 
       render();
 
-      expect(actionLinks()).toHaveLength(0);
+      expect(actions()).toEqual([
+        {
+          label: 'Register a Fleet here',
+          link: [
+            '/fleets',
+            'communities',
+            'united-federation-alliance',
+            'fleets',
+            'register',
+          ],
+          description: expect.stringContaining('Register a Fleet into'),
+        },
+        {
+          label: 'Register an Armada here',
+          link: [
+            '/fleets',
+            'communities',
+            'united-federation-alliance',
+            'armadas',
+            'register',
+          ],
+          description: expect.stringContaining('Register an Armada into'),
+        },
+      ]);
+      expect(
+        fixture.nativeElement.querySelectorAll('.fleet-scope-view__actions a'),
+      ).toHaveLength(2);
+    });
+
+    // The server says what the viewer may do here, so a control nobody could
+    // use is not drawn: signed in and following is not enough.
+    it('offers nothing to anybody else', () => {
+      render();
+
+      expect(actions()).toEqual([]);
+      expect(
+        fixture.nativeElement.querySelectorAll('.fleet-scope-view__actions a'),
+      ).toHaveLength(0);
     });
   });
 
