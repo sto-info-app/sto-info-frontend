@@ -4,6 +4,7 @@ import { ParamMap } from '@angular/router';
 
 import { Observable } from 'rxjs';
 
+import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   FLEET_AUDIENCE_LABELS,
   FLEET_SCOPE_COMMUNITY,
@@ -17,6 +18,7 @@ import {
 import { scopeStatusPill } from 'src/app/fleet/fleet-card.builders';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
+import { GOVERNANCE_READER_ROLES } from 'src/app/fleet/governance/governance.constants';
 import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
 import { FLEET_SCOPE_LABELS } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
@@ -46,6 +48,7 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 })
 export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFleetCommunity> {
   private readonly _scopes = inject(FleetScopeService);
+  private readonly _authService = inject(AuthService);
 
   readonly missingMessage =
     'No Community answers to that address. It may have been closed, or the ' +
@@ -84,32 +87,45 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
   /**
    * What the reader may do here: register a Fleet or an Armada into the
    * Community, offered only to whoever the server says holds
-   * `scope.children.register` here.
+   * `scope.children.register` here; and manage who governs it (FC-022),
+   * offered to its Owner and Admins, and to a site administrator, who
+   * settles disputes over its ownership from there.
    *
    * @param resolved - The server's answer.
    * @returns What to offer, which may be nothing.
    */
   private actionsFor(resolved: ResolvedFleetCommunity): FleetScopeAction[] {
     const { community, viewer } = resolved;
+    const communityLink = FLEET_LINKS.community(community.slug);
+    const actions: FleetScopeAction[] = [];
 
-    if (!viewer.capabilities.includes(SCOPE_CHILDREN_REGISTER_CAPABILITY)) {
-      return [];
+    if (viewer.capabilities.includes(SCOPE_CHILDREN_REGISTER_CAPABILITY)) {
+      actions.push(
+        {
+          label: 'Register a Fleet here',
+          link: [...communityLink, 'fleets', 'register'],
+          description: `Register a Fleet into ${community.name}`,
+        },
+        {
+          label: 'Register an Armada here',
+          link: [...communityLink, 'armadas', 'register'],
+          description: `Register an Armada into ${community.name}`,
+        },
+      );
     }
 
-    const communityLink = FLEET_LINKS.community(community.slug);
+    if (
+      viewer.roles.some(role => GOVERNANCE_READER_ROLES.includes(role)) ||
+      this._authService.isLoggedInAsAdmin()
+    ) {
+      actions.push({
+        label: 'Manage',
+        link: FLEET_LINKS.communityManage(community.slug),
+        description: `Manage who runs ${community.name}`,
+      });
+    }
 
-    return [
-      {
-        label: 'Register a Fleet here',
-        link: [...communityLink, 'fleets', 'register'],
-        description: `Register a Fleet into ${community.name}`,
-      },
-      {
-        label: 'Register an Armada here',
-        link: [...communityLink, 'armadas', 'register'],
-        description: `Register an Armada into ${community.name}`,
-      },
-    ];
+    return actions;
   }
 
   /**

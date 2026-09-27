@@ -1,0 +1,135 @@
+@if (state$ | async; as state) {
+  <app-fleet-page-shell
+    heading="Site administration"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the Community"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let view = state.data;
+
+      <p class="community-dispute__back">
+        <a [routerLink]="scope.manageLink">Back to Manage</a>
+      </p>
+
+      <p class="community-dispute__intro">
+        For settling a dispute over who owns this Community. Everything here is
+        kept with its history, with your reason.
+      </p>
+
+      @if (notice(); as done) {
+        <p
+          class="community-dispute__notice"
+          role="status">
+          {{ done }}
+        </p>
+      }
+      @if (error(); as refusal) {
+        <app-lcars-error-message
+          title="Not changed"
+          [message]="refusal" />
+      }
+
+      <dl class="community-dispute__facts">
+        <dt>Owner</dt>
+        <dd>{{ view.owner.username ?? unnamed }}</dd>
+        <dt>Admins</dt>
+        <dd>
+          @for (admin of view.admins; track admin.userId; let last = $last) {
+            {{ admin.username ?? unnamed }}{{ last ? '' : ', ' }}
+          } @empty {
+            None
+          }
+        </dd>
+        <dt>Open offer</dt>
+        <dd>
+          @if (view.offer; as offer) {
+            To {{ offer.to.username ?? unnamed }}, lapsing
+            {{ offer.expiresAt | appDate: 'medium' }}
+          } @else {
+            None
+          }
+        </dd>
+        @if (view.status === closed) {
+          <dt>Status</dt>
+          <dd>Closed</dd>
+        }
+      </dl>
+
+      <section aria-labelledby="dispute-reassign-heading">
+        <div class="lcars-text-bar">
+          <span id="dispute-reassign-heading">Move ownership</span>
+        </div>
+
+        @if (view.admins.length === 0) {
+          <p class="fleet-community-empty">
+            Ownership can move only to one of its Admins, and it has none.
+          </p>
+        } @else {
+          <form
+            class="community-dispute__form"
+            aria-label="Move ownership"
+            (submit)="$event.preventDefault(); onReassign(scope, view)">
+            <div class="lcars-input-container tangerine">
+              <label for="dispute-recipient">New Owner</label>
+              <select
+                id="dispute-recipient"
+                [value]="recipient()"
+                [disabled]="busy()"
+                (change)="recipient.set($any($event.target).value)">
+                <option value="">Choose an Admin</option>
+                @for (admin of view.admins; track admin.userId) {
+                  <option [value]="admin.userId">
+                    {{ admin.username ?? unnamed }}
+                  </option>
+                }
+              </select>
+            </div>
+            <div class="lcars-input-container tangerine">
+              <label for="dispute-reason">Reason</label>
+              <textarea
+                id="dispute-reason"
+                rows="3"
+                [attr.maxlength]="reasonLimit"
+                [value]="reason()"
+                [disabled]="busy()"
+                (input)="reason.set($any($event.target).value)"></textarea>
+            </div>
+            <div class="fleet-community-form-actions">
+              <button
+                type="submit"
+                class="lcars-btn lcars-btn-auto gold"
+                [disabled]="
+                  busy() || recipient() === '' || reason().trim() === ''
+                ">
+                Move ownership…
+              </button>
+            </div>
+          </form>
+        }
+      </section>
+
+      @if (view.status !== closed) {
+        <section
+          class="community-dispute__close"
+          aria-labelledby="dispute-close-heading">
+          <div class="lcars-text-bar">
+            <span id="dispute-close-heading">Close this Community</span>
+          </div>
+          <p>
+            Closing ends every role and delegated capability in it, and cannot
+            be undone. You will be asked for its name and a reason.
+          </p>
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto red"
+            [disabled]="busy()"
+            (click)="onClose(scope, view)">
+            Close…
+          </button>
+        </section>
+      }
+    }
+  </app-fleet-page-shell>
+}

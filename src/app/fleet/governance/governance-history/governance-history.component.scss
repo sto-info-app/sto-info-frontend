@@ -1,0 +1,41 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.governance-history {
+  &__back {
+    margin: 0 0 1rem;
+  }
+
+  &__list {
+    display: grid;
+    gap: 1rem;
+    max-width: 70ch;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__entry {
+    padding-left: 0.75rem;
+    border-left: 4px solid vars.$lcars-sky;
+  }
+
+  &__when {
+    color: vars.$lcars-sky;
+    font-size: 0.9rem;
+  }
+
+  &__sentence,
+  &__reason {
+    margin: 0.25rem 0 0;
+    overflow-wrap: anywhere;
+  }
+
+  // Whatever somebody typed, kept as they typed it.
+  &__reason {
+    white-space: pre-wrap;
+  }
+}

@@ -1,0 +1,54 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.governance-delegation {
+  &__back {
+    margin: 0 0 1rem;
+  }
+
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  &__form {
+    max-width: 40rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__asking {
+    font-weight: 600;
+  }
+
+  &__checklist {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    border: 0;
+  }
+
+  &__check {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    cursor: pointer;
+
+    input {
+      flex: none;
+      margin-top: 0.3rem;
+    }
+  }
+
+  &__description {
+    display: block;
+    color: vars.$lcars-sky;
+  }
+
+  &__held {
+    margin: 0 0 1.5rem;
+  }
+}

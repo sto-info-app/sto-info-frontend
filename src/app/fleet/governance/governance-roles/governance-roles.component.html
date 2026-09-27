@@ -1,0 +1,206 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Roles"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading who holds a role"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let roles = state.data;
+      @let changes = mayChange(scope, roles);
+
+      <p class="governance-roles__back">
+        <a [routerLink]="scope.manageLink">Back to Manage</a>
+      </p>
+
+      <p class="governance-roles__owner">
+        Owner: <strong>{{ roles.owner.username ?? unnamed }}</strong>
+      </p>
+
+      @if (notice(); as done) {
+        <p
+          class="governance-roles__notice"
+          role="status">
+          {{ done }}
+        </p>
+      }
+      @if (error(); as refusal) {
+        <app-lcars-error-message
+          title="Not changed"
+          [message]="refusal" />
+      }
+
+      @if (withdrawing(); as holder) {
+        <form
+          class="governance-roles__form"
+          aria-label="Withdraw a role"
+          (submit)="$event.preventDefault(); onConfirmWithdraw(scope)">
+          <p class="governance-roles__asking">
+            Withdraw {{ holder.username ?? 'this account' }}’s role as
+            {{ roleLabels[holder.role] }}?
+          </p>
+          <div class="lcars-input-container tangerine">
+            <label for="role-withdraw-reason">Reason</label>
+            <textarea
+              id="role-withdraw-reason"
+              rows="3"
+              [attr.maxlength]="reasonLimit"
+              [value]="withdrawReason()"
+              [disabled]="busy()"
+              (input)="
+                withdrawReason.set($any($event.target).value)
+              "></textarea>
+          </div>
+          <p class="fleet-community-field-hint">
+            Kept with the change, where the Admins can read it.
+          </p>
+          <div class="fleet-community-form-actions">
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto bluey"
+              [disabled]="busy()"
+              (click)="onKeep()">
+              Keep it
+            </button>
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto red"
+              [disabled]="busy() || withdrawReason().trim() === ''">
+              Withdraw
+            </button>
+          </div>
+        </form>
+      }
+
+      @if (roles.holders.length === 0) {
+        <p class="fleet-community-empty">
+          Nobody but the Owner holds a role here yet.
+        </p>
+      } @else {
+        <table class="fleet-community-table">
+          <caption>
+            Who holds a role
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Person</th>
+              <th scope="col">Role</th>
+              <th scope="col">Since</th>
+              @if (changes) {
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (holder of roles.holders; track holder.assignmentId) {
+              <tr>
+                <td data-label="Person">{{ holder.username ?? unnamed }}</td>
+                <td data-label="Role">{{ roleLabels[holder.role] }}</td>
+                <td data-label="Since">
+                  {{ holder.since | appDate: 'medium' }}
+                </td>
+                @if (changes) {
+                  <td data-label="Actions">
+                    <button
+                      type="button"
+                      class="lcars-btn lcars-btn-auto red"
+                      [disabled]="busy()"
+                      (click)="onWithdraw(holder)">
+                      Withdraw…
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+
+      @if (changes) {
+        <section
+          class="governance-roles__appoint"
+          aria-labelledby="role-appoint-heading">
+          <div class="lcars-text-bar">
+            <span id="role-appoint-heading">Appoint somebody</span>
+          </div>
+
+          @let people = appointable(roles);
+
+          @if (people.length === 0) {
+            <p class="fleet-community-empty">
+              Nobody is waiting to be appointed. Only
+              {{ scope.isCommunity ? 'members of its Fleets' : 'its members' }}
+              who hold no role here can be.
+            </p>
+          } @else {
+            <form
+              class="governance-roles__form"
+              aria-label="Appoint somebody"
+              (submit)="$event.preventDefault(); onAppoint(scope)">
+              <div class="lcars-input-container tangerine">
+                <label for="role-appointee">Person</label>
+                <select
+                  id="role-appointee"
+                  [value]="appointee()"
+                  [disabled]="busy()"
+                  (change)="appointee.set($any($event.target).value)">
+                  <option value="">Choose somebody</option>
+                  @for (person of people; track person.userId) {
+                    <option [value]="person.userId">
+                      {{ person.username ?? unnamed }}
+                    </option>
+                  }
+                </select>
+              </div>
+              <div class="lcars-input-container tangerine">
+                <label for="role-appoint-role">Role</label>
+                <select
+                  id="role-appoint-role"
+                  [value]="appointRole()"
+                  [disabled]="busy()"
+                  (change)="appointRole.set($any($event.target).value)">
+                  <option value="">Choose a role</option>
+                  @for (role of appointableRoles; track role) {
+                    <option [value]="role">{{ roleLabels[role] }}</option>
+                  }
+                </select>
+              </div>
+              <div class="lcars-input-container tangerine">
+                <label for="role-appoint-reason">Why (optional)</label>
+                <textarea
+                  id="role-appoint-reason"
+                  rows="2"
+                  [attr.maxlength]="reasonLimit"
+                  [value]="appointReason()"
+                  [disabled]="busy()"
+                  (input)="
+                    appointReason.set($any($event.target).value)
+                  "></textarea>
+              </div>
+              <p class="fleet-community-field-hint">
+                An Admin runs its recruitment, members, roster and public face,
+                and may read how it is governed. An Officer holds only what
+                Delegation gives Officers.
+              </p>
+              <div class="fleet-community-form-actions">
+                <button
+                  type="submit"
+                  class="lcars-btn lcars-btn-auto green"
+                  [disabled]="
+                    busy() || appointee() === '' || appointRole() === ''
+                  ">
+                  Appoint
+                </button>
+              </div>
+            </form>
+          }
+        </section>
+      }
+    }
+  </app-fleet-page-shell>
+}

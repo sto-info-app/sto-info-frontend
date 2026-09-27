@@ -1,0 +1,80 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Manage"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading who runs this"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+
+      @if (scope.isCommunity) {
+        <p class="governance-hub__back">
+          <a [routerLink]="scope.scopeLink">Back to {{ scope.name }}</a>
+        </p>
+      }
+
+      @if (closeNotice(); as notice) {
+        <p
+          class="governance-hub__notice"
+          role="status">
+          {{ notice }}
+        </p>
+      }
+      @if (closeError(); as refusal) {
+        <app-lcars-error-message
+          title="Not closed"
+          [message]="refusal" />
+      }
+
+      @if (scope.isClosed) {
+        <p class="governance-hub__closed">
+          This {{ scope.isCommunity ? 'Community' : 'Fleet' }} is closed. Its
+          history can still be read.
+        </p>
+      }
+
+      <ul class="governance-hub__list">
+        @for (action of state.data.actions; track action.label) {
+          <li class="governance-hub__item">
+            <a
+              class="lcars-btn lcars-btn-auto gold"
+              [routerLink]="action.link"
+              >{{ action.label }}</a
+            >
+            <p class="governance-hub__description">
+              {{ action.description }}
+            </p>
+          </li>
+        }
+      </ul>
+
+      @if (state.data.mayClose) {
+        <section
+          class="governance-hub__close"
+          aria-labelledby="governance-close-heading">
+          <div class="lcars-text-bar">
+            <span id="governance-close-heading"
+              >Close this {{ scope.isCommunity ? 'Community' : 'Fleet' }}</span
+            >
+          </div>
+          <p>
+            Closing ends every role and delegated capability here, and cannot be
+            undone. You will be asked for its name and a reason.
+          </p>
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto red"
+            [disabled]="busy()"
+            (click)="onClose(scope)">
+            Close…
+          </button>
+        </section>
+      }
+    }
+  </app-fleet-page-shell>
+}

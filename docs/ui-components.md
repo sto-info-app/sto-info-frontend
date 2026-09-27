@@ -804,6 +804,48 @@ one, while a recruited one asks whether the Character is in the Fleet in game
 A recruited proposal the server withdrew when the Fleet membership ended
 (`WITHDRAWN`) is not shown.
 
+### Governance
+
+Who governs a Community or Fleet (FC-022) lives in `src/app/fleet/governance/`.
+Every request goes through `FleetGovernanceService`, and a refusal is shown
+with `recruitmentRefusalOf`, as recruitment's are.
+
+The pages are the same at both levels: `GovernancePageDirective` reads the
+address, resolving a Fleet when it names a platform and the Community
+otherwise, and tells absent, failed and not permitted apart. Each lives below
+the scope's **Manage** hub (`FLEET_LINKS.communityManage`,
+`FLEET_LINKS.fleetManage`):
+
+| Page | Address | Who opens it |
+|---|---|---|
+| Manage hub | `…/manage` | The Owner and Admins; on a Community, a site administrator too |
+| Roles | `…/manage/roles` | The Owner changes it; Admins read it |
+| Delegation | `…/manage/delegation` | The Owner changes it; Admins read it |
+| History | `…/manage/history` | The Owner and Admins |
+| Ownership | `communities/:slug/manage/ownership` | The Community's Owner |
+| Site administration | `communities/:slug/manage/dispute` | A site administrator |
+
+A Fleet's **Manage** tab is offered to its Owner and Admins (`roles` on the tab
+strip's view model). A Community's page offers **Manage** among its actions to
+the same people and to a site administrator.
+
+Roles are appointed from the scope's members, one each: somebody holding a role
+is not offered again until it is withdrawn. Delegation ticks what every Officer
+holds and grants or denies one capability to one person; the Owner is never
+offered, since they hold everything. A reason is asked for wherever something
+is taken away — withdrawing a role, unticking an Officer capability, a denial,
+clearing a grant, closing — and is optional otherwise. Capabilities are named
+with `capabilityNamer(delegable)`, and History reads each change as a sentence
+with `describeGovernanceAction`.
+
+**`<app-governance-close-dialog>`** — opened through `MatDialog` by the hub and
+by the site administration page. Closing cannot be undone, so the reader types
+the name back as well as a reason; the name is compared with its edge spaces
+trimmed. It closes with `{ reason }`, or nothing when kept open.
+
+Confirmations built from names somebody chose escape them with `escapeHtml`
+before they reach the dialog's markup.
+
 ### Upload and scan state
 
 **`<app-asset-scan-status>`** lives in `src/app/shared/components/`, not in the

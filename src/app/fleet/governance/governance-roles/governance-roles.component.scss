@@ -1,0 +1,30 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.governance-roles {
+  &__back,
+  &__owner {
+    margin: 0 0 1rem;
+  }
+
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  &__form {
+    max-width: 32rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__asking {
+    font-weight: 600;
+  }
+
+  &__appoint {
+    margin-top: 2rem;
+  }
+}

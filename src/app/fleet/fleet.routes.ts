@@ -301,6 +301,100 @@ export const FLEET_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
 
+      // Who governs a Community or Fleet (FC-022). The same pages answer at
+      // both levels; the address says which. Ownership and its disputes are
+      // the Community's alone.
+      {
+        path: 'communities/:communitySlug/manage',
+        loadComponent: () =>
+          import('./governance/governance-hub/governance-hub.component').then(
+            m => m.GovernanceHubComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_MANAGE },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/manage/roles',
+        loadComponent: () =>
+          import('./governance/governance-roles/governance-roles.component').then(
+            m => m.GovernanceRolesComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/manage/delegation',
+        loadComponent: () =>
+          import('./governance/governance-delegation/governance-delegation.component').then(
+            m => m.GovernanceDelegationComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/manage/history',
+        loadComponent: () =>
+          import('./governance/governance-history/governance-history.component').then(
+            m => m.GovernanceHistoryComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/manage/ownership',
+        loadComponent: () =>
+          import('./governance/community-ownership/community-ownership.component').then(
+            m => m.CommunityOwnershipComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_COMMUNITY_OWNERSHIP },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/manage/dispute',
+        loadComponent: () =>
+          import('./governance/community-dispute/community-dispute.component').then(
+            m => m.CommunityDisputeComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_COMMUNITY_DISPUTE },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/manage',
+        loadComponent: () =>
+          import('./governance/governance-hub/governance-hub.component').then(
+            m => m.GovernanceHubComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_MANAGE },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/manage/roles',
+        loadComponent: () =>
+          import('./governance/governance-roles/governance-roles.component').then(
+            m => m.GovernanceRolesComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/manage/delegation',
+        loadComponent: () =>
+          import('./governance/governance-delegation/governance-delegation.component').then(
+            m => m.GovernanceDelegationComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/manage/history',
+        loadComponent: () =>
+          import('./governance/governance-history/governance-history.component').then(
+            m => m.GovernanceHistoryComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY },
+        canActivate: [AuthGuard],
+      },
+
       // Where those pages lived before they moved under Investigate, kept so
       // a link to one still arrives.
       {

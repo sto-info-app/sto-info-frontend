@@ -34,6 +34,7 @@ function vm(...capabilities: string[]): FleetTabsVm {
     fleetSlug: 'ninth-fleet',
     providesRoster: true,
     capabilities,
+    roles: [],
   };
 }
 
@@ -192,6 +193,38 @@ describe('FleetTabsComponent', () => {
     });
   });
 
+  // FC-022: who governs the Fleet, for its Owner and Admins.
+  describe('the Manage tab', () => {
+    it.each([['OWNER'], ['ADMIN']])(
+      'is offered to a reader holding %s, last of all',
+      (role: string) => {
+        expect(
+          draw({ ...vm('roster.view', 'recruitment.manage'), roles: [role] }),
+        ).toEqual([
+          ['Overview', FLEET_HREF],
+          ['Roster', `${FLEET_HREF}/roster`],
+          ['History', `${FLEET_HREF}/history`],
+          ['Recruitment', `${FLEET_HREF}/recruitment`],
+          ['Manage', `${FLEET_HREF}/manage`],
+        ]);
+      },
+    );
+
+    it('is not offered to an Officer or a member', () => {
+      expect(
+        draw({ ...vm('roster.view'), roles: ['OFFICER', 'MEMBER'] }).map(
+          ([label]) => label,
+        ),
+      ).not.toContain('Manage');
+    });
+
+    it('is offered on a Fleet with no roster too', () => {
+      expect(
+        draw({ ...consoleVm(), roles: ['ADMIN'] }).map(([label]) => label),
+      ).toEqual(['Overview', 'Manage']);
+    });
+  });
+
   describe('on a Fleet with no roster', () => {
     it('offers Recruitment and nothing about a roster', () => {
       expect(
@@ -244,7 +277,7 @@ describe('FleetTabsComponent', () => {
         },
         communitySlug: 'united-federation-alliance',
         platformSegment: 'pc',
-        viewer: { capabilities: ['roster.view'] },
+        viewer: { capabilities: ['roster.view'], roles: [] },
       } as unknown as ResolvedStoFleet;
     }
 

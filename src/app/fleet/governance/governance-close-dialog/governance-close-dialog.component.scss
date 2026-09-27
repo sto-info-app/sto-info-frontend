@@ -1,0 +1,36 @@
+@use 'lcars-variables' as vars;
+
+#governance-close-dialog-container {
+  padding: 10px;
+
+  .mat-mdc-dialog-actions {
+    gap: 1rem;
+    padding: 1rem 3rem;
+  }
+}
+
+.governance-close__note {
+  margin: 1rem 0 0;
+  color: vars.$lcars-sky;
+}
+
+.governance-close__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+// Shown as recorded, so the reader types what they see. The label it sits in
+// is set in capitals, and the name is compared with its own.
+.governance-close__name {
+  font-weight: 600;
+  text-transform: none;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.field-error {
+  color: vars.$lcars-orange;
+  font-size: 0.8rem;
+}

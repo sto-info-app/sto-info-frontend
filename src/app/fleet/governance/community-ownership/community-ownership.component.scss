@@ -1,0 +1,27 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.community-ownership {
+  &__back {
+    margin: 0 0 1rem;
+  }
+
+  &__intro {
+    max-width: 70ch;
+    margin: 0 0 1rem;
+  }
+
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  &__offer,
+  &__form {
+    max-width: 40rem;
+    margin-bottom: 1.5rem;
+  }
+}

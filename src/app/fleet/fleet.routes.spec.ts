@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(33);
+    expect(children).toHaveLength(43);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -133,6 +133,43 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/settings',
       APP_ROUTE_TITLES.FLEET_RECRUITMENT_SETTINGS,
+    ],
+    ['communities/:communitySlug/manage', APP_ROUTE_TITLES.FLEET_MANAGE],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage',
+      APP_ROUTE_TITLES.FLEET_MANAGE,
+    ],
+    [
+      'communities/:communitySlug/manage/roles',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/roles',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES,
+    ],
+    [
+      'communities/:communitySlug/manage/delegation',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/delegation',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION,
+    ],
+    [
+      'communities/:communitySlug/manage/history',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/history',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY,
+    ],
+    [
+      'communities/:communitySlug/manage/ownership',
+      APP_ROUTE_TITLES.FLEET_COMMUNITY_OWNERSHIP,
+    ],
+    [
+      'communities/:communitySlug/manage/dispute',
+      APP_ROUTE_TITLES.FLEET_COMMUNITY_DISPUTE,
     ],
   ])('puts %s behind the sign-in guard', (path, title) => {
     expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
@@ -354,6 +391,34 @@ describe('FLEET_ROUTES', () => {
       'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/settings',
       'FleetRecruitmentSettingsComponent',
     ],
+    ['communities/:communitySlug/manage', 'GovernanceHubComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage',
+      'GovernanceHubComponent',
+    ],
+    ['communities/:communitySlug/manage/roles', 'GovernanceRolesComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/roles',
+      'GovernanceRolesComponent',
+    ],
+    [
+      'communities/:communitySlug/manage/delegation',
+      'GovernanceDelegationComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/delegation',
+      'GovernanceDelegationComponent',
+    ],
+    ['communities/:communitySlug/manage/history', 'GovernanceHistoryComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/history',
+      'GovernanceHistoryComponent',
+    ],
+    [
+      'communities/:communitySlug/manage/ownership',
+      'CommunityOwnershipComponent',
+    ],
+    ['communities/:communitySlug/manage/dispute', 'CommunityDisputeComponent'],
   ])('loads the right component for %s', async (path, expected) => {
     const loaded = await (
       childAt(path)?.loadComponent as () => Promise<{ name: string }>

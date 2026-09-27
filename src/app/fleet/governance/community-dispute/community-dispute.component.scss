@@ -1,0 +1,47 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.community-dispute {
+  &__back {
+    margin: 0 0 1rem;
+  }
+
+  &__intro {
+    max-width: 70ch;
+    margin: 0 0 1rem;
+  }
+
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  &__facts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.25rem 1rem;
+    margin: 0 0 1.5rem;
+
+    dt {
+      color: vars.$lcars-sky;
+    }
+
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__form {
+    max-width: 40rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__close {
+    max-width: 70ch;
+    margin-top: 2.5rem;
+  }
+}

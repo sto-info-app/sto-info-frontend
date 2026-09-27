@@ -1,0 +1,47 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Governance history"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the history"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      <p class="governance-history__back">
+        <a [routerLink]="state.scope.manageLink">Back to Manage</a>
+      </p>
+
+      @if (state.data.length === 0) {
+        <p class="fleet-community-empty">
+          Nothing about how this is run has changed yet.
+        </p>
+      } @else {
+        <ol
+          class="governance-history__list"
+          aria-label="Changes, newest first">
+          @for (entry of state.data; track entry.id) {
+            <li class="governance-history__entry">
+              <time
+                class="governance-history__when"
+                [attr.datetime]="entry.createdAt"
+                >{{ entry.createdAt | appDate: 'medium' }}</time
+              >
+              <p class="governance-history__sentence">{{ entry.sentence }}</p>
+              @if (entry.reason) {
+                <p class="governance-history__reason">
+                  Reason: {{ entry.reason }}
+                </p>
+              }
+            </li>
+          }
+        </ol>
+        <p class="fleet-community-field-hint">
+          The newest fifty changes are shown.
+        </p>
+      }
+    }
+  </app-fleet-page-shell>
+}

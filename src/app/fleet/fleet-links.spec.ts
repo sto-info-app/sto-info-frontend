@@ -168,6 +168,24 @@ describe('FLEET_LINKS', () => {
     ).toEqual([...recruitment, 'settings']);
   });
 
+  it('should address the Manage hubs below their scopes', () => {
+    expect(FLEET_LINKS.communityManage('ufa')).toEqual([
+      '/fleets',
+      'communities',
+      'ufa',
+      'manage',
+    ]);
+    expect(FLEET_LINKS.fleetManage('ufa', 'pc', 'starfleet-command')).toEqual([
+      '/fleets',
+      'communities',
+      'ufa',
+      'fleets',
+      'pc',
+      'starfleet-command',
+      'manage',
+    ]);
+  });
+
   it('should address a standalone Fleet under the reserved segment', () => {
     expect(FLEET_LINKS.standaloneFleet('pc', 'starfleet-command')).toEqual([
       '/fleets',

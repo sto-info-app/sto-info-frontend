@@ -402,6 +402,34 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * Where a Fleet's Owner and Admins manage who governs it (FC-022).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetManage: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'manage',
+  ],
+
+  /**
+   * Where a Community's Owner and Admins manage who governs it (FC-022).
+   *
+   * @param communitySlug - The Community's URL segment.
+   * @returns The router link.
+   */
+  communityManage: (communitySlug: string): string[] => [
+    ...FLEET_LINKS.community(communitySlug),
+    'manage',
+  ],
+
+  /**
    * A Fleet's members, for whoever may remove one.
    *
    * @param communitySlug - The holding Community's URL segment.

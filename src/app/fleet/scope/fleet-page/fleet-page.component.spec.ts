@@ -562,6 +562,7 @@ describe('FleetPageComponent', () => {
         fleetSlug: 'starfleet-command',
         providesRoster: true,
         capabilities: ROSTER_INVESTIGATOR.capabilities,
+        roles: [],
       });
     });
 

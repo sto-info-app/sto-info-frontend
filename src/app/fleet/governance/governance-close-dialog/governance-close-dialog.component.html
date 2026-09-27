@@ -1,0 +1,75 @@
+<div id="governance-close-dialog-container">
+  <div mat-dialog-content>
+    <app-lcars-warning-message
+      [title]="'Close this ' + data.scopeNoun"
+      [message]="warning" />
+
+    @if (data.asSiteAdmin) {
+      <p class="governance-close__note">
+        You are closing it as a site administrator. Your reason is kept with its
+        history, where its Owner and Admins can read it.
+      </p>
+    }
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onConfirm()"
+      class="governance-close__form">
+      <div class="lcars-input-container perano">
+        <label for="governance-close-name">
+          Type the {{ data.scopeNoun }}’s name to confirm:
+          <span class="governance-close__name">{{ data.name }}</span>
+        </label>
+        <input
+          id="governance-close-name"
+          type="text"
+          autocomplete="off"
+          formControlName="name"
+          aria-required="true" />
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <small class="field-error">
+            That is not its name. Type it exactly as shown.
+          </small>
+        }
+      </div>
+
+      <div class="lcars-input-container perano">
+        <label for="governance-close-reason">Why</label>
+        <textarea
+          id="governance-close-reason"
+          formControlName="reason"
+          rows="3"
+          [attr.maxlength]="maxLength"
+          aria-required="true"></textarea>
+        @if (form.controls.reason.touched && form.controls.reason.invalid) {
+          <small class="field-error">
+            @if (form.controls.reason.hasError('required')) {
+              Say why, so whoever looks at this next knows.
+            } @else {
+              Keep it to {{ maxLength }} characters.
+            }
+          </small>
+        }
+      </div>
+    </form>
+  </div>
+
+  <div
+    class="buttons-container lcars-flex-right"
+    mat-dialog-actions>
+    <button
+      type="button"
+      class="lcars-btn bluey"
+      mat-button
+      (click)="onCancel()">
+      Keep it open
+    </button>
+    <button
+      type="button"
+      class="lcars-btn red"
+      mat-button
+      (click)="onConfirm()">
+      Close it
+    </button>
+  </div>
+</div>

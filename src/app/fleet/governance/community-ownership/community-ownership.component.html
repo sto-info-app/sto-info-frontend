@@ -1,0 +1,97 @@
+@if (state$ | async; as state) {
+  <app-fleet-page-shell
+    heading="Ownership"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading who owns it"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let standing = state.data;
+
+      <p class="community-ownership__back">
+        <a [routerLink]="scope.manageLink">Back to Manage</a>
+      </p>
+
+      <p class="community-ownership__intro">
+        You can hand {{ scope.name }} over to one of its Admins. It moves only
+        when they accept, within seven days. You then stay on as an Admin.
+      </p>
+
+      @if (notice(); as done) {
+        <p
+          class="community-ownership__notice"
+          role="status">
+          {{ done }}
+        </p>
+      }
+      @if (error(); as refusal) {
+        <app-lcars-error-message
+          title="Not changed"
+          [message]="refusal" />
+      }
+
+      @if (standing.offer; as offer) {
+        <section
+          class="community-ownership__offer"
+          aria-labelledby="ownership-offer-heading">
+          <div class="lcars-text-bar">
+            <span id="ownership-offer-heading">Open offer</span>
+          </div>
+          <p>
+            Offered to
+            <strong>{{ offer.to.username ?? unnamed }}</strong>
+            on {{ offer.offeredAt | appDate: 'medium' }}. It lapses on
+            {{ offer.expiresAt | appDate: 'medium' }} unless they answer.
+          </p>
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto red"
+            [disabled]="busy()"
+            (click)="onCancel(scope, offer)">
+            Take the offer back…
+          </button>
+        </section>
+      } @else if (scope.isClosed) {
+        <p class="fleet-community-empty">
+          A closed Community cannot be handed over.
+        </p>
+      } @else if (standing.eligible.length === 0) {
+        <p class="fleet-community-empty">
+          Only an Admin of the Community can be offered it, and it has none.
+          <a [routerLink]="[...scope.manageLink, 'roles']">Appoint one</a>
+          first.
+        </p>
+      } @else {
+        <form
+          class="community-ownership__form"
+          aria-label="Offer ownership"
+          (submit)="$event.preventDefault(); onOffer(scope, standing)">
+          <div class="lcars-input-container tangerine">
+            <label for="ownership-recipient">Admin</label>
+            <select
+              id="ownership-recipient"
+              [value]="recipient()"
+              [disabled]="busy()"
+              (change)="recipient.set($any($event.target).value)">
+              <option value="">Choose an Admin</option>
+              @for (person of standing.eligible; track person.userId) {
+                <option [value]="person.userId">
+                  {{ person.username ?? unnamed }}
+                </option>
+              }
+            </select>
+          </div>
+          <div class="fleet-community-form-actions">
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto gold"
+              [disabled]="busy() || recipient() === ''">
+              Offer ownership…
+            </button>
+          </div>
+        </form>
+      }
+    }
+  </app-fleet-page-shell>
+}

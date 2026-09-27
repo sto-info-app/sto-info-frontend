@@ -1,0 +1,299 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Delegation"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading what is delegated"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let roles = state.data;
+      @let changes = mayChange(scope, roles);
+
+      <p class="governance-delegation__back">
+        <a [routerLink]="scope.manageLink">Back to Manage</a>
+      </p>
+
+      @if (notice(); as done) {
+        <p
+          class="governance-delegation__notice"
+          role="status">
+          {{ done }}
+        </p>
+      }
+      @if (error(); as refusal) {
+        <app-lcars-error-message
+          title="Not changed"
+          [message]="refusal" />
+      }
+
+      <section aria-labelledby="delegation-officers-heading">
+        <div class="lcars-text-bar">
+          <span id="delegation-officers-heading">What every Officer holds</span>
+        </div>
+
+        @if (changes) {
+          <form
+            class="governance-delegation__form"
+            aria-label="What every Officer holds"
+            (submit)="$event.preventDefault(); onSaveOfficers(scope, roles)">
+            <fieldset class="governance-delegation__checklist">
+              <legend class="sr-only">Capabilities</legend>
+              @for (capability of roles.delegable; track capability.code) {
+                <label class="governance-delegation__check">
+                  <input
+                    type="checkbox"
+                    [checked]="
+                      officerSelection(roles).includes(capability.code)
+                    "
+                    [disabled]="busy()"
+                    (change)="
+                      onToggleOfficer(
+                        roles,
+                        capability.code,
+                        $any($event.target).checked
+                      )
+                    " />
+                  <span>
+                    <strong>{{ capability.name }}</strong>
+                    <span class="governance-delegation__description">
+                      {{ capability.description }}
+                    </span>
+                  </span>
+                </label>
+              }
+            </fieldset>
+
+            @if (officersLosing(roles)) {
+              <div class="lcars-input-container tangerine">
+                <label for="delegation-officer-reason">
+                  Why take these from the Officers
+                </label>
+                <textarea
+                  id="delegation-officer-reason"
+                  rows="2"
+                  [attr.maxlength]="reasonLimit"
+                  [value]="officerReason()"
+                  [disabled]="busy()"
+                  (input)="
+                    officerReason.set($any($event.target).value)
+                  "></textarea>
+              </div>
+            }
+
+            <div class="fleet-community-form-actions">
+              <button
+                type="button"
+                class="lcars-btn lcars-btn-auto bluey"
+                [disabled]="busy() || !officersChanged(roles)"
+                (click)="onResetOfficers()">
+                Undo changes
+              </button>
+              <button
+                type="submit"
+                class="lcars-btn lcars-btn-auto green"
+                [disabled]="
+                  busy() ||
+                  !officersChanged(roles) ||
+                  (officersLosing(roles) && officerReason().trim() === '')
+                ">
+                Save
+              </button>
+            </div>
+          </form>
+        } @else if (roles.officerCapabilities.length === 0) {
+          <p class="fleet-community-empty">Officers hold nothing extra here.</p>
+        } @else {
+          <ul class="governance-delegation__held">
+            @for (code of roles.officerCapabilities; track code) {
+              <li>{{ capabilityName(roles, code) }}</li>
+            }
+          </ul>
+        }
+      </section>
+
+      <section aria-labelledby="delegation-personal-heading">
+        <div class="lcars-text-bar">
+          <span id="delegation-personal-heading">Particular people</span>
+        </div>
+
+        @if (clearing(); as entry) {
+          <form
+            class="governance-delegation__form"
+            aria-label="Clear a grant or denial"
+            (submit)="$event.preventDefault(); onConfirmClear(scope)">
+            <p class="governance-delegation__asking">
+              Clear {{ entry.username ?? 'this account' }}’s
+              {{ entry.effect === deny ? 'denial of' : 'grant of' }}
+              “{{ capabilityName(roles, entry.capability) }}”?
+            </p>
+            <div class="lcars-input-container tangerine">
+              <label for="delegation-clear-reason">
+                Reason{{ entry.effect === deny ? ' (optional)' : '' }}
+              </label>
+              <textarea
+                id="delegation-clear-reason"
+                rows="2"
+                [attr.maxlength]="reasonLimit"
+                [value]="clearReason()"
+                [disabled]="busy()"
+                (input)="clearReason.set($any($event.target).value)"></textarea>
+            </div>
+            <div class="fleet-community-form-actions">
+              <button
+                type="button"
+                class="lcars-btn lcars-btn-auto bluey"
+                [disabled]="busy()"
+                (click)="onKeep()">
+                Keep it
+              </button>
+              <button
+                type="submit"
+                class="lcars-btn lcars-btn-auto red"
+                [disabled]="busy() || !clearReady(entry)">
+                Clear
+              </button>
+            </div>
+          </form>
+        }
+
+        @if (roles.personal.length === 0) {
+          <p class="fleet-community-empty">
+            Nobody has been granted or denied anything in particular here.
+          </p>
+        } @else {
+          <table class="fleet-community-table">
+            <caption>
+              Granted or denied to one person
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Person</th>
+                <th scope="col">Capability</th>
+                <th scope="col">Effect</th>
+                <th scope="col">Since</th>
+                @if (changes) {
+                  <th scope="col"><span class="sr-only">Actions</span></th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of roles.personal; track entry.grantId) {
+                <tr>
+                  <td data-label="Person">{{ entry.username ?? unnamed }}</td>
+                  <td data-label="Capability">
+                    {{ capabilityName(roles, entry.capability) }}
+                  </td>
+                  <td data-label="Effect">{{ effectLabels[entry.effect] }}</td>
+                  <td data-label="Since">
+                    {{ entry.since | appDate: 'medium' }}
+                  </td>
+                  @if (changes) {
+                    <td data-label="Actions">
+                      <button
+                        type="button"
+                        class="lcars-btn lcars-btn-auto red"
+                        [disabled]="busy()"
+                        (click)="onClear(entry)">
+                        Clear…
+                      </button>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        @if (changes) {
+          @let everyone = people(roles);
+
+          @if (everyone.length === 0) {
+            <p class="fleet-community-empty">
+              Nobody here can be granted or denied anything yet. Only role
+              holders and members can be.
+            </p>
+          } @else {
+            <form
+              class="governance-delegation__form"
+              aria-label="Grant or deny one person"
+              (submit)="$event.preventDefault(); onSetPersonal(scope)">
+              <div class="lcars-input-container tangerine">
+                <label for="delegation-person">Person</label>
+                <select
+                  id="delegation-person"
+                  [value]="personUserId()"
+                  [disabled]="busy()"
+                  (change)="personUserId.set($any($event.target).value)">
+                  <option value="">Choose somebody</option>
+                  @for (person of everyone; track person.userId) {
+                    <option [value]="person.userId">
+                      {{ person.username ?? unnamed }}
+                    </option>
+                  }
+                </select>
+              </div>
+              <div class="lcars-input-container tangerine">
+                <label for="delegation-capability">Capability</label>
+                <select
+                  id="delegation-capability"
+                  [value]="personCapability()"
+                  [disabled]="busy()"
+                  (change)="personCapability.set($any($event.target).value)">
+                  <option value="">Choose a capability</option>
+                  @for (capability of roles.delegable; track capability.code) {
+                    <option [value]="capability.code">
+                      {{ capability.name }}
+                    </option>
+                  }
+                </select>
+              </div>
+              <div class="lcars-input-container tangerine">
+                <label for="delegation-effect">Grant or deny</label>
+                <select
+                  id="delegation-effect"
+                  [value]="personEffect()"
+                  [disabled]="busy()"
+                  (change)="personEffect.set($any($event.target).value)">
+                  <option value="">Choose one</option>
+                  @for (effect of effects; track effect) {
+                    <option [value]="effect">{{ effectLabels[effect] }}</option>
+                  }
+                </select>
+              </div>
+              <div class="lcars-input-container tangerine">
+                <label for="delegation-person-reason">
+                  Why{{ personEffect() === deny ? '' : ' (optional)' }}
+                </label>
+                <textarea
+                  id="delegation-person-reason"
+                  rows="2"
+                  [attr.maxlength]="reasonLimit"
+                  [value]="personReason()"
+                  [disabled]="busy()"
+                  (input)="
+                    personReason.set($any($event.target).value)
+                  "></textarea>
+              </div>
+              <p class="fleet-community-field-hint">
+                A denial beats any role they hold, and needs a reason.
+              </p>
+              <div class="fleet-community-form-actions">
+                <button
+                  type="submit"
+                  class="lcars-btn lcars-btn-auto green"
+                  [disabled]="busy() || !personReady()">
+                  Save
+                </button>
+              </div>
+            </form>
+          }
+        }
+      </section>
+    }
+  </app-fleet-page-shell>
+}

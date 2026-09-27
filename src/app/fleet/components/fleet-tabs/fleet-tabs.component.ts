@@ -13,6 +13,7 @@ import { catchError, map, of, switchMap } from 'rxjs';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
 import { ROSTER_IMPORT_READERS } from 'src/app/fleet/imports/roster-import.constants';
+import { GOVERNANCE_READER_ROLES } from 'src/app/fleet/governance/governance.constants';
 import { RECRUITMENT_TAB_CAPABILITIES } from 'src/app/fleet/recruitment/recruitment.constants';
 import { ROSTER_VIEW_CAPABILITY } from 'src/app/fleet/roster/roster.constants';
 import { ResolvedStoFleet } from 'src/app/models/fleet.models';
@@ -32,6 +33,8 @@ export interface FleetTabsVm {
   readonly providesRoster: boolean;
   /** What the reader may do here, which decides the tabs they are offered. */
   readonly capabilities: readonly string[];
+  /** The role labels the reader holds here, which decide the Manage tab. */
+  readonly roles: readonly string[];
 }
 
 /** One tab in the strip. */
@@ -64,6 +67,7 @@ export function fleetTabsVmOf(resolved: ResolvedStoFleet): FleetTabsVm | null {
     fleetSlug: resolved.fleet.slug,
     providesRoster: resolved.fleet.platformProvidesRosterExport,
     capabilities: resolved.viewer.capabilities,
+    roles: resolved.viewer.roles,
   };
 }
 
@@ -121,6 +125,7 @@ export class FleetTabsComponent {
       fleetSlug,
       providesRoster,
       capabilities,
+      roles,
     } = this.vm();
     const tabs: FleetTab[] = [
       {
@@ -199,6 +204,21 @@ export class FleetTabsComponent {
         ),
         label: 'Recruitment',
         // Lit on the applications, invitations, members and settings too.
+        exact: false,
+      });
+    }
+
+    // Who governs the Fleet (FC-022): for its Owner, who changes it, and its
+    // Admins, who may read it.
+    if (roles.some(role => GOVERNANCE_READER_ROLES.includes(role))) {
+      tabs.push({
+        link: FLEET_LINKS.fleetManage(
+          communitySlug,
+          platformSegment,
+          fleetSlug,
+        ),
+        label: 'Manage',
+        // Lit on its roles, delegation and history too.
         exact: false,
       });
     }

@@ -9,6 +9,7 @@ import {
 
 import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { FLEET_SCOPE_ERROR } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
@@ -86,6 +87,10 @@ describe('CommunityPageComponent', () => {
   let scopes: { resolveCommunity: jest.Mock };
   let router: { navigate: jest.Mock };
   let pageTitle: { setTitle: jest.Mock };
+  let auth: {
+    isLoggedIn: jest.Mock;
+    isLoggedInAsAdmin: jest.Mock;
+  };
   let formatted: string | null;
 
   beforeEach(async () => {
@@ -103,6 +108,10 @@ describe('CommunityPageComponent', () => {
     };
     router = { navigate: jest.fn() };
     pageTitle = { setTitle: jest.fn() };
+    auth = {
+      isLoggedIn: jest.fn(() => false),
+      isLoggedInAsAdmin: jest.fn(() => false),
+    };
     formatted = '2 January 2026';
 
     await TestBed.configureTestingModule({
@@ -125,6 +134,7 @@ describe('CommunityPageComponent', () => {
           },
         },
         { provide: PageTitleService, useValue: pageTitle },
+        { provide: AuthService, useValue: auth },
       ],
     })
       .overrideComponent(CommunityPageComponent, {
@@ -537,6 +547,74 @@ describe('CommunityPageComponent', () => {
       expect(drawn.following?.relationship).toBe(FleetScopeRelationship.MEMBER);
       expect(drawn.following?.isFollowing).toBe(true);
       expect(drawn.following?.followerCount).toBe(12);
+    });
+  });
+
+  // FC-022: who governs it.
+  describe('managing it', () => {
+    const MANAGE_LINK = [
+      '/fleets',
+      'communities',
+      'united-federation-alliance',
+      'manage',
+    ];
+
+    /**
+     * Resolves the Community for a reader holding some roles.
+     *
+     * @param roles - The role labels they hold.
+     * @param status - The Community's state.
+     */
+    function resolveFor(
+      roles: string[],
+      status: FleetScopeStatus = FleetScopeStatus.ACTIVE,
+    ): void {
+      scopes.resolveCommunity.mockReturnValue(
+        of<ResolvedFleetCommunity>({
+          community: community({ status }),
+          redirectedFrom: null,
+          viewer: { ...READER, roles },
+        }),
+      );
+    }
+
+    /**
+     * The page as drawn, once ready.
+     *
+     * @returns The ready state.
+     */
+    const ready = (): Extract<FleetScopePageState, { kind: 'READY' }> =>
+      state() as Extract<FleetScopePageState, { kind: 'READY' }>;
+
+    it.each([['OWNER'], ['ADMIN']])(
+      'offers Manage to a reader holding %s',
+      (role: string) => {
+        resolveFor([role]);
+        render();
+
+        expect(ready().actions).toEqual([
+          {
+            label: 'Manage',
+            link: MANAGE_LINK,
+            description: 'Manage who runs United Federation Alliance',
+          },
+        ]);
+      },
+    );
+
+    it('offers Manage to a site administrator holding no role', () => {
+      auth.isLoggedInAsAdmin.mockReturnValue(true);
+      resolveFor([]);
+      render();
+
+      expect(ready().actions.map(action => action.label)).toEqual(['Manage']);
+    });
+
+    it('offers nothing to anybody else', () => {
+      resolveFor(['OFFICER']);
+      render();
+
+      expect(ready().actions).toEqual([]);
     });
   });
 });

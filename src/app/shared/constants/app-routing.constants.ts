@@ -152,6 +152,14 @@ export const APP_ROUTES = {
   FLEET_RECRUITMENT_SETTINGS:
     FLEET_COMMUNITIES_ROOT +
     '/:communitySlug/fleets/:platformSegment/:slug/recruitment/settings',
+  FLEET_COMMUNITY_MANAGE: FLEET_COMMUNITIES_ROOT + '/:communitySlug/manage',
+  FLEET_COMMUNITY_OWNERSHIP:
+    FLEET_COMMUNITIES_ROOT + '/:communitySlug/manage/ownership',
+  FLEET_COMMUNITY_DISPUTE:
+    FLEET_COMMUNITIES_ROOT + '/:communitySlug/manage/dispute',
+  FLEET_MANAGE:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/manage',
 
   // News
   NEWS: ROOT_ROUTES.NEWS,
@@ -333,6 +341,12 @@ export const APP_ROUTE_TITLES = {
   FLEET_INVITATIONS: 'Fleet Invitations',
   FLEET_MEMBERS: 'Fleet Members',
   FLEET_RECRUITMENT_SETTINGS: 'Recruitment Settings',
+  FLEET_MANAGE: 'Manage',
+  FLEET_GOVERNANCE_ROLES: 'Roles',
+  FLEET_GOVERNANCE_DELEGATION: 'Delegation',
+  FLEET_GOVERNANCE_HISTORY: 'Governance History',
+  FLEET_COMMUNITY_OWNERSHIP: 'Community Ownership',
+  FLEET_COMMUNITY_DISPUTE: 'Community Site Administration',
 
   // News
   NEWS: 'News',
