@@ -180,4 +180,6 @@ export const API_URLS = {
   ARMADAS: apiUrl + '/armadas',
   // The signed-in person's own applications and invitations, across Fleets.
   FLEET_RECRUITMENT: apiUrl + '/fleet-recruitment',
+  // A site administrator's dispute actions on a Community (FC-022).
+  FLEET_COMMUNITIES_ADMIN: apiUrl + '/admin/fleet-communities',
 };

@@ -61,6 +61,7 @@ function community(overrides: Partial<FleetCommunity> = {}): FleetCommunity {
 /** A viewer who may look and change nothing, which is most of them. */
 const READER: FleetScopeViewer = {
   capabilities: [],
+  roles: [],
   mayManageBanner: false,
   mayManageEmblem: false,
   relationship: FleetScopeRelationship.NONE,
@@ -71,6 +72,7 @@ const READER: FleetScopeViewer = {
 /** A viewer who may change the artwork. */
 const ARTWORK_KEEPER: FleetScopeViewer = {
   capabilities: ['scope.images.manage'],
+  roles: [],
   mayManageBanner: true,
   mayManageEmblem: true,
   relationship: FleetScopeRelationship.NONE,
@@ -357,6 +359,7 @@ describe('CommunityPageComponent', () => {
           redirectedFrom: null,
           viewer: {
             capabilities: [],
+            roles: [],
             mayManageBanner: false,
             mayManageEmblem: true,
           },

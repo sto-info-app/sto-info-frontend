@@ -93,6 +93,7 @@ function fleet(overrides: Partial<StoFleet> = {}): StoFleet {
 /** Somebody who may look and nothing else. */
 const READER: FleetScopeViewer = {
   capabilities: [],
+  roles: [],
   mayManageBanner: false,
   mayManageEmblem: false,
   relationship: FleetScopeRelationship.NONE,

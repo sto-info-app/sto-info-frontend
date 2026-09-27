@@ -419,6 +419,14 @@ export interface FleetScopeViewer {
    */
   capabilities: string[];
 
+  /**
+   * The role labels held here, those held at the Community included (FC-022).
+   *
+   * Display only, for telling an Admin from an Officer with delegated
+   * capabilities: what a label allows is in `capabilities`.
+   */
+  roles: string[];
+
   /** Whether to offer setting or replacing the banner. */
   mayManageBanner: boolean;
 

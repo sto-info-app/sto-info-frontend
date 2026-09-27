@@ -62,6 +62,7 @@ function fleet(overrides: Partial<StoFleet> = {}): StoFleet {
 /** A viewer who may look and change nothing, which is most of them. */
 const READER: FleetScopeViewer = {
   capabilities: [],
+  roles: [],
   mayManageBanner: false,
   mayManageEmblem: false,
   relationship: FleetScopeRelationship.NONE,
@@ -84,6 +85,7 @@ const ROSTER_INVESTIGATOR: FleetScopeViewer = {
 /** A viewer who may change the artwork. */
 const ARTWORK_KEEPER: FleetScopeViewer = {
   capabilities: ['scope.images.manage'],
+  roles: [],
   mayManageBanner: true,
   mayManageEmblem: true,
   relationship: FleetScopeRelationship.NONE,

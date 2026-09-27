@@ -43,7 +43,7 @@ export function recruitmentFleet(
     communityName: 'United Federation Alliance',
     platformSegment: 'pc',
     redirected: false,
-    viewer: { capabilities },
+    viewer: { capabilities, roles: [] },
   } as unknown as ResolvedStoFleet;
 }
 
