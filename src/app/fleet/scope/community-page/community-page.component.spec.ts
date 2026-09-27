@@ -11,6 +11,7 @@ import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
+import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
 import { FLEET_SCOPE_ERROR } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
   FleetScopeAction,
@@ -90,7 +91,9 @@ describe('CommunityPageComponent', () => {
   let auth: {
     isLoggedIn: jest.Mock;
     isLoggedInAsAdmin: jest.Mock;
+    getUserId: jest.Mock;
   };
+  let governance: { ownership: jest.Mock };
   let formatted: string | null;
 
   beforeEach(async () => {
@@ -111,6 +114,10 @@ describe('CommunityPageComponent', () => {
     auth = {
       isLoggedIn: jest.fn(() => false),
       isLoggedInAsAdmin: jest.fn(() => false),
+      getUserId: jest.fn(() => 'user-2'),
+    };
+    governance = {
+      ownership: jest.fn(() => of({ offer: null, eligible: [] })),
     };
     formatted = '2 January 2026';
 
@@ -135,6 +142,7 @@ describe('CommunityPageComponent', () => {
         },
         { provide: PageTitleService, useValue: pageTitle },
         { provide: AuthService, useValue: auth },
+        { provide: FleetGovernanceService, useValue: governance },
       ],
     })
       .overrideComponent(CommunityPageComponent, {
@@ -615,6 +623,26 @@ describe('CommunityPageComponent', () => {
       render();
 
       expect(ready().actions).toEqual([]);
+      expect(ready().ownershipOffer).toBeNull();
+    });
+
+    it('asks an Admin of an open Community about any offer made to them', () => {
+      resolveFor(['ADMIN']);
+      render();
+
+      expect(ready().ownershipOffer).toEqual({
+        communityId: 'community-1',
+        communityName: 'United Federation Alliance',
+        manageLink: MANAGE_LINK,
+      });
+      expect(governance.ownership).toHaveBeenCalledWith('community-1');
+    });
+
+    it('asks nothing on a closed Community', () => {
+      resolveFor(['ADMIN'], FleetScopeStatus.CLOSED);
+      render();
+
+      expect(ready().ownershipOffer).toBeNull();
     });
   });
 });

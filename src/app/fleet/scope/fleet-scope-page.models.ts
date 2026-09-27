@@ -4,6 +4,7 @@ import { FleetScopeType } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetPicture } from 'src/app/fleet/fleet-artwork';
 import { FleetImageSlot } from 'src/app/fleet/fleet-image.constants';
 import { FleetArtworkTarget } from 'src/app/fleet/fleet-image.service';
+import { OwnershipOfferPanelVm } from 'src/app/fleet/governance/ownership-offer-panel/ownership-offer-panel.component';
 import { FleetRecruitmentPanelVm } from 'src/app/fleet/recruitment/fleet-recruitment-panel/fleet-recruitment-panel.component';
 import { FleetScopeRelationship } from 'src/app/models/fleet.models';
 
@@ -214,4 +215,11 @@ export interface FleetScopeReadyState {
    * nobody joins a record nobody runs, or a Fleet that has closed.
    */
   readonly recruitment?: FleetRecruitmentPanelVm | null;
+
+  /**
+   * Where an offer of the Community's ownership is asked about (FC-022), on
+   * an open Community the reader is an Admin of. The panel shows nothing
+   * unless the offer is theirs. Absent or null everywhere else.
+   */
+  readonly ownershipOffer?: OwnershipOfferPanelVm | null;
 }

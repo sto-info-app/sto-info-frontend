@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 
 import { CommunitySubscriptionService } from 'src/app/fleet/community-subscription.service';
 import { FLEET_SCOPE_COMMUNITY } from 'src/app/fleet/constants/fleet-scope.constants';
+import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
 import { FleetRecruitmentService } from 'src/app/fleet/recruitment/fleet-recruitment.service';
 import {
   FleetScopeHeaderVm,
@@ -41,7 +42,14 @@ describe('FleetScopeViewComponent', () => {
       providers: [
         provideRouter([]),
         { provide: CommunitySubscriptionService, useValue: {} },
-        { provide: AuthService, useValue: { isLoggedIn: () => false } },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: () => false, getUserId: () => null },
+        },
+        {
+          provide: FleetGovernanceService,
+          useValue: { ownership: () => new Subject() },
+        },
         {
           provide: FleetRecruitmentService,
           useValue: { view: () => recruitmentView, leave: () => new Subject() },
@@ -320,6 +328,35 @@ describe('FleetScopeViewComponent', () => {
       });
 
       expect(find('app-fleet-recruitment-panel')).toBeNull();
+    });
+  });
+
+  // FC-022: asked about only on a Community the reader is an Admin of.
+  describe('the ownership offer panel', () => {
+    it.each([
+      [
+        'drawn when the page has one',
+        {
+          communityId: 'community-1',
+          communityName: 'United Federation Alliance',
+          manageLink: ['/fleets', 'communities', 'ufa', 'manage'],
+        },
+        false,
+      ],
+      ['not drawn where the page has none', null, true],
+    ])('is %s', (_what, ownershipOffer, absent) => {
+      render({
+        kind: 'READY',
+        actions: [],
+        header: HEADER,
+        notice: null,
+        description: null,
+        artwork: null,
+        following: null,
+        ownershipOffer,
+      });
+
+      expect(find('app-ownership-offer-panel') === null).toBe(absent);
     });
   });
 });

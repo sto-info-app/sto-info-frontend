@@ -43,6 +43,10 @@
       </nav>
     }
 
+    @if (state.ownershipOffer) {
+      <app-ownership-offer-panel [vm]="state.ownershipOffer" />
+    }
+
     @if (state.following) {
       <app-fleet-follow [vm]="state.following" />
     }

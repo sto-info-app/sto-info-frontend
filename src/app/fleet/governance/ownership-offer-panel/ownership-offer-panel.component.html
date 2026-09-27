@@ -1,0 +1,68 @@
+@if (community(); as community) {
+  @if (outcome() === 'ACCEPTED') {
+    <section
+      class="ownership-offer"
+      aria-labelledby="ownership-offer-heading">
+      <div class="lcars-text-bar">
+        <span id="ownership-offer-heading">Ownership</span>
+      </div>
+      <p
+        class="ownership-offer__done"
+        role="status">
+        You are now the Owner of {{ community.communityName }}.
+        <a [routerLink]="community.manageLink">Manage it</a>
+      </p>
+    </section>
+  } @else if (outcome() === 'DECLINED') {
+    <section
+      class="ownership-offer"
+      aria-labelledby="ownership-offer-heading">
+      <div class="lcars-text-bar">
+        <span id="ownership-offer-heading">Ownership</span>
+      </div>
+      <p role="status">
+        Declined. It is recorded in the Community’s history, where the Owner can
+        see it.
+      </p>
+    </section>
+  } @else if (offer(); as offer) {
+    <section
+      class="ownership-offer"
+      aria-labelledby="ownership-offer-heading">
+      <div class="lcars-text-bar">
+        <span id="ownership-offer-heading">Ownership offered to you</span>
+      </div>
+      <p>
+        {{ offer.from.username ?? unnamed }} has offered you ownership of
+        {{ community.communityName }}. The offer lapses on
+        {{ offer.expiresAt | appDate: 'medium' }}.
+      </p>
+      <p>
+        As Owner you would appoint its Admins and Officers, decide what they may
+        do, and could close it. {{ offer.from.username ?? unnamed }} would stay
+        on as an Admin.
+      </p>
+      @if (error(); as refusal) {
+        <app-lcars-error-message
+          title="Not answered"
+          [message]="refusal" />
+      }
+      <div class="buttons-row">
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto bluey"
+          [disabled]="busy()"
+          (click)="onDecline()">
+          Decline
+        </button>
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto green"
+          [disabled]="busy()"
+          (click)="onAccept()">
+          Accept…
+        </button>
+      </div>
+    </section>
+  }
+}

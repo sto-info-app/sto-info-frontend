@@ -843,6 +843,12 @@ by the site administration page. Closing cannot be undone, so the reader types
 the name back as well as a reason; the name is compared with its edge spaces
 trimmed. It closes with `{ reason }`, or nothing when kept open.
 
+**`<app-ownership-offer-panel>`** — on a Community's page, for an Admin of an
+open Community. It reads where ownership stands and shows nothing unless the
+open offer is to the reader. Accepting asks first; declining does not, since
+the Owner can offer it again. The page is not read again afterwards: that would
+draw the panel afresh and lose what it says about the answer.
+
 Confirmations built from names somebody chose escape them with `escapeHtml`
 before they reach the dialog's markup.
 

@@ -19,6 +19,7 @@ import { scopeStatusPill } from 'src/app/fleet/fleet-card.builders';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { GOVERNANCE_READER_ROLES } from 'src/app/fleet/governance/governance.constants';
+import { OwnershipOfferPanelVm } from 'src/app/fleet/governance/ownership-offer-panel/ownership-offer-panel.component';
 import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
 import { FLEET_SCOPE_LABELS } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
@@ -28,7 +29,11 @@ import {
   FleetScopeReadyState,
 } from 'src/app/fleet/scope/fleet-scope-page.models';
 import { FleetScopeViewComponent } from 'src/app/fleet/scope/fleet-scope-view/fleet-scope-view.component';
-import { ResolvedFleetCommunity } from 'src/app/models/fleet.models';
+import { FleetScopeRole } from 'src/app/models/fleet-governance.models';
+import {
+  FleetScopeStatus,
+  ResolvedFleetCommunity,
+} from 'src/app/models/fleet.models';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
@@ -129,6 +134,32 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
   }
 
   /**
+   * Where an offer of ownership is asked about: on an open Community the
+   * reader is an Admin of, since only an Admin can be offered it.
+   *
+   * @param resolved - The server's answer.
+   * @returns The panel's view model, or null.
+   */
+  private ownershipOfferFor(
+    resolved: ResolvedFleetCommunity,
+  ): OwnershipOfferPanelVm | null {
+    const { community, viewer } = resolved;
+
+    if (
+      community.status !== FleetScopeStatus.ACTIVE ||
+      !viewer.roles.includes(FleetScopeRole.ADMIN)
+    ) {
+      return null;
+    }
+
+    return {
+      communityId: community.id,
+      communityName: community.name,
+      manageLink: FLEET_LINKS.communityManage(community.slug),
+    };
+  }
+
+  /**
    * Turns the Community into what the page draws.
    *
    * @param resolved - The server's answer.
@@ -156,6 +187,7 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
     return {
       kind: 'READY',
       actions: this.actionsFor(resolved),
+      ownershipOffer: this.ownershipOfferFor(resolved),
       header: {
         scope: FLEET_SCOPE_COMMUNITY,
         name: community.name,
