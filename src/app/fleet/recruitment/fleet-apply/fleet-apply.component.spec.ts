@@ -26,6 +26,8 @@ import { FleetRecruitmentState } from 'src/app/models/fleet.models';
 import {
   APPLICATION_SEND_FAILED,
   APPLICATION_SENT,
+  APPLY_ANSWER_REQUIRED,
+  APPLY_CHOOSE_CHARACTER,
   FleetApplyComponent,
 } from './fleet-apply.component';
 
@@ -244,13 +246,33 @@ describe('FleetApplyComponent', () => {
     await render();
 
     expect(findButton(fixture, 'Send the application')?.disabled).toBe(true);
+    expect(pageText(fixture)).toContain(APPLY_CHOOSE_CHARACTER);
     chooseFrom(fixture, '#apply-character', 'c-1');
     typeInto(fixture, '#answer-q-short', '   ');
     click('input[name="answer-q-yes"][value="no"]');
     expect(findButton(fixture, 'Send the application')?.disabled).toBe(true);
+    expect(pageText(fixture)).toContain(APPLY_ANSWER_REQUIRED);
+    expect(
+      findButton(fixture, 'Send the application')?.getAttribute(
+        'aria-describedby',
+      ),
+    ).toBe('apply-send-hint');
     submit();
 
     expect(recruitment.apply).not.toHaveBeenCalled();
+  });
+
+  it('says nothing of what is missing once nothing is', async () => {
+    await render();
+    fillIn();
+
+    expect(pageText(fixture)).not.toContain(APPLY_ANSWER_REQUIRED);
+    expect(pageText(fixture)).not.toContain(APPLY_CHOOSE_CHARACTER);
+    expect(
+      findButton(fixture, 'Send the application')?.hasAttribute(
+        'aria-describedby',
+      ),
+    ).toBe(false);
   });
 
   it('sends the answers given, against the form version read', async () => {
@@ -318,6 +340,8 @@ describe('FleetApplyComponent', () => {
 
     expect(recruitment.apply).toHaveBeenCalledTimes(1);
     expect(findButton(fixture, 'Sending')?.disabled).toBe(true);
+    // Nothing is missing while it is sending; it is only waiting.
+    expect(pageText(fixture)).not.toContain(APPLY_ANSWER_REQUIRED);
   });
 
   it('reads the form again when the Fleet changed it meanwhile', async () => {

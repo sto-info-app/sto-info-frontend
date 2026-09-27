@@ -52,6 +52,13 @@ export const APPLICATION_SENT =
 export const APPLICATION_SEND_FAILED =
   'Your application could not be sent. Please try again.';
 
+/** Why Send waits, while no Character is chosen. */
+export const APPLY_CHOOSE_CHARACTER = 'Choose your Character to send.';
+
+/** Why Send waits, while a question that must be answered is not. */
+export const APPLY_ANSWER_REQUIRED =
+  'Answer every question not marked optional to send.';
+
 /** How a Fleet recruits, the reader's Characters there, and the Fleet. */
 export interface FleetApplyData {
   readonly section: FleetSection;
@@ -236,6 +243,23 @@ export class FleetApplyComponent extends FleetSectionPageDirective<FleetApplyDat
         question => !question.required || answered.has(question.id),
       )
     );
+  }
+
+  /**
+   * Why Send cannot be pressed yet, said beside it so a greyed-out button
+   * is never the only answer.
+   *
+   * @param data - The page.
+   * @returns What is missing, or null when nothing is, or while sending.
+   */
+  sendHint(data: FleetApplyData): string | null {
+    if (this.busy() || this.canSend(data)) {
+      return null;
+    }
+
+    return this.characterId() === ''
+      ? APPLY_CHOOSE_CHARACTER
+      : APPLY_ANSWER_REQUIRED;
   }
 
   /**

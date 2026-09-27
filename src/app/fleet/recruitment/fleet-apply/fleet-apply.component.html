@@ -217,11 +217,20 @@
               and faction, and what the Fleet’s roster says about the Character.
             </p>
 
+            @let hint = sendHint(data);
             <div class="fleet-community-form-actions">
+              @if (hint) {
+                <p
+                  id="apply-send-hint"
+                  class="fleet-community-field-hint">
+                  {{ hint }}
+                </p>
+              }
               <button
                 type="submit"
                 class="lcars-btn lcars-btn-auto gold"
-                [disabled]="!canSend(data)">
+                [disabled]="!canSend(data)"
+                [attr.aria-describedby]="hint ? 'apply-send-hint' : null">
                 {{ busy() ? 'Sending' : 'Send the application' }}
               </button>
             </div>
