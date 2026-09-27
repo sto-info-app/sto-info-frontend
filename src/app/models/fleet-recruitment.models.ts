@@ -152,6 +152,14 @@ export interface MyFleetApplication {
   readonly submittedAt: string;
   readonly decidedAt: string | null;
   readonly decisionNote: string | null;
+  /**
+   * For an accepted application, how the membership it granted has since
+   * ended; null while it stands, and for anything not accepted.
+   */
+  readonly membershipEnded:
+    ScopeMembershipStatus.LEFT | ScopeMembershipStatus.REVOKED | null;
+  /** Whether they may still see the Fleet, and so open it. */
+  readonly fleetVisible: boolean;
 }
 
 /** The roster's evidence about an applicant's Character. */

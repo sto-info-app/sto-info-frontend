@@ -135,7 +135,11 @@
             @for (application of data.applications; track application.id) {
               <tr>
                 <td data-label="Fleet">
-                  @if (fleetLink(application.fleet); as link) {
+                  @let link =
+                    application.fleetVisible
+                      ? fleetLink(application.fleet)
+                      : null;
+                  @if (link) {
                     <a [routerLink]="link">{{
                       application.fleet.exactGameName
                     }}</a>
@@ -160,11 +164,16 @@
                       >“{{ application.decisionNote }}”</span
                     >
                   }
-                  @if (isAccepted(application)) {
+                  @if (isStillMember(application)) {
                     <span class="my-fleet-applications__muted"
                       >Confirm the Fleet on your Character’s page once you have
                       been invited in game.</span
                     >
+                  }
+                  @if (application.membershipEnded; as ended) {
+                    <span class="my-fleet-applications__muted">{{
+                      endedLines[ended]
+                    }}</span>
                   }
                 </td>
                 <td data-label="Actions">

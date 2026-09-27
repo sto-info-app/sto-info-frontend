@@ -768,9 +768,11 @@ control, for an active Fleet a Community holds. It reads how the Fleet recruits
 itself, says what the state means, lists the requirements, and offers the
 reader what they may do: join an `OPEN` Fleet with one of their Characters on
 its platform, apply to an `APPLICATION` one on a page of its own, accept or
-decline an open invitation, or leave. It raises `changed` after anything that
-changes the reader's membership, so the page reads their standing and tabs
-again.
+decline an open invitation, or leave. It raises `changed` after a join,
+acceptance or decline, so the page reads their standing and tabs again. Leaving
+instead takes the reader to their own applications, saying so: a Fleet only its
+Community can see is gone from them once they leave it. An open invitation shows
+the invitee such a Fleet until they answer it.
 
 A Character is chosen from the reader's own accounts on the Fleet's platform
 (`recruitmentCharactersOf`). Level and faction are the server's to check.
@@ -788,7 +790,14 @@ server's message.
 The applicant's side is **`/fleets/applications`**: their applications with
 each decision and its reason, their open invitations, and withdrawing one
 still waiting. It is linked from the dashboard and from a Fleet's page while an
-application waits.
+application waits. An accepted application whose membership has since ended
+says whether they left or were removed, and a Fleet they can no longer see is
+named without a link.
+
+A Fleet proposal that recruitment raised on a Character's page says how the
+Character came in — an application, an invitation or a join
+(`RECRUITED_BY_LINES`) — before asking the owner to confirm it once they are
+in the Fleet in game.
 
 ### Upload and scan state
 

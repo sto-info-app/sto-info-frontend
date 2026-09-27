@@ -71,6 +71,26 @@ export const APPLICATION_ROUTE_LABELS: Record<FleetApplicationRoute, string> = {
   [FleetApplicationRoute.INVITATION]: 'Invitation',
 };
 
+/**
+ * How a Fleet proposal on a Character's page says recruitment raised it,
+ * before asking them to confirm once they are in the Fleet in game.
+ */
+export const RECRUITED_BY_LINES: Record<FleetApplicationRoute, string> = {
+  [FleetApplicationRoute.APPLICATION]: 'From your accepted application.',
+  [FleetApplicationRoute.INVITATION]: 'From the invitation you accepted.',
+  [FleetApplicationRoute.OPEN_JOIN]: 'From joining this Fleet.',
+};
+
+/** How an ended membership reads on the applicant's own list. */
+export const MEMBERSHIP_ENDED_LINES: Record<
+  ScopeMembershipStatus.LEFT | ScopeMembershipStatus.REVOKED,
+  string
+> = {
+  [ScopeMembershipStatus.LEFT]: 'You have since left this Fleet.',
+  [ScopeMembershipStatus.REVOKED]:
+    'You have since been removed from this Fleet.',
+};
+
 /** How each step in an application's history reads. */
 export const APPLICATION_ACTION_LABELS: Record<
   FleetApplicationActionKind,

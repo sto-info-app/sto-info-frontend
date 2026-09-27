@@ -1,3 +1,5 @@
+import type { FleetApplicationRoute } from 'src/app/models/fleet-recruitment.models';
+
 /**
  * Which parts of Fleet Community are currently switched on.
  */
@@ -746,8 +748,11 @@ export interface CharacterFleetProposal {
   expiresAt: string;
   answeredAt: string | null;
 
-  /** Whether an accepted application to the Fleet raised it (FC-021). */
-  fromApplication: boolean;
+  /**
+   * How the Character came into the Fleet when recruitment raised it, or
+   * null when a roster did (FC-021).
+   */
+  recruitedBy: FleetApplicationRoute | null;
 }
 
 /**

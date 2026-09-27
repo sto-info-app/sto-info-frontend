@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -18,6 +19,7 @@ import {
   FleetApplicationStatus,
   MyFleetApplication,
   MyFleetInvitation,
+  ScopeMembershipStatus,
 } from 'src/app/models/fleet-recruitment.models';
 import { CharacterFleetSummary } from 'src/app/models/fleet.models';
 
@@ -58,6 +60,8 @@ function application(
     submittedAt: '2026-09-20T10:00:00.000Z',
     decidedAt: null,
     decisionNote: null,
+    membershipEnded: null,
+    fleetVisible: true,
     ...overrides,
   };
 }
@@ -120,8 +124,12 @@ describe('MyFleetApplicationsComponent', () => {
   };
   let stoAccounts: { getSwitcherList: jest.Mock };
 
-  /** Draws the page. */
-  async function render(): Promise<void> {
+  /**
+   * Draws the page.
+   *
+   * @param state - What the page that sent the reader here handed on.
+   */
+  async function render(state?: object): Promise<void> {
     await TestBed.configureTestingModule({
       imports: [MyFleetApplicationsComponent],
       providers: [
@@ -130,6 +138,10 @@ describe('MyFleetApplicationsComponent', () => {
         { provide: StoAccountService, useValue: stoAccounts },
       ],
     }).compileComponents();
+
+    if (state) {
+      TestBed.inject(Location).replaceState('', '', state);
+    }
 
     fixture = TestBed.createComponent(MyFleetApplicationsComponent);
     fixture.detectChanges();
@@ -192,6 +204,53 @@ describe('MyFleetApplicationsComponent', () => {
     expect(
       (fixture.nativeElement as HTMLElement).querySelectorAll('tbody a').length,
     ).toBe(1);
+  });
+
+  it.each([
+    [ScopeMembershipStatus.LEFT, 'You have since left this Fleet.'],
+    [
+      ScopeMembershipStatus.REVOKED,
+      'You have since been removed from this Fleet.',
+    ],
+  ] as const)(
+    'says an accepted membership has since ended as %s',
+    async (membershipEnded, line) => {
+      recruitment.myApplications.mockReturnValue(
+        of([
+          application({
+            status: FleetApplicationStatus.ACCEPTED,
+            route: FleetApplicationRoute.INVITATION,
+            membershipEnded,
+          }),
+        ]),
+      );
+
+      await render();
+
+      const text = pageText(fixture);
+
+      expect(text).toContain(line);
+      expect(text).not.toContain('Confirm the Fleet on your Character’s page');
+    },
+  );
+
+  it('names a Fleet they can no longer see without linking to it', async () => {
+    recruitment.myApplications.mockReturnValue(
+      of([application({ fleetVisible: false })]),
+    );
+
+    await render();
+
+    expect(pageText(fixture)).toContain('Ninth Fleet');
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('tbody a').length,
+    ).toBe(0);
+  });
+
+  it('says what the page that sent the reader here had to say', async () => {
+    await render({ notice: 'You have left Ninth Fleet.' });
+
+    expect(pageText(fixture)).toContain('You have left Ninth Fleet.');
   });
 
   it('says so when there are none', async () => {

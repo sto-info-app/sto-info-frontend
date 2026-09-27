@@ -16,6 +16,7 @@ import {
   FleetScopeStatus,
   StoFleetCard,
 } from 'src/app/models/fleet.models';
+import { FleetApplicationRoute } from 'src/app/models/fleet-recruitment.models';
 
 import { CharacterFleetPanelComponent } from './character-fleet-panel.component';
 
@@ -81,7 +82,7 @@ function proposal(
     raisedAt: '2026-01-01T00:00:00.000Z',
     expiresAt: '2026-04-01T00:00:00.000Z',
     answeredAt: null,
-    fromApplication: false,
+    recruitedBy: null,
     ...overrides,
   };
 }
@@ -365,22 +366,26 @@ describe('CharacterFleetPanelComponent', () => {
       expect(text()).toContain('Seen on that roster');
     });
 
-    it('says when an accepted application raised it', () => {
-      service.proposals.mockReturnValue(
-        of([proposal({ fromApplication: true })]),
-      );
+    it.each([
+      [FleetApplicationRoute.APPLICATION, 'From your accepted application.'],
+      [FleetApplicationRoute.INVITATION, 'From the invitation you accepted.'],
+      [FleetApplicationRoute.OPEN_JOIN, 'From joining this Fleet.'],
+    ])('says recruitment raised it by %s', (recruitedBy, line) => {
+      service.proposals.mockReturnValue(of([proposal({ recruitedBy })]));
 
       render();
 
-      expect(text()).toContain('From your accepted application');
+      expect(text()).toContain(
+        `${line} Say yes once you have been invited in game.`,
+      );
     });
 
-    it('says nothing of an application when a roster raised it', () => {
+    it('says nothing of recruitment when a roster raised it', () => {
       service.proposals.mockReturnValue(of([proposal()]));
 
       render();
 
-      expect(text()).not.toContain('From your accepted application');
+      expect(text()).not.toContain('Say yes once you have been invited');
     });
 
     // The acceptance criteria ask for the Community as well as the moment. A

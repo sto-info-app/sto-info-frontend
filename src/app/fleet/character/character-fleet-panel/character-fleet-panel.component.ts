@@ -30,6 +30,7 @@ import {
 } from '../../constants/fleet-scope.constants';
 import { CharacterFleetService } from '../../character-fleet.service';
 import { FLEET_LINKS } from '../../fleet-links';
+import { RECRUITED_BY_LINES } from '../../recruitment/recruitment.constants';
 import { FleetDirectoryService } from '../../fleet-directory.service';
 
 /** How many Fleets the picker offers at once. */
@@ -93,6 +94,9 @@ export class CharacterFleetPanelComponent implements OnInit {
   private readonly _directory = inject(FleetDirectoryService);
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _datePipe = inject(AppDatePipe);
+
+  /** How a proposal recruitment raised says where it came from. */
+  readonly recruitedByLines = RECRUITED_BY_LINES;
 
   /** Whether the first read is still in flight. */
   protected loading = signal(true);

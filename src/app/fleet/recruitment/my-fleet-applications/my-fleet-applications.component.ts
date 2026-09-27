@@ -1,4 +1,4 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, Location } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -29,6 +29,7 @@ import {
   APPLICATION_ROUTE_LABELS,
   APPLICATION_STATUS_LABELS,
   IN_GAME_INVITE_NOTE,
+  MEMBERSHIP_ENDED_LINES,
 } from 'src/app/fleet/recruitment/recruitment.constants';
 import {
   RecruitmentCharacterOption,
@@ -60,6 +61,15 @@ export const INVITATION_DECLINED = 'The invitation is declined.';
 
 /** What to say once an application is withdrawn. */
 export const APPLICATION_WITHDRAWN = 'Your application is withdrawn.';
+
+/**
+ * What another page hands this one when it sends the reader here, such as
+ * the Fleet page once they have left.
+ */
+export interface MyFleetApplicationsNavigationState {
+  /** What to say at the top of the page. */
+  readonly notice?: string;
+}
 
 /** The reader's applications and invitations, and their Characters. */
 export interface MyFleetApplicationsData {
@@ -108,6 +118,7 @@ export class MyFleetApplicationsComponent {
   readonly statusLabels = APPLICATION_STATUS_LABELS;
   readonly routeLabels = APPLICATION_ROUTE_LABELS;
   readonly inGameNote = IN_GAME_INVITE_NOTE;
+  readonly endedLines = MEMBERSHIP_ENDED_LINES;
 
   /** The Character chosen for each invitation. */
   readonly chosen = signal<Readonly<Record<string, string>>>({});
@@ -118,8 +129,14 @@ export class MyFleetApplicationsComponent {
   /** What the last action came to, if it was refused or failed. */
   readonly actionError = signal<string | null>(null);
 
-  /** What the last action came to, if it was made. */
-  readonly actionNotice = signal<string | null>(null);
+  /**
+   * What the last action came to, if it was made — or what the page that
+   * sent the reader here had to say.
+   */
+  readonly actionNotice = signal<string | null>(
+    (inject(Location).getState() as MyFleetApplicationsNavigationState | null)
+      ?.notice ?? null,
+  );
 
   /** The page, read again after each action. */
   readonly state$: Observable<MyFleetApplicationsState> = this._reload$.pipe(
@@ -210,13 +227,16 @@ export class MyFleetApplicationsComponent {
   }
 
   /**
-   * Whether an application made its applicant a member.
+   * Whether an application made its applicant a member who still is.
    *
    * @param application - The application.
-   * @returns True once accepted.
+   * @returns True once accepted, until the membership ends.
    */
-  isAccepted(application: MyFleetApplication): boolean {
-    return application.status === FleetApplicationStatus.ACCEPTED;
+  isStillMember(application: MyFleetApplication): boolean {
+    return (
+      application.status === FleetApplicationStatus.ACCEPTED &&
+      application.membershipEnded === null
+    );
   }
 
   /**

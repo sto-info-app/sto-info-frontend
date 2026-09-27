@@ -42,9 +42,9 @@
               }
             </div>
             <div class="character-fleet__muted">
-              @if (proposal.fromApplication) {
-                From your accepted application to this Fleet. Say yes once you
-                have been invited in game.
+              @if (proposal.recruitedBy; as recruitedBy) {
+                {{ recruitedByLines[recruitedBy] }} Say yes once you have been
+                invited in game.
               }
               @if (proposal.observedAt) {
                 Seen on that roster {{ instant(proposal.observedAt) }}.

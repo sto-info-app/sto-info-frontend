@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 
 import { NEVER, of, Subject, throwError } from 'rxjs';
 
@@ -629,6 +629,9 @@ describe('FleetRecruitmentPanelComponent', () => {
 
     it('leaves once they confirm it', () => {
       render();
+      const navigate = jest
+        .spyOn(TestBed.inject(Router), 'navigate')
+        .mockResolvedValue(true);
       press('Leave this Fleet');
 
       expect(dialog.open).toHaveBeenCalledWith(
@@ -643,7 +646,12 @@ describe('FleetRecruitmentPanelComponent', () => {
         }),
       );
       expect(recruitment.leave).toHaveBeenCalledWith('community-1', 'fleet-1');
-      expect(changed).toHaveBeenCalledTimes(1);
+      // Their own list, saying so, rather than a page that may be gone from
+      // them: a Fleet only its Community can see is, once they leave it.
+      expect(navigate).toHaveBeenCalledWith(['/fleets', 'applications'], {
+        state: { notice: 'You have left Starfleet Command.' },
+      });
+      expect(changed).not.toHaveBeenCalled();
     });
 
     it('stays when they think better of it', () => {

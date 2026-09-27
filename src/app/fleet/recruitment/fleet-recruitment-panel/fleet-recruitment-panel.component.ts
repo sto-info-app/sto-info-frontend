@@ -10,13 +10,14 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { catchError, map, Observable, of, take } from 'rxjs';
 
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetRecruitmentService } from 'src/app/fleet/recruitment/fleet-recruitment.service';
+import { MyFleetApplicationsNavigationState } from 'src/app/fleet/recruitment/my-fleet-applications/my-fleet-applications.component';
 import { IN_GAME_INVITE_NOTE } from 'src/app/fleet/recruitment/recruitment.constants';
 import {
   RecruitmentCharacterOption,
@@ -82,7 +83,9 @@ export const RECRUITMENT_ACTION_ERROR =
  * the Fleet's platform; applying has a page of its own, because it has a
  * form. An open invitation is accepted here the same way a join is made.
  * Whatever the reader does, the page is read again afterwards, since their
- * membership, and so the sections they are offered, may have changed.
+ * membership, and so the sections they are offered, may have changed — except
+ * leaving, which takes them to their own applications instead: a Fleet only
+ * its Community can see is gone from them the moment they leave it.
  */
 @Component({
   selector: 'app-fleet-recruitment-panel',
@@ -96,6 +99,7 @@ export class FleetRecruitmentPanelComponent {
   private readonly _recruitment = inject(FleetRecruitmentService);
   private readonly _accounts = inject(StoAccountService);
   private readonly _dialog = inject(MatDialog);
+  private readonly _router = inject(Router);
 
   private _vm!: FleetRecruitmentPanelVm;
 
@@ -130,8 +134,8 @@ export class FleetRecruitmentPanelComponent {
   protected errorMessage = signal<string | null>(null);
 
   /**
-   * Raised once the reader has joined, accepted, declined or left, so the
-   * page reads their standing and sections again.
+   * Raised once the reader has joined, accepted or declined, so the page
+   * reads their standing and sections again.
    */
   @Output() readonly changed = new EventEmitter<void>();
 
@@ -289,6 +293,7 @@ export class FleetRecruitmentPanelComponent {
         if (confirmed) {
           this.run(
             this._recruitment.leave(this.vm.communityId, this.vm.fleetId),
+            () => this.afterLeaving(),
           );
         }
       });
@@ -355,19 +360,32 @@ export class FleetRecruitmentPanelComponent {
       });
   }
 
+  /** Takes somebody who has just left to their own applications. */
+  private afterLeaving(): void {
+    const state: MyFleetApplicationsNavigationState = {
+      notice: `You have left ${this.vm.fleetName.trim()}.`,
+    };
+
+    void this._router.navigate(FLEET_LINKS.myApplications(), { state });
+  }
+
   /**
-   * Sends one change, and has the page read again once it is made.
+   * Sends one change, then does what follows it.
    *
    * @param work - The request.
+   * @param done - What follows; by default, the page reads itself again.
    */
-  private run(work: Observable<void>): void {
+  private run(
+    work: Observable<void>,
+    done: () => void = () => this.changed.emit(),
+  ): void {
     this.busy.set(true);
     this.errorMessage.set(null);
 
     work.subscribe({
       next: () => {
         this.busy.set(false);
-        this.changed.emit();
+        done();
       },
       error: (error: unknown) => {
         this.busy.set(false);
