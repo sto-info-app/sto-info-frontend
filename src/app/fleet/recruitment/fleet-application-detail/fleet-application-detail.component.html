@@ -88,7 +88,13 @@
         <span>What the roster says</span>
       </div>
       @let evidence = application.evidence;
-      @if (evidence.latestExportAt === null) {
+      @let fleet = data.section.resolved.fleet;
+      @if (!fleet.platformProvidesRosterExport) {
+        <p class="fleet-community-empty">
+          The game provides no roster export on {{ fleet.platformName }}, so
+          there is no roster to check.
+        </p>
+      } @else if (evidence.latestExportAt === null) {
         <p class="fleet-community-empty">
           No roster export of this Fleet has been imported yet.
         </p>
@@ -123,11 +129,13 @@
           }
         </ul>
       }
-      <p class="fleet-community-field-hint">
-        Matched by the Character’s exact name and handle. A roster shows who the
-        game listed, not who plays them: it proves nothing, and nothing here
-        decides for you.
-      </p>
+      @if (fleet.platformProvidesRosterExport) {
+        <p class="fleet-community-field-hint">
+          Matched by the Character’s exact name and handle. A roster shows who
+          the game listed, not who plays them: it proves nothing, and nothing
+          here decides for you.
+        </p>
+      }
 
       <div class="lcars-text-bar">
         <span>History</span>

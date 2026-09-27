@@ -8,6 +8,7 @@ import {
   findButton,
   pageText,
   RECRUITMENT_FLEET_HREF,
+  recruitmentFleet,
   recruitmentRoute,
   RecruitmentRouteStubs,
   typeInto,
@@ -286,6 +287,56 @@ describe('FleetApplicationDetailComponent', () => {
       await render();
 
       expect(pageText(fixture)).toContain('No roster export of this Fleet');
+      expect(pageText(fixture)).toContain('Matched by the Character’s exact');
+    });
+
+    /**
+     * A console Fleet will never have an export to import, so "none imported
+     * yet" would promise one.
+     */
+    it('says a platform with no roster export has no roster to check', async () => {
+      recruitment.application.mockReturnValue(
+        of(
+          detail({
+            evidence: {
+              listed: false,
+              latestExportAt: null,
+              listedSince: null,
+              rank: null,
+              everListed: false,
+            },
+          }),
+        ),
+      );
+      route = recruitmentRoute(['applications.view'], {
+        applicationId: 'application-1',
+      });
+      route.scopes.resolveFleet.mockReturnValue(
+        of(
+          recruitmentFleet(['applications.view'], {
+            platformName: 'PlayStation',
+            platformProvidesRosterExport: false,
+          }),
+        ),
+      );
+
+      await TestBed.configureTestingModule({
+        imports: [FleetApplicationDetailComponent],
+        providers: [
+          ...route.providers,
+          { provide: FleetRecruitmentService, useValue: recruitment },
+        ],
+      }).compileComponents();
+      fixture = TestBed.createComponent(FleetApplicationDetailComponent);
+      fixture.detectChanges();
+
+      const text = pageText(fixture);
+
+      expect(text).toContain(
+        'The game provides no roster export on PlayStation, so there is no roster to check.',
+      );
+      expect(text).not.toContain('No roster export of this Fleet');
+      expect(text).not.toContain('Matched by the Character’s exact');
     });
   });
 
