@@ -1,0 +1,210 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Holdings"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the holdings"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+
+      <p class="fleet-holdings__intro">
+        The tier of each of this Fleet’s holdings and their departments, as its
+        officers have recorded them. Each goes from tier 0, not started. The
+        tiers follow version {{ data.holdings.catalogueVersion }} of the
+        holdings catalogue, read from the STO Wiki.
+      </p>
+
+      @if (notice(); as saved) {
+        <p
+          class="fleet-holdings__notice"
+          role="status">
+          {{ saved }}
+        </p>
+      }
+
+      <div class="fleet-holdings__list">
+        @for (holding of data.holdings.holdings; track holding.code) {
+          <section
+            class="fleet-holding"
+            [attr.aria-labelledby]="'holding-' + holding.code">
+            <div class="lcars-text-bar">
+              <h2>
+                <span [id]="'holding-' + holding.code">{{ holding.name }}</span>
+              </h2>
+            </div>
+
+            @if (editing() === holding.code) {
+              <form
+                class="fleet-holding__form"
+                [attr.aria-label]="'Record the ' + holding.name"
+                (submit)="
+                  $event.preventDefault(); onSave(data.section, holding)
+                ">
+                @for (track of holding.tracks; track track.code) {
+                  <div class="lcars-input-container tangerine">
+                    <label [for]="'tier-' + track.code">{{ track.name }}</label>
+                    <select
+                      [id]="'tier-' + track.code"
+                      [disabled]="busy()"
+                      (change)="onTier(track, $any($event.target).value)">
+                      @for (tier of tiersOf(track); track tier) {
+                        <option
+                          [value]="tier"
+                          [selected]="tier === drafted(track)">
+                          Tier {{ tier }}
+                        </option>
+                      }
+                    </select>
+                  </div>
+                }
+                <div class="lcars-input-container tangerine">
+                  <label [for]="'reason-' + holding.code">Why (optional)</label>
+                  <textarea
+                    [id]="'reason-' + holding.code"
+                    rows="2"
+                    [attr.maxlength]="reasonLimit"
+                    [value]="reason()"
+                    [disabled]="busy()"
+                    (input)="reason.set($any($event.target).value)"></textarea>
+                </div>
+                <p class="fleet-community-field-hint">
+                  Only the tiers you change are recorded. A tier can go down to
+                  put a mistake right.
+                </p>
+                @if (error(); as refusal) {
+                  <app-lcars-error-message
+                    title="Not recorded"
+                    [message]="refusal" />
+                }
+                <div class="fleet-community-form-actions">
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto bluey"
+                    [disabled]="busy()"
+                    (click)="onCancel()">
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    class="lcars-btn lcars-btn-auto green"
+                    [disabled]="busy() || changed(holding).length === 0">
+                    Record
+                  </button>
+                </div>
+              </form>
+            } @else {
+              <table class="fleet-community-table fleet-holding__tracks">
+                <caption class="sr-only">
+                  {{
+                    holding.name
+                  }}, by track
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Track</th>
+                    <th scope="col">Tier</th>
+                    <th scope="col">Last recorded</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (track of holding.tracks; track track.code) {
+                    <tr [class.fleet-holding__own]="!track.isDepartment">
+                      <th
+                        scope="row"
+                        data-label="Track">
+                        {{ track.name }}
+                      </th>
+                      <td data-label="Tier">
+                        {{ track.tier }} of {{ track.maxTier }}
+                      </td>
+                      <td data-label="Last recorded">
+                        {{ (track.updatedAt | appDate: 'medium') ?? 'Never' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+              @if (data.holdings.mayRecord && editing() === null) {
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto tangerine"
+                  (click)="onRecord(holding)">
+                  Record…
+                </button>
+              }
+            }
+
+            <p class="fleet-holding__source">
+              Tiers from the
+              <a
+                [href]="holding.sourceUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                >STO Wiki</a
+              >, as of {{ holding.sourceEditedOn | date: 'd MMMM y' }}.
+            </p>
+          </section>
+        }
+      </div>
+
+      <section
+        class="fleet-holdings__history"
+        aria-labelledby="holdings-history-heading">
+        <div class="lcars-text-bar">
+          <h2><span id="holdings-history-heading">History</span></h2>
+        </div>
+
+        @let page = data.history;
+
+        @if (page.total === 0) {
+          <p class="fleet-community-empty">Nothing has been recorded yet.</p>
+        } @else {
+          <ol class="fleet-holdings__changes">
+            @for (change of page.items; track change.id) {
+              <li class="fleet-holdings__change">
+                <p class="fleet-holdings__when">
+                  {{ change.recordedAt | appDate: 'medium' }}
+                </p>
+                <p>
+                  <strong>{{ change.holdingName }}:</strong>
+                  {{ movesOf(change) }}.
+                </p>
+                @if (page.recordersShown && change.recordedBy !== null) {
+                  <p>Recorded by {{ change.recordedBy }}.</p>
+                }
+                @if (change.reason !== null) {
+                  <p class="fleet-holdings__reason">
+                    Reason: {{ change.reason }}
+                  </p>
+                }
+              </li>
+            }
+          </ol>
+
+          @if (totalPages(page) > 1) {
+            <div class="lcars-pagination">
+              <button
+                type="button"
+                [disabled]="page.page <= 1"
+                (click)="onPage(page.page - 1)">
+                Newer
+              </button>
+              <span>Page {{ page.page }} of {{ totalPages(page) }}</span>
+              <button
+                type="button"
+                [disabled]="page.page >= totalPages(page)"
+                (click)="onPage(page.page + 1)">
+                Older
+              </button>
+            </div>
+          }
+        }
+      </section>
+    }
+  </app-fleet-page-shell>
+}

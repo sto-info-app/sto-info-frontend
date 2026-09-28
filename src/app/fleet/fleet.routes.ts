@@ -174,6 +174,16 @@ export const FLEET_ROUTES: Routes = [
           ),
         data: { title: APP_ROUTE_TITLES.FLEET_REPORTS },
       },
+      // A Fleet's holdings (FC-023): public, so signed out as well. Whether
+      // the reader may record them is the server's answer.
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/holdings',
+        loadComponent: () =>
+          import('./holdings/fleet-holdings/fleet-holdings.component').then(
+            m => m.FleetHoldingsComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_HOLDINGS },
+      },
       // Where a Fleet's roster is looked into (FC-020). The pages below it
       // sit under its address so its tab stays lit while a reader works
       // through them.

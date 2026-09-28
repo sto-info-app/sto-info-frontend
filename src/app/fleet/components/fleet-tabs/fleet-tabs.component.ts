@@ -52,7 +52,7 @@ export interface FleetTab {
  * @returns The strip's view model, or null for a Fleet no Community holds,
  *   which has no sections: nobody imports into it or recruits to it. A Fleet
  *   on a platform with no roster export still has one, for its recruitment
- *   (FC-021).
+ *   (FC-021) and its holdings (FC-023).
  */
 export function fleetTabsVmOf(resolved: ResolvedStoFleet): FleetTabsVm | null {
   if (resolved.fleet.communityId === null) {
@@ -77,8 +77,9 @@ export function fleetTabsVmOf(resolved: ResolvedStoFleet): FleetTabsVm | null {
  * Every section is a route of its own, so a tab is a link: bookmarkable, and
  * honest to the back button. A tab is offered only to a reader who may use
  * it, as the Overview's actions are — a strip of sections somebody cannot
- * open tells them about permissions they did not ask about. For the same
- * reason a strip holding the Overview alone is not drawn at all.
+ * open tells them about permissions they did not ask about. Holdings are
+ * public (FC-023), so every reader has that tab as well as the Overview, and
+ * the strip is always drawn.
  */
 @Component({
   selector: 'app-fleet-tabs',
@@ -170,6 +171,18 @@ export class FleetTabsComponent {
         exact: false,
       });
     }
+
+    // A Fleet's holdings (FC-023): public, on every registered Fleet,
+    // console ones included.
+    tabs.push({
+      link: FLEET_LINKS.fleetHoldings(
+        communitySlug,
+        platformSegment,
+        fleetSlug,
+      ),
+      label: 'Holdings',
+      exact: false,
+    });
 
     if (
       providesRoster &&

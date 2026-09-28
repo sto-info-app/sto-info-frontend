@@ -1,0 +1,77 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.fleet-holdings {
+  &__intro {
+    max-width: 70ch;
+    margin: 0 0 1rem;
+  }
+
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  &__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: 1.5rem;
+  }
+
+  &__history {
+    margin-top: 2rem;
+  }
+
+  &__changes {
+    margin: 1rem 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__change {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid vars.$lcars-bluey;
+
+    p {
+      margin: 0.25rem 0;
+    }
+  }
+
+  &__when {
+    color: vars.$lcars-sky;
+  }
+
+  &__reason {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+
+.fleet-holding {
+  h2 {
+    margin: 0;
+    font-size: inherit;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  // The holding's own track leads, and its departments follow it.
+  &__own th,
+  &__own td {
+    font-weight: 600;
+  }
+
+  &__source {
+    margin: 0.75rem 0 0;
+    color: vars.$lcars-sky;
+    font-size: 0.85rem;
+  }
+}

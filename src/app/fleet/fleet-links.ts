@@ -174,6 +174,24 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * The tier of each of a Fleet's holdings, and their history (FC-023).
+   * Public: for whoever may see the Fleet.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetHoldings: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'holdings',
+  ],
+
+  /**
    * Where a Fleet's roster is looked into: the imports, the renames, the
    * conflicts and the rank order, for whoever imports or investigates.
    *

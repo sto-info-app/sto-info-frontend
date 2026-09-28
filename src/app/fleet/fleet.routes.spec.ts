@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(43);
+    expect(children).toHaveLength(44);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -257,6 +257,16 @@ describe('FLEET_ROUTES', () => {
     expect(reports?.data?.['title']).toBe(APP_ROUTE_TITLES.FLEET_REPORTS);
   });
 
+  // Holdings are public (FC-023), and the server says who may record them.
+  it('leaves a Fleet’s holdings open to a signed-out reader', () => {
+    const holdings = childAt(
+      'communities/:communitySlug/fleets/:platformSegment/:slug/holdings',
+    );
+
+    expect(holdings?.canActivate).toBeUndefined();
+    expect(holdings?.data?.['title']).toBe(APP_ROUTE_TITLES.FLEET_HOLDINGS);
+  });
+
   /**
    * A Community's own page is declared last of the three, so
    * `communities/x/fleets/pc/y` is never read as a Community called `x`
@@ -337,6 +347,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/reports',
       'FleetReportsPageComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/holdings',
+      'FleetHoldingsComponent',
     ],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',

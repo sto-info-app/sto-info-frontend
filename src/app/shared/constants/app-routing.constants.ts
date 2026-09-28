@@ -112,6 +112,9 @@ export const APP_ROUTES = {
   FLEET_REPORTS:
     FLEET_COMMUNITIES_ROOT +
     '/:communitySlug/fleets/:platformSegment/:slug/reports',
+  FLEET_HOLDINGS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/holdings',
   FLEET_INVESTIGATE:
     FLEET_COMMUNITIES_ROOT +
     '/:communitySlug/fleets/:platformSegment/:slug/investigate',
@@ -327,6 +330,7 @@ export const APP_ROUTE_TITLES = {
   FLEET_ROSTER_HISTORY: 'Roster History',
   FLEET_ROSTER_MEMBER: 'Roster Member',
   FLEET_REPORTS: 'Fleet Reports',
+  FLEET_HOLDINGS: 'Fleet Holdings',
   FLEET_INVESTIGATE: 'Investigate',
   FLEET_ROSTER_IMPORTS: 'Roster Imports',
   FLEET_ROSTER_IMPORT_DETAIL: 'Roster Import',

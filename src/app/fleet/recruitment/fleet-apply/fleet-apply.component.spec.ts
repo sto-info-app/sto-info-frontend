@@ -295,7 +295,7 @@ describe('FleetApplyComponent', () => {
     expect(pageText(fixture)).toContain(APPLICATION_SENT);
     expect(
       (fixture.nativeElement as HTMLElement)
-        .querySelector('nav a')
+        .querySelector('nav[aria-label="Where next"] a')
         ?.getAttribute('href'),
     ).toBe('/fleets/applications');
   });
@@ -423,7 +423,7 @@ describe('FleetApplyComponent', () => {
     ).toBeNull();
     expect(
       (fixture.nativeElement as HTMLElement)
-        .querySelector('nav a')
+        .querySelector('nav[aria-label="Where next"] a')
         ?.getAttribute('href'),
     ).toBe(RECRUITMENT_FLEET_HREF);
   });

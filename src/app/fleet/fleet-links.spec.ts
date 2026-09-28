@@ -186,6 +186,20 @@ describe('FLEET_LINKS', () => {
     ]);
   });
 
+  it('should address a Fleet’s holdings below it', () => {
+    expect(FLEET_LINKS.fleetHoldings('ufa', 'pc', 'starfleet-command')).toEqual(
+      [
+        '/fleets',
+        'communities',
+        'ufa',
+        'fleets',
+        'pc',
+        'starfleet-command',
+        'holdings',
+      ],
+    );
+  });
+
   it('should address a standalone Fleet under the reserved segment', () => {
     expect(FLEET_LINKS.standaloneFleet('pc', 'starfleet-command')).toEqual([
       '/fleets',

@@ -686,17 +686,18 @@ only its rendering.
 
 **`<app-fleet-tabs>`** — the strip along the top of every page of a Fleet a
 Community holds: Overview for anybody; Roster and History for `roster.view`
-holders; Reports for anybody the server shows a report to; Investigate for
-whoever imports or investigates its rosters; Recruitment for whoever holds
-`applications.view`, `applications.decide`, `recruitment.manage` or
-`members.manage`. It takes a `FleetTabsVm`, which `fleetTabsVmOf(resolved)`
+holders; Reports for anybody the server shows a report to; Holdings for
+anybody (FC-023); Investigate for whoever imports or investigates its rosters;
+Recruitment for whoever holds `applications.view`, `applications.decide`,
+`recruitment.manage` or `members.manage`; Manage for its Owner and Admins
+(FC-022). It takes a `FleetTabsVm`, which `fleetTabsVmOf(resolved)`
 builds from the resolved Fleet and returns null for a Fleet no Community holds,
 so such a Fleet draws no strip.
 
 On a platform the game writes no roster export on, `providesRoster` is false:
-the roster, history, report and investigation tabs are not offered, and only
-Recruitment can be (FC-021). A strip holding the Overview alone is not drawn at
-all, because a single tab is not a choice.
+the roster, history, report and investigation tabs are not offered, and
+Holdings, Recruitment and Manage still can be (FC-021). Every reader has
+Holdings as well as the Overview, so the strip is always drawn.
 
 Every tab but Reports is decided by the reader's capabilities. Reports asks the
 server once per Fleet which reports the reader sees, because a report's
@@ -851,6 +852,30 @@ draw the panel afresh and lose what it says about the answer.
 
 Confirmations built from names somebody chose escape them with `escapeHtml`
 before they reach the dialog's markup.
+
+### Holdings
+
+A Fleet's holdings (FC-023) live in `src/app/fleet/holdings/`, behind
+`FleetHoldingsService`. **`<app-fleet-holdings>`** is the Holdings tab, a
+`FleetSectionPageDirective` page open to anybody who may see the Fleet, signed
+out included, on every platform.
+
+Each of the seven holdings in the catalogue is drawn with its own track first,
+then its departments, as "2 of 5" and when each was last recorded, and says
+which STO Wiki page and edit date its tiers come from. A track never recorded
+reads as tier 0. When the server says the reader may record (`mayRecord`),
+each holding offers **Record…**, which opens a form for that holding alone: a
+select per track at its tier now, and an optional reason. **Record** stays
+disabled until a tier changes, and only the tracks that changed are sent; a
+tier may go down to put a mistake right.
+
+The history beneath is the server's, newest first, paged by `?page=` as the
+roster history is. Each change reads as one line, "Fleet Starbase: Starbase
+1 → 2, Military 3 → 0.", with its reason, and names who recorded it only when
+the server says the reader is shown recorders (`recordersShown`).
+
+Because holdings are public, every registered Fleet's tab strip has at least
+the Overview and Holdings, and the strip is always drawn.
 
 ### Upload and scan state
 
