@@ -1,8 +1,8 @@
 name: Weekly end-to-end
 
 # Sunday 02:43 UTC. GitHub runs a schedule from the default branch only.
-# The runner is a Linux machine labelled sto-e2e, with Docker. It does not
-# exist yet, so this file is the whole of the job.
+# GitHub-hosted Ubuntu, the same as the frequent scan. This repository is
+# public, so the job does not use a self-hosted runner.
 
 on:
   schedule:
@@ -27,7 +27,7 @@ env:
 jobs:
   e2e:
     name: Weekly scan
-    runs-on: [self-hosted, Linux, sto-e2e]
+    runs-on: ubuntu-latest
     timeout-minutes: 180
     permissions:
       contents: read
