@@ -1,0 +1,172 @@
+@if (view(); as view) {
+  @if (view.placement !== null || view.mayRequest) {
+    <section
+      class="fleet-armada"
+      aria-labelledby="fleet-armada-heading">
+      <div class="lcars-text-bar">
+        <span id="fleet-armada-heading">Armada</span>
+      </div>
+
+      @if (notice(); as done) {
+        <p
+          class="fleet-armada__notice"
+          role="status">
+          {{ done }}
+        </p>
+      }
+      @if (error(); as refusal) {
+        <app-lcars-error-message
+          title="Not done"
+          [message]="refusal" />
+      }
+
+      @if (view.placement; as placement) {
+        <p>
+          In
+          <a [routerLink]="armadaLink(placement.armada)">{{
+            placement.armada.name
+          }}</a>
+          as {{ positionLabels[placement.position] }}
+          @if (placement.parent; as parent) {
+            under
+            @if (fleetLink(parent); as link) {
+              <a [routerLink]="link">{{ fleetName(parent) }}</a>
+            } @else {
+              {{ fleetName(parent) }}
+            }
+          }
+          since {{ placement.since | appDate: 'mediumDate' }}.
+        </p>
+
+        @if (view.mayRequest) {
+          @if (placement.gammaCount > 0) {
+            <p class="fleet-community-field-hint">
+              It has Gammas under it, which belong to other Fleets. Before it
+              can leave, an Armada manager has to move them or take them out.
+            </p>
+          } @else if (leaving()) {
+            <form
+              class="fleet-armada__form"
+              aria-label="Leave the Armada"
+              (submit)="
+                $event.preventDefault(); onConfirmLeave(placement.armada)
+              ">
+              <div class="lcars-input-container tangerine">
+                <label for="fleet-armada-leave-reason">Reason</label>
+                <textarea
+                  id="fleet-armada-leave-reason"
+                  rows="2"
+                  [attr.maxlength]="textLimit"
+                  [value]="reason()"
+                  [disabled]="busy()"
+                  (input)="reason.set($any($event.target).value)"></textarea>
+              </div>
+              <p class="fleet-community-field-hint">
+                Kept with the change, which the Armada’s members can read.
+              </p>
+              <div class="fleet-community-form-actions">
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto bluey"
+                  [disabled]="busy()"
+                  (click)="onKeep()">
+                  Stay
+                </button>
+                <button
+                  type="submit"
+                  class="lcars-btn lcars-btn-auto red"
+                  [disabled]="busy() || reason().trim() === ''">
+                  Leave…
+                </button>
+              </div>
+            </form>
+          } @else {
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto red"
+              (click)="onLeave()">
+              Leave the Armada…
+            </button>
+          }
+        }
+      } @else if (view.openRequest; as open) {
+        <p>
+          You have asked to join
+          <a [routerLink]="armadaLink(open.armada)">{{ open.armada.name }}</a
+          >. The request waits for its managers until
+          {{ open.expiresAt | appDate: 'medium' }}.
+        </p>
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto bluey"
+          [disabled]="busy()"
+          (click)="onWithdraw(open.id)">
+          Withdraw the request
+        </button>
+      } @else if (view.cannotRequestBecause; as because) {
+        <p>Not in an Armada. {{ because }}</p>
+      } @else if (view.choices.length === 0) {
+        <p>
+          Not in an Armada. No open Armada in this Community takes Fleets on
+          this platform with this allegiance.
+        </p>
+      } @else {
+        <p>Not in an Armada. Its managers can ask to join one here.</p>
+        <form
+          class="fleet-armada__form"
+          aria-label="Ask to join an Armada"
+          (submit)="$event.preventDefault(); onRequest()">
+          <div class="lcars-input-container tangerine">
+            <label for="fleet-armada-choice">Armada</label>
+            <select
+              id="fleet-armada-choice"
+              [disabled]="busy()"
+              (change)="armadaId.set($any($event.target).value)">
+              <option value="">Choose an Armada</option>
+              @for (choice of view.choices; track choice.id) {
+                <option
+                  [value]="choice.id"
+                  [selected]="choice.id === armadaId()">
+                  {{ choice.name }}
+                </option>
+              }
+            </select>
+          </div>
+          <div class="lcars-input-container tangerine">
+            <label for="fleet-armada-message">Message (optional)</label>
+            <textarea
+              id="fleet-armada-message"
+              rows="2"
+              [attr.maxlength]="textLimit"
+              [value]="message()"
+              [disabled]="busy()"
+              (input)="message.set($any($event.target).value)"></textarea>
+          </div>
+          <p class="fleet-community-field-hint">
+            Its managers choose where the Fleet goes. The request lapses after
+            14 days unanswered.
+          </p>
+          <div class="fleet-community-form-actions">
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto green"
+              [disabled]="busy() || armadaId() === ''">
+              Ask to join
+            </button>
+          </div>
+        </form>
+      }
+
+      @if (view.lastAnswered; as last) {
+        <p class="fleet-armada__last">
+          The last request, to join {{ last.armada.name }}, was
+          {{ statusLabels[last.status].toLowerCase() }} on
+          {{ last.answeredAt ?? last.expiresAt | appDate: 'mediumDate' }}.
+        </p>
+        @if (last.reason; as why) {
+          <p class="fleet-armada__last">Reason: {{ why }}</p>
+        }
+      }
+    </section>
+  }
+}

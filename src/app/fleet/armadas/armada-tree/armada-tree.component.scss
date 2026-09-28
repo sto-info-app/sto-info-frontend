@@ -1,0 +1,58 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.armada-tree {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &__children {
+    margin: 0.25rem 0 0 1rem;
+    padding: 0 0 0 1rem;
+    list-style: none;
+    border-left: 3px solid vars.$lcars-bluey;
+  }
+
+  &__node {
+    padding: 0.35rem 0;
+  }
+
+  &__position {
+    display: inline-block;
+    min-width: 4.5rem;
+    color: vars.$lcars-sky;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  &__fleet {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+
+    &--hidden {
+      font-style: italic;
+      font-weight: normal;
+    }
+  }
+
+  &__since {
+    margin-left: 0.5rem;
+    color: vars.$lcars-sky;
+    font-size: 0.85rem;
+  }
+
+  &__empty {
+    font-style: italic;
+  }
+
+  &__actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-left: 0.75rem;
+    vertical-align: middle;
+  }
+}

@@ -265,6 +265,17 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
       // artwork is a capability held at it; an unregistered one's is a
       // question about who filled the slot, answered a slot at a time.
       tabs: fleetTabsVmOf(resolved),
+      // Which Armada it is in, for anybody; asking to join one, for its
+      // managers (FC-026). A Fleet no Community holds is in none.
+      fleetArmada:
+        fleet.communityId === null
+          ? null
+          : {
+              communityId: fleet.communityId,
+              fleetId: fleet.id,
+              fleetName: fleet.exactGameName,
+              communitySlug: resolved.communitySlug,
+            },
       recruitment:
         fleet.communityId !== null && fleet.status === FleetScopeStatus.ACTIVE
           ? {

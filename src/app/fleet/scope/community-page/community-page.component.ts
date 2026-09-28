@@ -188,6 +188,12 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
       kind: 'READY',
       actions: this.actionsFor(resolved),
       ownershipOffer: this.ownershipOfferFor(resolved),
+      // Both of R04's paths: its Armadas, then its Fleets in none (FC-026).
+      communityStructure: {
+        communityId: community.id,
+        communitySlug: community.slug,
+        communityName: community.name,
+      },
       header: {
         scope: FLEET_SCOPE_COMMUNITY,
         name: community.name,

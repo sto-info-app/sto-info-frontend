@@ -501,4 +501,55 @@ export const FLEET_LINKS = {
     platformSegment,
     armadaSlug,
   ],
+
+  /**
+   * How an Armada's shape changed (FC-026). For whoever may see it.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armadaHistory: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
+    'history',
+  ],
+
+  /**
+   * An Armada's requests to join, for its managers (FC-026).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armadaRequests: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
+    'requests',
+  ],
+
+  /**
+   * Where an Armada's Owner and Admins manage who governs it (FC-025).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armadaManage: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
+    'manage',
+  ],
 };

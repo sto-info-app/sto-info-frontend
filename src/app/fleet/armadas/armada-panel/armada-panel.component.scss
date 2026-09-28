@@ -1,0 +1,45 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.armada-panel {
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 36rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__asking {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &__gammas {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid vars.$lcars-bluey;
+
+    legend {
+      padding: 0 0.5rem;
+      color: vars.$lcars-sky;
+    }
+  }
+
+  &__gamma {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}

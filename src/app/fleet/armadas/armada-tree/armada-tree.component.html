@@ -1,0 +1,93 @@
+@let shape = structure();
+@let name = nameOf();
+
+<ng-template
+  #fleetLine
+  let-node>
+  <!-- &ngsp; keeps the space Angular would strip, so the position and the
+       name read as two words, not only look like them. -->
+  <span class="armada-tree__position">{{ labelOf(node) }}</span>&ngsp;
+  @if (linkOf(node); as link) {
+    <a
+      class="armada-tree__fleet"
+      [routerLink]="link"
+      >{{ name(node.fleet) }}</a
+    >
+  } @else {
+    <span class="armada-tree__fleet armada-tree__fleet--hidden">{{
+      name(node.fleet)
+    }}</span>
+  }
+  <span class="armada-tree__since">
+    since {{ node.since | appDate: 'mediumDate' }}
+  </span>
+  @if (manageable() && node.fleet.id !== null) {
+    <span class="armada-tree__actions">
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto bluey"
+        [attr.aria-label]="'Move ' + name(node.fleet)"
+        (click)="move.emit(node)">
+        Move…
+      </button>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto red"
+        [attr.aria-label]="'Remove ' + name(node.fleet)"
+        (click)="remove.emit(node)">
+        Remove…
+      </button>
+    </span>
+  }
+</ng-template>
+
+<ul
+  class="armada-tree"
+  aria-label="Fleets in this Armada, by position">
+  <li class="armada-tree__node armada-tree__node--alpha">
+    @if (shape.alpha; as alpha) {
+      <ng-container
+        [ngTemplateOutlet]="fleetLine"
+        [ngTemplateOutletContext]="{ $implicit: alpha }" />
+    } @else {
+      <span class="armada-tree__position">Alpha</span>&ngsp;
+      <span class="armada-tree__empty">Empty</span>
+    }
+
+    <ul
+      class="armada-tree__children"
+      [attr.aria-label]="
+        'Betas, ' + shape.betas.length + ' of ' + shape.maxBetas
+      ">
+      @for (beta of shape.betas; track beta.fleet.id ?? $index) {
+        <li class="armada-tree__node armada-tree__node--beta">
+          <ng-container
+            [ngTemplateOutlet]="fleetLine"
+            [ngTemplateOutletContext]="{ $implicit: beta }" />
+          @if (beta.gammas.length > 0) {
+            <ul
+              class="armada-tree__children"
+              [attr.aria-label]="
+                'Gammas under ' +
+                name(beta.fleet) +
+                ', ' +
+                beta.gammas.length +
+                ' of ' +
+                shape.maxGammasPerBeta
+              ">
+              @for (gamma of beta.gammas; track gamma.fleet.id ?? $index) {
+                <li class="armada-tree__node armada-tree__node--gamma">
+                  <ng-container
+                    [ngTemplateOutlet]="fleetLine"
+                    [ngTemplateOutletContext]="{ $implicit: gamma }" />
+                </li>
+              }
+            </ul>
+          }
+        </li>
+      } @empty {
+        <li class="armada-tree__empty">No Betas yet.</li>
+      }
+    </ul>
+  </li>
+</ul>

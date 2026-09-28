@@ -4,6 +4,7 @@ import { ParamMap } from '@angular/router';
 
 import { Observable } from 'rxjs';
 
+import { armadaTabsVmOf } from 'src/app/fleet/armadas/armada-tabs/armada-tabs.component';
 import { FLEET_SCOPE_ARMADA } from 'src/app/fleet/constants/fleet-scope.constants';
 import {
   bannerOf,
@@ -30,9 +31,10 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
  * seen exactly as far as the Community holding it, and it groups Fleets
  * rather than recruiting players.
  *
- * Which Fleets are in it is not here either. Membership is a temporal
- * record with its own route, so a Fleet can leave without this page's shape
- * changing at all — it arrives with the ticket that builds it.
+ * Which Fleets are in it, and where, is its tree (FC-026): a panel that
+ * reads the placements itself, so a Fleet can leave without this page's own
+ * record changing at all. Its history, its requests and who governs it are
+ * on its tabs.
  */
 @Component({
   selector: 'app-armada-page',
@@ -102,6 +104,15 @@ export class ArmadaPageComponent extends FleetScopePageDirective<ResolvedStoArma
       { label: 'Registered', value: this.formatInstant(armada.createdAt) },
     ];
 
+    // Which Fleets may ask to join turns on it, so it is shown beside the
+    // platform, which decides the same thing.
+    if (resolved.allegianceName !== null) {
+      facts.splice(1, 0, {
+        label: 'Allegiance',
+        value: resolved.allegianceName,
+      });
+    }
+
     // The exact game name is the heading, so a Community that prefers to
     // call it something else gets its preference here, where it cannot be
     // mistaken for the name the game holds.
@@ -121,8 +132,21 @@ export class ArmadaPageComponent extends FleetScopePageDirective<ResolvedStoArma
 
     return {
       kind: 'READY',
-      // Nothing yet. FC-024 to FC-026 own what may be done to an Armada.
+      // What may be done to it is on its tabs and in its tree (FC-026).
       actions: [],
+      armadaTabs: armadaTabsVmOf(resolved),
+      armada: {
+        communityId: armada.communityId,
+        armadaId: armada.id,
+        armadaName: armada.exactGameName,
+        communitySlug: resolved.communitySlug,
+        communityName: resolved.communityName ?? '',
+        requestsLink: FLEET_LINKS.armadaRequests(
+          resolved.communitySlug,
+          resolved.platformSegment,
+          armada.slug,
+        ),
+      },
       header: {
         scope: FLEET_SCOPE_ARMADA,
         name: armada.exactGameName,

@@ -20,6 +20,10 @@
       <app-fleet-tabs [vm]="state.tabs" />
     }
 
+    @if (state.armadaTabs) {
+      <app-armada-tabs [vm]="state.armadaTabs" />
+    }
+
     @if (state.notice) {
       <app-lcars-information-message
         title="About this record"
@@ -49,6 +53,18 @@
 
     @if (state.following) {
       <app-fleet-follow [vm]="state.following" />
+    }
+
+    @if (state.armada) {
+      <app-armada-panel [vm]="state.armada" />
+    }
+
+    @if (state.fleetArmada) {
+      <app-fleet-armada-panel [vm]="state.fleetArmada" />
+    }
+
+    @if (state.communityStructure) {
+      <app-community-structure-panel [vm]="state.communityStructure" />
     }
 
     @if (state.recruitment) {

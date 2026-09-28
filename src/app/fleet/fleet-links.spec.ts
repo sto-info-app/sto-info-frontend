@@ -200,6 +200,22 @@ describe('FLEET_LINKS', () => {
     );
   });
 
+  it.each([
+    ['history', FLEET_LINKS.armadaHistory],
+    ['requests', FLEET_LINKS.armadaRequests],
+    ['manage', FLEET_LINKS.armadaManage],
+  ])('should address an Armada’s %s below it', (section, link) => {
+    expect(link('ufa', 'pc', 'sol-armada')).toEqual([
+      '/fleets',
+      'communities',
+      'ufa',
+      'armadas',
+      'pc',
+      'sol-armada',
+      section,
+    ]);
+  });
+
   it('should address a standalone Fleet under the reserved segment', () => {
     expect(FLEET_LINKS.standaloneFleet('pc', 'starfleet-command')).toEqual([
       '/fleets',

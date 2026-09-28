@@ -537,6 +537,13 @@ export interface ResolvedStoArmada {
   communityName: string | null;
   platformSegment: string;
 
+  /**
+   * Federation or Klingon, named here because a signed-out reader cannot
+   * ask the character lookup what the id means. Null for an Armada
+   * registered before either was required.
+   */
+  allegianceName: string | null;
+
   /** True when the address asked for is no longer the canonical one. */
   redirected: boolean;
 

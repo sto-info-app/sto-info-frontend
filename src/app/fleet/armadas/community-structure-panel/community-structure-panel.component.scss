@@ -1,0 +1,32 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.community-structure {
+  h3 {
+    margin: 1.25rem 0 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  &__armada {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid vars.$lcars-bluey;
+  }
+
+  &__facts {
+    margin: 0 0 0.5rem;
+    color: vars.$lcars-sky;
+  }
+
+  &__standalone {
+    margin: 0;
+    padding-left: 1.25rem;
+
+    li {
+      padding: 0.2rem 0;
+      overflow-wrap: anywhere;
+    }
+  }
+}

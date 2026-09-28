@@ -1,0 +1,195 @@
+@if (armada(); as armada) {
+  <section
+    class="armada-panel"
+    aria-labelledby="armada-panel-heading">
+    <div class="lcars-text-bar">
+      <span id="armada-panel-heading">Fleets in this Armada</span>
+    </div>
+
+    @if (failed()) {
+      <app-lcars-error-message
+        title="Not read"
+        [message]="failedMessage" />
+    } @else if (view(); as view) {
+      @if (view.mayManage && view.openRequests > 0) {
+        <p class="armada-panel__requests">
+          <a [routerLink]="armada.requestsLink"
+            >{{ view.openRequests }}
+            {{ view.openRequests === 1 ? 'request' : 'requests' }} to join</a
+          >
+          waiting for an answer.
+        </p>
+      }
+
+      @if (notice(); as done) {
+        <p
+          class="armada-panel__notice"
+          role="status">
+          {{ done }}
+        </p>
+      }
+
+      @if (editing(); as edit) {
+        @let name = nameOf()(edit.node.fleet);
+
+        <form
+          class="armada-panel__form"
+          [attr.aria-label]="
+            (edit.mode === 'MOVE' ? 'Move ' : 'Remove ') + name
+          "
+          (submit)="$event.preventDefault(); onSubmit()">
+          <p class="armada-panel__asking">
+            {{ edit.mode === 'MOVE' ? 'Move' : 'Take out' }} {{ name }}, now
+            {{ positionLabels[edit.node.position] }}.
+          </p>
+
+          @if (edit.mode === 'MOVE') {
+            <div class="lcars-input-container tangerine">
+              <label for="armada-move-position">To</label>
+              <select
+                id="armada-move-position"
+                [disabled]="busy()"
+                (change)="position.set($any($event.target).value)">
+                @for (option of positions; track option) {
+                  <option
+                    [value]="option"
+                    [selected]="option === position()">
+                    {{ positionLabels[option] }}
+                  </option>
+                }
+              </select>
+            </div>
+            @if (position() === 'GAMMA') {
+              <div class="lcars-input-container tangerine">
+                <label for="armada-move-parent">Under</label>
+                <select
+                  id="armada-move-parent"
+                  [disabled]="busy()"
+                  (change)="parentFleetId.set($any($event.target).value)">
+                  <option value="">Choose a Beta</option>
+                  @for (beta of betaChoices(); track beta.fleet.id) {
+                    <option
+                      [value]="beta.fleet.id"
+                      [selected]="beta.fleet.id === parentFleetId()">
+                      {{ nameOf()(beta.fleet) }}
+                    </option>
+                  }
+                </select>
+              </div>
+            }
+          }
+
+          @if (needsGammas()) {
+            <fieldset class="armada-panel__gammas">
+              <legend>What becomes of the Gammas under {{ name }}</legend>
+              @for (gamma of gammasOfEdited(); track gamma.fleet.id) {
+                @let choice = choiceFor(gamma);
+
+                <div class="armada-panel__gamma">
+                  <div class="lcars-input-container tangerine">
+                    <label [for]="'gamma-outcome-' + gamma.fleet.id">{{
+                      nameOf()(gamma.fleet)
+                    }}</label>
+                    <select
+                      [id]="'gamma-outcome-' + gamma.fleet.id"
+                      [disabled]="busy()"
+                      (change)="
+                        onGammaOutcome(gamma, $any($event.target).value)
+                      ">
+                      <option value="">Choose</option>
+                      <option
+                        value="GAMMA"
+                        [selected]="choice.outcome === 'GAMMA'">
+                        Move under another Beta
+                      </option>
+                      <option
+                        value="BETA"
+                        [selected]="choice.outcome === 'BETA'">
+                        Become a Beta
+                      </option>
+                      <option
+                        value="LEAVE"
+                        [selected]="choice.outcome === 'LEAVE'">
+                        Take out too
+                      </option>
+                    </select>
+                  </div>
+                  @if (choice.outcome === 'GAMMA') {
+                    <div class="lcars-input-container tangerine">
+                      <label [for]="'gamma-parent-' + gamma.fleet.id"
+                        >Under</label
+                      >
+                      <select
+                        [id]="'gamma-parent-' + gamma.fleet.id"
+                        [disabled]="busy()"
+                        (change)="
+                          onGammaParent(gamma, $any($event.target).value)
+                        ">
+                        <option value="">Choose a Beta</option>
+                        @for (beta of betaChoices(); track beta.fleet.id) {
+                          <option
+                            [value]="beta.fleet.id"
+                            [selected]="beta.fleet.id === choice.parentFleetId">
+                            {{ nameOf()(beta.fleet) }}
+                          </option>
+                        }
+                      </select>
+                    </div>
+                  }
+                </div>
+              }
+            </fieldset>
+          }
+
+          <div class="lcars-input-container tangerine">
+            <label for="armada-change-reason">Reason</label>
+            <textarea
+              id="armada-change-reason"
+              rows="2"
+              [attr.maxlength]="textLimit"
+              [value]="reason()"
+              [disabled]="busy()"
+              (input)="reason.set($any($event.target).value)"></textarea>
+          </div>
+          <p class="fleet-community-field-hint">
+            Kept with the change, which the Armada’s members can read.
+          </p>
+
+          @if (error(); as refusal) {
+            <app-lcars-error-message
+              title="Not changed"
+              [message]="refusal" />
+          }
+
+          <div class="fleet-community-form-actions">
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto bluey"
+              [disabled]="busy()"
+              (click)="onCancel()">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto"
+              [class.green]="edit.mode === 'MOVE'"
+              [class.red]="edit.mode === 'REMOVE'"
+              [disabled]="!ready()">
+              {{ edit.mode === 'MOVE' ? 'Move' : 'Remove…' }}
+            </button>
+          </div>
+        </form>
+      }
+
+      <app-armada-tree
+        [structure]="view.structure"
+        [communitySlug]="armada.communitySlug"
+        [communityName]="armada.communityName"
+        [manageable]="view.mayManage && editing() === null"
+        (move)="onMove($event)"
+        (remove)="onRemove($event)" />
+    } @else {
+      <p class="armada-panel__loading">Reading the Fleets…</p>
+    }
+  </section>
+}

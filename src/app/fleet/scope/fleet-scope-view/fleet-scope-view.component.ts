@@ -7,6 +7,10 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { ArmadaPanelComponent } from 'src/app/fleet/armadas/armada-panel/armada-panel.component';
+import { ArmadaTabsComponent } from 'src/app/fleet/armadas/armada-tabs/armada-tabs.component';
+import { CommunityStructurePanelComponent } from 'src/app/fleet/armadas/community-structure-panel/community-structure-panel.component';
+import { FleetArmadaPanelComponent } from 'src/app/fleet/armadas/fleet-armada-panel/fleet-armada-panel.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { OwnershipOfferPanelComponent } from 'src/app/fleet/governance/ownership-offer-panel/ownership-offer-panel.component';
 import { FleetRecruitmentPanelComponent } from 'src/app/fleet/recruitment/fleet-recruitment-panel/fleet-recruitment-panel.component';
@@ -36,6 +40,10 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
+    ArmadaPanelComponent,
+    ArmadaTabsComponent,
+    CommunityStructurePanelComponent,
+    FleetArmadaPanelComponent,
     FleetScopeArtworkComponent,
     FleetScopeHeaderComponent,
     FleetFollowComponent,

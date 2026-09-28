@@ -1,0 +1,51 @@
+@if (community(); as community) {
+  @if (structure(); as structure) {
+    @if (
+      structure.armadas.length > 0 || structure.standaloneFleets.length > 0
+    ) {
+      <section
+        class="community-structure"
+        aria-labelledby="community-structure-heading">
+        <div class="lcars-text-bar">
+          <span id="community-structure-heading">Armadas and Fleets</span>
+        </div>
+
+        @for (entry of structure.armadas; track entry.armada.id) {
+          <article
+            class="community-structure__armada"
+            [attr.aria-labelledby]="'armada-' + entry.armada.id">
+            <h3 [id]="'armada-' + entry.armada.id">
+              <a [routerLink]="armadaLink(entry.armada)">{{
+                entry.armada.name
+              }}</a>
+            </h3>
+            @if (entry.armada.allegiance; as allegiance) {
+              <p class="community-structure__facts">{{ allegiance }}</p>
+            }
+            <app-armada-tree
+              [structure]="entry.structure"
+              [communitySlug]="community.communitySlug"
+              [communityName]="community.communityName" />
+          </article>
+        }
+
+        <h3 class="community-structure__standalone-heading">
+          Fleets not in an Armada
+        </h3>
+        @if (structure.standaloneFleets.length === 0) {
+          <p class="fleet-community-empty">Every Fleet here is in an Armada.</p>
+        } @else {
+          @let nameOf = namerFor(structure, community);
+
+          <ul class="community-structure__standalone">
+            @for (fleet of structure.standaloneFleets; track fleet.id) {
+              <li>
+                <a [routerLink]="fleetLink(fleet)">{{ nameOf(fleet) }}</a>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  }
+}

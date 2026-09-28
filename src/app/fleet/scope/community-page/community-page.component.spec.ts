@@ -10,6 +10,7 @@ import {
 import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { FleetArmadaService } from 'src/app/fleet/armadas/fleet-armada.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
 import { FLEET_SCOPE_ERROR } from 'src/app/fleet/scope/fleet-scope-page.directive';
@@ -143,6 +144,14 @@ describe('CommunityPageComponent', () => {
         { provide: PageTitleService, useValue: pageTitle },
         { provide: AuthService, useValue: auth },
         { provide: FleetGovernanceService, useValue: governance },
+        {
+          provide: FleetArmadaService,
+          useValue: {
+            communityStructure: jest.fn(() =>
+              of({ armadas: [], standaloneFleets: [] }),
+            ),
+          },
+        },
       ],
     })
       .overrideComponent(CommunityPageComponent, {
@@ -233,6 +242,18 @@ describe('CommunityPageComponent', () => {
   });
 
   describe('what it draws', () => {
+    it('hands its Armadas and Fleets panel the Community', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.communityStructure).toEqual({
+        communityId: 'community-1',
+        communitySlug: 'united-federation-alliance',
+        communityName: 'United Federation Alliance',
+      });
+    });
+
     it('heads the page with the Community, and no parent above it', () => {
       render();
 

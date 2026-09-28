@@ -1,3 +1,7 @@
+import { ArmadaPanelVm } from 'src/app/fleet/armadas/armada-panel/armada-panel.component';
+import { ArmadaTabsVm } from 'src/app/fleet/armadas/armada-tabs/armada-tabs.component';
+import { CommunityStructurePanelVm } from 'src/app/fleet/armadas/community-structure-panel/community-structure-panel.component';
+import { FleetArmadaPanelVm } from 'src/app/fleet/armadas/fleet-armada-panel/fleet-armada-panel.component';
 import { FleetScopeCardStatus } from 'src/app/fleet/components/fleet-scope-card/fleet-scope-card.model';
 import { FleetTabsVm } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FleetScopeType } from 'src/app/fleet/constants/fleet-scope.constants';
@@ -222,4 +226,28 @@ export interface FleetScopeReadyState {
    * unless the offer is theirs. Absent or null everywhere else.
    */
   readonly ownershipOffer?: OwnershipOfferPanelVm | null;
+
+  /**
+   * The Armada's section tabs (FC-026), on an Armada page. Absent or null
+   * everywhere else.
+   */
+  readonly armadaTabs?: ArmadaTabsVm | null;
+
+  /**
+   * Which Fleets are in the Armada, and where (FC-026), on an Armada page.
+   * Absent or null everywhere else.
+   */
+  readonly armada?: ArmadaPanelVm | null;
+
+  /**
+   * The Fleet's Armada and its managers' requests (FC-026), on a Fleet a
+   * Community holds. Absent or null everywhere else.
+   */
+  readonly fleetArmada?: FleetArmadaPanelVm | null;
+
+  /**
+   * The Community's Armadas and its Fleets in none (FC-026), on a Community
+   * page. Absent or null everywhere else.
+   */
+  readonly communityStructure?: CommunityStructurePanelVm | null;
 }
