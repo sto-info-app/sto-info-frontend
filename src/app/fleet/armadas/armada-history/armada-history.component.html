@@ -1,0 +1,66 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-armada-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Armada History"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the history"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let page = state.data.page;
+      @let nameOf = namerFor(state.data);
+
+      <p class="armada-history__intro">
+        Every placement, move and departure, newest first. Each was made here
+        by a person and recorded as it was made; none comes from the game’s
+        roster exports, which say nothing about Armadas.
+      </p>
+
+      @if (page.total === 0) {
+        <p class="fleet-community-empty">No Fleet has been placed here yet.</p>
+      } @else {
+        <ol class="armada-history__changes">
+          @for (change of page.items; track change.changeId) {
+            <li class="armada-history__change">
+              <p class="armada-history__when">
+                {{ change.at | appDate: 'medium' }}
+              </p>
+              @for (sentence of sentencesOf(change, nameOf); track $index) {
+                <p>{{ sentence }}</p>
+              }
+              @if (page.recordersShown && change.recordedBy !== null) {
+                <p>Made by {{ change.recordedBy }}.</p>
+              }
+              @if (change.reason !== null) {
+                <p class="armada-history__reason">
+                  Reason: {{ change.reason }}
+                </p>
+              }
+            </li>
+          }
+        </ol>
+
+        @if (totalPages(page) > 1) {
+          <div class="lcars-pagination">
+            <button
+              type="button"
+              [disabled]="page.page <= 1"
+              (click)="onPage(page.page - 1)">
+              Newer
+            </button>
+            <span>Page {{ page.page }} of {{ totalPages(page) }}</span>
+            <button
+              type="button"
+              [disabled]="page.page >= totalPages(page)"
+              (click)="onPage(page.page + 1)">
+              Older
+            </button>
+          </div>
+        }
+      }
+    }
+  </app-fleet-page-shell>
+}

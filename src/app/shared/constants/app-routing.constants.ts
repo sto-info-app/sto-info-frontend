@@ -163,6 +163,15 @@ export const APP_ROUTES = {
   FLEET_MANAGE:
     FLEET_COMMUNITIES_ROOT +
     '/:communitySlug/fleets/:platformSegment/:slug/manage',
+  FLEET_ARMADA_HISTORY:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/armadas/:platformSegment/:slug/history',
+  FLEET_ARMADA_REQUESTS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/armadas/:platformSegment/:slug/requests',
+  FLEET_ARMADA_MANAGE:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/armadas/:platformSegment/:slug/manage',
 
   // News
   NEWS: ROOT_ROUTES.NEWS,
@@ -346,6 +355,8 @@ export const APP_ROUTE_TITLES = {
   FLEET_MEMBERS: 'Fleet Members',
   FLEET_RECRUITMENT_SETTINGS: 'Recruitment Settings',
   FLEET_MANAGE: 'Manage',
+  FLEET_ARMADA_HISTORY: 'Armada History',
+  FLEET_ARMADA_REQUESTS: 'Armada Requests',
   FLEET_GOVERNANCE_ROLES: 'Roles',
   FLEET_GOVERNANCE_DELEGATION: 'Delegation',
   FLEET_GOVERNANCE_HISTORY: 'Governance History',

@@ -1,0 +1,36 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.armada-history {
+  &__intro {
+    max-width: 70ch;
+    margin: 0 0 1rem;
+  }
+
+  &__changes {
+    margin: 1rem 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__change {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid vars.$lcars-bluey;
+
+    p {
+      margin: 0.25rem 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__when {
+    color: vars.$lcars-sky;
+  }
+
+  &__reason {
+    white-space: pre-wrap;
+  }
+}

@@ -807,15 +807,17 @@ A recruited proposal the server withdrew when the Fleet membership ended
 
 ### Governance
 
-Who governs a Community or Fleet (FC-022) lives in `src/app/fleet/governance/`.
+Who governs a Community, Fleet or Armada (FC-022, FC-025) lives in
+`src/app/fleet/governance/`.
 Every request goes through `FleetGovernanceService`, and a refusal is shown
 with `recruitmentRefusalOf`, as recruitment's are.
 
-The pages are the same at both levels: `GovernancePageDirective` reads the
-address, resolving a Fleet when it names a platform and the Community
-otherwise, and tells absent, failed and not permitted apart. Each lives below
-the scope's **Manage** hub (`FLEET_LINKS.communityManage`,
-`FLEET_LINKS.fleetManage`):
+The pages are the same at every level: `GovernancePageDirective` reads the
+address, resolving an Armada when the route says it governs one, a Fleet when
+it names a platform and the Community otherwise, and tells absent, failed and
+not permitted apart. Each lives below the scope's **Manage** hub
+(`FLEET_LINKS.communityManage`, `FLEET_LINKS.fleetManage`,
+`FLEET_LINKS.armadaManage`):
 
 | Page | Address | Who opens it |
 |---|---|---|
@@ -876,6 +878,64 @@ the server says the reader is shown recorders (`recordersShown`).
 
 Because holdings are public, every registered Fleet's tab strip has at least
 the Overview and Holdings, and the strip is always drawn.
+
+### Armadas
+
+How Fleets sit in an Armada (FC-024 to FC-026) lives in
+`src/app/fleet/armadas/`, behind `FleetArmadaService`. Reading works signed
+out; every change needs an account, and a refusal is shown with
+`recruitmentRefusalOf`, as recruitment's are.
+
+**`<app-armada-tree>`** — an Armada's shape as nested lists: the Alpha, or
+"Empty" while the slot stands empty, then each Beta with its Gammas beneath
+it. Lists rather than a drawing, so a keyboard, a screen reader and a phone
+all follow the hierarchy the same way. Each Fleet says its position and when
+it took it, and links to its page. A Fleet the reader may not see keeps its
+place without its name or a link. With `manageable`, each Fleet the reader
+may see offers **Move…** and **Remove…**, raised as `move` and `remove` for
+the page to answer.
+
+Two Fleets in one list with the same name get their Community's name after
+it (`fleetNamer`); one Fleet named twice, as in a history, is still one Fleet.
+The position and the name are separate spans kept apart by `&ngsp;`, so they
+read as two words, not only look like them.
+
+**`<app-armada-panel>`** — the tree on an Armada's page. A manager
+(`armada.manage` at an open Armada) moves a Fleet or takes it out, each with
+a reason; a Gamma needs the Beta it goes under, and a Beta that stops being
+one needs every Gamma under it moved under another Beta, made a Beta or taken
+out too. Taking a Fleet out asks first. A manager is also pointed at any
+requests waiting.
+
+**`<app-fleet-armada-panel>`** — on a Fleet's page: which Armada it is in and
+where. Its `armada.request` holders ask to join one of the Armadas it could,
+with an optional message; withdraw the request; see how the last one was
+answered and why; and take the Fleet out, with a reason and after confirming.
+A Beta with Gammas under it is told it cannot leave until an Armada manager
+moves them.
+
+**`<app-community-structure-panel>`** — on a Community's page: each open
+Armada as a tree, then the Fleets in none. Neither the panel nor the Fleet
+one shows anything when it cannot be read, since neither is what the page is
+for.
+
+An Armada's pages have their own strip, **`<app-armada-tabs>`**: Overview and
+History for anybody, Requests for `armada.manage` holders, Manage for its Owner
+and Admins. **`ArmadaSectionPageDirective<T>`** is the Armada's
+`FleetSectionPageDirective`, for its two section pages:
+
+| Page | Address | Who opens it |
+|---|---|---|
+| History | `…/armadas/:platform/:slug/history` | Anybody who may see the Armada; who made each change and why, its members only |
+| Requests | `…/armadas/:platform/:slug/requests` | `armada.manage` holders |
+
+Both page by `?page=`, and Requests filters by `?status=`, open by default.
+Approving asks where the Fleet goes; rejecting asks why, which the requesting
+Fleet is shown.
+
+Its Manage pages are the governance pages, told by their route's
+`data.governs: 'ARMADA'` that the scope is an Armada. There is no closing
+there: an Armada is closed from its Community.
 
 ### Upload and scan state
 

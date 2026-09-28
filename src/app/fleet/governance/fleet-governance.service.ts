@@ -18,8 +18,10 @@ import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 /** The Community, or the Fleet in it, whose governance is meant. */
 export interface GovernanceTarget {
   readonly communityId: string;
-  /** Null for the Community itself. */
+  /** Null for the Community itself, or an Armada. */
   readonly fleetId: string | null;
+  /** The Armada, when the target is one (FC-025). */
+  readonly armadaId?: string | null;
 }
 
 /**
@@ -315,6 +317,10 @@ export class FleetGovernanceService {
    * @returns The address.
    */
   private url(target: GovernanceTarget): string {
+    if (target.armadaId) {
+      return `${API_URLS.FLEET_COMMUNITIES}/${target.communityId}/armadas/${target.armadaId}/governance`;
+    }
+
     return target.fleetId === null
       ? this.communityUrl(target.communityId)
       : `${API_URLS.FLEET_COMMUNITIES}/${target.communityId}/fleets/${target.fleetId}/governance`;

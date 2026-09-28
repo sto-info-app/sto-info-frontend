@@ -9,6 +9,7 @@ import {
 import { BehaviorSubject, of } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { resolvedArmada } from 'src/app/fleet/armadas/armada.testing';
 import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { recruitmentFleet } from 'src/app/fleet/recruitment/recruitment.testing';
@@ -34,6 +35,8 @@ export interface GovernanceReader {
   readonly isSiteAdmin?: boolean;
   /** Whether the page is a Fleet's rather than the Community's. */
   readonly onFleet?: boolean;
+  /** Whether the page is an Armada's, which its route says. */
+  readonly onArmada?: boolean;
   /** Whether the scope has been closed. */
   readonly closed?: boolean;
 }
@@ -41,7 +44,11 @@ export interface GovernanceReader {
 /** The stubs a Manage page is drawn with. */
 export interface GovernanceRouteStubs {
   readonly params$: BehaviorSubject<ParamMap>;
-  readonly scopes: { resolveCommunity: jest.Mock; resolveFleet: jest.Mock };
+  readonly scopes: {
+    resolveCommunity: jest.Mock;
+    resolveFleet: jest.Mock;
+    resolveArmada: jest.Mock;
+  };
   readonly auth: { isLoggedInAsAdmin: jest.Mock };
   readonly providers: Provider[];
 }
@@ -154,11 +161,15 @@ export function governanceRoute(
     convertToParamMap({
       communitySlug: 'united-federation-alliance',
       ...(reader.onFleet ? { platformSegment: 'pc', slug: 'ninth-fleet' } : {}),
+      ...(reader.onArmada ? { platformSegment: 'pc', slug: 'sol-armada' } : {}),
     }),
   );
   const scopes = {
     resolveCommunity: jest.fn(() => of(governanceCommunity(reader))),
     resolveFleet: jest.fn(() => of(governanceFleet(reader))),
+    resolveArmada: jest.fn(() =>
+      of(resolvedArmada(reader.capabilities ?? [], reader.roles ?? [])),
+    ),
   };
   const auth = {
     isLoggedInAsAdmin: jest.fn(() => reader.isSiteAdmin ?? false),
@@ -174,7 +185,13 @@ export function governanceRoute(
       { provide: FleetScopeService, useValue: scopes },
       { provide: AuthService, useValue: auth },
       { provide: FleetGovernanceService, useValue: governance },
-      { provide: ActivatedRoute, useValue: { paramMap: params$ } },
+      {
+        provide: ActivatedRoute,
+        useValue: {
+          paramMap: params$,
+          snapshot: { data: reader.onArmada ? { governs: 'ARMADA' } : {} },
+        },
+      },
     ],
   };
 }

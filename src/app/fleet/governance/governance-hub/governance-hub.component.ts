@@ -12,6 +12,7 @@ import { RouterLink } from '@angular/router';
 
 import { filter, Observable, of, switchMap } from 'rxjs';
 
+import { ArmadaTabsComponent } from 'src/app/fleet/armadas/armada-tabs/armada-tabs.component';
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
@@ -72,6 +73,7 @@ export interface GovernanceHubData {
     AsyncPipe,
     RouterLink,
     FleetPageShellComponent,
+    ArmadaTabsComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
   ],
@@ -210,8 +212,11 @@ export class GovernanceHubComponent extends GovernancePageDirective<GovernanceHu
 
     return of({
       actions,
+      // An Armada closes through its own route, not from here (FC-025).
       mayClose:
-        !scope.isClosed && scope.capabilities.includes(SCOPE_CLOSE_CAPABILITY),
+        !scope.isArmada &&
+        !scope.isClosed &&
+        scope.capabilities.includes(SCOPE_CLOSE_CAPABILITY),
     });
   }
 }

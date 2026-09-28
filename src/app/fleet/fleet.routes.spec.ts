@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(44);
+    expect(children).toHaveLength(50);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -272,6 +272,54 @@ describe('FLEET_ROUTES', () => {
    * `communities/x/fleets/pc/y` is never read as a Community called `x`
    * with three segments of nonsense after it.
    */
+  // Anybody who may see an Armada may read how its shape changed; only its
+  // managers answer requests, and only its Owner and Admins govern it.
+  it('leaves an Armada’s history open to a signed-out reader', () => {
+    const history = childAt(
+      'communities/:communitySlug/armadas/:platformSegment/:slug/history',
+    );
+
+    expect(history?.canActivate).toBeUndefined();
+    expect(history?.data?.['title']).toBe(
+      APP_ROUTE_TITLES.FLEET_ARMADA_HISTORY,
+    );
+  });
+
+  it('asks for an account before an Armada’s requests', () => {
+    const requests = childAt(
+      'communities/:communitySlug/armadas/:platformSegment/:slug/requests',
+    );
+
+    expect(requests?.canActivate).toEqual([AuthGuard]);
+    expect(requests?.data?.['title']).toBe(
+      APP_ROUTE_TITLES.FLEET_ARMADA_REQUESTS,
+    );
+  });
+
+  // The Manage pages are the Fleet's and the Community's, told by the route
+  // which kind of scope they govern.
+  it.each([
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage',
+      APP_ROUTE_TITLES.FLEET_MANAGE,
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage/roles',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES,
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage/delegation',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION,
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage/history',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY,
+    ],
+  ])('tells %s that it governs an Armada', (path, title) => {
+    expect(childAt(path)?.data).toEqual({ title, governs: 'ARMADA' });
+    expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
+  });
+
   it('matches the deeper scope addresses before the Community’s own', () => {
     const paths = children.map(child => child.path);
 
@@ -308,6 +356,23 @@ describe('FLEET_ROUTES', () => {
 
     expect(
       paths.indexOf('communities/:communitySlug/fleets/:platformSegment/:slug'),
+    ).toBeGreaterThan(paths.indexOf(path));
+  });
+
+  it.each([
+    'communities/:communitySlug/armadas/:platformSegment/:slug/history',
+    'communities/:communitySlug/armadas/:platformSegment/:slug/requests',
+    'communities/:communitySlug/armadas/:platformSegment/:slug/manage',
+    'communities/:communitySlug/armadas/:platformSegment/:slug/manage/roles',
+    'communities/:communitySlug/armadas/:platformSegment/:slug/manage/delegation',
+    'communities/:communitySlug/armadas/:platformSegment/:slug/manage/history',
+  ])('matches %s before the Armada page it sits under', (path: string) => {
+    const paths = children.map(child => child.path);
+
+    expect(
+      paths.indexOf(
+        'communities/:communitySlug/armadas/:platformSegment/:slug',
+      ),
     ).toBeGreaterThan(paths.indexOf(path));
   });
 
@@ -433,6 +498,30 @@ describe('FLEET_ROUTES', () => {
       'CommunityOwnershipComponent',
     ],
     ['communities/:communitySlug/manage/dispute', 'CommunityDisputeComponent'],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/history',
+      'ArmadaHistoryComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/requests',
+      'ArmadaRequestsComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage',
+      'GovernanceHubComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage/roles',
+      'GovernanceRolesComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage/delegation',
+      'GovernanceDelegationComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage/history',
+      'GovernanceHistoryComponent',
+    ],
   ])('loads the right component for %s', async (path, expected) => {
     const loaded = await (
       childAt(path)?.loadComponent as () => Promise<{ name: string }>

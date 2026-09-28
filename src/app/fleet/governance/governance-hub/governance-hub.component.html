@@ -2,6 +2,9 @@
   @if (tabsOf(state); as tabs) {
     <app-fleet-tabs [vm]="tabs" />
   }
+  @if (armadaTabsOf(state); as armadaTabs) {
+    <app-armada-tabs [vm]="armadaTabs" />
+  }
 
   <app-fleet-page-shell
     heading="Manage"

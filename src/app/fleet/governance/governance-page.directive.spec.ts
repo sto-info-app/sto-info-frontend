@@ -97,10 +97,13 @@ describe('GovernancePageDirective', () => {
         'manage',
       ],
       tabs: null,
+      isArmada: false,
+      armadaTabs: null,
     });
     expect(page.subjectOf(ready)).toBe('United Federation Alliance');
     expect(page.messageOf(ready)).toBeNull();
     expect(page.tabsOf(ready)).toBeNull();
+    expect(page.armadaTabsOf(ready)).toBeNull();
   });
 
   it('resolves a Fleet from an address naming its platform', () => {
@@ -188,6 +191,7 @@ describe('GovernancePageDirective', () => {
     expect(page.messageOf(failed)).toBe(GOVERNANCE_ERROR);
     expect(page.messageOf({ kind: 'LOADING' })).toBeNull();
     expect(page.tabsOf({ kind: 'LOADING' })).toBeNull();
+    expect(page.armadaTabsOf({ kind: 'LOADING' })).toBeNull();
   });
 
   it('reads the page again on asking, keeping the address', () => {

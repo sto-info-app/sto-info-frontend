@@ -405,6 +405,73 @@ export const FLEET_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
 
+      // An Armada's sections (FC-026). Its history is for whoever may see it;
+      // its requests are its managers', which the server decides. Its Manage
+      // pages are the Fleet's, told by the route that the scope is an
+      // Armada.
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/history',
+        loadComponent: () =>
+          import('./armadas/armada-history/armada-history.component').then(
+            m => m.ArmadaHistoryComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_ARMADA_HISTORY },
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/requests',
+        loadComponent: () =>
+          import('./armadas/armada-requests/armada-requests.component').then(
+            m => m.ArmadaRequestsComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_ARMADA_REQUESTS },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/manage',
+        loadComponent: () =>
+          import('./governance/governance-hub/governance-hub.component').then(
+            m => m.GovernanceHubComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_MANAGE, governs: 'ARMADA' },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/manage/roles',
+        loadComponent: () =>
+          import('./governance/governance-roles/governance-roles.component').then(
+            m => m.GovernanceRolesComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES,
+          governs: 'ARMADA',
+        },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/manage/delegation',
+        loadComponent: () =>
+          import('./governance/governance-delegation/governance-delegation.component').then(
+            m => m.GovernanceDelegationComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION,
+          governs: 'ARMADA',
+        },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/manage/history',
+        loadComponent: () =>
+          import('./governance/governance-history/governance-history.component').then(
+            m => m.GovernanceHistoryComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY,
+          governs: 'ARMADA',
+        },
+        canActivate: [AuthGuard],
+      },
+
       // Where those pages lived before they moved under Investigate, kept so
       // a link to one still arrives.
       {

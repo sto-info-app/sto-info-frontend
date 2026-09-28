@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 
 import { forkJoin, map, Observable } from 'rxjs';
 
+import { ArmadaTabsComponent } from 'src/app/fleet/armadas/armada-tabs/armada-tabs.component';
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
@@ -49,6 +50,7 @@ export interface GovernanceHistoryEntry {
     AppDatePipe,
     RouterLink,
     FleetPageShellComponent,
+    ArmadaTabsComponent,
     FleetTabsComponent,
   ],
 })

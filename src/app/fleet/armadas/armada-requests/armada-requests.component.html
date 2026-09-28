@@ -1,0 +1,219 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-armada-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Armada Requests"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the requests"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+
+      <div class="lcars-input-container tangerine armada-requests__filter">
+        <label for="armada-request-status">Show</label>
+        <select
+          id="armada-request-status"
+          (change)="onStatus($any($event.target).value)">
+          @for (status of statuses; track status) {
+            <option
+              [value]="status"
+              [selected]="status === data.status">
+              {{ statusLabels[status] }}
+            </option>
+          }
+        </select>
+      </div>
+
+      @if (notice(); as done) {
+        <p
+          class="armada-requests__notice"
+          role="status">
+          {{ done }}
+        </p>
+      }
+
+      @if (answering(); as answer) {
+        @let name = fleetName(answer.request.fleet);
+
+        <form
+          class="armada-requests__form"
+          [attr.aria-label]="
+            (answer.mode === 'APPROVE' ? 'Approve ' : 'Reject ') + name
+          "
+          (submit)="$event.preventDefault(); onSubmit(data)">
+          @if (answer.mode === 'APPROVE') {
+            <p class="armada-requests__asking">Where does {{ name }} go?</p>
+            <div class="lcars-input-container tangerine">
+              <label for="armada-approve-position">Position</label>
+              <select
+                id="armada-approve-position"
+                [disabled]="busy()"
+                (change)="position.set($any($event.target).value)">
+                @for (option of positions; track option) {
+                  <option
+                    [value]="option"
+                    [selected]="option === position()">
+                    {{ positionLabels[option] }}
+                  </option>
+                }
+              </select>
+            </div>
+            @if (position() === 'GAMMA') {
+              <div class="lcars-input-container tangerine">
+                <label for="armada-approve-parent">Under</label>
+                <select
+                  id="armada-approve-parent"
+                  [disabled]="busy()"
+                  (change)="parentFleetId.set($any($event.target).value)">
+                  <option value="">Choose a Beta</option>
+                  @for (
+                    beta of data.view.structure.betas;
+                    track beta.fleet.id
+                  ) {
+                    @if (beta.fleet.id !== null) {
+                      <option
+                        [value]="beta.fleet.id"
+                        [selected]="beta.fleet.id === parentFleetId()">
+                        {{ fleetName(beta.fleet) }} ({{ beta.gammas.length }} of
+                        {{ data.view.structure.maxGammasPerBeta }})
+                      </option>
+                    }
+                  }
+                </select>
+              </div>
+            }
+            <p class="fleet-community-field-hint">
+              The Armada has
+              {{ data.view.structure.alpha === null ? 'no' : 'an' }} Alpha and
+              {{ data.view.structure.betas.length }} of
+              {{ data.view.structure.maxBetas }} Betas.
+            </p>
+          } @else {
+            <p class="armada-requests__asking">
+              Reject the request from {{ name }}?
+            </p>
+            <div class="lcars-input-container tangerine">
+              <label for="armada-reject-reason">Reason</label>
+              <textarea
+                id="armada-reject-reason"
+                rows="2"
+                [attr.maxlength]="textLimit"
+                [value]="reason()"
+                [disabled]="busy()"
+                (input)="reason.set($any($event.target).value)"></textarea>
+            </div>
+            <p class="fleet-community-field-hint">
+              The requesting Fleet is shown it.
+            </p>
+          }
+
+          @if (error(); as refusal) {
+            <app-lcars-error-message
+              title="Not answered"
+              [message]="refusal" />
+          }
+
+          <div class="fleet-community-form-actions">
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto bluey"
+              [disabled]="busy()"
+              (click)="onCancel()">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto"
+              [class.green]="answer.mode === 'APPROVE'"
+              [class.red]="answer.mode === 'REJECT'"
+              [disabled]="!ready()">
+              {{ answer.mode === 'APPROVE' ? 'Approve' : 'Reject' }}
+            </button>
+          </div>
+        </form>
+      }
+
+      @if (data.page.items.length === 0) {
+        <p class="fleet-community-empty">
+          No {{ statusLabels[data.status].toLowerCase() }} requests.
+        </p>
+      } @else {
+        <table class="fleet-community-table">
+          <caption>
+            {{
+              statusLabels[data.status]
+            }}
+            requests, newest first
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Fleet</th>
+              <th scope="col">Asked by</th>
+              <th scope="col">Message</th>
+              <th scope="col">Asked</th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (request of data.page.items; track request.id) {
+              <tr>
+                <td data-label="Fleet">{{ fleetName(request.fleet) }}</td>
+                <td data-label="Asked by">{{ request.requestedBy ?? '—' }}</td>
+                <td data-label="Message">{{ request.message ?? '—' }}</td>
+                <td data-label="Asked">
+                  {{ request.createdAt | appDate: 'medium' }}
+                </td>
+                <td data-label="Status">
+                  {{ statusLabels[request.status]
+                  }}@if (request.reason) {<span class="armada-requests__reason"
+                      >: {{ request.reason }}</span
+                    >}
+                </td>
+                <td data-label="Actions">
+                  @if (request.status === 'PENDING' && answering() === null) {
+                    <span class="armada-requests__actions">
+                      <button
+                        type="button"
+                        class="lcars-btn lcars-btn-auto green"
+                        (click)="onAnswer('APPROVE', request)">
+                        Approve…
+                      </button>
+                      <button
+                        type="button"
+                        class="lcars-btn lcars-btn-auto red"
+                        (click)="onAnswer('REJECT', request)">
+                        Reject…
+                      </button>
+                    </span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (totalPages(data.page) > 1) {
+          <div class="lcars-pagination">
+            <button
+              type="button"
+              [disabled]="data.page.page <= 1"
+              (click)="onPage(data.page.page - 1)">
+              Newer
+            </button>
+            <span>Page {{ data.page.page }} of {{ totalPages(data.page) }}</span>
+            <button
+              type="button"
+              [disabled]="data.page.page >= totalPages(data.page)"
+              (click)="onPage(data.page.page + 1)">
+              Older
+            </button>
+          </div>
+        }
+      }
+    }
+  </app-fleet-page-shell>
+}

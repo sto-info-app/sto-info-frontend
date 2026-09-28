@@ -106,6 +106,18 @@ describe('FleetGovernanceService', () => {
       undefined,
     ],
     [
+      'an Armada’s roles',
+      () =>
+        service.roles({
+          communityId: 'community-1',
+          fleetId: null,
+          armadaId: 'armada-1',
+        }),
+      'GET',
+      `${API_URLS.FLEET_COMMUNITIES}/community-1/armadas/armada-1/governance/roles`,
+      undefined,
+    ],
+    [
       'an appointment',
       () =>
         service.assign(FLEET, {

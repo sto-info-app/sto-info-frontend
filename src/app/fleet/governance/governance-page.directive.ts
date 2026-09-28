@@ -15,6 +15,10 @@ import {
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
+  ArmadaTabsVm,
+  armadaTabsVmOf,
+} from 'src/app/fleet/armadas/armada-tabs/armada-tabs.component';
+import {
   FleetTabsVm,
   fleetTabsVmOf,
 } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
@@ -55,8 +59,12 @@ export interface GovernanceScopeVm {
   readonly scopeLink: string[];
   /** The Manage hub; every Manage page hangs below it. */
   readonly manageLink: string[];
-  /** A Fleet's tab strip, or null on a Community. */
+  /** A Fleet's tab strip, or null on a Community or Armada. */
   readonly tabs: FleetTabsVm | null;
+  /** Whether it is an Armada (FC-025). */
+  readonly isArmada: boolean;
+  /** An Armada's tab strip, or null on a Community or Fleet. */
+  readonly armadaTabs: ArmadaTabsVm | null;
 }
 
 /** What a Manage page is showing. */
@@ -151,6 +159,18 @@ export abstract class GovernancePageDirective<T> {
   }
 
   /**
+   * An Armada's tab strip, once the Armada is known (FC-025).
+   *
+   * @param state - What the page is showing.
+   * @returns The strip's view model, or null anywhere else or before.
+   */
+  armadaTabsOf(state: GovernancePageState<T>): ArmadaTabsVm | null {
+    return state.kind === 'READY' || state.kind === 'NOT_PERMITTED'
+      ? state.scope.armadaTabs
+      : null;
+  }
+
+  /**
    * A Fleet's tab strip, once the Fleet is known.
    *
    * @param state - What the page is showing.
@@ -221,6 +241,47 @@ export abstract class GovernancePageDirective<T> {
     const platformSegment = params.get('platformSegment');
     const isSiteAdmin = this._authService.isLoggedInAsAdmin();
 
+    // An Armada's Manage pages are these pages, told so by their route.
+    if (this._route.snapshot?.data?.['governs'] === 'ARMADA') {
+      return this._scopeService
+        .resolveArmada(
+          communitySlug,
+          platformSegment ?? '',
+          params.get('slug') ?? '',
+        )
+        .pipe(
+          map(resolved => {
+            const { armada } = resolved;
+
+            return {
+              target: {
+                communityId: armada.communityId,
+                fleetId: null,
+                armadaId: armada.id,
+              },
+              isCommunity: false,
+              isArmada: true,
+              name: armada.exactGameName,
+              isClosed: armada.status === FleetScopeStatus.CLOSED,
+              ...standing(resolved.viewer),
+              isSiteAdmin,
+              scopeLink: FLEET_LINKS.armada(
+                resolved.communitySlug,
+                resolved.platformSegment,
+                armada.slug,
+              ),
+              manageLink: FLEET_LINKS.armadaManage(
+                resolved.communitySlug,
+                resolved.platformSegment,
+                armada.slug,
+              ),
+              tabs: null,
+              armadaTabs: armadaTabsVmOf(resolved),
+            };
+          }),
+        );
+    }
+
     if (platformSegment === null) {
       return this._scopeService.resolveCommunity(communitySlug).pipe(
         map(({ community, viewer }) => {
@@ -236,6 +297,8 @@ export abstract class GovernancePageDirective<T> {
             scopeLink,
             manageLink: FLEET_LINKS.communityManage(community.slug),
             tabs: null,
+            isArmada: false,
+            armadaTabs: null,
           };
         }),
       );
@@ -272,6 +335,8 @@ export abstract class GovernancePageDirective<T> {
               fleet.slug,
             ),
             tabs,
+            isArmada: false,
+            armadaTabs: null,
           };
         }),
       );

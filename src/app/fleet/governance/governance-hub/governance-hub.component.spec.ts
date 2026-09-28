@@ -1,12 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
+import { convertToParamMap } from '@angular/router';
 
 import { NEVER, of, throwError } from 'rxjs';
 
 import {
   GovernanceReader,
   governanceRoute,
+  GovernanceRouteStubs,
 } from 'src/app/fleet/governance/governance.testing';
 import {
   pageText,
@@ -30,8 +32,15 @@ describe('GovernanceHubComponent', () => {
    *
    * @param reader - Who is reading, and where.
    */
-  async function render(reader: GovernanceReader): Promise<void> {
+  async function render(
+    reader: GovernanceReader,
+    params?: Record<string, string>,
+  ): Promise<GovernanceRouteStubs> {
     const route = governanceRoute(reader, governance);
+
+    if (params !== undefined) {
+      route.params$.next(convertToParamMap(params));
+    }
 
     await TestBed.configureTestingModule({
       imports: [GovernanceHubComponent],
@@ -40,6 +49,8 @@ describe('GovernanceHubComponent', () => {
 
     fixture = TestBed.createComponent(GovernanceHubComponent);
     fixture.detectChanges();
+
+    return route;
   }
 
   /**
@@ -124,6 +135,48 @@ describe('GovernanceHubComponent', () => {
     expect(pageText(fixture)).not.toContain('Back to');
     expect(
       (fixture.nativeElement as HTMLElement).querySelector('app-fleet-tabs'),
+    ).not.toBeNull();
+  });
+
+  // An Armada is governed as a Fleet is, from the same pages, told by the
+  // route which kind of scope it is. It is closed from its Community.
+  it('offers an Armada’s Owner its pages, and neither ownership nor closing', async () => {
+    await render({
+      onArmada: true,
+      roles: ['OWNER'],
+      capabilities: ['scope.close'],
+    });
+
+    const base =
+      '/fleets/communities/united-federation-alliance/armadas/pc/sol-armada/manage';
+
+    expect(links()).toEqual({
+      Roles: `${base}/roles`,
+      Delegation: `${base}/delegation`,
+      History: `${base}/history`,
+    });
+    expect(pageText(fixture)).toContain('Sol Armada');
+    expect(pageText(fixture)).not.toContain('Close this');
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('app-armada-tabs'),
+    ).not.toBeNull();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('app-fleet-tabs'),
+    ).toBeNull();
+  });
+
+  it('asks for an Armada with empty segments when the address has none', async () => {
+    const route = await render({ onArmada: true, roles: ['OWNER'] }, {});
+
+    expect(route.scopes.resolveArmada).toHaveBeenCalledWith('', '', '');
+  });
+
+  it('turns away a reader holding no role in an Armada', async () => {
+    await render({ onArmada: true });
+
+    expect(links()).toEqual({});
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('app-armada-tabs'),
     ).not.toBeNull();
   });
 
