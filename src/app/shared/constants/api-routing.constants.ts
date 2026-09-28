@@ -182,4 +182,6 @@ export const API_URLS = {
   FLEET_RECRUITMENT: apiUrl + '/fleet-recruitment',
   // A site administrator's dispute actions on a Community (FC-022).
   FLEET_COMMUNITIES_ADMIN: apiUrl + '/admin/fleet-communities',
+  // A site administrator taking a scoped news post down (FC-027).
+  FLEET_NEWS_ADMIN: apiUrl + '/admin/fleet-news',
 };

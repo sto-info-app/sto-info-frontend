@@ -1,5 +1,6 @@
 /**
- * The two pictures a Community, Fleet or Armada carries.
+ * The two pictures a Community, Fleet or Armada carries, and the cover a
+ * post of its news may carry (FC-027).
  *
  * Mirrors the server's slot list. Everything that differs between the wide
  * header and the square badge — the shape, the size a crop must reach, the
@@ -9,6 +10,7 @@
 export enum FleetImageSlot {
   BANNER = 'BANNER',
   EMBLEM = 'EMBLEM',
+  COVER = 'COVER',
 }
 
 /** Everything the artwork dialogue needs to know about one slot. */
@@ -81,6 +83,21 @@ export const FLEET_IMAGE_SPECS: Record<FleetImageSlot, FleetImageSpec> = {
     recommendedHeight: 512,
     outputFormat: 'png',
     endpoint: 'emblem-image',
+  },
+  // The shape of a Storytime chapter cover, which is the same job: one
+  // picture heading one piece of writing.
+  [FleetImageSlot.COVER]: {
+    label: 'Cover',
+    guidance:
+      'The picture heading the post, and shown beside it in the news list.',
+    aspectRatio: 16 / 9,
+    aspectLabel: '16:9',
+    minimumWidth: 640,
+    minimumHeight: 360,
+    recommendedWidth: 1920,
+    recommendedHeight: 1080,
+    outputFormat: 'jpeg',
+    endpoint: 'cover-image',
   },
 };
 

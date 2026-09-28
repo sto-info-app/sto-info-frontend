@@ -200,6 +200,49 @@ describe('FLEET_LINKS', () => {
     );
   });
 
+  // FC-027: each scope's news, and a post, its editor and a new one below it.
+  it('should address a Fleet’s, an Armada’s and a Community’s news', () => {
+    expect(FLEET_LINKS.fleetNews('ufa', 'pc', 'starfleet-command')).toEqual([
+      '/fleets',
+      'communities',
+      'ufa',
+      'fleets',
+      'pc',
+      'starfleet-command',
+      'news',
+    ]);
+    expect(FLEET_LINKS.armadaNews('ufa', 'pc', 'sol-armada')).toEqual([
+      '/fleets',
+      'communities',
+      'ufa',
+      'armadas',
+      'pc',
+      'sol-armada',
+      'news',
+    ]);
+    expect(FLEET_LINKS.communityNews('ufa')).toEqual([
+      '/fleets',
+      'communities',
+      'ufa',
+      'news',
+    ]);
+  });
+
+  it('should address a post, its editor and a new post below the news', () => {
+    const news = FLEET_LINKS.communityNews('ufa');
+
+    expect(FLEET_LINKS.newsPost(news, 'refit-abc')).toEqual([
+      ...news,
+      'refit-abc',
+    ]);
+    expect(FLEET_LINKS.newsEdit(news, 'refit-abc')).toEqual([
+      ...news,
+      'refit-abc',
+      'edit',
+    ]);
+    expect(FLEET_LINKS.newsWrite(news)).toEqual([...news, 'write']);
+  });
+
   it.each([
     ['history', FLEET_LINKS.armadaHistory],
     ['requests', FLEET_LINKS.armadaRequests],

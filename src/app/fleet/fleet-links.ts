@@ -192,6 +192,69 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * A Fleet's news (FC-027): for whoever each post is published to.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetNews: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'news',
+  ],
+
+  /**
+   * A Community's own news (FC-027), not its Fleets' or Armadas'.
+   *
+   * @param communitySlug - The Community's URL segment.
+   * @returns The router link.
+   */
+  communityNews: (communitySlug: string): string[] => [
+    ...FLEET_LINKS.community(communitySlug),
+    'news',
+  ],
+
+  /**
+   * One post of a scope's news (FC-027).
+   *
+   * @param newsLink - The scope's news, from {@link communityNews},
+   *   {@link fleetNews} or {@link armadaNews}.
+   * @param postSlug - The post's address.
+   * @returns The router link.
+   */
+  newsPost: (newsLink: readonly string[], postSlug: string): string[] => [
+    ...newsLink,
+    postSlug,
+  ],
+
+  /**
+   * Where a new post of a scope's news is written (FC-027). A literal no
+   * post's address can be: every address ends in a suffix of its own.
+   *
+   * @param newsLink - The scope's news.
+   * @returns The router link.
+   */
+  newsWrite: (newsLink: readonly string[]): string[] => [...newsLink, 'write'],
+
+  /**
+   * Where a post of a scope's news is changed (FC-027).
+   *
+   * @param newsLink - The scope's news.
+   * @param postSlug - The post's address.
+   * @returns The router link.
+   */
+  newsEdit: (newsLink: readonly string[], postSlug: string): string[] => [
+    ...newsLink,
+    postSlug,
+    'edit',
+  ],
+
+  /**
    * Where a Fleet's roster is looked into: the imports, the renames, the
    * conflicts and the rank order, for whoever imports or investigates.
    *
@@ -500,6 +563,23 @@ export const FLEET_LINKS = {
     'armadas',
     platformSegment,
     armadaSlug,
+  ],
+
+  /**
+   * An Armada's news (FC-027): for whoever each post is published to.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armadaNews: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
+    'news',
   ],
 
   /**

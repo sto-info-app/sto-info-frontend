@@ -110,6 +110,43 @@ describe('FleetImageService', () => {
       request.flush({});
     });
 
+    // A news post's cover (FC-027), below the post in its scope's news.
+    it.each([
+      ['a Community’s', null, null, `${communities}/c-1/news/p-1/cover-image`],
+      [
+        'a Fleet’s',
+        'f-1',
+        null,
+        `${communities}/c-1/fleets/f-1/news/p-1/cover-image`,
+      ],
+      [
+        'an Armada’s',
+        null,
+        'a-1',
+        `${communities}/c-1/armadas/a-1/news/p-1/cover-image`,
+      ],
+    ])(
+      'addresses the cover of %s news post',
+      (_scope, fleetId, armadaId, url) => {
+        const request = upload(
+          {
+            kind: 'NEWS_POST',
+            communityId: 'c-1',
+            fleetId,
+            armadaId,
+            postId: 'p-1',
+          },
+          FleetImageSlot.COVER,
+        );
+
+        expect(request.request.url).toBe(url);
+        expect(
+          ((request.request.body as FormData).get('image') as File).name,
+        ).toBe('cover-image.jpeg');
+        request.flush({});
+      },
+    );
+
     it('names the slot in the path', () => {
       const request = upload(
         { kind: 'COMMUNITY', communityId: 'c-1' },

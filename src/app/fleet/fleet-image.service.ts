@@ -30,7 +30,18 @@ export type FleetArtworkTarget =
    * the type system can tell apart is what stops a record under the lenient
    * rule being addressed as though it were under the strict one.
    */
-  | { readonly kind: 'STANDALONE_FLEET'; readonly fleetId: string };
+  | { readonly kind: 'STANDALONE_FLEET'; readonly fleetId: string }
+  /**
+   * A post of a Community's, a Fleet's or an Armada's news, for its cover
+   * (FC-027). At most one of the Fleet and the Armada is named.
+   */
+  | {
+      readonly kind: 'NEWS_POST';
+      readonly communityId: string;
+      readonly fleetId: string | null;
+      readonly armadaId: string | null;
+      readonly postId: string;
+    };
 
 /**
  * Setting and removing the banner and emblem a Fleet scope shows.
@@ -128,6 +139,16 @@ export class FleetImageService {
         return `${communities}/${target.communityId}/fleets/${target.fleetId}`;
       case 'ARMADA':
         return `${communities}/${target.communityId}/armadas/${target.armadaId}`;
+      case 'NEWS_POST': {
+        const scope =
+          target.fleetId !== null
+            ? `/fleets/${target.fleetId}`
+            : target.armadaId !== null
+              ? `/armadas/${target.armadaId}`
+              : '';
+
+        return `${communities}/${target.communityId}${scope}/news/${target.postId}`;
+      }
       // Outside the Community collection entirely, because there is no
       // Community to nest it under and the rule it is held to is a different
       // one.
