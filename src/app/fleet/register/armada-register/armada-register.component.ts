@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { map, Observable, take } from 'rxjs';
 
+import { CharacterLookupService } from 'src/app/dashboard/services/character-lookup.service';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetRegistrationService } from 'src/app/fleet/fleet-registration.service';
 import { ScopeDuplicateWarningComponent } from 'src/app/fleet/register/scope-duplicate-warning/scope-duplicate-warning.component';
@@ -22,6 +23,12 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 export const ARMADA_NAME_MAX_LENGTH = 255;
 export const ARMADA_DISPLAY_NAME_MAX_LENGTH = 160;
 export const ARMADA_SLUG_MAX_LENGTH = 80;
+
+/** The general factions an Armada may belong to. */
+export const ARMADA_ALLEGIANCE_NAMES: readonly string[] = [
+  'Federation',
+  'Klingon',
+];
 
 /**
  * Registers an Armada under a Community.
@@ -57,6 +64,7 @@ export const ARMADA_SLUG_MAX_LENGTH = 80;
 export class ArmadaRegisterComponent extends ScopeRegisterPageDirective {
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _registration = inject(FleetRegistrationService);
+  private readonly _lookup = inject(CharacterLookupService);
 
   readonly nameMaxLength = ARMADA_NAME_MAX_LENGTH;
   readonly displayNameMaxLength = ARMADA_DISPLAY_NAME_MAX_LENGTH;
@@ -67,12 +75,27 @@ export class ArmadaRegisterComponent extends ScopeRegisterPageDirective {
     'No Community answers to that address, so there is nothing to register ' +
     'an Armada into.';
 
+  /**
+   * The allegiances an Armada can have: Federation or Klingon, never
+   * Undecided (FC-024). A Fleet must share it to be placed there.
+   */
+  readonly allegiances$ = this._lookup
+    .getGeneralFactions()
+    .pipe(
+      map(factions =>
+        factions.filter(faction =>
+          ARMADA_ALLEGIANCE_NAMES.includes(faction.name),
+        ),
+      ),
+    );
+
   readonly form = this._formBuilder.nonNullable.group({
     exactGameName: [
       '',
       [Validators.required, Validators.maxLength(ARMADA_NAME_MAX_LENGTH)],
     ],
     platformId: ['', [Validators.required]],
+    allegianceFactionId: ['', [Validators.required]],
     displayName: ['', [Validators.maxLength(ARMADA_DISPLAY_NAME_MAX_LENGTH)]],
     slug: ['', [Validators.maxLength(ARMADA_SLUG_MAX_LENGTH)]],
   });
@@ -113,6 +136,7 @@ export class ArmadaRegisterComponent extends ScopeRegisterPageDirective {
       .registerArmada(context.community.id, {
         exactGameName: values.exactGameName,
         platformId: values.platformId,
+        allegianceFactionId: values.allegianceFactionId,
         ...(values.displayName.trim() === ''
           ? {}
           : { displayName: values.displayName.trim() }),

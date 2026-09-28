@@ -368,6 +368,11 @@ export interface StoArmada extends FleetScopeArtwork {
   platformSegment: string;
   exactGameName: string;
   displayName: string | null;
+  /**
+   * Its allegiance, the Federation or Klingon general faction, or null for
+   * one registered before either, which takes no Fleets (FC-024).
+   */
+  allegianceFactionId: string | null;
   slug: string;
   status: FleetScopeStatus;
   closedAt: string | null;
@@ -599,6 +604,9 @@ export interface CreateStoFleet {
 export interface CreateStoArmada {
   exactGameName: string;
   platformId: string;
+
+  /** Its allegiance: the Federation or Klingon general faction (FC-024). */
+  allegianceFactionId: string;
 
   /** What the Community prefers to call it, where that differs. */
   displayName?: string;

@@ -3,6 +3,7 @@ import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 
 import { BehaviorSubject, of, throwError } from 'rxjs';
 
+import { CharacterLookupService } from 'src/app/dashboard/services/character-lookup.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { FleetRegistrationService } from 'src/app/fleet/fleet-registration.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
@@ -77,6 +78,18 @@ describe('ArmadaRegisterComponent', () => {
             getPlatforms: jest.fn(() => of([{ id: 'platform-1', name: 'PC' }])),
           },
         },
+        {
+          provide: CharacterLookupService,
+          useValue: {
+            getGeneralFactions: jest.fn(() =>
+              of([
+                { id: 'faction-federation', name: 'Federation' },
+                { id: 'faction-klingon', name: 'Klingon' },
+                { id: 'faction-undecided', name: 'Undecided' },
+              ]),
+            ),
+          },
+        },
         { provide: Router, useValue: router },
         {
           provide: ActivatedRoute,
@@ -135,18 +148,26 @@ describe('ArmadaRegisterComponent', () => {
   }
 
   /**
-   * Fills the two required fields in.
+   * Chooses from a list.
+   *
+   * @param selector - The list's CSS selector.
+   * @param value - The option's value.
+   */
+  function choose(selector: string, value: string): void {
+    const select = find<HTMLSelectElement>(selector) as HTMLSelectElement;
+
+    select.value = value;
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+  }
+
+  /**
+   * Fills the three required fields in.
    */
   function fillRequired(): void {
     type('#armada-name', 'Ninth Fleet Armada');
-
-    const platform = find<HTMLSelectElement>(
-      '#armada-platform',
-    ) as HTMLSelectElement;
-
-    platform.value = 'platform-1';
-    platform.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
+    choose('#armada-platform', 'platform-1');
+    choose('#armada-allegiance', 'faction-klingon');
   }
 
   /**
@@ -191,8 +212,35 @@ describe('ArmadaRegisterComponent', () => {
     expect(sent()).toEqual({
       exactGameName: 'Ninth Fleet Armada',
       platformId: 'platform-1',
+      allegianceFactionId: 'faction-klingon',
       displayName: 'The Ninth',
     });
+  });
+
+  // An Armada is one side or the other; a Fleet that has not decided
+  // cannot join one, so neither can the Armada be undecided.
+  it('offers Federation and Klingon as its allegiance, and nothing else', () => {
+    render();
+
+    const offered = Array.from(
+      (find<HTMLSelectElement>('#armada-allegiance') as HTMLSelectElement)
+        .options,
+    ).map(option => option.textContent?.trim());
+
+    expect(offered).toEqual(['Choose an allegiance', 'Federation', 'Klingon']);
+  });
+
+  it('refuses to send a registration with no allegiance', () => {
+    render();
+
+    type('#armada-name', 'Ninth Fleet Armada');
+    choose('#armada-platform', 'platform-1');
+    submit();
+
+    expect(registration.registerArmada).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain(
+      'Please say whether the Armada is Federation or Klingon.',
+    );
   });
 
   it('sends a web address when one was typed', () => {

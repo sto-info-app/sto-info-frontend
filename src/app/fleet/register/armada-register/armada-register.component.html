@@ -61,7 +61,26 @@
               }
             </select>
           </div>
+
+          <div class="lcars-input-container sky">
+            <label for="armada-allegiance">Allegiance</label>
+            <select
+              id="armada-allegiance"
+              formControlName="allegianceFactionId"
+              aria-describedby="armada-allegiance-hint">
+              <option value="">Choose an allegiance</option>
+              @for (faction of allegiances$ | async; track faction.id) {
+                <option [value]="faction.id">{{ faction.name }}</option>
+              }
+            </select>
+          </div>
         </div>
+        <p
+          id="armada-allegiance-hint"
+          class="fleet-community-field-hint">
+          Only Fleets of the same allegiance can join, and it cannot change once
+          a Fleet has.
+        </p>
 
         @if (
           form.controls.exactGameName.touched &&
@@ -77,6 +96,15 @@
         ) {
           <p class="register-page__field-error">
             Please say which platform the Armada is on.
+          </p>
+        }
+
+        @if (
+          form.controls.allegianceFactionId.touched &&
+          form.controls.allegianceFactionId.invalid
+        ) {
+          <p class="register-page__field-error">
+            Please say whether the Armada is Federation or Klingon.
           </p>
         }
 
