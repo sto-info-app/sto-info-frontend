@@ -1,0 +1,146 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+  @if (armadaTabsOf(state); as armadaTabs) {
+    <app-armada-tabs [vm]="armadaTabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="News"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the post"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let view = state.data;
+      @let post = view.post;
+
+      <p class="fleet-news__back">
+        <a [routerLink]="newsLinkOf(scope)">Back to the news</a>
+      </p>
+
+      <article
+        class="fleet-news__post"
+        aria-labelledby="fleet-news-post-title">
+        @if (coverOf(post); as cover) {
+          <img
+            class="fleet-news__cover"
+            [src]="cover.url"
+            [alt]="cover.alt" />
+        }
+
+        <h2
+          id="fleet-news-post-title"
+          class="fleet-news__heading">
+          {{ post.title }}
+        </h2>
+
+        <p class="fleet-news__meta">
+          @if (post.publishedAt) {
+            <time [attr.datetime]="post.publishedAt">{{
+              post.publishedAt | appDate: 'medium'
+            }}</time>
+          } @else {
+            <span class="fleet-news__badge fleet-news__badge--draft"
+              >Draft</span
+            >
+            <span>&ngsp;Last changed&ngsp;</span>
+            <time [attr.datetime]="post.updatedAt">{{
+              post.updatedAt | appDate: 'medium'
+            }}</time>
+          }
+          @if (post.author; as author) {
+            <span>&ngsp;· Posted by&ngsp;</span>
+            @if (author.linksToProfile) {
+              <a [routerLink]="profileLinkOf(author)">{{ author.username }}</a>
+            } @else {
+              <span>{{ author.username }}</span>
+            }
+          }
+        </p>
+        <p class="fleet-news__for">For: {{ audienceOf(scope, post) }}</p>
+
+        @if (post.summary) {
+          <p class="fleet-news__lead">{{ post.summary }}</p>
+        }
+
+        <div
+          class="fleet-news__body"
+          [innerHTML]="post.body | markdown"></div>
+      </article>
+
+      @if (error(); as refusal) {
+        <app-lcars-error-message
+          title="Not done"
+          [message]="refusal" />
+      }
+
+      @if (view.mayWrite) {
+        <nav
+          class="buttons-row fleet-news__actions"
+          aria-label="What you can do with this post">
+          @if (view.isOpen) {
+            <a
+              class="lcars-btn lcars-btn-auto gold"
+              [routerLink]="editLinkOf(scope, post)"
+              >Edit</a
+            >
+            @if (post.status === 'DRAFT') {
+              <button
+                type="button"
+                class="lcars-btn lcars-btn-auto green"
+                [disabled]="busy()"
+                (click)="onPublish(scope, post)">
+                Publish
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="lcars-btn lcars-btn-auto bluey"
+                [disabled]="busy()"
+                (click)="onUnpublish(scope, post)">
+                Unpublish
+              </button>
+            }
+          }
+          @if (view.isOpen || post.status === 'DRAFT') {
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto red"
+              [disabled]="busy()"
+              (click)="onDelete(scope, post)">
+              Delete
+            </button>
+          }
+        </nav>
+        @if (!view.isOpen) {
+          <p class="fleet-community-field-hint">
+            This is closed, so its news can no longer change.
+          </p>
+        }
+      } @else if (mayTakeDown(scope, view)) {
+        <nav
+          class="buttons-row fleet-news__actions"
+          aria-label="Site administration">
+          <!-- A site administrator is only ever shown a published post. -->
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto bluey"
+            [disabled]="busy()"
+            (click)="onTakeDown(post)">
+            Unpublish as site administrator
+          </button>
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto red"
+            [disabled]="busy()"
+            (click)="onAdminDelete(scope, post)">
+            Delete as site administrator
+          </button>
+        </nav>
+      }
+    }
+  </app-fleet-page-shell>
+}

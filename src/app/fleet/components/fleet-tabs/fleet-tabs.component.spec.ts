@@ -20,6 +20,7 @@ const FLEET_HREF =
   '/fleets/communities/united-federation-alliance/fleets/pc/ninth-fleet';
 
 /** The Holdings tab, which every registered Fleet has (FC-023). */
+const NEWS_TAB = ['News', `${FLEET_HREF}/news`];
 const HOLDINGS_TAB: [string, string] = ['Holdings', `${FLEET_HREF}/holdings`];
 
 /**
@@ -83,10 +84,19 @@ describe('FleetTabsComponent', () => {
     ).map(tab => [tab.textContent?.trim() ?? '', tab.getAttribute('href')]);
   }
 
-  // FC-023: holdings are public, so every reader has two tabs at least.
-  it('offers Holdings to anybody, signed in or not', () => {
-    expect(draw(vm())).toEqual([['Overview', FLEET_HREF], HOLDINGS_TAB]);
-    expect(draw(consoleVm())).toEqual([['Overview', FLEET_HREF], HOLDINGS_TAB]);
+  // FC-023 and FC-027: holdings and news are public, so every reader has
+  // three tabs at least.
+  it('offers News and Holdings to anybody, signed in or not', () => {
+    expect(draw(vm())).toEqual([
+      ['Overview', FLEET_HREF],
+      NEWS_TAB,
+      HOLDINGS_TAB,
+    ]);
+    expect(draw(consoleVm())).toEqual([
+      ['Overview', FLEET_HREF],
+      NEWS_TAB,
+      HOLDINGS_TAB,
+    ]);
   });
 
   it.each(['roster.import', 'roster.investigate'])(
@@ -94,6 +104,7 @@ describe('FleetTabsComponent', () => {
     capability => {
       expect(draw(vm(capability))).toEqual([
         ['Overview', FLEET_HREF],
+        NEWS_TAB,
         HOLDINGS_TAB,
         ['Investigate', `${FLEET_HREF}/investigate`],
       ]);
@@ -103,6 +114,7 @@ describe('FleetTabsComponent', () => {
   it('offers the Roster and its History to a member', () => {
     expect(draw(vm('roster.view'))).toEqual([
       ['Overview', FLEET_HREF],
+      NEWS_TAB,
       ['Roster', `${FLEET_HREF}/roster`],
       ['History', `${FLEET_HREF}/history`],
       HOLDINGS_TAB,
@@ -112,7 +124,14 @@ describe('FleetTabsComponent', () => {
   it('draws every tab in strip order for somebody who may open them all', () => {
     expect(
       draw(vm('roster.investigate', 'roster.view')).map(([label]) => label),
-    ).toEqual(['Overview', 'Roster', 'History', 'Holdings', 'Investigate']);
+    ).toEqual([
+      'Overview',
+      'News',
+      'Roster',
+      'History',
+      'Holdings',
+      'Investigate',
+    ]);
   });
 
   describe('the Reports tab', () => {
@@ -125,6 +144,7 @@ describe('FleetTabsComponent', () => {
 
       expect(draw(vm())).toEqual([
         ['Overview', FLEET_HREF],
+        NEWS_TAB,
         ['Reports', `${FLEET_HREF}/reports`],
         HOLDINGS_TAB,
       ]);
@@ -134,6 +154,7 @@ describe('FleetTabsComponent', () => {
     it('is not offered when the server shows no report', () => {
       expect(draw(vm('roster.view')).map(([label]) => label)).toEqual([
         'Overview',
+        'News',
         'Roster',
         'History',
         'Holdings',
@@ -145,6 +166,7 @@ describe('FleetTabsComponent', () => {
 
       expect(draw(vm('roster.view')).map(([label]) => label)).toEqual([
         'Overview',
+        'News',
         'Roster',
         'History',
         'Holdings',
@@ -170,6 +192,7 @@ describe('FleetTabsComponent', () => {
         draw(vm('roster.view', 'roster.investigate')).map(([label]) => label),
       ).toEqual([
         'Overview',
+        'News',
         'Roster',
         'History',
         'Reports',
@@ -188,6 +211,7 @@ describe('FleetTabsComponent', () => {
     ])('is offered to a reader holding %s', capability => {
       expect(draw(vm(capability))).toEqual([
         ['Overview', FLEET_HREF],
+        NEWS_TAB,
         HOLDINGS_TAB,
         ['Recruitment', `${FLEET_HREF}/recruitment`],
       ]);
@@ -200,6 +224,7 @@ describe('FleetTabsComponent', () => {
         ),
       ).toEqual([
         'Overview',
+        'News',
         'Roster',
         'History',
         'Holdings',
@@ -218,6 +243,7 @@ describe('FleetTabsComponent', () => {
           draw({ ...vm('roster.view', 'recruitment.manage'), roles: [role] }),
         ).toEqual([
           ['Overview', FLEET_HREF],
+          NEWS_TAB,
           ['Roster', `${FLEET_HREF}/roster`],
           ['History', `${FLEET_HREF}/history`],
           HOLDINGS_TAB,
@@ -238,7 +264,7 @@ describe('FleetTabsComponent', () => {
     it('is offered on a Fleet with no roster too', () => {
       expect(
         draw({ ...consoleVm(), roles: ['ADMIN'] }).map(([label]) => label),
-      ).toEqual(['Overview', 'Holdings', 'Manage']);
+      ).toEqual(['Overview', 'News', 'Holdings', 'Manage']);
     });
   });
 
@@ -255,6 +281,7 @@ describe('FleetTabsComponent', () => {
         ),
       ).toEqual([
         ['Overview', FLEET_HREF],
+        NEWS_TAB,
         HOLDINGS_TAB,
         ['Recruitment', `${FLEET_HREF}/recruitment`],
       ]);

@@ -685,7 +685,8 @@ showing it, so do not rely on the shell to delay a child's initialisation —
 only its rendering.
 
 **`<app-fleet-tabs>`** — the strip along the top of every page of a Fleet a
-Community holds: Overview for anybody; Roster and History for `roster.view`
+Community holds: Overview and News for anybody (News from FC-027); Roster
+and History for `roster.view`
 holders; Reports for anybody the server shows a report to; Holdings for
 anybody (FC-023); Investigate for whoever imports or investigates its rosters;
 Recruitment for whoever holds `applications.view`, `applications.decide`,
@@ -696,8 +697,8 @@ so such a Fleet draws no strip.
 
 On a platform the game writes no roster export on, `providesRoster` is false:
 the roster, history, report and investigation tabs are not offered, and
-Holdings, Recruitment and Manage still can be (FC-021). Every reader has
-Holdings as well as the Overview, so the strip is always drawn.
+News, Holdings, Recruitment and Manage still can be (FC-021). Every reader
+has News and Holdings as well as the Overview, so the strip is always drawn.
 
 Every tab but Reports is decided by the reader's capabilities. Reports asks the
 server once per Fleet which reports the reader sees, because a report's
@@ -876,8 +877,8 @@ roster history is. Each change reads as one line, "Fleet Starbase: Starbase
 1 → 2, Military 3 → 0.", with its reason, and names who recorded it only when
 the server says the reader is shown recorders (`recordersShown`).
 
-Because holdings are public, every registered Fleet's tab strip has at least
-the Overview and Holdings, and the strip is always drawn.
+Because holdings and news are public, every registered Fleet's tab strip has
+at least the Overview, News and Holdings, and the strip is always drawn.
 
 ### Armadas
 
@@ -919,8 +920,8 @@ Armada as a tree, then the Fleets in none. Neither the panel nor the Fleet
 one shows anything when it cannot be read, since neither is what the page is
 for.
 
-An Armada's pages have their own strip, **`<app-armada-tabs>`**: Overview and
-History for anybody, Requests for `armada.manage` holders, Manage for its Owner
+An Armada's pages have their own strip, **`<app-armada-tabs>`**: Overview,
+News and History for anybody, Requests for `armada.manage` holders, Manage for its Owner
 and Admins. **`ArmadaSectionPageDirective<T>`** is the Armada's
 `FleetSectionPageDirective`, for its two section pages:
 
@@ -936,6 +937,55 @@ Fleet is shown.
 Its Manage pages are the governance pages, told by their route's
 `data.governs: 'ARMADA'` that the scope is an Armada. There is no closing
 there: an Armada is closed from its Community.
+
+### News
+
+A Community's, a Fleet's and an Armada's own news (FC-027) lives in
+`src/app/fleet/news/`, behind `FleetNewsService`. The posts are the site's
+news table's, so the body is Markdown shown through the same `markdown` pipe
+as the site's News; nothing a post can carry is more than the site's own
+news can.
+
+The pages are the same at three kinds of address, and resolve their scope as
+the Manage pages do: **`FleetNewsPageDirective<T>`** extends
+`GovernancePageDirective<T>`, so an Armada's pages are told so by
+`data.governs: 'ARMADA'`, and a Community's by having no platform in the
+address.
+
+| Page | Address | Who opens it |
+|---|---|---|
+| News | `…/news` | Anybody who may see the scope; which posts, and drafts for its news writers, is the server's answer |
+| A post | `…/news/:postSlug` | Anybody it is published to; a draft, its news writers |
+| Write a post | `…/news/write` | `news.write` holders, while the scope is open |
+| Edit a post | `…/news/:postSlug/edit` | `news.write` holders, while the scope is open |
+
+`…` is a Community's, a Fleet's or an Armada's own address. `write` is a
+literal no post's address can be, and its route comes first.
+
+**The list** searches titles and summaries, pages, and for news writers
+switches between published posts and drafts. All three are in the address
+(`?q=`, `?page=`, `?status=DRAFT`), so each is a link of its own.
+
+**A post** shows its cover, who wrote it — linking their profile only where
+the server says the reader may open it — and who it is for, in words for the
+kind of scope (`fleetNewsAudienceLabel`). A news writer edits, publishes,
+unpublishes and deletes it while the scope is open, and deletes a draft after
+it closes. A site administrator who writes no news there may unpublish or
+delete it. Unpublishing and deleting ask first, through the shared LCARS
+confirmation.
+
+**The editor** takes a title, an optional summary, the audience and the
+body, with a preview. A new post is saved as a draft or published straight
+away; a new draft opens in the editor again, since a cover needs the post to
+exist. The cover goes through `<app-fleet-image-crop-dialog>` like a banner,
+as the `COVER` slot of a `NEWS_POST` target, and is shown once the scanner
+has cleared it. Reading the post again after a cover changes keeps what has
+been typed.
+
+A Fleet's and an Armada's strips have a **News** tab, after Overview. A
+Community page has no strip, so **`<app-fleet-news-latest>`** shows its
+latest three posts and the way to the rest, and offers its writers a new
+post.
 
 ### Upload and scan state
 

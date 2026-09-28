@@ -53,11 +53,12 @@ describe('ArmadaTabsComponent', () => {
     });
   });
 
-  it('offers anybody the Overview and the History', () => {
+  it('offers anybody the Overview, the News and the History', () => {
     render();
 
     expect(tabs()).toEqual([
       ['Overview', ARMADA_HREF],
+      ['News', `${ARMADA_HREF}/news`],
       ['History', `${ARMADA_HREF}/history`],
     ]);
   });
@@ -67,21 +68,22 @@ describe('ArmadaTabsComponent', () => {
 
     expect(tabs().map(([label]) => label)).toEqual([
       'Overview',
+      'News',
       'History',
       'Requests',
     ]);
-    expect(tabs()[2][1]).toBe(`${ARMADA_HREF}/requests`);
+    expect(tabs()[3][1]).toBe(`${ARMADA_HREF}/requests`);
   });
 
   it('offers Manage to its Owner and Admins', () => {
     render([], ['ADMIN']);
 
-    expect(tabs()[2]).toEqual(['Manage', `${ARMADA_HREF}/manage`]);
+    expect(tabs()[3]).toEqual(['Manage', `${ARMADA_HREF}/manage`]);
   });
 
   it('offers Manage to nobody else', () => {
     render([], ['OFFICER']);
 
-    expect(tabs()).toHaveLength(2);
+    expect(tabs()).toHaveLength(3);
   });
 });

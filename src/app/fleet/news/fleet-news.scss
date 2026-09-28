@@ -1,0 +1,191 @@
+// A Community's, a Fleet's and an Armada's news (FC-027): the list, a post,
+// the editor and the Community page's latest posts share these.
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.fleet-news {
+  &__back {
+    margin: 0 0 1rem;
+  }
+
+  &__actions,
+  &__views {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+  }
+
+  &__search {
+    max-width: 40rem;
+    margin: 0 0 1.5rem;
+  }
+
+  &__list,
+  &__latest-list {
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    padding: 1rem 0;
+    border-bottom: 1px solid vars.$lcars-bluey;
+  }
+
+  &__card {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  &__thumb {
+    width: min(100%, 12rem);
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 0.5rem;
+  }
+
+  &__card-body {
+    flex: 1 1 18rem;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0 0 0.25rem;
+    font-size: 1.2rem;
+    overflow-wrap: anywhere;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0;
+    align-items: baseline;
+    margin: 0 0 0.5rem;
+    color: vars.$lcars-sky;
+  }
+
+  &__badge {
+    margin-left: 0.5rem;
+    padding: 0 0.5rem;
+    border-radius: 1rem;
+    background: vars.$lcars-bluey;
+    color: vars.$lcars-black;
+    font-size: 0.85rem;
+    font-weight: 600;
+
+    &--draft {
+      background: vars.$lcars-sunflower;
+    }
+  }
+
+  &__summary,
+  &__lead {
+    margin: 0.25rem 0;
+    overflow-wrap: anywhere;
+  }
+
+  &__lead {
+    font-size: 1.1rem;
+  }
+
+  &__for {
+    margin: 0 0 1rem;
+    color: vars.$lcars-perano;
+  }
+
+  &__post {
+    max-width: 75ch;
+    margin: 0 0 1.5rem;
+  }
+
+  &__heading {
+    margin: 0 0 0.5rem;
+    overflow-wrap: anywhere;
+  }
+
+  &__cover {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    margin: 0 0 1rem;
+    border-radius: 0.75rem;
+
+    &--small {
+      max-width: 24rem;
+    }
+  }
+
+  &__body {
+    overflow-wrap: anywhere;
+  }
+
+  &__form {
+    max-width: 60rem;
+  }
+
+  &__audiences {
+    margin: 1rem 0 0;
+    padding: 0.5rem 1rem;
+    border: 1px solid vars.$lcars-tangerine;
+    border-radius: 0.75rem;
+
+    legend {
+      padding: 0 0.5rem;
+      color: vars.$lcars-tangerine;
+    }
+  }
+
+  &__audience {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0.5rem 0;
+  }
+
+  &__body-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+    margin: 1rem 0 0.5rem;
+    color: vars.$lcars-tangerine;
+  }
+
+  &__preview {
+    min-height: 10rem;
+    padding: 1rem;
+    border: 1px solid vars.$lcars-tangerine;
+    border-radius: 0.75rem;
+  }
+
+  &__cover-section {
+    max-width: 60rem;
+    margin-top: 2rem;
+
+    h2 {
+      margin: 0;
+      font-size: inherit;
+    }
+  }
+
+  &__latest {
+    margin: 1.5rem 0;
+
+    h2 {
+      margin: 0;
+      font-size: inherit;
+    }
+
+    li {
+      padding: 0.5rem 0;
+    }
+  }
+}

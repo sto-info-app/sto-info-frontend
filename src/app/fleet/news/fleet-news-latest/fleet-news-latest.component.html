@@ -1,0 +1,49 @@
+@if (scope(); as vm) {
+  <section
+    class="fleet-news__latest"
+    aria-labelledby="fleet-news-latest-heading">
+    <div class="lcars-text-bar">
+      <h2><span id="fleet-news-latest-heading">News</span></h2>
+    </div>
+
+    @if (page(); as latest) {
+      @if (latest.items.length === 0) {
+        <p class="fleet-community-empty">
+          Nothing has been published here yet.
+        </p>
+      } @else {
+        <ul class="fleet-news__latest-list">
+          @for (post of latest.items; track post.id) {
+            <li>
+              <a [routerLink]="postLinkOf(vm, post)">{{ post.title }}</a>
+              @if (post.publishedAt) {
+                <span>&ngsp;·&ngsp;</span>
+                <time [attr.datetime]="post.publishedAt">{{
+                  post.publishedAt | appDate: 'mediumDate'
+                }}</time>
+              }
+              @if (post.summary) {
+                <p class="fleet-news__summary">{{ post.summary }}</p>
+              }
+            </li>
+          }
+        </ul>
+      }
+    }
+
+    <div class="buttons-row">
+      <a
+        class="lcars-btn lcars-btn-auto sunflower"
+        [routerLink]="vm.newsLink"
+        >All news</a
+      >
+      @if (page()?.mayWrite && page()?.isOpen) {
+        <a
+          class="lcars-btn lcars-btn-auto gold"
+          [routerLink]="writeLinkOf(vm)"
+          >Write a post</a
+        >
+      }
+    </div>
+  </section>
+}

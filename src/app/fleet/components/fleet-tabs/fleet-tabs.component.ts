@@ -137,6 +137,14 @@ export class FleetTabsComponent {
       },
     ];
 
+    // Its news (FC-027): on every registered Fleet, for whoever each post is
+    // published to. Lit on a post, the editor and the drafts too.
+    tabs.push({
+      link: FLEET_LINKS.fleetNews(communitySlug, platformSegment, fleetSlug),
+      label: 'News',
+      exact: false,
+    });
+
     // The private roster: the Fleet's members and up.
     if (providesRoster && capabilities.includes(ROSTER_VIEW_CAPABILITY)) {
       tabs.push({

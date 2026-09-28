@@ -184,6 +184,45 @@ export const FLEET_ROUTES: Routes = [
           ),
         data: { title: APP_ROUTE_TITLES.FLEET_HOLDINGS },
       },
+      // A Fleet's news (FC-027). Reading is for whoever each post is
+      // published to, signed in or not, which is the server's answer;
+      // writing is for its news writers. `write` is a literal no post's
+      // address can be, and comes before the post it would otherwise be read
+      // as.
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/news',
+        loadComponent: () =>
+          import('./news/fleet-news-list/fleet-news-list.component').then(
+            m => m.FleetNewsListComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_NEWS },
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/news/write',
+        loadComponent: () =>
+          import('./news/fleet-news-editor/fleet-news-editor.component').then(
+            m => m.FleetNewsEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_WRITE },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/news/:postSlug',
+        loadComponent: () =>
+          import('./news/fleet-news-post/fleet-news-post.component').then(
+            m => m.FleetNewsPostComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_POST },
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/news/:postSlug/edit',
+        loadComponent: () =>
+          import('./news/fleet-news-editor/fleet-news-editor.component').then(
+            m => m.FleetNewsEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_EDIT },
+        canActivate: [AuthGuard],
+      },
       // Where a Fleet's roster is looked into (FC-020). The pages below it
       // sit under its address so its tab stays lit while a reader works
       // through them.
@@ -469,6 +508,79 @@ export const FLEET_ROUTES: Routes = [
           title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY,
           governs: 'ARMADA',
         },
+        canActivate: [AuthGuard],
+      },
+
+      // An Armada's news (FC-027), as a Fleet's. Resolved as the Armada's
+      // Manage pages are, told so by the route.
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/news',
+        loadComponent: () =>
+          import('./news/fleet-news-list/fleet-news-list.component').then(
+            m => m.FleetNewsListComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_NEWS, governs: 'ARMADA' },
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/news/write',
+        loadComponent: () =>
+          import('./news/fleet-news-editor/fleet-news-editor.component').then(
+            m => m.FleetNewsEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_WRITE, governs: 'ARMADA' },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/news/:postSlug',
+        loadComponent: () =>
+          import('./news/fleet-news-post/fleet-news-post.component').then(
+            m => m.FleetNewsPostComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_POST, governs: 'ARMADA' },
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/news/:postSlug/edit',
+        loadComponent: () =>
+          import('./news/fleet-news-editor/fleet-news-editor.component').then(
+            m => m.FleetNewsEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_EDIT, governs: 'ARMADA' },
+        canActivate: [AuthGuard],
+      },
+      // A Community's own news (FC-027), as a Fleet's. Its address has no
+      // platform, which is how the pages know it is the Community's.
+      {
+        path: 'communities/:communitySlug/news',
+        loadComponent: () =>
+          import('./news/fleet-news-list/fleet-news-list.component').then(
+            m => m.FleetNewsListComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_NEWS },
+      },
+      {
+        path: 'communities/:communitySlug/news/write',
+        loadComponent: () =>
+          import('./news/fleet-news-editor/fleet-news-editor.component').then(
+            m => m.FleetNewsEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_WRITE },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/news/:postSlug',
+        loadComponent: () =>
+          import('./news/fleet-news-post/fleet-news-post.component').then(
+            m => m.FleetNewsPostComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_POST },
+      },
+      {
+        path: 'communities/:communitySlug/news/:postSlug/edit',
+        loadComponent: () =>
+          import('./news/fleet-news-editor/fleet-news-editor.component').then(
+            m => m.FleetNewsEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_EDIT },
         canActivate: [AuthGuard],
       },
 

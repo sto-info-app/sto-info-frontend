@@ -1,0 +1,181 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+  @if (armadaTabsOf(state); as armadaTabs) {
+    <app-armada-tabs [vm]="armadaTabs" />
+  }
+
+  <app-fleet-page-shell
+    [heading]="
+      state.kind === 'READY' && state.data ? 'Edit a post' : 'Write a post'
+    "
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Opening the editor"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let post = state.data;
+
+      <form
+        class="fleet-news__form"
+        [attr.aria-label]="post ? 'Edit ' + post.title : 'Write a post'"
+        (submit)="$event.preventDefault(); onSave(scope, post, false)">
+        <div class="lcars-input-container tangerine">
+          <label for="fleet-news-title">Title</label>
+          <input
+            id="fleet-news-title"
+            type="text"
+            required
+            [attr.maxlength]="titleLimit"
+            [value]="title()"
+            [disabled]="busy()"
+            (input)="title.set($any($event.target).value)" />
+        </div>
+
+        <div class="lcars-input-container tangerine">
+          <label for="fleet-news-summary">Summary (optional)</label>
+          <textarea
+            id="fleet-news-summary"
+            rows="2"
+            aria-describedby="fleet-news-summary-hint"
+            [attr.maxlength]="summaryLimit"
+            [value]="summary()"
+            [disabled]="busy()"
+            (input)="summary.set($any($event.target).value)"></textarea>
+        </div>
+        <p
+          id="fleet-news-summary-hint"
+          class="fleet-community-field-hint">
+          A line or two shown in the news list and searched with the title.
+        </p>
+
+        <fieldset class="fleet-news__audiences">
+          <legend>Who may read it</legend>
+          @for (choice of audiences; track choice) {
+            <label class="fleet-news__audience">
+              <input
+                type="radio"
+                name="fleet-news-audience"
+                [value]="choice"
+                [checked]="audience() === choice"
+                [disabled]="busy()"
+                (change)="audience.set(choice)" />
+              {{ audienceLabel(scope, choice) }}
+            </label>
+          }
+        </fieldset>
+        <p class="fleet-community-field-hint">
+          Never more people than can see {{ scope.name }} itself.
+        </p>
+
+        <div class="fleet-news__body-head">
+          <label for="fleet-news-body">Post (Markdown)</label>
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto sky"
+            [attr.aria-pressed]="previewing()"
+            (click)="previewing.set(!previewing())">
+            {{ previewing() ? 'Write' : 'Preview' }}
+          </button>
+        </div>
+        @if (previewing()) {
+          <div
+            class="fleet-news__body fleet-news__preview"
+            aria-live="polite"
+            [innerHTML]="body() | markdown"></div>
+        } @else {
+          <div class="lcars-input-container tangerine">
+            <textarea
+              id="fleet-news-body"
+              rows="14"
+              required
+              [attr.maxlength]="bodyLimit"
+              [value]="body()"
+              [disabled]="busy()"
+              (input)="body.set($any($event.target).value)"></textarea>
+          </div>
+        }
+
+        @if (error(); as refusal) {
+          <app-lcars-error-message
+            title="Not saved"
+            [message]="refusal" />
+        }
+
+        <div class="fleet-community-form-actions">
+          <a
+            class="lcars-btn lcars-btn-auto bluey"
+            [routerLink]="cancelLinkOf(scope, post)"
+            >Cancel</a
+          >
+          @if (post === null || post.status === 'DRAFT') {
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto gold"
+              [disabled]="!canSave()">
+              Save draft
+            </button>
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto green"
+              [disabled]="!canSave()"
+              (click)="onSave(scope, post, true)">
+              Publish
+            </button>
+          } @else {
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto green"
+              [disabled]="!canSave()">
+              Save changes
+            </button>
+          }
+        </div>
+      </form>
+
+      <section
+        class="fleet-news__cover-section"
+        aria-labelledby="fleet-news-cover-heading">
+        <div class="lcars-text-bar">
+          <h2><span id="fleet-news-cover-heading">Cover</span></h2>
+        </div>
+        @if (post === null) {
+          <p class="fleet-community-field-hint">
+            Save the post as a draft first; its cover can be added then.
+          </p>
+        } @else {
+          @if (coverOf(post); as cover) {
+            <img
+              class="fleet-news__cover fleet-news__cover--small"
+              [src]="cover.url"
+              [alt]="cover.alt" />
+          } @else {
+            <p class="fleet-community-empty">This post has no cover.</p>
+          }
+          <div class="buttons-row">
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto gold"
+              (click)="onSetCover(scope, post)">
+              {{ post.coverImageId ? 'Replace the cover' : 'Set the cover' }}
+            </button>
+            @if (post.coverImageId) {
+              <button
+                type="button"
+                class="lcars-btn lcars-btn-auto red"
+                (click)="onRemoveCover(scope, post)">
+                Remove the cover
+              </button>
+            }
+          </div>
+          <p class="fleet-community-field-hint">
+            A new cover is checked for safety before it appears. Its picture can
+            be seen by anyone who has its link.
+          </p>
+        }
+      </section>
+    }
+  </app-fleet-page-shell>
+}

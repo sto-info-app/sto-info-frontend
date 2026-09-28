@@ -13,6 +13,8 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import { FleetArmadaService } from 'src/app/fleet/armadas/fleet-armada.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
+import { newsPage } from 'src/app/fleet/news/fleet-news.testing';
+import { FleetNewsService } from 'src/app/fleet/news/fleet-news.service';
 import { FLEET_SCOPE_ERROR } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
   FleetScopeAction,
@@ -152,6 +154,10 @@ describe('CommunityPageComponent', () => {
             ),
           },
         },
+        {
+          provide: FleetNewsService,
+          useValue: { list: jest.fn(() => of(newsPage([]))) },
+        },
       ],
     })
       .overrideComponent(CommunityPageComponent, {
@@ -251,6 +257,22 @@ describe('CommunityPageComponent', () => {
         communityId: 'community-1',
         communitySlug: 'united-federation-alliance',
         communityName: 'United Federation Alliance',
+      });
+    });
+
+    it('hands its News section the Community’s own news', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.communityNews).toEqual({
+        target: { communityId: 'community-1', fleetId: null, armadaId: null },
+        newsLink: [
+          '/fleets',
+          'communities',
+          'united-federation-alliance',
+          'news',
+        ],
       });
     });
 

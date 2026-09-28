@@ -63,6 +63,10 @@
       <app-fleet-armada-panel [vm]="state.fleetArmada" />
     }
 
+    @if (state.communityNews) {
+      <app-fleet-news-latest [vm]="state.communityNews" />
+    }
+
     @if (state.communityStructure) {
       <app-community-structure-panel [vm]="state.communityStructure" />
     }

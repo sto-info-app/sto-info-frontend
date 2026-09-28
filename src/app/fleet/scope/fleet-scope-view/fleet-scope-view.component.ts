@@ -12,6 +12,7 @@ import { ArmadaTabsComponent } from 'src/app/fleet/armadas/armada-tabs/armada-ta
 import { CommunityStructurePanelComponent } from 'src/app/fleet/armadas/community-structure-panel/community-structure-panel.component';
 import { FleetArmadaPanelComponent } from 'src/app/fleet/armadas/fleet-armada-panel/fleet-armada-panel.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
+import { FleetNewsLatestComponent } from 'src/app/fleet/news/fleet-news-latest/fleet-news-latest.component';
 import { OwnershipOfferPanelComponent } from 'src/app/fleet/governance/ownership-offer-panel/ownership-offer-panel.component';
 import { FleetRecruitmentPanelComponent } from 'src/app/fleet/recruitment/fleet-recruitment-panel/fleet-recruitment-panel.component';
 import { FleetScopeArtworkComponent } from 'src/app/fleet/scope/fleet-scope-artwork/fleet-scope-artwork.component';
@@ -47,6 +48,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
     FleetScopeArtworkComponent,
     FleetScopeHeaderComponent,
     FleetFollowComponent,
+    FleetNewsLatestComponent,
     FleetRecruitmentPanelComponent,
     OwnershipOfferPanelComponent,
     FleetTabsComponent,

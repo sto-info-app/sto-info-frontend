@@ -68,6 +68,17 @@ export class ArmadaTabsComponent {
         label: 'Overview',
         exact: true,
       },
+      // Its news (FC-027): for whoever each post is published to, and lit
+      // on a post, the editor and the drafts beneath it too.
+      {
+        link: FLEET_LINKS.armadaNews(
+          communitySlug,
+          platformSegment,
+          armadaSlug,
+        ),
+        label: 'News',
+        exact: false,
+      },
       {
         link: FLEET_LINKS.armadaHistory(
           communitySlug,

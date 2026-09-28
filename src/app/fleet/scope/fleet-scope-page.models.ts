@@ -7,6 +7,7 @@ import { FleetTabsVm } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.comp
 import { FleetScopeType } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetPicture } from 'src/app/fleet/fleet-artwork';
 import { FleetImageSlot } from 'src/app/fleet/fleet-image.constants';
+import { FleetNewsLatestVm } from 'src/app/fleet/news/fleet-news-latest/fleet-news-latest.component';
 import { FleetArtworkTarget } from 'src/app/fleet/fleet-image.service';
 import { OwnershipOfferPanelVm } from 'src/app/fleet/governance/ownership-offer-panel/ownership-offer-panel.component';
 import { FleetRecruitmentPanelVm } from 'src/app/fleet/recruitment/fleet-recruitment-panel/fleet-recruitment-panel.component';
@@ -250,4 +251,10 @@ export interface FleetScopeReadyState {
    * page. Absent or null everywhere else.
    */
   readonly communityStructure?: CommunityStructurePanelVm | null;
+
+  /**
+   * The Community's latest news (FC-027), on a Community page, which has no
+   * tab strip to reach its News page by. Absent or null everywhere else.
+   */
+  readonly communityNews?: FleetNewsLatestVm | null;
 }

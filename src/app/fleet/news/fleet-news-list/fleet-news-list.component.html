@@ -1,0 +1,189 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+  @if (armadaTabsOf(state); as armadaTabs) {
+    <app-armada-tabs [vm]="armadaTabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="News"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the news"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let data = state.data;
+
+      @if (scope.isCommunity) {
+        <p class="fleet-news__back">
+          <a [routerLink]="scope.scopeLink">Back to {{ scope.name }}</a>
+        </p>
+      }
+
+      @if (data.page.mayWrite) {
+        @if (data.page.isOpen) {
+          <nav
+            class="buttons-row fleet-news__actions"
+            aria-label="Writing news">
+            <a
+              class="lcars-btn lcars-btn-auto gold"
+              [routerLink]="writeLinkOf(scope)"
+              >Write a post</a
+            >
+          </nav>
+        } @else {
+          <p class="fleet-community-field-hint">
+            This is closed, so its news can no longer change. Drafts can still
+            be deleted.
+          </p>
+        }
+
+        <nav
+          class="fleet-news__views"
+          aria-label="Which posts">
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto"
+            [class.sunflower]="!data.drafts"
+            [class.bluey]="data.drafts"
+            [attr.aria-pressed]="!data.drafts"
+            (click)="onDrafts(false)">
+            Published
+          </button>
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto"
+            [class.sunflower]="data.drafts"
+            [class.bluey]="!data.drafts"
+            [attr.aria-pressed]="data.drafts"
+            (click)="onDrafts(true)">
+            Drafts
+          </button>
+        </nav>
+      }
+
+      <form
+        class="fleet-news__search"
+        role="search"
+        aria-label="Search the news"
+        (submit)="$event.preventDefault(); onSearch()">
+        <div class="lcars-input-container tangerine">
+          <label for="fleet-news-search">Search titles and summaries</label>
+          <input
+            id="fleet-news-search"
+            type="search"
+            maxlength="100"
+            [value]="search()"
+            (input)="search.set($any($event.target).value)" />
+        </div>
+        <div class="fleet-community-form-actions">
+          <button
+            type="submit"
+            class="lcars-btn lcars-btn-auto green">
+            Search
+          </button>
+          @if (data.search) {
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto bluey"
+              (click)="onClearSearch()">
+              Clear
+            </button>
+          }
+        </div>
+      </form>
+
+      @if (data.page.items.length === 0) {
+        <p class="fleet-community-empty">
+          @if (data.search) {
+            No post matches “{{ data.search }}”.
+          } @else if (data.drafts) {
+            There are no drafts.
+          } @else {
+            Nothing has been published here yet.
+          }
+        </p>
+      } @else {
+        <ol
+          class="fleet-news__list"
+          [attr.aria-label]="data.drafts ? 'Drafts' : 'Posts, newest first'">
+          @for (post of data.page.items; track post.id) {
+            <li class="fleet-news__item">
+              <article class="fleet-news__card">
+                @if (coverOf(post); as cover) {
+                  <img
+                    class="fleet-news__thumb"
+                    [src]="cover.url"
+                    [alt]="cover.alt"
+                    loading="lazy" />
+                }
+                <div class="fleet-news__card-body">
+                  <h2 class="fleet-news__title">
+                    <a [routerLink]="postLinkOf(scope, post)">{{
+                      post.title
+                    }}</a>
+                  </h2>
+                  <p class="fleet-news__meta">
+                    @if (post.publishedAt) {
+                      <time [attr.datetime]="post.publishedAt">{{
+                        post.publishedAt | appDate: 'medium'
+                      }}</time>
+                    } @else {
+                      <span>Last changed&ngsp;</span>
+                      <time [attr.datetime]="post.updatedAt">{{
+                        post.updatedAt | appDate: 'medium'
+                      }}</time>
+                    }
+                    @if (post.author; as author) {
+                      <span>&ngsp;· Posted by&ngsp;</span>
+                      @if (author.linksToProfile) {
+                        <a [routerLink]="profileLinkOf(author)">{{
+                          author.username
+                        }}</a>
+                      } @else {
+                        <span>{{ author.username }}</span>
+                      }
+                    }
+                    <span class="fleet-news__badge">{{
+                      audienceBadgeOf(post)
+                    }}</span>
+                    @if (post.status === 'DRAFT') {
+                      <span class="fleet-news__badge fleet-news__badge--draft"
+                        >Draft</span
+                      >
+                    }
+                  </p>
+                  @if (post.summary) {
+                    <p class="fleet-news__summary">{{ post.summary }}</p>
+                  }
+                </div>
+              </article>
+            </li>
+          }
+        </ol>
+
+        @if (totalPages(data.page) > 1) {
+          <div class="lcars-pagination">
+            <button
+              type="button"
+              [disabled]="data.page.page <= 1"
+              (click)="onPage(data.page.page - 1)">
+              Newer
+            </button>
+            <span
+              >Page {{ data.page.page }} of {{ totalPages(data.page) }}</span
+            >
+            <button
+              type="button"
+              [disabled]="data.page.page >= totalPages(data.page)"
+              (click)="onPage(data.page.page + 1)">
+              Older
+            </button>
+          </div>
+        }
+      }
+    }
+  </app-fleet-page-shell>
+}

@@ -189,6 +189,11 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
       actions: this.actionsFor(resolved),
       ownershipOffer: this.ownershipOfferFor(resolved),
       // Both of R04's paths: its Armadas, then its Fleets in none (FC-026).
+      // Its own news, which it has no tab strip to reach (FC-027).
+      communityNews: {
+        target: { communityId: community.id, fleetId: null, armadaId: null },
+        newsLink: FLEET_LINKS.communityNews(community.slug),
+      },
       communityStructure: {
         communityId: community.id,
         communitySlug: community.slug,

@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(50);
+    expect(children).toHaveLength(62);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -320,6 +320,55 @@ describe('FLEET_ROUTES', () => {
     expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
   });
 
+  // A Community's, a Fleet's and an Armada's news (FC-027): read by whoever
+  // each post is published to, written by its news writers. An Armada's
+  // pages are told by the route that they are an Armada's.
+  describe.each([
+    ['a Community', 'communities/:communitySlug', {}],
+    ['a Fleet', 'communities/:communitySlug/fleets/:platformSegment/:slug', {}],
+    [
+      'an Armada',
+      'communities/:communitySlug/armadas/:platformSegment/:slug',
+      { governs: 'ARMADA' },
+    ],
+  ])('the news of %s', (_scope, prefix, data) => {
+    it('leaves its list and posts open to a signed-out reader', () => {
+      expect(childAt(`${prefix}/news`)?.canActivate).toBeUndefined();
+      expect(childAt(`${prefix}/news`)?.data).toEqual({
+        title: APP_ROUTE_TITLES.FLEET_NEWS,
+        ...data,
+      });
+      expect(childAt(`${prefix}/news/:postSlug`)?.canActivate).toBeUndefined();
+      expect(childAt(`${prefix}/news/:postSlug`)?.data).toEqual({
+        title: APP_ROUTE_TITLES.FLEET_NEWS_POST,
+        ...data,
+      });
+    });
+
+    it('asks for an account before writing or editing', () => {
+      expect(childAt(`${prefix}/news/write`)?.canActivate).toEqual([AuthGuard]);
+      expect(childAt(`${prefix}/news/write`)?.data).toEqual({
+        title: APP_ROUTE_TITLES.FLEET_NEWS_WRITE,
+        ...data,
+      });
+      expect(childAt(`${prefix}/news/:postSlug/edit`)?.canActivate).toEqual([
+        AuthGuard,
+      ]);
+      expect(childAt(`${prefix}/news/:postSlug/edit`)?.data).toEqual({
+        title: APP_ROUTE_TITLES.FLEET_NEWS_EDIT,
+        ...data,
+      });
+    });
+
+    it('matches the editor’s literal before a post it could be read as', () => {
+      const paths = children.map(child => child.path);
+
+      expect(paths.indexOf(`${prefix}/news/write`)).toBeLessThan(
+        paths.indexOf(`${prefix}/news/:postSlug`),
+      );
+    });
+  });
+
   it('matches the deeper scope addresses before the Community’s own', () => {
     const paths = children.map(child => child.path);
 
@@ -521,6 +570,45 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/armadas/:platformSegment/:slug/manage/history',
       'GovernanceHistoryComponent',
+    ],
+    ['communities/:communitySlug/news', 'FleetNewsListComponent'],
+    ['communities/:communitySlug/news/write', 'FleetNewsEditorComponent'],
+    ['communities/:communitySlug/news/:postSlug', 'FleetNewsPostComponent'],
+    [
+      'communities/:communitySlug/news/:postSlug/edit',
+      'FleetNewsEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/news',
+      'FleetNewsListComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/news/write',
+      'FleetNewsEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/news/:postSlug',
+      'FleetNewsPostComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/news/:postSlug/edit',
+      'FleetNewsEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/news',
+      'FleetNewsListComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/news/write',
+      'FleetNewsEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/news/:postSlug',
+      'FleetNewsPostComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/news/:postSlug/edit',
+      'FleetNewsEditorComponent',
     ],
   ])('loads the right component for %s', async (path, expected) => {
     const loaded = await (
