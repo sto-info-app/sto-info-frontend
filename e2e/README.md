@@ -153,9 +153,10 @@ project is not part of that workflow.
 
 `.github/workflows/e2e-full-weekly.yml` runs every Sunday at 02:43 UTC, and
 it can also be started by hand. GitHub only runs that schedule from the
-default branch. The job runs on a Linux self-hosted runner labelled
-`sto-e2e`, with Docker, and its own Postgres and Redis. It does not use a
-developer database. The runner is not installed yet.
+default branch. The job runs on a GitHub-hosted Ubuntu runner, the same
+kind as the frequent scan. It starts its own Postgres and Redis for that
+job. It does not use a developer database. This repository is public, so
+the scan does not use a self-hosted runner.
 
 A manual run has to name the backend revision. A scheduled run reads the
 `E2E_BACKEND_REF` repository variable and stops if that variable is empty.
