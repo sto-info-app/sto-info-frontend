@@ -4,7 +4,7 @@
   <span class="go-roseblush">8th March 2025</span>.<br />
 
   <strong class="go-gold">Last updated: </strong>
-  <span class="go-roseblush">9th July 2026</span>.
+  <span class="go-roseblush">29th September 2026</span>.
 </p>
 
 <p>
@@ -157,8 +157,9 @@
         title="(*external link)"></i
     ></a>
     - Records user sessions to help diagnose issues and improve app
-    functionality. LogRocket may capture user interactions, including clicks,
-    navigation, and text inputs.
+    functionality. LogRocket records clicks and navigation. Every text and
+    input on the page is masked, and what you send or receive is never
+    recorded, so it never sees your messages, rosters or form contents.
   </li>
   <li>
     <a
@@ -172,7 +173,8 @@
     - Used for application monitoring such as error tracking and performance
     diagnostics. When enabled, Sentry may collect technical information (for
     example: page URL, device/browser details, timestamps, and error stack
-    traces) to help us detect and fix issues.
+    traces) to help us detect and fix issues. Its session replays mask every
+    text, input and picture, and it never receives what you send us.
   </li>
   <li>
     <a
@@ -200,6 +202,54 @@
     - SendGrid is used as a backup alternative transactional email delivery
     provider. SendGrid processes recipient email addresses and delivery metadata
     in order to deliver messages and report on bounce and complaint events.
+  </li>
+</ul>
+
+<h3 id="fleets">F. Fleet Communities</h3>
+<p>
+  Fleet Communities let players run their Star Trek Online Fleets here. What
+  they keep, and what we work out from it:
+</p>
+<ul class="lcars-list">
+  <li>
+    <strong class="go-sky">Roster uploads</strong> - A Fleet's officers may
+    upload the roster export Star Trek Online produces. The officer-only
+    columns, including officer notes, are discarded before anything else reads
+    the file, and are never stored. We keep a sanitised copy holding each
+    listed Character's name, &#64;handle, level, class, rank, contribution,
+    join, rank-change and last-active dates, status and public comment.
+  </li>
+  <li>
+    <strong class="go-sky">What we work out</strong> - From one roster to the
+    next we work out when members joined, left, changed rank or renamed a
+    Character, and we may suggest that a roster name is a Character registered
+    here. A suggestion becomes a link only when that Character's owner says
+    yes. We never verify who leads a Fleet in the game.
+  </li>
+  <li>
+    <strong class="go-sky">Scanning uploads</strong> - Every uploaded file is
+    held in private storage (Cloudflare R2) and checked for malware by our own
+    scanning service, which uses ClamAV, before anything reads it. No other
+    company scans your files.
+  </li>
+  <li>
+    <strong class="go-sky">Chat</strong> - Fleet chat is readable by the
+    channel's members for four hours. A Fleet's moderators may export a
+    transcript of up to the last seven days, giving a reason, and it is kept
+    for 24 hours. Direct messages are between friends only. Site
+    administrators read chat only when a message is reported to them, or
+    under a documented hold, and every reading is logged.
+  </li>
+  <li>
+    <strong class="go-sky">Your roster data</strong> - If a Fleet's roster
+    lists your Character, you can ask us to erase it through the
+    <a [routerLink]="getRouteLink(appRoutes.CONTACT)">Contact us</a> page,
+    with or without an account here. Once we have verified it is you, your
+    Character name, &#64;handle and public comment are removed from every
+    Fleet's roster, the files naming you are deleted, and future uploads are
+    scrubbed of you. Fleets keep only anonymous head counts. Removing a Fleet
+    from your own Character's page is different: it changes only what your
+    page says, not what a Fleet's roster recorded.
   </li>
 </ul>
 
@@ -260,6 +310,26 @@
     for <strong class="go-gold">7 years</strong> to protect email
     deliverability. These records contain no personally identifiable information
     &mdash; email addresses are stored only as one-way cryptographic hashes.
+  </li>
+  <li>
+    <strong class="go-sky">Fleet roster files</strong> - The sanitised copy of
+    an uploaded roster is deleted <strong class="go-gold">180 days</strong>
+    after upload. The roster history read from it stays with the Fleet, and
+    with a closed Fleet, unless you ask us to erase your part in it.
+  </li>
+  <li>
+    <strong class="go-sky">Fleet chat</strong> - Messages are deleted after
+    <strong class="go-gold">45 days</strong>, transcripts after
+    <strong class="go-gold">24 hours</strong>, and closed reports of messages
+    <strong class="go-gold">90 days</strong> after they were decided, unless a
+    site administrator holds them for an investigation. Every hold is
+    reviewed at least every 180 days and released if nobody reviews it.
+  </li>
+  <li>
+    <strong class="go-sky">Fleet activity</strong> - Activity feeds keep
+    <strong class="go-gold">12 months</strong>. News posts and Character Fleet
+    links you delete are removed for good
+    <strong class="go-gold">30 days</strong> later.
   </li>
   <li>
     <strong class="go-sky">Automatically collected data</strong> - Retained for

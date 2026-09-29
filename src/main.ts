@@ -20,6 +20,11 @@ import { Router, RouterModule, provideRouter } from '@angular/router';
 import { JwtModule } from '@auth0/angular-jwt';
 
 import * as Sentry from '@sentry/angular';
+import {
+  scrubSentryBreadcrumb,
+  scrubSentryEvent,
+  SENTRY_REPLAY_PRIVACY,
+} from './app/shared/telemetry/sentry-privacy';
 import { routes } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
 import { authTokenInterceptor } from './app/core/auth/auth-token.interceptor';
@@ -51,7 +56,8 @@ if (
     sendDefaultPii: false,
 
     // Integrations
-    integrations: [Sentry.replayIntegration()],
+    // Masked throughout (FC-038): no text, input or picture is recorded.
+    integrations: [Sentry.replayIntegration(SENTRY_REPLAY_PRIVACY)],
 
     // Error Sampling
     sampleRate: 1,
@@ -64,10 +70,9 @@ if (
     // Error Filtering
     ignoreErrors: ['ResizeObserver loop limit exceeded'],
 
-    // Error Processing
-    beforeSend(event) {
-      return event;
-    },
+    // Nothing a person sent leaves with an error (FC-038).
+    beforeSend: scrubSentryEvent,
+    beforeBreadcrumb: scrubSentryBreadcrumb,
   });
 }
 

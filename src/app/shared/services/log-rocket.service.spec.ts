@@ -23,14 +23,6 @@ class MockSharedDataService {
 describe('LogRocketService', () => {
   let service: LogRocketService;
   let sharedDataService: MockSharedDataService;
-  const getRequestSanitizer = () => {
-    const options = (
-      service as unknown as {
-        getInitOptions(): Parameters<typeof LogRocket.init>[1];
-      }
-    ).getInitOptions();
-    return options?.network?.requestSanitizer ?? (() => undefined);
-  };
 
   beforeEach(() => {
     sharedDataService = new MockSharedDataService();
@@ -135,106 +127,52 @@ describe('LogRocketService', () => {
     expect(completeSpy).toHaveBeenCalled();
   });
 
-  it('redacts password fields within nested objects and arrays', () => {
-    const sanitizer = getRequestSanitizer();
-
-    const mockRequest = {
-      reqId: 'test-req-id',
-      url: 'https://example.com/api',
-      headers: {},
+  // FC-038: a canary typed, read or sent never reaches LogRocket.
+  it('masks the page and drops every body and credential', () => {
+    const options = (
+      service as unknown as {
+        getInitOptions(): Parameters<typeof LogRocket.init>[1];
+      }
+    ).getInitOptions();
+    const canary = 'OFFICER-CANARY';
+    const request = options!.network!.requestSanitizer!({
+      reqId: 'r1',
+      url: 'https://example.com/api/chat',
       method: 'POST',
-      body: JSON.stringify({
-        email: 'captain@ufp.com',
-        password: 'PicardAlpha', // NOSONAR - Testing top-level password redaction
-        nested: {
-          confirmPassword: 'MakeItSo', // NOSONAR - Testing nested password redaction
-        },
-        history: [
-          {
-            newPassword: 'Secret1', // NOSONAR - Testing nested password redaction
-          },
-          {
-            note: 'All good',
-          },
-        ],
-      }),
-    };
+      headers: { Authorization: `Bearer ${canary}`, 'Content-Type': 'json' },
+      body: JSON.stringify({ body: canary }),
+    });
+    const response = options!.network!.responseSanitizer!({
+      reqId: 'r1',
+      status: 200,
+      method: 'POST',
+      url: 'https://example.com/api/chat',
+      headers: { 'set-cookie': canary },
+      body: JSON.stringify({ characterName: canary }),
+    });
 
-    const sanitizedRequest = sanitizer(mockRequest);
-    const parsedBody = JSON.parse((sanitizedRequest as { body: string }).body);
-    expect(parsedBody.password).toBe('[REDACTED]');
-    expect(parsedBody.nested.confirmPassword).toBe('[REDACTED]');
-    expect(parsedBody.history[0].newPassword).toBe('[REDACTED]');
-    expect(parsedBody.history[1].note).toBe('All good');
-    expect(parsedBody.email).toBe('captain@ufp.com');
+    expect(options!.dom).toEqual({ textSanitizer: true, inputSanitizer: true });
+    expect(JSON.stringify(request)).not.toContain(canary);
+    expect(JSON.stringify(response)).not.toContain(canary);
+    expect(request!.headers).toEqual({ 'Content-Type': 'json' });
   });
 
-  it('leaves the request untouched when body is not a string', () => {
-    const sanitizer = getRequestSanitizer();
-    const request = {
-      reqId: 'test-req-id',
-      url: 'https://example.com/api',
-      headers: {},
-      method: 'POST',
-      body: { password: 'hidden' } as unknown as string, // NOSONAR - Testing non-string body handling
-    };
-    expect(sanitizer(request)).toBe(request);
-  });
+  it('passes nothing on when there is nothing to sanitise', () => {
+    const options = (
+      service as unknown as {
+        getInitOptions(): Parameters<typeof LogRocket.init>[1];
+      }
+    ).getInitOptions();
 
-  it('returns the original request when body lacks sensitive fields', () => {
-    const sanitizer = getRequestSanitizer();
-    const request = {
-      reqId: 'test-req-id',
-      url: 'https://example.com/api',
-      headers: {},
-      method: 'POST',
-      body: { email: 'seven@ufp.com' } as unknown as string,
-    };
-    expect(sanitizer(request)).toBe(request);
-  });
-
-  it('ignores password keys whose values are not strings and handles null references', () => {
-    const sanitizer = getRequestSanitizer();
-    const request = {
-      reqId: 'test-req-id',
-      url: 'https://example.com/api',
-      headers: {},
-      method: 'POST',
-      body: JSON.stringify({
-        password: { hashed: 'abc123' },
-        nullableField: null,
-      }),
-    };
-
-    expect(sanitizer(request)).toBe(request);
-  });
-
-  it('returns the original request when JSON parsing fails', () => {
-    const sanitizer = getRequestSanitizer();
-    const request = {
-      reqId: 'test-req-id',
-      url: 'https://example.com/api',
-      headers: {},
-      method: 'POST',
-      body: '{ invalid json',
-    };
-    expect(sanitizer(request)).toBe(request);
-  });
-
-  it('returns the original request when the payload is a primitive value', () => {
-    const sanitizer = getRequestSanitizer();
-    const request = {
-      reqId: 'test-req-id',
-      url: 'https://example.com/api',
-      headers: {},
-      method: 'POST',
-      body: JSON.stringify('plain-text'),
-    };
-    expect(sanitizer(request)).toBe(request);
-  });
-
-  it('returns undefined when sanitizer receives a falsy request', () => {
-    const sanitizer = getRequestSanitizer();
-    expect(sanitizer(undefined as never)).toBeUndefined();
+    expect(options!.network!.requestSanitizer!(null as never)).toBeNull();
+    expect(options!.network!.responseSanitizer!(null as never)).toBeNull();
+    expect(
+      options!.network!.requestSanitizer!({
+        reqId: 'r2',
+        url: 'u',
+        method: 'GET',
+        headers: undefined as never,
+      })!.headers,
+    ).toEqual({});
   });
 });
