@@ -79,6 +79,26 @@ export class ArmadaTabsComponent {
         label: 'News',
         exact: false,
       },
+      // Its activity (FC-029).
+      {
+        link: FLEET_LINKS.armadaActivity(
+          communitySlug,
+          platformSegment,
+          armadaSlug,
+        ),
+        label: 'Activity',
+        exact: false,
+      },
+      // Its events (FC-030).
+      {
+        link: FLEET_LINKS.armadaEvents(
+          communitySlug,
+          platformSegment,
+          armadaSlug,
+        ),
+        label: 'Events',
+        exact: false,
+      },
       {
         link: FLEET_LINKS.armadaHistory(
           communitySlug,

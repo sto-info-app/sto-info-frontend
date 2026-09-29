@@ -14,6 +14,8 @@ import { FleetArmadaService } from 'src/app/fleet/armadas/fleet-armada.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
 import { newsPage } from 'src/app/fleet/news/fleet-news.testing';
+import { FleetActivityService } from 'src/app/fleet/activity/fleet-activity.service';
+import { FleetEventsService } from 'src/app/fleet/events/fleet-events.service';
 import { FleetNewsService } from 'src/app/fleet/news/fleet-news.service';
 import { FLEET_SCOPE_ERROR } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
@@ -158,6 +160,26 @@ describe('CommunityPageComponent', () => {
           provide: FleetNewsService,
           useValue: { list: jest.fn(() => of(newsPage([]))) },
         },
+        {
+          provide: FleetActivityService,
+          useValue: {
+            scopeFeed: jest.fn(() => of({ items: [], next: null })),
+          },
+        },
+        {
+          provide: FleetEventsService,
+          useValue: {
+            calendar: jest.fn(() =>
+              of({
+                from: '',
+                to: '',
+                entries: [],
+                mayManage: false,
+                isOpen: true,
+              }),
+            ),
+          },
+        },
       ],
     })
       .overrideComponent(CommunityPageComponent, {
@@ -272,6 +294,42 @@ describe('CommunityPageComponent', () => {
           'communities',
           'united-federation-alliance',
           'news',
+        ],
+      });
+    });
+
+    it('hands its Events section the Community’s own calendar', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.communityEvents).toEqual({
+        kind: 'SCOPE',
+        target: { communityId: 'community-1', fleetId: null, armadaId: null },
+        calendarLink: [
+          '/fleets',
+          'communities',
+          'united-federation-alliance',
+          'events',
+        ],
+      });
+    });
+
+    it('hands its Activity section the Community’s own feed', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.communityActivity).toEqual({
+        source: {
+          kind: 'SCOPE',
+          target: { communityId: 'community-1', fleetId: null, armadaId: null },
+        },
+        allLink: [
+          '/fleets',
+          'communities',
+          'united-federation-alliance',
+          'activity',
         ],
       });
     });

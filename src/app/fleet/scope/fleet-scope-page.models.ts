@@ -7,6 +7,8 @@ import { FleetTabsVm } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.comp
 import { FleetScopeType } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetPicture } from 'src/app/fleet/fleet-artwork';
 import { FleetImageSlot } from 'src/app/fleet/fleet-image.constants';
+import { FleetActivitySource } from 'src/app/fleet/activity/fleet-activity-feed/fleet-activity-feed.component';
+import { FleetUpcomingSource } from 'src/app/fleet/events/fleet-events-upcoming/fleet-events-upcoming.component';
 import { FleetNewsLatestVm } from 'src/app/fleet/news/fleet-news-latest/fleet-news-latest.component';
 import { FleetArtworkTarget } from 'src/app/fleet/fleet-image.service';
 import { OwnershipOfferPanelVm } from 'src/app/fleet/governance/ownership-offer-panel/ownership-offer-panel.component';
@@ -257,4 +259,19 @@ export interface FleetScopeReadyState {
    * tab strip to reach its News page by. Absent or null everywhere else.
    */
   readonly communityNews?: FleetNewsLatestVm | null;
+
+  /**
+   * The Community's latest activity (FC-029), on a Community page, with a
+   * link to the rest. Absent or null everywhere else.
+   */
+  readonly communityActivity?: {
+    readonly source: FleetActivitySource;
+    readonly allLink: string[];
+  } | null;
+
+  /**
+   * The Community's next events (FC-030), on a Community page, with a link
+   * to its calendar. Absent or null everywhere else.
+   */
+  readonly communityEvents?: FleetUpcomingSource | null;
 }

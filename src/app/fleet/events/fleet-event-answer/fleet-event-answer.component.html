@@ -1,0 +1,78 @@
+@let mine = occurrence().mine;
+
+<fieldset class="fleet-events__answer">
+  <legend>Your answer</legend>
+
+  <p class="fleet-events__meta">
+    @if (mine === null) {
+      You have not answered.
+    } @else if (mine.waitlistPosition !== null) {
+      You are going, and waiting for a place: {{ mine.waitlistPosition }} in
+      line. When one comes free, the first waiting gets it and is told.
+    } @else if (mine.response === 'GOING') {
+      You are going, with a place.
+    } @else if (mine.response === 'MAYBE') {
+      You might go. Maybe holds no place.
+    } @else {
+      You can’t go.
+    }
+  </p>
+
+  @if (characters().length > 0) {
+    <div class="lcars-select-container gold">
+      <label [attr.for]="'answer-character-' + occurrence().id"
+        >As which Character (optional)</label
+      >
+      <select
+        [id]="'answer-character-' + occurrence().id"
+        [disabled]="busy()"
+        (change)="characterId.set($any($event.target).value)">
+        <option
+          value=""
+          [selected]="characterId() === ''">
+          No Character
+        </option>
+        @for (character of characters(); track character.id) {
+          <option
+            [value]="character.id"
+            [selected]="characterId() === character.id">
+            {{ character.label }}
+          </option>
+        }
+      </select>
+    </div>
+  }
+
+  @if (isFull()) {
+    <p class="fleet-community-field-hint">
+      Every place is taken, so answering Going puts you on the waitlist.
+    </p>
+  }
+
+  <div
+    class="fleet-events__answers"
+    role="group"
+    [attr.aria-label]="'Answer for ' + occurrence().localStart">
+    @for (response of responses; track response) {
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto"
+        [class.sunflower]="mine?.response === response"
+        [class.bluey]="mine?.response !== response"
+        [attr.aria-pressed]="mine?.response === response"
+        [disabled]="busy()"
+        (click)="onAnswer(response)">
+        {{ labels[response] }}
+      </button>
+    }
+    @if (mine !== null) {
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto red"
+        [disabled]="busy()"
+        (click)="onWithdraw()">
+        Take my answer back
+      </button>
+    }
+  </div>
+</fieldset>

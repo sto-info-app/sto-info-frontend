@@ -1,0 +1,407 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+  @if (armadaTabsOf(state); as armadaTabs) {
+    <app-armada-tabs [vm]="armadaTabs" />
+  }
+
+  <app-fleet-page-shell
+    [heading]="
+      state.kind === 'READY' && state.data.event
+        ? 'Change an event'
+        : 'New event'
+    "
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the event"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let event = state.data.event;
+
+      @if (event) {
+        <p class="fleet-community-field-hint">
+          Changes apply from now on. Whatever has started keeps its answers and
+          attendance; an occurrence the new rule still names keeps its answers.
+        </p>
+      }
+
+      <form
+        class="fleet-events__editor"
+        aria-label="The event"
+        (submit)="$event.preventDefault(); onSave(scope, event)">
+        <div class="lcars-input-container gold">
+          <label for="event-title">Title</label>
+          <input
+            id="event-title"
+            type="text"
+            required
+            maxlength="200"
+            [value]="title()"
+            (input)="title.set($any($event.target).value)" />
+        </div>
+
+        <div class="lcars-input-container gold">
+          <label for="event-description"
+            >Description (Markdown, optional)</label
+          >
+          <textarea
+            id="event-description"
+            rows="6"
+            maxlength="20000"
+            [value]="description()"
+            (input)="description.set($any($event.target).value)"></textarea>
+        </div>
+
+        <div class="lcars-input-container gold">
+          <label for="event-link"
+            >Link, such as a Discord event (optional)</label
+          >
+          <input
+            id="event-link"
+            type="url"
+            placeholder="https://"
+            [value]="externalUrl()"
+            (input)="externalUrl.set($any($event.target).value)" />
+        </div>
+
+        <div class="lcars-select-container sky">
+          <label for="event-audience">Who it is for</label>
+          <select
+            id="event-audience"
+            (change)="audience.set($any($event.target).value)">
+            @for (option of audiences; track option) {
+              <option
+                [value]="option"
+                [selected]="audience() === option">
+                {{ audienceLabel(scope, option) }}
+              </option>
+            }
+          </select>
+        </div>
+
+        @if (audience() === 'SELECTED') {
+          @if (state.data.fleets.length > 0) {
+            <fieldset class="fleet-events__answer">
+              <legend>Chosen Fleets</legend>
+              @for (fleet of state.data.fleets; track fleet.id) {
+                <label class="fleet-events__check">
+                  <input
+                    type="checkbox"
+                    [checked]="has(fleetIds(), fleet.id)"
+                    (change)="onFleet(fleet.id, $any($event.target).checked)" />
+                  {{ fleet.name }}
+                </label>
+              }
+            </fieldset>
+          }
+          <fieldset class="fleet-events__answer">
+            <legend>Chosen roles</legend>
+            @for (role of roles; track role.key) {
+              <label class="fleet-events__check">
+                <input
+                  type="checkbox"
+                  [checked]="has(chosenRoles(), role.key)"
+                  (change)="onRole(role.key, $any($event.target).checked)" />
+                {{ role.label }}
+              </label>
+            }
+          </fieldset>
+        }
+
+        <div class="lcars-select-container sky">
+          <label for="event-timezone">On the clock of</label>
+          <select
+            id="event-timezone"
+            (change)="timezone.set($any($event.target).value)">
+            <option
+              value=""
+              [selected]="timezone() === ''">
+              The Community’s own zone
+            </option>
+            @for (zone of timezones; track zone) {
+              <option
+                [value]="zone"
+                [selected]="timezone() === zone">
+                {{ zone }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <fieldset class="fleet-events__answer">
+          <legend>How often</legend>
+          <div class="fleet-events__answers">
+            @for (rule of rules; track rule.key) {
+              <label class="fleet-events__check">
+                <input
+                  type="radio"
+                  name="event-recurrence"
+                  [value]="rule.key"
+                  [checked]="recurrence() === rule.key"
+                  (change)="recurrence.set(rule.key)" />
+                {{ rule.label }}
+              </label>
+            }
+          </div>
+
+          <div class="fleet-events__answers">
+            <div class="lcars-input-container sky">
+              <label for="event-start-date">{{
+                recurrence() === 'NONE' ? 'Day' : 'Starting'
+              }}</label>
+              <input
+                id="event-start-date"
+                type="date"
+                required
+                [value]="startDate()"
+                (input)="startDate.set($any($event.target).value)" />
+            </div>
+            <div class="lcars-input-container sky">
+              <label for="event-start-time">Start</label>
+              <input
+                id="event-start-time"
+                type="time"
+                required
+                [value]="startTime()"
+                (input)="startTime.set($any($event.target).value)" />
+            </div>
+            <div class="lcars-input-container sky">
+              <label for="event-duration">Minutes long (5 to 1440)</label>
+              <input
+                id="event-duration"
+                type="number"
+                min="5"
+                max="1440"
+                [value]="durationMinutes()"
+                (input)="durationMinutes.set(+$any($event.target).value)" />
+            </div>
+          </div>
+
+          @if (recurrence() !== 'NONE') {
+            <div class="lcars-input-container sky">
+              <label for="event-interval"
+                >Every how many
+                {{ recurrence() === 'WEEKLY' ? 'weeks' : 'months' }} (1 to
+                12)</label
+              >
+              <input
+                id="event-interval"
+                type="number"
+                min="1"
+                max="12"
+                [value]="interval()"
+                (input)="interval.set(+$any($event.target).value)" />
+            </div>
+          }
+
+          @if (recurrence() === 'WEEKLY') {
+            <div
+              class="fleet-events__answers"
+              role="group"
+              aria-label="On which days">
+              @for (name of weekdayNames; track name; let index = $index) {
+                <label class="fleet-events__check">
+                  <input
+                    type="checkbox"
+                    [checked]="has(weekdays(), index + 1)"
+                    (change)="
+                      onWeekday(index + 1, $any($event.target).checked)
+                    " />
+                  {{ name }}
+                </label>
+              }
+            </div>
+          }
+
+          @if (recurrence() === 'MONTHLY_DAY') {
+            <div class="lcars-input-container sky">
+              <label for="event-month-day"
+                >On the day of the month (1 to 31)</label
+              >
+              <input
+                id="event-month-day"
+                type="number"
+                min="1"
+                max="31"
+                [value]="monthDay()"
+                (input)="monthDay.set(+$any($event.target).value)" />
+            </div>
+            <p class="fleet-community-field-hint">
+              A month without that day is skipped, and the preview lists it.
+            </p>
+          }
+
+          @if (recurrence() === 'MONTHLY_WEEKDAY') {
+            <div class="fleet-events__answers">
+              <div class="lcars-select-container sky">
+                <label for="event-month-week">On the</label>
+                <select
+                  id="event-month-week"
+                  (change)="monthWeek.set(+$any($event.target).value)">
+                  @for (week of monthWeeks; track week) {
+                    <option
+                      [value]="week"
+                      [selected]="monthWeek() === week">
+                      {{ monthWeekNames[week] }}
+                    </option>
+                  }
+                </select>
+              </div>
+              <div class="lcars-select-container sky">
+                <label for="event-month-weekday">Weekday</label>
+                <select
+                  id="event-month-weekday"
+                  (change)="monthWeekday.set(+$any($event.target).value)">
+                  @for (name of weekdayNames; track name; let index = $index) {
+                    <option
+                      [value]="index + 1"
+                      [selected]="monthWeekday() === index + 1">
+                      {{ name }}
+                    </option>
+                  }
+                </select>
+              </div>
+            </div>
+          }
+
+          @if (recurrence() !== 'NONE') {
+            <div
+              class="fleet-events__answers"
+              role="radiogroup"
+              aria-label="When it ends">
+              <label class="fleet-events__check">
+                <input
+                  type="radio"
+                  name="event-ends"
+                  [checked]="ends() === 'NEVER'"
+                  (change)="ends.set('NEVER')" />
+                Never
+              </label>
+              <label class="fleet-events__check">
+                <input
+                  type="radio"
+                  name="event-ends"
+                  [checked]="ends() === 'ON'"
+                  (change)="ends.set('ON')" />
+                On a day
+              </label>
+              <label class="fleet-events__check">
+                <input
+                  type="radio"
+                  name="event-ends"
+                  [checked]="ends() === 'AFTER'"
+                  (change)="ends.set('AFTER')" />
+                After a number of times
+              </label>
+            </div>
+            @if (ends() === 'ON') {
+              <div class="lcars-input-container sky">
+                <label for="event-ends-on">Last day</label>
+                <input
+                  id="event-ends-on"
+                  type="date"
+                  [value]="endsOn()"
+                  (input)="endsOn.set($any($event.target).value)" />
+              </div>
+            }
+            @if (ends() === 'AFTER') {
+              <div class="lcars-input-container sky">
+                <label for="event-limit">How many times (1 to 500)</label>
+                <input
+                  id="event-limit"
+                  type="number"
+                  min="1"
+                  max="500"
+                  [value]="occurrenceLimit()"
+                  (input)="occurrenceLimit.set(+$any($event.target).value)" />
+              </div>
+            }
+          }
+        </fieldset>
+
+        <div class="lcars-input-container gold">
+          <label for="event-capacity"
+            >Places for Going (1 to 1000; empty for no limit)</label
+          >
+          <input
+            id="event-capacity"
+            type="number"
+            min="1"
+            max="1000"
+            [value]="capacity()"
+            (input)="capacity.set($any($event.target).value)" />
+        </div>
+
+        @if (error(); as refusal) {
+          <app-lcars-error-message
+            title="Not done"
+            [message]="refusal" />
+        }
+
+        <div class="fleet-community-form-actions">
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto sky"
+            [disabled]="busy() || startDate() === ''"
+            (click)="onPreview(scope)">
+            Show what it comes to
+          </button>
+          <button
+            type="submit"
+            class="lcars-btn lcars-btn-auto green"
+            [disabled]="!canSave()">
+            {{ event ? 'Save from now on' : 'Create the event' }}
+          </button>
+          <a
+            class="lcars-btn lcars-btn-auto bluey"
+            [routerLink]="cancelLinkOf(scope, event)"
+            >Cancel</a
+          >
+        </div>
+      </form>
+
+      @if (preview(); as shown) {
+        <section
+          class="fleet-events__preview"
+          aria-labelledby="event-preview-heading">
+          <h2 id="event-preview-heading">
+            Over the next year, on the {{ shown.timezone }} clock
+          </h2>
+          @if (shown.skippedMonths.length > 0) {
+            <p class="fleet-events__notice">
+              Skipped, having no such day: {{ shown.skippedMonths.join(', ') }}
+            </p>
+          }
+          @if (shown.occurrences.length === 0) {
+            <p class="fleet-community-empty">Nothing of this lies ahead.</p>
+          } @else {
+            <p class="fleet-community-field-hint">
+              {{ shown.occurrences.length }}
+              {{
+                shown.occurrences.length === 1 ? 'occurrence' : 'occurrences'
+              }}
+            </p>
+            <ol class="fleet-events__people">
+              @for (occurrence of shown.occurrences; track occurrence.key) {
+                <li>
+                  {{ occurrence.localStart.replace('T', ' ') }}
+                  <span class="fleet-events__zone-note">
+                    (<time [attr.datetime]="occurrence.startsAt">{{
+                      occurrence.startsAt | appDate: 'EEE d MMM, HH:mm'
+                    }}</time>
+                    your time)
+                  </span>
+                  @if (adjustmentNotes[occurrence.adjustment]; as note) {
+                    <strong class="fleet-events__badge">{{ note }}</strong>
+                  }
+                </li>
+              }
+            </ol>
+          }
+        </section>
+      }
+    }
+  </app-fleet-page-shell>
+}

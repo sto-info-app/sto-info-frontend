@@ -4,6 +4,14 @@ import { RouterLink } from '@angular/router';
 
 import { catchError, map, Observable, of, startWith, switchMap } from 'rxjs';
 
+import {
+  FleetActivityFeedComponent,
+  FleetActivitySource,
+} from 'src/app/fleet/activity/fleet-activity-feed/fleet-activity-feed.component';
+import {
+  FleetEventsUpcomingComponent,
+  FleetUpcomingSource,
+} from 'src/app/fleet/events/fleet-events-upcoming/fleet-events-upcoming.component';
 import { CommunitySubscriptionService } from 'src/app/fleet/community-subscription.service';
 import { FleetScopeCardComponent } from 'src/app/fleet/components/fleet-scope-card/fleet-scope-card.component';
 import { FleetScopeCardVm } from 'src/app/fleet/components/fleet-scope-card/fleet-scope-card.model';
@@ -60,6 +68,8 @@ export type DashboardFleetsState =
   imports: [
     AsyncPipe,
     RouterLink,
+    FleetActivityFeedComponent,
+    FleetEventsUpcomingComponent,
     FleetScopeCardComponent,
     FeatureUnavailableComponent,
     LcarsErrorMessageComponent,
@@ -72,6 +82,12 @@ export class DashboardFleetsComponent {
 
   /** The feature's name, for the notice that says it is not there. */
   readonly featureName = FLEET_FEATURE_NAME;
+
+  /** The signed-in person's own activity feed (FC-029). */
+  readonly personalFeed: FleetActivitySource = { kind: 'MINE' };
+
+  /** The signed-in person's own upcoming events (FC-030). */
+  readonly upcoming: FleetUpcomingSource = { kind: 'MINE' };
 
   /** What is said when the list itself could not be read. */
   readonly errorMessage =

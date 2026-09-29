@@ -228,6 +228,64 @@ describe('FLEET_LINKS', () => {
     ]);
   });
 
+  // FC-030: each scope's calendar.
+  it('should address a Fleet’s, an Armada’s and a Community’s calendar', () => {
+    expect(FLEET_LINKS.fleetEvents('ufa', 'pc', 'starfleet-command')).toEqual([
+      '/fleets',
+      'communities',
+      'ufa',
+      'fleets',
+      'pc',
+      'starfleet-command',
+      'events',
+    ]);
+    expect(FLEET_LINKS.armadaEvents('ufa', 'pc', 'sol-armada')).toEqual([
+      '/fleets',
+      'communities',
+      'ufa',
+      'armadas',
+      'pc',
+      'sol-armada',
+      'events',
+    ]);
+    expect(FLEET_LINKS.communityEvents('ufa')).toEqual([
+      '/fleets',
+      'communities',
+      'ufa',
+      'events',
+    ]);
+  });
+
+  // FC-029: each scope's activity.
+  it('should address a Fleet’s, an Armada’s and a Community’s activity', () => {
+    expect(FLEET_LINKS.fleetActivity('ufa', 'pc', 'starfleet-command')).toEqual(
+      [
+        '/fleets',
+        'communities',
+        'ufa',
+        'fleets',
+        'pc',
+        'starfleet-command',
+        'activity',
+      ],
+    );
+    expect(FLEET_LINKS.armadaActivity('ufa', 'pc', 'sol-armada')).toEqual([
+      '/fleets',
+      'communities',
+      'ufa',
+      'armadas',
+      'pc',
+      'sol-armada',
+      'activity',
+    ]);
+    expect(FLEET_LINKS.communityActivity('ufa')).toEqual([
+      '/fleets',
+      'communities',
+      'ufa',
+      'activity',
+    ]);
+  });
+
   it('should address a post, its editor and a new post below the news', () => {
     const news = FLEET_LINKS.communityNews('ufa');
 

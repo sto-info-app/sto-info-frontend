@@ -1,0 +1,303 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+  @if (armadaTabsOf(state); as armadaTabs) {
+    <app-armada-tabs [vm]="armadaTabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Event"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the event"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let event = state.data.event;
+      @let characters = state.data.characters;
+
+      <p class="fleet-events__back">
+        <a [routerLink]="eventsLinkOf(scope)">Back to the calendar</a>
+      </p>
+
+      <h2 class="fleet-events__title">{{ event.title }}</h2>
+
+      @if (event.status === 'CANCELLED') {
+        <p
+          class="fleet-events__notice"
+          role="status">
+          This event was cancelled. Nothing of it lies ahead.
+        </p>
+      }
+
+      <dl class="fleet-events__facts">
+        <dt>When</dt>
+        <dd>{{ ruleOf(event) }}, on the {{ event.timezone }} clock</dd>
+        <dt>How long</dt>
+        <dd>{{ event.durationMinutes }} minutes</dd>
+        <dt>For</dt>
+        <dd>{{ audienceOf(scope, event.audience) }}</dd>
+        <dt>Places</dt>
+        <dd>
+          @if (event.capacity === null) {
+            No limit
+          } @else {
+            {{ event.capacity }}, then a waitlist
+          }
+        </dd>
+        @if (event.externalUrl) {
+          <dt>Link</dt>
+          <dd>
+            <a
+              [href]="event.externalUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              >{{ event.externalUrl }}</a
+            >
+          </dd>
+        }
+      </dl>
+
+      @if (event.description) {
+        <div
+          class="fleet-events__description"
+          [innerHTML]="event.description | markdown"></div>
+      }
+
+      @if (error(); as refusal) {
+        <app-lcars-error-message
+          title="Not done"
+          [message]="refusal" />
+      }
+
+      @if (event.mayManage && event.isOpen && event.status === 'ACTIVE') {
+        <nav
+          class="buttons-row fleet-events__actions"
+          aria-label="Managing this event">
+          <a
+            class="lcars-btn lcars-btn-auto gold"
+            [routerLink]="editLinkOf(scope, event.id)"
+            >Change from now on</a
+          >
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto red"
+            [disabled]="busy()"
+            (click)="onCancel(scope, event)">
+            Cancel the event
+          </button>
+        </nav>
+      }
+
+      @if (isSignedIn() && event.status === 'ACTIVE') {
+        <fieldset class="fleet-events__section">
+          <legend>Remind me</legend>
+          <div class="fleet-events__reminders">
+            @for (lead of leads; track lead) {
+              <label class="fleet-events__check">
+                <input
+                  type="checkbox"
+                  [checked]="isChosen(lead)"
+                  [disabled]="busy()"
+                  (change)="onLead(lead, $any($event.target).checked)" />
+                {{ leadLabels[lead] }}
+              </label>
+            }
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto green"
+              [disabled]="busy()"
+              (click)="onSaveReminders(scope, event)">
+              @if (chosenLeads().length === 0 && event.myReminders.length > 0) {
+                Stop reminding me
+              } @else {
+                Save reminders
+              }
+            </button>
+          </div>
+          <p class="fleet-community-field-hint">
+            In-app, before each occurrence. You are also told when one is
+            cancelled or moved.
+          </p>
+        </fieldset>
+      }
+
+      <section
+        class="fleet-events__section"
+        aria-labelledby="event-upcoming-heading">
+        <h3 id="event-upcoming-heading">What lies ahead</h3>
+        @if (event.upcoming.length === 0) {
+          <p class="fleet-community-empty">Nothing of this event lies ahead.</p>
+        } @else {
+          <ol class="fleet-events__list">
+            @for (occurrence of event.upcoming; track occurrence.id) {
+              <li
+                class="fleet-events__item"
+                [class.fleet-events__entry--cancelled]="
+                  occurrence.status === 'CANCELLED'
+                ">
+                <h4 class="fleet-events__title">
+                  <a
+                    [routerLink]="
+                      occurrenceLinkOf(scope, event.id, occurrence.id)
+                    "
+                    ><app-fleet-event-when
+                      [startsAt]="occurrence.startsAt"
+                      [endsAt]="occurrence.endsAt"
+                      [timezone]="event.timezone"
+                  /></a>
+                </h4>
+                <p class="fleet-events__meta">
+                  @if (occurrence.status === 'CANCELLED') {
+                    <span class="fleet-events__badge">Cancelled</span>
+                  } @else {
+                    <span
+                      >{{ occurrence.counts.going }} going ·
+                      {{ occurrence.counts.maybe }} maybe</span
+                    >
+                    @if (occurrence.counts.waitlisted > 0) {
+                      <span>· {{ occurrence.counts.waitlisted }} waiting</span>
+                    }
+                    @if (occurrence.counts.notGoing !== null) {
+                      <span>· {{ occurrence.counts.notGoing }} can’t go</span>
+                    }
+                  }
+                  @if (occurrence.movedFromStartsAt) {
+                    <span
+                      >· Moved from&ngsp;<time
+                        [attr.datetime]="occurrence.movedFromStartsAt"
+                        >{{
+                          occurrence.movedFromStartsAt
+                            | appDate: 'EEE d MMM, HH:mm'
+                        }}</time
+                      ></span
+                    >
+                  }
+                </p>
+                @if (adjustmentNotes[occurrence.adjustment]; as note) {
+                  <p class="fleet-community-field-hint">{{ note }}</p>
+                }
+
+                @if (isAhead(event, occurrence)) {
+                  @if (event.mayAnswer) {
+                    <app-fleet-event-answer
+                      [occurrence]="occurrence"
+                      [capacity]="event.capacity"
+                      [characters]="characters"
+                      [busy]="busy()"
+                      (answered)="onAnswer(scope, event, occurrence, $event)"
+                      (withdrawn)="onWithdraw(scope, event, occurrence)" />
+                  }
+
+                  @if (event.mayManage && event.isOpen) {
+                    @if (moving() === occurrence.id) {
+                      <form
+                        class="fleet-events__answers"
+                        [attr.aria-label]="
+                          'Move the occurrence of ' + occurrence.localStart
+                        "
+                        (submit)="
+                          $event.preventDefault();
+                          onMove(scope, event, occurrence)
+                        ">
+                        <div class="lcars-input-container sky">
+                          <label [attr.for]="'move-date-' + occurrence.id"
+                            >New day</label
+                          >
+                          <input
+                            [id]="'move-date-' + occurrence.id"
+                            type="date"
+                            required
+                            [value]="moveDate()"
+                            (input)="moveDate.set($any($event.target).value)" />
+                        </div>
+                        <div class="lcars-input-container sky">
+                          <label [attr.for]="'move-time-' + occurrence.id"
+                            >New start, {{ event.timezone }}</label
+                          >
+                          <input
+                            [id]="'move-time-' + occurrence.id"
+                            type="time"
+                            required
+                            [value]="moveTime()"
+                            (input)="moveTime.set($any($event.target).value)" />
+                        </div>
+                        <button
+                          type="submit"
+                          class="lcars-btn lcars-btn-auto green"
+                          [disabled]="busy()">
+                          Move it
+                        </button>
+                        <button
+                          type="button"
+                          class="lcars-btn lcars-btn-auto bluey"
+                          (click)="onCancelMove()">
+                          Never mind
+                        </button>
+                      </form>
+                    } @else {
+                      <div class="fleet-events__answers">
+                        <button
+                          type="button"
+                          class="lcars-btn lcars-btn-auto sky"
+                          [disabled]="busy()"
+                          (click)="onStartMove(occurrence)">
+                          Move this one
+                        </button>
+                        <button
+                          type="button"
+                          class="lcars-btn lcars-btn-auto red"
+                          [disabled]="busy()"
+                          (click)="
+                            onCancelOccurrence(scope, event, occurrence)
+                          ">
+                          Cancel this one
+                        </button>
+                      </div>
+                    }
+                  }
+                }
+              </li>
+            }
+          </ol>
+        }
+      </section>
+
+      @if (event.mayManage) {
+        <section
+          class="fleet-events__section"
+          aria-labelledby="event-history-heading">
+          <h3 id="event-history-heading">Change log</h3>
+          @if (history(); as actions) {
+            @if (actions.length === 0) {
+              <p class="fleet-community-empty">Nothing has changed yet.</p>
+            } @else {
+              <ol class="fleet-events__people">
+                @for (action of actions; track action.id) {
+                  <li>
+                    <time [attr.datetime]="action.createdAt">{{
+                      action.createdAt | appDate: 'medium'
+                    }}</time>
+                    — {{ actionLabel(action) }}
+                    @if (action.actorName) {
+                      by {{ action.actorName }}
+                    }
+                  </li>
+                }
+              </ol>
+            }
+          } @else {
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto bluey"
+              [disabled]="busy()"
+              (click)="onHistory(scope, event)">
+              Show the change log
+            </button>
+          }
+        </section>
+      }
+    }
+  </app-fleet-page-shell>
+}

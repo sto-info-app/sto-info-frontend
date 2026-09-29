@@ -1,0 +1,50 @@
+@if (loading()) {
+  <p class="fleet-community-field-hint">Reading what is coming up…</p>
+} @else if (error(); as message) {
+  <p class="fleet-community-empty">{{ message }}</p>
+} @else if (shown().length === 0) {
+  <p class="fleet-community-empty">
+    @if (isMine()) {
+      Nothing you have answered or asked to be reminded of in the next thirty
+      days.
+    } @else {
+      Nothing is on the calendar.
+    }
+  </p>
+} @else {
+  <ol class="fleet-events__list">
+    @for (item of shown(); track item.entry.occurrence.id) {
+      <li class="fleet-events__item">
+        <h3 class="fleet-events__title">
+          <a [routerLink]="item.link">{{ item.entry.event.title }}</a>
+        </h3>
+        <p class="fleet-events__meta">
+          <app-fleet-event-when
+            [startsAt]="item.entry.occurrence.startsAt"
+            [endsAt]="item.entry.occurrence.endsAt"
+            [timezone]="item.entry.event.timezone" />
+        </p>
+        <p class="fleet-events__meta">
+          @if (item.scopeName) {
+            <span>{{ item.scopeName }}</span>
+          }
+          @if (item.entry.occurrence.mine; as mine) {
+            <span class="fleet-events__badge fleet-events__badge--mine">
+              @if (mine.waitlistPosition !== null) {
+                Waiting, {{ mine.waitlistPosition }} in line
+              } @else {
+                {{ responseLabels[mine.response] }}
+              }
+            </span>
+          }
+        </p>
+      </li>
+    }
+  </ol>
+}
+
+@if (calendarLink(); as link) {
+  <p>
+    <a [routerLink]="link">The full calendar</a>
+  </p>
+}

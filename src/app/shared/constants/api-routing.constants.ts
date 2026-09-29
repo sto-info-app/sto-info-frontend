@@ -186,4 +186,6 @@ export const API_URLS = {
   FLEET_NEWS_ADMIN: apiUrl + '/admin/fleet-news',
   // The signed-in person's own Fleet activity (FC-029).
   FLEET_ACTIVITY: apiUrl + '/fleet-activity',
+  // The signed-in person's own upcoming Fleet events (FC-030).
+  FLEET_EVENTS: apiUrl + '/fleet-events',
 };

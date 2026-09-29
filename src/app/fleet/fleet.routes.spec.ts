@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(62);
+    expect(children).toHaveLength(80);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -369,6 +369,67 @@ describe('FLEET_ROUTES', () => {
     });
   });
 
+  // A Community's, a Fleet's and an Armada's activity (FC-029): open to
+  // whoever may see the scope, each item asked about again by the server.
+  it.each([
+    ['communities/:communitySlug/activity', {}],
+    ['communities/:communitySlug/fleets/:platformSegment/:slug/activity', {}],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/activity',
+      { governs: 'ARMADA' },
+    ],
+  ])('leaves %s open to a signed-out reader', (path, data) => {
+    expect(childAt(path)?.canActivate).toBeUndefined();
+    expect(childAt(path)?.data).toEqual({
+      title: APP_ROUTE_TITLES.FLEET_ACTIVITY,
+      ...data,
+    });
+  });
+
+  // A Community's, a Fleet's and an Armada's events (FC-030): read by
+  // whoever each is shown to, written by its event managers.
+  describe.each([
+    ['a Community', 'communities/:communitySlug', {}],
+    ['a Fleet', 'communities/:communitySlug/fleets/:platformSegment/:slug', {}],
+    [
+      'an Armada',
+      'communities/:communitySlug/armadas/:platformSegment/:slug',
+      { governs: 'ARMADA' },
+    ],
+  ])('the events of %s', (_scope, prefix, data) => {
+    it('leaves the calendar, an event and an occurrence open to a signed-out reader', () => {
+      for (const [path, title] of [
+        [`${prefix}/events`, APP_ROUTE_TITLES.FLEET_EVENTS],
+        [`${prefix}/events/:eventId`, APP_ROUTE_TITLES.FLEET_EVENT],
+        [
+          `${prefix}/events/:eventId/occurrences/:occurrenceId`,
+          APP_ROUTE_TITLES.FLEET_EVENT_OCCURRENCE,
+        ],
+      ]) {
+        expect(childAt(path)?.canActivate).toBeUndefined();
+        expect(childAt(path)?.data).toEqual({ title, ...data });
+      }
+    });
+
+    it('asks for an account before writing or changing one', () => {
+      for (const [path, title] of [
+        [`${prefix}/events/new`, APP_ROUTE_TITLES.FLEET_EVENT_NEW],
+        [`${prefix}/events/:eventId/edit`, APP_ROUTE_TITLES.FLEET_EVENT_EDIT],
+      ]) {
+        expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
+        expect(childAt(path)?.data).toEqual({ title, ...data });
+      }
+    });
+
+    it('matches the editor’s literal before an event it could be read as', () => {
+      const paths = children.map(child => child.path);
+
+      expect(paths.indexOf(`${prefix}/events/new`)).toBeLessThan(
+        paths.indexOf(`${prefix}/events/:eventId`),
+      );
+    });
+  });
+
   it('matches the deeper scope addresses before the Community’s own', () => {
     const paths = children.map(child => child.path);
 
@@ -609,6 +670,66 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/armadas/:platformSegment/:slug/news/:postSlug/edit',
       'FleetNewsEditorComponent',
+    ],
+    ['communities/:communitySlug/events', 'FleetEventCalendarComponent'],
+    ['communities/:communitySlug/events/new', 'FleetEventEditorComponent'],
+    ['communities/:communitySlug/events/:eventId', 'FleetEventDetailComponent'],
+    [
+      'communities/:communitySlug/events/:eventId/edit',
+      'FleetEventEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/events/:eventId/occurrences/:occurrenceId',
+      'FleetEventOccurrenceComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/events',
+      'FleetEventCalendarComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/events/new',
+      'FleetEventEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/events/:eventId',
+      'FleetEventDetailComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/events/:eventId/edit',
+      'FleetEventEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/events/:eventId/occurrences/:occurrenceId',
+      'FleetEventOccurrenceComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/events',
+      'FleetEventCalendarComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/events/new',
+      'FleetEventEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/events/:eventId',
+      'FleetEventDetailComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/events/:eventId/edit',
+      'FleetEventEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/events/:eventId/occurrences/:occurrenceId',
+      'FleetEventOccurrenceComponent',
+    ],
+    ['communities/:communitySlug/activity', 'FleetActivityPageComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/activity',
+      'FleetActivityPageComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/activity',
+      'FleetActivityPageComponent',
     ],
   ])('loads the right component for %s', async (path, expected) => {
     const loaded = await (

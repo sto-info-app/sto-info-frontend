@@ -184,6 +184,61 @@ export const FLEET_ROUTES: Routes = [
           ),
         data: { title: APP_ROUTE_TITLES.FLEET_HOLDINGS },
       },
+      // A Fleet's activity (FC-029), for whoever may see each item.
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/activity',
+        loadComponent: () =>
+          import('./activity/fleet-activity-page/fleet-activity-page.component').then(
+            m => m.FleetActivityPageComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_ACTIVITY },
+      },
+      // A Fleet’s events (FC-030): the calendar, each event and each occurrence
+      // for whoever it is shown to, signed in or not; the editor for its
+      // event managers. `new` is a literal no event's ID can be, and comes
+      // before the event it would otherwise be read as.
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/events',
+        loadComponent: () =>
+          import('./events/fleet-event-calendar/fleet-event-calendar.component').then(
+            m => m.FleetEventCalendarComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENTS },
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/events/new',
+        loadComponent: () =>
+          import('./events/fleet-event-editor/fleet-event-editor.component').then(
+            m => m.FleetEventEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_NEW },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/events/:eventId',
+        loadComponent: () =>
+          import('./events/fleet-event-detail/fleet-event-detail.component').then(
+            m => m.FleetEventDetailComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENT },
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/events/:eventId/edit',
+        loadComponent: () =>
+          import('./events/fleet-event-editor/fleet-event-editor.component').then(
+            m => m.FleetEventEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_EDIT },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/events/:eventId/occurrences/:occurrenceId',
+        loadComponent: () =>
+          import('./events/fleet-event-occurrence/fleet-event-occurrence.component').then(
+            m => m.FleetEventOccurrenceComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_OCCURRENCE },
+      },
       // A Fleet's news (FC-027). Reading is for whoever each post is
       // published to, signed in or not, which is the server's answer;
       // writing is for its news writers. `write` is a literal no post's
@@ -511,6 +566,64 @@ export const FLEET_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
 
+      // An Armada's activity (FC-029), told by the route it is an Armada's.
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/activity',
+        loadComponent: () =>
+          import('./activity/fleet-activity-page/fleet-activity-page.component').then(
+            m => m.FleetActivityPageComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_ACTIVITY, governs: 'ARMADA' },
+      },
+      // An Armada’s events (FC-030): the calendar, each event and each occurrence
+      // for whoever it is shown to, signed in or not; the editor for its
+      // event managers. `new` is a literal no event's ID can be, and comes
+      // before the event it would otherwise be read as.
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/events',
+        loadComponent: () =>
+          import('./events/fleet-event-calendar/fleet-event-calendar.component').then(
+            m => m.FleetEventCalendarComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENTS, governs: 'ARMADA' },
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/events/new',
+        loadComponent: () =>
+          import('./events/fleet-event-editor/fleet-event-editor.component').then(
+            m => m.FleetEventEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_NEW, governs: 'ARMADA' },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/events/:eventId',
+        loadComponent: () =>
+          import('./events/fleet-event-detail/fleet-event-detail.component').then(
+            m => m.FleetEventDetailComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENT, governs: 'ARMADA' },
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/events/:eventId/edit',
+        loadComponent: () =>
+          import('./events/fleet-event-editor/fleet-event-editor.component').then(
+            m => m.FleetEventEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_EDIT, governs: 'ARMADA' },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/events/:eventId/occurrences/:occurrenceId',
+        loadComponent: () =>
+          import('./events/fleet-event-occurrence/fleet-event-occurrence.component').then(
+            m => m.FleetEventOccurrenceComponent,
+          ),
+        data: {
+          title: APP_ROUTE_TITLES.FLEET_EVENT_OCCURRENCE,
+          governs: 'ARMADA',
+        },
+      },
       // An Armada's news (FC-027), as a Fleet's. Resolved as the Armada's
       // Manage pages are, told so by the route.
       {
@@ -546,6 +659,61 @@ export const FLEET_ROUTES: Routes = [
           ),
         data: { title: APP_ROUTE_TITLES.FLEET_NEWS_EDIT, governs: 'ARMADA' },
         canActivate: [AuthGuard],
+      },
+      // A Community's own activity (FC-029).
+      {
+        path: 'communities/:communitySlug/activity',
+        loadComponent: () =>
+          import('./activity/fleet-activity-page/fleet-activity-page.component').then(
+            m => m.FleetActivityPageComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_ACTIVITY },
+      },
+      // A Community’s own events (FC-030): the calendar, each event and each occurrence
+      // for whoever it is shown to, signed in or not; the editor for its
+      // event managers. `new` is a literal no event's ID can be, and comes
+      // before the event it would otherwise be read as.
+      {
+        path: 'communities/:communitySlug/events',
+        loadComponent: () =>
+          import('./events/fleet-event-calendar/fleet-event-calendar.component').then(
+            m => m.FleetEventCalendarComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENTS },
+      },
+      {
+        path: 'communities/:communitySlug/events/new',
+        loadComponent: () =>
+          import('./events/fleet-event-editor/fleet-event-editor.component').then(
+            m => m.FleetEventEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_NEW },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/events/:eventId',
+        loadComponent: () =>
+          import('./events/fleet-event-detail/fleet-event-detail.component').then(
+            m => m.FleetEventDetailComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENT },
+      },
+      {
+        path: 'communities/:communitySlug/events/:eventId/edit',
+        loadComponent: () =>
+          import('./events/fleet-event-editor/fleet-event-editor.component').then(
+            m => m.FleetEventEditorComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_EDIT },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/events/:eventId/occurrences/:occurrenceId',
+        loadComponent: () =>
+          import('./events/fleet-event-occurrence/fleet-event-occurrence.component').then(
+            m => m.FleetEventOccurrenceComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_OCCURRENCE },
       },
       // A Community's own news (FC-027), as a Fleet's. Its address has no
       // platform, which is how the pages know it is the Community's.

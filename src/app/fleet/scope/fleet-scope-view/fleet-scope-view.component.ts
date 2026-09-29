@@ -7,6 +7,8 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { FleetActivityFeedComponent } from 'src/app/fleet/activity/fleet-activity-feed/fleet-activity-feed.component';
+import { FleetEventsUpcomingComponent } from 'src/app/fleet/events/fleet-events-upcoming/fleet-events-upcoming.component';
 import { ArmadaPanelComponent } from 'src/app/fleet/armadas/armada-panel/armada-panel.component';
 import { ArmadaTabsComponent } from 'src/app/fleet/armadas/armada-tabs/armada-tabs.component';
 import { CommunityStructurePanelComponent } from 'src/app/fleet/armadas/community-structure-panel/community-structure-panel.component';
@@ -44,6 +46,8 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
     ArmadaPanelComponent,
     ArmadaTabsComponent,
     CommunityStructurePanelComponent,
+    FleetActivityFeedComponent,
+    FleetEventsUpcomingComponent,
     FleetArmadaPanelComponent,
     FleetScopeArtworkComponent,
     FleetScopeHeaderComponent,

@@ -1,0 +1,217 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+  @if (armadaTabsOf(state); as armadaTabs) {
+    <app-armada-tabs [vm]="armadaTabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Occurrence"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the occurrence"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let detail = state.data.detail;
+      @let occurrence = detail.occurrence;
+
+      <p class="fleet-events__back">
+        <a [routerLink]="eventLinkOf(scope, detail.event.id)"
+          >Back to {{ detail.event.title }}</a
+        >
+      </p>
+
+      <h2 class="fleet-events__title">{{ detail.event.title }}</h2>
+
+      <p class="fleet-events__meta">
+        <app-fleet-event-when
+          [startsAt]="occurrence.startsAt"
+          [endsAt]="occurrence.endsAt"
+          [timezone]="detail.event.timezone" />
+      </p>
+
+      @if (occurrence.status === 'CANCELLED') {
+        <p
+          class="fleet-events__notice"
+          role="status">
+          This occurrence was cancelled.
+        </p>
+      } @else if (detail.event.status === 'CANCELLED') {
+        <p
+          class="fleet-events__notice"
+          role="status">
+          This event was cancelled.
+        </p>
+      }
+      @if (occurrence.movedFromStartsAt) {
+        <p class="fleet-community-field-hint">
+          Moved from
+          <time [attr.datetime]="occurrence.movedFromStartsAt">{{
+            occurrence.movedFromStartsAt | appDate: 'EEE d MMM y, HH:mm'
+          }}</time
+          >.
+        </p>
+      }
+      @if (adjustmentNotes[occurrence.adjustment]; as note) {
+        <p class="fleet-community-field-hint">{{ note }}</p>
+      }
+
+      <p class="fleet-events__meta">
+        <span
+          >{{ occurrence.counts.going }} going ·
+          {{ occurrence.counts.maybe }} maybe</span
+        >
+        @if (occurrence.counts.waitlisted > 0) {
+          <span>· {{ occurrence.counts.waitlisted }} waiting</span>
+        }
+        @if (occurrence.counts.notGoing !== null) {
+          <span>· {{ occurrence.counts.notGoing }} can’t go</span>
+        }
+        @if (detail.event.capacity !== null) {
+          <span>· {{ detail.event.capacity }} places</span>
+        }
+      </p>
+
+      @if (error(); as refusal) {
+        <app-lcars-error-message
+          title="Not done"
+          [message]="refusal" />
+      }
+
+      @if (detail.mayAnswer && isAhead(detail)) {
+        <app-fleet-event-answer
+          [occurrence]="occurrence"
+          [capacity]="detail.event.capacity"
+          [characters]="state.data.characters"
+          [busy]="busy()"
+          (answered)="onAnswer(scope, detail, $event)"
+          (withdrawn)="onWithdraw(scope, detail)" />
+      }
+
+      @if (detail.myAttendance; as mine) {
+        <p class="fleet-community-field-hint">
+          {{ attendanceLine(mine) }}
+        </p>
+      }
+
+      @if (detail.people.length > 0) {
+        <section
+          class="fleet-events__section"
+          aria-labelledby="occurrence-people-heading">
+          <h3 id="occurrence-people-heading">Who answered</h3>
+          @for (group of groups; track group.key) {
+            @let people = peopleIn(detail, group.key);
+            @if (people.length > 0) {
+              <h4>{{ group.label }}</h4>
+              <ol class="fleet-events__people">
+                @for (person of people; track person.userId) {
+                  <li>
+                    {{ personLine(person) }}
+                  </li>
+                }
+              </ol>
+            }
+          }
+        </section>
+      }
+
+      @if (state.data.sheet; as sheet) {
+        <section
+          class="fleet-events__section"
+          aria-labelledby="occurrence-attendance-heading">
+          <h3 id="occurrence-attendance-heading">Who came</h3>
+          <p class="fleet-community-field-hint">
+            Kept apart from the answers. Only this calendar’s event managers and
+            each person see it. Each is recorded as the Character they answered
+            with, if any.
+          </p>
+          <div class="lcars-input-container tangerine">
+            <label for="attendance-filter">Find by name</label>
+            <input
+              id="attendance-filter"
+              type="search"
+              [value]="filter()"
+              (input)="filter.set($any($event.target).value)" />
+          </div>
+          @let candidates = candidatesOf(sheet);
+          @if (candidates.length === 0) {
+            <p class="fleet-community-empty">Nobody to record.</p>
+          } @else {
+            <div class="fleet-events__grid-wrap">
+              <table class="fleet-community-table">
+                <caption class="sr-only">
+                  Who came, and who did not
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Who</th>
+                    <th scope="col">Answered</th>
+                    <th scope="col">Recorded</th>
+                    <th scope="col"><span class="sr-only">Record</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (candidate of candidates; track candidate.userId) {
+                    @let record = recordOf(sheet, candidate.userId);
+                    <tr>
+                      <th scope="row">
+                        {{ candidate.username ?? 'Somebody' }}
+                      </th>
+                      <td>
+                        {{
+                          candidate.response === null
+                            ? 'Did not answer'
+                            : responseLabels[candidate.response]
+                        }}
+                      </td>
+                      <td>
+                        @if (record === null) {
+                          Not yet
+                        } @else {
+                          {{ record.attended ? 'Came' : 'Did not come' }}
+                        }
+                      </td>
+                      <td>
+                        <div class="fleet-events__answers">
+                          <button
+                            type="button"
+                            class="lcars-btn lcars-btn-auto green"
+                            [attr.aria-label]="
+                              (candidate.username ?? 'Somebody') + ' came'
+                            "
+                            [attr.aria-pressed]="record?.attended === true"
+                            [disabled]="busy()"
+                            (click)="
+                              onRecord(scope, detail, candidate.userId, true)
+                            ">
+                            Came
+                          </button>
+                          <button
+                            type="button"
+                            class="lcars-btn lcars-btn-auto red"
+                            [attr.aria-label]="
+                              (candidate.username ?? 'Somebody') +
+                              ' did not come'
+                            "
+                            [attr.aria-pressed]="record?.attended === false"
+                            [disabled]="busy()"
+                            (click)="
+                              onRecord(scope, detail, candidate.userId, false)
+                            ">
+                            Did not come
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+      }
+    }
+  </app-fleet-page-shell>
+}

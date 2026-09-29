@@ -685,7 +685,8 @@ showing it, so do not rely on the shell to delay a child's initialisation —
 only its rendering.
 
 **`<app-fleet-tabs>`** — the strip along the top of every page of a Fleet a
-Community holds: Overview and News for anybody (News from FC-027); Roster
+Community holds: Overview, News, Activity and Events for anybody (News from
+FC-027, Activity from FC-029, Events from FC-030); Roster
 and History for `roster.view`
 holders; Reports for anybody the server shows a report to; Holdings for
 anybody (FC-023); Investigate for whoever imports or investigates its rosters;
@@ -696,14 +697,15 @@ builds from the resolved Fleet and returns null for a Fleet no Community holds,
 so such a Fleet draws no strip.
 
 On a platform the game writes no roster export on, `providesRoster` is false:
-the roster, history, report and investigation tabs are not offered, and
-News, Holdings, Recruitment and Manage still can be (FC-021). Every reader
-has News and Holdings as well as the Overview, so the strip is always drawn.
+the roster, history and investigation tabs are not offered, and News,
+Activity, Events, Reports, Holdings, Recruitment and Manage still can be
+(FC-021, FC-030). Every reader has News, Activity, Events and Holdings as well
+as the Overview, so the strip is always drawn.
 
 Every tab but Reports is decided by the reader's capabilities. Reports asks the
-server once per Fleet which reports the reader sees, because a report's
-audience can make it public, and draws no tab when none is shown or the answer
-fails, rather than one leading to a page that cannot be read. Pages beneath a
+server once per Fleet which reports the reader sees, on every Fleet, since
+holdings are public and read from the Fleet's own records (FC-030). It draws
+no tab when none is shown or the answer fails, rather than one leading to a page that cannot be read. Pages beneath a
 section — an import under Investigate, a member under History — sit beneath
 its address, so its tab stays lit on them.
 
@@ -1014,6 +1016,65 @@ the way to the rest. The Dashboard's Fleets page shows **Your Fleet
 activity**: the Communities the member follows and the Fleets and Armadas they
 belong to, each item naming its scope.
 
+### Events
+
+A Community's, a Fleet's and an Armada's events (FC-030) live in
+`src/app/fleet/events/`, behind `FleetEventsService`. The pages are the same at
+three kinds of address and resolve their scope as the News pages do, through
+**`FleetEventsPageDirective<T>`**, which also carries their links, the wording
+of audiences for the kind of scope, and a change's running and refusal.
+
+| Page | Address | Who opens it |
+|---|---|---|
+| Calendar | `…/events` | Anybody who may see the scope; which events is the server's answer |
+| An event | `…/events/:eventId` | Anybody it is shown to |
+| An occurrence | `…/events/:eventId/occurrences/:occurrenceId` | Anybody it is shown to |
+| New event | `…/events/new` | `events.manage` holders, while the scope is open |
+| Change an event | `…/events/:eventId/edit` | `events.manage` holders, while the scope is open |
+
+`new` is a literal no event's ID can be, and its route comes first.
+
+**Every time says its zone.** **`<app-fleet-event-when>`** writes an
+occurrence in the reader's own zone, as every instant on the site is, and
+always gives the event's clock beside it. It reads "(Europe/London time)"
+where the two agree, and otherwise "your time" with the event's time, zone and,
+where it differs, day. The calendar names the reader's zone too.
+
+**The calendar** is a month grid, or an agenda by default on a narrow screen.
+The view and the month are in the address (`?view=`, `?month=`), so each is a
+link. It reads a week either side of the month and lays each occurrence on the
+day it starts in the reader's zone. Its event managers are offered a new event
+while the scope is open.
+
+**An event** gives its rule in words (`fleetEventRuleOf`), who it is for,
+places, link and description, and the next ten occurrences:
+
+- **Answering.** **`<app-fleet-event-answer>`** answers each occurrence ahead,
+  as one of the reader's own Characters on any account if they choose, and
+  says what the answer means: a place, the waitlist and how far along, or no
+  place.
+- **Reminders.** Ticking leads and saving asks for reminders; unticking every
+  one stops them.
+- **Managing.** Managers change it from now on, cancel it, cancel or move one
+  occurrence on the event's clock, and read the change log on asking.
+  Cancelling asks first.
+
+**An occurrence** shows its counts, who answered for the scope's members, and
+the reader's own recorded attendance. Once it has started, managers get the
+attendance sheet: everybody who answered, then the scope's members, found by
+name, each recorded as came or did not come.
+
+**The editor** takes the title, Markdown description, link, audience (with
+Fleets and roles when chosen), the zone (the Community's own by default), the
+rule, start, length, places and end. **Show what it comes to** asks the server
+for the next year, flagging every occurrence the clocks move and every month a
+monthly day skips, before anything is saved.
+
+A Fleet's and an Armada's strips have an **Events** tab, after Activity. A
+Community page shows its next five in **`<app-fleet-events-upcoming>`**, with
+a link to the calendar. The Dashboard's Fleets page shows **Your upcoming
+events**: the reader's own next thirty days, each naming its scope.
+
 ### Upload and scan state
 
 **`<app-asset-scan-status>`** lives in `src/app/shared/components/`, not in the
@@ -1057,6 +1118,23 @@ the report's tables and its chart.
   a plain link cannot carry, and handed over with `saveFile`, named by the
   Fleet, the report and the day, since the browser cannot read the
   `Content-Disposition` the server set across origins.
+
+Attendance, recruitment and holdings (FC-030) are read from the Fleet's own
+records, not its roster. They have no revision or exports, so the page says
+their span instead and offers the last twelve months as the span to go back
+to. `recordHeaderOf` tells them apart from the roster's reports. The page
+opens on every Fleet, console ones included (`_needsRoster` is false), and a
+roster report on a Fleet without one is simply not offered.
+
+- **`<app-attendance-report>`**: each occurrence of the Fleet's own events,
+  going, came, did not come and the rate, with the totals; and each person,
+  for the Owner and Admins alone.
+- **`<app-recruitment-report>`**: month by month and route by route, the
+  outcomes and the median days to a decision. Never a name.
+- **`<app-holdings-report>`**: every tier a track moved, newest first.
+
+Who may see attendance is worded per report (`fleetReportAudienceLabel`): its
+members see counts only, where the roster's members see a report in full.
 
 ### Corrections
 

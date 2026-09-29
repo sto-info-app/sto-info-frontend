@@ -21,6 +21,10 @@ const FLEET_HREF =
 
 /** The Holdings tab, which every registered Fleet has (FC-023). */
 const NEWS_TAB = ['News', `${FLEET_HREF}/news`];
+/** The Activity tab, open to anybody who may see the Fleet (FC-029). */
+const ACTIVITY_TAB = ['Activity', `${FLEET_HREF}/activity`];
+/** The Events tab, open to anybody who may see the Fleet (FC-030). */
+const EVENTS_TAB = ['Events', `${FLEET_HREF}/events`];
 const HOLDINGS_TAB: [string, string] = ['Holdings', `${FLEET_HREF}/holdings`];
 
 /**
@@ -173,14 +177,17 @@ describe('FleetTabsComponent', () => {
       ]);
     });
 
-    it('is not asked about on a Fleet with no roster', () => {
+    // FC-030: holdings, attendance and recruitment are read from the Fleet's
+    // own records, so a console Fleet has reports too.
+    it('is offered on a Fleet with no roster', () => {
       reports.visible.mockReturnValue(
-        of([{ report: FleetReport.GROWTH, view: FleetReportView.FULL }]),
+        of([{ report: FleetReport.HOLDINGS, view: FleetReportView.FULL }]),
       );
 
-      draw(consoleVm('applications.view'));
-
-      expect(reports.visible).not.toHaveBeenCalled();
+      expect(
+        draw(consoleVm('applications.view')).map(([label]) => label),
+      ).toContain('Reports');
+      expect(reports.visible).toHaveBeenCalledWith('community-1', 'fleet-1');
     });
 
     it('sits between History and Holdings', () => {
@@ -193,6 +200,8 @@ describe('FleetTabsComponent', () => {
       ).toEqual([
         'Overview',
         'News',
+        'Activity',
+        'Events',
         'Roster',
         'History',
         'Reports',
@@ -212,6 +221,8 @@ describe('FleetTabsComponent', () => {
       expect(draw(vm(capability))).toEqual([
         ['Overview', FLEET_HREF],
         NEWS_TAB,
+        ACTIVITY_TAB,
+        EVENTS_TAB,
         HOLDINGS_TAB,
         ['Recruitment', `${FLEET_HREF}/recruitment`],
       ]);
@@ -225,6 +236,8 @@ describe('FleetTabsComponent', () => {
       ).toEqual([
         'Overview',
         'News',
+        'Activity',
+        'Events',
         'Roster',
         'History',
         'Holdings',
@@ -244,6 +257,8 @@ describe('FleetTabsComponent', () => {
         ).toEqual([
           ['Overview', FLEET_HREF],
           NEWS_TAB,
+          ACTIVITY_TAB,
+          EVENTS_TAB,
           ['Roster', `${FLEET_HREF}/roster`],
           ['History', `${FLEET_HREF}/history`],
           HOLDINGS_TAB,
@@ -264,7 +279,14 @@ describe('FleetTabsComponent', () => {
     it('is offered on a Fleet with no roster too', () => {
       expect(
         draw({ ...consoleVm(), roles: ['ADMIN'] }).map(([label]) => label),
-      ).toEqual(['Overview', 'News', 'Holdings', 'Manage']);
+      ).toEqual([
+        'Overview',
+        'News',
+        'Activity',
+        'Events',
+        'Holdings',
+        'Manage',
+      ]);
     });
   });
 
@@ -282,6 +304,8 @@ describe('FleetTabsComponent', () => {
       ).toEqual([
         ['Overview', FLEET_HREF],
         NEWS_TAB,
+        ACTIVITY_TAB,
+        EVENTS_TAB,
         HOLDINGS_TAB,
         ['Recruitment', `${FLEET_HREF}/recruitment`],
       ]);

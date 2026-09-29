@@ -1,0 +1,190 @@
+// A Community's, a Fleet's and an Armada's events (FC-030): the calendar, an
+// event, an occurrence, the editor and the lists of what is coming up share
+// these.
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.fleet-events {
+  &__back {
+    margin: 0 0 1rem;
+  }
+
+  &__actions,
+  &__views,
+  &__months,
+  &__answers,
+  &__reminders {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0 0 1rem;
+  }
+
+  &__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+    align-items: center;
+  }
+
+  &__month {
+    margin: 0 0.5rem;
+    font-size: 1.2rem;
+  }
+
+  &__grid-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  &__grid {
+    width: 100%;
+    min-width: 42rem;
+    border-collapse: collapse;
+    table-layout: fixed;
+
+    th {
+      padding: 0.25rem;
+      color: vars.$lcars-sky;
+      text-align: left;
+    }
+  }
+
+  &__day {
+    height: 6rem;
+    padding: 0.25rem;
+    border: 1px solid vars.$lcars-bluey;
+    vertical-align: top;
+
+    &--outside {
+      opacity: 0.55;
+    }
+
+    &--today {
+      outline: 2px solid vars.$lcars-sunflower;
+      outline-offset: -2px;
+    }
+  }
+
+  &__date {
+    display: block;
+    font-weight: 600;
+  }
+
+  &__day-list,
+  &__agenda,
+  &__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__day-list li {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+  }
+
+  &__agenda-day {
+    margin: 0 0 1.25rem;
+  }
+
+  &__agenda-date {
+    margin: 0 0 0.5rem;
+    color: vars.$lcars-sunflower;
+    font-size: 1.1rem;
+  }
+
+  &__item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid vars.$lcars-bluey;
+  }
+
+  &__title {
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+    overflow-wrap: anywhere;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+    align-items: baseline;
+    margin: 0 0 0.25rem;
+    color: vars.$lcars-sky;
+  }
+
+  &__entry--cancelled a {
+    text-decoration: line-through;
+  }
+
+  &__badge {
+    padding: 0 0.5rem;
+    border-radius: 1rem;
+    background: vars.$lcars-bluey;
+    color: vars.$lcars-black;
+    font-size: 0.85rem;
+    font-weight: 600;
+
+    &--mine {
+      background: vars.$lcars-sunflower;
+    }
+  }
+
+  &__section {
+    margin: 1.5rem 0 0;
+  }
+
+  &__people {
+    margin: 0 0 1rem;
+    padding-left: 1.25rem;
+  }
+
+  &__preview {
+    margin: 1rem 0;
+  }
+
+  &__facts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.25rem 1rem;
+    margin: 0 0 1.5rem;
+
+    dt {
+      color: vars.$lcars-sky;
+    }
+
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__notice {
+    margin: 0 0 1rem;
+    padding: 0.5rem 1rem;
+    border-left: 0.5rem solid vars.$lcars-sunflower;
+  }
+
+  &__check {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  &__answer {
+    margin: 0.5rem 0 0;
+    border: 1px solid vars.$lcars-bluey;
+    border-radius: 0.5rem;
+
+    legend {
+      padding: 0 0.5rem;
+      color: vars.$lcars-sunflower;
+    }
+  }
+}

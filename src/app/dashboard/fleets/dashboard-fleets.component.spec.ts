@@ -3,6 +3,8 @@ import { provideRouter } from '@angular/router';
 
 import { of, throwError } from 'rxjs';
 
+import { FleetActivityService } from 'src/app/fleet/activity/fleet-activity.service';
+import { FleetEventsService } from 'src/app/fleet/events/fleet-events.service';
 import { CommunitySubscriptionService } from 'src/app/fleet/community-subscription.service';
 import {
   FleetAudience,
@@ -74,6 +76,8 @@ describe('DashboardFleetsComponent', () => {
   let fixture: ComponentFixture<DashboardFleetsComponent>;
   let fleetConfiguration: { getConfiguration: jest.Mock };
   let subscriptions: { listFollowed: jest.Mock };
+  let activity: { mine: jest.Mock };
+  let events: { mine: jest.Mock };
 
   /** Everything the page currently says. */
   const text = (): string => fixture.nativeElement.textContent as string;
@@ -96,12 +100,16 @@ describe('DashboardFleetsComponent', () => {
     subscriptions = {
       listFollowed: jest.fn().mockReturnValue(of([])),
     };
+    activity = { mine: jest.fn(() => of({ items: [], next: null })) };
+    events = { mine: jest.fn(() => of({ entries: [] })) };
 
     await TestBed.configureTestingModule({
       imports: [DashboardFleetsComponent],
       providers: [
         { provide: FleetConfigurationService, useValue: fleetConfiguration },
         { provide: CommunitySubscriptionService, useValue: subscriptions },
+        { provide: FleetActivityService, useValue: activity },
+        { provide: FleetEventsService, useValue: events },
         provideRouter([]),
       ],
     }).compileComponents();

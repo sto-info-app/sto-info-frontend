@@ -67,6 +67,33 @@
       <app-fleet-news-latest [vm]="state.communityNews" />
     }
 
+    @if (state.communityEvents; as events) {
+      <section
+        class="fleet-scope-view__events"
+        aria-labelledby="fleet-scope-events-heading">
+        <div class="lcars-text-bar">
+          <h2><span id="fleet-scope-events-heading">Events</span></h2>
+        </div>
+        <app-fleet-events-upcoming
+          [source]="events"
+          [latest]="5" />
+      </section>
+    }
+
+    @if (state.communityActivity; as activity) {
+      <section
+        class="fleet-scope-view__activity"
+        aria-labelledby="fleet-scope-activity-heading">
+        <div class="lcars-text-bar">
+          <h2><span id="fleet-scope-activity-heading">Activity</span></h2>
+        </div>
+        <app-fleet-activity-feed
+          [source]="activity.source"
+          [latest]="5"
+          [allLink]="activity.allLink" />
+      </section>
+    }
+
     @if (state.communityStructure) {
       <app-community-structure-panel [vm]="state.communityStructure" />
     }

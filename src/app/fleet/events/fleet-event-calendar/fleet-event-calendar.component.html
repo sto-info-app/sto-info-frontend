@@ -1,0 +1,227 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+  @if (armadaTabsOf(state); as armadaTabs) {
+    <app-armada-tabs [vm]="armadaTabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Events"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the calendar"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let data = state.data;
+
+      @if (scope.isCommunity) {
+        <p class="fleet-events__back">
+          <a [routerLink]="scope.scopeLink">Back to {{ scope.name }}</a>
+        </p>
+      }
+
+      @if (data.calendar.mayManage) {
+        @if (data.calendar.isOpen) {
+          <nav
+            class="buttons-row fleet-events__actions"
+            aria-label="Organising events">
+            <a
+              class="lcars-btn lcars-btn-auto gold"
+              [routerLink]="newLinkOf(scope)"
+              >New event</a
+            >
+          </nav>
+        } @else {
+          <p class="fleet-community-field-hint">
+            This is closed, so no new event can be added and nothing ahead can
+            change.
+          </p>
+        }
+      }
+
+      <div class="fleet-events__controls">
+        <nav
+          class="fleet-events__views"
+          aria-label="How the calendar is shown">
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto"
+            [class.sunflower]="data.view === 'month'"
+            [class.bluey]="data.view !== 'month'"
+            [attr.aria-pressed]="data.view === 'month'"
+            (click)="onView('month')">
+            Month
+          </button>
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto"
+            [class.sunflower]="data.view === 'agenda'"
+            [class.bluey]="data.view !== 'agenda'"
+            [attr.aria-pressed]="data.view === 'agenda'"
+            (click)="onView('agenda')">
+            Agenda
+          </button>
+        </nav>
+
+        <nav
+          class="fleet-events__months"
+          aria-label="Which month">
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto bluey"
+            (click)="onMonth(data, -1)">
+            Previous month
+          </button>
+          <h2 class="fleet-events__month">{{ monthName(data.month) }}</h2>
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto bluey"
+            (click)="onMonth(data, 1)">
+            Next month
+          </button>
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto tangerine"
+            (click)="onToday()">
+            This month
+          </button>
+        </nav>
+      </div>
+
+      <p class="fleet-community-field-hint">
+        Times are in your zone, {{ data.zone }}. Each event also gives the time
+        on its own clock.
+      </p>
+
+      @if (data.view === 'month') {
+        <div class="fleet-events__grid-wrap">
+          <table class="fleet-events__grid">
+            <caption class="sr-only">
+              {{
+                monthName(data.month)
+              }}, by week
+            </caption>
+            <thead>
+              <tr>
+                @for (weekday of weekdays; track weekday) {
+                  <th scope="col">{{ weekday }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (week of data.weeks; track week[0].key) {
+                <tr>
+                  @for (day of week; track day.key) {
+                    <td
+                      class="fleet-events__day"
+                      [class.fleet-events__day--outside]="!day.inMonth"
+                      [class.fleet-events__day--today]="day.isToday"
+                      [attr.aria-current]="day.isToday ? 'date' : null">
+                      <span class="fleet-events__date">{{ day.date }}</span>
+                      @if (day.entries.length > 0) {
+                        <ul class="fleet-events__day-list">
+                          @for (
+                            entry of day.entries;
+                            track entry.occurrence.id
+                          ) {
+                            <li
+                              [class.fleet-events__entry--cancelled]="
+                                entry.occurrence.status === 'CANCELLED'
+                              ">
+                              <a [routerLink]="entryLinkOf(scope, entry)"
+                                ><time
+                                  [attr.datetime]="entry.occurrence.startsAt"
+                                  >{{
+                                    entry.occurrence.startsAt | appDate: 'HH:mm'
+                                  }}</time
+                                >
+                                {{ entry.event.title }}</a
+                              >
+                              @if (entry.occurrence.status === 'CANCELLED') {
+                                <span class="fleet-events__badge"
+                                  >Cancelled</span
+                                >
+                              }
+                            </li>
+                          }
+                        </ul>
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else if (data.agenda.length === 0) {
+        <p class="fleet-community-empty">
+          Nothing is on the calendar in {{ monthName(data.month) }}.
+        </p>
+      } @else {
+        <ol
+          class="fleet-events__agenda"
+          [attr.aria-label]="monthName(data.month) + ', day by day'">
+          @for (day of data.agenda; track day.key) {
+            <li class="fleet-events__agenda-day">
+              <h3
+                class="fleet-events__agenda-date"
+                [attr.aria-current]="day.isToday ? 'date' : null">
+                {{ dayName(day.key) }}
+              </h3>
+              <ul class="fleet-events__list">
+                @for (entry of day.entries; track entry.occurrence.id) {
+                  <li
+                    class="fleet-events__item"
+                    [class.fleet-events__entry--cancelled]="
+                      entry.occurrence.status === 'CANCELLED'
+                    ">
+                    <h4 class="fleet-events__title">
+                      <a [routerLink]="entryLinkOf(scope, entry)">{{
+                        entry.event.title
+                      }}</a>
+                    </h4>
+                    <p class="fleet-events__meta">
+                      <app-fleet-event-when
+                        [startsAt]="entry.occurrence.startsAt"
+                        [endsAt]="entry.occurrence.endsAt"
+                        [timezone]="entry.event.timezone" />
+                    </p>
+                    <p class="fleet-events__meta">
+                      @if (entry.occurrence.status === 'CANCELLED') {
+                        <span class="fleet-events__badge">Cancelled</span>
+                      } @else {
+                        <span
+                          >{{ entry.occurrence.counts.going }} going ·
+                          {{ entry.occurrence.counts.maybe }} maybe</span
+                        >
+                        @if (entry.occurrence.counts.waitlisted > 0) {
+                          <span
+                            >&ngsp;·
+                            {{ entry.occurrence.counts.waitlisted }}
+                            waiting</span
+                          >
+                        }
+                      }
+                      @if (entry.occurrence.mine; as mine) {
+                        <span
+                          class="fleet-events__badge fleet-events__badge--mine">
+                          @if (mine.waitlistPosition !== null) {
+                            Waiting, {{ mine.waitlistPosition }} in line
+                          } @else {
+                            {{ responseLabels[mine.response] }}
+                          }
+                        </span>
+                      }
+                    </p>
+                  </li>
+                }
+              </ul>
+            </li>
+          }
+        </ol>
+      }
+    }
+  </app-fleet-page-shell>
+}

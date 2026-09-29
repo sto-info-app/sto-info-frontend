@@ -194,6 +194,20 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
         target: { communityId: community.id, fleetId: null, armadaId: null },
         newsLink: FLEET_LINKS.communityNews(community.slug),
       },
+      // Its next events, likewise (FC-030).
+      communityEvents: {
+        kind: 'SCOPE',
+        target: { communityId: community.id, fleetId: null, armadaId: null },
+        calendarLink: FLEET_LINKS.communityEvents(community.slug),
+      },
+      // Its own activity, likewise (FC-029).
+      communityActivity: {
+        source: {
+          kind: 'SCOPE',
+          target: { communityId: community.id, fleetId: null, armadaId: null },
+        },
+        allLink: FLEET_LINKS.communityActivity(community.slug),
+      },
       communityStructure: {
         communityId: community.id,
         communitySlug: community.slug,

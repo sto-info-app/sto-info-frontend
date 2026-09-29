@@ -209,6 +209,62 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * A Fleet's activity (FC-029).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetActivity: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'activity',
+  ],
+
+  /**
+   * A Fleet's calendar (FC-030).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetEvents: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'events',
+  ],
+
+  /**
+   * A Community's own calendar (FC-030).
+   *
+   * @param communitySlug - The Community's URL segment.
+   * @returns The router link.
+   */
+  communityEvents: (communitySlug: string): string[] => [
+    ...FLEET_LINKS.community(communitySlug),
+    'events',
+  ],
+
+  /**
+   * A Community's own activity (FC-029).
+   *
+   * @param communitySlug - The Community's URL segment.
+   * @returns The router link.
+   */
+  communityActivity: (communitySlug: string): string[] => [
+    ...FLEET_LINKS.community(communitySlug),
+    'activity',
+  ],
+
+  /**
    * A Community's own news (FC-027), not its Fleets' or Armadas'.
    *
    * @param communitySlug - The Community's URL segment.
@@ -580,6 +636,40 @@ export const FLEET_LINKS = {
   ): string[] => [
     ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
     'news',
+  ],
+
+  /**
+   * An Armada's calendar (FC-030).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armadaEvents: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
+    'events',
+  ],
+
+  /**
+   * An Armada's activity (FC-029).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armadaActivity: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
+    'activity',
   ],
 
   /**
