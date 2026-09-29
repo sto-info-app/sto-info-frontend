@@ -66,6 +66,12 @@ export default defineConfig({
       name: 'teardown',
       testMatch: /support[\\/]restore\.teardown\.e2e\.ts/,
     },
+    // Public pages, seen by a stranger: no sign-in, so no seed password.
+    {
+      name: 'public',
+      testMatch: /public[\\/].*\.e2e\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
     {
       name: 'journeys',
       testMatch: /(journeys|reviews)[\\/].*\.e2e\.ts/,

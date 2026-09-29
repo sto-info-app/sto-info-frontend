@@ -47,6 +47,15 @@ local checkout.
 `npm run e2e:ui` opens Playwright's interactive runner; `npm run e2e:report`
 opens the last report.
 
+### Public pages, without the password
+
+`e2e/public` holds checks of pages a stranger sees, such as Help (FC-048).
+They sign in as nobody, so they need no password and run on their own:
+
+```bash
+npx playwright test --project=public
+```
+
 ## The picture journey is opt-in
 
 Journey 4 uploads real files. They are scanned by a third-party service and
