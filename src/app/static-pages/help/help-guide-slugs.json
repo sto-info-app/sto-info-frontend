@@ -1,5 +1,5 @@
 {
-  "comment": "Every help guide slug, in reading order. Read at build time by scripts/generate-content.mjs so each guide gets its own sitemap entry. The guides themselves live in help.data.ts; help.data.spec.ts fails if this list and that one ever disagree.",
+  "comment": "Every help guide slug, in reading order, and every section anybody may open. Read at build time by scripts/generate-content.mjs so each guide and section page gets its own sitemap entry. The guides themselves live in help.data.ts; help.data.spec.ts fails if these lists and that file ever disagree.",
   "slugs": [
     "the-galactic-personnel-registry",
     "listing-your-own-record",
@@ -17,6 +17,13 @@
     "writing-with-markdown",
     "cast-crew-and-pictures",
     "writing-with-other-people",
-    "ratings-reporting-and-safety"
-  ]
+    "ratings-reporting-and-safety",
+    "your-settings",
+    "privacy-mode",
+    "staying-signed-in",
+    "dates-and-times",
+    "fleet-settings",
+    "what-you-are-notified-about"
+  ],
+  "topics": ["community", "custom-tracking", "storytime", "settings"]
 }

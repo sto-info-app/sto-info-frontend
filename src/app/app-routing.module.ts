@@ -104,6 +104,14 @@ export const routes: Routes = [
     data: { title: APP_ROUTE_TITLES.HELP },
   },
   {
+    path: APP_ROUTES.HELP_TOPIC,
+    loadComponent: () =>
+      import('./static-pages/help/help-topic/help-topic.component').then(
+        m => m.HelpTopicComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.HELP_TOPIC },
+  },
+  {
     path: APP_ROUTES.HELP_GUIDE,
     loadComponent: () =>
       import('./static-pages/help/help-guide/help-guide.component').then(

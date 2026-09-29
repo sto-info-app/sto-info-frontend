@@ -31,6 +31,9 @@ export const APP_ROUTES = {
   RESOURCES: 'resources',
   HELP: ROOT_ROUTES.HELP,
   HELP_GUIDE: ROOT_ROUTES.HELP + '/:guideSlug',
+  // Two segments where a guide has one, so a section never answers for a guide
+  // (FC-048).
+  HELP_TOPIC: ROOT_ROUTES.HELP + '/topics/:topicId',
   CONTACT: 'contact',
   TERMS_OF_USE: 'terms-of-use',
   CREDITS: 'credits',
@@ -290,6 +293,8 @@ export const APP_ROUTE_TITLES = {
   // Replaced once the guide loads: one route serves every guide, so the
   // address is the only thing that says which one is being read.
   HELP_GUIDE: 'Help',
+  // Replaced with the section's title once it loads.
+  HELP_TOPIC: 'Help',
   CONTACT: 'Contact us',
   TERMS_OF_USE: 'Terms of Use',
   CREDITS: 'Credits',

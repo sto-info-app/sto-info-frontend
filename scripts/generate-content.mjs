@@ -26,6 +26,7 @@ import {
   buildRssFeed,
   buildSitemap,
   helpGuideSitemapPaths,
+  helpTopicSitemapPaths,
 } from './lib/feeds.mjs';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
@@ -163,6 +164,25 @@ async function generateOgImages(posts) {
 }
 
 /**
+ * Reads the help sections the application publishes (FC-048), from the same
+ * manifest as the guide slugs, on the same terms.
+ *
+ * @param {string} [file=HELP_GUIDE_SLUGS_FILE] - The manifest to read.
+ * @returns {Promise<string[]>} The section ids, or an empty list if unavailable.
+ */
+export async function readHelpTopics(file = HELP_GUIDE_SLUGS_FILE) {
+  try {
+    const { topics } = JSON.parse(await readFile(file, 'utf8'));
+    return Array.isArray(topics) ? topics : [];
+  } catch (error) {
+    console.warn(
+      `[generate-content] Could not read help sections (${error.message}). Listing the help index only.`,
+    );
+    return [];
+  }
+}
+
+/**
  * Reads the help guide slugs the application publishes.
  *
  * Read from the application rather than repeated here, so a guide added or
@@ -221,6 +241,7 @@ async function main() {
       posts,
       staticPaths: [
         ...STATIC_SITEMAP_PATHS,
+        ...helpTopicSitemapPaths(await readHelpTopics()),
         ...helpGuideSitemapPaths(await readHelpGuideSlugs()),
       ],
     }),

@@ -598,6 +598,34 @@ Notes:
 
 ---
 
+## Help
+
+The guides are data in `src/app/static-pages/help/help.data.ts`, grouped into
+sections (`HelpTopic`), and three pages show them. Their styles are in
+`_help.scss`.
+
+- **The Help home** (`/help`, `HelpComponent`) is one tile per section, then
+  "Still stuck?" (FC-048). A tile is a panel card in its section's colour: the
+  section's title, how many guides it holds for this reader ("6 guides"), and
+  its introduction. The whole tile is the link.
+- **A section** (`/help/topics/<id>`, `HelpTopicComponent`) lists its guides as
+  the same panels, under a "Help › Section" breadcrumb.
+- **A guide** (`/help/<slug>`, `HelpGuideComponent`). Its breadcrumb leads back
+  to its section.
+
+A section's address has two parts where a guide's has one, so neither can
+answer for the other. No guide may be called `topics`, and `help.data.spec.ts`
+checks this.
+
+Which sections and guides a reader sees is decided in one place,
+`visibleHelpTopics`:
+
+`help-guide-slugs.json` lists every public guide and every section anybody may
+open. `scripts/generate-content.mjs` reads it for the sitemap, and
+`help.data.spec.ts` fails if it and the guides disagree.
+
+---
+
 ## Fleet Community
 
 The Fleet system is built from the vocabulary above rather than from a language

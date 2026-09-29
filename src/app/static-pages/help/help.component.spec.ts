@@ -74,26 +74,62 @@ describe('HelpComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should list every guide in an available topic', () => {
+  /**
+   * Reads each section tile: where it leads, its title, its count and its
+   * summary.
+   *
+   * @returns One entry per tile, in order.
+   */
+  const tiles = () =>
+    Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        '.help-tile-grid > li',
+      ),
+    ).map(tile => ({
+      href: tile.querySelector('a')?.getAttribute('href'),
+      title: tile.querySelector('h2')?.textContent?.trim(),
+      count: tile.querySelector('.help-panel-card__count')?.textContent?.trim(),
+      summary: tile
+        .querySelector('.help-panel-card__summary')
+        ?.textContent?.trim(),
+    }));
+
+  // FC-048: one tile per section on offer, each leading to that section's
+  // own page, with the section's introduction as its summary.
+  it('should offer one tile for every section on offer, leading to its page', () => {
     createComponent(true);
 
-    expectedTopics(true).forEach(topic => {
-      expect(pageText()).toContain(topic.title);
-      topic.guides.forEach(guide => {
-        expect(pageText()).toContain(guide.title);
-      });
+    expect(tiles()).toEqual(
+      expectedTopics(true).map(topic => ({
+        href: `/help/topics/${topic.id}`,
+        title: topic.title,
+        count: `${topic.guides.length} guides`,
+        summary: topic.intro,
+      })),
+    );
+  });
+
+  // Steve's decision: the Help home is tiles only; the guides are listed on
+  // each section's page.
+  it('should list no guide on the Help home itself', () => {
+    createComponent(true);
+
+    HELP_TOPICS.flatMap(topic => topic.guides).forEach(guide => {
+      expect(pageText()).not.toContain(guide.title);
     });
   });
 
-  it('should link each guide to its own page', () => {
-    createComponent(true);
+  // The count is of what this reader may open, so a tile never promises a
+  // guide the section's page will not show them.
+  it('should count only the guides the reader may open, in words', () => {
+    createComponent(true, [PERMISSIONS.STORYTIME_MODERATE]);
 
-    const [guide] = HELP_TOPICS[0].guides;
-    const links = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('a'),
-    ).map(link => link.getAttribute('href'));
-
-    expect(links).toContain(`/help/${guide.slug}`);
+    expect(tiles().at(-1)).toEqual(
+      expect.objectContaining({
+        href: '/help/topics/storytime-admin',
+        count: '1 guide',
+      }),
+    );
   });
 
   // While Storytime is off it is meant to look like a feature that does not
@@ -110,7 +146,7 @@ describe('HelpComponent', () => {
     createComponent(false);
 
     const alwaysAvailable = HELP_TOPICS.filter(
-      topic => !topic.requiresStorytime,
+      topic => topic.requiresFeature !== 'STORYTIME',
     );
 
     expect(component.topics).toEqual(alwaysAvailable);
@@ -131,21 +167,34 @@ describe('HelpComponent', () => {
     expect(pageText()).not.toContain('Running Storytime');
   });
 
+  /**
+   * The guides offered under one section.
+   *
+   * @param id The section's id.
+   * @returns Their titles.
+   */
+  const guideTitlesIn = (id: string): string[] =>
+    component.topics
+      .find(topic => topic.id === id)
+      ?.guides.map(guide => guide.title) ?? [];
+
   it('should offer a moderator the guide to the queue', () => {
     createComponent(true, [PERMISSIONS.STORYTIME_MODERATE]);
 
     expect(pageText()).toContain('Running Storytime');
-    expect(pageText()).toContain('Working the moderation queue');
+    expect(guideTitlesIn('storytime-admin')).toEqual([
+      'Working the moderation queue',
+    ]);
   });
 
-  // The three jobs are handed out one at a time, so holding one of them shows
-  // one guide rather than the set.
+  // The three jobs are handed out one at a time, so holding one of them
+  // offers one guide rather than the set.
   it('should offer only the guide for the job the reader was given', () => {
     createComponent(true, [PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE]);
 
-    expect(pageText()).toContain('Curating the Spotlight');
-    expect(pageText()).not.toContain('Working the moderation queue');
-    expect(pageText()).not.toContain('Looking after the tag list');
+    expect(guideTitlesIn('storytime-admin')).toEqual([
+      'Curating the Spotlight',
+    ]);
   });
 
   // Storytime being off takes its guides with it, whoever is reading.
@@ -164,8 +213,8 @@ describe('HelpComponent', () => {
       providers: [
         provideRouter([]),
         {
-          provide: StorytimeService,
-          useValue: { isOffered: () => of(true) },
+          provide: HelpFeaturesService,
+          useValue: { features: () => of(ALL_HELP_FEATURES_ON) },
         },
         {
           provide: AccessControlService,
@@ -195,32 +244,21 @@ describe('HelpComponent', () => {
     expect(pageText()).toContain('Still stuck?');
   });
 
-  // Every topic is long enough to be worth folding away, so each one gets its
-  // own bar rather than the page having a single toggle.
-  it('should give every topic a heading bar the reader can collapse', () => {
+  // Each tile is headed one level below the page, so a screen reader's list
+  // of headings reads as the list of sections.
+  it('should head each tile one level below the page', () => {
     createComponent(true);
 
-    const bars = (fixture.nativeElement as HTMLElement).querySelectorAll(
-      'app-collapsible-section',
-    );
+    const headings = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('h1, h2'),
+    ).map(heading => heading.tagName);
 
-    // One per topic shown, plus the "Still stuck?" section.
-    expect(bars).toHaveLength(expectedTopics(true).length + 1);
-  });
-
-  it('should hide a topic’s guides once its bar is collapsed', () => {
-    createComponent(true);
-
-    const [guide] = HELP_TOPICS[0].guides;
-    const firstToggle = (fixture.nativeElement as HTMLElement).querySelector(
-      'app-collapsible-section button',
-    ) as HTMLButtonElement;
-
-    firstToggle.click();
-    fixture.detectChanges();
-
-    expect(pageText()).not.toContain(guide.title);
-    expect(pageText()).toContain(HELP_TOPICS[0].title);
+    // One per tile, then "Still stuck?".
+    expect(headings).toEqual([
+      'H1',
+      ...expectedTopics(true).map(() => 'H2'),
+      'H2',
+    ]);
   });
 
   // Somebody the guides did not help needs the way out to be on the page.
@@ -234,11 +272,13 @@ describe('HelpComponent', () => {
     expect(links).toContain('/contact');
   });
 
-  describe('getGuideLink', () => {
-    it('should build the path to a guide', () => {
+  describe('getTopicLink', () => {
+    it('should build the path to a section', () => {
       createComponent(true);
 
-      expect(component.getGuideLink('a-guide')).toBe('/help/a-guide');
+      expect(component.getTopicLink('a-section')).toBe(
+        '/help/topics/a-section',
+      );
     });
   });
 

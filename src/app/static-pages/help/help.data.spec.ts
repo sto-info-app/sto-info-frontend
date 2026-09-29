@@ -98,12 +98,48 @@ describe('help data', () => {
     );
   });
 
+  // FC-048: a section's page is listed when anybody may open it, which is
+  // when it holds at least one guide asking for no permission.
+  it('should list every section anybody may open in the manifest, in order', () => {
+    expect(helpGuideSlugs.topics).toEqual(
+      HELP_TOPICS.filter(
+        topic =>
+          !topic.requiresAdmin &&
+          topic.guides.some(guide => !guide.requiresPermission),
+      ).map(topic => topic.id),
+    );
+  });
+
+  // A section's address is /help/topics/<id>. Two parts where a guide's has
+  // one, so neither can answer for the other, but a guide called "topics"
+  // would still read as the start of a section's address.
+  it('should keep section addresses and guide addresses apart', () => {
+    HELP_TOPICS.forEach(topic => {
+      expect(topic.id).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+    });
+    expect(new Set(HELP_TOPICS.map(topic => topic.id)).size).toBe(
+      HELP_TOPICS.length,
+    );
+    expect(allGuides().map(guide => guide.slug)).not.toContain('topics');
+  });
+
   it('should keep the guides behind a permission out of the sitemap', () => {
     allGuides()
       .filter(guide => guide.requiresPermission)
       .forEach(guide => {
         expect(helpGuideSlugs.slugs).not.toContain(guide.slug);
       });
+  });
+
+  describe('findHelpTopic', () => {
+    it('should find a section by its id', () => {
+      expect(findHelpTopic('community')).toBe(HELP_TOPICS[0]);
+    });
+
+    it('should find nothing for an id that names no section, or none', () => {
+      expect(findHelpTopic('no-such-section')).toBeUndefined();
+      expect(findHelpTopic(null)).toBeUndefined();
+    });
   });
 
   describe('findHelpGuide', () => {

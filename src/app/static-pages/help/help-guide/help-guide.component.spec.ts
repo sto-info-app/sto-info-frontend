@@ -140,6 +140,23 @@ describe('HelpGuideComponent', () => {
     expect(pageText()).toContain(storytimeTopic.title);
   });
 
+  // FC-048: the breadcrumb leads back to the guide's section as well as to
+  // Help, so a reader can step back one level rather than start again.
+  it('should lead back to the topic’s own page from the breadcrumb', () => {
+    createComponent(firstGuide.slug);
+
+    const crumbs = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        '.help-guide__breadcrumb a',
+      ),
+    ).map(link => [link.getAttribute('href'), link.textContent?.trim()]);
+
+    expect(crumbs).toEqual([
+      ['/help', 'Help'],
+      [`/help/topics/${storytimeTopic.id}`, storytimeTopic.title],
+    ]);
+  });
+
   it('should offer the other guides in the topic, but not this one', () => {
     createComponent(firstGuide.slug);
 
@@ -205,6 +222,7 @@ describe('HelpGuideComponent', () => {
 
     expect(component.guide).toBeNull();
     expect(component.unavailableReason).toBe('DISABLED');
+    expect(component.topicLink).toBe('');
     expect(navigateSpy).not.toHaveBeenCalled();
     expect(pageText()).toContain('switched off at the moment');
   });

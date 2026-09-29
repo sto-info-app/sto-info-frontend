@@ -11,24 +11,26 @@ import { RouterModule } from '@angular/router';
 import { catchError, combineLatest, of } from 'rxjs';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
-import { StorytimeService } from 'src/app/storytime/storytime.service';
 
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { HelpFeaturesService } from './help-features.service';
 import { visibleHelpTopics } from './help.data';
 import { HelpTopic } from './help.models';
 
 /**
  * The help index.
  *
- * Lists the guides on offer, grouped by the part of the site they cover. The
- * guides themselves are content held in `help.data.ts`; this page only decides
- * which of them a given visitor may be shown.
+ * One tile for each section on offer, which opens the section's own page
+ * (FC-048, Steve's decisions of 29 September 2026). The guides themselves are
+ * content held in `help.data.ts`; this page only decides which sections a
+ * given visitor may be shown, and how many guides each holds for them.
  *
- * It checks the Storytime switch itself rather than being told, because it is
- * reachable whether or not Storytime exists — unlike the Storytime pages, which
- * a guard has already vetted before they render.
+ * It checks the feature switches itself rather than being told, because it is
+ * reachable whether or not Storytime or Fleet Community exists — unlike their
+ * own pages, which a guard has already vetted before they render.
  */
 @Component({
   selector: 'app-help',
@@ -44,8 +46,9 @@ export class HelpComponent implements OnInit {
   topics: HelpTopic[] = [];
 
   private readonly _routingService = inject(RoutingService);
-  private readonly _storytimeService = inject(StorytimeService);
+  private readonly _helpFeatures = inject(HelpFeaturesService);
   private readonly _accessControlService = inject(AccessControlService);
+  private readonly _authService = inject(AuthService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
@@ -53,9 +56,9 @@ export class HelpComponent implements OnInit {
   /**
    * Works out which topics to show.
    *
-   * Storytime guides wait on the feature switch: while Storytime is off it is
-   * meant to look like a feature that does not exist, and a page of guides
-   * describing it would give that away.
+   * Guides about Storytime, Fleet Community or Fleet chat wait on its switch:
+   * while a feature is off it is meant to look like one that does not exist,
+   * and a page of guides describing it would give that away.
    *
    * The guides for running Storytime wait on the permission for the page each
    * one describes, so a moderator is offered the moderation guide and nobody
@@ -69,7 +72,7 @@ export class HelpComponent implements OnInit {
    */
   ngOnInit(): void {
     combineLatest([
-      this._storytimeService.isOffered(),
+      this._helpFeatures.features(),
       this._accessControlService
         .getMyPermissions()
         .pipe(catchError(() => of(new Set<string>() as ReadonlySet<string>))),
@@ -78,19 +81,37 @@ export class HelpComponent implements OnInit {
         takeUntilDestroyed(this._destroyRef),
         observeInZone(this._ngZone, this._cdr),
       )
-      .subscribe(([isStorytimeOffered, permissions]) => {
-        this.topics = visibleHelpTopics(isStorytimeOffered, permissions);
+      .subscribe(([features, permissions]) => {
+        this.topics = visibleHelpTopics(
+          features,
+          permissions,
+          this._authService.isAdmin(),
+        );
       });
   }
 
   /**
-   * Builds the path to a guide.
+   * Builds the path to a section's page (FC-048).
    *
-   * @param slug The guide's slug.
-   * @returns The router path to that guide.
+   * @param id The section's id.
+   * @returns The router path to that section.
    */
-  getGuideLink(slug: string): string {
-    return `${this._routingService.getLink(this.appRoutes.HELP)}/${slug}`;
+  getTopicLink(id: string): string {
+    return this._routingService.getLink(
+      this.appRoutes.HELP_TOPIC.replace(':topicId', id),
+    );
+  }
+
+  /**
+   * How many guides a tile's section holds for this reader, in words.
+   *
+   * @param topic The section, already filtered to what the reader may open.
+   * @returns For example "6 guides".
+   */
+  guideCountOf(topic: HelpTopic): string {
+    return topic.guides.length === 1
+      ? '1 guide'
+      : `${topic.guides.length} guides`;
   }
 
   /**

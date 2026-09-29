@@ -1,0 +1,74 @@
+@if (unavailableReason) {
+  <article id="help-topic-page">
+    <p class="help-guide__breadcrumb">
+      <a [routerLink]="getRouteLink(appRoutes.HELP)">Help</a>
+    </p>
+
+    <app-feature-unavailable
+      [featureName]="unavailableFeatureName"
+      [reason]="unavailableReason" />
+
+    <div class="buttons-row">
+      <a
+        [routerLink]="getRouteLink(appRoutes.HELP)"
+        class="violet"
+        >All sections</a
+      >
+    </div>
+  </article>
+}
+
+@if (topic) {
+  <article id="help-topic-page">
+    <p class="help-guide__breadcrumb">
+      <a [routerLink]="getRouteLink(appRoutes.HELP)">Help</a>
+      <span aria-hidden="true">&rsaquo;</span>
+      <span aria-current="page">{{ topic.title }}</span>
+    </p>
+
+    <h1>{{ topic.title }}</h1>
+
+    <p class="help-topic__intro">{{ topic.intro }}</p>
+
+    <ul
+      class="help-guide-list"
+      [attr.aria-label]="topic.title + ' guides'">
+      @for (guide of guides; track guide.slug) {
+        <!--
+          Each guide is a panel in its section's colour, and the panel is the
+          link rather than something with a link in it: somebody reaching for
+          a guide aims at the box, so the anchor fills the box.
+        -->
+        <li class="help-panel-card help-panel-card--{{ topic.id }}">
+          <a
+            class="help-panel-card__link"
+            [routerLink]="getGuideLink(guide.slug)">
+            <div class="help-panel-card__heading">
+              <h2 class="help-panel-card__name">{{ guide.title }}</h2>
+              <span class="help-panel-card__marks">
+                <i
+                  class="fas fa-chevron-right"
+                  aria-hidden="true"></i>
+              </span>
+            </div>
+
+            <p class="help-panel-card__summary">{{ guide.summary }}</p>
+          </a>
+        </li>
+      }
+    </ul>
+
+    <div class="buttons-row">
+      <a
+        [routerLink]="getRouteLink(appRoutes.HELP)"
+        class="violet"
+        >All sections</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.CONTACT)"
+        class="ice"
+        >Contact us</a
+      >
+    </div>
+  </article>
+}

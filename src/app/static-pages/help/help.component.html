@@ -6,44 +6,36 @@
     None of them assume you have read any of the others.
   </p>
 
-  @for (topic of topics; track topic.id) {
-    <app-collapsible-section
-      [heading]="topic.title"
-      barClass="small-lcars-bar-gap">
-      <p class="help-topic__intro">{{ topic.intro }}</p>
+  <!--
+    One tile per section (FC-048). Each opens the section's own page, which
+    lists its guides; the count is of the guides this reader may open, so a
+    tile never promises a guide its page will not show.
+  -->
+  <ul
+    class="help-tile-grid"
+    aria-label="Help sections">
+    @for (topic of topics; track topic.id) {
+      <li class="help-panel-card help-panel-card--{{ topic.id }}">
+        <a
+          class="help-panel-card__link"
+          [routerLink]="getTopicLink(topic.id)">
+          <div class="help-panel-card__heading">
+            <h2 class="help-panel-card__name">{{ topic.title }}</h2>
+            <span class="help-panel-card__marks">
+              <span class="help-panel-card__count">{{
+                guideCountOf(topic)
+              }}</span>
+              <i
+                class="fas fa-chevron-right"
+                aria-hidden="true"></i>
+            </span>
+          </div>
 
-      <ul class="help-guide-list">
-        @for (guide of topic.guides; track guide.slug) {
-          <!--
-            Each guide is a panel of the shape Storytime's are, in its topic's
-            colour: the index is a set of things to choose between, and a panel
-            says that where a heading with a line under it does not.
-          -->
-          <li class="help-panel-card help-panel-card--{{ topic.id }}">
-            <!--
-              The panel is the link rather than something with a link in it.
-              Somebody reaching for a guide aims at the box, so the anchor
-              fills the box.
-            -->
-            <a
-              class="help-panel-card__link"
-              [routerLink]="getGuideLink(guide.slug)">
-              <div class="help-panel-card__heading">
-                <h3 class="help-panel-card__name">{{ guide.title }}</h3>
-                <span class="help-panel-card__marks">
-                  <i
-                    class="fas fa-chevron-right"
-                    aria-hidden="true"></i>
-                </span>
-              </div>
-
-              <p class="help-panel-card__summary">{{ guide.summary }}</p>
-            </a>
-          </li>
-        }
-      </ul>
-    </app-collapsible-section>
-  }
+          <p class="help-panel-card__summary">{{ topic.intro }}</p>
+        </a>
+      </li>
+    }
+  </ul>
 
   <app-collapsible-section
     heading="Still stuck?"

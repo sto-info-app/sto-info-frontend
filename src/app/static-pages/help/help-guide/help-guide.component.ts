@@ -71,6 +71,9 @@ export class HelpGuideComponent implements OnInit {
   /** The topic heading, shown above the guide's title. */
   topicTitle = '';
 
+  /** The topic's own page, which the breadcrumb leads back to (FC-048). */
+  topicLink = '';
+
   /**
    * Why Storytime is out of reach, when a Storytime guide was asked for and
    * the feature is not there. Null whenever the guide itself is shown.
@@ -177,6 +180,9 @@ export class HelpGuideComponent implements OnInit {
     this.unavailableReason = null;
     this.guide = location.guide;
     this.topicTitle = location.topic.title;
+    this.topicLink = this._routingService.getLink(
+      this.appRoutes.HELP_TOPIC.replace(':topicId', location.topic.id),
+    );
     this.otherGuides = location.topic.guides.filter(
       candidate =>
         candidate.slug !== location.guide.slug &&
@@ -199,6 +205,7 @@ export class HelpGuideComponent implements OnInit {
     this.guide = null;
     this.otherGuides = [];
     this.topicTitle = '';
+    this.topicLink = '';
     this.unavailableReason =
       availability === STORYTIME_AVAILABILITY_UNAVAILABLE
         ? FEATURE_UNAVAILABLE_OFFLINE

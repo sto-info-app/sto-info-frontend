@@ -3,10 +3,11 @@
 @use 'lcars-mixins' as mixins;
 
 // The help section.
-// Two pages — the index and a guide — that are mostly text, so there is very
-// little here: enough to make the index read as a set of panels the reader
-// chooses between, and enough to keep a wall of prose comfortable to read.
-// Everything is scoped by the `help-` prefix its templates use.
+// Three pages — the index, a section and a guide — that are mostly text, so
+// there is very little here: enough to make the index and each section read as
+// a set of panels the reader chooses between, and enough to keep a wall of
+// prose comfortable to read. Everything is scoped by the `help-` prefix its
+// templates use.
 
 // What each topic's guides are coloured, keyed by the topic's id.
 // ---
@@ -23,11 +24,15 @@ $help-topic-colours: (
   'storytime-admin': vars.$lcars-bluey,
 );
 
-#help-page {
+// The index's section tiles (FC-048) and a section's guides are the same
+// panels, so the two pages share everything below.
+#help-page,
+#help-topic-page {
   .help-topic__intro {
     margin-bottom: 1rem;
   }
 
+  .help-tile-grid,
   .help-guide-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -83,6 +88,13 @@ $help-topic-colours: (
     @include mixins.lcars-panel-card-marks;
   }
 
+  // How many guides a section holds for the reader. It sits on the title's
+  // block, so it takes the block's black text rather than a colour of its own.
+  .help-panel-card__count {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
   .help-panel-card__summary {
     @include mixins.lcars-panel-card-body;
 
@@ -101,7 +113,8 @@ $help-topic-colours: (
 // inside it: the two selectors weigh the same, so source order is what decides
 // whether a topic's colour is heard over the stand-in.
 @each $id, $colour in $help-topic-colours {
-  #help-page .help-panel-card--#{$id} {
+  #help-page .help-panel-card--#{$id},
+  #help-topic-page .help-panel-card--#{$id} {
     @include mixins.lcars-panel-card($colour);
 
     margin-bottom: 0;
@@ -116,7 +129,8 @@ $help-topic-colours: (
   }
 }
 
-#help-guide-page {
+#help-guide-page,
+#help-topic-page {
   .help-guide__breadcrumb {
     display: flex;
     gap: 0.5rem;

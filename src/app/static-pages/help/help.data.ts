@@ -1152,6 +1152,16 @@ export function isGuidePermitted(
 }
 
 /**
+ * Finds a section by its id, whatever the reader may see of it.
+ *
+ * @param id The section id taken from the route.
+ * @returns The section, or undefined when none has that id.
+ */
+export function findHelpTopic(id: string | null): HelpTopic | undefined {
+  return HELP_TOPICS.find(topic => topic.id === id);
+}
+
+/**
  * Finds a guide by its slug.
  *
  * Returns the topic as well as the guide, because the page showing a guide has
