@@ -16,7 +16,9 @@ import { ROSTER_IMPORT_READERS } from 'src/app/fleet/imports/roster-import.const
 import { GOVERNANCE_READER_ROLES } from 'src/app/fleet/governance/governance.constants';
 import { RECRUITMENT_TAB_CAPABILITIES } from 'src/app/fleet/recruitment/recruitment.constants';
 import { ROSTER_VIEW_CAPABILITY } from 'src/app/fleet/roster/roster.constants';
+import { CHAT_POST_CAPABILITY } from 'src/app/fleet/chat/chat.text';
 import { ResolvedStoFleet } from 'src/app/models/fleet.models';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 
 /** What the strip needs to know about the Fleet it sits on. */
 export interface FleetTabsVm {
@@ -92,6 +94,14 @@ export function fleetTabsVmOf(resolved: ResolvedStoFleet): FleetTabsVm | null {
 export class FleetTabsComponent {
   private readonly _reportService = inject(FleetReportService);
 
+  /** Whether chat is switched on (FC-033). */
+  private readonly _chatOffered = toSignal(
+    inject(FleetConfigurationService)
+      .getFeatures()
+      .pipe(map(features => features.chatEnabled)),
+    { initialValue: false },
+  );
+
   /** The Fleet the strip sits on. */
   readonly vm = input.required<FleetTabsVm>();
 
@@ -105,14 +115,13 @@ export class FleetTabsComponent {
    */
   private readonly _hasReports = toSignal(
     toObservable(this.vm).pipe(
+      // Every Fleet has reports read from its own records (FC-030), so the
+      // server is asked whatever its game writes.
       switchMap(vm =>
-        // Reports are counted from rosters, so a Fleet with none has none.
-        vm.providesRoster
-          ? this._reportService.visible(vm.communityId, vm.fleetId).pipe(
-              map(reports => reports.length > 0),
-              catchError(() => of(false)),
-            )
-          : of(false),
+        this._reportService.visible(vm.communityId, vm.fleetId).pipe(
+          map(reports => reports.length > 0),
+          catchError(() => of(false)),
+        ),
       ),
     ),
     { initialValue: false },
@@ -121,6 +130,7 @@ export class FleetTabsComponent {
   /** The tabs the reader is offered, in strip order. */
   readonly tabs = computed<FleetTab[]>(() => {
     const {
+      fleetId,
       communitySlug,
       platformSegment,
       fleetSlug,
@@ -142,6 +152,24 @@ export class FleetTabsComponent {
     tabs.push({
       link: FLEET_LINKS.fleetNews(communitySlug, platformSegment, fleetSlug),
       label: 'News',
+      exact: false,
+    });
+
+    // Its activity (FC-029): for whoever may see each item.
+    tabs.push({
+      link: FLEET_LINKS.fleetActivity(
+        communitySlug,
+        platformSegment,
+        fleetSlug,
+      ),
+      label: 'Activity',
+      exact: false,
+    });
+
+    // Its events (FC-030): for whoever each is shown to.
+    tabs.push({
+      link: FLEET_LINKS.fleetEvents(communitySlug, platformSegment, fleetSlug),
+      label: 'Events',
       exact: false,
     });
 
@@ -241,6 +269,19 @@ export class FleetTabsComponent {
         label: 'Manage',
         // Lit on its roles, delegation and history too.
         exact: false,
+      });
+    }
+
+    // Its chat (FC-033): a door out to the chat page, so last, for its
+    // members and role holders while chat is on.
+    if (
+      this._chatOffered() &&
+      (capabilities.includes(CHAT_POST_CAPABILITY) || roles.length > 0)
+    ) {
+      tabs.push({
+        link: ['/chat', 'fleets', fleetId],
+        label: 'Chat',
+        exact: true,
       });
     }
 

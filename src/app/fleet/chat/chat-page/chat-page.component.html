@@ -1,0 +1,285 @@
+<div
+  id="chat-page"
+  class="chat-page"
+  [class.chat-page--open]="selection() !== null || isMissing()">
+  <h1>Chat</h1>
+
+  @switch (status()) {
+    @case ('offline') {
+      <app-lcars-information-message
+        title="Reconnecting"
+        message="Chat lost its connection and is reconnecting. Anything sent meanwhile will go once it is back."></app-lcars-information-message>
+    }
+    @case ('replaced') {
+      <div class="chat-page__banner">
+        <app-lcars-warning-message
+          title="Chat is open elsewhere"
+          message="Chat is open in five other tabs or devices, so this one gave way."></app-lcars-warning-message>
+        <button
+          type="button"
+          class="lcars-btn sunflower"
+          (click)="reconnect()">
+          Use chat here
+        </button>
+      </div>
+    }
+    @case ('signedOut') {
+      <app-lcars-warning-message
+        title="Signed out"
+        message="Your session has ended. Sign in again to use chat."></app-lcars-warning-message>
+    }
+  }
+
+  @if (actionError(); as error) {
+    <app-lcars-error-message
+      title="Channel not saved"
+      [message]="error"></app-lcars-error-message>
+  }
+
+  @if (isLoading()) {
+    <app-loading-bar loadingText="Reading your chats"></app-loading-bar>
+  } @else if (errorMessage(); as error) {
+    <app-lcars-error-message
+      title="Chat"
+      [message]="error"></app-lcars-error-message>
+  } @else {
+    <div class="chat-page__layout">
+      <nav
+        class="chat-page__list"
+        aria-label="Your chats">
+        @if (scopes().length === 0 && conversations().length === 0) {
+          <p class="fleet-community-empty">
+            You have no chats yet. Chat opens to members of a Fleet, its Armada
+            and its Community, and between friends.
+          </p>
+        }
+
+        @for (scope of scopes(); track scope.path) {
+          <section class="chat-page__scope">
+            <h2 class="chat-page__scope-name">
+              <span class="chat-page__scope-kind">{{
+                scopeLabels[scope.kind]
+              }}</span
+              >&ngsp;<a [routerLink]="scope.path">{{ scope.name }}</a>
+            </h2>
+            <ul class="chat-page__places">
+              @for (channel of scope.channels; track channel.id) {
+                <li class="chat-page__place">
+                  <a
+                    class="chat-page__place-link"
+                    [routerLink]="['/chat', 'channels', channel.id]"
+                    [attr.aria-current]="isOpenChannel(channel) ? 'page' : null"
+                    [class.chat-page__place-link--open]="
+                      isOpenChannel(channel)
+                    ">
+                    <span># {{ channel.name }}</span>
+                    @if (channel.readRole !== 'MEMBER') {
+                      &ngsp;<span class="chat-page__place-note">{{
+                        roleLabels[channel.readRole]
+                      }}</span>
+                    }
+                  </a>
+                  @if (channel.mayManage || scope.mayExport) {
+                    <span class="chat-page__manage">
+                      @if (scope.mayExport) {
+                        <button
+                          type="button"
+                          class="chat-page__manage-button"
+                          [attr.aria-label]="
+                            'Export a transcript of ' + channel.name
+                          "
+                          (click)="exportTranscript(scope, channel)">
+                          <i
+                            class="fas fa-file-lines"
+                            aria-hidden="true"></i>
+                        </button>
+                      }
+                      @if (channel.mayManage) {
+                        <button
+                          type="button"
+                          class="chat-page__manage-button"
+                          [attr.aria-label]="'Change ' + channel.name"
+                          (click)="changeChannel(scope, channel)">
+                          <i
+                            class="fas fa-user-pen"
+                            aria-hidden="true"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="chat-page__manage-button"
+                          [attr.aria-label]="'Archive ' + channel.name"
+                          (click)="archiveChannel(scope, channel)">
+                          <i
+                            class="fas fa-box-archive"
+                            aria-hidden="true"></i>
+                        </button>
+                      }
+                    </span>
+                  }
+                </li>
+              }
+            </ul>
+            @if (scope.mayCreate) {
+              <button
+                type="button"
+                class="lcars-btn sky chat-page__add"
+                (click)="addChannel(scope)">
+                Add channel
+              </button>
+            }
+          </section>
+        }
+
+        <section class="chat-page__scope">
+          <h2 class="chat-page__scope-name">Direct messages</h2>
+          @if (conversations().length === 0) {
+            <p class="chat-page__place-note">
+              Open a conversation from a friend's profile.
+            </p>
+          } @else {
+            <ul class="chat-page__places">
+              @for (conversation of conversations(); track conversation.id) {
+                <li class="chat-page__place">
+                  <a
+                    class="chat-page__place-link"
+                    [routerLink]="['/chat', 'direct', conversation.id]"
+                    [attr.aria-current]="
+                      isOpenConversation(conversation) ? 'page' : null
+                    "
+                    [class.chat-page__place-link--open]="
+                      isOpenConversation(conversation)
+                    ">
+                    <span class="chat-page__friend">
+                      <span
+                        class="chat-presence"
+                        [class.chat-presence--online]="isOnline(conversation)"
+                        aria-hidden="true"></span>
+                      {{ conversation.other.username ?? 'Somebody' }}
+                      @if (isOnline(conversation)) {
+                        <span class="sr-only">(online)</span>
+                      }
+                    </span>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        @if (mayExport() || transcripts().length > 0) {
+          <section
+            class="chat-page__scope chat-page__transcripts"
+            aria-labelledby="chat-transcripts-heading">
+            <h2
+              id="chat-transcripts-heading"
+              class="chat-page__scope-name">
+              Your transcripts
+            </h2>
+            @if (transcriptError(); as error) {
+              <app-lcars-error-message
+                title="Transcripts"
+                [message]="error"></app-lcars-error-message>
+            }
+            @if (transcripts().length === 0) {
+              <p class="chat-page__place-note">
+                Export a channel's transcript with the export button beside it.
+                Transcripts you asked for in the last day show here.
+              </p>
+            }
+            @if (hasPending()) {
+              <p class="chat-page__place-note">
+                You'll get a notice when a transcript is ready. Refresh to see
+                it here.
+              </p>
+            }
+            @if (transcripts().length > 0) {
+              <ul class="chat-page__places">
+                @for (transcript of transcripts(); track transcript.id) {
+                  <li class="chat-page__transcript">
+                    <span class="chat-page__transcript-name">
+                      # {{ transcript.channelName }}
+                      @if (transcript.scopeName; as scopeName) {
+                        &ngsp;<span class="chat-page__place-note">{{
+                          scopeName
+                        }}</span>
+                      }
+                    </span>
+                    <span class="chat-page__place-note">
+                      {{ transcript.fromAt | appDate: 'short' }} to
+                      {{ transcript.toAt | appDate: 'short' }}
+                    </span>
+                    <span class="chat-page__transcript-status">
+                      {{ transcriptStatusLabels[transcript.status] }}
+                      @if (transcript.messageCount !== null) {
+                        · {{ transcript.messageCount }}
+                        {{
+                          transcript.messageCount === 1 ? 'message' : 'messages'
+                        }}
+                      }
+                    </span>
+                    @if (isDownloadable(transcript)) {
+                      <button
+                        type="button"
+                        class="lcars-btn green chat-page__transcript-download"
+                        [attr.aria-label]="
+                          'Download the transcript of ' + transcript.channelName
+                        "
+                        (click)="download(transcript)">
+                        Download
+                      </button>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+            <button
+              type="button"
+              class="lcars-btn sky chat-page__add"
+              (click)="refreshTranscripts()">
+              Refresh
+            </button>
+          </section>
+        }
+      </nav>
+
+      <div class="chat-page__open">
+        @if (selection(); as open) {
+          @if (open.kind === 'channel') {
+            <app-chat-conversation
+              [place]="open.place"
+              [title]="'# ' + open.channel.name"
+              [subtitle]="
+                scopeLabels[open.scope.kind] + ' · ' + open.scope.name
+              "
+              [mayPost]="open.channel.mayPost"
+              [mayModerate]="open.scope.mayCreate"
+              [mayReport]="open.channel.mayReport"
+              (removed)="onRemoved()"
+              (back)="showList()"></app-chat-conversation>
+          } @else {
+            <app-chat-conversation
+              [place]="open.place"
+              [title]="open.conversation.other.username ?? 'Somebody'"
+              subtitle="Direct messages"
+              [partner]="open.conversation.other"
+              [mayReport]="true"
+              (removed)="onRemoved()"
+              (back)="showList()"></app-chat-conversation>
+          }
+        } @else if (isMissing()) {
+          <app-lcars-error-message
+            title="Not found"
+            message="That chat is not there, or you can no longer read it."></app-lcars-error-message>
+          <button
+            type="button"
+            class="lcars-btn sky"
+            (click)="showList()">
+            All chats
+          </button>
+        } @else {
+          <p class="chat-page__prompt">Choose a channel or a conversation.</p>
+        }
+      </div>
+    </div>
+  }
+</div>

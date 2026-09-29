@@ -323,6 +323,16 @@ export const routes: Routes = [
   },
 
   // *****************************************
+  // * Chat (authenticated, FC-033)
+  {
+    path: APP_ROUTES.CHAT,
+    loadChildren: () =>
+      import('./fleet/chat/chat.routes').then(m => m.CHAT_ROUTES),
+    data: { title: APP_ROUTE_TITLES.CHAT, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+
+  // *****************************************
   // * Admin (admin role required)
   {
     path: APP_ROUTES.ADMIN,

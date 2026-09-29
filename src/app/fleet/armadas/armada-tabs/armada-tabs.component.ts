@@ -2,18 +2,26 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+
+import { map } from 'rxjs';
 
 import { ARMADA_MANAGE_CAPABILITY } from 'src/app/fleet/armadas/armada.constants';
 import { FleetTab } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
+import { CHAT_POST_CAPABILITY } from 'src/app/fleet/chat/chat.text';
 import { GOVERNANCE_READER_ROLES } from 'src/app/fleet/governance/governance.constants';
 import { ResolvedStoArmada } from 'src/app/models/fleet.models';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 
 /** What the Armada tab strip needs to know. */
 export interface ArmadaTabsVm {
+  /** The Armada, for the way into its chat (FC-033). */
+  readonly armadaId: string;
   readonly communitySlug: string;
   readonly platformSegment: string;
   readonly armadaSlug: string;
@@ -31,6 +39,7 @@ export interface ArmadaTabsVm {
  */
 export function armadaTabsVmOf(resolved: ResolvedStoArmada): ArmadaTabsVm {
   return {
+    armadaId: resolved.armada.id,
     communitySlug: resolved.communitySlug,
     platformSegment: resolved.platformSegment,
     armadaSlug: resolved.armada.slug,
@@ -58,10 +67,24 @@ export class ArmadaTabsComponent {
   /** The Armada the strip sits on. */
   readonly vm = input.required<ArmadaTabsVm>();
 
+  /** Whether chat is switched on (FC-033). */
+  private readonly _chatOffered = toSignal(
+    inject(FleetConfigurationService)
+      .getFeatures()
+      .pipe(map(features => features.chatEnabled)),
+    { initialValue: false },
+  );
+
   /** The tabs the reader is offered, in strip order. */
   readonly tabs = computed<FleetTab[]>(() => {
-    const { communitySlug, platformSegment, armadaSlug, capabilities, roles } =
-      this.vm();
+    const {
+      armadaId,
+      communitySlug,
+      platformSegment,
+      armadaSlug,
+      capabilities,
+      roles,
+    } = this.vm();
     const tabs: FleetTab[] = [
       {
         link: FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
@@ -132,6 +155,19 @@ export class ArmadaTabsComponent {
         label: 'Manage',
         // Lit on its roles, delegation and history too.
         exact: false,
+      });
+    }
+
+    // Its chat (FC-033): a door out to the chat page, so last, for whoever
+    // takes part in it while chat is on.
+    if (
+      this._chatOffered() &&
+      (capabilities.includes(CHAT_POST_CAPABILITY) || roles.length > 0)
+    ) {
+      tabs.push({
+        link: ['/chat', 'armadas', armadaId],
+        label: 'Chat',
+        exact: true,
       });
     }
 

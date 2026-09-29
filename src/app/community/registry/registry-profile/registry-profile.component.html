@@ -267,6 +267,15 @@
               <p class="registry-relationship-state">
                 {{ profile.username }} is on your friends list.
               </p>
+              @if (isChatOffered) {
+                <button
+                  type="button"
+                  class="full-width-btn-link sky"
+                  [disabled]="isActing"
+                  (click)="message()">
+                  Message
+                </button>
+              }
               <button
                 type="button"
                 class="full-width-btn-link african-violet"

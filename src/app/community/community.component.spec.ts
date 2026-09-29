@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { FLEET_FEATURES_DISABLED } from 'src/app/models/fleet.models';
 import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { CommunityComponent } from './community.component';
@@ -28,7 +29,10 @@ describe('CommunityComponent', () => {
         },
         {
           provide: FleetConfigurationService,
-          useValue: { isOffered: () => fleetOffered$ },
+          useValue: {
+            isOffered: () => fleetOffered$,
+            getFeatures: () => of(FLEET_FEATURES_DISABLED),
+          },
         },
       ],
     }).compileComponents();

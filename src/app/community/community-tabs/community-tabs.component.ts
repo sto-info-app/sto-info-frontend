@@ -66,6 +66,9 @@ export class CommunityTabsComponent {
    */
   private isFleetOffered = false;
 
+  /** Whether chat is switched on (FC-033), kept the same way. */
+  private isChatOffered = false;
+
   constructor() {
     this._fleetConfiguration
       .isOffered()
@@ -75,6 +78,15 @@ export class CommunityTabsComponent {
       )
       .subscribe(isOffered => {
         this.isFleetOffered = isOffered;
+      });
+    this._fleetConfiguration
+      .getFeatures()
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(features => {
+        this.isChatOffered = features.chatEnabled;
       });
   }
 
@@ -135,6 +147,15 @@ export class CommunityTabsComponent {
         // Exact, though it can never be lit from within this section. Said
         // plainly so that nothing later mistakes it for a tab that is meant
         // to match the addresses beneath it.
+        exact: true,
+      });
+    }
+
+    // Chat (FC-033): a door out too, for a signed-in reader while it is on.
+    if (this.isChatOffered && this._authService.isLoggedIn()) {
+      tabs.push({
+        link: this.link(APP_ROUTES.CHAT),
+        label: 'Chat',
         exact: true,
       });
     }

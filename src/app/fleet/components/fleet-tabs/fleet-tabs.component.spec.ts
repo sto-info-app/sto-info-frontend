@@ -8,7 +8,11 @@ import {
   FleetReport,
   FleetReportView,
 } from 'src/app/models/fleet-report.models';
-import { ResolvedStoFleet } from 'src/app/models/fleet.models';
+import {
+  FLEET_FEATURES_DISABLED,
+  ResolvedStoFleet,
+} from 'src/app/models/fleet.models';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 
 import {
   FleetTabsComponent,
@@ -59,15 +63,23 @@ function consoleVm(...capabilities: string[]): FleetTabsVm {
 describe('FleetTabsComponent', () => {
   let fixture: ComponentFixture<FleetTabsComponent>;
   let reports: { visible: jest.Mock };
+  let chatEnabled: boolean;
 
   beforeEach(async () => {
     reports = { visible: jest.fn(() => of([])) };
 
+    chatEnabled = false;
     await TestBed.configureTestingModule({
       imports: [FleetTabsComponent],
       providers: [
         provideRouter([]),
         { provide: FleetReportService, useValue: reports },
+        {
+          provide: FleetConfigurationService,
+          useValue: {
+            getFeatures: () => of({ ...FLEET_FEATURES_DISABLED, chatEnabled }),
+          },
+        },
       ],
     }).compileComponents();
   });
@@ -88,17 +100,37 @@ describe('FleetTabsComponent', () => {
     ).map(tab => [tab.textContent?.trim() ?? '', tab.getAttribute('href')]);
   }
 
+  describe('the Chat door (FC-033)', () => {
+    const CHAT_DOOR = ['Chat', '/chat/fleets/fleet-1'];
+
+    it('offers members and role holders a way into chat, last, while it is on', () => {
+      chatEnabled = true;
+
+      expect(draw(vm('chat.post')).at(-1)).toEqual(CHAT_DOOR);
+      expect(draw({ ...vm(), roles: ['Officer'] }).at(-1)).toEqual(CHAT_DOOR);
+      expect(draw(vm()).at(-1)).toEqual(HOLDINGS_TAB);
+    });
+
+    it('offers no door while chat is off', () => {
+      expect(draw(vm('chat.post')).at(-1)).toEqual(HOLDINGS_TAB);
+    });
+  });
+
   // FC-023 and FC-027: holdings and news are public, so every reader has
   // three tabs at least.
   it('offers News and Holdings to anybody, signed in or not', () => {
     expect(draw(vm())).toEqual([
       ['Overview', FLEET_HREF],
       NEWS_TAB,
+      ACTIVITY_TAB,
+      EVENTS_TAB,
       HOLDINGS_TAB,
     ]);
     expect(draw(consoleVm())).toEqual([
       ['Overview', FLEET_HREF],
       NEWS_TAB,
+      ACTIVITY_TAB,
+      EVENTS_TAB,
       HOLDINGS_TAB,
     ]);
   });
@@ -109,6 +141,8 @@ describe('FleetTabsComponent', () => {
       expect(draw(vm(capability))).toEqual([
         ['Overview', FLEET_HREF],
         NEWS_TAB,
+        ACTIVITY_TAB,
+        EVENTS_TAB,
         HOLDINGS_TAB,
         ['Investigate', `${FLEET_HREF}/investigate`],
       ]);
@@ -119,6 +153,8 @@ describe('FleetTabsComponent', () => {
     expect(draw(vm('roster.view'))).toEqual([
       ['Overview', FLEET_HREF],
       NEWS_TAB,
+      ACTIVITY_TAB,
+      EVENTS_TAB,
       ['Roster', `${FLEET_HREF}/roster`],
       ['History', `${FLEET_HREF}/history`],
       HOLDINGS_TAB,
@@ -131,6 +167,8 @@ describe('FleetTabsComponent', () => {
     ).toEqual([
       'Overview',
       'News',
+      'Activity',
+      'Events',
       'Roster',
       'History',
       'Holdings',
@@ -149,6 +187,8 @@ describe('FleetTabsComponent', () => {
       expect(draw(vm())).toEqual([
         ['Overview', FLEET_HREF],
         NEWS_TAB,
+        ACTIVITY_TAB,
+        EVENTS_TAB,
         ['Reports', `${FLEET_HREF}/reports`],
         HOLDINGS_TAB,
       ]);
@@ -159,6 +199,8 @@ describe('FleetTabsComponent', () => {
       expect(draw(vm('roster.view')).map(([label]) => label)).toEqual([
         'Overview',
         'News',
+        'Activity',
+        'Events',
         'Roster',
         'History',
         'Holdings',
@@ -171,6 +213,8 @@ describe('FleetTabsComponent', () => {
       expect(draw(vm('roster.view')).map(([label]) => label)).toEqual([
         'Overview',
         'News',
+        'Activity',
+        'Events',
         'Roster',
         'History',
         'Holdings',

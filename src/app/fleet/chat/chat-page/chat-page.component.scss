@@ -1,0 +1,176 @@
+@use 'lcars-variables' as vars;
+
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.chat-page__banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.chat-page__layout {
+  display: grid;
+  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+
+  // Stacked below 720px: the list, or the open place with a way back.
+  @media (width < 720px) {
+    grid-template-columns: minmax(0, 1fr);
+
+    .chat-page--open & .chat-page__list {
+      display: none;
+    }
+
+    .chat-page:not(.chat-page--open) & .chat-page__open {
+      display: none;
+    }
+  }
+}
+
+.chat-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.chat-page__scope-name {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  color: vars.$lcars-sky;
+  font-family: vars.$font-antonio;
+  overflow-wrap: anywhere;
+
+  a {
+    color: inherit;
+  }
+}
+
+.chat-page__scope-kind {
+  display: block;
+  font-size: 0.75rem;
+  color: vars.$lcars-grey-light;
+  text-transform: uppercase;
+}
+
+.chat-page__places {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chat-page__place {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.chat-page__place-link {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0 1rem 1rem 0;
+  color: vars.$lcars-white;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+
+  &:hover,
+  &:focus-visible {
+    background: vars.$lcars-card-surface-hover;
+  }
+
+  &--open {
+    background: vars.$lcars-sky;
+    color: vars.$lcars-black;
+
+    &:hover,
+    &:focus-visible {
+      background: vars.$lcars-sky;
+    }
+
+    .chat-page__place-note {
+      color: vars.$lcars-black;
+    }
+  }
+}
+
+.chat-page__place-note {
+  margin: 0;
+  font-size: 0.75rem;
+  color: vars.$lcars-grey-light;
+}
+
+.chat-page__manage {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.chat-page__manage-button {
+  padding: 0.2rem 0.35rem;
+  border: 0;
+  background: none;
+  color: vars.$lcars-sky;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: vars.$lcars-white;
+  }
+}
+
+.chat-page__add {
+  margin-top: 0.35rem;
+}
+
+.chat-page__open {
+  min-width: 0;
+}
+
+.chat-page__prompt {
+  color: vars.$lcars-grey-light;
+}
+
+.chat-page__friend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+// A friend's presence (FC-034): hollow when away, filled when online.
+.chat-presence {
+  width: 0.6rem;
+  height: 0.6rem;
+  border: 2px solid vars.$lcars-grey-light;
+  border-radius: 50%;
+
+  &--online {
+    border-color: vars.$lcars-green;
+    background: vars.$lcars-green;
+  }
+}
+
+.chat-page__transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+}
+
+.chat-page__transcript-status {
+  font-size: 0.85rem;
+}
+
+.chat-page__transcript-download {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+}

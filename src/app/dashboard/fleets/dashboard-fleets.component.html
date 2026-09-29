@@ -38,8 +38,8 @@
                 Start with the directories. A
                 <strong>Community</strong> is the group behind one or more
                 fleets, often across several platforms; an
-                <strong>Armada</strong> is a set of fleets that have allied;
-                and a <strong>Fleet</strong> can also be listed on its own.
+                <strong>Armada</strong> is a set of fleets that have allied; and
+                a <strong>Fleet</strong> can also be listed on its own.
               </p>
 
               <nav
@@ -91,6 +91,61 @@
               >
             </nav>
           }
+
+          @if (state.chatEnabled) {
+            <section
+              id="dashboard-fleets-chat"
+              aria-labelledby="dashboard-fleets-chat-heading">
+              <div class="lcars-text-bar">
+                <span id="dashboard-fleets-chat-heading">Chat</span>
+              </div>
+              <p class="fleet-community-field-hint">
+                The channels of your Fleets, their Armadas and Communities, and
+                your conversations with friends.
+              </p>
+              <nav
+                class="buttons-row"
+                aria-label="Chat">
+                <a
+                  routerLink="/chat"
+                  class="sky"
+                  >Open chat</a
+                >
+              </nav>
+            </section>
+          }
+
+          <section
+            id="dashboard-fleets-events"
+            aria-labelledby="dashboard-fleets-events-heading">
+            <div class="lcars-text-bar">
+              <span id="dashboard-fleets-events-heading"
+                >Your upcoming events</span
+              >
+            </div>
+            <p class="fleet-community-field-hint">
+              The next thirty days of what you answered Going or Maybe, are
+              waiting for, or asked to be reminded of.
+            </p>
+            <app-fleet-events-upcoming [source]="upcoming" />
+          </section>
+
+          <section
+            id="dashboard-fleets-activity"
+            aria-labelledby="dashboard-fleets-activity-heading">
+            <div class="lcars-text-bar">
+              <span id="dashboard-fleets-activity-heading"
+                >Your Fleet activity</span
+              >
+            </div>
+            <p class="fleet-community-field-hint">
+              What has happened in the Communities you follow and the Fleets and
+              Armadas you belong to.
+            </p>
+            <app-fleet-activity-feed
+              [source]="personalFeed"
+              [showScope]="true" />
+          </section>
         }
       }
     }

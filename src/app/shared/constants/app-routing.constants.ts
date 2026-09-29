@@ -180,6 +180,9 @@ export const APP_ROUTES = {
   // Notifications
   NOTIFICATIONS: 'notifications',
 
+  // Chat (FC-033)
+  CHAT: 'chat',
+
   // Admin
   ADMIN: ROOT_ROUTES.ADMIN,
   ADMIN_NEWS: ROOT_ROUTES.ADMIN + '/news',
@@ -379,6 +382,7 @@ export const APP_ROUTE_TITLES = {
 
   // Notifications
   NOTIFICATIONS: 'Notifications',
+  CHAT: 'Chat',
 
   // Admin
   ADMIN: 'Admin',

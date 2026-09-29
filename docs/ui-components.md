@@ -923,7 +923,7 @@ one shows anything when it cannot be read, since neither is what the page is
 for.
 
 An Armada's pages have their own strip, **`<app-armada-tabs>`**: Overview,
-News and History for anybody, Requests for `armada.manage` holders, Manage for its Owner
+News, Activity and History for anybody, Requests for `armada.manage` holders, Manage for its Owner
 and Admins. **`ArmadaSectionPageDirective<T>`** is the Armada's
 `FleetSectionPageDirective`, for its two section pages:
 
@@ -1074,6 +1074,57 @@ A Fleet's and an Armada's strips have an **Events** tab, after Activity. A
 Community page shows its next five in **`<app-fleet-events-upcoming>`**, with
 a link to the calendar. The Dashboard's Fleets page shows **Your upcoming
 events**: the reader's own next thirty days, each naming its scope.
+
+### Chat
+
+Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC-032 added,
+`ChatSocketService`. Everything is in `src/app/fleet/chat`, and the protocol is in the backend's
+`docs/fleet-chat.md`.
+
+**The page** (`ChatPageComponent`):
+
+- **The list.** Every channel the reader may read, by Community, Armada and Fleet (each scope's
+  name linking to its page, a role-limited channel saying who it is for), then Direct messages.
+  The open place sits beside the list. Below 720px the two are stacked, one at a time, and the
+  open place has an "All chats" button back.
+- **Addresses.** One route matcher keeps one page for every address, so moving between places
+  keeps the list and the connection:
+  - `/chat` and `/chat/channels/:id` or `/chat/direct/:id` say what is open;
+  - `/chat/fleets/:id`, `/chat/armadas/:id` and `/chat/communities/:id` open that scope's first
+    channel, replacing the address;
+  - a place the list does not hold says so, with the way back.
+- **The connection.** A banner says when it is reconnecting, when five other tabs pushed this one
+  out ("Use chat here" opens it again), or when the session ended.
+- **Custom channels.** A scope's moderators add them ("Add channel"), and change or archive each.
+  Changing opens `ChatChannelDialogComponent`: a name, who reads it, and who posts, never looser
+  than reading. Archiving asks first with the LCARS confirmation.
+**One place** (`ChatConversationComponent`):
+
+- **Messages as text.** Every message is written as text, never markup, in compact rows: the time
+  in the reader's zone (the full date in its tooltip and `datetime`), the author in sky, then the
+  text. The same author within five minutes drops the name. A day starts with a divider, and the
+  reader's own messages carry a sky bar on the left.
+- **Mentions** are marked only for the people the server says a message mentions.
+- **Replies** show a one-line quote of what they answer, or "Earlier message" once it is gone or
+  older than four hours. Clicking the quote scrolls to the message when it is on screen.
+- **Moving through time.** "Load earlier" reads back to the four-hour edge, where the top says
+  "Chat keeps the last four hours here." New messages keep the log at the bottom. While the reader
+  is scrolled up, a button counts what arrived.
+- **The composer.** Enter sends and Shift+Enter starts a new line. A counter appears from 1,800
+  characters of the 2,000. Typing `@` opens the list of people who can read the place: arrows move
+  through it, Enter or Tab picks, Escape closes it. Reply starts a reply, and Escape stops it. A
+  message shows as "Sending…" until the server has it, or "Not sent" with the reason, "Try again"
+  and "Discard".
+- **Deleting.** Reply and Delete appear on hover and focus, and always on a touch screen. Deleting
+  one's own message asks first. A moderator's Remove asks why, in `ChatRemoveDialogComponent`.
+**The ways in:**
+
+- a Chat door at the end of each Fleet's and Armada's strip, for its members and role holders;
+- a Chat door at the end of the Community strip, for anybody signed in;
+- "Open chat" on the dashboard's Fleets page;
+- a Message button on a friend's profile, which opens the conversation by the friendship.
+
+Each is offered only while chat is switched on.
 
 **The connection, `ChatSocketService`:**
 

@@ -1,0 +1,41 @@
+<form
+  id="chat-remove-dialog"
+  (submit)="$event.preventDefault(); remove()">
+  <div mat-dialog-content>
+    <app-lcars-warning-message
+      title="Remove this message?"
+      [message]="
+        'It will show as removed to everybody. Say why: the reason is kept with the log of what moderators did, and ' +
+        data.authorName +
+        ' is not shown it.'
+      "></app-lcars-warning-message>
+
+    <div class="lcars-input-container gold">
+      <label for="chat-remove-reason">Why</label>
+      <textarea
+        id="chat-remove-reason"
+        rows="3"
+        required
+        [attr.maxlength]="reasonMax"
+        [value]="reason()"
+        (input)="setReason($any($event.target).value)"></textarea>
+    </div>
+  </div>
+
+  <div
+    class="buttons-container lcars-flex-right"
+    mat-dialog-actions>
+    <button
+      type="button"
+      class="lcars-btn green"
+      (click)="cancel()">
+      Keep it
+    </button>
+    <button
+      type="submit"
+      class="lcars-btn red"
+      [disabled]="!isValid()">
+      Remove
+    </button>
+  </div>
+</form>

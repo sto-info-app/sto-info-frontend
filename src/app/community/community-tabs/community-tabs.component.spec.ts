@@ -4,6 +4,10 @@ import { provideRouter } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
+import {
+  FLEET_FEATURES_DISABLED,
+  FleetFeatureState,
+} from 'src/app/models/fleet.models';
 import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { CommunityTabsComponent } from './community-tabs.component';
@@ -13,10 +17,12 @@ describe('CommunityTabsComponent', () => {
   let component: CommunityTabsComponent;
   let authServiceSpy: { isLoggedIn: jest.Mock };
   let fleetOffered$: BehaviorSubject<boolean>;
+  let features$: BehaviorSubject<FleetFeatureState>;
 
   beforeEach(async () => {
     authServiceSpy = { isLoggedIn: jest.fn(() => false) };
     fleetOffered$ = new BehaviorSubject<boolean>(true);
+    features$ = new BehaviorSubject<FleetFeatureState>(FLEET_FEATURES_DISABLED);
 
     await TestBed.configureTestingModule({
       imports: [CommunityTabsComponent],
@@ -29,7 +35,10 @@ describe('CommunityTabsComponent', () => {
         },
         {
           provide: FleetConfigurationService,
-          useValue: { isOffered: () => fleetOffered$ },
+          useValue: {
+            isOffered: () => fleetOffered$,
+            getFeatures: () => features$,
+          },
         },
       ],
     }).compileComponents();
@@ -158,6 +167,28 @@ describe('CommunityTabsComponent', () => {
 
     expect(fleets?.link).toBe('/fleets');
     expect(fleets?.exact).toBe(true);
+  });
+
+  it('should offer a Chat door, last, to a signed-in reader while chat is on', () => {
+    features$.next({ ...FLEET_FEATURES_DISABLED, chatEnabled: true });
+    render(true);
+
+    const labels = renderedLabels();
+    const chat = component.tabs.find(tab => tab.label === 'Chat');
+
+    expect(labels[labels.length - 1]).toBe('Chat');
+    expect(chat?.link).toBe('/chat');
+    expect(chat?.exact).toBe(true);
+  });
+
+  it('should offer no Chat door signed out, or while chat is off', () => {
+    features$.next({ ...FLEET_FEATURES_DISABLED, chatEnabled: true });
+    render(false);
+    expect(renderedLabels()).not.toContain('Chat');
+
+    features$.next(FLEET_FEATURES_DISABLED);
+    authServiceSpy.isLoggedIn.mockReturnValue(true);
+    expect(component.tabs.map(tab => tab.label)).not.toContain('Chat');
   });
 
   it('should cap the strip with the LCARS end piece', () => {

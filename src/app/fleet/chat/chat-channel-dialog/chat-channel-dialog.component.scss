@@ -1,0 +1,19 @@
+@use 'lcars-variables' as vars;
+
+#chat-channel-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: min(28rem, 90vw);
+}
+
+.chat-channel-dialog__scope {
+  display: block;
+  color: vars.$lcars-sky;
+  font-size: 0.8em;
+}
+
+.chat-channel-dialog__hint {
+  margin: 0;
+  font-size: 0.9rem;
+}

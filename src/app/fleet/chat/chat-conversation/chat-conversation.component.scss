@@ -1,0 +1,332 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.chat-conversation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  min-height: 24rem;
+  position: relative;
+}
+
+.chat-conversation__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+// The way back to the list only on a narrow screen, where the two are
+// stacked.
+.chat-conversation__back {
+  display: none;
+
+  @media (width < 720px) {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+  }
+}
+
+.chat-conversation__title {
+  margin: 0;
+  color: vars.$lcars-sky;
+  font-family: vars.$font-antonio;
+  overflow-wrap: anywhere;
+}
+
+.chat-conversation__subtitle {
+  display: block;
+  font-size: 0.6em;
+  color: vars.$lcars-grey-light;
+}
+
+.chat-conversation__log {
+  flex: 1 1 auto;
+  min-height: 16rem;
+  max-height: 60vh;
+  overflow: hidden auto;
+  padding: 0.5rem;
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 0.5rem;
+  background: vars.$lcars-grey-bg;
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-sky;
+  }
+}
+
+.chat-conversation__edge {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 0.5rem;
+}
+
+.chat-conversation__edge-note {
+  margin: 0;
+  color: vars.$lcars-grey-light;
+  font-style: italic;
+}
+
+.chat-conversation__messages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chat-conversation__day {
+  margin: 0.75rem 0 0.25rem;
+  padding-bottom: 0.15rem;
+  border-bottom: 1px solid vars.$lcars-grey-border;
+  color: vars.$lcars-sky;
+  font-family: vars.$font-antonio;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.chat-message {
+  position: relative;
+  padding: 0.15rem 0.5rem;
+  border-left: 3px solid transparent;
+  border-radius: 0.25rem;
+
+  &:not(.chat-message--grouped) {
+    margin-top: 0.35rem;
+  }
+
+  &:hover,
+  &:focus-within,
+  &:focus {
+    background: vars.$lcars-card-surface-hover;
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-sky;
+  }
+}
+
+.chat-message--mine {
+  border-left-color: vars.$lcars-sky;
+}
+
+.chat-message--pending {
+  opacity: 0.65;
+}
+
+.chat-message--failed {
+  opacity: 1;
+  border-left-color: vars.$lcars-red;
+}
+
+.chat-message__line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+  align-items: baseline;
+}
+
+.chat-message__time {
+  flex: 0 0 auto;
+  color: vars.$lcars-grey-light;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.chat-message__author {
+  color: vars.$lcars-sky;
+  font-weight: bold;
+}
+
+.chat-message__text {
+  flex: 1 1 12rem;
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.chat-message__text--deleted {
+  color: vars.$lcars-grey-light;
+  font-style: italic;
+}
+
+.chat-message__mention {
+  color: vars.$lcars-sunflower;
+  font-weight: bold;
+}
+
+.chat-message__reply-to {
+  display: flex;
+  gap: 0.4rem;
+  max-width: 100%;
+  margin: 0 0 0.1rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: vars.$lcars-grey-light;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: vars.$lcars-white;
+  }
+}
+
+.chat-message__reply-author {
+  color: vars.$lcars-sky;
+}
+
+.chat-message__reply-excerpt {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Shown on hover or focus, so a long log stays quiet; always on a touch
+// screen, where there is no hover.
+.chat-message__actions {
+  display: none;
+  gap: 0.5rem;
+  justify-content: flex-end;
+
+  .chat-message:hover &,
+  .chat-message:focus-within &,
+  &--shown {
+    display: flex;
+  }
+
+  @media (hover: none) {
+    display: flex;
+  }
+}
+
+.chat-message__action {
+  padding: 0.1rem 0.4rem;
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 0.75rem;
+  background: none;
+  color: vars.$lcars-sky;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    border-color: vars.$lcars-sky;
+  }
+}
+
+.chat-message__action--danger {
+  color: vars.$lcars-red;
+
+  &:hover,
+  &:focus-visible {
+    border-color: vars.$lcars-red;
+  }
+}
+
+.chat-message__failure {
+  color: vars.$lcars-red;
+  font-size: 0.8rem;
+}
+
+.chat-conversation__typing {
+  min-height: 1.2em;
+  margin: 0;
+  color: vars.$lcars-grey-light;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.chat-conversation__unseen {
+  position: absolute;
+  right: 1rem;
+  bottom: 9rem;
+}
+
+.chat-conversation__read-only {
+  margin: 0;
+  color: vars.$lcars-grey-light;
+}
+
+.chat-composer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.chat-composer__reply {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.chat-composer__input {
+  width: 100%;
+  min-height: 3rem;
+  resize: vertical;
+  padding: 0.5rem;
+  border: 1px solid vars.$lcars-sky;
+  border-radius: 0.5rem;
+  background: vars.$lcars-black;
+  color: vars.$lcars-white;
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-sky;
+  }
+}
+
+.chat-composer__mentions {
+  position: absolute;
+  bottom: calc(100% - 1rem);
+  left: 0.5rem;
+  z-index: 2;
+  min-width: 12rem;
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  border: 1px solid vars.$lcars-sky;
+  border-radius: 0.5rem;
+  background: vars.$lcars-black;
+}
+
+.chat-composer__mention {
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+}
+
+.chat-composer__mention--active {
+  background: vars.$lcars-sky;
+  color: vars.$lcars-black;
+}
+
+.chat-composer__footer {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.chat-composer__counter {
+  color: vars.$lcars-sunflower;
+  font-size: 0.85rem;
+}
+
+.chat-conversation__notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+
+  > :first-child {
+    flex: 1 1 16rem;
+  }
+}

@@ -1,0 +1,74 @@
+<form
+  id="chat-channel-dialog"
+  (submit)="$event.preventDefault(); save()">
+  <h2 mat-dialog-title>
+    {{
+      data.channel === null ? 'Add a channel' : 'Change ' + data.channel.name
+    }}
+    <span class="chat-channel-dialog__scope">{{ data.scopeName }}</span>
+  </h2>
+
+  <div mat-dialog-content>
+    <div class="lcars-input-container sky">
+      <label for="chat-channel-name">Name</label>
+      <input
+        id="chat-channel-name"
+        type="text"
+        required
+        autocomplete="off"
+        [attr.maxlength]="nameMax"
+        [value]="name()"
+        (input)="setName($any($event.target).value)" />
+    </div>
+
+    <div class="lcars-select-container sky">
+      <label for="chat-channel-read">Who reads it</label>
+      <select
+        id="chat-channel-read"
+        (change)="chooseReadRole($any($event.target).value)">
+        @for (role of roles; track role) {
+          <option
+            [value]="role"
+            [selected]="readRole() === role">
+            {{ roleLabels[role] }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <div class="lcars-select-container sky">
+      <label for="chat-channel-post">Who posts in it</label>
+      <select
+        id="chat-channel-post"
+        (change)="choosePostRole($any($event.target).value)">
+        @for (role of postRoles(); track role) {
+          <option
+            [value]="role"
+            [selected]="postRole() === role">
+            {{ roleLabels[role] }}
+          </option>
+        }
+      </select>
+    </div>
+    <p class="chat-channel-dialog__hint">
+      Posting is never open to more people than reading.
+    </p>
+  </div>
+
+  <div
+    class="buttons-container lcars-flex-right"
+    mat-dialog-actions>
+    <button
+      type="button"
+      class="lcars-btn red"
+      (click)="cancel()">
+      Cancel
+    </button>
+    <button
+      type="submit"
+      class="lcars-btn green"
+      [disabled]="!isValid()">
+      {{ data.channel === null ? 'Add channel' : 'Save' }}
+    </button>
+  </div>
+</form>

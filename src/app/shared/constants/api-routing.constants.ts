@@ -188,4 +188,6 @@ export const API_URLS = {
   FLEET_ACTIVITY: apiUrl + '/fleet-activity',
   // The signed-in person's own upcoming Fleet events (FC-030).
   FLEET_EVENTS: apiUrl + '/fleet-events',
+  // Chat (FC-031, FC-033): the reader's channels, conversations and messages.
+  CHAT: apiUrl + '/chat',
 };

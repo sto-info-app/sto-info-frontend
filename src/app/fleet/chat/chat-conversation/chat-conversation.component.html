@@ -1,0 +1,343 @@
+<section
+  class="chat-conversation"
+  [attr.aria-label]="title()">
+  <header class="chat-conversation__header">
+    <button
+      type="button"
+      class="lcars-btn sky chat-conversation__back"
+      (click)="back.emit()">
+      <i
+        class="fas fa-chevron-left"
+        aria-hidden="true"></i>
+      All chats
+    </button>
+    <h2 class="chat-conversation__title">
+      {{ title() }}
+      @if (subtitle(); as subtitle) {
+        <span class="chat-conversation__subtitle">{{ subtitle }}</span>
+      }
+    </h2>
+  </header>
+
+  @if (isLoading()) {
+    <app-loading-bar loadingText="Opening chat"></app-loading-bar>
+  }
+
+  @if (errorMessage(); as error) {
+    <app-lcars-error-message
+      title="Chat"
+      [message]="error"></app-lcars-error-message>
+  }
+
+  @if (reportNotice(); as notice) {
+    <div class="chat-conversation__notice">
+      @if (notice.sent) {
+        <app-lcars-success-message
+          title="Report sent"
+          [message]="notice.message"></app-lcars-success-message>
+      } @else {
+        <app-lcars-error-message
+          title="Report not sent"
+          [message]="notice.message"></app-lcars-error-message>
+      }
+      <button
+        type="button"
+        class="lcars-btn sky"
+        (click)="dismissReportNotice()">
+        OK
+      </button>
+    </div>
+  }
+
+  <div
+    #log
+    class="chat-conversation__log"
+    role="log"
+    aria-live="polite"
+    aria-relevant="additions"
+    tabindex="0"
+    [attr.aria-label]="'Messages in ' + title()"
+    (scroll)="onScroll()">
+    @if (!isLoading() && errorMessage() === null) {
+      <div class="chat-conversation__edge">
+        @if (before() !== null) {
+          <button
+            type="button"
+            class="lcars-btn sky"
+            [disabled]="isLoadingOlder()"
+            (click)="loadOlder()">
+            {{ isLoadingOlder() ? 'Loading…' : 'Load earlier' }}
+          </button>
+        } @else {
+          <p class="chat-conversation__edge-note">{{ edgeNote }}</p>
+        }
+      </div>
+    }
+
+    <ol class="chat-conversation__messages">
+      @for (row of rows(); track row.message.id) {
+        @if (row.day; as day) {
+          <li
+            class="chat-conversation__day"
+            role="separator">
+            {{ day }}
+          </li>
+        }
+        <li
+          class="chat-message"
+          tabindex="-1"
+          [id]="'chat-message-' + row.message.id"
+          [class.chat-message--grouped]="row.grouped"
+          [class.chat-message--mine]="row.message.mine"
+          [class.chat-message--deleted]="row.message.deleted">
+          @if (row.message.replyTo; as answered) {
+            <button
+              type="button"
+              class="chat-message__reply-to"
+              (click)="showAnswered(answered.id)">
+              <i
+                class="fas fa-reply"
+                aria-hidden="true"></i>
+              @if (answered.excerpt === null) {
+                <span>Earlier message</span>
+              } @else {
+                <span class="chat-message__reply-author"
+                  >{{ nameOf(answered.author) }}:</span
+                >&ngsp;<span class="chat-message__reply-excerpt">{{
+                  answered.excerpt
+                }}</span>
+              }
+            </button>
+          }
+          <div class="chat-message__line">
+            <time
+              class="chat-message__time"
+              [attr.datetime]="row.message.createdAt"
+              [title]="row.message.createdAt | appDate: 'EEEE d MMMM y, HH:mm'"
+              >{{ row.message.createdAt | appDate: 'HH:mm' }}</time
+            >
+            @if (!row.grouped && !row.message.hidden) {
+              <span class="chat-message__author">{{
+                nameOf(row.message.author)
+              }}</span>
+            }
+            @if (row.message.hidden) {
+              <span class="chat-message__text chat-message__text--deleted"
+                >Message from a member you can’t see</span
+              >
+            } @else if (row.message.deleted) {
+              <span class="chat-message__text chat-message__text--deleted"
+                >Message deleted</span
+              >
+            } @else {
+              <span class="chat-message__text">
+                @for (segment of row.segments; track $index) {
+                  @if (segment.mention) {
+                    <span class="chat-message__mention">{{
+                      segment.text
+                    }}</span>
+                  } @else {
+                    {{ segment.text }}
+                  }
+                }
+              </span>
+            }
+          </div>
+          @if (!row.message.deleted && !row.message.hidden) {
+            <div class="chat-message__actions">
+              @if (mayPost()) {
+                <button
+                  type="button"
+                  class="chat-message__action"
+                  [attr.aria-label]="'Reply to ' + nameOf(row.message.author)"
+                  (click)="reply(row.message)">
+                  <i
+                    class="fas fa-reply"
+                    aria-hidden="true"></i>
+                  Reply
+                </button>
+              }
+              @if (row.message.mine) {
+                <button
+                  type="button"
+                  class="chat-message__action chat-message__action--danger"
+                  aria-label="Delete your message"
+                  (click)="deleteOwn(row.message)">
+                  <i
+                    class="fas fa-trash"
+                    aria-hidden="true"></i>
+                  Delete
+                </button>
+              } @else if (mayModerate()) {
+                <button
+                  type="button"
+                  class="chat-message__action chat-message__action--danger"
+                  [attr.aria-label]="
+                    'Remove the message from ' + nameOf(row.message.author)
+                  "
+                  (click)="moderate(row.message)">
+                  <i
+                    class="fas fa-ban"
+                    aria-hidden="true"></i>
+                  Remove
+                </button>
+              }
+              @if (!row.message.mine && mayReport()) {
+                <button
+                  type="button"
+                  class="chat-message__action"
+                  [attr.aria-label]="
+                    'Report the message from ' + nameOf(row.message.author)
+                  "
+                  (click)="report(row.message)">
+                  <i
+                    class="fas fa-flag"
+                    aria-hidden="true"></i>
+                  Report
+                </button>
+              }
+            </div>
+          }
+        </li>
+      }
+      @for (line of pending(); track line.localId) {
+        <li
+          class="chat-message chat-message--mine chat-message--pending"
+          [class.chat-message--failed]="line.failure !== null">
+          <div class="chat-message__line">
+            <span class="chat-message__time">
+              {{ line.failure === null ? 'Sending…' : 'Not sent' }}
+            </span>
+            <span class="chat-message__text">{{ line.body }}</span>
+          </div>
+          @if (line.failure; as failure) {
+            <div class="chat-message__actions chat-message__actions--shown">
+              <span class="chat-message__failure">{{ failure }}</span>
+              <button
+                type="button"
+                class="chat-message__action"
+                (click)="retry(line)">
+                Try again
+              </button>
+              <button
+                type="button"
+                class="chat-message__action"
+                (click)="discard(line)">
+                Discard
+              </button>
+            </div>
+          }
+        </li>
+      }
+    </ol>
+  </div>
+
+  <p
+    class="chat-conversation__typing"
+    aria-live="polite">
+    {{ typingLine() ?? '' }}
+  </p>
+
+  @if (unseen() > 0) {
+    <button
+      type="button"
+      class="lcars-btn sunflower chat-conversation__unseen"
+      (click)="toLatest()">
+      {{ unseen() }} new {{ unseen() === 1 ? 'message' : 'messages' }}
+      <i
+        class="fas fa-arrow-down"
+        aria-hidden="true"></i>
+    </button>
+  }
+
+  @if (mayPost()) {
+    <form
+      class="chat-composer"
+      (submit)="$event.preventDefault(); send()">
+      @if (replyTo(); as answering) {
+        <div class="chat-composer__reply">
+          <span
+            >Replying to
+            <span class="chat-message__author">{{
+              nameOf(answering.author)
+            }}</span></span
+          >
+          <button
+            type="button"
+            class="chat-message__action"
+            aria-label="Stop replying"
+            (click)="cancelReply()">
+            <i
+              class="fas fa-xmark"
+              aria-hidden="true"></i>
+          </button>
+        </div>
+      }
+      <label
+        class="sr-only"
+        for="chat-composer-input"
+        >Message {{ title() }}</label
+      >
+      <textarea
+        #composer
+        id="chat-composer-input"
+        class="chat-composer__input"
+        rows="2"
+        placeholder="Write a message. Enter sends; Shift+Enter starts a new line."
+        role="combobox"
+        aria-autocomplete="list"
+        aria-controls="chat-mentions"
+        [attr.aria-expanded]="suggestions().length > 0"
+        [attr.aria-activedescendant]="
+          suggestions().length > 0 ? 'chat-mention-' + activeSuggestion() : null
+        "
+        [attr.maxlength]="maxLength"
+        (input)="onInput(composer)"
+        (keydown)="onKeydown($event, composer)"></textarea>
+      @if (suggestions().length > 0) {
+        <ul
+          id="chat-mentions"
+          class="chat-composer__mentions"
+          role="listbox"
+          aria-label="People to mention">
+          @for (
+            person of suggestions();
+            track person.userId;
+            let index = $index
+          ) {
+            <li
+              role="option"
+              class="chat-composer__mention"
+              [id]="'chat-mention-' + index"
+              [attr.aria-selected]="index === activeSuggestion()"
+              [class.chat-composer__mention--active]="
+                index === activeSuggestion()
+              "
+              (mousedown)="$event.preventDefault(); pick(person, composer)">
+              {{ nameOf(person) }}
+            </li>
+          }
+        </ul>
+      }
+      <div class="chat-composer__footer">
+        @if (remaining() !== null) {
+          <span
+            class="chat-composer__counter"
+            aria-live="polite"
+            >{{ remaining() }} characters left</span
+          >
+        }
+        <button
+          type="submit"
+          class="lcars-btn green"
+          [disabled]="!maySend()">
+          Send
+        </button>
+      </div>
+    </form>
+  } @else {
+    <p class="chat-conversation__read-only">
+      You can read this channel, but not post in it.
+    </p>
+  }
+</section>

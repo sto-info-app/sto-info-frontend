@@ -34,7 +34,12 @@ export type DashboardFleetsState =
   | { kind: 'LOADING' }
   | { kind: 'UNAVAILABLE'; reason: FeatureUnavailableReason }
   | { kind: 'ERROR' }
-  | { kind: 'READY'; cards: FleetScopeCardVm[] };
+  | {
+      kind: 'READY';
+      cards: FleetScopeCardVm[];
+      /** Whether chat is switched on, for the way into it (FC-033). */
+      chatEnabled: boolean;
+    };
 
 /**
  * The Communities a member follows.
@@ -138,6 +143,7 @@ export class DashboardFleetsComponent {
               cards: followed.map(entry =>
                 buildCommunityCardVm(entry.community),
               ),
+              chatEnabled: configuration.features.chatEnabled,
             };
           }),
           catchError(() => of<DashboardFleetsState>({ kind: 'ERROR' })),

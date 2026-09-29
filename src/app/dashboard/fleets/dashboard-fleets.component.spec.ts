@@ -66,9 +66,12 @@ function followed(overrides: Partial<FleetCommunity> = {}): FollowedCommunity {
  * @param isEnabled - Whether the feature is switched on.
  * @returns The configuration.
  */
-function configuration(isEnabled: boolean): FleetConfiguration {
+function configuration(
+  isEnabled: boolean,
+  chatEnabled = false,
+): FleetConfiguration {
   return {
-    features: { isEnabled },
+    features: { isEnabled, chatEnabled },
   } as FleetConfiguration;
 }
 
@@ -119,6 +122,58 @@ describe('DashboardFleetsComponent', () => {
     render();
 
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  // FC-029: the member's own feed, naming each item's scope.
+  it('should show the member’s own Fleet activity', () => {
+    render();
+
+    expect(text()).toContain('Your Fleet activity');
+    expect(activity.mine).toHaveBeenCalledWith(null);
+    expect(
+      fixture.nativeElement.querySelector('app-fleet-activity-feed'),
+    ).not.toBeNull();
+  });
+
+  // FC-030: the member's own upcoming events.
+  it('should show the member’s own upcoming events', () => {
+    render();
+
+    expect(text()).toContain('Your upcoming events');
+    expect(events.mine).toHaveBeenCalled();
+  });
+
+  it('should offer a way into chat while it is on (FC-033)', () => {
+    fleetConfiguration.getConfiguration.mockReturnValue(
+      of(configuration(true, true)),
+    );
+    render();
+
+    const link = fixture.nativeElement.querySelector(
+      '#dashboard-fleets-chat a',
+    ) as HTMLAnchorElement;
+
+    expect(link.textContent?.trim()).toBe('Open chat');
+    expect(link.getAttribute('href')).toBe('/chat');
+  });
+
+  it('should offer no way into chat while it is off', () => {
+    render();
+
+    expect(
+      fixture.nativeElement.querySelector('#dashboard-fleets-chat'),
+    ).toBeNull();
+  });
+
+  it('should read no activity while the feature is off', () => {
+    fleetConfiguration.getConfiguration.mockReturnValue(
+      of(configuration(false)),
+    );
+
+    render();
+
+    expect(activity.mine).not.toHaveBeenCalled();
+    expect(events.mine).not.toHaveBeenCalled();
   });
 
   describe('what it lists', () => {
