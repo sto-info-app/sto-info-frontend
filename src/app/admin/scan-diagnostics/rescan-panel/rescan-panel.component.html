@@ -1,0 +1,250 @@
+<section
+  class="admin-section"
+  aria-labelledby="rescan-heading">
+  <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+    <span id="rescan-heading">Rescan campaigns</span>
+  </div>
+
+  <p>
+    Rescan published pictures against today's scanner and policy, behind new
+    uploads. A picture found infected is taken down, and site admins and its
+    owner are told. One refused for policy stays up and is listed here for a
+    site admin to decide. Pictures from before scanning began are rescanned
+    once, automatically, overnight.
+  </p>
+
+  @if (message(); as done) {
+    <p
+      class="image-estate__message"
+      role="status">
+      {{ done }}
+    </p>
+  }
+  @if (failure(); as problem) {
+    <p
+      class="scan-diagnostics__unavailable"
+      role="alert">
+      {{ problem }}
+    </p>
+  }
+
+  @let current = state();
+  @switch (current.kind) {
+    @case ('LOADING') {
+      <p>Reading the campaigns…</p>
+    }
+    @case ('ERROR') {
+      <p class="scan-diagnostics__unavailable">
+        The campaigns could not be read.
+      </p>
+    }
+  }
+
+  @if (current.kind === 'READY') {
+    @let overview = current.overview;
+
+    <dl class="scan-diagnostics__details">
+      <div>
+        <dt>Waiting for a verdict</dt>
+        <dd>{{ overview.waiting }}</dd>
+      </div>
+      <div>
+        <dt>Never scanned</dt>
+        <dd>{{ overview.unverified }}</dd>
+      </div>
+    </dl>
+
+    @if (overview.campaigns.length === 0) {
+      <p>No campaign has run.</p>
+    } @else {
+      <ul
+        class="rescan__campaigns"
+        aria-label="Campaigns, newest first">
+        @for (campaign of overview.campaigns; track campaign.id) {
+          <li>
+            <h3 class="image-estate__heading">
+              {{
+                campaign.kind === legacy
+                  ? 'Pictures from before scanning'
+                  : 'Chosen by a site admin'
+              }}: {{ stateLabels[campaign.state] }}
+            </h3>
+            <p>
+              Started {{ campaign.createdAt | appDate: 'medium' }}
+              @if (campaign.finishedAt) {
+                · finished {{ campaign.finishedAt | appDate: 'medium' }}
+              }
+            </p>
+            <dl class="scan-diagnostics__details">
+              @for (count of countsOf(campaign); track count.label) {
+                <div>
+                  <dt>{{ count.label }}</dt>
+                  <dd>{{ count.count }}</dd>
+                </div>
+              }
+            </dl>
+            @if (campaign.lastError) {
+              <p class="scan-diagnostics__unavailable">
+                {{ campaign.lastError }}
+              </p>
+            }
+            @if (isOpen(campaign)) {
+              <div class="image-estate__actions">
+                @if (campaign.state === 'RUNNING') {
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto gold"
+                    (click)="act(campaign, 'pause')">
+                    Pause
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto green"
+                    (click)="act(campaign, 'resume')">
+                    Resume
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto red"
+                  (click)="act(campaign, 'cancel')">
+                  Cancel
+                </button>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    @if (overview.findings.length > 0) {
+      <table class="fleet-community-table">
+        <caption>
+          The latest pictures found infected or refused, newest first
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Verdict</th>
+            <th scope="col">Asset</th>
+            <th scope="col">Outcome</th>
+            <th scope="col">Code</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (finding of overview.findings; track $index) {
+            <tr>
+              <td data-label="Verdict">
+                {{
+                  finding.verdictAt
+                    ? (finding.verdictAt | appDate: 'medium')
+                    : '—'
+                }}
+              </td>
+              <td data-label="Asset">
+                <code class="image-estate__id">{{ finding.assetId }}</code>
+              </td>
+              <td data-label="Outcome">
+                {{
+                  finding.state === 'INFECTED'
+                    ? 'Infected, taken down'
+                    : 'Refused for policy, still up'
+                }}
+              </td>
+              <td data-label="Code">{{ finding.rejectionCode ?? '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    <h3 class="image-estate__heading">Start a campaign</h3>
+    @let chosen = form();
+    <form
+      class="rescan__form"
+      (submit)="$event.preventDefault(); start()">
+      <fieldset class="rescan__kinds">
+        <legend>Kinds of picture</legend>
+        @for (kind of kinds; track kind) {
+          <label class="rescan__check">
+            <input
+              type="checkbox"
+              [checked]="chosen.kinds.includes(kind)"
+              (change)="toggleKind(kind, $any($event.target).checked)" />
+            {{ kindLabels[kind] }}
+          </label>
+        }
+      </fieldset>
+      <p class="rescan__hint">
+        Leave every field empty to rescan every published picture.
+      </p>
+
+      <div class="lcars-input-container sunflower">
+        <label for="rescan-from">Uploaded on or after</label>
+        <input
+          id="rescan-from"
+          type="date"
+          [value]="chosen.uploadedFrom"
+          (change)="set('uploadedFrom', $any($event.target).value)" />
+      </div>
+      <div class="lcars-input-container sunflower">
+        <label for="rescan-before">Uploaded before</label>
+        <input
+          id="rescan-before"
+          type="date"
+          [value]="chosen.uploadedBefore"
+          (change)="set('uploadedBefore', $any($event.target).value)" />
+      </div>
+      <div class="lcars-input-container sunflower">
+        <label for="rescan-days">Not scanned for this many days</label>
+        <input
+          id="rescan-days"
+          type="number"
+          min="0"
+          max="3650"
+          step="1"
+          [value]="chosen.notScannedForDays"
+          (change)="set('notScannedForDays', $any($event.target).value)" />
+      </div>
+      <div class="lcars-select-container sky">
+        <label for="rescan-priority">Order</label>
+        <select
+          id="rescan-priority"
+          (change)="set('priority', $any($event.target).value)">
+          <option
+            value="LOW"
+            [selected]="chosen.priority === 'LOW'">
+            Behind other campaigns
+          </option>
+          <option
+            value="HIGH"
+            [selected]="chosen.priority === 'HIGH'">
+            Ahead of other campaigns
+          </option>
+        </select>
+      </div>
+      <label class="rescan__check">
+        <input
+          type="checkbox"
+          [checked]="chosen.unverifiedOnly"
+          (change)="set('unverifiedOnly', $any($event.target).checked)" />
+        Only pictures never scanned
+      </label>
+    </form>
+
+    <div class="image-estate__actions">
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto sunflower"
+        (click)="load()">
+        Refresh
+      </button>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto green"
+        (click)="start()">
+        Start a campaign
+      </button>
+    </div>
+  }
+</section>

@@ -1261,6 +1261,17 @@ what with its codes and counts, and why.
 first, with each one's rejection code and engine, and **Look up** reads one
 asset by its ID. Neither ever shows a signature name.
 
+**Rescan campaigns** (FC-041, `RescanPanelComponent` in
+`src/app/admin/scan-diagnostics/rescan-panel`), on Scan Diagnostics above
+private image delivery: how many rescans are waiting and how many legacy
+pictures have never been scanned; each of the latest campaigns with its state
+and counts, and **Pause**, **Resume** and **Cancel** while it is open; the
+latest pictures found infected or refused, by asset ID and code only; and
+**Start a campaign**, narrowed by kind of picture, upload dates, days since the
+last scan and "only pictures never scanned", behind or ahead of other
+campaigns. Everything asks for a reason through
+`GovernanceReasonDialogComponent`.
+
 **Private image delivery** (FC-040, `ImageEstatePanelComponent` in
 `src/app/admin/scan-diagnostics/image-estate-panel`), at the foot of Scan
 Diagnostics: how many pictures are still public and where each copy stands;

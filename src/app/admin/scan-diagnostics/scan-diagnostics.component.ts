@@ -23,6 +23,9 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import { ScanDiagnosticsService } from 'src/app/shared/services/scan-diagnostics.service';
 
+import { ImageEstatePanelComponent } from './image-estate-panel/image-estate-panel.component';
+import { RescanPanelComponent } from './rescan-panel/rescan-panel.component';
+
 /** What to say when the diagnostics could not be read at all. */
 export const SCAN_DIAGNOSTICS_ERROR =
   'The scan diagnostics could not be read. Please try again.';
@@ -152,6 +155,7 @@ export function formatDuration(ms: number | null): string {
     ImageEstatePanelComponent,
     LcarsErrorMessageComponent,
     LoadingBarComponent,
+    RescanPanelComponent,
     RouterModule,
   ],
 })

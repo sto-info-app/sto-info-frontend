@@ -53,10 +53,40 @@ These headers are also configured in the same place (Render static site -> Manag
 
 ## Consent and analytics security
 
-- Analytics and session replay are consent-gated.
-- LogRocket sanitises request bodies by redacting keys containing "password".
+- Analytics and LogRocket are consent-gated.
+- Nothing a person types, reads or sends reaches a telemetry provider (FC-038):
+  - LogRocket masks every text and input, and drops every request's and
+    response's body and credentials.
+  - Sentry's Session Replay masks every text, input and picture.
+  - Sentry errors carry no request body, query or cookies.
+  - Sentry breadcrumbs keep where a request went, without its query.
 
-See [src/app/shared/services/log-rocket.service.ts](../src/app/shared/services/log-rocket.service.ts).
+See [src/app/shared/services/log-rocket.service.ts](../src/app/shared/services/log-rocket.service.ts)
+and [src/app/shared/telemetry/sentry-privacy.ts](../src/app/shared/telemetry/sentry-privacy.ts).
+The backend's side, including the audit trail, is its `docs/privacy-erasure.md`.
+
+## Pictures
+
+Every uploaded picture is private at Cloudflare and reachable only by an
+address the API signs, for about a day, while the picture may be shown
+(FC-040). The browser draws the addresses it is given and never builds one; a
+picture that is revoked is replaced by the "photo unavailable" image. The
+backend's side is its `docs/image-delivery.md`.
+
+Site admins can rescan published pictures (FC-041). One found infected is taken
+down, and its owner is told only that a picture failed a security check. Scan
+Diagnostics shows what a rescan found by asset ID and code, never the picture,
+its owner or a signature name. The backend's side is its
+`docs/rescan-campaigns.md`.
+
+## Site admin accountability
+
+Every site-level admin action asks for a reason, which the server keeps with
+the action in its site admin log (FC-039): role and permission changes,
+disabling and restoring accounts, report decisions and content moderation. The
+log is kept like the audit trail: 180 days, the IP address 90. Site admins read
+it, with the other logs they act in and the retention runs, on the Security
+Log page. The backend's side is its `docs/admin-audit.md`.
 
 ## Rate limiting
 

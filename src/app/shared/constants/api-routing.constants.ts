@@ -112,6 +112,7 @@ export const API_URLS = {
   SECURITY_LOG_ADMIN: apiUrl + '/admin/security-log',
   // Private image delivery (FC-040).
   IMAGE_ESTATE_ADMIN: apiUrl + '/admin/image-estate',
+  RESCAN_CAMPAIGNS_ADMIN: apiUrl + '/admin/rescan-campaigns',
 
   // Access control (what the signed-in user is permitted to do, and the admin
   // side that grants or withholds it per user)

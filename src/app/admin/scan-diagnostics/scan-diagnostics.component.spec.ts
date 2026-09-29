@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
@@ -7,7 +8,10 @@ import {
   ScanRejectionPage,
   ScanUsageWindow,
 } from 'src/app/models/scan-diagnostics.models';
+import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 import { ScanDiagnosticsService } from 'src/app/shared/services/scan-diagnostics.service';
+import { ImageEstateAdminService } from './image-estate-panel/image-estate-admin.service';
+import { RescanAdminService } from './rescan-panel/rescan-admin.service';
 import {
   SCAN_DIAGNOSTICS_ERROR,
   ScanDiagnosticsComponent,
@@ -164,7 +168,24 @@ describe('ScanDiagnosticsComponent', () => {
       imports: [ScanDiagnosticsComponent],
       providers: [
         provideRouter([]),
-        { provide: ScanDiagnosticsService, useValue: { read } },
+        {
+          provide: ScanDiagnosticsService,
+          useValue: { read, rejections, asset },
+        },
+        {
+          provide: UserSettingsService,
+          useValue: { displayTimezone: () => 'UTC' },
+        },
+        // The private delivery and rescan panels read on their own; their
+        // specs cover them.
+        {
+          provide: ImageEstateAdminService,
+          useValue: { status: () => new Subject() },
+        },
+        {
+          provide: RescanAdminService,
+          useValue: { overview: () => new Subject() },
+        },
       ],
     }).compileComponents();
 
