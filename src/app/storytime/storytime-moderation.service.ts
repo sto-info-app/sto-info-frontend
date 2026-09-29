@@ -237,7 +237,7 @@ export class StorytimeModerationService {
    */
   decideAppeal(
     appealId: string,
-    payload: { uphold: boolean; reviewNotes?: string },
+    payload: { uphold: boolean; reviewNotes: string },
   ): Observable<ModerationAppeal> {
     return this.authenticated(options =>
       this._http.post<ModerationAppeal>(

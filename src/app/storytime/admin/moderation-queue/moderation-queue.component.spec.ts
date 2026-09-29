@@ -174,27 +174,40 @@ describe('ModerationQueueComponent', () => {
     });
   });
 
-  it('dismisses a report without one', () => {
+  // FC-039: each decision's reason is kept in the site admin log.
+  it('will not dismiss a report without one', () => {
     render();
+    fixture.componentInstance.form.patchValue({ resolution: '   ' });
     fixture.componentInstance.dismiss(buildReport());
 
-    expect(moderationService.resolveReport).toHaveBeenCalledWith('report-1', {
-      status: StorytimeReportStatus.DISMISSED,
-      resolution: undefined,
-    });
+    expect(moderationService.resolveReport).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.errorMessage).toContain(
+      'Say why the report is dismissed',
+    );
   });
 
   it.each([
     ['uphold', true],
     ['reject', false],
-  ])('%ss an appeal', (method, uphold) => {
+  ])('%ss an appeal, saying why', (method, uphold) => {
     render();
+    fixture.componentInstance.form.patchValue({ message: ' Reviewed. ' });
     fixture.componentInstance[method as 'uphold' | 'reject'](buildAppeal());
 
     expect(moderationService.decideAppeal).toHaveBeenCalledWith('appeal-1', {
       uphold,
-      reviewNotes: undefined,
+      reviewNotes: 'Reviewed.',
     });
+  });
+
+  it('will not decide an appeal without saying why', () => {
+    render();
+    fixture.componentInstance.reject(buildAppeal());
+
+    expect(moderationService.decideAppeal).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.errorMessage).toContain(
+      'Say what the creator is told about their appeal',
+    );
   });
 
   it('passes the administrator’s words on with a decision', () => {
@@ -234,6 +247,7 @@ describe('ModerationQueueComponent', () => {
     );
 
     render();
+    fixture.componentInstance.form.patchValue({ message: 'You are right.' });
     fixture.componentInstance.uphold(buildAppeal());
 
     expect(fixture.componentInstance.errorMessage).toContain(
@@ -247,6 +261,7 @@ describe('ModerationQueueComponent', () => {
     );
 
     render();
+    fixture.componentInstance.form.patchValue({ message: 'You are right.' });
     fixture.componentInstance.uphold(buildAppeal());
 
     expect(fixture.componentInstance.errorMessage).toContain(

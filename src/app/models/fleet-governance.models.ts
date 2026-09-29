@@ -116,6 +116,11 @@ export interface ScopeGovernanceAction {
   capability: string | null;
   clearedEffect: ScopeCapabilityEffect | null;
   reason: string | null;
+  /**
+   * Whether nobody did it: a role or grant that ended because of something
+   * else, such as its holder leaving or the scope closing (FC-039).
+   */
+  automatic: boolean;
   createdAt: string;
 }
 

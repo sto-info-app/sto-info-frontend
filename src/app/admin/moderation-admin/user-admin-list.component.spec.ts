@@ -14,7 +14,7 @@ import {
   ModeratedUser,
   PaginatedModeratedUsers,
 } from 'src/app/models/moderation.models';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { GovernanceReasonDialogComponent } from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
 import { ModerationService } from 'src/app/shared/services/moderation.service';
 import { UserAdminListComponent } from './user-admin-list.component';
 
@@ -64,13 +64,15 @@ describe('UserAdminListComponent', () => {
   >;
 
   /**
-   * Stubs the confirm dialog to close with the given result.
+   * Stubs the reason dialog to close with a reason, or with none (FC-039).
    *
-   * @param confirmed - Whether the administrator confirmed.
+   * @param confirmed - Whether the administrator gave a reason.
    */
   const stubDialog = (confirmed: boolean): void => {
     dialogSpy.open.mockReturnValue({
-      afterClosed: jest.fn().mockReturnValue(of(confirmed)),
+      afterClosed: jest
+        .fn()
+        .mockReturnValue(of(confirmed ? 'Spamming' : undefined)),
     } as unknown as MatDialogRef<unknown>);
   };
 
@@ -222,7 +224,7 @@ describe('UserAdminListComponent', () => {
     expect(component.errorMessage).toBe('');
   });
 
-  it('disables a member after confirmation and reloads', () => {
+  it('disables a member once a reason is given, and reloads', () => {
     fixture.detectChanges();
     stubDialog(true);
     serviceSpy.getUsers.mockClear();
@@ -230,10 +232,14 @@ describe('UserAdminListComponent', () => {
     component.disable(buildUser());
 
     expect(dialogSpy.open).toHaveBeenCalledWith(
-      ConfirmDialogComponent,
-      expect.anything(),
+      GovernanceReasonDialogComponent,
+      expect.objectContaining({
+        data: expect.objectContaining({ label: 'Reason', max: 500 }),
+      }),
     );
-    expect(serviceSpy.disableUser).toHaveBeenCalledWith(MEMBER_ID);
+    expect(serviceSpy.disableUser).toHaveBeenCalledWith(MEMBER_ID, {
+      reason: 'Spamming',
+    });
     expect(serviceSpy.getUsers).toHaveBeenCalled();
     expect(component.successMessage).toContain('disabled');
   });
@@ -247,13 +253,13 @@ describe('UserAdminListComponent', () => {
     expect(serviceSpy.disableUser).not.toHaveBeenCalled();
   });
 
-  it('restores a member after confirmation', () => {
+  it('restores a member once a reason is given', () => {
     fixture.detectChanges();
     stubDialog(true);
 
     component.enable(buildUser({ isAccountDisabled: true }));
 
-    expect(serviceSpy.enableUser).toHaveBeenCalledWith(MEMBER_ID);
+    expect(serviceSpy.enableUser).toHaveBeenCalledWith(MEMBER_ID, 'Spamming');
     expect(component.successMessage).toContain('restored');
   });
 

@@ -254,6 +254,198 @@
       </section>
     }
 
+    <section
+      class="admin-section"
+      aria-labelledby="scan-rejections-heading">
+      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+        <span id="scan-rejections-heading">Refused uploads</span>
+      </div>
+
+      <p>
+        Why each upload was refused, and with what: the rejection code and the
+        engine, never what matched. The uploader is only told it was not
+        accepted.
+      </p>
+
+      <form
+        class="scan-diagnostics__lookup"
+        (submit)="$event.preventDefault(); lookUp(assetId.value)">
+        <div class="lcars-input-container sunflower">
+          <label for="scan-asset-id">Look up an asset by its ID</label>
+          <input
+            #assetId
+            id="scan-asset-id"
+            type="text"
+            autocomplete="off"
+            spellcheck="false" />
+        </div>
+        <button
+          type="submit"
+          class="lcars-btn sunflower">
+          Look up
+        </button>
+      </form>
+
+      @switch (lookup().kind) {
+        @case ('LOADING') {
+          <p>Looking it up…</p>
+        }
+        @case ('INVALID') {
+          <p class="scan-diagnostics__unavailable">
+            That is not an asset ID. An ID looks like
+            <code>1b4e28ba-2fa1-11d2-883f-0016d3cca427</code>.
+          </p>
+        }
+        @case ('NOT_FOUND') {
+          <p class="scan-diagnostics__unavailable">No asset has that ID.</p>
+        }
+        @case ('ERROR') {
+          <p class="scan-diagnostics__unavailable">
+            The asset could not be looked up. Please try again.
+          </p>
+        }
+      }
+      @if (lookup(); as found) {
+        @if (found.kind === 'FOUND') {
+          <dl class="scan-diagnostics__details scan-diagnostics__asset">
+            <div>
+              <dt>Asset</dt>
+              <dd>
+                <code>{{ found.asset.id }}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>For</dt>
+              <dd>{{ found.asset.kind }}</dd>
+            </div>
+            <div>
+              <dt>State</dt>
+              <dd>{{ found.asset.state }}</dd>
+            </div>
+            <div>
+              <dt>Rejection code</dt>
+              <dd>{{ found.asset.rejectionCode ?? '—' }}</dd>
+            </div>
+            <div>
+              <dt>Engine</dt>
+              <dd>
+                {{ found.asset.scanEngine ?? '—' }}
+                {{ found.asset.scanEngineVersion ?? '' }}
+              </dd>
+            </div>
+            <div>
+              <dt>Signatures</dt>
+              <dd>{{ found.asset.scanSignatureVersion ?? '—' }}</dd>
+            </div>
+            <div>
+              <dt>Policy</dt>
+              <dd>{{ found.asset.policyVersion }}</dd>
+            </div>
+            <div>
+              <dt>Uploaded</dt>
+              <dd>{{ found.asset.createdAt | appDate: 'medium' }}</dd>
+            </div>
+            <div>
+              <dt>Verdict</dt>
+              <dd>
+                {{
+                  found.asset.lastVerdictAt
+                    ? (found.asset.lastVerdictAt | appDate: 'medium')
+                    : 'None yet'
+                }}
+              </dd>
+            </div>
+          </dl>
+        }
+      }
+
+      @switch (rejections().kind) {
+        @case ('LOADING') {
+          <p>Loading the refused uploads…</p>
+        }
+        @case ('ERROR') {
+          <p class="scan-diagnostics__unavailable">
+            The refused uploads could not be read.
+          </p>
+        }
+      }
+      @if (rejections(); as list) {
+        @if (list.kind === 'READY') {
+          @if (list.page.items.length === 0) {
+            <p>Nothing has been refused.</p>
+          } @else {
+            <table class="fleet-community-table">
+              <caption>
+                Refused uploads, newest verdict first
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Verdict</th>
+                  <th scope="col">Asset</th>
+                  <th scope="col">Code</th>
+                  <th scope="col">Engine</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (asset of list.page.items; track asset.id) {
+                  <tr>
+                    <td data-label="Verdict">
+                      {{
+                        asset.lastVerdictAt
+                          ? (asset.lastVerdictAt | appDate: 'medium')
+                          : '—'
+                      }}
+                    </td>
+                    <td data-label="Asset">
+                      {{ asset.kind }}
+                      <span class="fleet-report-note"
+                        ><code>{{ asset.id }}</code></span
+                      >
+                    </td>
+                    <td data-label="Code">{{ asset.rejectionCode ?? '—' }}</td>
+                    <td data-label="Engine">
+                      {{ asset.scanEngine ?? '—' }}
+                      {{ asset.scanEngineVersion ?? '' }}
+                      @if (asset.scanSignatureVersion) {
+                        <span class="fleet-report-note"
+                          >signatures {{ asset.scanSignatureVersion }}</span
+                        >
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            @if (pageCountOf(list.page) > 1) {
+              <div class="lcars-pagination">
+                <button
+                  type="button"
+                  [disabled]="rejectionPage() <= 1"
+                  (click)="turnRejections(-1)">
+                  Newer
+                </button>
+                <span
+                  >Page {{ rejectionPage() }} of
+                  {{ pageCountOf(list.page) }}</span
+                >
+                <button
+                  type="button"
+                  [disabled]="rejectionPage() >= pageCountOf(list.page)"
+                  (click)="turnRejections(1)">
+                  Older
+                </button>
+              </div>
+            }
+          }
+        }
+      }
+    </section>
+
+    <app-rescan-panel></app-rescan-panel>
+
+    <app-image-estate-panel></app-image-estate-panel>
+
     <p>
       <a [routerLink]="adminLink">Back to Admin</a>
     </p>

@@ -141,6 +141,8 @@ export const ADMIN_ROLE = 'ADMIN';
  */
 export interface SetUserRoleRequest {
   role: AssignableRole;
+  /** Why, kept in the site admin log (FC-039). */
+  reason: string;
 }
 
 /**

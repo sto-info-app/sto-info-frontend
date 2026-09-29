@@ -130,3 +130,18 @@ $scan-diagnostics-colour: vars.$lcars-sunflower;
     font-variant-numeric: tabular-nums;
   }
 }
+
+// The asset lookup: the box and its button on one line where there is room
+// (FC-039).
+.scan-diagnostics__lookup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  .lcars-input-container {
+    flex: 1 1 22rem;
+    margin: 0;
+  }
+}

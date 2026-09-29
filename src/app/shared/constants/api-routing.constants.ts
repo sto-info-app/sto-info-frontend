@@ -106,6 +106,10 @@ export const API_URLS = {
   ROSTER_ERASURES_ADMIN: apiUrl + '/admin/roster-erasures',
   MODERATION_ADMIN_OPEN_COUNTS: apiUrl + '/admin/moderation/open-counts',
   FILE_SCANNING_ADMIN_DIAGNOSTICS: apiUrl + '/admin/file-scanning/diagnostics',
+  // Refused assets and one asset's scan outcome, and the Security Log (FC-039).
+  FILE_SCANNING_ADMIN_REJECTIONS: apiUrl + '/admin/file-scanning/rejections',
+  FILE_SCANNING_ADMIN_ASSETS: apiUrl + '/admin/file-scanning/assets',
+  SECURITY_LOG_ADMIN: apiUrl + '/admin/security-log',
 
   // Access control (what the signed-in user is permitted to do, and the admin
   // side that grants or withholds it per user)

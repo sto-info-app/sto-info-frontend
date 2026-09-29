@@ -465,6 +465,15 @@ export const routes: Routes = [
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.ADMIN_SECURITY_LOG,
+    loadComponent: () =>
+      import('./admin/security-log/security-log.component').then(
+        m => m.SecurityLogComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_SECURITY_LOG, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.ADMIN_USERS,
     loadComponent: () =>
       import('./admin/moderation-admin/user-admin-list.component').then(

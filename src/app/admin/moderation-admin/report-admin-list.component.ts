@@ -11,6 +11,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 import { Observable, finalize, take } from 'rxjs';
 import {
+  ADMIN_REASON_MAX_LENGTH,
   ModeratedUser,
   REPORT_REASON_LABELS,
   REPORT_STATUS_LABELS,
@@ -18,7 +19,6 @@ import {
   ReportStatus,
   UserReport,
 } from 'src/app/models/moderation.models';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -175,26 +175,26 @@ export class ReportAdminListComponent implements OnInit {
   }
 
   /**
-   * Closes a report without action against the reported member.
+   * Closes a report without action against the reported member, once a
+   * reason is given for the site admin log (FC-039).
    *
    * @param report - The report to dismiss.
    */
   dismiss(report: UserReport): void {
-    this.confirm(
+    this.askReason(
       {
         title: 'Dismiss Report',
-        message: `
-          <p>Dismiss the report about
-          <strong>${this.reportedName(report)}</strong>?</p>
-          <p>The report is closed with no action taken. Neither member is
-          told.</p>`,
+        message:
+          `Dismiss the report about ${this.reportedName(report)}? The ` +
+          'report is closed with no action taken. Neither member is told.',
         confirmText: 'Dismiss',
       },
-      () =>
+      reason =>
         this.setStatus(
           report,
           ReportStatus.DISMISSED,
           `Report about ${this.reportedName(report)} dismissed.`,
+          reason,
         ),
     );
   }
@@ -204,14 +204,26 @@ export class ReportAdminListComponent implements OnInit {
    *
    * Kept separate from disabling: not every upheld report warrants locking an
    * account, and a warning given elsewhere still needs the report closing.
+   * What was done is kept in the site admin log (FC-039).
    *
    * @param report - The report to uphold.
    */
   markActioned(report: UserReport): void {
-    this.setStatus(
-      report,
-      ReportStatus.ACTIONED,
-      `Report about ${this.reportedName(report)} closed as actioned.`,
+    this.askReason(
+      {
+        title: 'Close Report as Actioned',
+        message:
+          `Close the report about ${this.reportedName(report)} as ` +
+          'actioned? Say what was done. Their account is not touched.',
+        confirmText: 'Close',
+      },
+      reason =>
+        this.setStatus(
+          report,
+          ReportStatus.ACTIONED,
+          `Report about ${this.reportedName(report)} closed as actioned.`,
+          reason,
+        ),
     );
   }
 
@@ -226,20 +238,21 @@ export class ReportAdminListComponent implements OnInit {
   disableReported(report: UserReport): void {
     const name = this.reportedName(report);
 
-    this.confirm(
+    this.askReason(
       {
         title: 'Disable Account',
-        message: `
-          <p>Disable <strong>${name}</strong>?</p>
-          <p>They are signed out immediately and cannot sign in again, their
-          record leaves the registry, and every open report about them is
-          closed as actioned.</p>
-          <p><strong>WARNING:</strong> They are not told why.</p>`,
+        message:
+          `Disable ${name}? They are signed out immediately and cannot ` +
+          'sign in again, their record leaves the registry, and every open ' +
+          'report about them is closed as actioned. They are not told why.',
         confirmText: 'Disable',
       },
-      () =>
+      reason =>
         this.runAction(
-          () => this._moderationService.disableUser(report.reported.userId),
+          () =>
+            this._moderationService.disableUser(report.reported.userId, {
+              reason,
+            }),
           `${name}'s account was disabled.`,
           'Failed to disable that account.',
         ),
@@ -254,18 +267,18 @@ export class ReportAdminListComponent implements OnInit {
   enableReported(report: UserReport): void {
     const name = this.reportedName(report);
 
-    this.confirm(
+    this.askReason(
       {
         title: 'Restore Account',
-        message: `
-          <p>Restore <strong>${name}</strong>?</p>
-          <p>They can sign in again and their record returns to the registry.
-          Reports already closed against them stay closed.</p>`,
+        message:
+          `Restore ${name}? They can sign in again and their record returns ` +
+          'to the registry. Reports already closed against them stay closed.',
         confirmText: 'Restore',
       },
-      () =>
+      reason =>
         this.runAction(
-          () => this._moderationService.enableUser(report.reported.userId),
+          () =>
+            this._moderationService.enableUser(report.reported.userId, reason),
           `${name}'s account was restored.`,
           'Failed to restore that account.',
         ),
@@ -350,14 +363,20 @@ export class ReportAdminListComponent implements OnInit {
    * @param report - The report to update.
    * @param status - The state to move it into.
    * @param successMessage - Copy shown when it succeeds.
+   * @param reason - Why, required to close it (FC-039).
    */
   private setStatus(
     report: UserReport,
     status: ReportStatus,
     successMessage: string,
+    reason?: string,
   ): void {
     this.runAction(
-      () => this._moderationService.updateReport(report.id, { status }),
+      () =>
+        this._moderationService.updateReport(report.id, {
+          status,
+          ...(reason === undefined ? {} : { reason }),
+        }),
       successMessage,
       'Failed to update that report.',
     );
@@ -392,26 +411,30 @@ export class ReportAdminListComponent implements OnInit {
   }
 
   /**
-   * Opens the LCARS confirmation dialog and runs the action if confirmed.
+   * Asks why, and runs the action with the reason once one is given. The
+   * reason is kept in the site admin log (FC-039).
    *
    * @param data - The dialog copy.
-   * @param onConfirm - Invoked when the administrator confirms.
+   * @param onConfirm - Invoked with the reason, trimmed.
    */
-  private confirm(
+  private askReason(
     data: { title: string; message: string; confirmText: string },
-    onConfirm: () => void,
+    onConfirm: (reason: string) => void,
   ): void {
-    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
-      width: '75%',
-      data: { ...data, cancelText: 'Cancel' },
-    });
-
-    dialogRef
+    this._dialog
+      .open<
+        GovernanceReasonDialogComponent,
+        GovernanceReasonDialogData,
+        string
+      >(GovernanceReasonDialogComponent, {
+        width: '75%',
+        data: { ...data, label: 'Reason', max: ADMIN_REASON_MAX_LENGTH },
+      })
       .afterClosed()
       .pipe(take(1), observeInZone(this._ngZone, this._cdr))
-      .subscribe(confirmed => {
-        if (confirmed) {
-          onConfirm();
+      .subscribe(reason => {
+        if (reason) {
+          onConfirm(reason);
         }
       });
   }

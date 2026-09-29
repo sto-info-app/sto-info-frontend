@@ -2,7 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import {
+  ScanAssetDetail,
   ScanDiagnostics,
+  ScanRejectionPage,
   ScanUsageWindow,
 } from 'src/app/models/scan-diagnostics.models';
 import { ScanDiagnosticsService } from 'src/app/shared/services/scan-diagnostics.service';
@@ -63,6 +65,32 @@ const DIAGNOSTICS: ScanDiagnostics = {
   awaiting: { quarantined: 0, scanning: 3, retryPending: 1 },
 };
 
+/** A refused asset (FC-039). */
+const REFUSED: ScanAssetDetail = {
+  id: '1b4e28ba-2fa1-11d2-883f-0016d3cca427',
+  kind: 'PROFILE_IMAGE',
+  state: 'REJECTED',
+  rejectionCode: 'MALWARE_DETECTED',
+  scanEngine: 'clamav',
+  scanEngineVersion: '1.4.3',
+  scanSignatureVersion: '27500',
+  policyVersion: 3,
+  createdAt: '2026-09-26T10:00:00.000Z',
+  lastVerdictAt: '2026-09-26T10:01:00.000Z',
+};
+
+/**
+ * A page of refused assets.
+ *
+ * @param items - Its assets.
+ * @param total - How many there are.
+ * @returns The page.
+ */
+const refusedPage = (
+  items: ScanAssetDetail[],
+  total = items.length,
+): ScanRejectionPage => ({ items, total, page: 1, pageSize: 25 });
+
 describe('formatDuration', () => {
   it.each([
     [null, '—'],
@@ -81,6 +109,8 @@ describe('formatDuration', () => {
 describe('ScanDiagnosticsComponent', () => {
   let fixture: ComponentFixture<ScanDiagnosticsComponent>;
   let read: jest.Mock;
+  let rejections: jest.Mock;
+  let asset: jest.Mock;
 
   /** The page, as a reader sees it. */
   const page = (): HTMLElement => fixture.nativeElement as HTMLElement;
@@ -122,8 +152,13 @@ describe('ScanDiagnosticsComponent', () => {
    *
    * @param answer - What the service returns.
    */
-  const render = async (answer: unknown): Promise<void> => {
+  const render = async (
+    answer: unknown,
+    refused: unknown = of(refusedPage([])),
+  ): Promise<void> => {
     read = jest.fn().mockReturnValue(answer);
+    rejections = jest.fn().mockReturnValue(refused);
+    asset = jest.fn().mockReturnValue(of(REFUSED));
 
     await TestBed.configureTestingModule({
       imports: [ScanDiagnosticsComponent],
@@ -292,6 +327,162 @@ describe('ScanDiagnosticsComponent', () => {
       expect(details).toContain('clamav');
       expect(details).toContain('Not reported');
       expect(details).toContain('Unknown');
+    });
+  });
+
+  // FC-039: why an upload was refused, and with what, for an admin.
+  describe('refused uploads', () => {
+    /**
+     * Types an asset ID and looks it up.
+     *
+     * @param value - What is typed.
+     */
+    const lookUp = (value: string): void => {
+      const input = page().querySelector('#scan-asset-id') as HTMLInputElement;
+
+      input.value = value;
+      page()
+        .querySelector('.scan-diagnostics__lookup')!
+        .dispatchEvent(new Event('submit', { cancelable: true }));
+      fixture.detectChanges();
+    };
+
+    const text = (): string => page().textContent?.replace(/\s+/g, ' ') ?? '';
+
+    it('lists them with their code and engine, a page at a time', async () => {
+      await render(of(DIAGNOSTICS), of(refusedPage([REFUSED], 30)));
+
+      expect(rejections).toHaveBeenCalledWith(1);
+      expect(
+        rowOf('Refused uploads, newest verdict first', '').length,
+      ).toBeGreaterThanOrEqual(0);
+      expect(text()).toContain('MALWARE_DETECTED');
+      expect(text()).toContain('clamav 1.4.3');
+      expect(text()).toContain('signatures 27500');
+      expect(text()).toContain('Page 1 of 2');
+
+      const older = Array.from(page().querySelectorAll('button')).find(
+        button => button.textContent?.trim() === 'Older',
+      )!;
+
+      older.click();
+      fixture.detectChanges();
+      expect(rejections).toHaveBeenLastCalledWith(2);
+
+      Array.from(page().querySelectorAll('button'))
+        .find(button => button.textContent?.trim() === 'Newer')!
+        .click();
+      expect(rejections).toHaveBeenLastCalledWith(1);
+    });
+
+    it('shows what it knows of one with no verdict or engine yet', async () => {
+      await render(
+        of(DIAGNOSTICS),
+        of(
+          refusedPage([
+            {
+              ...REFUSED,
+              rejectionCode: null,
+              scanEngine: null,
+              scanEngineVersion: null,
+              scanSignatureVersion: null,
+              lastVerdictAt: null,
+            },
+          ]),
+        ),
+      );
+
+      expect(text()).not.toContain('signatures');
+      expect(text()).toContain('—');
+    });
+
+    it('says when nothing has been refused, or the list cannot be read', async () => {
+      await render(of(DIAGNOSTICS));
+      expect(text()).toContain('Nothing has been refused.');
+
+      TestBed.resetTestingModule();
+      await render(
+        of(DIAGNOSTICS),
+        throwError(() => new Error('down')),
+      );
+      expect(text()).toContain('The refused uploads could not be read.');
+
+      TestBed.resetTestingModule();
+      await render(of(DIAGNOSTICS), new Subject<ScanRejectionPage>());
+      expect(text()).toContain('Loading the refused uploads');
+    });
+
+    it('looks one asset up by its ID', async () => {
+      await render(of(DIAGNOSTICS));
+
+      lookUp(`  ${REFUSED.id}  `);
+
+      expect(asset).toHaveBeenCalledWith(REFUSED.id);
+      expect(textsOf('.scan-diagnostics__asset dd')).toEqual(
+        expect.arrayContaining([
+          REFUSED.id,
+          'PROFILE_IMAGE',
+          'REJECTED',
+          'MALWARE_DETECTED',
+          'clamav 1.4.3',
+          '27500',
+          '3',
+        ]),
+      );
+    });
+
+    it('says what it knows of an asset with no verdict or engine', async () => {
+      await render(of(DIAGNOSTICS));
+      asset.mockReturnValue(
+        of({
+          ...REFUSED,
+          state: 'QUARANTINED',
+          rejectionCode: null,
+          scanEngine: null,
+          scanEngineVersion: null,
+          scanSignatureVersion: null,
+          lastVerdictAt: null,
+        }),
+      );
+
+      lookUp(REFUSED.id);
+
+      expect(textsOf('.scan-diagnostics__asset dd')).toEqual(
+        expect.arrayContaining(['QUARANTINED', '—', 'None yet']),
+      );
+    });
+
+    it('refuses what is not an ID without asking', async () => {
+      await render(of(DIAGNOSTICS));
+
+      lookUp('not-an-id');
+
+      expect(asset).not.toHaveBeenCalled();
+      expect(text()).toContain('That is not an asset ID.');
+    });
+
+    it('says when there is no such asset, or it cannot be looked up', async () => {
+      await render(of(DIAGNOSTICS));
+
+      asset.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 })),
+      );
+      lookUp(REFUSED.id);
+      expect(text()).toContain('No asset has that ID.');
+
+      asset.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+      lookUp(REFUSED.id);
+      expect(text()).toContain('The asset could not be looked up.');
+
+      asset.mockReturnValue(throwError(() => new Error('offline')));
+      lookUp(REFUSED.id);
+      expect(text()).toContain('The asset could not be looked up.');
+
+      asset.mockReturnValue(new Subject<ScanAssetDetail>());
+      lookUp(REFUSED.id);
+      expect(text()).toContain('Looking it up');
     });
   });
 });

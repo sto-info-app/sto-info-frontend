@@ -13,7 +13,11 @@ import { RouterModule } from '@angular/router';
 import { Observable, finalize, take } from 'rxjs';
 import { PrivacyModeService } from 'src/app/dashboard/services/privacy-mode.service';
 import { ModeratedUser } from 'src/app/models/moderation.models';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import {
+  GovernanceReasonDialogComponent,
+  GovernanceReasonDialogData,
+} from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
+import { ADMIN_REASON_MAX_LENGTH } from 'src/app/models/moderation.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -176,27 +180,26 @@ export class UserAdminListComponent implements OnInit {
   }
 
   /**
-   * Disables a member's account.
+   * Disables a member's account, once a reason is given. The reason is kept
+   * in the site admin log (FC-039), and with each report it closes.
    *
    * @param user - The member to disable.
    */
   disable(user: ModeratedUser): void {
     const name = this.displayName(user);
 
-    this.confirm(
+    this.askReason(
       {
         title: 'Disable Account',
-        message: `
-          <p>Disable <strong>${name}</strong>?</p>
-          <p>They are signed out immediately and cannot sign in again, their
-          record leaves the registry, and every open report about them is
-          closed as actioned.</p>
-          <p><strong>WARNING:</strong> They are not told why.</p>`,
+        message:
+          `Disable ${name}? They are signed out immediately and cannot ` +
+          'sign in again, their record leaves the registry, and every open ' +
+          'report about them is closed as actioned. They are not told why.',
         confirmText: 'Disable',
       },
-      () =>
+      reason =>
         this.runAction(
-          () => this._moderationService.disableUser(user.id),
+          () => this._moderationService.disableUser(user.id, { reason }),
           `${name}'s account was disabled.`,
           'Failed to disable that account.',
         ),
@@ -204,25 +207,25 @@ export class UserAdminListComponent implements OnInit {
   }
 
   /**
-   * Restores a disabled member's account.
+   * Restores a disabled member's account, once a reason is given for the
+   * site admin log (FC-039).
    *
    * @param user - The member to restore.
    */
   enable(user: ModeratedUser): void {
     const name = this.displayName(user);
 
-    this.confirm(
+    this.askReason(
       {
         title: 'Restore Account',
-        message: `
-          <p>Restore <strong>${name}</strong>?</p>
-          <p>They can sign in again and their record returns to the registry.
-          Reports already closed against them stay closed.</p>`,
+        message:
+          `Restore ${name}? They can sign in again and their record returns ` +
+          'to the registry. Reports already closed against them stay closed.',
         confirmText: 'Restore',
       },
-      () =>
+      reason =>
         this.runAction(
-          () => this._moderationService.enableUser(user.id),
+          () => this._moderationService.enableUser(user.id, reason),
           `${name}'s account was restored.`,
           'Failed to restore that account.',
         ),
@@ -303,26 +306,30 @@ export class UserAdminListComponent implements OnInit {
   }
 
   /**
-   * Opens the LCARS confirmation dialog and runs the action if confirmed.
+   * Asks why, and runs the action with the reason once one is given. The
+   * reason is kept in the site admin log (FC-039).
    *
    * @param data - The dialog copy.
-   * @param onConfirm - Invoked when the administrator confirms.
+   * @param onConfirm - Invoked with the reason, trimmed.
    */
-  private confirm(
+  private askReason(
     data: { title: string; message: string; confirmText: string },
-    onConfirm: () => void,
+    onConfirm: (reason: string) => void,
   ): void {
-    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
-      width: '75%',
-      data: { ...data, cancelText: 'Cancel' },
-    });
-
-    dialogRef
+    this._dialog
+      .open<
+        GovernanceReasonDialogComponent,
+        GovernanceReasonDialogData,
+        string
+      >(GovernanceReasonDialogComponent, {
+        width: '75%',
+        data: { ...data, label: 'Reason', max: ADMIN_REASON_MAX_LENGTH },
+      })
       .afterClosed()
       .pipe(take(1), observeInZone(this._ngZone, this._cdr))
-      .subscribe(confirmed => {
-        if (confirmed) {
-          onConfirm();
+      .subscribe(reason => {
+        if (reason) {
+          onConfirm(reason);
         }
       });
   }

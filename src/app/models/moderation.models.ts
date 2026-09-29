@@ -85,6 +85,8 @@ export interface CreateUserReportRequest {
 export interface UpdateReportRequest {
   status: ReportStatus;
   moderatorNotes?: string;
+  /** Why, kept in the site admin log: required to close it (FC-039). */
+  reason?: string;
 }
 
 /**
@@ -127,8 +129,12 @@ export interface ModeratedUserQuery {
  * Payload for disabling a member's account.
  */
 export interface DisableUserRequest {
-  reason?: string;
+  /** Why: recorded against the account and in the site admin log (FC-039). */
+  reason: string;
 }
+
+/** The longest reason a site admin action takes (FC-039). */
+export const ADMIN_REASON_MAX_LENGTH = 500;
 
 export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
   [ReportReason.HARASSMENT]: 'Harassment or threats',

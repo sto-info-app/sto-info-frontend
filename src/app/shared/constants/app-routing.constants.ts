@@ -201,6 +201,7 @@ export const APP_ROUTES = {
   ADMIN_USERS: ROOT_ROUTES.ADMIN + '/users',
   ADMIN_PERMISSIONS: ROOT_ROUTES.ADMIN + '/permissions',
   ADMIN_SCAN_DIAGNOSTICS: ROOT_ROUTES.ADMIN + '/scan-diagnostics',
+  ADMIN_SECURITY_LOG: ROOT_ROUTES.ADMIN + '/security-log',
 
   // Storytime
   STORYTIME: ROOT_ROUTES.STORYTIME,
@@ -406,6 +407,7 @@ export const APP_ROUTE_TITLES = {
   ADMIN_USERS: 'Manage Members',
   ADMIN_PERMISSIONS: 'Manage Permissions',
   ADMIN_SCAN_DIAGNOSTICS: 'Scan Diagnostics',
+  ADMIN_SECURITY_LOG: 'Security Log',
 
   // Storytime
   STORYTIME: 'Storytime',

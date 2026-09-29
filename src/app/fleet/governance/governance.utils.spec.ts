@@ -30,6 +30,7 @@ function change(
     capability: null,
     clearedEffect: null,
     reason: null,
+    automatic: false,
     createdAt: '2026-09-20T10:00:00.000Z',
     ...overrides,
   };
@@ -56,6 +57,50 @@ describe('governance utils', () => {
 
   describe('describeGovernanceAction', () => {
     const named = (code: string): string => `<${code}>`;
+
+    // FC-039: what ended by itself, because of something else, says so and
+    // names nobody as having done it.
+    it.each<[Partial<ScopeGovernanceAction>, string]>([
+      [
+        {
+          action: ScopeGovernanceActionKind.ROLE_WITHDRAWN,
+          role: FleetScopeRole.OFFICER,
+        },
+        'Kira’s role as an Officer ended.',
+      ],
+      [
+        {
+          action: ScopeGovernanceActionKind.CAPABILITY_CLEARED,
+          capability: 'news.write',
+          clearedEffect: ScopeCapabilityEffect.GRANT,
+        },
+        'Kira’s grant of “<news.write>” ended.',
+      ],
+      [
+        {
+          action: ScopeGovernanceActionKind.CAPABILITY_CLEARED,
+          capability: 'news.write',
+          clearedEffect: ScopeCapabilityEffect.DENY,
+        },
+        'The denial of “<news.write>” to Kira ended.',
+      ],
+      [
+        {
+          action: ScopeGovernanceActionKind.CAPABILITY_CLEARED,
+          subjectName: null,
+          role: FleetScopeRole.OFFICER,
+          capability: 'news.write',
+        },
+        '“<news.write>” for every Officer ended.',
+      ],
+    ])('says what ended by itself: %j', (overrides, sentence) => {
+      expect(
+        describeGovernanceAction(
+          change({ ...overrides, actorName: null, automatic: true }),
+          named,
+        ),
+      ).toBe(sentence);
+    });
 
     it.each<[Partial<ScopeGovernanceAction>, string]>([
       [{ role: FleetScopeRole.ADMIN }, 'Owner made Kira an Admin.'],

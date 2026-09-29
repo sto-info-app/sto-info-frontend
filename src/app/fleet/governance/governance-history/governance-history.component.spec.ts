@@ -38,6 +38,7 @@ function change(
     capability: null,
     clearedEffect: null,
     reason: null,
+    automatic: false,
     createdAt: '2026-09-20T10:00:00.000Z',
     ...overrides,
   };

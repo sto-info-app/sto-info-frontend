@@ -1,3 +1,4 @@
+import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,7 +11,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 
 import {
+  ScanAssetDetail,
   ScanDiagnostics,
+  ScanRejectionPage,
   ScanUsageWindow,
   ScanUsageWindowName,
 } from 'src/app/models/scan-diagnostics.models';
@@ -76,6 +79,25 @@ export const SCAN_LATENCY_ROWS: readonly DurationRow[] = [
   { key: 'waitMaxMs', label: 'Wait for a verdict, longest' },
 ];
 
+/** An asset ID, as the server will look one up. */
+const ASSET_ID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** What the list of refused assets is showing (FC-039). */
+export type ScanRejectionsState =
+  | { readonly kind: 'LOADING' }
+  | { readonly kind: 'ERROR' }
+  | { readonly kind: 'READY'; readonly page: ScanRejectionPage };
+
+/** What looking one asset up came to (FC-039). */
+export type ScanAssetLookup =
+  | { readonly kind: 'NONE' }
+  | { readonly kind: 'LOADING' }
+  | { readonly kind: 'FOUND'; readonly asset: ScanAssetDetail }
+  | { readonly kind: 'NOT_FOUND' }
+  | { readonly kind: 'INVALID' }
+  | { readonly kind: 'ERROR' };
+
 /** What the page is showing. */
 export type ScanDiagnosticsState =
   | { readonly kind: 'LOADING' }
@@ -127,6 +149,7 @@ export function formatDuration(ms: number | null): string {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AppDatePipe,
+    ImageEstatePanelComponent,
     LcarsErrorMessageComponent,
     LoadingBarComponent,
     RouterModule,
@@ -144,12 +167,78 @@ export class ScanDiagnosticsComponent implements OnInit {
   readonly latencyRows = SCAN_LATENCY_ROWS;
 
   readonly state = signal<ScanDiagnosticsState>({ kind: 'LOADING' });
+  readonly rejections = signal<ScanRejectionsState>({ kind: 'LOADING' });
+  readonly rejectionPage = signal(1);
+  readonly lookup = signal<ScanAssetLookup>({ kind: 'NONE' });
 
   /**
-   * Reads the diagnostics on arrival.
+   * Reads the diagnostics and the refused assets on arrival.
    */
   ngOnInit(): void {
     this.load();
+    this.loadRejections();
+  }
+
+  /**
+   * How many pages of refused assets there are.
+   *
+   * @param page - A page of them.
+   * @returns The count, at least one.
+   */
+  pageCountOf(page: ScanRejectionPage): number {
+    return Math.max(1, Math.ceil(page.total / page.pageSize));
+  }
+
+  /**
+   * Moves to another page of refused assets.
+   *
+   * @param step - One back or one on.
+   */
+  turnRejections(step: -1 | 1): void {
+    this.rejectionPage.update(page => page + step);
+    this.loadRejections();
+  }
+
+  /**
+   * Looks one asset up by its ID (FC-039).
+   *
+   * @param value - The ID, as typed.
+   */
+  lookUp(value: string): void {
+    const assetId = value.trim();
+
+    if (!ASSET_ID.test(assetId)) {
+      this.lookup.set({ kind: 'INVALID' });
+      return;
+    }
+
+    this.lookup.set({ kind: 'LOADING' });
+    this._diagnosticsService
+      .asset(assetId)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: asset => this.lookup.set({ kind: 'FOUND', asset }),
+        error: (error: unknown) =>
+          this.lookup.set({
+            kind:
+              error instanceof HttpErrorResponse &&
+              error.status === HttpStatusCode.NotFound
+                ? 'NOT_FOUND'
+                : 'ERROR',
+          }),
+      });
+  }
+
+  /** Reads the page of refused assets asked for. */
+  private loadRejections(): void {
+    this.rejections.set({ kind: 'LOADING' });
+    this._diagnosticsService
+      .rejections(this.rejectionPage())
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: page => this.rejections.set({ kind: 'READY', page }),
+        error: () => this.rejections.set({ kind: 'ERROR' }),
+      });
   }
 
   /**

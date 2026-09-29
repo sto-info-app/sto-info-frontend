@@ -18,6 +18,8 @@ $admin-landing-colours: (
   'reports': color.adjust(vars.$lcars-red, $lightness: 10%),
   'moderation': color.adjust(vars.$lcars-red, $lightness: 10%),
   'members': vars.$lcars-tangerine,
+  // With the moderation queues it is reached from: somebody is waiting on it.
+  'erasures': color.adjust(vars.$lcars-red, $lightness: 10%),
   // Violet is the one colour here that will not carry black text at the size
   // these names are set in. Taken a shade lighter it clears the contrast the
   // rest of the site holds to and is still recognisably violet.
@@ -30,6 +32,10 @@ $admin-landing-colours: (
   // Operations, which has a band of its own. Sunflower is taken by nothing
   // else here and carries black text.
   'scan-diagnostics': vars.$lcars-sunflower,
+  // The record of what admins did sits with the scanner's in Operations.
+  // Perano is otherwise only the banners' card, a band away, and carries
+  // black text.
+  'security-log': vars.$lcars-perano,
 );
 
 #admin-page {

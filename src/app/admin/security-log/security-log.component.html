@@ -1,0 +1,133 @@
+@if (isLoading()) {
+  <app-loading-bar loadingText="Loading the log"></app-loading-bar>
+}
+
+<div
+  id="security-log-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Security Log</h1>
+    <p class="admin-page-intro">
+      What site admins did, and what the retention jobs did: who, when, what, to
+      whom or what, and why. Each entry is kept for as long as the log it comes
+      from keeps it. Nothing here is anything a member wrote.
+    </p>
+
+    @if (errorMessage(); as error) {
+      <app-lcars-error-message
+        title="Not read"
+        [message]="error"></app-lcars-error-message>
+    }
+
+    <section class="admin-section">
+      <div class="admin-panel">
+        <div class="form-row compact">
+          <div class="lcars-select-container sunflower">
+            <label
+              class="select-label"
+              for="security-log-source"
+              >Show</label
+            >
+            <select
+              id="security-log-source"
+              title="Show"
+              (change)="filter($any($event.target).value)">
+              <option
+                value=""
+                [selected]="source() === null">
+                Everything
+              </option>
+              @for (option of sources; track option) {
+                <option
+                  [value]="option"
+                  [selected]="option === source()">
+                  {{ sourceLabels[option] }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    @if (!isLoading() && entries().length === 0 && !errorMessage()) {
+      <p class="records-empty">Nothing has been logged here yet.</p>
+    }
+
+    @if (entries().length > 0) {
+      <table class="fleet-community-table">
+        <caption>
+          Security log entries, newest first
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">When</th>
+            <th scope="col">Who</th>
+            <th scope="col">What</th>
+            <th scope="col">To whom or what</th>
+            <th scope="col">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of entries(); track entry.source + entry.id) {
+            <tr>
+              <td data-label="When">{{ entry.at | appDate: 'medium' }}</td>
+              <td data-label="Who">{{ actorOf(entry) }}</td>
+              <td data-label="What">
+                {{ actionOf(entry) }}
+                <span class="fleet-report-note">{{
+                  sourceLabels[entry.source]
+                }}</span>
+              </td>
+              <td data-label="To whom or what">
+                @if (entry.target; as target) {
+                  {{ nameOf(target) }}
+                }
+                @if (subjectOf(entry); as subject) {
+                  <span class="fleet-report-note"
+                    >{{ subject }} <code>{{ entry.subjectId }}</code></span
+                  >
+                }
+                @for (line of detailOf(entry); track line) {
+                  <span class="fleet-report-note">{{ line }}</span>
+                }
+              </td>
+              <td data-label="Why">{{ entry.reason ?? '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (pageCount() > 1) {
+        <div class="lcars-pagination">
+          <button
+            type="button"
+            [disabled]="page() <= 1"
+            (click)="turn(-1)">
+            Newer
+          </button>
+          <span>Page {{ page() }} of {{ pageCount() }}</span>
+          <button
+            type="button"
+            [disabled]="page() >= pageCount()"
+            (click)="turn(1)">
+            Older
+          </button>
+        </div>
+      }
+    }
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN"
+        >Admin home</a
+      >
+    </div>
+  </div>
+</div>

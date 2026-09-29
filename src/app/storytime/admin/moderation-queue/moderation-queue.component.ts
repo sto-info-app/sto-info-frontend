@@ -156,15 +156,24 @@ export class ModerationQueueComponent implements OnInit {
   }
 
   /**
-   * Closes a report without acting on the content.
+   * Closes a report without acting on the content, with a note for the
+   * record: the reason the site admin log keeps (FC-039).
    *
    * @param report - The report.
    */
   dismiss(report: StorytimeReport): void {
+    const resolution = this.form.getRawValue().resolution.trim();
+
+    if (!resolution) {
+      this.errorMessage =
+        'Say why the report is dismissed. It is kept with the report and in the site admin log.';
+      return;
+    }
+
     this.runAction(
       this._moderationService.resolveReport(report.id, {
         status: StorytimeReportStatus.DISMISSED,
-        resolution: this.form.getRawValue().resolution.trim() || undefined,
+        resolution,
       }),
     );
   }
@@ -188,17 +197,23 @@ export class ModerationQueueComponent implements OnInit {
   }
 
   /**
-   * Decides an appeal either way.
+   * Decides an appeal either way, telling the creator why: the reason the
+   * site admin log keeps (FC-039).
    *
    * @param appeal - The appeal.
    * @param uphold - Whether it succeeds.
    */
   private decide(appeal: ModerationAppeal, uphold: boolean): void {
+    const reviewNotes = this.form.getRawValue().message.trim();
+
+    if (!reviewNotes) {
+      this.errorMessage =
+        'Say what the creator is told about their appeal. They are shown it word for word.';
+      return;
+    }
+
     this.runAction(
-      this._moderationService.decideAppeal(appeal.id, {
-        uphold,
-        reviewNotes: this.form.getRawValue().message.trim() || undefined,
-      }),
+      this._moderationService.decideAppeal(appeal.id, { uphold, reviewNotes }),
     );
   }
 

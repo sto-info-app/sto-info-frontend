@@ -85,3 +85,30 @@ export interface ScanDiagnostics {
   readonly queue: ScanQueue | null;
   readonly awaiting: ScanAwaiting;
 }
+
+/**
+ * One asset's scan outcome (FC-039): why it was refused and with what, but
+ * never a signature name, which the server does not keep.
+ */
+export interface ScanAssetDetail {
+  readonly id: string;
+  /** What the asset is for. */
+  readonly kind: string;
+  readonly state: string;
+  /** Why it was refused, as a code. */
+  readonly rejectionCode: string | null;
+  readonly scanEngine: string | null;
+  readonly scanEngineVersion: string | null;
+  readonly scanSignatureVersion: string | null;
+  readonly policyVersion: number;
+  readonly createdAt: string;
+  readonly lastVerdictAt: string | null;
+}
+
+/** A page of refused assets, newest verdict first. */
+export interface ScanRejectionPage {
+  readonly items: readonly ScanAssetDetail[];
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
+}

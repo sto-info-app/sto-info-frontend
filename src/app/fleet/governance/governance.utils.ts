@@ -44,6 +44,10 @@ export function describeGovernanceAction(
   const capability = capabilityName(entry.capability ?? '');
   const role = ROLE_WITH_ARTICLE[entry.role ?? FleetScopeRole.MEMBER];
 
+  if (entry.automatic) {
+    return describeEnding(entry, subject, role, capability);
+  }
+
   switch (entry.action) {
     case ScopeGovernanceActionKind.ROLE_ASSIGNED:
       return `${actor} made ${subject} ${role}.`;
@@ -80,6 +84,35 @@ export function describeGovernanceAction(
     case ScopeGovernanceActionKind.REINSTATED:
       return `${actor} lifted its suspension.`;
   }
+}
+
+/**
+ * Says what ended, by itself, when something else happened (FC-039): nobody
+ * did it, and its reason says what caused it.
+ *
+ * @param entry - The change.
+ * @param subject - Whose it was, named.
+ * @param role - Their role, with its article.
+ * @param capability - The capability, named.
+ * @returns A sentence, without its reason.
+ */
+function describeEnding(
+  entry: ScopeGovernanceAction,
+  subject: string,
+  role: string,
+  capability: string,
+): string {
+  if (entry.action === ScopeGovernanceActionKind.ROLE_WITHDRAWN) {
+    return `${subject}’s role as ${role} ended.`;
+  }
+
+  if (entry.subjectName === null && entry.role !== null) {
+    return `“${capability}” for every Officer ended.`;
+  }
+
+  return entry.clearedEffect === ScopeCapabilityEffect.DENY
+    ? `The denial of “${capability}” to ${subject} ended.`
+    : `${subject}’s grant of “${capability}” ended.`;
 }
 
 /**

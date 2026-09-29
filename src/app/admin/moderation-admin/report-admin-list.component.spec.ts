@@ -81,13 +81,15 @@ describe('ReportAdminListComponent', () => {
   let holds: { place: jest.Mock };
 
   /**
-   * Stubs the confirm dialog to close with the given result.
+   * Stubs the reason dialog to close with a reason, or with none (FC-039).
    *
-   * @param confirmed - Whether the administrator confirmed.
+   * @param confirmed - Whether the administrator gave a reason.
    */
   const stubDialog = (confirmed: boolean): void => {
     dialogSpy.open.mockReturnValue({
-      afterClosed: jest.fn().mockReturnValue(of(confirmed)),
+      afterClosed: jest
+        .fn()
+        .mockReturnValue(of(confirmed ? 'Spamming' : undefined)),
     } as unknown as MatDialogRef<unknown>);
   };
 
@@ -256,28 +258,42 @@ describe('ReportAdminListComponent', () => {
     expect(component.successMessage).toContain('under review');
   });
 
-  it('closes a report as actioned', () => {
+  it('closes a report as actioned once a reason is given', () => {
     fixture.detectChanges();
+    stubDialog(true);
 
     component.markActioned(buildReport());
 
     expect(serviceSpy.updateReport).toHaveBeenCalledWith('report-1', {
       status: ReportStatus.ACTIONED,
+      reason: 'Spamming',
     });
   });
 
-  it('dismisses a report after confirmation', () => {
+  it('does not close a report as actioned without a reason', () => {
+    fixture.detectChanges();
+    stubDialog(false);
+
+    component.markActioned(buildReport());
+
+    expect(serviceSpy.updateReport).not.toHaveBeenCalled();
+  });
+
+  it('dismisses a report once a reason is given', () => {
     fixture.detectChanges();
     stubDialog(true);
 
     component.dismiss(buildReport());
 
     expect(dialogSpy.open).toHaveBeenCalledWith(
-      ConfirmDialogComponent,
-      expect.anything(),
+      GovernanceReasonDialogComponent,
+      expect.objectContaining({
+        data: expect.objectContaining({ label: 'Reason', max: 500 }),
+      }),
     );
     expect(serviceSpy.updateReport).toHaveBeenCalledWith('report-1', {
       status: ReportStatus.DISMISSED,
+      reason: 'Spamming',
     });
   });
 
@@ -296,7 +312,7 @@ describe('ReportAdminListComponent', () => {
       throwError(() => ({ status: 500 })),
     );
 
-    component.markActioned(buildReport());
+    component.claim(buildReport());
 
     expect(component.errorMessage).toBe('Failed to update that report.');
   });
@@ -308,7 +324,9 @@ describe('ReportAdminListComponent', () => {
 
     component.disableReported(buildReport());
 
-    expect(serviceSpy.disableUser).toHaveBeenCalledWith(REPORTED_ID);
+    expect(serviceSpy.disableUser).toHaveBeenCalledWith(REPORTED_ID, {
+      reason: 'Spamming',
+    });
     expect(serviceSpy.getReports).toHaveBeenCalled();
     expect(component.successMessage).toContain('disabled');
   });
@@ -349,7 +367,7 @@ describe('ReportAdminListComponent', () => {
       }),
     );
 
-    expect(serviceSpy.enableUser).toHaveBeenCalledWith(REPORTED_ID);
+    expect(serviceSpy.enableUser).toHaveBeenCalledWith(REPORTED_ID, 'Spamming');
     expect(component.successMessage).toContain('restored');
   });
 

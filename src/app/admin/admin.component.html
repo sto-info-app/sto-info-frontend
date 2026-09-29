@@ -118,7 +118,15 @@
           <span class="admin-landing__name">Scan Diagnostics</span>
           <p class="admin-landing__summary">
             See what the file scanner has done, what it runs on and what is
-            waiting for it.
+            waiting for it, and why an upload was refused.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--security-log">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_SECURITY_LOG)">
+          <span class="admin-landing__name">Security Log</span>
+          <p class="admin-landing__summary">
+            What site admins and the retention jobs did, when, to whom and why.
           </p>
         </a>
       </li>

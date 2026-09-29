@@ -848,7 +848,11 @@ offered, since they hold everything. A reason is asked for wherever something
 is taken away — withdrawing a role, unticking an Officer capability, a denial,
 clearing a grant, closing — and is optional otherwise. Capabilities are named
 with `capabilityNamer(delegable)`, and History reads each change as a sentence
-with `describeGovernanceAction`.
+with `describeGovernanceAction`. A role or grant that ended because of
+something else — its holder leaving, the scope closing, ownership changing
+hands — is marked `automatic` and reads as what ended, naming nobody, with the
+cause as its reason (FC-039). The page says the history is kept for as long as
+the scope exists.
 
 **`<app-governance-close-dialog>`** — opened through `MatDialog` by the hub and
 by the site administration page. Closing cannot be undone, so the reader types
@@ -1229,6 +1233,33 @@ Each is offered only while chat is switched on.
   The list of erasures never names who was erased: each shows the pseudonym
   that replaced them. **Replay the erasure ledger…**, run after a database
   restore, makes again what the restore lost.
+
+**Reasons for every site admin action** (FC-039). Each is kept in the site
+admin log, so each asks why through `GovernanceReasonDialogComponent` (up to
+500 characters, `ADMIN_REASON_MAX_LENGTH`) where it used to ask only for
+confirmation:
+
+- Manage Permissions: changing a role and withdrawing an override. Setting an
+  override already took a reason.
+- Manage Members, and Reported Officers: disabling and restoring an account.
+- Reported Officers: dismissing a report and closing it as actioned. Claiming
+  one needs no reason.
+- Chat Reports: the note on Resolve and Dismiss is required, and the button
+  waits for it.
+- Storytime Moderation: dismissing a report needs the note for the record, and
+  deciding an appeal needs what the creator is told.
+
+**`/admin/security-log`**, "Security Log" (FC-039, `SecurityLogComponent` in
+`src/app/admin/security-log`), under Operations on the Admin page: what site
+admins and the retention jobs did, newest first, fifty a page, from every log
+that holds it. **Show** narrows it to one source: site admin actions, Fleet
+disputes, moderation holds, Fleet investigations, roster erasures or retention
+runs. Each row gives when, who (or "The system"), what in words, to whom or
+what with its codes and counts, and why.
+
+**Scan Diagnostics** (FC-039) also lists refused uploads, newest verdict
+first, with each one's rejection code and engine, and **Look up** reads one
+asset by its ID. Neither ever shows a signature name.
 
 **The site admins' queue** (FC-035): `/admin/chat-reports`, "Chat Reports" on the Admin page, in
 `src/app/admin/moderation-admin` (`ChatReportAdminListComponent`):

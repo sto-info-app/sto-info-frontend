@@ -24,7 +24,7 @@ import {
   ModeratedUser,
   PaginatedModeratedUsers,
 } from 'src/app/models/moderation.models';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { GovernanceReasonDialogComponent } from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
 import { AccessControlAdminService } from 'src/app/shared/services/access-control-admin.service';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { ModerationService } from 'src/app/shared/services/moderation.service';
@@ -170,13 +170,15 @@ describe('PermissionAdminComponent', () => {
     ).find(button => button.textContent?.trim() === 'Clear');
 
   /**
-   * Stubs the confirm dialog to close with the given result.
+   * Stubs the reason dialog to close with a reason, or with none (FC-039).
    *
-   * @param confirmed - Whether the administrator confirmed.
+   * @param confirmed - Whether the administrator gave a reason.
    */
   const stubDialog = (confirmed: boolean): void => {
     dialogSpy.open.mockReturnValue({
-      afterClosed: jest.fn().mockReturnValue(of(confirmed)),
+      afterClosed: jest
+        .fn()
+        .mockReturnValue(of(confirmed ? 'Needs it' : undefined)),
     } as unknown as MatDialogRef<unknown>);
   };
 
@@ -204,7 +206,7 @@ describe('PermissionAdminComponent', () => {
       >(() => of(buildSummary())),
       removePermissionOverride: jest.fn<
         Observable<UserAccessSummary>,
-        [string, string]
+        [string, string, string]
       >(() => of(buildSummary())),
       setUserRole: jest.fn<
         Observable<UserAccessSummary>,
@@ -796,7 +798,7 @@ describe('PermissionAdminComponent', () => {
     expect(adminServiceSpy.setUserRole).not.toHaveBeenCalled();
   });
 
-  it('makes a member a curator after confirmation', () => {
+  it('makes a member a curator once a reason is given', () => {
     selectMember();
     stubDialog(true);
     const updated = buildSummary({
@@ -809,11 +811,14 @@ describe('PermissionAdminComponent', () => {
     component.changeRole();
 
     expect(dialogSpy.open).toHaveBeenCalledWith(
-      ConfirmDialogComponent,
-      expect.anything(),
+      GovernanceReasonDialogComponent,
+      expect.objectContaining({
+        data: expect.objectContaining({ label: 'Reason', max: 500 }),
+      }),
     );
     expect(adminServiceSpy.setUserRole).toHaveBeenCalledWith(MEMBER_ID, {
       role: ASSIGNABLE_ROLES.STORYTIME_CURATOR,
+      reason: 'Needs it',
     });
     expect(component.summary).toEqual(updated);
     expect(component.selectedMember?.role).toBe(
@@ -1083,19 +1088,22 @@ describe('PermissionAdminComponent', () => {
 
   // ----- Withdrawing an override -----
 
-  it('withdraws an override after confirmation', () => {
+  it('withdraws an override once a reason is given', () => {
     selectMember(buildSummary({ overrides: [buildOverride()] }));
     stubDialog(true);
 
     component.withdrawOverride(component.rows[1]);
 
     expect(dialogSpy.open).toHaveBeenCalledWith(
-      ConfirmDialogComponent,
-      expect.anything(),
+      GovernanceReasonDialogComponent,
+      expect.objectContaining({
+        data: expect.objectContaining({ label: 'Reason', max: 500 }),
+      }),
     );
     expect(adminServiceSpy.removePermissionOverride).toHaveBeenCalledWith(
       MEMBER_ID,
       MODERATE,
+      'Needs it',
     );
     expect(component.successMessage).toBe(
       'The override on Moderate Storytime was withdrawn from member.',

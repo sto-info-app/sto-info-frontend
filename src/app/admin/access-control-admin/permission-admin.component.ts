@@ -30,7 +30,10 @@ import {
   UserPermissionOverride,
 } from 'src/app/models/access-control.models';
 import { ModeratedUser } from 'src/app/models/moderation.models';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import {
+  GovernanceReasonDialogComponent,
+  GovernanceReasonDialogData,
+} from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -378,12 +381,12 @@ export class PermissionAdminComponent implements OnInit {
   // ----- Role -----
 
   /**
-   * Gives the selected member the role in the picker, after confirmation.
+   * Gives the selected member the role in the picker, once a reason is given.
    *
    * Confirmed rather than applied outright because a role is the blunt
    * instrument: promoting somebody hands them the moderation queue, the
    * Spotlight and the tag vocabulary in one go, and demoting them takes all
-   * three away.
+   * three away. The reason is kept in the site admin log (FC-039).
    */
   changeRole(): void {
     const member = this.selectedMember;
@@ -395,20 +398,18 @@ export class PermissionAdminComponent implements OnInit {
     const name = this.displayName(member);
     const label = this.roleLabels[role];
 
-    this.confirm(
+    this.askReason(
       {
         title: 'Change Role',
-        message: `
-          <p>Make <strong>${name}</strong> a
-          <strong>${label}</strong>?</p>
-          <p>${this.roleDescriptions[role]}</p>
-          <p>Overrides already applied to them stay in force, and still beat
-          whatever the new role confers.</p>`,
+        message:
+          `Make ${name} a ${label}? ${this.roleDescriptions[role]} ` +
+          'Overrides already applied to them stay in force, and still beat ' +
+          'whatever the new role confers.',
         confirmText: 'Change role',
       },
-      () =>
+      reason =>
         this.runChange(
-          () => this._adminService.setUserRole(member.id, { role }),
+          () => this._adminService.setUserRole(member.id, { role, reason }),
           `${name} is now a ${label.toLowerCase()}.`,
           'Failed to change that role.',
           'The API refused that role change. Administrator roles are set outside STO Info.',
@@ -487,7 +488,8 @@ export class PermissionAdminComponent implements OnInit {
   }
 
   /**
-   * Withdraws an override, after confirmation.
+   * Withdraws an override, once a reason is given for the site admin log
+   * (FC-039).
    *
    * @param row - The permission whose override is being withdrawn.
    */
@@ -500,24 +502,23 @@ export class PermissionAdminComponent implements OnInit {
     const name = this.displayName(member);
     const permissionName = row.permission.name;
 
-    this.confirm(
+    this.askReason(
       {
         title: 'Withdraw Override',
-        message: `
-          <p>Withdraw the
-          <strong>${this.effectLabels[row.override.effect].toLowerCase()}</strong>
-          override on <strong>${permissionName}</strong> for
-          <strong>${name}</strong>?</p>
-          <p>They go back to whatever their role confers, which may take the
-          permission away or hand it back.</p>`,
+        message:
+          `Withdraw the ${this.effectLabels[row.override.effect].toLowerCase()} ` +
+          `override on ${permissionName} for ${name}? They go back to ` +
+          'whatever their role confers, which may take the permission away ' +
+          'or hand it back.',
         confirmText: 'Withdraw',
       },
-      () =>
+      reason =>
         this.runChange(
           () =>
             this._adminService.removePermissionOverride(
               member.id,
               row.permission.code,
+              reason,
             ),
           `The override on ${permissionName} was withdrawn from ${name}.`,
           'Failed to withdraw that override.',
@@ -822,26 +823,30 @@ export class PermissionAdminComponent implements OnInit {
   }
 
   /**
-   * Opens the LCARS confirmation dialog and runs the action if confirmed.
+   * Asks why, and runs the action with the reason once one is given. The
+   * reason is kept in the site admin log (FC-039).
    *
    * @param data - The dialog copy.
-   * @param onConfirm - Invoked when the administrator confirms.
+   * @param onConfirm - Invoked with the reason, trimmed.
    */
-  private confirm(
+  private askReason(
     data: { title: string; message: string; confirmText: string },
-    onConfirm: () => void,
+    onConfirm: (reason: string) => void,
   ): void {
-    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
-      width: '75%',
-      data: { ...data, cancelText: 'Cancel' },
-    });
-
-    dialogRef
+    this._dialog
+      .open<
+        GovernanceReasonDialogComponent,
+        GovernanceReasonDialogData,
+        string
+      >(GovernanceReasonDialogComponent, {
+        width: '75%',
+        data: { ...data, label: 'Reason', max: REASON_MAX_LENGTH },
+      })
       .afterClosed()
       .pipe(take(1), observeInZone(this._ngZone, this._cdr))
-      .subscribe(confirmed => {
-        if (confirmed) {
-          onConfirm();
+      .subscribe(reason => {
+        if (reason) {
+          onConfirm(reason);
         }
       });
   }

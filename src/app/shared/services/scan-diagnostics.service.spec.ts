@@ -67,4 +67,28 @@ describe('ScanDiagnosticsService', () => {
     httpMock.expectNone(API_URLS.FILE_SCANNING_ADMIN_DIAGNOSTICS);
     expect(failure?.message).toBe('No token found');
   });
+
+  // FC-039.
+  it('reads a page of refused assets', () => {
+    service.rejections(2).subscribe();
+
+    const request = httpMock.expectOne(
+      req => req.url === API_URLS.FILE_SCANNING_ADMIN_REJECTIONS,
+    );
+
+    expect(request.request.headers.get('Authorization')).toBe(AUTH_HEADER);
+    expect(request.request.params.get('page')).toBe('2');
+    request.flush({ items: [], total: 0, page: 2, pageSize: 25 });
+  });
+
+  it('reads one asset’s outcome, its ID kept to one path segment', () => {
+    service.asset('asset/1').subscribe();
+
+    const request = httpMock.expectOne(
+      `${API_URLS.FILE_SCANNING_ADMIN_ASSETS}/asset%2F1`,
+    );
+
+    expect(request.request.method).toBe('GET');
+    request.flush({});
+  });
 });
