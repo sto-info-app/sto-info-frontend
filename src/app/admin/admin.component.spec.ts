@@ -6,12 +6,14 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { StorytimeService } from 'src/app/storytime/storytime.service';
 import { AdminComponent } from './admin.component';
+import { ModerationHoldAdminService } from './moderation-admin/moderation-hold-admin.service';
 
 describe('AdminComponent', () => {
   let component: AdminComponent;
   let fixture: ComponentFixture<AdminComponent>;
   let accessControlService: { getMyPermissions: jest.Mock };
   let storytimeService: { isEnabled: jest.Mock };
+  let holds: { openCounts: jest.Mock };
 
   /**
    * The hrefs of every link on the rendered page.
@@ -27,6 +29,7 @@ describe('AdminComponent', () => {
     // Storytime is on, and this administrator runs none of it. The management
     // cards are the exception on this page, not the rule.
     storytimeService = { isEnabled: jest.fn().mockReturnValue(of(true)) };
+    holds = { openCounts: jest.fn(() => of({ total: 0 })) };
     accessControlService = {
       getMyPermissions: jest
         .fn()
@@ -39,6 +42,7 @@ describe('AdminComponent', () => {
         provideRouter([]),
         { provide: AccessControlService, useValue: accessControlService },
         { provide: StorytimeService, useValue: storytimeService },
+        { provide: ModerationHoldAdminService, useValue: holds },
       ],
     }).compileComponents();
 
@@ -49,6 +53,27 @@ describe('AdminComponent', () => {
   it('should create', () => {
     fixture.detectChanges();
     expect(component).toBeTruthy();
+  });
+
+  it('counts the open reports of both kinds beside Community (FC-036)', () => {
+    holds.openCounts.mockReturnValue(of({ total: 4 }));
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'Community · 4 open reports',
+    );
+    expect(hrefs()).toEqual(
+      expect.arrayContaining(['/admin/holds', '/admin/fleet-investigations']),
+    );
+  });
+
+  it('names Community alone when nothing is open, or the count is unknown', () => {
+    fixture.detectChanges();
+    expect(component.openReports).toBe(0);
+
+    holds.openCounts.mockReturnValue(throwError(() => new Error('down')));
+    component.ngOnInit();
+    expect(component.openReports).toBeNull();
   });
 
   it('builds route links', () => {

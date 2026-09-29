@@ -110,6 +110,21 @@
                     </p>
                   }
 
+                  @if (report.openChatReportCount > 0) {
+                    <p class="moderation-no-details">
+                      Also
+                      <a [routerLink]="'/' + appRoutes.ADMIN_CHAT_REPORTS">
+                        {{ report.openChatReportCount }} open chat
+                        {{
+                          report.openChatReportCount === 1
+                            ? 'report'
+                            : 'reports'
+                        }}
+                      </a>
+                      of their messages.
+                    </p>
+                  }
+
                   <dl class="admin-record-details">
                     <div class="admin-record-detail">
                       <span class="label">Reported by</span>
@@ -174,6 +189,15 @@
                     ><i class="fas fa-xmark"></i
                     ></button>
                   }
+
+                  <button
+                    type="button"
+                    class="cta-icon"
+                    (click)="holdMessages(report)"
+                    title="Hold their chat messages"
+                    aria-label="Hold their chat messages"
+                  ><i class="fas fa-box-archive"></i
+                  ></button>
 
                   @if (report.reported.isAccountDisabled) {
                     <button

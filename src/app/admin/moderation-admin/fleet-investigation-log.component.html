@@ -1,0 +1,108 @@
+@if (isLoading()) {
+  <app-loading-bar loadingText="Loading the log"></app-loading-bar>
+}
+
+<div
+  id="fleet-investigation-log-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Fleet Investigations</h1>
+    <p class="admin-page-intro">
+      Every look a site admin has taken into a Fleet's imports, with its
+      purpose. Each lasts 24 hours and reads only. A look is opened from a
+      Community's dispute page.
+    </p>
+
+    @if (errorMessage(); as error) {
+      <app-lcars-error-message
+        title="Not read"
+        [message]="error"></app-lcars-error-message>
+    }
+
+    @if (!isLoading() && looks().length === 0) {
+      <p class="records-empty">Nobody has looked into a Fleet yet.</p>
+    }
+
+    @if (looks().length > 0) {
+      <table class="fleet-community-table">
+        <caption>
+          Looks into Fleets, newest first
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">When</th>
+            <th scope="col">Who</th>
+            <th scope="col">Fleet</th>
+            <th scope="col">Purpose</th>
+            <th scope="col">Until</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (look of looks(); track look.id) {
+            <tr>
+              <td data-label="When">
+                {{ look.createdAt | appDate: 'medium' }}
+              </td>
+              <td data-label="Who">
+                {{
+                  look.admin
+                    ? (look.admin.username ?? 'An account with no username')
+                    : 'An account since closed'
+                }}
+              </td>
+              <td data-label="Fleet">
+                @if (linkOf(look); as link) {
+                  <a [routerLink]="link">{{ look.fleetName }}</a>
+                } @else {
+                  {{ look.fleetName }}
+                }
+                <span class="fleet-report-note"
+                  >{{ look.platformName }} ·
+                  {{ look.communityName ?? 'a Community since gone' }}</span
+                >
+              </td>
+              <td data-label="Purpose">{{ look.purpose }}</td>
+              <td data-label="Until">
+                {{ look.expiresAt | appDate: 'medium' }}
+                @if (!look.active) {
+                  <span class="fleet-report-note">ended</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (pageCount() > 1) {
+        <div class="lcars-pagination">
+          <button
+            type="button"
+            [disabled]="page() <= 1"
+            (click)="turn(-1)">
+            Newer
+          </button>
+          <span>Page {{ page() }} of {{ pageCount() }}</span>
+          <button
+            type="button"
+            [disabled]="page() >= pageCount()"
+            (click)="turn(1)">
+            Older
+          </button>
+        </div>
+      }
+    }
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN"
+        >Admin home</a
+      >
+    </div>
+  </div>
+</div>
