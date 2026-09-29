@@ -1,4 +1,21 @@
 import { Permission } from 'src/app/models/access-control.models';
+import { StorytimeAvailability } from 'src/app/models/storytime.models';
+
+/**
+ * A switch part of the help waits on (FC-049).
+ *
+ * Storytime, Fleet Community and Fleet chat can each be turned off, and a
+ * feature nobody can reach is meant to look like one that does not exist.
+ * Help agrees: a section, a guide or a part of a guide about a switched-off
+ * feature is not offered.
+ */
+export type HelpFeature = 'STORYTIME' | 'FLEET' | 'CHAT';
+
+/**
+ * Where each switch stands: on, off, or unknown because the backend could
+ * not be asked. The same three words Storytime already uses.
+ */
+export type HelpFeatures = Readonly<Record<HelpFeature, StorytimeAvailability>>;
 
 /**
  * One block of a guide: a heading and the plain-English copy beneath it.
@@ -14,6 +31,12 @@ export interface HelpGuideSection {
   paragraphs: string[];
   /** Bullet points shown after the paragraphs, when the copy needs a list. */
   points?: string[];
+  /**
+   * The switch this part of the guide waits on, when the rest of the guide
+   * does not: the Settings guide to Fleet controls describes chat's among
+   * them, and those go when chat is off (FC-049).
+   */
+  requiresFeature?: HelpFeature;
 }
 
 /**
@@ -58,6 +81,12 @@ export interface HelpGuide {
    * Absent on every guide anybody may read, which is most of them.
    */
   requiresPermission?: Permission;
+  /**
+   * The switch this guide waits on, when its topic does not (FC-049): a
+   * settings guide about Fleet notices waits on Fleet Community, while the
+   * rest of the settings help does not.
+   */
+  requiresFeature?: HelpFeature;
 }
 
 /**
@@ -75,7 +104,7 @@ export interface HelpTopic {
   /** A sentence introducing what the topic covers. */
   intro: string;
   /**
-   * Whether the topic is only offered while Storytime is switched on.
+   * The switch the whole topic waits on, if any.
    *
    * Storytime can be turned off entirely, and its route guard sends visitors to
    * the not-found page rather than telling them the feature exists but is

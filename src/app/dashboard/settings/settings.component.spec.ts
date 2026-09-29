@@ -8,6 +8,8 @@ import { FleetConfigurationService } from 'src/app/shared/services/fleet-configu
 import { UserSettings } from '../models/user.model';
 import { PrivacyModeService } from '../services/privacy-mode.service';
 import { DEFAULT_USER_SETTINGS } from '../services/user-settings.service';
+import { findHelpGuide } from 'src/app/static-pages/help/help.data';
+import { SETTINGS_FORM_LABELS } from 'src/app/static-pages/help/help.testing';
 import { SettingsComponent } from './settings.component';
 
 describe('SettingsComponent', () => {
@@ -420,5 +422,73 @@ describe('SettingsComponent', () => {
         }),
       );
     });
+  });
+
+  describe('its Help (FC-049)', () => {
+    /** Shows the page with Fleet Community and chat on. */
+    const createWithEverything = (): void => {
+      fleetConfigurationService.getFeatures.mockReturnValue(
+        of({ ...FLEET_FEATURES_DISABLED, isEnabled: true, chatEnabled: true }),
+      );
+      createComponent();
+    };
+
+    /**
+     * Each help link on the page: where it leads and what it says.
+     *
+     * @returns The links, in page order.
+     */
+    const helpLinks = (): [string | null, string][] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll('a.help-link'),
+      ).map(link => [link.getAttribute('href'), link.textContent!.trim()]);
+
+    // Steve's decision: a link under each heading, to that panel's guide.
+    it('links the page and each of its panels to its own guide', () => {
+      createWithEverything();
+
+      expect(helpLinks()).toEqual([
+        ['/help/your-settings', 'Help with Settings'],
+        ['/help/privacy-mode', 'Help with Privacy Mode'],
+        ['/help/staying-signed-in', 'Help with staying signed in'],
+        ['/help/dates-and-times', 'Help with dates and times'],
+        ['/help/fleet-settings', 'Help with Fleet settings'],
+        ['/help/what-you-are-notified-about', 'Help with notifications'],
+        ['/help/what-custom-tracking-is', 'Help with Custom Tracking'],
+      ]);
+    });
+
+    it('leads only to guides that exist', () => {
+      createWithEverything();
+
+      helpLinks().forEach(([href]) => {
+        expect(findHelpGuide(href!.replace('/help/', ''))).toBeDefined();
+      });
+    });
+
+    // The Fleet panels, and their links, go with Fleet Community.
+    it('offers no link to a Fleet guide while Fleet Community is off', () => {
+      createComponent();
+
+      expect(helpLinks().map(([href]) => href)).toEqual([
+        '/help/your-settings',
+        '/help/privacy-mode',
+        '/help/staying-signed-in',
+        '/help/dates-and-times',
+        '/help/what-custom-tracking-is',
+      ]);
+    });
+
+    // The Help data's spec checks the guides use each of these labels; this
+    // checks the page still shows them, so a control renamed without its
+    // guide fails one or the other.
+    it.each(SETTINGS_FORM_LABELS)(
+      'shows the label “%s” its guide quotes',
+      label => {
+        createWithEverything();
+
+        expect(fixture.nativeElement.textContent).toContain(label);
+      },
+    );
   });
 });

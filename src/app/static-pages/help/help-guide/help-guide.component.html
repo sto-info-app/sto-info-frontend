@@ -5,7 +5,7 @@
     </p>
 
     <app-feature-unavailable
-      [featureName]="storytimeFeatureName"
+      [featureName]="unavailableFeatureName"
       [reason]="unavailableReason" />
 
     <div class="buttons-row">
@@ -23,14 +23,14 @@
     <p class="help-guide__breadcrumb">
       <a [routerLink]="getRouteLink(appRoutes.HELP)">Help</a>
       <span aria-hidden="true">&rsaquo;</span>
-      <span>{{ topicTitle }}</span>
+      <a [routerLink]="topicLink">{{ topicTitle }}</a>
     </p>
 
     <h1>{{ guide.title }}</h1>
 
     <p class="help-guide__summary">{{ guide.summary }}</p>
 
-    @for (section of guide.sections; track section.heading) {
+    @for (section of sections; track section.heading) {
       <app-collapsible-section [heading]="section.heading">
         @for (paragraph of section.paragraphs; track paragraph) {
           <p>{{ paragraph }}</p>

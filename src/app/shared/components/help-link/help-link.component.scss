@@ -1,0 +1,13 @@
+// A line of its own under a heading, small, so it reads as an aside rather
+// than one of the page's controls.
+:host {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.help-link {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 0.9rem;
+}

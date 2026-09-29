@@ -12,6 +12,7 @@ import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -28,16 +29,7 @@ import {
   SESSION_TIMEOUT_OPTIONS,
 } from 'src/app/shared/constants/session-timeout.constants';
 import { PresenceVisibility } from '../models/user.model';
-
-/** The presence audiences, and how the page describes each one. */
-const PRESENCE_OPTIONS: readonly {
-  value: PresenceVisibility;
-  label: string;
-}[] = [
-  { value: 'EVERYONE', label: 'Everyone' },
-  { value: 'FRIENDS', label: 'Friends only' },
-  { value: 'FLEETS_AND_ARMADAS', label: 'My Fleets and Armadas' },
-];
+import { PRESENCE_OPTIONS } from './settings.constants';
 
 @Component({
   selector: 'app-settings',
@@ -52,6 +44,7 @@ const PRESENCE_OPTIONS: readonly {
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsToggleComponent,
+    HelpLinkComponent,
   ],
 })
 export class SettingsComponent implements OnInit, OnDestroy {

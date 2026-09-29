@@ -5,10 +5,16 @@
 <div class="settings-container">
   <div class="settings-main-column col">
     <h1>Settings</h1>
+    <app-help-link
+      slug="your-settings"
+      label="Help with Settings" />
     @if (!isLoading) {
       <form [formGroup]="settingsForm" (ngSubmit)="save()">
         <div class="lcars-text-bar settings-bar"><span>Privacy</span></div>
         <div class="settings-content">
+          <app-help-link
+            slug="privacy-mode"
+            label="Help with Privacy Mode" />
           <div class="settings-row">
             <app-lcars-toggle
               formControlName="privacyMode"
@@ -39,6 +45,9 @@
         </div>
         <div class="lcars-text-bar settings-bar"><span>Security</span></div>
         <div class="settings-content">
+          <app-help-link
+            slug="staying-signed-in"
+            label="Help with staying signed in" />
           <div class="settings-field">
             <label for="session-timeout">Login inactivity timeout</label>
             <select
@@ -59,6 +68,9 @@
         </div>
         <div class="lcars-text-bar settings-bar"><span>Dates and times</span></div>
         <div class="settings-content">
+          <app-help-link
+            slug="dates-and-times"
+            label="Help with dates and times" />
           <div class="settings-field">
             <label for="display-timezone">Show dates and times in</label>
             <select
@@ -84,6 +96,9 @@
         @if (isFleetOffered) {
           <div class="lcars-text-bar settings-bar"><span>Fleet</span></div>
           <div class="settings-content">
+            <app-help-link
+              slug="fleet-settings"
+              label="Help with Fleet settings" />
             <div class="settings-field">
               <label for="export-timezone">Read Fleet roster exports as</label>
               <select
@@ -148,6 +163,9 @@
           </div>
           <div class="lcars-text-bar settings-bar"><span>Notifications</span></div>
           <div class="settings-content">
+            <app-help-link
+              slug="what-you-are-notified-about"
+              label="Help with notifications" />
             <p class="settings-description">
               These arrive in STO Info only. Everything else a Fleet does
               &mdash; news, imports, events being scheduled &mdash; stays in the
@@ -216,6 +234,9 @@
       </form>
       <div class="lcars-text-bar settings-bar"><span>Custom Tracking</span></div>
       <div class="settings-content">
+        <app-help-link
+          slug="what-custom-tracking-is"
+          label="Help with Custom Tracking" />
         <p class="settings-description">
           Decide what else to record about your own accounts and characters, and
           fill it in. Everything you add is private until you say otherwise.

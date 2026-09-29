@@ -374,6 +374,7 @@ place `.lcars-number-highlight` gives up its sunflower.
 | `<app-entity-avatar>` (3) | `src`, `alt` (required), `size` (`100 \| 300`) | Profile picture with a size-matched placeholder fallback. Resets its failure flag when `src` changes. Replaces the open-coded `<img>` plus `(error)` handler pages used to repeat. |
 | `<app-endeavour-rank-badge>` (3) | `totalNodes`, `size` (`'default' \| 'small'`) | Zero-padded four-digit rank readout. `small` rescales through host CSS variables rather than a second stylesheet. |
 | `<app-smart-chart>` (1) | `data: ChartDataItem[]`, `threshold` (5), `mode` (`'pie' \| 'donut' \| 'bar' \| 'auto'`) | Signal inputs. Switches between an SVG pie/donut and a bar chart on the number of data points; every segment path, bar width and colour class is computed once in a `computed`. Falls back to `<app-lcars-information-message>` when there is no data. |
+| `<app-help-link>` | `slug`, `label` (both required) | A small link, on its own line, to one Help guide (FC-049, FC-050). Goes under a page's or panel's heading. Settings uses it under each panel; `<app-fleet-page-shell>` draws one when given `helpSlug` and `helpLabel`. |
 
 ### Feature locks
 
@@ -619,6 +620,23 @@ checks this.
 
 Which sections and guides a reader sees is decided in one place,
 `visibleHelpTopics`:
+
+- A section, a guide or one part of a guide can wait on a switch with
+  `requiresFeature`: `STORYTIME`, `FLEET` or `CHAT` (FC-049).
+  `HelpFeaturesService` reads all three. Help about a switched-off feature is
+  not offered; a switch that can't be read counts as on.
+- A guide with `requiresPermission` waits on that permission.
+- A section left with no guides is dropped.
+- If permissions can't be read, the public guides stay.
+
+An address the reader can't open goes to the not-found page. A section or
+guide whose feature is off, or unreachable, says so instead. A part of a guide
+about a switched-off feature is left out.
+
+**STO Info settings** (FC-049) has a guide for the Settings page and one for
+each of its panels. A help link under each of the page's headings leads to
+that panel's guide. The guides quote the form's own labels; `help.testing.ts`
+lists them, and the specs for the page and for the Help data both check them.
 
 `help-guide-slugs.json` lists every public guide and every section anybody may
 open. `scripts/generate-content.mjs` reads it for the sitemap, and

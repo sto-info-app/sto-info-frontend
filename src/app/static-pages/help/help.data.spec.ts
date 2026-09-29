@@ -9,12 +9,21 @@ import helpGuideSlugs from './help-guide-slugs.json';
 import { PERMISSIONS } from 'src/app/models/access-control.models';
 import { CONTENT_POLICY_RULES } from 'src/app/storytime/storytime.constants';
 import {
+  HELP_FEATURE_NAMES,
   HELP_TOPICS,
+  blockingFeature,
   findHelpGuide,
+  findHelpTopic,
+  isFeatureOffered,
   isGuidePermitted,
   visibleHelpTopics,
 } from './help.data';
 import { HelpGuide } from './help.models';
+import {
+  ALL_HELP_FEATURES_ON,
+  SETTINGS_FORM_LABELS,
+  helpFeaturesWith,
+} from './help.testing';
 
 /**
  * Every guide in the section, whatever topic it sits in.
@@ -33,6 +42,9 @@ const publicGuides = (): HelpGuide[] =>
 
 /** Somebody holding nothing at all. */
 const noPermissions: ReadonlySet<string> = new Set<string>();
+
+const ALL_ON = ALL_HELP_FEATURES_ON;
+const featuresWith = helpFeaturesWith;
 
 describe('help data', () => {
   it('should offer at least one topic with guides in it', () => {
@@ -169,7 +181,7 @@ describe('help data', () => {
     // The registry is always there, so its help is too. Gating it would hide
     // the guides that explain a feature every member can already use.
     it('should not wait on any feature switch', () => {
-      expect(communityTopic?.requiresStorytime).toBe(false);
+      expect(communityTopic?.requiresFeature).toBeUndefined();
     });
 
     it('should cover the registry, friends and blocking', () => {
@@ -228,7 +240,7 @@ describe('help data', () => {
     // to keep quiet, and a reader who cannot open the page is exactly who the
     // guides are for.
     it('should not wait on any feature switch', () => {
-      expect(customTrackingTopic?.requiresStorytime).toBe(false);
+      expect(customTrackingTopic?.requiresFeature).toBeUndefined();
     });
 
     it('should cover building, filling in and publishing', () => {
@@ -280,7 +292,7 @@ describe('help data', () => {
 
     // The guides describe Storytime pages, so they go when Storytime does.
     it('should wait on the Storytime feature switch', () => {
-      expect(adminTopic?.requiresStorytime).toBe(true);
+      expect(adminTopic?.requiresFeature).toBe('STORYTIME');
     });
 
     // One guide per job, each behind the permission that opens the page it
@@ -334,17 +346,55 @@ describe('help data', () => {
 
   describe('visibleHelpTopics', () => {
     it('should drop the Storytime topics while the feature is off', () => {
-      const ids = visibleHelpTopics(false, noPermissions).map(
-        topic => topic.id,
-      );
+      const ids = visibleHelpTopics(
+        featuresWith({ STORYTIME: 'DISABLED' }),
+        noPermissions,
+      ).map(topic => topic.id);
 
-      expect(ids).toEqual(['community', 'custom-tracking']);
+      expect(ids).toEqual(['community', 'custom-tracking', 'settings']);
+    });
+
+    // FC-049: a guide can wait on a switch its topic does not, and a topic
+    // left with none is dropped like any other.
+    it('should drop the guides about Fleet Community while it is off', () => {
+      const settings = visibleHelpTopics(
+        featuresWith({ FLEET: 'DISABLED', CHAT: 'DISABLED' }),
+        noPermissions,
+      ).find(topic => topic.id === 'settings');
+
+      expect(settings?.guides.map(guide => guide.slug)).toEqual([
+        'your-settings',
+        'privacy-mode',
+        'staying-signed-in',
+        'dates-and-times',
+      ]);
+    });
+
+    // A switch that could not be read has said nothing about the feature.
+    it('should keep every topic while no switch can be read', () => {
+      const ids = visibleHelpTopics(
+        featuresWith({
+          STORYTIME: 'UNAVAILABLE',
+          FLEET: 'UNAVAILABLE',
+          CHAT: 'UNAVAILABLE',
+        }),
+        noPermissions,
+      ).map(topic => topic.id);
+
+      expect(ids).toEqual([
+        'community',
+        'custom-tracking',
+        'storytime',
+        'settings',
+      ]);
     });
 
     // A heading with nothing under it tells a reader there is something here
     // they are not being shown, which is the opposite of what gating it is for.
     it('should drop a topic once every guide in it has been filtered away', () => {
-      const ids = visibleHelpTopics(true, noPermissions).map(topic => topic.id);
+      const ids = visibleHelpTopics(ALL_ON, noPermissions).map(
+        topic => topic.id,
+      );
 
       expect(ids).toContain('storytime');
       expect(ids).not.toContain('storytime-admin');
@@ -352,7 +402,7 @@ describe('help data', () => {
 
     it('should offer only the guides the reader holds the permission for', () => {
       const topics = visibleHelpTopics(
-        true,
+        ALL_ON,
         new Set([PERMISSIONS.STORYTIME_SPOTLIGHT_MANAGE]),
       );
       const adminTopic = topics.find(topic => topic.id === 'storytime-admin');
@@ -363,7 +413,7 @@ describe('help data', () => {
     });
 
     it('should leave the public topics alone whatever the reader holds', () => {
-      const topics = visibleHelpTopics(true, noPermissions);
+      const topics = visibleHelpTopics(ALL_ON, noPermissions);
       const community = topics.find(topic => topic.id === 'community');
 
       expect(community?.guides.length).toBe(
@@ -383,7 +433,7 @@ describe('help data', () => {
     // feature that does not exist while it is. Guides describing it have to
     // wait on the same switch.
     it('should wait on the Storytime feature switch', () => {
-      expect(storytimeTopic?.requiresStorytime).toBe(true);
+      expect(storytimeTopic?.requiresFeature).toBe('STORYTIME');
     });
 
     it('should explain reading and writing, not just one of them', () => {
@@ -419,5 +469,174 @@ describe('help data', () => {
         expect(policyCopy).toContain(title);
       },
     );
+  });
+
+  describe('feature switches (FC-049)', () => {
+    it('should offer help about a feature unless it is switched off', () => {
+      expect(isFeatureOffered(undefined, featuresWith({}))).toBe(true);
+      expect(isFeatureOffered('FLEET', featuresWith({}))).toBe(true);
+      expect(
+        isFeatureOffered('FLEET', featuresWith({ FLEET: 'UNAVAILABLE' })),
+      ).toBe(true);
+      expect(
+        isFeatureOffered('FLEET', featuresWith({ FLEET: 'DISABLED' })),
+      ).toBe(false);
+    });
+
+    // A page waits on its topic's switch first, then its guide's; only one
+    // that is on lets it through, since unknown is not the same as on.
+    it('should name the first switch keeping a page from being read', () => {
+      expect(blockingFeature(ALL_ON, undefined, 'FLEET')).toBeNull();
+      expect(
+        blockingFeature(
+          featuresWith({ STORYTIME: 'UNAVAILABLE', FLEET: 'DISABLED' }),
+          'STORYTIME',
+          'FLEET',
+        ),
+      ).toBe('STORYTIME');
+      expect(
+        blockingFeature(featuresWith({ CHAT: 'DISABLED' }), undefined, 'CHAT'),
+      ).toBe('CHAT');
+      expect(blockingFeature(ALL_ON)).toBeNull();
+    });
+
+    it('should leave out the parts of a guide about a switched-off feature', () => {
+      const guide = findHelpGuide('fleet-settings')!.guide;
+
+      expect(
+        visibleSections(guide, featuresWith({ CHAT: 'DISABLED' })).map(
+          section => section.heading,
+        ),
+      ).toEqual(['Read Fleet roster exports as']);
+      expect(visibleSections(guide, ALL_ON)).toEqual(guide.sections);
+    });
+
+    it('should name every switch for the notice saying it is off', () => {
+      expect(HELP_FEATURE_NAMES).toEqual({
+        STORYTIME: 'Storytime',
+        FLEET: 'Fleet Community',
+        CHAT: 'Fleet chat',
+      });
+    });
+  });
+
+  describe('the STO Info settings topic', () => {
+    const settingsTopic = HELP_TOPICS.find(topic => topic.id === 'settings');
+
+    /**
+     * Everything the settings guides say, as one string.
+     *
+     * @returns The text.
+     */
+    const settingsText = (): string =>
+      (settingsTopic?.guides ?? [])
+        .flatMap(guide => [
+          guide.title,
+          guide.summary,
+          ...guide.sections.flatMap(section => [
+            section.heading,
+            ...section.paragraphs,
+            ...(section.points ?? []),
+          ]),
+        ])
+        .join(' ');
+
+    // Steve's order of 29 September 2026: settings after STO Storytime,
+    // before the guides almost nobody is shown.
+    it('should come after STO Storytime and before Running Storytime', () => {
+      expect(HELP_TOPICS.map(topic => topic.id)).toEqual([
+        'community',
+        'custom-tracking',
+        'storytime',
+        'settings',
+        'storytime-admin',
+      ]);
+    });
+
+    it('should not wait on any switch as a whole, nor on any permission', () => {
+      expect(settingsTopic?.requiresFeature).toBeUndefined();
+      settingsTopic?.guides.forEach(guide => {
+        expect(guide.requiresPermission).toBeUndefined();
+      });
+    });
+
+    // One guide for the page, then one per panel in the order the page shows
+    // them.
+    it('should give the page and each of its panels a guide', () => {
+      expect(settingsTopic?.guides.map(guide => guide.slug)).toEqual([
+        'your-settings',
+        'privacy-mode',
+        'staying-signed-in',
+        'dates-and-times',
+        'fleet-settings',
+        'what-you-are-notified-about',
+      ]);
+    });
+
+    // The page shows its Fleet and chat controls only while those features
+    // are on, and the guides to them follow the same switches.
+    it('should wait on Fleet Community for the Fleet controls, and chat for chat’s', () => {
+      const guides = settingsTopic?.guides ?? [];
+      const byFeature = (feature: string | undefined) =>
+        guides.filter(guide => guide.requiresFeature === feature);
+
+      expect(byFeature('FLEET').map(guide => guide.slug)).toEqual([
+        'fleet-settings',
+        'what-you-are-notified-about',
+      ]);
+      expect(
+        guides.flatMap(guide =>
+          guide.sections
+            .filter(section => section.requiresFeature === 'CHAT')
+            .map(section => section.heading),
+        ),
+      ).toEqual([
+        'Who can see when I am online',
+        'Appear offline',
+        'Show when I am typing',
+        'Mentions, replies and direct messages',
+      ]);
+      expect(
+        findHelpGuide('dates-and-times')?.guide.sections[1].requiresFeature,
+      ).toBe('FLEET');
+    });
+
+    // AC: instructions use the form's own words. The Settings page's spec
+    // checks the same list is on the page, so a renamed control fails one or
+    // the other.
+    it.each(SETTINGS_FORM_LABELS)('should use the form’s label “%s”', label => {
+      expect(settingsText()).toContain(label);
+    });
+
+    // Privacy Mode is screen masking, and nothing to do with who may see
+    // what. A reader who takes it for either has misunderstood it.
+    it('should explain Privacy Mode as a blur on the reader’s own screen', () => {
+      const text = findHelpGuide('privacy-mode')!
+        .guide.sections.flatMap(section => section.paragraphs)
+        .join(' ');
+
+      expect(text).toContain('on your own screen');
+      expect(text).toContain('It changes nothing anybody else sees.');
+      expect(text).toContain('It is a blur, not a removal.');
+    });
+
+    it('should tell settings apart from the STO accounts recorded in the game', () => {
+      expect(settingsText()).toContain('Settings are not your STO accounts');
+    });
+
+    it('should lead every guide back to Settings', () => {
+      settingsTopic?.guides.forEach(guide => {
+        expect(guide.relatedLinks?.[0]).toEqual({
+          label: 'Your settings',
+          route: APP_ROUTES.STO_DASHBOARD_SETTINGS,
+        });
+      });
+    });
+
+    it('should offer the inactivity timeout’s choices as the form does', () => {
+      expect(settingsText()).toContain(
+        '1 hour, 4 hours (the default), 8 hours',
+      );
+    });
   });
 });

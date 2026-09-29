@@ -15,10 +15,11 @@ import {
 } from 'src/app/models/storytime.models';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
-import { StorytimeService } from 'src/app/storytime/storytime.service';
 
+import { HelpFeaturesService } from '../help-features.service';
 import { HELP_TOPICS } from '../help.data';
-import { HelpTopic } from '../help.models';
+import { HelpFeatures, HelpTopic } from '../help.models';
+import { ALL_HELP_FEATURES_ON, helpFeaturesWith } from '../help.testing';
 import { HelpGuideComponent } from './help-guide.component';
 
 describe('HelpGuideComponent', () => {
@@ -31,10 +32,10 @@ describe('HelpGuideComponent', () => {
   // The Storytime topic is the gated one, so it is what the visibility tests
   // need; the Community topic is always available and proves the other side.
   const storytimeTopic = HELP_TOPICS.find(
-    topic => topic.requiresStorytime,
+    topic => topic.requiresFeature === 'STORYTIME',
   ) as HelpTopic;
   const openTopic = HELP_TOPICS.find(
-    topic => !topic.requiresStorytime,
+    topic => topic.requiresFeature === undefined,
   ) as HelpTopic;
   const firstGuide = storytimeTopic.guides[0];
   const secondGuide = storytimeTopic.guides[1];
@@ -46,11 +47,13 @@ describe('HelpGuideComponent', () => {
    * @param storytimeAvailability Whether the Storytime feature is on, off, or
    *   could not be asked about at all.
    * @param permissions The permission codes the reader holds.
+   * @param others Where the other switches stand, when not on.
    */
   const createComponent = (
     slug: string | null,
     storytimeAvailability: StorytimeAvailability = STORYTIME_AVAILABILITY_ENABLED,
     permissions: string[] = [],
+    others: Partial<HelpFeatures> = {},
   ): void => {
     paramMap$ = new BehaviorSubject(
       convertToParamMap(slug === null ? {} : { guideSlug: slug }),
@@ -65,8 +68,16 @@ describe('HelpGuideComponent', () => {
         { provide: ActivatedRoute, useValue: { paramMap: paramMap$ } },
         { provide: PageTitleService, useValue: pageTitleSpy },
         {
-          provide: StorytimeService,
-          useValue: { getAvailability: () => of(storytimeAvailability) },
+          provide: HelpFeaturesService,
+          useValue: {
+            features: () =>
+              of(
+                helpFeaturesWith({
+                  STORYTIME: storytimeAvailability,
+                  ...others,
+                }),
+              ),
+          },
         },
         {
           provide: AccessControlService,
@@ -341,10 +352,8 @@ describe('HelpGuideComponent', () => {
         { provide: ActivatedRoute, useValue: { paramMap: paramMap$ } },
         { provide: PageTitleService, useValue: pageTitleSpy },
         {
-          provide: StorytimeService,
-          useValue: {
-            getAvailability: () => of(STORYTIME_AVAILABILITY_ENABLED),
-          },
+          provide: HelpFeaturesService,
+          useValue: { features: () => of(ALL_HELP_FEATURES_ON) },
         },
         {
           provide: AccessControlService,
@@ -366,5 +375,65 @@ describe('HelpGuideComponent', () => {
 
     expect(component.guide).toBe(firstGuide);
     expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  describe('guides about Fleet Community and chat (FC-049)', () => {
+    it('should say a Fleet guide is switched off rather than refuse it', () => {
+      createComponent('fleet-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
+        FLEET: 'DISABLED',
+        CHAT: 'DISABLED',
+      });
+
+      expect(component.guide).toBeNull();
+      expect(component.sections).toEqual([]);
+      expect(component.unavailableReason).toBe('DISABLED');
+      expect(component.unavailableFeatureName).toBe('Fleet Community');
+      expect(pageTitleSpy.setTitle).toHaveBeenCalledWith('Fleet Community');
+      expect(navigateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should say the systems are not answering when the switch cannot be read', () => {
+      createComponent('fleet-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
+        FLEET: 'UNAVAILABLE',
+      });
+
+      expect(component.unavailableReason).toBe('OFFLINE');
+    });
+
+    // The page shows chat's controls only while chat is on, so the guide to
+    // them keeps only its roster export part while chat is off.
+    it('should leave out the parts about chat while chat is off', () => {
+      createComponent('fleet-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
+        CHAT: 'DISABLED',
+      });
+
+      expect(component.sections.map(section => section.heading)).toEqual([
+        'Read Fleet roster exports as',
+      ]);
+      expect(pageText()).not.toContain('Show when I am typing');
+    });
+
+    it('should show every part while chat is on', () => {
+      createComponent('fleet-settings');
+
+      expect(pageText()).toContain('Who can see when I am online');
+      expect(pageText()).toContain('Show when I am typing');
+    });
+
+    // A guide about a feature that is on still offers only the other guides
+    // a reader could open.
+    it('should offer no guide about Fleet Community at the foot while it is off', () => {
+      createComponent('your-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
+        FLEET: 'DISABLED',
+        CHAT: 'DISABLED',
+      });
+
+      expect(component.otherGuides.map(guide => guide.slug)).toEqual([
+        'privacy-mode',
+        'staying-signed-in',
+        'dates-and-times',
+      ]);
+      expect(pageText()).not.toContain('Roster exports keep their own zone');
+    });
   });
 });

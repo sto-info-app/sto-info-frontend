@@ -10,7 +10,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { catchError, combineLatest, map, of } from 'rxjs';
 import {
-  STORYTIME_AVAILABILITY_ENABLED,
   STORYTIME_AVAILABILITY_UNAVAILABLE,
   StorytimeAvailability,
 } from 'src/app/models/storytime.models';
@@ -25,11 +24,24 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
-import { StorytimeService } from 'src/app/storytime/storytime.service';
 
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
-import { findHelpGuide, isGuidePermitted } from '../help.data';
-import { HelpGuide, HelpGuideLocation } from '../help.models';
+import { HelpFeaturesService } from '../help-features.service';
+import {
+  blockingFeature,
+  findHelpGuide,
+  HELP_FEATURE_NAMES,
+  isFeatureOffered,
+  isGuidePermitted,
+  visibleSections,
+} from '../help.data';
+import {
+  HelpFeature,
+  HelpFeatures,
+  HelpGuide,
+  HelpGuideLocation,
+  HelpGuideSection,
+} from '../help.models';
 
 /**
  * One help guide.
@@ -42,11 +54,12 @@ import { HelpGuide, HelpGuideLocation } from '../help.models';
  * not hold, go to the not-found page: neither page is something to advertise to
  * somebody who cannot open it.
  *
- * A Storytime guide asked for while Storytime is out of reach is a different
- * case, and is answered with a notice saying why rather than a 404. The switch
- * being off and the backend not answering are both temporary, and neither is a
- * wrong address — a visitor told their address is wrong will not come back
- * when the feature returns.
+ * A guide about a feature that is out of reach — Storytime, or since FC-049
+ * Fleet Community or its chat — is a different case, and is answered with a
+ * notice saying why rather than a 404. The switch being off and the backend
+ * not answering are both temporary, and neither is a wrong address — a
+ * visitor told their address is wrong will not come back when the feature
+ * returns. A part of a guide about a switched-off feature is simply left out.
  */
 @Component({
   selector: 'app-help-guide',
@@ -65,6 +78,9 @@ export class HelpGuideComponent implements OnInit {
   /** The guide being read, once it has been resolved. */
   guide: HelpGuide | null = null;
 
+  /** The parts of it on offer: none about a switched-off feature. */
+  sections: HelpGuideSection[] = [];
+
   /** The other guides in the same topic, offered at the end. */
   otherGuides: HelpGuide[] = [];
 
@@ -75,19 +91,19 @@ export class HelpGuideComponent implements OnInit {
   topicLink = '';
 
   /**
-   * Why Storytime is out of reach, when a Storytime guide was asked for and
-   * the feature is not there. Null whenever the guide itself is shown.
+   * Why the guide's feature is out of reach, when it is. Null whenever the
+   * guide itself is shown.
    */
   unavailableReason: FeatureUnavailableReason | null = null;
 
   /** The feature the notice is about. */
-  readonly storytimeFeatureName = 'Storytime';
+  unavailableFeatureName = '';
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
   private readonly _routingService = inject(RoutingService);
   private readonly _pageTitleService = inject(PageTitleService);
-  private readonly _storytimeService = inject(StorytimeService);
+  private readonly _helpFeatures = inject(HelpFeaturesService);
   private readonly _accessControlService = inject(AccessControlService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
@@ -104,7 +120,7 @@ export class HelpGuideComponent implements OnInit {
   ngOnInit(): void {
     combineLatest([
       this._route.paramMap.pipe(map(params => params.get('guideSlug'))),
-      this._storytimeService.getAvailability(),
+      this._helpFeatures.features(),
       this._accessControlService
         .getMyPermissions()
         .pipe(catchError(() => of(new Set<string>() as ReadonlySet<string>))),
@@ -113,7 +129,7 @@ export class HelpGuideComponent implements OnInit {
         takeUntilDestroyed(this._destroyRef),
         observeInZone(this._ngZone, this._cdr),
       )
-      .subscribe(([slug, storytimeAvailability, permissions]) => {
+      .subscribe(([slug, features, permissions]) => {
         const location = findHelpGuide(slug);
 
         if (!location) {
@@ -121,11 +137,14 @@ export class HelpGuideComponent implements OnInit {
           return;
         }
 
-        if (
-          location.topic.requiresStorytime &&
-          storytimeAvailability !== STORYTIME_AVAILABILITY_ENABLED
-        ) {
-          this.showUnavailable(storytimeAvailability);
+        const blocking = blockingFeature(
+          features,
+          location.topic.requiresFeature,
+          location.guide.requiresFeature,
+        );
+
+        if (blocking) {
+          this.showUnavailable(blocking, features[blocking]);
           return;
         }
 
@@ -134,7 +153,7 @@ export class HelpGuideComponent implements OnInit {
           return;
         }
 
-        this.show(location, permissions);
+        this.show(location, features, permissions);
       });
   }
 
@@ -170,15 +189,18 @@ export class HelpGuideComponent implements OnInit {
    * not-found page.
    *
    * @param location The guide and the topic it belongs to.
+   * @param features Where each feature switch stands.
    * @param permissions The permission codes the visitor holds.
    * @returns void
    */
   private show(
     location: HelpGuideLocation,
+    features: HelpFeatures,
     permissions: ReadonlySet<string>,
   ): void {
     this.unavailableReason = null;
     this.guide = location.guide;
+    this.sections = visibleSections(location.guide, features);
     this.topicTitle = location.topic.title;
     this.topicLink = this._routingService.getLink(
       this.appRoutes.HELP_TOPIC.replace(':topicId', location.topic.id),
@@ -186,23 +208,30 @@ export class HelpGuideComponent implements OnInit {
     this.otherGuides = location.topic.guides.filter(
       candidate =>
         candidate.slug !== location.guide.slug &&
-        isGuidePermitted(candidate, permissions),
+        isGuidePermitted(candidate, permissions) &&
+        isFeatureOffered(candidate.requiresFeature, features),
     );
     this._pageTitleService.setTitle(location.guide.title);
   }
 
   /**
-   * Says why a Storytime guide cannot be read, in place of the guide.
+   * Says why a guide cannot be read, in place of the guide.
    *
-   * The page title is set to the topic rather than the guide's, because the
+   * The page title is set to the feature rather than the guide's, because the
    * guide is not what is being shown and naming it in the tab would advertise
    * exactly what the notice is declining to open.
    *
-   * @param availability Why Storytime is out of reach.
+   * @param feature The feature out of reach.
+   * @param availability Why: switched off, or not answering.
    * @returns void
    */
-  private showUnavailable(availability: StorytimeAvailability): void {
+  private showUnavailable(
+    feature: HelpFeature,
+    availability: StorytimeAvailability,
+  ): void {
     this.guide = null;
+    this.sections = [];
+    this.unavailableFeatureName = HELP_FEATURE_NAMES[feature];
     this.otherGuides = [];
     this.topicTitle = '';
     this.topicLink = '';
@@ -210,7 +239,7 @@ export class HelpGuideComponent implements OnInit {
       availability === STORYTIME_AVAILABILITY_UNAVAILABLE
         ? FEATURE_UNAVAILABLE_OFFLINE
         : FEATURE_UNAVAILABLE_DISABLED;
-    this._pageTitleService.setTitle(this.storytimeFeatureName);
+    this._pageTitleService.setTitle(this.unavailableFeatureName);
   }
 
   /**
