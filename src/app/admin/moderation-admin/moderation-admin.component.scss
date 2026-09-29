@@ -8,7 +8,8 @@
 // that tint: an account is not a complaint, and its card is coloured by the
 // member's role instead, the same way Manage Permissions colours the same
 // account.
-#report-admin-page {
+#report-admin-page,
+#chat-report-admin-page {
   .admin-record-card {
     border-left-color: color.adjust(vars.$lcars-cardinal, $lightness: -10%);
   }
@@ -29,6 +30,8 @@
 }
 
 #report-admin-page,
+#chat-report-admin-page,
+#moderation-hold-page,
 #user-admin-page {
   // The report body stacks a free-text account above the detail grid, so the
   // grid must not also try to sit beside it.

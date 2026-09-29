@@ -54,14 +54,16 @@
         </caption>
         <thead>
           <tr>
-            <th scope="col">
-              <input
-                type="checkbox"
-                aria-label="Tick every row on this page"
-                [checked]="allTicked(rows)"
-                [disabled]="busy()"
-                (change)="onTickAll(rows, $any($event.target).checked)" />
-            </th>
+            @if (!readOnly()) {
+              <th scope="col">
+                <input
+                  type="checkbox"
+                  aria-label="Tick every row on this page"
+                  [checked]="allTicked(rows)"
+                  [disabled]="busy()"
+                  (change)="onTickAll(rows, $any($event.target).checked)" />
+              </th>
+            }
             <th
               scope="col"
               class="fleet-community-table__number">
@@ -86,20 +88,22 @@
         <tbody>
           @for (row of rows.items; track row.line) {
             <tr [class.import-rows__excluded]="row.excluded">
-              <td data-label="Tick">
-                <input
-                  type="checkbox"
-                  [attr.aria-label]="
-                    'Line ' +
-                    row.line +
-                    ': ' +
-                    row.characterName +
-                    row.accountHandle
-                  "
-                  [checked]="ticked().has(row.line)"
-                  [disabled]="busy()"
-                  (change)="onTick(row.line, $any($event.target).checked)" />
-              </td>
+              @if (!readOnly()) {
+                <td data-label="Tick">
+                  <input
+                    type="checkbox"
+                    [attr.aria-label]="
+                      'Line ' +
+                      row.line +
+                      ': ' +
+                      row.characterName +
+                      row.accountHandle
+                    "
+                    [checked]="ticked().has(row.line)"
+                    [disabled]="busy()"
+                    (change)="onTick(row.line, $any($event.target).checked)" />
+                </td>
+              }
               <td
                 data-label="Line"
                 class="fleet-community-table__number">
@@ -149,37 +153,39 @@
         </div>
       }
 
-      <div class="lcars-input-container sky">
-        <label for="import-rows-reason">Why</label>
-        <textarea
-          id="import-rows-reason"
-          rows="2"
-          [attr.maxlength]="reasonLimit"
-          [value]="reason()"
-          [disabled]="busy()"
-          (input)="reason.set($any($event.target).value)"></textarea>
-      </div>
-      <p class="fleet-community-field-hint">
-        {{ tickedRows().length }} ticked. Rows are excluded only when every one
-        ticked counts, and put back only when every one is excluded.
-      </p>
+      @if (!readOnly()) {
+        <div class="lcars-input-container sky">
+          <label for="import-rows-reason">Why</label>
+          <textarea
+            id="import-rows-reason"
+            rows="2"
+            [attr.maxlength]="reasonLimit"
+            [value]="reason()"
+            [disabled]="busy()"
+            (input)="reason.set($any($event.target).value)"></textarea>
+        </div>
+        <p class="fleet-community-field-hint">
+          {{ tickedRows().length }} ticked. Rows are excluded only when every
+          one ticked counts, and put back only when every one is excluded.
+        </p>
 
-      <div class="fleet-community-form-actions">
-        <button
-          type="button"
-          class="lcars-btn lcars-btn-auto sky"
-          [disabled]="!canExclude()"
-          (click)="onChange(true)">
-          Exclude ticked
-        </button>
-        <button
-          type="button"
-          class="lcars-btn lcars-btn-auto sky"
-          [disabled]="!canReinstate()"
-          (click)="onChange(false)">
-          Put back ticked
-        </button>
-      </div>
+        <div class="fleet-community-form-actions">
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto sky"
+            [disabled]="!canExclude()"
+            (click)="onChange(true)">
+            Exclude ticked
+          </button>
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto sky"
+            [disabled]="!canReinstate()"
+            (click)="onChange(false)">
+            Put back ticked
+          </button>
+        </div>
+      }
     }
   }
 </section>

@@ -27,19 +27,19 @@
       }
       @if (removalError(); as refusal) {
         <app-lcars-error-message
-          title="Not removed"
+          [title]="refusedTitle()"
           [message]="refusal" />
       }
 
       @if (removing(); as member) {
+        @let asked = actions[action()];
         <form
           class="fleet-members__remove"
-          aria-label="Remove a member"
+          [attr.aria-label]="asked.verb + ' a member'"
           (submit)="$event.preventDefault(); onConfirm(data)">
           <p class="fleet-members__asking">
-            Remove
-            {{ member.username ?? 'this account' }}
-            from this Fleet?
+            {{ asked.verb }} {{ member.username ?? 'this account'
+            }}{{ action() === 'REMOVE' ? ' from this Fleet' : '' }}?
           </p>
           <div class="lcars-input-container tangerine">
             <label for="member-removal-reason">Reason</label>
@@ -52,7 +52,7 @@
               (input)="reason.set($any($event.target).value)"></textarea>
           </div>
           <p class="fleet-community-field-hint">
-            Kept with the removal. Any role they hold here ends with it.
+            {{ asked.hint }}
           </p>
           <div class="fleet-community-form-actions">
             <button
@@ -64,9 +64,9 @@
             </button>
             <button
               type="submit"
-              class="lcars-btn lcars-btn-auto red"
+              [class]="'lcars-btn lcars-btn-auto ' + asked.button"
               [disabled]="busy() || reason().trim() === ''">
-              Remove
+              {{ asked.verb }}
             </button>
           </div>
         </form>
@@ -106,15 +106,41 @@
                 <td data-label="Since">
                   {{ (member.memberSince | appDate: 'medium') ?? '—' }}
                 </td>
-                <td data-label="Status">{{ statusLabels[member.status] }}</td>
+                <td data-label="Status">
+                  {{ statusLabels[member.status] }}
+                  @if (member.suspensionReason) {
+                    <span class="fleet-report-note">{{
+                      member.suspensionReason
+                    }}</span>
+                  }
+                </td>
                 <td data-label="Actions">
-                  <button
-                    type="button"
-                    class="lcars-btn lcars-btn-auto red"
-                    [disabled]="busy()"
-                    (click)="onRemove(member)">
-                    Remove…
-                  </button>
+                  <span class="fleet-members__actions">
+                    @if (member.status === suspended) {
+                      <button
+                        type="button"
+                        class="lcars-btn lcars-btn-auto green"
+                        [disabled]="busy()"
+                        (click)="onAct(member, 'REINSTATE')">
+                        Reinstate…
+                      </button>
+                    } @else {
+                      <button
+                        type="button"
+                        class="lcars-btn lcars-btn-auto tangerine"
+                        [disabled]="busy()"
+                        (click)="onAct(member, 'SUSPEND')">
+                        Suspend…
+                      </button>
+                    }
+                    <button
+                      type="button"
+                      class="lcars-btn lcars-btn-auto red"
+                      [disabled]="busy()"
+                      (click)="onRemove(member)">
+                      Remove…
+                    </button>
+                  </span>
                 </td>
               </tr>
             }

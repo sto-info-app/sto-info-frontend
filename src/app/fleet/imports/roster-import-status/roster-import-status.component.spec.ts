@@ -1,4 +1,5 @@
 import { Location } from '@angular/common';
+import { ROSTER_READ_ONLY_NOTE } from 'src/app/fleet/imports/roster-import.constants';
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import {
@@ -735,4 +736,20 @@ describe('RosterImportStatusComponent', () => {
       expect(text()).not.toContain(ROSTER_IMPORT_STATUS_REPEATED);
     }));
   });
+
+  it('shows a site admin looking in what was done, and nothing to correct (FC-036)', fakeAsync(() => {
+    scopes.resolveFleet.mockReturnValue(
+      of(
+        resolved({
+          viewer: { ...READER, capabilities: ['roster.investigate.read'] },
+        }),
+      ),
+    );
+    imports.detail.mockReturnValue(of(detail({ actions: [] })));
+    render();
+
+    expect(text()).toContain(ROSTER_READ_ONLY_NOTE);
+    expect(find('#import-correction-reason')).toBeNull();
+    expect(find('#import-rows-reason')).toBeNull();
+  }));
 });

@@ -75,6 +75,10 @@ export function describeGovernanceAction(
       return `${actor} made ${subject} the Owner.`;
     case ScopeGovernanceActionKind.CLOSED:
       return `${actor} closed it.`;
+    case ScopeGovernanceActionKind.SUSPENDED:
+      return `${actor} suspended it: nothing here may change until it is reinstated.`;
+    case ScopeGovernanceActionKind.REINSTATED:
+      return `${actor} lifted its suspension.`;
   }
 }
 

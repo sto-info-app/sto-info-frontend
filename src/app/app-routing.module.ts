@@ -435,6 +435,27 @@ export const routes: Routes = [
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.ADMIN_HOLDS,
+    loadComponent: () =>
+      import('./admin/moderation-admin/moderation-hold-list.component').then(
+        m => m.ModerationHoldListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_HOLDS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_FLEET_INVESTIGATIONS,
+    loadComponent: () =>
+      import('./admin/moderation-admin/fleet-investigation-log.component').then(
+        m => m.FleetInvestigationLogComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.ADMIN_FLEET_INVESTIGATIONS,
+      requiresApi: true,
+    },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.ADMIN_USERS,
     loadComponent: () =>
       import('./admin/moderation-admin/user-admin-list.component').then(

@@ -24,6 +24,12 @@ import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-su
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { ModerationService } from 'src/app/shared/services/moderation.service';
+import {
+  GovernanceReasonDialogComponent,
+  GovernanceReasonDialogData,
+} from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
+
+import { ModerationHoldAdminService } from './moderation-hold-admin.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -62,6 +68,7 @@ type StatusFilter = ReportStatus | 'ALL';
 })
 export class ReportAdminListComponent implements OnInit {
   private readonly _moderationService = inject(ModerationService);
+  private readonly _holds = inject(ModerationHoldAdminService);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _dialog = inject(MatDialog);
@@ -263,6 +270,55 @@ export class ReportAdminListComponent implements OnInit {
           'Failed to restore that account.',
         ),
     );
+  }
+
+  /**
+   * Holds everything the reported member wrote in chat past the 45-day purge,
+   * with a reason (FC-036).
+   *
+   * @param report - The report whose subject is held.
+   */
+  holdMessages(report: UserReport): void {
+    const name = this.reportedName(report);
+
+    this._dialog
+      .open<
+        GovernanceReasonDialogComponent,
+        GovernanceReasonDialogData,
+        string
+      >(GovernanceReasonDialogComponent, {
+        data: {
+          title: `Hold ${name}’s messages`,
+          message:
+            'Everything they wrote in chat, in every channel and conversation, is kept past the 45-day purge until the hold is released. The hold is reviewed within 180 days.',
+          label: 'Reason',
+          confirmText: 'Hold',
+          max: 500,
+        },
+      })
+      .afterClosed()
+      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+      .subscribe((reason: string | undefined) => {
+        if (reason === undefined) {
+          return;
+        }
+
+        this.errorMessage = '';
+        this.successMessage = '';
+        this._holds
+          .place({
+            kind: 'MEMBER_MESSAGES',
+            subjectUserId: report.reported.userId,
+            reason,
+          })
+          .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+          .subscribe({
+            next: () => (this.successMessage = `${name}’s messages are held.`),
+            error: (error: { error?: { message?: string } }) =>
+              (this.errorMessage =
+                error.error?.message ?? 'Their messages could not be held.'),
+          });
+      });
   }
 
   /**

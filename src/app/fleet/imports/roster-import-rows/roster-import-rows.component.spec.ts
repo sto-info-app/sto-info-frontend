@@ -470,4 +470,24 @@ describe('RosterImportRowsComponent', () => {
       ).toBe(0);
     });
   });
+
+  it('shows a site admin looking in the rows, with nothing to tick (FC-036)', () => {
+    fixture = TestBed.createComponent(RosterImportRowsComponent);
+    fixture.componentRef.setInput('communityId', 'community-1');
+    fixture.componentRef.setInput('fleetId', 'fleet-1');
+    fixture.componentRef.setInput('importId', 'import-1');
+    fixture.componentRef.setInput('readOnly', true);
+    fixture.detectChanges();
+
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'input[type="checkbox"]',
+      ),
+    ).toHaveLength(0);
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector(
+        '#import-rows-reason',
+      ),
+    ).toBeNull();
+  });
 });

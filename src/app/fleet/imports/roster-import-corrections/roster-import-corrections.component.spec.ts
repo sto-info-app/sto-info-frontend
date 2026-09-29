@@ -526,4 +526,21 @@ describe('RosterImportCorrectionsComponent', () => {
       expect(text()).toContain('Nobody has corrected this import.');
     });
   });
+
+  it('shows a site admin looking in where the import stands, and no controls (FC-036)', () => {
+    fixture = TestBed.createComponent(RosterImportCorrectionsComponent);
+    fixture.componentRef.setInput('communityId', 'community-1');
+    fixture.componentRef.setInput('fleetId', 'fleet-1');
+    fixture.componentRef.setInput('detail', detail());
+    fixture.componentRef.setInput('conflictsLink', ['/fleets']);
+    fixture.componentRef.setInput('readOnly', true);
+    fixture.detectChanges();
+
+    expect(text()).toContain('This import counts in the Fleet’s history.');
+    expect(find('#import-correction-reason')).toBeNull();
+    expect(find('#import-correction-zone')).toBeNull();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('button'),
+    ).toHaveLength(0);
+  });
 });

@@ -10,7 +10,9 @@ import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import {
   ROSTER_IMPORT_CAPABILITY,
   ROSTER_IMPORT_READERS,
-  ROSTER_INVESTIGATE_CAPABILITY,
+  ROSTER_INVESTIGATION_READERS,
+  ROSTER_READ_ONLY_NOTE,
+  readsOnly,
 } from 'src/app/fleet/imports/roster-import.constants';
 import {
   FleetSection,
@@ -42,6 +44,7 @@ export class FleetInvestigateComponent extends FleetSectionPageDirective<
   FleetScopeAction[]
 > {
   readonly notPermittedMessage = FLEET_INVESTIGATE_NOT_PERMITTED;
+  readonly readOnlyNote = ROSTER_READ_ONLY_NOTE;
 
   protected readonly _requiredCapabilities = ROSTER_IMPORT_READERS;
 
@@ -51,6 +54,16 @@ export class FleetInvestigateComponent extends FleetSectionPageDirective<
    * @param section - The Fleet.
    * @returns The pages they may open, in the order they are offered.
    */
+  /**
+   * Whether the reader looks in as a site admin, read-only (FC-036).
+   *
+   * @param section - The Fleet's section.
+   * @returns True when they do.
+   */
+  protected isReadOnly(section: FleetSection): boolean {
+    return readsOnly(section.tabs.capabilities);
+  }
+
   protected load(section: FleetSection): Observable<FleetScopeAction[]> {
     const { communitySlug, platformSegment, fleetSlug, capabilities } =
       section.tabs;
@@ -81,8 +94,13 @@ export class FleetInvestigateComponent extends FleetSectionPageDirective<
       description: `See what became of each roster export imported into ${fleet.exactGameName}.`,
     });
 
-    // Deciding renames is investigating, and only that capability's.
-    if (capabilities.includes(ROSTER_INVESTIGATE_CAPABILITY)) {
+    // Deciding renames is investigating, and only that capability's; a site
+    // admin looking in reads the same pages (FC-036).
+    if (
+      ROSTER_INVESTIGATION_READERS.some(capability =>
+        capabilities.includes(capability),
+      )
+    ) {
       actions.push({
         label: 'Conflicting exports',
         link: FLEET_LINKS.fleetRosterConflicts(

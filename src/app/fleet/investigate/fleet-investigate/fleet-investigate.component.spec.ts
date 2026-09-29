@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { ROSTER_READ_ONLY_NOTE } from 'src/app/fleet/imports/roster-import.constants';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   ActivatedRoute,
@@ -264,5 +265,27 @@ describe('FleetInvestigateComponent', () => {
 
     // A console Fleet has no sections at all.
     expect(state().kind).toBe('MISSING');
+  });
+
+  it('offers a site admin looking in the pages that read, saying they only read (FC-036)', () => {
+    scopes.resolveFleet.mockReturnValue(
+      of(resolved(['roster.investigate.read'])),
+    );
+    render();
+
+    expect(offered().map(([label]) => label)).toEqual([
+      'Roster imports',
+      'Conflicting exports',
+      'Roster identities',
+      'Rank order',
+    ]);
+    expect(text()).toContain(ROSTER_READ_ONLY_NOTE);
+  });
+
+  it('says nothing of reading only to an investigator', () => {
+    scopes.resolveFleet.mockReturnValue(of(resolved(['roster.investigate'])));
+    render();
+
+    expect(text()).not.toContain(ROSTER_READ_ONLY_NOTE);
   });
 });

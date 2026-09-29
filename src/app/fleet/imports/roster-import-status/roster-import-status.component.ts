@@ -32,6 +32,8 @@ import {
   ROSTER_IMPORT_POLL_INTERVAL_MS,
   ROSTER_IMPORT_POLL_WINDOW_MS,
   ROSTER_IMPORT_READERS,
+  ROSTER_READ_ONLY_NOTE,
+  readsOnly,
 } from 'src/app/fleet/imports/roster-import.constants';
 import {
   describeStatusReason,
@@ -114,6 +116,8 @@ export type RosterImportStatusState =
       readonly platformSegment: string;
       readonly detail: RosterImportDetail;
       readonly watching: boolean;
+      /** Whether the reader is a site admin looking in (FC-036). */
+      readonly readOnly: boolean;
     };
 
 /** How the page's parts are addressed, once the Fleet is resolved. */
@@ -167,6 +171,7 @@ interface RosterImportContext {
   ],
 })
 export class RosterImportStatusComponent {
+  readonly readOnlyNote = ROSTER_READ_ONLY_NOTE;
   private readonly _route = inject(ActivatedRoute);
   private readonly _scopeService = inject(FleetScopeService);
   private readonly _importService = inject(RosterImportService);
@@ -381,6 +386,7 @@ export class RosterImportStatusComponent {
               platformSegment: resolved.platformSegment,
               detail: watch.detail,
               watching: watch.watching,
+              readOnly: readsOnly(resolved.viewer.capabilities),
             })),
           );
         }),

@@ -44,6 +44,31 @@
           No export of this Fleet has listed a rank yet, so there is nothing to
           order.
         </p>
+      } @else if (isReadOnly(data)) {
+        <p
+          class="fleet-report-notice"
+          role="note">
+          {{ readOnlyNote }}
+        </p>
+        <table class="fleet-community-table">
+          <caption>
+            Every rank this Fleet’s exports have listed
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Rank</th>
+              <th scope="col">Tier</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (label of labels; track label.label) {
+              <tr>
+                <td data-label="Rank">{{ label.label }}</td>
+                <td data-label="Tier">{{ label.tier ?? 'None' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
       } @else {
         <form
           aria-label="Rank order"

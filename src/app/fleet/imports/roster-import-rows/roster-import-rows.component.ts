@@ -85,6 +85,11 @@ export class RosterImportRowsComponent {
   readonly communityId = input.required<string>();
   readonly fleetId = input.required<string>();
   readonly importId = input.required<string>();
+  /**
+   * Whether only to show the rows, with no ticking and nothing to change, as
+   * a site admin looking in sees them (FC-036).
+   */
+  readonly readOnly = input(false);
 
   /** Tells the page the import changed, with the import as it now is. */
   readonly corrected = output<RosterImportDetail>();

@@ -99,6 +99,10 @@ export const API_URLS = {
   MODERATION_ADMIN_USERS: apiUrl + '/admin/moderation/users',
   // The site admins' queue of chat reports (FC-035).
   CHAT_ADMIN_REPORTS: apiUrl + '/admin/chat-reports',
+  // Site admins' holds on chat evidence, and looks into Fleets (FC-036).
+  MODERATION_HOLDS_ADMIN: apiUrl + '/admin/moderation-holds',
+  FLEET_INVESTIGATIONS_ADMIN: apiUrl + '/admin/fleet-investigations',
+  MODERATION_ADMIN_OPEN_COUNTS: apiUrl + '/admin/moderation/open-counts',
   FILE_SCANNING_ADMIN_DIAGNOSTICS: apiUrl + '/admin/file-scanning/diagnostics',
 
   // Access control (what the signed-in user is permitted to do, and the admin

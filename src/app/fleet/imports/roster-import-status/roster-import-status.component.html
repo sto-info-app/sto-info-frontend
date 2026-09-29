@@ -145,7 +145,9 @@
               <li>
                 <span class="roster-status__line">Line {{ problem.line }}</span>
                 @if (problem.column) {
-                  <span class="roster-status__column">{{ problem.column }}</span>
+                  <span class="roster-status__column">{{
+                    problem.column
+                  }}</span>
                 }
                 <span>{{ rowProblem(problem) }}</span>
               </li>
@@ -185,11 +187,19 @@
       }
 
       @if (state.detail.actions !== null) {
+        @if (state.readOnly) {
+          <p
+            class="fleet-report-notice"
+            role="note">
+            {{ readOnlyNote }}
+          </p>
+        }
         <app-roster-import-corrections
           [communityId]="state.communityId"
           [fleetId]="state.fleet.id"
           [detail]="state.detail"
           [conflictsLink]="conflictsLink(state)"
+          [readOnly]="state.readOnly"
           (corrected)="onCheckAgain()" />
 
         @if (state.detail.status === imported) {
@@ -197,6 +207,7 @@
             [communityId]="state.communityId"
             [fleetId]="state.fleet.id"
             [importId]="state.detail.id"
+            [readOnly]="state.readOnly"
             (corrected)="onCheckAgain()" />
         }
       }

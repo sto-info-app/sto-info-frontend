@@ -237,6 +237,60 @@ describe('FleetGovernanceService', () => {
       `${adminUrl}/close`,
       { reason: 'Abandoned.' },
     ],
+    [
+      'a Community’s suspension',
+      () => service.actAsSiteAdmin('community-1', null, 'suspend', 'Disputed.'),
+      'POST',
+      `${adminUrl}/suspend`,
+      { reason: 'Disputed.' },
+    ],
+    [
+      'a Fleet’s reinstatement',
+      () =>
+        service.actAsSiteAdmin(
+          'community-1',
+          { kind: 'FLEET', id: 'fleet-1' },
+          'reinstate',
+          'Settled.',
+        ),
+      'POST',
+      `${adminUrl}/fleets/fleet-1/reinstate`,
+      { reason: 'Settled.' },
+    ],
+    [
+      'an Armada’s closure',
+      () =>
+        service.actAsSiteAdmin(
+          'community-1',
+          { kind: 'ARMADA', id: 'armada-1' },
+          'close',
+          'Abandoned.',
+        ),
+      'POST',
+      `${adminUrl}/armadas/armada-1/close`,
+      { reason: 'Abandoned.' },
+    ],
+    [
+      'a look into a Fleet',
+      () => service.investigate('community-1', 'fleet-1', 'Checking it.'),
+      'POST',
+      `${adminUrl}/fleets/fleet-1/investigations`,
+      { purpose: 'Checking it.' },
+    ],
+    [
+      'the log of looks',
+      () => service.investigations(2),
+      'GET',
+      `${API_URLS.FLEET_INVESTIGATIONS_ADMIN}?page=2`,
+      undefined,
+    ],
+    [
+      'the log of looks from its first page',
+      () => service.investigations(),
+      'GET',
+      `${API_URLS.FLEET_INVESTIGATIONS_ADMIN}?page=1`,
+      undefined,
+    ],
   ])('sends %s', (_what, call, method, url, body) => {
     expectRequest(call, method, url, body);
   });

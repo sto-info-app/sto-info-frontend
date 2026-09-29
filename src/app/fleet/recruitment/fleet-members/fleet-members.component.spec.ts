@@ -20,6 +20,7 @@ import {
 import {
   FLEET_MEMBERS_NOT_PERMITTED,
   FleetMembersComponent,
+  MEMBER_ACTIONS,
   MEMBER_REMOVAL_FAILED,
   MEMBER_REMOVED,
 } from './fleet-members.component';
@@ -38,13 +39,18 @@ function member(overrides: Partial<FleetMember> = {}): FleetMember {
     memberSince: '2026-09-21T10:00:00.000Z',
     route: FleetApplicationRoute.APPLICATION,
     characterName: 'Dax Orlan@fixture002',
+    suspensionReason: null,
     ...overrides,
   };
 }
 
 describe('FleetMembersComponent', () => {
   let fixture: ComponentFixture<FleetMembersComponent>;
-  let recruitment: { members: jest.Mock; removeMember: jest.Mock };
+  let recruitment: {
+    members: jest.Mock;
+    removeMember: jest.Mock;
+    changeMember: jest.Mock;
+  };
 
   /**
    * Draws the members.
@@ -90,10 +96,12 @@ describe('FleetMembersComponent', () => {
             memberSince: null,
             route: null,
             characterName: null,
+            suspensionReason: 'Repeated spam',
           }),
         ]),
       ),
       removeMember: jest.fn(() => of(undefined)),
+      changeMember: jest.fn(() => of(undefined)),
     };
   });
 
@@ -108,6 +116,7 @@ describe('FleetMembersComponent', () => {
     expect(text).toContain('Application');
     expect(text).toContain('An account with no username');
     expect(text).toContain('Suspended');
+    expect(text).toContain('Repeated spam');
   });
 
   it('says so when there are none', async () => {
@@ -139,7 +148,8 @@ describe('FleetMembersComponent', () => {
         'tbody button',
       );
 
-      (buttons[1] as HTMLButtonElement).click();
+      // Suspend… and Remove… for the first; Reinstate… and Remove… for this.
+      (buttons[3] as HTMLButtonElement).click();
       fixture.detectChanges();
 
       expect(pageText(fixture)).toContain(
@@ -228,6 +238,57 @@ describe('FleetMembersComponent', () => {
       submit();
 
       expect(pageText(fixture)).toContain(MEMBER_REMOVAL_FAILED);
+    });
+  });
+
+  describe('suspending and reinstating (FC-036)', () => {
+    it('suspends a member with the reason, and says what it means', async () => {
+      await render();
+      pressButton(fixture, 'Suspend…');
+
+      expect(pageText(fixture)).toContain('Suspend FleetApplicant?');
+      expect(pageText(fixture)).toContain('never why');
+      typeInto(fixture, '#member-removal-reason', ' Spam ');
+      submit();
+
+      expect(recruitment.changeMember).toHaveBeenCalledWith(
+        'community-1',
+        'fleet-1',
+        'membership-1',
+        'suspend',
+        'Spam',
+      );
+      expect(pageText(fixture)).toContain(MEMBER_ACTIONS.SUSPEND.done);
+      expect(recruitment.members).toHaveBeenCalledTimes(2);
+    });
+
+    it('reinstates a suspended member', async () => {
+      await render();
+      pressButton(fixture, 'Reinstate…');
+      typeInto(fixture, '#member-removal-reason', 'Sorted out');
+      submit();
+
+      expect(recruitment.changeMember).toHaveBeenCalledWith(
+        'community-1',
+        'fleet-1',
+        'membership-2',
+        'reinstate',
+        'Sorted out',
+      );
+      expect(pageText(fixture)).toContain(MEMBER_ACTIONS.REINSTATE.done);
+    });
+
+    it('titles a refusal by what was refused', async () => {
+      recruitment.changeMember.mockReturnValue(
+        throwError(() => new Error('down')),
+      );
+      await render();
+      pressButton(fixture, 'Suspend…');
+      typeInto(fixture, '#member-removal-reason', 'Spam');
+      submit();
+
+      expect(pageText(fixture)).toContain('Not suspended');
+      expect(pageText(fixture)).toContain(MEMBER_ACTIONS.SUSPEND.failed);
     });
   });
 

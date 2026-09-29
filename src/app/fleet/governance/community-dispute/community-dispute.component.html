@@ -33,7 +33,13 @@
 
       <dl class="community-dispute__facts">
         <dt>Owner</dt>
-        <dd>{{ view.owner.username ?? unnamed }}</dd>
+        <dd>
+          @if (view.owner) {
+            {{ view.owner.username ?? unnamed }}
+          } @else {
+            None: its Owner’s account was erased
+          }
+        </dd>
         <dt>Admins</dt>
         <dd>
           @for (admin of view.admins; track admin.userId; let last = $last) {
@@ -54,6 +60,9 @@
         @if (view.status === closed) {
           <dt>Status</dt>
           <dd>Closed</dd>
+        } @else if (view.status === suspendedStatus) {
+          <dt>Status</dt>
+          <dd>Suspended</dd>
         }
       </dl>
 
@@ -110,7 +119,173 @@
         }
       </section>
 
+      <section aria-labelledby="dispute-registrations-heading">
+        <div class="lcars-text-bar">
+          <span id="dispute-registrations-heading">Its Fleets and Armadas</span>
+        </div>
+        <p class="fleet-report-notice">{{ unverified }}</p>
+
+        @for (registration of view.scopes; track registration.id) {
+          <article class="community-dispute__scope">
+            <h3 class="community-dispute__scope-name">
+              {{ registration.kind === 'FLEET' ? 'Fleet' : 'Armada' }}
+              {{ registration.exactGameName }}
+              <span class="fleet-report-note"
+                >{{ registration.platformName }} ·
+                {{ registration.status | titlecase }}</span
+              >
+            </h3>
+
+            <table class="fleet-community-table">
+              <caption>
+                Registrations of this name on
+                {{
+                  registration.platformName
+                }}, this one first
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Community</th>
+                  <th scope="col">Its Owner</th>
+                  <th scope="col">Registered</th>
+                  <th scope="col">Last import</th>
+                  <th
+                    scope="col"
+                    class="fleet-community-table__number">
+                    Members
+                  </th>
+                  <th scope="col">Seen by</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of registrationsOf(registration); track row.id) {
+                  <tr>
+                    <td data-label="Community">
+                      {{ row.communityName ?? 'Not registered' }}
+                    </td>
+                    <td data-label="Its Owner">
+                      {{
+                        row.communityOwner
+                          ? (row.communityOwner.username ?? unnamed)
+                          : '—'
+                      }}
+                    </td>
+                    <td data-label="Registered">
+                      {{ row.registeredAt | appDate: 'mediumDate' }}
+                    </td>
+                    <td data-label="Last import">
+                      {{ (row.lastImportAt | appDate: 'mediumDate') ?? '—' }}
+                    </td>
+                    <td
+                      data-label="Members"
+                      class="fleet-community-table__number">
+                      {{ row.memberCount ?? '—' }}
+                    </td>
+                    <td data-label="Seen by">
+                      {{
+                        row.visibility ? audienceLabels[row.visibility] : '—'
+                      }}
+                    </td>
+                    <td data-label="Status">{{ row.status | titlecase }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            @if (registration.status !== closed) {
+              <div class="community-dispute__actions">
+                @if (registration.status === suspendedStatus) {
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto green"
+                    [disabled]="busy()"
+                    (click)="
+                      onSuspension(
+                        scope,
+                        registration,
+                        registration.exactGameName,
+                        'reinstate'
+                      )
+                    ">
+                    Reinstate…
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto tangerine"
+                    [disabled]="busy()"
+                    (click)="
+                      onSuspension(
+                        scope,
+                        registration,
+                        registration.exactGameName,
+                        'suspend'
+                      )
+                    ">
+                    Suspend…
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto red"
+                  [disabled]="busy()"
+                  (click)="onCloseScope(scope, registration)">
+                  Close…
+                </button>
+              </div>
+            }
+            @if (registration.kind === 'FLEET') {
+              <button
+                type="button"
+                class="lcars-btn lcars-btn-auto sky"
+                [disabled]="busy()"
+                (click)="onInvestigate(scope, registration)">
+                Look into its imports…
+              </button>
+            }
+          </article>
+        } @empty {
+          <p class="fleet-community-empty">
+            It has no Fleets or Armadas registered.
+          </p>
+        }
+      </section>
+
       @if (view.status !== closed) {
+        <section
+          class="community-dispute__suspend"
+          aria-labelledby="dispute-suspend-heading">
+          <div class="lcars-text-bar">
+            <span id="dispute-suspend-heading">{{
+              view.status === suspendedStatus
+                ? 'Reinstate this Community'
+                : 'Suspend this Community'
+            }}</span>
+          </div>
+          <p>
+            A suspended Community, and everything in it, can be read and cannot
+            change until it is reinstated. Nothing ends.
+          </p>
+          <button
+            type="button"
+            [class]="
+              'lcars-btn lcars-btn-auto ' +
+              (view.status === suspendedStatus ? 'green' : 'tangerine')
+            "
+            [disabled]="busy()"
+            (click)="
+              onSuspension(
+                scope,
+                null,
+                view.name,
+                view.status === suspendedStatus ? 'reinstate' : 'suspend'
+              )
+            ">
+            {{ view.status === suspendedStatus ? 'Reinstate…' : 'Suspend…' }}
+          </button>
+        </section>
+
         <section
           class="community-dispute__close"
           aria-labelledby="dispute-close-heading">

@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { ROSTER_READ_ONLY_NOTE } from 'src/app/fleet/imports/roster-import.constants';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   ActivatedRoute,
@@ -521,5 +522,18 @@ describe('RosterConflictsComponent', () => {
         fixture.componentInstance.totalPages(page([], { pageSize: 0 })),
       ).toBe(0);
     });
+  });
+
+  it('shows a site admin looking in the groups, and nothing to select (FC-036)', () => {
+    scopes.resolveFleet.mockReturnValue(
+      of(resolved(['roster.investigate.read'])),
+    );
+    render();
+
+    expect(text()).toContain(ROSTER_READ_ONLY_NOTE);
+    expect(text()).not.toContain('Select this one');
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('textarea'),
+    ).toBeNull();
   });
 });

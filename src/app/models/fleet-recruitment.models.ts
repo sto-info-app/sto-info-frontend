@@ -254,4 +254,6 @@ export interface FleetMember {
   readonly memberSince: string | null;
   readonly route: FleetApplicationRoute | null;
   readonly characterName: string | null;
+  /** Why they are suspended, for the Fleet's admins (FC-036). */
+  readonly suspensionReason: string | null;
 }

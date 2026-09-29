@@ -33,6 +33,10 @@ export enum ScopeGovernanceActionKind {
   OWNERSHIP_CANCELLED = 'OWNERSHIP_CANCELLED',
   OWNERSHIP_REASSIGNED = 'OWNERSHIP_REASSIGNED',
   CLOSED = 'CLOSED',
+  /** A site administrator suspended it (FC-036). */
+  SUSPENDED = 'SUSPENDED',
+  /** A site administrator lifted its suspension (FC-036). */
+  REINSTATED = 'REINSTATED',
 }
 
 /** Where an offer of ownership stands, the clock included. */
@@ -140,4 +144,59 @@ export interface CommunityDisputeView {
   owner: GovernancePerson;
   admins: GovernancePerson[];
   offer: OwnershipTransfer | null;
+  /** Its Fleets, then its Armadas, each with its duplicates (FC-036). */
+  scopes: DisputeScope[];
+}
+
+/**
+ * One registration of an in-game name on STO Info, as a site administrator
+ * sees it in a dispute (FC-036): where it came from, never who leads it.
+ */
+export interface DisputeRegistration {
+  readonly kind: 'FLEET' | 'ARMADA';
+  readonly id: string;
+  readonly exactGameName: string;
+  readonly platformName: string;
+  /** Null for a Fleet observed but never registered. */
+  readonly communityId: string | null;
+  readonly communityName: string | null;
+  readonly communityOwner: GovernancePerson | null;
+  readonly visibility: string | null;
+  readonly status: string;
+  readonly registeredAt: string;
+  /** A Fleet's last roster import. */
+  readonly lastImportAt: string | null;
+  /** A Fleet's approved members. */
+  readonly memberCount: number | null;
+}
+
+/** A Fleet or Armada of the disputed Community, with every other registration of its name. */
+export interface DisputeScope extends DisputeRegistration {
+  readonly duplicates: DisputeRegistration[];
+}
+
+/** A site administrator's look into a Fleet's imports (FC-036). */
+export interface FleetInvestigation {
+  readonly id: string;
+  readonly communityId: string;
+  readonly communityName: string | null;
+  readonly communitySlug: string | null;
+  readonly fleetId: string;
+  readonly fleetName: string;
+  readonly fleetSlug: string;
+  readonly platformName: string;
+  readonly platformSegment: string;
+  readonly admin: GovernancePerson | null;
+  readonly purpose: string;
+  readonly createdAt: string;
+  readonly expiresAt: string;
+  readonly active: boolean;
+}
+
+/** A page of site administrators' looks into Fleets. */
+export interface FleetInvestigationPage {
+  readonly items: FleetInvestigation[];
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
 }

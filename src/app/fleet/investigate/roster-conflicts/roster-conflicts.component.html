@@ -13,6 +13,14 @@
       @let data = state.data;
       @let page = data.page;
 
+      @if (isReadOnly(data)) {
+        <p
+          class="fleet-report-notice"
+          role="note">
+          {{ readOnlyNote }}
+        </p>
+      }
+
       <p class="roster-conflicts__intro">
         Two or more exports claiming the same moment, and listing different
         rosters. Only one can stand for that moment: select it, and say why.
@@ -118,6 +126,9 @@
                     @if (member.partial) {
                       <span class="fleet-report-note">partial</span>
                     }
+                    @if (retiredNotes[member.status]; as note) {
+                      <span class="fleet-report-note">{{ note }}</span>
+                    }
                   </td>
                   <td data-label="Uploaded">
                     {{ member.uploadedAt | appDate: 'medium' }}
@@ -135,7 +146,11 @@
                     {{ statusLabels[member.status] }}
                   </td>
                   <td data-label="Select">
-                    @if (member.id !== group.selectedImportId) {
+                    @if (
+                      member.id !== group.selectedImportId &&
+                      !retiredNotes[member.status] &&
+                      !isReadOnly(data)
+                    ) {
                       <button
                         type="button"
                         class="lcars-btn lcars-btn-auto sky"
@@ -152,22 +167,24 @@
             </tbody>
           </table>
 
-          <div class="lcars-input-container sky">
-            <label [attr.for]="'reason-' + group.id">Why</label>
-            <textarea
-              rows="2"
-              [id]="'reason-' + group.id"
-              [attr.maxlength]="reasonLimit"
-              [value]="reasonOf(group)"
-              [disabled]="busy() !== null"
-              (input)="
-                onReason(group.id, $any($event.target).value)
-              "></textarea>
-          </div>
-          <p class="fleet-community-field-hint">
-            Needed to select an export, and kept with the selection. At most
-            {{ reasonLimit }} characters.
-          </p>
+          @if (!isReadOnly(data)) {
+            <div class="lcars-input-container sky">
+              <label [attr.for]="'reason-' + group.id">Why</label>
+              <textarea
+                rows="2"
+                [id]="'reason-' + group.id"
+                [attr.maxlength]="reasonLimit"
+                [value]="reasonOf(group)"
+                [disabled]="busy() !== null"
+                (input)="
+                  onReason(group.id, $any($event.target).value)
+                "></textarea>
+            </div>
+            <p class="fleet-community-field-hint">
+              Needed to select an export, and kept with the selection. At most
+              {{ reasonLimit }} characters.
+            </p>
+          }
         </section>
       }
 

@@ -791,6 +791,12 @@ and a settings save send the revision or version they read, and a refusal
 because somebody else got there first reads the page again beneath the
 server's message.
 
+**Members** (FC-036): each member offers Suspend… (or Reinstate… once
+suspended) beside Remove…. Each asks for a reason in the same inline form,
+worded for what it does. A suspended member shows as Suspended, with the
+reason; they are told they are suspended, never why, and "Member since" is when
+they joined. A refusal is titled by what was refused ("Not suspended").
+
 The applicant's side is **`/fleets/applications`**: their applications with
 each decision and its reason, their open invitations, and withdrawing one
 still waiting. It is linked from the dashboard and from a Fleet's page while an
@@ -848,6 +854,23 @@ with `describeGovernanceAction`.
 by the site administration page. Closing cannot be undone, so the reader types
 the name back as well as a reason; the name is compared with its edge spaces
 trimmed. It closes with `{ reason }`, or nothing when kept open.
+
+**Site administration** (FC-036) adds, on the dispute page:
+
+- **Its Fleets and Armadas**, each with every other registration of its exact
+  name on its platform, private ones included: Community, its Owner, when
+  registered, last import, members and who may see it. A note above them says
+  STO Info cannot tell who leads a Fleet in the game, and none is shown as the
+  real one.
+- **Suspend… / Reinstate… and Close…** on each, and Suspend… / Reinstate… for
+  the Community itself. Suspending and reinstating ask for a reason in
+  **`<app-governance-reason-dialog>`**; closing uses the close dialog with the
+  Fleet's or Armada's name.
+- **Look into its imports…** on each Fleet: the reason dialog asks for a
+  purpose of 10 to 500 characters, and the page then goes to the Fleet's
+  Investigate pages, open to that administrator, read-only, for 24 hours.
+
+History reads a suspension and a reinstatement as sentences too.
 
 **`<app-ownership-offer-panel>`** — on a Community's page, for an Admin of an
 open Community. It reads where ownership stands and shows nothing unless the
@@ -1167,6 +1190,33 @@ Each is offered only while chat is switched on.
   message notices show while chat is on. The roster timezone and the other Fleet notices show
   while Fleet is on.
 
+**Linked queues and holds** (FC-036), in `src/app/admin/moderation-admin`:
+
+- A chat report says how many open member reports there are about its author,
+  linking to Reported Officers; a member report says how many open chat
+  reports there are about the member, linking to Chat Reports. The Admin page's
+  Community heading carries both queues' open count.
+- A chat report offers **Hold this evidence…** once its evidence is shown, and
+  says when it is held; each report offers holding its author's messages, and
+  each member report holding the member's. Each asks for a reason.
+- **`/admin/holds`**, "Moderation Holds" (`ModerationHoldListComponent`): holds
+  in force first, then released or all. Each shows whose, why, its owner and
+  review date, flagged when due.
+  - **Read what it keeps** asks for a purpose each time, then shows the
+    messages newest first, with where each was, deleted text marked, and
+    Earlier for the page before.
+  - Its log lists every placing, extension, release and reading with its
+    reason or purpose.
+  - **Extend** (`ModerationHoldExtendDialogComponent`) takes a review date up
+    to 180 days ahead and a reason. **Release** takes a reason.
+  - A hold in force also shows when STO Info will release it automatically
+    unless somebody extends it: 14 days after its review date (FC-037).
+    STO Info's own steps show in the log as automatic: telling the owner,
+    warning every site admin, and the release. A hold STO Info released
+    names nobody as having released it.
+- **`/admin/fleet-investigations`**, "Fleet Investigations": every site
+  administrator's look into a Fleet, newest first, with its purpose, linking to
+  the Fleet while it is open.
 **The site admins' queue** (FC-035): `/admin/chat-reports`, "Chat Reports" on the Admin page, in
 `src/app/admin/moderation-admin` (`ChatReportAdminListComponent`):
 

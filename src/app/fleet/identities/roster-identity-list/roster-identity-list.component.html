@@ -54,6 +54,14 @@
         a name to an STO Info account, or changes an account handle.
       </p>
 
+      @if (state.readOnly) {
+        <p
+          class="fleet-report-notice"
+          role="note">
+          {{ readOnlyNote }}
+        </p>
+      }
+
       <nav
         class="lcars-tabs"
         aria-label="Which renames to show">
@@ -136,7 +144,8 @@
               <dl class="roster-identities__facts">
                 <dt>Old name last seen</dt>
                 <dd>
-                  <a [routerLink]="importLink(state, candidate.earlier.importId)"
+                  <a
+                    [routerLink]="importLink(state, candidate.earlier.importId)"
                     >Export taken
                     {{ candidate.earlier.exportedAt | appDate: 'medium' }}</a
                   >
@@ -169,7 +178,7 @@
               }
 
               <div class="roster-identities__actions">
-                @if (candidate.decidable) {
+                @if (candidate.decidable && !state.readOnly) {
                   <button
                     type="button"
                     class="lcars-btn green"
@@ -185,7 +194,7 @@
                     Reject
                   </button>
                 }
-                @if (candidate.state !== 'OPEN') {
+                @if (candidate.state !== 'OPEN' && !state.readOnly) {
                   <button
                     type="button"
                     class="lcars-btn bluey"
@@ -200,7 +209,10 @@
                 <details class="roster-identities__history">
                   <summary>History ({{ candidate.decisions.length }})</summary>
                   <ol>
-                    @for (decision of candidate.decisions; track decision.revision) {
+                    @for (
+                      decision of candidate.decisions;
+                      track decision.revision
+                    ) {
                       <li>
                         {{ actionLabels[decision.action] }} by
                         {{ decision.actorUsername ?? actorGone }},

@@ -27,20 +27,22 @@
       [message]="refusal" />
   }
 
-  <div class="lcars-input-container sky">
-    <label for="import-correction-reason">Why</label>
-    <textarea
-      id="import-correction-reason"
-      rows="2"
-      [attr.maxlength]="reasonLimit"
-      [value]="reason()"
-      [disabled]="busy() !== null"
-      (input)="reason.set($any($event.target).value)"></textarea>
-  </div>
-  <p class="fleet-community-field-hint">
-    Needed for every correction, and kept with it. At most
-    {{ reasonLimit }} characters.
-  </p>
+  @if (!readOnly()) {
+    <div class="lcars-input-container sky">
+      <label for="import-correction-reason">Why</label>
+      <textarea
+        id="import-correction-reason"
+        rows="2"
+        [attr.maxlength]="reasonLimit"
+        [value]="reason()"
+        [disabled]="busy() !== null"
+        (input)="reason.set($any($event.target).value)"></textarea>
+    </div>
+    <p class="fleet-community-field-hint">
+      Needed for every correction, and kept with it. At most
+      {{ reasonLimit }} characters.
+    </p>
+  }
 
   <div class="import-corrections__group">
     <p>
@@ -51,19 +53,21 @@
         This import counts in the Fleet’s history.
       }
     </p>
-    <button
-      type="button"
-      class="lcars-btn lcars-btn-auto sky"
-      [disabled]="!canExclude()"
-      (click)="onExcluded()">
-      @if (busy() === 'EXCLUSION') {
-        Saving
-      } @else if (shown.excluded) {
-        Put it back
-      } @else {
-        Take it out
-      }
-    </button>
+    @if (!readOnly()) {
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto sky"
+        [disabled]="!canExclude()"
+        (click)="onExcluded()">
+        @if (busy() === 'EXCLUSION') {
+          Saving
+        } @else if (shown.excluded) {
+          Put it back
+        } @else {
+          Take it out
+        }
+      </button>
+    }
   </div>
 
   <div class="import-corrections__group">
@@ -75,19 +79,21 @@
         Taken as complete: anybody missing from it is taken to have left.
       }
     </p>
-    <button
-      type="button"
-      class="lcars-btn lcars-btn-auto sky"
-      [disabled]="!canMarkPartial()"
-      (click)="onPartial()">
-      @if (busy() === 'PARTIAL') {
-        Saving
-      } @else if (shown.partial) {
-        Mark it complete
-      } @else {
-        Mark it partial
-      }
-    </button>
+    @if (!readOnly()) {
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto sky"
+        [disabled]="!canMarkPartial()"
+        (click)="onPartial()">
+        @if (busy() === 'PARTIAL') {
+          Saving
+        } @else if (shown.partial) {
+          Mark it complete
+        } @else {
+          Mark it partial
+        }
+      </button>
+    }
   </div>
 
   <div class="import-corrections__group">
@@ -102,6 +108,7 @@
         <a [routerLink]="conflictsLink()">Choose between them</a>, or take one
         out, before correcting its timezone.
       </p>
+    } @else if (readOnly()) {
     } @else if (shown.exportLocalStamp) {
       <div class="fleet-community-filter-row">
         <div class="lcars-input-container sky">
@@ -168,7 +175,7 @@
         <li>
           <span class="import-corrections__when">
             {{ action.actedAt | appDate: 'medium' }},
-            {{ action.actorName ?? 'an account since closed' }}
+            {{ whoDid(action) }}
             {{ verbs[action.action] }}:
           </span>
           “{{ action.reason }}”

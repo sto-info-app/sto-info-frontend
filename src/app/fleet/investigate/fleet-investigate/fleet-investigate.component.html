@@ -10,6 +10,13 @@
     loadingText="Reading the Fleet"
     [errorMessage]="messageOf(state)">
     @if (state.kind === 'READY') {
+      @if (isReadOnly(state.section)) {
+        <p
+          class="fleet-report-notice"
+          role="note">
+          {{ readOnlyNote }}
+        </p>
+      }
       <ul class="fleet-investigate__list">
         @for (action of state.data; track action.label) {
           <li class="fleet-investigate__item">

@@ -44,4 +44,25 @@
     max-width: 70ch;
     margin-top: 2.5rem;
   }
+
+  &__scope {
+    margin: 0 0 2rem;
+  }
+
+  &__scope-name {
+    margin: 1rem 0 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+  }
+
+  &__suspend {
+    max-width: 70ch;
+    margin-top: 2.5rem;
+  }
 }

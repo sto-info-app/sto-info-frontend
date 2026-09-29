@@ -41,7 +41,9 @@
   </app-collapsible-section>
 
   <app-collapsible-section
-    heading="Community"
+    [heading]="
+      openReports ? 'Community · ' + openReports + ' open reports' : 'Community'
+    "
     barClass="small-lcars-bar-gap">
     <ul class="admin-landing__panels">
       <li class="admin-landing__card--reports">
@@ -58,6 +60,23 @@
           <p class="admin-landing__summary">
             Messages members have reported in chat, with the messages before
             them.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--holds">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_HOLDS)">
+          <span class="admin-landing__name">Moderation Holds</span>
+          <p class="admin-landing__summary">
+            Evidence kept past its deletion while a case is open, and read with
+            a purpose.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--investigations">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_FLEET_INVESTIGATIONS)">
+          <span class="admin-landing__name">Fleet Investigations</span>
+          <p class="admin-landing__summary">
+            Every site admin's read-only look into a Fleet's imports, and why.
           </p>
         </a>
       </li>

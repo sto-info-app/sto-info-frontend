@@ -26,3 +26,9 @@
     font-weight: 600;
   }
 }
+
+.fleet-members__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

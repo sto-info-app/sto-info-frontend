@@ -10,11 +10,42 @@ export const ROSTER_IMPORT_CAPABILITY = 'roster.import';
  */
 export const ROSTER_INVESTIGATE_CAPABILITY = 'roster.investigate';
 
-/** Either capability, which is what reading a Fleet's imports takes. */
+/**
+ * A site admin's look into a Fleet (FC-036): what
+ * {@link ROSTER_INVESTIGATE_CAPABILITY} reads, for 24 hours under a logged
+ * purpose, and nothing it changes.
+ */
+export const ROSTER_INVESTIGATE_READ_CAPABILITY = 'roster.investigate.read';
+
+/** What reading what investigating reads takes. */
+export const ROSTER_INVESTIGATION_READERS: readonly string[] = [
+  ROSTER_INVESTIGATE_CAPABILITY,
+  ROSTER_INVESTIGATE_READ_CAPABILITY,
+];
+
+/** Any of these, which is what reading a Fleet's imports takes. */
 export const ROSTER_IMPORT_READERS: readonly string[] = [
   ROSTER_IMPORT_CAPABILITY,
-  ROSTER_INVESTIGATE_CAPABILITY,
+  ...ROSTER_INVESTIGATION_READERS,
 ];
+
+/**
+ * Whether somebody reads what investigating reads but may change none of it:
+ * a site admin looking in (FC-036).
+ *
+ * @param capabilities - What they hold at the Fleet.
+ * @returns True when they look in read-only.
+ */
+export function readsOnly(capabilities: readonly string[]): boolean {
+  return (
+    capabilities.includes(ROSTER_INVESTIGATE_READ_CAPABILITY) &&
+    !capabilities.includes(ROSTER_INVESTIGATE_CAPABILITY)
+  );
+}
+
+/** What a site admin looking in is told on each page they read. */
+export const ROSTER_READ_ONLY_NOTE =
+  'You are looking in as a site admin: you can read this, and change nothing. Your look, and why, is logged.';
 
 /** How often an import that has not settled is read again. */
 export const ROSTER_IMPORT_POLL_INTERVAL_MS = 5_000;

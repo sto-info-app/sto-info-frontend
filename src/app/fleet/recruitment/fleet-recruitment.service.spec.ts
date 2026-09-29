@@ -191,6 +191,20 @@ describe('FleetRecruitmentService', () => {
       body: { reason: 'Left the game.' },
     },
     {
+      name: 'changeMember',
+      call: () =>
+        service.changeMember(
+          'community-1',
+          'fleet-1',
+          'membership-1',
+          'suspend',
+          'Spam.',
+        ),
+      method: 'POST',
+      url: `${fleetUrl}/members/membership-1/suspend`,
+      body: { reason: 'Spam.' },
+    },
+    {
       name: 'myApplications',
       call: () => service.myApplications(),
       method: 'GET',

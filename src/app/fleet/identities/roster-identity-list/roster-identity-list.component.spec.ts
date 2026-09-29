@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { ROSTER_READ_ONLY_NOTE } from 'src/app/fleet/imports/roster-import.constants';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
@@ -860,5 +861,21 @@ describe('RosterIdentityListComponent', () => {
 
       expect(text()).not.toContain(ROSTER_IDENTITY_DECISION_ERROR);
     });
+  });
+
+  it('shows a site admin looking in the renames, and nothing to decide (FC-036)', () => {
+    scopes.resolveFleet.mockReturnValue(
+      of(
+        resolved({
+          viewer: { ...READER, capabilities: ['roster.investigate.read'] },
+        }),
+      ),
+    );
+    render();
+
+    expect(text()).toContain(ROSTER_READ_ONLY_NOTE);
+    expect(button('Confirm')).toBeUndefined();
+    expect(button('Reject')).toBeUndefined();
+    expect(button('Undo')).toBeUndefined();
   });
 });

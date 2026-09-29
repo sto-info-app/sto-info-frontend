@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 
 import { NEVER, of, throwError } from 'rxjs';
 
@@ -16,6 +17,7 @@ import {
 } from 'src/app/fleet/recruitment/recruitment.testing';
 import {
   CommunityDisputeView,
+  DisputeScope,
   OwnershipTransferState,
 } from 'src/app/models/fleet-governance.models';
 import {
@@ -29,7 +31,65 @@ import {
   DISPUTE_FAILED,
   DISPUTE_NOT_PERMITTED,
   DISPUTE_REASSIGNED,
+  DISPUTE_REINSTATED,
+  DISPUTE_SCOPE_CLOSED,
+  DISPUTE_SUSPENDED,
+  DISPUTE_UNVERIFIED,
 } from './community-dispute.component';
+
+/**
+ * Builds a Fleet or Armada of the Community, with its duplicates.
+ *
+ * @param overrides - Fields to override.
+ * @returns The registration.
+ */
+function scopeOf(overrides: Partial<DisputeScope> = {}): DisputeScope {
+  return {
+    kind: 'FLEET',
+    id: 'fleet-1',
+    exactGameName: 'Deep Space Nine',
+    platformName: 'Windows',
+    communityId: 'community-1',
+    communityName: 'United Federation Alliance',
+    communityOwner: { userId: 'user-owner', username: 'FleetOwner' },
+    visibility: 'PUBLIC',
+    status: 'ACTIVE',
+    registeredAt: '2026-01-01T00:00:00.000Z',
+    lastImportAt: '2026-09-01T00:00:00.000Z',
+    memberCount: 12,
+    duplicates: [
+      {
+        kind: 'FLEET',
+        id: 'fleet-rival',
+        exactGameName: 'Deep Space Nine',
+        platformName: 'Windows',
+        communityId: 'community-2',
+        communityName: 'Rival Alliance',
+        communityOwner: { userId: 'user-rival', username: null },
+        visibility: 'PRIVATE',
+        status: 'ACTIVE',
+        registeredAt: '2026-02-01T00:00:00.000Z',
+        lastImportAt: null,
+        memberCount: 0,
+      },
+      {
+        kind: 'FLEET',
+        id: 'fleet-unregistered',
+        exactGameName: 'Deep Space Nine',
+        platformName: 'Windows',
+        communityId: null,
+        communityName: null,
+        communityOwner: null,
+        visibility: null,
+        status: 'ACTIVE',
+        registeredAt: '2026-03-01T00:00:00.000Z',
+        lastImportAt: null,
+        memberCount: null,
+      },
+    ],
+    ...overrides,
+  };
+}
 
 /**
  * Builds the Community as a site administrator sees it.
@@ -50,6 +110,7 @@ function disputeView(
       { userId: 'user-nameless', username: null },
     ],
     offer: null,
+    scopes: [],
     ...overrides,
   };
 }
@@ -61,6 +122,8 @@ describe('CommunityDisputeComponent', () => {
     disputeView: jest.Mock;
     reassignOwnership: jest.Mock;
     closeAsSiteAdmin: jest.Mock;
+    actAsSiteAdmin: jest.Mock;
+    investigate: jest.Mock;
   };
 
   /**
@@ -108,7 +171,255 @@ describe('CommunityDisputeComponent', () => {
       disputeView: jest.fn(() => of(disputeView())),
       reassignOwnership: jest.fn(() => of(undefined)),
       closeAsSiteAdmin: jest.fn(() => of(undefined)),
+      actAsSiteAdmin: jest.fn(() => of(undefined)),
+      investigate: jest.fn(() =>
+        of({
+          communitySlug: 'ufa',
+          platformSegment: 'windows',
+          fleetSlug: 'deep-space-nine',
+        }),
+      ),
     };
+  });
+
+  describe('Fleets, Armadas and their registrations (FC-036)', () => {
+    /**
+     * Answers the next dialog.
+     *
+     * @param answer - What it closes with.
+     */
+    const answer = (answer: unknown): void => {
+      confirm.dialog.open.mockReturnValue({ afterClosed: () => of(answer) });
+    };
+
+    it('lists every registration of each name, saying none is verified', async () => {
+      governance.disputeView.mockReturnValue(
+        of(
+          disputeView({
+            scopes: [
+              scopeOf(),
+              scopeOf({
+                kind: 'ARMADA',
+                id: 'armada-1',
+                exactGameName: 'Alpha',
+                status: 'SUSPENDED',
+                lastImportAt: null,
+                memberCount: null,
+                duplicates: [],
+              }),
+            ],
+          }),
+        ),
+      );
+      await render();
+
+      const text = pageText(fixture);
+
+      expect(text).toContain(DISPUTE_UNVERIFIED);
+      expect(text).toContain('Fleet Deep Space Nine');
+      expect(text).toContain('Rival Alliance');
+      expect(text).toContain('Not registered');
+      expect(text).toContain('Anyone, including signed-out visitors');
+      expect(text).toContain('The owner alone');
+      expect(text).toContain('An account with no username');
+      expect(text).toContain('Armada Alpha');
+      expect(findButton(fixture, 'Reinstate…')).toBeDefined();
+      expect(
+        [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')]
+          .map(button => button.textContent?.trim())
+          .filter(label => label === 'Look into its imports…'),
+      ).toHaveLength(1);
+    });
+
+    it('says when the Community has neither', async () => {
+      await render();
+
+      expect(pageText(fixture)).toContain('It has no Fleets or Armadas');
+    });
+
+    it('suspends a Fleet with a reason', async () => {
+      governance.disputeView.mockReturnValue(
+        of(disputeView({ scopes: [scopeOf()] })),
+      );
+      await render();
+
+      answer(undefined);
+      (
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '.community-dispute__actions button',
+        ) as HTMLButtonElement
+      ).click();
+      expect(governance.actAsSiteAdmin).not.toHaveBeenCalled();
+
+      answer('Disputed');
+      (
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '.community-dispute__actions button',
+        ) as HTMLButtonElement
+      ).click();
+      fixture.detectChanges();
+
+      expect(confirm.dialog.open.mock.lastCall?.[1]).toMatchObject({
+        data: { title: 'Suspend Deep Space Nine', confirmText: 'Suspend' },
+      });
+      expect(governance.actAsSiteAdmin).toHaveBeenCalledWith(
+        'community-1',
+        { kind: 'FLEET', id: 'fleet-1' },
+        'suspend',
+        'Disputed',
+      );
+      expect(pageText(fixture)).toContain(DISPUTE_SUSPENDED);
+
+      answer({ reason: 'Abandoned' });
+      (
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.community-dispute__actions button',
+        )[1] as HTMLButtonElement
+      ).click();
+
+      expect(confirm.dialog.open.mock.lastCall?.[1]).toMatchObject({
+        data: { scopeNoun: 'Fleet', name: 'Deep Space Nine' },
+      });
+    });
+
+    it('reinstates a suspended Community', async () => {
+      governance.disputeView.mockReturnValue(
+        of(disputeView({ status: 'SUSPENDED' })),
+      );
+      await render();
+
+      expect(pageText(fixture)).toContain('StatusSuspended');
+      answer('Settled');
+      pressButton(fixture, 'Reinstate…');
+
+      expect(governance.actAsSiteAdmin).toHaveBeenCalledWith(
+        'community-1',
+        null,
+        'reinstate',
+        'Settled',
+      );
+      expect(pageText(fixture)).toContain(DISPUTE_REINSTATED);
+    });
+
+    it('suspends the Community itself', async () => {
+      await render();
+
+      answer('Disputed');
+      pressButton(fixture, 'Suspend…');
+
+      expect(governance.actAsSiteAdmin).toHaveBeenCalledWith(
+        'community-1',
+        null,
+        'suspend',
+        'Disputed',
+      );
+    });
+
+    it('closes a Fleet or Armada with its name and a reason', async () => {
+      governance.disputeView.mockReturnValue(
+        of(
+          disputeView({
+            scopes: [
+              scopeOf({
+                kind: 'ARMADA',
+                id: 'armada-1',
+                exactGameName: 'Alpha',
+                duplicates: [],
+              }),
+            ],
+          }),
+        ),
+      );
+      await render();
+
+      answer({ reason: 'Abandoned' });
+      (
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.community-dispute__actions button',
+        )[1] as HTMLButtonElement
+      ).click();
+      fixture.detectChanges();
+
+      expect(confirm.dialog.open.mock.lastCall?.[1]).toMatchObject({
+        data: { scopeNoun: 'Armada', name: 'Alpha', asSiteAdmin: true },
+      });
+      expect(governance.actAsSiteAdmin).toHaveBeenCalledWith(
+        'community-1',
+        { kind: 'ARMADA', id: 'armada-1' },
+        'close',
+        'Abandoned',
+      );
+      expect(pageText(fixture)).toContain(DISPUTE_SCOPE_CLOSED);
+
+      answer(undefined);
+      governance.actAsSiteAdmin.mockClear();
+      (
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.community-dispute__actions button',
+        )[1] as HTMLButtonElement
+      ).click();
+      expect(governance.actAsSiteAdmin).not.toHaveBeenCalled();
+    });
+
+    it('offers nothing to change on a closed Fleet', async () => {
+      governance.disputeView.mockReturnValue(
+        of(disputeView({ scopes: [scopeOf({ status: 'CLOSED' })] })),
+      );
+      await render();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '.community-dispute__actions',
+        ),
+      ).toBeNull();
+    });
+
+    it('opens a look into a Fleet with a purpose, and goes there', async () => {
+      governance.disputeView.mockReturnValue(
+        of(disputeView({ scopes: [scopeOf()] })),
+      );
+      await render();
+
+      const navigate = jest
+        .spyOn(TestBed.inject(Router), 'navigate')
+        .mockResolvedValue(true);
+
+      answer('Checking an import');
+      pressButton(fixture, 'Look into its imports…');
+
+      expect(confirm.dialog.open.mock.lastCall?.[1]).toMatchObject({
+        data: { label: 'Purpose', min: 10, max: 500 },
+      });
+      expect(governance.investigate).toHaveBeenCalledWith(
+        'community-1',
+        'fleet-1',
+        'Checking an import',
+      );
+      expect(navigate).toHaveBeenCalledWith([
+        '/fleets',
+        'communities',
+        'ufa',
+        'fleets',
+        'windows',
+        'deep-space-nine',
+        'investigate',
+      ]);
+    });
+
+    it('says why a look could not be opened', async () => {
+      governance.disputeView.mockReturnValue(
+        of(disputeView({ scopes: [scopeOf()] })),
+      );
+      governance.investigate.mockReturnValue(
+        throwError(() => new Error('down')),
+      );
+      await render();
+
+      answer('Checking an import');
+      pressButton(fixture, 'Look into its imports…');
+
+      expect(pageText(fixture)).toContain(DISPUTE_FAILED);
+    });
   });
 
   it('names the Owner, the Admins and any offer', async () => {

@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { ROSTER_READ_ONLY_NOTE } from 'src/app/fleet/imports/roster-import.constants';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   ActivatedRoute,
@@ -402,6 +403,17 @@ describe('RankOrderComponent', () => {
 
     expect(text()).toContain(RANK_ORDER_SAVE_FAILED);
     expect(find('[role="status"]')).toBeNull();
+  });
+  it('shows a site admin looking in the order, and nothing to change (FC-036)', () => {
+    scopes.resolveFleet.mockReturnValue(
+      of(resolved(['roster.investigate.read'])),
+    );
+    render();
+
+    expect(text()).toContain(ROSTER_READ_ONLY_NOTE);
+    expect(find('form')).toBeNull();
+    expect(text()).toMatch(/Admiral\s*1/);
+    expect(text()).toMatch(/Cadet\s*None/);
   });
 });
 

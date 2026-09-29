@@ -48,6 +48,8 @@ export const ROSTER_IMPORT_ACTION_VERBS: Readonly<
   [RosterImportActionKind.ROWS_REINSTATED]: 'put rows back',
   [RosterImportActionKind.TIMEZONE_CORRECTED]: 'corrected its timezone',
   [RosterImportActionKind.CONFLICT_SELECTED]: 'selected it for its moment',
+  [RosterImportActionKind.SOURCE_EXPIRED]: 'retired it',
+  [RosterImportActionKind.SOURCE_ERASED]: 'retired it',
 };
 
 /** The statuses whose import can be corrected: in force, or held. */
@@ -97,6 +99,11 @@ export class RosterImportCorrectionsComponent {
   readonly fleetId = input.required<string>();
   /** The import, as an investigator sees it. */
   readonly detail = input.required<RosterImportDetail>();
+  /**
+   * Whether only to show the import's state and what was done to it, as a
+   * site admin looking in sees it (FC-036).
+   */
+  readonly readOnly = input(false);
   /** Where the Fleet's conflicting exports are chosen between. */
   readonly conflictsLink = input.required<string[]>();
 

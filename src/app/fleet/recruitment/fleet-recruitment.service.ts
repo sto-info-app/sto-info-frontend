@@ -292,6 +292,32 @@ export class FleetRecruitmentService {
   }
 
   /**
+   * Suspends or reinstates a member, with a reason (FC-036).
+   *
+   * @param communityId - The Community holding the Fleet.
+   * @param fleetId - The Fleet.
+   * @param membershipId - The membership.
+   * @param action - Which.
+   * @param reason - Why.
+   * @returns An observable that completes when it is done.
+   */
+  changeMember(
+    communityId: string,
+    fleetId: string,
+    membershipId: string,
+    action: 'suspend' | 'reinstate',
+    reason: string,
+  ): Observable<void> {
+    return this.authenticated(options =>
+      this._http.post<void>(
+        `${this.recruitmentUrl(communityId, fleetId)}/members/${membershipId}/${action}`,
+        { reason },
+        options,
+      ),
+    );
+  }
+
+  /**
    * Removes a member, with a reason.
    *
    * @param communityId - The Community holding the Fleet.

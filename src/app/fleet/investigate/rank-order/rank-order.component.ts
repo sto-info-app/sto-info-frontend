@@ -15,7 +15,11 @@ import { map, Observable } from 'rxjs';
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
-import { ROSTER_INVESTIGATE_CAPABILITY } from 'src/app/fleet/imports/roster-import.constants';
+import {
+  ROSTER_INVESTIGATION_READERS,
+  ROSTER_READ_ONLY_NOTE,
+  readsOnly,
+} from 'src/app/fleet/imports/roster-import.constants';
 import { RosterService } from 'src/app/fleet/roster/roster.service';
 import {
   FleetSection,
@@ -88,7 +92,9 @@ export class RankOrderComponent extends FleetSectionPageDirective<RankOrderData>
   readonly notPermittedMessage = RANK_ORDER_NOT_PERMITTED;
   readonly reasonLimit = RANK_ORDER_REASON_LIMIT;
 
-  protected readonly _requiredCapabilities = [ROSTER_INVESTIGATE_CAPABILITY];
+  readonly readOnlyNote = ROSTER_READ_ONLY_NOTE;
+
+  protected readonly _requiredCapabilities = ROSTER_INVESTIGATION_READERS;
 
   /** The tier typed for each label changed since the order was read. */
   readonly drafts = signal<Readonly<Record<string, string>>>({});
@@ -114,6 +120,17 @@ export class RankOrderComponent extends FleetSectionPageDirective<RankOrderData>
   labelsOf(data: RankOrderData): readonly RosterRankLabel[] {
     // An investigator is always sent the labels.
     return data.order.labels as RosterRankLabel[];
+  }
+
+  /**
+   * Whether the reader is a site admin looking in, who changes nothing
+   * (FC-036).
+   *
+   * @param data - The page.
+   * @returns True when they are.
+   */
+  isReadOnly(data: RankOrderData): boolean {
+    return readsOnly(data.section.tabs.capabilities);
   }
 
   /**

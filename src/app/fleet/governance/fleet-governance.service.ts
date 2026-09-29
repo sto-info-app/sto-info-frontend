@@ -7,6 +7,8 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   AssignScopeRoleRequest,
   CommunityDisputeView,
+  FleetInvestigation,
+  FleetInvestigationPage,
   OwnershipStanding,
   OwnershipTransfer,
   ScopeGovernanceAction,
@@ -288,6 +290,74 @@ export class FleetGovernanceService {
         `${this.adminUrl(communityId)}/close`,
         { reason },
         options,
+      ),
+    );
+  }
+
+  /**
+   * Suspends, reinstates or closes a Community, or one of its Fleets or
+   * Armadas, as a site administrator (FC-036).
+   *
+   * @param communityId - The Community.
+   * @param scope - The Community itself, or one of its Fleets or Armadas.
+   * @param action - What to do.
+   * @param reason - Why.
+   * @returns An observable that completes when it is done.
+   */
+  actAsSiteAdmin(
+    communityId: string,
+    scope: { readonly kind: 'FLEET' | 'ARMADA'; readonly id: string } | null,
+    action: 'suspend' | 'reinstate' | 'close',
+    reason: string,
+  ): Observable<void> {
+    const where =
+      scope === null
+        ? ''
+        : `/${scope.kind === 'FLEET' ? 'fleets' : 'armadas'}/${scope.id}`;
+
+    return this.authenticated(options =>
+      this._http.post<void>(
+        `${this.adminUrl(communityId)}${where}/${action}`,
+        { reason },
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Opens a site administrator's read-only look into a Fleet's imports, for
+   * 24 hours (FC-036).
+   *
+   * @param communityId - The Community.
+   * @param fleetId - The Fleet.
+   * @param purpose - Why, 10 to 500 characters.
+   * @returns The look.
+   */
+  investigate(
+    communityId: string,
+    fleetId: string,
+    purpose: string,
+  ): Observable<FleetInvestigation> {
+    return this.authenticated(options =>
+      this._http.post<FleetInvestigation>(
+        `${this.adminUrl(communityId)}/fleets/${fleetId}/investigations`,
+        { purpose },
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Lists site administrators' looks into Fleets, newest first (FC-036).
+   *
+   * @param page - Which page.
+   * @returns The page.
+   */
+  investigations(page = 1): Observable<FleetInvestigationPage> {
+    return this.authenticated(options =>
+      this._http.get<FleetInvestigationPage>(
+        API_URLS.FLEET_INVESTIGATIONS_ADMIN,
+        { ...options, params: { page: String(page) } },
       ),
     );
   }

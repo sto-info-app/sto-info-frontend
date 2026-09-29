@@ -155,6 +155,14 @@ describe('governance utils', () => {
         { action: ScopeGovernanceActionKind.CLOSED, actorName: null },
         'An account with no username closed it.',
       ],
+      [
+        { action: ScopeGovernanceActionKind.SUSPENDED, asSiteAdmin: true },
+        'A site administrator suspended it: nothing here may change until it is reinstated.',
+      ],
+      [
+        { action: ScopeGovernanceActionKind.REINSTATED, asSiteAdmin: true },
+        'A site administrator lifted its suspension.',
+      ],
     ])('describes %p', (overrides, sentence) => {
       expect(describeGovernanceAction(change(overrides), named)).toBe(sentence);
     });

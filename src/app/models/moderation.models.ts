@@ -34,6 +34,8 @@ export interface ReportParty {
  * A report as presented to administrators.
  */
 export interface UserReport {
+  /** Open reports of chat messages the reported member wrote (FC-036). */
+  openChatReportCount: number;
   id: string;
   reporter: ReportParty;
   reported: ReportParty;

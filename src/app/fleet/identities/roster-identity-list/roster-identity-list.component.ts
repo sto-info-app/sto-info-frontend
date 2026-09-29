@@ -42,7 +42,11 @@ import {
   ROSTER_IDENTITY_STATE_LABELS,
 } from 'src/app/fleet/identities/roster-identity.messages';
 import { RosterIdentityService } from 'src/app/fleet/identities/roster-identity.service';
-import { ROSTER_INVESTIGATE_CAPABILITY } from 'src/app/fleet/imports/roster-import.constants';
+import {
+  ROSTER_INVESTIGATION_READERS,
+  ROSTER_READ_ONLY_NOTE,
+  readsOnly,
+} from 'src/app/fleet/imports/roster-import.constants';
 import {
   RosterIdentityCandidate,
   RosterIdentityCandidatePage,
@@ -160,6 +164,8 @@ export interface RosterIdentityListReady {
   readonly platformSegment: string;
   readonly filter: RosterIdentityFilter;
   readonly page: RosterIdentityCandidatePage;
+  /** Whether the reader is a site admin looking in, who decides nothing (FC-036). */
+  readonly readOnly: boolean;
 }
 
 /** What the page is showing. */
@@ -206,6 +212,7 @@ export type RosterIdentityListState =
   ],
 })
 export class RosterIdentityListComponent {
+  readonly readOnlyNote = ROSTER_READ_ONLY_NOTE;
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
   private readonly _dialog = inject(MatDialog);
@@ -450,7 +457,11 @@ export class RosterIdentityListComponent {
       return of<RosterIdentityListState>({ kind: 'MISSING' });
     }
 
-    if (!viewer.capabilities.includes(ROSTER_INVESTIGATE_CAPABILITY)) {
+    if (
+      !ROSTER_INVESTIGATION_READERS.some(capability =>
+        viewer.capabilities.includes(capability),
+      )
+    ) {
       return of<RosterIdentityListState>({
         kind: 'NOT_PERMITTED',
         tabs: fleetTabsVmOf(resolved),
@@ -472,6 +483,7 @@ export class RosterIdentityListComponent {
           platformSegment: resolved.platformSegment,
           filter: value,
           page: candidates,
+          readOnly: readsOnly(viewer.capabilities),
         })),
       );
   }
