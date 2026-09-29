@@ -357,6 +357,34 @@ describe('RosterConflictsComponent', () => {
     expect(selects().length).toBe(1);
   });
 
+  it('offers no selecting an export whose file expired, and says why (FC-037)', () => {
+    imports.conflicts.mockReturnValue(
+      of(
+        page([
+          group({
+            members: [
+              member('import-1'),
+              member('import-2', { status: RosterImportStatus.EXPIRED }),
+              member('import-3', { status: RosterImportStatus.ERASED }),
+            ],
+          }),
+        ]),
+      ),
+    );
+    render();
+
+    expect(text()).toContain('File erased');
+    expect(text()).toContain(
+      'its file was erased before it was chosen, so it can no longer be selected',
+    );
+
+    expect(text()).toContain('File expired');
+    expect(text()).toContain(
+      'its file expired before it was chosen, so it can no longer be selected',
+    );
+    expect(selects().length).toBe(1);
+  });
+
   it('says a reopened group keeps its selection until it is changed', () => {
     imports.conflicts.mockReturnValue(
       of(page([group({ selectedImportId: 'import-1' })])),

@@ -136,6 +136,25 @@ export class RosterImportCorrectionsComponent {
   /** Whether a reason has been given. */
   readonly hasReason = computed(() => this.reason().trim() !== '');
 
+  /**
+   * Who made a correction: its investigator, an account since closed, or
+   * STO Info itself, which retires a held import whose file expired
+   * (FC-037).
+   *
+   * @param action - The correction.
+   * @returns Who, in words.
+   */
+  whoDid(action: RosterImportAction): string {
+    if (action.actorName !== null) {
+      return action.actorName;
+    }
+
+    return action.action === RosterImportActionKind.SOURCE_EXPIRED ||
+      action.action === RosterImportActionKind.SOURCE_ERASED
+      ? 'STO Info'
+      : 'an account since closed';
+  }
+
   /** The zone the timezone control shows: picked, or the import's own. */
   readonly zone = computed(
     () => this.pickedZone() ?? this.detail().exportTimezone ?? '',

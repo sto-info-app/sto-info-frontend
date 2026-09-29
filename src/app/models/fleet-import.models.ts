@@ -302,7 +302,10 @@ export interface RosterImportActionDetail {
 export interface RosterImportAction {
   id: string;
   action: RosterImportActionKind;
-  /** Who made it, by username, or null once that account is gone. */
+  /**
+   * Who made it, by username, or null once that account is gone, or when
+   * STO Info made it (FC-037).
+   */
   actorName: string | null;
   reason: string;
   detail: RosterImportActionDetail | null;
