@@ -1098,6 +1098,16 @@ Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC
 - **Custom channels.** A scope's moderators add them ("Add channel"), and change or archive each.
   Changing opens `ChatChannelDialogComponent`: a name, who reads it, and who posts, never looser
   than reading. Archiving asks first with the LCARS confirmation.
+- **Transcripts** (FC-035). Where the reader may export (`mayExport`), each channel has an export
+  button. It opens `ChatTranscriptDialogComponent`:
+  - From and To, in the device's time, defaulting to the last day and bounded to the last seven
+    days (ten minutes' grace, for a clock a little behind the server's);
+  - a purpose of 10 to 500 characters.
+  - "Your transcripts" then lists what they asked for in the last day, with its status, range and
+    message count, and Download while it is ready and within its day. The download is fetched with
+    the reader's token and saved as `chat-<channel>-<date>.txt`.
+  - An in-app notice says when one is ready. Refresh reads the list again; the page does not poll.
+
 **One place** (`ChatConversationComponent`):
 
 - **Messages as text.** Every message is written as text, never markup, in compact rows: the time
@@ -1117,6 +1127,10 @@ Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC
   and "Discard".
 - **Deleting.** Reply and Delete appear on hover and focus, and always on a touch screen. Deleting
   one's own message asks first. A moderator's Remove asks why, in `ChatRemoveDialogComponent`.
+- **Reporting** (FC-035). Report appears on others' messages where the reader may report
+  (`mayReport`), and always in a conversation. `ChatReportDialogComponent` takes a reason from the
+  member reports' list, with details that "Something else" needs. The reader is thanked ("Thanks,
+  a site admin will look at it.") or told they already reported it, and never told the outcome.
 - **Blocks** (FC-034). A message from somebody across a block reads "Message from a member you
   can't see", with no name and nothing to do.
 - **Typing** (FC-034). A line under the log says who is writing: one name, two, or "several
@@ -1152,6 +1166,18 @@ Each is offered only while chat is switched on.
 - **Settings.** Presence visibility, appearing offline, typing, and the mention, reply and direct
   message notices show while chat is on. The roster timezone and the other Fleet notices show
   while Fleet is on.
+
+**The site admins' queue** (FC-035): `/admin/chat-reports`, "Chat Reports" on the Admin page, in
+`src/app/admin/moderation-admin` (`ChatReportAdminListComponent`):
+
+- Open reports first, oldest first, twenty a page. The filter offers open, actioned and dismissed.
+- Each says whose message, the reason and details, where it was (scope and channel, or "Direct
+  message"), and who reported it.
+- "Show evidence" reads the report once and shows the twenty messages before it, oldest first,
+  with the reported one marked. A message deleted before the report shows as such.
+- Resolve and Dismiss take a note (`ChatReportDecisionDialogComponent`), required since FC-039:
+  it is the decision's reason in the site admin log. Remove the message asks why, as a
+  moderator's removal does, and keeps the evidence as it was.
 
 **The connection, `ChatSocketService`:**
 

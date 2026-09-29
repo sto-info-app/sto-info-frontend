@@ -1,0 +1,52 @@
+<form
+  id="chat-report-decision-dialog"
+  (submit)="$event.preventDefault(); confirm()">
+  <div mat-dialog-content>
+    <div class="lcars-text-bar">
+      <span class="go-october-sunset">{{
+        isResolving ? 'Resolve report' : 'Dismiss report'
+      }}</span>
+    </div>
+
+    <p>
+      {{
+        isResolving
+          ? 'Close the report about ' +
+            data.authorName +
+            '’s message as actioned?'
+          : 'Close the report about ' +
+            data.authorName +
+            '’s message with no action?'
+      }}
+      The reporter is not told. Its evidence is kept for 90 days, then deleted.
+    </p>
+
+    <div class="lcars-input-container perano">
+      <label for="chat-report-note">What was found or done, and why</label>
+      <textarea
+        id="chat-report-note"
+        rows="3"
+        required
+        [attr.maxlength]="noteMax"
+        [value]="note()"
+        (input)="setNote($any($event.target).value)"></textarea>
+    </div>
+  </div>
+
+  <div
+    class="buttons-container lcars-flex-right"
+    mat-dialog-actions>
+    <button
+      type="button"
+      class="lcars-btn red"
+      (click)="cancel()">
+      Cancel
+    </button>
+    <button
+      type="submit"
+      class="lcars-btn green"
+      [disabled]="!isValid()">
+      {{ isResolving ? 'Resolve' : 'Dismiss' }}
+    </button>
+  </div>
+</form>

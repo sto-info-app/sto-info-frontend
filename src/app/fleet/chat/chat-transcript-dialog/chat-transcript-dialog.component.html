@@ -1,0 +1,77 @@
+<form
+  id="chat-transcript-dialog"
+  (submit)="$event.preventDefault(); request()">
+  <div mat-dialog-content>
+    <div class="lcars-text-bar">
+      <span class="go-october-sunset">Export transcript</span>
+    </div>
+
+    <p class="chat-transcript-dialog__intro">
+      A plain-text transcript of <strong># {{ data.channelName }}</strong> in
+      {{ data.scopeName }}, from any time in the last seven days. It is written
+      in the background, and you can download it for 24 hours. The request, its
+      purpose and each download are logged.
+    </p>
+
+    <div class="chat-transcript-dialog__range">
+      <div class="lcars-input-container bluey">
+        <label for="chat-transcript-from">From</label>
+        <input
+          id="chat-transcript-from"
+          type="datetime-local"
+          required
+          [attr.min]="earliest"
+          [attr.max]="latest"
+          [value]="fromAt()"
+          (input)="setFrom($any($event.target).value)" />
+      </div>
+      <div class="lcars-input-container bluey">
+        <label for="chat-transcript-to">To</label>
+        <input
+          id="chat-transcript-to"
+          type="datetime-local"
+          required
+          [attr.min]="earliest"
+          [attr.max]="latest"
+          [value]="toAt()"
+          (input)="setTo($any($event.target).value)" />
+      </div>
+    </div>
+    <p class="chat-transcript-dialog__note">
+      In your device's time. The transcript itself is in UTC.
+    </p>
+    @if (rangeError(); as error) {
+      <small class="chat-transcript-dialog__error">{{ error }}</small>
+    }
+
+    <div class="lcars-input-container perano">
+      <label for="chat-transcript-purpose">
+        Purpose ({{ purposeMin }} to {{ purposeMax }} characters)
+      </label>
+      <textarea
+        id="chat-transcript-purpose"
+        rows="3"
+        required
+        [attr.maxlength]="purposeMax"
+        [value]="purpose()"
+        (input)="setPurpose($any($event.target).value)"></textarea>
+    </div>
+  </div>
+
+  <div
+    class="buttons-container lcars-flex-right"
+    mat-dialog-actions>
+    <button
+      type="button"
+      class="lcars-btn red"
+      (click)="cancel()">
+      Cancel
+    </button>
+    <button
+      type="submit"
+      class="lcars-btn green"
+      [disabled]="rangeError() !== null || !isPurposeValid()">
+      Export
+    </button>
+  </div>
+</form>

@@ -60,3 +60,64 @@
     margin-top: 1rem;
   }
 }
+
+// A chat report's evidence: the messages before the reported one, oldest
+// first, with the reported one marked (FC-035), and what a hold keeps
+// (FC-036).
+#chat-report-admin-page,
+#moderation-hold-page {
+  .chat-report-evidence {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .chat-report-evidence__messages {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chat-report-evidence__message {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.35rem 0.6rem;
+    border-left: 4px solid rgb(255 255 255 / 20%);
+    overflow-wrap: anywhere;
+  }
+
+  .chat-report-evidence__message--reported {
+    border-left-color: vars.$lcars-orange;
+    background: rgb(255 255 255 / 6%);
+  }
+
+  .chat-report-evidence__meta {
+    font-size: 0.8rem;
+    color: rgb(255 255 255 / 66%);
+  }
+
+  .chat-report-evidence__body {
+    white-space: pre-wrap;
+  }
+
+  .chat-report-evidence__outcome {
+    margin: 0;
+    font-size: 0.85rem;
+  }
+
+  .admin-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+// A verified erasure's outcome (FC-038).
+.roster-erasure__notice {
+  margin: 0 0 1rem;
+  color: vars.$lcars-green;
+}

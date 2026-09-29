@@ -1,0 +1,296 @@
+@if (isLoading()) {
+  <app-loading-bar loadingText="Loading chat reports"></app-loading-bar>
+}
+
+<div
+  id="chat-report-admin-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Chat Reports</h1>
+    <p class="admin-page-intro">
+      Messages members have reported in chat, longest-waiting first, each with
+      the twenty messages before it. The reporter is not told what happens here.
+      A closed report and its evidence are deleted after 90 days.
+    </p>
+
+    @if (errorMessage(); as error) {
+      <app-lcars-error-message
+        title="Action failed"
+        [message]="error"></app-lcars-error-message>
+    }
+
+    @if (successMessage(); as success) {
+      <app-lcars-success-message
+        title="Acknowledged"
+        [message]="success"></app-lcars-success-message>
+    }
+
+    <section class="admin-section">
+      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+        <span class="title-with-badge">
+          Chat Queue
+          @if (openCount() > 0) {
+            <span class="header-count-badge">{{ openCount() }}</span>
+          }
+        </span>
+      </div>
+
+      <div class="admin-panel">
+        <div class="form-row compact">
+          <div class="lcars-select-container sunflower">
+            <label
+              class="select-label"
+              for="chat-report-status-filter"
+              >Status</label
+            >
+            <select
+              id="chat-report-status-filter"
+              title="Status"
+              (change)="setFilter($any($event.target).value)">
+              @for (filter of statusFilters; track filter) {
+                <option
+                  [value]="filter"
+                  [selected]="filter === statusFilter()">
+                  {{ filterLabel(filter) }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      @if (!isLoading() && reports().length === 0) {
+        <p class="records-empty">No chat reports match this filter.</p>
+      }
+
+      @if (reports().length > 0) {
+        <div class="admin-records">
+          @for (report of reports(); track report.id) {
+            <article class="admin-record-card">
+              <header class="admin-record-header">
+                <div class="admin-record-title">
+                  <strong>{{ nameOf(report.author) }}</strong>
+                  <span>{{ reasonLabels[report.reason] }}</span>
+                </div>
+                <div class="admin-record-meta">
+                  <span
+                    [class]="'status-pill ' + statusPillClasses[report.status]">
+                    {{ statusLabels[report.status] }}
+                  </span>
+                </div>
+              </header>
+
+              <div class="admin-record-body">
+                <div class="moderation-record-main">
+                  @if (report.details) {
+                    <p class="admin-record-summary">{{ report.details }}</p>
+                  } @else {
+                    <p class="admin-record-summary moderation-no-details">
+                      The reporter left no further detail.
+                    </p>
+                  }
+
+                  @if (report.openUserReportCount > 0) {
+                    <p class="moderation-no-details">
+                      Also
+                      <a [routerLink]="'/' + appRoutes.ADMIN_REPORTS">
+                        {{ report.openUserReportCount }} open member
+                        {{
+                          report.openUserReportCount === 1
+                            ? 'report'
+                            : 'reports'
+                        }}
+                      </a>
+                      about {{ nameOf(report.author) }}.
+                    </p>
+                  }
+
+                  <dl class="admin-record-details">
+                    <div class="admin-record-detail">
+                      <span class="label">Where</span>
+                      <span class="value">{{ placeOf(report) }}</span>
+                    </div>
+                    <div class="admin-record-detail">
+                      <span class="label">Reported by</span>
+                      <span class="value">{{ nameOf(report.reporter) }}</span>
+                    </div>
+                    <div class="admin-record-detail">
+                      <span class="label">Raised</span>
+                      <span class="value">
+                        {{ report.createdAt | appDate: 'medium' }}
+                      </span>
+                    </div>
+                  </dl>
+
+                  @if (details().get(report.id); as detail) {
+                    <div class="chat-report-evidence">
+                      <div class="lcars-text-bar small-lcars-bar-gap">
+                        <span>Evidence</span>
+                      </div>
+                      @if (detail.holdId) {
+                        <p class="moderation-no-details">
+                          Held past its 90 days —
+                          <a [routerLink]="'/' + appRoutes.ADMIN_HOLDS"
+                            >see Moderation Holds</a
+                          >.
+                        </p>
+                      } @else {
+                        <button
+                          type="button"
+                          class="lcars-btn lcars-btn-auto sky"
+                          (click)="hold(report, 'EVIDENCE')">
+                          Hold this evidence…
+                        </button>
+                      }
+                      @if (detail.messageRemoved) {
+                        <p class="moderation-no-details">
+                          The reported message has since been deleted or
+                          removed. What it said is kept below.
+                        </p>
+                      }
+                      <ol class="chat-report-evidence__messages">
+                        @for (held of detail.evidence; track held.messageId) {
+                          <li
+                            class="chat-report-evidence__message"
+                            [class.chat-report-evidence__message--reported]="
+                              held.position === 0
+                            ">
+                            <span class="chat-report-evidence__meta">
+                              {{ held.sentAt | appDate: 'medium' }} ·
+                              {{ nameOf(held.author) }}
+                              @if (held.position === 0) {
+                                · Reported
+                              }
+                            </span>
+                            @if (held.body !== null) {
+                              <span class="chat-report-evidence__body">{{
+                                held.body
+                              }}</span>
+                            } @else {
+                              <span class="moderation-no-details"
+                                >Deleted before the report</span
+                              >
+                            }
+                          </li>
+                        }
+                      </ol>
+                      @if (detail.resolvedAt) {
+                        <p class="chat-report-evidence__outcome">
+                          {{ statusLabels[detail.status] }} by
+                          {{ nameOf(detail.resolvedBy) }},
+                          {{ detail.resolvedAt | appDate: 'medium' }}
+                          @if (detail.resolutionNote) {
+                            — {{ detail.resolutionNote }}
+                          }
+                        </p>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <div class="admin-record-actions moderation-record-actions">
+                  <button
+                    type="button"
+                    class="cta-icon"
+                    (click)="toggleEvidence(report)"
+                    [attr.aria-expanded]="details().has(report.id)"
+                    [title]="
+                      details().has(report.id)
+                        ? 'Hide evidence'
+                        : 'Show evidence'
+                    "
+                    [attr.aria-label]="
+                      details().has(report.id)
+                        ? 'Hide evidence'
+                        : 'Show evidence'
+                    ">
+                    <i class="fas fa-eye"></i>
+                  </button>
+
+                  @if (isOpen(report)) {
+                    <button
+                      type="button"
+                      class="cta-icon"
+                      (click)="decide(report, reportStatus.ACTIONED)"
+                      title="Resolve"
+                      aria-label="Resolve">
+                      <i class="fas fa-check"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="cta-icon"
+                      (click)="decide(report, reportStatus.DISMISSED)"
+                      title="Dismiss"
+                      aria-label="Dismiss">
+                      <i class="fas fa-xmark"></i>
+                    </button>
+                  }
+
+                  @if (report.author) {
+                    <button
+                      type="button"
+                      class="cta-icon"
+                      (click)="hold(report, 'AUTHOR')"
+                      [title]="'Hold ' + nameOf(report.author) + '’s messages'"
+                      [attr.aria-label]="
+                        'Hold ' + nameOf(report.author) + '’s messages'
+                      "
+                      ><i class="fas fa-box-archive"></i
+                    ></button>
+                  }
+
+                  <button
+                    type="button"
+                    class="cta-icon delete-icon"
+                    (click)="removeMessage(report)"
+                    title="Remove the message"
+                    aria-label="Remove the message">
+                    <i class="fas fa-ban"></i>
+                  </button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+
+        @if (pageCount() > 1) {
+          <div class="admin-form-actions">
+            <button
+              type="button"
+              class="lcars-btn sky"
+              [disabled]="page() <= 1"
+              (click)="turn(-1)">
+              Earlier
+            </button>
+            <span>Page {{ page() }} of {{ pageCount() }}</span>
+            <button
+              type="button"
+              class="lcars-btn sky"
+              [disabled]="page() >= pageCount()"
+              (click)="turn(1)">
+              Later
+            </button>
+          </div>
+        }
+      }
+    </section>
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN_REPORTS"
+        >Reported officers</a
+      >
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN"
+        >Admin home</a
+      >
+    </div>
+  </div>
+</div>

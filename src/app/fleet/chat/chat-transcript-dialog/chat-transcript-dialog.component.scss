@@ -1,0 +1,41 @@
+@use 'lcars-variables' as vars;
+
+#chat-transcript-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: min(30rem, 90vw);
+
+  [mat-dialog-content] {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+.chat-transcript-dialog__intro,
+.chat-transcript-dialog__note {
+  margin: 0;
+  color: rgb(255 255 255 / 84%);
+  line-height: 1.5;
+}
+
+.chat-transcript-dialog__note {
+  font-size: 0.85rem;
+  color: rgb(255 255 255 / 66%);
+}
+
+.chat-transcript-dialog__range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  > * {
+    flex: 1 1 12rem;
+  }
+}
+
+.chat-transcript-dialog__error {
+  color: vars.$lcars-orange;
+  font-size: 0.8rem;
+}

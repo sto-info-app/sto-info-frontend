@@ -426,6 +426,15 @@ export const routes: Routes = [
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.ADMIN_CHAT_REPORTS,
+    loadComponent: () =>
+      import('./admin/moderation-admin/chat-report-admin-list.component').then(
+        m => m.ChatReportAdminListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_CHAT_REPORTS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.ADMIN_USERS,
     loadComponent: () =>
       import('./admin/moderation-admin/user-admin-list.component').then(
