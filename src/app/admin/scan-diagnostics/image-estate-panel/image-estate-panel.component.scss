@@ -1,0 +1,27 @@
+@use 'lcars-variables' as vars;
+
+// Private image delivery (FC-040): the run's controls wrap on a phone.
+.image-estate__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.image-estate__heading {
+  margin: 1.5rem 0 0.5rem;
+  font-family: vars.$font-antonio;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.image-estate__message {
+  color: vars.$lcars-green;
+}
+
+// IDs are long and unbroken; they wrap rather than widen the page.
+.image-estate__id {
+  display: inline-block;
+  margin: 0 0.5rem 0.25rem 0;
+  overflow-wrap: anywhere;
+}

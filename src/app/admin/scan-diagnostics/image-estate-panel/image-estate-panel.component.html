@@ -1,0 +1,239 @@
+<section
+  class="admin-section"
+  aria-labelledby="image-estate-heading">
+  <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+    <span id="image-estate-heading">Private image delivery</span>
+  </div>
+
+  <p>
+    Every picture becomes private, reachable only by an address the site signs
+    while the picture may be shown. Take an inventory, copy every public
+    picture to a private one, check the site, then retire the old copies. Until
+    then a copy can be undone.
+  </p>
+
+  @if (message(); as done) {
+    <p
+      class="image-estate__message"
+      role="status">
+      {{ done }}
+    </p>
+  }
+  @if (failure(); as problem) {
+    <p
+      class="scan-diagnostics__unavailable"
+      role="alert">
+      {{ problem }}
+    </p>
+  }
+
+  @let current = state();
+  @switch (current.kind) {
+    @case ('LOADING') {
+      <p>Reading where the pictures stand…</p>
+    }
+    @case ('ERROR') {
+      <p class="scan-diagnostics__unavailable">
+        Where the pictures stand could not be read.
+      </p>
+    }
+  }
+
+  @if (current.kind === 'READY') {
+    @let status = current.status;
+
+    @if (!status.signingEnabled) {
+      <p class="scan-diagnostics__unavailable">
+        The Images signing key is not set, so addresses are not signed, new
+        pictures go up public and no copy can start. Add
+        <code>cloudflareImagesSigningKey</code> to the application's secret.
+      </p>
+    }
+
+    <dl class="scan-diagnostics__details">
+      <div>
+        <dt>Pictures still public</dt>
+        <dd>{{ status.remaining }}</dd>
+      </div>
+      @for (step of steps(); track step.label) {
+        <div>
+          <dt>{{ step.label }}</dt>
+          <dd>{{ step.count }}</dd>
+        </div>
+      }
+    </dl>
+
+    @if (status.run; as run) {
+      <h3 class="image-estate__heading">
+        {{ runLabels[run.kind] }}: {{ stateLabels[run.state] }}
+      </h3>
+      <p>
+        Started {{ run.createdAt | appDate: 'medium' }}
+        @if (run.finishedAt) {
+          · finished {{ run.finishedAt | appDate: 'medium' }}
+        }
+      </p>
+      <dl class="scan-diagnostics__details">
+        @for (count of runCounts(); track count.label) {
+          <div>
+            <dt>{{ count.label }}</dt>
+            <dd>{{ count.count }}</dd>
+          </div>
+        }
+      </dl>
+      @if (run.lastError) {
+        <p class="scan-diagnostics__unavailable">{{ run.lastError }}</p>
+      }
+    }
+
+    <div class="image-estate__actions">
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto sunflower"
+        (click)="load()">
+        Refresh
+      </button>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto bluey"
+        [disabled]="status.inventory?.state === 'RUNNING'"
+        (click)="takeInventory()">
+        Take an inventory
+      </button>
+      @if (openRun(); as run) {
+        @if (run.state === 'RUNNING') {
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto gold"
+            (click)="pause()">
+            Pause
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto green"
+            (click)="resume()">
+            Resume
+          </button>
+        }
+      } @else {
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto green"
+          [disabled]="!mayStart(status, kinds.COPY)"
+          (click)="start(kinds.COPY)">
+          {{ runLabels[kinds.COPY] }}
+        </button>
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto tangerine"
+          [disabled]="!mayStart(status, kinds.UNDO)"
+          (click)="start(kinds.UNDO)">
+          {{ runLabels[kinds.UNDO] }}
+        </button>
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto red"
+          [disabled]="!mayStart(status, kinds.RETIRE)"
+          (click)="start(kinds.RETIRE)">
+          {{ runLabels[kinds.RETIRE] }}
+        </button>
+      }
+    </div>
+
+    @if (status.inventory; as inventory) {
+      <h3 class="image-estate__heading">
+        Inventory, {{ inventory.createdAt | appDate: 'medium' }}
+      </h3>
+      @if (inventory.state === 'RUNNING') {
+        <p>Being taken. Refresh in a moment.</p>
+      }
+      @if (inventory.error) {
+        <p class="scan-diagnostics__unavailable">
+          Cloudflare's listing could not be read: {{ inventory.error }}
+        </p>
+      }
+      @if (inventory.report; as report) {
+        <table class="fleet-community-table">
+          <caption>
+            Where each picture is referenced
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Column</th>
+              <th scope="col">Rows</th>
+              <th scope="col">Registered</th>
+              <th scope="col">R2 keys</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+              reference of report.references;
+              track reference.table + reference.column
+            ) {
+              <tr>
+                <th
+                  scope="row"
+                  data-label="Column">
+                  <code>{{ reference.table }}.{{ reference.column }}</code>
+                </th>
+                <td data-label="Rows">{{ reference.rows }}</td>
+                <td data-label="Registered">{{ reference.registered }}</td>
+                <td data-label="R2 keys">{{ reference.r2 }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (report.cloudflare; as cloudflare) {
+          <dl class="scan-diagnostics__details">
+            <div>
+              <dt>In Cloudflare for this site</dt>
+              <dd>{{ cloudflare.listed }}</dd>
+            </div>
+            <div>
+              <dt>Private</dt>
+              <dd>{{ cloudflare.private }}</dd>
+            </div>
+            <div>
+              <dt>Public</dt>
+              <dd>{{ cloudflare.public }}</dd>
+            </div>
+            <div>
+              <dt>Old copies to retire</dt>
+              <dd>{{ cloudflare.awaitingRetirement }}</dd>
+            </div>
+            <div>
+              <dt>Nothing points at them</dt>
+              <dd>{{ cloudflare.orphans }}</dd>
+            </div>
+            <div>
+              <dt>Shown but missing</dt>
+              <dd>{{ cloudflare.missing }}</dd>
+            </div>
+            <div>
+              <dt>Elsewhere in the account</dt>
+              <dd>{{ cloudflare.elsewhere }}</dd>
+            </div>
+          </dl>
+          @if (cloudflare.orphanIds.length > 0) {
+            <p>
+              Nothing points at:
+              @for (id of cloudflare.orphanIds; track id) {
+                <code class="image-estate__id">{{ id }}</code>
+              }
+            </p>
+          }
+          @if (cloudflare.missingAssetIds.length > 0) {
+            <p>
+              Missing from Cloudflare (asset IDs):
+              @for (id of cloudflare.missingAssetIds; track id) {
+                <code class="image-estate__id">{{ id }}</code>
+              }
+            </p>
+          }
+        }
+      }
+    }
+  }
+</section>
