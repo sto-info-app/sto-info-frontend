@@ -271,5 +271,16 @@
         </div>
       }
     }
+
+    <!--
+      Personal unassociation is not erasure (FC-038): this changes the
+      Character's page, never what a Fleet's roster recorded.
+    -->
+    <p class="character-fleet__note character-fleet__privacy">
+      Saying No, leaving or removing a Fleet here changes only what this
+      Character's page says. A Fleet's roster still lists the name it
+      imported. To have your roster data erased from every Fleet,
+      <a [routerLink]="'/' + contactRoute">contact us</a>.
+    </p>
   }
 </div>

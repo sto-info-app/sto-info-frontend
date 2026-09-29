@@ -117,6 +117,15 @@ describe('GovernanceRolesComponent', () => {
     expect(pageText(fixture)).toContain('Owner: An account with no username');
   });
 
+  it('says a closed Community whose Owner was erased has none (FC-038)', async () => {
+    rolesAre({ owner: null });
+    await render();
+
+    expect(pageText(fixture)).toContain(
+      'Owner: none, since its Owner’s account was erased',
+    );
+  });
+
   it('says so when nobody else holds a role', async () => {
     rolesAre({ holders: [] });
     await render();

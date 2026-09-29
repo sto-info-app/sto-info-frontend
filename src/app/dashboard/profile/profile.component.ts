@@ -13,9 +13,10 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
-import { finalize, Subject, takeUntil } from 'rxjs';
+import { catchError, finalize, of, Subject, takeUntil } from 'rxjs';
 import { buildRegistryProfileLink } from 'src/app/community/registry/registry-card.builders';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { escapeHtml } from 'src/app/shared/actions/confirm-prompt';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { SRC_PHOTO_UNAVAILABLE_300PX } from 'src/app/shared/constants/app-image-assets.constants';
@@ -26,7 +27,10 @@ import {
 import { DatesTimeHelperService } from 'src/app/shared/services/dates-time-helper.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { User } from '../models/user.model';
-import { DashboardService } from '../services/dashboard.service';
+import {
+  DashboardService,
+  OwnedCommunityOutcome,
+} from '../services/dashboard.service';
 import { PrivacyModeService } from '../services/privacy-mode.service';
 import { EditPersonalDetailsComponent } from './dialogs/edit-personal-details/edit-personal-details.component';
 import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component';
@@ -304,15 +308,33 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Requests account closure for the authenticated user.
+   * Requests account closure for the authenticated user, saying first what
+   * becomes of any Fleet Community they own (FC-038).
    */
   closeAccount(): void {
+    this._dashboardService
+      .closurePreview()
+      .pipe(
+        catchError(() => of(null)),
+        takeUntil(this._destroy$),
+      )
+      .subscribe(communities => this.confirmClosure(communities));
+  }
+
+  /**
+   * Asks the user to confirm closing their account, and closes it.
+   *
+   * @param communities - What becomes of each Community they own, or null
+   *   when that could not be read.
+   */
+  private confirmClosure(communities: OwnedCommunityOutcome[] | null): void {
     const dialogRef = this._dialog.open(ConfirmDialogComponent, {
       width: '75%',
       data: {
         title: 'Close Account',
         message:
-          '<p>Are you sure you want to close your account?<br/>&nbsp;<br/>You will be signed out, and your profile and STO data will be marked as deleted and removed permanently after the retention period.</p>',
+          '<p>Are you sure you want to close your account?<br/>&nbsp;<br/>You will be signed out, and your profile and STO data will be marked as deleted and removed permanently after the retention period.</p>' +
+          closureCommunitiesText(communities),
         confirmText: 'Close Account',
         cancelText: 'Cancel',
       },
@@ -375,4 +397,44 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.lastUpdatedLabel = this.timeSinceLastUpdated();
     this.memberSinceLabel = this.timeSinceUserCreated();
   }
+}
+
+/**
+ * What closing the account does to the Fleet Communities the user owns, as
+ * the closure dialog says it (FC-038). Names are escaped: the dialog renders
+ * HTML, and a Community is named by whoever made it.
+ *
+ * @param communities - What becomes of each, or null when that could not be
+ *   read.
+ * @returns The paragraphs, or nothing when they own none.
+ */
+export function closureCommunitiesText(
+  communities: readonly OwnedCommunityOutcome[] | null,
+): string {
+  if (communities === null) {
+    return (
+      '<p>If you own any Fleet Communities, each goes to its ' +
+      'longest-serving Admin, or is closed if no Admin can take it over.</p>'
+    );
+  }
+
+  if (communities.length === 0) {
+    return '';
+  }
+
+  const items = communities
+    .map(community =>
+      community.outcome === 'TRANSFER'
+        ? `<li>${escapeHtml(community.name)} goes to ` +
+          `${escapeHtml(community.toUsername ?? 'its longest-serving Admin')}</li>`
+        : `<li>${escapeHtml(community.name)} is closed, as no Admin can ` +
+          'take it over</li>',
+    )
+    .join('');
+
+  return (
+    '<p>You own these Fleet Communities. We suggest you transfer each ' +
+    'from its page first. If you close your account now:</p>' +
+    `<ul>${items}</ul>`
+  );
 }

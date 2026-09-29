@@ -131,6 +131,15 @@ describe('GovernanceDelegationComponent', () => {
     expect(saveIn('What every Officer holds').disabled).toBe(true);
   });
 
+  it('offers everybody named when the Owner was erased (FC-038)', async () => {
+    rolesAre({ owner: null });
+    await render();
+
+    expect(
+      fixture.componentInstance.people(scopeRoles({ owner: null })),
+    ).not.toHaveLength(0);
+  });
+
   it('lists who is granted or denied what', async () => {
     rolesAre({
       personal: [

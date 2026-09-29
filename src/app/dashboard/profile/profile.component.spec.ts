@@ -15,7 +15,7 @@ import { User } from '../models/user.model';
 import { DashboardService } from '../services/dashboard.service';
 import { EditPersonalDetailsComponent } from './dialogs/edit-personal-details/edit-personal-details.component';
 import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component';
-import { ProfileComponent } from './profile.component';
+import { closureCommunitiesText, ProfileComponent } from './profile.component';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -51,6 +51,7 @@ describe('ProfileComponent', () => {
       getUser: jest.fn().mockReturnValue(of(mockUser)),
       getUserSettings: jest.fn().mockReturnValue(of({ privacyMode: false })),
       closeAccount: jest.fn().mockReturnValue(of({ success: true })),
+      closurePreview: jest.fn().mockReturnValue(of([])),
     } as unknown as jest.Mocked<DashboardService>;
 
     mockAuthService = {
@@ -421,6 +422,80 @@ describe('ProfileComponent', () => {
       );
 
       consoleWarnSpy.mockRestore();
+    });
+  });
+
+  // FC-038: an Owner is told what becomes of each Community first.
+  describe('closing while owning Fleet Communities', () => {
+    const opened = () =>
+      (mockDialog.open.mock.calls[0][1] as { data: { message: string } }).data
+        .message;
+
+    beforeEach(() => {
+      mockDialog.open.mockReturnValue({
+        afterClosed: jest.fn().mockReturnValue(of(false)),
+      } as unknown as MatDialogRef<unknown>);
+    });
+
+    it('names each Community and what will happen to it', () => {
+      mockDashboardService.closurePreview.mockReturnValue(
+        of([
+          {
+            communityId: 'c1',
+            name: 'Fixture <Community>',
+            outcome: 'TRANSFER',
+            toUserId: 'u2',
+            toUsername: 'Deputy',
+          },
+          {
+            communityId: 'c2',
+            name: 'Lonely',
+            outcome: 'CLOSE',
+            toUserId: null,
+            toUsername: null,
+          },
+        ]),
+      );
+
+      component.closeAccount();
+
+      expect(opened()).toContain(
+        '<li>Fixture &lt;Community&gt; goes to Deputy</li>',
+      );
+      expect(opened()).toContain(
+        '<li>Lonely is closed, as no Admin can take it over</li>',
+      );
+      expect(opened()).toContain('We suggest you transfer each');
+    });
+
+    it('says what happens in general when it cannot find out', () => {
+      mockDashboardService.closurePreview.mockReturnValue(
+        throwError(() => new Error('down')),
+      );
+
+      component.closeAccount();
+
+      expect(opened()).toContain('If you own any Fleet Communities');
+    });
+
+    it('says nothing of Communities to somebody who owns none', () => {
+      component.closeAccount();
+
+      expect(opened()).not.toContain('Fleet Communities');
+    });
+
+    it('names an Admin with no username by their place', () => {
+      expect(
+        closureCommunitiesText([
+          {
+            communityId: 'c1',
+            name: 'Fixture',
+            outcome: 'TRANSFER',
+            toUserId: 'u2',
+            toUsername: null,
+          },
+        ]),
+      ).toContain('goes to its longest-serving Admin');
     });
   });
 

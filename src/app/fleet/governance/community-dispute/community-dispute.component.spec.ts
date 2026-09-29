@@ -443,7 +443,7 @@ describe('CommunityDisputeComponent', () => {
     const text = pageText(fixture);
 
     expect(governance.disputeView).toHaveBeenCalledWith('community-1');
-    expect(text).toContain('OwnerFleetOwner');
+    expect(text).toContain('Owner FleetOwner');
     expect(text).toContain('FleetAdmin, An account with no username');
     expect(text).toContain('To FleetAdmin, lapsing');
     expect(text).not.toContain('StatusClosed');
@@ -463,12 +463,23 @@ describe('CommunityDisputeComponent', () => {
 
     const text = pageText(fixture);
 
-    expect(text).toContain('OwnerAn account with no username');
+    expect(text).toContain('Owner An account with no username');
     expect(text).toContain('Admins None');
     expect(text).toContain('Open offer None');
     expect(text).toContain('StatusClosed');
     expect(text).toContain('it has none');
     expect(findButton(fixture, 'Close…')).toBeUndefined();
+  });
+
+  it('says a closed Community whose Owner was erased has none (FC-038)', async () => {
+    governance.disputeView.mockReturnValue(
+      of(disputeView({ owner: null, admins: [], status: 'CLOSED' })),
+    );
+    await render();
+
+    expect(pageText(fixture)).toContain(
+      'Owner None: its Owner’s account was erased',
+    );
   });
 
   describe('moving ownership', () => {

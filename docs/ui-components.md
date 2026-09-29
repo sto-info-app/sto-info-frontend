@@ -1217,6 +1217,19 @@ Each is offered only while chat is switched on.
 - **`/admin/fleet-investigations`**, "Fleet Investigations": every site
   administrator's look into a Fleet, newest first, with its purpose, linking to
   the Fleet while it is open.
+- **`/admin/roster-erasures`**, "Roster Erasures" (FC-038,
+  `RosterErasureListComponent`), for a verified request to erase somebody's
+  roster data:
+  1. The admin gives the Character name and @handle, then **Find their
+     rosters** lists the Fleets whose rosters name them, and how many rows.
+  2. After a reason, **Erase…** asks through `ConfirmDialogComponent`, since
+     it cannot be undone.
+  3. The page then says what the erasure did.
+
+  The list of erasures never names who was erased: each shows the pseudonym
+  that replaced them. **Replay the erasure ledger…**, run after a database
+  restore, makes again what the restore lost.
+
 **The site admins' queue** (FC-035): `/admin/chat-reports`, "Chat Reports" on the Admin page, in
 `src/app/admin/moderation-admin` (`ChatReportAdminListComponent`):
 
@@ -1326,7 +1339,34 @@ exports, an import's corrections and rows — share a shape:
   showed is no longer how things stand. A change made to something another
   investigator changed meanwhile is refused and the page reads it again.
 - **The history of changes** is listed beneath, newest first, naming an
-  account since closed as such.
+  account since closed as such, and STO Info for what it did itself.
+
+**An export whose file expired** (FC-037) reads "File expired". When a held
+export's file reaches the end of its retention before anybody chose it, STO
+Info retires it. The conflicting exports page then lists it with a note that
+it can no longer be selected, and offers no Select. Its corrections list "STO
+Info retired it", with the reason. One whose file an erasure deleted (FC-038)
+reads "File erased" in the same way.
+
+**Privacy** (FC-038):
+
+- **Closing an account.** The dialog first names each Fleet Community the
+  person owns: either which Admin it goes to, or that it is closed because no
+  Admin can take it. It suggests they transfer each one first. Names are
+  escaped, since the dialog renders HTML.
+- **A Character's Fleet panel.** It says that saying No, leaving or removing
+  changes only that page. A Fleet's roster still lists the name, and the
+  panel links to Contact us for erasure.
+- **A closed Community whose Owner's account was erased** shows no Owner, on
+  its dispute page and its roles page.
+
+**A site administrator looking in** (FC-036) holds `roster.investigate.read`
+rather than `roster.investigate` (`readsOnly(capabilities)`). The Investigate
+hub, an import's page, its rows, conflicting exports, roster identities and
+rank order all open to them and say, once, that they read and change nothing
+(`ROSTER_READ_ONLY_NOTE`). Every control that changes something — reasons,
+ticks, Select, Confirm/Reject/Undo, the rank order form — is left out; the
+rank order is shown as a plain table.
 
 ### Warnings and user text
 

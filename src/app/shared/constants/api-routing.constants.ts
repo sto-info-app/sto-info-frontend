@@ -31,6 +31,7 @@ export const API_URLS = {
   USER: apiUrl + '/user',
   USER_SETTINGS: apiUrl + '/user/settings',
   CLOSE_ACCOUNT: apiUrl + '/user/close-account',
+  CLOSE_ACCOUNT_COMMUNITIES: apiUrl + '/user/close-account/communities',
   UPDATE_USER_PROFILE: apiUrl + '/user/update-profile',
   UPDATE_USER_PROFILE_PIC: apiUrl + '/user/update-profile-pic',
 
@@ -102,6 +103,7 @@ export const API_URLS = {
   // Site admins' holds on chat evidence, and looks into Fleets (FC-036).
   MODERATION_HOLDS_ADMIN: apiUrl + '/admin/moderation-holds',
   FLEET_INVESTIGATIONS_ADMIN: apiUrl + '/admin/fleet-investigations',
+  ROSTER_ERASURES_ADMIN: apiUrl + '/admin/roster-erasures',
   MODERATION_ADMIN_OPEN_COUNTS: apiUrl + '/admin/moderation/open-counts',
   FILE_SCANNING_ADMIN_DIAGNOSTICS: apiUrl + '/admin/file-scanning/diagnostics',
 

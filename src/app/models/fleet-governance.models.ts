@@ -78,7 +78,8 @@ export interface DelegableCapability {
 
 /** Who governs a scope. */
 export interface ScopeRoles {
-  owner: GovernancePerson;
+  /** Null for a closed Community whose Owner's account was erased (FC-038). */
+  owner: GovernancePerson | null;
   /** Whether the reader may change any of it: the Owner. */
   mayManage: boolean;
   holders: ScopeRoleHolder[];
@@ -141,7 +142,8 @@ export interface CommunityDisputeView {
   communityId: string;
   name: string;
   status: string;
-  owner: GovernancePerson;
+  /** Null for a closed Community whose Owner's account was erased (FC-038). */
+  owner: GovernancePerson | null;
   admins: GovernancePerson[];
   offer: OwnershipTransfer | null;
   /** Its Fleets, then its Armadas, each with its duplicates (FC-036). */

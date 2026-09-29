@@ -299,7 +299,8 @@ export interface FleetScopeArtwork {
  */
 export interface FleetCommunity extends FleetScopeArtwork {
   id: string;
-  ownerUserId: string;
+  /** Null for a closed Community whose Owner's account was erased (FC-038). */
+  ownerUserId: string | null;
   name: string;
   slug: string;
   description: string | null;

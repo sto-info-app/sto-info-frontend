@@ -15,6 +15,16 @@ import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { AcceptedAsset } from 'src/app/shared/services/asset-scan.service';
 
+/** What closing the account does to one Community the user owns (FC-038). */
+export interface OwnedCommunityOutcome {
+  readonly communityId: string;
+  readonly name: string;
+  /** Handed to an Admin, or closed because none can take it. */
+  readonly outcome: 'TRANSFER' | 'CLOSE';
+  readonly toUserId: string | null;
+  readonly toUsername: string | null;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -96,6 +106,24 @@ export class DashboardService {
           return throwError(() => error);
         }),
       );
+  }
+
+  /**
+   * What closing the account would do to each open Fleet Community the user
+   * owns (FC-038).
+   *
+   * @returns Each, and whether it goes to an Admin or is closed.
+   */
+  closurePreview(): Observable<OwnedCommunityOutcome[]> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+
+    return this._http.get<OwnedCommunityOutcome[]>(
+      API_URLS.CLOSE_ACCOUNT_COMMUNITIES,
+      httpOptions,
+    );
   }
 
   closeAccount() {

@@ -118,6 +118,8 @@ export const ROSTER_IMPORT_STATUS_LABELS: Record<RosterImportStatus, string> = {
   [RosterImportStatus.HELD]: 'Held',
   [RosterImportStatus.REFUSED]: 'Refused',
   [RosterImportStatus.ABANDONED]: 'Abandoned',
+  [RosterImportStatus.EXPIRED]: 'File expired',
+  [RosterImportStatus.ERASED]: 'File erased',
 };
 
 /** What each status means for the roster, in a sentence. */
@@ -142,6 +144,15 @@ export const ROSTER_IMPORT_STATUS_DESCRIPTIONS: Record<
   [RosterImportStatus.ABANDONED]:
     'This import was given up on before it was read. Nothing in it is in ' +
     'force. Importing the export again starts afresh.',
+  [RosterImportStatus.EXPIRED]:
+    'This export was waiting for a decision when its file reached the end ' +
+    'of its retention and was deleted. It was never read into the roster, ' +
+    'and can no longer be selected.',
+  [RosterImportStatus.ERASED]:
+    'This export was waiting for a decision when its file was deleted, ' +
+    'because it named somebody whose roster data was erased at their ' +
+    'request. It was never read into the roster, and can no longer be ' +
+    'selected.',
 };
 
 /** Why an import is held or was refused, in words. */

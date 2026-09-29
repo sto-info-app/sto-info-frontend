@@ -15,7 +15,11 @@ import { map, Observable } from 'rxjs';
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
-import { ROSTER_INVESTIGATE_CAPABILITY } from 'src/app/fleet/imports/roster-import.constants';
+import {
+  ROSTER_INVESTIGATION_READERS,
+  ROSTER_READ_ONLY_NOTE,
+  readsOnly,
+} from 'src/app/fleet/imports/roster-import.constants';
 import { ROSTER_IMPORT_STATUS_LABELS } from 'src/app/fleet/imports/roster-import.messages';
 import { RosterImportService } from 'src/app/fleet/imports/roster-import.service';
 import {
@@ -121,8 +125,21 @@ export class RosterConflictsComponent extends FleetSectionPageDirective<RosterCo
   readonly filters = ROSTER_CONFLICT_FILTERS;
   readonly statusLabels = ROSTER_IMPORT_STATUS_LABELS;
   readonly reasonLimit = ROSTER_CONFLICT_REASON_LIMIT;
+  /**
+   * Why a held export whose file went before it was chosen can no longer be
+   * selected: it expired (FC-037), or was erased (FC-038).
+   */
+  readonly retiredNotes: Readonly<Partial<Record<RosterImportStatus, string>>> =
+    {
+      [RosterImportStatus.EXPIRED]:
+        'its file expired before it was chosen, so it can no longer be selected',
+      [RosterImportStatus.ERASED]:
+        'its file was erased before it was chosen, so it can no longer be selected',
+    };
 
-  protected readonly _requiredCapabilities = [ROSTER_INVESTIGATE_CAPABILITY];
+  readonly readOnlyNote = ROSTER_READ_ONLY_NOTE;
+
+  protected readonly _requiredCapabilities = ROSTER_INVESTIGATION_READERS;
 
   /** The reason typed for each group, by its id. */
   readonly reasons = signal<Readonly<Record<string, string>>>({});
@@ -181,6 +198,17 @@ export class RosterConflictsComponent extends FleetSectionPageDirective<RosterCo
       fleetSlug,
       member.id,
     );
+  }
+
+  /**
+   * Whether the reader is a site admin looking in, who selects nothing
+   * (FC-036).
+   *
+   * @param data - The page.
+   * @returns True when they are.
+   */
+  isReadOnly(data: RosterConflictsData): boolean {
+    return readsOnly(data.section.tabs.capabilities);
   }
 
   /**

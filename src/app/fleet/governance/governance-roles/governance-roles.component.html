@@ -22,7 +22,12 @@
       </p>
 
       <p class="governance-roles__owner">
-        Owner: <strong>{{ roles.owner.username ?? unnamed }}</strong>
+        Owner:
+        @if (roles.owner) {
+          <strong>{{ roles.owner.username ?? unnamed }}</strong>
+        } @else {
+          none, since its Owner’s account was erased
+        }
       </p>
 
       @if (notice(); as done) {

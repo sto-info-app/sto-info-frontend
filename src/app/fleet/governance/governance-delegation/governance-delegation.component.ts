@@ -246,7 +246,7 @@ export class GovernanceDelegationComponent extends GovernancePageDirective<Scope
    * @returns The people to offer, each once.
    */
   people(roles: ScopeRoles): GovernancePerson[] {
-    const seen = new Set([roles.owner.userId]);
+    const seen = new Set(roles.owner ? [roles.owner.userId] : []);
     const people: GovernancePerson[] = [];
 
     for (const person of [...roles.holders, ...roles.candidates]) {

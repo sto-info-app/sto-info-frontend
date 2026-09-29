@@ -456,6 +456,15 @@ export const routes: Routes = [
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.ADMIN_ROSTER_ERASURES,
+    loadComponent: () =>
+      import('./admin/moderation-admin/roster-erasure-list.component').then(
+        m => m.RosterErasureListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_ROSTER_ERASURES, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.ADMIN_USERS,
     loadComponent: () =>
       import('./admin/moderation-admin/user-admin-list.component').then(

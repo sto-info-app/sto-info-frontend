@@ -134,7 +134,7 @@ export class GovernanceRolesComponent extends GovernancePageDirective<ScopeRoles
 
     return roles.candidates.filter(
       person =>
-        !holding.has(person.userId) && person.userId !== roles.owner.userId,
+        !holding.has(person.userId) && person.userId !== roles.owner?.userId,
     );
   }
 

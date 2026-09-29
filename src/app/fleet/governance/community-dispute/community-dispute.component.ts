@@ -162,7 +162,9 @@ export class CommunityDisputeComponent extends GovernancePageDirective<Community
           message:
             `<p>Make ${escapeHtml(nameOf(recipient.username))} the Owner ` +
             `of ${escapeHtml(view.name)}?</p>` +
-            `<p>${escapeHtml(nameOf(view.owner.username))} will hold no ` +
+            // Only an open Community is offered to move, and an open one
+            // always has an Owner (FC-038).
+            `<p>${escapeHtml(nameOf(view.owner!.username))} will hold no ` +
             'role here. Nobody is asked to accept.</p>',
           confirmText: 'Move it',
         })

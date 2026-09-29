@@ -202,6 +202,20 @@ describe('CharacterFleetPanelComponent', () => {
       expect(text()).toContain('No Fleet is recorded for this Captain');
       expect(text()).toContain('unless you say so');
     });
+
+    // FC-038: unlinking is not erasure, and the page says where erasure is.
+    it('says unlinking changes this page, and how to have roster data erased', () => {
+      render();
+
+      expect(text().replace(/\s+/g, ' ')).toContain(
+        "A Fleet's roster still lists the name it imported.",
+      );
+      expect(
+        (fixture.nativeElement as HTMLElement)
+          .querySelector('.character-fleet__privacy a')
+          ?.getAttribute('href'),
+      ).toBe('/contact');
+    });
   });
 
   describe('when the history cannot be read', () => {

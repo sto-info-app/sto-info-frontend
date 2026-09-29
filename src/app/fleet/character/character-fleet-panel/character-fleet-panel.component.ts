@@ -32,6 +32,7 @@ import { CharacterFleetService } from '../../character-fleet.service';
 import { FLEET_LINKS } from '../../fleet-links';
 import { RECRUITED_BY_LINES } from '../../recruitment/recruitment.constants';
 import { FleetDirectoryService } from '../../fleet-directory.service';
+import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 
 /** How many Fleets the picker offers at once. */
 const PICKER_RESULTS = 8;
@@ -113,6 +114,9 @@ export class CharacterFleetPanelComponent implements OnInit {
 
   /** How a proposal recruitment raised says where it came from. */
   readonly recruitedByLines = RECRUITED_BY_LINES;
+
+  /** Where somebody asks for their roster data to be erased (FC-038). */
+  readonly contactRoute = APP_ROUTES.CONTACT;
 
   /** Whether the first read is still in flight. */
   protected loading = signal(true);

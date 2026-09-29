@@ -502,6 +502,22 @@ describe('RosterImportCorrectionsComponent', () => {
               detail: { fromTimezone: null, toTimezone: 'Europe/London' },
               actedAt: '2024-11-30T12:00:00.000Z',
             },
+            {
+              id: 'action-x',
+              action: RosterImportActionKind.SOURCE_EXPIRED,
+              actorName: null,
+              reason: 'Its file was deleted',
+              detail: null,
+              actedAt: '2024-11-29T12:00:00.000Z',
+            },
+            {
+              id: 'action-y',
+              action: RosterImportActionKind.SOURCE_ERASED,
+              actorName: null,
+              reason: 'Its file was erased',
+              detail: null,
+              actedAt: '2024-11-28T12:00:00.000Z',
+            },
           ],
         }),
       );
@@ -517,6 +533,8 @@ describe('RosterImportCorrectionsComponent', () => {
         'Dec 2, 2024, 12:00:00 PM, an account since closed excluded rows: “Duplicates” Line 2, 5.',
         'Dec 1, 2024, 12:00:00 PM, steve marked it partial: “Stopped early”',
         'Nov 30, 2024, 12:00:00 PM, steve corrected its timezone: “First zone” From no zone to Europe/London.',
+        'Nov 29, 2024, 12:00:00 PM, STO Info retired it: “Its file was deleted”',
+        'Nov 28, 2024, 12:00:00 PM, STO Info retired it: “Its file was erased”',
       ]);
     });
 

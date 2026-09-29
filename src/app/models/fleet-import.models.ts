@@ -179,6 +179,18 @@ export enum RosterImportStatus {
 
   /** Given up on, and never read. */
   ABANDONED = 'ABANDONED',
+
+  /**
+   * Held, and its file deleted at the end of its retention before anybody
+   * selected it, so it can no longer be (FC-037).
+   */
+  EXPIRED = 'EXPIRED',
+
+  /**
+   * Held, and its file deleted by a verified erasure of somebody it named
+   * before anybody selected it, so it can no longer be (FC-038).
+   */
+  ERASED = 'ERASED',
 }
 
 /** The statuses nothing further happens to on its own. */
@@ -187,6 +199,8 @@ export const SETTLED_ROSTER_IMPORT_STATUSES: readonly RosterImportStatus[] = [
   RosterImportStatus.HELD,
   RosterImportStatus.REFUSED,
   RosterImportStatus.ABANDONED,
+  RosterImportStatus.EXPIRED,
+  RosterImportStatus.ERASED,
 ];
 
 /**
@@ -285,6 +299,10 @@ export enum RosterImportActionKind {
   ROWS_REINSTATED = 'ROWS_REINSTATED',
   TIMEZONE_CORRECTED = 'TIMEZONE_CORRECTED',
   CONFLICT_SELECTED = 'CONFLICT_SELECTED',
+  /** Retired by STO Info when its file expired while it was held (FC-037). */
+  SOURCE_EXPIRED = 'SOURCE_EXPIRED',
+  /** Retired by STO Info when an erasure deleted its file (FC-038). */
+  SOURCE_ERASED = 'SOURCE_ERASED',
 }
 
 /** What a correction changed, beyond which import and why. */
