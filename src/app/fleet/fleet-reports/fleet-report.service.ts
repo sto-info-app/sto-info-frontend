@@ -8,9 +8,12 @@ import { paramsOf } from 'src/app/fleet/roster/roster.service';
 import { FleetAudience } from 'src/app/models/fleet.models';
 import {
   FleetActivityReport,
+  FleetAttendanceReport,
   FleetContributionReport,
   FleetGrowthReport,
+  FleetHoldingsReport,
   FleetRanksReport,
+  FleetRecruitmentReport,
   FleetReport,
   FleetReportAccess,
   FleetReportAudiences,
@@ -26,6 +29,9 @@ export interface FleetReportsByKind {
   [FleetReport.RANKS]: FleetRanksReport;
   [FleetReport.ACTIVITY]: FleetActivityReport;
   [FleetReport.CONTRIBUTION]: FleetContributionReport;
+  [FleetReport.ATTENDANCE]: FleetAttendanceReport;
+  [FleetReport.RECRUITMENT]: FleetRecruitmentReport;
+  [FleetReport.HOLDINGS]: FleetHoldingsReport;
 }
 
 /**

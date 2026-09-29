@@ -11,7 +11,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
 import {
-  FLEET_REPORT_AUDIENCE_LABELS,
+  fleetReportAudienceLabel,
   FLEET_REPORT_AUDIENCES,
   FLEET_REPORT_LABELS,
   FLEET_REPORTS,
@@ -79,8 +79,18 @@ export class ReportAudiencesComponent implements OnInit {
   readonly errorMessage = REPORT_AUDIENCES_ERROR;
   readonly saveFailedMessage = REPORT_AUDIENCE_SAVE_FAILED;
   readonly audienceChoices = FLEET_REPORT_AUDIENCES;
-  readonly audienceLabels = FLEET_REPORT_AUDIENCE_LABELS;
   readonly reportLabels = FLEET_REPORT_LABELS;
+
+  /**
+   * Who an audience lets see a report, and how much of it.
+   *
+   * @param report - The report.
+   * @param audience - The audience.
+   * @returns The words.
+   */
+  audienceLabel(report: FleetReport, audience: FleetAudience): string {
+    return fleetReportAudienceLabel(report, audience);
+  }
 
   /** The Community holding the Fleet. */
   readonly communityId = input.required<string>();

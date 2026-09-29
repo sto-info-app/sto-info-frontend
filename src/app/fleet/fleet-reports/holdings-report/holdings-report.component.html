@@ -1,0 +1,43 @@
+@let shown = report();
+
+@if (shown.changes.length === 0) {
+  <p class="fleet-community-empty">No holding changed in this span.</p>
+} @else {
+  <table class="fleet-community-table">
+    <caption>
+      Every tier a holding’s track moved, newest first
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">When</th>
+        <th scope="col">Holding</th>
+        <th scope="col">Track</th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          From tier
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          To tier
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (change of shown.changes; track $index) {
+        <tr>
+          <th scope="row">
+            <time [attr.datetime]="change.at">{{
+              change.at | appDate: 'medium'
+            }}</time>
+          </th>
+          <td>{{ change.holding }}</td>
+          <td>{{ change.track }}</td>
+          <td class="fleet-community-table__number">{{ change.from }}</td>
+          <td class="fleet-community-table__number">{{ change.to }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

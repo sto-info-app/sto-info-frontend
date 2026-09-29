@@ -6,6 +6,7 @@
 import { FleetAudience } from 'src/app/models/fleet.models';
 import {
   FleetReport,
+  RecruitmentRoute,
   RosterActivityBand,
   RosterTenureBand,
 } from 'src/app/models/fleet-report.models';
@@ -17,6 +18,9 @@ export const FLEET_REPORTS: readonly FleetReport[] = [
   FleetReport.TENURE,
   FleetReport.RANKS,
   FleetReport.CONTRIBUTION,
+  FleetReport.ATTENDANCE,
+  FleetReport.RECRUITMENT,
+  FleetReport.HOLDINGS,
 ];
 
 /** Each report's name. */
@@ -26,7 +30,46 @@ export const FLEET_REPORT_LABELS: Readonly<Record<FleetReport, string>> = {
   [FleetReport.TENURE]: 'Tenure',
   [FleetReport.RANKS]: 'Ranks',
   [FleetReport.CONTRIBUTION]: 'Contribution',
+  [FleetReport.ATTENDANCE]: 'Attendance',
+  [FleetReport.RECRUITMENT]: 'Recruitment',
+  [FleetReport.HOLDINGS]: 'Holdings',
 };
+
+/** The reports read from the roster history. */
+export const ROSTER_REPORTS: readonly FleetReport[] = [
+  FleetReport.GROWTH,
+  FleetReport.ACTIVITY,
+  FleetReport.TENURE,
+  FleetReport.RANKS,
+  FleetReport.CONTRIBUTION,
+];
+
+/** How each way of recruiting reads (FC-030). */
+export const RECRUITMENT_ROUTE_LABELS: Readonly<
+  Record<RecruitmentRoute, string>
+> = {
+  APPLICATION: 'Applications',
+  OPEN_JOIN: 'Open joins',
+  INVITATION: 'Invitations',
+};
+
+/**
+ * Who an audience lets see one report, and how much of it. The Fleet's
+ * members see attendance as counts only (FC-030).
+ *
+ * @param report - The report.
+ * @param audience - The audience.
+ * @returns The words.
+ */
+export function fleetReportAudienceLabel(
+  report: FleetReport,
+  audience: FleetAudience,
+): string {
+  return report === FleetReport.ATTENDANCE &&
+    audience === FleetAudience.FLEET_MEMBERS
+    ? 'The Fleet’s members, counts only'
+    : FLEET_REPORT_AUDIENCE_LABELS[audience];
+}
 
 /**
  * Who each audience lets see a report, and how much of it.

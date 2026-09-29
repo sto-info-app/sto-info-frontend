@@ -15,6 +15,7 @@ import { UserSettingsService } from 'src/app/dashboard/services/user-settings.se
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { ActivityReportComponent } from 'src/app/fleet/fleet-reports/activity-report/activity-report.component';
+import { AttendanceReportComponent } from 'src/app/fleet/fleet-reports/attendance-report/attendance-report.component';
 import { ContributionReportComponent } from 'src/app/fleet/fleet-reports/contribution-report/contribution-report.component';
 import {
   FleetReportService,
@@ -25,7 +26,9 @@ import {
   FLEET_REPORTS,
 } from 'src/app/fleet/fleet-reports/fleet-report.text';
 import { GrowthReportComponent } from 'src/app/fleet/fleet-reports/growth-report/growth-report.component';
+import { HoldingsReportComponent } from 'src/app/fleet/fleet-reports/holdings-report/holdings-report.component';
 import { RanksReportComponent } from 'src/app/fleet/fleet-reports/ranks-report/ranks-report.component';
+import { RecruitmentReportComponent } from 'src/app/fleet/fleet-reports/recruitment-report/recruitment-report.component';
 import { ReportAudiencesComponent } from 'src/app/fleet/fleet-reports/report-audiences/report-audiences.component';
 import { TenureReportComponent } from 'src/app/fleet/fleet-reports/tenure-report/tenure-report.component';
 import {
@@ -37,8 +40,10 @@ import {
   FleetSectionPageDirective,
 } from 'src/app/fleet/scope/fleet-section-page.directive';
 import {
+  FleetRecordReportHeader,
   FleetReport,
   FleetReportAccess,
+  FleetReportHeader,
   FleetReportQuery,
   FleetReportView,
 } from 'src/app/models/fleet-report.models';
@@ -85,7 +90,7 @@ export interface FleetReportsData {
 export type FleetReportsCsvState = 'IDLE' | 'BUSY' | 'FAILED';
 
 /**
- * A Fleet's reports (FC-020).
+ * A Fleet's reports (FC-020, FC-030).
  *
  * Open to anybody who can see the Fleet: which reports a reader is shown,
  * and whether in full or as counts only, is each report's audience, which
@@ -114,6 +119,9 @@ export type FleetReportsCsvState = 'IDLE' | 'BUSY' | 'FAILED';
     TenureReportComponent,
     RanksReportComponent,
     ContributionReportComponent,
+    AttendanceReportComponent,
+    RecruitmentReportComponent,
+    HoldingsReportComponent,
     ReportAudiencesComponent,
   ],
 })
@@ -137,6 +145,36 @@ export class FleetReportsPageComponent extends FleetSectionPageDirective<FleetRe
 
   /** Anybody who can see the Fleet may open the page. */
   protected readonly _requiredCapabilities: readonly string[] = [];
+
+  /**
+   * Every Fleet has reports now, console ones included: attendance,
+   * recruitment and holdings are read from its own records (FC-030).
+   */
+  protected override readonly _needsRoster = false;
+
+  /**
+   * The header of a report read from the Fleet's own records, which has no
+   * roster revision to speak of (FC-030).
+   *
+   * @param shown - The report.
+   * @returns Its header, or null for one of the roster's reports.
+   */
+  recordHeaderOf(
+    shown: FleetReportsByKind[FleetReport],
+  ): FleetRecordReportHeader | null {
+    return 'revision' in shown ? null : shown;
+  }
+
+  /**
+   * The header of one of the roster's reports, with its revision and
+   * exports. Asked only once {@link recordHeaderOf} has said it is one.
+   *
+   * @param shown - The report.
+   * @returns Its header.
+   */
+  rosterHeaderOf(shown: FleetReportsByKind[FleetReport]): FleetReportHeader {
+    return shown as FleetReportHeader;
+  }
 
   /**
    * Whether the reader holds a capability on the Fleet: `reports.view` to

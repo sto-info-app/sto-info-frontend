@@ -1,0 +1,116 @@
+@let shown = report();
+@let cohort = shown.minimumCohort;
+
+@if (shown.occurrences.length === 0) {
+  <p class="fleet-community-empty">
+    None of this Fleet’s own events took place in this span.
+  </p>
+} @else {
+  <table class="fleet-community-table">
+    <caption>
+      Each occurrence of this Fleet’s own events, how many were going, and who
+      was recorded as coming
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Occurrence</th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Going
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Came
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Did not come
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Rate
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of shown.occurrences; track row.occurrenceId) {
+        <tr>
+          <th scope="row">
+            {{ row.title }},
+            <time [attr.datetime]="row.startsAt">{{
+              row.startsAt | appDate: 'medium'
+            }}</time>
+          </th>
+          <td class="fleet-community-table__number">
+            {{ row.going | reportFigure: cohort }}
+          </td>
+          <td class="fleet-community-table__number">
+            {{ row.attended | reportFigure: cohort }}
+          </td>
+          <td class="fleet-community-table__number">
+            {{ row.absent | reportFigure: cohort }}
+          </td>
+          <td class="fleet-community-table__number">
+            {{ percent(row.rate) }}
+          </td>
+        </tr>
+      }
+    </tbody>
+    <tfoot>
+      <tr>
+        <th scope="row">All {{ shown.totals.occurrences }}</th>
+        <td></td>
+        <td class="fleet-community-table__number">
+          {{ shown.totals.attended | reportFigure: cohort }}
+        </td>
+        <td class="fleet-community-table__number">
+          {{ shown.totals.absent | reportFigure: cohort }}
+        </td>
+        <td class="fleet-community-table__number">
+          {{ percent(shown.totals.rate) }}
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+}
+
+@if (shown.members; as members) {
+  @if (members.length > 0) {
+    <table class="fleet-community-table">
+      <caption>
+        Each person recorded, most often there first. Only the Owner and Admins
+        see this.
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Who</th>
+          <th
+            scope="col"
+            class="fleet-community-table__number">
+            Came
+          </th>
+          <th
+            scope="col"
+            class="fleet-community-table__number">
+            Did not come
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (member of members; track $index) {
+          <tr>
+            <th scope="row">
+              {{ member.username ?? 'An account since closed' }}
+            </th>
+            <td class="fleet-community-table__number">{{ member.attended }}</td>
+            <td class="fleet-community-table__number">{{ member.absent }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+}

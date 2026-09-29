@@ -21,6 +21,12 @@ export enum FleetReport {
   RANKS = 'RANKS',
   ACTIVITY = 'ACTIVITY',
   CONTRIBUTION = 'CONTRIBUTION',
+  /** Who came to the Fleet's own events (FC-030). */
+  ATTENDANCE = 'ATTENDANCE',
+  /** How applications and invitations turned out (FC-030). */
+  RECRUITMENT = 'RECRUITMENT',
+  /** How the Fleet's holdings changed (FC-030). Public. */
+  HOLDINGS = 'HOLDINGS',
 }
 
 /** How much of a report a viewer is shown. */
@@ -216,4 +222,84 @@ export interface FleetReportAudienceChange {
 export interface FleetReportAudiences {
   reports: FleetReportAudience[];
   changes: FleetReportAudienceChange[];
+}
+
+/**
+ * What a report built from the Fleet's own records says about itself
+ * (FC-030): no roster revision or exports, only its span and view.
+ */
+export interface FleetRecordReportHeader {
+  report: FleetReport;
+  view: FleetReportView;
+  range: { from: string; to: string };
+  minimumCohort: number;
+}
+
+/** One occurrence of one of the Fleet's own events, and who came. */
+export interface AttendanceOccurrenceRow {
+  occurrenceId: string;
+  eventId: string;
+  title: string;
+  startsAt: string;
+  going: number | null;
+  attended: number | null;
+  absent: number | null;
+  /** Attended out of everybody recorded, 0 to 1. */
+  rate: number | null;
+}
+
+/** One person's attendance over the span, for the full view alone. */
+export interface AttendanceMemberRow {
+  username: string | null;
+  attended: number;
+  absent: number;
+}
+
+/** Who came to the Fleet's own events. */
+export interface FleetAttendanceReport extends FleetRecordReportHeader {
+  occurrences: AttendanceOccurrenceRow[];
+  totals: {
+    occurrences: number;
+    attended: number | null;
+    absent: number | null;
+    rate: number | null;
+  };
+  /** Each person; null unless the reader sees it in full. */
+  members: AttendanceMemberRow[] | null;
+}
+
+/** How a Fleet recruits someone. */
+export type RecruitmentRoute = 'APPLICATION' | 'OPEN_JOIN' | 'INVITATION';
+
+/** How one route's requests in one month turned out. */
+export interface RecruitmentMonthRow {
+  /** YYYY-MM. */
+  month: string;
+  route: RecruitmentRoute;
+  received: number | null;
+  accepted: number | null;
+  declined: number | null;
+  withdrawn: number | null;
+  lapsed: number | null;
+  pending: number | null;
+  medianDaysToDecision: number | null;
+}
+
+/** How applications and invitations turned out. */
+export interface FleetRecruitmentReport extends FleetRecordReportHeader {
+  months: RecruitmentMonthRow[];
+}
+
+/** One track's tier changed. */
+export interface HoldingsChangeRow {
+  at: string;
+  holding: string;
+  track: string;
+  from: number;
+  to: number;
+}
+
+/** How the Fleet's holdings changed, newest first. */
+export interface FleetHoldingsReport extends FleetRecordReportHeader {
+  changes: HoldingsChangeRow[];
 }

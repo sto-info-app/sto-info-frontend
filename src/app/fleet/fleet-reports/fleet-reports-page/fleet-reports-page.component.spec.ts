@@ -333,6 +333,134 @@ describe('FleetReportsPageComponent', () => {
     expect(find('app-growth-report')).toBeNull();
   });
 
+  describe('reports from the Fleet’s own records (FC-030)', () => {
+    /**
+     * A report read from the Fleet's own records.
+     *
+     * @param report - The kind.
+     * @param view - How much the reader is shown.
+     * @returns The report.
+     */
+    const record = (
+      report: FleetReport,
+      view = FleetReportView.FULL,
+    ): unknown => ({
+      report,
+      view,
+      range: {
+        from: '2025-09-28T00:00:00.000Z',
+        to: '2026-09-28T12:00:00.000Z',
+      },
+      minimumCohort: 5,
+      occurrences: [],
+      totals: { occurrences: 0, attended: 0, absent: 0, rate: null },
+      members: [],
+      months: [],
+      changes: [],
+    });
+
+    beforeEach(() => {
+      reports.visible.mockReturnValue(
+        of(
+          access(
+            [
+              FleetReport.ATTENDANCE,
+              FleetReport.RECRUITMENT,
+              FleetReport.HOLDINGS,
+            ],
+            FleetReportView.FULL,
+          ),
+        ),
+      );
+      reports.report.mockImplementation(
+        (_c: string, _f: string, kind: FleetReport) => of(record(kind)),
+      );
+    });
+
+    it('are open on a Fleet whose game writes no roster', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of({
+          ...resolved(),
+          fleet: { ...resolved().fleet, platformProvidesRosterExport: false },
+        }),
+      );
+
+      render();
+
+      expect(text()).toContain(
+        'From the Fleet’s own records, Sep 28, 2025 to Sep 28, 2026.',
+      );
+      expect(find('app-attendance-report')).not.toBeNull();
+      expect(text()).not.toContain('From revision');
+    });
+
+    it.each([
+      ['recruitment', 'app-recruitment-report'],
+      ['holdings', 'app-holdings-report'],
+    ])('draws the %s report', (report, selector) => {
+      query$.next(convertToParamMap({ report }));
+
+      render();
+
+      expect(find(selector)).not.toBeNull();
+    });
+
+    it('says a reader shown counts alone is shown counts alone', () => {
+      reports.report.mockReturnValue(
+        of(record(FleetReport.ATTENDANCE, FleetReportView.AGGREGATE)),
+      );
+
+      render();
+
+      expect(text()).toContain(
+        'You are shown counts only. A figure counting from 1 to 4 people is shown as < 5',
+      );
+    });
+
+    it('reads another span, or the last twelve months again', () => {
+      query$.next(convertToParamMap({ from: '2026-01-01T00:00:00.000Z' }));
+      render();
+
+      const from = find<HTMLInputElement>('#record-report-from')!;
+      const to = find<HTMLInputElement>('#record-report-to')!;
+
+      from.value = '2026-02-01';
+      to.value = '';
+      find('form[aria-label="Span"]')!.dispatchEvent(new Event('submit'));
+      button('The last twelve months').click();
+
+      expect(
+        navigate.mock.calls.map(([, extras]) => extras.queryParams),
+      ).toEqual([
+        { from: '2026-02-01T00:00:00.000Z', to: null, at: null },
+        { from: null, to: null, at: null },
+      ]);
+    });
+
+    it('downloads one as CSV', () => {
+      render();
+
+      button('Download CSV').click();
+
+      expect(reports.csv).toHaveBeenCalledWith(
+        'community-1',
+        'fleet-1',
+        FleetReport.ATTENDANCE,
+        {},
+      );
+    });
+
+    it('says so when the CSV could not be made', () => {
+      reports.csv.mockReturnValue(throwError(() => new Error('down')));
+      render();
+
+      button('Download CSV').click();
+      fixture.detectChanges();
+
+      expect(text()).toContain(FLEET_REPORTS_CSV_FAILED);
+    });
+  });
+
   it('tells a reader shown none of the reports so, without asking for one', () => {
     reports.visible.mockReturnValue(of([]));
     render();

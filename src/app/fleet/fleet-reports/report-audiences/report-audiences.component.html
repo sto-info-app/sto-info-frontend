@@ -56,7 +56,7 @@
                         <option
                           [value]="choice"
                           [selected]="choice === shownAudience(entry)">
-                          {{ audienceLabels[choice] }}
+                          {{ audienceLabel(entry.report, choice) }}
                         </option>
                       }
                     </select>
@@ -70,7 +70,7 @@
                   </button>
                 </div>
               } @else {
-                {{ audienceLabels[entry.audience] }}
+                {{ audienceLabel(entry.report, entry.audience) }}
               }
             </td>
             <td data-label="Last changed">
@@ -106,8 +106,8 @@
               {{ change.changedAt | appDate: 'medium' }}:
               {{ change.actorName ?? 'An account since closed' }} showed
               {{ reportLabels[change.report] }} to
-              {{ audienceLabels[change.audienceAfter] }}, not
-              {{ audienceLabels[change.audienceBefore] }}
+              {{ audienceLabel(change.report, change.audienceAfter) }}, not
+              {{ audienceLabel(change.report, change.audienceBefore) }}
             </li>
           }
         </ul>
