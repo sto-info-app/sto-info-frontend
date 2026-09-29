@@ -1075,6 +1075,25 @@ Community page shows its next five in **`<app-fleet-events-upcoming>`**, with
 a link to the calendar. The Dashboard's Fleets page shows **Your upcoming
 events**: the reader's own next thirty days, each naming its scope.
 
+**The connection, `ChatSocketService`:**
+
+- **Opening.** The socket opens when a page first joins a place or sends, WebSocket only, at the
+  API's origin on `/chat/socket`. The access token goes in the first message, never in the
+  address, and a fresh one follows a minute before it runs out.
+- **Status.** `status` is a signal:
+  - `idle`, `connecting`, `online` or `offline` (reconnecting);
+  - `signedOut` when there is no session;
+  - `replaced` when five other tabs pushed this one out. It then waits to be asked again.
+- **Reading.** `join(place)` gives the latest page. After that, each new message comes once
+  through `messages$`, however often the server sends it. `deleted$` and `removed$` say what was
+  deleted, and which places may no longer be read. `leave(place)` stops.
+- **Sending.** `send(place, body)` picks a client ID and sends again with the same ID until the
+  server acknowledges the committed message. A dropped connection neither loses nor doubles it. A
+  refusal comes back as a `ChatSocketError` with the server's status: 403, 404 or 429.
+- **Reconnecting.** On every reconnect, to whichever instance, it joins each place again from the
+  last message it holds. Anything missed comes through `messages$`, and a place it may no longer
+  read through `removed$`.
+
 ### Upload and scan state
 
 **`<app-asset-scan-status>`** lives in `src/app/shared/components/`, not in the
