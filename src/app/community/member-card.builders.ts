@@ -116,6 +116,29 @@ export function buildFriendMemberCard(
   };
 }
 
+/** The badge a friend who is online wears (FC-034). */
+export const MEMBER_CARD_ONLINE_BADGE = { label: 'Online', modifier: 'online' };
+
+/**
+ * Marks a friend's card with whether they are online (FC-034).
+ *
+ * @param card - The card.
+ * @param online - Who is online, by username.
+ * @returns The card, with the Online badge or without.
+ */
+export function withPresence(
+  card: MemberCardVm,
+  online: ReadonlySet<string>,
+): MemberCardVm {
+  const isOnline = online.has(card.username);
+
+  return {
+    ...card,
+    badge: isOnline ? MEMBER_CARD_ONLINE_BADGE : null,
+    reserveBadgeSlot: isOnline,
+  };
+}
+
 /**
  * Builds the identity and counts every member card shares.
  *

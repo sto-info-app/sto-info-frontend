@@ -1,9 +1,16 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
+import { ChatService } from 'src/app/fleet/chat/chat.service';
+import {
+  FLEET_FEATURES_DISABLED,
+  FleetFeatureState,
+} from 'src/app/models/fleet.models';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { ReportReason } from 'src/app/models/moderation.models';
 import { ModerationService } from 'src/app/shared/services/moderation.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
@@ -62,6 +69,10 @@ describe('RegistryProfileComponent', () => {
    *
    * @param username - The username route parameter.
    */
+  let chatSpy: { open: jest.Mock };
+  let online: ReadonlySet<string>;
+  let features$: BehaviorSubject<FleetFeatureState>;
+
   async function setup(username: string | null = 'captain.picard') {
     registryServiceSpy = { getProfile: jest.fn(() => of(buildProfile())) };
     communityServiceSpy = {
@@ -78,6 +89,9 @@ describe('RegistryProfileComponent', () => {
     dialogSpy = { open: jest.fn(() => ({ afterClosed: () => of(true) })) };
     seoSpy = { setPageMeta: jest.fn() };
     pageTitleSpy = { setTitle: jest.fn() };
+    chatSpy = { open: jest.fn(() => of({ id: 'talk' })) };
+    online = new Set();
+    features$ = new BehaviorSubject<FleetFeatureState>(FLEET_FEATURES_DISABLED);
 
     await TestBed.configureTestingModule({
       imports: [RegistryProfileComponent],
@@ -97,6 +111,18 @@ describe('RegistryProfileComponent', () => {
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: { get: () => username } } },
+        },
+        { provide: ChatService, useValue: chatSpy },
+        {
+          provide: ChatPresenceService,
+          useValue: { watch: jest.fn(() => of(online)) },
+        },
+        {
+          provide: FleetConfigurationService,
+          useValue: {
+            getFeatures: () => features$,
+            isOffered: () => of(false),
+          },
         },
       ],
     }).compileComponents();
@@ -467,11 +493,97 @@ describe('RegistryProfileComponent', () => {
       component.acceptRequest();
       component.declineRequest();
       component.cancelRequest();
+      component.message();
 
+      expect(chatSpy.open).not.toHaveBeenCalled();
       expect(communityServiceSpy.removeFriend).not.toHaveBeenCalled();
       expect(communityServiceSpy.acceptFriendRequest).not.toHaveBeenCalled();
       expect(communityServiceSpy.declineFriendRequest).not.toHaveBeenCalled();
       expect(communityServiceSpy.cancelFriendRequest).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('presence (FC-034)', () => {
+    it('says the member is online, whatever the case of their name', async () => {
+      await setup();
+      online = new Set(['Captain.Picard', 'someone-else']);
+      fixture.detectChanges();
+
+      expect(component.isOnline).toBe(true);
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector('.registry-online')
+          ?.textContent,
+      ).toContain('Online');
+    });
+
+    it('says nothing while they are not', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      expect(component.isOnline).toBe(false);
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '.registry-online',
+        ),
+      ).toBeNull();
+    });
+
+    it('asks about nobody when the address names nobody', async () => {
+      await setup(null);
+      fixture.detectChanges();
+
+      expect(TestBed.inject(ChatPresenceService).watch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('messaging a friend (FC-033)', () => {
+    /**
+     * The Message button, if shown.
+     *
+     * @returns It.
+     */
+    const messageButton = (): HTMLButtonElement | undefined =>
+      [
+        ...(fixture.nativeElement as HTMLElement).querySelectorAll('button'),
+      ].find(each => each.textContent?.trim() === 'Message');
+
+    it('should open chat with a friend by the friendship while chat is on', async () => {
+      await setup();
+      features$.next({ ...FLEET_FEATURES_DISABLED, chatEnabled: true });
+      signedInWith(RelationshipStatus.FRIENDS);
+
+      const navigate = jest
+        .spyOn(TestBed.inject(Router), 'navigate')
+        .mockResolvedValue(true);
+
+      messageButton()?.click();
+
+      expect(chatSpy.open).toHaveBeenCalledWith({
+        friendshipId: 'friendship-1',
+      });
+      expect(navigate).toHaveBeenCalledWith(['/chat', 'direct', 'talk']);
+      expect(component.isActing).toBe(false);
+    });
+
+    it('should say when the conversation could not be opened', async () => {
+      await setup();
+      chatSpy.open.mockReturnValue(throwError(() => new Error('offline')));
+      features$.next({ ...FLEET_FEATURES_DISABLED, chatEnabled: true });
+      signedInWith(RelationshipStatus.FRIENDS);
+
+      messageButton()?.click();
+
+      expect(component.actionError).toBe(
+        'The conversation could not be opened.',
+      );
+      expect(component.isActing).toBe(false);
+    });
+
+    it('should offer no Message button while chat is off', async () => {
+      await setup();
+      signedInWith(RelationshipStatus.FRIENDS);
+
+      expect(messageButton()).toBeUndefined();
     });
   });
 

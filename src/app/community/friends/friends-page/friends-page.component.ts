@@ -4,25 +4,28 @@ import {
   ChangeDetectorRef,
   Component,
   NgZone,
+  OnDestroy,
   OnInit,
   inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, take } from 'rxjs';
+import { Observable, Subscription, take } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { MemberCardComponent } from 'src/app/shared/components/member-card/member-card.component';
 import { MemberCardVm } from 'src/app/shared/components/member-card/member-card.model';
+import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CommunityService } from '../../community.service';
 import { CommunityTabsComponent } from '../../community-tabs/community-tabs.component';
 import {
   MEMBER_CARD_UNFRIEND,
   buildFriendMemberCard,
+  withPresence,
 } from '../../member-card.builders';
 import {
   BlockedMember,
@@ -97,7 +100,7 @@ const TAB_CONFIG: Record<FriendsTab, { heading: string; empty: string }> = {
     CommunityTabsComponent,
   ],
 })
-export class FriendsPageComponent implements OnInit {
+export class FriendsPageComponent implements OnInit, OnDestroy {
   private readonly _userSettingsService = inject(UserSettingsService);
   private readonly _communityService = inject(CommunityService);
   private readonly _route = inject(ActivatedRoute);
@@ -105,6 +108,10 @@ export class FriendsPageComponent implements OnInit {
   private readonly _dialog = inject(MatDialog);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _presence = inject(ChatPresenceService);
+
+  /** The friends shown who are online, read again each minute (FC-034). */
+  private _presenceWatch: Subscription | null = null;
 
   tab: FriendsTab = 'friends';
   isLoading = false;
@@ -234,9 +241,33 @@ export class FriendsPageComponent implements OnInit {
             this._userSettingsService.displayTimezone(),
           ),
         }));
+        this.watchPresence();
       },
       'Something went wrong loading your friends.',
     );
+  }
+
+  /**
+   * Stops reading who is online with the page.
+   */
+  ngOnDestroy(): void {
+    this._presenceWatch?.unsubscribe();
+  }
+
+  /**
+   * Marks the friends shown who are online, and keeps doing so each minute.
+   */
+  private watchPresence(): void {
+    this._presenceWatch?.unsubscribe();
+    this._presenceWatch = this._presence
+      .watch(this.friends.map(friend => friend.member.username))
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe(online => {
+        this.friendVms = this.friendVms.map(vm => ({
+          ...vm,
+          card: withPresence(vm.card, online),
+        }));
+      });
   }
 
   /**

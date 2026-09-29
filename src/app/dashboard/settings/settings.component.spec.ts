@@ -264,9 +264,9 @@ describe('SettingsComponent', () => {
   });
 
   describe('the Fleet preferences', () => {
-    const withFleetEnabled = (): void => {
+    const withFleetEnabled = (chatEnabled = true): void => {
       fleetConfigurationService.getFeatures.mockReturnValue(
-        of({ ...FLEET_FEATURES_DISABLED, isEnabled: true }),
+        of({ ...FLEET_FEATURES_DISABLED, isEnabled: true, chatEnabled }),
       );
     };
 
@@ -290,17 +290,35 @@ describe('SettingsComponent', () => {
       );
     });
 
-    it('appear once it is switched on', () => {
-      withFleetEnabled();
+    it('appear once it is switched on, without chat’s while chat is off', () => {
+      withFleetEnabled(false);
       createComponent();
 
       expect(component.isFleetOffered).toBe(true);
+      expect(component.isChatOffered).toBe(false);
       expect(
         fixture.nativeElement.querySelector('#export-timezone'),
       ).toBeTruthy();
       expect(
         fixture.nativeElement.querySelector('#presence-visibility'),
+      ).toBeNull();
+      expect(fixture.nativeElement.textContent).not.toContain('Mentions');
+    });
+
+    it('offer presence, typing and chat’s notices while chat is on (FC-034)', () => {
+      fleetConfigurationService.getFeatures.mockReturnValue(
+        of({ ...FLEET_FEATURES_DISABLED, isEnabled: true, chatEnabled: true }),
+      );
+      createComponent();
+
+      expect(component.isChatOffered).toBe(true);
+      expect(
+        fixture.nativeElement.querySelector('#presence-visibility'),
       ).toBeTruthy();
+      expect(fixture.nativeElement.textContent).toContain(
+        'Show when I am typing',
+      );
+      expect(fixture.nativeElement.textContent).toContain('Mentions');
     });
 
     /**

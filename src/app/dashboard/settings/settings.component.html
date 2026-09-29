@@ -103,6 +103,7 @@
                 the setting above, and you can change it for a single import.
               </p>
             </div>
+            @if (isChatOffered) {
             <div class="settings-field">
               <label for="presence-visibility">Who can see when I am online</label>
               <select
@@ -115,7 +116,10 @@
                 }
               </select>
               <p id="presence-visibility-description" class="settings-description">
-                Only people who can already see your profile are ever included.
+                Online means you have STO Info open, never whether you are in
+                the game. Only people who can already see your profile are
+                ever included, and nobody you have blocked or who has blocked
+                you.
               </p>
             </div>
             <div class="settings-row">
@@ -137,9 +141,10 @@
               ></app-lcars-toggle>
             </div>
             <p class="settings-description">
-              Lets other people in a conversation see that you are composing a
-              message. Off unless you turn it on.
+              Lets people in a chat see when you are writing, and lets you see
+              when they are. Off unless you turn it on.
             </p>
+            }
           </div>
           <div class="lcars-text-bar settings-bar"><span>Notifications</span></div>
           <div class="settings-content">
@@ -148,6 +153,7 @@
               &mdash; news, imports, events being scheduled &mdash; stays in the
               activity feed rather than your inbox.
             </p>
+            @if (isChatOffered) {
             <div class="settings-row">
               <app-lcars-toggle
                 formControlName="notifyMention"
@@ -169,6 +175,11 @@
                 ariaLabel="Notify me about direct messages"
               ></app-lcars-toggle>
             </div>
+            <p class="settings-description">
+              A direct message tells you once while you are away, and not
+              again until you open the conversation.
+            </p>
+            }
             <div class="settings-row">
               <app-lcars-toggle
                 formControlName="notifyRosterAssociation"

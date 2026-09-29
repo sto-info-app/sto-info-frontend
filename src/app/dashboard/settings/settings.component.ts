@@ -96,6 +96,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
    */
   isFleetOffered = false;
 
+  /**
+   * Whether the chat preferences are shown: presence, typing and chat's
+   * notices (FC-034), which do nothing while chat is off.
+   */
+  isChatOffered = false;
+
   isLoading = true;
   isSaving = false;
   errorMessage = '';
@@ -114,6 +120,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this._destroy$))
       .subscribe(features => {
         this.isFleetOffered = features.isEnabled;
+        this.isChatOffered = features.chatEnabled;
         this._cdr.markForCheck();
       });
 

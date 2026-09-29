@@ -1,11 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, take } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
+import { ChatService } from 'src/app/fleet/chat/chat.service';
 import { AccountCardComponent } from 'src/app/shared/components/account-card/account-card.component';
 import { AccountCardVm } from 'src/app/shared/components/account-card/account-card.model';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
@@ -14,6 +24,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { ModerationService } from 'src/app/shared/services/moderation.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
@@ -107,6 +118,18 @@ export class RegistryProfileComponent
   private readonly _route = inject(ActivatedRoute);
   private readonly _seoService = inject(SeoService);
   private readonly _pageTitleService = inject(PageTitleService);
+  private readonly _chat = inject(ChatService);
+  private readonly _router = inject(Router);
+  private readonly _fleetConfiguration = inject(FleetConfigurationService);
+  private readonly _destroyRef = inject(DestroyRef);
+
+  /** Whether chat is switched on, for the Message button (FC-033). */
+  isChatOffered = false;
+
+  /** Whether the member is online, as the viewer may know it (FC-034). */
+  isOnline = false;
+
+  private readonly _presence = inject(ChatPresenceService);
 
   relationshipStatus = RelationshipStatus;
 
@@ -221,8 +244,31 @@ export class RegistryProfileComponent
    */
   ngOnInit(): void {
     this.username = this._route.snapshot.paramMap.get('username') ?? '';
+    this._fleetConfiguration
+      .getFeatures()
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(features => {
+        this.isChatOffered = features.chatEnabled;
+      });
 
     this.loadProfile();
+
+    if (this.username) {
+      this._presence
+        .watch([this.username])
+        .pipe(
+          takeUntilDestroyed(this._destroyRef),
+          observeInZone(this._ngZone, this._cdr),
+        )
+        .subscribe(online => {
+          this.isOnline = [...online].some(
+            name => name.toLowerCase() === this.username.toLowerCase(),
+          );
+        });
+    }
   }
 
   /**
@@ -302,6 +348,33 @@ export class RegistryProfileComponent
       'Friend request withdrawn.',
       'Something went wrong withdrawing that request.',
     );
+  }
+
+  /**
+   * Opens chat with this friend (FC-033), by the friendship, since the
+   * profile names nobody's ID.
+   */
+  message(): void {
+    const friendshipId = this.profile?.relationship?.friendshipId;
+    if (!friendshipId) {
+      return;
+    }
+
+    this.isActing = true;
+    this.actionError = '';
+    this._chat
+      .open({ friendshipId })
+      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+      .subscribe({
+        next: conversation => {
+          this.isActing = false;
+          void this._router.navigate(['/chat', 'direct', conversation.id]);
+        },
+        error: () => {
+          this.isActing = false;
+          this.actionError = 'The conversation could not be opened.';
+        },
+      });
   }
 
   /**

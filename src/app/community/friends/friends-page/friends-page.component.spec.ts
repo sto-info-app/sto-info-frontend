@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
 import { MatDialog } from '@angular/material/dialog';
 import {
   ActivatedRoute,
@@ -138,8 +139,11 @@ describe('FriendsPageComponent', () => {
    *
    * @param params - The initial query parameters.
    */
+  let online$: BehaviorSubject<ReadonlySet<string>>;
+
   async function setup(params: Record<string, string> = {}) {
     queryParams = new BehaviorSubject(convertToParamMap(params));
+    online$ = new BehaviorSubject<ReadonlySet<string>>(new Set());
 
     communityServiceSpy = {
       getSummary: jest.fn(() => of(summary)),
@@ -165,6 +169,10 @@ describe('FriendsPageComponent', () => {
           provide: ActivatedRoute,
           useValue: { queryParamMap: queryParams.asObservable() },
         },
+        {
+          provide: ChatPresenceService,
+          useValue: { watch: jest.fn(() => online$) },
+        },
       ],
     }).compileComponents();
 
@@ -174,6 +182,33 @@ describe('FriendsPageComponent', () => {
     const router = TestBed.inject(Router);
     routerNavigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
   }
+
+  describe('presence (FC-034)', () => {
+    it('marks a friend who is online, and unmarks them once they go', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      const username = component.friends[0].member.username;
+
+      online$.next(new Set([username]));
+      expect(component.friendVms[0].card.badge).toEqual({
+        label: 'Online',
+        modifier: 'online',
+      });
+
+      online$.next(new Set());
+      expect(component.friendVms[0].card.badge).toBeNull();
+    });
+
+    it('stops reading presence with the page, and when it reads the list again', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      expect(online$.observed).toBe(true);
+      fixture.destroy();
+      expect(online$.observed).toBe(false);
+    });
+  });
 
   describe('tab selection', () => {
     it('should default to the friends tab', async () => {

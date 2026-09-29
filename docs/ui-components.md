@@ -1117,6 +1117,16 @@ Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC
   and "Discard".
 - **Deleting.** Reply and Delete appear on hover and focus, and always on a touch screen. Deleting
   one's own message asks first. A moderator's Remove asks why, in `ChatRemoveDialogComponent`.
+- **Blocks** (FC-034). A message from somebody across a block reads "Message from a member you
+  can't see", with no name and nothing to do.
+- **Typing** (FC-034). A line under the log says who is writing: one name, two, or "several
+  people". A writer drops off five seconds after their last signal, or when their message arrives.
+  The reader's own signal goes only while they share their typing (Settings).
+- **Access.** The log is an ARIA log. The composer is a combobox with its list, so the whole page
+  works from the keyboard.
+- **Its own life.** It joins its place when shown and leaves it when changed or destroyed. No
+  subscription or timer outlives it.
+
 **The ways in:**
 
 - a Chat door at the end of each Fleet's and Armada's strip, for its members and role holders;
@@ -1125,6 +1135,23 @@ Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC
 - a Message button on a friend's profile, which opens the conversation by the friendship.
 
 Each is offered only while chat is switched on.
+
+**Across the site** (FC-034):
+
+- **Staying connected.** `ChatSessionService` keeps the socket open in every signed-in tab while
+  chat is on, and `AppComponent` starts it. Being online means having STO Info open.
+- **Toasts.** `<app-chat-toasts>`, in the app shell, shows a toast for a direct message or a
+  mention of the reader, unless that place is open. It gives who and where, never the text, lasts
+  eight seconds, and links to it.
+- **Presence.** `ChatPresenceService` asks who is online every minute while shown, and only while
+  chat is on. It shows:
+  - a dot beside each friend in the chat page's Direct messages;
+  - an Online badge on a friend's card (`withPresence`);
+  - an Online chip beside a member's name on their profile.
+  - The server answers only for people the reader may see.
+- **Settings.** Presence visibility, appearing offline, typing, and the mention, reply and direct
+  message notices show while chat is on. The roster timezone and the other Fleet notices show
+  while Fleet is on.
 
 **The connection, `ChatSocketService`:**
 

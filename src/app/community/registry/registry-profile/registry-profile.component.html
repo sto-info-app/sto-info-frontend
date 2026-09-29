@@ -35,7 +35,12 @@
     }
 
     @if (profile) {
-      <h1>{{ profile.username }}</h1>
+      <h1>
+        {{ profile.username }}
+        @if (isOnline) {
+          <span class="registry-online">Online</span>
+        }
+      </h1>
 
       <div id="registry-profile-main-content">
         <div class="lcars-text-bar">
