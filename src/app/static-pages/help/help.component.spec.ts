@@ -2,14 +2,34 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { PERMISSIONS } from 'src/app/models/access-control.models';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
-import { StorytimeService } from 'src/app/storytime/storytime.service';
 
+import { HelpFeaturesService } from './help-features.service';
 import { HelpComponent } from './help.component';
 import { HELP_TOPICS, visibleHelpTopics } from './help.data';
-import { HelpTopic } from './help.models';
+import { HelpFeatures, HelpTopic } from './help.models';
+import { ALL_HELP_FEATURES_ON, helpFeaturesWith } from './help.testing';
+
+/**
+ * The switches, with Storytime on or off and everything else on.
+ *
+ * @param isStorytimeOffered Whether Storytime is offered.
+ * @returns The switches.
+ */
+const featuresFor = (isStorytimeOffered: boolean): HelpFeatures =>
+  isStorytimeOffered
+    ? ALL_HELP_FEATURES_ON
+    : helpFeaturesWith({ STORYTIME: 'DISABLED' });
 
 describe('HelpComponent', () => {
+  // Whether the reader is a site administrator (FC-050).
+  let isAdmin = false;
+
+  beforeEach(() => {
+    isAdmin = false;
+  });
+
   let fixture: ComponentFixture<HelpComponent>;
   let component: HelpComponent;
 
@@ -29,9 +49,10 @@ describe('HelpComponent', () => {
       providers: [
         provideRouter([]),
         {
-          provide: StorytimeService,
-          useValue: { isOffered: () => of(isStorytimeOffered) },
+          provide: HelpFeaturesService,
+          useValue: { features: () => of(featuresFor(isStorytimeOffered)) },
         },
+        { provide: AuthService, useValue: { isAdmin: () => isAdmin } },
         {
           provide: AccessControlService,
           useValue: {
@@ -58,7 +79,10 @@ describe('HelpComponent', () => {
     isStorytimeOffered: boolean,
     permissions: string[] = [],
   ): HelpTopic[] =>
-    visibleHelpTopics(isStorytimeOffered, new Set<string>(permissions));
+    visibleHelpTopics(
+      featuresFor(isStorytimeOffered),
+      new Set<string>(permissions),
+    );
 
   /**
    * Reads the page's text.
@@ -216,6 +240,7 @@ describe('HelpComponent', () => {
           provide: HelpFeaturesService,
           useValue: { features: () => of(ALL_HELP_FEATURES_ON) },
         },
+        { provide: AuthService, useValue: { isAdmin: () => isAdmin } },
         {
           provide: AccessControlService,
           useValue: {
@@ -233,6 +258,7 @@ describe('HelpComponent', () => {
       'community',
       'custom-tracking',
       'storytime',
+      'settings',
     ]);
   });
 

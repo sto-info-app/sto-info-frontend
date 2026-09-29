@@ -110,8 +110,19 @@ export interface HelpTopic {
    * the not-found page rather than telling them the feature exists but is
    * unavailable. Help has to agree with that: guides describing a feature
    * nobody can reach would advertise exactly what the switch is there to hide.
+   * Fleet Community and its chat are switched the same way (FC-049).
    */
-  requiresStorytime: boolean;
+  requiresFeature?: HelpFeature;
+  /**
+   * Whether the topic is only for site administrators (FC-050).
+   *
+   * Running the site is the ADMIN role's, and no permission stands for it,
+   * so the topic waits on the role itself. Its guides are never offered to
+   * anybody else, their addresses answer anybody else with the not-found
+   * page, and they stay out of the sitemap. The server refuses the pages they
+   * describe whatever the client believes.
+   */
+  requiresAdmin?: boolean;
   /** The guides in this topic, in reading order. */
   guides: HelpGuide[];
 }

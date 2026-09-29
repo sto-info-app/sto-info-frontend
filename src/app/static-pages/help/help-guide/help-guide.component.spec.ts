@@ -13,6 +13,7 @@ import {
   STORYTIME_AVAILABILITY_UNAVAILABLE,
   StorytimeAvailability,
 } from 'src/app/models/storytime.models';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 
@@ -23,6 +24,13 @@ import { ALL_HELP_FEATURES_ON, helpFeaturesWith } from '../help.testing';
 import { HelpGuideComponent } from './help-guide.component';
 
 describe('HelpGuideComponent', () => {
+  // Whether the reader is a site administrator (FC-050).
+  let isAdmin = false;
+
+  beforeEach(() => {
+    isAdmin = false;
+  });
+
   let fixture: ComponentFixture<HelpGuideComponent>;
   let component: HelpGuideComponent;
   let paramMap$: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
@@ -79,6 +87,7 @@ describe('HelpGuideComponent', () => {
               ),
           },
         },
+        { provide: AuthService, useValue: { isAdmin: () => isAdmin } },
         {
           provide: AccessControlService,
           useValue: {
@@ -355,6 +364,7 @@ describe('HelpGuideComponent', () => {
           provide: HelpFeaturesService,
           useValue: { features: () => of(ALL_HELP_FEATURES_ON) },
         },
+        { provide: AuthService, useValue: { isAdmin: () => isAdmin } },
         {
           provide: AccessControlService,
           useValue: {

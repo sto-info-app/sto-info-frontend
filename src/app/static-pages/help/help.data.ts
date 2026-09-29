@@ -1358,6 +1358,18 @@ export function isFeatureOffered(
 }
 
 /**
+ * Whether a visitor may be offered a topic at all: a topic for site
+ * administrators waits on the ADMIN role (FC-050).
+ *
+ * @param topic The topic.
+ * @param isAdmin Whether the visitor is a site administrator.
+ * @returns True when the topic may be offered.
+ */
+export function isTopicPermitted(topic: HelpTopic, isAdmin: boolean): boolean {
+  return !topic.requiresAdmin || isAdmin;
+}
+
+/**
  * The topics a visitor may be offered.
  *
  * Two filters, for two different reasons. Help about a switched-off feature
@@ -1367,23 +1379,25 @@ export function isFeatureOffered(
  * that permission because it describes a page its reader would be turned
  * away from, and help for a door somebody cannot open is not help.
  *
- * The switch is read as "should this be offered", not "is it on": while the
- * backend cannot be asked the guides stay, since a reader with the feature in
- * front of them and no idea why it will not open is exactly who help is for.
+ * A topic for site administrators is offered only to them.
  *
  * A topic whose guides have all been filtered away is dropped rather than
  * shown as a heading with nothing under it.
  *
  * @param features Where each switch stands.
  * @param permissions The permission codes the visitor holds.
+ * @param isAdmin Whether the visitor is a site administrator.
  * @returns The topics to show, each carrying only the guides on offer.
  */
 export function visibleHelpTopics(
   features: HelpFeatures,
   permissions: ReadonlySet<string>,
+  isAdmin = false,
 ): HelpTopic[] {
-  return HELP_TOPICS.filter(topic =>
-    isFeatureOffered(topic.requiresFeature, features),
+  return HELP_TOPICS.filter(
+    topic =>
+      isTopicPermitted(topic, isAdmin) &&
+      isFeatureOffered(topic.requiresFeature, features),
   )
     .map(topic => ({
       ...topic,

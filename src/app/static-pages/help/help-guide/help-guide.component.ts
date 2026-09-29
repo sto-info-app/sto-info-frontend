@@ -21,6 +21,7 @@ import {
   FeatureUnavailableReason,
 } from 'src/app/shared/constants/feature-availability.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -33,6 +34,7 @@ import {
   HELP_FEATURE_NAMES,
   isFeatureOffered,
   isGuidePermitted,
+  isTopicPermitted,
   visibleSections,
 } from '../help.data';
 import {
@@ -50,8 +52,9 @@ import {
  * only in their words, so giving each one a component would be seven copies of
  * the same template kept in step by hand.
  *
- * A slug that names no guide, and one asking for a permission the visitor does
- * not hold, go to the not-found page: neither page is something to advertise to
+ * A slug that names no guide, one asking for a permission the visitor does
+ * not hold, and one in the site administrators' topic asked for by anybody
+ * else (FC-050), go to the not-found page: none is something to advertise to
  * somebody who cannot open it.
  *
  * A guide about a feature that is out of reach — Storytime, or since FC-049
@@ -105,6 +108,7 @@ export class HelpGuideComponent implements OnInit {
   private readonly _pageTitleService = inject(PageTitleService);
   private readonly _helpFeatures = inject(HelpFeaturesService);
   private readonly _accessControlService = inject(AccessControlService);
+  private readonly _authService = inject(AuthService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
@@ -132,7 +136,10 @@ export class HelpGuideComponent implements OnInit {
       .subscribe(([slug, features, permissions]) => {
         const location = findHelpGuide(slug);
 
-        if (!location) {
+        if (
+          !location ||
+          !isTopicPermitted(location.topic, this._authService.isAdmin())
+        ) {
           this.sendToNotFound();
           return;
         }

@@ -16,7 +16,9 @@ import {
   findHelpTopic,
   isFeatureOffered,
   isGuidePermitted,
+  isTopicPermitted,
   visibleHelpTopics,
+  visibleSections,
 } from './help.data';
 import { HelpGuide } from './help.models';
 import {
@@ -35,10 +37,13 @@ const allGuides = (): HelpGuide[] => HELP_TOPICS.flatMap(topic => topic.guides);
 /**
  * The guides anybody may read.
  *
- * @returns The guides that ask for no permission.
+ * @returns The guides that ask for no permission, outside the site
+ *   administrators' topic (FC-050).
  */
 const publicGuides = (): HelpGuide[] =>
-  allGuides().filter(guide => !guide.requiresPermission);
+  HELP_TOPICS.filter(topic => !topic.requiresAdmin)
+    .flatMap(topic => topic.guides)
+    .filter(guide => !guide.requiresPermission);
 
 /** Somebody holding nothing at all. */
 const noPermissions: ReadonlySet<string> = new Set<string>();
@@ -341,6 +346,19 @@ describe('help data', () => {
           new Set([PERMISSIONS.STORYTIME_MODERATE]),
         ),
       ).toBe(true);
+    });
+  });
+
+  describe('isTopicPermitted', () => {
+    const adminTopic = { ...HELP_TOPICS[0], requiresAdmin: true };
+
+    it('should offer a topic for site administrators only to one', () => {
+      expect(isTopicPermitted(adminTopic, false)).toBe(false);
+      expect(isTopicPermitted(adminTopic, true)).toBe(true);
+    });
+
+    it('should offer any other topic to everybody', () => {
+      expect(isTopicPermitted(HELP_TOPICS[0], false)).toBe(true);
     });
   });
 
