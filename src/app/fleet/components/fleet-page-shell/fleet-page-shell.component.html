@@ -22,6 +22,12 @@
 <div class="fleet-page-shell">
   <h1>{{ heading }}</h1>
 
+  @if (helpSlug) {
+    <app-help-link
+      [slug]="helpSlug"
+      [label]="helpLabel" />
+  }
+
   @if (subject) {
     <div class="page-subject-row">
       <span class="fleet-page-shell__subject">{{ subject }}</span>

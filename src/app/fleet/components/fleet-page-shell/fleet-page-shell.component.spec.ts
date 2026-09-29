@@ -18,7 +18,9 @@ import { FleetShellTab } from './fleet-page-shell.model';
       [subject]="subject"
       [tabs]="tabs"
       [isLoading]="isLoading"
-      [errorMessage]="errorMessage">
+      [errorMessage]="errorMessage"
+      [helpSlug]="helpSlug"
+      [helpLabel]="helpLabel">
       <p class="projected">The roster</p>
     </app-fleet-page-shell>
   `,
@@ -29,6 +31,8 @@ class HostComponent {
   tabs: FleetShellTab[] = [];
   isLoading = false;
   errorMessage: string | null = null;
+  helpSlug: string | null = null;
+  helpLabel = 'Help with this page';
 }
 
 describe('FleetPageShellComponent', () => {
@@ -69,6 +73,25 @@ describe('FleetPageShellComponent', () => {
     expect(find('.fleet-page-shell__subject')?.textContent).toContain(
       'Starfleet Command · PC',
     );
+  });
+
+  // FC-050: a Fleet page links to its Help guide under its heading.
+  it('links to the page’s Help guide under its heading', () => {
+    host.helpSlug = 'importing-a-roster';
+    host.helpLabel = 'Help with importing';
+
+    fixture.detectChanges();
+
+    const link = find('app-help-link a');
+
+    expect(link?.getAttribute('href')).toBe('/help/importing-a-roster');
+    expect(link?.textContent?.trim()).toBe('Help with importing');
+  });
+
+  it('shows no Help link for a page without a guide', () => {
+    fixture.detectChanges();
+
+    expect(find('app-help-link')).toBeNull();
   });
 
   it('leaves out the subject line when the page is not about one thing', () => {

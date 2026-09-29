@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 
@@ -26,7 +27,12 @@ import { FleetShellTab } from './fleet-page-shell.model';
   styleUrls: ['./fleet-page-shell.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterModule, LoadingBarComponent, LcarsErrorMessageComponent],
+  imports: [
+    RouterModule,
+    LoadingBarComponent,
+    LcarsErrorMessageComponent,
+    HelpLinkComponent,
+  ],
 })
 export class FleetPageShellComponent {
   /** The page's heading, rendered as its `<h1>`. */
@@ -39,6 +45,15 @@ export class FleetPageShellComponent {
    * to know which one this tab is, and a UUID does not tell them.
    */
   @Input() subject: string | null = null;
+
+  /**
+   * The Help guide about this page, linked under the heading (FC-050), or
+   * null for none.
+   */
+  @Input() helpSlug: string | null = null;
+
+  /** What the Help link says, such as “Help with importing”. */
+  @Input() helpLabel = 'Help with this page';
 
   /** The section tabs, or an empty strip when the page has no sections. */
   @Input() tabs: readonly FleetShellTab[] = [];
