@@ -1,0 +1,219 @@
+@if (isLoading()) {
+  <app-loading-bar loadingText="Loading erasures"></app-loading-bar>
+}
+
+<div
+  id="roster-erasure-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Roster Erasures</h1>
+    <p class="admin-page-intro">
+      Erase somebody's roster data from every Fleet, at their request, once
+      you have verified it is them. Their name, @handle and public comment
+      become "Erased member" in every roster row, every stored file naming them
+      is deleted, and future imports are scrubbed of them. Fleets keep their
+      head counts. This is separate from a player unlinking their own
+      Character from a Fleet, and cannot be undone.
+    </p>
+
+    @if (refusal(); as message) {
+      <app-lcars-error-message
+        title="Not done"
+        [message]="message"></app-lcars-error-message>
+    }
+
+    @if (notice(); as done) {
+      <p
+        class="roster-erasure__notice"
+        role="status">
+        {{ done }}
+      </p>
+    }
+
+    <div class="lcars-input-container bluey">
+      <label for="erasure-character-name">Character name</label>
+      <input
+        id="erasure-character-name"
+        type="text"
+        maxlength="255"
+        autocomplete="off"
+        [value]="characterName()"
+        (input)="onName($any($event.target).value)" />
+    </div>
+
+    <div class="lcars-input-container bluey">
+      <label for="erasure-account-handle">&#64;handle</label>
+      <input
+        id="erasure-account-handle"
+        type="text"
+        maxlength="255"
+        autocomplete="off"
+        [value]="accountHandle()"
+        (input)="onHandle($any($event.target).value)" />
+    </div>
+
+    <div class="buttons-container">
+      <button
+        type="button"
+        class="lcars-btn sky"
+        [disabled]="!hasTarget() || busy()"
+        (click)="onFind()">
+        Find their rosters
+      </button>
+    </div>
+
+    @if (preview(); as found) {
+      @if (found.alreadyErased) {
+        <p class="records-empty">They are already erased.</p>
+      } @else {
+        @if (found.fleets.length === 0) {
+          <p class="records-empty">
+            No roster names them now. Erasing still keeps them out of every
+            future import.
+          </p>
+        } @else {
+          <table class="fleet-community-table">
+            <caption>
+              {{
+                found.rows
+              }}
+              roster row(s) name them
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Fleet</th>
+                <th scope="col">Community</th>
+                <th
+                  scope="col"
+                  class="fleet-community-table__number">
+                  Rows
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (fleet of found.fleets; track fleet.fleetId) {
+                <tr>
+                  <td data-label="Fleet">{{ fleet.fleetName }}</td>
+                  <td data-label="Community">
+                    {{ fleet.communityName ?? 'None' }}
+                  </td>
+                  <td
+                    data-label="Rows"
+                    class="fleet-community-table__number">
+                    {{ fleet.rows }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        <div class="lcars-input-container tangerine">
+          <label for="erasure-reason">
+            Why, and how you verified the request
+          </label>
+          <textarea
+            id="erasure-reason"
+            rows="3"
+            [attr.maxlength]="reasonLimits.max"
+            [value]="reason()"
+            (input)="reason.set($any($event.target).value)"></textarea>
+        </div>
+        <p class="fleet-report-note">
+          {{ reasonLimits.min }} to {{ reasonLimits.max }} characters. Don't
+          repeat the name or handle here.
+        </p>
+
+        <div class="buttons-container">
+          <button
+            type="button"
+            class="lcars-btn red"
+            [disabled]="!mayErase()"
+            (click)="onErase()">
+            Erase…
+          </button>
+        </div>
+      }
+    }
+
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Erasures made</span>
+    </div>
+
+    @if (errorMessage(); as error) {
+      <app-lcars-error-message
+        title="Not read"
+        [message]="error"></app-lcars-error-message>
+    }
+
+    @if (!isLoading() && erasures().length === 0 && !errorMessage()) {
+      <p class="records-empty">Nobody's roster data has been erased.</p>
+    }
+
+    @if (erasures().length > 0) {
+      <table class="fleet-community-table">
+        <caption>
+          Erasures, newest first
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">When</th>
+            <th scope="col">Who</th>
+            <th scope="col">Replaced by</th>
+            <th scope="col">Why</th>
+            <th scope="col">Changed</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (erasure of erasures(); track erasure.id) {
+            <tr>
+              <td data-label="When">
+                {{ erasure.createdAt | appDate: 'medium' }}
+              </td>
+              <td data-label="Who">
+                @if (erasure.replayed) {
+                  Replayed from the ledger
+                } @else if (erasure.admin) {
+                  {{ erasure.admin.username ?? 'An account with no username' }}
+                } @else {
+                  An account since closed
+                }
+              </td>
+              <td data-label="Replaced by">{{ erasure.pseudonym }}</td>
+              <td data-label="Why">{{ erasure.reason }}</td>
+              <td data-label="Changed">
+                {{ erasure.observations }} row(s), {{ erasure.aliases }}
+                alias(es), {{ erasure.fleets }} Fleet(s)
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>After a restore</span>
+    </div>
+    <div class="buttons">
+      <button
+        type="button"
+        class="full-width-btn-link tangerine"
+        [disabled]="busy()"
+        (click)="onReplay()">
+        Replay the erasure ledger…
+      </button>
+    </div>
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN"
+        >Admin home</a
+      >
+    </div>
+  </div>
+</div>
