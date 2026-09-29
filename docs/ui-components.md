@@ -987,6 +987,33 @@ Community page has no strip, so **`<app-fleet-news-latest>`** shows its
 latest three posts and the way to the rest, and offers its writers a new
 post.
 
+### Activity
+
+A Community's, a Fleet's and an Armada's activity, and each member's own
+(FC-029), live in `src/app/fleet/activity/`, behind `FleetActivityService`.
+The server writes each item as a sentence and decides which the reader sees,
+asking afresh each time, so the pages only draw what they are given.
+
+**`<app-fleet-activity-feed>`** draws a feed. Its `source` is a scope's feed
+(`{ kind: 'SCOPE', target }`) or the reader's own (`{ kind: 'MINE' }`), and a
+new source starts it again. Each item is its sentence, linking where the
+server says to read more, and when it happened. `showScope` names each item's
+Community, Fleet or Armada, for a feed gathering several. `latest` shows only
+that many, with `allLink` leading to the rest; otherwise **Older** reads the
+next page, held while one is being read, until there are none. A feed that
+cannot be read says so rather than that nothing has happened.
+
+| Page | Address | Who opens it |
+|---|---|---|
+| Activity | `…/activity` | Anybody who may see the scope; which items is the server's answer |
+
+It resolves its scope as the News pages do, and draws the scope's strip. A
+Fleet's and an Armada's strips have an **Activity** tab, after News. A
+Community page has no strip, so its Overview shows the latest five items and
+the way to the rest. The Dashboard's Fleets page shows **Your Fleet
+activity**: the Communities the member follows and the Fleets and Armadas they
+belong to, each item naming its scope.
+
 ### Upload and scan state
 
 **`<app-asset-scan-status>`** lives in `src/app/shared/components/`, not in the

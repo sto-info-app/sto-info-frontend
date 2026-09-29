@@ -1,0 +1,63 @@
+@if (error(); as problem) {
+  <p
+    class="fleet-activity__problem"
+    role="alert">
+    {{ problem }}
+  </p>
+} @else if (!loading() && items().length === 0) {
+  <p class="fleet-community-empty">Nothing has happened here yet.</p>
+}
+
+@if (shown().length > 0) {
+  <ol
+    class="fleet-activity__list"
+    aria-label="Activity, newest first">
+    @for (item of shown(); track item.id) {
+      <li class="fleet-activity__item">
+        <time
+          class="fleet-activity__when"
+          [attr.datetime]="item.occurredAt"
+          >{{ item.occurredAt | appDate: 'medium' }}</time
+        >
+        @if (showScope) {
+          <a
+            class="fleet-activity__scope"
+            [routerLink]="item.scope.path"
+            >{{ item.scope.name }}</a
+          >
+        }
+        @if (item.path) {
+          <a
+            class="fleet-activity__sentence"
+            [routerLink]="item.path"
+            >{{ item.sentence }}</a
+          >
+        } @else {
+          <span class="fleet-activity__sentence">{{ item.sentence }}</span>
+        }
+      </li>
+    }
+  </ol>
+}
+
+@if (latest !== null) {
+  @if (allLink) {
+    <div class="buttons-row">
+      <a
+        class="lcars-btn lcars-btn-auto sunflower"
+        [routerLink]="allLink"
+        >All activity</a
+      >
+    </div>
+  }
+} @else if (next()) {
+  <div class="buttons-row">
+    <button
+      type="button"
+      class="lcars-btn lcars-btn-auto bluey"
+      [disabled]="loading()"
+      (click)="onOlder()">
+      Older
+    </button>
+  </div>
+}

@@ -184,4 +184,6 @@ export const API_URLS = {
   FLEET_COMMUNITIES_ADMIN: apiUrl + '/admin/fleet-communities',
   // A site administrator taking a scoped news post down (FC-027).
   FLEET_NEWS_ADMIN: apiUrl + '/admin/fleet-news',
+  // The signed-in person's own Fleet activity (FC-029).
+  FLEET_ACTIVITY: apiUrl + '/fleet-activity',
 };

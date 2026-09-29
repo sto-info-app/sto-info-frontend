@@ -1,0 +1,29 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+  @if (armadaTabsOf(state); as armadaTabs) {
+    <app-armada-tabs [vm]="armadaTabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Activity"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the activity"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @if (state.scope.isCommunity) {
+        <p class="fleet-community-field-hint">
+          <a [routerLink]="state.scope.scopeLink"
+            >Back to {{ state.scope.name }}</a
+          >
+        </p>
+      }
+      <p class="fleet-community-field-hint">
+        What has happened here in the last twelve months that you may see.
+      </p>
+      <app-fleet-activity-feed [source]="state.data" />
+    }
+  </app-fleet-page-shell>
+}

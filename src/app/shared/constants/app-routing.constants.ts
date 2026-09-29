@@ -344,6 +344,7 @@ export const APP_ROUTE_TITLES = {
   FLEET_NEWS_POST: 'News Post',
   FLEET_NEWS_WRITE: 'Write a Post',
   FLEET_NEWS_EDIT: 'Edit a Post',
+  FLEET_ACTIVITY: 'Activity',
   FLEET_INVESTIGATE: 'Investigate',
   FLEET_ROSTER_IMPORTS: 'Roster Imports',
   FLEET_ROSTER_IMPORT_DETAIL: 'Roster Import',
