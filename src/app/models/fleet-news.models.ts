@@ -28,6 +28,8 @@ export interface FleetNewsPostSummary {
   /** Delivery reference of its cover, or null. */
   readonly coverImageId: string | null;
   readonly coverImageAlt: string | null;
+  /** Its cover's signed address, or null (FC-040). */
+  readonly coverImageUrl: string | null;
   /** Its author, or null when nobody can be named. */
   readonly author: FleetNewsAuthor | null;
 }

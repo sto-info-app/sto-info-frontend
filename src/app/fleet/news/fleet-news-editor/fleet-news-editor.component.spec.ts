@@ -257,7 +257,15 @@ describe('FleetNewsEditorComponent', () => {
     });
 
     it('saves a published post’s changes without publishing it again', async () => {
-      await render(EDITING, newsPost({ summary: null, coverImageId: 'c-1' }));
+      await render(
+        EDITING,
+        newsPost({
+          summary: null,
+          coverImageId: 'c-1',
+          coverImageUrl:
+            'https://cdn.test/cdn-cgi/imagedelivery/hash/c-1/public?sig=c',
+        }),
+      );
 
       expect(fixture.componentInstance.summary()).toBe('');
       expect(findButton(fixture, 'Publish')).toBeUndefined();
@@ -347,6 +355,8 @@ describe('FleetNewsEditorComponent', () => {
         newsPost({
           status: 'DRAFT',
           coverImageId: 'cover-1',
+          coverImageUrl:
+            'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/public?sig=c',
           coverImageAlt: 'The fleet',
         }),
       );
@@ -374,7 +384,14 @@ describe('FleetNewsEditorComponent', () => {
     });
 
     it('keeps the cover when the question is declined, and says when removing fails', async () => {
-      await render(EDITING, newsPost({ coverImageId: 'cover-1' }));
+      await render(
+        EDITING,
+        newsPost({
+          coverImageId: 'cover-1',
+          coverImageUrl:
+            'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/public?sig=c',
+        }),
+      );
       dialog.answer(false);
 
       pressButton(fixture, 'Remove the cover');

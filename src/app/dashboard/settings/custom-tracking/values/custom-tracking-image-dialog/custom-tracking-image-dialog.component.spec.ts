@@ -22,6 +22,8 @@ describe('CustomTrackingImageDialogComponent', () => {
   const spec = aConfiguration().imageShapes[0];
   const stored = {
     imageId: 'image-1',
+    imageUrl:
+      'https://cdn.test/cdn-cgi/imagedelivery/hash/image-1/square300?sig=1',
     altText: 'A ship',
     shape: CustomTrackingImageShape.SQUARE,
   };

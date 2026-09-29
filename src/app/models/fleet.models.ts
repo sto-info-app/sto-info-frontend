@@ -129,6 +129,11 @@ export interface FleetDirectoryCard {
   createdAt: string;
   emblemImageId: string | null;
   emblemImageAlt: string | null;
+  /**
+   * The emblem's signed addresses, by variant (square100, square300). The API
+   * signs them; the browser never builds one (FC-040).
+   */
+  emblemImageUrls: Record<string, string> | null;
 }
 
 /**
@@ -290,8 +295,15 @@ export enum FleetAudience {
 export interface FleetScopeArtwork {
   bannerImageId: string | null;
   bannerImageAlt: string | null;
+  /** The banner's signed address (FC-040). */
+  bannerImageUrl: string | null;
   emblemImageId: string | null;
   emblemImageAlt: string | null;
+  /**
+   * The emblem's signed addresses, by variant (square100, square300). The API
+   * signs them; the browser never builds one (FC-040).
+   */
+  emblemImageUrls: Record<string, string> | null;
 }
 
 /**

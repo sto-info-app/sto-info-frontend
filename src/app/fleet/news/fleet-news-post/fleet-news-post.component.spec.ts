@@ -89,7 +89,12 @@ describe('FleetNewsPostComponent', () => {
 
   it('shows a published post to its reader, in full', async () => {
     await render({
-      post: newsPost({ coverImageId: 'cover-1', coverImageAlt: 'The fleet' }),
+      post: newsPost({
+        coverImageId: 'cover-1',
+        coverImageUrl:
+          'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/public?sig=c',
+        coverImageAlt: 'The fleet',
+      }),
     });
 
     const text = pageText(fixture);

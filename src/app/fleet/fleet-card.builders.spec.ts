@@ -36,6 +36,7 @@ function communityCard(
     status: FleetScopeStatus.ACTIVE,
     createdAt: '2026-01-02T03:04:05.000Z',
     emblemImageId: null,
+    emblemImageUrls: null,
     emblemImageAlt: null,
     name: 'United Federation Alliance',
     description: 'A home for casual PvE fleets.',
@@ -57,6 +58,7 @@ function fleetCard(overrides: Partial<StoFleetCard> = {}): StoFleetCard {
     status: FleetScopeStatus.ACTIVE,
     createdAt: '2026-01-02T03:04:05.000Z',
     emblemImageId: null,
+    emblemImageUrls: null,
     emblemImageAlt: null,
     exactGameName: 'Starfleet Command',
     communityId: 'community-1',
@@ -86,6 +88,7 @@ function armadaCard(overrides: Partial<StoArmadaCard> = {}): StoArmadaCard {
     status: FleetScopeStatus.ACTIVE,
     createdAt: '2026-01-02T03:04:05.000Z',
     emblemImageId: null,
+    emblemImageUrls: null,
     emblemImageAlt: null,
     exactGameName: 'Ninth Fleet Armada',
     communityId: 'community-1',
@@ -147,6 +150,9 @@ describe('fleet-card.builders', () => {
       const vm = buildCommunityCardVm(
         communityCard({
           emblemImageId: 'emblem-ref',
+          emblemImageUrls: {
+            square100: `${BASE_CLOUDFLARE_IMAGES_URL}/emblem-ref/square100`,
+          },
           emblemImageAlt: 'A crossed-sabres badge',
         }),
       );
@@ -163,7 +169,11 @@ describe('fleet-card.builders', () => {
 
     it('should fall back to an empty description, which is valid markup', () => {
       const vm = buildFleetCardVm(
-        fleetCard({ emblemImageId: 'emblem-ref', emblemImageAlt: null }),
+        fleetCard({
+          emblemImageId: 'emblem-ref',
+          emblemImageUrls: { square100: 'signed-emblem' },
+          emblemImageAlt: null,
+        }),
         formatInstant,
       );
 

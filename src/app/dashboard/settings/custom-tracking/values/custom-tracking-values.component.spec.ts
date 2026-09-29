@@ -524,6 +524,8 @@ describe('CustomTrackingValuesComponent', () => {
 
       component.onImageChanged(required.tabs[0].fields[0], {
         imageId: 'image-1',
+        imageUrl:
+          'https://cdn.test/cdn-cgi/imagedelivery/hash/image-1/square300?sig=1',
         altText: 'A ship',
         shape: CustomTrackingImageShape.SQUARE,
       });

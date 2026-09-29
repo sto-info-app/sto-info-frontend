@@ -194,6 +194,8 @@ export interface CustomTrackingImageAnswer {
   imageId: string;
   altText: string;
   shape: CustomTrackingImageShape;
+  /** The signed address to draw it from, in its shape's variant (FC-040). */
+  imageUrl: string;
 }
 
 /** One field's answer, as it stands. */

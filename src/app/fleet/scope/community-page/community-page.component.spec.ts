@@ -55,8 +55,10 @@ function community(overrides: Partial<FleetCommunity> = {}): FleetCommunity {
     status: FleetScopeStatus.ACTIVE,
     closedAt: null,
     bannerImageId: null,
+    bannerImageUrl: null,
     bannerImageAlt: null,
     emblemImageId: null,
+    emblemImageUrls: null,
     emblemImageAlt: null,
     revision: 1,
     createdAt: '2026-01-02T03:04:05.000Z',
@@ -413,8 +415,16 @@ describe('CommunityPageComponent', () => {
         of({
           community: community({
             bannerImageId: 'banner-ref',
+            bannerImageUrl:
+              'https://cdn.test/cdn-cgi/imagedelivery/hash/banner-ref/public',
             bannerImageAlt: 'A fleet yard at dusk',
             emblemImageId: 'emblem-ref',
+            emblemImageUrls: {
+              square100:
+                'https://cdn.test/cdn-cgi/imagedelivery/hash/emblem-ref/square100',
+              square300:
+                'https://cdn.test/cdn-cgi/imagedelivery/hash/emblem-ref/square300',
+            },
             emblemImageAlt: 'A crossed-sabres badge',
           }),
           redirectedFrom: null,

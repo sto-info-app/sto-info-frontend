@@ -1,5 +1,3 @@
-import { BASE_CLOUDFLARE_IMAGES_URL } from 'src/app/shared/constants/app-image-assets.constants';
-
 import {
   bannerOf,
   emblemOf,
@@ -7,48 +5,57 @@ import {
   FleetArtworkSource,
 } from './fleet-artwork';
 
+const SIGNED = 'https://cdn.test/cdn-cgi/imagedelivery/hash';
+
 /**
- * Builds a record's artwork columns.
+ * Builds a record's artwork as the server sends it.
  *
- * @param overrides - Columns to override.
- * @returns The artwork as the server sends it.
+ * @param overrides - Fields to override.
+ * @returns The artwork.
  */
 function artwork(
   overrides: Partial<FleetArtworkSource> = {},
 ): FleetArtworkSource {
   return {
-    bannerImageId: null,
     bannerImageAlt: null,
-    emblemImageId: null,
+    bannerImageUrl: null,
     emblemImageAlt: null,
+    emblemImageUrls: null,
     ...overrides,
   };
 }
 
+// FC-040: the API signs every address; the browser only draws them.
 describe('fleet-artwork', () => {
   describe('emblemOf', () => {
-    it('asks for the size the caller wants', () => {
+    it('draws the size the caller wants, from the address the API signed', () => {
       const source = artwork({
-        emblemImageId: 'emblem-ref',
+        emblemImageUrls: {
+          square100: `${SIGNED}/emblem-ref/square100?sig=1`,
+          square300: `${SIGNED}/emblem-ref/square300?sig=3`,
+        },
         emblemImageAlt: 'A crossed-sabres badge',
       });
 
       expect(emblemOf(source, FLEET_EMBLEM_SIZES.CARD)).toEqual({
-        url: `${BASE_CLOUDFLARE_IMAGES_URL}/emblem-ref/square100`,
+        url: `${SIGNED}/emblem-ref/square100?sig=1`,
         alt: 'A crossed-sabres badge',
       });
       expect(emblemOf(source, FLEET_EMBLEM_SIZES.PAGE)?.url).toBe(
-        `${BASE_CLOUDFLARE_IMAGES_URL}/emblem-ref/square300`,
+        `${SIGNED}/emblem-ref/square300?sig=3`,
       );
     });
 
-    it('draws nothing where the scope has no emblem', () => {
+    it('draws nothing where the scope has no emblem, or none at that size', () => {
       expect(emblemOf(artwork(), FLEET_EMBLEM_SIZES.CARD)).toBeNull();
+      expect(
+        emblemOf(artwork({ emblemImageUrls: {} }), FLEET_EMBLEM_SIZES.CARD),
+      ).toBeNull();
     });
 
     it('falls back to an empty description, which is valid markup', () => {
       const found = emblemOf(
-        artwork({ emblemImageId: 'emblem-ref' }),
+        artwork({ emblemImageUrls: { square100: `${SIGNED}/e/square100` } }),
         FLEET_EMBLEM_SIZES.CARD,
       );
 
@@ -57,18 +64,16 @@ describe('fleet-artwork', () => {
   });
 
   describe('bannerOf', () => {
-    // A banner is five times as wide as it is tall, so the square variants
-    // would crop it to nothing.
-    it('always asks for the original upload', () => {
+    it('draws the banner from its signed address', () => {
       const found = bannerOf(
         artwork({
-          bannerImageId: 'banner-ref',
+          bannerImageUrl: `${SIGNED}/banner-ref/public?sig=b`,
           bannerImageAlt: 'A fleet yard at dusk',
         }),
       );
 
       expect(found).toEqual({
-        url: `${BASE_CLOUDFLARE_IMAGES_URL}/banner-ref/public`,
+        url: `${SIGNED}/banner-ref/public?sig=b`,
         alt: 'A fleet yard at dusk',
       });
     });

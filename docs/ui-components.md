@@ -1261,6 +1261,23 @@ what with its codes and counts, and why.
 first, with each one's rejection code and engine, and **Look up** reads one
 asset by its ID. Neither ever shows a signature name.
 
+**Private image delivery** (FC-040, `ImageEstatePanelComponent` in
+`src/app/admin/scan-diagnostics/image-estate-panel`), at the foot of Scan
+Diagnostics: how many pictures are still public and where each copy stands;
+the open or last run with its counts; **Take an inventory**, with the last one's
+columns and Cloudflare's counts, orphans and missing pictures by ID; and
+**Copy to private**, **Undo copies** and **Retire old copies**, or **Pause** and
+**Resume** while a run is open. Each run asks for a reason through
+`GovernanceReasonDialogComponent`. Without the signing key the panel says so
+and offers no copy.
+
+**Picture addresses** (FC-040). The browser never builds one: the API signs
+each and sends it with the record (`bannerImageUrl`, `emblemImageUrls` by
+variant, `coverImageUrl`, a Custom Tracking picture's `imageUrl`), and
+`bannerOf`/`emblemOf` in `src/app/fleet/fleet-artwork.ts` only choose which to
+draw. `BASE_CLOUDFLARE_IMAGES_URL` is left for the site's own public artwork,
+such as the "photo unavailable" image.
+
 **The site admins' queue** (FC-035): `/admin/chat-reports`, "Chat Reports" on the Admin page, in
 `src/app/admin/moderation-admin` (`ChatReportAdminListComponent`):
 

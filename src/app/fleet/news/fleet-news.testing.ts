@@ -46,6 +46,7 @@ export function newsPost(
     createdAt: '2026-09-28T09:00:00.000Z',
     updatedAt: '2026-09-28T09:30:00.000Z',
     coverImageId: null,
+    coverImageUrl: null,
     coverImageAlt: null,
     author: { username: 'FleetOwner', linksToProfile: true },
     body: 'Friday at **eight**.',

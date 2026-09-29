@@ -1,6 +1,4 @@
 import {
-  BASE_CLOUDFLARE_IMAGES_URL,
-  CLOUDFLARE_VARIANT_DEFAULT_NAME,
   CLOUDFLARE_VARIANT_SQUARE_100PX_NAME,
   CLOUDFLARE_VARIANT_SQUARE_300PX_NAME,
 } from 'src/app/shared/constants/app-image-assets.constants';
@@ -16,10 +14,12 @@ export interface FleetPicture {
 
 /** The artwork columns a scope record carries, as the server sends them. */
 export interface FleetArtworkSource {
-  bannerImageId: string | null;
   bannerImageAlt: string | null;
-  emblemImageId: string | null;
+  /** The banner's signed address, from the API (FC-040). */
+  bannerImageUrl: string | null;
   emblemImageAlt: string | null;
+  /** The emblem's signed addresses by variant, from the API (FC-040). */
+  emblemImageUrls: Record<string, string> | null;
 }
 
 /** The emblem sizes anything in the Fleet section asks for. */
@@ -31,27 +31,26 @@ export const FLEET_EMBLEM_SIZES = {
 };
 
 /**
- * Turns an image reference into somewhere to fetch the picture from.
+ * A picture to draw, from the address the API signed.
  *
- * Done here rather than at each call site so that nothing drawing a scope
- * has to know where images are kept.
+ * The browser never builds a picture's address (FC-040): each is signed by
+ * the API for as long as the picture may be shown, and one built here would
+ * be refused.
  *
- * @param imageId - The reference, or null when there is no picture.
+ * @param url - The signed address, or null.
  * @param alt - What the picture shows, where anybody said.
- * @param variant - Which size to ask for.
  * @returns The picture, or null when there is none.
  */
 function pictureOf(
-  imageId: string | null,
+  url: string | null | undefined,
   alt: string | null,
-  variant: string,
 ): FleetPicture | null {
-  if (imageId === null) {
+  if (!url) {
     return null;
   }
 
   return {
-    url: `${BASE_CLOUDFLARE_IMAGES_URL}/${imageId}/${variant}`,
+    url,
     // An empty description is the right markup for a picture nobody
     // described, and reads as decoration rather than a missing sentence.
     alt: alt ?? '',
@@ -69,7 +68,7 @@ export function emblemOf(
   source: FleetArtworkSource,
   variant: string,
 ): FleetPicture | null {
-  return pictureOf(source.emblemImageId, source.emblemImageAlt, variant);
+  return pictureOf(source.emblemImageUrls?.[variant], source.emblemImageAlt);
 }
 
 /**
@@ -83,9 +82,5 @@ export function emblemOf(
  * @returns The banner, or null when the scope has none.
  */
 export function bannerOf(source: FleetArtworkSource): FleetPicture | null {
-  return pictureOf(
-    source.bannerImageId,
-    source.bannerImageAlt,
-    CLOUDFLARE_VARIANT_DEFAULT_NAME,
-  );
+  return pictureOf(source.bannerImageUrl, source.bannerImageAlt);
 }

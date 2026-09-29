@@ -16,10 +16,6 @@ import {
   FleetNewsAuthor,
   FleetNewsPostSummary,
 } from 'src/app/models/fleet-news.models';
-import {
-  BASE_CLOUDFLARE_IMAGES_URL,
-  CLOUDFLARE_VARIANT_DEFAULT_NAME,
-} from 'src/app/shared/constants/app-image-assets.constants';
 
 /**
  * The half of a news page that is the same for all of them (FC-027).
@@ -98,12 +94,13 @@ export abstract class FleetNewsPageDirective<
    * @returns The picture, or null.
    */
   coverOf(post: FleetNewsPostSummary): FleetPicture | null {
-    if (post.coverImageId === null) {
+    if (!post.coverImageUrl) {
       return null;
     }
 
     return {
-      url: `${BASE_CLOUDFLARE_IMAGES_URL}/${post.coverImageId}/${CLOUDFLARE_VARIANT_DEFAULT_NAME}`,
+      // Signed by the API (FC-040); the browser never builds an address.
+      url: post.coverImageUrl,
       // An empty description reads as decoration rather than a gap.
       alt: post.coverImageAlt ?? '',
     };

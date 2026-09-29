@@ -63,7 +63,12 @@ describe('FleetNewsListComponent', () => {
   it('lists a Fleet’s posts for the reader, newest first', async () => {
     await render(undefined, {
       ...newsPage([
-        newsPost({ coverImageId: 'cover-1', coverImageAlt: 'The fleet' }),
+        newsPost({
+          coverImageId: 'cover-1',
+          coverImageUrl:
+            'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/public?sig=c',
+          coverImageAlt: 'The fleet',
+        }),
         newsPost({
           id: 'post-2',
           title: 'Members only',

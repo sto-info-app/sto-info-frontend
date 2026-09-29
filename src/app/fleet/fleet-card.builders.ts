@@ -81,7 +81,7 @@ const LIFECYCLE_PILLS: Readonly<
  */
 function emblemOf(card: FleetDirectoryCard): FleetScopeCardEmblem | null {
   return pictureEmblemOf(
-    { ...card, bannerImageId: null, bannerImageAlt: null },
+    { ...card, bannerImageUrl: null, bannerImageAlt: null },
     FLEET_EMBLEM_SIZES.CARD,
   );
 }

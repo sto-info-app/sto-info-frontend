@@ -110,6 +110,8 @@ export const API_URLS = {
   FILE_SCANNING_ADMIN_REJECTIONS: apiUrl + '/admin/file-scanning/rejections',
   FILE_SCANNING_ADMIN_ASSETS: apiUrl + '/admin/file-scanning/assets',
   SECURITY_LOG_ADMIN: apiUrl + '/admin/security-log',
+  // Private image delivery (FC-040).
+  IMAGE_ESTATE_ADMIN: apiUrl + '/admin/image-estate',
 
   // Access control (what the signed-in user is permitted to do, and the admin
   // side that grants or withholds it per user)
