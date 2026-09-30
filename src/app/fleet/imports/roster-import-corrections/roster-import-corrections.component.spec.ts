@@ -360,11 +360,14 @@ describe('RosterImportCorrectionsComponent', () => {
       expect(button('Read it again').disabled).toBe(true);
     });
 
-    it('offers no zone while another export claims its moment', () => {
+    // Steve's decision of 30 September 2026: a wrong clock is usually why
+    // it clashed, so correcting it is offered at once.
+    it('offers the zone while another export claims its moment, saying what it does', () => {
       render(detail({ conflictGroupId: 'group-1' }));
 
-      expect(find('#import-correction-zone')).toBeNull();
+      expect(find('#import-correction-zone')).not.toBeNull();
       expect(text()).toContain('Another export claims this one’s moment.');
+      expect(text()).toContain('takes it out of the clash');
       expect(find('.import-corrections__group a')?.getAttribute('href')).toBe(
         '/fleets/investigate/conflicts',
       );

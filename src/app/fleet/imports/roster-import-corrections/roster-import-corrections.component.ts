@@ -186,7 +186,6 @@ export class RosterImportCorrectionsComponent {
 
     return (
       this.canExclude() &&
-      this.detail().conflictGroupId === null &&
       this.zone() !== (this.detail().exportTimezone ?? '') &&
       moments.length > 0 &&
       (moments.length === 1 || moments.includes(this.pickedMoment() ?? ''))

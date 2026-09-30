@@ -104,11 +104,12 @@
     </p>
     @if (shown.conflictGroupId) {
       <p class="fleet-report-notice">
-        Another export claims this one’s moment.
-        <a [routerLink]="conflictsLink()">Choose between them</a>, or take one
-        out, before correcting its timezone.
+        Another export claims this one’s moment. If this one was taken on
+        another clock, reading it through that one takes it out of the clash;
+        if not, <a [routerLink]="conflictsLink()">choose between them</a>.
       </p>
-    } @else if (readOnly()) {
+    }
+    @if (readOnly()) {
     } @else if (shown.exportLocalStamp) {
       <div class="fleet-community-filter-row">
         <div class="lcars-input-container sky">
