@@ -1,12 +1,15 @@
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
-import { NEVER, of, throwError } from 'rxjs';
+import { NEVER, Observable, of, throwError } from 'rxjs';
 
+import { GOVERNANCE_MISSING } from 'src/app/fleet/governance/governance-page.directive';
 import {
+  governanceCommunity,
   GovernanceReader,
   governanceRoute,
+  GovernanceRouteStubs,
 } from 'src/app/fleet/governance/governance.testing';
 import {
   chooseFrom,
@@ -118,7 +121,9 @@ function disputeView(
 describe('CommunityDisputeComponent', () => {
   let fixture: ComponentFixture<CommunityDisputeComponent>;
   let confirm: ConfirmPromptDouble;
+  let route: GovernanceRouteStubs;
   let governance: {
+    resolveCommunityAsSiteAdmin: jest.Mock;
     disputeView: jest.Mock;
     reassignOwnership: jest.Mock;
     closeAsSiteAdmin: jest.Mock;
@@ -134,7 +139,7 @@ describe('CommunityDisputeComponent', () => {
   async function render(
     reader: GovernanceReader = { isSiteAdmin: true },
   ): Promise<void> {
-    const route = governanceRoute(reader, governance);
+    route = governanceRoute(reader, governance);
 
     await TestBed.configureTestingModule({
       imports: [CommunityDisputeComponent],
@@ -168,6 +173,9 @@ describe('CommunityDisputeComponent', () => {
   beforeEach(() => {
     confirm = stubConfirmPrompt();
     governance = {
+      resolveCommunityAsSiteAdmin: jest.fn(() =>
+        of(governanceCommunity({ isSiteAdmin: true })),
+      ),
       disputeView: jest.fn(() => of(disputeView())),
       reassignOwnership: jest.fn(() => of(undefined)),
       closeAsSiteAdmin: jest.fn(() => of(undefined)),
@@ -229,6 +237,43 @@ describe('CommunityDisputeComponent', () => {
           .map(button => button.textContent?.trim())
           .filter(label => label === 'Look into its imports…'),
       ).toHaveLength(1);
+    });
+
+    /**
+     * A Fleet's row carries its own audience, and an Armada's its
+     * Community's, which reads as a Community's does (FC-050).
+     */
+    it('words who may see each row for the kind of scope it is', async () => {
+      governance.disputeView.mockReturnValue(
+        of(
+          disputeView({
+            scopes: [
+              scopeOf({ visibility: 'FLEET_MEMBERS', duplicates: [] }),
+              scopeOf({
+                kind: 'ARMADA',
+                id: 'armada-1',
+                exactGameName: 'Alpha',
+                visibility: 'FLEET_MEMBERS',
+                lastImportAt: null,
+                memberCount: null,
+                duplicates: [],
+              }),
+            ],
+          }),
+        ),
+      );
+      await render();
+
+      const seenBy = [
+        ...(fixture.nativeElement as HTMLElement).querySelectorAll(
+          'td[data-label="Seen by"]',
+        ),
+      ].map(cell => cell.textContent?.trim());
+
+      expect(seenBy).toEqual([
+        'Approved members of the Fleet',
+        'Members of the Community’s Fleets, its Owner and Admins',
+      ]);
     });
 
     it('says when the Community has neither', async () => {
@@ -617,4 +662,62 @@ describe('CommunityDisputeComponent', () => {
       expect(pageText(fixture)).toContain(DISPUTE_NOT_PERMITTED);
     },
   );
+
+  // Steve's decision of 30 September 2026: a site administrator reaches any
+  // Community's dispute page, whoever may see it; nobody else gains anything.
+  describe('whoever may see the Community (FC-050)', () => {
+    /** The answer the public read gives a reader it hides a Community from. */
+    const hidden = (): Observable<never> =>
+      throwError(
+        () => new HttpErrorResponse({ status: HttpStatusCode.NotFound }),
+      );
+
+    it('finds it for a site administrator through their own lookup, never the public read', async () => {
+      await render();
+
+      expect(governance.resolveCommunityAsSiteAdmin).toHaveBeenCalledWith(
+        'united-federation-alliance',
+      );
+      expect(route.scopes.resolveCommunity).not.toHaveBeenCalled();
+      expect(governance.disputeView).toHaveBeenCalledWith('community-1');
+      expect(pageText(fixture)).not.toContain(DISPUTE_NOT_PERMITTED);
+    });
+
+    it('says nothing answers when no Community does, even to a site administrator', async () => {
+      governance.resolveCommunityAsSiteAdmin.mockReturnValue(hidden());
+      await render();
+
+      expect(pageText(fixture)).toContain(GOVERNANCE_MISSING);
+      expect(governance.disputeView).not.toHaveBeenCalled();
+    });
+
+    it('still asks the public read for anybody else, who is turned away', async () => {
+      await render({ roles: ['OWNER'] });
+
+      expect(route.scopes.resolveCommunity).toHaveBeenCalledWith(
+        'united-federation-alliance',
+      );
+      expect(governance.resolveCommunityAsSiteAdmin).not.toHaveBeenCalled();
+      expect(governance.disputeView).not.toHaveBeenCalled();
+      expect(pageText(fixture)).toContain(DISPUTE_NOT_PERMITTED);
+    });
+
+    it('shows nothing of a Community the public read hides from a reader who is not a site administrator', async () => {
+      const reader: GovernanceReader = { roles: [] };
+
+      route = governanceRoute(reader, governance);
+      route.scopes.resolveCommunity.mockReturnValue(hidden());
+      await TestBed.configureTestingModule({
+        imports: [CommunityDisputeComponent],
+        providers: [...route.providers, confirm.provider],
+      }).compileComponents();
+      fixture = TestBed.createComponent(CommunityDisputeComponent);
+      fixture.detectChanges();
+
+      expect(pageText(fixture)).toContain(GOVERNANCE_MISSING);
+      expect(pageText(fixture)).not.toContain('United Federation Alliance');
+      expect(governance.resolveCommunityAsSiteAdmin).not.toHaveBeenCalled();
+      expect(governance.disputeView).not.toHaveBeenCalled();
+    });
+  });
 });

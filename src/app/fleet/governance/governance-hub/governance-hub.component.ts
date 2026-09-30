@@ -28,6 +28,7 @@ import {
 import {
   GOVERNANCE_READER_ROLES,
   SCOPE_CLOSE_CAPABILITY,
+  SCOPE_SETTINGS_MANAGE_CAPABILITY,
 } from 'src/app/fleet/governance/governance.constants';
 import { recruitmentRefusalOf } from 'src/app/fleet/recruitment/recruitment.utils';
 import { FleetScopeAction } from 'src/app/fleet/scope/fleet-scope-page.models';
@@ -40,6 +41,10 @@ export const GOVERNANCE_HUB_NOT_PERMITTED =
 
 /** What to say once it is closed. */
 export const GOVERNANCE_CLOSED = 'It is closed. Every role here has ended.';
+
+/** What to say once an Armada is closed. */
+export const GOVERNANCE_ARMADA_CLOSED =
+  'It is closed. Its Fleets have left it, and every role here has ended.';
 
 /** What to say when closing failed for a reason the server did not give. */
 export const GOVERNANCE_CLOSE_FAILED =
@@ -59,9 +64,11 @@ export interface GovernanceHubData {
  *
  * A hub, as Recruitment is: roles, delegation and history are pages of their
  * own, and a Community adds its ownership. A site administrator reaches a
- * Community's dispute page from here, whether or not they hold a role in it.
+ * Community's dispute page from here, whether or not they hold a role in it
+ * or may see it.
  * Closing sits at the foot, for the Owner alone, behind a dialog that asks
- * for the name and a reason.
+ * for the name and a reason. An Armada's asks for the name alone, since it
+ * closes through its own route, which keeps no reason (FC-050).
  */
 @Component({
   selector: 'app-governance-hub',
@@ -85,6 +92,14 @@ export class GovernanceHubComponent extends GovernancePageDirective<GovernanceHu
 
   readonly notPermittedMessage = GOVERNANCE_HUB_NOT_PERMITTED;
 
+  /**
+   * A site administrator finds the Community whoever may see it, as on the
+   * dispute page this leads to, so its Site administration entry is reached
+   * from here at a members-only or private one too (FC-050). Anybody else is
+   * answered by the public read, as before.
+   */
+  protected override readonly _siteAdminFindsAnyCommunity = true;
+
   /** Whether a closure is under way. */
   readonly busy = signal(false);
 
@@ -93,6 +108,22 @@ export class GovernanceHubComponent extends GovernancePageDirective<GovernanceHu
 
   /** What the last closure came to, if it was refused or failed. */
   readonly closeError = signal<string | null>(null);
+
+  /**
+   * What the scope is, in a word.
+   *
+   * @param scope - The scope.
+   * @returns "Community", "Fleet" or "Armada".
+   */
+  scopeNounOf(
+    scope: GovernanceScopeVm,
+  ): GovernanceCloseDialogData['scopeNoun'] {
+    if (scope.isArmada) {
+      return 'Armada';
+    }
+
+    return scope.isCommunity ? 'Community' : 'Fleet';
+  }
 
   /**
    * Asks for the name and a reason, then closes the scope.
@@ -108,7 +139,7 @@ export class GovernanceHubComponent extends GovernancePageDirective<GovernanceHu
       >(GovernanceCloseDialogComponent, {
         width: '75%',
         data: {
-          scopeNoun: scope.isCommunity ? 'Community' : 'Fleet',
+          scopeNoun: this.scopeNounOf(scope),
           name: scope.name,
           asSiteAdmin: false,
         },
@@ -131,7 +162,9 @@ export class GovernanceHubComponent extends GovernancePageDirective<GovernanceHu
       .subscribe({
         next: () => {
           this.busy.set(false);
-          this.closeNotice.set(GOVERNANCE_CLOSED);
+          this.closeNotice.set(
+            scope.isArmada ? GOVERNANCE_ARMADA_CLOSED : GOVERNANCE_CLOSED,
+          );
           this.reload();
         },
         error: (error: unknown) => {
@@ -166,6 +199,23 @@ export class GovernanceHubComponent extends GovernancePageDirective<GovernanceHu
     // A closed scope is read, not changed, whoever reads it.
     const changes = isOwner && !scope.isClosed;
     const actions: FleetScopeAction[] = [];
+
+    // Its own settings, for whoever holds them: the Owner, while it is open.
+    // An Armada's are not changed here.
+    if (
+      !scope.isArmada &&
+      scope.capabilities.includes(SCOPE_SETTINGS_MANAGE_CAPABILITY)
+    ) {
+      actions.push({
+        label: 'Settings',
+        link: [...manageLink, 'settings'],
+        description: scope.isCommunity
+          ? `Rename ${name}, and change its description, who can see it, ` +
+            'how people join and the timezone its dates are shown in.'
+          : `Rename ${name} to follow the game, and change its allegiance ` +
+            'and who can see it.',
+      });
+    }
 
     if (scope.roles.some(role => GOVERNANCE_READER_ROLES.includes(role))) {
       actions.push(
@@ -212,11 +262,9 @@ export class GovernanceHubComponent extends GovernancePageDirective<GovernanceHu
 
     return of({
       actions,
-      // An Armada closes through its own route, not from here (FC-025).
+      // An Armada is closed from here too, through its own route (FC-050).
       mayClose:
-        !scope.isArmada &&
-        !scope.isClosed &&
-        scope.capabilities.includes(SCOPE_CLOSE_CAPABILITY),
+        !scope.isClosed && scope.capabilities.includes(SCOPE_CLOSE_CAPABILITY),
     });
   }
 }

@@ -5,6 +5,7 @@ import { Observable, throwError } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
+  AdminCommunityPage,
   AssignScopeRoleRequest,
   CommunityDisputeView,
   FleetInvestigation,
@@ -15,6 +16,7 @@ import {
   ScopeRoles,
   SetPersonalCapabilityRequest,
 } from 'src/app/models/fleet-governance.models';
+import { ResolvedFleetCommunity } from 'src/app/models/fleet.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 
 /** The Community, or the Fleet in it, whose governance is meant. */
@@ -170,7 +172,8 @@ export class FleetGovernanceService {
   }
 
   /**
-   * Closes a scope.
+   * Closes a Community, Fleet or Armada, with a reason (an Armada's since
+   * FC-050).
    *
    * @param target - The scope.
    * @param reason - Why.
@@ -235,6 +238,26 @@ export class FleetGovernanceService {
       this._http.post<void>(
         `${this.communityUrl(communityId)}/ownership/${transferId}/${answer}`,
         {},
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Finds a Community by its web address as a site administrator, whoever
+   * may see it, for its dispute page (FC-050). Anybody else is refused.
+   *
+   * @param communitySlug - The segment the reader arrived on.
+   * @returns An observable of the Community, and the retired segment when
+   *   one was used.
+   */
+  resolveCommunityAsSiteAdmin(
+    communitySlug: string,
+  ): Observable<ResolvedFleetCommunity> {
+    return this.authenticated(options =>
+      this._http.get<ResolvedFleetCommunity>(
+        `${API_URLS.FLEET_COMMUNITIES_ADMIN}/by-slug/` +
+          encodeURIComponent(communitySlug),
         options,
       ),
     );
@@ -359,6 +382,31 @@ export class FleetGovernanceService {
         API_URLS.FLEET_INVESTIGATIONS_ADMIN,
         { ...options, params: { page: String(page) } },
       ),
+    );
+  }
+
+  /**
+   * Finds live Communities by name or web address as a site administrator,
+   * whoever may see them, for the Admin area's way to their dispute pages
+   * (FC-050). Anybody else is refused.
+   *
+   * @param search - What to look for; every one when blank.
+   * @param page - Which page.
+   * @returns The page, by name.
+   */
+  communitiesAsSiteAdmin(
+    search: string,
+    page = 1,
+  ): Observable<AdminCommunityPage> {
+    const term = search.trim();
+
+    return this.authenticated(options =>
+      this._http.get<AdminCommunityPage>(API_URLS.FLEET_COMMUNITIES_ADMIN, {
+        ...options,
+        params: term
+          ? { search: term, page: String(page) }
+          : { page: String(page) },
+      }),
     );
   }
 

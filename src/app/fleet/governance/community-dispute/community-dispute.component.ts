@@ -13,7 +13,10 @@ import { Router, RouterLink } from '@angular/router';
 import { filter, Observable, switchMap } from 'rxjs';
 
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
-import { FLEET_AUDIENCE_LABELS } from 'src/app/fleet/constants/fleet-scope.constants';
+import {
+  COMMUNITY_AUDIENCE_LABELS,
+  FLEET_AUDIENCE_LABELS,
+} from 'src/app/fleet/constants/fleet-scope.constants';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
 import {
@@ -116,12 +119,19 @@ export class CommunityDisputeComponent extends GovernancePageDirective<Community
   private readonly _confirm = new ConfirmPrompt();
 
   readonly notPermittedMessage = DISPUTE_NOT_PERMITTED;
+
+  /**
+   * A site administrator finds the Community whoever may see it, so a
+   * members-only or private one's page opens for them too (Steve's decision
+   * of 30 September 2026). Anybody else is answered by the public read, as
+   * on every other page, and is then told this page is not for them.
+   */
+  protected override readonly _siteAdminFindsAnyCommunity = true;
   readonly reasonLimit = GOVERNANCE_REASON_LIMIT;
   readonly unnamed = UNNAMED_PERSON;
   readonly closed = FleetScopeStatus.CLOSED;
   readonly suspendedStatus = FleetScopeStatus.SUSPENDED;
   readonly unverified = DISPUTE_UNVERIFIED;
-  readonly audienceLabels = FLEET_AUDIENCE_LABELS;
 
   /** The Admin chosen, by account. */
   readonly recipient = signal('');
@@ -217,6 +227,26 @@ export class CommunityDisputeComponent extends GovernancePageDirective<Community
    */
   registrationsOf(scope: DisputeScope): DisputeRegistration[] {
     return [scope, ...scope.duplicates];
+  }
+
+  /**
+   * Who may see a registration, in words.
+   *
+   * A Fleet's row carries the Fleet's own audience. An Armada has none, so
+   * its row carries its Community's, which reads as a Community's does
+   * (FC-050).
+   *
+   * @param row - The registration.
+   * @returns Its audience, or a dash when it has none.
+   */
+  seenBy(row: DisputeRegistration): string {
+    if (row.visibility === null) {
+      return '—';
+    }
+
+    return (
+      row.kind === 'FLEET' ? FLEET_AUDIENCE_LABELS : COMMUNITY_AUDIENCE_LABELS
+    )[row.visibility];
   }
 
   /**

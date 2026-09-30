@@ -21,6 +21,7 @@ import {
 import {
   FleetScopeStatus,
   ResolvedFleetCommunity,
+  ResolvedStoArmada,
   ResolvedStoFleet,
 } from 'src/app/models/fleet.models';
 import { FleetGovernanceService } from './fleet-governance.service';
@@ -91,6 +92,27 @@ export function governanceFleet(reader: GovernanceReader): ResolvedStoFleet {
   return {
     ...resolved,
     viewer: { ...resolved.viewer, roles: reader.roles ?? [] },
+  };
+}
+
+/**
+ * Builds the Armada as the server resolves it.
+ *
+ * @param reader - Who is reading.
+ * @returns The resolved Armada.
+ */
+export function governanceArmada(reader: GovernanceReader): ResolvedStoArmada {
+  const resolved = resolvedArmada(
+    reader.capabilities ?? [],
+    reader.roles ?? [],
+  );
+
+  return {
+    ...resolved,
+    armada: {
+      ...resolved.armada,
+      status: reader.closed ? FleetScopeStatus.CLOSED : FleetScopeStatus.ACTIVE,
+    },
   };
 }
 
@@ -167,9 +189,7 @@ export function governanceRoute(
   const scopes = {
     resolveCommunity: jest.fn(() => of(governanceCommunity(reader))),
     resolveFleet: jest.fn(() => of(governanceFleet(reader))),
-    resolveArmada: jest.fn(() =>
-      of(resolvedArmada(reader.capabilities ?? [], reader.roles ?? [])),
-    ),
+    resolveArmada: jest.fn(() => of(governanceArmada(reader))),
   };
   const auth = {
     isLoggedInAsAdmin: jest.fn(() => reader.isSiteAdmin ?? false),

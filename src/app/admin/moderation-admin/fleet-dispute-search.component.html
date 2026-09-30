@@ -1,0 +1,148 @@
+@if (isLoading()) {
+  <app-loading-bar loadingText="Finding Communities"></app-loading-bar>
+}
+
+<div
+  id="fleet-dispute-search-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Fleet Disputes</h1>
+    <app-help-link
+      slug="site-admin-disputes-and-investigations"
+      label="Help with Fleet disputes" />
+    <p class="admin-page-intro">
+      Find any Community, members-only and private ones included, and open its
+      dispute page. From there you can move its ownership to one of its Admins,
+      suspend, reinstate or close it or one of its Fleets or Armadas, or look
+      into a Fleet’s imports.
+    </p>
+
+    @if (errorMessage(); as error) {
+      <app-lcars-error-message
+        title="Not read"
+        [message]="error"></app-lcars-error-message>
+    }
+
+    <section class="admin-section">
+      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+        <span class="title-with-badge">
+          Communities
+          @if (total() > 0) {
+            <span class="header-count-badge">{{ total() }}</span>
+          }
+        </span>
+      </div>
+
+      <form
+        class="admin-panel"
+        role="search"
+        [formGroup]="form"
+        (ngSubmit)="find()">
+        <div class="form-row compact">
+          <div class="lcars-input-container bluey">
+            <label for="fleet-dispute-search-input"
+              >Search by name or web address</label
+            >
+            <input
+              id="fleet-dispute-search-input"
+              type="search"
+              formControlName="search"
+              [maxlength]="maxLength" />
+          </div>
+        </div>
+
+        <div class="admin-form-actions">
+          <button
+            type="submit"
+            class="lcars-btn green"
+            [disabled]="isLoading()">
+            Search
+          </button>
+        </div>
+      </form>
+
+      @if (!isLoading() && !errorMessage() && communities().length === 0) {
+        <p class="records-empty">
+          @if (searched()) {
+            No Community matches this search.
+          } @else {
+            There are no Communities yet.
+          }
+        </p>
+      }
+
+      @if (communities().length > 0) {
+        <table class="fleet-community-table">
+          <caption>
+            Communities by name, whoever may see them
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Community</th>
+              <th scope="col">Who may see it</th>
+              <th scope="col">State</th>
+              <th scope="col">Owner</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (community of communities(); track community.id) {
+              <tr>
+                <td data-label="Community">
+                  <a [routerLink]="disputeLinkOf(community)">{{
+                    community.name
+                  }}</a>
+                  <span class="fleet-report-note">{{ community.slug }}</span>
+                </td>
+                <td data-label="Who may see it">
+                  {{ audienceLabels[community.visibility] }}
+                </td>
+                <td data-label="State">
+                  {{ statusLabels[community.status] }}
+                </td>
+                <td data-label="Owner">
+                  {{ community.ownerUsername ?? 'None on record' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (pageCount() > 1) {
+          <div class="lcars-pagination">
+            <button
+              type="button"
+              [disabled]="page() <= 1"
+              (click)="turn(-1)">
+              Previous
+            </button>
+            <span>Page {{ page() }} of {{ pageCount() }}</span>
+            <button
+              type="button"
+              [disabled]="page() >= pageCount()"
+              (click)="turn(1)">
+              Next
+            </button>
+          </div>
+        }
+      }
+    </section>
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN_FLEET_INVESTIGATIONS"
+        >Fleet investigations</a
+      >
+      <a
+        class="full-width-btn-link sunflower"
+        [routerLink]="'/' + appRoutes.ADMIN"
+        >Admin home</a
+      >
+    </div>
+  </div>
+</div>

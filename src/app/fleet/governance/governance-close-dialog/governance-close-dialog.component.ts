@@ -17,8 +17,8 @@ import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-wa
 
 /** What the dialog asks about. */
 export interface GovernanceCloseDialogData {
-  /** "Community" or "Fleet". */
-  readonly scopeNoun: string;
+  /** What is being closed. */
+  readonly scopeNoun: 'Community' | 'Fleet' | 'Armada';
   /** The name to be typed back, exactly as recorded. */
   readonly name: string;
   /** Whether a site administrator is closing it rather than its Owner. */
@@ -37,13 +37,23 @@ export const GOVERNANCE_CLOSE_WARNING =
   '<p>Every role and delegated capability here ends with it. Its history, ' +
   'members and pictures are kept.</p>';
 
+/** What closing an Armada does, which its Fleets leaving makes different. */
+export const GOVERNANCE_ARMADA_CLOSE_WARNING =
+  '<p>Closing cannot be undone: nothing here reopens a closed record.</p>' +
+  '<p>Every Fleet in it leaves, and every request to join it is cancelled, ' +
+  'so its Fleets are free to join another Armada. Every role and delegated ' +
+  'capability here ends with it, and its events still to come are ' +
+  'cancelled. Its history, including which Fleets were in it and when, and ' +
+  'its pictures are kept.</p>';
+
 /**
- * Asks for a Community or Fleet to be closed, and why (FC-022).
+ * Asks for a Community, Fleet or Armada to be closed, and why (FC-022).
  *
  * Closing cannot be undone, so the reader types the name back as well as
  * giving a reason. The name is compared with its edge spaces trimmed from
  * both sides, since nobody can see a trailing space to type it; anything
- * else must match exactly, capitals included.
+ * else must match exactly, capitals included. An Armada is closed the same
+ * way, with its own warning (FC-050).
  */
 @Component({
   selector: 'app-governance-close-dialog',
@@ -62,7 +72,10 @@ export class GovernanceCloseDialogComponent {
     >(MatDialogRef);
   private readonly _fb = inject(FormBuilder);
 
-  readonly warning = GOVERNANCE_CLOSE_WARNING;
+  readonly warning =
+    this.data.scopeNoun === 'Armada'
+      ? GOVERNANCE_ARMADA_CLOSE_WARNING
+      : GOVERNANCE_CLOSE_WARNING;
   readonly maxLength = GOVERNANCE_REASON_LIMIT;
 
   readonly form = this._fb.nonNullable.group({

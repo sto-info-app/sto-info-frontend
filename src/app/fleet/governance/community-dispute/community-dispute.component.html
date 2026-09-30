@@ -1,6 +1,8 @@
 @if (state$ | async; as state) {
   <app-fleet-page-shell
     heading="Site administration"
+    helpSlug="site-admin-disputes-and-investigations"
+    helpLabel="Help with Fleet disputes"
     [subject]="subjectOf(state)"
     [isLoading]="state.kind === 'LOADING'"
     loadingText="Reading the Community"
@@ -182,11 +184,7 @@
                       class="fleet-community-table__number">
                       {{ row.memberCount ?? '—' }}
                     </td>
-                    <td data-label="Seen by">
-                      {{
-                        row.visibility ? audienceLabels[row.visibility] : '—'
-                      }}
-                    </td>
+                    <td data-label="Seen by">{{ seenBy(row) }}</td>
                     <td data-label="Status">{{ row.status | titlecase }}</td>
                   </tr>
                 }

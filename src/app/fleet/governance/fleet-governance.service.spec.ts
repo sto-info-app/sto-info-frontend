@@ -196,6 +196,17 @@ describe('FleetGovernanceService', () => {
       { reason: 'Merged.' },
     ],
     [
+      'an Armada’s closure by its Owner, with the reason (FC-050)',
+      () =>
+        service.close(
+          { communityId: 'community-1', fleetId: null, armadaId: 'armada-1' },
+          'Wound up.',
+        ),
+      'POST',
+      `${API_URLS.FLEET_COMMUNITIES}/community-1/armadas/armada-1/governance/close`,
+      { reason: 'Wound up.' },
+    ],
+    [
       'where ownership stands',
       () => service.ownership('community-1'),
       'GET',
@@ -215,6 +226,13 @@ describe('FleetGovernanceService', () => {
       'POST',
       `${communityUrl}/ownership/transfer-1/accept`,
       {},
+    ],
+    [
+      'a site administrator’s lookup of any Community (FC-050)',
+      () => service.resolveCommunityAsSiteAdmin('hidden fleet'),
+      'GET',
+      `${API_URLS.FLEET_COMMUNITIES_ADMIN}/by-slug/hidden%20fleet`,
+      undefined,
     ],
     [
       'a dispute view',
@@ -282,6 +300,20 @@ describe('FleetGovernanceService', () => {
       () => service.investigations(2),
       'GET',
       `${API_URLS.FLEET_INVESTIGATIONS_ADMIN}?page=2`,
+      undefined,
+    ],
+    [
+      'a site administrator’s search for Communities (FC-050)',
+      () => service.communitiesAsSiteAdmin('  hidden  ', 2),
+      'GET',
+      `${API_URLS.FLEET_COMMUNITIES_ADMIN}?search=hidden&page=2`,
+      undefined,
+    ],
+    [
+      'a site administrator’s list of every Community from its first page',
+      () => service.communitiesAsSiteAdmin(' '),
+      'GET',
+      `${API_URLS.FLEET_COMMUNITIES_ADMIN}?page=1`,
       undefined,
     ],
     [

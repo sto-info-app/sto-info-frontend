@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
-import { Directive, inject } from '@angular/core';
+import { Directive, inject, Injector } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 
 import {
@@ -24,17 +24,21 @@ import {
 } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
-import { GovernanceTarget } from 'src/app/fleet/governance/fleet-governance.service';
+import {
+  FleetGovernanceService,
+  GovernanceTarget,
+} from 'src/app/fleet/governance/fleet-governance.service';
 import { GOVERNANCE_READER_ROLES } from 'src/app/fleet/governance/governance.constants';
 import {
   FleetScopeStatus,
   FleetScopeViewer,
+  ResolvedFleetCommunity,
 } from 'src/app/models/fleet.models';
 
 /** What to say when nothing answers to a Manage page's address. */
 export const GOVERNANCE_MISSING =
-  'Nothing here answers to that address. It may have been closed, or the ' +
-  'address may have changed.';
+  'Nothing here answers to that address. There may be nothing there, or it ' +
+  'may not be shown to you.';
 
 /** What to say when a Manage page could not be read for any other reason. */
 export const GOVERNANCE_ERROR = 'This could not be read. Please try again.';
@@ -94,6 +98,13 @@ export abstract class GovernancePageDirective<T> {
   protected readonly _scopeService = inject(FleetScopeService);
   protected readonly _authService = inject(AuthService);
 
+  /**
+   * Finds the governance service when a site administrator's read is needed.
+   * Asked for then rather than injected, since the Fleet's news, events and
+   * activity pages are built on this too and never need it.
+   */
+  private readonly _injector = inject(Injector);
+
   /** Asks for the page again, keeping the address. */
   private readonly _reload$ = new BehaviorSubject<void>(undefined);
 
@@ -102,6 +113,17 @@ export abstract class GovernancePageDirective<T> {
 
   /** What to tell a reader the page is not open to. */
   abstract readonly notPermittedMessage: string;
+
+  /**
+   * Whether a site administrator finds the Community through their own read,
+   * whoever may see it (FC-050), rather than the public one.
+   *
+   * Steve's decision of 30 September 2026: a site administrator reaches every
+   * Community's dispute page, and the Manage hub that leads to it. Those two
+   * pages turn this on; every other page, and everybody but a site
+   * administrator on those two, still asks the public read.
+   */
+  protected readonly _siteAdminFindsAnyCommunity: boolean = false;
 
   /** The scope and the page, reloaded whenever the address changes. */
   readonly state$: Observable<GovernancePageState<T>> = combineLatest([
@@ -195,6 +217,27 @@ export abstract class GovernancePageDirective<T> {
   }
 
   /**
+   * Finds the Community a Community's page is about.
+   *
+   * Through the public read, which answers only a reader who may see it, or
+   * for a site administrator on a page that says so, through theirs, which
+   * answers whoever may see it.
+   *
+   * @param communitySlug - The segment the reader arrived on.
+   * @returns The Community, and what the reader holds there.
+   */
+  protected resolveCommunity(
+    communitySlug: string,
+  ): Observable<ResolvedFleetCommunity> {
+    return this._siteAdminFindsAnyCommunity &&
+      this._authService.isLoggedInAsAdmin()
+      ? this._injector
+          .get(FleetGovernanceService)
+          .resolveCommunityAsSiteAdmin(communitySlug)
+      : this._scopeService.resolveCommunity(communitySlug);
+  }
+
+  /**
    * Reads the page, once the scope is resolved and the reader may.
    *
    * @param scope - The scope.
@@ -283,7 +326,7 @@ export abstract class GovernancePageDirective<T> {
     }
 
     if (platformSegment === null) {
-      return this._scopeService.resolveCommunity(communitySlug).pipe(
+      return this.resolveCommunity(communitySlug).pipe(
         map(({ community, viewer }) => {
           const scopeLink = FLEET_LINKS.community(community.slug);
 

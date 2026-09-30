@@ -85,6 +85,8 @@ describe('GovernanceCloseDialogComponent', () => {
     expect(text()).toContain('cannot be undone');
     expect(text()).toContain('United Federation Alliance');
     expect(text()).not.toContain('site administrator');
+    expect(text()).toContain('Every role and delegated capability');
+    expect(text()).not.toContain('Every Fleet in it leaves');
   });
 
   it('tells a site administrator where the reason is kept', async () => {
@@ -134,6 +136,45 @@ describe('GovernanceCloseDialogComponent', () => {
     expect(text()).toContain(
       `Keep it to ${GOVERNANCE_REASON_LIMIT} characters.`,
     );
+  });
+
+  describe('an Armada', () => {
+    it('says its Fleets leave it, and asks its Owner for the name and why', async () => {
+      await render({ scopeNoun: 'Armada', name: 'Sol Armada' });
+
+      expect(text()).toContain('Close this Armada');
+      expect(text()).toContain('Every Fleet in it leaves');
+      expect(text()).toContain('which Fleets were in it and when');
+
+      type('#governance-close-name', 'Sol Armada');
+      type('#governance-close-reason', ' Wound up. ');
+      press('Close it');
+
+      expect(dialogRef.close).toHaveBeenCalledWith({ reason: 'Wound up.' });
+    });
+
+    it('still refuses a name that does not match', async () => {
+      await render({ scopeNoun: 'Armada', name: 'Sol Armada' });
+      type('#governance-close-name', 'Sol');
+      press('Close it');
+
+      expect(dialogRef.close).not.toHaveBeenCalled();
+      expect(text()).toContain('That is not its name.');
+    });
+
+    it('asks a site administrator why', async () => {
+      await render({
+        scopeNoun: 'Armada',
+        name: 'Sol Armada',
+        asSiteAdmin: true,
+      });
+      type('#governance-close-name', 'Sol Armada');
+      press('Close it');
+
+      expect(dialogRef.close).not.toHaveBeenCalled();
+      expect(text()).toContain('Every Fleet in it leaves');
+      expect(text()).toContain('Say why');
+    });
   });
 
   it('closes with nothing when kept open', async () => {

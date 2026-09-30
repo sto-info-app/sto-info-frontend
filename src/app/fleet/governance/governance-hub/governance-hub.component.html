@@ -8,6 +8,8 @@
 
   <app-fleet-page-shell
     heading="Manage"
+    helpSlug="roles-ownership-and-closing"
+    helpLabel="Help with roles and ownership"
     [subject]="subjectOf(state)"
     [isLoading]="state.kind === 'LOADING'"
     loadingText="Reading who runs this"
@@ -36,8 +38,8 @@
 
       @if (scope.isClosed) {
         <p class="governance-hub__closed">
-          This {{ scope.isCommunity ? 'Community' : 'Fleet' }} is closed. Its
-          history can still be read.
+          This {{ scopeNounOf(scope) }} is closed. Its history can still be
+          read.
         </p>
       }
 
@@ -62,13 +64,21 @@
           aria-labelledby="governance-close-heading">
           <div class="lcars-text-bar">
             <span id="governance-close-heading"
-              >Close this {{ scope.isCommunity ? 'Community' : 'Fleet' }}</span
+              >Close this {{ scopeNounOf(scope) }}</span
             >
           </div>
-          <p>
-            Closing ends every role and delegated capability here, and cannot be
-            undone. You will be asked for its name and a reason.
-          </p>
+          @if (scope.isArmada) {
+            <p>
+              Closing takes every Fleet out of it and ends every role and
+              delegated capability here, and cannot be undone. You will be asked
+              for its name and a reason.
+            </p>
+          } @else {
+            <p>
+              Closing ends every role and delegated capability here, and cannot
+              be undone. You will be asked for its name and a reason.
+            </p>
+          }
           <button
             type="button"
             class="lcars-btn lcars-btn-auto red"

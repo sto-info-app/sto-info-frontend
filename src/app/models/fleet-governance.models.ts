@@ -3,6 +3,8 @@
  * (FC-022). Mirrors the server's `fleet/governance` DTOs.
  */
 
+import { FleetAudience, FleetScopeStatus } from './fleet.models';
+
 /** A fixed role label, as the server names it. */
 export enum FleetScopeRole {
   OWNER = 'OWNER',
@@ -203,6 +205,28 @@ export interface FleetInvestigation {
 /** A page of site administrators' looks into Fleets. */
 export interface FleetInvestigationPage {
   readonly items: FleetInvestigation[];
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
+}
+
+/**
+ * A Community as a site administrator finds it for its dispute page, whoever
+ * may see it (FC-050).
+ */
+export interface AdminCommunitySummary {
+  readonly id: string;
+  readonly name: string;
+  readonly slug: string;
+  readonly visibility: FleetAudience;
+  readonly status: FleetScopeStatus;
+  /** Null when it has no Owner, or its Owner has no username. */
+  readonly ownerUsername: string | null;
+}
+
+/** A page of Communities a site administrator found. */
+export interface AdminCommunityPage {
+  readonly items: AdminCommunitySummary[];
   readonly total: number;
   readonly page: number;
   readonly pageSize: number;

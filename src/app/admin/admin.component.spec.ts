@@ -89,6 +89,17 @@ describe('AdminComponent', () => {
     expect(link?.textContent).toContain('Manage Permissions');
   });
 
+  // Steve's decision of 30 September 2026: a site administrator reaches any
+  // Community's dispute page, and this is the way in to a hidden one.
+  it('links to the Fleet disputes page (FC-050)', () => {
+    fixture.detectChanges();
+
+    const link: HTMLAnchorElement | null = fixture.nativeElement.querySelector(
+      'a[href="/admin/fleet-disputes"]',
+    );
+    expect(link?.textContent).toContain('Fleet Disputes');
+  });
+
   it('links to the scan diagnostics page', () => {
     fixture.detectChanges();
 

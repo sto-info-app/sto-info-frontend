@@ -12,6 +12,12 @@ export const SCOPE_OWNERSHIP_TRANSFER_CAPABILITY = 'scope.ownership.transfer';
 /** Closing: the Owner's, and not delegable. */
 export const SCOPE_CLOSE_CAPABILITY = 'scope.close';
 
+/**
+ * Changing a Community's or Fleet's own settings — its name, web address and
+ * who can see it: the Owner's, and not delegable.
+ */
+export const SCOPE_SETTINGS_MANAGE_CAPABILITY = 'scope.settings.manage';
+
 /** Who may read who governs a scope. */
 export const GOVERNANCE_READER_ROLES: readonly string[] = [
   FleetScopeRole.OWNER,

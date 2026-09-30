@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { Observable, of, throwError } from 'rxjs';
 
 import {
+  governanceCommunity,
   GovernanceReader,
   governanceFleet,
   governanceRoute,
@@ -38,6 +39,12 @@ class TestGovernancePageComponent extends GovernancePageDirective<string> {
   protected load(): Observable<string> {
     return this.loadWith();
   }
+}
+
+/** The same page, where a site administrator finds any Community (FC-050). */
+@Component({ selector: 'app-test-admin-governance-page', template: '' })
+class TestAdminGovernancePageComponent extends TestGovernancePageComponent {
+  protected override readonly _siteAdminFindsAnyCommunity = true;
 }
 
 describe('GovernancePageDirective', () => {
@@ -218,6 +225,65 @@ describe('GovernancePageDirective', () => {
     states();
 
     expect(route.scopes.resolveCommunity).toHaveBeenLastCalledWith('');
+  });
+
+  // Steve's decision of 30 September 2026, for the pages that ask for it.
+  describe('a site administrator’s own read (FC-050)', () => {
+    let governance: { resolveCommunityAsSiteAdmin: jest.Mock };
+
+    /**
+     * Builds a page.
+     *
+     * @param reader - Who is reading.
+     * @param type - Which page.
+     */
+    function buildWith(
+      reader: GovernanceReader,
+      type: typeof TestGovernancePageComponent,
+    ): void {
+      governance = {
+        resolveCommunityAsSiteAdmin: jest.fn(() =>
+          of(governanceCommunity({ roles: ['ADMIN'] })),
+        ),
+      };
+      route = governanceRoute(reader, governance);
+      TestBed.configureTestingModule({
+        imports: [type],
+        providers: route.providers,
+      });
+      page = TestBed.createComponent(type).componentInstance;
+    }
+
+    it('finds the Community through it on a page that asks for it', () => {
+      buildWith({ isSiteAdmin: true }, TestAdminGovernancePageComponent);
+
+      const ready = states()[1] as { scope: GovernanceScopeVm };
+
+      expect(governance.resolveCommunityAsSiteAdmin).toHaveBeenCalledWith(
+        'united-federation-alliance',
+      );
+      expect(route.scopes.resolveCommunity).not.toHaveBeenCalled();
+      expect(ready.scope.roles).toEqual(['ADMIN']);
+      expect(ready.scope.isSiteAdmin).toBe(true);
+    });
+
+    it('asks the public read for anybody else on that page', () => {
+      buildWith({ roles: ['OWNER'] }, TestAdminGovernancePageComponent);
+
+      states();
+
+      expect(route.scopes.resolveCommunity).toHaveBeenCalled();
+      expect(governance.resolveCommunityAsSiteAdmin).not.toHaveBeenCalled();
+    });
+
+    it('asks the public read for a site administrator on any other page', () => {
+      buildWith({ isSiteAdmin: true }, TestGovernancePageComponent);
+
+      states();
+
+      expect(route.scopes.resolveCommunity).toHaveBeenCalled();
+      expect(governance.resolveCommunityAsSiteAdmin).not.toHaveBeenCalled();
+    });
   });
 
   it('answers to a missing Fleet segment with an empty one', () => {
