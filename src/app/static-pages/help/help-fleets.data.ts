@@ -1063,6 +1063,7 @@ const FLEET_ROSTER_GUIDES: HelpGuide[] = [
       guideSection('What it is for', [
         'A roster export is the file Star Trek Online writes listing a Fleet’s members: each Character and @handle, with their level, class, rank, contribution total, Join Date, Last Active date and public comment.',
         'Each export is a snapshot of one moment. The Fleet’s Roster, History and reports are built from the exports imported, so the more often one is imported, the more they can say.',
+        'STO Info cannot tell whether a file really came from the game unchanged: an export is taken at its word. So import only files the game wrote for you, or somebody you trust. Every import keeps who sent it, and an investigator can take a wrong one out of the history.',
       ]),
       guideSection('Who can use it', [
         'Importing needs Import rosters at the Fleet, and recording former names needs Investigate imports. The Owner and Admins hold both, of the Fleet or of its Community; anybody else holds them only if the Owner gives them.',
