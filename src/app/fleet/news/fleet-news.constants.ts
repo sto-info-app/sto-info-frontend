@@ -33,7 +33,8 @@ export type FleetNewsScopeKind = 'COMMUNITY' | 'FLEET' | 'ARMADA';
  *
  * Written as who can read the post rather than as the value's name. A
  * Fleet's members are its approved members; an Armada's are the members of
- * the Fleets placed in it.
+ * the Fleets placed in it; a Community's are the members of every Fleet in
+ * it, with its Owner and Admins (FC-050).
  *
  * @param audience - The audience.
  * @param kind - The kind of scope the post belongs to.
@@ -50,7 +51,7 @@ export function fleetNewsAudienceLabel(
       return 'The Community’s followers and members';
     case 'FLEET_MEMBERS':
       return {
-        COMMUNITY: 'Members of the Community',
+        COMMUNITY: 'Members of the Community’s Fleets, its Owner and Admins',
         FLEET: 'Approved members of the Fleet',
         ARMADA: 'Members of the Armada’s Fleets',
       }[kind];

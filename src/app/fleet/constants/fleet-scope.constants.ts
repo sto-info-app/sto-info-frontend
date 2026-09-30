@@ -1,8 +1,8 @@
 /**
  * The three things a Fleet page can be about, and how each is named and drawn.
  *
- * A Community holds Fleets, and an Armada holds Fleets from more than one
- * Community, so a directory listing shows all three side by side and a reader
+ * A Community holds Fleets, and an Armada allies some of one Community's
+ * Fleets, so a directory listing shows all three side by side and a reader
  * has to be able to tell at a glance which one they are looking at.
  *
  * That distinction is carried by a label and an icon rather than by a colour.
@@ -20,7 +20,7 @@ export const FLEET_SCOPE_COMMUNITY = 'COMMUNITY';
 /** A single Fleet on one platform. */
 export const FLEET_SCOPE_FLEET = 'FLEET';
 
-/** An Armada, which holds Fleets from one or more Communities. */
+/** An Armada, which allies Fleets of its own Community. */
 export const FLEET_SCOPE_ARMADA = 'ARMADA';
 
 /** Which level of the Fleet hierarchy something sits at. */
@@ -50,16 +50,30 @@ export const FLEET_SCOPE_ICONS: Readonly<Record<FleetScopeType, string>> = {
 };
 
 /**
- * How each visibility setting is worded on a scope's page.
+ * How each visibility setting is worded on a Fleet's page, and wherever else
+ * a Fleet's own audience is read back.
  *
  * Written as who can see it rather than as the value's name, because
  * "FLEET_MEMBERS" is a column and "Approved Fleet members" is an answer.
+ * A Community's reads differently: see {@link COMMUNITY_AUDIENCE_LABELS}.
  */
 export const FLEET_AUDIENCE_LABELS: Readonly<Record<string, string>> = {
   PUBLIC: 'Anyone, including signed-out visitors',
-  COMMUNITY: 'Subscribers and members of the Community',
+  COMMUNITY: 'Followers of the Community and members of its Fleets',
   FLEET_MEMBERS: 'Approved members of the Fleet',
   PRIVATE: 'The owner alone',
+};
+
+/**
+ * How each visibility setting is worded when it is a Community's own.
+ *
+ * "Fleet members" on a Community is not one Fleet's members but the members
+ * of every Fleet in it, with its Owner and Admins, by Steve's decision of 30
+ * September 2026 (FC-050). The rest read as they do on a Fleet.
+ */
+export const COMMUNITY_AUDIENCE_LABELS: Readonly<Record<string, string>> = {
+  ...FLEET_AUDIENCE_LABELS,
+  FLEET_MEMBERS: 'Members of the Community’s Fleets, its Owner and Admins',
 };
 
 /**
@@ -89,6 +103,27 @@ export const FLEET_AUDIENCE_CHOICES: Readonly<Record<string, string>> = {
   FLEET_MEMBERS: 'Fleet members',
   PRIVATE: 'Only me',
 };
+
+/**
+ * What the audience choices mean when the thing being seen is a Community.
+ *
+ * Both count the approved members of every Fleet in the Community, by Steve's
+ * decision of 30 September 2026 (FC-050), so a Fleet's members reach their
+ * own Fleet without following. "Community members" adds its followers and
+ * whoever holds a role there, and means the same on its Fleets, so a member
+ * of one Fleet sees a sibling set to it; "Fleet members" leaves followers
+ * out, adding only the Owner, its Admins and whoever holds `members.view`
+ * there. The two differ, so the form says how rather than offering one fewer
+ * choice. The last sentence is the consequence people miss: a Fleet's page
+ * reads its Community first.
+ */
+export const COMMUNITY_AUDIENCE_HINT =
+  'For a Community, “Community members” means its followers, the members ' +
+  'of any of its Fleets and anyone holding a Community role, and it means ' +
+  'the same on its Fleets. “Fleet members” leaves out followers: the ' +
+  'members of its Fleets, the Owner, its Admins and anyone given “View ' +
+  'members” there. Anyone who cannot see the Community cannot open its ' +
+  'Fleets’ pages either, short of an invitation.';
 
 /**
  * What a page says about the caller's own standing at a scope.

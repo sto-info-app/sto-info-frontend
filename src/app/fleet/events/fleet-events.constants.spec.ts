@@ -11,8 +11,13 @@ describe('fleet events wording', () => {
   it.each([
     ['PUBLIC', 'FLEET', 'Anyone'],
     ['COMMUNITY', 'FLEET', 'The Community’s followers and members'],
-    ['MEMBERS', 'COMMUNITY', 'Members of the Community'],
+    [
+      'MEMBERS',
+      'COMMUNITY',
+      'Members of the Community’s Fleets, its Owner and Admins',
+    ],
     ['MEMBERS', 'FLEET', 'Members of the Fleet'],
+    ['MEMBERS', 'ARMADA', 'Members of the Armada'],
     ['OFFICERS', 'ARMADA', 'The Owner, Admins and Officers of the Armada'],
     ['SELECTED', 'FLEET', 'Chosen Fleets and roles'],
   ] as const)('words %s for a %s', (audience, kind, label) => {

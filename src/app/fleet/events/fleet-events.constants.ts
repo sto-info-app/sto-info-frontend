@@ -77,6 +77,10 @@ export const FLEET_ADJUSTMENT_NOTES: Readonly<
 /**
  * Who an event is for, in words for the kind of scope.
  *
+ * A Community's own members are the members of every Fleet in it, with its
+ * Owner and Admins (FC-050), so they are named as such rather than as members
+ * of the Community, which its followers might take to mean them.
+ *
  * @param audience - The audience.
  * @param kind - The kind of scope.
  * @returns Who may see it.
@@ -98,7 +102,9 @@ export function fleetEventAudienceLabel(
     case 'COMMUNITY':
       return 'The Community’s followers and members';
     case 'MEMBERS':
-      return `Members of ${scope}`;
+      return kind === 'COMMUNITY'
+        ? 'Members of the Community’s Fleets, its Owner and Admins'
+        : `Members of ${scope}`;
     case 'OFFICERS':
       return `The Owner, Admins and Officers of ${scope}`;
     case 'SELECTED':
