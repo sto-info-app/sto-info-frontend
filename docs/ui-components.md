@@ -602,8 +602,10 @@ Notes:
 ## Help
 
 The guides are data in `src/app/static-pages/help/help.data.ts`, grouped into
-sections (`HelpTopic`), and three pages show them. Their styles are in
-`_help.scss`.
+sections (`HelpTopic`), and three pages show them. The Fleets section and
+Running the site (FC-050) live in `help-fleets.data.ts` and
+`help-site-admin.data.ts`, which `help.data.ts` gathers; `help-section.ts` holds
+the `guideSection` helper they share. Their styles are in `_help.scss`.
 
 - **The Help home** (`/help`, `HelpComponent`) is one tile per section, then
   "Still stuck?" (FC-048). A tile is a panel card in its section's colour: the
@@ -623,15 +625,37 @@ Which sections and guides a reader sees is decided in one place,
 
 - A section, a guide or one part of a guide can wait on a switch with
   `requiresFeature`: `STORYTIME`, `FLEET` or `CHAT` (FC-049).
-  `HelpFeaturesService` reads all three. Help about a switched-off feature is
-  not offered; a switch that can't be read counts as on.
+  `HelpFeaturesService` reads all three; a switch that can't be read counts as
+  on. `HELP_HIDDEN_WHEN_OFF` says what a switched-off feature's help does:
+  Storytime's is not offered, while Fleet Community's and Fleet chat's stay,
+  so they can still be found, and their pages carry a `.help-switched-off`
+  note (FC-050). The note stands once, over the widest thing that is off: a
+  section, then a guide, then one part of it.
+- A section with `requiresAdmin` is offered to site administrators alone, and
+  answers anybody else with the not-found page (FC-050).
 - A guide with `requiresPermission` waits on that permission.
 - A section left with no guides is dropped.
 - If permissions can't be read, the public guides stay.
 
-An address the reader can't open goes to the not-found page. A section or
-guide whose feature is off, or unreachable, says so instead. A part of a guide
-about a switched-off feature is left out.
+An address the reader can't open goes to the not-found page. A Storytime
+section or guide whose feature is off, or unreachable, says so instead, and a
+part of a guide about it is left out.
+
+**Fleets and Running the site** (FC-050). Fleets is second, sky like every
+Fleet page, and waits on Fleet Community as a whole; Running the site is last,
+bluey like Running Storytime, and for site administrators alone. Every guide in
+both has the same six parts in order — What it is for, Who can use it, Where to
+find it, one or more How sections, Who can see it, When something goes wrong —
+and `help-fleets.data.spec.ts` checks it, with curly quotes throughout. Each
+Fleet page, and each admin page a Running the site guide covers, links to one
+guide through `<app-fleet-page-shell>`'s `helpSlug` and `helpLabel`, or an
+`<app-help-link>` under its heading where there is no shell. One link per page:
+the Community, Fleet and Armada overviews share `fleet-scope-view`'s, and the
+three directory tabs each carry their own, since `<app-fleet-home>`'s shell
+wraps every Fleet page. `help-link-placements.spec.ts` lists where each link
+goes and what it says, and fails if any template anywhere links to a guide that
+does not exist. Dialogs carry none: a Material dialog stays open over a
+`routerLink` navigation, since it closes only on the browser's back and forward.
 
 **STO Info settings** (FC-049) has a guide for the Settings page and one for
 each of its panels. A help link under each of the page's headings leads to
@@ -639,7 +663,7 @@ that panel's guide. The guides quote the form's own labels; `help.testing.ts`
 lists them, and the specs for the page and for the Help data both check them.
 
 `help-guide-slugs.json` lists every public guide and every section anybody may
-open. `scripts/generate-content.mjs` reads it for the sitemap, and
+open; Running the site's are left out. `scripts/generate-content.mjs` reads it for the sitemap, and
 `help.data.spec.ts` fails if it and the guides disagree.
 
 ---
@@ -882,6 +906,7 @@ not permitted apart. Each lives below the scope's **Manage** hub
 | History | `…/manage/history` | The Owner and Admins |
 | Ownership | `communities/:slug/manage/ownership` | The Community's Owner |
 | Site administration | `communities/:slug/manage/dispute` | A site administrator |
+| Settings | `…/manage/settings`, a Community's or a Fleet's | The Owner (`scope.settings.manage`) |
 
 A Fleet's **Manage** tab is offered to its Owner and Admins (`roles` on the tab
 strip's view model). A Community's page offers **Manage** among its actions to
@@ -900,10 +925,27 @@ hands — is marked `automatic` and reads as what ended, naming nobody, with the
 cause as its reason (FC-039). The page says the history is kept for as long as
 the scope exists.
 
+**Settings** (`ScopeSettingsComponent`, FC-050; `FLEET_LINKS.communitySettings`,
+`FLEET_LINKS.fleetSettings`) changes what registration set, with registration's
+labels: the name, web address and who can see it, and for a Community its
+description, how people join and the timezone its dates are shown in, or for a
+Fleet its allegiance. The hub offers it to whoever holds
+`scope.settings.manage`; the page opens to the Owner as well, to say why a
+closed or suspended scope — or a Fleet in one — cannot change. Only what
+changed is sent, with the revision read; a 409 says whether it changed
+meanwhile (with **Reload**) or the web address was taken. A rename makes a new
+web address from the new name, the old one kept by the server as a redirect,
+and the page follows the scope there. After a Fleet is renamed it points at
+**Former names**, since roster exports taken before carry the old name; it
+records nothing itself. A Fleet's recruitment state is changed in its
+recruitment settings, which the page links to, and its platform cannot change.
+
 **`<app-governance-close-dialog>`** — opened through `MatDialog` by the hub and
 by the site administration page. Closing cannot be undone, so the reader types
 the name back as well as a reason; the name is compared with its edge spaces
-trimmed. It closes with `{ reason }`, or nothing when kept open.
+trimmed. It closes with `{ reason }`, or nothing when kept open. For an Armada
+it says what closing one does instead: its Fleets leave, its open requests are
+cancelled, and which Fleets were in it stays readable.
 
 **Site administration** (FC-036) adds, on the dispute page:
 
@@ -919,6 +961,17 @@ trimmed. It closes with `{ reason }`, or nothing when kept open.
 - **Look into its imports…** on each Fleet: the reason dialog asks for a
   purpose of 10 to 500 characters, and the page then goes to the Fleet's
   Investigate pages, open to that administrator, read-only, for 24 hours.
+
+A site administrator opens the dispute page of any Community, members-only and
+private ones included (FC-050): the page sets the directive's
+`_siteAdminFindsAnyCommunity`, so for them `resolveCommunity` finds it through
+`FleetGovernanceService.resolveCommunityAsSiteAdmin`
+(`GET /admin/fleet-communities/by-slug/:slug`) rather than the public read.
+Anybody else is still answered by the public read and turned away. The Manage
+hub sets it too, so its **Site administration** entry is reached from the hub
+at a Community a site administrator cannot otherwise see; every other Manage
+page, and the Community's own page, still use the public read. The way in from
+the Admin area is **Fleet Disputes** (`/admin/fleet-disputes`).
 
 History reads a suspension and a reinstatement as sentences too.
 
@@ -1010,8 +1063,9 @@ Approving asks where the Fleet goes; rejecting asks why, which the requesting
 Fleet is shown.
 
 Its Manage pages are the governance pages, told by their route's
-`data.governs: 'ARMADA'` that the scope is an Armada. There is no closing
-there: an Armada is closed from its Community.
+`data.governs: 'ARMADA'` that the scope is an Armada. Its Owner, who holds
+`scope.close` there, closes it from the hub as a Fleet is closed, with its
+name and a reason, through `POST …/armadas/:a/governance/close` (FC-050).
 
 ### News
 
@@ -1267,6 +1321,13 @@ Each is offered only while chat is switched on.
 - **`/admin/fleet-investigations`**, "Fleet Investigations": every site
   administrator's look into a Fleet, newest first, with its purpose, linking to
   the Fleet while it is open.
+- **`/admin/fleet-disputes`**, "Fleet Disputes" (FC-050,
+  `FleetDisputeSearchComponent`): finds any live Community by name or web
+  address, members-only and private ones included, through
+  `FleetGovernanceService.communitiesAsSiteAdmin`
+  (`GET /admin/fleet-communities`). Every Community is listed by name until a
+  term is searched for, 20 to a page, each with who may see it, its state and
+  its Owner's username, and its name links to its dispute page.
 - **`/admin/roster-erasures`**, "Roster Erasures" (FC-038,
   `RosterErasureListComponent`), for a verified request to erase somebody's
   roster data:
