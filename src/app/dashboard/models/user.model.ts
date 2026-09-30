@@ -42,9 +42,11 @@ export type PresenceVisibility = 'EVERYONE' | 'FRIENDS' | 'FLEETS_AND_ARMADAS';
  * Every account setting, as the settings page reads them.
  *
  * `displayTimezone` is null when dates should follow the viewer's own device,
- * which is the default. `stoExportTimezone` is null until the user has chosen
- * one; it is deliberately never guessed, because reading a roster export in the
- * wrong zone shifts every date in it by hours.
+ * which is the default. `stoExportTimezone` is null when roster exports should
+ * be read in the zone of the device importing them, which is also the default;
+ * either way the import page shows dates read through the zone before
+ * anything is imported, because reading an export in the wrong zone shifts
+ * every date in it by hours.
  */
 export interface UserSettings {
   privacyMode: boolean;

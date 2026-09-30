@@ -336,7 +336,7 @@ describe('SettingsComponent', () => {
         '#export-timezone',
       ) as HTMLSelectElement;
 
-      expect(select.options[0].textContent).toContain('Ask me each time');
+      expect(select.options[0].textContent).toContain('My device’s zone');
       expect(fixture.nativeElement.textContent).toContain(
         'It is separate from the setting above',
       );

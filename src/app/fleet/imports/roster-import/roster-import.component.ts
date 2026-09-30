@@ -6,12 +6,13 @@ import {
   Component,
   inject,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 
 import { catchError, map, Observable, of, startWith, switchMap } from 'rxjs';
 
+import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { ROSTER_IMPORT_CAPABILITY } from 'src/app/fleet/imports/roster-import.constants';
@@ -32,6 +33,7 @@ import {
   RosterSourceHeaderShape,
 } from 'src/app/models/fleet-import.models';
 import { ResolvedStoFleet, StoFleet } from 'src/app/models/fleet.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
@@ -41,6 +43,7 @@ import {
   availableTimezones,
   describeTimezone,
   deviceTimezone,
+  isUsableTimezone,
 } from 'src/app/shared/utils/timezone.utils';
 
 /** What to say when the Fleet could not be read for any reason but absence. */
@@ -49,8 +52,8 @@ export const ROSTER_CHECK_ERROR =
 
 /** What to say when nothing answers to the address. */
 export const ROSTER_CHECK_MISSING =
-  'No Fleet here answers to that address. It may have been closed, or the ' +
-  'address may have changed.';
+  'No Fleet here answers to that address. There may be no such Fleet, or ' +
+  'it may not be shown to you.';
 
 /** What to say when the check itself could not be run. */
 export const ROSTER_CHECK_FAILED =
@@ -139,11 +142,12 @@ export interface RosterImportRepeatNotice {
  * of dates and obvious when the same dates are drawn beside the instants they
  * were read as. That is what the sample is for.
  *
- * The control starts on the zone the reader's own browser reports, because
- * whoever is checking an export is far likelier to have taken it themselves
- * than to be uploading somebody else's. It is a starting point and not an
- * assumption — the whole page exists so that it can be corrected before
- * anything is committed to.
+ * The control starts on the zone chosen under "Read Fleet roster exports as"
+ * in Settings, or, when none has been, on the zone the reader's own browser
+ * reports, because whoever is checking an export is far likelier to have
+ * taken it themselves than to be uploading somebody else's. It is a starting
+ * point and not an assumption — the whole page exists so that it can be
+ * corrected before anything is committed to.
  *
  * ## Three ways a Fleet cannot take one
  *
@@ -163,6 +167,7 @@ export interface RosterImportRepeatNotice {
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,
     LcarsSuccessMessageComponent,
@@ -176,13 +181,14 @@ export class RosterImportComponent {
   private readonly _importService = inject(RosterImportService);
   private readonly _router = inject(Router);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _settings = inject(UserSettingsService);
 
   /** Every zone the browser can convert with, UTC first. */
   readonly timezones = availableTimezones();
 
-  /** The timezone control, started on whatever clock this device is on. */
+  /** The timezone control, started on the reader's chosen zone or device's. */
   readonly form = inject(FormBuilder).group({
-    timezone: [deviceTimezone(), Validators.required],
+    timezone: [this.startingZone(), Validators.required],
   });
 
   /** The export chosen, or null while none has been. */
@@ -245,6 +251,31 @@ export class RosterImportComponent {
         this.forget();
         this._cdr.markForCheck();
       });
+
+    // The settings load with the application and can arrive after the page
+    // has drawn. They move the control only until the reader has touched it.
+    toObservable(this._settings.settings)
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        const zone = this.startingZone();
+        const control = this.form.controls.timezone;
+
+        if (control.pristine && control.value !== zone) {
+          control.setValue(zone);
+        }
+      });
+  }
+
+  /**
+   * The zone the control starts on.
+   *
+   * @returns The zone chosen in Settings, or the device's when none has been
+   *   or the one stored cannot be converted with here.
+   */
+  private startingZone(): string {
+    const chosen = this._settings.settings()?.stoExportTimezone ?? null;
+
+    return isUsableTimezone(chosen) ? chosen : deviceTimezone();
   }
 
   /** The Fleet, and whether it can take an import at all. */

@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   ActivatedRoute,
@@ -10,6 +11,11 @@ import {
 
 import { BehaviorSubject, NEVER, of, throwError } from 'rxjs';
 
+import {
+  DEFAULT_USER_SETTINGS,
+  UserSettingsService,
+} from 'src/app/dashboard/services/user-settings.service';
+import { UserSettings } from 'src/app/dashboard/models/user.model';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { RosterImportService } from 'src/app/fleet/imports/roster-import.service';
 import {
@@ -188,6 +194,7 @@ describe('RosterImportComponent', () => {
   let params$: BehaviorSubject<ParamMap>;
   let scopes: { resolveFleet: jest.Mock };
   let imports: { preview: jest.Mock; upload: jest.Mock };
+  let settings: WritableSignal<UserSettings | null>;
 
   beforeEach(async () => {
     params$ = new BehaviorSubject<ParamMap>(
@@ -211,10 +218,13 @@ describe('RosterImportComponent', () => {
       ),
     };
 
+    settings = signal<UserSettings | null>(null);
+
     await TestBed.configureTestingModule({
       imports: [RosterImportComponent],
       providers: [
         provideRouter([]),
+        { provide: UserSettingsService, useValue: { settings } },
         { provide: FleetScopeService, useValue: scopes },
         { provide: RosterImportService, useValue: imports },
         { provide: ActivatedRoute, useValue: { paramMap: params$ } },
@@ -378,6 +388,62 @@ describe('RosterImportComponent', () => {
       render();
 
       expect(component.form.controls.timezone.value).toBe(deviceTimezone());
+    });
+
+    describe('with a zone chosen in Settings', () => {
+      // Never the device's own, so the test cannot pass by coincidence.
+      const chosen =
+        deviceTimezone() === 'Pacific/Auckland'
+          ? 'America/New_York'
+          : 'Pacific/Auckland';
+
+      /**
+       * Settings as they stand with an export zone chosen.
+       *
+       * @param stoExportTimezone - The zone chosen.
+       * @returns The settings.
+       */
+      const choosing = (stoExportTimezone: string | null): UserSettings => ({
+        ...DEFAULT_USER_SETTINGS,
+        stoExportTimezone,
+      });
+
+      it('starts on it', () => {
+        settings.set(choosing(chosen));
+
+        render();
+
+        expect(component.form.controls.timezone.value).toBe(chosen);
+      });
+
+      it('moves to it when the settings arrive after the page', () => {
+        render();
+
+        settings.set(choosing(chosen));
+        fixture.detectChanges();
+
+        expect(component.form.controls.timezone.value).toBe(chosen);
+      });
+
+      it('leaves a zone the reader picked alone', () => {
+        render();
+        const control = component.form.controls.timezone;
+
+        control.setValue('UTC');
+        control.markAsDirty();
+        settings.set(choosing(chosen));
+        fixture.detectChanges();
+
+        expect(control.value).toBe('UTC');
+      });
+
+      it('falls back to the device for a zone this browser cannot use', () => {
+        settings.set(choosing('Not/A_Zone'));
+
+        render();
+
+        expect(component.form.controls.timezone.value).toBe(deviceTimezone());
+      });
     });
 
     it('offers every zone the browser can convert with', () => {

@@ -106,7 +106,7 @@
                 formControlName="stoExportTimezone"
                 aria-describedby="export-timezone-description"
               >
-                <option [ngValue]="null">Ask me each time</option>
+                <option [ngValue]="null">My device’s zone</option>
                 @for (zone of timezones; track zone) {
                   <option [ngValue]="zone">{{ describe(zone) }}</option>
                 }
@@ -114,8 +114,9 @@
               <p id="export-timezone-description" class="settings-description">
                 Star Trek Online writes the times in a roster export using the
                 clock of the computer it was exported from, without saying which
-                zone that was. This is the zone we assume. It is separate from
-                the setting above, and you can change it for a single import.
+                zone that was. An import starts on the zone chosen here, or on
+                the zone of the device you import on. It is separate from the
+                setting above, and you can change it for a single import.
               </p>
             </div>
             @if (isChatOffered) {
