@@ -6,8 +6,10 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 
 import { CharacterLookupService } from 'src/app/dashboard/services/character-lookup.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
+import { EXACT_GAME_NAME_TOO_LONG } from 'src/app/fleet/fleet-name-length';
 import { FleetRegistrationService } from 'src/app/fleet/fleet-registration.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
+import { rosterUnavailableOn } from 'src/app/fleet/imports/roster-import.constants';
 import {
   SCOPE_REGISTER_FAILED,
   SCOPE_REGISTER_FORBIDDEN,
@@ -24,6 +26,7 @@ const COMMUNITY = {
   id: 'community-1',
   slug: 'united-federation-alliance',
   name: 'United Federation Alliance',
+  recruitmentState: 'INVITE_ONLY',
 };
 
 /**
@@ -41,6 +44,7 @@ function duplicate(overrides: Partial<FleetDuplicate> = {}): FleetDuplicate {
     communitySlug: 'ninth-fleet',
     platformId: 'platform-1',
     platformName: 'PC',
+    platformProvidesRosterExport: true,
     lastEffectiveImportAt: null,
     status: FleetScopeStatus.ACTIVE,
     ...overrides,
@@ -313,6 +317,29 @@ describe('FleetRegisterComponent', () => {
       );
     });
 
+    // A console record has no date because the game gives it no export, and
+    // the warning says so in the words its card and its page use.
+    it('says why a console match has no roster rather than calling it never imported', () => {
+      registration.findFleetDuplicates.mockReturnValue(
+        of([
+          duplicate({
+            platformName: 'Xbox',
+            platformProvidesRosterExport: false,
+          }),
+        ]),
+      );
+
+      render();
+      fillRequired();
+      find<HTMLButtonElement>('.lcars-btn.gold')?.click();
+      fixture.detectChanges();
+
+      const text = fixture.nativeElement.textContent;
+
+      expect(text).toContain(rosterUnavailableOn('Xbox'));
+      expect(text).not.toContain('No roster has ever been imported');
+    });
+
     it('names a match that belongs to no Community for what it is', () => {
       registration.findFleetDuplicates.mockReturnValue(
         of([duplicate({ communityId: null, communityName: null })]),
@@ -391,14 +418,28 @@ describe('FleetRegisterComponent', () => {
       expect(sent()['platformId']).toBe('platform-1');
     });
 
-    // Joining at once is the looser choice, and its officers' to make.
-    it('takes applications unless told otherwise', () => {
+    // A Community's recruitment state pre-fills its new Fleets.
+    it('starts on the Community’s own recruitment state', () => {
       render();
+
+      expect(find<HTMLSelectElement>('#fleet-recruitment')?.value).toBe(
+        'INVITE_ONLY',
+      );
 
       fillRequired();
       submit();
 
-      expect(sent()['recruitmentState']).toBe('APPLICATION');
+      expect(sent()['recruitmentState']).toBe('INVITE_ONLY');
+    });
+
+    it('sends the recruitment state the registrant chose instead', () => {
+      render();
+
+      fillRequired();
+      pick('#fleet-recruitment', 'OPEN');
+      submit();
+
+      expect(sent()['recruitmentState']).toBe('OPEN');
     });
 
     it('leaves an unstated allegiance and web address out altogether', () => {
@@ -459,6 +500,36 @@ describe('FleetRegisterComponent', () => {
         expect(find('.register-page__field-error')).not.toBeNull();
       },
     );
+
+    // The server's rule is 64 codepoints, edge spaces included. A name over
+    // it is said to be over it here rather than refused as a failure there.
+    it('says a name over the server’s budget is too long, and sends nothing', () => {
+      render();
+      fillRequired();
+      type('#fleet-name', ` ${'a'.repeat(63)} `);
+      submit();
+
+      expect(registration.registerFleet).not.toHaveBeenCalled();
+      expect(find('.register-page__field-error')?.textContent).toContain(
+        EXACT_GAME_NAME_TOO_LONG,
+      );
+    });
+
+    // An astral character is one codepoint however many UTF-16 units it
+    // takes, so the field must not clip such a name to half its budget.
+    it('accepts a name of astral characters the budget allows', () => {
+      const name = '𝕬'.repeat(64);
+
+      render();
+      fillRequired();
+      type('#fleet-name', name);
+      submit();
+
+      expect(
+        Number(find<HTMLInputElement>('#fleet-name')?.maxLength),
+      ).toBeGreaterThanOrEqual(name.length);
+      expect(sent()['exactGameName']).toBe(name);
+    });
 
     it('cannot be sent twice while the first is in flight', () => {
       registration.registerFleet.mockReturnValue(new Observable());

@@ -9,8 +9,15 @@ import {
   FLEET_AUDIENCE_CHOICES,
   FLEET_RECRUITMENT_CHOICES,
 } from 'src/app/fleet/constants/fleet-scope.constants';
+import { fleetFreshnessOf } from 'src/app/fleet/fleet-card.builders';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetRegistrationService } from 'src/app/fleet/fleet-registration.service';
+import {
+  EXACT_GAME_NAME_MAX_CODEPOINTS,
+  EXACT_GAME_NAME_TOO_LONG,
+  inputCeilingFor,
+  maxCodepointsValidator,
+} from 'src/app/fleet/fleet-name-length';
 import { ScopeDuplicateWarningComponent } from 'src/app/fleet/register/scope-duplicate-warning/scope-duplicate-warning.component';
 import { ScopeRegisterPageDirective } from 'src/app/fleet/register/scope-register-page.directive';
 import {
@@ -23,13 +30,19 @@ import {
   FleetRecruitmentState,
   FleetScopeStatus,
 } from 'src/app/models/fleet.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
-/** Column widths the server enforces, repeated so the form says so first. */
-export const FLEET_NAME_MAX_LENGTH = 255;
+/**
+ * The longest name the server holds, in codepoints, repeated so the form says
+ * so first. Not the column width: ADR-0003's rule is 64.
+ */
+export const FLEET_NAME_MAX_LENGTH = EXACT_GAME_NAME_MAX_CODEPOINTS;
+
+/** Column width the server enforces, repeated so the form says so first. */
 export const FLEET_SLUG_MAX_LENGTH = 80;
 
 /**
@@ -56,6 +69,7 @@ export const FLEET_SLUG_MAX_LENGTH = 80;
     AsyncPipe,
     ReactiveFormsModule,
     ScopeDuplicateWarningComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,
     LoadingBarComponent,
@@ -66,7 +80,11 @@ export class FleetRegisterComponent extends ScopeRegisterPageDirective {
   private readonly _registration = inject(FleetRegistrationService);
   private readonly _lookup = inject(CharacterLookupService);
 
-  readonly nameMaxLength = FLEET_NAME_MAX_LENGTH;
+  /** The name field's `maxlength`: a ceiling, since the rule is codepoints. */
+  readonly nameMaxLength = inputCeilingFor(FLEET_NAME_MAX_LENGTH);
+
+  /** Shown when the name is over the server's budget. */
+  readonly nameTooLong = EXACT_GAME_NAME_TOO_LONG;
   readonly slugMaxLength = FLEET_SLUG_MAX_LENGTH;
 
   readonly recruitmentChoices = Object.entries(FLEET_RECRUITMENT_CHOICES);
@@ -91,16 +109,31 @@ export class FleetRegisterComponent extends ScopeRegisterPageDirective {
     // what gets stored.
     exactGameName: [
       '',
-      [Validators.required, Validators.maxLength(FLEET_NAME_MAX_LENGTH)],
+      [Validators.required, maxCodepointsValidator(FLEET_NAME_MAX_LENGTH)],
     ],
     platformId: ['', [Validators.required]],
     allegianceFactionId: [''],
     slug: ['', [Validators.maxLength(FLEET_SLUG_MAX_LENGTH)]],
-    // A new Fleet takes applications until its officers choose otherwise
-    // (FC-021): joining at once is the looser choice, and theirs to make.
-    recruitmentState: [FleetRecruitmentState.APPLICATION],
+    // Replaced by the Community's own state before the form is drawn, since
+    // a Community's recruitment state pre-fills its new Fleets. The value
+    // here is never seen; it is the column's own default.
+    recruitmentState: [FleetRecruitmentState.CLOSED],
     visibility: [FleetAudience.PUBLIC],
   });
+
+  /**
+   * Starts the recruitment choice on the Community's own.
+   *
+   * The registrant may still change it before registering; it is where the
+   * form starts, not a rule.
+   *
+   * @param context - The Community and the platform catalogue.
+   */
+  protected override prepareForm(context: ScopeRegisterContext): void {
+    this.form.controls.recruitmentState.setValue(
+      context.community.recruitmentState,
+    );
+  }
 
   /**
    * Asks what already answers to the typed name on the chosen platform.
@@ -197,10 +230,7 @@ export class FleetRegisterComponent extends ScopeRegisterPageDirective {
       name: match.exactGameName,
       heldBy: match.communityName ?? 'No Community — a standalone record',
       platform: match.platformName,
-      freshness:
-        match.lastEffectiveImportAt === null
-          ? 'No roster has ever been imported'
-          : `Roster last imported ${this.formatInstant(match.lastEffectiveImportAt)}`,
+      freshness: fleetFreshnessOf(match, this.formatInstant),
       lifecycle:
         match.status === FleetScopeStatus.ACTIVE
           ? null

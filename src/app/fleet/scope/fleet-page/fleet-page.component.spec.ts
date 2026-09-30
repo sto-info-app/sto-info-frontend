@@ -206,6 +206,18 @@ describe('FleetPageComponent', () => {
     expect(scopes.resolveFleet).toHaveBeenLastCalledWith('', '', '');
   });
 
+  // A closed Fleet keeps its address and is still read there, so "it may have
+  // been closed" would be untrue. Absent and hidden are one answer, so which
+  // it is stays unsaid.
+  it('says there may be no such Fleet, or that it is not shown, never closed', () => {
+    render();
+
+    expect(fixture.componentInstance.missingMessage).toContain(
+      'There may be no such Fleet, or it may not be shown to you.',
+    );
+    expect(fixture.componentInstance.missingMessage).not.toContain('closed');
+  });
+
   it('heads the page with the name the game holds, spaces and all', () => {
     render();
 
@@ -310,6 +322,27 @@ describe('FleetPageComponent', () => {
     expect(drawn.kind === 'READY' && drawn.header.facts[0]?.value).toBe(
       'The game provides no roster export on PlayStation',
     );
+  });
+
+  // FC-050: a Fleet's own members are its approved members, never a
+  // sibling Fleet's.
+  it('reads back "Fleet members" as the Fleet’s own members', () => {
+    scopes.resolveFleet.mockReturnValue(
+      of(
+        resolved({
+          fleet: fleet({ visibility: FleetAudience.FLEET_MEMBERS }),
+        }),
+      ),
+    );
+
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.header.facts).toContainEqual({
+      label: 'Visible to',
+      value: 'Approved members of the Fleet',
+    });
   });
 
   it('says when a closed Fleet was closed', () => {

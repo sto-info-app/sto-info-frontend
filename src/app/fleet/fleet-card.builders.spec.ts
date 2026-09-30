@@ -3,6 +3,7 @@ import {
   FLEET_SCOPE_COMMUNITY,
   FLEET_SCOPE_FLEET,
 } from 'src/app/fleet/constants/fleet-scope.constants';
+import { rosterUnavailableOn } from 'src/app/fleet/imports/roster-import.constants';
 import {
   FleetCommunityCard,
   FleetRecruitmentState,
@@ -70,6 +71,7 @@ function fleetCard(overrides: Partial<StoFleetCard> = {}): StoFleetCard {
     duplicateCount: 0,
     recruitmentState: FleetRecruitmentState.OPEN,
     allegianceFactionId: null,
+    platformProvidesRosterExport: true,
     lastEffectiveImportAt: null,
     ...overrides,
   };
@@ -276,6 +278,38 @@ describe('fleet-card.builders', () => {
       const vm = buildFleetCardVm(fleetCard(), formatInstant);
 
       expect(vm.lastObservedLabel).toBe('No roster has ever been imported');
+    });
+
+    // The card and the Fleet's own page give the same reason in the same
+    // words, rather than the card calling a console Fleet neglected.
+    it('should say the game provides no roster export on a console, as the page does', () => {
+      const vm = buildFleetCardVm(
+        fleetCard({
+          platformName: 'Xbox',
+          platformProvidesRosterExport: false,
+        }),
+        formatInstant,
+      );
+
+      expect(vm.lastObservedLabel).toBe(rosterUnavailableOn('Xbox'));
+      expect(vm.lastObservedLabel).toBe(
+        'The game provides no roster export on Xbox',
+      );
+    });
+
+    it('should give the platform’s reason even over a date recorded before', () => {
+      const vm = buildFleetCardVm(
+        fleetCard({
+          platformName: 'PlayStation',
+          platformProvidesRosterExport: false,
+          lastEffectiveImportAt: '2015-03-04T00:00:00.000Z',
+        }),
+        formatInstant,
+      );
+
+      expect(vm.lastObservedLabel).toBe(
+        'The game provides no roster export on PlayStation',
+      );
     });
 
     it('should say nothing about duplicates when the name is unique', () => {

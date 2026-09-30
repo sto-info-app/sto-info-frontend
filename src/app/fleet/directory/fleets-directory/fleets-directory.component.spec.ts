@@ -50,6 +50,7 @@ function fleetCard(overrides: Partial<StoFleetCard> = {}): StoFleetCard {
     duplicateCount: 0,
     recruitmentState: FleetRecruitmentState.OPEN,
     allegianceFactionId: null,
+    platformProvidesRosterExport: true,
     lastEffectiveImportAt: null,
     ...overrides,
   };
@@ -247,6 +248,24 @@ describe('FleetsDirectoryComponent', () => {
     expect(lastQuery()['search']).toBeUndefined();
   });
 
+  // ADR-0003: " Omega" and "Omega" are two Fleets, so the empty-result
+  // message's advice to check a space at either end has to be true.
+  it('sends the search with any space at either end kept', () => {
+    setParams({ search: ' command ' });
+
+    render();
+
+    expect(lastQuery()['search']).toBe(' command ');
+  });
+
+  it('sends no search when the URL holds only spaces', () => {
+    setParams({ search: '   ' });
+
+    render();
+
+    expect(lastQuery()['search']).toBeUndefined();
+  });
+
   describe('what it shows', () => {
     /**
      * Reads the current state.
@@ -325,6 +344,27 @@ describe('FleetsDirectoryComponent', () => {
       expect(fixture.nativeElement.textContent).toContain(
         'Roster last imported 2015-03-04T00:00:00Z',
       );
+    });
+
+    // The card says what the Fleet's page says, not that nobody has bothered.
+    it('says the game provides no roster export on a console Fleet’s card', () => {
+      directory.listFleets.mockReturnValue(
+        of(
+          page([
+            fleetCard({
+              platformName: 'Xbox',
+              platformProvidesRosterExport: false,
+            }),
+          ]),
+        ),
+      );
+
+      render();
+
+      const text = fixture.nativeElement.textContent as string;
+
+      expect(text).toContain('The game provides no roster export on Xbox');
+      expect(text).not.toContain('No roster has ever been imported');
     });
 
     it('says how many other records answer to a name', () => {

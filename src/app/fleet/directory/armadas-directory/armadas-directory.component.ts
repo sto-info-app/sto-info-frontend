@@ -15,6 +15,7 @@ import { FleetDirectoryResultsComponent } from 'src/app/fleet/directory/fleet-di
 import { buildArmadaCardVm } from 'src/app/fleet/fleet-card.builders';
 import { FleetDirectoryService } from 'src/app/fleet/fleet-directory.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
@@ -39,6 +40,7 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
     FormsModule,
     FleetDirectoryFiltersComponent,
     FleetDirectoryResultsComponent,
+    HelpLinkComponent,
   ],
 })
 export class ArmadasDirectoryComponent extends FleetDirectoryPageDirective {

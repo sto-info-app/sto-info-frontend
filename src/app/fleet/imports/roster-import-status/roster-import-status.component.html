@@ -43,6 +43,10 @@
         <span>Roster import</span>
       </div>
 
+      <app-help-link
+        slug="importing-a-roster"
+        label="Help with importing a roster" />
+
       <p class="roster-status__fleet">
         <a [routerLink]="state.fleetLink">{{ state.fleet.exactGameName }}</a>
         on {{ state.fleet.platformName }}

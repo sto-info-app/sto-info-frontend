@@ -138,6 +138,34 @@ describe('FleetScopeViewComponent', () => {
     );
   });
 
+  // FC-050: one link under the name, the same on a Community, Fleet or
+  // Armada, since one guide explains all three.
+  it('links the record to the guide about Communities, Fleets and Armadas', () => {
+    render({
+      kind: 'READY',
+      actions: [],
+      header: HEADER,
+      notice: null,
+      description: null,
+    });
+
+    const links = fixture.nativeElement.querySelectorAll('a.help-link');
+
+    expect(links).toHaveLength(1);
+    expect(links[0].getAttribute('href')).toBe(
+      '/help/communities-fleets-and-armadas',
+    );
+    expect(links[0].textContent.trim()).toBe(
+      'Help with Communities, Fleets and Armadas',
+    );
+  });
+
+  it('offers no help link before there is a record to explain', () => {
+    render({ kind: 'LOADING' });
+
+    expect(find('a.help-link')).toBeNull();
+  });
+
   // A Community's own activity, which it has no tab strip to reach (FC-029).
   it('draws the latest of a Community’s activity, with a way to the rest', () => {
     render({

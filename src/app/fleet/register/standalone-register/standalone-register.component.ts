@@ -11,8 +11,15 @@ import { Router } from '@angular/router';
 import { catchError, of, take } from 'rxjs';
 
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
+import { fleetFreshnessOf } from 'src/app/fleet/fleet-card.builders';
 import { FleetDirectoryService } from 'src/app/fleet/fleet-directory.service';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
+import {
+  EXACT_GAME_NAME_MAX_CODEPOINTS,
+  EXACT_GAME_NAME_TOO_LONG,
+  inputCeilingFor,
+  maxCodepointsValidator,
+} from 'src/app/fleet/fleet-name-length';
 import { FleetRegistrationService } from 'src/app/fleet/fleet-registration.service';
 import { ScopeDuplicateWarningComponent } from 'src/app/fleet/register/scope-duplicate-warning/scope-duplicate-warning.component';
 import { ScopeDuplicateVm } from 'src/app/fleet/register/scope-register.models';
@@ -21,12 +28,16 @@ import {
   FleetScopeStatus,
   StoFleetCard,
 } from 'src/app/models/fleet.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
-/** Column width the server enforces, repeated so the form says so first. */
-export const STANDALONE_NAME_MAX_LENGTH = 255;
+/**
+ * The longest name the server holds, in codepoints, repeated so the form says
+ * so first. Not the column width: ADR-0003's rule is 64.
+ */
+export const STANDALONE_NAME_MAX_LENGTH = EXACT_GAME_NAME_MAX_CODEPOINTS;
 
 /** How many matches the preflight warning asks for. */
 export const STANDALONE_DUPLICATE_LIMIT = 10;
@@ -68,6 +79,7 @@ export const STANDALONE_CONFIRM_FAILED =
     AsyncPipe,
     ReactiveFormsModule,
     ScopeDuplicateWarningComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LoadingBarComponent,
   ],
@@ -81,7 +93,11 @@ export class StandaloneRegisterComponent {
   private readonly _router = inject(Router);
   private readonly _changeDetector = inject(ChangeDetectorRef);
 
-  readonly nameMaxLength = STANDALONE_NAME_MAX_LENGTH;
+  /** The name field's `maxlength`: a ceiling, since the rule is codepoints. */
+  readonly nameMaxLength = inputCeilingFor(STANDALONE_NAME_MAX_LENGTH);
+
+  /** Shown when the name is over the server's budget. */
+  readonly nameTooLong = EXACT_GAME_NAME_TOO_LONG;
 
   /** The platforms the catalogue knows about, for the picker. */
   readonly platforms$ = this._accounts.getPlatforms();
@@ -101,7 +117,7 @@ export class StandaloneRegisterComponent {
   readonly form = this._formBuilder.nonNullable.group({
     exactGameName: [
       '',
-      [Validators.required, Validators.maxLength(STANDALONE_NAME_MAX_LENGTH)],
+      [Validators.required, maxCodepointsValidator(STANDALONE_NAME_MAX_LENGTH)],
     ],
     platformId: ['', [Validators.required]],
     confirmUnregistered: [false, [Validators.requiredTrue]],
@@ -196,10 +212,10 @@ export class StandaloneRegisterComponent {
       name: card.exactGameName,
       heldBy: card.communityName ?? 'No Community — a standalone record',
       platform: card.platformName,
-      freshness:
-        card.lastEffectiveImportAt === null
-          ? 'No roster has ever been imported'
-          : `Roster last imported ${this._datePipe.transform(card.lastEffectiveImportAt) ?? card.lastEffectiveImportAt}`,
+      freshness: fleetFreshnessOf(
+        card,
+        value => this._datePipe.transform(value) ?? value,
+      ),
       lifecycle:
         card.status === FleetScopeStatus.ACTIVE
           ? null

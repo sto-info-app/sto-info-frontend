@@ -13,6 +13,7 @@ import {
   FLEET_EMBLEM_SIZES,
 } from 'src/app/fleet/fleet-artwork';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
+import { rosterUnavailableOn } from 'src/app/fleet/imports/roster-import.constants';
 import {
   FleetCommunityCard,
   FleetDirectoryCard,
@@ -163,6 +164,38 @@ export function buildCommunityCardVm(
   };
 }
 
+/** What a Fleet's freshness line is written from. */
+export type FleetFreshnessFacts = Pick<
+  StoFleetCard,
+  'platformName' | 'platformProvidesRosterExport' | 'lastEffectiveImportAt'
+>;
+
+/**
+ * Says how fresh a Fleet's record is, on its card or in a duplicate warning.
+ *
+ * A console Fleet gets the reason rather than "never", in the words its own
+ * page uses: the game gives it no roster export, so having no date is the
+ * platform rather than neglect. The platform answers first even over a date,
+ * as on the page, since a Fleet can carry one from before it moved platform.
+ * Exported so the registration warnings say it the same way as the card.
+ *
+ * @param card - The Fleet as the server sent it.
+ * @param formatInstant - Writes a roster import date out for the reader.
+ * @returns The line the card draws.
+ */
+export function fleetFreshnessOf(
+  card: FleetFreshnessFacts,
+  formatInstant: InstantFormatter,
+): string {
+  if (!card.platformProvidesRosterExport) {
+    return rosterUnavailableOn(card.platformName);
+  }
+
+  return card.lastEffectiveImportAt === null
+    ? 'No roster has ever been imported'
+    : `Roster last imported ${formatInstant(card.lastEffectiveImportAt)}`;
+}
+
 /**
  * Builds the card for a Fleet.
  *
@@ -191,10 +224,7 @@ export function buildFleetCardVm(
         : FLEET_LINKS.fleet(communitySlug, card.platformSegment, card.slug),
     unlinkedTitle: null,
     status: scopeStatusPill(card.status, card.recruitmentState),
-    lastObservedLabel:
-      card.lastEffectiveImportAt === null
-        ? 'No roster has ever been imported'
-        : `Roster last imported ${formatInstant(card.lastEffectiveImportAt)}`,
+    lastObservedLabel: fleetFreshnessOf(card, formatInstant),
     meta: [duplicateLine(card)].filter((line): line is string => line !== null),
     actions: [],
   };

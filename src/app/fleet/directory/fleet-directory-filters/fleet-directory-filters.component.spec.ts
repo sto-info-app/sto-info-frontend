@@ -9,6 +9,7 @@ import {
   FLEET_SORTS_WITH_FRESHNESS,
   FLEET_SORTS_WITHOUT_FRESHNESS,
 } from 'src/app/fleet/directory/fleet-directory-page.models';
+import { COMMUNITY_NAME_MAX_CODEPOINTS } from 'src/app/fleet/fleet-name-length';
 import {
   FleetDirectorySort,
   FleetDirectoryStatusFilter,
@@ -87,6 +88,16 @@ describe('FleetDirectoryFiltersComponent', () => {
     ).toBe('Fleet name');
   }));
 
+  // The server refuses a longer term, and a Community name can be this long,
+  // so the box stops at the same figure: any name fits, nothing is refused.
+  it('stops the box where the server does, at the longest name', fakeAsync(() => {
+    render();
+
+    expect(find<HTMLInputElement>('#fleet-directory-search').maxLength).toBe(
+      COMMUNITY_NAME_MAX_CODEPOINTS,
+    );
+  }));
+
   // The server is asked a whole question at a time. A listing reloading per
   // character would send nineteen requests for "Starfleet Command".
   it('searches on submit rather than on every keystroke', fakeAsync(() => {
@@ -108,24 +119,42 @@ describe('FleetDirectoryFiltersComponent', () => {
     expect(asked).toBe('starfleet');
   }));
 
-  // An edge space is part of an in-game name, but it is not part of a search
-  // for one: somebody who types a trailing space has not asked for the Fleet
-  // whose name ends in one.
-  it('trims what was typed before searching for it', fakeAsync(() => {
+  // ADR-0003: an edge space is part of an in-game name, and two Fleets can
+  // differ by nothing else, so a search keeps what was typed at either end.
+  it('searches for what was typed, spaces at either end and all', fakeAsync(() => {
     render();
 
     let asked: string | undefined;
     fixture.componentInstance.searchChange.subscribe(value => (asked = value));
 
     const input = find<HTMLInputElement>('#fleet-directory-search');
-    input.value = '  starfleet  ';
+    input.value = ' starfleet ';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
     tick();
 
     find<HTMLFormElement>('form').dispatchEvent(new Event('submit'));
 
-    expect(asked).toBe('starfleet');
+    expect(asked).toBe(' starfleet ');
+  }));
+
+  // Every name of two words contains a space; matching them all answers
+  // nothing, so a box of spaces alone stops searching instead.
+  it('treats a box holding only spaces as no search', fakeAsync(() => {
+    render();
+
+    let asked: string | undefined;
+    fixture.componentInstance.searchChange.subscribe(value => (asked = value));
+
+    const input = find<HTMLInputElement>('#fleet-directory-search');
+    input.value = '   ';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    tick();
+
+    find<HTMLFormElement>('form').dispatchEvent(new Event('submit'));
+
+    expect(asked).toBe('');
   }));
 
   it('offers no Clear button until there is something to clear', fakeAsync(() => {

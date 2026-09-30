@@ -1,11 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { Observable, of, throwError } from 'rxjs';
 
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { FleetDirectoryService } from 'src/app/fleet/fleet-directory.service';
+import { EXACT_GAME_NAME_TOO_LONG } from 'src/app/fleet/fleet-name-length';
 import { FleetRegistrationService } from 'src/app/fleet/fleet-registration.service';
+import { rosterUnavailableOn } from 'src/app/fleet/imports/roster-import.constants';
 import {
   FleetDirectoryStatusFilter,
   FleetRecruitmentState,
@@ -33,6 +35,7 @@ function card(overrides: Partial<StoFleetCard> = {}): StoFleetCard {
     createdAt: '2026-01-02T03:04:05.000Z',
     emblemImageId: null,
     emblemImageAlt: null,
+    emblemImageUrls: null,
     exactGameName: 'Starfleet Command',
     communityId: null,
     communityName: null,
@@ -43,6 +46,7 @@ function card(overrides: Partial<StoFleetCard> = {}): StoFleetCard {
     duplicateCount: 0,
     recruitmentState: FleetRecruitmentState.OPEN,
     allegianceFactionId: null,
+    platformProvidesRosterExport: true,
     lastEffectiveImportAt: null,
     ...overrides,
   };
@@ -85,6 +89,8 @@ describe('StandaloneRegisterComponent', () => {
           },
         },
         { provide: Router, useValue: router },
+        // For the Help link's routerLink (FC-050).
+        { provide: ActivatedRoute, useValue: {} },
       ],
     })
       .overrideComponent(StandaloneRegisterComponent, {
@@ -314,6 +320,31 @@ describe('StandaloneRegisterComponent', () => {
       );
     });
 
+    // A console record has no date because the game gives it no export, and
+    // the warning says so in the words its card and its page use.
+    it('says why a console match has no roster rather than calling it never imported', () => {
+      directory.listFleets.mockReturnValue(
+        of({
+          items: [
+            card({ platformName: 'Xbox', platformProvidesRosterExport: false }),
+          ],
+          total: 1,
+          page: 1,
+          pageSize: 10,
+        }),
+      );
+
+      render();
+      fillRequired();
+      find<HTMLButtonElement>('.lcars-btn.gold')?.click();
+      fixture.detectChanges();
+
+      const text = fixture.nativeElement.textContent;
+
+      expect(text).toContain(rosterUnavailableOn('Xbox'));
+      expect(text).not.toContain('No roster has ever been imported');
+    });
+
     it('says when a match is closed', () => {
       directory.listFleets.mockReturnValue(
         of({
@@ -360,6 +391,20 @@ describe('StandaloneRegisterComponent', () => {
   });
 
   describe('confirming', () => {
+    it('says a name over the server’s budget is too long, and sends nothing', () => {
+      render();
+
+      fillRequired();
+      type('#standalone-name', `${'a'.repeat(64)} `);
+      confirm();
+      submit();
+
+      expect(registration.confirmStandaloneFleet).not.toHaveBeenCalled();
+      expect(fixture.nativeElement.textContent).toContain(
+        EXACT_GAME_NAME_TOO_LONG,
+      );
+    });
+
     it('sends the name untrimmed, spaces and all', () => {
       render();
 

@@ -140,11 +140,18 @@ export abstract class FleetDirectoryPageDirective {
   /**
    * Reads the name being searched for.
    *
+   * Exactly as the URL holds it, edge spaces included, because they are part
+   * of an in-game name (ADR-0003). One holding nothing but spaces — typed
+   * into the address bar, since the search box never writes one — is no
+   * search, as it is in the box.
+   *
    * @param params - The query string.
    * @returns The search, or undefined when there is none to send.
    */
   protected searchOf(params: ParamMap): string | undefined {
-    return params.get('search') || undefined;
+    const search = params.get('search') ?? '';
+
+    return search.trim() === '' ? undefined : search;
   }
 
   /**

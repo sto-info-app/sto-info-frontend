@@ -6,6 +6,12 @@ import { map, Observable, take } from 'rxjs';
 
 import { CharacterLookupService } from 'src/app/dashboard/services/character-lookup.service';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
+import {
+  EXACT_GAME_NAME_MAX_CODEPOINTS,
+  EXACT_GAME_NAME_TOO_LONG,
+  inputCeilingFor,
+  maxCodepointsValidator,
+} from 'src/app/fleet/fleet-name-length';
 import { FleetRegistrationService } from 'src/app/fleet/fleet-registration.service';
 import { ScopeDuplicateWarningComponent } from 'src/app/fleet/register/scope-duplicate-warning/scope-duplicate-warning.component';
 import { ScopeRegisterPageDirective } from 'src/app/fleet/register/scope-register-page.directive';
@@ -14,13 +20,19 @@ import {
   ScopeRegisterContext,
 } from 'src/app/fleet/register/scope-register.models';
 import { ArmadaDuplicate, FleetScopeStatus } from 'src/app/models/fleet.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
+/**
+ * The longest name the server holds, in codepoints, repeated so the form says
+ * so first. Not the column width: ADR-0003's rule is 64.
+ */
+export const ARMADA_NAME_MAX_LENGTH = EXACT_GAME_NAME_MAX_CODEPOINTS;
+
 /** Column widths the server enforces, repeated so the form says so first. */
-export const ARMADA_NAME_MAX_LENGTH = 255;
 export const ARMADA_DISPLAY_NAME_MAX_LENGTH = 160;
 export const ARMADA_SLUG_MAX_LENGTH = 80;
 
@@ -56,6 +68,7 @@ export const ARMADA_ALLEGIANCE_NAMES: readonly string[] = [
     AsyncPipe,
     ReactiveFormsModule,
     ScopeDuplicateWarningComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,
     LoadingBarComponent,
@@ -66,7 +79,11 @@ export class ArmadaRegisterComponent extends ScopeRegisterPageDirective {
   private readonly _registration = inject(FleetRegistrationService);
   private readonly _lookup = inject(CharacterLookupService);
 
-  readonly nameMaxLength = ARMADA_NAME_MAX_LENGTH;
+  /** The name field's `maxlength`: a ceiling, since the rule is codepoints. */
+  readonly nameMaxLength = inputCeilingFor(ARMADA_NAME_MAX_LENGTH);
+
+  /** Shown when the name is over the server's budget. */
+  readonly nameTooLong = EXACT_GAME_NAME_TOO_LONG;
   readonly displayNameMaxLength = ARMADA_DISPLAY_NAME_MAX_LENGTH;
   readonly slugMaxLength = ARMADA_SLUG_MAX_LENGTH;
 
@@ -92,7 +109,7 @@ export class ArmadaRegisterComponent extends ScopeRegisterPageDirective {
   readonly form = this._formBuilder.nonNullable.group({
     exactGameName: [
       '',
-      [Validators.required, Validators.maxLength(ARMADA_NAME_MAX_LENGTH)],
+      [Validators.required, maxCodepointsValidator(ARMADA_NAME_MAX_LENGTH)],
     ],
     platformId: ['', [Validators.required]],
     allegianceFactionId: ['', [Validators.required]],

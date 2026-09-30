@@ -17,7 +17,11 @@ import { StoAccountService } from 'src/app/dashboard/services/sto-account.servic
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
-import { ScopeDuplicateVm, ScopeRegisterState } from './scope-register.models';
+import {
+  ScopeDuplicateVm,
+  ScopeRegisterContext,
+  ScopeRegisterState,
+} from './scope-register.models';
 
 /** Shown when the Community or the platform catalogue could not be read. */
 export const SCOPE_REGISTER_UNREADABLE =
@@ -90,10 +94,13 @@ export abstract class ScopeRegisterPageDirective {
         this._scopes.resolveCommunity(params.get('communitySlug') ?? ''),
         this._accounts.getPlatforms(),
       ]).pipe(
-        map(([resolved, platforms]): ScopeRegisterState => ({
-          kind: 'READY',
-          context: { community: resolved.community, platforms },
-        })),
+        map(([resolved, platforms]): ScopeRegisterState => {
+          const context = { community: resolved.community, platforms };
+
+          this.prepareForm?.(context);
+
+          return { kind: 'READY', context };
+        }),
         catchError((error: HttpErrorResponse) =>
           of<ScopeRegisterState>(
             error.status === 404
@@ -139,6 +146,17 @@ export abstract class ScopeRegisterPageDirective {
         this._changeDetector.markForCheck();
       });
   }
+
+  /**
+   * Starts the form on what the Community says, once it has been read.
+   *
+   * Called before the form is drawn, so a reader never sees a choice change
+   * under them. Optional: only a Fleet takes anything from the Community it
+   * is registered into.
+   *
+   * @param context - The Community and the platform catalogue.
+   */
+  protected prepareForm?(context: ScopeRegisterContext): void;
 
   /**
    * Asks the server what already answers to the name.

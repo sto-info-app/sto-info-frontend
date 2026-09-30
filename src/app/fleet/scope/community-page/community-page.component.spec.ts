@@ -253,6 +253,18 @@ describe('CommunityPageComponent', () => {
     expect(state()).toEqual({ kind: 'MISSING' });
   });
 
+  // A closed Community keeps its address and is still read there, so "it may have
+  // been closed" would be untrue. Absent and hidden are one answer, so which
+  // it is stays unsaid.
+  it('says there may be no such Community, or that it is not shown, never closed', () => {
+    render();
+
+    expect(fixture.componentInstance.missingMessage).toContain(
+      'There may be no such Community, or it may not be shown to you.',
+    );
+    expect(fixture.componentInstance.missingMessage).not.toContain('closed');
+  });
+
   it('reports any other failure as a failure', () => {
     scopes.resolveCommunity.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 500 })),
@@ -366,6 +378,27 @@ describe('CommunityPageComponent', () => {
         },
         { label: 'Dates shown in', value: 'Europe/London' },
       ]);
+    });
+
+    // FC-050: a Community's members are its Fleets' members, with its Owner
+    // and Admins, not one Fleet's.
+    it('reads back "Fleet members" as the members of its Fleets', () => {
+      scopes.resolveCommunity.mockReturnValue(
+        of({
+          community: community({ visibility: FleetAudience.FLEET_MEMBERS }),
+          redirectedFrom: null,
+          viewer: READER,
+        }),
+      );
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.header.facts).toContainEqual({
+        label: 'Visible to',
+        value: 'Members of the Community’s Fleets, its Owner and Admins',
+      });
     });
 
     it('says when a closed Community was closed', () => {

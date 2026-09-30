@@ -3,6 +3,10 @@
     <span>Register a Community</span>
   </div>
 
+  <app-help-link
+    slug="registering-a-fleet"
+    label="Help with registering" />
+
   <p class="community-register__intro">
     A Community is your umbrella here: it holds the Fleets and Armadas you
     register, and it is the thing that tells your record of a Fleet apart from
@@ -32,7 +36,9 @@
       </div>
     </div>
 
-    @if (form.controls.name.touched && form.controls.name.invalid) {
+    @if (form.controls.name.hasError('maxCodepoints')) {
+      <p class="community-register__field-error">{{ nameTooLong }}</p>
+    } @else if (form.controls.name.touched && form.controls.name.invalid) {
       <p class="community-register__field-error">
         Please give the Community a name.
       </p>
@@ -78,7 +84,8 @@
         <label for="community-visibility">Who can see it</label>
         <select
           id="community-visibility"
-          formControlName="visibility">
+          formControlName="visibility"
+          aria-describedby="community-visibility-hint">
           @for (choice of audienceChoices; track choice[0]) {
             <option [value]="choice[0]">{{ choice[1] }}</option>
           }
@@ -96,6 +103,11 @@
         </select>
       </div>
     </div>
+    <p
+      id="community-visibility-hint"
+      class="fleet-community-field-hint community-register__hint">
+      {{ audienceHint }}
+    </p>
 
     @if (isSaving) {
       <app-loading-bar loadingText="Registering the Community" />

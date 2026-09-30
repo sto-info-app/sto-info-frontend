@@ -8,6 +8,7 @@ import {
 import { FormsModule } from '@angular/forms';
 
 import { FleetDirectorySortOption } from 'src/app/fleet/directory/fleet-directory-page.models';
+import { DIRECTORY_SEARCH_MAX_LENGTH } from 'src/app/fleet/fleet-name-length';
 import {
   FleetDirectorySort,
   FleetDirectoryStatusFilter,
@@ -62,6 +63,9 @@ export class FleetDirectoryFiltersComponent {
   /** The lifecycle choices, in the order they are offered. */
   readonly statusOptions = FLEET_STATUS_OPTIONS;
 
+  /** The longest search the server accepts. */
+  readonly searchMaxLength = DIRECTORY_SEARCH_MAX_LENGTH;
+
   /** What is currently in the search box. */
   searchTerm = '';
 
@@ -108,10 +112,18 @@ export class FleetDirectoryFiltersComponent {
   @Output() readonly cleared = new EventEmitter<void>();
 
   /**
-   * Searches for what is in the box.
+   * Searches for what is in the box, exactly as it was typed.
+   *
+   * Not trimmed. A space at either end of an in-game name is part of the name
+   * (ADR-0003), and two Fleets can differ by nothing else, so a reader who
+   * types `" Omega"` is looking for the one that starts with a space. A box
+   * holding nothing but spaces is no search at all, though: every name of two
+   * words contains a space, and matching them all would answer nothing.
    */
   onSubmit(): void {
-    this.searchChange.emit(this.searchTerm.trim());
+    this.searchChange.emit(
+      this.searchTerm.trim() === '' ? '' : this.searchTerm,
+    );
   }
 
   /**

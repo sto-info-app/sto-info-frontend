@@ -18,7 +18,10 @@ import { scopeStatusPill } from 'src/app/fleet/fleet-card.builders';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { fleetTabsVmOf } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
-import { ROSTER_IMPORT_CAPABILITY } from 'src/app/fleet/imports/roster-import.constants';
+import {
+  ROSTER_IMPORT_CAPABILITY,
+  rosterUnavailableOn,
+} from 'src/app/fleet/imports/roster-import.constants';
 import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
@@ -42,25 +45,6 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
  * make it different — nobody stands behind it, and nobody can correct it —
  * are exactly the two a reader would otherwise assume the opposite of.
  */
-/**
- * What stands where the import date would, on a platform the game exports no
- * roster from.
- *
- * The date line is the strongest thing a reader has for telling a kept record
- * from an abandoned one, which is exactly why “Never” is the wrong thing to
- * say to somebody looking at a console Fleet: nobody there has ever been
- * given a file to import, and a record that could not possibly have one reads
- * as a record nobody is keeping. Naming the platform matters because the
- * reader may be the Fleet leader who has spent ten minutes looking for the
- * menu.
- *
- * @param platformName - The platform, as the catalogue names it.
- * @returns What the line says instead of a date.
- */
-function rosterUnavailableOn(platformName: string): string {
-  return `The game provides no roster export on ${platformName}`;
-}
-
 const STANDALONE_NOTICE =
   'No Community here has registered this Fleet. The record exists so an ' +
   'imported roster has something to attach to, and so anybody looking for ' +
@@ -98,8 +82,8 @@ export class FleetPageComponent extends FleetScopePageDirective<ResolvedStoFleet
   private readonly _scopes = inject(FleetScopeService);
 
   readonly missingMessage =
-    'No Fleet answers to that address under that Community. It may have ' +
-    'been closed, or the link may be out of date.';
+    'No Fleet answers to that address under that Community. There may be ' +
+    'no such Fleet, or it may not be shown to you.';
 
   /**
    * Asks for the Fleet the address names.

@@ -31,6 +31,7 @@ import {
   RosterImportStatus,
 } from 'src/app/models/fleet-import.models';
 import { ResolvedStoFleet, StoFleet } from 'src/app/models/fleet.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -44,8 +45,8 @@ export const ROSTER_IMPORT_LIST_ERROR =
 
 /** What to say when nothing answers to the address. */
 export const ROSTER_IMPORT_LIST_MISSING =
-  'No Fleet here answers to that address. It may have been closed, or the ' +
-  'address may have changed.';
+  'No Fleet here answers to that address. There may be no such Fleet, or ' +
+  'it may not be shown to you.';
 
 /** What to say to somebody who may not read a Fleet's imports. */
 export const ROSTER_IMPORT_LIST_NOT_PERMITTED =
@@ -101,6 +102,7 @@ export type RosterImportListState =
     AsyncPipe,
     RouterLink,
     AppDatePipe,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,
     LoadingBarComponent,

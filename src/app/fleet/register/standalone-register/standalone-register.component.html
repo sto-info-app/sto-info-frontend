@@ -2,6 +2,10 @@
   <span>Confirm a Fleet nobody here runs</span>
 </div>
 
+<app-help-link
+  slug="registering-a-fleet"
+  label="Help with confirming a Fleet" />
+
 <p class="register-page__intro">
   Use this only for a Fleet that belongs to no Community on this site — a record
   so that an imported roster has something to attach to, and so anybody looking
@@ -49,7 +53,9 @@
     </div>
   </div>
 
-  @if (
+  @if (form.controls.exactGameName.hasError('maxCodepoints')) {
+    <p class="register-page__field-error">{{ nameTooLong }}</p>
+  } @else if (
     form.controls.exactGameName.touched && form.controls.exactGameName.invalid
   ) {
     <p class="register-page__field-error">Please give the Fleet its name.</p>

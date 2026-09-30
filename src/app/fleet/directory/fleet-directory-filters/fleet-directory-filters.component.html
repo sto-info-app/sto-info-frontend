@@ -9,7 +9,7 @@
         type="search"
         name="search"
         autocomplete="off"
-        maxlength="120"
+        [maxlength]="searchMaxLength"
         [placeholder]="searchPlaceholder"
         [(ngModel)]="searchTerm" />
     </div>

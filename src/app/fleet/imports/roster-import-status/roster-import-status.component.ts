@@ -52,6 +52,7 @@ import {
   SETTLED_ROSTER_IMPORT_STATUSES,
 } from 'src/app/models/fleet-import.models';
 import { ResolvedStoFleet, StoFleet } from 'src/app/models/fleet.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
@@ -161,6 +162,7 @@ interface RosterImportContext {
     AsyncPipe,
     RouterLink,
     AppDatePipe,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,
     LcarsSuccessMessageComponent,

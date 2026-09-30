@@ -22,8 +22,8 @@ import { ResolvedStoFleet } from 'src/app/models/fleet.models';
 
 /** What to say when nothing answers to a section's address. */
 export const FLEET_SECTION_MISSING =
-  'No Fleet here answers to that address. It may have been closed, or the ' +
-  'address may have changed.';
+  'No Fleet here answers to that address. There may be no such Fleet, or ' +
+  'it may not be shown to you.';
 
 /** What to say when a section could not be read for any reason but absence. */
 export const FLEET_SECTION_ERROR = 'This could not be read. Please try again.';

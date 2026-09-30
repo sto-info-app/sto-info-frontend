@@ -49,8 +49,8 @@ export class ArmadaPageComponent extends FleetScopePageDirective<ResolvedStoArma
   private readonly _scopes = inject(FleetScopeService);
 
   readonly missingMessage =
-    'No Armada answers to that address under that Community. It may have ' +
-    'been closed, or the link may be out of date.';
+    'No Armada answers to that address under that Community. There may be ' +
+    'no such Armada, or it may not be shown to you.';
 
   /**
    * Asks for the Armada the address names.

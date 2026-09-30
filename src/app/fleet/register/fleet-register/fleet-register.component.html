@@ -21,6 +21,10 @@
         <span>Register a Fleet</span>
       </div>
 
+      <app-help-link
+        slug="registering-a-fleet"
+        label="Help with registering" />
+
       <p class="register-page__intro">
         Registering a Fleet records it under
         {{ state.context.community.name }}. Type the name exactly as the game
@@ -62,7 +66,9 @@
           </div>
         </div>
 
-        @if (
+        @if (form.controls.exactGameName.hasError('maxCodepoints')) {
+          <p class="register-page__field-error">{{ nameTooLong }}</p>
+        } @else if (
           form.controls.exactGameName.touched &&
           form.controls.exactGameName.invalid
         ) {

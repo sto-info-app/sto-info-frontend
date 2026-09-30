@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
-  FLEET_AUDIENCE_LABELS,
+  COMMUNITY_AUDIENCE_LABELS,
   FLEET_SCOPE_COMMUNITY,
   SCOPE_CHILDREN_REGISTER_CAPABILITY,
 } from 'src/app/fleet/constants/fleet-scope.constants';
@@ -56,8 +56,8 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
   private readonly _authService = inject(AuthService);
 
   readonly missingMessage =
-    'No Community answers to that address. It may have been closed, or the ' +
-    'link may be out of date.';
+    'No Community answers to that address. There may be no such Community, ' +
+    'or it may not be shown to you.';
 
   /**
    * Asks for the Community the address names.
@@ -172,7 +172,7 @@ export class CommunityPageComponent extends FleetScopePageDirective<ResolvedFlee
       { label: 'Registered', value: this.formatInstant(community.createdAt) },
       {
         label: 'Visible to',
-        value: FLEET_AUDIENCE_LABELS[community.visibility],
+        value: COMMUNITY_AUDIENCE_LABELS[community.visibility],
       },
       { label: 'Dates shown in', value: community.preferredTimezone },
     ];

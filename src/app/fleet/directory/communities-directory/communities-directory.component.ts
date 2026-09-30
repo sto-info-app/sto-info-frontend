@@ -19,6 +19,7 @@ import { FleetDirectoryResultsComponent } from 'src/app/fleet/directory/fleet-di
 import { buildCommunityCardVm } from 'src/app/fleet/fleet-card.builders';
 import { FleetDirectoryService } from 'src/app/fleet/fleet-directory.service';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -46,6 +47,7 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
     RouterModule,
     FleetDirectoryFiltersComponent,
     FleetDirectoryResultsComponent,
+    HelpLinkComponent,
   ],
 })
 export class CommunitiesDirectoryComponent extends FleetDirectoryPageDirective {

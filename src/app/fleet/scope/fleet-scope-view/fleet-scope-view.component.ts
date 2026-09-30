@@ -21,6 +21,7 @@ import { FleetScopeArtworkComponent } from 'src/app/fleet/scope/fleet-scope-artw
 import { FleetFollowComponent } from 'src/app/fleet/scope/fleet-follow/fleet-follow.component';
 import { FleetScopeHeaderComponent } from 'src/app/fleet/scope/fleet-scope-header/fleet-scope-header.component';
 import { FleetScopePageState } from 'src/app/fleet/scope/fleet-scope-page.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -56,6 +57,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
     FleetRecruitmentPanelComponent,
     OwnershipOfferPanelComponent,
     FleetTabsComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,
     LoadingBarComponent,

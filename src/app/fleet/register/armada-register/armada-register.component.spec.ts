@@ -5,6 +5,7 @@ import { BehaviorSubject, of, throwError } from 'rxjs';
 
 import { CharacterLookupService } from 'src/app/dashboard/services/character-lookup.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
+import { EXACT_GAME_NAME_TOO_LONG } from 'src/app/fleet/fleet-name-length';
 import { FleetRegistrationService } from 'src/app/fleet/fleet-registration.service';
 import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { SCOPE_REGISTER_FAILED } from 'src/app/fleet/register/scope-register-page.directive';
@@ -286,6 +287,18 @@ describe('ArmadaRegisterComponent', () => {
 
     expect(registration.registerArmada).not.toHaveBeenCalled();
     expect(find('.register-page__field-error')).not.toBeNull();
+  });
+
+  it('says a name over the server’s budget is too long, and sends nothing', () => {
+    render();
+    fillRequired();
+    type('#armada-name', 'a'.repeat(65));
+    submit();
+
+    expect(registration.registerArmada).not.toHaveBeenCalled();
+    expect(find('.register-page__field-error')?.textContent).toContain(
+      EXACT_GAME_NAME_TOO_LONG,
+    );
   });
 
   it('says something a reader can act on when the registration fails', () => {

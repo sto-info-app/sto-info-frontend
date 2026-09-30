@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { Observable, of, throwError } from 'rxjs';
 
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
+import { COMMUNITY_AUDIENCE_HINT } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetRegistrationService } from 'src/app/fleet/fleet-registration.service';
+import { COMMUNITY_NAME_TOO_LONG } from 'src/app/fleet/fleet-name-length';
 import {
   FleetAudience,
   FleetFeatureState,
@@ -13,6 +15,7 @@ import {
 import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 
 import {
+  COMMUNITY_OWNER_LIMIT_REACHED,
   COMMUNITY_REGISTER_FAILED,
   COMMUNITY_SLUG_TAKEN,
   CommunityRegisterComponent,
@@ -59,6 +62,8 @@ describe('CommunityRegisterComponent', () => {
         { provide: FleetRegistrationService, useValue: registration },
         { provide: DashboardService, useValue: dashboard },
         { provide: Router, useValue: router },
+        // For the Help link's routerLink (FC-050).
+        { provide: ActivatedRoute, useValue: {} },
         {
           provide: FleetConfigurationService,
           useValue: {
@@ -182,6 +187,28 @@ describe('CommunityRegisterComponent', () => {
     });
   });
 
+  describe('the audience choice', () => {
+    it('says who each members audience means for a Community', () => {
+      render();
+
+      const hint = find<HTMLElement>('#community-visibility-hint');
+
+      expect(hint?.textContent?.trim()).toBe(COMMUNITY_AUDIENCE_HINT);
+      // FC-050: both audiences count the members of the Community's Fleets.
+      expect(COMMUNITY_AUDIENCE_HINT).toContain(
+        'the members of any of its Fleets',
+      );
+      expect(COMMUNITY_AUDIENCE_HINT).toContain('leaves out followers');
+      // And "Community members" means the same on its Fleets.
+      expect(COMMUNITY_AUDIENCE_HINT).toContain('the same on its Fleets');
+      expect(
+        find<HTMLSelectElement>('#community-visibility')?.getAttribute(
+          'aria-describedby',
+        ),
+      ).toBe('community-visibility-hint');
+    });
+  });
+
   describe('registering', () => {
     it('sends the name, the posture, the audience and the timezone', () => {
       render();
@@ -242,6 +269,29 @@ describe('CommunityRegisterComponent', () => {
       expect(find('.community-register__field-error')).not.toBeNull();
     });
 
+    it('says a name over the server’s budget is too long, and sends nothing', () => {
+      render();
+
+      type('#community-name', 'a'.repeat(121));
+      submit();
+
+      expect(registration.registerCommunity).not.toHaveBeenCalled();
+      expect(find('.community-register__field-error')?.textContent).toContain(
+        COMMUNITY_NAME_TOO_LONG,
+      );
+    });
+
+    // The server trims a Community name before measuring it, and so does
+    // the form before sending it.
+    it('does not count the spaces at either end against the budget', () => {
+      render();
+
+      type('#community-name', `  ${'a'.repeat(120)}  `);
+      submit();
+
+      expect(sent()['name']).toBe('a'.repeat(120));
+    });
+
     it('cannot be sent twice while the first is in flight', () => {
       registration.registerCommunity.mockReturnValue(new Observable());
 
@@ -260,9 +310,9 @@ describe('CommunityRegisterComponent', () => {
      *
      * @param status - The HTTP status to fail with.
      */
-    function failWith(status: number): void {
+    function failWith(status: number, message?: string): void {
       registration.registerCommunity.mockReturnValue(
-        throwError(() => ({ status })),
+        throwError(() => ({ status, error: { message } })),
       );
     }
 
@@ -277,6 +327,25 @@ describe('CommunityRegisterComponent', () => {
       submit();
 
       expect(fixture.nativeElement.textContent).toContain(COMMUNITY_SLUG_TAKEN);
+    });
+
+    // The limit is a 409 too. A closed Community still counts towards it,
+    // so telling somebody their address was taken — or to close one — would
+    // send them round in a circle.
+    it('says the limit, closed ones included, when the server names it', () => {
+      failWith(
+        409,
+        'You may own at most 10 Fleet Communities, closed ones included. ' +
+          'If you need more, use Contact us.',
+      );
+
+      render();
+      submit();
+
+      const text = fixture.nativeElement.textContent;
+
+      expect(text).toContain(COMMUNITY_OWNER_LIMIT_REACHED);
+      expect(text).not.toContain(COMMUNITY_SLUG_TAKEN);
     });
 
     it('says something a reader can act on for any other failure', () => {

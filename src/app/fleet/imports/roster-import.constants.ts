@@ -2,6 +2,26 @@
 export const ROSTER_IMPORT_CAPABILITY = 'roster.import';
 
 /**
+ * What stands where the import date would, on a platform the game exports no
+ * roster from.
+ *
+ * The date line is the strongest thing a reader has for telling a kept record
+ * from an abandoned one, which is exactly why “Never” is the wrong thing to
+ * say to somebody looking at a console Fleet: nobody there has ever been
+ * given a file to import, and a record that could not possibly have one reads
+ * as a record nobody is keeping. Naming the platform matters because the
+ * reader may be the Fleet leader who has spent ten minutes looking for the
+ * menu. Said the same way on the Fleet's page and on its directory card, so
+ * the two never disagree about why there is no date.
+ *
+ * @param platformName - The platform, as the catalogue names it.
+ * @returns What the line says instead of a date.
+ */
+export function rosterUnavailableOn(platformName: string): string {
+  return `The game provides no roster export on ${platformName}`;
+}
+
+/**
  * The capability that lets somebody look into a Fleet's imports.
  *
  * Either this or {@link ROSTER_IMPORT_CAPABILITY} lets somebody list a

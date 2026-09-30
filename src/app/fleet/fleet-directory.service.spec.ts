@@ -133,6 +133,26 @@ describe('FleetDirectoryService', () => {
       request.flush(emptyPage);
     });
 
+    /**
+     * A query string reads a bare `+` as a space, so a search for "C++" sent
+     * with its pluses unescaped would reach the server as "C" and two
+     * spaces. Angular's default codec once left `+` alone; this pins the
+     * version in use to escaping it, spaces at either end included.
+     */
+    it('should escape a plus sign rather than let it arrive as a space', () => {
+      service.listFleets({ search: ' C++ & Co ' }).subscribe();
+
+      const request = httpMock.expectOne(
+        candidate => candidate.url === API_URLS.FLEETS,
+      );
+
+      expect(request.request.urlWithParams).toBe(
+        `${API_URLS.FLEETS}?search=%20C%2B%2B%20%26%20Co%20`,
+      );
+
+      request.flush(emptyPage);
+    });
+
     it('should send withRoster=false rather than dropping it', () => {
       service.listFleets({ withRoster: false }).subscribe();
 

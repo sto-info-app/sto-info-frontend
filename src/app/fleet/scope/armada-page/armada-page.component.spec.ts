@@ -184,6 +184,18 @@ describe('ArmadaPageComponent', () => {
     expect(scopes.resolveArmada).toHaveBeenLastCalledWith('', '', '');
   });
 
+  // A closed Armada keeps its address and is still read there, so "it may have
+  // been closed" would be untrue. Absent and hidden are one answer, so which
+  // it is stays unsaid.
+  it('says there may be no such Armada, or that it is not shown, never closed', () => {
+    render();
+
+    expect(fixture.componentInstance.missingMessage).toContain(
+      'There may be no such Armada, or it may not be shown to you.',
+    );
+    expect(fixture.componentInstance.missingMessage).not.toContain('closed');
+  });
+
   // An Armada groups Fleets rather than recruiting players, so the pill
   // speaks only when the record itself has stopped operating.
   it('says nothing about recruitment', () => {
