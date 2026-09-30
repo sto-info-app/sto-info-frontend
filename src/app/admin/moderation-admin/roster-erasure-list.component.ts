@@ -14,6 +14,7 @@ import { RouterLink } from '@angular/router';
 import { filter, switchMap, take } from 'rxjs';
 
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -52,6 +53,7 @@ export const ROSTER_ERASURE_REASON_LIMITS = { min: 10, max: 500 } as const;
   standalone: true,
   imports: [
     AppDatePipe,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LoadingBarComponent,
     RouterLink,

@@ -25,6 +25,7 @@ import {
   REPORT_STATUS_PILL_CLASSES,
   ReportStatus,
 } from 'src/app/models/moderation.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -79,6 +80,7 @@ const SCOPE_LABELS: Readonly<Record<string, string>> = {
   standalone: true,
   imports: [
     AppDatePipe,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
     LoadingBarComponent,

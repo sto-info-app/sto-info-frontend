@@ -18,6 +18,7 @@ import {
   SecurityLogSource,
   SITE_ADMIN_ACTION_LABELS,
 } from 'src/app/models/security-log.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -61,6 +62,7 @@ function inWords(code: string): string {
   standalone: true,
   imports: [
     AppDatePipe,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LoadingBarComponent,
     RouterLink,

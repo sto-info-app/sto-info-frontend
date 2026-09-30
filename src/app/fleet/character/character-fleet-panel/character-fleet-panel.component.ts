@@ -13,6 +13,7 @@ import { RouterLink } from '@angular/router';
 
 import { Observable, catchError, map, of } from 'rxjs';
 
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
@@ -98,6 +99,7 @@ export const PROPOSALS_MIXED_NOTE =
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
+    HelpLinkComponent,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
   ],

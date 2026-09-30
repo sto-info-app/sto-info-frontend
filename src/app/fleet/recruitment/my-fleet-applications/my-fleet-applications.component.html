@@ -1,6 +1,8 @@
 @if (state$ | async; as state) {
   <app-fleet-page-shell
     heading="Your Fleet applications"
+    helpSlug="applying-to-a-fleet"
+    helpLabel="Help with joining a Fleet"
     [isLoading]="state.kind === 'LOADING'"
     loadingText="Reading your applications"
     [errorMessage]="state.kind === 'ERROR' ? errorMessage : null">

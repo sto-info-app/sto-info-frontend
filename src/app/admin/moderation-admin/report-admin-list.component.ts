@@ -19,6 +19,7 @@ import {
   ReportStatus,
   UserReport,
 } from 'src/app/models/moderation.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -61,6 +62,7 @@ type StatusFilter = ReportStatus | 'ALL';
     FormsModule,
     MatDialogModule,
     RouterModule,
+    HelpLinkComponent,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,

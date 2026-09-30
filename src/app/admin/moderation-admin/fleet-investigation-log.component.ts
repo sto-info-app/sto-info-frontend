@@ -14,6 +14,7 @@ import { take } from 'rxjs';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
 import { FleetInvestigation } from 'src/app/models/fleet-governance.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -35,6 +36,7 @@ const PAGE_SIZE = 20;
   standalone: true,
   imports: [
     AppDatePipe,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LoadingBarComponent,
     RouterLink,
