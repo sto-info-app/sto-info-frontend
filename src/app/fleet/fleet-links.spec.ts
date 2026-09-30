@@ -101,6 +101,25 @@ describe('FLEET_LINKS', () => {
     ]);
   });
 
+  it('should address a Fleet’s former names beneath its investigation', () => {
+    expect(
+      FLEET_LINKS.fleetFormerNames(
+        'united-federation-alliance',
+        'pc',
+        'starfleet-command',
+      ),
+    ).toEqual([
+      '/fleets',
+      'communities',
+      'united-federation-alliance',
+      'fleets',
+      'pc',
+      'starfleet-command',
+      'investigate',
+      'former-names',
+    ]);
+  });
+
   it('should address one roster import beneath the Fleet’s imports', () => {
     expect(
       FLEET_LINKS.fleetRosterImport(
@@ -184,6 +203,28 @@ describe('FLEET_LINKS', () => {
       'starfleet-command',
       'manage',
     ]);
+  });
+
+  it('should address the settings pages below the Manage hubs', () => {
+    expect(FLEET_LINKS.communitySettings('ufa')).toEqual([
+      '/fleets',
+      'communities',
+      'ufa',
+      'manage',
+      'settings',
+    ]);
+    expect(FLEET_LINKS.fleetSettings('ufa', 'pc', 'starfleet-command')).toEqual(
+      [
+        '/fleets',
+        'communities',
+        'ufa',
+        'fleets',
+        'pc',
+        'starfleet-command',
+        'manage',
+        'settings',
+      ],
+    );
   });
 
   it('should address a Fleet’s holdings below it', () => {

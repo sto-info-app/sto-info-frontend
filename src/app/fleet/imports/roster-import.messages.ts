@@ -86,8 +86,10 @@ export const ROSTER_FILENAME_REJECTIONS: Record<
   [RosterFilenameRejection.FLEET_NAME_MISMATCH]:
     'The Fleet named in the filename is not this Fleet. Names are compared ' +
     'exactly, spaces at either end included, because that spacing may be the ' +
-    'only thing telling two Fleets apart. If the Fleet has been renamed, its ' +
-    'former name has to be recorded here before older exports will match.',
+    'only thing telling two Fleets apart. If the Fleet has been renamed, ' +
+    'anybody who can investigate its imports, its Owner and Admins among ' +
+    'them, can record its former name under Investigate, Former names, and ' +
+    'older exports will then match.',
 };
 
 /** Why a row cannot be read as an observation. */

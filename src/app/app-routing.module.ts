@@ -464,6 +464,15 @@ export const routes: Routes = [
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.ADMIN_FLEET_DISPUTES,
+    loadComponent: () =>
+      import('./admin/moderation-admin/fleet-dispute-search.component').then(
+        m => m.FleetDisputeSearchComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_FLEET_DISPUTES, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.ADMIN_ROSTER_ERASURES,
     loadComponent: () =>
       import('./admin/moderation-admin/roster-erasure-list.component').then(

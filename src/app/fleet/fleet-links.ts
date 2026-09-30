@@ -366,6 +366,24 @@ export const FLEET_LINKS = {
   ],
 
   /**
+   * The names a Fleet was known by before, for its investigators to record
+   * so older exports still match (FC-050).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetFormerNames: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetInvestigate(communitySlug, platformSegment, fleetSlug),
+    'former-names',
+  ],
+
+  /**
    * The exports of a Fleet claiming one moment, for its investigators to
    * choose between.
    *
@@ -564,6 +582,34 @@ export const FLEET_LINKS = {
   communityManage: (communitySlug: string): string[] => [
     ...FLEET_LINKS.community(communitySlug),
     'manage',
+  ],
+
+  /**
+   * Where a Community's Owner changes its name, web address and the rest.
+   *
+   * @param communitySlug - The Community's URL segment.
+   * @returns The router link.
+   */
+  communitySettings: (communitySlug: string): string[] => [
+    ...FLEET_LINKS.communityManage(communitySlug),
+    'settings',
+  ],
+
+  /**
+   * Where a Fleet's Owner changes its name, web address and the rest.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetSettings: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetManage(communitySlug, platformSegment, fleetSlug),
+    'settings',
   ],
 
   /**

@@ -133,6 +133,44 @@ describe('FleetRegistrationService', () => {
     });
   });
 
+  describe('changing settings', () => {
+    it('patches a Community with what changed and the revision loaded', () => {
+      service
+        .updateCommunity('community-1', { name: 'Renamed', revision: 3 })
+        .subscribe();
+
+      const request = httpMock.expectOne(
+        `${API_URLS.FLEET_COMMUNITIES}/community-1`,
+      );
+
+      expect(request.request.method).toBe('PATCH');
+      expect(request.request.body).toEqual({ name: 'Renamed', revision: 3 });
+      expect(request.request.headers.get('Authorization')).toBe(
+        'Bearer token-1',
+      );
+
+      request.flush({});
+    });
+
+    it('patches a Fleet below its Community, its name exactly as typed', () => {
+      service
+        .updateFleet('community-1', 'fleet/1', {
+          exactGameName: ' Ninth Fleet',
+          revision: 2,
+        })
+        .subscribe();
+
+      const request = httpMock.expectOne(
+        `${API_URLS.FLEET_COMMUNITIES}/community-1/fleets/fleet%2F1`,
+      );
+
+      expect(request.request.method).toBe('PATCH');
+      expect(request.request.body.exactGameName).toBe(' Ninth Fleet');
+
+      request.flush({});
+    });
+  });
+
   // No Community to register into, so the address is its own.
   it('posts a standalone confirmation to the Fleet collection', () => {
     service

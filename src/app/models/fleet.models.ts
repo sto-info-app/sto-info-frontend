@@ -180,6 +180,12 @@ export interface StoFleetCard extends InGameScopeCard {
   allegianceFactionId: string | null;
 
   /**
+   * Whether the game provides a fleet roster export on the Fleet's platform.
+   * False means no roster can ever be imported for it.
+   */
+  platformProvidesRosterExport: boolean;
+
+  /**
    * Export instant of its newest effective roster import, which is how fresh
    * the record is. Null means nothing has ever been imported for it.
    */
@@ -616,6 +622,40 @@ export interface CreateStoFleet {
 }
 
 /**
+ * What changing a Community's settings sends: only what changed, and the
+ * revision the Owner loaded.
+ *
+ * A description is cleared with null. The revision turns a blind overwrite
+ * into a refusal when somebody else changed it first.
+ */
+export interface UpdateFleetCommunity {
+  name?: string;
+  slug?: string;
+  description?: string | null;
+  recruitmentState?: FleetRecruitmentState;
+  visibility?: FleetAudience;
+  preferredTimezone?: string;
+  revision?: number;
+}
+
+/**
+ * What changing a Fleet's settings sends.
+ *
+ * Neither the platform nor the recruitment state: the platform is half of
+ * the Fleet's address and cannot change, and how it recruits is changed in
+ * its recruitment settings, which version every change (FC-021). The name is
+ * sent exactly as typed, as on registration. An allegiance is cleared with
+ * null.
+ */
+export interface UpdateStoFleet {
+  exactGameName?: string;
+  slug?: string;
+  allegianceFactionId?: string | null;
+  visibility?: FleetAudience;
+  revision?: number;
+}
+
+/**
  * What registering an Armada under a Community asks for.
  *
  * No recruitment posture and no audience: an Armada groups Fleets rather
@@ -648,6 +688,8 @@ export interface FleetDuplicate {
   communitySlug: string | null;
   platformId: string;
   platformName: string;
+  /** False on a console, where no roster can ever be imported. */
+  platformProvidesRosterExport: boolean;
   lastEffectiveImportAt: string | null;
   status: FleetScopeStatus;
 }

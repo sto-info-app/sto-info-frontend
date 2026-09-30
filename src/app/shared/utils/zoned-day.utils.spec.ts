@@ -3,6 +3,7 @@ import {
   localDayOf,
   momentsOf,
   startOfLocalDay,
+  startOfNextLocalDay,
 } from './zoned-day.utils';
 
 describe('zoned days', () => {
@@ -90,6 +91,38 @@ describe('zoned days', () => {
       } finally {
         spy.mockRestore();
       }
+    });
+  });
+
+  describe('startOfNextLocalDay', () => {
+    it('starts the next day at its midnight in the zone', () => {
+      expect(startOfNextLocalDay('2024-07-15', 'Europe/London')).toBe(
+        '2024-07-15T23:00:00.000Z',
+      );
+      expect(startOfNextLocalDay('2024-11-15', 'America/New_York')).toBe(
+        '2024-11-16T05:00:00.000Z',
+      );
+    });
+
+    // The clocks went back at 02:00 BST on 27 October 2024, so the next day
+    // starts in GMT, 25 hours after that day began.
+    it('starts the day after the clocks went back in the offset it began in', () => {
+      expect(startOfNextLocalDay('2024-10-27', 'Europe/London')).toBe(
+        '2024-10-28T00:00:00.000Z',
+      );
+    });
+
+    it('moves on past the end of a month and a year', () => {
+      expect(startOfNextLocalDay('2024-02-29', 'UTC')).toBe(
+        '2024-03-01T00:00:00.000Z',
+      );
+      expect(startOfNextLocalDay('2024-12-31', 'UTC')).toBe(
+        '2025-01-01T00:00:00.000Z',
+      );
+    });
+
+    it('refuses something that is not a day', () => {
+      expect(startOfNextLocalDay('tomorrow', 'UTC')).toBeNull();
     });
   });
 

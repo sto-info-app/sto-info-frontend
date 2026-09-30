@@ -1,0 +1,258 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Former names"
+    helpSlug="importing-a-roster"
+    helpLabel="Help with former names"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the former names"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let data = state.data;
+      @let list = data.list;
+
+      @if (!list.mayChange) {
+        <p
+          class="fleet-report-notice"
+          role="note">
+          {{ readOnlyNote }}
+        </p>
+      }
+
+      <p class="fleet-former-names__intro">
+        An older roster export carries the name the Fleet had when it was
+        taken. A former name recorded here, with the days it was used, lets
+        those exports match this Fleet. Nothing is ever learned from a file: a
+        name is only used once somebody records it here.
+      </p>
+
+      @if (changeNotice(); as notice) {
+        <app-lcars-success-message
+          title="Done"
+          [message]="notice" />
+      }
+      @if (changeError(); as refusal) {
+        <app-lcars-error-message
+          [title]="refusedTitle()"
+          [message]="refusal" />
+      }
+
+      @if (list.items.length === 0) {
+        <p class="fleet-community-empty">
+          No former names are recorded for this Fleet.
+        </p>
+      } @else {
+        <table class="fleet-community-table">
+          <caption>
+            Former names in use, most recent first
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Used</th>
+              <th scope="col">Why</th>
+              <th scope="col">Recorded</th>
+              <th scope="col">Imports</th>
+              @if (list.mayChange) {
+                <th scope="col"><span class="sr-only">Remove</span></th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (name of list.items; track name.id) {
+              <tr>
+                <td data-label="Name">
+                  “<app-fleet-exact-name [name]="name.exactName" />”
+                </td>
+                <td data-label="Used">
+                  From {{ name.validFrom | appDate }}
+                  @if (name.validTo) {
+                    until {{ lastInstantOf(name.validTo) | appDate }}
+                  } @else {
+                    onwards
+                  }
+                </td>
+                <td data-label="Why">{{ name.reason }}</td>
+                <td data-label="Recorded">
+                  Recorded by {{ name.recordedByName ?? actorGone }} on
+                  {{ name.recordedAt | appDate }}
+                </td>
+                <td data-label="Imports">{{ matchedLabel(name) }}</td>
+                @if (list.mayChange) {
+                  <td data-label="Remove">
+                    <button
+                      type="button"
+                      class="lcars-btn lcars-btn-auto red"
+                      [disabled]="busy()"
+                      (click)="onRemove(data, name)">
+                      Remove
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+
+      @if (list.mayChange) {
+        <form
+          class="fleet-former-names__form"
+          aria-labelledby="former-name-add-heading"
+          [formGroup]="form"
+          (ngSubmit)="onRecord(data)">
+          <h2
+            class="fleet-former-names__heading"
+            id="former-name-add-heading">
+            Add a former name
+          </h2>
+
+          <div class="lcars-input-container sky">
+            <label for="former-name-name">Name, exactly as in game</label>
+            <input
+              id="former-name-name"
+              type="text"
+              autocomplete="off"
+              formControlName="exactName"
+              [maxlength]="nameMaxLength" />
+            @if (form.controls.exactName.hasError('maxCodepoints')) {
+              <small class="field-error">{{ nameTooLong }}</small>
+            } @else if (
+              form.controls.exactName.touched && form.controls.exactName.invalid
+            ) {
+              <small class="field-error">
+                Please give the name the Fleet had.
+              </small>
+            }
+          </div>
+          <p class="fleet-community-field-hint">
+            Exactly as the game wrote it into the export’s filename, spaces at
+            either end included.
+          </p>
+
+          <div class="fleet-community-form-row">
+            <div class="lcars-input-container sky">
+              <label for="former-name-from">Used from</label>
+              <input
+                id="former-name-from"
+                type="date"
+                formControlName="usedFrom" />
+              @if (
+                form.controls.usedFrom.touched && form.controls.usedFrom.invalid
+              ) {
+                <small class="field-error">
+                  Please say when the name was first used.
+                </small>
+              }
+            </div>
+            <div class="lcars-input-container sky">
+              <label for="former-name-until">Used until</label>
+              <input
+                id="former-name-until"
+                type="date"
+                formControlName="usedUntil" />
+              @if (
+                form.controls.usedUntil.touched &&
+                form.controls.usedUntil.invalid
+              ) {
+                <small class="field-error">
+                  Please say the last day the name was used.
+                </small>
+              } @else if (
+                form.controls.usedUntil.touched && form.hasError('backwards')
+              ) {
+                <small class="field-error">
+                  The last day it was used cannot be before the first.
+                </small>
+              }
+            </div>
+          </div>
+          <p class="fleet-community-field-hint">
+            Both days are included, and read in your display timezone.
+          </p>
+
+          <div class="lcars-input-container sky">
+            <label for="former-name-reason">Why</label>
+            <textarea
+              id="former-name-reason"
+              rows="2"
+              formControlName="reason"
+              [attr.maxlength]="reasonLimit"></textarea>
+            @if (form.controls.reason.touched && form.controls.reason.invalid) {
+              <small class="field-error">
+                @if (form.controls.reason.hasError('required')) {
+                  Say why, so whoever looks at this next knows.
+                } @else {
+                  Keep it to {{ reasonLimit }} characters.
+                }
+              </small>
+            }
+          </div>
+          <p class="fleet-community-field-hint">
+            Kept with the name. At most {{ reasonLimit }} characters.
+          </p>
+
+          <div class="fleet-community-form-actions">
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto green"
+              [disabled]="busy()">
+              {{ busy() ? 'Recording' : 'Record this name' }}
+            </button>
+          </div>
+        </form>
+      }
+
+      @if (list.removed.length > 0) {
+        <section
+          class="fleet-former-names__removed"
+          aria-labelledby="former-name-removed-heading">
+          <h2
+            class="fleet-former-names__heading"
+            id="former-name-removed-heading">
+            Removed names
+          </h2>
+          <table class="fleet-community-table">
+            <caption>
+              Removed names match nothing new, most recently removed first
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Used</th>
+                <th scope="col">Removed</th>
+                <th scope="col">Imports</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (name of list.removed; track name.id) {
+                <tr>
+                  <td data-label="Name">
+                    “<app-fleet-exact-name [name]="name.exactName" />”
+                  </td>
+                  <td data-label="Used">
+                    From {{ name.validFrom | appDate }}
+                    @if (name.validTo) {
+                      until {{ lastInstantOf(name.validTo) | appDate }}
+                    } @else {
+                      onwards
+                    }
+                  </td>
+                  <td data-label="Removed">
+                    Removed by {{ name.removedByName ?? actorGone }} on
+                    {{ name.removedAt | appDate }}: {{ name.removalReason }}
+                  </td>
+                  <td data-label="Imports">{{ matchedLabel(name) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </section>
+      }
+    }
+  </app-fleet-page-shell>
+}

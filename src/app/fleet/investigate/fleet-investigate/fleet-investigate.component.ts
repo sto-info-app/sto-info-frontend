@@ -30,7 +30,7 @@ export const FLEET_INVESTIGATE_NOT_PERMITTED =
  * For whoever imports the Fleet's rosters or investigates them — neither
  * implies the other — and offering each only what they may do: an importer
  * sends exports and follows them, an investigator decides renames, settles
- * conflicts and orders the ranks.
+ * conflicts, records the Fleet's former names and orders the ranks.
  */
 @Component({
   selector: 'app-fleet-investigate',
@@ -122,6 +122,17 @@ export class FleetInvestigateComponent extends FleetSectionPageDirective<
         description:
           `Decide the renames ${fleet.exactGameName}’s rosters suggest from ` +
           'one export to the next.',
+      });
+      actions.push({
+        label: 'Former names',
+        link: FLEET_LINKS.fleetFormerNames(
+          communitySlug,
+          platformSegment,
+          fleetSlug,
+        ),
+        description:
+          `The names ${fleet.exactGameName} was known by before, so older ` +
+          'roster exports still match.',
       });
       actions.push({
         label: 'Rank order',

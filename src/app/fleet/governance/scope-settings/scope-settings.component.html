@@ -1,0 +1,223 @@
+@if (state$ | async; as state) {
+  @if (tabsOf(state); as tabs) {
+    <app-fleet-tabs [vm]="tabs" />
+  }
+
+  <app-fleet-page-shell
+    heading="Settings"
+    helpSlug="registering-a-fleet"
+    helpLabel="Help with changing settings"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading its settings"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let data = state.data;
+
+      <p class="scope-settings__back">
+        <a [routerLink]="scope.manageLink">Back to Manage</a>
+      </p>
+
+      @if (notice(); as done) {
+        <app-lcars-success-message
+          title="Settings"
+          [message]="done" />
+      }
+
+      @if (renamed(); as rename) {
+        <p
+          class="scope-settings__renamed"
+          role="note">
+          It was called
+          <app-fleet-exact-name [name]="rename.oldName" />. Exports taken before
+          the rename still carry the old name. Record it under
+          <a [routerLink]="rename.formerNamesLink">Former names</a> so they keep
+          matching.
+        </p>
+      }
+
+      @if (error(); as refusal) {
+        <app-lcars-error-message
+          title="Not saved"
+          [message]="refusal" />
+        @if (stale()) {
+          <div class="fleet-community-form-actions">
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto gold"
+              (click)="onReload()">
+              Reload
+            </button>
+          </div>
+        }
+      }
+
+      @if (data.lock; as lock) {
+        <p class="fleet-community-empty">{{ lock }}</p>
+      } @else if (form(); as form) {
+        <p class="scope-settings__intro">
+          @if (data.kind === 'FLEET') {
+            Type the name exactly as the game shows it, spaces at either end
+            included — that spacing may be the only thing telling your Fleet
+            apart from somebody else's.
+          } @else {
+            Only what you change is saved.
+          }
+        </p>
+
+        <form
+          class="scope-settings__form"
+          [attr.aria-label]="data.noun + ' settings'"
+          [formGroup]="form"
+          (ngSubmit)="onSubmit(data, form)">
+          <div class="form-row">
+            <div class="lcars-input-container sky">
+              <label for="settings-name">{{
+                data.kind === 'FLEET' ? 'Name, exactly as in game' : 'Name'
+              }}</label>
+              <input
+                id="settings-name"
+                type="text"
+                autocomplete="off"
+                formControlName="name"
+                [maxlength]="data.nameMaxLength" />
+            </div>
+          </div>
+
+          @if (form.controls.name.hasError('maxCodepoints')) {
+            <p class="scope-settings__field-error">{{ data.nameTooLong }}</p>
+          } @else if (
+            form.controls.name.touched && form.controls.name.invalid
+          ) {
+            <p class="scope-settings__field-error">
+              @if (data.kind === 'FLEET') {
+                Please give the Fleet its name.
+              } @else {
+                Please give the Community a name.
+              }
+            </p>
+          }
+
+          <div class="form-row">
+            <div class="lcars-input-container sky">
+              <label for="settings-slug">Web address</label>
+              <input
+                id="settings-slug"
+                type="text"
+                autocomplete="off"
+                placeholder="Made from the name when left blank"
+                formControlName="slug"
+                [maxlength]="data.slugMaxLength" />
+            </div>
+          </div>
+          <p class="fleet-community-field-hint scope-settings__hint">
+            Renaming makes a new web address from the new name, unless you type
+            a different one here. The old address keeps working and leads to the
+            new one.
+          </p>
+
+          @if (data.kind === 'COMMUNITY') {
+            <div class="form-row">
+              <div class="lcars-input-container sky">
+                <label for="settings-description">What the Community is</label>
+                <textarea
+                  id="settings-description"
+                  rows="4"
+                  formControlName="description"
+                  [maxlength]="descriptionMaxLength"></textarea>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="lcars-input-container sky">
+                <label for="settings-recruitment">How people join</label>
+                <select
+                  id="settings-recruitment"
+                  formControlName="recruitmentState">
+                  @for (choice of recruitmentChoices; track choice[0]) {
+                    <option [value]="choice[0]">{{ choice[1] }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="lcars-input-container sky">
+                <label for="settings-visibility">Who can see it</label>
+                <select
+                  id="settings-visibility"
+                  formControlName="visibility"
+                  aria-describedby="settings-visibility-hint">
+                  @for (choice of audienceChoices; track choice[0]) {
+                    <option [value]="choice[0]">{{ choice[1] }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="lcars-input-container sky">
+                <label for="settings-timezone">Show dates in</label>
+                <select
+                  id="settings-timezone"
+                  formControlName="preferredTimezone">
+                  @for (zone of data.timezones; track zone) {
+                    <option [value]="zone">{{ zone }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            <p
+              id="settings-visibility-hint"
+              class="fleet-community-field-hint scope-settings__hint">
+              {{ audienceHint }}
+            </p>
+          } @else {
+            <div class="form-row">
+              <div class="lcars-input-container sky">
+                <label for="settings-allegiance">Allegiance</label>
+                <select
+                  id="settings-allegiance"
+                  formControlName="allegianceFactionId">
+                  <option value="">Not stated</option>
+                  @for (faction of allegiances$ | async; track faction.id) {
+                    <option [value]="faction.id">{{ faction.name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="lcars-input-container sky">
+                <label for="settings-visibility">Who can see it</label>
+                <select
+                  id="settings-visibility"
+                  formControlName="visibility">
+                  @for (choice of audienceChoices; track choice[0]) {
+                    <option [value]="choice[0]">{{ choice[1] }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <p class="fleet-community-field-hint scope-settings__hint">
+              Its platform, {{ data.fleet.platformName }}, cannot be changed: a
+              Fleet registered on the wrong platform is closed and registered
+              again. How people join is changed in its
+              <a [routerLink]="data.recruitmentLink">recruitment settings</a>,
+              which keep a version of every change.
+            </p>
+          }
+
+          @if (busy()) {
+            <app-loading-bar loadingText="Saving the settings" />
+          }
+
+          <div class="form-actions">
+            <button
+              type="submit"
+              class="lcars-btn green"
+              [disabled]="busy()">
+              Save
+            </button>
+          </div>
+        </form>
+      }
+    }
+  </app-fleet-page-shell>
+}

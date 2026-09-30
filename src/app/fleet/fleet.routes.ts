@@ -320,6 +320,15 @@ export const FLEET_ROUTES: Routes = [
         canActivate: [AuthGuard],
       },
       {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/former-names',
+        loadComponent: () =>
+          import('./investigate/former-names/fleet-former-names.component').then(
+            m => m.FleetFormerNamesComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_FORMER_NAMES },
+        canActivate: [AuthGuard],
+      },
+      {
         path: 'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/conflicts',
         loadComponent: () =>
           import('./investigate/roster-conflicts/roster-conflicts.component').then(
@@ -460,6 +469,27 @@ export const FLEET_ROUTES: Routes = [
             m => m.CommunityDisputeComponent,
           ),
         data: { title: APP_ROUTE_TITLES.FLEET_COMMUNITY_DISPUTE },
+        canActivate: [AuthGuard],
+      },
+      // A Community's and a Fleet's own settings, for the Owner alone. One
+      // page at both addresses, as the other Manage pages are; an Armada's
+      // are its own and are not here.
+      {
+        path: 'communities/:communitySlug/manage/settings',
+        loadComponent: () =>
+          import('./governance/scope-settings/scope-settings.component').then(
+            m => m.ScopeSettingsComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_COMMUNITY_SETTINGS },
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/manage/settings',
+        loadComponent: () =>
+          import('./governance/scope-settings/scope-settings.component').then(
+            m => m.ScopeSettingsComponent,
+          ),
+        data: { title: APP_ROUTE_TITLES.FLEET_SETTINGS },
         canActivate: [AuthGuard],
       },
       {

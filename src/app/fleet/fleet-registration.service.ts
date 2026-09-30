@@ -14,11 +14,15 @@ import {
   FleetDuplicate,
   RegisteredStoArmada,
   RegisteredStoFleet,
+  StoFleet,
+  UpdateFleetCommunity,
+  UpdateStoFleet,
 } from 'src/app/models/fleet.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 
 /**
- * Registers records into the Fleet directory.
+ * Registers records into the Fleet directory, and changes their settings
+ * afterwards.
  *
  * Separate from the service that reads it. Reading is anonymous and
  * cacheable; writing needs an account, changes what everybody else sees,
@@ -78,6 +82,44 @@ export class FleetRegistrationService {
     return this._http.post<RegisteredStoArmada>(
       this.childUrl(communityId, 'armadas'),
       armada,
+      this.callerOptions(),
+    );
+  }
+
+  /**
+   * Changes a Community's settings: its Owner's, and nobody else's.
+   *
+   * @param communityId - The Community.
+   * @param changes - What changed, and the revision the Owner loaded.
+   * @returns The Community as it now stands, its slug included.
+   */
+  updateCommunity(
+    communityId: string,
+    changes: UpdateFleetCommunity,
+  ): Observable<FleetCommunity> {
+    return this._http.patch<FleetCommunity>(
+      `${API_URLS.FLEET_COMMUNITIES}/${encodeURIComponent(communityId)}`,
+      changes,
+      this.callerOptions(),
+    );
+  }
+
+  /**
+   * Changes a Fleet's settings: the Owner's, and nobody else's.
+   *
+   * @param communityId - The Community holding it.
+   * @param fleetId - The Fleet.
+   * @param changes - What changed, and the revision the Owner loaded.
+   * @returns The Fleet as it now stands, its slug included.
+   */
+  updateFleet(
+    communityId: string,
+    fleetId: string,
+    changes: UpdateStoFleet,
+  ): Observable<StoFleet> {
+    return this._http.patch<StoFleet>(
+      `${this.childUrl(communityId, 'fleets')}/${encodeURIComponent(fleetId)}`,
+      changes,
       this.callerOptions(),
     );
   }

@@ -147,6 +147,7 @@ describe('FleetInvestigateComponent', () => {
       ['Roster imports', `${FLEET_HREF}/investigate/imports`],
       ['Conflicting exports', `${FLEET_HREF}/investigate/conflicts`],
       ['Roster identities', `${FLEET_HREF}/investigate/identities`],
+      ['Former names', `${FLEET_HREF}/investigate/former-names`],
       ['Rank order', `${FLEET_HREF}/investigate/rank-order`],
     ]);
     expect(text()).toContain('Investigate');
@@ -174,6 +175,7 @@ describe('FleetInvestigateComponent', () => {
       'Roster imports',
       'Conflicting exports',
       'Roster identities',
+      'Former names',
       'Rank order',
     ]);
   });
@@ -277,6 +279,7 @@ describe('FleetInvestigateComponent', () => {
       'Roster imports',
       'Conflicting exports',
       'Roster identities',
+      'Former names',
       'Rank order',
     ]);
     expect(text()).toContain(ROSTER_READ_ONLY_NOTE);

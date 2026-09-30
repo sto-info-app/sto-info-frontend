@@ -22,7 +22,7 @@ describe('FLEET_ROUTES', () => {
   it('declares one parent holding the listings and the scope pages', () => {
     expect(FLEET_ROUTES).toHaveLength(1);
     expect(parentRoute.path).toBe('');
-    expect(children).toHaveLength(80);
+    expect(children).toHaveLength(83);
   });
 
   // The parent is the component that answers whether the feature is switched
@@ -94,6 +94,10 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
       APP_ROUTE_TITLES.FLEET_ROSTER_IDENTITIES,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/former-names',
+      APP_ROUTE_TITLES.FLEET_FORMER_NAMES,
     ],
     [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/conflicts',
@@ -170,6 +174,14 @@ describe('FLEET_ROUTES', () => {
     [
       'communities/:communitySlug/manage/dispute',
       APP_ROUTE_TITLES.FLEET_COMMUNITY_DISPUTE,
+    ],
+    [
+      'communities/:communitySlug/manage/settings',
+      APP_ROUTE_TITLES.FLEET_COMMUNITY_SETTINGS,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/settings',
+      APP_ROUTE_TITLES.FLEET_SETTINGS,
     ],
   ])('puts %s behind the sign-in guard', (path, title) => {
     expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
@@ -544,6 +556,10 @@ describe('FLEET_ROUTES', () => {
       'RosterIdentityListComponent',
     ],
     [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/former-names',
+      'FleetFormerNamesComponent',
+    ],
+    [
       'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/conflicts',
       'RosterConflictsComponent',
     ],
@@ -608,6 +624,11 @@ describe('FLEET_ROUTES', () => {
       'CommunityOwnershipComponent',
     ],
     ['communities/:communitySlug/manage/dispute', 'CommunityDisputeComponent'],
+    ['communities/:communitySlug/manage/settings', 'ScopeSettingsComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/settings',
+      'ScopeSettingsComponent',
+    ],
     [
       'communities/:communitySlug/armadas/:platformSegment/:slug/history',
       'ArmadaHistoryComponent',

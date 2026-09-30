@@ -43,6 +43,24 @@ export function startOfLocalDay(day: string, timezone: string): string | null {
 }
 
 /**
+ * The first instant of the day after a day in a timezone: where a span that
+ * includes the whole of that day ends, for a server that takes a span's end
+ * as the first moment outside it.
+ *
+ * @param day - The day, `YYYY-MM-DD`.
+ * @param timezone - The IANA zone.
+ * @returns The instant, as an ISO string, or null for a day that is not one.
+ */
+export function startOfNextLocalDay(
+  day: string,
+  timezone: string,
+): string | null {
+  const nextMidnight = midnightOf(day, 1, timezone);
+
+  return nextMidnight === null ? null : new Date(nextMidnight).toISOString();
+}
+
+/**
  * The last instant of a day in a timezone: a millisecond before the next
  * day begins there.
  *

@@ -130,6 +130,9 @@ export const APP_ROUTES = {
   FLEET_ROSTER_IDENTITIES:
     FLEET_COMMUNITIES_ROOT +
     '/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
+  FLEET_FORMER_NAMES:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/investigate/former-names',
   FLEET_ROSTER_CONFLICTS:
     FLEET_COMMUNITIES_ROOT +
     '/:communitySlug/fleets/:platformSegment/:slug/investigate/conflicts',
@@ -163,9 +166,14 @@ export const APP_ROUTES = {
     FLEET_COMMUNITIES_ROOT + '/:communitySlug/manage/ownership',
   FLEET_COMMUNITY_DISPUTE:
     FLEET_COMMUNITIES_ROOT + '/:communitySlug/manage/dispute',
+  FLEET_COMMUNITY_SETTINGS:
+    FLEET_COMMUNITIES_ROOT + '/:communitySlug/manage/settings',
   FLEET_MANAGE:
     FLEET_COMMUNITIES_ROOT +
     '/:communitySlug/fleets/:platformSegment/:slug/manage',
+  FLEET_SETTINGS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/manage/settings',
   FLEET_ARMADA_HISTORY:
     FLEET_COMMUNITIES_ROOT +
     '/:communitySlug/armadas/:platformSegment/:slug/history',
@@ -200,6 +208,7 @@ export const APP_ROUTES = {
   ADMIN_CHAT_REPORTS: ROOT_ROUTES.ADMIN + '/chat-reports',
   ADMIN_HOLDS: ROOT_ROUTES.ADMIN + '/holds',
   ADMIN_FLEET_INVESTIGATIONS: ROOT_ROUTES.ADMIN + '/fleet-investigations',
+  ADMIN_FLEET_DISPUTES: ROOT_ROUTES.ADMIN + '/fleet-disputes',
   ADMIN_ROSTER_ERASURES: ROOT_ROUTES.ADMIN + '/roster-erasures',
   ADMIN_USERS: ROOT_ROUTES.ADMIN + '/users',
   ADMIN_PERMISSIONS: ROOT_ROUTES.ADMIN + '/permissions',
@@ -367,6 +376,7 @@ export const APP_ROUTE_TITLES = {
   FLEET_ROSTER_IMPORTS: 'Roster Imports',
   FLEET_ROSTER_IMPORT_DETAIL: 'Roster Import',
   FLEET_ROSTER_IDENTITIES: 'Roster Identities',
+  FLEET_FORMER_NAMES: 'Former Names',
   FLEET_ROSTER_CONFLICTS: 'Conflicting Exports',
   FLEET_RANK_ORDER: 'Rank Order',
   FLEET_MY_APPLICATIONS: 'Your Fleet Applications',
@@ -385,6 +395,8 @@ export const APP_ROUTE_TITLES = {
   FLEET_GOVERNANCE_HISTORY: 'Governance History',
   FLEET_COMMUNITY_OWNERSHIP: 'Community Ownership',
   FLEET_COMMUNITY_DISPUTE: 'Community Site Administration',
+  FLEET_COMMUNITY_SETTINGS: 'Community Settings',
+  FLEET_SETTINGS: 'Fleet Settings',
 
   // News
   NEWS: 'News',
@@ -408,6 +420,7 @@ export const APP_ROUTE_TITLES = {
   ADMIN_CHAT_REPORTS: 'Chat Reports',
   ADMIN_HOLDS: 'Moderation Holds',
   ADMIN_FLEET_INVESTIGATIONS: 'Fleet Investigations',
+  ADMIN_FLEET_DISPUTES: 'Fleet Disputes',
   ADMIN_ROSTER_ERASURES: 'Roster Erasures',
   ADMIN_USERS: 'Manage Members',
   ADMIN_PERMISSIONS: 'Manage Permissions',

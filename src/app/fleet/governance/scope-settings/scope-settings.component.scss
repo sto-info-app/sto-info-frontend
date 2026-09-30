@@ -1,0 +1,37 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.scope-settings {
+  &__back {
+    margin: 0 0 1rem;
+  }
+
+  &__intro,
+  &__renamed {
+    max-width: 70ch;
+    margin: 1rem 0;
+  }
+
+  // The fields sit side by side where there is room and stack on a phone,
+  // as on registration.
+  &__form .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+  }
+
+  &__hint {
+    margin: -0.5rem 0 1rem;
+  }
+
+  // Beneath the field it is about, as on registration.
+  &__field-error {
+    margin: -0.5rem 0 1rem;
+    color: vars.$lcars-red;
+  }
+}
