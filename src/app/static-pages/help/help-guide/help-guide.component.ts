@@ -33,6 +33,8 @@ import {
   findHelpGuide,
   HELP_FEATURE_NAMES,
   isFeatureOffered,
+  switchedOffFeature,
+  switchedOffNote,
   isGuidePermitted,
   isTopicPermitted,
   visibleSections,
@@ -83,6 +85,12 @@ export class HelpGuideComponent implements OnInit {
 
   /** The parts of it on offer: none about a switched-off feature. */
   sections: HelpGuideSection[] = [];
+
+  /** The note over each shown part whose own switch is off, or null (FC-050). */
+  sectionNotes: (string | null)[] = [];
+
+  /** The note that the guide's feature is switched off, or null (FC-050). */
+  switchedOff: string | null = null;
 
   /** The other guides in the same topic, offered at the end. */
   otherGuides: HelpGuide[] = [];
@@ -205,9 +213,25 @@ export class HelpGuideComponent implements OnInit {
     features: HelpFeatures,
     permissions: ReadonlySet<string>,
   ): void {
+    const off = switchedOffFeature(
+      features,
+      location.topic.requiresFeature,
+      location.guide.requiresFeature,
+    );
+
     this.unavailableReason = null;
     this.guide = location.guide;
+    this.switchedOff = off === null ? null : switchedOffNote(off, 'guide');
     this.sections = visibleSections(location.guide, features);
+    // A part says nothing more while the whole guide is noted: chat is off
+    // whenever Fleet Community is.
+    this.sectionNotes = this.sections.map(section => {
+      const sectionOff = switchedOffFeature(features, section.requiresFeature);
+
+      return off !== null || sectionOff === null
+        ? null
+        : switchedOffNote(sectionOff, 'section');
+    });
     this.topicTitle = location.topic.title;
     this.topicLink = this._routingService.getLink(
       this.appRoutes.HELP_TOPIC.replace(':topicId', location.topic.id),

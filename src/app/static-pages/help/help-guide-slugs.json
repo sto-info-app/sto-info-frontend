@@ -1,10 +1,26 @@
 {
-  "comment": "Every help guide slug, in reading order, and every section anybody may open. Read at build time by scripts/generate-content.mjs so each guide and section page gets its own sitemap entry. The guides themselves live in help.data.ts; help.data.spec.ts fails if these lists and that file ever disagree.",
+  "comment": "Every help guide slug, in reading order, and every section anybody may open. Read at build time by scripts/generate-content.mjs so each guide and section page gets its own sitemap entry. The guides themselves live in help.data.ts and the files it gathers; help.data.spec.ts fails if these lists and that file ever disagree.",
   "slugs": [
     "the-galactic-personnel-registry",
     "listing-your-own-record",
     "finding-and-adding-friends",
     "blocking-and-reporting",
+    "communities-fleets-and-armadas",
+    "finding-a-fleet",
+    "registering-a-fleet",
+    "roles-ownership-and-closing",
+    "your-characters-and-fleets",
+    "applying-to-a-fleet",
+    "armadas",
+    "fleet-holdings",
+    "fleet-news-and-activity",
+    "fleet-events",
+    "fleet-chat",
+    "how-long-things-are-kept",
+    "when-a-moderator-acts",
+    "importing-a-roster",
+    "roster-history-and-corrections",
+    "fleet-reports",
     "what-custom-tracking-is",
     "building-what-you-track",
     "filling-in-your-records",
@@ -25,5 +41,5 @@
     "fleet-settings",
     "what-you-are-notified-about"
   ],
-  "topics": ["community", "custom-tracking", "storytime", "settings"]
+  "topics": ["community", "fleets", "custom-tracking", "storytime", "settings"]
 }

@@ -14,10 +14,13 @@ import {
   blockingFeature,
   findHelpGuide,
   findHelpTopic,
+  HELP_HIDDEN_WHEN_OFF,
   isFeatureOffered,
   isGuidePermitted,
   isTopicPermitted,
   visibleHelpTopics,
+  switchedOffFeature,
+  switchedOffNote,
   visibleSections,
 } from './help.data';
 import { HelpGuide } from './help.models';
@@ -369,23 +372,25 @@ describe('help data', () => {
         noPermissions,
       ).map(topic => topic.id);
 
-      expect(ids).toEqual(['community', 'custom-tracking', 'settings']);
+      expect(ids).toEqual([
+        'community',
+        'fleets',
+        'custom-tracking',
+        'settings',
+      ]);
     });
 
-    // FC-049: a guide can wait on a switch its topic does not, and a topic
-    // left with none is dropped like any other.
-    it('should drop the guides about Fleet Community while it is off', () => {
+    // FC-050: Fleet Community's guides stay while it is off, so they can
+    // still be found; their pages say it is off.
+    it('should keep the guides about Fleet Community while it is off', () => {
       const settings = visibleHelpTopics(
         featuresWith({ FLEET: 'DISABLED', CHAT: 'DISABLED' }),
         noPermissions,
       ).find(topic => topic.id === 'settings');
 
-      expect(settings?.guides.map(guide => guide.slug)).toEqual([
-        'your-settings',
-        'privacy-mode',
-        'staying-signed-in',
-        'dates-and-times',
-      ]);
+      expect(settings?.guides.map(guide => guide.slug)).toContain(
+        'fleet-settings',
+      );
     });
 
     // A switch that could not be read has said nothing about the feature.
@@ -401,6 +406,7 @@ describe('help data', () => {
 
       expect(ids).toEqual([
         'community',
+        'fleets',
         'custom-tracking',
         'storytime',
         'settings',
@@ -490,42 +496,84 @@ describe('help data', () => {
   });
 
   describe('feature switches (FC-049)', () => {
-    it('should offer help about a feature unless it is switched off', () => {
+    // Steve's decision of 30 September 2026 (FC-050): only Storytime's help
+    // goes with it; Fleet Community's and its chat's stay, noted.
+    it('should hide only Storytime’s help while it is off', () => {
+      expect(HELP_HIDDEN_WHEN_OFF).toEqual({
+        STORYTIME: true,
+        FLEET: false,
+        CHAT: false,
+      });
+    });
+
+    it('should offer help about a feature unless it is off and hidden with it', () => {
       expect(isFeatureOffered(undefined, featuresWith({}))).toBe(true);
-      expect(isFeatureOffered('FLEET', featuresWith({}))).toBe(true);
+      expect(isFeatureOffered('STORYTIME', featuresWith({}))).toBe(true);
       expect(
-        isFeatureOffered('FLEET', featuresWith({ FLEET: 'UNAVAILABLE' })),
+        isFeatureOffered(
+          'STORYTIME',
+          featuresWith({ STORYTIME: 'UNAVAILABLE' }),
+        ),
       ).toBe(true);
       expect(
-        isFeatureOffered('FLEET', featuresWith({ FLEET: 'DISABLED' })),
+        isFeatureOffered('STORYTIME', featuresWith({ STORYTIME: 'DISABLED' })),
       ).toBe(false);
+      expect(
+        isFeatureOffered('FLEET', featuresWith({ FLEET: 'DISABLED' })),
+      ).toBe(true);
     });
 
     // A page waits on its topic's switch first, then its guide's; only one
-    // that is on lets it through, since unknown is not the same as on.
+    // that is on lets it through, since unknown is not the same as on. A
+    // switch whose help stays blocks nothing.
     it('should name the first switch keeping a page from being read', () => {
-      expect(blockingFeature(ALL_ON, undefined, 'FLEET')).toBeNull();
+      expect(blockingFeature(ALL_ON, undefined, 'STORYTIME')).toBeNull();
       expect(
         blockingFeature(
           featuresWith({ STORYTIME: 'UNAVAILABLE', FLEET: 'DISABLED' }),
-          'STORYTIME',
           'FLEET',
+          'STORYTIME',
         ),
       ).toBe('STORYTIME');
       expect(
         blockingFeature(featuresWith({ CHAT: 'DISABLED' }), undefined, 'CHAT'),
-      ).toBe('CHAT');
+      ).toBeNull();
       expect(blockingFeature(ALL_ON)).toBeNull();
     });
 
-    it('should leave out the parts of a guide about a switched-off feature', () => {
+    it('should name the first switch off whose help stays', () => {
+      expect(
+        switchedOffFeature(
+          featuresWith({ STORYTIME: 'DISABLED', CHAT: 'DISABLED' }),
+          'STORYTIME',
+          undefined,
+          'CHAT',
+        ),
+      ).toBe('CHAT');
+      // A switch that could not be read has said nothing.
+      expect(
+        switchedOffFeature(featuresWith({ FLEET: 'UNAVAILABLE' }), 'FLEET'),
+      ).toBeNull();
+      expect(switchedOffFeature(ALL_ON, 'FLEET', 'CHAT')).toBeNull();
+    });
+
+    it.each([
+      ['topic', 'Its guides stay here'],
+      ['guide', 'This guide stays here'],
+      ['section', 'what this part describes'],
+    ] as const)('should say a feature is off over a %s', (part, words) => {
+      const note = switchedOffNote('FLEET', part);
+
+      expect(note).toContain('Fleet Community is switched off at the moment');
+      expect(note).toContain(words);
+    });
+
+    it('should keep the parts of a guide about a feature whose help stays', () => {
       const guide = findHelpGuide('fleet-settings')!.guide;
 
       expect(
-        visibleSections(guide, featuresWith({ CHAT: 'DISABLED' })).map(
-          section => section.heading,
-        ),
-      ).toEqual(['Read Fleet roster exports as']);
+        visibleSections(guide, featuresWith({ CHAT: 'DISABLED' })),
+      ).toEqual(guide.sections);
       expect(visibleSections(guide, ALL_ON)).toEqual(guide.sections);
     });
 
@@ -559,15 +607,18 @@ describe('help data', () => {
         ])
         .join(' ');
 
-    // Steve's order of 29 September 2026: settings after STO Storytime,
-    // before the guides almost nobody is shown.
+    // Steve's order of 29 September 2026: Fleets second, settings after STO
+    // Storytime, before the guides almost nobody is shown, and Running the
+    // site last (FC-050).
     it('should come after STO Storytime and before Running Storytime', () => {
       expect(HELP_TOPICS.map(topic => topic.id)).toEqual([
         'community',
+        'fleets',
         'custom-tracking',
         'storytime',
         'settings',
         'storytime-admin',
+        'site-admin',
       ]);
     });
 

@@ -31,6 +31,9 @@ import {
   TAG_CATEGORY_LABELS,
 } from 'src/app/storytime/storytime.constants';
 
+import { FLEETS_TOPIC } from './help-fleets.data';
+import { guideSection } from './help-section';
+import { SITE_ADMIN_TOPIC } from './help-site-admin.data';
 import {
   HelpFeature,
   HelpFeatures,
@@ -39,17 +42,6 @@ import {
   HelpGuideSection,
   HelpTopic,
 } from './help.models';
-
-/** Builds a prose section with optional bullet points. */
-function guideSection(
-  heading: string,
-  paragraphs: string[],
-  points?: string[],
-): HelpGuideSection {
-  return points === undefined
-    ? { heading, paragraphs }
-    : { heading, paragraphs, points };
-}
 
 /**
  * The links several guides finish with.
@@ -1245,8 +1237,8 @@ const SETTINGS_TOPIC: HelpTopic = {
       requiresFeature: 'FLEET',
       sections: [
         guideSection('Read Fleet roster exports as', [
-          'Star Trek Online writes the times in a roster export using the clock of the computer it was exported from, and does not say which zone that was. This setting is the zone STO Info assumes when you import one.',
-          '“Ask me each time” leaves the choice to each import. Whatever you choose here, you can change it for a single import, and it is separate from the zone dates are shown in.',
+          'Star Trek Online writes the times in a roster export using the clock of the computer it was exported from, and does not say which zone that was. When you import one, the zone chosen here is where the import page starts.',
+          '“My device’s zone”, the default, starts each import on the zone of the device you are importing on. Whatever you choose here, you can change it for a single import, and it is separate from the zone dates are shown in.',
         ]),
         {
           heading: 'Who can see when I am online',
@@ -1325,10 +1317,12 @@ const SETTINGS_TOPIC: HelpTopic = {
  */
 export const HELP_TOPICS: HelpTopic[] = [
   COMMUNITY_TOPIC,
+  FLEETS_TOPIC,
   CUSTOM_TRACKING_TOPIC,
   STORYTIME_TOPIC,
   SETTINGS_TOPIC,
   STORYTIME_ADMIN_TOPIC,
+  SITE_ADMIN_TOPIC,
 ];
 
 /** What each switch is called when a page says it is off. */
@@ -1339,22 +1333,102 @@ export const HELP_FEATURE_NAMES: Readonly<Record<HelpFeature, string>> = {
 };
 
 /**
+ * Whether a switch's help goes with it while it is off.
+ *
+ * Storytime's does: its route guard answers with the not-found page, and
+ * help naming it would advertise what the switch is there to hide. Fleet
+ * Community's and its chat's stay, each with a note saying the feature is
+ * off, so that their guides can still be found. Steve's decision of 30
+ * September 2026 (FC-050).
+ */
+export const HELP_HIDDEN_WHEN_OFF: Readonly<Record<HelpFeature, boolean>> = {
+  STORYTIME: true,
+  FLEET: false,
+  CHAT: false,
+};
+
+/**
  * Whether help about a feature may be offered.
  *
  * Read as "should this be offered", not "is it on": while the backend cannot
  * be asked the help stays, since a reader with the feature in front of them
  * and no idea why it will not open is exactly who help is for. Only the
- * server saying a feature is off takes its help away.
+ * server saying a feature is off takes its help away, and only for a feature
+ * whose help goes with it (FC-050).
  *
  * @param feature The switch waited on, if any.
  * @param features Where each switch stands.
- * @returns True unless the feature is switched off.
+ * @returns True unless the feature is switched off and its help with it.
  */
 export function isFeatureOffered(
   feature: HelpFeature | undefined,
   features: HelpFeatures,
 ): boolean {
-  return feature === undefined || features[feature] !== 'DISABLED';
+  return (
+    feature === undefined ||
+    !HELP_HIDDEN_WHEN_OFF[feature] ||
+    features[feature] !== 'DISABLED'
+  );
+}
+
+/**
+ * The switch that is off for a page whose help stays while it is (FC-050).
+ *
+ * Only a switch the server says is off: one that could not be asked has said
+ * nothing, and a note claiming a feature is off when it may not be would send
+ * a reader away from something that works.
+ *
+ * @param features Where each switch stands.
+ * @param waitsOn The switches the page waits on, outermost first.
+ * @returns The first switch off, or null when none is.
+ */
+export function switchedOffFeature(
+  features: HelpFeatures,
+  ...waitsOn: (HelpFeature | undefined)[]
+): HelpFeature | null {
+  return (
+    waitsOn.find(
+      (feature): feature is HelpFeature =>
+        feature !== undefined &&
+        !HELP_HIDDEN_WHEN_OFF[feature] &&
+        features[feature] === 'DISABLED',
+    ) ?? null
+  );
+}
+
+/**
+ * What a page says about a switch that is off while its help stays (FC-050).
+ *
+ * @param feature The switch.
+ * @param part What the note stands above: a section of guides, one guide, or
+ *   a part of a guide.
+ * @returns The note.
+ */
+export function switchedOffNote(
+  feature: HelpFeature,
+  part: 'topic' | 'guide' | 'section',
+): string {
+  const name = HELP_FEATURE_NAMES[feature];
+
+  switch (part) {
+    case 'topic':
+      return (
+        `${name} is switched off at the moment. Its guides stay here so ` +
+        'they can still be found, but the pages they describe cannot be ' +
+        'opened until it is switched back on.'
+      );
+    case 'guide':
+      return (
+        `${name} is switched off at the moment. This guide stays here so ` +
+        'it can still be found, but the pages it describes cannot be ' +
+        'opened until it is switched back on.'
+      );
+    default:
+      return (
+        `${name} is switched off at the moment, so what this part ` +
+        'describes cannot be used until it is switched back on.'
+      );
+  }
 }
 
 /**
@@ -1373,9 +1447,10 @@ export function isTopicPermitted(topic: HelpTopic, isAdmin: boolean): boolean {
  * The topics a visitor may be offered.
  *
  * Two filters, for two different reasons. Help about a switched-off feature
- * is not offered, because there is nothing to explain about a feature nobody
- * can reach: a topic, or one guide in it, can wait on Storytime, Fleet
- * Community or Fleet chat (FC-049). A guide with a permission on it waits on
+ * whose help goes with it is not offered, because there is nothing to
+ * explain about a feature nobody can reach: a topic, or one guide in it, can
+ * wait on Storytime, Fleet Community or Fleet chat (FC-049), and only
+ * Storytime's help goes (FC-050). A guide with a permission on it waits on
  * that permission because it describes a page its reader would be turned
  * away from, and help for a door somebody cannot open is not help.
  *
@@ -1417,7 +1492,8 @@ export function visibleHelpTopics(
  * guides: switched off, or unknown because the backend could not be asked.
  * Neither is a wrong address, and a visitor told their address is wrong will
  * not come back when the feature returns. The topic's switch is asked first,
- * then the guide's.
+ * then the guide's. Only a switch whose help goes with it blocks a page; the
+ * others' pages are shown with a note (FC-050).
  *
  * @param features Where each switch stands.
  * @param waitsOn The switches the page waits on, outermost first.
@@ -1430,14 +1506,16 @@ export function blockingFeature(
   return (
     waitsOn.find(
       (feature): feature is HelpFeature =>
-        feature !== undefined && features[feature] !== 'ENABLED',
+        feature !== undefined &&
+        HELP_HIDDEN_WHEN_OFF[feature] &&
+        features[feature] !== 'ENABLED',
     ) ?? null
   );
 }
 
 /**
  * The parts of a guide a visitor may read: those about a feature that is
- * switched off are left out (FC-049).
+ * switched off, and whose help goes with it, are left out (FC-049, FC-050).
  *
  * @param guide The guide.
  * @param features Where each switch stands.

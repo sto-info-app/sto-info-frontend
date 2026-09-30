@@ -32,6 +32,8 @@ import {
   findHelpTopic,
   HELP_FEATURE_NAMES,
   isFeatureOffered,
+  switchedOffFeature,
+  switchedOffNote,
   isGuidePermitted,
   isTopicPermitted,
 } from '../help.data';
@@ -67,6 +69,12 @@ export class HelpTopicComponent implements OnInit {
 
   /** Its guides that this reader may open, in reading order. */
   guides: HelpGuide[] = [];
+
+  /** The note on each shown guide whose own switch is off, or null (FC-050). */
+  guideNotes: (string | null)[] = [];
+
+  /** The note that the section's feature is switched off, or null (FC-050). */
+  switchedOff: string | null = null;
 
   /**
    * Why the section's feature is out of reach, when it is. Null whenever the
@@ -135,9 +143,20 @@ export class HelpTopicComponent implements OnInit {
           return;
         }
 
+        const off = switchedOffFeature(features, topic.requiresFeature);
+
         this.unavailableReason = null;
         this.topic = topic;
         this.guides = guides;
+        this.switchedOff = off === null ? null : switchedOffNote(off, 'topic');
+        // A guide says nothing more while the whole section is noted.
+        this.guideNotes = guides.map(guide => {
+          const guideOff = switchedOffFeature(features, guide.requiresFeature);
+
+          return off !== null || guideOff === null
+            ? null
+            : `${HELP_FEATURE_NAMES[guideOff]} is switched off at the moment.`;
+        });
         this._pageTitleService.setTitle(topic.title);
       });
   }

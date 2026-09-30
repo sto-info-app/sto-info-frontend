@@ -170,7 +170,7 @@ describe('HelpComponent', () => {
     createComponent(false);
 
     const alwaysAvailable = HELP_TOPICS.filter(
-      topic => topic.requiresFeature !== 'STORYTIME',
+      topic => topic.requiresFeature !== 'STORYTIME' && !topic.requiresAdmin,
     );
 
     expect(component.topics).toEqual(alwaysAvailable);
@@ -256,6 +256,7 @@ describe('HelpComponent', () => {
 
     expect(component.topics.map(topic => topic.id)).toEqual([
       'community',
+      'fleets',
       'custom-tracking',
       'storytime',
       'settings',

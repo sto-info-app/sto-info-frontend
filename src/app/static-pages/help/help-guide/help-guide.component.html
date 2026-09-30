@@ -30,8 +30,23 @@
 
     <p class="help-guide__summary">{{ guide.summary }}</p>
 
-    @for (section of sections; track section.heading) {
+    @if (switchedOff) {
+      <p
+        class="help-switched-off"
+        role="note">
+        {{ switchedOff }}
+      </p>
+    }
+
+    @for (section of sections; track section.heading; let index = $index) {
       <app-collapsible-section [heading]="section.heading">
+        @if (sectionNotes[index]; as note) {
+          <p
+            class="help-switched-off"
+            role="note">
+            {{ note }}
+          </p>
+        }
         @for (paragraph of section.paragraphs; track paragraph) {
           <p>{{ paragraph }}</p>
         }

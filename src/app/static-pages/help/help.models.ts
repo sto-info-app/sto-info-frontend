@@ -4,10 +4,11 @@ import { StorytimeAvailability } from 'src/app/models/storytime.models';
 /**
  * A switch part of the help waits on (FC-049).
  *
- * Storytime, Fleet Community and Fleet chat can each be turned off, and a
- * feature nobody can reach is meant to look like one that does not exist.
- * Help agrees: a section, a guide or a part of a guide about a switched-off
- * feature is not offered.
+ * Storytime, Fleet Community and Fleet chat can each be turned off. Storytime
+ * switched off is meant to look like a feature that does not exist, and help
+ * agrees: a section, a guide or a part of a guide about it is not offered.
+ * Fleet Community's and Fleet chat's help stays, with a note that the feature
+ * is off, so that it can still be found (FC-050).
  */
 export type HelpFeature = 'STORYTIME' | 'FLEET' | 'CHAT';
 

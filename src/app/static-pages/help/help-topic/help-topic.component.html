@@ -30,10 +30,18 @@
 
     <p class="help-topic__intro">{{ topic.intro }}</p>
 
+    @if (switchedOff) {
+      <p
+        class="help-switched-off"
+        role="note">
+        {{ switchedOff }}
+      </p>
+    }
+
     <ul
       class="help-guide-list"
       [attr.aria-label]="topic.title + ' guides'">
-      @for (guide of guides; track guide.slug) {
+      @for (guide of guides; track guide.slug; let index = $index) {
         <!--
           Each guide is a panel in its section's colour, and the panel is the
           link rather than something with a link in it: somebody reaching for
@@ -53,6 +61,9 @@
             </div>
 
             <p class="help-panel-card__summary">{{ guide.summary }}</p>
+            @if (guideNotes[index]; as note) {
+              <p class="help-panel-card__summary">{{ note }}</p>
+            }
           </a>
         </li>
       }

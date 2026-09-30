@@ -29,7 +29,7 @@ export const SETTINGS_FORM_LABELS: readonly string[] = [
   'Show dates and times in',
   'Automatically',
   'Read Fleet roster exports as',
-  'Ask me each time',
+  'My device’s zone',
   'Who can see when I am online',
   'Appear offline',
   'Show when I am typing',

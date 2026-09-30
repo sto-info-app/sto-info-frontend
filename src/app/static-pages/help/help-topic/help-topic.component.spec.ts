@@ -232,18 +232,51 @@ describe('HelpTopicComponent (FC-048)', () => {
     expect(component.unavailableReason).toBeNull();
   });
 
-  // FC-049: a guide about a switched-off feature is left out of its section.
-  it('leaves the Fleet settings guides out while Fleet Community is off', () => {
+  // FC-050: a guide about Fleet Community stays in its section while it is
+  // off, noted, so it can still be found.
+  it('keeps the Fleet settings guide while Fleet Community is off, noted', () => {
     createComponent('settings', STORYTIME_AVAILABILITY_ENABLED, [], {
       FLEET: 'DISABLED',
       CHAT: 'DISABLED',
     });
 
-    expect(component.guides.map(guide => guide.slug)).toEqual([
-      'your-settings',
-      'privacy-mode',
-      'staying-signed-in',
-      'dates-and-times',
-    ]);
+    const index = component.guides.findIndex(
+      guide => guide.slug === 'fleet-settings',
+    );
+
+    expect(index).toBeGreaterThan(-1);
+    expect(component.switchedOff).toBeNull();
+    expect(component.guideNotes[index]).toBe(
+      'Fleet Community is switched off at the moment.',
+    );
+    expect(fixture.nativeElement.textContent).toContain(
+      'Fleet Community is switched off at the moment.',
+    );
+    expect(component.guideNotes.filter(note => note !== null)).toHaveLength(
+      component.guides.filter(guide => guide.requiresFeature === 'FLEET')
+        .length,
+    );
+  });
+
+  // The whole section says so once; its chat guide adds nothing more.
+  it('keeps the Fleets section while Fleet Community is off, noted once', () => {
+    createComponent('fleets', STORYTIME_AVAILABILITY_ENABLED, [], {
+      FLEET: 'DISABLED',
+      CHAT: 'DISABLED',
+    });
+
+    expect(component.topic?.id).toBe('fleets');
+    expect(component.switchedOff).toContain(
+      'Fleet Community is switched off at the moment',
+    );
+    expect(component.guideNotes.every(note => note === null)).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Its guides stay here');
+  });
+
+  it('notes nothing while every switch is on', () => {
+    createComponent('settings');
+
+    expect(component.switchedOff).toBeNull();
+    expect(component.guideNotes.every(note => note === null)).toBe(true);
   });
 });

@@ -387,63 +387,77 @@ describe('HelpGuideComponent', () => {
     expect(navigateSpy).not.toHaveBeenCalled();
   });
 
-  describe('guides about Fleet Community and chat (FC-049)', () => {
-    it('should say a Fleet guide is switched off rather than refuse it', () => {
+  // Steve's decision of 30 September 2026 (FC-050): Fleet Community's and
+  // chat's guides stay while they are off, so they can still be found, and
+  // say that they are off.
+  describe('guides about Fleet Community and chat (FC-049, FC-050)', () => {
+    const notes = () =>
+      [...fixture.nativeElement.querySelectorAll('.help-switched-off')].map(
+        (note: Element) => note.textContent?.trim(),
+      );
+
+    it('should show a Fleet guide while it is off, saying so once', () => {
       createComponent('fleet-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
         FLEET: 'DISABLED',
         CHAT: 'DISABLED',
       });
 
-      expect(component.guide).toBeNull();
-      expect(component.sections).toEqual([]);
-      expect(component.unavailableReason).toBe('DISABLED');
-      expect(component.unavailableFeatureName).toBe('Fleet Community');
-      expect(pageTitleSpy.setTitle).toHaveBeenCalledWith('Fleet Community');
+      expect(component.guide?.slug).toBe('fleet-settings');
+      expect(component.unavailableReason).toBeNull();
+      expect(component.switchedOff).toContain(
+        'Fleet Community is switched off at the moment',
+      );
+      // Chat's parts are noted only when chat alone is off.
+      expect(notes()).toEqual([component.switchedOff]);
+      expect(pageText()).toContain('Show when I am typing');
       expect(navigateSpy).not.toHaveBeenCalled();
     });
 
-    it('should say the systems are not answering when the switch cannot be read', () => {
+    it('should say nothing is off while the switch cannot be read', () => {
       createComponent('fleet-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
         FLEET: 'UNAVAILABLE',
       });
 
-      expect(component.unavailableReason).toBe('OFFLINE');
+      expect(component.guide?.slug).toBe('fleet-settings');
+      expect(component.switchedOff).toBeNull();
+      expect(notes()).toEqual([]);
     });
 
-    // The page shows chat's controls only while chat is on, so the guide to
-    // them keeps only its roster export part while chat is off.
-    it('should leave out the parts about chat while chat is off', () => {
+    it('should note the parts about chat while chat alone is off', () => {
       createComponent('fleet-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
         CHAT: 'DISABLED',
       });
 
-      expect(component.sections.map(section => section.heading)).toEqual([
-        'Read Fleet roster exports as',
-      ]);
-      expect(pageText()).not.toContain('Show when I am typing');
+      expect(component.switchedOff).toBeNull();
+      expect(component.sectionNotes[0]).toBeNull();
+      expect(
+        component.sectionNotes
+          .slice(1)
+          .every(note =>
+            note?.startsWith('Fleet chat is switched off at the moment'),
+          ),
+      ).toBe(true);
+      expect(pageText()).toContain('Show when I am typing');
     });
 
-    it('should show every part while chat is on', () => {
+    it('should show every part, unnoted, while chat is on', () => {
       createComponent('fleet-settings');
 
       expect(pageText()).toContain('Who can see when I am online');
       expect(pageText()).toContain('Show when I am typing');
+      expect(component.sectionNotes.every(note => note === null)).toBe(true);
     });
 
-    // A guide about a feature that is on still offers only the other guides
-    // a reader could open.
-    it('should offer no guide about Fleet Community at the foot while it is off', () => {
+    // Every other guide stays on offer at the foot too.
+    it('should still offer the Fleet guide at the foot while it is off', () => {
       createComponent('your-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
         FLEET: 'DISABLED',
         CHAT: 'DISABLED',
       });
 
-      expect(component.otherGuides.map(guide => guide.slug)).toEqual([
-        'privacy-mode',
-        'staying-signed-in',
-        'dates-and-times',
-      ]);
-      expect(pageText()).not.toContain('Roster exports keep their own zone');
+      expect(component.otherGuides.map(guide => guide.slug)).toContain(
+        'fleet-settings',
+      );
     });
   });
 });

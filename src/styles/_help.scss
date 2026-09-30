@@ -15,7 +15,9 @@
 // subjects — crew's sky for Community, the builder's perano for Custom
 // Tracking, a Story's sunflower for Storytime, and the moderation card's red
 // for the guides to running it, and gold for STO Info settings (FC-049) — so a
-// guide and the pages it describes agree about what colour a thing is. Every one of them carries black text at 4.5:1
+// guide and the pages it describes agree about what colour a thing is. The
+// Fleets section is sky like every Fleet page, and Running the site bluey like
+// Running Storytime (Steve's choices of 30 September 2026, FC-050). Every one of them carries black text at 4.5:1
 // or better, which is what lets a guide's title sit on the block.
 $help-topic-colours: (
   'community': vars.$lcars-sky,
@@ -23,6 +25,8 @@ $help-topic-colours: (
   'storytime': vars.$lcars-sunflower,
   'settings': vars.$lcars-gold,
   'storytime-admin': vars.$lcars-bluey,
+  'fleets': vars.$lcars-sky,
+  'site-admin': vars.$lcars-bluey,
 );
 
 // The index's section tiles (FC-048) and a section's guides are the same
@@ -151,4 +155,14 @@ $help-topic-colours: (
   .help-guide__other-summary {
     font-size: 0.9rem;
   }
+}
+
+// A note that the feature a page describes is switched off, while its help
+// stays so that it can still be found (FC-050).
+.help-switched-off {
+  max-width: 70ch;
+  margin: 0 0 1rem;
+  padding-left: 0.75rem;
+  border-left: 0.35rem solid vars.$lcars-tangerine;
+  font-style: italic;
 }
