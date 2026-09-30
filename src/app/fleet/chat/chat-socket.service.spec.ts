@@ -47,6 +47,7 @@ function messageOf(
     clientMessageId: `client-${id}`,
     createdAt: new Date(Date.UTC(2026, 8, 28, 12, 0, at)).toISOString(),
     deleted: false,
+    removed: false,
     mine: false,
     mentions: [],
     replyTo: null,
@@ -335,11 +336,13 @@ describe('ChatSocketService', () => {
       socket.fire('message', messageOf('b', 2));
       socket.fire('message', messageOf('b', 2));
       socket.fire('message', messageOf('c', 3, TALK));
-      socket.fire('deleted', { ...GENERAL, messageId: 'b' });
+      socket.fire('deleted', { ...GENERAL, messageId: 'b', removed: true });
       socket.fire('removed', GENERAL);
 
       expect(messages).toEqual(['b', 'c']);
-      expect(deleted).toEqual([{ channelId: 'general', messageId: 'b' }]);
+      expect(deleted).toEqual([
+        { channelId: 'general', messageId: 'b', removed: true },
+      ]);
       expect(removed).toEqual([GENERAL]);
     });
 

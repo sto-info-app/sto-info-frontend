@@ -88,6 +88,11 @@ export interface ChatMessage {
   readonly clientMessageId: string;
   readonly createdAt: string;
   readonly deleted: boolean;
+  /**
+   * Whether somebody other than its author deleted it: a moderator or a site
+   * admin removing it (FC-050).
+   */
+  readonly removed: boolean;
   readonly mine: boolean;
   /**
    * Whether it is from somebody across a block from the reader, and so shows
@@ -134,8 +139,14 @@ export interface ChatPresence {
   readonly online: boolean;
 }
 
-/** A message deleted in a place being read. */
-export type ChatDeletion = ChatPlace & { readonly messageId: string };
+/**
+ * A message deleted in a place being read, and whether somebody other than
+ * its author removed it (FC-050).
+ */
+export type ChatDeletion = ChatPlace & {
+  readonly messageId: string;
+  readonly removed: boolean;
+};
 
 /**
  * Where the chat socket stands:

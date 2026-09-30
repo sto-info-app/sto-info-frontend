@@ -48,6 +48,7 @@ function messageOf(
     clientMessageId: `client-${id}`,
     createdAt: new Date(Date.UTC(2026, 8, 28, 12, minute)).toISOString(),
     deleted: false,
+    removed: false,
     mine: false,
     hidden: false,
     mentions: [],
@@ -373,6 +374,7 @@ describe('ChatConversationComponent', () => {
             replyTo: { id: 'y', author: null, excerpt: null },
           }),
           messageOf('c', 2, { deleted: true, body: null }),
+          messageOf('d', 3, { deleted: true, removed: true, body: null }),
         ],
         before: null,
       };
@@ -382,8 +384,10 @@ describe('ChatConversationComponent', () => {
         'Odo: Shields up',
         'Earlier message',
       ]);
+      // A moderator's removal is told as one (FC-050).
       expect(texts('.chat-message__text--deleted')).toEqual([
         'Message deleted',
+        'Message removed by a moderator',
       ]);
     });
 
@@ -482,14 +486,23 @@ describe('ChatConversationComponent', () => {
 
     it('shows a deletion in this place', async () => {
       messages$.next(messageOf('b', 1));
-      deleted$.next({ channelId: 'other', messageId: 'a' });
-      deleted$.next({ channelId: 'general', messageId: 'a' });
+      deleted$.next({ channelId: 'other', messageId: 'a', removed: false });
+      deleted$.next({ channelId: 'general', messageId: 'a', removed: false });
       await settle();
 
       expect(texts('.chat-message__text--deleted')).toEqual([
         'Message deleted',
       ]);
       expect(texts('.chat-message__text')).toContain('Message b');
+    });
+
+    it('shows a moderator’s removal in this place as one', async () => {
+      deleted$.next({ channelId: 'general', messageId: 'a', removed: true });
+      await settle();
+
+      expect(texts('.chat-message__text--deleted')).toEqual([
+        'Message removed by a moderator',
+      ]);
     });
 
     it('says when the reader may no longer read the place', async () => {
@@ -816,6 +829,9 @@ describe('ChatConversationComponent', () => {
         data: { authorName: 'Kira' },
       });
       expect(chat.remove).toHaveBeenCalledWith('a', 'Off topic');
+      expect(texts('.chat-message__text--deleted')).toEqual([
+        'Message removed by a moderator',
+      ]);
     });
 
     it('offers no removal to a reader who does not moderate', async () => {

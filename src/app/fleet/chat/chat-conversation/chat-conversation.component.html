@@ -125,6 +125,10 @@
               <span class="chat-message__text chat-message__text--deleted"
                 >Message from a member you can’t see</span
               >
+            } @else if (row.message.removed) {
+              <span class="chat-message__text chat-message__text--deleted"
+                >Message removed by a moderator</span
+              >
             } @else if (row.message.deleted) {
               <span class="chat-message__text chat-message__text--deleted"
                 >Message deleted</span

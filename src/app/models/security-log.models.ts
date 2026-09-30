@@ -46,6 +46,9 @@ export const SITE_ADMIN_ACTION_LABELS: Readonly<Record<string, string>> = {
   RESCAN_PAUSED: 'Paused a rescan campaign',
   RESCAN_RESUMED: 'Resumed a rescan campaign',
   RESCAN_CANCELLED: 'Cancelled a rescan campaign',
+  CHAT_MESSAGE_REMOVED: 'Removed a chat message',
+  IMAGE_TAKEN_DOWN: 'Took down a picture refused for policy',
+  IMAGE_KEPT: 'Kept a picture refused for policy',
 };
 
 /** Somebody an entry names. */

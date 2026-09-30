@@ -246,7 +246,7 @@ describe('ChatPageComponent', () => {
         'You have no chats yet.',
       );
       expect(texts(element, '.chat-page__place-note')).toEqual([
-        "Open a conversation from a friend's profile.",
+        'Open a conversation from a friend’s profile.',
       ]);
     });
 

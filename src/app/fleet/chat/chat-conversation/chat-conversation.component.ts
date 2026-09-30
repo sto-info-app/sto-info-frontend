@@ -277,7 +277,9 @@ export class ChatConversationComponent implements OnDestroy {
         ),
         takeUntilDestroyed(),
       )
-      .subscribe(deletion => this.markDeleted(deletion.messageId));
+      .subscribe(deletion =>
+        this.markDeleted(deletion.messageId, deletion.removed),
+      );
 
     this._socket.removed$
       .pipe(
@@ -734,11 +736,12 @@ export class ChatConversationComponent implements OnDestroy {
   }
 
   /**
-   * Shows a message as deleted.
+   * Shows a message as deleted, or as removed by a moderator.
    *
    * @param messageId - The message.
+   * @param removed - Whether somebody other than its author removed it.
    */
-  private markDeleted(messageId: string): void {
+  private markDeleted(messageId: string, removed: boolean): void {
     this.messages.update(messages =>
       messages.map(message =>
         message.id === messageId
@@ -746,6 +749,7 @@ export class ChatConversationComponent implements OnDestroy {
               ...message,
               body: null,
               deleted: true,
+              removed,
               mentions: [],
               replyTo: null,
             }
@@ -797,7 +801,9 @@ export class ChatConversationComponent implements OnDestroy {
       .remove(messageId, reason)
       .pipe(take(1), takeUntilDestroyed(this._destroyRef))
       .subscribe({
-        next: () => this.markDeleted(messageId),
+        // A reason is given only for somebody else's message, which is a
+        // moderator's removal.
+        next: () => this.markDeleted(messageId, reason !== undefined),
         error: () => this.errorMessage.set('The message could not be deleted.'),
       });
   }

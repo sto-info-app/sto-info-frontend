@@ -3,6 +3,9 @@
   class="chat-page"
   [class.chat-page--open]="selection() !== null || isMissing()">
   <h1>Chat</h1>
+  <app-help-link
+    slug="fleet-chat"
+    label="Help with chat" />
 
   @switch (status()) {
     @case ('offline') {
@@ -134,7 +137,7 @@
           <h2 class="chat-page__scope-name">Direct messages</h2>
           @if (conversations().length === 0) {
             <p class="chat-page__place-note">
-              Open a conversation from a friend's profile.
+              Open a conversation from a friend’s profile.
             </p>
           } @else {
             <ul class="chat-page__places">
@@ -182,13 +185,13 @@
             }
             @if (transcripts().length === 0) {
               <p class="chat-page__place-note">
-                Export a channel's transcript with the export button beside it.
+                Export a channel’s transcript with the export button beside it.
                 Transcripts you asked for in the last day show here.
               </p>
             }
             @if (hasPending()) {
               <p class="chat-page__place-note">
-                You'll get a notice when a transcript is ready. Refresh to see
+                You’ll get a notice when a transcript is ready. Refresh to see
                 it here.
               </p>
             }

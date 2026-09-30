@@ -36,6 +36,7 @@ import {
   ChatTranscriptStatus,
 } from 'src/app/models/fleet-chat.models';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
@@ -124,6 +125,7 @@ const SCOPE_LABELS: Readonly<Record<ChatScopeChannels['kind'], string>> = {
   imports: [
     AppDatePipe,
     ChatConversationComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,
     LcarsWarningMessageComponent,
