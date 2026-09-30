@@ -61,7 +61,7 @@ export const MEMBER_ACTIONS: Readonly<
 > = {
   REMOVE: {
     verb: 'Remove',
-    hint: 'Kept with the removal. Any role they hold here ends with it.',
+    hint: 'Kept with the removal. Somebody holding a role here cannot be removed until the role is taken away.',
     done: MEMBER_REMOVED,
     failed: MEMBER_REMOVAL_FAILED,
     refused: 'Not removed',

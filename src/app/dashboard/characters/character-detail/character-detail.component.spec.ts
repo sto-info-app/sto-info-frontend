@@ -29,6 +29,8 @@ import {
   SRC_PHOTO_UNAVAILABLE_300PX,
 } from 'src/app/shared/constants/app-image-assets.constants';
 import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
+import { CharacterFleetPanelComponent } from 'src/app/fleet/character/character-fleet-panel/character-fleet-panel.component';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.component';
 import { CharacterDetailComponent } from './character-detail.component';
 
@@ -41,6 +43,7 @@ describe('CharacterDetailComponent', () => {
   let mockDialog: jest.Mocked<MatDialog>;
   let routeParamsSubject: BehaviorSubject<Record<string, string>>;
   let routeQueryParamsSubject: BehaviorSubject<ParamMap>;
+  let fleetOffered: BehaviorSubject<boolean>;
 
   const mockAccount: StoAccount = {
     id: 'acc-1',
@@ -94,9 +97,15 @@ describe('CharacterDetailComponent', () => {
       convertToParamMap({}),
     );
 
+    fleetOffered = new BehaviorSubject(true);
+
     await TestBed.configureTestingModule({
       imports: [CharacterDetailComponent, MatButtonModule, LoadingBarComponent],
       providers: [
+        {
+          provide: FleetConfigurationService,
+          useValue: { isOffered: () => fleetOffered.asObservable() },
+        },
         { provide: CharacterService, useValue: mockCharacterService },
         { provide: StoAccountService, useValue: mockStoAccountService },
         { provide: Router, useValue: mockRouter },
@@ -110,7 +119,12 @@ describe('CharacterDetailComponent', () => {
         },
       ],
       schemas: [NO_ERRORS_SCHEMA],
-    }).compileComponents();
+    })
+      // The panel has specs of its own; here it is only an element.
+      .overrideComponent(CharacterDetailComponent, {
+        remove: { imports: [CharacterFleetPanelComponent] },
+      })
+      .compileComponents();
   });
 
   beforeEach(() => {
@@ -291,6 +305,42 @@ describe('CharacterDetailComponent', () => {
       expect(component.characterScope).toBe(
         CustomTrackingTargetScope.CHARACTER,
       );
+    }));
+  });
+
+  describe('the Character’s Fleet panel', () => {
+    function open(): void {
+      mockStoAccountService.getAccounts.mockReturnValue(of([mockAccount]));
+      mockCharacterService.getCharactersByAccount.mockReturnValue(
+        of([mockCharacter]),
+      );
+      mockCharacterService.getCharacter.mockReturnValue(of(mockCharacter));
+
+      fixture.detectChanges();
+      routeParamsSubject.next({
+        handle: 'TestAccount',
+        characterHandle: 'TestChar',
+      });
+      tick();
+      fixture.detectChanges();
+    }
+
+    it('shows the panel while Fleet Community is on', fakeAsync(() => {
+      open();
+
+      expect(
+        fixture.nativeElement.querySelector('app-character-fleet-panel'),
+      ).not.toBeNull();
+    }));
+
+    it('leaves the panel out while Fleet Community is off', fakeAsync(() => {
+      fleetOffered.next(false);
+
+      open();
+
+      expect(
+        fixture.nativeElement.querySelector('app-character-fleet-panel'),
+      ).toBeNull();
     }));
   });
 

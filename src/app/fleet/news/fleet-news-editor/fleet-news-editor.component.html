@@ -10,6 +10,8 @@
     [heading]="
       state.kind === 'READY' && state.data ? 'Edit a post' : 'Write a post'
     "
+    helpSlug="fleet-news-and-activity"
+    helpLabel="Help with news"
     [subject]="subjectOf(state)"
     [isLoading]="state.kind === 'LOADING'"
     loadingText="Opening the editor"
@@ -171,8 +173,9 @@
             }
           </div>
           <p class="fleet-community-field-hint">
-            A new cover is checked for safety before it appears. Its picture can
-            be seen by anyone who has its link.
+            A new cover is checked for safety before it appears. It is shown to
+            whoever may read the post, and a link to the picture copied from
+            the page stops working at the end of the next day (UTC).
           </p>
         }
       </section>

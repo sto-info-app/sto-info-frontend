@@ -155,7 +155,7 @@ describe('CommunityComponent', () => {
       const text = fixture.nativeElement.textContent;
 
       expect(text).toContain('is the group behind one or more');
-      expect(text).toContain('is a set of fleets that have allied');
+      expect(text).toContain('of a Community’s fleets that have allied');
       expect(text).toContain('can also be listed on its own');
     });
 
@@ -204,7 +204,7 @@ describe('CommunityComponent', () => {
 
       expect(fleetLinks()).toEqual([]);
       expect(fixture.nativeElement.textContent).not.toContain(
-        'is a set of fleets that have allied',
+        'fleets that have allied',
       );
     });
   });

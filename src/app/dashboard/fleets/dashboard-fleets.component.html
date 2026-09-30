@@ -3,6 +3,9 @@
     id="dashboard-fleets-main-column"
     class="col">
     <h1>Communities You Follow</h1>
+    <app-help-link
+      slug="your-characters-and-fleets"
+      label="Help with your Fleets" />
 
     @if (state$ | async; as state) {
       @switch (state.kind) {
@@ -38,7 +41,8 @@
                 Start with the directories. A
                 <strong>Community</strong> is the group behind one or more
                 fleets, often across several platforms; an
-                <strong>Armada</strong> is a set of fleets that have allied; and
+                <strong>Armada</strong> is a set of a Community’s fleets that have
+                allied; and
                 a <strong>Fleet</strong> can also be listed on its own.
               </p>
 

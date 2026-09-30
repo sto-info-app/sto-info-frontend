@@ -206,9 +206,11 @@
             <!--
               Which Fleet this Captain is in, and anything a Fleet's roster
               has suggested about them. Private unless the owner says
-              otherwise.
+              otherwise. Gone with the rest of Fleet Community while it is off.
             -->
-            <app-character-fleet-panel [characterId]="character.id" />
+            @if (isFleetOffered$ | async) {
+              <app-character-fleet-panel [characterId]="character.id" />
+            }
           </div>
 
           <div

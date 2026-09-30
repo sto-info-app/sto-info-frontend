@@ -39,6 +39,7 @@ import {
   encodeStoHandle,
 } from 'src/app/shared/utils/sto-handle.utils';
 import { CharacterFleetPanelComponent } from 'src/app/fleet/character/character-fleet-panel/character-fleet-panel.component';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.component';
 
 /** Identifiers for the tabs available on the character detail page. */
@@ -148,6 +149,9 @@ export class CharacterDetailComponent
   private readonly _dialog = inject(MatDialog);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _destroy$ = new Subject<void>();
+
+  /** Whether Fleet Community is on, so the Character's Fleet panel is drawn. */
+  readonly isFleetOffered$ = inject(FleetConfigurationService).isOffered();
 
   public readonly appRoutes = APP_ROUTES;
   public readonly unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;

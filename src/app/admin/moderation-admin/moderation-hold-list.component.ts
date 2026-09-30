@@ -25,6 +25,7 @@ import {
   GovernanceReasonDialogData,
 } from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
 import { ChatReportPlace } from 'src/app/models/fleet-chat.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -84,7 +85,8 @@ export const HOLD_ACTION_LABELS: Readonly<Record<string, string>> = {
  * 45-day purge, with a reason, an owner and a review date at most 180 days
  * ahead. What it keeps is read here alone, each time with a purpose that is
  * logged; nobody else, scope moderators included, sees it. A hold passing
- * its review date is flagged, never released by itself.
+ * its review date is flagged, and the system releases it 14 days later
+ * unless it is extended first (FC-037).
  */
 @Component({
   selector: 'app-moderation-hold-list',
@@ -96,6 +98,7 @@ export const HOLD_ACTION_LABELS: Readonly<Record<string, string>> = {
   standalone: true,
   imports: [
     AppDatePipe,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
     LoadingBarComponent,

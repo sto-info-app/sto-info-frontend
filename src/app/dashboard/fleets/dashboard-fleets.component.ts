@@ -19,6 +19,7 @@ import { FLEET_FEATURE_NAME } from 'src/app/fleet/constants/fleet-feature.consta
 import { buildCommunityCardVm } from 'src/app/fleet/fleet-card.builders';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FeatureUnavailableComponent } from 'src/app/shared/components/feature-unavailable/feature-unavailable.component';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -77,6 +78,7 @@ export type DashboardFleetsState =
     FleetEventsUpcomingComponent,
     FleetScopeCardComponent,
     FeatureUnavailableComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LoadingBarComponent,
   ],
