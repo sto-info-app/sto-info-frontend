@@ -6,6 +6,7 @@ import { Observable, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   RescanCampaign,
+  RescanDecision,
   RescanOverview,
   RescanSelection,
 } from 'src/app/models/rescan.models';
@@ -70,6 +71,28 @@ export class RescanAdminService {
       this._http.post<RescanCampaign>(
         `${API_URLS.RESCAN_CAMPAIGNS_ADMIN}/${campaignId}/${action}`,
         { reason },
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Takes down or keeps a picture refused for policy on rescan (FC-050).
+   *
+   * @param rescanId - The rescan that refused it.
+   * @param decision - Which.
+   * @param reason - Why.
+   * @returns Nothing, once decided.
+   */
+  decide(
+    rescanId: string,
+    decision: RescanDecision,
+    reason: string,
+  ): Observable<void> {
+    return this.authenticated(options =>
+      this._http.post<void>(
+        `${API_URLS.RESCAN_CAMPAIGNS_ADMIN}/findings/${rescanId}/decision`,
+        { decision, reason },
         options,
       ),
     );

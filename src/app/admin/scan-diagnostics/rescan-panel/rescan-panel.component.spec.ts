@@ -45,7 +45,12 @@ const CAMPAIGN: RescanCampaign = {
 
 describe('RescanPanelComponent (FC-041)', () => {
   let fixture: ComponentFixture<RescanPanelComponent>;
-  let rescans: { overview: jest.Mock; start: jest.Mock; act: jest.Mock };
+  let rescans: {
+    overview: jest.Mock;
+    start: jest.Mock;
+    act: jest.Mock;
+    decide: jest.Mock;
+  };
   let dialog: { open: jest.Mock };
 
   beforeEach(() => {
@@ -53,6 +58,7 @@ describe('RescanPanelComponent (FC-041)', () => {
       overview: jest.fn(() => of(overviewOf())),
       start: jest.fn(() => of({})),
       act: jest.fn(() => of({})),
+      decide: jest.fn(() => of(undefined)),
     };
     dialog = {
       open: jest.fn(() => ({ afterClosed: () => of('Because') })),
@@ -195,12 +201,14 @@ describe('RescanPanelComponent (FC-041)', () => {
         overviewOf({
           findings: [
             {
+              id: 'rescan-1',
               assetId: 'asset-1',
               state: 'INFECTED',
               rejectionCode: 'INFECTED',
               verdictAt: '2026-09-29T10:05:00.000Z',
             },
             {
+              id: 'rescan-2',
               assetId: 'asset-2',
               state: 'REFUSED',
               rejectionCode: null,
@@ -222,6 +230,76 @@ describe('RescanPanelComponent (FC-041)', () => {
     expect(rows[1]).toContain('asset-2');
     expect(rows[1]).toContain('Refused for policy, still up');
     expect(rows[1]).toMatch(/— .*—/);
+    // Only a policy refusal waits on a decision (FC-050).
+    expect(rows[0]).not.toContain('Take it down');
+    expect(rows[1]).toContain('Take it down');
+    expect(rows[1]).toContain('Keep it');
+  });
+
+  describe('deciding a policy refusal (FC-050)', () => {
+    const REFUSAL = {
+      id: 'rescan-2',
+      assetId: 'asset-2',
+      state: 'REFUSED' as const,
+      rejectionCode: 'DIMENSIONS_EXCEEDED',
+      verdictAt: '2026-09-29T10:05:00.000Z',
+    };
+
+    beforeEach(() => {
+      rescans.overview.mockReturnValue(of(overviewOf({ findings: [REFUSAL] })));
+    });
+
+    it.each([
+      ['Take it down', 'TAKEN_DOWN', 'Taken down.', 'Take the picture down'],
+      ['Keep it', 'KEPT', 'Kept.', 'Keep the picture'],
+    ])(
+      '%s, with the reason given, and reads the list again',
+      async (label, decision, done, title) => {
+        await show();
+
+        button(label)!.click();
+
+        expect(dialog.open).toHaveBeenCalledWith(
+          GovernanceReasonDialogComponent,
+          expect.objectContaining({
+            data: expect.objectContaining({ title }),
+          }),
+        );
+        expect(rescans.decide).toHaveBeenCalledWith(
+          'rescan-2',
+          decision,
+          'Because',
+        );
+        expect(text()).toContain(done);
+        expect(rescans.overview).toHaveBeenCalledTimes(2);
+      },
+    );
+
+    it('decides nothing when the dialog is closed without a reason', async () => {
+      dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });
+      await show();
+
+      button('Keep it')!.click();
+
+      expect(rescans.decide).not.toHaveBeenCalled();
+    });
+
+    it('says why the server would not decide it', async () => {
+      rescans.decide.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 409,
+              error: { message: 'That finding has already been decided.' },
+            }),
+        ),
+      );
+      await show();
+
+      button('Keep it')!.click();
+
+      expect(text()).toContain('That finding has already been decided.');
+    });
   });
 
   it('starts a campaign over everything, behind others, with the reason given', async () => {

@@ -80,6 +80,17 @@ describe('RescanAdminService (FC-041)', () => {
     }
   });
 
+  it('takes down or keeps a picture refused for policy (FC-050)', () => {
+    service.decide('rescan-1', 'KEPT', 'Fine as it is').subscribe();
+    const request = expectOne('POST', `${URL}/findings/rescan-1/decision`);
+
+    expect(request.request.body).toEqual({
+      decision: 'KEPT',
+      reason: 'Fine as it is',
+    });
+    request.flush(null);
+  });
+
   it('asks nothing when signed out', async () => {
     authService.getHttpOptionsWithAccessToken.mockReturnValue(null);
 

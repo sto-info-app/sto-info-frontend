@@ -9,8 +9,9 @@
     Rescan published pictures against today's scanner and policy, behind new
     uploads. A picture found infected is taken down, and site admins and its
     owner are told. One refused for policy stays up and is listed here for a
-    site admin to decide. Pictures from before scanning began are rescanned
-    once, automatically, overnight.
+    site admin to take down or keep, with a reason; once decided, it leaves
+    the list. Pictures from before scanning began are rescanned once,
+    automatically, overnight.
   </p>
 
   @if (message(); as done) {
@@ -121,7 +122,8 @@
     @if (overview.findings.length > 0) {
       <table class="fleet-community-table">
         <caption>
-          The latest pictures found infected or refused, newest first
+          The latest pictures found infected, and those refused for policy
+          still to decide, newest first
         </caption>
         <thead>
           <tr>
@@ -129,6 +131,7 @@
             <th scope="col">Asset</th>
             <th scope="col">Outcome</th>
             <th scope="col">Code</th>
+            <th scope="col">Decide</th>
           </tr>
         </thead>
         <tbody>
@@ -152,6 +155,26 @@
                 }}
               </td>
               <td data-label="Code">{{ finding.rejectionCode ?? '—' }}</td>
+              <td data-label="Decide">
+                @if (finding.state === 'REFUSED') {
+                  <div class="buttons-row">
+                    <button
+                      type="button"
+                      class="lcars-btn lcars-btn-auto red"
+                      (click)="decide(finding, 'TAKEN_DOWN')">
+                      Take it down
+                    </button>
+                    <button
+                      type="button"
+                      class="lcars-btn lcars-btn-auto gold"
+                      (click)="decide(finding, 'KEPT')">
+                      Keep it
+                    </button>
+                  </div>
+                } @else {
+                  —
+                }
+              </td>
             </tr>
           }
         </tbody>

@@ -67,6 +67,8 @@ export interface RescanCampaign {
 
 /** A refusal or infection, by asset and code. */
 export interface RescanFinding {
+  /** The rescan, which a policy refusal is decided by (FC-050). */
+  readonly id: string;
   readonly assetId: string;
   readonly state: 'INFECTED' | 'REFUSED';
   readonly rejectionCode: string | null;
@@ -82,3 +84,6 @@ export interface RescanOverview {
   readonly unverified: number;
   readonly findings: readonly RescanFinding[];
 }
+
+/** A site admin's decision on a picture refused for policy (FC-050). */
+export type RescanDecision = 'TAKEN_DOWN' | 'KEPT';

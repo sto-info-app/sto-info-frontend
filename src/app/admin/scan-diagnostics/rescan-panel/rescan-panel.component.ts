@@ -24,6 +24,8 @@ import {
   RescanCampaign,
   RescanCampaignKind,
   RescanCampaignState,
+  RescanDecision,
+  RescanFinding,
   RescanOverview,
   RescanSelection,
 } from 'src/app/models/rescan.models';
@@ -68,6 +70,27 @@ const ACTIONS = {
       'It stages nothing more. Rescans already asked for still get their verdicts.',
     confirmText: 'Cancel campaign',
     done: 'Cancelled.',
+  },
+} as const;
+
+/** A decision on a policy refusal, as the dialog asks about it (FC-050). */
+const DECISIONS = {
+  TAKEN_DOWN: {
+    title: 'Take the picture down',
+    message:
+      'It stops being shown and its image is deleted. Its owner is told a ' +
+      'picture was removed for breaking the rules for pictures, without ' +
+      'your reason.',
+    confirmText: 'Take it down',
+    done: 'Taken down.',
+  },
+  KEPT: {
+    title: 'Keep the picture',
+    message:
+      'It stays up, and leaves this list. A later rescan under a new policy ' +
+      'may refuse it again.',
+    confirmText: 'Keep it',
+    done: 'Kept.',
   },
 } as const;
 
@@ -217,6 +240,21 @@ export class RescanPanelComponent implements OnInit {
 
     this.askReason(copy.title, copy.message, copy.confirmText, reason =>
       this.run(this._rescans.act(campaign.id, action, reason), copy.done),
+    );
+  }
+
+  /**
+   * Takes down or keeps a picture refused for policy, once a reason is given
+   * (FC-050).
+   *
+   * @param finding - The refusal.
+   * @param decision - Which.
+   */
+  decide(finding: RescanFinding, decision: RescanDecision): void {
+    const copy = DECISIONS[decision];
+
+    this.askReason(copy.title, copy.message, copy.confirmText, reason =>
+      this.run(this._rescans.decide(finding.id, decision, reason), copy.done),
     );
   }
 
