@@ -87,6 +87,7 @@ describe('FleetEventsUpcomingComponent', () => {
         to: '',
         mayManage: false,
         isOpen: true,
+        isSuspended: false,
         entries: [
           calendarEntry({ id: 'first' }),
           calendarEntry({ id: 'off', status: 'CANCELLED' }),
@@ -118,7 +119,14 @@ describe('FleetEventsUpcomingComponent', () => {
 
   it('says when nothing is on a scope’s calendar', async () => {
     events.calendar.mockReturnValue(
-      of({ from: '', to: '', mayManage: false, isOpen: true, entries: [] }),
+      of({
+        from: '',
+        to: '',
+        mayManage: false,
+        isOpen: true,
+        isSuspended: false,
+        entries: [],
+      }),
     );
 
     await render(COMMUNITY);
@@ -210,7 +218,14 @@ describe('FleetEventsUpcomingComponent', () => {
   it('reads again when given another source', async () => {
     events.mine.mockReturnValue(throwError(() => new Error('down')));
     events.calendar.mockReturnValue(
-      of({ from: '', to: '', mayManage: false, isOpen: true, entries: [] }),
+      of({
+        from: '',
+        to: '',
+        mayManage: false,
+        isOpen: true,
+        isSuspended: false,
+        entries: [],
+      }),
     );
 
     await render({ kind: 'MINE' });

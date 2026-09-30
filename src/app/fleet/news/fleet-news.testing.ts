@@ -72,6 +72,7 @@ export function newsPage(
     pageSize: 10,
     mayWrite: false,
     isOpen: true,
+    isSuspended: false,
     ...overrides,
   };
 }

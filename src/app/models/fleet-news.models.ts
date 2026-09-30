@@ -47,6 +47,8 @@ export interface FleetNewsPostView {
   readonly mayWrite: boolean;
   /** Whether the scope is open, so its news may change. */
   readonly isOpen: boolean;
+  /** Whether it is suspended rather than closed, when it is not open. */
+  readonly isSuspended: boolean;
 }
 
 /** A page of a scope's posts. */
@@ -59,6 +61,8 @@ export interface FleetNewsPage {
   readonly mayWrite: boolean;
   /** Whether the scope is open, so its news may change. */
   readonly isOpen: boolean;
+  /** Whether it is suspended rather than closed, when it is not open. */
+  readonly isSuspended: boolean;
 }
 
 /** Which of a scope's posts to list. */

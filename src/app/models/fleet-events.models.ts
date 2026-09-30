@@ -91,6 +91,8 @@ export interface FleetEventCalendar {
   readonly mayManage: boolean;
   /** Whether the scope is open. */
   readonly isOpen: boolean;
+  /** Whether it is suspended rather than closed, when it is not open. */
+  readonly isSuspended: boolean;
 }
 
 /** An event in full, with its rule and what lies ahead. */

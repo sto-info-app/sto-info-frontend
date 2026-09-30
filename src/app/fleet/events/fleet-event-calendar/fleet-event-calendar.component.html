@@ -8,6 +8,8 @@
 
   <app-fleet-page-shell
     heading="Events"
+    helpSlug="fleet-events"
+    helpLabel="Help with events"
     [subject]="subjectOf(state)"
     [isLoading]="state.kind === 'LOADING'"
     loadingText="Reading the calendar"
@@ -33,6 +35,11 @@
               >New event</a
             >
           </nav>
+        } @else if (data.calendar.isSuspended) {
+          <p class="fleet-community-field-hint">
+            This is suspended, so no new event can be added and nothing ahead
+            can change until it is reinstated.
+          </p>
         } @else {
           <p class="fleet-community-field-hint">
             This is closed, so no new event can be added and nothing ahead can

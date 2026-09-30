@@ -194,6 +194,19 @@ describe('FleetNewsListComponent', () => {
     expect(text).toContain('This is closed, so its news can no longer change.');
   });
 
+  it('tells a news writer when the scope is suspended rather than closed', async () => {
+    await render(
+      undefined,
+      newsPage([], { mayWrite: true, isOpen: false, isSuspended: true }),
+    );
+
+    const text = pageText(fixture);
+
+    expect(text).not.toContain('Write a post');
+    expect(text).toContain('its news cannot change until it is reinstated');
+    expect(text).not.toContain('This is closed');
+  });
+
   it('searches from the first page, and clears the search', async () => {
     await render({ onFleet: true, query: { q: 'refit' } });
 

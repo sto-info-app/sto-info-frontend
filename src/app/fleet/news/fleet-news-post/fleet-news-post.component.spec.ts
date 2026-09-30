@@ -51,7 +51,13 @@ describe('FleetNewsPostComponent', () => {
   ): Promise<void> {
     news = {
       read: jest.fn(() =>
-        of({ post: newsPost(), mayWrite: false, isOpen: true, ...view }),
+        of({
+          post: newsPost(),
+          mayWrite: false,
+          isOpen: true,
+          isSuspended: false,
+          ...view,
+        }),
       ),
       publish: jest.fn(() => of(newsPost())),
       unpublish: jest.fn(() => of(newsPost({ status: 'DRAFT' }))),
@@ -268,6 +274,13 @@ describe('FleetNewsPostComponent', () => {
       expect(findButton(fixture, 'Publish')).toBeUndefined();
       expect(links().map(link => link.text)).not.toContain('Edit');
       expect(pageText(fixture)).toContain('its news can no longer change');
+    });
+
+    it('says a suspended scope’s news waits on reinstatement', async () => {
+      await render({ mayWrite: true, isOpen: false, isSuspended: true });
+
+      expect(pageText(fixture)).toContain('until it is reinstated');
+      expect(pageText(fixture)).not.toContain('This is closed');
     });
 
     it('offers nothing on a closed scope’s published post', async () => {

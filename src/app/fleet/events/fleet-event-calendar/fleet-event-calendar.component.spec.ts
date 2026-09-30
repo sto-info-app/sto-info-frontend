@@ -50,6 +50,7 @@ describe('FleetEventCalendarComponent', () => {
         entries: [],
         mayManage: false,
         isOpen: true,
+        isSuspended: false,
         ...calendar,
       }),
     );
@@ -240,6 +241,18 @@ describe('FleetEventCalendarComponent', () => {
     await render({ onFleet: true }, { mayManage: true, isOpen: false });
 
     expect(pageText(fixture)).toContain('This is closed');
+    expect(links().map(link => link.text)).not.toContain('New event');
+  });
+
+  it('tells its event managers a suspended calendar waits on reinstatement', async () => {
+    await render(
+      { onFleet: true },
+      { mayManage: true, isOpen: false, isSuspended: true },
+    );
+
+    expect(pageText(fixture)).toContain('This is suspended');
+    expect(pageText(fixture)).toContain('until it is reinstated');
+    expect(pageText(fixture)).not.toContain('This is closed');
     expect(links().map(link => link.text)).not.toContain('New event');
   });
 

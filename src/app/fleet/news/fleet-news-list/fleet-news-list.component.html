@@ -8,6 +8,8 @@
 
   <app-fleet-page-shell
     heading="News"
+    helpSlug="fleet-news-and-activity"
+    helpLabel="Help with news"
     [subject]="subjectOf(state)"
     [isLoading]="state.kind === 'LOADING'"
     loadingText="Reading the news"
@@ -33,6 +35,11 @@
               >Write a post</a
             >
           </nav>
+        } @else if (data.page.isSuspended) {
+          <p class="fleet-community-field-hint">
+            This is suspended, so its news cannot change until it is
+            reinstated. Drafts can still be deleted.
+          </p>
         } @else {
           <p class="fleet-community-field-hint">
             This is closed, so its news can no longer change. Drafts can still

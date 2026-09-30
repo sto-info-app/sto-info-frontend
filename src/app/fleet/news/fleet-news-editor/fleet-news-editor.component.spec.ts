@@ -57,7 +57,9 @@ describe('FleetNewsEditorComponent', () => {
     post: FleetNewsPost = newsPost({ status: 'DRAFT', publishedAt: null }),
   ): Promise<void> {
     news = {
-      read: jest.fn(() => of({ post, mayWrite: true, isOpen: true })),
+      read: jest.fn(() =>
+        of({ post, mayWrite: true, isOpen: true, isSuspended: false }),
+      ),
       create: jest.fn((_target, draft) =>
         of(
           newsPost({
@@ -408,6 +410,8 @@ describe('FleetNewsEditorComponent', () => {
   it('words each audience for a Community', async () => {
     await render({ capabilities: ['news.write'] });
 
-    expect(pageText(fixture)).toContain('Members of the Community');
+    expect(pageText(fixture)).toContain(
+      'Members of the Community’s Fleets, its Owner and Admins',
+    );
   });
 });

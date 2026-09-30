@@ -8,6 +8,8 @@
 
   <app-fleet-page-shell
     heading="News"
+    helpSlug="fleet-news-and-activity"
+    helpLabel="Help with news"
     [subject]="subjectOf(state)"
     [isLoading]="state.kind === 'LOADING'"
     loadingText="Reading the post"
@@ -115,7 +117,12 @@
             </button>
           }
         </nav>
-        @if (!view.isOpen) {
+        @if (view.isSuspended) {
+          <p class="fleet-community-field-hint">
+            This is suspended, so its news cannot change until it is
+            reinstated.
+          </p>
+        } @else if (!view.isOpen) {
           <p class="fleet-community-field-hint">
             This is closed, so its news can no longer change.
           </p>
