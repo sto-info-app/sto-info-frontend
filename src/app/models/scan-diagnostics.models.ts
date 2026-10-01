@@ -116,7 +116,8 @@ export type OperationsAlertKind =
   | 'SIGNATURES_STALE'
   | 'FAILED_JOBS'
   | 'PUBLICATION_PAUSED_LONG'
-  | 'QUEUES_UNREACHABLE';
+  | 'QUEUES_UNREACHABLE'
+  | 'PURGE_OWED';
 
 /**
  * An operations problem that is open now (FC-042). Every site admin was told
@@ -163,6 +164,18 @@ export interface PublicationPause {
 }
 
 /**
+ * Withdrawn pictures whose public copy is still to be deleted from
+ * Cloudflare (FC-043). The server asks again every hour.
+ */
+export interface OwedPurges {
+  readonly owed: number;
+  /** How many of those have been owed for more than a day. */
+  readonly overdue: number;
+  /** Whole hours the oldest has been owed, or null when none is. */
+  readonly oldestHours: number | null;
+}
+
+/**
  * Everything the admin scan diagnostics page shows (FC-003).
  *
  * A part is null when the server could not reach its source, so the page
@@ -185,6 +198,8 @@ export interface ScanDiagnostics {
   readonly alerts: readonly OperationsAlert[];
   /** Whether publication is paused (FC-042). */
   readonly publication: PublicationPause;
+  /** Withdrawn pictures still to be deleted (FC-043). */
+  readonly owedPurges: OwedPurges;
 }
 
 /**

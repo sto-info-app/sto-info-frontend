@@ -131,6 +131,7 @@ const DIAGNOSTICS: ScanDiagnostics = {
     queuePaused: false,
     held: 0,
   },
+  owedPurges: { owed: 0, overdue: 0, oldestHours: null },
 };
 
 /** A refused asset (FC-039). */
@@ -308,6 +309,16 @@ describe('alertDetailOf (FC-042)', () => {
       'Paused for 75 minutes.',
     ],
     ['QUEUES_UNREACHABLE', { minutesUnreachable: 3 }, 'For 3 minutes.'],
+    [
+      'PURGE_OWED',
+      { overdue: 2, oldestHours: 30 },
+      '2 pictures owed for over a day; the oldest for 30 hours.',
+    ],
+    [
+      'PURGE_OWED',
+      { overdue: 1, oldestHours: 25 },
+      '1 picture owed for over a day; the oldest for 25 hours.',
+    ],
   ])('says what %s with %p means', (kind, detail, expected) => {
     expect(alertDetailOf(alertOf(kind, detail))).toBe(expected);
   });
@@ -319,6 +330,7 @@ describe('alertDetailOf (FC-042)', () => {
     ['FAILED_JOBS'],
     ['PUBLICATION_PAUSED_LONG'],
     ['QUEUES_UNREACHABLE'],
+    ['PURGE_OWED'],
     ['SOMETHING_NEW'],
   ])('says nothing more of %s without its counts', kind => {
     expect(alertDetailOf(alertOf(kind))).toBeNull();
@@ -742,6 +754,32 @@ describe('ScanDiagnosticsComponent', () => {
         'Publication is running. The job queues can’t be reached just now, ' +
           'so nothing is published until they answer.',
       );
+    });
+
+    // FC-043: a withdrawn picture is still online until Cloudflare deletes
+    // it, and the page says so.
+    it('says every withdrawn picture has been deleted', async () => {
+      await render(of(DIAGNOSTICS));
+
+      expect(text()).toContain(
+        'Every withdrawn picture has been deleted from Cloudflare.',
+      );
+    });
+
+    it.each([
+      [1, '1 withdrawn picture still to be deleted from Cloudflare.'],
+      [3, '3 withdrawn pictures still to be deleted from Cloudflare.'],
+    ])('says how many withdrawn pictures are owed, %s', async (owed, words) => {
+      await render(
+        of({
+          ...DIAGNOSTICS,
+          owedPurges: { owed, overdue: 1, oldestHours: 27 },
+        }),
+      );
+
+      expect(text()).toContain(words);
+      expect(text()).toContain('The site asks Cloudflare again every hour.');
+      expect(textsOf('dd')).toEqual(expect.arrayContaining(['1', '27 hours']));
     });
 
     it('reads the diagnostics alone on Try again', async () => {

@@ -123,6 +123,7 @@ export const OPERATIONS_ALERT_TITLES: Readonly<Record<string, string>> = {
   FAILED_JOBS: 'Background jobs have failed',
   PUBLICATION_PAUSED_LONG: 'Publication is still paused',
   QUEUES_UNREACHABLE: 'The job queues cannot be reached',
+  PURGE_OWED: 'Withdrawn pictures are still online',
 };
 
 /** The worker processes the page shows, and what it says of the rest. */
@@ -284,6 +285,12 @@ export function alertDetailOf(alert: OperationsAlert): string | null {
       return detail['minutesUnreachable'] === undefined
         ? null
         : `For ${minutes('minutesUnreachable')}.`;
+    case 'PURGE_OWED':
+      return detail['overdue'] === undefined ||
+        detail['oldestHours'] === undefined
+        ? null
+        : `${counted(detail['overdue'], 'picture')} owed for over a day; ` +
+            `the oldest for ${detail['oldestHours']} hours.`;
     default:
       return null;
   }
@@ -496,6 +503,16 @@ export class ScanDiagnosticsComponent implements OnInit {
    */
   pausedBy(publication: PublicationPause): string {
     return pausedByOf(publication, this._authService.getUserId());
+  }
+
+  /**
+   * Counts withdrawn pictures in words (FC-043).
+   *
+   * @param count - How many.
+   * @returns "1 withdrawn picture", "3 withdrawn pictures".
+   */
+  owedPicturesOf(count: number): string {
+    return counted(count, 'withdrawn picture');
   }
 
   /**

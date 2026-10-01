@@ -1394,6 +1394,10 @@ rest on **Refresh**; the page never polls.
   username, or "An account since closed", as `pausedByOf` says it) and how many
   uploads wait, with a link to the Admin page. While the job queues cannot be
   reached (`queuePaused: null`) it says so, and shows no count.
+- **Withdrawn pictures** (FC-043), under Publication: how many withdrawn
+  pictures Cloudflare has still to delete (`owedPicturesOf`), how many for over
+  a day and how old the oldest is, or that every one has been deleted. The
+  `PURGE_OWED` alert opens once one has waited a day.
 
 **Failed jobs** (FC-042, `FailedJobsPanelComponent` in
 `src/app/admin/scan-diagnostics/failed-jobs-panel`), on Scan Diagnostics above

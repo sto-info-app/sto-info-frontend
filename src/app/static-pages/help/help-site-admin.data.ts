@@ -295,6 +295,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
           'Background jobs have failed — any job at all is waiting under Failed jobs.',
           'Publication is still paused — it has been paused for more than an hour.',
           'The job queues cannot be reached — they have not answered for two minutes, so uploads are neither scanned nor published and background jobs wait. Tell whoever runs the servers.',
+          'Withdrawn pictures are still online — a picture taken down more than a day ago has not yet been deleted from Cloudflare, so it can still be reached at its old address. The site asks Cloudflare again every hour; if it keeps refusing, tell whoever runs the servers.',
         ],
       ),
       guideSection('How to read the worker', [
@@ -311,6 +312,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
         'Pause publication, on the Admin page under Operations, holds back everything the scanner clears: uploads are still accepted and scanned, but nothing is published until publication resumes; then everything held publishes. Use it when something is being published that should not be, while you find out why.',
         'Pause publication and Resume publication each ask for a Reason. While publication is paused, the Admin page and Scan Diagnostics say since when, by whom and how many uploads are waiting, and every site administrator is told if it stays paused for more than an hour.',
         'If the job queues can’t be reached, the switch still changes: the page says so, a pause reaches the queues as soon as they answer, and nothing is published meanwhile.',
+        'Scan Diagnostics also counts, under Publication, withdrawn pictures still to be deleted from Cloudflare, with how long the oldest has waited.',
       ]),
       guideSection('How to find out why an upload was refused', [
         'Refused uploads lists each refused asset by its kind and ID, newest verdict first, 25 to a page, with its rejection code and the engine and signature versions behind the verdict. It never shows what matched: STO Info does not record it, because naming it would tell somebody probing the scanner what gets through.',

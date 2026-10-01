@@ -218,6 +218,28 @@
           <a [routerLink]="adminLink">Pause or resume publication on the Admin
             page</a>, under Operations.
         </p>
+
+        @let owed = diagnostics.owedPurges;
+        @if (owed.owed === 0) {
+          <p>Every withdrawn picture has been deleted from Cloudflare.</p>
+        } @else {
+          <p>
+            <strong>{{ owedPicturesOf(owed.owed) }} still to be deleted from
+              Cloudflare.</strong>
+            Until it is, a withdrawn picture can still be reached at its old
+            address. The site asks Cloudflare again every hour.
+          </p>
+          <dl class="scan-diagnostics__details">
+            <div>
+              <dt>Owed for over a day</dt>
+              <dd>{{ owed.overdue }}</dd>
+            </div>
+            <div>
+              <dt>Oldest</dt>
+              <dd>{{ owed.oldestHours }} hours</dd>
+            </div>
+          </dl>
+        }
       </section>
 
       <section

@@ -27,6 +27,7 @@ const DIAGNOSTICS: ScanDiagnostics = {
     queuePaused: null,
     held: null,
   },
+  owedPurges: { owed: 0, overdue: 0, oldestHours: null },
 };
 
 describe('ScanDiagnosticsService', () => {
