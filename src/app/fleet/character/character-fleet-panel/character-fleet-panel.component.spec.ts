@@ -109,6 +109,7 @@ function card(): StoFleetCard {
     platformId: 'platform-1',
     platformName: 'Windows',
     platformSegment: 'windows',
+    platformProvidesRosterExport: true,
     duplicateCount: 0,
     recruitmentState: FleetRecruitmentState.OPEN,
     allegianceFactionId: null,
@@ -118,6 +119,8 @@ function card(): StoFleetCard {
     bannerImageAlt: null,
     emblemImageId: null,
     emblemImageAlt: null,
+    emblemImageUrls: null,
+    createdAt: '2026-01-02T03:04:05.000Z',
   } as StoFleetCard;
 }
 

@@ -1,4 +1,4 @@
-import { Provider } from '@angular/core';
+import { EnvironmentProviders, Provider } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, ParamMap } from '@angular/router';
 
 import { BehaviorSubject } from 'rxjs';
@@ -101,7 +101,7 @@ export function newsRoute(reader: NewsReader, news: object): NewsRouteStubs {
   const query$ = new BehaviorSubject<ParamMap>(
     convertToParamMap(reader.query ?? {}),
   );
-  const providers: Provider[] = [
+  const providers: (Provider | EnvironmentProviders)[] = [
     ...route.providers,
     { provide: FleetNewsService, useValue: news },
     {

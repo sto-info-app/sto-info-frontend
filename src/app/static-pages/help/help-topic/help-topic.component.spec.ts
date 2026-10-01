@@ -196,7 +196,7 @@ describe('HelpTopicComponent (FC-048)', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/page-not-found']);
   });
 
-  it.each([
+  it.each<[StorytimeAvailability, string]>([
     [STORYTIME_AVAILABILITY_DISABLED, FEATURE_UNAVAILABLE_DISABLED],
     [STORYTIME_AVAILABILITY_UNAVAILABLE, FEATURE_UNAVAILABLE_OFFLINE],
   ])(

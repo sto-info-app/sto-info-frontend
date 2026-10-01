@@ -1,4 +1,4 @@
-import { Provider } from '@angular/core';
+import { EnvironmentProviders, Provider } from '@angular/core';
 import {
   ActivatedRoute,
   convertToParamMap,
@@ -51,7 +51,7 @@ export interface GovernanceRouteStubs {
     resolveArmada: jest.Mock;
   };
   readonly auth: { isLoggedInAsAdmin: jest.Mock };
-  readonly providers: Provider[];
+  readonly providers: (Provider | EnvironmentProviders)[];
 }
 
 /**

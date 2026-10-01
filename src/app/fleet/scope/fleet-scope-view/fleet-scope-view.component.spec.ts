@@ -126,6 +126,8 @@ describe('FleetScopeViewComponent', () => {
   it('draws the head of the record when it has one', () => {
     render({
       kind: 'READY',
+      following: null,
+      artwork: null,
       actions: [],
       header: HEADER,
       notice: null,
@@ -143,6 +145,8 @@ describe('FleetScopeViewComponent', () => {
   it('links the record to the guide about Communities, Fleets and Armadas', () => {
     render({
       kind: 'READY',
+      following: null,
+      artwork: null,
       actions: [],
       header: HEADER,
       notice: null,
@@ -170,6 +174,8 @@ describe('FleetScopeViewComponent', () => {
   it('draws the latest of a Community’s activity, with a way to the rest', () => {
     render({
       kind: 'READY',
+      following: null,
+      artwork: null,
       actions: [],
       header: HEADER,
       notice: null,
@@ -195,6 +201,8 @@ describe('FleetScopeViewComponent', () => {
   it('draws a Community’s next events, with a way to its calendar', () => {
     render({
       kind: 'READY',
+      following: null,
+      artwork: null,
       actions: [],
       header: HEADER,
       notice: null,
@@ -218,6 +226,8 @@ describe('FleetScopeViewComponent', () => {
   it('draws no Activity section for a record without one', () => {
     render({
       kind: 'READY',
+      following: null,
+      artwork: null,
       actions: [],
       header: HEADER,
       notice: null,
@@ -233,6 +243,8 @@ describe('FleetScopeViewComponent', () => {
   it('puts a notice about the record above the record', () => {
     render({
       kind: 'READY',
+      following: null,
+      artwork: null,
       actions: [],
       header: HEADER,
       notice: 'No Community here has registered this Fleet.',
@@ -254,6 +266,8 @@ describe('FleetScopeViewComponent', () => {
   it('draws no notice where there is nothing to say', () => {
     render({
       kind: 'READY',
+      following: null,
+      artwork: null,
       actions: [],
       header: HEADER,
       notice: null,
@@ -266,6 +280,8 @@ describe('FleetScopeViewComponent', () => {
   it('shows a description beneath its own bar', () => {
     render({
       kind: 'READY',
+      following: null,
+      artwork: null,
       actions: [],
       header: HEADER,
       notice: null,
@@ -281,6 +297,8 @@ describe('FleetScopeViewComponent', () => {
   it('draws no About bar where nothing was written', () => {
     render({
       kind: 'READY',
+      following: null,
+      artwork: null,
       actions: [],
       header: HEADER,
       notice: null,
@@ -295,6 +313,8 @@ describe('FleetScopeViewComponent', () => {
   it('renders a description containing markup as text', () => {
     render({
       kind: 'READY',
+      following: null,
+      artwork: null,
       actions: [],
       header: HEADER,
       notice: null,
@@ -310,6 +330,8 @@ describe('FleetScopeViewComponent', () => {
   it('offers what the reader may go and do', () => {
     render({
       kind: 'READY',
+      following: null,
+      artwork: null,
       actions: [
         {
           label: 'Check a roster export',
@@ -338,6 +360,8 @@ describe('FleetScopeViewComponent', () => {
   it('draws no row of controls when there is nothing to offer', () => {
     render({
       kind: 'READY',
+      following: null,
+      artwork: null,
       actions: [],
       header: HEADER,
       notice: null,

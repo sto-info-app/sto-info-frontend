@@ -109,6 +109,7 @@ describe('FleetRegistrationService', () => {
         .registerArmada('community-1', {
           exactGameName: 'Ninth Fleet Armada',
           platformId: 'platform-1',
+          allegianceFactionId: 'faction-1',
         })
         .subscribe();
 

@@ -48,6 +48,7 @@ function messageOf(
     createdAt: new Date(Date.UTC(2026, 8, 28, 12, 0, at)).toISOString(),
     deleted: false,
     removed: false,
+    hidden: false,
     mine: false,
     mentions: [],
     replyTo: null,

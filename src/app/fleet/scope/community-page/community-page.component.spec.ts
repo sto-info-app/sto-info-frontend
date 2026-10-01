@@ -519,12 +519,7 @@ describe('CommunityPageComponent', () => {
         of<ResolvedFleetCommunity>({
           community: community(),
           redirectedFrom: null,
-          viewer: {
-            capabilities: [],
-            roles: [],
-            mayManageBanner: false,
-            mayManageEmblem: true,
-          },
+          viewer: { ...READER, mayManageEmblem: true },
         }),
       );
 

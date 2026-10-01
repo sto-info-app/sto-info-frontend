@@ -39,7 +39,7 @@ describe('FleetScopeBadgeComponent', () => {
   const badge = (): HTMLElement =>
     fixture.nativeElement.querySelector('.fleet-scope-badge') as HTMLElement;
 
-  it.each([
+  it.each<[FleetScopeType, string, string]>([
     [FLEET_SCOPE_COMMUNITY, 'Community', 'fa-people-group'],
     [FLEET_SCOPE_FLEET, 'Fleet', 'fa-rocket-launch'],
     [FLEET_SCOPE_ARMADA, 'Armada', 'fa-layer-group'],
@@ -53,11 +53,12 @@ describe('FleetScopeBadgeComponent', () => {
   // The whole reason the scope is said in words: a reader who cannot separate
   // two mid-tone blues still gets three distinguishable badges.
   it('tells the three scopes apart by their labels, not their colour', () => {
-    const labels = [
+    const scopes: FleetScopeType[] = [
       FLEET_SCOPE_COMMUNITY,
       FLEET_SCOPE_FLEET,
       FLEET_SCOPE_ARMADA,
-    ].map(scope => {
+    ];
+    const labels = scopes.map(scope => {
       render(scope);
 
       return badge().textContent?.trim();

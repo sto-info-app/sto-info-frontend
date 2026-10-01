@@ -592,12 +592,14 @@ describe('AccountsComponent', () => {
       {
         id: 'p1',
         name: 'Windows',
+        providesRosterExport: true,
         createdAt: '2023-01-01',
         updatedAt: '2023-01-01',
       },
       {
         id: 'p2',
         name: 'Xbox',
+        providesRosterExport: false,
         createdAt: '2023-01-01',
         updatedAt: '2023-01-01',
       },

@@ -34,6 +34,7 @@ function armadaCard(overrides: Partial<StoArmadaCard> = {}): StoArmadaCard {
     createdAt: '2026-01-02T03:04:05.000Z',
     emblemImageId: null,
     emblemImageAlt: null,
+    emblemImageUrls: null,
     exactGameName: 'Ninth Fleet Armada',
     communityId: 'community-1',
     communityName: 'United Federation Alliance',

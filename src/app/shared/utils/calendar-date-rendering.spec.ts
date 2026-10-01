@@ -73,6 +73,7 @@ describe('calendar date rendering', () => {
     it('shows an account creation day unshifted', () => {
       const card = buildRegistryAccountCard(
         buildAccountSummary({ accountCreatedDate: '2015-03-04' }),
+        'kira',
       );
 
       expect(card.details.some(detail => detail.text === 'March 4, 2015')).toBe(

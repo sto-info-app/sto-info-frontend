@@ -106,7 +106,7 @@ describe('FleetNewsPostComponent', () => {
     const text = pageText(fixture);
     const element = fixture.nativeElement as HTMLElement;
 
-    expect(news.read).toHaveBeenCalledWith(
+    expect(news['read']).toHaveBeenCalledWith(
       { communityId: 'community-1', fleetId: 'fleet-1' },
       'refit-night-abc',
     );
@@ -179,7 +179,7 @@ describe('FleetNewsPostComponent', () => {
   it('reads nothing when the address names no post', async () => {
     await render({}, { onFleet: true });
 
-    expect(news.read).toHaveBeenCalledWith(expect.anything(), '');
+    expect(news['read']).toHaveBeenCalledWith(expect.anything(), '');
     expect(fixture.componentInstance.notPermittedMessage).toBe('');
   });
 
@@ -194,15 +194,15 @@ describe('FleetNewsPostComponent', () => {
 
       pressButton(fixture, 'Unpublish');
       expect(confirm.lastAsked()?.title).toBe('Unpublish this post?');
-      expect(news.unpublish).toHaveBeenCalledWith(
+      expect(news['unpublish']).toHaveBeenCalledWith(
         { communityId: 'community-1', fleetId: 'fleet-1' },
         'post-1',
       );
-      expect(news.read).toHaveBeenCalledTimes(2);
+      expect(news['read']).toHaveBeenCalledTimes(2);
 
       pressButton(fixture, 'Delete');
       expect(confirm.lastAsked()?.message).toContain('Refit night');
-      expect(news.remove).toHaveBeenCalledWith(expect.anything(), 'post-1');
+      expect(news['remove']).toHaveBeenCalledWith(expect.anything(), 'post-1');
       expect(navigate).toHaveBeenCalledWith(
         FLEET_LINKS.fleetNews(
           'united-federation-alliance',
@@ -220,8 +220,8 @@ describe('FleetNewsPostComponent', () => {
 
       pressButton(fixture, 'Publish');
 
-      expect(news.publish).toHaveBeenCalledWith(expect.anything(), 'post-1');
-      expect(news.read).toHaveBeenCalledTimes(2);
+      expect(news['publish']).toHaveBeenCalledWith(expect.anything(), 'post-1');
+      expect(news['read']).toHaveBeenCalledTimes(2);
     });
 
     it('changes nothing when the question is declined', async () => {
@@ -231,8 +231,8 @@ describe('FleetNewsPostComponent', () => {
       pressButton(fixture, 'Unpublish');
       pressButton(fixture, 'Delete');
 
-      expect(news.unpublish).not.toHaveBeenCalled();
-      expect(news.remove).not.toHaveBeenCalled();
+      expect(news['unpublish']).not.toHaveBeenCalled();
+      expect(news['remove']).not.toHaveBeenCalled();
     });
 
     it('shows why a change was refused, or that it failed', async () => {
@@ -304,10 +304,10 @@ describe('FleetNewsPostComponent', () => {
 
       pressButton(fixture, 'Unpublish as site administrator');
       expect(confirm.lastAsked()?.message).toContain('site administrator');
-      expect(news.unpublishAsSiteAdmin).toHaveBeenCalledWith('post-1');
+      expect(news['unpublishAsSiteAdmin']).toHaveBeenCalledWith('post-1');
 
       pressButton(fixture, 'Delete as site administrator');
-      expect(news.removeAsSiteAdmin).toHaveBeenCalledWith('post-1');
+      expect(news['removeAsSiteAdmin']).toHaveBeenCalledWith('post-1');
       expect(navigate).toHaveBeenCalled();
     });
 

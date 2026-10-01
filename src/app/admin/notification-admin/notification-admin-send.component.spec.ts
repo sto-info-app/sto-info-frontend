@@ -4,6 +4,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { PrivacyModeService } from 'src/app/dashboard/services/privacy-mode.service';
+import { DEFAULT_USER_SETTINGS } from 'src/app/dashboard/services/user-settings.service';
 import {
   AppNotification,
   NotificationSeverity,
@@ -76,6 +77,7 @@ describe('NotificationAdminSendComponent', () => {
               privacyModeLoadFails
                 ? throwError(() => new Error('Setting unavailable'))
                 : of({
+                    ...DEFAULT_USER_SETTINGS,
                     privacyMode: isPrivacyModeOn,
                     sessionTimeoutMinutes: 30,
                   }),

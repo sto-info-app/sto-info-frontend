@@ -155,7 +155,6 @@ describe('FleetEventAnswerComponent', () => {
     render(
       {
         counts: {
-          going: 0,
           maybe: 0,
           waitlisted: 0,
           notGoing: null,

@@ -41,8 +41,10 @@ function community(overrides: Partial<FleetCommunity> = {}): FleetCommunity {
     updatedAt: '2026-01-02T03:04:05.000Z',
     bannerImageId: null,
     bannerImageAlt: null,
+    bannerImageUrl: null,
     emblemImageId: null,
     emblemImageAlt: null,
+    emblemImageUrls: null,
     ...overrides,
   };
 }

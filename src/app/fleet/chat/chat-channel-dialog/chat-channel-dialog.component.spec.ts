@@ -17,6 +17,7 @@ const CHANNEL: ChatChannel = {
   postRole: 'ADMIN',
   mayPost: true,
   mayManage: true,
+  mayReport: true,
 };
 
 describe('ChatChannelDialogComponent', () => {

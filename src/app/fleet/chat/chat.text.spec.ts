@@ -31,6 +31,7 @@ function messageOf(overrides: Partial<ChatMessage> = {}): ChatMessage {
     createdAt: '2026-09-28T12:00:00.000Z',
     deleted: false,
     removed: false,
+    hidden: false,
     mine: false,
     mentions: [],
     replyTo: null,

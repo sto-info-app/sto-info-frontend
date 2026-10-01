@@ -119,18 +119,19 @@ describe('AssetScanStatusComponent', () => {
     expect(text()).toContain('Nobody can see or download it yet');
   });
 
-  it.each([ASSET_SCAN_UPLOADING, ASSET_SCAN_AWAITING, ASSET_SCAN_SCANNING])(
-    'shows a progress bar while %s',
-    state => {
-      render(state);
+  it.each<AssetScanState>([
+    ASSET_SCAN_UPLOADING,
+    ASSET_SCAN_AWAITING,
+    ASSET_SCAN_SCANNING,
+  ])('shows a progress bar while %s', state => {
+    render(state);
 
-      expect(find('.asset-scan-status__progress')).not.toBeNull();
-    },
-  );
+    expect(find('.asset-scan-status__progress')).not.toBeNull();
+  });
 
   // A progress animation under a finished upload says the site is still
   // working when it is not.
-  it.each([ASSET_SCAN_AVAILABLE, ASSET_SCAN_REJECTED])(
+  it.each<AssetScanState>([ASSET_SCAN_AVAILABLE, ASSET_SCAN_REJECTED])(
     'shows no progress bar once %s',
     state => {
       render(state);

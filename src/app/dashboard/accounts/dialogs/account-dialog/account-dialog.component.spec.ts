@@ -28,8 +28,20 @@ describe('AccountDialogComponent', () => {
   let dialogRefSpy: jest.Mocked<MatDialogRef<AccountDialogComponent>>;
 
   const mockPlatforms: Platform[] = [
-    { id: 'p1', name: 'PC', createdAt: '', updatedAt: '' },
-    { id: 'p2', name: 'Console', createdAt: '', updatedAt: '' },
+    {
+      id: 'p1',
+      name: 'PC',
+      providesRosterExport: true,
+      createdAt: '',
+      updatedAt: '',
+    },
+    {
+      id: 'p2',
+      name: 'Console',
+      providesRosterExport: false,
+      createdAt: '',
+      updatedAt: '',
+    },
   ];
 
   const mockLaunchers: Launcher[] = [

@@ -113,7 +113,7 @@ describe('FleetNewsEditorComponent', () => {
     await render({ onFleet: true });
 
     expect(pageText(fixture)).toContain(FLEET_NEWS_EDITOR_NOT_PERMITTED);
-    expect(news.read).not.toHaveBeenCalled();
+    expect(news['read']).not.toHaveBeenCalled();
   });
 
   it('is closed with the scope', async () => {
@@ -130,7 +130,7 @@ describe('FleetNewsEditorComponent', () => {
 
       expect(text).toContain('Write a post');
       expect(text).toContain('Save the post as a draft first');
-      expect(news.read).not.toHaveBeenCalled();
+      expect(news['read']).not.toHaveBeenCalled();
       expect(
         (
           (fixture.nativeElement as HTMLElement).querySelector(
@@ -141,7 +141,7 @@ describe('FleetNewsEditorComponent', () => {
       expect(findButton(fixture, 'Save draft')?.disabled).toBe(true);
 
       fixture.componentInstance.onSave({} as never, null, false);
-      expect(news.create).not.toHaveBeenCalled();
+      expect(news['create']).not.toHaveBeenCalled();
     });
 
     it('saves a draft and opens it here again, for its cover', async () => {
@@ -153,13 +153,13 @@ describe('FleetNewsEditorComponent', () => {
       chooseAudience('FLEET_MEMBERS');
       pressButton(fixture, 'Save draft');
 
-      expect(news.create).toHaveBeenCalledWith(FLEET, {
+      expect(news['create']).toHaveBeenCalledWith(FLEET, {
         title: 'Refit night',
         summary: null,
         body: 'Friday.',
         audience: 'FLEET_MEMBERS',
       });
-      expect(news.publish).not.toHaveBeenCalled();
+      expect(news['publish']).not.toHaveBeenCalled();
       expect(navigate).toHaveBeenCalledWith([
         ...FLEET_NEWS,
         'new-post-xyz',
@@ -175,11 +175,11 @@ describe('FleetNewsEditorComponent', () => {
       typeInto(fixture, '#fleet-news-body', 'Friday.');
       pressButton(fixture, 'Publish');
 
-      expect(news.create).toHaveBeenCalledWith(
+      expect(news['create']).toHaveBeenCalledWith(
         FLEET,
         expect.objectContaining({ summary: 'Bring ships', audience: 'PUBLIC' }),
       );
-      expect(news.publish).toHaveBeenCalledWith(FLEET, 'post-9');
+      expect(news['publish']).toHaveBeenCalledWith(FLEET, 'post-9');
       expect(navigate).toHaveBeenCalledWith([...FLEET_NEWS, 'new-post-xyz']);
     });
 
@@ -242,7 +242,7 @@ describe('FleetNewsEditorComponent', () => {
     it('fills the form from the draft, and saves it', async () => {
       await render(EDITING);
 
-      expect(news.read).toHaveBeenCalledWith(FLEET, 'refit-night-abc');
+      expect(news['read']).toHaveBeenCalledWith(FLEET, 'refit-night-abc');
       expect(pageText(fixture)).toContain('Edit a post');
       expect(fixture.componentInstance.title()).toBe('Refit night');
       expect(fixture.componentInstance.summary()).toBe('Bring your ships.');
@@ -250,7 +250,7 @@ describe('FleetNewsEditorComponent', () => {
       typeInto(fixture, '#fleet-news-title', 'Refit night, moved');
       pressButton(fixture, 'Save draft');
 
-      expect(news.update).toHaveBeenCalledWith(
+      expect(news['update']).toHaveBeenCalledWith(
         FLEET,
         'post-1',
         expect.objectContaining({ title: 'Refit night, moved' }),
@@ -287,8 +287,8 @@ describe('FleetNewsEditorComponent', () => {
         true,
       );
 
-      expect(news.update).toHaveBeenCalledTimes(2);
-      expect(news.publish).not.toHaveBeenCalled();
+      expect(news['update']).toHaveBeenCalledTimes(2);
+      expect(news['publish']).not.toHaveBeenCalled();
       expect(navigate).toHaveBeenCalledWith([...FLEET_NEWS, 'refit-night-abc']);
     });
 
@@ -297,8 +297,8 @@ describe('FleetNewsEditorComponent', () => {
 
       pressButton(fixture, 'Publish');
 
-      expect(news.update).toHaveBeenCalled();
-      expect(news.publish).toHaveBeenCalledWith(FLEET, 'post-1');
+      expect(news['update']).toHaveBeenCalled();
+      expect(news['publish']).toHaveBeenCalledWith(FLEET, 'post-1');
     });
 
     it('cancels back to the post', async () => {
@@ -338,7 +338,7 @@ describe('FleetNewsEditorComponent', () => {
           },
         }),
       );
-      expect(news.read).toHaveBeenCalledTimes(2);
+      expect(news['read']).toHaveBeenCalledTimes(2);
       expect(fixture.componentInstance.title()).toBe('Typed');
     });
 
@@ -348,7 +348,7 @@ describe('FleetNewsEditorComponent', () => {
 
       pressButton(fixture, 'Set the cover');
 
-      expect(news.read).toHaveBeenCalledTimes(1);
+      expect(news['read']).toHaveBeenCalledTimes(1);
     });
 
     it('replaces and removes a cover, asking first', async () => {
@@ -382,7 +382,7 @@ describe('FleetNewsEditorComponent', () => {
         },
         FleetImageSlot.COVER,
       );
-      expect(news.read).toHaveBeenCalledTimes(2);
+      expect(news['read']).toHaveBeenCalledTimes(2);
     });
 
     it('keeps the cover when the question is declined, and says when removing fails', async () => {

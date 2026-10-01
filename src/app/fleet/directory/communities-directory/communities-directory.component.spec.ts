@@ -37,6 +37,7 @@ function communityCard(
     createdAt: '2026-01-02T03:04:05.000Z',
     emblemImageId: null,
     emblemImageAlt: null,
+    emblemImageUrls: null,
     name: 'United Federation Alliance',
     description: 'A home for casual PvE fleets.',
     recruitmentState: FleetRecruitmentState.OPEN,

@@ -1,4 +1,4 @@
-import { Provider } from '@angular/core';
+import { EnvironmentProviders, Provider } from '@angular/core';
 import {
   ActivatedRoute,
   convertToParamMap,
@@ -185,7 +185,7 @@ export interface ArmadaRouteStubs {
   readonly params$: BehaviorSubject<ParamMap>;
   readonly query$: BehaviorSubject<ParamMap>;
   readonly scopes: { resolveArmada: jest.Mock };
-  readonly providers: Provider[];
+  readonly providers: (Provider | EnvironmentProviders)[];
 }
 
 /**

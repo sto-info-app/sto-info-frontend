@@ -1,4 +1,4 @@
-import { Provider } from '@angular/core';
+import { EnvironmentProviders, Provider } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, ParamMap } from '@angular/router';
 
 import { BehaviorSubject, of } from 'rxjs';
@@ -79,7 +79,10 @@ export function eventsStub(): EventsStub {
 export function eventsRoute(
   reader: EventsReader,
   events: object,
-): { providers: Provider[]; query$: BehaviorSubject<ParamMap> } {
+): {
+  providers: (Provider | EnvironmentProviders)[];
+  query$: BehaviorSubject<ParamMap>;
+} {
   const route = governanceRoute(reader, {});
   const base = route.params$.value;
   const params = convertToParamMap({
@@ -91,7 +94,7 @@ export function eventsRoute(
     convertToParamMap(reader.query ?? {}),
   );
 
-  const providers: Provider[] = [
+  const providers: (Provider | EnvironmentProviders)[] = [
     ...route.providers,
     { provide: FleetEventsService, useValue: events },
     {

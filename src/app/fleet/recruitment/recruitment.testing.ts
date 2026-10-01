@@ -1,4 +1,4 @@
-import { Provider } from '@angular/core';
+import { EnvironmentProviders, Provider } from '@angular/core';
 import { ComponentFixture } from '@angular/core/testing';
 import {
   ActivatedRoute,
@@ -52,7 +52,7 @@ export interface RecruitmentRouteStubs {
   readonly params$: BehaviorSubject<ParamMap>;
   readonly query$: BehaviorSubject<ParamMap>;
   readonly scopes: { resolveFleet: jest.Mock };
-  readonly providers: Provider[];
+  readonly providers: (Provider | EnvironmentProviders)[];
 }
 
 /**
