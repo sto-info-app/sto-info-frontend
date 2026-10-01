@@ -321,6 +321,13 @@ const PLACEMENTS: readonly [string, string, string][] = [
     'site-admin-scanning',
     'Help with Scan Diagnostics',
   ],
+  // The Admin page's one link, on its publication pause (FC-042); the page
+  // itself is a set of ways into others, each with a link of its own.
+  [
+    'admin/publication-pause/publication-pause.component.html',
+    'site-admin-scanning',
+    'Help with pausing publication',
+  ],
 ];
 
 /** Pages only site admins reach, and so the only ones to link an admin guide. */

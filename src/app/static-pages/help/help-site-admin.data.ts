@@ -160,7 +160,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     slug: 'site-admin-roster-erasure',
     title: 'Roster erasures',
     summary:
-      'Erasing somebody’s roster data from every Fleet at their verified request, and replaying erasures after a restore.',
+      'Erasing somebody’s roster data from every Fleet at their verified request, and how erasures come back after a restore.',
     sections: [
       guideSection('What it is for', [
         'A Fleet’s roster imports record each member’s Character name, @handle and public comment. Anybody listed in any Fleet’s roster, with or without an STO Info account, can ask through Contact us for that to be erased. Roster Erasures is where you do it.',
@@ -185,9 +185,9 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
         'Each erasure has a pseudonym of its own, beginning @erased-. One erased member stays one member in a Fleet’s history, and two stay two.',
         'Erasures made lists every erasure, newest first: When, Who, Replaced by, Why and Changed. It never holds the name or the handle.',
       ]),
-      guideSection('How to replay the ledger after a restore', [
+      guideSection('How erasures come back after a restore', [
         'A database restored from a backup older than an erasure would bring back what it erased. So each erasure is also recorded in a ledger kept outside the database, which holds no name, handle or reason.',
-        'After every restore, press Replay the erasure ledger… under After a restore, and confirm with Replay. Every erasure the database no longer has is made again, and the page says how many the ledger holds and how many were made again. In the list, those show “Replayed from the ledger” under Who.',
+        'After a restore, the site brings erasures back by itself when it starts, before it serves anything: every erasure the database no longer has is made again from the ledger. There is nothing to press. In the list, those show “Replayed from the ledger” under Who, and the Security Log shows “Restore check brought records back” under Site admin actions.',
       ]),
       guideSection('How erasure differs from unlinking', [
         'A player who says No to a Fleet proposal, leaves a Fleet or removes a Fleet from their Character changes only what their Character’s page says. The Fleet’s roster still lists the name it imported.',
@@ -230,11 +230,11 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
           'Show narrows the feed to one source, or Everything:',
         ],
         [
-          'Site admin actions — role, permission and limit changes; disabling and restoring accounts; decisions on member, chat and Storytime reports and appeals; chat messages removed from Chat Reports; Custom Tracking and Storytime moderation; picture runs, rescan campaigns, and pictures refused for policy taken down or kept.',
+          'Site admin actions — role, permission and limit changes; disabling and restoring accounts; decisions on member, chat and Storytime reports and appeals; chat messages removed from Chat Reports; Custom Tracking and Storytime moderation; picture runs, rescan campaigns, and pictures refused for policy taken down or kept; reads of Scan Diagnostics, failed jobs retried or discarded, and publication paused or resumed; and the system’s own restore check, when it brings back records a restored database had lost.',
           'Fleet disputes — a site administrator’s actions on a Community’s Site administration page.',
           'Moderation holds — holds placed, extended, released and read, and the system’s own review notices and releases.',
           'Fleet investigations — each look into a Fleet, with its purpose.',
-          'Roster erasures — each erasure, and each replay after a restore.',
+          'Roster erasures — each erasure, and each one the site made again by itself after a restore.',
           'Retention runs — each run of the Fleet retention jobs, what it removed, and any failure.',
         ],
       ),
@@ -267,18 +267,50 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     slug: 'site-admin-scanning',
     title: 'Scan Diagnostics',
     summary:
-      'The file scanner’s health, why an upload was refused, rescanning published pictures, and making pictures private.',
+      'The file scanner’s health and alerts, failed jobs, pausing publication, why an upload was refused, rescanning published pictures, and making pictures private.',
     sections: [
       guideSection('What it is for', [
         'Every upload to STO Info is held back and scanned before anybody else can see it. Scan Diagnostics shows how that scanning is going and why an upload was refused.',
+        'When something needs a person — uploads waiting too long, a silent or paused worker, old virus signatures, failed background jobs, or publication paused for too long — every site administrator is told in the site, and the page shows what is wrong.',
         'It also runs two jobs on the site’s pictures: Rescan campaigns, which scan published pictures again, and Private image delivery, which makes every picture private.',
       ]),
       guideSection('Who can use it', ['Site administrators only.']),
       guideSection('Where to find it', [
-        'Choose Admin in the side bar. Scan Diagnostics is under Operations. The page reads its figures when you open it, and Refresh reads them again.',
+        'Choose Admin in the side bar. Scan Diagnostics is under Operations, and an alert’s notification links straight to it. The page reads its figures when you open it, and Refresh reads them again, failed jobs included, back at every queue’s first page; it never refreshes by itself.',
+        'Pause publication is on the Admin page itself, under Operations.',
       ]),
       guideSection('How to read the scanner’s health', [
         'The top of the page is totals only, and never names a file, an uploader or a signature. Usage counts scans, outcomes and latency over the last 24 hours, 7 days and 30 days; Engine shows the scanner and how old its signatures are; Backlog shows what is waiting to be scanned.',
+      ]),
+      guideSection(
+        'How to read the alerts',
+        [
+          'Alerts lists each problem open now, oldest first, with when it opened and when it was last seen. Every site administrator was told of it once, in the site, when it opened, and is told again when it clears. There is nothing to close: an alert clears by itself once its problem goes, checked every minute. The problems are:',
+        ],
+        [
+          'Uploads are waiting to be scanned, or to be published — one has waited more than 15 minutes.',
+          'The scan worker is silent — no worker has checked in for two minutes.',
+          'The scan worker is paused — every worker has been paused for more than 10 minutes.',
+          'Virus signatures are out of date — the newest are more than 36 hours old. The worker stops scanning at 48.',
+          'Background jobs have failed — any job at all is waiting under Failed jobs.',
+          'Publication is still paused — it has been paused for more than an hour.',
+          'The job queues cannot be reached — they have not answered for two minutes, so uploads are neither scanned nor published and background jobs wait. Tell whoever runs the servers.',
+        ],
+      ),
+      guideSection('How to read the worker', [
+        'Worker shows each worker process that has checked in during the last two minutes: its state, its signature version and age, the scans it has in hand, its last heartbeat and, while paused, since when.',
+        'A worker that cannot trust its scanner pauses rather than pass what it cannot judge, so uploads wait and none fails. “The scanner can’t be reached” most often means the scanner is starting or down; “signatures too old” means its updates are failing. If no worker has checked in, the page says for how long. Either way, tell whoever runs the servers.',
+      ]),
+      guideSection('How to retry or discard a failed job', [
+        'Failed jobs lists every background job that ran out of attempts, 25 to a page, newest failure first in each queue; Queue narrows it to one. Each shows when it failed, its queue, its job ID, its attempts, the asset, chat transcript or Fleet it concerns, and why it failed, as a code. It never shows what the job carried or its error’s text.',
+        'Retry sends a job round again, with its attempts back. It is only offered when a retry could change something: a job whose upload, transcript or Fleet has moved on since says so instead. Discard removes any failed job for good.',
+        'Retry all retries every failed job a retry can help, and Discard all that can’t be retried removes those it cannot, in the queue chosen or every queue, up to 500 at a press. Each says how many it did and how many it left alone; press it again if it says more are left.',
+        'Every retry and discard asks for a Reason.',
+      ]),
+      guideSection('How to pause publication', [
+        'Pause publication, on the Admin page under Operations, holds back everything the scanner clears: uploads are still accepted and scanned, but nothing is published until publication resumes; then everything held publishes. Use it when something is being published that should not be, while you find out why.',
+        'Pause publication and Resume publication each ask for a Reason. While publication is paused, the Admin page and Scan Diagnostics say since when, by whom and how many uploads are waiting, and every site administrator is told if it stays paused for more than an hour.',
+        'If the job queues can’t be reached, the switch still changes: the page says so, a pause reaches the queues as soon as they answer, and nothing is published meanwhile.',
       ]),
       guideSection('How to find out why an upload was refused', [
         'Refused uploads lists each refused asset by its kind and ID, newest verdict first, 25 to a page, with its rejection code and the engine and signature versions behind the verdict. It never shows what matched: STO Info does not record it, because naming it would tell somebody probing the scanner what gets through.',
@@ -315,17 +347,22 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
       ),
       guideSection('Who can see it', [
         'Scan Diagnostics is for site administrators. An uploader is only ever told their file was not accepted. The owner of an infected picture is told only that it failed a security check and was removed; the owner of one you take down is told, without your reason, that it broke the site’s rules for pictures.',
-        'Every run or campaign you start, pause, resume or cancel, and every policy refusal you decide, appears in the Security Log with your reason. Taking an inventory asks for no reason.',
+        'Every run or campaign you start, pause, resume or cancel, every policy refusal you decide, every failed job you retry or discard, and every pause or resume of publication appears in the Security Log with your reason. Taking an inventory asks for no reason.',
+        'Opening or refreshing Scan Diagnostics, turning the refused uploads’ pages, looking up an asset, and choosing a queue or turning a page of the failed jobs are each recorded there too, as “Read Scan Diagnostics”.',
       ]),
       guideSection('When something goes wrong', [
         'A part of the page that could not be read says so, and the rest still shows. Press Refresh, or Try again if nothing loaded.',
         'If Private image delivery says addresses are not signed, the signing key is not set up on the server: no copy can start and new pictures go up public. Tell whoever runs the servers.',
         'A run button stays unavailable until there is something for it to do. “Another run is open. Finish it first.” means just that.',
         '“That campaign cannot do that now.” means the campaign has already moved on, and “That finding has already been decided.” means another administrator decided it first. Press Refresh to see where things stand.',
+        '“The job queues cannot be reached.” under Failed jobs means the site cannot reach them just now; tell whoever runs the servers. If they stop answering part way through Retry all or Discard all, the page says so, and what was done is in the Security Log.',
+        'A retry or discard that is refused shows the reason it was given, most often that somebody else acted on the job first, and the list is read again.',
+        '“Publication is already paused.” or “Publication is not paused.” means another administrator changed it first. The Admin page then shows it as it is.',
       ]),
     ],
     relatedLinks: [
       { label: 'Scan Diagnostics', route: APP_ROUTES.ADMIN_SCAN_DIAGNOSTICS },
+      { label: 'Admin', route: APP_ROUTES.ADMIN },
       { label: 'Security Log', route: APP_ROUTES.ADMIN_SECURITY_LOG },
     ],
   },
