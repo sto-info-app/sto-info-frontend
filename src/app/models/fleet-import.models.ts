@@ -136,6 +136,15 @@ export interface RosterPreviewRow {
   lastActiveAt: RosterPreviewDate;
 }
 
+/** Dates after now in an export, as the check found them (FC-043). */
+export interface RosterPreviewFutureDates {
+  /** Whether the export stamp is more than ten minutes after now. */
+  exportStampAhead: boolean;
+
+  /** How many readable rows carry a date more than ten minutes after now. */
+  rowCount: number;
+}
+
 /** How an export would be read, without reading it into anything. */
 export interface RosterImportPreview {
   /** Whether this file could be imported as it stands. */
@@ -154,6 +163,12 @@ export interface RosterImportPreview {
 
   /** How many readable rows carry a date the clock went back over. */
   ambiguousDateCount: number;
+
+  /**
+   * Dates after now, which usually mean the wrong timezone (FC-043). A
+   * warning only: it never changes canImport.
+   */
+  futureDates: RosterPreviewFutureDates;
   problems: RosterPreviewProblem[];
 
   /** The first rows of the file, as the importer reads them. */

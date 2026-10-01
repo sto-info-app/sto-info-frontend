@@ -1080,6 +1080,7 @@ const FLEET_ROSTER_GUIDES: HelpGuide[] = [
         'The file writes every time in the clock of the computer it was exported on, and never says which. The choice starts on the zone picked in Settings under “Read Fleet roster exports as”, or on your device’s zone when that is left on “My device’s zone”. Change it here if this export was taken somewhere else.',
         'A wrong zone does not fail: it quietly moves every date by a few hours. That is why the first rows show each date twice, as the file says it and as it was read, in UTC. Check they agree.',
         'An export taken in the hour the clocks go back names two moments, and you are asked which. A time in the hour they skip going forward is refused, which usually means the zone is wrong.',
+        'If the export’s time, or any date in it, comes out later than now, the check warns you, because that usually means the zone is wrong. Check the zone; if it is right, tick “The timezone is right; import it anyway” to import it.',
       ]),
       guideSection(
         'How to import it',

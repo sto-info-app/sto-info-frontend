@@ -319,12 +319,24 @@
                 </fieldset>
               }
 
+              @if (hasFutureDates(result)) {
+                <app-lcars-warning-message
+                  title="Dates after now"
+                  [message]="futureWarning(result)" />
+                <label class="roster-import__confirm">
+                  <input
+                    type="checkbox"
+                    [checked]="futureConfirmed"
+                    [disabled]="importing"
+                    (change)="onConfirmFuture($any($event.target).checked)" />
+                  The timezone is right; import it anyway
+                </label>
+              }
+
               <button
                 type="button"
                 class="lcars-btn lcars-btn-auto gold roster-import__commit"
-                [disabled]="
-                  importing || (needsMomentChoice(result) && !chosenExportedAt)
-                "
+                [disabled]="importing || !readyToImport(result)"
                 (click)="onImport(state)">
                 Import this export
               </button>

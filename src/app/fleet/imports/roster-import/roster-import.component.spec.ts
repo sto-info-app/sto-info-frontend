@@ -167,6 +167,7 @@ function preview(
     readableRowCount: 2,
     unknownClassCount: 0,
     ambiguousDateCount: 0,
+    futureDates: { exportStampAhead: false, rowCount: 0 },
     problems: [],
     sample: [
       {
@@ -978,6 +979,97 @@ describe('RosterImportComponent', () => {
         choose(FILE);
 
         expect(component.chosenExportedAt).toBeNull();
+      });
+    });
+
+    // FC-043: dates after now usually mean the wrong timezone. Warned of,
+    // and imported only once the reader says the zone is right.
+    describe('dates after now', () => {
+      /** The box that says to import anyway. */
+      const confirmBox = (): HTMLInputElement | undefined =>
+        find('input[type="checkbox"]') as HTMLInputElement | undefined;
+
+      /** A page with the checked export on it. */
+      function checked(futureDates: RosterImportPreview['futureDates']): void {
+        imports.preview.mockReturnValue(of(preview({ futureDates })));
+        render();
+        choose(FILE);
+        check();
+      }
+
+      it('says nothing, and asks nothing, when every date is in the past', () => {
+        checked({ exportStampAhead: false, rowCount: 0 });
+
+        expect(text()).not.toContain('Dates after now');
+        expect(confirmBox()).toBeFalsy();
+        expect(importButton()?.disabled).toBe(false);
+      });
+
+      it.each([
+        [
+          { exportStampAhead: true, rowCount: 0 },
+          "The export's time is after now.",
+        ],
+        [
+          { exportStampAhead: false, rowCount: 1 },
+          '1 row has a date after now.',
+        ],
+        [
+          { exportStampAhead: true, rowCount: 3 },
+          "The export's time and 3 rows have dates after now.",
+        ],
+      ])('warns of %o', (futureDates, words) => {
+        checked(futureDates);
+
+        expect(text()).toContain('Dates after now');
+        expect(text()).toContain(words);
+        expect(text()).toContain(
+          'That usually means the export was taken in a different timezone ' +
+            'from the one chosen above.',
+        );
+      });
+
+      it('will not import until the reader says the zone is right', () => {
+        checked({ exportStampAhead: true, rowCount: 0 });
+
+        expect(importButton()?.disabled).toBe(true);
+        component.onImport({
+          kind: 'READY',
+          fleet: fleet(),
+          communityId: 'community-1',
+          communitySlug: 'united-federation-alliance',
+          platformSegment: 'pc',
+          fleetLink: [],
+          block: null,
+        });
+        expect(imports.upload).not.toHaveBeenCalled();
+
+        confirmBox()!.click();
+        fixture.detectChanges();
+
+        expect(importButton()?.disabled).toBe(false);
+        importButton()!.click();
+
+        expect(imports.upload).toHaveBeenCalled();
+      });
+
+      it('takes the confirmation back when the box is cleared', () => {
+        checked({ exportStampAhead: true, rowCount: 0 });
+        confirmBox()!.click();
+        fixture.detectChanges();
+        confirmBox()!.click();
+        fixture.detectChanges();
+
+        expect(component.futureConfirmed).toBe(false);
+        expect(importButton()?.disabled).toBe(true);
+      });
+
+      it('asks again for every check', () => {
+        checked({ exportStampAhead: true, rowCount: 0 });
+        component.onConfirmFuture(true);
+        choose(FILE);
+
+        expect(component.futureConfirmed).toBe(false);
       });
     });
 

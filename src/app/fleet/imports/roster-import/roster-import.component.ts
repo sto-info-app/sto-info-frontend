@@ -209,6 +209,12 @@ export class RosterImportComponent {
    */
   chosenExportedAt: string | null = null;
 
+  /**
+   * Whether the reader has said to import an export with dates after now
+   * anyway (FC-043). Asked again for every check.
+   */
+  futureConfirmed = false;
+
   /** True while the export is being sent to be imported. */
   importing = false;
 
@@ -394,6 +400,66 @@ export class RosterImportComponent {
   }
 
   /**
+   * Reports whether the check found dates after now (FC-043).
+   *
+   * @param preview - What the server found.
+   * @returns True when the reader should check the timezone first.
+   */
+  hasFutureDates(preview: RosterImportPreview): boolean {
+    return (
+      preview.futureDates.exportStampAhead || preview.futureDates.rowCount > 0
+    );
+  }
+
+  /**
+   * Says what is in the future, and what that usually means (FC-043).
+   *
+   * Fixed words and counts only: the warning component renders its message
+   * as HTML, so nothing that came from the file or the request goes in it.
+   *
+   * @param preview - What the server found.
+   * @returns The warning.
+   */
+  futureWarning(preview: RosterImportPreview): string {
+    const { exportStampAhead, rowCount } = preview.futureDates;
+    const rows =
+      rowCount === 1 ? '1 row has a date' : `${rowCount} rows have dates`;
+    const found = exportStampAhead
+      ? rowCount > 0
+        ? `The export's time and ${rows} after now`
+        : "The export's time is after now"
+      : `${rows} after now`;
+
+    return (
+      `${found}. That usually means the export was taken in a different ` +
+      'timezone from the one chosen above. Check it before importing.'
+    );
+  }
+
+  /**
+   * Remembers whether the reader says to import despite dates after now.
+   *
+   * @param confirmed - Whether the box is ticked.
+   */
+  onConfirmFuture(confirmed: boolean): void {
+    this.futureConfirmed = confirmed;
+  }
+
+  /**
+   * Reports whether the import may be sent as things stand.
+   *
+   * @param preview - What the server found.
+   * @returns False while a moment or a confirmation is still owed.
+   */
+  readyToImport(preview: RosterImportPreview): boolean {
+    return (
+      this.importable(preview) &&
+      !(this.needsMomentChoice(preview) && this.chosenExportedAt === null) &&
+      !(this.hasFutureDates(preview) && !this.futureConfirmed)
+    );
+  }
+
+  /**
    * Remembers which moment the reader says the stamp names.
    *
    * @param candidate - One of the moments the server offered.
@@ -421,8 +487,7 @@ export class RosterImportComponent {
       state.communityId === null ||
       file === null ||
       preview === null ||
-      !this.importable(preview) ||
-      (this.needsMomentChoice(preview) && this.chosenExportedAt === null)
+      !this.readyToImport(preview)
     ) {
       return;
     }
@@ -617,6 +682,7 @@ export class RosterImportComponent {
     this.preview = null;
     this.errorMessage = null;
     this.chosenExportedAt = null;
+    this.futureConfirmed = false;
     this.importError = null;
     this.repeatNotice = null;
   }
