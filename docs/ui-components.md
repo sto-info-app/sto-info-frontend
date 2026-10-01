@@ -1338,8 +1338,10 @@ Each is offered only while chat is switched on.
   3. The page then says what the erasure did.
 
   The list of erasures never names who was erased: each shows the pseudonym
-  that replaced them. **Replay the erasure ledger…**, run after a database
-  restore, makes again what the restore lost.
+  that replaced them. There is no replay button (FC-042): after a database
+  restore, the backend makes again every erasure the restore lost by itself
+  when it starts, before it serves anything, and those show as "Replayed from
+  the ledger".
 
 **Reasons for every site admin action** (FC-039). Each is kept in the site
 admin log, so each asks why through `GovernanceReasonDialogComponent` (up to
@@ -1362,11 +1364,66 @@ admins and the retention jobs did, newest first, fifty a page, from every log
 that holds it. **Show** narrows it to one source: site admin actions, Fleet
 disputes, moderation holds, Fleet investigations, roster erasures or retention
 runs. Each row gives when, who (or "The system"), what in words, to whom or
-what with its codes and counts, and why.
+what with its codes and counts, and why. A site admin action with no actor
+reads "An account since closed", except those the system records itself
+(`SYSTEM_SITE_ADMIN_ACTIONS`: the restore check's `LEDGERS_RECONCILED`,
+FC-042), which read "The system".
 
 **Scan Diagnostics** (FC-039) also lists refused uploads, newest verdict
 first, with each one's rejection code and engine, and **Look up** reads one
 asset by its ID. Neither ever shows a signature name.
+
+**Operations on Scan Diagnostics** (FC-042), all read from
+`GET /admin/file-scanning/diagnostics` above Usage, so they come back with the
+rest on **Refresh**; the page never polls.
+
+- **Alerts**: each problem the backend's alert run has open, oldest first,
+  titled as the in-app notification every site admin was sent
+  (`OPERATIONS_ALERT_TITLES`), with its counts in words (`alertDetailOf`) and
+  when it opened and was last seen. "Nothing needs a site admin." when none
+  is. An alert's notification links to `/admin/scan-diagnostics`, which the
+  notifications page already routes as an internal link.
+- **Worker**: one item per process that beat in the last two minutes, with
+  its state in words (`workerStateOf`: every pause reason code, a paused row
+  with no reason, and a fallback), signature version and age, jobs in hand,
+  last heartbeat from the server's own `secondsSinceBeat` ("12 seconds ago"),
+  and since when it has been paused. With none live it says how long since any
+  checked in, or that none has in the last day; processes that stopped beating
+  are counted, not shown.
+- **Publication**: running or paused, since when, by whom ("You", their
+  username, or "An account since closed", as `pausedByOf` says it) and how many
+  uploads wait, with a link to the Admin page. While the job queues cannot be
+  reached (`queuePaused: null`) it says so, and shows no count.
+
+**Failed jobs** (FC-042, `FailedJobsPanelComponent` in
+`src/app/admin/scan-diagnostics/failed-jobs-panel`), on Scan Diagnostics above
+refused uploads: every job a queue gave up on, 25 a page, newest failure first
+within each queue, narrowed by **Queue** (each with its count). Each row gives
+when it failed, the queue in words, the job ID, attempts, the asset, transcript
+or Fleet it concerns, and the failure code; **Retry** only while `retryable`
+(otherwise why not), **Discard** on every job. **Retry all** and **Discard all
+that can't be retried** act on the queue chosen, or every queue, and say what
+they came to. Each asks for a reason through
+`GovernanceReasonDialogComponent`; a refusal, a 503 while the job queues cannot
+be reached included, shows the server's message and the list is read again; a
+list that cannot be read shows the server's message too. It reads every queue's
+first page on arrival and when the page's **Refresh** calls its `reset()`: the
+backend logs that read with the diagnostics, so a page view is one Security Log
+entry, and only a queue chosen or a later page logs a read of its own.
+
+**Publication pause** (FC-042, `PublicationPauseComponent` in
+`src/app/admin/publication-pause`), under Operations on the Admin page, below
+its cards: whether publication is paused, since when, by whom and how many
+uploads wait, with **Pause publication** or **Resume publication**, each asking
+for a reason. A pause or resume made while the job queues cannot be reached
+still changes the switch, and the control says the queues follow once they
+answer. It carries the Admin page's one help link, to the Scan Diagnostics
+guide.
+
+**Security Log subjects** (FC-042): a Scan Diagnostics read names what was read
+("Scan Diagnostics", "Scan Diagnostics: an asset" and so on), and a failed job
+action names its queue as Scan Diagnostics does, or "Failed jobs in every
+queue" for a bulk one; `ALL` is not shown as an ID.
 
 **Rescan campaigns** (FC-041, `RescanPanelComponent` in
 `src/app/admin/scan-diagnostics/rescan-panel`), on Scan Diagnostics above
