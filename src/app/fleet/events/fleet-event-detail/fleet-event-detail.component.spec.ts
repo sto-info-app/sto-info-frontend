@@ -111,6 +111,24 @@ describe('FleetEventDetailComponent', () => {
     });
   });
 
+  // Plan §11.7 (FC-043): an organiser's link opens away from the site,
+  // with no handle back to it and no address passed on.
+  it('opens the event’s own link apart, telling it nothing', async () => {
+    await render({ externalUrl: 'https://discord.gg/example' });
+
+    const link = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('a'),
+    ).find(
+      anchor => anchor.getAttribute('href') === 'https://discord.gg/example',
+    );
+
+    expect(link?.getAttribute('target')).toBe('_blank');
+    expect(link?.getAttribute('rel')?.split(' ').sort()).toEqual([
+      'noopener',
+      'noreferrer',
+    ]);
+  });
+
   it('shows a signed-out reader what lies ahead, and nothing to answer', async () => {
     await render({
       upcoming: [
