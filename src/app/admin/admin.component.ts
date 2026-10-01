@@ -10,6 +10,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { ModerationHoldAdminService } from 'src/app/admin/moderation-admin/moderation-hold-admin.service';
+import { PublicationPauseComponent } from 'src/app/admin/publication-pause/publication-pause.component';
 import {
   STORYTIME_ADMIN_LINKS,
   StorytimeAdminLink,
@@ -35,13 +36,20 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
  * Everything above it comes with the administrator role, while those three are
  * given out one at a time by permission, so they are filtered against what this
  * administrator actually holds rather than shown to every administrator.
+ *
+ * Under Operations sits the publication pause (FC-042): a switch rather than a
+ * way into a page, so it is a control of its own rather than a card.
  */
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss'],
   standalone: true,
-  imports: [RouterModule, CollapsibleSectionComponent],
+  imports: [
+    RouterModule,
+    CollapsibleSectionComponent,
+    PublicationPauseComponent,
+  ],
 })
 export class AdminComponent implements OnInit {
   private readonly _routingService = inject(RoutingService);

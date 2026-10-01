@@ -1,0 +1,108 @@
+@let current = state();
+<section
+  class="publication-pause"
+  [class.publication-pause--paused]="
+    current.kind === 'READY' && current.pause.paused
+  "
+  aria-labelledby="publication-pause-heading">
+  <h2
+    id="publication-pause-heading"
+    class="publication-pause__heading">
+    Publication
+  </h2>
+  <app-help-link
+    slug="site-admin-scanning"
+    label="Help with pausing publication" />
+  <p>
+    Uploads are still accepted and scanned, but nothing is published until
+    publication resumes; then everything held publishes.
+  </p>
+
+  @if (message(); as done) {
+    <p
+      class="publication-pause__message"
+      role="status">
+      {{ done }}
+    </p>
+  }
+  @if (failure(); as problem) {
+    <p
+      class="publication-pause__failure"
+      role="alert">
+      {{ problem }}
+    </p>
+  }
+
+  @switch (current.kind) {
+    @case ('LOADING') {
+      <p>Reading whether publication is paused…</p>
+    }
+    @case ('ERROR') {
+      <p class="publication-pause__failure">
+        Whether publication is paused could not be read.
+      </p>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto sunflower"
+        (click)="load()">
+        Try again
+      </button>
+    }
+  }
+
+  @if (current.kind === 'READY') {
+    @let pause = current.pause;
+
+    @if (pause.paused) {
+      <p class="publication-pause__state">
+        <strong>Publication is paused.</strong>
+        @if (pause.queuePaused === null) {
+          The job queues can’t be reached just now; they will be paused as
+          soon as they answer, and nothing is published meanwhile.
+        }
+      </p>
+      <dl class="publication-pause__details">
+        <div>
+          <dt>Since</dt>
+          <dd>
+            {{
+              pause.pausedAt ? (pause.pausedAt | appDate: 'medium') : 'Unknown'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>By</dt>
+          <dd>{{ pausedBy(pause) }}</dd>
+        </div>
+        @if (pause.held !== null) {
+          <div>
+            <dt>Waiting to be published</dt>
+            <dd>{{ pause.held }}</dd>
+          </div>
+        }
+      </dl>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto green"
+        (click)="toggle(pause)">
+        Resume publication
+      </button>
+    } @else {
+      <p class="publication-pause__state">
+        <strong>Publication is running.</strong>
+        @if (pause.queuePaused === null) {
+          The job queues can’t be reached just now, so nothing is published
+          until they answer.
+        } @else {
+          Uploads are published as soon as the scanner clears them.
+        }
+      </p>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto red"
+        (click)="toggle(pause)">
+        Pause publication
+      </button>
+    }
+  }
+</section>

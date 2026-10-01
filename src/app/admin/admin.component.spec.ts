@@ -1,12 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { PERMISSIONS } from 'src/app/models/access-control.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { StorytimeService } from 'src/app/storytime/storytime.service';
 import { AdminComponent } from './admin.component';
 import { ModerationHoldAdminService } from './moderation-admin/moderation-hold-admin.service';
+import { PublicationPauseAdminService } from './publication-pause/publication-pause-admin.service';
 
 describe('AdminComponent', () => {
   let component: AdminComponent;
@@ -43,6 +45,22 @@ describe('AdminComponent', () => {
         { provide: AccessControlService, useValue: accessControlService },
         { provide: StorytimeService, useValue: storytimeService },
         { provide: ModerationHoldAdminService, useValue: holds },
+        // The publication pause's own spec covers it (FC-042).
+        {
+          provide: PublicationPauseAdminService,
+          useValue: {
+            read: () =>
+              of({
+                paused: false,
+                pausedAt: null,
+                pausedByUserId: null,
+                pausedByUsername: null,
+                queuePaused: false,
+                held: 0,
+              }),
+          },
+        },
+        { provide: AuthService, useValue: { getUserId: () => 'admin-1' } },
       ],
     }).compileComponents();
 
@@ -98,6 +116,18 @@ describe('AdminComponent', () => {
       'a[href="/admin/fleet-disputes"]',
     );
     expect(link?.textContent).toContain('Fleet Disputes');
+  });
+
+  // Steve's decision of 30 September 2026: the kill switch for publication
+  // sits under Operations, with the scanner it holds back.
+  it('offers the publication pause under Operations (FC-042)', () => {
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.querySelector('app-publication-pause')).not.toBeNull();
+    expect(element.textContent).toContain('Publication is running.');
+    expect(element.textContent).toContain('Pause publication');
   });
 
   it('links to the scan diagnostics page', () => {
