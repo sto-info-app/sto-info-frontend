@@ -1,0 +1,177 @@
+<section
+  class="admin-section"
+  aria-labelledby="failed-jobs-heading">
+  <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+    <span id="failed-jobs-heading">Failed jobs</span>
+  </div>
+
+  <p>
+    Background jobs that ran out of attempts, queue by queue, newest failure
+    first. Each shows internal IDs and a reason code only, never what the job
+    carried or its error’s text. Retry sends a job round again when that could
+    change something; Discard removes it. Each asks for a reason, kept in the
+    Security Log.
+  </p>
+
+  @if (message(); as done) {
+    <p
+      class="image-estate__message"
+      role="status">
+      {{ done }}
+    </p>
+  }
+  @if (failure(); as problem) {
+    <p
+      class="scan-diagnostics__unavailable"
+      role="alert">
+      {{ problem }}
+    </p>
+  }
+
+  @let current = state();
+  @switch (current.kind) {
+    @case ('LOADING') {
+      <p>Reading the failed jobs…</p>
+    }
+    @case ('ERROR') {
+      <p class="scan-diagnostics__unavailable">
+        {{ current.message }}
+      </p>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto sunflower"
+        (click)="load()">
+        Try again
+      </button>
+    }
+  }
+
+  @if (current.kind === 'READY') {
+    @let list = current.page;
+
+    <div class="lcars-select-container sunflower failed-jobs__queue">
+      <label for="failed-jobs-queue">Queue</label>
+      <select
+        id="failed-jobs-queue"
+        (change)="choose($any($event.target).value)">
+        <option
+          value=""
+          [selected]="queue() === null">
+          Every queue
+        </option>
+        @for (choice of queues; track choice.value) {
+          <option
+            [value]="choice.value"
+            [selected]="queue() === choice.value">
+            {{ choice.label }}
+            @if (countIn(list, choice.value); as count) {
+              · {{ count }}
+            }
+          </option>
+        }
+      </select>
+    </div>
+
+    @if (list.items.length === 0) {
+      <p>No background job has failed.</p>
+    } @else {
+      <table class="fleet-community-table">
+        <caption>
+          Failed jobs, newest failure first in each queue
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Failed</th>
+            <th scope="col">Queue</th>
+            <th scope="col">Job</th>
+            <th scope="col">Attempts</th>
+            <th scope="col">Concerns</th>
+            <th scope="col">Reason</th>
+            <th scope="col">Act</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (job of list.items; track job.queue + job.jobId) {
+            <tr>
+              <td data-label="Failed">
+                {{ job.failedAt ? (job.failedAt | appDate: 'medium') : '—' }}
+              </td>
+              <td data-label="Queue">{{ queueLabelOf(job.queue) }}</td>
+              <td data-label="Job">
+                <code class="image-estate__id">{{ job.jobId }}</code>
+              </td>
+              <td data-label="Attempts">{{ job.attemptsMade }}</td>
+              <td data-label="Concerns">
+                @if (job.subjectId) {
+                  {{ subjectLabelOf(job) }}
+                  <code class="image-estate__id">{{ job.subjectId }}</code>
+                } @else {
+                  —
+                }
+              </td>
+              <td data-label="Reason">
+                <code>{{ job.reason }}</code>
+                @if (!job.retryable) {
+                  <span class="fleet-report-note">{{
+                    whyNotRetryable(job)
+                  }}</span>
+                }
+              </td>
+              <td data-label="Act">
+                <div class="buttons-row">
+                  @if (job.retryable) {
+                    <button
+                      type="button"
+                      class="lcars-btn lcars-btn-auto green"
+                      (click)="retry(job)">
+                      Retry
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto red"
+                    (click)="discard(job)">
+                    Discard
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (pageCountOf(list) > 1) {
+        <div class="lcars-pagination">
+          <button
+            type="button"
+            [disabled]="pageNumber() <= 1"
+            (click)="turn(-1)">
+            Newer
+          </button>
+          <span>Page {{ pageNumber() }} of {{ pageCountOf(list) }}</span>
+          <button
+            type="button"
+            [disabled]="pageNumber() >= pageCountOf(list)"
+            (click)="turn(1)">
+            Older
+          </button>
+        </div>
+      }
+
+      <div class="image-estate__actions">
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto green"
+          (click)="retryAll()">
+          Retry all
+        </button>
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto red"
+          (click)="discardUnretryable()">
+          Discard all that can’t be retried
+        </button>
+      </div>
+    }
+  }
+</section>

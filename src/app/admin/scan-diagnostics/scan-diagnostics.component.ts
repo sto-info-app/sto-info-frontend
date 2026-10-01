@@ -6,16 +6,22 @@ import {
   OnInit,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 
+import { pausedByOf } from 'src/app/admin/publication-pause/publication-pause.component';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import {
+  OperationsAlert,
+  PublicationPause,
   ScanAssetDetail,
   ScanDiagnostics,
   ScanRejectionPage,
   ScanUsageWindow,
   ScanUsageWindowName,
+  ScanWorkerHeartbeat,
 } from 'src/app/models/scan-diagnostics.models';
 import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -24,6 +30,7 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import { ScanDiagnosticsService } from 'src/app/shared/services/scan-diagnostics.service';
 
+import { FailedJobsPanelComponent } from './failed-jobs-panel/failed-jobs-panel.component';
 import { ImageEstatePanelComponent } from './image-estate-panel/image-estate-panel.component';
 import { RescanPanelComponent } from './rescan-panel/rescan-panel.component';
 
@@ -83,6 +90,205 @@ export const SCAN_LATENCY_ROWS: readonly DurationRow[] = [
   { key: 'waitMaxMs', label: 'Wait for a verdict, longest' },
 ];
 
+/**
+ * What a paused worker's reason code means, in words (FC-042). The codes are
+ * the worker's own; see its infrastructure documentation.
+ */
+export const WORKER_PAUSE_REASON_LABELS: Readonly<Record<string, string>> = {
+  SCANNER_NOT_ASKED: 'Paused — just started, and hasn’t asked the scanner yet',
+  SCANNER_UNREACHABLE: 'Paused — the scanner can’t be reached',
+  SIGNATURES_UNDATED:
+    'Paused — the scanner didn’t say how old its signatures are',
+  SIGNATURES_TOO_OLD: 'Paused — signatures too old',
+  UNKNOWN: 'Paused — for a reason the worker has no code for; read its log',
+};
+
+/**
+ * What a paused worker with no reason means: its scanner is fit again but
+ * the resume did not take, and it will not retry on its own (FC-042).
+ */
+export const WORKER_PAUSED_WITHOUT_REASON =
+  'Paused — the scanner is fit again, but the worker hasn’t resumed; restart it if this stays';
+
+/**
+ * What each open alert is called: the title of the notification every site
+ * admin was sent when it opened (FC-042).
+ */
+export const OPERATIONS_ALERT_TITLES: Readonly<Record<string, string>> = {
+  SCAN_QUEUE_LAG: 'Uploads are waiting to be scanned',
+  PUBLICATION_QUEUE_LAG: 'Uploads are waiting to be published',
+  WORKER_SILENT: 'The scan worker is silent',
+  WORKER_PAUSED: 'The scan worker is paused',
+  SIGNATURES_STALE: 'Virus signatures are out of date',
+  FAILED_JOBS: 'Background jobs have failed',
+  PUBLICATION_PAUSED_LONG: 'Publication is still paused',
+  QUEUES_UNREACHABLE: 'The job queues cannot be reached',
+};
+
+/** The worker processes the page shows, and what it says of the rest. */
+export interface WorkerSummary {
+  /** Those that beat in the last two minutes, latest beat first. */
+  readonly live: readonly ScanWorkerHeartbeat[];
+  /** How many more beat in the last day but have stopped. */
+  readonly gone: number;
+  /**
+   * Whole minutes since any process beat, when none is live and one beat in
+   * the last day; otherwise null.
+   */
+  readonly quietMinutes: number | null;
+}
+
+/**
+ * Counts something in words: "1 minute", "3 minutes".
+ *
+ * @param count - How many.
+ * @param noun - What, in the singular.
+ * @returns The count and the noun.
+ */
+function counted(count: number, noun: string): string {
+  return `${count} ${noun}${count === 1 ? '' : 's'}`;
+}
+
+/**
+ * Says a code in words: `SCAN_QUEUE_LAG` as "Scan queue lag".
+ *
+ * @param code - The code.
+ * @returns It, as a reader would say it.
+ */
+function inWords(code: string): string {
+  const words = code.toLowerCase().replaceAll('_', ' ');
+
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/**
+ * Says how long ago something was, from a count of seconds (FC-042).
+ *
+ * @param seconds - Seconds since, on the server's clock.
+ * @returns "just now", "12 seconds ago", "3 minutes ago" and so on.
+ */
+export function formatSecondsAgo(seconds: number): string {
+  const whole = Math.max(0, Math.floor(seconds));
+
+  if (whole < 1) {
+    return 'just now';
+  }
+
+  if (whole < 60) {
+    return `${counted(whole, 'second')} ago`;
+  }
+
+  if (whole < 3600) {
+    return `${counted(Math.floor(whole / 60), 'minute')} ago`;
+  }
+
+  if (whole < 86_400) {
+    return `${counted(Math.floor(whole / 3600), 'hour')} ago`;
+  }
+
+  return `${counted(Math.floor(whole / 86_400), 'day')} ago`;
+}
+
+/**
+ * A worker's state, in words (FC-042).
+ *
+ * @param worker - The worker.
+ * @returns "Running", "Stopping", or "Paused" and why.
+ */
+export function workerStateOf(worker: ScanWorkerHeartbeat): string {
+  const state: string = worker.state;
+
+  switch (state) {
+    case 'RUNNING':
+      return 'Running';
+    case 'STOPPING':
+      return 'Stopping';
+    case 'PAUSED':
+      return worker.pauseReason === null
+        ? WORKER_PAUSED_WITHOUT_REASON
+        : (WORKER_PAUSE_REASON_LABELS[worker.pauseReason] ??
+            `Paused — ${inWords(worker.pauseReason)}`);
+    default:
+      return inWords(state);
+  }
+}
+
+/**
+ * Sorts the worker processes into those to show and what to say of the rest
+ * (FC-042).
+ *
+ * @param workers - Every process that beat in the last day.
+ * @returns The summary.
+ */
+export function summariseWorkers(
+  workers: readonly ScanWorkerHeartbeat[],
+): WorkerSummary {
+  const live = workers.filter(worker => worker.live);
+
+  return {
+    live,
+    gone: workers.length - live.length,
+    quietMinutes:
+      live.length === 0 && workers.length > 0
+        ? Math.floor(
+            Math.min(...workers.map(worker => worker.secondsSinceBeat)) / 60,
+          )
+        : null,
+  };
+}
+
+/**
+ * What an alert's counts say, in words (FC-042).
+ *
+ * @param alert - The alert.
+ * @returns A sentence, or null when its counts say nothing more.
+ */
+export function alertDetailOf(alert: OperationsAlert): string | null {
+  const detail = alert.detail;
+  const minutes = (key: string): string => counted(detail[key], 'minute');
+
+  switch (alert.kind) {
+    case 'SCAN_QUEUE_LAG':
+    case 'PUBLICATION_QUEUE_LAG':
+      return detail['oldestMinutes'] === undefined
+        ? null
+        : `The oldest has waited ${minutes('oldestMinutes')}.`;
+    case 'WORKER_SILENT':
+      if (detail['minutesSinceBeat'] !== undefined) {
+        return `None has checked in for ${minutes('minutesSinceBeat')}.`;
+      }
+
+      return detail['liveWorkers'] === undefined
+        ? 'The workers’ heartbeat could not be read.'
+        : 'None has checked in during the last day.';
+    case 'WORKER_PAUSED':
+      return detail['pausedWorkers'] === undefined ||
+        detail['pausedMinutes'] === undefined
+        ? null
+        : `${counted(detail['pausedWorkers'], 'worker')} paused, the ` +
+            `latest for ${minutes('pausedMinutes')}.`;
+    case 'SIGNATURES_STALE':
+      return detail['signatureAgeHours'] === undefined
+        ? null
+        : `The newest are ${detail['signatureAgeHours']} hours old; the ` +
+            'worker stops scanning at 48.';
+    case 'FAILED_JOBS':
+      return detail['failed'] === undefined
+        ? null
+        : `${counted(detail['failed'], 'failed job')}, listed under Failed jobs.`;
+    case 'PUBLICATION_PAUSED_LONG':
+      return detail['pausedMinutes'] === undefined
+        ? null
+        : `Paused for ${minutes('pausedMinutes')}.`;
+    case 'QUEUES_UNREACHABLE':
+      return detail['minutesUnreachable'] === undefined
+        ? null
+        : `For ${minutes('minutesUnreachable')}.`;
+    default:
+      return null;
+  }
+}
+
 /** An asset ID, as the server will look one up. */
 const ASSET_ID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -141,6 +347,11 @@ export function formatDuration(ms: number | null): string {
  * worker's own views, which cannot name a file, an uploader or a signature.
  * A part the server could not reach is said to be unavailable, and the rest
  * of the page still shows.
+ *
+ * FC-042 added the operations a site admin needs when something is wrong:
+ * the alerts open now, each worker process's heartbeat, whether publication
+ * is paused, and the failed background jobs to retry or discard. It reads on
+ * arrival and on Refresh, and never polls.
  */
 @Component({
   selector: 'app-scan-diagnostics',
@@ -153,6 +364,7 @@ export function formatDuration(ms: number | null): string {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AppDatePipe,
+    FailedJobsPanelComponent,
     ImageEstatePanelComponent,
     HelpLinkComponent,
     LcarsErrorMessageComponent,
@@ -163,7 +375,11 @@ export function formatDuration(ms: number | null): string {
 })
 export class ScanDiagnosticsComponent implements OnInit {
   private readonly _diagnosticsService = inject(ScanDiagnosticsService);
+  private readonly _authService = inject(AuthService);
   private readonly _destroyRef = inject(DestroyRef);
+
+  /** The failed jobs, which read on their own and again on Refresh. */
+  private readonly _failedJobs = viewChild(FailedJobsPanelComponent);
 
   readonly adminLink = '/' + APP_ROUTES.ADMIN;
   readonly errorMessage = SCAN_DIAGNOSTICS_ERROR;
@@ -171,6 +387,10 @@ export class ScanDiagnosticsComponent implements OnInit {
   readonly activityRows = SCAN_ACTIVITY_ROWS;
   readonly outcomeRows = SCAN_OUTCOME_ROWS;
   readonly latencyRows = SCAN_LATENCY_ROWS;
+  readonly workerStateOf = workerStateOf;
+  readonly formatSecondsAgo = formatSecondsAgo;
+  readonly summariseWorkers = summariseWorkers;
+  readonly alertDetailOf = alertDetailOf;
 
   readonly state = signal<ScanDiagnosticsState>({ kind: 'LOADING' });
   readonly rejections = signal<ScanRejectionsState>({ kind: 'LOADING' });
@@ -245,6 +465,37 @@ export class ScanDiagnosticsComponent implements OnInit {
         next: page => this.rejections.set({ kind: 'READY', page }),
         error: () => this.rejections.set({ kind: 'ERROR' }),
       });
+  }
+
+  /**
+   * Reads the diagnostics and the failed jobs again, when a site admin
+   * presses Refresh. The page never polls. The failed jobs go back to every
+   * queue's first page, which the server does not log apart from the
+   * diagnostics, so a page view stays one Security Log entry.
+   */
+  refresh(): void {
+    this.load();
+    this._failedJobs()?.reset();
+  }
+
+  /**
+   * What an open alert is called.
+   *
+   * @param alert - The alert.
+   * @returns Its title, or its kind in words for one this page does not know.
+   */
+  alertTitleOf(alert: OperationsAlert): string {
+    return OPERATIONS_ALERT_TITLES[alert.kind] ?? inWords(alert.kind);
+  }
+
+  /**
+   * Who paused publication, in words.
+   *
+   * @param publication - The pause.
+   * @returns "You", their username, or what stands in for one.
+   */
+  pausedBy(publication: PublicationPause): string {
+    return pausedByOf(publication, this._authService.getUserId());
   }
 
   /**

@@ -2,20 +2,32 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import {
+  OperationsAlert,
+  OperationsAlertKind,
   ScanAssetDetail,
   ScanDiagnostics,
   ScanRejectionPage,
   ScanUsageWindow,
+  ScanWorkerHeartbeat,
 } from 'src/app/models/scan-diagnostics.models';
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 import { ScanDiagnosticsService } from 'src/app/shared/services/scan-diagnostics.service';
+import { FailedJobsAdminService } from './failed-jobs-panel/failed-jobs-admin.service';
 import { ImageEstateAdminService } from './image-estate-panel/image-estate-admin.service';
 import { RescanAdminService } from './rescan-panel/rescan-admin.service';
 import {
+  OPERATIONS_ALERT_TITLES,
   SCAN_DIAGNOSTICS_ERROR,
   ScanDiagnosticsComponent,
+  WORKER_PAUSE_REASON_LABELS,
+  WORKER_PAUSED_WITHOUT_REASON,
+  alertDetailOf,
   formatDuration,
+  formatSecondsAgo,
+  summariseWorkers,
+  workerStateOf,
 } from './scan-diagnostics.component';
 
 /**
@@ -54,6 +66,48 @@ function usage(
   };
 }
 
+/**
+ * A worker process's heartbeat (FC-042).
+ *
+ * @param overrides - What differs.
+ * @returns The heartbeat.
+ */
+const workerOf = (
+  overrides: Partial<ScanWorkerHeartbeat> = {},
+): ScanWorkerHeartbeat => ({
+  workerId: 'worker-a',
+  state: 'RUNNING',
+  pauseReason: null,
+  definitionsVersion: '27501',
+  definitionsBuiltAt: '2026-09-26T08:39:00.000Z',
+  signatureAgeHours: 3.4,
+  jobsInHand: 2,
+  startedAt: '2026-09-26T08:00:00.000Z',
+  beatAt: '2026-09-26T11:59:48.000Z',
+  secondsSinceBeat: 12,
+  live: true,
+  pausedSince: null,
+  pausedMinutes: null,
+  ...overrides,
+});
+
+/**
+ * An open alert (FC-042).
+ *
+ * @param kind - Which.
+ * @param detail - Its counts.
+ * @returns The alert.
+ */
+const alertOf = (
+  kind: string,
+  detail: Record<string, number> = {},
+): OperationsAlert => ({
+  kind: kind as OperationsAlertKind,
+  openedAt: '2026-09-26T11:00:00.000Z',
+  lastSeenAt: '2026-09-26T11:59:00.000Z',
+  detail,
+});
+
 const DIAGNOSTICS: ScanDiagnostics = {
   generatedAt: '2026-09-26T12:00:00.000Z',
   usage: [usage('24h', 3), usage('7d', 4), usage('30d', 5)],
@@ -67,6 +121,16 @@ const DIAGNOSTICS: ScanDiagnostics = {
   },
   queue: { waiting: 3, delayed: 4, active: 1, failed: 0 },
   awaiting: { quarantined: 0, scanning: 3, retryPending: 1 },
+  workers: [workerOf()],
+  alerts: [],
+  publication: {
+    paused: false,
+    pausedAt: null,
+    pausedByUserId: null,
+    pausedByUsername: null,
+    queuePaused: false,
+    held: 0,
+  },
 };
 
 /** A refused asset (FC-039). */
@@ -110,11 +174,172 @@ describe('formatDuration', () => {
   });
 });
 
+describe('formatSecondsAgo (FC-042)', () => {
+  it.each([
+    [0, 'just now'],
+    [-3, 'just now'],
+    [1, '1 second ago'],
+    [12.7, '12 seconds ago'],
+    [60, '1 minute ago'],
+    [3599, '59 minutes ago'],
+    [3600, '1 hour ago'],
+    [86_399, '23 hours ago'],
+    [86_400, '1 day ago'],
+    [172_800, '2 days ago'],
+  ])('writes %p seconds as %p', (seconds, expected) => {
+    expect(formatSecondsAgo(seconds)).toBe(expected);
+  });
+});
+
+describe('workerStateOf (FC-042)', () => {
+  it('says running and stopping in words', () => {
+    expect(workerStateOf(workerOf())).toBe('Running');
+    expect(workerStateOf(workerOf({ state: 'STOPPING' }))).toBe('Stopping');
+  });
+
+  it.each(Object.entries(WORKER_PAUSE_REASON_LABELS))(
+    'says why a worker paused for %s',
+    (pauseReason, label) => {
+      expect(workerStateOf(workerOf({ state: 'PAUSED', pauseReason }))).toBe(
+        label,
+      );
+    },
+  );
+
+  it('names the scanner and the signatures as the brief asks', () => {
+    expect(WORKER_PAUSE_REASON_LABELS['SCANNER_UNREACHABLE']).toBe(
+      'Paused — the scanner can’t be reached',
+    );
+    expect(WORKER_PAUSE_REASON_LABELS['SIGNATURES_TOO_OLD']).toBe(
+      'Paused — signatures too old',
+    );
+  });
+
+  it('says a worker paused with no reason has not resumed', () => {
+    expect(workerStateOf(workerOf({ state: 'PAUSED' }))).toBe(
+      WORKER_PAUSED_WITHOUT_REASON,
+    );
+  });
+
+  it('falls back to the code in words for a reason or state it does not know', () => {
+    expect(
+      workerStateOf(workerOf({ state: 'PAUSED', pauseReason: 'DISK_FULL' })),
+    ).toBe('Paused — Disk full');
+    expect(
+      workerStateOf(
+        workerOf({ state: 'DRAINING' as ScanWorkerHeartbeat['state'] }),
+      ),
+    ).toBe('Draining');
+  });
+});
+
+describe('summariseWorkers (FC-042)', () => {
+  it('shows the live ones and counts the rest', () => {
+    const live = workerOf();
+    const gone = workerOf({
+      workerId: 'worker-b',
+      live: false,
+      secondsSinceBeat: 900,
+    });
+
+    expect(summariseWorkers([live, gone])).toEqual({
+      live: [live],
+      gone: 1,
+      quietMinutes: null,
+    });
+  });
+
+  it('says how long since any beat when none is live', () => {
+    expect(
+      summariseWorkers([
+        workerOf({ live: false, secondsSinceBeat: 1000 }),
+        workerOf({ live: false, secondsSinceBeat: 330 }),
+      ]),
+    ).toEqual({ live: [], gone: 2, quietMinutes: 5 });
+  });
+
+  it('says nothing of minutes when no process beat in the last day', () => {
+    expect(summariseWorkers([])).toEqual({
+      live: [],
+      gone: 0,
+      quietMinutes: null,
+    });
+  });
+});
+
+describe('alertDetailOf (FC-042)', () => {
+  it.each([
+    [
+      'SCAN_QUEUE_LAG',
+      { oldestMinutes: 23 },
+      'The oldest has waited 23 minutes.',
+    ],
+    [
+      'PUBLICATION_QUEUE_LAG',
+      { oldestMinutes: 1 },
+      'The oldest has waited 1 minute.',
+    ],
+    [
+      'WORKER_SILENT',
+      { liveWorkers: 0, minutesSinceBeat: 4 },
+      'None has checked in for 4 minutes.',
+    ],
+    [
+      'WORKER_SILENT',
+      { liveWorkers: 0 },
+      'None has checked in during the last day.',
+    ],
+    ['WORKER_SILENT', {}, 'The workers’ heartbeat could not be read.'],
+    [
+      'WORKER_PAUSED',
+      { pausedWorkers: 2, pausedMinutes: 11 },
+      '2 workers paused, the latest for 11 minutes.',
+    ],
+    [
+      'SIGNATURES_STALE',
+      { signatureAgeHours: 37.5 },
+      'The newest are 37.5 hours old; the worker stops scanning at 48.',
+    ],
+    ['FAILED_JOBS', { failed: 1 }, '1 failed job, listed under Failed jobs.'],
+    ['FAILED_JOBS', { failed: 3 }, '3 failed jobs, listed under Failed jobs.'],
+    [
+      'PUBLICATION_PAUSED_LONG',
+      { pausedMinutes: 75 },
+      'Paused for 75 minutes.',
+    ],
+    ['QUEUES_UNREACHABLE', { minutesUnreachable: 3 }, 'For 3 minutes.'],
+  ])('says what %s with %p means', (kind, detail, expected) => {
+    expect(alertDetailOf(alertOf(kind, detail))).toBe(expected);
+  });
+
+  it.each([
+    ['SCAN_QUEUE_LAG'],
+    ['PUBLICATION_QUEUE_LAG'],
+    ['SIGNATURES_STALE'],
+    ['FAILED_JOBS'],
+    ['PUBLICATION_PAUSED_LONG'],
+    ['QUEUES_UNREACHABLE'],
+    ['SOMETHING_NEW'],
+  ])('says nothing more of %s without its counts', kind => {
+    expect(alertDetailOf(alertOf(kind))).toBeNull();
+  });
+
+  it('says nothing more of a paused worker missing either count', () => {
+    expect(
+      alertDetailOf(alertOf('WORKER_PAUSED', { pausedWorkers: 1 })),
+    ).toBeNull();
+    expect(
+      alertDetailOf(alertOf('WORKER_PAUSED', { pausedMinutes: 12 })),
+    ).toBeNull();
+  });
+});
+
 describe('ScanDiagnosticsComponent', () => {
   let fixture: ComponentFixture<ScanDiagnosticsComponent>;
   let read: jest.Mock;
   let rejections: jest.Mock;
   let asset: jest.Mock;
+  let failedJobs: { list: jest.Mock };
 
   /** The page, as a reader sees it. */
   const page = (): HTMLElement => fixture.nativeElement as HTMLElement;
@@ -163,6 +388,7 @@ describe('ScanDiagnosticsComponent', () => {
     read = jest.fn().mockReturnValue(answer);
     rejections = jest.fn().mockReturnValue(refused);
     asset = jest.fn().mockReturnValue(of(REFUSED));
+    failedJobs = { list: jest.fn(() => new Subject()) };
 
     await TestBed.configureTestingModule({
       imports: [ScanDiagnosticsComponent],
@@ -186,6 +412,10 @@ describe('ScanDiagnosticsComponent', () => {
           provide: RescanAdminService,
           useValue: { overview: () => new Subject() },
         },
+        // The failed jobs panel's own spec covers what it shows; here only
+        // that Refresh reads it again (FC-042).
+        { provide: FailedJobsAdminService, useValue: failedJobs },
+        { provide: AuthService, useValue: { getUserId: () => 'admin-1' } },
       ],
     }).compileComponents();
 
@@ -297,6 +527,229 @@ describe('ScanDiagnosticsComponent', () => {
       fixture.detectChanges();
 
       expect(read).toHaveBeenCalledTimes(2);
+      expect(failedJobs.list).toHaveBeenCalledTimes(2);
+    });
+
+    it('says nothing needs a site admin while no alert is open (FC-042)', () => {
+      expect(page().textContent).toContain('Nothing needs a site admin.');
+    });
+
+    it('shows each live worker with its state and heartbeat (FC-042)', () => {
+      expect(textsOf('.scan-diagnostics__worker-state')).toEqual(['Running']);
+      expect(textsOf('.scan-diagnostics__workers dd')).toEqual([
+        'worker-a',
+        '27501',
+        '3.4 hours',
+        '2',
+        '12 seconds ago',
+      ]);
+    });
+
+    it('says publication is running, and where it is switched (FC-042)', () => {
+      expect(page().textContent).toContain('Publication is running.');
+      expect(
+        page()
+          .querySelector('a[href="/admin"]')
+          ?.textContent?.replace(/\s+/g, ' ')
+          .trim(),
+      ).toBe('Pause or resume publication on the Admin page');
+    });
+  });
+
+  // FC-042: what needs a site admin, the worker processes and the pause.
+  describe('operations', () => {
+    const text = (): string => page().textContent?.replace(/\s+/g, ' ') ?? '';
+
+    it('lists the open alerts in words, with when each opened', async () => {
+      await render(
+        of({
+          ...DIAGNOSTICS,
+          alerts: [
+            alertOf('FAILED_JOBS', { failed: 2 }),
+            alertOf('WORKER_PAUSED'),
+            alertOf('SOMETHING_NEW'),
+          ],
+        } satisfies ScanDiagnostics),
+      );
+
+      const alerts = textsOf('.scan-diagnostics__alerts li');
+
+      expect(alerts).toHaveLength(3);
+      expect(alerts[0]).toContain(OPERATIONS_ALERT_TITLES['FAILED_JOBS']);
+      expect(alerts[0]).toContain('2 failed jobs, listed under Failed jobs.');
+      expect(alerts[0]).toContain('Opened Sep 26, 2026, 11:00:00 AM');
+      expect(alerts[0]).toContain('last seen Sep 26, 2026, 11:59:00 AM');
+      expect(alerts[1]).toContain('The scan worker is paused');
+      expect(
+        page().querySelectorAll('.scan-diagnostics__alert-detail'),
+      ).toHaveLength(1);
+      expect(alerts[2]).toContain('Something new');
+    });
+
+    it('says when the heartbeat cannot be read', async () => {
+      await render(of({ ...DIAGNOSTICS, workers: null }));
+
+      expect(text()).toContain('The worker’s heartbeat could not be read.');
+    });
+
+    it('says no worker is running when none beat in the last day', async () => {
+      await render(of({ ...DIAGNOSTICS, workers: [] }));
+
+      expect(text()).toContain(
+        'No worker is running: none has checked in during the last day.',
+      );
+    });
+
+    it('says how long since any worker checked in when none is live', async () => {
+      await render(
+        of({
+          ...DIAGNOSTICS,
+          workers: [workerOf({ live: false, secondsSinceBeat: 420 })],
+        }),
+      );
+
+      expect(text()).toContain('No worker has checked in for 7 minutes.');
+      expect(page().querySelector('.scan-diagnostics__workers')).toBeNull();
+
+      TestBed.resetTestingModule();
+      await render(
+        of({
+          ...DIAGNOSTICS,
+          workers: [workerOf({ live: false, secondsSinceBeat: 60 })],
+        }),
+      );
+      expect(text()).toContain('No worker has checked in for 1 minute.');
+    });
+
+    it('shows a paused worker, since when, and says what is not shown', async () => {
+      await render(
+        of({
+          ...DIAGNOSTICS,
+          workers: [
+            workerOf({
+              state: 'PAUSED',
+              pauseReason: 'SIGNATURES_TOO_OLD',
+              definitionsVersion: null,
+              signatureAgeHours: null,
+              pausedSince: '2026-09-26T11:40:00.000Z',
+              pausedMinutes: 20,
+            }),
+            workerOf({ workerId: 'worker-b', live: false }),
+          ],
+        }),
+      );
+
+      expect(textsOf('.scan-diagnostics__worker-state')).toEqual([
+        'Paused — signatures too old',
+      ]);
+      expect(textsOf('.scan-diagnostics__workers dd')).toEqual(
+        expect.arrayContaining([
+          'Not reported',
+          'Unknown',
+          'Sep 26, 2026, 11:40:00 AM',
+        ]),
+      );
+      expect(text()).toContain(
+        'Not shown: 1 earlier process that stopped checking in',
+      );
+
+      TestBed.resetTestingModule();
+      await render(
+        of({
+          ...DIAGNOSTICS,
+          workers: [
+            workerOf(),
+            workerOf({ workerId: 'worker-b', live: false }),
+            workerOf({ workerId: 'worker-c', live: false }),
+          ],
+        }),
+      );
+      expect(text()).toContain('Not shown: 2 earlier processes that stopped');
+    });
+
+    it('says publication is paused, since when and by this site admin', async () => {
+      await render(
+        of({
+          ...DIAGNOSTICS,
+          publication: {
+            paused: true,
+            pausedAt: '2026-09-26T10:30:00.000Z',
+            pausedByUserId: 'admin-1',
+            pausedByUsername: 'Quark',
+            queuePaused: true,
+            held: 4,
+          },
+        }),
+      );
+
+      expect(text()).toContain('Publication is paused.');
+      expect(textsOf('dd')).toEqual(
+        expect.arrayContaining(['Sep 26, 2026, 10:30:00 AM', 'You', '4']),
+      );
+    });
+
+    it('names another site admin, and says what it does not know while the queues are down', async () => {
+      await render(
+        of({
+          ...DIAGNOSTICS,
+          publication: {
+            paused: true,
+            pausedAt: null,
+            pausedByUserId: 'admin-2',
+            pausedByUsername: 'Rom',
+            queuePaused: null,
+            held: null,
+          },
+        }),
+      );
+
+      expect(textsOf('dd')).toEqual(expect.arrayContaining(['Unknown', 'Rom']));
+      expect(text()).not.toContain('Waiting to be published');
+      expect(text()).toContain(
+        'The job queues can’t be reached just now; they will be paused as ' +
+          'soon as they answer, and nothing is published meanwhile.',
+      );
+
+      TestBed.resetTestingModule();
+      await render(
+        of({
+          ...DIAGNOSTICS,
+          publication: {
+            paused: true,
+            pausedAt: null,
+            pausedByUserId: 'admin-2',
+            pausedByUsername: null,
+            queuePaused: true,
+            held: 0,
+          },
+        }),
+      );
+      expect(textsOf('dd')).toEqual(
+        expect.arrayContaining(['Unknown', 'An account since closed']),
+      );
+      expect(text()).not.toContain('they will be paused');
+    });
+
+    it('says nothing is published while the queues are down and it runs', async () => {
+      await render(
+        of({
+          ...DIAGNOSTICS,
+          publication: { ...DIAGNOSTICS.publication, queuePaused: null },
+        }),
+      );
+
+      expect(text()).toContain(
+        'Publication is running. The job queues can’t be reached just now, ' +
+          'so nothing is published until they answer.',
+      );
+    });
+
+    it('reads the diagnostics alone on Try again', async () => {
+      await render(throwError(() => new Error('down')));
+
+      fixture.componentInstance.load();
+
+      expect(failedJobs.list).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -113,6 +113,9 @@ export const API_URLS = {
   // Private image delivery (FC-040).
   IMAGE_ESTATE_ADMIN: apiUrl + '/admin/image-estate',
   RESCAN_CAMPAIGNS_ADMIN: apiUrl + '/admin/rescan-campaigns',
+  // Failed background jobs, and the publication pause (FC-042).
+  FILE_SCANNING_ADMIN_FAILED_JOBS: apiUrl + '/admin/file-scanning/failed-jobs',
+  FILE_PUBLICATION_ADMIN: apiUrl + '/admin/file-publication',
 
   // Access control (what the signed-in user is permitted to do, and the admin
   // side that grants or withholds it per user)

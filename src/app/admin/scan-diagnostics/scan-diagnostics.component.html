@@ -37,10 +37,188 @@
         <button
           type="button"
           class="lcars-btn lcars-btn-auto sunflower"
-          (click)="load()">
+          (click)="refresh()">
           Refresh
         </button>
       </div>
+
+      <section
+        class="admin-section"
+        aria-labelledby="scan-alerts-heading">
+        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+          <span id="scan-alerts-heading">Alerts</span>
+        </div>
+
+        @if (diagnostics.alerts.length === 0) {
+          <p>Nothing needs a site admin.</p>
+        } @else {
+          <p class="scan-diagnostics__note">
+            Every site admin was told of each in the site when it opened, and
+            will be told again when it clears.
+          </p>
+          <ul
+            class="scan-diagnostics__alerts"
+            aria-label="Open alerts, oldest first">
+            @for (alert of diagnostics.alerts; track alert.kind) {
+              <li>
+                <strong>{{ alertTitleOf(alert) }}</strong>
+                @if (alertDetailOf(alert); as detail) {
+                  <span class="scan-diagnostics__alert-detail">{{
+                    detail
+                  }}</span>
+                }
+                <span class="scan-diagnostics__alert-when"
+                  >Opened {{ alert.openedAt | appDate: 'medium' }} · last seen
+                  {{ alert.lastSeenAt | appDate: 'medium' }}</span
+                >
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <section
+        class="admin-section"
+        aria-labelledby="scan-worker-heading">
+        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+          <span id="scan-worker-heading">Worker</span>
+        </div>
+
+        @if (diagnostics.workers === null) {
+          <p class="scan-diagnostics__unavailable">
+            The worker’s heartbeat could not be read. Its migrations may not
+            have run here yet.
+          </p>
+        } @else {
+          @let workers = summariseWorkers(diagnostics.workers);
+
+          @if (workers.live.length > 0) {
+            <ul
+              class="scan-diagnostics__workers"
+              aria-label="Worker processes, latest heartbeat first">
+              @for (worker of workers.live; track worker.workerId) {
+                <li>
+                  <h3 class="scan-diagnostics__worker-state">
+                    {{ workerStateOf(worker) }}
+                  </h3>
+                  <dl class="scan-diagnostics__details">
+                    <div>
+                      <dt>Process</dt>
+                      <dd>
+                        <code class="scan-diagnostics__id">{{
+                          worker.workerId
+                        }}</code>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Signature version</dt>
+                      <dd>{{ worker.definitionsVersion ?? 'Not reported' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Signature age</dt>
+                      <dd>
+                        @if (worker.signatureAgeHours !== null) {
+                          {{ worker.signatureAgeHours }} hours
+                        } @else {
+                          Unknown
+                        }
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Jobs in hand</dt>
+                      <dd>{{ worker.jobsInHand }}</dd>
+                    </div>
+                    <div>
+                      <dt>Last heartbeat</dt>
+                      <dd>{{ formatSecondsAgo(worker.secondsSinceBeat) }}</dd>
+                    </div>
+                    @if (worker.pausedSince; as pausedSince) {
+                      <div>
+                        <dt>Paused since</dt>
+                        <dd>{{ pausedSince | appDate: 'medium' }}</dd>
+                      </div>
+                    }
+                  </dl>
+                </li>
+              }
+            </ul>
+            @if (workers.gone > 0) {
+              <p class="scan-diagnostics__note">
+                Not shown: {{ workers.gone }} earlier
+                {{ workers.gone === 1 ? 'process' : 'processes' }} that stopped
+                checking in, as each restart leaves one behind for a day.
+              </p>
+            }
+          } @else if (workers.quietMinutes !== null) {
+            <p class="scan-diagnostics__unavailable">
+              No worker has checked in for {{ workers.quietMinutes }}
+              {{ workers.quietMinutes === 1 ? 'minute' : 'minutes' }}. Uploads
+              are not being scanned.
+            </p>
+          } @else {
+            <p class="scan-diagnostics__unavailable">
+              No worker is running: none has checked in during the last day.
+              Uploads are not being scanned.
+            </p>
+          }
+        }
+      </section>
+
+      <section
+        class="admin-section"
+        aria-labelledby="scan-publication-heading">
+        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
+          <span id="scan-publication-heading">Publication</span>
+        </div>
+
+        @let publication = diagnostics.publication;
+        @if (publication.paused) {
+          <p>
+            <strong>Publication is paused.</strong> Uploads are still scanned,
+            but nothing is published until it resumes.
+            @if (publication.queuePaused === null) {
+              The job queues can’t be reached just now; they will be paused as
+              soon as they answer, and nothing is published meanwhile.
+            }
+          </p>
+          <dl class="scan-diagnostics__details">
+            <div>
+              <dt>Since</dt>
+              <dd>
+                {{
+                  publication.pausedAt
+                    ? (publication.pausedAt | appDate: 'medium')
+                    : 'Unknown'
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>By</dt>
+              <dd>{{ pausedBy(publication) }}</dd>
+            </div>
+            @if (publication.held !== null) {
+              <div>
+                <dt>Waiting to be published</dt>
+                <dd>{{ publication.held }}</dd>
+              </div>
+            }
+          </dl>
+        } @else {
+          <p>
+            <strong>Publication is running.</strong>
+            @if (publication.queuePaused === null) {
+              The job queues can’t be reached just now, so nothing is
+              published until they answer.
+            } @else {
+              Uploads are published as soon as the scanner clears them.
+            }
+          </p>
+        }
+        <p>
+          <a [routerLink]="adminLink">Pause or resume publication on the Admin
+            page</a>, under Operations.
+        </p>
+      </section>
 
       <section
         class="admin-section"
@@ -256,6 +434,8 @@
         </dl>
       </section>
     }
+
+    <app-failed-jobs-panel></app-failed-jobs-panel>
 
     <section
       class="admin-section"

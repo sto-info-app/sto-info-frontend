@@ -1,0 +1,6 @@
+// Failed jobs (FC-042): the choice of queue sits over the list, no wider
+// than it needs to be.
+.failed-jobs__queue {
+  max-width: 24rem;
+  margin: 0 0 1rem;
+}

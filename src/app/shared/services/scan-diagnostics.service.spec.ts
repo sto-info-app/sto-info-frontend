@@ -17,6 +17,16 @@ const DIAGNOSTICS: ScanDiagnostics = {
   engine: null,
   queue: null,
   awaiting: { quarantined: 0, scanning: 0, retryPending: 0 },
+  workers: null,
+  alerts: [],
+  publication: {
+    paused: false,
+    pausedAt: null,
+    pausedByUserId: null,
+    pausedByUsername: null,
+    queuePaused: null,
+    held: null,
+  },
 };
 
 describe('ScanDiagnosticsService', () => {

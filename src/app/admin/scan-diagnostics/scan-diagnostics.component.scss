@@ -145,3 +145,45 @@ $scan-diagnostics-colour: vars.$lcars-sunflower;
     margin: 0;
   }
 }
+
+// The open alerts and the worker processes (FC-042): one bordered item each,
+// as the rescan campaigns are, so each reads as a thing of its own. An alert
+// takes red, because somebody is waiting on it.
+.scan-diagnostics__alerts,
+.scan-diagnostics__workers {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0 1.5rem;
+  padding: 0;
+  list-style: none;
+
+  > li {
+    padding: 0.75rem 1rem;
+    border-left: 0.5rem solid $scan-diagnostics-colour;
+    border-radius: 0.5rem;
+  }
+}
+
+.scan-diagnostics__alerts > li {
+  display: grid;
+  gap: 0.25rem;
+  border-left-color: vars.$lcars-red;
+}
+
+.scan-diagnostics__alert-when {
+  color: vars.$lcars-grey-light;
+}
+
+.scan-diagnostics__worker-state {
+  margin: 0;
+  font-family: vars.$font-antonio;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $scan-diagnostics-colour;
+}
+
+// IDs are long and unbroken; they wrap rather than widen the page.
+.scan-diagnostics__id {
+  overflow-wrap: anywhere;
+}
