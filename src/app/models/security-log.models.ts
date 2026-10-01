@@ -49,7 +49,22 @@ export const SITE_ADMIN_ACTION_LABELS: Readonly<Record<string, string>> = {
   CHAT_MESSAGE_REMOVED: 'Removed a chat message',
   IMAGE_TAKEN_DOWN: 'Took down a picture refused for policy',
   IMAGE_KEPT: 'Kept a picture refused for policy',
+  LEDGERS_RECONCILED: 'Restore check brought records back',
+  SCAN_DIAGNOSTICS_VIEWED: 'Read Scan Diagnostics',
+  SCAN_JOB_RETRIED: 'Retried failed jobs',
+  SCAN_JOB_DISCARDED: 'Discarded failed jobs',
+  PUBLICATION_PAUSED: 'Paused publication',
+  PUBLICATION_RESUMED: 'Resumed publication',
 };
+
+/**
+ * Site admin actions the system records itself, with no administrator
+ * behind them: the restore check at start (FC-042). Their "Who" reads as the
+ * system rather than as an account since closed.
+ */
+export const SYSTEM_SITE_ADMIN_ACTIONS: ReadonlySet<string> = new Set([
+  'LEDGERS_RECONCILED',
+]);
 
 /** Somebody an entry names. */
 export interface SecurityLogPerson {

@@ -158,6 +158,98 @@ describe('SecurityLogComponent (FC-039)', () => {
     expect(rows()[7]).toContain('A later step');
   });
 
+  it('names the system for the restore check, and a closed account for an admin action (FC-042)', async () => {
+    log.list.mockReturnValue(
+      of({
+        items: [
+          entryOf({
+            action: 'LEDGERS_RECONCILED',
+            actor: null,
+            target: null,
+            reason: 'The restore check at start brought records back.',
+          }),
+          entryOf({ id: 'entry-2', actor: null }),
+        ],
+        total: 2,
+        page: 1,
+        pageSize: 50,
+      }),
+    );
+    await show();
+
+    expect(rows()[0]).toContain('The system');
+    expect(rows()[0]).toContain('Restore check brought records back');
+    expect(rows()[0]).not.toContain('An account since closed');
+    expect(rows()[1]).toContain('An account since closed');
+    expect(rows()[1]).toContain('Disabled an account');
+  });
+
+  it.each([
+    ['SCAN_DIAGNOSTICS_VIEWED', 'Read Scan Diagnostics'],
+    ['SCAN_JOB_RETRIED', 'Retried failed jobs'],
+    ['SCAN_JOB_DISCARDED', 'Discarded failed jobs'],
+    ['PUBLICATION_PAUSED', 'Paused publication'],
+    ['PUBLICATION_RESUMED', 'Resumed publication'],
+  ])('names %s as “%s” (FC-042)', async (action, label) => {
+    log.list.mockReturnValue(
+      of({
+        items: [entryOf({ action, target: null })],
+        total: 1,
+        page: 1,
+        pageSize: 50,
+      }),
+    );
+    await show();
+
+    expect(rows()[0]).toContain(label);
+    expect(rows()[0]).toContain('Quark');
+  });
+
+  it.each([
+    ['SCAN_DIAGNOSTICS_VIEWED', 'DIAGNOSTICS', 'ALL', 'Scan Diagnostics', null],
+    [
+      'SCAN_DIAGNOSTICS_VIEWED',
+      'ASSET',
+      'asset-1',
+      'Scan Diagnostics: an asset',
+      'asset-1',
+    ],
+    ['SCAN_DIAGNOSTICS_VIEWED', 'SOMETHING_NEW', 'ALL', 'Something new', null],
+    ['SCAN_JOB_RETRIED', 'file-scan', '42', 'Scan requests', '42'],
+    [
+      'SCAN_JOB_DISCARDED',
+      'file-asset-publication',
+      'ALL',
+      'Failed jobs in Publishing scanned uploads',
+      null,
+    ],
+    ['SCAN_JOB_RETRIED', 'ALL', 'ALL', 'Failed jobs in every queue', null],
+    ['SCAN_JOB_RETRIED', 'new-queue', '7', 'new-queue', '7'],
+    ['USER_DISABLED', 'SOME_THING', 'ALL', 'Some thing', 'ALL'],
+  ])(
+    'names %s’s subject %s %s in words (FC-042)',
+    async (action, subjectKind, subjectId, words, code) => {
+      log.list.mockReturnValue(
+        of({
+          items: [entryOf({ action, target: null, subjectKind, subjectId })],
+          total: 1,
+          page: 1,
+          pageSize: 50,
+        }),
+      );
+      await show();
+
+      const subject = (fixture.nativeElement as HTMLElement).querySelector(
+        'td[data-label="To whom or what"] .fleet-report-note',
+      );
+
+      expect(subject?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+        code === null ? words : `${words} ${code}`,
+      );
+      expect(subject?.querySelector('code')?.textContent ?? null).toBe(code);
+    },
+  );
+
   it('shows one source only, from the first page', async () => {
     await show();
 

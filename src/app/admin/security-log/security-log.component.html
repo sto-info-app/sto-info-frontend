@@ -88,7 +88,10 @@
                 }
                 @if (subjectOf(entry); as subject) {
                   <span class="fleet-report-note"
-                    >{{ subject }} <code>{{ entry.subjectId }}</code></span
+                    >{{ subject }}
+                    @if (subjectIdOf(entry); as subjectId) {
+                      <code>{{ subjectId }}</code>
+                    }</span
                   >
                 }
                 @for (line of detailOf(entry); track line) {

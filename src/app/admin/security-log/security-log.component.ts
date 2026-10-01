@@ -11,12 +11,14 @@ import { RouterLink } from '@angular/router';
 
 import { take } from 'rxjs';
 
+import { FAILED_JOB_QUEUE_LABELS } from 'src/app/models/failed-jobs.models';
 import {
   SECURITY_LOG_SOURCE_LABELS,
   SecurityLogEntry,
   SecurityLogPerson,
   SecurityLogSource,
   SITE_ADMIN_ACTION_LABELS,
+  SYSTEM_SITE_ADMIN_ACTIONS,
 } from 'src/app/models/security-log.models';
 import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -33,6 +35,20 @@ const OTHER_ACTION_LABELS: Readonly<Record<string, string>> = {
   ERASED: 'Erased roster data',
   REPLAYED: 'Replayed an erasure after a restore',
 };
+
+/** What each read of Scan Diagnostics is logged against (FC-042). */
+const DIAGNOSTICS_SUBJECT_LABELS: Readonly<Record<string, string>> = {
+  DIAGNOSTICS: 'Scan Diagnostics',
+  REJECTIONS: 'Scan Diagnostics: refused uploads',
+  ASSET: 'Scan Diagnostics: an asset',
+  FAILED_JOBS: 'Scan Diagnostics: failed jobs',
+};
+
+/** The site admin actions on failed jobs, whose subject is a queue (FC-042). */
+const FAILED_JOB_ACTIONS: ReadonlySet<string> = new Set([
+  'SCAN_JOB_RETRIED',
+  'SCAN_JOB_DISCARDED',
+]);
 
 /**
  * Says a code in words: `ROLE_WITHDRAWN` as "Role withdrawn".
@@ -141,12 +157,16 @@ export class SecurityLogComponent {
    * @returns Their username, or what stands in for one.
    */
   protected actorOf(entry: SecurityLogEntry): string {
-    return entry.actor === null
-      ? entry.source === SecurityLogSource.SITE_ADMIN ||
-        entry.source === SecurityLogSource.FLEET
-        ? 'An account since closed'
-        : 'The system'
-      : this.nameOf(entry.actor);
+    if (entry.actor !== null) {
+      return this.nameOf(entry.actor);
+    }
+
+    const byAnAdmin =
+      (entry.source === SecurityLogSource.SITE_ADMIN &&
+        !SYSTEM_SITE_ADMIN_ACTIONS.has(entry.action)) ||
+      entry.source === SecurityLogSource.FLEET;
+
+    return byAnAdmin ? 'An account since closed' : 'The system';
   }
 
   /**
@@ -166,7 +186,42 @@ export class SecurityLogComponent {
    * @returns Its kind, in words, or null for none.
    */
   protected subjectOf(entry: SecurityLogEntry): string | null {
-    return entry.subjectKind === null ? null : inWords(entry.subjectKind);
+    const kind = entry.subjectKind;
+
+    if (kind === null) {
+      return null;
+    }
+
+    if (entry.action === 'SCAN_DIAGNOSTICS_VIEWED') {
+      return DIAGNOSTICS_SUBJECT_LABELS[kind] ?? inWords(kind);
+    }
+
+    if (FAILED_JOB_ACTIONS.has(entry.action)) {
+      const queue =
+        kind === 'ALL'
+          ? 'every queue'
+          : (FAILED_JOB_QUEUE_LABELS[kind] ?? kind);
+
+      return entry.subjectId === 'ALL' ? `Failed jobs in ${queue}` : queue;
+    }
+
+    return inWords(kind);
+  }
+
+  /**
+   * The ID of what it acted on, when there is one to show. The Scan
+   * Diagnostics reads and the bulk actions on failed jobs name `ALL`, which
+   * their subject already says in words (FC-042).
+   *
+   * @param entry - The entry.
+   * @returns The ID, or null for none.
+   */
+  protected subjectIdOf(entry: SecurityLogEntry): string | null {
+    const operations =
+      entry.action === 'SCAN_DIAGNOSTICS_VIEWED' ||
+      FAILED_JOB_ACTIONS.has(entry.action);
+
+    return operations && entry.subjectId === 'ALL' ? null : entry.subjectId;
   }
 
   /**
