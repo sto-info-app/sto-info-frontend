@@ -40,8 +40,9 @@ export const ROSTER_ERASURE_REASON_LIMITS = { min: 10, max: 500 } as const;
  * future import; it cannot be undone. The list never names who was erased,
  * only the pseudonym that replaced them.
  *
- * After a database restore, "Replay the erasure ledger" makes again every
- * erasure the restore lost.
+ * After a database restore, the server makes again every erasure the restore
+ * lost by itself when it starts, before it serves anything (FC-042); those
+ * show as replayed from the ledger.
  */
 @Component({
   selector: 'app-roster-erasure-list',
@@ -189,46 +190,6 @@ export class RosterErasureListComponent {
                 ? ` ${done.filesPending} file(s) could not be deleted now; ` +
                   'tonight’s retention run deletes them.'
                 : ''),
-          );
-          this.load();
-        },
-        error: (error: unknown) => this.refused(error),
-      });
-  }
-
-  /** Makes again every erasure a restore lost, once confirmed. */
-  protected onReplay(): void {
-    this._dialog
-      .open(ConfirmDialogComponent, {
-        width: '75%',
-        data: {
-          title: 'Replay the erasure ledger?',
-          message:
-            'Run this after restoring the database from a backup. Every ' +
-            'erasure made since that backup is made again from the ledger ' +
-            'kept outside the database.',
-          confirmText: 'Replay',
-          cancelText: 'Cancel',
-        },
-      })
-      .afterClosed()
-      .pipe(
-        take(1),
-        filter(Boolean),
-        switchMap(() => {
-          this.busy.set(true);
-          this.refusal.set(null);
-
-          return this._erasures.replayLedger();
-        }),
-        takeUntilDestroyed(this._destroyRef),
-      )
-      .subscribe({
-        next: done => {
-          this.busy.set(false);
-          this.notice.set(
-            `The ledger holds ${done.markers} erasure(s); ` +
-              `${done.replayed} the database had lost were made again.`,
           );
           this.load();
         },

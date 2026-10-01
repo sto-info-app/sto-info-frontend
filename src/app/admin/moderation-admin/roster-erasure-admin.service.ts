@@ -49,12 +49,6 @@ export interface RosterErasureResult extends RosterErasure {
   readonly filesPending: number;
 }
 
-/** What replaying the ledger came to. */
-export interface RosterErasureLedgerReplay {
-  readonly markers: number;
-  readonly replayed: number;
-}
-
 /**
  * The site admins' verified erasure of roster data (FC-038). The server
  * refuses all of it without the ADMIN role, whatever the client believes.
@@ -104,21 +98,6 @@ export class RosterErasureAdminService {
       this._http.post<RosterErasureResult>(
         API_URLS.ROSTER_ERASURES_ADMIN,
         request,
-        options,
-      ),
-    );
-  }
-
-  /**
-   * Makes again every erasure a database restore lost.
-   *
-   * @returns What it came to.
-   */
-  replayLedger(): Observable<RosterErasureLedgerReplay> {
-    return this.authenticated(options =>
-      this._http.post<RosterErasureLedgerReplay>(
-        `${API_URLS.ROSTER_ERASURES_ADMIN}/replay-ledger`,
-        {},
         options,
       ),
     );

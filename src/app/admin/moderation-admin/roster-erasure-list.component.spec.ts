@@ -46,7 +46,6 @@ describe('RosterErasureListComponent (FC-038)', () => {
     list: jest.Mock;
     preview: jest.Mock;
     erase: jest.Mock;
-    replayLedger: jest.Mock;
   };
   let dialogResult: unknown;
   let dialog: { open: jest.Mock };
@@ -58,7 +57,6 @@ describe('RosterErasureListComponent (FC-038)', () => {
       erase: jest.fn(() =>
         of({ ...ERASURE, filesDeleted: 2, filesPending: 0 }),
       ),
-      replayLedger: jest.fn(() => of({ markers: 4, replayed: 1 })),
     };
     dialogResult = true;
     dialog = {
@@ -131,6 +129,8 @@ describe('RosterErasureListComponent (FC-038)', () => {
     expect(text()).toContain('Replayed from the ledger');
     expect(text()).toContain('An account with no username');
     expect(text()).toContain('3 row(s), 1 alias(es), 2 Fleet(s)');
+    // The server replays the ledger by itself at start (FC-042).
+    expect(text()).not.toContain('Replay the erasure ledger');
   });
 
   it('says when nothing has been erased, or the list cannot be read', async () => {
@@ -258,42 +258,5 @@ describe('RosterErasureListComponent (FC-038)', () => {
     button('Find their rosters').click();
     await fixture.whenStable();
     expect(text()).toContain('That could not be done. Please try again.');
-  });
-
-  it('replays the erasure ledger once confirmed', async () => {
-    await show();
-    button('Replay the erasure ledger…').click();
-    await fixture.whenStable();
-
-    expect(erasures.replayLedger).toHaveBeenCalled();
-    expect(text()).toContain(
-      'The ledger holds 4 erasure(s); 1 the database had lost were made again.',
-    );
-
-    dialogResult = undefined;
-    button('Replay the erasure ledger…').click();
-    await fixture.whenStable();
-    expect(erasures.replayLedger).toHaveBeenCalledTimes(1);
-  });
-
-  it('gives the reason a replay failed', async () => {
-    erasures.replayLedger.mockReturnValue(
-      throwError(
-        () =>
-          new HttpErrorResponse({
-            status: 503,
-            error: {
-              message: 'Roster erasure is not configured on this server.',
-            },
-          }),
-      ),
-    );
-    await show();
-    button('Replay the erasure ledger…').click();
-    await fixture.whenStable();
-
-    expect(text()).toContain(
-      'Roster erasure is not configured on this server.',
-    );
   });
 });

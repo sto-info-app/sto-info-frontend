@@ -54,7 +54,7 @@ describe('RosterErasureAdminService (FC-038)', () => {
     return request;
   };
 
-  it('lists, previews, erases and replays the ledger', () => {
+  it('lists, previews and erases', () => {
     const target = { characterName: 'Kira', accountHandle: '@nerys' };
 
     service.list().subscribe();
@@ -68,9 +68,6 @@ describe('RosterErasureAdminService (FC-038)', () => {
       ...target,
       reason: 'Verified in game',
     });
-
-    service.replayLedger().subscribe();
-    expect(expectOne('POST', `${URL}/replay-ledger`).request.body).toEqual({});
   });
 
   it('fails without a token, sending nothing', () => {
