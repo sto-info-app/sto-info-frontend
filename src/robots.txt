@@ -4,6 +4,8 @@ Allow: /
 # Private / authenticated areas — keep these out of search results
 Disallow: /dashboard
 Disallow: /admin
+Disallow: /chat
+Disallow: /notifications
 Disallow: /login
 Disallow: /register
 Disallow: /verify-email
