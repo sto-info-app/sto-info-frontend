@@ -105,19 +105,19 @@
                 <div class="admin-record-body">
                   <dl class="admin-record-details">
                     <div class="admin-record-detail">
-                      <span class="label">Role</span>
-                      <span
+                      <dt class="label">Role</dt>
+                      <dd
                         class="value member-role"
                         [ngClass]="'role-' + roleModifier(member)"
-                        >{{ roleLabel(member) }}</span
+                        >{{ roleLabel(member) }}</dd
                       >
                     </div>
                     <div class="admin-record-detail">
-                      <span class="label">Email</span>
-                      <span
+                      <dt class="label">Email</dt>
+                      <dd
                         class="value member-email"
                         [class.privacy-blur]="privacyMode.isEnabled()"
-                        >{{ member.email }}</span
+                        >{{ member.email }}</dd
                       >
                     </div>
                   </dl>
@@ -166,36 +166,36 @@
         <div class="admin-panel selected-member">
           <dl class="admin-record-details">
             <div class="admin-record-detail">
-              <span class="label">Member</span>
-              <span
+              <dt class="label">Member</dt>
+              <dd
                 class="value"
                 [class.privacy-blur]="
                   isNameAnEmail(selectedMember) && privacyMode.isEnabled()
                 "
-                >{{ displayName(selectedMember) }}</span
+                >{{ displayName(selectedMember) }}</dd
               >
             </div>
             <div class="admin-record-detail">
-              <span class="label">Email</span>
-              <span
+              <dt class="label">Email</dt>
+              <dd
                 class="value member-email"
                 [class.privacy-blur]="privacyMode.isEnabled()"
-                >{{ selectedMember.email }}</span
+                >{{ selectedMember.email }}</dd
               >
             </div>
             <div class="admin-record-detail">
-              <span class="label">Role</span>
-              <span
+              <dt class="label">Role</dt>
+              <dd
                 class="value member-role"
                 [ngClass]="'role-' + roleModifier(selectedMember)"
-                >{{ roleLabel(selectedMember) }}</span
+                >{{ roleLabel(selectedMember) }}</dd
               >
             </div>
             <div class="admin-record-detail">
-              <span class="label">Permissions held</span>
-              <span class="value">{{
+              <dt class="label">Permissions held</dt>
+              <dd class="value">{{
                 summary ? summary.effectivePermissions.length : 0
-              }}</span>
+              }}</dd>
             </div>
           </dl>
         </div>

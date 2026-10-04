@@ -336,6 +336,13 @@
   gap: 0.2rem;
   min-width: 0;
 
+  // A term and its value in a description list (FC-044): without these the
+  // browser indents the value and spaces the pair apart.
+  dt,
+  dd {
+    margin: 0;
+  }
+
   .label {
     font-size: 0.72rem;
     text-transform: uppercase;

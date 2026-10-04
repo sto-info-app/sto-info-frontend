@@ -85,40 +85,40 @@
                 <p class="admin-record-summary">{{ hold.reason }}</p>
                 <dl class="admin-record-details">
                   <div class="admin-record-detail">
-                    <span class="label">Owner</span>
-                    <span class="value">{{ nameOf(hold.owner) }}</span>
+                    <dt class="label">Owner</dt>
+                    <dd class="value">{{ nameOf(hold.owner) }}</dd>
                   </div>
                   <div class="admin-record-detail">
-                    <span class="label">Placed</span>
-                    <span class="value">{{
+                    <dt class="label">Placed</dt>
+                    <dd class="value">{{
                       hold.createdAt | appDate: 'medium'
-                    }}</span>
+                    }}</dd>
                   </div>
                   <div class="admin-record-detail">
-                    <span class="label">Review</span>
-                    <span class="value">{{
+                    <dt class="label">Review</dt>
+                    <dd class="value">{{
                       hold.reviewAt | appDate: 'mediumDate'
-                    }}</span>
+                    }}</dd>
                   </div>
                   @if (hold.releasesAt) {
                     <div class="admin-record-detail">
-                      <span class="label">Released automatically</span>
-                      <span class="value"
+                      <dt class="label">Released automatically</dt>
+                      <dd class="value"
                         >{{ hold.releasesAt | appDate: 'mediumDate' }}, unless
-                        extended</span
+                        extended</dd
                       >
                     </div>
                   }
                   @if (hold.releasedAt) {
                     <div class="admin-record-detail">
-                      <span class="label">Released</span>
-                      <span class="value">
+                      <dt class="label">Released</dt>
+                      <dd class="value">
                         {{ hold.releasedAt | appDate: 'medium' }}
                         @if (hold.releasedBy) {
                           by {{ nameOf(hold.releasedBy) }}
                         }
                         — {{ hold.releaseReason }}
-                      </span>
+                      </dd>
                     </div>
                   }
                 </dl>

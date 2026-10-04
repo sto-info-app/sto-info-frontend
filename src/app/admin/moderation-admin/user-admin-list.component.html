@@ -120,49 +120,49 @@
                 <div class="moderation-record-main">
                   <dl class="admin-record-details">
                     <div class="admin-record-detail">
-                      <span class="label">Role</span>
-                      <span
+                      <dt class="label">Role</dt>
+                      <dd
                         class="value member-role"
                         [ngClass]="'role-' + roleModifier(user)"
-                        >{{ roleLabel(user) }}</span
+                        >{{ roleLabel(user) }}</dd
                       >
                     </div>
                     <div class="admin-record-detail">
-                      <span class="label">Email</span>
-                      <span
+                      <dt class="label">Email</dt>
+                      <dd
                         class="value member-email"
                         [class.privacy-blur]="privacyMode.isEnabled()"
-                        >{{ user.email }}</span
+                        >{{ user.email }}</dd
                       >
                     </div>
                     <div class="admin-record-detail">
-                      <span class="label">Registered</span>
-                      <span class="value">
+                      <dt class="label">Registered</dt>
+                      <dd class="value">
                         {{ user.createdAt | appDate: dateTimeFormat }}
-                      </span>
+                      </dd>
                     </div>
                     <div class="admin-record-detail">
-                      <span class="label">Last signed in</span>
-                      <span class="value">
+                      <dt class="label">Last signed in</dt>
+                      <dd class="value">
                         {{
                           user.lastLoginAt
                             ? (user.lastLoginAt | appDate: dateTimeFormat)
                             : 'Never'
                         }}
-                      </span>
+                      </dd>
                     </div>
                     @if (user.isAccountDisabled) {
                       <div class="admin-record-detail">
-                        <span class="label">Disabled</span>
-                        <span class="value">
+                        <dt class="label">Disabled</dt>
+                        <dd class="value">
                           {{ user.disabledAt | appDate: dateTimeFormat }}
-                        </span>
+                        </dd>
                       </div>
                       <div class="admin-record-detail">
-                        <span class="label">Reason</span>
-                        <span class="value">
+                        <dt class="label">Reason</dt>
+                        <dd class="value">
                           {{ user.disabledReason ?? 'None recorded' }}
-                        </span>
+                        </dd>
                       </div>
                     }
                   </dl>

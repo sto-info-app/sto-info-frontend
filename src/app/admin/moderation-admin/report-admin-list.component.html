@@ -130,30 +130,30 @@
 
                   <dl class="admin-record-details">
                     <div class="admin-record-detail">
-                      <span class="label">Reported by</span>
-                      <span class="value">{{ reporterName(report) }}</span>
+                      <dt class="label">Reported by</dt>
+                      <dd class="value">{{ reporterName(report) }}</dd>
                     </div>
                     <div class="admin-record-detail">
-                      <span class="label">Raised</span>
-                      <span class="value">
+                      <dt class="label">Raised</dt>
+                      <dd class="value">
                         {{ report.createdAt | appDate: 'medium' }}
-                      </span>
+                      </dd>
                     </div>
                     @if (report.reviewedBy) {
                       <div class="admin-record-detail">
-                        <span class="label">Last reviewed by</span>
-                        <span class="value">
+                        <dt class="label">Last reviewed by</dt>
+                        <dd class="value">
                           {{ report.reviewedBy }}
                           @if (report.reviewedAt) {
                             — {{ report.reviewedAt | appDate: 'medium' }}
                           }
-                        </span>
+                        </dd>
                       </div>
                     }
                     @if (report.moderatorNotes) {
                       <div class="admin-record-detail">
-                        <span class="label">Notes</span>
-                        <span class="value">{{ report.moderatorNotes }}</span>
+                        <dt class="label">Notes</dt>
+                        <dd class="value">{{ report.moderatorNotes }}</dd>
                       </div>
                     }
                   </dl>

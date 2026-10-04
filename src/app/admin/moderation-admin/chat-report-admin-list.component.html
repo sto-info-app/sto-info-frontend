@@ -110,18 +110,18 @@
 
                   <dl class="admin-record-details">
                     <div class="admin-record-detail">
-                      <span class="label">Where</span>
-                      <span class="value">{{ placeOf(report) }}</span>
+                      <dt class="label">Where</dt>
+                      <dd class="value">{{ placeOf(report) }}</dd>
                     </div>
                     <div class="admin-record-detail">
-                      <span class="label">Reported by</span>
-                      <span class="value">{{ nameOf(report.reporter) }}</span>
+                      <dt class="label">Reported by</dt>
+                      <dd class="value">{{ nameOf(report.reporter) }}</dd>
                     </div>
                     <div class="admin-record-detail">
-                      <span class="label">Raised</span>
-                      <span class="value">
+                      <dt class="label">Raised</dt>
+                      <dd class="value">
                         {{ report.createdAt | appDate: 'medium' }}
-                      </span>
+                      </dd>
                     </div>
                   </dl>
 
