@@ -912,7 +912,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
       {
         heading: 'How long chat is kept',
         paragraphs: [
-          'Members can read back four hours in any channel or conversation, and nothing older; the start of a chat says “Chat keeps the last four hours here.” That is a window on what is stored, not how long it is stored.',
+          'Members can read back four hours in any channel or conversation, and nothing older; the start of a chat says “You can read back the last four hours here.” Messages are kept longer than that, as below.',
           'Every message is deleted 45 days after it was sent. Deleting your own message takes its words off everybody’s screen at once; the message itself goes with the rest at 45 days.',
           'A channel’s Admins and Owner can export a transcript of it from any time in the last seven days, giving a purpose that is logged and printed at its head. Only the person who asked can download it, for 24 hours, and each download is logged. Then the file is deleted.',
         ],

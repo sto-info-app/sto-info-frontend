@@ -68,8 +68,8 @@
             (click)="loadOlder()">
             {{ isLoadingOlder() ? 'Loading…' : 'Load earlier' }}
           </button>
-        } @else {
-          <p class="chat-conversation__edge-note">{{ edgeNote }}</p>
+        } @else if (edgeNote(); as note) {
+          <p class="chat-conversation__edge-note">{{ note }}</p>
         }
       </div>
     }

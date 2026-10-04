@@ -12,7 +12,11 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import {
+  takeUntilDestroyed,
+  toObservable,
+  toSignal,
+} from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 
 import {
@@ -21,6 +25,7 @@ import {
   distinctUntilChanged,
   filter,
   from,
+  map,
   of,
   Subject,
   switchMap,
@@ -28,6 +33,7 @@ import {
 } from 'rxjs';
 
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import {
   ChatMessage,
   ChatPerson,
@@ -46,7 +52,7 @@ import { ChatReportDialogComponent } from '../chat-report-dialog/chat-report-dia
 import { ChatSocketService } from '../chat-socket.service';
 import {
   CHAT_COUNTER_FROM,
-  CHAT_EDGE_NOTE,
+  chatEdgeNote,
   CHAT_MESSAGE_MAX_LENGTH,
   chatAuthorName,
   chatPlaceKey,
@@ -150,7 +156,19 @@ export class ChatConversationComponent implements OnDestroy {
   /** The reader wants the list back, on a narrow screen. */
   readonly back = output<void>();
 
-  readonly edgeNote = CHAT_EDGE_NOTE;
+  /** How far back members may read, in the server's own figure. */
+  readonly edgeNote = toSignal(
+    inject(FleetConfigurationService)
+      .getConfiguration()
+      .pipe(
+        map(configuration =>
+          configuration === null
+            ? null
+            : chatEdgeNote(configuration.policy.chatMemberHistoryHours),
+        ),
+      ),
+    { initialValue: null },
+  );
   readonly maxLength = CHAT_MESSAGE_MAX_LENGTH;
 
   readonly messages = signal<ChatMessage[]>([]);

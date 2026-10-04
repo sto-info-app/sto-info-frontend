@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
-import { of, Subject, throwError } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 import {
@@ -14,6 +14,9 @@ import {
   ChatSocketStatus,
   ChatTranscript,
 } from 'src/app/models/fleet-chat.models';
+import { FleetConfiguration } from 'src/app/models/fleet.models';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
+import { FLEET_CONFIGURATION } from 'src/app/shared/services/fleet-configuration.testing';
 import * as saving from 'src/app/shared/utils/save-file.utils';
 
 import { ChatChannelDialogComponent } from '../chat-channel-dialog/chat-channel-dialog.component';
@@ -113,6 +116,7 @@ describe('ChatPageComponent', () => {
   let dialog: { open: jest.Mock };
   let harness: RouterTestingHarness;
   let router: Router;
+  let configuration: Observable<FleetConfiguration | null>;
 
   beforeEach(() => {
     chat = {
@@ -143,6 +147,7 @@ describe('ChatPageComponent', () => {
       send: jest.fn(),
     };
     dialogResults = [];
+    configuration = of(FLEET_CONFIGURATION);
     dialog = {
       open: jest.fn(() => ({ afterClosed: () => of(dialogResults.shift()) })),
     };
@@ -159,6 +164,10 @@ describe('ChatPageComponent', () => {
         {
           provide: UserSettingsService,
           useValue: { displayTimezone: () => 'UTC' },
+        },
+        {
+          provide: FleetConfigurationService,
+          useValue: { getConfiguration: () => configuration },
         },
       ],
     });
@@ -557,12 +566,29 @@ describe('ChatPageComponent', () => {
 
       expect(dialog.open).toHaveBeenLastCalledWith(
         ChatTranscriptDialogComponent,
-        { data: { channelName: 'General', scopeName: 'Fleet Fixture Fleet' } },
+        {
+          data: {
+            channelName: 'General',
+            scopeName: 'Fleet Fixture Fleet',
+            reachDays: 7,
+          },
+        },
       );
       expect(chat.requestTranscript).toHaveBeenCalledWith('general', ask);
       expect(texts(element, '.chat-page__transcript-status')).toEqual([
         'Being written · 12 messages',
       ]);
+    });
+
+    // FC-044: the reach is the server's figure; without it there is none.
+    it('offers no transcript while the Fleet policy is unknown', async () => {
+      configuration = of(null);
+
+      const element = await open('/chat');
+
+      button(element, 'Export a transcript of General').click();
+
+      expect(dialog.open).not.toHaveBeenCalled();
     });
 
     it('says why a transcript could not be asked for', async () => {

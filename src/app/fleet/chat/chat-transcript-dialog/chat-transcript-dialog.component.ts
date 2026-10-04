@@ -13,11 +13,15 @@ import {
 
 import { ChatTranscriptRequest } from 'src/app/models/fleet-chat.models';
 
+import { inWords } from '../chat.text';
+
 /** What the transcript dialog is opened with. */
 export interface ChatTranscriptDialogData {
   readonly channelName: string;
   /** The scope it belongs to, as a label and a name. */
   readonly scopeName: string;
+  /** How many days back a transcript may reach, from the Fleet policy. */
+  readonly reachDays: number;
 }
 
 /** The shortest purpose, as the server allows. */
@@ -26,17 +30,17 @@ export const CHAT_TRANSCRIPT_PURPOSE_MIN = 10;
 /** The longest purpose, as the server allows. */
 export const CHAT_TRANSCRIPT_PURPOSE_MAX = 500;
 
-/** How far back a transcript reaches, in milliseconds. */
-const REACH_MS = 7 * 24 * 3_600_000;
+/** A day, in milliseconds. */
+const DAY_MS = 24 * 3_600_000;
 
 /**
- * Room left inside the seven days, so a device clock a little behind the
- * server's is not refused.
+ * Room left inside the reach, so a device clock a little behind the server's
+ * is not refused.
  */
 const REACH_MARGIN_MS = 10 * 60_000;
 
 /** The range offered first: the last day. */
-const DEFAULT_SPAN_MS = 24 * 3_600_000;
+const DEFAULT_SPAN_MS = DAY_MS;
 
 /**
  * An instant as a `datetime-local` field holds it: the device's own time, to
@@ -56,8 +60,9 @@ export function toLocalInput(at: Date): string {
 
 /**
  * Asks a scope admin for a transcript's range and purpose (FC-035). The range
- * is in the device's time, within the last seven days; the server checks it
- * again. Closes with the request, or undefined when cancelled.
+ * is in the device's time, within the policy's reach (seven days at launch);
+ * the server checks it again. Closes with the request, or undefined when
+ * cancelled.
  */
 @Component({
   selector: 'app-chat-transcript-dialog',
@@ -75,10 +80,15 @@ export class ChatTranscriptDialogComponent {
 
   private readonly _now = new Date();
 
+  /** How far back a transcript reaches, in words: "seven days". */
+  readonly reach = inWords(this.data.reachDays, 'day');
+
   readonly purposeMin = CHAT_TRANSCRIPT_PURPOSE_MIN;
   readonly purposeMax = CHAT_TRANSCRIPT_PURPOSE_MAX;
   readonly earliest = toLocalInput(
-    new Date(this._now.getTime() - REACH_MS + REACH_MARGIN_MS),
+    new Date(
+      this._now.getTime() - this.data.reachDays * DAY_MS + REACH_MARGIN_MS,
+    ),
   );
   readonly latest = toLocalInput(this._now);
   readonly fromAt = signal(
@@ -97,7 +107,7 @@ export class ChatTranscriptDialogComponent {
     }
 
     if (from < new Date(this.earliest).getTime()) {
-      return 'A transcript reaches back seven days at most.';
+      return `A transcript reaches back ${this.reach} at most.`;
     }
 
     return from < to ? null : 'The end must come after the start.';

@@ -23,7 +23,11 @@ describe('ChatTranscriptDialogComponent', () => {
       providers: [
         {
           provide: MAT_DIALOG_DATA,
-          useValue: { channelName: 'General', scopeName: 'Fleet Kira' },
+          useValue: {
+            channelName: 'General',
+            scopeName: 'Fleet Kira',
+            reachDays: 7,
+          },
         },
         { provide: MatDialogRef, useValue: { close } },
       ],
@@ -129,5 +133,46 @@ describe('ChatTranscriptDialogComponent', () => {
     (element.querySelector('button.red') as HTMLButtonElement).click();
 
     expect(close).toHaveBeenCalledWith();
+  });
+
+  // FC-044: the reach is the server's figure, so the words follow it.
+  it('says the reach the Fleet policy gives, in words', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [ChatTranscriptDialogComponent, NoopAnimationsModule],
+      providers: [
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: {
+            channelName: 'General',
+            scopeName: 'Fleet Kira',
+            reachDays: 3,
+          },
+        },
+        { provide: MatDialogRef, useValue: { close } },
+      ],
+    });
+
+    const shorter = TestBed.createComponent(ChatTranscriptDialogComponent);
+
+    shorter.detectChanges();
+
+    expect(shorter.nativeElement.textContent).toContain(
+      'from any time in the last three days',
+    );
+    expect(
+      (
+        shorter.nativeElement.querySelector(
+          '#chat-transcript-from',
+        ) as HTMLInputElement
+      ).getAttribute('min'),
+    ).toBe(toLocalInput(new Date(NOW.getTime() - 3 * DAY + 10 * 60_000)));
+
+    shorter.componentInstance.fromAt.set(
+      toLocalInput(new Date(NOW.getTime() - 3 * DAY)),
+    );
+    expect(shorter.componentInstance.rangeError()).toBe(
+      'A transcript reaches back three days at most.',
+    );
   });
 });

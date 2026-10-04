@@ -2,9 +2,11 @@ import { ChatMessage, ChatPerson } from 'src/app/models/fleet-chat.models';
 
 import {
   chatAuthorName,
+  chatEdgeNote,
   chatPlaceKey,
   chatSegmentsOf,
   isGroupedWith,
+  inWords,
   isInPlace,
   mentionQueryAt,
   mentionsStillIn,
@@ -161,5 +163,25 @@ describe('chat text', () => {
     expect(chatAuthorName(KIRA)).toBe('Kira');
     expect(chatAuthorName(NAMELESS)).toBe('Somebody');
     expect(chatAuthorName(null)).toBe('Somebody');
+  });
+
+  // FC-044: the windows are the server's figures, said in words.
+  describe('saying a window', () => {
+    it.each([
+      [4, 'hour', 'four hours'],
+      [7, 'day', 'seven days'],
+      [1, 'day', 'one day'],
+      [12, 'hour', 'twelve hours'],
+      [45, 'day', '45 days'],
+    ])('says %s %s as "%s"', (count, unit, said) => {
+      expect(inWords(count, unit)).toBe(said);
+    });
+
+    it('says how far back a member can read, not how long chat is kept', () => {
+      expect(chatEdgeNote(4)).toBe(
+        'You can read back the last four hours here.',
+      );
+      expect(chatEdgeNote(1)).toBe('You can read back the last hour here.');
+    });
   });
 });

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 
-import { of, Subject, throwError } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 import {
@@ -13,7 +13,10 @@ import {
   ChatTyping,
 } from 'src/app/models/fleet-chat.models';
 
+import { FleetConfiguration } from 'src/app/models/fleet.models';
 import { ReportReason } from 'src/app/models/moderation.models';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
+import { FLEET_CONFIGURATION } from 'src/app/shared/services/fleet-configuration.testing';
 
 import { ChatRemoveDialogComponent } from '../chat-remove-dialog/chat-remove-dialog.component';
 import { ChatReportDialogComponent } from '../chat-report-dialog/chat-report-dialog.component';
@@ -76,6 +79,7 @@ describe('ChatConversationComponent', () => {
   let removed$: Subject<ChatPlace>;
   let typing$: Subject<ChatTyping>;
   let typingOn: boolean;
+  let configuration: Observable<FleetConfiguration | null>;
   let socket: {
     messages$: Subject<ChatMessage>;
     deleted$: Subject<ChatDeletion>;
@@ -102,6 +106,7 @@ describe('ChatConversationComponent', () => {
     removed$ = new Subject();
     typing$ = new Subject();
     typingOn = true;
+    configuration = of(FLEET_CONFIGURATION);
     page = { messages: [messageOf('a', 0)], before: null };
     socket = {
       messages$,
@@ -143,6 +148,10 @@ describe('ChatConversationComponent', () => {
             displayTimezone: () => 'UTC',
             current: () => ({ typingIndicatorsEnabled: typingOn }),
           },
+        },
+        {
+          provide: FleetConfigurationService,
+          useValue: { getConfiguration: () => configuration },
         },
       ],
     });
@@ -239,8 +248,18 @@ describe('ChatConversationComponent', () => {
         'Fleet · Fixture Fleet',
       ]);
       expect(texts('.chat-conversation__edge-note')).toEqual([
-        'Chat keeps the last four hours here.',
+        'You can read back the last four hours here.',
       ]);
+    });
+
+    // FC-044: the window is the server's, so the note says nothing until
+    // the server has said what it is.
+    it('says nothing at the edge while the Fleet policy is unknown', async () => {
+      configuration = of(null);
+      await show();
+
+      expect(element.querySelector('.chat-conversation__edge')).not.toBeNull();
+      expect(texts('.chat-conversation__edge-note')).toEqual([]);
     });
 
     it('offers earlier messages, then the edge', async () => {

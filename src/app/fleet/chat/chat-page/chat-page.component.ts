@@ -42,6 +42,7 @@ import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcar
 import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { saveFile } from 'src/app/shared/utils/save-file.utils';
 
 import {
@@ -142,6 +143,14 @@ export class ChatPageComponent {
   private readonly _router = inject(Router);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _presence = inject(ChatPresenceService);
+
+  /** The Fleet policy, for the figures the server enforces. */
+  private readonly _policy = toSignal(
+    inject(FleetConfigurationService)
+      .getConfiguration()
+      .pipe(map(configuration => configuration?.policy ?? null)),
+    { initialValue: null },
+  );
 
   readonly scopeLabels = SCOPE_LABELS;
   readonly roleLabels = CHAT_ROLE_LABELS;
@@ -293,9 +302,19 @@ export class ChatPageComponent {
     scope: ChatScopeChannels,
     channel: ChatChannel,
   ): void {
+    const policy = this._policy();
+
+    // Without the server's figures there is no reach to offer; the page
+    // only shows once the Fleet configuration has been read, so this waits
+    // for nothing in practice.
+    if (policy === null) {
+      return;
+    }
+
     const data: ChatTranscriptDialogData = {
       channelName: channel.name,
       scopeName: `${SCOPE_LABELS[scope.kind]} ${scope.name}`,
+      reachDays: policy.chatTranscriptHistoryDays,
     };
 
     this._dialog

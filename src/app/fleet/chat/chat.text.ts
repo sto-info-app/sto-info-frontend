@@ -17,8 +17,49 @@ export const CHAT_COUNTER_FROM = 1_800;
 /** How long after one message the same author's next is grouped under it. */
 export const CHAT_GROUP_WITHIN_MS = 5 * 60_000;
 
-/** What the top of a place says once nothing older can be read. */
-export const CHAT_EDGE_NOTE = 'Chat keeps the last four hours here.';
+/** Small counts as the guides write them; anything larger is a numeral. */
+const COUNT_WORDS: readonly string[] = [
+  'no',
+  'one',
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine',
+  'ten',
+  'eleven',
+  'twelve',
+];
+
+/**
+ * A count with its unit, in words: "four hours", "one day".
+ *
+ * @param count - How many.
+ * @param unit - The unit, singular.
+ * @returns The phrase.
+ */
+export function inWords(count: number, unit: string): string {
+  return `${COUNT_WORDS[count] ?? String(count)} ${count === 1 ? unit : `${unit}s`}`;
+}
+
+/**
+ * What the top of a place says once nothing older can be read (FC-044).
+ *
+ * It says how far back a member can read, not how long messages are kept:
+ * they are kept far longer, for moderation, and the window is the server's,
+ * so the figure is too.
+ *
+ * @param hours - How far back members may read, from the Fleet policy.
+ * @returns The note.
+ */
+export function chatEdgeNote(hours: number): string {
+  return hours === 1
+    ? 'You can read back the last hour here.'
+    : `You can read back the last ${inWords(hours, 'hour')} here.`;
+}
 
 /** The roles a channel may be kept for, least first. */
 export const CHAT_ROLES: readonly ChatRole[] = [
