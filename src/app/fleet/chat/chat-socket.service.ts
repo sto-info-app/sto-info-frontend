@@ -326,6 +326,9 @@ export class ChatSocketService implements OnDestroy {
    */
   ready(): Promise<void> {
     if (this._socket === null) {
+      // A disconnect before the first open, as the session makes while
+      // sign-in is still settling, refused the first wait; this one is new.
+      this._online = deferred();
       this._socket = this.open();
     } else if (['idle', 'signedOut', 'replaced'].includes(this._status())) {
       this._online = deferred();

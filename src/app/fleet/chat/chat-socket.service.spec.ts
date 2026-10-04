@@ -264,6 +264,16 @@ describe('ChatSocketService', () => {
       expect(service.status()).toBe('idle');
     });
 
+    // FC-044: the session closes chat while sign-in is still settling, before
+    // anything has opened it; that must not refuse every wait after it.
+    it('opens for the first time after a close that came before it', async () => {
+      service.disconnect();
+
+      await expect(joined()).resolves.toBeDefined();
+      expect(service.status()).toBe('online');
+      expect(factory).toHaveBeenCalledTimes(1);
+    });
+
     it('opens again when asked after being closed', async () => {
       socket.answer = () => Promise.resolve(refused(404));
       await expect(joined()).rejects.toBeInstanceOf(ChatSocketError);
