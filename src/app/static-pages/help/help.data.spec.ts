@@ -12,6 +12,7 @@ import {
   HELP_FEATURE_NAMES,
   HELP_TOPICS,
   blockingFeature,
+  unreachableFeature,
   findHelpGuide,
   findHelpTopic,
   HELP_HIDDEN_WHEN_OFF,
@@ -530,7 +531,7 @@ describe('help data', () => {
       expect(blockingFeature(ALL_ON, undefined, 'STORYTIME')).toBeNull();
       expect(
         blockingFeature(
-          featuresWith({ STORYTIME: 'UNAVAILABLE', FLEET: 'DISABLED' }),
+          featuresWith({ STORYTIME: 'DISABLED', FLEET: 'DISABLED' }),
           'FLEET',
           'STORYTIME',
         ),
@@ -539,6 +540,31 @@ describe('help data', () => {
         blockingFeature(featuresWith({ CHAT: 'DISABLED' }), undefined, 'CHAT'),
       ).toBeNull();
       expect(blockingFeature(ALL_ON)).toBeNull();
+    });
+
+    // FC-044, Steve's decision of 2 October 2026: transient unavailability
+    // must not hide useful help (plan section 5).
+    it('should keep a page whose switch could not be asked, and name it for a notice', () => {
+      const unknown = featuresWith({ STORYTIME: 'UNAVAILABLE' });
+
+      expect(blockingFeature(unknown, 'STORYTIME')).toBeNull();
+      expect(unreachableFeature(unknown, undefined, 'STORYTIME')).toBe(
+        'STORYTIME',
+      );
+      expect(
+        unreachableFeature(
+          featuresWith({ FLEET: 'UNAVAILABLE', CHAT: 'UNAVAILABLE' }),
+          'FLEET',
+          'CHAT',
+        ),
+      ).toBe('FLEET');
+      expect(
+        unreachableFeature(
+          featuresWith({ STORYTIME: 'DISABLED' }),
+          'STORYTIME',
+        ),
+      ).toBeNull();
+      expect(unreachableFeature(ALL_ON, 'FLEET')).toBeNull();
     });
 
     it('should name the first switch off whose help stays', () => {

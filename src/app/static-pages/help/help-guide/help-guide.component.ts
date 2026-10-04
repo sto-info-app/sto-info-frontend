@@ -9,10 +9,6 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { catchError, combineLatest, map, of } from 'rxjs';
-import {
-  STORYTIME_AVAILABILITY_UNAVAILABLE,
-  StorytimeAvailability,
-} from 'src/app/models/storytime.models';
 import { FeatureUnavailableComponent } from 'src/app/shared/components/feature-unavailable/feature-unavailable.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
@@ -35,6 +31,7 @@ import {
   isFeatureOffered,
   switchedOffFeature,
   switchedOffNote,
+  unreachableFeature,
   isGuidePermitted,
   isTopicPermitted,
   visibleSections,
@@ -110,6 +107,15 @@ export class HelpGuideComponent implements OnInit {
   /** The feature the notice is about. */
   unavailableFeatureName = '';
 
+  /**
+   * The feature the guide is about when the backend could not be asked about
+   * it, for the notice above the guide; null otherwise (FC-044).
+   */
+  unreachableFeatureName: string | null = null;
+
+  /** Why, for that notice: the systems are not answering. */
+  readonly unreachableReason = FEATURE_UNAVAILABLE_OFFLINE;
+
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
   private readonly _routingService = inject(RoutingService);
@@ -159,7 +165,7 @@ export class HelpGuideComponent implements OnInit {
         );
 
         if (blocking) {
-          this.showUnavailable(blocking, features[blocking]);
+          this.showUnavailable(blocking);
           return;
         }
 
@@ -219,7 +225,15 @@ export class HelpGuideComponent implements OnInit {
       location.guide.requiresFeature,
     );
 
+    const unreachable = unreachableFeature(
+      features,
+      location.topic.requiresFeature,
+      location.guide.requiresFeature,
+    );
+
     this.unavailableReason = null;
+    this.unreachableFeatureName =
+      unreachable === null ? null : HELP_FEATURE_NAMES[unreachable];
     this.guide = location.guide;
     this.switchedOff = off === null ? null : switchedOffNote(off, 'guide');
     this.sections = visibleSections(location.guide, features);
@@ -253,23 +267,17 @@ export class HelpGuideComponent implements OnInit {
    * exactly what the notice is declining to open.
    *
    * @param feature The feature out of reach.
-   * @param availability Why: switched off, or not answering.
    * @returns void
    */
-  private showUnavailable(
-    feature: HelpFeature,
-    availability: StorytimeAvailability,
-  ): void {
+  private showUnavailable(feature: HelpFeature): void {
     this.guide = null;
     this.sections = [];
     this.unavailableFeatureName = HELP_FEATURE_NAMES[feature];
+    this.unreachableFeatureName = null;
     this.otherGuides = [];
     this.topicTitle = '';
     this.topicLink = '';
-    this.unavailableReason =
-      availability === STORYTIME_AVAILABILITY_UNAVAILABLE
-        ? FEATURE_UNAVAILABLE_OFFLINE
-        : FEATURE_UNAVAILABLE_DISABLED;
+    this.unavailableReason = FEATURE_UNAVAILABLE_DISABLED;
     this._pageTitleService.setTitle(this.unavailableFeatureName);
   }
 

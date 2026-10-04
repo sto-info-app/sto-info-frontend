@@ -1488,16 +1488,19 @@ export function visibleHelpTopics(
 /**
  * The switch keeping a page from being read, if any.
  *
- * A page about a feature that is not on says so rather than showing its
- * guides: switched off, or unknown because the backend could not be asked.
- * Neither is a wrong address, and a visitor told their address is wrong will
- * not come back when the feature returns. The topic's switch is asked first,
- * then the guide's. Only a switch whose help goes with it blocks a page; the
- * others' pages are shown with a note (FC-050).
+ * A page about a feature the server says is switched off says so rather than
+ * showing its guides. It is not a wrong address, and a visitor told their
+ * address is wrong will not come back when the feature returns. The topic's
+ * switch is asked first, then the guide's. Only a switch whose help goes with
+ * it blocks a page; the others' pages are shown with a note (FC-050).
+ *
+ * A switch the backend could not be asked about blocks nothing: transient
+ * unavailability must not hide useful help (plan section 5; Steve's decision
+ * of 2 October 2026, FC-044). {@link unreachableFeature} notes it instead.
  *
  * @param features Where each switch stands.
  * @param waitsOn The switches the page waits on, outermost first.
- * @returns The first switch not on, or null when none is off.
+ * @returns The first switch off, or null when none is.
  */
 export function blockingFeature(
   features: HelpFeatures,
@@ -1508,7 +1511,31 @@ export function blockingFeature(
       (feature): feature is HelpFeature =>
         feature !== undefined &&
         HELP_HIDDEN_WHEN_OFF[feature] &&
-        features[feature] !== 'ENABLED',
+        features[feature] === 'DISABLED',
+    ) ?? null
+  );
+}
+
+/**
+ * The first switch a page waits on that the backend could not be asked
+ * about, if any (FC-044).
+ *
+ * The page is read as usual, with the notice above it that the feature
+ * itself cannot be reached for the moment, so a reader whose feature will
+ * not open learns why without losing the help that explains it.
+ *
+ * @param features Where each switch stands.
+ * @param waitsOn The switches the page waits on, outermost first.
+ * @returns The first switch not answering, or null when all answered.
+ */
+export function unreachableFeature(
+  features: HelpFeatures,
+  ...waitsOn: (HelpFeature | undefined)[]
+): HelpFeature | null {
+  return (
+    waitsOn.find(
+      (feature): feature is HelpFeature =>
+        feature !== undefined && features[feature] === 'UNAVAILABLE',
     ) ?? null
   );
 }

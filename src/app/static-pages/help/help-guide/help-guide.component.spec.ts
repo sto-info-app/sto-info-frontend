@@ -259,14 +259,18 @@ describe('HelpGuideComponent', () => {
   });
 
   // An outage is not a missing page either, and it is not the same thing as
-  // the switch being off — so it gets its own wording on the same notice.
-  it('should say the systems are not answering when the backend cannot be reached', () => {
+  // the switch being off. Transient unavailability must not hide useful help
+  // (plan section 5; Steve's decision of 2 October 2026, FC-044), so the
+  // guide is read, under a notice saying the systems are not answering.
+  it('should keep the guide, saying the systems are not answering, when the backend cannot be reached', () => {
     createComponent(firstGuide.slug, STORYTIME_AVAILABILITY_UNAVAILABLE);
 
-    expect(component.guide).toBeNull();
-    expect(component.unavailableReason).toBe('OFFLINE');
+    expect(component.guide).toBe(firstGuide);
+    expect(component.unavailableReason).toBeNull();
+    expect(component.unreachableFeatureName).toBe('Storytime');
     expect(navigateSpy).not.toHaveBeenCalled();
     expect(pageText()).toContain('systems are not answering');
+    expect(pageText()).toContain(firstGuide.title);
   });
 
   // Only the gated topic waits on the backend. A Community guide is words on a

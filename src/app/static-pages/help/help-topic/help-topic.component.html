@@ -30,6 +30,12 @@
 
     <p class="help-topic__intro">{{ topic.intro }}</p>
 
+    @if (unreachableFeatureName; as featureName) {
+      <app-feature-unavailable
+        [featureName]="featureName"
+        [reason]="unreachableReason" />
+    }
+
     @if (switchedOff) {
       <p
         class="help-switched-off"

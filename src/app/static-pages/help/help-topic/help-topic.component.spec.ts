@@ -198,7 +198,6 @@ describe('HelpTopicComponent (FC-048)', () => {
 
   it.each<[StorytimeAvailability, string]>([
     [STORYTIME_AVAILABILITY_DISABLED, FEATURE_UNAVAILABLE_DISABLED],
-    [STORYTIME_AVAILABILITY_UNAVAILABLE, FEATURE_UNAVAILABLE_OFFLINE],
   ])(
     'says why a Storytime section cannot be read while Storytime is %s',
     (availability, reason) => {
@@ -214,6 +213,20 @@ describe('HelpTopicComponent (FC-048)', () => {
       expect(navigateSpy).not.toHaveBeenCalled();
     },
   );
+
+  // FC-044, Steve's decision of 2 October 2026: transient unavailability
+  // must not hide useful help, so the section is read, with a notice.
+  it('keeps a Storytime section readable while Storytime cannot be asked', () => {
+    createComponent('storytime', STORYTIME_AVAILABILITY_UNAVAILABLE);
+
+    expect(component.unavailableReason).toBeNull();
+    expect(component.topic).toBe(storytime);
+    expect(component.unreachableFeatureName).toBe('Storytime');
+    expect(component.unreachableReason).toBe(FEATURE_UNAVAILABLE_OFFLINE);
+    expect(page().querySelector('app-feature-unavailable')).not.toBeNull();
+    expect(pageText()).toContain(storytime.guides[0].title);
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
 
   it('shows the section again once Storytime is back', () => {
     createComponent('storytime', STORYTIME_AVAILABILITY_DISABLED);

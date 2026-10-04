@@ -9,10 +9,6 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { catchError, combineLatest, map, of } from 'rxjs';
-import {
-  STORYTIME_AVAILABILITY_UNAVAILABLE,
-  StorytimeAvailability,
-} from 'src/app/models/storytime.models';
 import { FeatureUnavailableComponent } from 'src/app/shared/components/feature-unavailable/feature-unavailable.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import {
@@ -34,6 +30,7 @@ import {
   isFeatureOffered,
   switchedOffFeature,
   switchedOffNote,
+  unreachableFeature,
   isGuidePermitted,
   isTopicPermitted,
 } from '../help.data';
@@ -85,6 +82,15 @@ export class HelpTopicComponent implements OnInit {
   /** The feature the notice is about. */
   unavailableFeatureName = '';
 
+  /**
+   * The section's feature when the backend could not be asked about it, for
+   * the notice above its guides; null otherwise (FC-044).
+   */
+  unreachableFeatureName: string | null = null;
+
+  /** Why, for that notice: the systems are not answering. */
+  readonly unreachableReason = FEATURE_UNAVAILABLE_OFFLINE;
+
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
   private readonly _routingService = inject(RoutingService);
@@ -128,7 +134,7 @@ export class HelpTopicComponent implements OnInit {
         const blocking = blockingFeature(features, topic.requiresFeature);
 
         if (blocking) {
-          this.showUnavailable(blocking, features[blocking]);
+          this.showUnavailable(blocking);
           return;
         }
 
@@ -144,8 +150,11 @@ export class HelpTopicComponent implements OnInit {
         }
 
         const off = switchedOffFeature(features, topic.requiresFeature);
+        const unreachable = unreachableFeature(features, topic.requiresFeature);
 
         this.unavailableReason = null;
+        this.unreachableFeatureName =
+          unreachable === null ? null : HELP_FEATURE_NAMES[unreachable];
         this.topic = topic;
         this.guides = guides;
         this.switchedOff = off === null ? null : switchedOffNote(off, 'topic');
@@ -185,20 +194,14 @@ export class HelpTopicComponent implements OnInit {
    * Says why a section cannot be read, in place of it.
    *
    * @param feature The feature out of reach.
-   * @param availability Why: switched off, or not answering.
    * @returns void
    */
-  private showUnavailable(
-    feature: HelpFeature,
-    availability: StorytimeAvailability,
-  ): void {
+  private showUnavailable(feature: HelpFeature): void {
     this.topic = null;
     this.guides = [];
     this.unavailableFeatureName = HELP_FEATURE_NAMES[feature];
-    this.unavailableReason =
-      availability === STORYTIME_AVAILABILITY_UNAVAILABLE
-        ? FEATURE_UNAVAILABLE_OFFLINE
-        : FEATURE_UNAVAILABLE_DISABLED;
+    this.unreachableFeatureName = null;
+    this.unavailableReason = FEATURE_UNAVAILABLE_DISABLED;
     this._pageTitleService.setTitle(this.unavailableFeatureName);
   }
 
