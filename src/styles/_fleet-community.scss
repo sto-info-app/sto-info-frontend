@@ -109,8 +109,17 @@
     font-variant-numeric: tabular-nums;
   }
 
-  // A header cell that sorts: the whole cell is the control.
+  // A header cell that sorts: the whole cell is the control. The theme's
+  // `button` rule draws every button as a 200 px pill, so its size, margin and
+  // alignment are set back here too; left alone, eight sortable columns made
+  // the roster 1,850 px wide (FC-044).
   .fleet-community-table__sort {
+    display: inline;
+    width: auto;
+    height: auto;
+    margin: 0;
+    border-radius: 0;
+    text-align: inherit;
     padding: 0;
     font: inherit;
     color: inherit;
@@ -124,6 +133,15 @@
 
 @media (width <= 720px) {
   .fleet-community-table {
+    // Laid out as blocks rather than as a table, so a long unbroken value
+    // (a log entry's JSON counts) wraps in its row instead of widening the
+    // whole table past the screen and carrying every value off it (FC-044).
+    display: block;
+
+    tbody {
+      display: block;
+    }
+
     thead {
       position: absolute;
       width: 1px;
@@ -141,10 +159,17 @@
 
     td {
       display: flex;
-      gap: 1rem;
+      flex-wrap: wrap;
+      gap: 0.25rem 1rem;
       justify-content: space-between;
       padding: 0.25rem 0;
       border: 0;
+      overflow-wrap: anywhere;
+
+      // A value too long to sit beside its label goes beneath it.
+      > * {
+        min-width: 0;
+      }
     }
 
     td::before {

@@ -63,6 +63,7 @@ export interface FleetApplicationsData {
 @Component({
   selector: 'app-fleet-applications',
   templateUrl: './fleet-applications.component.html',
+  styleUrls: ['./fleet-applications.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

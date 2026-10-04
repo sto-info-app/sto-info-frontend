@@ -1,4 +1,10 @@
+@use 'lcars-tabs' as tabs;
 @use 'lcars-variables' as vars;
+
+// The filter strip is an LCARS tab strip, which each component draws for its
+// own template; without it the tabs fell back to the theme's 200 px buttons
+// (FC-044).
+@include tabs.lcars-tab-strip($min-width: 0);
 
 :host {
   display: block;

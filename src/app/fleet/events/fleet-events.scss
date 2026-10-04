@@ -24,6 +24,14 @@
     margin: 0 0 1rem;
   }
 
+  // The LCARS frame caps every `nav` at the sidebar's 660px and pushes its
+  // rows right, which wrapped "This month" onto a line of its own (FC-044).
+  &__views,
+  &__months {
+    max-width: none;
+    justify-content: flex-start;
+  }
+
   &__controls {
     display: flex;
     flex-wrap: wrap;
@@ -179,6 +187,7 @@
 
   &__answer {
     margin: 0.5rem 0 0;
+    padding: 0.75rem 1rem 1rem;
     border: 1px solid vars.$lcars-bluey;
     border-radius: 0.5rem;
 

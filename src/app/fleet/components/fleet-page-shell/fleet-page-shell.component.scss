@@ -12,6 +12,12 @@
 
 .fleet-page-shell {
   padding: 1rem;
+
+  // A section's page sits inside the directory's shell, and two insets moved
+  // every section's content in further than the Overview's (FC-044).
+  .fleet-page-shell {
+    padding-inline: 0;
+  }
 }
 
 // The Community or Fleet the page is about, under its heading. Sky, so the

@@ -1428,6 +1428,23 @@ button:hover {
   line-height: 1.7rem;
 }
 
+/* A bar whose name may not fit a phone on one line (FC-044). The name is laid
+   out in the bar rather than pinned over it, so a second line makes the bar
+   taller instead of spilling over whatever follows; on one line it draws
+   exactly as the pinned name does. */
+.lcars-text-bar.lcars-text-bar--wraps {
+  height: auto;
+  min-height: 32px;
+}
+
+.lcars-text-bar.lcars-text-bar--wraps span {
+  position: relative;
+  top: auto;
+  height: auto;
+  min-height: 40px;
+  margin: -4px 0;
+}
+
 .lcars-text-bar .cta-icon {
   position: absolute;
   right: 1px;
@@ -2475,8 +2492,24 @@ button.gold {
 }
 
 @media only screen and (width <= 610px) {
+  // On a phone the header's cascade (or its "Incoming transmission" notice)
+  // and the four page buttons stack, each the full width. Side by side the
+  // buttons took all but 10px, and the notice ran one letter to a line.
   .data-cascade-button-group {
-    column-gap: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px 0;
+    padding-left: 10px;
+  }
+
+  .data-cascade-button-group .comms-alert,
+  .data-cascade-button-group .cascade-wrapper {
+    padding-right: 0;
+  }
+
+  .data-cascade-button-group #nav-standard {
+    max-width: none;
+    justify-content: center;
   }
 
   .button-col,
@@ -2610,6 +2643,26 @@ button.gold {
     width: 60px;
     min-width: 60px;
     font-size: 0.8rem;
+  }
+
+  // The section names fit the 60px column: at 0.8rem "Community" and
+  // "Dashboard" were 70px of type and lost their last letters.
+  .sidebar-buttons a {
+    padding-inline: 2px;
+    font-size: 0.62rem;
+    overflow-wrap: anywhere;
+  }
+
+  // The version keeps a column wide enough for "FV-1.4.24" rather than 13%
+  // of a phone's footer, which wrapped it out of its panel.
+  #footer-panel-container {
+    flex: 0 0 72px;
+    width: 72px;
+  }
+
+  #footer-panel {
+    padding: 40px 6px 0 4px;
+    white-space: nowrap;
   }
 
   .left-frame-top {

@@ -7,7 +7,10 @@
 // Fleet name on two lines rather than five on a narrow screen.
 .fleet-directory-results__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+
+  // Never wider than the results themselves, which a phone's column is not
+  // (FC-044): at 18rem a card ran 33px off a 412px screen.
+  grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
   gap: 1rem;
   margin-top: 1rem;
 }

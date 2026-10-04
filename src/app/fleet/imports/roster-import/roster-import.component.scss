@@ -74,7 +74,10 @@
 // instead of wrapping beside a mostly empty label column.
 .roster-import__facts {
   display: grid;
-  grid-template-columns: auto 1fr;
+
+  // The value column may shrink below its longest word: a timestamp read as
+  // UTC is one unbroken string, and held the card wider than a phone.
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 0.35rem 1rem;
   margin: 1rem 0;
 
@@ -132,7 +135,8 @@
   // One column at phone width, two where there is room. The rows are read
   // one at a time rather than compared down a column, so nothing is lost by
   // letting them wrap.
-  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  // Never wider than the list itself, which a phone's column is not.
+  grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr));
 }
 
 .roster-import__row {
