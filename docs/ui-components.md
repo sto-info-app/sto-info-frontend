@@ -110,6 +110,7 @@ helpers per slug (`common`, `uncommon`, `rare`, `very-rare`, `ultra-rare`,
 |---|---|
 | `.lcars-text-bar` | The standard section heading: a bar with rounded end caps, carrying its title in a black cut-out `<span>`. |
 | `.lcars-text-bar.small-lcars-bar-gap` | Same bar with a tighter top margin, for bars stacked one under another. |
+| `.lcars-text-bar.lcars-text-bar--wraps` | For a title that may not fit a phone on one line: the title is laid out in the bar rather than pinned over it, so a second line makes the bar taller instead of spilling over what follows. On one line it draws exactly as the plain bar does (FC-044). |
 | `.lcars-text-bar .cta-icon` | A single action pinned to the bar's right-hand end, on its own black cut-out. |
 | `.lcars-text-bar .lcars-bar-actions` | A group of actions at that end — reorder arrows, edit, delete, collapse — on the same cut-out, so a bar with one action and a bar with five read as the same shape. |
 | `.lcars-text-bar .title-with-badge` + `.header-count-badge` | Heading with a count pill, e.g. "Captain List (3)". One or two digits keep the round badge; three or more grow it sideways into a pill. |
@@ -124,7 +125,7 @@ owns the ARIA wiring.
 
 | Class | What it is |
 |---|---|
-| `.lcars-btn` (+ a colour class) | The standard pill. 60px tall, fully rounded, uppercase, label bottom-right. Works on `<button>` and `<a>` alike — the rule restates weight and tracking so both look identical. |
+| `.lcars-btn` (+ a colour class) | The standard pill. 60px tall, fully rounded, uppercase, label bottom-right. Works on `<button>` and `<a>` alike — the rule restates weight and tracking, and takes the link underline away, so both look identical. |
 | `.lcars-btn-auto` | The same pill sized to its own label rather than a fixed 150px minimum. Named as `button.lcars-btn-auto` too, so it outranks the base rule and keeps its wide left gutter. |
 | `.full-width-btn-link` | Full-width pill for a sidebar stack; used for both links (navigation) and buttons (actions). |
 | `.buttons` | The sidebar stack itself — a column of `.full-width-btn-link`s. `.buttons.filter-buttons` adds the `.filter-btn` / `.filter-btn.active` treatment. |
@@ -160,9 +161,24 @@ border both read it. Handles `input`, `textarea`, number inputs (spinners
 removed) and date inputs (dark colour scheme, gold accent). A `.field-error` as
 the last child rounds off the bottom corners.
 
+A `<select>` in the container reads as the field beside it: the same dark
+body, a white LCARS arrow in place of the browser's grey box, and an ellipsis
+when its value is longer than the field (FC-044).
+
 **`.lcars-select-container`** — the standard chooser. A fully rounded coloured
 block holding a `.select-label` and a native `<select>` with a custom SVG arrow;
-the same colour variants apply.
+the same colour variants apply. A bare `<label>` as its direct child is drawn
+as the select label too, so leaving the class off no longer sits the label on
+the rounded edge in body type.
+
+**Tick boxes, radio buttons and file inputs** stay native, for their keyboard
+and screen reader behaviour, and are drawn the LCARS way by `styles.scss`
+(FC-044): a sky tick or ring at a fixed 1.1rem, a perano focus ring, and a
+`<label>` wrapping its box laid out beside it, box first. The file input's
+button is a sky pill. A `<fieldset>` is a section of the page rather than a
+box drawn round it, its `<legend>` uppercase Antonio in perano; both rules
+carry no specificity, so a feature that draws its own group keeps it. The
+plain `input` rule below once drew every checkbox and radio 100% wide.
 
 **`.field-picker`** — a field whose value is chosen in a dialog rather than
 typed (a recipient, a featured work). It sits inside a `.lcars-input-container`
@@ -268,6 +284,18 @@ anything new.
 | `.uppercase`, `.strike`, `.nomar`, `.border`, `.indent` | Vendored theme text helpers. |
 | `i.ext-link` | External-link icon spacing. |
 | `ul.no-bullets` | Unbulleted list. |
+
+### Motion
+
+Everybody whose system asks for less motion (`prefers-reduced-motion: reduce`) gets it everywhere
+(FC-044). One rule at the end of `src/styles/styles.scss`, loaded last so it outranks every
+component, sets `animation: none`, `transition: none` and `scroll-behavior: auto` on every
+element and pseudo-element. Animations stop on the element's own resting style, never a frame of
+the animation, so the blink, pulse, sweep and data-cascade effects stand still and nothing is left
+on an invisible frame. The header's back-to-top button jumps rather than glides for the same
+reader. A component need not add a reduced-motion rule of its own; the few that predate this one
+(the scan-status sweep, the alert panel) still say what they show instead, which the global rule
+does not change.
 
 ---
 
@@ -638,8 +666,11 @@ Which sections and guides a reader sees is decided in one place,
 - If permissions can't be read, the public guides stay.
 
 An address the reader can't open goes to the not-found page. A Storytime
-section or guide whose feature is off, or unreachable, says so instead, and a
-part of a guide about it is left out.
+section or guide whose feature is off says so instead, and a part of a guide
+about it is left out. A section or guide whose feature could not be asked
+about is read as usual, under the `app-feature-unavailable` "Connection Lost"
+notice (`unreachableFeature`): transient unavailability must not hide useful
+help (plan §5; Steve's decision of 2 October 2026, FC-044).
 
 **Fleets and Running the site** (FC-050). Fleets is second, sky like every
 Fleet page, and waits on Fleet Community as a whole; Running the site is last,
@@ -678,8 +709,13 @@ What follows is only what Fleet adds.
 
 ### Colour
 
-**The whole feature is sky**, the way Custom Tracking is tangerine and the help
-section is perano. Community, Fleet and Armada are *not* three colours: they
+**The whole feature is sky** — `$lcars-sky`, which is the lavender `#aaf` — the
+way Custom Tracking is tangerine and the help section is perano: fields,
+choosers, tab strips, table headers, the chat list's open channel. Around that
+the shared vocabulary keeps its own meanings, as on every other page: a
+primary action is a gold or orange pill, a page-level link a blue one, a
+section bar's title perano, a Community's or Fleet's name under a heading gold,
+a destructive action red. Community, Fleet and Armada are *not* three colours: they
 are told apart by a label and an icon, which leaves the palette free to mean
 something — a Fleet that is recruiting, closed or disputed, an upload that has
 passed or been refused — and keeps the distinction legible to a reader who
@@ -727,6 +763,20 @@ spec asserts each note element rather than the cell's text.
 `.form-row`, `.field-hint` and `.compact` are a per-feature convention rather
 than a global rule, which is why Fleet declares its own rather than assuming
 one exists.
+
+**The theme's bare-element rules.** `lcars-theme.scss` draws every `nav a` as
+the sidebar's 210px violet pill, every bare `button` as a 200px pill, and caps
+every `nav` at 660px, pushed right. Fleet's controls are classes that undo
+what they need: `.buttons-row` and the tab strip lift the `nav` cap, the
+table's sort button and `app-lcars-toggle` set the button's size back, and the
+chat list's links set back the pill (FC-044). A new `nav`, link or button in a
+Fleet page needs the same, or it is drawn as part of the sidebar.
+
+**The directory strip** over every Fleet page lights by the kind of page, not
+by its address: Fleets on a Fleet's page, Armadas on an Armada's, Communities
+on a Community's, although all three addresses run through the Community's. A
+tab given `lightsOn` (a path pattern) decides that way; others still use the
+router's prefix match (FC-044).
 
 ### Components
 
@@ -1245,14 +1295,20 @@ Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC
 - **Replies** show a one-line quote of what they answer, or "Earlier message" once it is gone or
   older than four hours. Clicking the quote scrolls to the message when it is on screen.
 - **Moving through time.** "Load earlier" reads back to the four-hour edge, where the top says
-  "Chat keeps the last four hours here." New messages keep the log at the bottom. While the reader
-  is scrolled up, a button counts what arrived.
+  "You can read back the last four hours here." It says how far back a member can read, not how
+  long chat is kept, and its figure is the server's (`chatMemberHistoryHours` from the Fleet
+  configuration), as is the transcript dialog's reach (`chatTranscriptHistoryDays`) (FC-044). New
+  messages keep the log at the bottom. While the reader is scrolled up, a button counts what
+  arrived.
 - **The composer.** Enter sends and Shift+Enter starts a new line. A counter appears from 1,800
   characters of the 2,000. Typing `@` opens the list of people who can read the place: arrows move
   through it, Enter or Tab picks, Escape closes it. Reply starts a reply, and Escape stops it. A
   message shows as "Sending…" until the server has it, or "Not sent" with the reason, "Try again"
   and "Discard".
-- **Deleting.** Reply and Delete appear on hover and focus, and always on a touch screen. Deleting
+- **Deleting.** Reply and Delete appear on hover and focus, and always on a touch screen. Until
+  then they are clipped to nothing rather than not displayed, so they stay in the Tab order: a
+  keyboard reaches Reply, and the row's actions appear because one of them has focus (FC-044;
+  with `display: none` no keyboard could reach them, WCAG 2.1.1). Deleting
   one's own message asks first. A moderator's Remove asks why, in `ChatRemoveDialogComponent`.
 - **Reporting** (FC-035). Report appears on others' messages where the reader may report
   (`mayReport`), and always in a conversation. `ChatReportDialogComponent` takes a reason from the
