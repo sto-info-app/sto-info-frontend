@@ -249,6 +249,10 @@ export class CommunityRegisterComponent implements OnInit {
         error: (error: { status?: number; error?: { message?: unknown } }) => {
           this.isSaving = false;
           this.errorMessage = refusalOf(error);
+          // OnPush: without this a refusal, the ten-Community limit included,
+          // left "Registering the Community" up for good and never said why
+          // (FC-044).
+          this._changeDetector.markForCheck();
         },
       });
   }

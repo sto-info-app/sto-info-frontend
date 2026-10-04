@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import { COMMUNITY_AUDIENCE_HINT } from 'src/app/fleet/constants/fleet-scope.constants';
@@ -346,6 +346,35 @@ describe('CommunityRegisterComponent', () => {
 
       expect(text).toContain(COMMUNITY_OWNER_LIMIT_REACHED);
       expect(text).not.toContain(COMMUNITY_SLUG_TAKEN);
+    });
+
+    // FC-044: a real answer arrives after the submit's own change detection,
+    // and on an OnPush page nothing redrew it: "Registering the Community"
+    // stayed up for good and the reason never showed.
+    it('takes the loading bar down and says why when the refusal arrives later', () => {
+      const answer = new Subject<never>();
+
+      registration.registerCommunity.mockReturnValue(answer);
+
+      render();
+      submit();
+
+      expect(find('app-loading-bar')).not.toBeNull();
+
+      answer.error({
+        status: 409,
+        error: {
+          message:
+            'You may own at most 10 Fleet Communities, closed ones included. ' +
+            'If you need more, use Contact us.',
+        },
+      });
+      fixture.detectChanges();
+
+      expect(find('app-loading-bar')).toBeNull();
+      expect(fixture.nativeElement.textContent).toContain(
+        COMMUNITY_OWNER_LIMIT_REACHED,
+      );
     });
 
     it('says something a reader can act on for any other failure', () => {
