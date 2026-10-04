@@ -190,19 +190,40 @@
 
 // Shown on hover or focus, so a long log stays quiet; always on a touch
 // screen, where there is no hover.
+// ---
+// Clipped to nothing rather than not displayed, so the buttons stay in the
+// Tab order: a keyboard reaches Reply, and the row's actions appear because
+// one of them has focus (FC-044, WCAG 2.1.1). Nothing else can focus a
+// message's insides, so with display: none they could never be reached.
 .chat-message__actions {
-  display: none;
+  display: flex;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
   gap: 0.5rem;
   justify-content: flex-end;
 
   .chat-message:hover &,
   .chat-message:focus-within &,
   &--shown {
-    display: flex;
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
   }
 
   @media (hover: none) {
-    display: flex;
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
   }
 }
 
