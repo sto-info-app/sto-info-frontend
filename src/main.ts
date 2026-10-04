@@ -46,10 +46,6 @@ if (
     environment: environment.env_name ?? 'dev',
     release: `sto-info-frontend@${environment.version}`,
 
-    // Setting this option to true will send default PII data to Sentry.
-    // For example, automatic IP address collection on events
-    sendDefaultPii: false,
-
     // Integrations
     integrations: [Sentry.replayIntegration()],
 
