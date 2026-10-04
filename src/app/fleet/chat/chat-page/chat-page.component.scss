@@ -41,6 +41,22 @@
   min-width: 0;
 }
 
+// The theme draws every link in a <nav> as the sidebar's 210 px violet pill
+// (`nav a` in lcars-theme.scss). This list is navigation too, but a list of
+// names: each of its links sets back what that rule sets, so the names wrap
+// inside the column and read as text (FC-044).
+@mixin not-a-sidebar-pill {
+  width: auto;
+  height: auto;
+  margin: 0;
+  background-color: transparent;
+  text-align: left;
+  text-transform: none;
+  font-size: inherit;
+  font-weight: inherit;
+  user-select: text;
+}
+
 .chat-page__scope-name {
   margin: 0 0 0.35rem;
   font-size: 1rem;
@@ -49,6 +65,11 @@
   overflow-wrap: anywhere;
 
   a {
+    @include not-a-sidebar-pill;
+
+    display: inline;
+    padding: 0;
+    border-radius: 0;
     color: inherit;
   }
 }
@@ -73,6 +94,8 @@
 }
 
 .chat-page__place-link {
+  @include not-a-sidebar-pill;
+
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
