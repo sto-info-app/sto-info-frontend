@@ -167,6 +167,30 @@ describe('FleetHomeComponent', () => {
     ]);
   });
 
+  // FC-044: a Fleet's and an Armada's addresses run through their
+  // Community's, so a prefix match lit Communities on every Fleet page.
+  it.each([
+    ['/fleets', 'Fleets'],
+    ['/fleets/communities', 'Communities'],
+    ['/fleets/armadas', 'Armadas'],
+    ['/fleets/communities/alpha', 'Communities'],
+    ['/fleets/communities/alpha/manage', 'Communities'],
+    ['/fleets/communities/alpha/fleets/windows/one/roster', 'Fleets'],
+    ['/fleets/communities/standalone/fleets/windows/one', 'Fleets'],
+    ['/fleets/communities/alpha/armadas/windows/allied/news', 'Armadas'],
+    ['/fleets/register', null],
+  ])('lights the tab for the kind of page on %s', (path, lit) => {
+    configuration$ = of(buildConfiguration(true));
+
+    render();
+
+    const tabs = fixture.componentInstance.tabsFor('ENABLED');
+
+    expect(
+      tabs.filter(tab => tab.lightsOn?.test(path)).map(tab => tab.label),
+    ).toEqual(lit === null ? [] : [lit]);
+  });
+
   // A strip of tabs over a notice saying the feature is off would offer three
   // addresses that all say the same thing.
   it.each(['LOADING', 'OFFLINE', 'DISABLED'] as const)(

@@ -23,22 +23,28 @@ export type FleetHomeState = 'LOADING' | 'OFFLINE' | 'DISABLED' | 'ENABLED';
 export const FLEET_DIRECTORY_TABS: readonly FleetShellTab[] = [
   // Exact, because `/fleets` is the prefix of both of the others and would
   // otherwise stay lit while the reader is on one of them.
+  // Each tab lights on its listing and on every page of the kind it lists, a
+  // Fleet's or an Armada's included, although both addresses run through the
+  // Community's (FC-044). Pages that list nothing, such as registering, light
+  // none.
   {
     link: FLEET_LINKS.fleetDirectory().join('/'),
     label: 'Fleets',
     exact: true,
+    lightsOn: /^\/fleets(\/?$|\/communities\/[^/]+\/fleets\/)/,
   },
   {
     link: FLEET_LINKS.communityDirectory().join('/'),
     label: 'Communities',
-    // Not exact, so the tab stays lit while the reader drills into a
-    // Community, and into a Fleet or Armada beneath it.
     exact: false,
+    lightsOn:
+      /^\/fleets\/communities(\/?$|\/[^/]+(\/?$|\/(?!fleets\/|armadas\/)))/,
   },
   {
     link: FLEET_LINKS.armadaDirectory().join('/'),
     label: 'Armadas',
     exact: false,
+    lightsOn: /^\/fleets(\/armadas(\/|$)|\/communities\/[^/]+\/armadas\/)/,
   },
 ];
 

@@ -20,4 +20,12 @@ export interface FleetShellTab {
    * reader drills into a page beneath it.
    */
   exact: boolean;
+
+  /**
+   * The pages the tab lights on, by path, when its link's prefix is the
+   * wrong test (FC-044). A Fleet's address runs through its Community's, so
+   * the directory strip would otherwise light Communities on every Fleet and
+   * Armada page. Given, it decides alone and `exact` is ignored.
+   */
+  lightsOn?: RegExp;
 }

@@ -3,15 +3,25 @@
     class="lcars-tabs"
     [attr.aria-label]="tabsAriaLabel">
     @for (tab of tabs; track tab.link) {
-      <a
-        class="lcars-tab"
-        [routerLink]="tab.link"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: tab.exact }"
-        #tabActive="routerLinkActive"
-        [attr.aria-current]="tabActive.isActive ? 'page' : null"
-        >{{ tab.label }}</a
-      >
+      @if (tab.lightsOn; as lightsOn) {
+        <a
+          class="lcars-tab"
+          [routerLink]="tab.link"
+          [class.active]="isLitByPath(lightsOn)"
+          [attr.aria-current]="isLitByPath(lightsOn) ? 'page' : null"
+          >{{ tab.label }}</a
+        >
+      } @else {
+        <a
+          class="lcars-tab"
+          [routerLink]="tab.link"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: tab.exact }"
+          #tabActive="routerLinkActive"
+          [attr.aria-current]="tabActive.isActive ? 'page' : null"
+          >{{ tab.label }}</a
+        >
+      }
     }
     <span
       class="lcars-tabs-filler"

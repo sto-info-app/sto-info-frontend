@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 
 import { FleetPageShellComponent } from './fleet-page-shell.component';
 import { FleetShellTab } from './fleet-page-shell.model';
@@ -42,7 +42,7 @@ describe('FleetPageShellComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [provideRouter([])],
+      providers: [provideRouter([{ path: '**', children: [] }])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HostComponent);
@@ -195,5 +195,43 @@ describe('FleetPageShellComponent', () => {
     fixture.detectChanges();
 
     expect(find('nav.lcars-tabs')).toBeNull();
+  });
+
+  // FC-044: a tab with a path pattern lights by the page shown, whatever its
+  // link's prefix says.
+  it('lights a tab that decides by path on the pages it names', async () => {
+    host.tabs = [
+      {
+        link: '/fleets/communities',
+        label: 'Communities',
+        exact: false,
+        lightsOn: /^\/fleets\/communities\/?$/,
+      },
+      {
+        link: '/fleets',
+        label: 'Fleets',
+        exact: true,
+        lightsOn: /\/fleets\/windows\//,
+      },
+    ];
+    fixture.detectChanges();
+
+    await TestBed.inject(Router).navigateByUrl(
+      '/fleets/communities/alpha/fleets/windows/one?tab=roster',
+    );
+    fixture.detectChanges();
+
+    const lit = Array.from(
+      fixture.nativeElement.querySelectorAll('a.lcars-tab'),
+    ).map(tab => [
+      (tab as HTMLElement).textContent?.trim(),
+      (tab as HTMLElement).classList.contains('active'),
+      (tab as HTMLElement).getAttribute('aria-current'),
+    ]);
+
+    expect(lit).toEqual([
+      ['Communities', false, null],
+      ['Fleets', true, 'page'],
+    ]);
   });
 });

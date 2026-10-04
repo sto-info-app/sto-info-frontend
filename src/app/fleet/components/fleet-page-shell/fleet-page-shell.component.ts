@@ -1,5 +1,13 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  Input,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+
+import { filter, map } from 'rxjs';
 
 import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -84,5 +92,26 @@ export class FleetPageShellComponent {
    */
   get showsContent(): boolean {
     return !this.isLoading && this.errorMessage === null;
+  }
+
+  private readonly _router = inject(Router);
+
+  /** The address being shown, without its query or fragment. */
+  private readonly _path = toSignal(
+    this._router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      map(event => (event as NavigationEnd).urlAfterRedirects),
+    ),
+    { initialValue: this._router.url },
+  );
+
+  /**
+   * Whether a tab that decides by path is lit on the page being shown.
+   *
+   * @param lightsOn - The tab's pattern.
+   * @returns True when the path matches it.
+   */
+  isLitByPath(lightsOn: RegExp): boolean {
+    return lightsOn.test(this._path().split(/[?#]/)[0]);
   }
 }
