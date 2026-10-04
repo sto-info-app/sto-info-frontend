@@ -135,11 +135,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.showScrollButton = scrollY > 0;
   }
 
+  /**
+   * Returns to the top of the page: gliding there, unless the reader's system
+   * asks for less motion (FC-044), when it jumps.
+   */
   scrollToTop() {
-    (globalThis as Window | typeof globalThis).scrollTo?.({
-      top: 0,
-      behavior: 'smooth',
-    });
+    const window = globalThis as Window | typeof globalThis;
+    const reduced =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+
+    window.scrollTo?.({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
   }
 
   getRouteLink(route: string): string {

@@ -117,6 +117,34 @@ describe('HeaderComponent', () => {
       });
     });
 
+    // FC-044: less motion where the reader's system asks for it.
+    it.each([
+      [true, 'auto'],
+      [false, 'smooth'],
+    ])(
+      'jumps rather than glides when reduced motion is %s',
+      (reduced, behavior) => {
+        const scrollToSpy = jest.fn();
+        Object.defineProperty(globalThis, 'scrollTo', {
+          writable: true,
+          value: scrollToSpy,
+        });
+        Object.defineProperty(globalThis, 'matchMedia', {
+          writable: true,
+          configurable: true,
+          value: jest.fn().mockReturnValue({ matches: reduced }),
+        });
+
+        try {
+          component.scrollToTop();
+        } finally {
+          delete (globalThis as { matchMedia?: unknown }).matchMedia;
+        }
+
+        expect(scrollToSpy).toHaveBeenCalledWith({ top: 0, behavior });
+      },
+    );
+
     it('should update the button visibility on a real window scroll event, driving Angular change detection', () => {
       Object.defineProperty(globalThis, 'scrollY', {
         writable: true,

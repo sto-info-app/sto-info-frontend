@@ -1228,3 +1228,26 @@ button.lcars-btn-auto {
   margin: 0 !important;
   white-space: nowrap;
 }
+
+// FC-044: less motion everywhere for everybody whose system asks for it, not
+// only where a component remembered to ask. Animations stop on the element's
+// own resting style rather than a frame of the animation, so nothing blinks,
+// pulses, sweeps or cascades and nothing is left on an invisible frame;
+// transitions and scrolling jump. Loaded last, so it outranks any component.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+
+  // The LCARS buttons insist on their hover fade with a selector that
+  // outranks `*`, so they are named here to be outranked in turn.
+  .lcars-btn,
+  button.lcars-btn,
+  .submit-button {
+    transition: none !important;
+  }
+}
