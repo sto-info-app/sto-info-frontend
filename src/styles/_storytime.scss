@@ -167,13 +167,6 @@ nav[class^='storytime-'] :where(a, [aria-current='page']) {
   margin: 0 auto;
 }
 
-// An anchor wearing a button's clothes is still an anchor, and the global
-// underline would show through the pill.
-.storytime-page a.lcars-btn,
-.storytime-page a.lcars-btn:hover {
-  text-decoration: none;
-}
-
 // The theme gives a bare `button` a 16px bottom margin and 8px sides, which
 // `.lcars-btn` never undoes. An anchor in the same row has no such margin, so a
 // centred row aligns the button's margin box against the anchor's border box
@@ -457,17 +450,6 @@ $storytime-comment-colours: (
   // below its content runs that label straight through the switch next to it.
   > * {
     flex: 0 0 auto;
-  }
-
-  // The theme styles a bare `button` as a fixed 200px LCARS pill, and the
-  // switch is a button whose own stylesheet never says otherwise. Everywhere
-  // else it is used the labels are a word or two and fit; Storytime's say what
-  // a collaborator may do, and at 200px they run out of the switch and through
-  // the one beside it.
-  .lcars-toggle {
-    width: auto;
-    height: auto;
-    margin: 0;
   }
 }
 

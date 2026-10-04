@@ -119,6 +119,83 @@ input.errored {
   border-color: #c23;
 }
 
+// ─── Tick boxes, radio buttons, file inputs and their groups ────────────────
+// FC-044. The `input` rule above is the auth pages' text field, and it drew
+// every checkbox and radio 100% wide, so a box sat a column away from its
+// words and a row of choices wrapped a word to a line. These stay native,
+// for their keyboard and screen reader behaviour, drawn the LCARS way.
+
+input[type='checkbox'],
+input[type='radio'] {
+  flex: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  padding: 0;
+  accent-color: vars.$lcars-sky;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  // The rule above takes the outline away on focus, which left a keyboard
+  // with no way to see which box it was on.
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-perano;
+    outline-offset: 2px;
+  }
+}
+
+// A box and its words, side by side, the box first.
+label:has(> input[type='checkbox'], > input[type='radio']) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+// The browser's grey "Choose file" button, drawn as an LCARS pill.
+input[type='file'] {
+  padding: 0;
+  border: 0;
+  background: transparent;
+
+  &::file-selector-button {
+    margin-right: 1rem;
+    padding: 0.6rem 1.25rem;
+    border: 0;
+    border-radius: 100vmax;
+    background-color: vars.$lcars-sky;
+    color: vars.$lcars-black;
+    font-family: vars.$font-antonio;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+}
+
+// A group of choices reads as a section of the page rather than a box drawn
+// round it, its legend in the label style the fields above use. Zero
+// specificity, so a feature that draws its own group keeps it.
+:where(fieldset) {
+  min-width: 0;
+  margin: 1rem 0;
+  padding: 0;
+  border: 0;
+}
+
+:where(legend) {
+  margin-bottom: 0.5rem;
+  padding: 0;
+  font-family: vars.$font-antonio;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: vars.$lcars-perano;
+}
+
 .helper-error-text,
 .error-message-text {
   color: #f20;
@@ -160,6 +237,10 @@ button.lcars-btn,
   color: #000 !important;
   border: none !important;
   cursor: pointer;
+
+  // An anchor wearing the pill is still an anchor, and the global underline
+  // showed through it (FC-044); Storytime and Settings each undid it alone.
+  text-decoration: none;
   min-width: 150px !important;
   transition: filter 0.2s ease !important;
   line-height: 1.1 !important;
@@ -337,10 +418,16 @@ button.lcars-btn-auto {
     filter: brightness(1.1);
   }
 
-  .select-label {
+  // A bare <label> is a select label too: Fleet's choosers carried one
+  // without the class, and the theme's own label rule sat it on the rounded
+  // edge in body type, clipping its first letter (FC-044).
+  .select-label,
+  > label {
     position: absolute;
     top: 0.5rem;
     left: 1rem;
+    margin: 0;
+    color: #000;
     font-size: 0.6rem;
     text-transform: uppercase;
     font-weight: 800;
@@ -366,6 +453,7 @@ button.lcars-btn-auto {
     width: 100%;
     min-height: 4rem;
     box-sizing: border-box;
+    text-overflow: ellipsis;
 
     // top: push text below label (container-top-pad + label-height + gap)
     // right: arrow space + container-right-pad
@@ -514,6 +602,45 @@ button.lcars-btn-auto {
 
   textarea {
     resize: vertical;
+  }
+
+  // A chooser in a field container reads as the field beside it, with the
+  // LCARS arrow rather than the browser's grey box (FC-044).
+  select {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0.5rem 2.5rem 0.5rem 1rem;
+    border: none;
+    border-top: 1px solid rgb(255 255 255 / 8%);
+    border-radius: 0;
+    background-color: #1c1c1c;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23fff'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1.2rem center;
+    background-size: 8px 5px;
+    color: vars.$lcars-white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+
+    &:focus-visible {
+      background-color: #222;
+      box-shadow: inset 0 0 0 2px vars.$lcars-perano;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    option {
+      background: #222;
+      color: #fff;
+    }
   }
 
   .field-error {

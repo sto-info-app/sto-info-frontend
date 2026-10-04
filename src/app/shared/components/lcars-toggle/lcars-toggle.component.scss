@@ -1,7 +1,15 @@
 @use 'lcars-variables' as vars;
 
+// The theme styles a bare `button` as a fixed 200 px LCARS pill (size,
+// margin, alignment); the switch is a button, so it sets each of those back
+// and is sized by its label wherever it is used (FC-044).
 .lcars-toggle {
   display: inline-flex;
+  width: auto;
+  height: auto;
+  margin: 0;
+  text-align: left;
+  border-radius: 0;
   align-items: center;
   gap: 0.55rem;
   background: none;
