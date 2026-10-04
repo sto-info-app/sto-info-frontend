@@ -1,11 +1,12 @@
 <!--
-  One element carrying the whole accessible name, with everything inside it
-  hidden from assistive technology. Read piecemeal, a marked space would be
-  announced as an unnamed element between two halves of a name.
+  The whole name said once, as text only assistive technology reaches, with
+  everything drawn hidden from it. Read piecemeal, a marked space would be
+  announced as an unnamed element between two halves of a name. Not an
+  aria-label: on a plain span that is prohibited, and screen readers ignore it.
 -->
-<span
-  class="fleet-exact-name"
-  [attr.aria-label]="ariaLabel">
+<span class="fleet-exact-name">
+  <span class="sr-only">{{ ariaLabel }}</span>
+
   @for (space of leadingSpaces; track $index) {
     <span
       class="fleet-exact-name__space"

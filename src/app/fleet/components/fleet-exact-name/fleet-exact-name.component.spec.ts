@@ -45,14 +45,23 @@ describe('FleetExactNameComponent', () => {
     ).textContent ?? '';
 
   /**
-   * The accessible name the whole thing carries.
+   * What a screen reader is given: the only text not hidden from it.
    *
-   * @returns The aria-label.
+   * @returns The hidden text.
    */
-  const ariaLabel = (): string | null =>
-    (
-      fixture.nativeElement.querySelector('.fleet-exact-name') as HTMLElement
-    ).getAttribute('aria-label');
+  const ariaLabel = (): string | null => {
+    const root = fixture.nativeElement.querySelector(
+      '.fleet-exact-name',
+    ) as HTMLElement;
+    const drawn = root.querySelectorAll('[aria-hidden="true"]');
+
+    // Everything drawn is hidden from assistive technology; prohibited on a
+    // plain span, an aria-label would be ignored.
+    expect(root.hasAttribute('aria-label')).toBe(false);
+    expect(drawn).toHaveLength(root.children.length - 1);
+
+    return root.querySelector('.sr-only')?.textContent ?? null;
+  };
 
   it('should draw a name with no edge spaces as itself', () => {
     render('Alpha Quadrant Alliance');
@@ -106,13 +115,14 @@ describe('FleetExactNameComponent', () => {
     ).map(child => child.className);
 
     expect(children).toEqual([
+      'sr-only',
       'fleet-exact-name__space',
       'fleet-exact-name__core',
       'fleet-exact-name__space',
     ]);
   });
 
-  it('should hide every drawn part from assistive technology', () => {
+  it('should hide every drawn part from assistive technology, and only them', () => {
     render(' Alpha ');
 
     const parts = Array.from(
@@ -120,9 +130,12 @@ describe('FleetExactNameComponent', () => {
         .children,
     );
 
-    expect(
-      parts.every(part => part.getAttribute('aria-hidden') === 'true'),
-    ).toBe(true);
+    expect(parts.map(part => part.getAttribute('aria-hidden'))).toEqual([
+      null,
+      'true',
+      'true',
+      'true',
+    ]);
   });
 
   it('should keep a run of spaces inside the name in the core, unmarked', () => {

@@ -64,13 +64,30 @@ export async function configureReportView(component: unknown): Promise<void> {
 }
 
 /**
+ * The text an element draws: an exact name's words for screen readers are
+ * left out, so the name reads once, as it looks.
+ *
+ * @param element - The element.
+ * @returns Its drawn text.
+ */
+function drawnText(element: Element): string {
+  const copy = element.cloneNode(true) as Element;
+
+  copy
+    .querySelectorAll('.fleet-exact-name > .sr-only')
+    .forEach(spoken => spoken.remove());
+
+  return String(copy.textContent);
+}
+
+/**
  * What an element says, however its template wraps the words.
  *
  * @param element - The element.
  * @returns Its text, each run of whitespace one space.
  */
 export function textOf(element: Element): string {
-  return String(element.textContent).replace(/\s+/g, ' ');
+  return drawnText(element).replace(/\s+/g, ' ');
 }
 
 /**
@@ -83,7 +100,7 @@ export function cellsOf(table: Element): string[][] {
   return Array.from(table.querySelectorAll('tbody tr')).map(row =>
     Array.from(row.querySelectorAll('td')).map(cell =>
       // A cell always has text, if only an empty string.
-      String(cell.textContent).replace(/\s+/g, ' ').trim(),
+      drawnText(cell).replace(/\s+/g, ' ').trim(),
     ),
   );
 }

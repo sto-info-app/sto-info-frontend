@@ -274,7 +274,7 @@ describe('FleetFormerNamesComponent', () => {
         ],
       ]);
       // The edge spaces are drawn, one mark each.
-      expect(find('.fleet-exact-name')?.getAttribute('aria-label')).toBe(
+      expect(find('.fleet-exact-name > .sr-only')?.textContent).toBe(
         'Eighth Fleet, with one leading space and one trailing space',
       );
     });
