@@ -81,6 +81,40 @@ export default defineConfig({
         storageState: SIGNED_IN_STATE,
       },
     },
+    // FC-044: the Fleet journeys, as people made for the run and removed after
+    // it, so no seed password is needed (see e2e/README.md). Desktop first,
+    // then the same journeys on a phone, each on its own Communities.
+    // ---
+    // One retry each: the local dev server now and then refuses a single
+    // script on a fresh page's first burst, which leaves the page blank. A
+    // test that passes only on its retry is still reported as flaky.
+    {
+      name: 'fleet-setup',
+      testMatch: /support[\\/]fleet\.setup\.e2e\.ts/,
+      teardown: 'fleet-teardown',
+      retries: 1,
+    },
+    {
+      name: 'fleet-teardown',
+      testMatch: /support[\\/]fleet\.teardown\.e2e\.ts/,
+    },
+    {
+      name: 'fleet-desktop',
+      testMatch: /fleet[\\/].*\.e2e\.ts/,
+      dependencies: ['fleet-setup'],
+      retries: 1,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 900 },
+      },
+    },
+    {
+      name: 'fleet-mobile',
+      testMatch: /fleet[\\/].*\.e2e\.ts/,
+      dependencies: ['fleet-desktop'],
+      retries: 1,
+      use: { ...devices['Pixel 7'] },
+    },
   ],
 
   webServer: {
