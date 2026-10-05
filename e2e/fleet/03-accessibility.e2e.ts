@@ -89,44 +89,71 @@ test.describe.serial('Fleet Community, mechanically accessible', () => {
     fleetPath = new URL(page.url()).pathname;
   });
 
-  test('every page the Owner reaches passes axe', async ({ as }) => {
-    const page = await as('owner');
+  // The Owner's pages, a few to a test: axe sends its whole script and its
+  // findings through every check, and one page for all of them left the
+  // phone's trace too big for the runner to save when the page closed.
+  const ownerPages: [string, () => string[]][] = [
+    [
+      'the Owner’s dashboard and the Fleet Community lists',
+      () => [
+        '/dashboard/fleets',
+        '/dashboard/settings',
+        '/fleets',
+        '/fleets/communities',
+        '/fleets/armadas',
+        '/fleets/register',
+        '/fleets/register-standalone',
+        '/fleets/applications',
+      ],
+    ],
+    [
+      'the Owner’s Community, and their Fleet’s page, news and activity',
+      () => [
+        communityPath,
+        `${communityPath}/manage`,
+        `${communityPath}/manage/settings`,
+        fleetPath,
+        `${fleetPath}/news`,
+        `${fleetPath}/news/write`,
+        `${fleetPath}/activity`,
+      ],
+    ],
+    [
+      'the Owner’s Fleet events, holdings, import and recruitment',
+      () => [
+        `${fleetPath}/events`,
+        `${fleetPath}/events/new`,
+        `${fleetPath}/holdings`,
+        `${fleetPath}/import`,
+        `${fleetPath}/recruitment`,
+        `${fleetPath}/recruitment/settings`,
+        `${fleetPath}/recruitment/applications`,
+        `${fleetPath}/recruitment/members`,
+      ],
+    ],
+    [
+      'the Owner’s Fleet management, chat and Help',
+      () => [
+        `${fleetPath}/manage`,
+        `${fleetPath}/manage/settings`,
+        '/chat',
+        '/help/topics/fleets',
+        '/help/fleet-chat',
+        '/help/topics/settings',
+      ],
+    ],
+  ];
 
-    for (const path of [
-      '/dashboard/fleets',
-      '/dashboard/settings',
-      '/fleets',
-      '/fleets/communities',
-      '/fleets/armadas',
-      '/fleets/register',
-      '/fleets/register-standalone',
-      '/fleets/applications',
-      communityPath,
-      `${communityPath}/manage`,
-      `${communityPath}/manage/settings`,
-      fleetPath,
-      `${fleetPath}/news`,
-      `${fleetPath}/news/write`,
-      `${fleetPath}/activity`,
-      `${fleetPath}/events`,
-      `${fleetPath}/events/new`,
-      `${fleetPath}/holdings`,
-      `${fleetPath}/import`,
-      `${fleetPath}/recruitment`,
-      `${fleetPath}/recruitment/settings`,
-      `${fleetPath}/recruitment/applications`,
-      `${fleetPath}/recruitment/members`,
-      `${fleetPath}/manage`,
-      `${fleetPath}/manage/settings`,
-      '/chat',
-      '/help/topics/fleets',
-      '/help/fleet-chat',
-      '/help/topics/settings',
-    ]) {
-      await settle(page, path);
-      await noViolations(page, path);
-    }
-  });
+  for (const [pages, paths] of ownerPages) {
+    test(`${pages} pass axe`, async ({ as }) => {
+      const page = await as('owner');
+
+      for (const path of paths()) {
+        await settle(page, path);
+        await noViolations(page, path);
+      }
+    });
+  }
 
   test('every page a site admin reaches for Fleet Community passes axe', async ({
     as,
