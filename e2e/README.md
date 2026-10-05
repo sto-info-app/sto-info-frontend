@@ -80,7 +80,25 @@ npx playwright test --project=fleet-desktop --project=fleet-mobile
   that nothing of theirs is left.
 - Each journey file starts by removing the people's Communities
   (`fleet-clear-communities`), keeping the people: an Owner may hold ten,
-  closed ones included, and desktop and phone together register more.
+  closed ones included, and desktop and phone together register more. It also
+  forgets this machine's rate limit counts, since every person writes from one
+  address and the write limit allows it 200 in fifteen minutes.
+- A few checks need the backend's help, through more `e2e:support` commands:
+  - `fleet-storytime on|off|restore` throws Storytime's switch for Storytime
+    Moderation, then puts it back as `fleet-begin` found it, since the Help
+    journeys count its section; `fleet-finish` does the same.
+  - `fleet-proposal-notices <email> hold|release` holds a roster proposal
+    notice from the outbox while its Character's owner answers first, then
+    lets it go and reports what the outbox did with it.
+  - `fleet-dm-notices <email>` counts a person's direct message notices
+    without opening a page of theirs, which would make them present.
+  - `fleet-review-holds <tag>` and `fleet-expire-export <importId>` move this
+    run's hold to its review date, or its held export to the end of its
+    retention, and run the scheduled job that acts on it (the 05:03 hold
+    review, the 04:11 roster file retention). They start the backend
+    application, with its own schedule stopped, so each takes a minute or two,
+    and like the scheduled runs they also act on anything else overdue on this
+    machine.
 - A test that refreshes a person's session saves it back to their file when
   it ends. An access token lasts an hour and each refresh retires the refresh
   token used, so without that every test after the first hour was signed
@@ -97,6 +115,23 @@ npx playwright test --project=fleet-desktop --project=fleet-mobile
   `start:dev` for a long run: its watcher restarts the API on file events that
   change nothing (antivirus scanning, on this machine), and twice stopped a
   journey halfway. The scan worker and the frontend can stay as they are.
+- The teardown also removes the chat reports the people filed or were
+  reported in, the moderation holds placed by or on them, and the rescan
+  campaigns they started. The database only nulls a person on these, so each
+  run's records used to stay on the admin pages, named for nobody, until the
+  open chat reports filled the queue's first page and a later run could not
+  find its own.
+- Keep an axe sweep to eight pages or so a test. axe sends its whole script
+  and its findings through every check, so a page that checks many keeps a
+  large trace: the Owner's 29 in one page passed 200 MB on the phone, and the
+  runner could not save it when the page closed, so the test timed out after
+  every page had passed.
+- The Fleet projects trace without a screencast (`FLEET_TRACE` in
+  `playwright.config.ts`). A worker keeps every trace's frames until it
+  exits, passed tests' included, and the runner deletes them before it
+  counts the worker gone: an hour of phone frames took longer than the five
+  minutes it allows, and every full run ended "worker process did not exit".
+  A failure's trace still has the page at each step.
 - The checks for FC-035's transcripts, FC-038's erasure and FC-040's private
   images need secrets the local stack does not hold, and are left out.
 
@@ -107,10 +142,10 @@ The journeys:
 | `01-registration-to-moderation` | A Community, a Fleet, an Armada and a Fleet nobody runs registered; a roster imported; an applicant accepted; an event answered; a chat; a report decided; a suspension |
 | `02-help-and-navigation` | Help to every section and guide, and every page a Fleet guide links to; Settings and its guide; Community and the Dashboard to Fleets; following nothing, several, signed out, switched off, and the systems not answering |
 | `03-accessibility` | axe (WCAG 2.1 A and AA) on every Fleet, chat, settings, Help and site admin page; tabs and a dialog by keyboard; nothing moving under reduced motion |
-| `04-owed-news-activity` | The signed-in checks FC-027, FC-029 and FC-049 left owed: a scoped post drafted, given a cover, published, found, kept from strangers, renamed, unpublished and deleted; the Activity it makes; Settings' help links and back |
-| `04-owed-events` | FC-028 and FC-030's: weekly and monthly events and their previews, audiences, places and the waiting line, reminders, a moved and a cancelled occurrence, attendance once one is under way, the change log, the dashboard and the reports |
-| `04-owed-chat` | FC-031 to FC-035's: channels added, renamed, archived and refused, mentions and replies and their notices, direct messages, presence, typing, a block, toasts, and a report's evidence and removal |
-| `04-owed-admin` | FC-036, FC-037, FC-039 and FC-041's: suspensions, disputes, investigations, holds, roles, disabled accounts, report decisions, the Security Log, Scan Diagnostics and rescan campaigns |
+| `04-owed-news-activity` | The signed-in checks FC-027, FC-029 and FC-049 left owed: a scoped post drafted, given a cover, published, found, kept from strangers and from the site's News and its API, renamed, unpublished and deleted with its cover taken down; an Armada's news; the Activity that posts, joining, roles, holdings, imports and an Armada placement make, and its Older page; a registered Character's owner asked once, and not when they answered first; Settings' help links and back |
+| `04-owed-events` | FC-028 and FC-030's: weekly and monthly events and their previews, audiences, places and the waiting line, each reminder, a moved and a cancelled occurrence, attendance once one is under way, the change log, the dashboard, and the attendance and recruitment reports with who sees each |
+| `04-owed-chat` | FC-031 to FC-035's: channels added, renamed, archived and refused, mentions and replies and their notices, direct messages and the one notice somebody away is sent until they read them, presence, typing, a block, toasts, and a report's evidence and removal |
+| `04-owed-admin` | FC-036, FC-037, FC-039 and FC-041's: suspensions, disputes and duplicate names, investigations, holds and their review, an expired held export, roles and overrides, disabled accounts, chat and member report decisions, Storytime Moderation, the Security Log and its pages, Scan Diagnostics and rescan campaigns |
 | `05-screenshots` | Representative pages at each size, written to `docs/screenshots/fc-044/` |
 
 ## The picture journey is opt-in
