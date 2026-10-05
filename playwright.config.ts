@@ -15,6 +15,14 @@ import { defineConfig, devices } from '@playwright/test';
 
 const baseURL = process.env['E2E_BASE_URL'] ?? 'http://localhost:4200';
 
+/** The Fleet journeys' traces: kept on failure, without the screencast. */
+const FLEET_TRACE = {
+  mode: 'retain-on-failure',
+  screenshots: false,
+  snapshots: true,
+  sources: true,
+} as const;
+
 /**
  * Where the signed-in session is kept between the sign-in step and the
  * journeys, so that ten journeys do not each spend a page load logging in.
@@ -88,6 +96,11 @@ export default defineConfig({
     // One retry each: the local dev server now and then refuses a single
     // script on a fresh page's first burst, which leaves the page blank. A
     // test that passes only on its retry is still reported as flaky.
+    // ---
+    // Their traces keep each step's page snapshot but no screencast: a
+    // worker keeps every trace's frames until it exits, passed tests'
+    // included, and an hour of phone frames took the runner more than the
+    // five minutes it allows to delete, so it reported the worker as hung.
     {
       name: 'fleet-setup',
       testMatch: /support[\\/]fleet\.setup\.e2e\.ts/,
@@ -106,6 +119,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 900 },
+        trace: FLEET_TRACE,
       },
     },
     {
@@ -113,7 +127,7 @@ export default defineConfig({
       testMatch: /fleet[\\/].*\.e2e\.ts/,
       dependencies: ['fleet-desktop'],
       retries: 1,
-      use: { ...devices['Pixel 7'] },
+      use: { ...devices['Pixel 7'], trace: FLEET_TRACE },
     },
   ],
 
