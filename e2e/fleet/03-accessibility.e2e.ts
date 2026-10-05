@@ -1,6 +1,6 @@
-import AxeBuilder from '@axe-core/playwright';
 import { expect, Page } from '@playwright/test';
 
+import { noViolations } from '../support/axe';
 import {
   fleetBackend,
   fleetTest as test,
@@ -15,30 +15,6 @@ import {
  * strip and a dialog driven by the keyboard alone; and nothing moving for a
  * reader whose system asks for less motion.
  */
-
-/**
- * Scans a page's main content with axe against WCAG 2.1 A and AA.
- *
- * @param page - The page.
- * @param what - What it is, for the failure message.
- */
-async function noViolations(page: Page, what: string): Promise<void> {
-  const { violations } = await new AxeBuilder({ page })
-    .include('main')
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-    .analyze();
-
-  expect(
-    violations.map(
-      violation =>
-        `${violation.id}: ${violation.help} (${violation.nodes
-          .slice(0, 3)
-          .map(node => node.target.join(' '))
-          .join('; ')})`,
-    ),
-    what,
-  ).toEqual([]);
-}
 
 /**
  * Opens a page and waits until it has settled.
