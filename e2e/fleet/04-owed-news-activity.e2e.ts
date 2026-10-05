@@ -2,6 +2,7 @@ import { resolve } from 'node:path';
 
 import { expect, Page } from '@playwright/test';
 
+import { noViolations } from '../support/axe';
 import { backendSupport, backendSupportStarted } from '../support/backend';
 import {
   fleetBackend,
@@ -9,6 +10,7 @@ import {
   fleetTest as test,
   named,
 } from '../support/fleet-people';
+import { tabAndEnter, tabTo } from '../support/keyboard';
 
 /**
  * The signed-in checks owed by FC-027, FC-029 and FC-049 (FC-044): a Fleet's
@@ -18,9 +20,12 @@ import {
  * activity that publishing, joining, roles, holdings, imports and an Armada
  * placement leave, for whoever may see it, on the Dashboard, and past its
  * first page; the notice asking whether a registered Character on an import
- * is its owner's, and none for an owner who answered first; Settings and its
- * guides leading to each other; and none of those pages scrolling sideways,
- * down to 375px.
+ * is its owner's, and none for an owner who answered first; a Fleet taken out
+ * of its Armada with the keyboard alone, the Armada's tree and history and its
+ * Community's Armadas and Fleets reading each step, and axe passing them (with
+ * the events journey, FC-052's Playwright criteria from FC-026 and FC-030);
+ * Settings and its guides leading to each other; and none of those pages
+ * scrolling sideways, down to 375px.
  *
  * Run on a desktop and again on a phone (the `fleet-desktop` and
  * `fleet-mobile` projects), each on records of its own.
@@ -759,6 +764,95 @@ test.describe
         ).toBeVisible();
       }
     }
+  });
+
+  test('the Owner takes the Fleet out of the Armada by keyboard, and its history and its Community say so', async ({
+    as,
+  }) => {
+    const owner = await as('owner');
+    const reason = 'FC-044 journey: a test removal.';
+    const tree = owner.getByRole('region', { name: 'Fleets in this Armada' });
+    const structure = owner.getByRole('region', {
+      name: 'Armadas and Fleets',
+    });
+    const armadaEntry = structure
+      .getByRole('article')
+      .filter({ hasText: armadaName });
+
+    // The tree as the move left it, and the Community listing it.
+    await owner.goto(armadaPath);
+    await expect(
+      tree
+        .getByRole('listitem')
+        .filter({ hasText: 'Alpha' })
+        .getByRole('link', { name: fleetName }),
+    ).toBeVisible();
+    await noViolations(owner, armadaPath);
+
+    await owner.goto(communityPath);
+    await expect(
+      armadaEntry.getByRole('link', { name: fleetName }),
+    ).toBeVisible();
+
+    // Taken out with the keyboard alone, through its confirmation.
+    await owner.goto(armadaPath);
+
+    const remove = owner.getByRole('button', {
+      name: `Remove ${fleetName}`,
+      exact: true,
+    });
+
+    await remove.focus();
+    await owner.keyboard.press('Enter');
+
+    const form = owner.getByRole('form', { name: `Remove ${fleetName}` });
+
+    await tabTo(owner, form.getByLabel('Reason', { exact: true }));
+    await owner.keyboard.type(reason);
+    await tabAndEnter(owner, form.getByRole('button', { name: 'Remove…' }));
+
+    const confirm = owner.getByRole('dialog');
+
+    await expect(confirm).toContainText(
+      `Take ${fleetName} out of ${armadaName}?`,
+    );
+    await tabAndEnter(
+      owner,
+      confirm.getByRole('button', { name: 'Remove', exact: true }),
+    );
+    await expect(
+      owner.getByText(`${fleetName} was taken out of the Armada.`, {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(tree.getByRole('link', { name: fleetName })).toHaveCount(0);
+
+    // Its history, newest first, with the reason given.
+    await openArmadaTab(owner, 'History');
+    await expect(
+      owner.getByRole('heading', { name: 'Armada History' }),
+    ).toBeVisible();
+
+    for (const sentence of [
+      `${fleetName} was taken out; it was Alpha.`,
+      `${fleetName} moved from Beta to Alpha.`,
+      `${fleetName} joined as Beta.`,
+    ]) {
+      await expect(owner.getByText(sentence, { exact: true })).toBeVisible();
+    }
+
+    await expect(owner.getByText(reason)).toBeVisible();
+    await noViolations(owner, `${armadaPath}/history`);
+
+    // The Community now lists it among its Fleets in no Armada.
+    await owner.goto(communityPath);
+    await expect(
+      armadaEntry.getByRole('link', { name: fleetName }),
+    ).toHaveCount(0);
+    await expect(structure.getByRole('link', { name: fleetName })).toHaveCount(
+      1,
+    );
+    await noViolations(owner, communityPath);
   });
 
   test('the Community’s News section lists a post written from it', async ({
