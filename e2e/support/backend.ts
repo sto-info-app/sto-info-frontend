@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 
 /**
@@ -37,6 +37,65 @@ function parseLastJson<T>(output: string, command: string): T {
   throw new Error(
     `The backend support command "${command}" printed nothing this harness could read:\n${output}`,
   );
+}
+
+/**
+ * Starts a backend support command without waiting for it, for one that
+ * watches for something the journey is about to cause (FC-044).
+ *
+ * @param args - The command and its arguments.
+ * @returns `ready`, settled once the command prints `{"waiting":true}`, and
+ *   `done`, its answer.
+ */
+export function backendSupportStarted<T>(...args: string[]): {
+  ready: Promise<void>;
+  done: Promise<T>;
+} {
+  const command = args.join(' ');
+  const child = spawn(
+    'npm',
+    ['run', '--silent', 'e2e:support', '--', ...args],
+    {
+      cwd: backendDirectory,
+      shell: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    },
+  );
+  let output = '';
+  let errors = '';
+  let markReady: () => void = () => undefined;
+  const ready = new Promise<void>(resolveReady => {
+    markReady = resolveReady;
+  });
+
+  child.stdout.setEncoding('utf8').on('data', (chunk: string) => {
+    output += chunk;
+
+    if (output.includes('{"waiting":true}')) {
+      markReady();
+    }
+  });
+  child.stderr.setEncoding('utf8').on('data', (chunk: string) => {
+    errors += chunk;
+  });
+
+  const done = new Promise<T>((resolveDone, reject) => {
+    child.on('close', code => {
+      markReady();
+
+      if (code === 0) {
+        resolveDone(parseLastJson<T>(output, command));
+      } else {
+        reject(
+          new Error(
+            `The backend support command "${command}" failed:\n${errors}`,
+          ),
+        );
+      }
+    });
+  });
+
+  return { ready, done };
 }
 
 export function backendSupport<T>(...args: string[]): T {
