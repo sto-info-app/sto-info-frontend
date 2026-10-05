@@ -1,5 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test';
 
+import { backendSupport } from '../support/backend';
 import {
   fleetBackend,
   fleetPeople,
@@ -11,7 +12,8 @@ import {
  * The signed-in chat checks owed by FC-031, FC-033, FC-034 and FC-035
  * (FC-044): the list and its channels, custom channels and their limit, who
  * reads and posts where, mentions, replies and deletions and the notices they
- * send, direct messages from a profile, presence and appearing offline,
+ * send, direct messages from a profile and the one notice somebody away is
+ * sent until they read them, presence and appearing offline,
  * typing, toasts, blocks, reports and their evidence, and the list and an
  * open chat stacked on a narrow screen.
  *
@@ -196,6 +198,30 @@ async function noSidewaysScroll(page: Page, what: string): Promise<void> {
   expect(fits, `${what} scrolls sideways`).toBe(true);
 }
 
+/**
+ * Waits until the outbox has decided every direct message notice it holds
+ * for somebody, then counts what they were sent. Asked of the backend rather
+ * than a page of theirs, since a page would hold chat's socket and make them
+ * present.
+ *
+ * @param email - Whose.
+ * @returns How many "sent you a message" notices they have.
+ */
+async function settledNotices(email: string): Promise<{ notices: number }> {
+  let counts = { notices: 0, pending: 1 };
+
+  // The outbox runs once a minute; each question takes the backend a while.
+  await expect(async () => {
+    counts = backendSupport<{ notices: number; pending: number }>(
+      'fleet-dm-notices',
+      email,
+    );
+    expect(counts.pending, 'notices the outbox has still to decide').toBe(0);
+  }).toPass({ timeout: 300_000, intervals: [5_000] });
+
+  return counts;
+}
+
 // An Owner may hold ten Communities, closed ones included; each file starts
 // with none of the run's, so desktop and phone together stay inside that.
 test.beforeAll(() => {
@@ -207,6 +233,7 @@ test.describe.serial('Chat, as its people use it', () => {
   let fleetName: string;
   let dmPath: string;
   let dmFirst: string;
+  let offlineBaseline: number;
 
   test('the Owner registers a Community and a Fleet, and accepts the applicant', async ({
     as,
@@ -495,6 +522,66 @@ test.describe.serial('Chat, as its people use it', () => {
     await post(owner, people.friend.username, dmLive);
     // Live, over the socket, without reloading.
     await expect(messageIn(log, dmLive)).toBeVisible();
+  });
+
+  test('the friend reads the conversation, and leaves no page open', async ({
+    as,
+  }) => {
+    const friend = await as('friend');
+    const { people } = fleetPeople();
+
+    // Reading it is what lets its next message tell them again.
+    await friend.goto(dmPath);
+    await expect(
+      messageIn(logOf(friend, people.owner.username), dmFirst),
+    ).toBeVisible();
+  });
+
+  test('with no page of theirs open, the friend is told once of new messages', async ({
+    as,
+  }, info) => {
+    test.setTimeout(480_000);
+
+    const owner = await as('owner');
+    const { people } = fleetPeople();
+
+    offlineBaseline = (await settledNotices(people.friend.email)).notices;
+
+    await owner.goto(dmPath);
+    await post(owner, people.friend.username, named(info, 'away one'));
+    await post(owner, people.friend.username, named(info, 'away two'));
+
+    expect((await settledNotices(people.friend.email)).notices).toBe(
+      offlineBaseline + 1,
+    );
+  });
+
+  test('the friend reads the conversation again, and leaves', async ({
+    as,
+  }) => {
+    const friend = await as('friend');
+    const { people } = fleetPeople();
+
+    await friend.goto(dmPath);
+    await expect(
+      messageIn(logOf(friend, people.owner.username), dmFirst),
+    ).toBeVisible();
+  });
+
+  test('once they have read it, the next message tells them again', async ({
+    as,
+  }, info) => {
+    test.setTimeout(480_000);
+
+    const owner = await as('owner');
+    const { people } = fleetPeople();
+
+    await owner.goto(dmPath);
+    await post(owner, people.friend.username, named(info, 'away three'));
+
+    expect((await settledNotices(people.friend.email)).notices).toBe(
+      offlineBaseline + 2,
+    );
   });
 
   test('friends see each other online, until one appears offline', async ({
