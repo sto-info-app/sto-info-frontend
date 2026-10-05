@@ -1,5 +1,6 @@
 import { expect, Page } from '@playwright/test';
 
+import { noViolations } from '../support/axe';
 import { backendSupport } from '../support/backend';
 import {
   fleetBackend,
@@ -7,14 +8,18 @@ import {
   fleetTest as test,
   named,
 } from '../support/fleet-people';
+import { tabAndEnter } from '../support/keyboard';
 
 /**
  * The events checks owed by FC-028 and FC-030, signed in (FC-044): an Owner
  * previews and creates repeating events, across the clocks going back and on
  * a day some months lack, and chooses who each is for; a member answers,
- * waits in line and is promoted, asks to be reminded and is told of changes;
- * once an occurrence has started its attendance is recorded and reported; and
- * the editor and an occurrence fit a phone's screen.
+ * some of it with the keyboard alone, waits in line and is promoted, asks to
+ * be reminded and is told of changes; once an occurrence has started its
+ * attendance is recorded and reported; axe passes the event, the occurrence
+ * with its sheet, and the report; and the editor and an occurrence fit a
+ * phone's screen. With the Armada journey, these meet FC-052's Playwright
+ * criteria from FC-026 and FC-030.
  *
  * Run on a desktop and again on a phone (the `fleet-desktop` and
  * `fleet-mobile` projects), each on records of its own.
@@ -438,18 +443,26 @@ test.describe.serial('Events, as their Owner and a member meet them', () => {
     await expect(owner.getByText('You are going, with a place.')).toBeVisible();
   });
 
-  test('Maybe and Can’t go hold no place', async ({ as }) => {
+  test('Maybe and Can’t go hold no place, answered with the keyboard alone', async ({
+    as,
+  }) => {
     const owner = await as('owner');
     const member = await as('applicant');
+    const answer = (name: string) =>
+      member.getByRole('button', { name, exact: true });
 
     await member.goto(placePath);
-    await member.getByRole('button', { name: 'Maybe', exact: true }).click();
+
+    const maybe = answer('Maybe');
+
+    await maybe.focus();
+    await member.keyboard.press('Enter');
     await expect(
       member.getByText('You might go. Maybe holds no place.'),
     ).toBeVisible();
     await expect(member.getByText('1 going · 1 maybe')).toBeVisible();
 
-    await member.getByRole('button', { name: 'Can’t go', exact: true }).click();
+    await tabAndEnter(member, answer('Can’t go'));
     await expect(member.getByText('You can’t go.')).toBeVisible();
     await expect(member.getByText('1 going · 0 maybe')).toBeVisible();
 
@@ -458,7 +471,7 @@ test.describe.serial('Events, as their Owner and a member meet them', () => {
 
     // Without an answer, so the attendance sheet lists them among the
     // members who gave none.
-    await member.getByRole('button', { name: 'Take my answer back' }).click();
+    await tabAndEnter(member, answer('Take my answer back'));
     await expect(member.getByText('You have not answered.')).toBeVisible();
   });
 
@@ -631,6 +644,28 @@ test.describe.serial('Events, as their Owner and a member meet them', () => {
       }),
     ).toBeVisible();
     await expect(byPerson(member)).toHaveCount(0);
+  });
+
+  test('the event, an occurrence with its attendance sheet, and the attendance report pass axe', async ({
+    as,
+  }) => {
+    const owner = await as('owner');
+    const main = owner.getByRole('main');
+
+    for (const [path, drawn] of [
+      [`${fleetPath}/events`, main],
+      [placePath, main.getByRole('heading', { name: placeTitle }).first()],
+      [occurrencePath, owner.getByRole('region', { name: 'Who came' })],
+      [
+        `${fleetPath}/reports?report=attendance`,
+        owner.getByRole('table', { name: /Each person recorded/ }),
+      ],
+    ] as const) {
+      await owner.goto(path);
+      await owner.waitForLoadState('networkidle');
+      await expect(drawn, `${path} drew its page`).toBeVisible();
+      await noViolations(owner, path);
+    }
   });
 
   test('recruitment is counted by month and route, and anyone shown it sees counts only', async ({
