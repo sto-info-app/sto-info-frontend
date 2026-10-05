@@ -972,7 +972,7 @@ const STORYTIME_ADMIN_GUIDES: HelpGuide[] = [
         ],
         [
           'Claim — takes an open report so another moderator does not work the same one. It decides nothing.',
-          'Remove the content — takes the work away from readers and sends the creator your message. It needs that message first.',
+          'Remove the content — takes the work away from readers, sends the creator your message, and closes every open report about it as actioned. It needs that message first.',
           'Dismiss — closes the report without touching the content. Use it when the report is wrong, not when you are unsure.',
         ],
       ),

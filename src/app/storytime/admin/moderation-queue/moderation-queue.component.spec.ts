@@ -142,7 +142,9 @@ describe('ModerationQueueComponent', () => {
     expect(fixture.componentInstance.errorMessage).toContain('word for word');
   });
 
-  it('removes the content and closes the report', () => {
+  // The server closes the report with the removal (FC-044), so nothing a
+  // reader leaving the page could cancel is sent after it.
+  it('removes the content, and leaves closing its reports to the server', () => {
     render();
     fixture.componentInstance.form.patchValue({
       message: 'This breaches the harassment policy.',
@@ -155,10 +157,7 @@ describe('ModerationQueueComponent', () => {
       reasonCode: StorytimeReportReason.HARASSMENT,
       message: 'This breaches the harassment policy.',
     });
-    expect(moderationService.resolveReport).toHaveBeenCalledWith('report-1', {
-      status: StorytimeReportStatus.ACTIONED,
-      resolution: 'This breaches the harassment policy.',
-    });
+    expect(moderationService.resolveReport).not.toHaveBeenCalled();
   });
 
   it('dismisses a report with a note for the record', () => {

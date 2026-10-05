@@ -134,6 +134,9 @@ export class ModerationQueueComponent implements OnInit {
       return;
     }
 
+    // The server closes every open report about the content with the
+    // removal, in one transaction (FC-044): a second request from here could
+    // be cancelled by leaving the page, leaving the report open.
     this.runAction(
       this._moderationService.removeContent({
         targetType: report.targetType,
@@ -141,17 +144,6 @@ export class ModerationQueueComponent implements OnInit {
         reasonCode: report.reasonCode,
         message,
       }),
-      () =>
-        this._moderationService
-          .resolveReport(report.id, {
-            status: StorytimeReportStatus.ACTIONED,
-            resolution: message,
-          })
-          .pipe(
-            takeUntilDestroyed(this._destroyRef),
-            observeInZone(this._ngZone, this._cdr),
-          )
-          .subscribe(),
     );
   }
 
@@ -223,7 +215,7 @@ export class ModerationQueueComponent implements OnInit {
    * @param action - The action to run.
    * @param onSuccess - Anything else to do once it succeeds.
    */
-  private runAction(action: Observable<unknown>, onSuccess?: () => void): void {
+  private runAction(action: Observable<unknown>): void {
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -234,7 +226,6 @@ export class ModerationQueueComponent implements OnInit {
       )
       .subscribe({
         next: () => {
-          onSuccess?.();
           this.form.reset();
           this.load();
         },
