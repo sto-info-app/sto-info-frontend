@@ -490,9 +490,19 @@ test.describe.serial('Events, as their Owner and a member meet them', () => {
     await member.reload();
     await expect(lead('An hour before')).not.toBeChecked();
 
+    // Each lead on its own, then the one the member keeps.
+    await lead('15 minutes before').check();
+    await press('Save reminders');
+    await member.reload();
+    await expect(lead('15 minutes before')).toBeChecked();
+    await lead('15 minutes before').uncheck();
+
     // Asked again, so the member is told of the changes that follow.
     await lead('A day before').check();
     await press('Save reminders');
+    await member.reload();
+    await expect(lead('A day before')).toBeChecked();
+    await expect(lead('15 minutes before')).not.toBeChecked();
   });
 
   test('the Owner moves one occurrence and cancels another, each asked first', async ({
@@ -621,6 +631,68 @@ test.describe.serial('Events, as their Owner and a member meet them', () => {
       }),
     ).toBeVisible();
     await expect(byPerson(member)).toHaveCount(0);
+  });
+
+  test('recruitment is counted by month and route, and anyone shown it sees counts only', async ({
+    as,
+    anonymous,
+  }) => {
+    const owner = await as('owner');
+    const visitor = await anonymous();
+    const reportPath = `${fleetPath}/reports?report=recruitment`;
+    const applications = (page: Page) =>
+      page
+        .getByRole('table', {
+          name: 'Month by month, how each way of joining went',
+        })
+        .getByRole('row')
+        .filter({ hasText: 'Applications' })
+        .getByRole('cell');
+
+    // One application, accepted: Received, Accepted, Declined, Withdrawn,
+    // Lapsed and Pending.
+    await owner.goto(reportPath);
+    await expect(applications(owner)).toHaveText([
+      'Applications',
+      '1',
+      '1',
+      '0',
+      '0',
+      '0',
+      '0',
+      /./,
+    ]);
+
+    const audiences = owner.getByRole('region', {
+      name: 'Who sees each report',
+    });
+
+    await expect(audiences).toContainText(
+      'the Community’s followers and anyone else see its counts only, never a name.',
+    );
+
+    const recruitment = audiences
+      .getByRole('row')
+      .filter({ hasText: 'Recruitment' });
+    const shownTo = recruitment.getByLabel('Shown to');
+    const save = recruitment.getByRole('button', { name: 'Save', exact: true });
+
+    await expect(shownTo.getByRole('option')).toContainText([
+      'The Community’s followers, counts only',
+      'Anyone, counts only',
+    ]);
+    await shownTo.selectOption({ label: 'Anyone, counts only' });
+    await save.click();
+    await expect(save).toBeDisabled();
+
+    // A figure from one to four is never given exactly to a counts-only
+    // reader.
+    await visitor.goto(reportPath);
+    await expect(
+      visitor.getByText(/You are shown counts only\./),
+    ).toBeVisible();
+    await expect(applications(visitor).nth(1)).toHaveText('< 5');
+    await expect(applications(visitor).nth(2)).toHaveText('< 5');
   });
 
   test('the Owner changes an event from now on, cancels it, and reads its change log', async ({
