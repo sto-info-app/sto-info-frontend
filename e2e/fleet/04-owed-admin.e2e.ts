@@ -5,6 +5,7 @@ import { Browser, expect, Locator, Page, TestInfo } from '@playwright/test';
 import { backendSupport } from '../support/backend';
 import {
   fleetBackend,
+  FLEET_PEOPLE_FILE,
   fleetPeople,
   FleetRole,
   fleetStateOf,
@@ -15,10 +16,18 @@ import {
 /**
  * The signed-in checks owed by FC-036, FC-037, FC-039 and FC-041, automated
  * for FC-044: a Fleet's members suspended and reinstated; a Fleet suspended
- * and reinstated, and looked into, by a site admin; chat evidence held, read,
- * extended and released; the two report queues; a role changed and an
- * account disabled and restored, each with a reason; Scan Diagnostics and its
- * rescan campaigns; and the Security Log, which lists all of it.
+ * and reinstated, and looked into, by a site admin, beside another
+ * Community's Fleet of the same name; chat evidence held, read, extended and
+ * released, and a hold past its review date told to its owner; the two report
+ * queues, and Reported Officers claimed, closed and dismissed; a role and an
+ * override changed and an account disabled and restored, each with a reason;
+ * a held export whose file expired; Storytime Moderation refusing a decision
+ * without its words; Scan Diagnostics and its rescan campaigns; and the
+ * Security Log, which lists all of it, a page at a time.
+ *
+ * The hold review and the export's expiry are the backend's scheduled jobs,
+ * run on demand by its support script with only this run's records moved to
+ * their dates.
  *
  * Roster erasure (FC-038) and private images (FC-040) are left out: their
  * keys are not configured locally.
@@ -44,6 +53,9 @@ const ADMIN_PAGES = [
   '/admin/users',
   '/admin/permissions',
 ];
+
+/** Where the API is. */
+const API_URL = process.env['E2E_API_URL'] ?? 'http://localhost:3000';
 
 /** What the investigating site admin is told on every page they read. */
 const READ_ONLY_NOTE = 'You are looking in as a site admin';
@@ -160,6 +172,9 @@ test.describe.serial('Signed-in checks owed to site admins and Owners', () => {
   let fleetName: string;
   let fleetPath: string;
   let messages: [string, string];
+  let secondCommunityName: string;
+  let storyTitle: string;
+  let storySlug: string;
 
   /** A reason, recognisably this run's. */
   const why = (what: string): string => `${tag}: ${what}`;
@@ -354,6 +369,80 @@ test.describe.serial('Signed-in checks owed to site admins and Owners', () => {
     ).toBeVisible();
   });
 
+  test('Reported Officers: a claim needs no reason; closing as actioned and dismissing each wait for one', async ({
+    as,
+  }) => {
+    const admin = await as('admin');
+    const { people } = fleetPeople();
+    const name = people.applicant.username;
+
+    // Two more reports about the member, from people who have none open.
+    for (const role of ['friend', 'officer'] as const) {
+      const page = await as(role);
+
+      await page.goto(`/community/registry/profiles/${name}`);
+      await page.getByRole('button', { name: 'Report', exact: true }).click();
+
+      const dialog = page.getByRole('dialog');
+
+      await dialog
+        .getByLabel('Reason')
+        .selectOption({ label: 'Spam or scams' });
+      await dialog
+        .getByLabel('What happened (optional)')
+        .fill(why(`${role}’s report`));
+      await dialog.getByRole('button', { name: 'Send Report' }).click();
+      await expect(
+        page.getByText('Your report has been sent to the administrators.'),
+      ).toBeVisible();
+    }
+
+    const status = admin.getByLabel('Status', { exact: true });
+    const report = (role: string) =>
+      admin.getByRole('article').filter({ hasText: why(`${role}’s report`) });
+
+    await admin.goto('/admin/reports');
+    await press(
+      admin,
+      report('friend').getByRole('button', { name: 'Mark as under review' }),
+    );
+    await expect(
+      admin.getByText(`Report about ${name} marked as under review.`),
+    ).toBeVisible();
+    await expect(admin.getByRole('dialog')).toHaveCount(0);
+
+    for (const [role, filter, action, confirm, reason, done] of [
+      [
+        'friend',
+        'Under review',
+        'Close as actioned',
+        'Close',
+        why('close the member report'),
+        `Report about ${name} closed as actioned.`,
+      ],
+      [
+        'officer',
+        'Open',
+        'Dismiss report',
+        'Dismiss',
+        why('dismiss the member report'),
+        `Report about ${name} dismissed.`,
+      ],
+    ]) {
+      await status.selectOption({ label: filter });
+      await press(admin, report(role).getByRole('button', { name: action }));
+
+      const dialog = admin.getByRole('dialog');
+      const button = dialog.getByRole('button', { name: confirm, exact: true });
+
+      await expect(button).toBeDisabled();
+      await dialog.getByLabel('Reason').fill(reason);
+      await expect(button).toBeEnabled();
+      await button.click();
+      await expect(admin.getByText(done)).toBeVisible();
+    }
+  });
+
   test('from Chat Reports, a site admin holds the evidence and the author’s messages', async ({
     as,
   }) => {
@@ -450,6 +539,60 @@ test.describe.serial('Signed-in checks owed to site admins and Owners', () => {
         .getByRole('button', { name: 'Release' }),
     );
     await answer(page, 'Reason', why('release their messages'), 'Release');
+    await expect(page.getByText('The hold is released.')).toBeVisible();
+  });
+
+  test('a hold past its review date tells its owner, and its log says so', async ({
+    as,
+  }) => {
+    // Starting the backend to run the review takes a minute or two.
+    test.setTimeout(420_000);
+
+    const page = await as('admin');
+
+    await page.goto('/admin/chat-reports');
+
+    const entry = page
+      .getByRole('article')
+      .filter({ hasText: why('report 2') });
+
+    await press(page, entry.getByRole('button', { name: 'Show evidence' }));
+    await entry.getByRole('button', { name: 'Hold this evidence…' }).click();
+    await answer(page, 'Reason', why('hold until its review'), 'Hold');
+    await expect(page.getByText('Its evidence is held.')).toBeVisible();
+
+    // The 05:03 review, run now, with this hold's date a minute gone.
+    const { moved } = backendSupport<{ moved: number }>(
+      'fleet-review-holds',
+      tag,
+    );
+
+    expect(moved, 'holds brought to their review date').toBe(1);
+
+    await expect(async () => {
+      await page.goto('/notifications');
+      await expect(
+        page.getByText('Hold due for review', { exact: true }).first(),
+      ).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 60_000 });
+
+    await page.goto('/admin/holds');
+
+    const hold = page
+      .getByRole('article')
+      .filter({ hasText: why('hold until its review') });
+
+    await expect(hold.getByText('Review due', { exact: true })).toBeVisible();
+    await press(page, hold.getByRole('button', { name: 'Show its log' }));
+    await expect(
+      hold
+        .getByRole('listitem')
+        .filter({ hasText: 'Owner told the review is due (automatic)' }),
+    ).toContainText('Its review date passed.');
+
+    // Released, so the next run can hold the same evidence.
+    await press(page, hold.getByRole('button', { name: 'Release' }));
+    await answer(page, 'Reason', why('release after its review'), 'Release');
     await expect(page.getByText('The hold is released.')).toBeVisible();
   });
 
@@ -571,6 +714,41 @@ test.describe.serial('Signed-in checks owed to site admins and Owners', () => {
     ).toBeVisible();
   });
 
+  test('the Owner registers a Fleet of the same name in a second Community, and is told of the first', async ({
+    as,
+  }, info) => {
+    const page = await as('owner');
+
+    secondCommunityName = named(info, 'Owed Second Community');
+
+    await page.goto('/fleets/register');
+    await page.getByLabel('Name', { exact: true }).fill(secondCommunityName);
+    await page.getByLabel('Who can see it').selectOption({ label: 'Anyone' });
+    await page.getByRole('button', { name: 'Register' }).click();
+    await expect(page).toHaveURL(/\/fleets\/communities\/[^/]+$/);
+
+    await page
+      .getByRole('link', {
+        name: `Register a Fleet into ${secondCommunityName}`,
+      })
+      .click();
+    await page.getByLabel('Name, exactly as in game').fill(fleetName);
+    await page.getByLabel('Platform').selectOption({ label: 'Windows' });
+    await page
+      .getByLabel('How people join')
+      .selectOption({ label: 'By application' });
+    await page.getByLabel('Who can see it').selectOption({ label: 'Anyone' });
+    await page
+      .getByRole('button', { name: 'Check for existing records' })
+      .click();
+    // Told, and not stopped: nobody's record of a name is the real one.
+    await expect(
+      page.getByText(/already answers? to that name on that platform/),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Register' }).click();
+    await expect(page).toHaveURL(/\/fleets\/windows\/[^/]+$/);
+  });
+
   test('a site admin sees the Fleet’s provenance, suspends and reinstates it, and its history shows both', async ({
     as,
   }) => {
@@ -587,6 +765,18 @@ test.describe.serial('Signed-in checks owed to site admins and Owners', () => {
 
     await expect(
       fleet.getByRole('row').filter({ hasText: communityName }),
+    ).toContainText(people.owner.username);
+
+    // Every registration of the name on the platform, this one first.
+    const registrations = fleet
+      .getByRole('table', {
+        name: 'Registrations of this name on Windows, this one first',
+      })
+      .getByRole('row');
+
+    await expect(registrations.nth(1)).toContainText(communityName);
+    await expect(
+      registrations.filter({ hasText: secondCommunityName }),
     ).toContainText(people.owner.username);
 
     await fleet.getByRole('button', { name: 'Suspend…' }).click();
@@ -702,6 +892,33 @@ test.describe.serial('Signed-in checks owed to site admins and Owners', () => {
         page.getByText(`${people.stranger.username} ${done}`),
       ).toBeVisible();
     }
+
+    // An override on top of the role, granted and then withdrawn.
+    const tags = page
+      .locator('article', {
+        has: page.locator('code', { hasText: 'storytime.tag.manage' }),
+      })
+      .last();
+
+    await expect(tags).toContainText('Not held');
+    await tags.getByRole('button', { name: 'Grant', exact: true }).click();
+    await page
+      .getByLabel('Reason', { exact: true })
+      .fill(why('grant an override'));
+    await page.getByRole('button', { name: 'Apply override' }).click();
+    await expect(
+      page.getByText(
+        `Manage tags was granted for ${people.stranger.username}.`,
+      ),
+    ).toBeVisible();
+    await expect(tags).toContainText('Granted by override');
+
+    await tags.getByRole('button', { name: 'Withdraw', exact: true }).click();
+    await answer(page, 'Reason', why('withdraw the override'), 'Withdraw');
+    await expect(
+      page.getByText(/^\s*The override on Manage tags was withdrawn from/),
+    ).toBeVisible();
+    await expect(tags).toContainText('Not held');
   });
 
   test('Manage Members disables and restores a test account, each with a reason', async ({
@@ -846,6 +1063,10 @@ test.describe.serial('Signed-in checks owed to site admins and Owners', () => {
       'Site admin actions': [
         why('make a curator'),
         why('make a member again'),
+        why('grant an override'),
+        why('withdraw the override'),
+        why('close the member report'),
+        why('dismiss the member report'),
         why('disable the account'),
         why('restore the account'),
         why('resolve the report'),
@@ -862,6 +1083,8 @@ test.describe.serial('Signed-in checks owed to site admins and Owners', () => {
         why('read the evidence'),
         why('extend the hold'),
         why('release the hold'),
+        why('hold until its review'),
+        why('release after its review'),
       ],
       'Fleet investigations': [why('look into the imports')],
       'Roster erasures': [],
@@ -889,6 +1112,251 @@ test.describe.serial('Signed-in checks owed to site admins and Owners', () => {
         ).toBeVisible();
       }
     }
+  });
+
+  test('with Storytime on, the Owner publishes a Story, and two people report it', async ({
+    as,
+  }, info) => {
+    test.setTimeout(240_000);
+
+    const owner = await as('owner');
+
+    storyTitle = named(info, 'Owed Story');
+    storySlug = storyTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+    // Nothing in the interface turns it on; the server reads the switch
+    // within ten seconds. The next test puts it back as the run found it.
+    backendSupport('fleet-storytime', 'on');
+    await expect(async () => {
+      await owner.goto('/storytime/manage/stories/new');
+      await expect(
+        owner.getByRole('heading', { name: 'Create a Story' }),
+      ).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000, intervals: [2_000] });
+
+    await owner.getByLabel('Title', { exact: true }).fill(storyTitle);
+    await owner.getByLabel('URL slug').fill(storySlug);
+    await owner
+      .getByLabel('Short description')
+      .fill('FC-044 journey: a test Story.');
+    await owner
+      .getByLabel('Visibility', { exact: true })
+      .selectOption({ label: 'Public' });
+    await owner.getByRole('button', { name: 'Save', exact: true }).click();
+    await owner.waitForURL(/\/storytime\/manage\/stories\/[0-9a-f-]{36}$/);
+
+    const storyPath = new URL(owner.url()).pathname;
+
+    await owner.getByRole('button', { name: 'I confirm' }).click();
+    await expect(owner.getByRole('button', { name: 'I confirm' })).toHaveCount(
+      0,
+    );
+
+    await owner.goto(`${storyPath}/chapters/new`);
+    await owner.getByLabel('Title', { exact: true }).fill('Chapter one');
+    await owner
+      .getByLabel('Chapter', { exact: true })
+      .fill('FC-044 journey: a test Chapter.');
+    await owner.getByRole('button', { name: 'Save', exact: true }).click();
+    await owner.waitForURL(/\/storytime\/manage\/chapters\/[0-9a-f-]{36}$/);
+    await owner.getByRole('button', { name: 'Save and publish' }).click();
+    await owner.waitForURL(/\/chapters$/);
+
+    await owner.goto(storyPath);
+    await owner.getByRole('button', { name: 'Save and publish' }).click();
+    await owner.waitForURL(/\/storytime\/manage\/stories$/);
+
+    for (const role of ['friend', 'officer'] as const) {
+      const page = await as(role);
+
+      await page.goto(`/storytime/stories/${storySlug}`);
+      await page.getByRole('button', { name: 'Report this Story' }).click();
+
+      const dialog = page.getByRole('dialog');
+
+      await dialog
+        .getByLabel('Anything you want to add')
+        .fill(why(`${role}’s Story report`));
+      await dialog.getByRole('button', { name: 'Send report' }).click();
+      await expect(
+        page.getByText('Thank you. An administrator will look at this.'),
+      ).toBeVisible();
+    }
+  });
+
+  test('Storytime Moderation refuses a dismissal without a note, and an appeal decided without a message', async ({
+    as,
+  }) => {
+    const admin = await as('admin');
+    const owner = await as('owner');
+    const queue = '/storytime/manage/moderation';
+    const report = (role: string) =>
+      admin
+        .locator('ul.storytime-moderation__reports > li')
+        .filter({ hasText: why(`${role}’s Story report`) });
+    const appeal = admin
+      .locator('ul.storytime-moderation__appeals > li')
+      .filter({ hasText: why('appeal the removal') });
+    const message = admin.getByLabel('What the creator is told');
+    const note = admin.getByLabel('Note for the record');
+
+    try {
+      await admin.goto(queue);
+
+      // Dismissed without a note: refused, and nothing sent.
+      await report('friend').getByRole('button', { name: 'Dismiss' }).click();
+      await expect(
+        admin.getByText(
+          'Say why the report is dismissed. It is kept with the report and in the site admin log.',
+        ),
+      ).toBeVisible();
+      await expect(report('friend')).toContainText('OPEN');
+
+      await note.fill(why('dismiss the Story report'));
+      await report('friend').getByRole('button', { name: 'Dismiss' }).click();
+      await expect(report('friend')).toContainText('DISMISSED');
+
+      // Removing it closes every report still open about it, in the same
+      // request, so leaving the page at once cancels nothing.
+      const removed = admin.waitForResponse(
+        response =>
+          response.request().method() === 'POST' &&
+          new URL(response.url()).pathname.endsWith('/moderation/remove'),
+      );
+
+      await message.fill(why('remove the Story'));
+      await report('officer')
+        .getByRole('button', { name: 'Remove the content' })
+        .click();
+      expect((await removed).ok()).toBe(true);
+      await admin.goto(queue);
+      await expect(report('officer')).toContainText('ACTIONED');
+
+      await owner.goto('/storytime/manage/stories');
+
+      const story = owner
+        .locator('article.storytime-record')
+        .filter({ hasText: storyTitle });
+
+      await expect(story).toContainText(
+        'This Story has been removed by an administrator.',
+      );
+      await story.getByRole('button', { name: 'Appeal this removal' }).click();
+      await story.getByLabel('Your appeal').fill(why('appeal the removal'));
+      await story.getByRole('button', { name: 'Send appeal' }).click();
+      await expect(
+        owner.getByText(
+          'Your appeal has been sent. An administrator will read it.',
+        ),
+      ).toBeVisible();
+
+      // Decided without a message: refused, and the appeal still waits.
+      await admin.goto(queue);
+      await appeal.getByRole('button', { name: 'Reject' }).click();
+      await expect(
+        admin.getByText(
+          'Say what the creator is told about their appeal. They are shown it word for word.',
+        ),
+      ).toBeVisible();
+      await expect(appeal).toHaveCount(1);
+
+      await message.fill(why('uphold the appeal'));
+      await appeal.getByRole('button', { name: 'Uphold and restore' }).click();
+      await expect(appeal).toHaveCount(0);
+
+      // Restored, so its page reads again.
+      await owner.goto(`/storytime/stories/${storySlug}`);
+      await expect(
+        owner.getByRole('heading', { name: storyTitle }),
+      ).toBeVisible();
+    } finally {
+      // As the run found it: the Help journeys count its section.
+      backendSupport('fleet-storytime', 'restore', FLEET_PEOPLE_FILE);
+    }
+  });
+
+  test('an export held for a conflict, whose file expires first, is shown as expired and cannot be chosen', async ({
+    as,
+  }) => {
+    // Starting the backend to run the retention takes a minute or two.
+    test.setTimeout(420_000);
+
+    const page = await as('owner');
+
+    // The same moment as the export in force, and different rows.
+    await page.goto(`${fleetPath}/import`);
+    await page.getByLabel('The export, as the game wrote it').setInputFiles({
+      name: `${fleetName}_20240101-120000.Csv`,
+      mimeType: 'text/csv',
+      buffer: Buffer.from(
+        `${ROSTER_ROWS.slice(0, 2).join('\r\n')}\r\n`,
+        'utf8',
+      ),
+    });
+    await page.getByLabel('The clock it was taken on').selectOption('UTC');
+    await page.getByRole('button', { name: 'Check this export' }).click();
+    await page.getByRole('button', { name: 'Import this export' }).click();
+    await expect(
+      page.getByText(/Another export of this Fleet claims the same moment/),
+    ).toBeVisible({ timeout: 120_000 });
+
+    const importId = new URL(page.url()).pathname.split('/').pop() as string;
+    const { moved } = backendSupport<{ moved: number }>(
+      'fleet-expire-export',
+      importId,
+    );
+
+    expect(moved).toBe(1);
+
+    await page.goto(`${fleetPath}/investigate/conflicts`);
+    await page
+      .getByRole('navigation', { name: 'Which conflicts' })
+      .getByRole('link', { name: 'All', exact: true })
+      .click();
+
+    const expired = page.getByRole('row').filter({ hasText: 'File expired' });
+
+    await expect(expired).toHaveCount(1);
+    await expect(expired).toContainText(
+      'its file expired before it was chosen, so it can no longer be selected',
+    );
+    await expect(expired.getByRole('button')).toHaveCount(0);
+  });
+
+  test('the Security Log reads more than fifty entries a page at a time', async ({
+    as,
+  }) => {
+    const page = await as('admin');
+
+    // Each read of Scan Diagnostics is logged: enough of them make a second
+    // page whatever was here before.
+    await settle(page, '/admin/security-log');
+
+    const token = await page.evaluate(() =>
+      localStorage.getItem('access_token'),
+    );
+
+    for (let read = 0; read < 51; read++) {
+      const answer = await page.request.get(
+        `${API_URL}/admin/file-scanning/diagnostics`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      expect(answer.status()).toBe(200);
+    }
+
+    await settle(page, '/admin/security-log');
+
+    const newer = page.getByRole('button', { name: 'Newer', exact: true });
+    const older = page.getByRole('button', { name: 'Older', exact: true });
+
+    await expect(page.getByText(/Page 1 of \d+/)).toBeVisible();
+    await expect(newer).toBeDisabled();
+    await older.click();
+    await expect(page.getByText(/Page 2 of \d+/)).toBeVisible();
+    await expect(newer).toBeEnabled();
+    await newer.click();
+    await expect(page.getByText(/Page 1 of \d+/)).toBeVisible();
   });
 
   test('no site administration page scrolls sideways, on a phone either', async ({
