@@ -144,9 +144,9 @@
     "usePathForSuiteName": "true"
   },
   "overrides": {
-    "@puppeteer/browsers": "3.2.1",
+    "@puppeteer/browsers": "3.2.3",
     "qs": "6.16.0",
     "tmp": "0.2.7",
-    "uuid": "14.0.0"
+    "uuid": "14.0.2"
   }
 }
