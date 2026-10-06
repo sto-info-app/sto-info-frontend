@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { provideRouter } from '@angular/router';
 
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 import { GovernanceReasonDialogComponent } from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
@@ -301,6 +301,30 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
 
     expect(button('Switch Fleet Communities on')).not.toBeNull();
     expect(text()).not.toContain('could not be read');
+  });
+
+  // The answer can arrive after the panel has lost its list, when reading it
+  // again failed meanwhile: the outcome is still said, and nothing is shown
+  // as though it had been read.
+  it('says what a change came to even when the switches could not be read meanwhile', async () => {
+    const answer = new Subject<FeatureSwitchState>();
+
+    switches.set.mockReturnValue(answer);
+    await show();
+
+    button('Switch Fleet Communities on')!.click();
+    await fixture.whenStable();
+    switches.list.mockReturnValue(throwError(() => new Error('offline')));
+    fixture.componentInstance.load();
+    answer.next({ ...FLEET_OFF, isEnabled: true });
+    answer.complete();
+    await fixture.whenStable();
+
+    expect(text()).toContain('The feature switches could not be read.');
+    expect(element().querySelector('[role="status"]')?.textContent).toContain(
+      'Fleet Communities switched on.',
+    );
+    expect(button('Switch Fleet Communities off')).toBeNull();
   });
 
   it('says it is reading before the answer arrives', () => {
