@@ -13,6 +13,7 @@ import { take } from 'rxjs';
 
 import { FAILED_JOB_QUEUE_LABELS } from 'src/app/models/failed-jobs.models';
 import {
+  FEATURE_SWITCH_LABELS,
   SECURITY_LOG_SOURCE_LABELS,
   SecurityLogEntry,
   SecurityLogPerson,
@@ -196,6 +197,11 @@ export class SecurityLogComponent {
       return DIAGNOSTICS_SUBJECT_LABELS[kind] ?? inWords(kind);
     }
 
+    // A feature switch names the feature, which says it all (FC-045).
+    if (kind === 'FEATURE_SWITCH' && entry.subjectId !== null) {
+      return FEATURE_SWITCH_LABELS[entry.subjectId] ?? inWords(entry.subjectId);
+    }
+
     if (FAILED_JOB_ACTIONS.has(entry.action)) {
       const queue =
         kind === 'ALL'
@@ -211,12 +217,17 @@ export class SecurityLogComponent {
   /**
    * The ID of what it acted on, when there is one to show. The Scan
    * Diagnostics reads and the bulk actions on failed jobs name `ALL`, which
-   * their subject already says in words (FC-042).
+   * their subject already says in words (FC-042), and a feature switch's
+   * subject is its feature's name (FC-045).
    *
    * @param entry - The entry.
    * @returns The ID, or null for none.
    */
   protected subjectIdOf(entry: SecurityLogEntry): string | null {
+    if (entry.subjectKind === 'FEATURE_SWITCH') {
+      return null;
+    }
+
     const operations =
       entry.action === 'SCAN_DIAGNOSTICS_VIEWED' ||
       FAILED_JOB_ACTIONS.has(entry.action);

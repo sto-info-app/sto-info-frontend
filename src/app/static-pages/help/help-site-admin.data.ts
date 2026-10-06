@@ -5,8 +5,9 @@ import { HelpGuide, HelpTopic } from './help.models';
 
 /**
  * The guides to running the site, for its administrators (FC-050): reports and
- * holds, disputes, roster erasure, the Security Log and picture scanning. Each
- * follows the same six parts as the Fleet guides.
+ * holds, disputes, roster erasure, the Security Log, picture scanning and,
+ * from FC-045, the feature switches. Each follows the same six parts as the
+ * Fleet guides.
  */
 const SITE_ADMIN_GUIDES: HelpGuide[] = [
   {
@@ -230,7 +231,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
           'Show narrows the feed to one source, or Everything:',
         ],
         [
-          'Site admin actions — role, permission and limit changes; disabling and restoring accounts; decisions on member, chat and Storytime reports and appeals; chat messages removed from Chat Reports; Custom Tracking and Storytime moderation; picture runs, rescan campaigns, and pictures refused for policy taken down or kept; reads of Scan Diagnostics, failed jobs retried or discarded, and publication paused or resumed; and the system’s own restore check, when it brings back records a restored database had lost.',
+          'Site admin actions — role, permission and limit changes; disabling and restoring accounts; decisions on member, chat and Storytime reports and appeals; chat messages removed from Chat Reports; Custom Tracking and Storytime moderation; picture runs, rescan campaigns, and pictures refused for policy taken down or kept; reads of Scan Diagnostics, failed jobs retried or discarded, and publication paused or resumed; features switched on or off; and the system’s own restore check, when it brings back records a restored database had lost.',
           'Fleet disputes — a site administrator’s actions on a Community’s Site administration page.',
           'Moderation holds — holds placed, extended, released and read, and the system’s own review notices and releases.',
           'Fleet investigations — each look into a Fleet, with its purpose.',
@@ -368,6 +369,45 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
       { label: 'Security Log', route: APP_ROUTES.ADMIN_SECURITY_LOG },
     ],
   },
+  {
+    slug: 'site-admin-features',
+    title: 'Switching features on and off',
+    summary:
+      'Fleet Communities, Storytime and Custom Tracking: switching each on or off for everybody, and what the environment allows beneath each.',
+    sections: [
+      guideSection('What it is for', [
+        'Fleet Communities, Storytime and Custom Tracking each have a switch. Off, the feature disappears for everybody, as though it did not exist: its pages say it is offline and its links leave the menus. Nothing it holds is deleted, and switching it on again brings it all back.',
+        'Use it to keep a feature hidden until it is ready, or to take one offline quickly when something is wrong with it.',
+        'No switch here touches the file scanner: uploads are scanned and published whatever these say. To hold back publishing, use Pause publication instead.',
+      ]),
+      guideSection('Who can use it', ['Site administrators only.']),
+      guideSection('Where to find it', [
+        'Choose Admin in the side bar. Features is under Operations, below Publication.',
+      ]),
+      guideSection('How to switch a feature', [
+        'Each feature shows whether it is On or Off, when its switch was last changed, and by whom.',
+        'Press Switch on or Switch off beside it. You are asked for a Reason, and nothing changes until you give one and confirm.',
+        'Every server applies the change within ten seconds. Pages already open in a browser, your own included, show it once they are reloaded.',
+      ]),
+      guideSection('How to read what the environment sets', [
+        'Under Set by the environment, each feature lists its parts and whether the server’s settings allow them — for Fleet Communities, registering, roster imports and chat. These are fixed where the site is deployed and cannot be changed here.',
+        'A part that is not allowed stays off even while its feature is on. While a feature is off, every part of it is off whatever this list says.',
+      ]),
+      guideSection('Who can see it', [
+        'Only site administrators see the switches. Every change appears in the Security Log as Switched a feature on or Switched a feature off, naming the feature, with your reason.',
+        'Members see only the result: a feature that is there, or one that says it is offline.',
+      ]),
+      guideSection('When something goes wrong', [
+        '“… is already switched on.” or “… is already switched off.” means another administrator changed it first. The switches are then read again and show it as it is.',
+        '“The feature switches could not be read.” means the site could not be reached. Try again.',
+        '“… switch is missing from the database.” means the setting was never created there; tell whoever runs the servers.',
+      ]),
+    ],
+    relatedLinks: [
+      { label: 'Admin', route: APP_ROUTES.ADMIN },
+      { label: 'Security Log', route: APP_ROUTES.ADMIN_SECURITY_LOG },
+    ],
+  },
 ];
 
 /**
@@ -379,7 +419,7 @@ export const SITE_ADMIN_TOPIC: HelpTopic = {
   id: 'site-admin',
   title: 'Running the site',
   intro:
-    'For site administrators: deciding reports, keeping evidence, settling disputes over who runs a Community, erasing somebody from rosters, reading the Security Log and checking pictures.',
+    'For site administrators: deciding reports, keeping evidence, settling disputes over who runs a Community, erasing somebody from rosters, reading the Security Log, checking pictures and switching features on and off.',
   requiresAdmin: true,
   guides: SITE_ADMIN_GUIDES,
 };

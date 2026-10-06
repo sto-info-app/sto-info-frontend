@@ -1477,13 +1477,26 @@ its cards: whether publication is paused, since when, by whom and how many
 uploads wait, with **Pause publication** or **Resume publication**, each asking
 for a reason. A pause or resume made while the job queues cannot be reached
 still changes the switch, and the control says the queues follow once they
-answer. It carries the Admin page's one help link, to the Scan Diagnostics
-guide.
+answer. It carries a help link to the Scan Diagnostics guide.
+
+**Feature switches** (FC-045, `FeatureSwitchesComponent` in
+`src/app/admin/feature-switches`), under Operations on the Admin page, below the
+publication pause: Fleet Communities, Storytime and Custom Tracking, each with
+whether it is **On** or **Off**, when its switch was last changed and by whom
+("Not recorded" when a migration or SQL set it), and the capability flags the
+environment sets beneath it, read-only, as "allowed" or "not allowed".
+**Switch on** (green) or **Switch off** (red) asks for a reason through
+`GovernanceReasonDialogComponent`; each button's accessible name says which
+feature and which way ("Switch Fleet Communities off"). A refusal, such as
+another administrator having switched it first, is shown and the switches are
+read again. Its help link goes to the site admin guide "Switching features on
+and off".
 
 **Security Log subjects** (FC-042): a Scan Diagnostics read names what was read
 ("Scan Diagnostics", "Scan Diagnostics: an asset" and so on), and a failed job
 action names its queue as Scan Diagnostics does, or "Failed jobs in every
-queue" for a bulk one; `ALL` is not shown as an ID.
+queue" for a bulk one; `ALL` is not shown as an ID. A feature switched on or off
+(FC-045) names the feature, with no ID.
 
 **Rescan campaigns** (FC-041, `RescanPanelComponent` in
 `src/app/admin/scan-diagnostics/rescan-panel`), on Scan Diagnostics above

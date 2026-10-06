@@ -190,7 +190,9 @@ describe('SecurityLogComponent (FC-039)', () => {
     ['SCAN_JOB_DISCARDED', 'Discarded failed jobs'],
     ['PUBLICATION_PAUSED', 'Paused publication'],
     ['PUBLICATION_RESUMED', 'Resumed publication'],
-  ])('names %s as “%s” (FC-042)', async (action, label) => {
+    ['FEATURE_SWITCHED_ON', 'Switched a feature on'],
+    ['FEATURE_SWITCHED_OFF', 'Switched a feature off'],
+  ])('names %s as “%s” (FC-042, FC-045)', async (action, label) => {
     log.list.mockReturnValue(
       of({
         items: [entryOf({ action, target: null })],
@@ -226,6 +228,23 @@ describe('SecurityLogComponent (FC-039)', () => {
     ['SCAN_JOB_RETRIED', 'ALL', 'ALL', 'Failed jobs in every queue', null],
     ['SCAN_JOB_RETRIED', 'new-queue', '7', 'new-queue', '7'],
     ['USER_DISABLED', 'SOME_THING', 'ALL', 'Some thing', 'ALL'],
+    // A feature switch names its feature, with no code (FC-045).
+    [
+      'FEATURE_SWITCHED_ON',
+      'FEATURE_SWITCH',
+      'FLEET_COMMUNITIES',
+      'Fleet Communities',
+      null,
+    ],
+    ['FEATURE_SWITCHED_OFF', 'FEATURE_SWITCH', 'STORYTIME', 'Storytime', null],
+    [
+      'FEATURE_SWITCHED_OFF',
+      'FEATURE_SWITCH',
+      'CUSTOM_TRACKING',
+      'Custom Tracking',
+      null,
+    ],
+    ['FEATURE_SWITCHED_ON', 'FEATURE_SWITCH', 'NEW_THING', 'New thing', null],
   ])(
     'names %s’s subject %s %s in words (FC-042)',
     async (action, subjectKind, subjectId, words, code) => {

@@ -55,6 +55,15 @@ export const SITE_ADMIN_ACTION_LABELS: Readonly<Record<string, string>> = {
   SCAN_JOB_DISCARDED: 'Discarded failed jobs',
   PUBLICATION_PAUSED: 'Paused publication',
   PUBLICATION_RESUMED: 'Resumed publication',
+  FEATURE_SWITCHED_ON: 'Switched a feature on',
+  FEATURE_SWITCHED_OFF: 'Switched a feature off',
+};
+
+/** Each feature a site admin may switch on or off, by name (FC-045). */
+export const FEATURE_SWITCH_LABELS: Readonly<Record<string, string>> = {
+  FLEET_COMMUNITIES: 'Fleet Communities',
+  STORYTIME: 'Storytime',
+  CUSTOM_TRACKING: 'Custom Tracking',
 };
 
 /**

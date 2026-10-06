@@ -10,6 +10,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { ModerationHoldAdminService } from 'src/app/admin/moderation-admin/moderation-hold-admin.service';
+import { FeatureSwitchesComponent } from 'src/app/admin/feature-switches/feature-switches.component';
 import { PublicationPauseComponent } from 'src/app/admin/publication-pause/publication-pause.component';
 import {
   STORYTIME_ADMIN_LINKS,
@@ -38,7 +39,8 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
  * administrator actually holds rather than shown to every administrator.
  *
  * Under Operations sits the publication pause (FC-042): a switch rather than a
- * way into a page, so it is a control of its own rather than a card.
+ * way into a page, so it is a control of its own rather than a card. So are
+ * the feature switches beside it (FC-045).
  */
 @Component({
   selector: 'app-admin',
@@ -49,6 +51,7 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
     RouterModule,
     CollapsibleSectionComponent,
     PublicationPauseComponent,
+    FeatureSwitchesComponent,
   ],
 })
 export class AdminComponent implements OnInit {

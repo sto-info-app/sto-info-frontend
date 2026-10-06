@@ -8,6 +8,7 @@ import { AccessControlService } from 'src/app/shared/services/access-control.ser
 import { StorytimeService } from 'src/app/storytime/storytime.service';
 import { AdminComponent } from './admin.component';
 import { ModerationHoldAdminService } from './moderation-admin/moderation-hold-admin.service';
+import { FeatureSwitchesAdminService } from './feature-switches/feature-switches-admin.service';
 import { PublicationPauseAdminService } from './publication-pause/publication-pause-admin.service';
 
 describe('AdminComponent', () => {
@@ -59,6 +60,11 @@ describe('AdminComponent', () => {
                 held: 0,
               }),
           },
+        },
+        // The feature switches' own spec covers them (FC-045).
+        {
+          provide: FeatureSwitchesAdminService,
+          useValue: { list: () => of([]) },
         },
         { provide: AuthService, useValue: { getUserId: () => 'admin-1' } },
       ],
@@ -128,6 +134,20 @@ describe('AdminComponent', () => {
     expect(element.querySelector('app-publication-pause')).not.toBeNull();
     expect(element.textContent).toContain('Publication is running.');
     expect(element.textContent).toContain('Pause publication');
+  });
+
+  // Steve's decision of 6 October 2026: no feature switch needs SQL, and
+  // they sit beside the publication pause.
+  it('offers the feature switches under Operations, after the publication pause (FC-045)', () => {
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const pause = element.querySelector('app-publication-pause')!;
+    const switches = element.querySelector('app-feature-switches');
+
+    expect(switches).not.toBeNull();
+    expect(pause.nextElementSibling).toBe(switches);
+    expect(element.textContent).toContain('Features');
   });
 
   it('links to the scan diagnostics page', () => {

@@ -116,6 +116,8 @@ export const API_URLS = {
   // Failed background jobs, and the publication pause (FC-042).
   FILE_SCANNING_ADMIN_FAILED_JOBS: apiUrl + '/admin/file-scanning/failed-jobs',
   FILE_PUBLICATION_ADMIN: apiUrl + '/admin/file-publication',
+  // The site features' master switches (FC-045).
+  FEATURE_SWITCHES_ADMIN: apiUrl + '/admin/feature-switches',
 
   // Access control (what the signed-in user is permitted to do, and the admin
   // side that grants or withholds it per user)
