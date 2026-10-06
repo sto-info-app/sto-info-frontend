@@ -147,6 +147,7 @@ The journeys:
 | `04-owed-chat` | FC-031 to FC-035's: channels added, renamed, archived and refused, mentions and replies and their notices, direct messages and the one notice somebody away is sent until they read them, presence, typing, a block, toasts, and a report's evidence and removal |
 | `04-owed-admin` | FC-036, FC-037, FC-039 and FC-041's: suspensions, disputes and duplicate names, investigations, holds and their review, an expired held export, roles and overrides, disabled accounts, chat and member report decisions, Storytime Moderation, the Security Log and its pages, Scan Diagnostics and rescan campaigns |
 | `05-screenshots` | Representative pages at each size, written to `docs/screenshots/fc-044/` |
+| `06-feature-switches` | FC-045's release smoke test: the Admin page's Features panel and what the environment allows; Fleet Community switched off with a reason, gone for everybody and its Contact topic withdrawn, then on again and back; Storytime switched and put back; a switch thrown elsewhere first; each change in the Security Log; axe on the Admin page |
 
 ## The picture journey is opt-in
 
