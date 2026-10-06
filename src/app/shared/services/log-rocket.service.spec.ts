@@ -128,14 +128,14 @@ describe('LogRocketService', () => {
   });
 
   // FC-038: a canary typed, read or sent never reaches LogRocket.
-  it('masks the page and drops every body and credential', () => {
+  it('masks the page and drops every body and credential', async () => {
     const options = (
       service as unknown as {
         getInitOptions(): Parameters<typeof LogRocket.init>[1];
       }
     ).getInitOptions();
     const canary = 'OFFICER-CANARY';
-    const request = options!.network!.requestSanitizer!({
+    const request = await options!.network!.requestSanitizer!({
       reqId: 'r1',
       url: 'https://example.com/api/chat',
       method: 'POST',
@@ -157,7 +157,7 @@ describe('LogRocketService', () => {
     expect(request!.headers).toEqual({ 'Content-Type': 'json' });
   });
 
-  it('passes nothing on when there is nothing to sanitise', () => {
+  it('passes nothing on when there is nothing to sanitise', async () => {
     const options = (
       service as unknown as {
         getInitOptions(): Parameters<typeof LogRocket.init>[1];
@@ -166,13 +166,13 @@ describe('LogRocketService', () => {
 
     expect(options!.network!.requestSanitizer!(null as never)).toBeNull();
     expect(options!.network!.responseSanitizer!(null as never)).toBeNull();
-    expect(
-      options!.network!.requestSanitizer!({
-        reqId: 'r2',
-        url: 'u',
-        method: 'GET',
-        headers: undefined as never,
-      })!.headers,
-    ).toEqual({});
+    const request = await options!.network!.requestSanitizer!({
+      reqId: 'r2',
+      url: 'u',
+      method: 'GET',
+      headers: undefined as never,
+    });
+
+    expect(request!.headers).toEqual({});
   });
 });
