@@ -3,9 +3,21 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BehaviorSubject } from 'rxjs';
+import {
+  FLEET_FEATURES_DISABLED,
+  FleetFeatureState,
+} from 'src/app/models/fleet.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
+import { FLEET_CONFIGURATION } from 'src/app/shared/services/fleet-configuration.testing';
 
 import { ContactComponent } from './contact.component';
+import {
+  CONTACT_TOPICS,
+  contactTopicsFor,
+  FLEET_CONTACT_TOPIC,
+} from './contact.constants';
 import { ContactTopic } from './models/contact-form.models';
 
 const feedbackTopic: ContactTopic = 'feedback';
@@ -14,10 +26,20 @@ describe('ContactComponent', () => {
   let component: ContactComponent;
   let fixture: ComponentFixture<ContactComponent>;
   let httpMock: HttpTestingController;
+  let fleetFeatures: BehaviorSubject<FleetFeatureState>;
 
   beforeEach(async () => {
+    fleetFeatures = new BehaviorSubject<FleetFeatureState>(
+      FLEET_FEATURES_DISABLED,
+    );
     await TestBed.configureTestingModule({
       imports: [ContactComponent, HttpClientTestingModule],
+      providers: [
+        {
+          provide: FleetConfigurationService,
+          useValue: { getFeatures: () => fleetFeatures },
+        },
+      ],
     }).compileComponents();
   });
 
@@ -42,6 +64,76 @@ describe('ContactComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  /**
+   * The topics the select offers, as a reader sees them.
+   *
+   * @returns Their labels, after the placeholder.
+   */
+  const offered = (): string[] =>
+    Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        '#contactTopic option:not([disabled])',
+      ),
+    ).map(option => option.textContent?.trim() ?? '');
+
+  // Steve's decision of 6 October 2026 (FC-045).
+  it('offers no Fleet Communities topic while Fleet is off', () => {
+    expect(offered()).toEqual(CONTACT_TOPICS.map(topic => topic.label));
+    expect(offered()).not.toContain('Fleet Communities');
+  });
+
+  it('offers Fleet Communities, before Other, once Fleet is on', () => {
+    fleetFeatures.next(FLEET_CONFIGURATION.features);
+    fixture.detectChanges();
+
+    expect(offered()).toEqual([
+      'Become a volunteer',
+      'Become a developer',
+      'Feedback',
+      'Question',
+      'Fleet Communities',
+      'Other',
+    ]);
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLOptionElement>(
+        'option[value="fleet"]',
+      ),
+    ).not.toBeNull();
+  });
+
+  it('builds the topics for each position of the switch', () => {
+    expect(contactTopicsFor(false)).toBe(CONTACT_TOPICS);
+    expect(contactTopicsFor(true)).toEqual([
+      ...CONTACT_TOPICS.slice(0, -1),
+      FLEET_CONTACT_TOPIC,
+      CONTACT_TOPICS[CONTACT_TOPICS.length - 1],
+    ]);
+    expect(FLEET_CONTACT_TOPIC).toEqual({
+      value: 'fleet',
+      label: 'Fleet Communities',
+    });
+  });
+
+  it('sends the Fleet Communities topic as fleet', () => {
+    fleetFeatures.next(FLEET_CONFIGURATION.features);
+    fixture.detectChanges();
+    component.contactForm.setValue({
+      name: 'Jean-Luc Picard',
+      email: 'picard@enterprise.com',
+      topic: 'fleet',
+      message: 'How do I register my Fleet?',
+    });
+
+    component.onSubmit();
+
+    const req = httpMock.expectOne(API_URLS.CONTACT);
+
+    expect(req.request.body).toEqual(
+      expect.objectContaining({ topic: 'fleet' }),
+    );
+    req.flush({ id: '1', status: 'received', receivedAt: 'now' });
   });
 
   it('should mark the form touched when invalid', () => {

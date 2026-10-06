@@ -66,6 +66,7 @@ const FLEET_BASICS_GUIDES: HelpGuide[] = [
         'A record you are not allowed to see answers exactly as one that does not exist, with “No such record”. A link somebody sent you may simply be to something you cannot open. Inside an Armada, a Fleet you cannot see keeps its place and reads “A Fleet you cannot see”.',
         'If the Fleet section says “Currently Offline”, Fleet Community is switched off for the moment. “Connection Lost” means the site could not be reached. Either way, nothing you recorded is lost.',
         'If somebody else’s record uses your Fleet’s name, you can still register your own. If you think a record misrepresents your Fleet, use Contact us.',
+        'For anything else about the Fleet section, use Contact us and choose the topic Fleet Communities. To report a member or a chat message, use Report on it instead: it goes straight to the site administrators.',
       ]),
     ],
     relatedLinks: [

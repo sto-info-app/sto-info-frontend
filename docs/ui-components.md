@@ -1492,6 +1492,10 @@ another administrator having switched it first, is shown and the switches are
 read again. Its help link goes to the site admin guide "Switching features on
 and off".
 
+**Contact topics** (FC-045): the Contact page offers **Fleet Communities**,
+before Other, only while `FleetConfigurationService` says Fleet Community is
+on, and not when the configuration cannot be read.
+
 **Security Log subjects** (FC-042): a Scan Diagnostics read names what was read
 ("Scan Diagnostics", "Scan Diagnostics: an asset" and so on), and a failed job
 action names its queue as Scan Diagnostics does, or "Failed jobs in every
