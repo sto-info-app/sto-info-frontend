@@ -199,7 +199,7 @@ jobs:
           from pathlib import Path
 
           values = {
-              "NODE_ENV": "local",
+              "NODE_ENV": "e2etest",
               "LOG_LEVEL": "error",
               "APP_PORT": "3000",
               "APP_FRONTEND_URL": "http://localhost:4200",
