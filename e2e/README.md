@@ -145,7 +145,10 @@ if any of these secrets is missing: `GH_PAT_REPO_TOKEN`,
 `AWS_REGION`, `DATASEED_USER_EMAIL`, `DATASEED_USER_USERNAME`,
 `DATASEED_USER_FIRSTNAME`, `DATASEED_USER_LASTNAME`, and
 `DATASEED_USER_PASSWORD`. The named AWS secret must contain `dbPassword`,
-`jwtSecret`, and `sendGridApiKey`. A run that retries a test and then
+`jwtSecret`, and `sendGridApiKey`. The `dbPassword` is also the password
+of the disposable Postgres the job starts. The backend runs as
+`NODE_ENV=e2etest`, which behaves like `local` and keeps any uploads in a
+folder of that name. A run that retries a test and then
 passes, or that skips a selected test, is failed as well. The external
 project is not part of that workflow.
 
