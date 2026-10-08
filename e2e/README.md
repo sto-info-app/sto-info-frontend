@@ -140,15 +140,17 @@ which weekly does not depend on. `npm run e2e:external` runs that project.
 `.github/workflows/e2e-high-priority.yml` is started by hand. It has no
 schedule. It checks this repository out, then the backend beside it at the
 ref given when the run is started. The job stops before it installs anything
-if any of these secrets is missing: `GH_PAT_REPO_TOKEN`,
-`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SECRET_NAME`,
-`AWS_REGION`, `DATASEED_USER_EMAIL`, `DATASEED_USER_USERNAME`,
-`DATASEED_USER_FIRSTNAME`, `DATASEED_USER_LASTNAME`, and
-`DATASEED_USER_PASSWORD`. The named AWS secret must contain `dbPassword`,
-`jwtSecret`, and `sendGridApiKey`. The `dbPassword` is also the password
-of the disposable Postgres the job starts. The backend runs as
-`NODE_ENV=e2etest`, which behaves like `local` and keeps any uploads in a
-folder of that name. A run that retries a test and then
+if any of these secrets is missing: `AWS_ACCESS_KEY_ID`,
+`AWS_SECRET_ACCESS_KEY`, `AWS_SECRET_NAME`, `AWS_REGION`,
+`DATASEED_USER_EMAIL`, `DATASEED_USER_USERNAME`, `DATASEED_USER_FIRSTNAME`,
+`DATASEED_USER_LASTNAME`, and `DATASEED_USER_PASSWORD`. The backend
+repository is public, so its checkout needs no token. The named AWS secret
+must contain `dbPassword` and `jwtSecret`. `sendGridApiKey` may be left
+out: SES sends the mail, and SendGrid is only the fallback. The
+`dbPassword` is also the password of the disposable Postgres the job
+starts. The backend runs as `NODE_ENV=e2etest`, which behaves like `local`
+and keeps any uploads in a folder of that name. A run that retries a test
+and then
 passes, or that skips a selected test, is failed as well. The external
 project is not part of that workflow.
 
