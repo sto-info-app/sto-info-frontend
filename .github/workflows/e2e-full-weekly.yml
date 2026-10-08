@@ -35,7 +35,6 @@ jobs:
     steps:
       - name: Require secrets
         env:
-          GH_PAT_REPO_TOKEN: ${{ secrets.GH_PAT_REPO_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_SECRET_NAME: ${{ secrets.AWS_SECRET_NAME }}
@@ -49,7 +48,6 @@ jobs:
           set -euo pipefail
           missing=0
           for name in \
-            GH_PAT_REPO_TOKEN \
             AWS_ACCESS_KEY_ID \
             AWS_SECRET_ACCESS_KEY \
             AWS_SECRET_NAME \
@@ -104,7 +102,6 @@ jobs:
         with:
           repository: sto-info-app/sto-info-backend
           ref: ${{ steps.backend.outputs.ref }}
-          token: ${{ secrets.GH_PAT_REPO_TOKEN }}
           path: sto-info-backend
           persist-credentials: false
 
@@ -165,9 +162,11 @@ jobs:
               print("AWS secret is not JSON")
               sys.exit(1)
 
+          # SES sends the mail. SendGrid is only the fallback, so its key
+          # may be absent from a test secret.
           missing = [
               key
-              for key in ("dbPassword", "jwtSecret", "sendGridApiKey")
+              for key in ("dbPassword", "jwtSecret")
               if not secret.get(key)
           ]
           if missing:
