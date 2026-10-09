@@ -1,6 +1,6 @@
 import { expect, Locator, test } from '@playwright/test';
 
-import { MEMBER_STORAGE_STATE } from '../support/actors';
+import { login, seedPassword } from '../external/account';
 import { backend } from '../support/backend';
 import { member } from '../support/member';
 
@@ -10,9 +10,14 @@ import { member } from '../support/member';
  * Actors: the demonstration member, and an anonymous reader of the registry.
  * Privacy Mode hides details on this screen. It does not change whether the
  * registry lists the member. The name and the publication flag are put back.
+ *
+ * Both cases sign in themselves. Saving a new inactivity window and saving
+ * personal details each refresh the session, and a refresh rotates the
+ * refresh token, so a case that did either from the shared session would
+ * leave the stored token revoked for every case after it.
  */
 
-test.use({ storageState: MEMBER_STORAGE_STATE });
+test.use({ storageState: { cookies: [], origins: [] } });
 
 /**
  * Writes a text field the way Angular's form hears it.
@@ -37,6 +42,9 @@ test(
     tag: '@weekly',
   },
   async ({ page, browser }) => {
+    await login(page, member.email, seedPassword());
+    await expect(page).not.toHaveURL(/\/login/);
+
     await page.goto('/dashboard/settings');
     await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
 
@@ -104,6 +112,9 @@ test(
     const anonymous = await browser.newContext();
 
     try {
+      await login(page, member.email, seedPassword());
+      await expect(page).not.toHaveURL(/\/login/);
+
       await page.goto('/dashboard/profile');
       await expect(
         page.getByRole('heading', { name: 'Personnel Record' }),
@@ -133,8 +144,15 @@ test(
       await expect(save).toBeEnabled();
       await publication.click();
       await expect(save).toBeEnabled();
+
+      // The page refreshes the session once the dialog has closed on a save.
+      // Reloading before that answer lands would abandon the refresh.
+      const refreshed = page.waitForResponse(response =>
+        response.url().includes('/auth/refresh'),
+      );
       await save.click();
       await expect(page.getByRole('dialog')).toHaveCount(0);
+      expect((await refreshed).ok()).toBe(true);
       await page.reload();
       await expect(
         page.getByText(edited.slice(0, 40), { exact: false }),
