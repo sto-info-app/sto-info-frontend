@@ -106,6 +106,11 @@ test(
       await expect(
         page.getByRole('heading', { name: 'Edit Story' }),
       ).toBeVisible();
+      // A new Story is private, and a private Story answers 404 to a reader
+      // even once published.
+      await page
+        .getByLabel('Visibility', { exact: true })
+        .selectOption({ label: 'Public' });
       await publish(page, /\/manage\/stories$/);
       await page.goto(
         `/storytime/stories/${storySlug}/chapters/${chapterSlug}`,
