@@ -5,7 +5,7 @@ import { expect, Locator, Page, test } from '@playwright/test';
 import { backend } from '../support/backend';
 import { member } from '../support/member';
 import { accountBySlug } from '../support/snapshot';
-import { nudgeCrop, press } from './account';
+import { login, nudgeCrop, press, seedPassword } from './account';
 
 /**
  * MEDIA-01.
@@ -23,6 +23,12 @@ test.skip(
   process.env['E2E_IMAGES'] !== 'on',
   'Uploads reach Cloudflare Images and the virus scanner. Set E2E_IMAGES=on to run it.',
 );
+
+// The photo dialog refreshes the session after an upload, and a refresh
+// revokes the token it was given. AUTH-05 has already refreshed from the
+// shared storage file by now, so its token is dead; this case signs in for
+// itself and keeps its own pair.
+test.use({ storageState: { cookies: [], origins: [] } });
 
 test(
   'MEDIA-01 a personnel picture and a character picture can be cropped and replaced',
@@ -42,6 +48,9 @@ test(
     let uploadedCharacter = false;
 
     try {
+      await login(page, member.email, seedPassword());
+      await expect(page).not.toHaveURL(/\/login/);
+
       await page.goto('/dashboard/profile', { waitUntil: 'domcontentloaded' });
       const personnel = page.locator('#personnel-image img');
       const before = await personnel.getAttribute('src');
