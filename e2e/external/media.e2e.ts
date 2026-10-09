@@ -89,6 +89,7 @@ test(
       );
       const characterPhoto = page.locator('#character-image img').first();
       const characterBefore = await characterPhoto.getAttribute('src');
+      await editorGone(page);
       await page
         .locator('#character-detail-shell')
         .getByRole('button', { name: 'Edit Photo' })
@@ -104,6 +105,7 @@ test(
         characterBefore ?? '',
       );
 
+      await editorGone(page);
       await page
         .locator('#character-detail-shell')
         .getByRole('button', { name: 'Edit Photo' })
@@ -136,7 +138,16 @@ test(
   },
 );
 
+/**
+ * A closed dialog stays in the document while it animates out. Opening the
+ * next one before it has gone leaves two editors on the page.
+ */
+async function editorGone(page: Page): Promise<void> {
+  await expect(page.getByText(/Personnel Record Photo: Edit/)).toHaveCount(0);
+}
+
 async function openPhoto(page: Page, name: string): Promise<void> {
+  await editorGone(page);
   await page
     .getByRole('button', { name })
     .evaluate((element: HTMLElement) => element.click());

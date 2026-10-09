@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, Page, test } from '@playwright/test';
 
 import { MEMBER_STORAGE_STATE } from '../support/actors';
+import { apiOrigin } from '../support/api';
 import { backend } from '../support/backend';
 
 /**
@@ -90,7 +91,7 @@ test(
     const original = await notes.inputValue();
     const edited = `${original} retry`;
 
-    await page.route('http://localhost:3004/**', async route => {
+    await page.route(`${apiOrigin()}/**`, async route => {
       const request = route.request();
       if (request.method() === 'PUT' || request.method() === 'PATCH') {
         await route.fulfill({
@@ -108,7 +109,7 @@ test(
     await page.unrouteAll({ behavior: 'ignoreErrors' });
 
     let writes = 0;
-    await page.route('http://localhost:3004/**', async route => {
+    await page.route(`${apiOrigin()}/**`, async route => {
       const request = route.request();
       if (request.method() === 'PUT' || request.method() === 'PATCH') {
         writes += 1;

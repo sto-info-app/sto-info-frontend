@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { expect, Page, test } from '@playwright/test';
 
 import { MEMBER_STORAGE_STATE } from '../support/actors';
+import { apiOrigin } from '../support/api';
 
 /**
  * AUTH-05 and HEALTH-01.
@@ -74,8 +75,11 @@ test(
   async ({ page }) => {
     await page.clock.install();
     await page.route('**/health/ready', route => route.abort());
-    await page.route('http://localhost:3004/**', route => route.abort());
-    await page.route('http://127.0.0.1:3004/**', route => route.abort());
+    for (const host of ['localhost', '127.0.0.1']) {
+      const api = new URL(apiOrigin());
+      api.hostname = host;
+      await page.route(`${api.origin}/**`, route => route.abort());
+    }
 
     await page.goto('/login');
     await page.clock.fastForward(45_000);
