@@ -143,15 +143,17 @@ export async function press(locator: Locator): Promise<void> {
  *
  * The cropper crops on its own once, straight after the picture is sized, and
  * on a runner that first crop does not always land, so Upload stays disabled.
- * Moving the frame with the keyboard runs a fresh crop every time, which is
- * what a member nudging the frame does.
+ * Changing the frame with the keyboard runs a fresh crop every time, which is
+ * what a member nudging the frame does. The frame is resized rather than
+ * moved: a frame that already fills the picture cannot move, and an unmoved
+ * frame crops nothing. Shift makes the arrow a resize and Alt inverts the
+ * edge, so this pulls the left edge inward by a few pixels.
  */
 export async function nudgeCrop(page: Page): Promise<void> {
   const frame = page.locator('.ngx-ic-cropper');
   await expect(frame).toBeVisible();
   await frame.focus();
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('Shift+Alt+ArrowRight');
 }
 
 /** The seed password, read once so a case does not log the lookup. */
