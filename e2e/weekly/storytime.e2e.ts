@@ -115,8 +115,12 @@ test(
     await page.goto(`/storytime/manage/stories/${id}/characters/new`);
     await page.getByLabel('Name', { exact: true }).fill('Weekly Captain');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
+    // Saving returns to the cast list; the editor's own heading changes only
+    // for the instant before it leaves.
+    await expect(page).toHaveURL(/\/characters$/);
+    await expect(page.getByRole('heading', { name: 'Cast' })).toBeVisible();
     await expect(
-      page.getByRole('heading', { name: 'Edit Character' }),
+      page.getByRole('link', { name: 'Weekly Captain', exact: true }),
     ).toBeVisible();
 
     await page.goto(`/storytime/manage/stories/${id}/credits`);
