@@ -39,13 +39,16 @@ Automated security testing is performed on every pull request and on a regular s
 
 ## Known Dependency Advisory Follow-up
 
-Both the full dependency audit (`npm audit`) and the production audit gate (`npm audit --audit-level=high --omit=dev`) currently pass with **zero advisories at any severity** (last verified 2026-08-05).
+The production audit gate (`npm audit --audit-level=high --omit=dev`) passes with **zero advisories at any severity** (last verified 2026-10-06). The full dependency audit (`npm audit`) reports one development-only advisory with no fixed release anywhere, `braces` via `stylelint` (GHSA-vfj7-8cjw-p6xm); see `docs/security.md` for why it cannot be pinned or overridden away.
 
-Active overrides are intentionally limited to advisories that still require forced transitive versions:
+Active overrides are intentionally limited to advisories that still require forced transitive versions, all of them in the development tree:
 
-- `@hono/node-server` for GHSA-frvp-7c67-39w9.
-- `qs` for GHSA-q8mj-m7cp-5q26.
-- `tmp` for GHSA-ph9p-34f9-6g65 and the related tmp symlink advisory.
+- `@puppeteer/browsers` for GHSA-jmr9-qjv8-65gv (`extract-zip`, no fixed release — the override removes it from the tree).
+- `argparse` for GHSA-hp3w-g68c-fv3c (`sprintf-js`, no fixed release — the override removes it from the tree).
+- `basic-ftp` for GHSA-c475-qrg2-pj4r.
+- `compression` for GHSA-vc2v-76pw-4v95.
+- `qs` for GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx and GHSA-4mjr-xmp4-gh2g.
+- `tmp` for GHSA-ph9p-34f9-6g65 and GHSA-52f5-9888-hmc6.
 - `uuid` for GHSA-w5hq-g745-h8pq.
 
 The current override inventory, rationale, and removal criteria are documented in `docs/security.md`.
