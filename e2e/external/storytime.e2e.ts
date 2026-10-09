@@ -54,14 +54,17 @@ test(
       const profile = page
         .locator('.storytime-image-manager')
         .filter({ hasText: 'Story profile image' });
+      const picker = page.getByLabel(
+        'Choose a picture for the Story profile image',
+      );
       await press(profile.getByRole('button', { name: 'Add' }));
       await press(page.getByRole('button', { name: 'Cancel' }));
       await expect(profile.getByRole('button', { name: 'Add' })).toBeVisible();
+      // The cancelled picker stays in the document while it animates out.
+      await expect(picker).toHaveCount(0);
 
       await press(profile.getByRole('button', { name: 'Add' }));
-      await page
-        .getByLabel('Choose a picture for the Story profile image')
-        .setInputFiles(PICTURE);
+      await picker.setInputFiles(PICTURE);
       await page
         .getByLabel('What does this picture show?')
         .fill('A fixture portrait');
