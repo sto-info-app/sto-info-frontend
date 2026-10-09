@@ -174,7 +174,15 @@ test(
         .locator('#confirm-dialog-container')
         .getByRole('button', { name: 'Remove', exact: true })
         .click();
-      await expect(page.getByText('Weekly partner')).toHaveCount(0);
+      // A removed collaborator stays on the list as a record of the
+      // collaboration; only their standing changes.
+      const partner = page
+        .locator('li.storytime-collaborators__entry')
+        .filter({ hasText: 'Weekly partner' });
+      await expect(partner).toHaveCount(1);
+      await expect(
+        partner.getByText('No longer collaborating', { exact: true }),
+      ).toBeVisible();
     } finally {
       await other.context.close();
     }

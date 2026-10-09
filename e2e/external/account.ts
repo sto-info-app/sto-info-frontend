@@ -151,9 +151,18 @@ export async function press(locator: Locator): Promise<void> {
  */
 export async function nudgeCrop(page: Page): Promise<void> {
   const frame = page.locator('.ngx-ic-cropper');
+  const preview = page.locator(
+    '#cropped-image-preview, #storytime-cropped-image-preview',
+  );
   await expect(frame).toBeVisible();
-  await frame.focus();
-  await page.keyboard.press('Shift+Alt+ArrowRight');
+
+  // One press is not always enough straight after the picture lands, so
+  // press until the dialog shows the crop it will send.
+  await expect(async () => {
+    await frame.focus();
+    await page.keyboard.press('Shift+Alt+ArrowRight');
+    await expect(preview).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 20_000 });
 }
 
 /** The seed password, read once so a case does not log the lookup. */
