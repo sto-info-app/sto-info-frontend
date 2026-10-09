@@ -15,11 +15,12 @@ test(
   {
     tag: '@weekly',
   },
-  async ({ browser }) => {
+  async ({ browser, baseURL }) => {
     const stamp = Date.now().toString(36);
     const internalTitle = `E2E Weekly internal ${stamp}`;
     const externalTitle = `E2E Weekly external ${stamp}`;
-    const internalUrl = 'http://localhost:4201/about';
+    // A link counts as internal only when its origin is the site's own.
+    const internalUrl = new URL('/about', baseURL).href;
 
     const admin = await browser.newContext({
       storageState: storageStateFor('ADM'),
