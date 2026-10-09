@@ -138,6 +138,22 @@ export async function press(locator: Locator): Promise<void> {
   await locator.evaluate((element: HTMLElement) => element.click());
 }
 
+/**
+ * Make the picture cropper produce a crop.
+ *
+ * The cropper crops on its own once, straight after the picture is sized, and
+ * on a runner that first crop does not always land, so Upload stays disabled.
+ * Moving the frame with the keyboard runs a fresh crop every time, which is
+ * what a member nudging the frame does.
+ */
+export async function nudgeCrop(page: Page): Promise<void> {
+  const frame = page.locator('.ngx-ic-cropper');
+  await expect(frame).toBeVisible();
+  await frame.focus();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowLeft');
+}
+
 /** The seed password, read once so a case does not log the lookup. */
 export function seedPassword(): string {
   return member.password;

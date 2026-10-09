@@ -4,7 +4,7 @@ import { expect, Locator, Page, test } from '@playwright/test';
 
 import { backend } from '../support/backend';
 import { member } from '../support/member';
-import { press } from './account';
+import { nudgeCrop, press } from './account';
 
 /**
  * STORY-12.
@@ -65,6 +65,7 @@ test(
 
       await press(profile.getByRole('button', { name: 'Add' }));
       await picker.setInputFiles(PICTURE);
+      await nudgeCrop(page);
       await page
         .getByLabel('What does this picture show?')
         .fill('A fixture portrait');

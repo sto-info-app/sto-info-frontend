@@ -5,7 +5,7 @@ import { expect, Locator, Page, test } from '@playwright/test';
 import { backend } from '../support/backend';
 import { member } from '../support/member';
 import { accountBySlug } from '../support/snapshot';
-import { press } from './account';
+import { nudgeCrop, press } from './account';
 
 /**
  * MEDIA-01.
@@ -71,6 +71,7 @@ test(
       await page
         .getByLabel('Select a new profile picture')
         .setInputFiles(PICTURE);
+      await nudgeCrop(page);
       await expect(page.getByRole('button', { name: 'Upload' })).toBeEnabled({
         timeout: 30_000,
       });
@@ -114,6 +115,7 @@ test(
       await page
         .getByLabel('Select a new profile picture')
         .setInputFiles(PICTURE);
+      await nudgeCrop(page);
       await expect(page.getByRole('button', { name: 'Upload' })).toBeEnabled({
         timeout: 30_000,
       });
@@ -159,6 +161,7 @@ async function openPhoto(page: Page, name: string): Promise<void> {
 async function uploadCrop(page: Page, file: string): Promise<void> {
   const upload: Locator = page.getByRole('button', { name: 'Upload' });
   await page.getByLabel('Select a new profile picture').setInputFiles(file);
+  await nudgeCrop(page);
   await expect(upload).toBeEnabled({ timeout: 30_000 });
   await press(upload);
   await expect(
