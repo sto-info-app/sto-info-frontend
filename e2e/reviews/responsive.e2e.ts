@@ -51,89 +51,91 @@ async function scrollsSideways(page: Page): Promise<boolean> {
   );
 }
 
-test('a wide configuration stays usable on a phone', async ({
-  browser,
-  page,
-  tracking,
-}) => {
-  await page.setViewportSize(DESKTOP);
-  await tracking.openReady();
-
-  await test.step('build something deliberately awkward', async () => {
-    await tracking.chooseScope(tracking.definitions, 'Accounts');
-    await tracking.addSection(SECTION);
-    await tracking.addTab(SECTION, TAB);
-
-    for (const field of FIELDS) {
-      await tracking.addField(TAB, field.name, { type: field.type });
-    }
-  });
-
-  await test.step('the builder does not scroll sideways on a phone', async () => {
-    await page.setViewportSize(PHONE);
-    await tracking.goto();
-    await tracking.chooseScope(tracking.definitions, 'Accounts');
-    await tracking.expand(SECTION);
-    await tracking.showTab(TAB);
-
-    expect(await scrollsSideways(page)).toBe(false);
-  });
-
-  await test.step('and every control on a panel bar is still reachable', async () => {
-    for (const name of [`Edit ${SECTION}`, `Delete ${SECTION}`]) {
-      const control = page.getByRole('button', { name });
-
-      await expect(control).toBeVisible();
-      await expect(control).toBeInViewport();
-    }
-  });
-
-  await test.step('nor does the recording panel, with every kind of control on it', async () => {
-    await tracking.show('What you have recorded');
-    await tracking.chooseScope(tracking.values, 'Accounts');
-    await tracking.chooseTarget(member.publicAccount);
-
-    for (const field of FIELDS) {
-      await expect(tracking.values.getByText(field.name).first()).toBeVisible();
-    }
-
-    // An answer, so that there is something for the published view to show.
-    // A published field with nothing recorded against it publishes nothing.
-    await tracking.values
-      .getByLabel(FIELDS[0].name, { exact: true })
-      .fill('Something to read on a small screen');
-    await tracking.saveRecord();
-    await expect(tracking.savedConfirmation).toBeVisible();
-
-    expect(await scrollsSideways(page)).toBe(false);
-  });
-
-  await test.step('and neither does it on a desktop', async () => {
+test(
+  'a wide configuration stays usable on a phone',
+  { tag: '@weekly' },
+  async ({ browser, page, tracking }) => {
     await page.setViewportSize(DESKTOP);
+    await tracking.openReady();
 
-    expect(await scrollsSideways(page)).toBe(false);
-  });
+    await test.step('build something deliberately awkward', async () => {
+      await tracking.chooseScope(tracking.definitions, 'Accounts');
+      await tracking.addSection(SECTION);
+      await tracking.addTab(SECTION, TAB);
 
-  // The same configuration seen by a visitor, in the same test rather than a
-  // second one: building it takes a minute, and a test that leaned on another
-  // test's leftovers is what this suite has already learned not to write.
-  await test.step('and the published view fits a phone as well', async () => {
-    await tracking.show('What you track');
-    await tracking.expand(SECTION);
-    await tracking.setPublic('section', SECTION, true);
-    await tracking.showTab(TAB);
-    await tracking.setPublic('tab', TAB, true);
-
-    for (const field of FIELDS) {
-      await tracking.setPublic('field', field.name, true);
-    }
-
-    await anonymously(browser, async visitor => {
-      await visitor.setViewportSize(PHONE);
-      await visitor.goto(publicAccountPath(member.publicAccount));
-      await openPublishedSection(visitor, SECTION);
-
-      expect(await scrollsSideways(visitor)).toBe(false);
+      for (const field of FIELDS) {
+        await tracking.addField(TAB, field.name, { type: field.type });
+      }
     });
-  });
-});
+
+    await test.step('the builder does not scroll sideways on a phone', async () => {
+      await page.setViewportSize(PHONE);
+      await tracking.goto();
+      await tracking.chooseScope(tracking.definitions, 'Accounts');
+      await tracking.expand(SECTION);
+      await tracking.showTab(TAB);
+
+      expect(await scrollsSideways(page)).toBe(false);
+    });
+
+    await test.step('and every control on a panel bar is still reachable', async () => {
+      for (const name of [`Edit ${SECTION}`, `Delete ${SECTION}`]) {
+        const control = page.getByRole('button', { name });
+
+        await expect(control).toBeVisible();
+        await expect(control).toBeInViewport();
+      }
+    });
+
+    await test.step('nor does the recording panel, with every kind of control on it', async () => {
+      await tracking.show('What you have recorded');
+      await tracking.chooseScope(tracking.values, 'Accounts');
+      await tracking.chooseTarget(member.publicAccount);
+
+      for (const field of FIELDS) {
+        await expect(
+          tracking.values.getByText(field.name).first(),
+        ).toBeVisible();
+      }
+
+      // An answer, so that there is something for the published view to show.
+      // A published field with nothing recorded against it publishes nothing.
+      await tracking.values
+        .getByLabel(FIELDS[0].name, { exact: true })
+        .fill('Something to read on a small screen');
+      await tracking.saveRecord();
+      await expect(tracking.savedConfirmation).toBeVisible();
+
+      expect(await scrollsSideways(page)).toBe(false);
+    });
+
+    await test.step('and neither does it on a desktop', async () => {
+      await page.setViewportSize(DESKTOP);
+
+      expect(await scrollsSideways(page)).toBe(false);
+    });
+
+    // The same configuration seen by a visitor, in the same test rather than a
+    // second one: building it takes a minute, and a test that leaned on another
+    // test's leftovers is what this suite has already learned not to write.
+    await test.step('and the published view fits a phone as well', async () => {
+      await tracking.show('What you track');
+      await tracking.expand(SECTION);
+      await tracking.setPublic('section', SECTION, true);
+      await tracking.showTab(TAB);
+      await tracking.setPublic('tab', TAB, true);
+
+      for (const field of FIELDS) {
+        await tracking.setPublic('field', field.name, true);
+      }
+
+      await anonymously(browser, async visitor => {
+        await visitor.setViewportSize(PHONE);
+        await visitor.goto(publicAccountPath(member.publicAccount));
+        await openPublishedSection(visitor, SECTION);
+
+        expect(await scrollsSideways(visitor)).toBe(false);
+      });
+    });
+  },
+);

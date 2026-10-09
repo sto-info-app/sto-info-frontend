@@ -1,3 +1,5 @@
+import { MEMBER_STORAGE_STATE } from '../support/actors';
+import { CustomTrackingPage } from '../support/custom-tracking.page';
 import { expect, test } from '../support/fixtures';
 
 /**
@@ -26,61 +28,101 @@ const BEFORE_THE_CHANGE = '2026-10-25T00:30';
 const AFTER_THE_CHANGE = '2026-10-25T03:30';
 const THE_DAY = '2026-10-25';
 
-test('moments either side of a clock change survive the round trip', async ({
-  tracking,
-}) => {
-  await tracking.openReady();
-
-  await test.step('two moments and a date', async () => {
-    await tracking.chooseScope(tracking.definitions, 'Accounts');
-    await tracking.addSection(SECTION);
-    await tracking.addTab(SECTION, TAB);
-    await tracking.addField(TAB, BEFORE, { type: 'DATE_TIME' });
-    await tracking.addField(TAB, AFTER, { type: 'DATE_TIME' });
-    await tracking.addField(TAB, CALENDAR, { type: 'DATE' });
-  });
-
-  await tracking.show('What you have recorded');
-  await tracking.chooseScope(tracking.values, 'Accounts');
-
-  const [account] = await tracking.targetLabels();
-
-  await tracking.chooseTarget(account);
-
-  const moment = (name: string) => tracking.values.getByRole('group', { name });
-
-  await test.step('record them in London time', async () => {
-    for (const [name, value] of [
-      [BEFORE, BEFORE_THE_CHANGE],
-      [AFTER, AFTER_THE_CHANGE],
-    ] as const) {
-      await moment(name).getByLabel('Date and time').fill(value);
-      await moment(name).getByLabel('Timezone').selectOption(ZONE);
-    }
-
-    await tracking.values.getByLabel(CALENDAR, { exact: true }).fill(THE_DAY);
-    await tracking.saveRecord();
-    await expect(tracking.savedConfirmation).toBeVisible();
-  });
-
-  await test.step('and read them back after a full reload', async () => {
+test(
+  'moments either side of a clock change survive the round trip',
+  { tag: '@weekly' },
+  async ({ tracking, browser }) => {
     await tracking.openReady();
+
+    await test.step('two moments and a date', async () => {
+      await tracking.chooseScope(tracking.definitions, 'Accounts');
+      await tracking.addSection(SECTION);
+      await tracking.addTab(SECTION, TAB);
+      await tracking.addField(TAB, BEFORE, { type: 'DATE_TIME' });
+      await tracking.addField(TAB, AFTER, { type: 'DATE_TIME' });
+      await tracking.addField(TAB, CALENDAR, { type: 'DATE' });
+    });
+
     await tracking.show('What you have recorded');
     await tracking.chooseScope(tracking.values, 'Accounts');
+
+    const [account] = await tracking.targetLabels();
+
     await tracking.chooseTarget(account);
 
-    await expect(moment(BEFORE).getByLabel('Date and time')).toHaveValue(
-      BEFORE_THE_CHANGE,
-    );
-    await expect(moment(BEFORE).getByLabel('Timezone')).toHaveValue(ZONE);
+    const moment = (name: string) =>
+      tracking.values.getByRole('group', { name });
 
-    await expect(moment(AFTER).getByLabel('Date and time')).toHaveValue(
-      AFTER_THE_CHANGE,
-    );
-    await expect(moment(AFTER).getByLabel('Timezone')).toHaveValue(ZONE);
+    await test.step('record them in London time', async () => {
+      for (const [name, value] of [
+        [BEFORE, BEFORE_THE_CHANGE],
+        [AFTER, AFTER_THE_CHANGE],
+      ] as const) {
+        await moment(name).getByLabel('Date and time').fill(value);
+        await moment(name).getByLabel('Timezone').selectOption(ZONE);
+      }
 
-    await expect(
-      tracking.values.getByLabel(CALENDAR, { exact: true }),
-    ).toHaveValue(THE_DAY);
-  });
-});
+      await tracking.values.getByLabel(CALENDAR, { exact: true }).fill(THE_DAY);
+      await tracking.saveRecord();
+      await expect(tracking.savedConfirmation).toBeVisible();
+    });
+
+    await test.step('and read them back after a full reload', async () => {
+      await tracking.openReady();
+      await tracking.show('What you have recorded');
+      await tracking.chooseScope(tracking.values, 'Accounts');
+      await tracking.chooseTarget(account);
+
+      await expect(moment(BEFORE).getByLabel('Date and time')).toHaveValue(
+        BEFORE_THE_CHANGE,
+      );
+      await expect(moment(BEFORE).getByLabel('Timezone')).toHaveValue(ZONE);
+
+      await expect(moment(AFTER).getByLabel('Date and time')).toHaveValue(
+        AFTER_THE_CHANGE,
+      );
+      await expect(moment(AFTER).getByLabel('Timezone')).toHaveValue(ZONE);
+
+      await expect(
+        tracking.values.getByLabel(CALENDAR, { exact: true }),
+      ).toHaveValue(THE_DAY);
+    });
+
+    await test.step('a browser set to New York reads the same stored values', async () => {
+      const context = await browser.newContext({
+        storageState: MEMBER_STORAGE_STATE,
+        timezoneId: 'America/New_York',
+      });
+      const page = await context.newPage();
+      const other = new CustomTrackingPage(page);
+
+      try {
+        await other.openReady();
+        await other.show('What you have recorded');
+        await other.chooseScope(other.values, 'Accounts');
+        await other.chooseTarget(account);
+
+        const otherMoment = (name: string) =>
+          other.values.getByRole('group', { name });
+
+        await expect(
+          otherMoment(BEFORE).getByLabel('Date and time'),
+        ).toHaveValue(BEFORE_THE_CHANGE);
+        await expect(otherMoment(BEFORE).getByLabel('Timezone')).toHaveValue(
+          ZONE,
+        );
+        await expect(
+          otherMoment(AFTER).getByLabel('Date and time'),
+        ).toHaveValue(AFTER_THE_CHANGE);
+        await expect(otherMoment(AFTER).getByLabel('Timezone')).toHaveValue(
+          ZONE,
+        );
+        await expect(
+          other.values.getByLabel(CALENDAR, { exact: true }),
+        ).toHaveValue(THE_DAY);
+      } finally {
+        await context.close();
+      }
+    });
+  },
+);

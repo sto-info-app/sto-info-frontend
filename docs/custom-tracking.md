@@ -297,9 +297,12 @@ The unit suites cover every component and utility to the project's usual
 hundred per cent, and they run in `npm test` like everything else.
 
 On top of them there are eleven end-to-end journeys in `e2e/`, run in a real
-browser against a real backend and a real database. They are separate from
-`npm test` and are not run by `npm run verify`, because they need a stack up;
-`e2e/README.md` says what and how.
+browser against a real backend and a real database, and three reviews. The
+accessibility review is three cases, so the suite is sixteen substantive
+tests. The picture journey is one of them and is skipped unless
+`E2E_IMAGES=on`. They are separate from `npm test` and are not run by
+`npm run verify`, because they need a stack up; `e2e/README.md` says what
+and how.
 
 They exist because the questions worth asking about this feature span the two
 halves of it. Whether a value recorded against one account stays off another,
@@ -312,11 +315,13 @@ Two things follow from that which are worth knowing before changing anything
 here:
 
 - **There are no test-only attributes.** Not one `data-testid` in the
-  application, and the journeys add none. Everything is found by role, label or
-  visible text, so a control that cannot be described by its accessible name
-  fails the journeys as well as the accessibility review. Renaming a control
-  breaks them, which is the point: renaming a control is a change worth
-  noticing.
+  application, and the journeys add none. Controls are found by role, label
+  or visible text. The page object also uses this feature's own panel ids,
+  scopes a form by the heading inside it, and reads the record picker's
+  option elements. A control that cannot be described by its accessible name
+  still fails the journeys as well as the accessibility review. Renaming a
+  control breaks them, which is the point: renaming a control is a change
+  worth noticing.
 - **The journeys found real faults.** The recording panel used to load once and
   never again, so building your first section and switching to it said you had
   defined nothing; and Edit on a folded panel opened a form inside the folded

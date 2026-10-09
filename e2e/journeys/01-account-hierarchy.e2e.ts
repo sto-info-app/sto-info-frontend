@@ -1,3 +1,5 @@
+import { backend } from '../support/backend';
+import { member } from '../support/member';
 import { expect, test } from '../support/fixtures';
 
 /**
@@ -13,62 +15,82 @@ const SECTION = 'Fleet holdings';
 const TAB = 'Progress';
 const FIELD = 'Marks banked';
 
-test('accepting the terms, building for accounts, and two records that do not share', async ({
-  page,
-  tracking,
-}) => {
-  await tracking.goto();
+test(
+  'CT-01 accepting the terms, building for accounts, and two records that do not share',
+  { tag: '@high' },
+  async ({ page, tracking }) => {
+    // Setup clears this once for the suite. A retry does not run setup again,
+    // and by then the agreement has been accepted, so the case clears it itself.
+    backend.reset(member.email);
 
-  await test.step('the agreement is asked for before anything can be built', async () => {
-    await expect(
-      page.getByRole('heading', { name: /content rules|agreement/i }),
-    ).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'What you track' })).toHaveCount(
-      0,
-    );
+    await tracking.goto();
 
-    await tracking.acceptAgreement();
-  });
+    await test.step('the agreement is asked for before anything can be built', async () => {
+      await expect(
+        page.getByRole('heading', { name: /content rules|agreement/i }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('tab', { name: 'What you track' }),
+      ).toHaveCount(0);
 
-  await test.step('build a section, a tab and a field for accounts', async () => {
-    await tracking.chooseScope(tracking.definitions, 'Accounts');
-    await tracking.addSection(SECTION, {
-      description: 'What each of my accounts has put away.',
+      await tracking.acceptAgreement();
     });
-    await tracking.addTab(SECTION, TAB);
-    await tracking.addField(TAB, FIELD, { type: 'INTEGER' });
-  });
 
-  await tracking.show('What you have recorded');
-  await tracking.chooseScope(tracking.values, 'Accounts');
+    await test.step('build a section, a tab and a field for accounts', async () => {
+      await tracking.chooseScope(tracking.definitions, 'Accounts');
+      await tracking.addSection(SECTION, {
+        description: 'What each of my accounts has put away.',
+      });
+      await tracking.addTab(SECTION, TAB);
+      await tracking.addField(TAB, FIELD, { type: 'INTEGER' });
+    });
 
-  const targets = await tracking.targetLabels();
+    await tracking.show('What you have recorded');
+    await tracking.chooseScope(tracking.values, 'Accounts');
 
-  expect(
-    targets.length,
-    'this journey needs a member with at least two STO accounts',
-  ).toBeGreaterThan(1);
+    const targets = await tracking.targetLabels();
 
-  const answer = tracking.values.getByLabel(FIELD, { exact: true });
+    expect(
+      targets.length,
+      'this journey needs a member with at least two STO accounts',
+    ).toBeGreaterThan(1);
 
-  await test.step('record 120 against the first account', async () => {
-    await tracking.chooseTarget(targets[0]);
-    await answer.fill('120');
-    await tracking.saveRecord();
-    await expect(tracking.savedConfirmation).toBeVisible();
-  });
+    const answer = tracking.values.getByLabel(FIELD, { exact: true });
 
-  await test.step('the second account starts empty and keeps its own answer', async () => {
-    await tracking.chooseTarget(targets[1]);
-    await expect(answer).toHaveValue('');
+    await test.step('record 120 against the first account', async () => {
+      await tracking.chooseTarget(targets[0]);
+      await answer.fill('120');
+      await tracking.saveRecord();
+      await expect(tracking.savedConfirmation).toBeVisible();
+    });
 
-    await answer.fill('45');
-    await tracking.saveRecord();
-    await expect(tracking.savedConfirmation).toBeVisible();
-  });
+    await test.step('the second account starts empty and keeps its own answer', async () => {
+      await tracking.chooseTarget(targets[1]);
+      await expect(answer).toHaveValue('');
 
-  await test.step('the first account still reads 120', async () => {
-    await tracking.chooseTarget(targets[0]);
-    await expect(answer).toHaveValue('120');
-  });
-});
+      await answer.fill('45');
+      await tracking.saveRecord();
+      await expect(tracking.savedConfirmation).toBeVisible();
+    });
+
+    await test.step('the first account still reads 120', async () => {
+      await tracking.chooseTarget(targets[0]);
+      await expect(answer).toHaveValue('120');
+    });
+
+    await test.step('both answers are still there after a reload', async () => {
+      await page.reload();
+      await expect(
+        page.getByRole('heading', { name: 'Custom Tracking', level: 1 }),
+      ).toBeVisible();
+      await tracking.show('What you have recorded');
+      await tracking.chooseScope(tracking.values, 'Accounts');
+
+      await tracking.chooseTarget(targets[0]);
+      await expect(answer).toHaveValue('120');
+
+      await tracking.chooseTarget(targets[1]);
+      await expect(answer).toHaveValue('45');
+    });
+  },
+);
