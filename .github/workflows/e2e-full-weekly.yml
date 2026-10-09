@@ -182,8 +182,36 @@ jobs:
           PY
 
       - name: Start Postgres and Redis
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           set -euo pipefail
+          # Anonymous pulls from the mirror are limited to one a second for
+          # the runner's shared address. A signed-in pull counts against the
+          # account instead. The sign-in needs ecr-public:GetAuthorizationToken
+          # and sts:GetServiceBearerToken on the key's IAM user; without them
+          # the pulls stay anonymous and lean on the pauses below.
+          if aws ecr-public get-login-password --region us-east-1 |
+            docker login --username AWS --password-stdin public.ecr.aws; then
+            echo "Signed in to the image mirror"
+          else
+            echo "::warning::Pulling from the image mirror anonymously"
+          fi
+          pull() {
+            for attempt in 1 2 3 4 5 6; do
+              if docker pull --quiet "$1"; then
+                return 0
+              fi
+              echo "Pull $attempt of $1 was refused; waiting $((attempt * 10))s"
+              sleep $((attempt * 10))
+            done
+            echo "Could not pull $1"
+            return 1
+          }
+          pull public.ecr.aws/docker/library/postgres:18
+          sleep 2
+          pull public.ecr.aws/docker/library/redis:7
           docker rm -f e2e-postgres e2e-redis >/dev/null 2>&1 || true
           password="$(cat "$RUNNER_TEMP/e2e-db-password")"
           docker run -d --name e2e-postgres \
