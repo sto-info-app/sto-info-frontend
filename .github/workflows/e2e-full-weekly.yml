@@ -191,9 +191,9 @@ jobs:
             -e POSTGRES_PASSWORD="$password" \
             -e POSTGRES_DB=sto_info_e2e \
             -p 5432:5432 \
-            postgres:18
+            public.ecr.aws/docker/library/postgres:18
           unset password
-          docker run -d --name e2e-redis -p 6379:6379 redis:7
+          docker run -d --name e2e-redis -p 6379:6379 public.ecr.aws/docker/library/redis:7
           ready=0
           for _ in $(seq 1 30); do
             if docker exec e2e-postgres pg_isready -U postgres; then
