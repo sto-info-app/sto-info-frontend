@@ -39,6 +39,7 @@ jobs:
           DATASEED_USER_FIRSTNAME: ${{ secrets.DATASEED_USER_FIRSTNAME }}
           DATASEED_USER_LASTNAME: ${{ secrets.DATASEED_USER_LASTNAME }}
           DATASEED_USER_PASSWORD: ${{ secrets.DATASEED_USER_PASSWORD }}
+          FONT_AWESOME_KIT_ID: ${{ secrets.FONT_AWESOME_KIT_ID }}
         run: |
           set -euo pipefail
           missing=0
@@ -51,7 +52,8 @@ jobs:
             DATASEED_USER_USERNAME \
             DATASEED_USER_FIRSTNAME \
             DATASEED_USER_LASTNAME \
-            DATASEED_USER_PASSWORD
+            DATASEED_USER_PASSWORD \
+            FONT_AWESOME_KIT_ID
           do
             if [ -z "${!name}" ]; then
               echo "Missing required secret: ${name}"
@@ -279,7 +281,10 @@ jobs:
           exit 1
 
       - name: Write the frontend environment
+        env:
+          FONT_AWESOME_KIT_ID: ${{ secrets.FONT_AWESOME_KIT_ID }}
         run: |
+          set -euo pipefail
           mkdir -p src/environments
           cat << 'EOF' > src/environments/environment.ts
           import packageJson from '../../package.json';
@@ -296,11 +301,15 @@ jobs:
             allowDebugging: false,
             minsBeforeLogoutExpiryToShowWarning: 5,
             minsBeforeLogoutExpiryToRefreshToken: 2,
+            fontAwesomeKitId: '__fontAwesomeKitId__',
             cookieYesUrl: 'https://cdn-cookieyes.com/client_data/test/script.js',
             gaMeasurementId: 'G-XXXXXXX',
             logRocketAppId: 'test/appid',
           };
           EOF
+          # Icon-only controls take their size from the Font Awesome glyph.
+          # Without the kit they have no box, and Playwright reports them hidden.
+          sed -i "s|__fontAwesomeKitId__|${FONT_AWESOME_KIT_ID}|" src/environments/environment.ts
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
