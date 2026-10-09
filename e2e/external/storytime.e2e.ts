@@ -76,7 +76,8 @@ test(
       await expect(profile.getByAltText('A fixture portrait')).toBeVisible();
       await removeProfileImage(page, profile);
 
-      await publish(page);
+      // A Story publishes only once it has a published Chapter, so the
+      // Chapter goes first and the Story follows from its own editor.
       await page.goto(`/storytime/manage/stories/${id}/chapters/new`, {
         waitUntil: 'domcontentloaded',
       });
@@ -98,7 +99,14 @@ test(
       await expect(page.locator('.storytime-editor__media-list')).toBeVisible();
       await expect(page.locator('iframe')).toHaveCount(0);
 
-      await publish(page);
+      await publish(page, /\/manage\/stories\/[0-9a-f-]{36}\/chapters$/i);
+      await page.goto(`/storytime/manage/stories/${id}`, {
+        waitUntil: 'domcontentloaded',
+      });
+      await expect(
+        page.getByRole('heading', { name: 'Edit Story' }),
+      ).toBeVisible();
+      await publish(page, /\/manage\/stories$/);
       await page.goto(
         `/storytime/stories/${storySlug}/chapters/${chapterSlug}`,
         {
@@ -173,14 +181,34 @@ async function createStory(
   return match[1];
 }
 
-async function publish(page: Page): Promise<void> {
-  await press(page.getByRole('button', { name: 'Save and publish' }));
+/**
+ * Save and publish from an editor, and wait until the editor has left for
+ * `destination`. Leaving early abandons the request mid-flight.
+ */
+async function publish(page: Page, destination: RegExp): Promise<void> {
+  const save = page.getByRole('button', { name: 'Save and publish' });
   const confirm = page.getByRole('button', { name: 'I confirm' });
 
+  // The content policy may already be asked for; accept it first so the
+  // publish is not answered with the panel while the editor is leaving.
   if (await confirm.isVisible()) {
     await press(confirm);
-    await press(page.getByRole('button', { name: 'Save and publish' }));
+    await expect(confirm).toBeHidden();
   }
+
+  await press(save);
+  await expect(async () => {
+    if (destination.test(page.url())) return;
+    await expect(confirm).toBeVisible({ timeout: 250 });
+  }).toPass({ timeout: 20_000 });
+
+  if (!destination.test(page.url())) {
+    await press(confirm);
+    await expect(confirm).toBeHidden();
+    await press(save);
+  }
+
+  await expect(page).toHaveURL(destination);
 }
 
 async function removeProfileImage(page: Page, profile: Locator): Promise<void> {
