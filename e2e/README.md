@@ -152,8 +152,14 @@ backend repository is public, so its checkout needs no token. The named
 AWS secret must contain `dbPassword` and `jwtSecret`. `sendGridApiKey`
 may be left out: SES sends the mail, and SendGrid is only the fallback.
 The `dbPassword` is also the password of the disposable Postgres the job
-starts. The backend runs as `NODE_ENV=e2etest`, which behaves like `local`
-and keeps any uploads in a folder of that name. A run that retries a test
+starts. Postgres 18 and Redis 7 are pulled from the Docker Library mirror
+on the AWS public registry. The job signs in to that registry with the same
+AWS key first, because anonymous pulls there are limited to one a second
+for the runner's shared address. The sign-in needs the key's IAM user to
+hold `ecr-public:GetAuthorizationToken` and `sts:GetServiceBearerToken`.
+Without them the job warns, pulls anonymously, and retries each pull with
+growing pauses. The backend runs as `NODE_ENV=e2etest`, which behaves like
+`local` and keeps any uploads in a folder of that name. A run that retries a test
 and then passes, or that skips a selected test, is failed as well. The
 external project is not part of that workflow.
 
