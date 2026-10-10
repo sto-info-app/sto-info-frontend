@@ -137,10 +137,13 @@ which weekly does not depend on. `npm run e2e:external` runs that project.
 
 ## Frequent GitHub Action
 
-`.github/workflows/e2e-high-priority.yml` is started by hand. It has no
-schedule. It checks this repository out, then the backend beside it at the
-ref given when the run is started. The job stops before it installs anything
-if any of these secrets is missing: `AWS_ACCESS_KEY_ID`,
+`.github/workflows/e2e-high-priority.yml` runs daily at 04:17 UTC, after
+the weekly scan's Sunday slot has finished, and it can also be started by
+hand. GitHub only runs that schedule from the default branch. A manual run has to name the
+backend revision. A scheduled run reads the `E2E_BACKEND_REF` repository
+variable and stops if that variable is empty. The job checks this
+repository out, then the backend beside it at that ref. It stops before it
+installs anything if any of these secrets is missing: `AWS_ACCESS_KEY_ID`,
 `AWS_SECRET_ACCESS_KEY`, `AWS_SECRET_NAME`, `AWS_REGION`,
 `DATASEED_USER_EMAIL`, `DATASEED_USER_USERNAME`, `DATASEED_USER_FIRSTNAME`,
 `DATASEED_USER_LASTNAME`, `DATASEED_USER_PASSWORD`, and
