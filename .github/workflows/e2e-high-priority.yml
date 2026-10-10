@@ -1,8 +1,11 @@
 name: High-priority end-to-end
 
-# Started by hand. The six-hour schedule stays out until ten clean runs exist.
+# Daily at 04:17 UTC, and by hand. GitHub runs a schedule from the default
+# branch only. The schedule went in after ten clean manual runs.
 
 on:
+  schedule:
+    - cron: '17 4 * * *'
   workflow_dispatch:
     inputs:
       backend_ref:
@@ -64,6 +67,27 @@ jobs:
             exit 1
           fi
 
+      - name: Resolve the backend revision
+        id: backend
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_REF: ${{ inputs.backend_ref }}
+          PINNED_REF: ${{ vars.E2E_BACKEND_REF }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            ref="$DISPATCH_REF"
+          else
+            ref="$PINNED_REF"
+          fi
+          if [ -z "$ref" ]; then
+            echo "The backend revision is not pinned."
+            echo "A manual run needs the backend ref."
+            echo "A scheduled run needs the E2E_BACKEND_REF repository variable."
+            exit 1
+          fi
+          echo "ref=${ref}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout frontend
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -73,7 +97,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: sto-info-app/sto-info-backend
-          ref: ${{ inputs.backend_ref }}
+          ref: ${{ steps.backend.outputs.ref }}
           path: sto-info-backend
           persist-credentials: false
 
@@ -393,7 +417,7 @@ jobs:
             echo ""
             echo "- Frontend: \`$(git rev-parse HEAD)\`"
             echo "- Backend: \`$(git -C sto-info-backend rev-parse HEAD 2>/dev/null || echo unavailable)\`"
-            echo "- Schedule: not installed"
+            echo "- Schedule: daily at 04:17 UTC"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload the report
