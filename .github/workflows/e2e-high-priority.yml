@@ -1,8 +1,11 @@
 name: High-priority end-to-end
 
-# Started by hand. The six-hour schedule stays out until ten clean runs exist.
+# Daily at 04:17 UTC, and by hand. GitHub runs a schedule from the default
+# branch only. The schedule went in after ten clean manual runs.
 
 on:
+  schedule:
+    - cron: '17 4 * * *'
   workflow_dispatch:
     inputs:
       backend_ref:
@@ -64,6 +67,27 @@ jobs:
             exit 1
           fi
 
+      - name: Resolve the backend revision
+        id: backend
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_REF: ${{ inputs.backend_ref }}
+          PINNED_REF: ${{ vars.E2E_BACKEND_REF }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            ref="$DISPATCH_REF"
+          else
+            ref="$PINNED_REF"
+          fi
+          if [ -z "$ref" ]; then
+            echo "The backend revision is not pinned."
+            echo "A manual run needs the backend ref."
+            echo "A scheduled run needs the E2E_BACKEND_REF repository variable."
+            exit 1
+          fi
+          echo "ref=${ref}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout frontend
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -73,7 +97,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: sto-info-app/sto-info-backend
-          ref: ${{ inputs.backend_ref }}
+          ref: ${{ steps.backend.outputs.ref }}
           path: sto-info-backend
           persist-credentials: false
 
@@ -152,17 +176,45 @@ jobs:
           PY
 
       - name: Start Postgres and Redis
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           set -euo pipefail
+          # Anonymous pulls from the mirror are limited to one a second for
+          # the runner's shared address. A signed-in pull counts against the
+          # account instead. The sign-in needs ecr-public:GetAuthorizationToken
+          # and sts:GetServiceBearerToken on the key's IAM user; without them
+          # the pulls stay anonymous and lean on the pauses below.
+          if aws ecr-public get-login-password --region us-east-1 |
+            docker login --username AWS --password-stdin public.ecr.aws; then
+            echo "Signed in to the image mirror"
+          else
+            echo "::warning::Pulling from the image mirror anonymously"
+          fi
+          pull() {
+            for attempt in 1 2 3 4 5 6; do
+              if docker pull --quiet "$1"; then
+                return 0
+              fi
+              echo "Pull $attempt of $1 was refused; waiting $((attempt * 10))s"
+              sleep $((attempt * 10))
+            done
+            echo "Could not pull $1"
+            return 1
+          }
+          pull public.ecr.aws/docker/library/postgres:18
+          sleep 2
+          pull public.ecr.aws/docker/library/redis:7
           password="$(cat "$RUNNER_TEMP/e2e-db-password")"
           docker run -d --name e2e-postgres \
             -e POSTGRES_USER=postgres \
             -e POSTGRES_PASSWORD="$password" \
             -e POSTGRES_DB=sto_info_e2e \
             -p 5432:5432 \
-            postgres:18
+            public.ecr.aws/docker/library/postgres:18
           unset password
-          docker run -d --name e2e-redis -p 6379:6379 redis:7
+          docker run -d --name e2e-redis -p 6379:6379 public.ecr.aws/docker/library/redis:7
           ready=0
           for _ in $(seq 1 30); do
             if docker exec e2e-postgres pg_isready -U postgres; then
@@ -365,7 +417,7 @@ jobs:
             echo ""
             echo "- Frontend: \`$(git rev-parse HEAD)\`"
             echo "- Backend: \`$(git -C sto-info-backend rev-parse HEAD 2>/dev/null || echo unavailable)\`"
-            echo "- Schedule: not installed"
+            echo "- Schedule: daily at 04:17 UTC"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload the report
