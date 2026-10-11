@@ -334,8 +334,10 @@ describe('AccountDialogComponent', () => {
       component.accountForm.patchValue({
         handle: 'Updated',
         platformId: 'p1',
+        launcherId: 'l1',
         accountCreatedDate: '2023-01-01',
       });
+      expect(component.accountForm.valid).toBe(true);
       component.onSaveClick();
       expect(stoAccountServiceSpy.updateAccount).not.toHaveBeenCalled();
     });
