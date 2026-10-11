@@ -152,11 +152,12 @@ describe('AccountDialogComponent', () => {
     expect(component.filteredLaunchers).toHaveLength(0);
   });
 
-  it('should not filter launchers if platformId is set to null', () => {
+  it('should clear the launchers if platformId is set to null', () => {
     fixture.detectChanges();
-    const filterSpy = jest.spyOn(component, 'filterLaunchers');
+    component.accountForm.patchValue({ platformId: 'p1', launcherId: 'l1' });
     component.accountForm.patchValue({ platformId: null });
-    expect(filterSpy).not.toHaveBeenCalled();
+    expect(component.filteredLaunchers).toHaveLength(0);
+    expect(component.accountForm.value.launcherId).toBe('');
   });
 
   it('should reset launcherId if not valid for selected platform', () => {
@@ -164,6 +165,41 @@ describe('AccountDialogComponent', () => {
     component.accountForm.patchValue({ platformId: 'p1', launcherId: 'l1' });
     component.accountForm.patchValue({ platformId: 'p2' });
     expect(component.accountForm.value.launcherId).toBe('');
+  });
+
+  it('should require a launcher once the platform offers one', () => {
+    fixture.detectChanges();
+    component.accountForm.patchValue({ handle: 'Test#1234', platformId: 'p1' });
+    expect(component.accountForm.get('launcherId')?.hasError('required')).toBe(
+      true,
+    );
+    expect(component.accountForm.valid).toBe(false);
+
+    component.accountForm.patchValue({ launcherId: 'l2' });
+    expect(component.accountForm.valid).toBe(true);
+  });
+
+  it('should not require a launcher when the platform offers none', () => {
+    fixture.detectChanges();
+    component.accountForm.patchValue({ handle: 'Test#1234', platformId: 'p1' });
+    component.accountForm.patchValue({ platformId: 'p2' });
+    expect(component.accountForm.get('launcherId')?.hasError('required')).toBe(
+      false,
+    );
+    expect(component.accountForm.valid).toBe(true);
+  });
+
+  it('should name the launcher placeholder for each state', () => {
+    fixture.detectChanges();
+    expect(component.launcherPlaceholderText).toBe('Select a platform first');
+
+    component.accountForm.patchValue({ platformId: 'p2' });
+    expect(component.launcherPlaceholderText).toBe(
+      'Not applicable for this platform',
+    );
+
+    component.accountForm.patchValue({ platformId: 'p1' });
+    expect(component.launcherPlaceholderText).toBe('Select a launcher');
   });
 
   describe('save', () => {
@@ -180,6 +216,7 @@ describe('AccountDialogComponent', () => {
       component.accountForm.patchValue({
         handle: 'New#1234',
         platformId: 'p1',
+        launcherId: 'l1',
         accountCreatedDate: '2023-01-01',
       });
       component.onSaveClick();
@@ -214,6 +251,7 @@ describe('AccountDialogComponent', () => {
       component.accountForm.patchValue({
         handle: 'New#1234',
         platformId: 'p1',
+        launcherId: 'l1',
         accountCreatedDate: '2023-01-01',
       });
       component.onSaveClick();
