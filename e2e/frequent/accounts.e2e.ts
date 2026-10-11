@@ -52,7 +52,7 @@ test(
         page.getByLabel('Platform', { exact: true }).locator('option:checked'),
       ).toHaveText(chosen.platform);
       await expect(
-        page.getByLabel('Launcher (Optional)').locator('option:checked'),
+        page.getByLabel('Launcher', { exact: true }).locator('option:checked'),
       ).toHaveText(chosen.launcher);
 
       await page.getByLabel('Notes').fill(notes);

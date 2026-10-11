@@ -138,7 +138,7 @@ async function speciesNames(species: Locator): Promise<string> {
 }
 
 async function launcherNames(page: Page): Promise<string[]> {
-  const launcher = page.getByLabel('Launcher (Optional)');
+  const launcher = page.getByLabel('Launcher', { exact: true });
 
   await expect
     .poll(async () => launcher.locator('option').count())

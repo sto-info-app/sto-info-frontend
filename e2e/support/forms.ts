@@ -48,7 +48,7 @@ export async function choosePlatformAndLauncher(page: Page): Promise<{
 
     await platform.selectOption({ index });
 
-    const launcher = page.getByLabel('Launcher (Optional)');
+    const launcher = page.getByLabel('Launcher', { exact: true });
 
     if ((await launcher.count()) === 0) {
       continue;
