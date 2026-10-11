@@ -26,7 +26,10 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
-import { createAccountForm } from '../../account-form.factory';
+import {
+  createAccountForm,
+  requireLauncherWhenOffered,
+} from '../../account-form.factory';
 
 /**
  * Interface for data passed to the account dialog.
@@ -93,12 +96,25 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
         observeInZone(this._ngZone, this._cdr),
       )
       .subscribe((platformId: string | null) => {
-        if (platformId) {
-          this.filterLaunchers(platformId);
-        }
+        this.filterLaunchers(platformId || '');
       });
 
     this.loadMetadata();
+  }
+
+  /**
+   * The first option of the launcher select, which has no value of its own.
+   */
+  get launcherPlaceholderText(): string {
+    if (!this.accountForm.get('platformId')?.value) {
+      return 'Select a platform first';
+    }
+
+    if (this.filteredLaunchers.length === 0) {
+      return 'Not applicable for this platform';
+    }
+
+    return 'Select a launcher';
   }
 
   /**
@@ -168,6 +184,8 @@ export class AccountDialogComponent implements OnInit, OnDestroy {
     if (currentLauncherId && !validLauncherIds.has(currentLauncherId)) {
       this.accountForm.patchValue({ launcherId: '' });
     }
+
+    requireLauncherWhenOffered(this.accountForm, this.filteredLaunchers.length);
   }
 
   /**

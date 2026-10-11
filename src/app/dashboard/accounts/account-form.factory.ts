@@ -24,3 +24,29 @@ export function createAccountForm(formBuilder: FormBuilder): FormGroup {
     launcherId: [''],
   });
 }
+
+/**
+ * Asks for a launcher once the chosen platform offers one.
+ *
+ * The backend drops an empty launcher instead of storing it, so a form that
+ * let the member leave the launcher blank saved nothing on a create and kept
+ * the old launcher on an edit. When the platform offers launchers, one has to
+ * be picked; a platform without any leaves the field alone.
+ *
+ * @param form - The account form.
+ * @param offered - How many launchers the chosen platform offers.
+ */
+export function requireLauncherWhenOffered(
+  form: FormGroup,
+  offered: number,
+): void {
+  const launcher = form.controls['launcherId'];
+
+  if (offered > 0) {
+    launcher.addValidators(Validators.required);
+  } else {
+    launcher.removeValidators(Validators.required);
+  }
+
+  launcher.updateValueAndValidity({ emitEvent: false });
+}

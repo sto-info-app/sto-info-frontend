@@ -26,7 +26,10 @@ import {
   decodeStoHandle,
   encodeStoHandle,
 } from 'src/app/shared/utils/sto-handle.utils';
-import { createAccountForm } from '../account-form.factory';
+import {
+  createAccountForm,
+  requireLauncherWhenOffered,
+} from '../account-form.factory';
 
 @Component({
   selector: 'app-account-manage',
@@ -170,6 +173,7 @@ export class AccountManageComponent implements OnInit, OnDestroy {
     if (!platformId) {
       this.filteredLaunchers = [];
       this.accountForm.patchValue({ launcherId: '' }, { emitEvent: false });
+      requireLauncherWhenOffered(this.accountForm, 0);
       return;
     }
 
@@ -188,6 +192,8 @@ export class AccountManageComponent implements OnInit, OnDestroy {
     if (currentLauncherId && !validLauncherIds.has(currentLauncherId)) {
       this.accountForm.patchValue({ launcherId: '' }, { emitEvent: false });
     }
+
+    requireLauncherWhenOffered(this.accountForm, this.filteredLaunchers.length);
   }
 
   onSave(): void {
