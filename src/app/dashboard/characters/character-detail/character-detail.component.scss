@@ -73,6 +73,13 @@
 
 @include tabs.lcars-tab-strip;
 
+// The tracking panel renders nothing at all for a captain nobody tracks, but
+// its host element is still an item in the column and the column still puts
+// its gap on either side of it. Out of the flow until it has something to say.
+app-custom-tracking-owner-panel:empty {
+  display: none;
+}
+
 // ─── Tab Panels ──────────────────────────────────────────────────────────────
 
 // The rule that used to sit here is drawn by the strip itself now, so every
@@ -139,6 +146,12 @@
 .character-details-content {
   padding: 0.5rem 2rem 2rem;
 
+  // Only the data grid sits on this inset surface now; the biography and the
+  // notes run the full width beneath it, bar for bar with the data above.
+  &--data {
+    padding-bottom: 0;
+  }
+
   .detail-grid {
     @include mixins.lcars-info-grid;
 
@@ -163,9 +176,11 @@
   }
 }
 
+// The collapsible section above each of these already carries 1.75rem beneath
+// it, so only a sliver is added here and bar follows bar at the same distance.
 .character-bio-section,
 .character-notes-section {
-  margin-top: 2rem;
+  margin-top: 0.25rem;
 
   .bio-content,
   .notes-content {

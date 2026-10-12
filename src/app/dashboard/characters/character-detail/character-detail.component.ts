@@ -16,14 +16,17 @@ import { EMPTY, Subject, catchError, map, switchMap, takeUntil } from 'rxjs';
 import { CharacterRdComponent } from 'src/app/dashboard/character-rd/character-rd.component';
 import { CharacterAdmiraltyComponent } from 'src/app/dashboard/character-admiralty/character-admiralty.component';
 import { CharacterCommendationsComponent } from 'src/app/dashboard/character-commendations/character-commendations.component';
+import { CharacterOverviewSummaryComponent } from 'src/app/dashboard/character-overview/character-overview-summary.component';
 import { CharacterReputationsComponent } from 'src/app/dashboard/character-reputations/character-reputations.component';
 import { CharacterSpecializationComponent } from 'src/app/dashboard/character-specialization/character-specialization.component';
 import { StoSwitcherButtonComponent } from 'src/app/dashboard/switcher/sto-switcher-button.component';
 import { CustomTrackingOwnerPanelComponent } from 'src/app/dashboard/custom-tracking/custom-tracking-owner-panel/custom-tracking-owner-panel.component';
 import { Character } from 'src/app/dashboard/models/character.model';
+import { CharacterTrackerTab } from 'src/app/dashboard/models/character-overview.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { HasUnsavedChanges } from 'src/app/shared/guards/unsaved-changes.guard';
@@ -41,13 +44,10 @@ import {
 import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.component';
 
 /** Identifiers for the tabs available on the character detail page. */
-export type CharacterTab =
-  | 'overview'
-  | 'reputations'
-  | 'rd'
-  | 'specializations'
-  | 'admiralty'
-  | 'commendations';
+export type CharacterTab = 'overview' | CharacterTrackerTab;
+
+/** The sections of the edit page a bar's pen can lead straight to. */
+export type CharacterEditSection = 'biography' | 'notes';
 
 @Component({
   selector: 'app-character-detail',
@@ -60,10 +60,12 @@ export type CharacterTab =
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
     MatButtonModule,
     CharacterReputationsComponent,
     CharacterAdmiraltyComponent,
     CharacterCommendationsComponent,
+    CharacterOverviewSummaryComponent,
     CharacterRdComponent,
     CharacterSpecializationComponent,
     CustomTrackingOwnerPanelComponent,
@@ -79,6 +81,10 @@ export class CharacterDetailComponent
   /** The tracked-information block, which is the only thing here that edits. */
   @ViewChild(CustomTrackingOwnerPanelComponent)
   customTracking?: CustomTrackingOwnerPanelComponent;
+
+  /** The tracker summaries on the overview, refreshed on each return to it. */
+  @ViewChild(CharacterOverviewSummaryComponent)
+  overviewSummary?: CharacterOverviewSummaryComponent;
 
   /**
    * Whether leaving now would lose something.
@@ -231,14 +237,29 @@ export class CharacterDetailComponent
       });
   }
 
-  editCharacter(): void {
+  /**
+   * Opens the captain's edit page.
+   *
+   * A section's pen names that section, and the edit page is asked for it
+   * by the id of its field, so the reader lands on the biography or the
+   * notes rather than at the top of the form.
+   *
+   * @param section - The section to land on, or nothing for the top.
+   * @returns void
+   */
+  editCharacter(section?: CharacterEditSection): void {
     if (!this.character) return;
-    this._router.navigate([
+    const commands = [
       '/dashboard/accounts',
       encodeStoHandle(this.accountHandle),
       this.character.handle,
       'edit',
-    ]);
+    ];
+    if (section) {
+      this._router.navigate(commands, { fragment: `${section}-input` });
+      return;
+    }
+    this._router.navigate(commands);
   }
 
   editCharacterPhoto(): void {
@@ -375,6 +396,12 @@ export class CharacterDetailComponent
    * @returns void
    */
   private setActiveTab(tab: CharacterTab): void {
+    // Any tracker tab visited in between may have moved a figure, so the
+    // overview's summaries are fetched again on the way back - and only on
+    // the way back, since the URL echo of a tab switch lands here too.
+    if (tab === 'overview' && this.activeTab() !== 'overview') {
+      this.overviewSummary?.reload();
+    }
     if (tab === 'reputations') {
       this.reputationsOpened.set(true);
     }

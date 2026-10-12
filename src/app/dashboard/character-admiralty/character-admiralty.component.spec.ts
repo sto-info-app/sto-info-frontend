@@ -66,7 +66,7 @@ describe('CharacterAdmiraltyComponent', () => {
         sortOrder: 20,
       },
       currentTier: 10,
-      tourOfDutyStep: 10,
+      tourOfDutyStep: 9,
       status: 'complete',
       completionPercentage: 100,
     },
@@ -77,8 +77,8 @@ describe('CharacterAdmiraltyComponent', () => {
     maxPossibleTiers: 20,
     completedCampaigns: 1,
     totalCampaigns: 2,
-    totalTourSteps: 12,
-    maxPossibleTourSteps: 20,
+    totalTourSteps: 11,
+    maxPossibleTourSteps: 18,
     overallCompletionPercentage: 70,
   };
 
@@ -143,6 +143,7 @@ describe('CharacterAdmiraltyComponent', () => {
     expect(component.maxTourStep).toBe(ADMIRALTY_MAX_TOUR_STEP);
     expect(component.unlockLevel).toBe(ADMIRALTY_UNLOCK_LEVEL);
     expect(component.steps).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(component.tourSteps).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 
   it('should load campaign progress and summary on init', () => {
@@ -303,6 +304,34 @@ describe('CharacterAdmiraltyComponent', () => {
       'camp1',
       4,
       1,
+    );
+  });
+
+  it('should reset the tour to nought when nought is pressed', () => {
+    component.characterId = 'char1';
+    component.progress.set(mockProgress);
+
+    component.selectTourStep(mockProgress[0], 0);
+
+    expect(admiraltyServiceSpy.updateProgress).toHaveBeenCalledWith(
+      'char1',
+      'camp1',
+      4,
+      0,
+    );
+  });
+
+  it('should keep a tour at nought when nought is pressed again', () => {
+    component.characterId = 'char1';
+    component.progress.set([{ ...mockProgress[0], tourOfDutyStep: 0 }]);
+
+    component.selectTourStep(component.progress()[0], 0);
+
+    expect(admiraltyServiceSpy.updateProgress).toHaveBeenCalledWith(
+      'char1',
+      'camp1',
+      4,
+      0,
     );
   });
 

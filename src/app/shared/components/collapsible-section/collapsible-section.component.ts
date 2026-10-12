@@ -19,6 +19,10 @@ let nextCollapsibleSectionId = 0;
  *
  * Sections open expanded. A reader arriving at a page wants to read it, not to
  * open it first.
+ *
+ * A host that needs a control of its own on the bar - an edit pen beside the
+ * caret - marks it `sectionActions`, and it is laid in the bar's actions group
+ * ahead of the caret.
  */
 @Component({
   selector: 'app-collapsible-section',
