@@ -195,6 +195,26 @@ describe('CharacterManageComponent', () => {
       expect(document.activeElement).toBe(field);
     }));
 
+    it('should leave the page alone when the named field is not on it', fakeAsync(() => {
+      routeMock.snapshot.fragment = 'biography-input';
+      const scrollIntoView = jest.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+      const lookup = jest
+        .spyOn(document, 'getElementById')
+        .mockReturnValue(null);
+
+      fixture.detectChanges();
+      routeParamsSubject.next({
+        handle: encodeStoHandle('TestAccount'),
+        characterHandle: 'TestChar',
+      });
+      tick();
+
+      expect(lookup).toHaveBeenCalledWith('biography-input');
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      lookup.mockRestore();
+    }));
+
     it('should leave the page alone for a fragment that is not a field', fakeAsync(() => {
       routeMock.snapshot.fragment = 'handle-input';
       const scrollIntoView = jest.fn();
