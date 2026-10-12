@@ -256,10 +256,10 @@ export class CharacterDetailComponent
       'edit',
     ];
     if (section) {
-      this._router.navigate(commands, { fragment: `${section}-input` });
+      void this._router.navigate(commands, { fragment: `${section}-input` });
       return;
     }
-    this._router.navigate(commands);
+    void this._router.navigate(commands);
   }
 
   editCharacterPhoto(): void {
