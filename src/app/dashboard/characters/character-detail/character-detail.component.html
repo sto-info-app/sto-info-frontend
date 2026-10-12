@@ -195,6 +195,14 @@
                   <app-collapsible-section
                     heading="Biography"
                     barClass="small-lcars-bar-gap">
+                    <button
+                      sectionActions
+                      type="button"
+                      class="cta-icon"
+                      (click)="editCharacter('biography')"
+                      title="Edit Biography">
+                      <i class="fas fa-user-pen"></i>
+                    </button>
                     <div class="bio-content">{{ character.biography }}</div>
                   </app-collapsible-section>
                 </div>
@@ -205,6 +213,14 @@
                   <app-collapsible-section
                     heading="Commander's Notes"
                     barClass="small-lcars-bar-gap">
+                    <button
+                      sectionActions
+                      type="button"
+                      class="cta-icon"
+                      (click)="editCharacter('notes')"
+                      title="Edit Notes">
+                      <i class="fas fa-user-pen"></i>
+                    </button>
                     <div class="notes-content">{{ character.notes }}</div>
                   </app-collapsible-section>
                 </div>

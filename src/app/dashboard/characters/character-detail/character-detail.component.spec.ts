@@ -206,6 +206,24 @@ describe('CharacterDetailComponent', () => {
       pen.click();
       expect(mockRouter.navigate).toHaveBeenCalled();
 
+      // The other two bars carry a pen of their own, each leading to its field.
+      (
+        sections[1].querySelector(
+          'button[title="Edit Biography"]',
+        ) as HTMLButtonElement
+      ).click();
+      expect(mockRouter.navigate).toHaveBeenLastCalledWith(expect.any(Array), {
+        fragment: 'biography-input',
+      });
+      (
+        sections[2].querySelector(
+          'button[title="Edit Notes"]',
+        ) as HTMLButtonElement
+      ).click();
+      expect(mockRouter.navigate).toHaveBeenLastCalledWith(expect.any(Array), {
+        fragment: 'notes-input',
+      });
+
       // Folding the data away leaves the pen and the other sections alone.
       (
         sections[0].querySelector('button[aria-expanded]') as HTMLButtonElement

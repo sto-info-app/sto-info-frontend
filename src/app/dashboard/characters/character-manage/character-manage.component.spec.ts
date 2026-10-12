@@ -9,7 +9,7 @@ import {
 import { ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Subject, of, throwError } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 import { Character, Species } from 'src/app/dashboard/models/character.model';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterLookupService } from 'src/app/dashboard/services/character-lookup.service';
@@ -48,6 +48,10 @@ describe('CharacterManageComponent', () => {
     >
   >;
   let routeParamsSubject: Subject<Params>;
+  let routeMock: {
+    params: Observable<Params>;
+    snapshot: { fragment: string | null };
+  };
 
   const mockAccount = {
     id: 'acc1',
@@ -108,6 +112,12 @@ describe('CharacterManageComponent', () => {
 
     routeParamsSubject = new Subject();
 
+    routeMock = {
+      params: routeParamsSubject.asObservable(),
+
+      snapshot: { fragment: null },
+    };
+
     await TestBed.configureTestingModule({
       imports: [
         CharacterManageComponent,
@@ -121,7 +131,7 @@ describe('CharacterManageComponent', () => {
         { provide: CharacterLookupService, useValue: mockLookupService },
         {
           provide: ActivatedRoute,
-          useValue: { params: routeParamsSubject.asObservable() },
+          useValue: routeMock,
         },
       ],
       schemas: [NO_ERRORS_SCHEMA],
@@ -160,6 +170,44 @@ describe('CharacterManageComponent', () => {
       expect(mockCharacterService.getCharacter).toHaveBeenCalledWith('char1');
       expect(component.characterForm.get('handle')?.value).toBe('TestChar');
       expect(component.isLoading).toBe(false);
+    }));
+
+    // The pen on a captain's Biography or Notes bar arrives with the field's
+    // id as the fragment; the reader lands on that field, not the top.
+    it('should scroll to and focus the field named in the URL fragment', fakeAsync(() => {
+      routeMock.snapshot.fragment = 'notes-input';
+      const scrollIntoView = jest.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+
+      fixture.detectChanges();
+      routeParamsSubject.next({
+        handle: encodeStoHandle('TestAccount'),
+        characterHandle: 'TestChar',
+      });
+      tick();
+
+      const field = document.getElementById('notes-input') as HTMLElement;
+      expect(field).not.toBeNull();
+      expect(scrollIntoView).toHaveBeenCalledWith({
+        block: 'center',
+        behavior: 'smooth',
+      });
+      expect(document.activeElement).toBe(field);
+    }));
+
+    it('should leave the page alone for a fragment that is not a field', fakeAsync(() => {
+      routeMock.snapshot.fragment = 'handle-input';
+      const scrollIntoView = jest.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+
+      fixture.detectChanges();
+      routeParamsSubject.next({
+        handle: encodeStoHandle('TestAccount'),
+        characterHandle: 'TestChar',
+      });
+      tick();
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
     }));
 
     it('should handle account not found', fakeAsync(() => {

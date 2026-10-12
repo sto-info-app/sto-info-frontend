@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DOCUMENT,
   OnDestroy,
   OnInit,
   inject,
@@ -50,6 +51,17 @@ import {
   encodeStoHandle,
 } from 'src/app/shared/utils/sto-handle.utils';
 
+/**
+ * The fields a link may ask to be taken straight to, by their ids: the pen on
+ * a captain's Biography or Commander's Notes bar lands here with the field's
+ * id as the URL fragment, and that field is scrolled to and given focus once
+ * the form is on the page.
+ */
+const LINKABLE_FIELD_IDS: ReadonlySet<string> = new Set([
+  'biography-input',
+  'notes-input',
+]);
+
 @Component({
   selector: 'app-character-manage',
   templateUrl: './character-manage.component.html',
@@ -92,6 +104,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
   private readonly _stoAccountService = inject(StoAccountService);
   private readonly _lookupService = inject(CharacterLookupService);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _document = inject(DOCUMENT);
   private readonly _destroy$ = new Subject<void>();
 
   private readonly _dashboardAccountsRoute = '/dashboard/accounts';
@@ -277,6 +290,7 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
           this.speciesList = species;
           this.isLoading = false;
           this._cdr.markForCheck();
+          this.revealRequestedField();
         },
         error: err => {
           this.errorMessage = 'Failed to load characters';
@@ -285,6 +299,27 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
           console.error(err);
         },
       });
+  }
+
+  /**
+   * Takes the reader to the field the link asked for, if it asked for one.
+   *
+   * The form sits behind the loading gate, so it is only in the document
+   * after the next change detection pass; that pass is run here rather than
+   * waited for, so the field is there to scroll to.
+   *
+   * @returns void
+   */
+  private revealRequestedField(): void {
+    const fragment = this._route.snapshot?.fragment ?? null;
+    if (!fragment || !LINKABLE_FIELD_IDS.has(fragment)) return;
+
+    this._cdr.detectChanges();
+    const field = this._document.getElementById(fragment);
+    if (!field) return;
+
+    field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    field.focus({ preventScroll: true });
   }
 
   private patchCharacterForm(fullChar: Character): void {

@@ -50,6 +50,9 @@ export type CharacterTab =
   | 'admiralty'
   | 'commendations';
 
+/** The sections of the edit page a bar's pen can lead straight to. */
+export type CharacterEditSection = 'biography' | 'notes';
+
 @Component({
   selector: 'app-character-detail',
   templateUrl: './character-detail.component.html',
@@ -233,14 +236,29 @@ export class CharacterDetailComponent
       });
   }
 
-  editCharacter(): void {
+  /**
+   * Opens the captain's edit page.
+   *
+   * A section's pen names that section, and the edit page is asked for it
+   * by the id of its field, so the reader lands on the biography or the
+   * notes rather than at the top of the form.
+   *
+   * @param section - The section to land on, or nothing for the top.
+   * @returns void
+   */
+  editCharacter(section?: CharacterEditSection): void {
     if (!this.character) return;
-    this._router.navigate([
+    const commands = [
       '/dashboard/accounts',
       encodeStoHandle(this.accountHandle),
       this.character.handle,
       'edit',
-    ]);
+    ];
+    if (section) {
+      this._router.navigate(commands, { fragment: `${section}-input` });
+      return;
+    }
+    this._router.navigate(commands);
   }
 
   editCharacterPhoto(): void {
