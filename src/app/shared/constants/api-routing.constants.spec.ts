@@ -26,4 +26,10 @@ describe('api-routing.constants', () => {
     expect(API_URLS.STO_ACCOUNT).toBe('https://api.test/account');
     expect(API_URLS.CHARACTER).toBe('https://api.test/character');
   });
+
+  it('should build the character overview URL', () => {
+    expect(API_URLS.CHARACTER_OVERVIEW).toBe(
+      'https://api.test/character-overview',
+    );
+  });
 });

@@ -1,0 +1,58 @@
+@if (isLoading()) {
+  <app-loading-bar></app-loading-bar>
+}
+
+@if (cards().length) {
+  <section
+    class="overview-summary"
+    aria-label="Progress summary">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Progress Summary</span>
+    </div>
+    <div class="overview-summary__cards">
+      @for (card of cards(); track card.tab) {
+        <!--
+          Each card is the tab in miniature, in the shape every panel on the
+          site takes: the tracker's name on a solid block across the top, its
+          figure beneath, and a press takes the reader to the tab itself.
+        -->
+        <button
+          type="button"
+          class="overview-summary__card"
+          [class]="'overview-summary__card overview-summary__card--' + card.tab"
+          [attr.aria-label]="
+            'Open ' + card.label + ', ' + card.percentage + '% complete'
+          "
+          (click)="openTab.emit(card.tab)">
+          <span class="overview-summary__heading">
+            <span class="overview-summary__name">{{ card.label }}</span>
+            <i
+              class="fas fa-chevron-right overview-summary__chevron"
+              aria-hidden="true"></i>
+          </span>
+          <span class="overview-summary__body">
+            <span class="overview-summary__figure">
+              <span class="overview-summary__value"
+                >{{ card.percentage }}%</span
+              >
+              <span class="overview-summary__caption">Complete</span>
+            </span>
+            <span
+              class="overview-summary__track"
+              aria-hidden="true">
+              <span
+                class="overview-summary__fill"
+                [style.width.%]="card.percentage"></span>
+            </span>
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+} @else if (hasFailed()) {
+  <p
+    class="overview-summary__error"
+    role="status">
+    Progress summaries could not be loaded.
+  </p>
+}
