@@ -16,11 +16,13 @@ import { EMPTY, Subject, catchError, map, switchMap, takeUntil } from 'rxjs';
 import { CharacterRdComponent } from 'src/app/dashboard/character-rd/character-rd.component';
 import { CharacterAdmiraltyComponent } from 'src/app/dashboard/character-admiralty/character-admiralty.component';
 import { CharacterCommendationsComponent } from 'src/app/dashboard/character-commendations/character-commendations.component';
+import { CharacterOverviewSummaryComponent } from 'src/app/dashboard/character-overview/character-overview-summary.component';
 import { CharacterReputationsComponent } from 'src/app/dashboard/character-reputations/character-reputations.component';
 import { CharacterSpecializationComponent } from 'src/app/dashboard/character-specialization/character-specialization.component';
 import { StoSwitcherButtonComponent } from 'src/app/dashboard/switcher/sto-switcher-button.component';
 import { CustomTrackingOwnerPanelComponent } from 'src/app/dashboard/custom-tracking/custom-tracking-owner-panel/custom-tracking-owner-panel.component';
 import { Character } from 'src/app/dashboard/models/character.model';
+import { CharacterTrackerTab } from 'src/app/dashboard/models/character-overview.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
@@ -42,13 +44,7 @@ import {
 import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.component';
 
 /** Identifiers for the tabs available on the character detail page. */
-export type CharacterTab =
-  | 'overview'
-  | 'reputations'
-  | 'rd'
-  | 'specializations'
-  | 'admiralty'
-  | 'commendations';
+export type CharacterTab = 'overview' | CharacterTrackerTab;
 
 /** The sections of the edit page a bar's pen can lead straight to. */
 export type CharacterEditSection = 'biography' | 'notes';
@@ -69,6 +65,7 @@ export type CharacterEditSection = 'biography' | 'notes';
     CharacterReputationsComponent,
     CharacterAdmiraltyComponent,
     CharacterCommendationsComponent,
+    CharacterOverviewSummaryComponent,
     CharacterRdComponent,
     CharacterSpecializationComponent,
     CustomTrackingOwnerPanelComponent,
@@ -84,6 +81,10 @@ export class CharacterDetailComponent
   /** The tracked-information block, which is the only thing here that edits. */
   @ViewChild(CustomTrackingOwnerPanelComponent)
   customTracking?: CustomTrackingOwnerPanelComponent;
+
+  /** The tracker summaries on the overview, refreshed on each return to it. */
+  @ViewChild(CharacterOverviewSummaryComponent)
+  overviewSummary?: CharacterOverviewSummaryComponent;
 
   /**
    * Whether leaving now would lose something.
@@ -395,6 +396,12 @@ export class CharacterDetailComponent
    * @returns void
    */
   private setActiveTab(tab: CharacterTab): void {
+    // Any tracker tab visited in between may have moved a figure, so the
+    // overview's summaries are fetched again on the way back - and only on
+    // the way back, since the URL echo of a tab switch lands here too.
+    if (tab === 'overview' && this.activeTab() !== 'overview') {
+      this.overviewSummary?.reload();
+    }
     if (tab === 'reputations') {
       this.reputationsOpened.set(true);
     }

@@ -232,6 +232,18 @@
               <app-custom-tracking-owner-panel
                 [scope]="characterScope"
                 [targetId]="character.id" />
+
+              <!--
+                What every tracker tab adds up to, so a glance at the overview
+                says how far the captain has come without opening each one.
+                In the same flow as the sections above so the margins between
+                them collapse to one distance, bar after bar.
+              -->
+              <app-character-overview-summary
+                [characterId]="character.id"
+                [characterLevel]="character.level ?? null"
+                [generalFaction]="character.generalFaction?.name ?? null"
+                (openTab)="selectTab($event)" />
             </div>
           </div>
 

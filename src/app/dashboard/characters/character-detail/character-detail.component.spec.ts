@@ -20,6 +20,7 @@ import { Character } from 'src/app/dashboard/models/character.model';
 import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
+import { CharacterOverviewService } from 'src/app/dashboard/services/character-overview.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
@@ -29,6 +30,7 @@ import {
   SRC_PHOTO_UNAVAILABLE_300PX,
 } from 'src/app/shared/constants/app-image-assets.constants';
 import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
+import { CharacterOverviewSummaryComponent } from 'src/app/dashboard/character-overview/character-overview-summary.component';
 import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.component';
 import { CharacterDetailComponent } from './character-detail.component';
 
@@ -99,6 +101,10 @@ describe('CharacterDetailComponent', () => {
       providers: [
         { provide: CharacterService, useValue: mockCharacterService },
         { provide: StoAccountService, useValue: mockStoAccountService },
+        {
+          provide: CharacterOverviewService,
+          useValue: { getSummary: jest.fn().mockReturnValue(of(null)) },
+        },
         { provide: Router, useValue: mockRouter },
         { provide: MatDialog, useValue: mockDialog },
         {
@@ -398,6 +404,38 @@ describe('CharacterDetailComponent', () => {
     it('should default to the overview tab', () => {
       expect(component.activeTab()).toBe('overview');
       expect(component.reputationsOpened()).toBe(false);
+    });
+
+    it('should refresh the overview summaries on the way back to the overview', () => {
+      const reload = jest.fn();
+      component.overviewSummary = {
+        reload,
+      } as unknown as CharacterOverviewSummaryComponent;
+
+      component.selectTab('admiralty');
+      expect(reload).not.toHaveBeenCalled();
+
+      component.selectTab('overview');
+      expect(reload).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not refresh the overview summaries when already on the overview', () => {
+      const reload = jest.fn();
+      component.overviewSummary = {
+        reload,
+      } as unknown as CharacterOverviewSummaryComponent;
+
+      component.selectTab('overview');
+
+      expect(reload).not.toHaveBeenCalled();
+    });
+
+    it('should cope with the overview summaries not being mounted yet', () => {
+      component.overviewSummary = undefined;
+
+      component.selectTab('rd');
+
+      expect(() => component.selectTab('overview')).not.toThrow();
     });
 
     it('should switch to the reputations tab and mark it opened', () => {
