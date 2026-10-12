@@ -13,6 +13,23 @@ import { CollapsibleSectionComponent } from './collapsible-section.component';
 })
 class HostComponent {}
 
+/** Hosts the section with a control of its own on the bar. */
+@Component({
+  standalone: true,
+  imports: [CollapsibleSectionComponent],
+  template: `<app-collapsible-section heading="With an action">
+    <button
+      sectionActions
+      type="button"
+      class="cta-icon"
+      id="edit">
+      Edit
+    </button>
+    <p>Projected content.</p>
+  </app-collapsible-section>`,
+})
+class ActionHostComponent {}
+
 describe('CollapsibleSectionComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
 
@@ -116,5 +133,38 @@ describe('CollapsibleSectionComponent', () => {
       ?.getAttribute('aria-controls');
 
     expect(otherId).not.toBe(toggleButton().getAttribute('aria-controls'));
+  });
+
+  describe('with a bar action', () => {
+    let actionFixture: ComponentFixture<ActionHostComponent>;
+
+    // The outer beforeEach has already configured and instantiated the test
+    // module; a standalone host needs no second configuration to be created.
+    beforeEach(() => {
+      actionFixture = TestBed.createComponent(ActionHostComponent);
+      actionFixture.detectChanges();
+    });
+
+    it('should lay the host action in the bar ahead of the caret', () => {
+      const group = (actionFixture.nativeElement as HTMLElement).querySelector(
+        '.lcars-text-bar .lcars-bar-actions',
+      ) as HTMLElement;
+      const buttons = [...group.querySelectorAll('button')];
+
+      expect(buttons.map(b => b.id || b.getAttribute('aria-expanded'))).toEqual(
+        ['edit', 'true'],
+      );
+    });
+
+    it('should keep the action out of the content that folds away', () => {
+      const host = actionFixture.nativeElement as HTMLElement;
+      (
+        host.querySelector('button[aria-expanded]') as HTMLButtonElement
+      ).click();
+      actionFixture.detectChanges();
+
+      expect(host.querySelector('#edit')).not.toBeNull();
+      expect(host.textContent).not.toContain('Projected content.');
+    });
   });
 });
