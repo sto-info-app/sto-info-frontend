@@ -6,6 +6,7 @@ import {
   SRC_PHOTO_UNAVAILABLE_300PX,
 } from 'src/app/shared/constants/app-image-assets.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { TeamGroup } from '../models/team-group.model';
@@ -18,7 +19,12 @@ import { TEAM_MEMBERS } from '../team.data';
   styleUrls: ['./team-member.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, LcarsErrorMessageComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
+  ],
 })
 export class TeamMemberComponent {
   readonly photoVariant = CLOUDFLARE_VARIANT_SQUARE_300PX_NAME;

@@ -95,14 +95,16 @@
                   </div>
                 </div>
                 <div class="progress-track tour-track">
+                  <!--
+                    No count here: the pressed pill is the position, and a
+                    tour has no total to be counted against the way a tier
+                    track does.
+                  -->
                   <div class="track-label">
-                    <span>Tour of Duty</span
-                    ><strong
-                      >{{ item.tourOfDutyStep }} / {{ maxTourStep }}</strong
-                    >
+                    <span>Tour of Duty</span>
                   </div>
                   <div class="segments round">
-                    @for (step of steps; track step) {
+                    @for (step of tourSteps; track step) {
                       <button
                         type="button"
                         [class.filled]="step <= item.tourOfDutyStep"
@@ -111,7 +113,8 @@
                           item.campaign.name +
                           ' Tour of Duty to ' +
                           step +
-                          ' of 10'
+                          ' of ' +
+                          maxTourStep
                         "
                         (click)="selectTourStep(item, step)">
                         {{ step }}

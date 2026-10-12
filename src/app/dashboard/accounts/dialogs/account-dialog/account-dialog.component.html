@@ -91,17 +91,23 @@
       <label
         class="select-label"
         for="launcherId"
-        >Launcher (Optional)</label
+        >Launcher</label
       >
       <select
         id="launcherId"
-        title="Launcher (Optional)"
+        title="Launcher"
         formControlName="launcherId">
-        <option value="">None</option>
+        <option value="">{{ launcherPlaceholderText }}</option>
         @for (launcher of filteredLaunchers; track launcher.id) {
           <option [value]="launcher.id">{{ launcher.name }}</option>
         }
       </select>
+      @if (
+        accountForm.get('launcherId')?.hasError('required') &&
+        accountForm.get('launcherId')?.touched
+      ) {
+        <div class="field-error">Launcher is required</div>
+      }
     </div>
 
     <div class="lcars-input-container perano">

@@ -49,129 +49,133 @@ const noViolations = async (page: Page, within: string): Promise<void> => {
   ).toEqual([]);
 };
 
-test('every Custom Tracking screen is mechanically accessible', async ({
-  browser,
-  page,
-  tracking,
-}) => {
-  await test.step('build something worth scanning', async () => {
-    await tracking.openReady();
-    await tracking.buildOneField({
-      section: SECTION,
-      tab: TAB,
-      field: FIELD,
-      type: 'DROPDOWN',
-      publiclyVisible: true,
+test(
+  'every Custom Tracking screen is mechanically accessible',
+  { tag: '@weekly' },
+  async ({ browser, page, tracking }) => {
+    await test.step('build something worth scanning', async () => {
+      await tracking.openReady();
+      await tracking.buildOneField({
+        section: SECTION,
+        tab: TAB,
+        field: FIELD,
+        type: 'DROPDOWN',
+        publiclyVisible: true,
+      });
+
+      await tracking.editField(FIELD);
+      await tracking.addOption('choice', 'A choice');
+
+      await tracking.show('What you have recorded');
+      await tracking.chooseScope(tracking.values, 'Accounts');
+      await tracking.chooseTarget(member.publicAccount);
+      await tracking.values
+        .getByLabel(FIELD, { exact: true })
+        .selectOption({ label: 'A choice' });
+      await tracking.saveRecord();
+      await expect(tracking.savedConfirmation).toBeVisible();
     });
 
-    await tracking.editField(FIELD);
-    await tracking.addOption('choice', 'A choice');
+    await test.step('the builder, with a hierarchy and an editor open', async () => {
+      await tracking.openReady();
+      await tracking.expand(SECTION);
+      await tracking.showTab(TAB);
+      await tracking.editField(FIELD);
 
-    await tracking.show('What you have recorded');
-    await tracking.chooseScope(tracking.values, 'Accounts');
-    await tracking.chooseTarget(member.publicAccount);
-    await tracking.values
-      .getByLabel(FIELD, { exact: true })
-      .selectOption({ label: 'A choice' });
-    await tracking.saveRecord();
-    await expect(tracking.savedConfirmation).toBeVisible();
-  });
-
-  await test.step('the builder, with a hierarchy and an editor open', async () => {
-    await tracking.openReady();
-    await tracking.expand(SECTION);
-    await tracking.showTab(TAB);
-    await tracking.editField(FIELD);
-
-    await noViolations(page, FEATURE);
-  });
-
-  await test.step('the recording panel', async () => {
-    await tracking.openReady();
-    await tracking.show('What you have recorded');
-    await tracking.chooseScope(tracking.values, 'Accounts');
-    await tracking.chooseTarget(member.publicAccount);
-
-    await noViolations(page, FEATURE);
-  });
-
-  await test.step('the rules, which are mostly prose', async () => {
-    await tracking.openReady();
-    await tracking.show('About and the rules');
-
-    await noViolations(page, FEATURE);
-  });
-
-  await test.step('and the published view a visitor gets', async () => {
-    await anonymously(browser, async visitor => {
-      await visitor.goto(publicAccountPath(member.publicAccount));
-      await openPublishedSection(visitor, SECTION);
-
-      await noViolations(visitor, PUBLISHED);
+      await noViolations(page, FEATURE);
     });
-  });
-});
 
-test('the agreement, which is the first thing anybody sees, is accessible', async ({
-  page,
-  tracking,
-}) => {
-  // By the time the reviews run this member has accepted, so the agreement is
-  // not on screen. Ageing the acceptance puts it back — as the re-acceptance
-  // panel, which is the same component carrying one extra notice, and is the
-  // version most people will meet more than once.
-  backend.staleAcceptance(member.email);
+    await test.step('the recording panel', async () => {
+      await tracking.openReady();
+      await tracking.show('What you have recorded');
+      await tracking.chooseScope(tracking.values, 'Accounts');
+      await tracking.chooseTarget(member.publicAccount);
 
-  await tracking.goto();
-  await expect(
-    page.getByText(/This agreement has changed since you last accepted it/),
-  ).toBeVisible();
+      await noViolations(page, FEATURE);
+    });
 
-  await noViolations(page, FEATURE);
+    await test.step('the rules, which are mostly prose', async () => {
+      await tracking.openReady();
+      await tracking.show('About and the rules');
 
-  // Put it back, or every test after this one is locked out of editing.
-  await tracking.acceptAgreement();
-});
+      await noViolations(page, FEATURE);
+    });
 
-test('a hierarchy can be reordered without a mouse', async ({
-  page,
-  tracking,
-}) => {
-  await tracking.openReady();
-  await tracking.chooseScope(tracking.definitions, 'Accounts');
+    await test.step('and the published view a visitor gets', async () => {
+      await anonymously(browser, async visitor => {
+        await visitor.goto(publicAccountPath(member.publicAccount));
+        await openPublishedSection(visitor, SECTION);
 
-  const first = 'Keyboard order one';
-  const second = 'Keyboard order two';
+        await noViolations(visitor, PUBLISHED);
+      });
+    });
+  },
+);
 
-  await tracking.addSection(first);
-  await tracking.addSection(second);
+test(
+  'the agreement, which is the first thing anybody sees, is accessible',
+  { tag: '@weekly' },
+  async ({ page, tracking }) => {
+    try {
+      // Accept first, so this case does not need an earlier journey to have
+      // done it. Ageing that acceptance brings the agreement back — as the
+      // re-acceptance panel, which is the same component carrying one extra
+      // notice, and is the version most people will meet more than once.
+      await tracking.openReady();
+      backend.staleAcceptance(member.email);
 
-  // Dragging is an alternative, never the only way. The buttons beside each
-  // panel do the same job, and they are reachable by keyboard alone — which is
-  // the whole point of them existing.
-  const moveUp = page.getByRole('button', { name: `Move ${second} up` });
+      await tracking.goto();
+      await expect(
+        page.getByText(/This agreement has changed since you last accepted it/),
+      ).toBeVisible();
 
-  await moveUp.focus();
-  await expect(moveUp).toBeFocused();
-  await page.keyboard.press('Enter');
+      await noViolations(page, FEATURE);
+    } finally {
+      await tracking.openReady();
+    }
+  },
+);
 
-  // The new order is the server's answer, so this waits for it rather than
-  // reading the list the instant the key is released.
-  await expect
-    .poll(async () => {
-      const bars = await page
-        .locator(
-          '.custom-tracking-section-list > li .custom-tracking-section-heading',
-        )
-        .allTextContents();
+test(
+  'a hierarchy can be reordered without a mouse',
+  { tag: '@weekly' },
+  async ({ page, tracking }) => {
+    await tracking.openReady();
+    await tracking.chooseScope(tracking.definitions, 'Accounts');
 
-      // A heading carries the section's name, what it holds and whether it is
-      // public, so this asks which bar mentions which name rather than for an
-      // exact match on one.
-      const positionOf = (name: string): number =>
-        bars.findIndex(bar => bar.includes(name));
+    const first = 'Keyboard order one';
+    const second = 'Keyboard order two';
 
-      return positionOf(second) < positionOf(first);
-    })
-    .toBe(true);
-});
+    await tracking.addSection(first);
+    await tracking.addSection(second);
+
+    // Dragging is an alternative, never the only way. The buttons beside each
+    // panel do the same job, and they are reachable by keyboard alone — which is
+    // the whole point of them existing.
+    const moveUp = page.getByRole('button', { name: `Move ${second} up` });
+
+    await moveUp.focus();
+    await expect(moveUp).toBeFocused();
+    await page.keyboard.press('Enter');
+
+    // The new order is the server's answer, so this waits for it rather than
+    // reading the list the instant the key is released.
+    await expect
+      .poll(async () => {
+        const bars = await page
+          .locator(
+            '.custom-tracking-section-list > li .custom-tracking-section-heading',
+          )
+          .allTextContents();
+
+        // A heading carries the section's name, what it holds and whether it is
+        // public, so this asks which bar mentions which name rather than for an
+        // exact match on one.
+        const positionOf = (name: string): number =>
+          bars.findIndex(bar => bar.includes(name));
+
+        return positionOf(second) < positionOf(first);
+      })
+      .toBe(true);
+  },
+);

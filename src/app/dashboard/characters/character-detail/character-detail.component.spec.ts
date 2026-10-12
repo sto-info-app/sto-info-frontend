@@ -20,6 +20,7 @@ import { Character } from 'src/app/dashboard/models/character.model';
 import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
 import { StoAccount } from 'src/app/dashboard/models/sto-account.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
+import { CharacterOverviewService } from 'src/app/dashboard/services/character-overview.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
@@ -29,6 +30,7 @@ import {
   SRC_PHOTO_UNAVAILABLE_300PX,
 } from 'src/app/shared/constants/app-image-assets.constants';
 import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
+import { CharacterOverviewSummaryComponent } from 'src/app/dashboard/character-overview/character-overview-summary.component';
 import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.component';
 import { CharacterDetailComponent } from './character-detail.component';
 
@@ -99,6 +101,10 @@ describe('CharacterDetailComponent', () => {
       providers: [
         { provide: CharacterService, useValue: mockCharacterService },
         { provide: StoAccountService, useValue: mockStoAccountService },
+        {
+          provide: CharacterOverviewService,
+          useValue: { getSummary: jest.fn().mockReturnValue(of(null)) },
+        },
         { provide: Router, useValue: mockRouter },
         { provide: MatDialog, useValue: mockDialog },
         {
@@ -168,6 +174,106 @@ describe('CharacterDetailComponent', () => {
         'acc-1',
       );
       expect(mockCharacterService.getCharacter).toHaveBeenCalledWith('char-1');
+    }));
+
+    it.each([
+      [true, 'Yes'],
+      [false, 'No'],
+    ])(
+      'should show whether the captain is publicly visible (%s)',
+      fakeAsync((publiclyVisible: boolean, shown: string) => {
+        const character = { ...mockCharacter, publiclyVisible };
+        mockStoAccountService.getAccounts.mockReturnValue(of([mockAccount]));
+        mockCharacterService.getCharactersByAccount.mockReturnValue(
+          of([character]),
+        );
+        mockCharacterService.getCharacter.mockReturnValue(of(character));
+
+        fixture.detectChanges();
+        routeParamsSubject.next({
+          handle: 'TestAccount',
+          characterHandle: 'TestChar',
+        });
+        tick();
+        fixture.detectChanges();
+
+        const item = [
+          ...(fixture.nativeElement as HTMLElement).querySelectorAll(
+            '.detail-item',
+          ),
+        ].find(
+          el =>
+            el.querySelector('.label')?.textContent?.trim() ===
+            'Publicly Visible',
+        );
+        expect(item?.querySelector('.value')?.textContent?.trim()).toBe(shown);
+      }),
+    );
+
+    it('should fold the data, biography and notes away as three sections', fakeAsync(() => {
+      const character = {
+        ...mockCharacter,
+        biography: 'Served on Voyager.',
+        notes: 'Finish the Dyson reputation.',
+      };
+      mockStoAccountService.getAccounts.mockReturnValue(of([mockAccount]));
+      mockCharacterService.getCharactersByAccount.mockReturnValue(
+        of([character]),
+      );
+      mockCharacterService.getCharacter.mockReturnValue(of(character));
+
+      fixture.detectChanges();
+      routeParamsSubject.next({
+        handle: 'TestAccount',
+        characterHandle: 'TestChar',
+      });
+      tick();
+      fixture.detectChanges();
+
+      const host = fixture.nativeElement as HTMLElement;
+      const sections = [...host.querySelectorAll('app-collapsible-section')];
+      expect(
+        sections.map(s =>
+          s.querySelector('.collapsible-section__title')?.textContent?.trim(),
+        ),
+      ).toEqual(['Character Data', 'Biography', "Commander's Notes"]);
+
+      // The pen rides on the data bar, beside its caret, and still edits.
+      const pen = sections[0].querySelector(
+        '.lcars-bar-actions button[title="Edit Character"]',
+      ) as HTMLButtonElement;
+      expect(pen).not.toBeNull();
+      pen.click();
+      expect(mockRouter.navigate).toHaveBeenCalled();
+
+      // The other two bars carry a pen of their own, each leading to its field.
+      (
+        sections[1].querySelector(
+          'button[title="Edit Biography"]',
+        ) as HTMLButtonElement
+      ).click();
+      expect(mockRouter.navigate).toHaveBeenLastCalledWith(expect.any(Array), {
+        fragment: 'biography-input',
+      });
+      (
+        sections[2].querySelector(
+          'button[title="Edit Notes"]',
+        ) as HTMLButtonElement
+      ).click();
+      expect(mockRouter.navigate).toHaveBeenLastCalledWith(expect.any(Array), {
+        fragment: 'notes-input',
+      });
+
+      // Folding the data away leaves the pen and the other sections alone.
+      (
+        sections[0].querySelector('button[aria-expanded]') as HTMLButtonElement
+      ).click();
+      fixture.detectChanges();
+      expect(host.querySelector('.detail-grid')).toBeNull();
+      expect(
+        sections[0].querySelector('button[title="Edit Character"]'),
+      ).not.toBeNull();
+      expect(host.querySelector('.notes-content')).not.toBeNull();
     }));
 
     it('should handle account loading error', fakeAsync(() => {
@@ -332,6 +438,38 @@ describe('CharacterDetailComponent', () => {
     it('should default to the overview tab', () => {
       expect(component.activeTab()).toBe('overview');
       expect(component.reputationsOpened()).toBe(false);
+    });
+
+    it('should refresh the overview summaries on the way back to the overview', () => {
+      const reload = jest.fn();
+      component.overviewSummary = {
+        reload,
+      } as unknown as CharacterOverviewSummaryComponent;
+
+      component.selectTab('admiralty');
+      expect(reload).not.toHaveBeenCalled();
+
+      component.selectTab('overview');
+      expect(reload).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not refresh the overview summaries when already on the overview', () => {
+      const reload = jest.fn();
+      component.overviewSummary = {
+        reload,
+      } as unknown as CharacterOverviewSummaryComponent;
+
+      component.selectTab('overview');
+
+      expect(reload).not.toHaveBeenCalled();
+    });
+
+    it('should cope with the overview summaries not being mounted yet', () => {
+      component.overviewSummary = undefined;
+
+      component.selectTab('rd');
+
+      expect(() => component.selectTab('overview')).not.toThrow();
     });
 
     it('should switch to the reputations tab and mark it opened', () => {

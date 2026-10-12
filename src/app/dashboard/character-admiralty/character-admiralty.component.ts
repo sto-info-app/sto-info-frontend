@@ -39,7 +39,21 @@ export class CharacterAdmiraltyComponent extends CharacterProgressBaseComponent<
   readonly maxTourStep = ADMIRALTY_MAX_TOUR_STEP;
   readonly unlockLevel = ADMIRALTY_UNLOCK_LEVEL;
   readonly featureName = 'Admiralty';
-  readonly steps = Array.from({ length: 10 }, (_, index) => index + 1);
+  readonly steps = Array.from(
+    { length: ADMIRALTY_MAX_TIER },
+    (_, index) => index + 1,
+  );
+
+  /**
+   * The Tour of Duty positions, 0 to 9. The tenth step pays the reward and
+   * resets the tour, so there is nothing to press for it - and a tour can sit
+   * at nought, so nought is a position to press rather than only the absence
+   * of one.
+   */
+  readonly tourSteps = Array.from(
+    { length: ADMIRALTY_MAX_TOUR_STEP + 1 },
+    (_, index) => index,
+  );
 
   protected readonly _loadDataErrorMessage = 'Failed to load Admiralty data';
   protected readonly _loadProgressErrorMessage =
@@ -112,7 +126,9 @@ export class CharacterAdmiraltyComponent extends CharacterProgressBaseComponent<
   }
 
   selectTourStep(item: CharacterAdmiraltyProgress, step: number): void {
-    const newStep = item.tourOfDutyStep === step ? step - 1 : step;
+    // Pressing the step a tour is already at steps it back one, as a tier
+    // does; nought has nowhere to step back to and stays put.
+    const newStep = item.tourOfDutyStep === step ? Math.max(step - 1, 0) : step;
     this.savingItemId.set(item.campaignId);
     this._service
       .updateProgress(

@@ -1,0 +1,134 @@
+@use 'sass:color';
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// One colour per tracker, the same wherever that tracker is named, so a card
+// says what it is about before its name is read.
+$trackers: (
+  'reputations': vars.$lcars-sunflower,
+  'rd': vars.$lcars-perano,
+  'specializations': vars.$lcars-violet,
+  'admiralty': vars.$lcars-tangerine,
+  'commendations': vars.$lcars-green,
+);
+
+// The host page's column spaces its blocks with a gap of its own, so the
+// section brings no top margin that would stack on it.
+.overview-summary {
+  margin-top: 0;
+}
+
+// Two to a row: five trackers make two pairs and one on its own, and each
+// card has the room for its name without shortening it. On a phone they
+// stack. Inset from the bar a little less than the captain's data grid is,
+// since a card carries a border of its own where the grid is bare text.
+.overview-summary__cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 0 1.5rem;
+}
+
+// The panel card the rest of the site draws, on a button: the global LCARS
+// `button` rule gives every button a fixed width, a fixed height, side margins
+// and right-aligned text, so each is reset before the shape goes on. The
+// panel-card mixin's own bottom margin goes too, since the grid spaces them.
+.overview-summary__card {
+  @include mixins.lcars-panel-card(vars.$lcars-sunflower);
+
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  margin: 0;
+  color: vars.$lcars-white;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+
+  @each $tracker, $colour in $trackers {
+    &--#{$tracker} {
+      border-left-color: color.adjust($colour, $lightness: -18%);
+      background: linear-gradient(
+        180deg,
+        rgba($colour, 0.14) 0%,
+        vars.$lcars-grey-bg 100%
+      );
+
+      .overview-summary__heading {
+        @include mixins.lcars-panel-card-heading($colour);
+      }
+
+      .overview-summary__fill {
+        background: $colour;
+      }
+    }
+  }
+}
+
+.overview-summary__name {
+  @include mixins.lcars-panel-card-name;
+}
+
+// The way on, at the bar's right-hand end: the whole card is the control, and
+// the chevron says so without a second button to find.
+.overview-summary__chevron {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  color: rgb(0 0 0 / 60%);
+}
+
+.overview-summary__body {
+  @include mixins.lcars-panel-card-body;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+// The figure and its caption sit on one line, the caption resting on the
+// figure's baseline, and keep the sizes they had when stacked.
+.overview-summary__figure {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.overview-summary__value {
+  font-family: vars.$font-antonio;
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.overview-summary__track {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 10%);
+}
+
+.overview-summary__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.overview-summary__caption {
+  color: rgb(255 255 255 / 55%);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.overview-summary__error {
+  display: block;
+  margin: 0;
+  color: rgb(255 255 255 / 55%);
+}
+
+@media (width <= 768px) {
+  .overview-summary__cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

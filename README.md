@@ -208,7 +208,7 @@ Install the [SonarQube IDE](https://www.sonarsource.com/products/sonarlint/) and
 
 ```json
 {
-  "sonarCloudOrganization": "steverobertsuk",
+  "sonarCloudOrganization": "sto-info-app",
   "projectKey": "sto-info-app_sto-info-frontend"
 }
 ```

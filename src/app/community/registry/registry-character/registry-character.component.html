@@ -97,14 +97,13 @@
         </div>
 
         @if (character.biography) {
-          <div class="lcars-text-bar">
-            <span>Biography</span>
-          </div>
-          <div class="registry-character-inner-content">
-            <p class="registry-character-biography">
-              {{ character.biography }}
-            </p>
-          </div>
+          <app-collapsible-section heading="Biography">
+            <div class="registry-character-inner-content">
+              <p class="registry-character-biography">
+                {{ character.biography }}
+              </p>
+            </div>
+          </app-collapsible-section>
         }
 
         <!--

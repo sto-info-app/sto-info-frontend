@@ -288,6 +288,23 @@ describe('RegistryCharacterComponent', () => {
       );
     });
 
+    it('should fold the biography away when its bar is collapsed', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      const toggle: HTMLButtonElement = fixture.nativeElement.querySelector(
+        'app-collapsible-section button[aria-expanded]',
+      );
+      toggle.click();
+      fixture.detectChanges();
+
+      expect(toggle.getAttribute('aria-expanded')).toBe('false');
+      expect(
+        fixture.nativeElement.querySelector('.registry-character-biography'),
+      ).toBeNull();
+      expect(fixture.nativeElement.textContent).toContain('Biography');
+    });
+
     it('should omit the biography section when there is none', async () => {
       await setup();
       registryServiceSpy.getCharacter.mockReturnValue(

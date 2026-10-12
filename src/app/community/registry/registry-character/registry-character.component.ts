@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { EntityAvatarComponent } from 'src/app/shared/components/entity-avatar/entity-avatar.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { displayFromPublic } from 'src/app/shared/custom-tracking/custom-tracking-display.builder';
 import { CustomTrackingDisplaySection } from 'src/app/shared/custom-tracking/custom-tracking-display.models';
 import { CustomTrackingDisplayComponent } from 'src/app/shared/custom-tracking/custom-tracking-display/custom-tracking-display.component';
@@ -39,6 +40,7 @@ import { RegistryService } from '../registry.service';
     EntityAvatarComponent,
     CommunityTabsComponent,
     CustomTrackingDisplayComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class RegistryCharacterComponent
