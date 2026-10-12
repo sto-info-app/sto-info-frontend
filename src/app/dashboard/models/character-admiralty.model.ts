@@ -2,7 +2,12 @@ export type CharacterAdmiraltyStatus =
   'not_started' | 'in_progress' | 'complete';
 
 export const ADMIRALTY_MAX_TIER = 10;
-export const ADMIRALTY_MAX_TOUR_STEP = 10;
+/**
+ * The furthest a Tour of Duty can be recorded at. The game pays the tour
+ * reward on the tenth step and starts the tour again, so the count a captain
+ * can sit at runs 0 to 9.
+ */
+export const ADMIRALTY_MAX_TOUR_STEP = 9;
 export const ADMIRALTY_UNLOCK_LEVEL = 52;
 
 export interface CharacterAdmiraltyCampaign {
