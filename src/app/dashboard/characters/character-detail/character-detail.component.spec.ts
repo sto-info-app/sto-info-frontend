@@ -176,6 +176,40 @@ describe('CharacterDetailComponent', () => {
       expect(mockCharacterService.getCharacter).toHaveBeenCalledWith('char-1');
     }));
 
+    it.each([
+      [true, 'Yes'],
+      [false, 'No'],
+    ])(
+      'should show whether the captain is publicly visible (%s)',
+      fakeAsync((publiclyVisible: boolean, shown: string) => {
+        const character = { ...mockCharacter, publiclyVisible };
+        mockStoAccountService.getAccounts.mockReturnValue(of([mockAccount]));
+        mockCharacterService.getCharactersByAccount.mockReturnValue(
+          of([character]),
+        );
+        mockCharacterService.getCharacter.mockReturnValue(of(character));
+
+        fixture.detectChanges();
+        routeParamsSubject.next({
+          handle: 'TestAccount',
+          characterHandle: 'TestChar',
+        });
+        tick();
+        fixture.detectChanges();
+
+        const item = [
+          ...(fixture.nativeElement as HTMLElement).querySelectorAll(
+            '.detail-item',
+          ),
+        ].find(
+          el =>
+            el.querySelector('.label')?.textContent?.trim() ===
+            'Publicly Visible',
+        );
+        expect(item?.querySelector('.value')?.textContent?.trim()).toBe(shown);
+      }),
+    );
+
     it('should fold the data, biography and notes away as three sections', fakeAsync(() => {
       const character = {
         ...mockCharacter,

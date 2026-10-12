@@ -169,6 +169,12 @@
                         character.recruitType?.name || 'Standard'
                       }}</span>
                     </div>
+                    <div class="detail-item">
+                      <span class="label">Publicly Visible</span>
+                      <span class="value">{{
+                        character.publiclyVisible ? 'Yes' : 'No'
+                      }}</span>
+                    </div>
                     @if (character.createdDate) {
                       <div class="detail-item">
                         <span class="label">Created Date</span>
