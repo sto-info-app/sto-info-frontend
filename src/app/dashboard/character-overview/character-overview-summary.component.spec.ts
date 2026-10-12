@@ -183,6 +183,31 @@ describe('CharacterOverviewSummaryComponent', () => {
     expect(serviceSpy.getSummary).not.toHaveBeenCalled();
   });
 
+  it('should re-gate the cards when only the allegiance changes', () => {
+    render();
+
+    fixture.componentRef.setInput('generalFaction', 'Romulan');
+    fixture.detectChanges();
+
+    expect(cardLabels()).not.toContain('Commendations');
+  });
+
+  // The first change is what init loads from, not a refetch or a re-gate. A
+  // captain id alone leaves the level unknown, which locks nothing, and the
+  // allegiance unrecorded, which hides Commendations.
+  it('should gate on the defaults when only the captain id is set', () => {
+    fixture.componentRef.setInput('characterId', 'char1');
+    fixture.detectChanges();
+
+    expect(serviceSpy.getSummary).toHaveBeenCalledTimes(1);
+    expect(cardLabels()).toEqual([
+      'Reputations',
+      'R&D',
+      'Specializations',
+      'Admiralty',
+    ]);
+  });
+
   it('should refetch when the captain changes', () => {
     render();
 
