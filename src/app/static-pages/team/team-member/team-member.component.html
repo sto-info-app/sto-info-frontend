@@ -26,12 +26,13 @@
 
         @if (member.bio) {
           <div class="member-bio-section">
-            <div class="lcars-text-bar small-lcars-bar-gap">
-              <span>Biography</span>
-            </div>
-            <div
-              class="bio-content"
-              [innerHTML]="member.bio"></div>
+            <app-collapsible-section
+              heading="Biography"
+              barClass="small-lcars-bar-gap">
+              <div
+                class="bio-content"
+                [innerHTML]="member.bio"></div>
+            </app-collapsible-section>
           </div>
         }
 

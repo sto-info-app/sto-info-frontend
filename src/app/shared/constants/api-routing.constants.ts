@@ -79,6 +79,9 @@ export const API_URLS = {
   // Captain specializations
   SPECIALIZATION: apiUrl + '/specialization',
 
+  // Every tracker's summary for a captain, in one request
+  CHARACTER_OVERVIEW: apiUrl + '/character-overview',
+
   // Stats
   STATS: apiUrl + '/stats',
 

@@ -108,7 +108,7 @@
             <label
               class="select-label"
               for="launcher-select"
-              >Launcher (Optional)</label
+              >Launcher</label
             >
             @if (isLauncherDisabled) {
               <span class="select-placeholder">{{
@@ -117,13 +117,19 @@
             } @else {
               <select
                 id="launcher-select"
-                title="Launcher (Optional)"
+                title="Launcher"
                 formControlName="launcherId">
-                <option value="">None</option>
+                <option value="">Select a launcher</option>
                 @for (launcher of filteredLaunchers; track launcher.id) {
                   <option [value]="launcher.id">{{ launcher.name }}</option>
                 }
               </select>
+              @if (
+                accountForm.get('launcherId')?.hasError('required') &&
+                accountForm.get('launcherId')?.touched
+              ) {
+                <div class="field-error">Launcher is required</div>
+              }
             }
           </div>
         </div>

@@ -184,6 +184,44 @@ describe('AccountManageComponent', () => {
     expect(component.accountForm.get('launcherId')?.value).toBe('');
   });
 
+  it('should require a launcher once the platform offers one', () => {
+    component.launchers = [{ id: 'l1', name: 'Steam' }] as Launcher[];
+    component.platformLaunchers = [
+      { platformId: 'p1', launcherId: 'l1' },
+    ] as PlatformLauncher[];
+    component.accountForm.patchValue({ handle: 'Test#1234' });
+
+    component.filterLaunchers('p1');
+
+    expect(component.accountForm.get('launcherId')?.hasError('required')).toBe(
+      true,
+    );
+    expect(component.accountForm.valid).toBe(false);
+
+    component.accountForm.patchValue({ launcherId: 'l1' });
+    expect(component.accountForm.valid).toBe(true);
+  });
+
+  it('should drop the launcher requirement when the platform offers none', () => {
+    component.launchers = [{ id: 'l1', name: 'Steam' }] as Launcher[];
+    component.platformLaunchers = [
+      { platformId: 'p1', launcherId: 'l1' },
+    ] as PlatformLauncher[];
+    component.accountForm.patchValue({ handle: 'Test#1234' });
+    component.filterLaunchers('p1');
+    expect(component.accountForm.valid).toBe(false);
+
+    component.filterLaunchers('p2');
+    expect(component.accountForm.get('launcherId')?.hasError('required')).toBe(
+      false,
+    );
+    expect(component.accountForm.valid).toBe(true);
+
+    component.filterLaunchers('p1');
+    component.filterLaunchers('');
+    expect(component.accountForm.valid).toBe(true);
+  });
+
   it('should return launcher disabled state and placeholder text', () => {
     component.filteredLaunchers = [];
     component.accountForm.patchValue({ platformId: '' });
