@@ -99,109 +99,124 @@
           <div
             id="character-detail-main-column"
             class="col">
-            <div class="lcars-text-bar small-lcars-bar-gap">
-              <span>Character Data</span>
-              <button
-                type="button"
-                class="cta-icon"
-                (click)="editCharacter()"
-                title="Edit Character">
-                <i class="fas fa-user-pen"></i>
-              </button>
-            </div>
-
-            <div class="character-details-content">
-              <div class="detail-grid">
-                <div class="detail-item">
-                  <span class="label">Rank</span>
-                  <span class="value">{{
-                    character.rank?.title || 'Unknown'
-                  }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">Level</span>
-                  <span class="value">{{ character.level }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">Sex</span>
-                  <span class="value">{{
-                    character.sex?.name || 'Unknown'
-                  }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">Class</span>
-                  <span class="value">{{
-                    character.class?.name || 'Unknown'
-                  }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">Starting Faction</span>
-                  <span class="value">{{
-                    character.faction?.name || 'Unknown'
-                  }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">General Allegiance</span>
-                  <span class="value">{{
-                    character.generalFaction?.name || 'Unknown'
-                  }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">Species</span>
-                  <span class="value">{{
-                    character.species?.name || 'Unknown'
-                  }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">Recruit Type</span>
-                  <span class="value">{{
-                    character.recruitType?.name || 'Standard'
-                  }}</span>
-                </div>
-                @if (character.createdDate) {
-                  <div class="detail-item">
-                    <span class="label">Created Date</span>
-                    <span class="value">{{
-                      character.createdDate | date: 'longDate'
-                    }}</span>
+            <!--
+              Everything on the overview is one item in the column, in normal
+              flow, so each section's bottom margin and the next bar's top
+              margin collapse into the same distance all the way down.
+            -->
+            <div class="character-details">
+              <!--
+                The STO data folds away like the sections beneath it; the pen
+                that edits it rides on the bar beside the caret.
+              -->
+              <app-collapsible-section
+                heading="Character Data"
+                barClass="small-lcars-bar-gap">
+                <button
+                  sectionActions
+                  type="button"
+                  class="cta-icon"
+                  (click)="editCharacter()"
+                  title="Edit Character">
+                  <i class="fas fa-user-pen"></i>
+                </button>
+                <div
+                  class="character-details-content character-details-content--data">
+                  <div class="detail-grid">
+                    <div class="detail-item">
+                      <span class="label">Rank</span>
+                      <span class="value">{{
+                        character.rank?.title || 'Unknown'
+                      }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Level</span>
+                      <span class="value">{{ character.level }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Sex</span>
+                      <span class="value">{{
+                        character.sex?.name || 'Unknown'
+                      }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Class</span>
+                      <span class="value">{{
+                        character.class?.name || 'Unknown'
+                      }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Starting Faction</span>
+                      <span class="value">{{
+                        character.faction?.name || 'Unknown'
+                      }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">General Allegiance</span>
+                      <span class="value">{{
+                        character.generalFaction?.name || 'Unknown'
+                      }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Species</span>
+                      <span class="value">{{
+                        character.species?.name || 'Unknown'
+                      }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Recruit Type</span>
+                      <span class="value">{{
+                        character.recruitType?.name || 'Standard'
+                      }}</span>
+                    </div>
+                    @if (character.createdDate) {
+                      <div class="detail-item">
+                        <span class="label">Created Date</span>
+                        <span class="value">{{
+                          character.createdDate | date: 'longDate'
+                        }}</span>
+                      </div>
+                    }
+                    @if (character.firstName || character.lastName) {
+                      <div class="detail-item">
+                        <span class="label">Full Name</span>
+                        <span class="value">
+                          {{ character.firstName }} {{ character.middleName }}
+                          {{ character.lastName }}
+                        </span>
+                      </div>
+                    }
                   </div>
-                }
-                @if (character.firstName || character.lastName) {
-                  <div class="detail-item">
-                    <span class="label">Full Name</span>
-                    <span class="value">
-                      {{ character.firstName }} {{ character.middleName }}
-                      {{ character.lastName }}
-                    </span>
-                  </div>
-                }
-              </div>
+                </div>
+              </app-collapsible-section>
 
               @if (character.biography) {
                 <div class="character-bio-section">
-                  <div class="lcars-text-bar small-lcars-bar-gap">
-                    <span>Biography</span>
-                  </div>
-                  <div class="bio-content">{{ character.biography }}</div>
+                  <app-collapsible-section
+                    heading="Biography"
+                    barClass="small-lcars-bar-gap">
+                    <div class="bio-content">{{ character.biography }}</div>
+                  </app-collapsible-section>
                 </div>
               }
 
               @if (character.notes) {
                 <div class="character-notes-section">
-                  <div class="lcars-text-bar small-lcars-bar-gap">
-                    <span>Commander's Notes</span>
-                  </div>
-                  <div class="notes-content">{{ character.notes }}</div>
+                  <app-collapsible-section
+                    heading="Commander's Notes"
+                    barClass="small-lcars-bar-gap">
+                    <div class="notes-content">{{ character.notes }}</div>
+                  </app-collapsible-section>
                 </div>
               }
-            </div>
 
-            <!--
-              Beneath the STO data: what is tracked, and the way to change it.
-            -->
-            <app-custom-tracking-owner-panel
-              [scope]="characterScope"
-              [targetId]="character.id" />
+              <!--
+                Beneath the STO data: what is tracked, and the way to change it.
+              -->
+              <app-custom-tracking-owner-panel
+                [scope]="characterScope"
+                [targetId]="character.id" />
+            </div>
           </div>
 
           <div

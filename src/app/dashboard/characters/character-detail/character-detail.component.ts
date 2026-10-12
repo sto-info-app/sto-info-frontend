@@ -24,6 +24,7 @@ import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { CustomTrackingTargetScope } from 'src/app/models/custom-tracking.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { HasUnsavedChanges } from 'src/app/shared/guards/unsaved-changes.guard';
@@ -60,6 +61,7 @@ export type CharacterTab =
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
     MatButtonModule,
     CharacterReputationsComponent,
     CharacterAdmiraltyComponent,
