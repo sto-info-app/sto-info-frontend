@@ -262,14 +262,15 @@ describe('memberCardBuilders', () => {
         ]);
       });
 
-      it('should not colour Unfriend and Block the same', () => {
+      // Both remove, so both are red; their labels tell them apart.
+      it('should colour Unfriend and Block as removing', () => {
         const card = buildRegistryMemberCard(
           withRelationship(RelationshipStatus.FRIENDS),
           true,
         );
 
-        expect(card.actions[0].colourClass).toBe('african-violet');
-        expect(card.actions[1].colourClass).toBe('cardinal');
+        expect(card.actions[0].colourClass).toBe('red');
+        expect(card.actions[1].colourClass).toBe('red');
       });
 
       it('should offer nothing on the viewer own card', () => {

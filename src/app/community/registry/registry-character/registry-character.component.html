@@ -26,75 +26,71 @@
       <h1>{{ character.handle }}</h1>
 
       <div id="registry-character-main-content">
-        <div class="lcars-text-bar">
-          <span>Captain Details</span>
-        </div>
+        <app-collapsible-section heading="Captain Details">
+          <div class="registry-character-inner-content">
+            <header class="registry-character-header">
+              <app-entity-avatar
+                [src]="character.profilePicture300"
+                [alt]="character.handle"
+                [size]="300"></app-entity-avatar>
 
-        <div class="registry-character-inner-content">
-          <header class="registry-character-header">
-            <app-entity-avatar
-              [src]="character.profilePicture300"
-              [alt]="character.handle"
-              [size]="300"></app-entity-avatar>
+              <div>
+                @if (character.rank) {
+                  <p class="registry-character-header__rank">
+                    {{ character.rank.title }}
+                  </p>
+                }
+                @if (captainHandleWithAccount) {
+                  <p class="registry-character-header__meta">
+                    {{ captainHandleWithAccount }}
+                  </p>
+                }
+                @if (fullName) {
+                  <p class="registry-character-header__meta">{{ fullName }}</p>
+                }
+              </div>
+            </header>
+          </div>
+        </app-collapsible-section>
 
-            <div>
-              @if (character.rank) {
-                <p class="registry-character-header__rank">
-                  {{ character.rank.title }}
-                </p>
+        <app-collapsible-section heading="Service Record">
+          <div class="registry-character-inner-content">
+            <dl class="registry-detail-grid">
+              @if (character.level !== null) {
+                <dt>Level</dt>
+                <dd>{{ character.level }}</dd>
               }
-              @if (captainHandleWithAccount) {
-                <p class="registry-character-header__meta">
-                  {{ captainHandleWithAccount }}
-                </p>
+              @if (character.sex) {
+                <dt>Sex</dt>
+                <dd>{{ character.sex.name }}</dd>
               }
-              @if (fullName) {
-                <p class="registry-character-header__meta">{{ fullName }}</p>
+              @if (character.class) {
+                <dt>Class</dt>
+                <dd>{{ character.class.name }}</dd>
               }
-            </div>
-          </header>
-        </div>
-
-        <div class="lcars-text-bar">
-          <span>Service Record</span>
-        </div>
-
-        <div class="registry-character-inner-content">
-          <dl class="registry-detail-grid">
-            @if (character.level !== null) {
-              <dt>Level</dt>
-              <dd>{{ character.level }}</dd>
-            }
-            @if (character.sex) {
-              <dt>Sex</dt>
-              <dd>{{ character.sex.name }}</dd>
-            }
-            @if (character.class) {
-              <dt>Class</dt>
-              <dd>{{ character.class.name }}</dd>
-            }
-            @if (character.species) {
-              <dt>Species</dt>
-              <dd>{{ character.species.name }}</dd>
-            }
-            @if (character.faction) {
-              <dt>Starting Faction</dt>
-              <dd>{{ character.faction.name }}</dd>
-            }
-            @if (character.generalFaction) {
-              <dt>Allegiance</dt>
-              <dd>{{ character.generalFaction.name }}</dd>
-            }
-            @if (character.recruitType) {
-              <dt>Recruit Type</dt>
-              <dd>{{ character.recruitType.name }}</dd>
-            }
-            @if (character.createdDate) {
-              <dt>Commissioned</dt>
-              <dd>{{ character.createdDate | date: 'longDate' }}</dd>
-            }
-          </dl>
-        </div>
+              @if (character.species) {
+                <dt>Species</dt>
+                <dd>{{ character.species.name }}</dd>
+              }
+              @if (character.faction) {
+                <dt>Starting Faction</dt>
+                <dd>{{ character.faction.name }}</dd>
+              }
+              @if (character.generalFaction) {
+                <dt>Allegiance</dt>
+                <dd>{{ character.generalFaction.name }}</dd>
+              }
+              @if (character.recruitType) {
+                <dt>Recruit Type</dt>
+                <dd>{{ character.recruitType.name }}</dd>
+              }
+              @if (character.createdDate) {
+                <dt>Commissioned</dt>
+                <dd>{{ character.createdDate | date: 'longDate' }}</dd>
+              }
+            </dl>
+          </div>
+        </app-collapsible-section>
 
         @if (character.biography) {
           <app-collapsible-section heading="Biography">
@@ -127,7 +123,7 @@
     <div class="buttons">
       <a
         [routerLink]="accountLink"
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         >Back to Account</a
       >
       <a

@@ -267,7 +267,7 @@ function buildRegistryActions(
         {
           key: MEMBER_CARD_ADD_FRIEND,
           label: 'Add Friend',
-          colourClass: 'sunflower',
+          colourClass: 'green',
           ariaLabel: `Add ${username} as a friend`,
         },
         buildBlockAction(username),
@@ -289,7 +289,7 @@ function buildUnfriendAction(username: string): MemberCardAction {
   return {
     key: MEMBER_CARD_UNFRIEND,
     label: 'Unfriend',
-    colourClass: 'african-violet',
+    colourClass: 'red',
     ariaLabel: `Unfriend ${username}`,
   };
 }
@@ -297,9 +297,10 @@ function buildUnfriendAction(username: string): MemberCardAction {
 /**
  * Builds the Block button.
  *
- * Kept in the red family, and distinct from the purple unfriend button beside
- * it: both end the friendship, but only blocking also hides the two members
- * from each other.
+ * Red, as the Unfriend button beside it is: red is kept for a control that
+ * removes or refuses (Steve's decision of 12 October 2026), and both end the
+ * friendship. Their labels tell them apart; only blocking also hides the two
+ * members from each other.
  *
  * @param username - The member the button acts on.
  * @returns The action.
@@ -308,7 +309,7 @@ function buildBlockAction(username: string): MemberCardAction {
   return {
     key: MEMBER_CARD_BLOCK,
     label: 'Block',
-    colourClass: 'cardinal',
+    colourClass: 'red',
     ariaLabel: `Block ${username}`,
   };
 }

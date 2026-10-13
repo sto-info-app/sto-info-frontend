@@ -14,8 +14,8 @@
     <form
       [formGroup]="form"
       (ngSubmit)="onSubmit()"
-      class="report-dialog-form">
-      <div class="lcars-select-container sunflower">
+      class="report-dialog-form lcars-rotate">
+      <div class="lcars-select-container">
         <label
           class="select-label"
           for="report-reason-select"
@@ -31,7 +31,7 @@
         </select>
       </div>
 
-      <div class="lcars-input-container perano">
+      <div class="lcars-input-container">
         <label for="report-details-input">
           What happened{{ requiresDetails ? '' : ' (optional)' }}
         </label>
@@ -64,7 +64,7 @@
     mat-dialog-actions>
     <button
       type="button"
-      class="lcars-btn red"
+      class="lcars-btn"
       mat-button
       (click)="onCancel()">
       Cancel

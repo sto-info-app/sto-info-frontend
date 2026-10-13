@@ -30,90 +30,76 @@
 
     <div id="registry-list-main-content">
       @if (mode === 'search') {
-        <div class="lcars-text-bar">
-          <span>Personnel Search</span>
-        </div>
-
-        <div class="registry-list-inner-content">
-          <form
-            class="registry-search"
-            (ngSubmit)="search()">
-            <div class="form-row">
-              <div class="lcars-input-container perano">
-                <label for="registry-search-input">Username</label>
-                <input
-                  id="registry-search-input"
-                  type="search"
-                  name="searchTerm"
-                  placeholder="e.g. captain.picard"
-                  autocomplete="off"
-                  maxlength="50"
-                  [(ngModel)]="searchTerm" />
+        <app-collapsible-section heading="Personnel Search">
+          <div class="registry-list-inner-content">
+            <form
+              class="registry-search"
+              (ngSubmit)="search()">
+              <div class="form-row lcars-rotate">
+                <div class="lcars-input-container">
+                  <label for="registry-search-input">Username</label>
+                  <input
+                    id="registry-search-input"
+                    type="search"
+                    name="searchTerm"
+                    placeholder="e.g. captain.picard"
+                    autocomplete="off"
+                    maxlength="50"
+                    [(ngModel)]="searchTerm" />
+                </div>
               </div>
-            </div>
 
-            <div class="form-actions">
-              @if (searchTerm) {
+              <div class="form-actions buttons-row">
+                @if (searchTerm) {
+                  <button
+                    type="button"
+                    class="lcars-btn"
+                    (click)="clearSearch()">
+                    Clear
+                  </button>
+                }
                 <button
-                  type="button"
-                  class="lcars-btn red"
-                  (click)="clearSearch()">
-                  Clear
+                  type="submit"
+                  class="lcars-btn">
+                  Search
                 </button>
-              }
-              <button
-                type="submit"
-                class="lcars-btn green">
-                Search
-              </button>
-            </div>
-          </form>
-        </div>
+              </div>
+            </form>
+          </div>
+        </app-collapsible-section>
       }
 
-      <div class="lcars-text-bar">
-        <span class="title-with-badge">
-          {{ heading }}
-          @if (total > 0) {
-            <span class="header-count-badge">{{ total }}</span>
+      <!--
+        Named apart from the page's own heading, which already says which
+        listing this is, so the page does not carry the same heading twice.
+      -->
+      <app-collapsible-section
+        heading="Personnel Records"
+        [badge]="total > 0 ? total : null">
+        <div class="registry-list-inner-content">
+          <p class="registry-intro">{{ intro }}</p>
+
+          @if (!isLoading && profiles.length === 0) {
+            <p class="lcars-empty-state">{{ emptyMessage }}</p>
           }
-        </span>
-      </div>
 
-      <div class="registry-list-inner-content">
-        <p class="registry-intro">{{ intro }}</p>
+          <div class="member-card-grid">
+            @for (vm of profileVms; track vm.id) {
+              <app-member-card
+                [vm]="vm.card"
+                [isActing]="isActing"
+                (action)="onMemberCardAction(vm.profile, $event)" />
+            }
+          </div>
 
-        @if (!isLoading && profiles.length === 0) {
-          <p class="lcars-empty-state">{{ emptyMessage }}</p>
-        }
-
-        <div class="member-card-grid">
-          @for (vm of profileVms; track vm.id) {
-            <app-member-card
-              [vm]="vm.card"
-              [isActing]="isActing"
-              (action)="onMemberCardAction(vm.profile, $event)" />
+          @if (totalPages > 1) {
+            <app-lcars-pagination
+              [page]="page"
+              [pageCount]="totalPages"
+              (turn)="loadPage(page + $event)" />
           }
         </div>
-
-        @if (totalPages > 1) {
-          <div class="lcars-pagination">
-            <button
-              type="button"
-              [disabled]="page <= 1"
-              (click)="loadPage(page - 1)">
-              Previous
-            </button>
-            <span>Page {{ page }} of {{ totalPages }}</span>
-            <button
-              type="button"
-              [disabled]="page >= totalPages"
-              (click)="loadPage(page + 1)">
-              Next
-            </button>
-          </div>
-        }
-      </div>
+      </app-collapsible-section>
     </div>
   </div>
 </div>

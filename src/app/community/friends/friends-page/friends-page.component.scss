@@ -23,18 +23,25 @@
     }
   }
 
+  // A row of pills that rotates, set to the form's right-hand edge.
   .form-actions {
-    display: flex;
-    gap: 1rem;
     margin-top: 1rem;
     justify-content: flex-end;
   }
 }
 
+// The side menu's buttons take the stack's rotation, so the list on show is
+// marked by a ring (and by `aria-pressed`) rather than by a colour of its own.
+#friends-side-column .full-width-btn-link.active {
+  box-shadow:
+    inset 0 0 0 3px vars.$lcars-black,
+    0 0 0 2px vars.$a11y-white;
+}
+
 // The tab counts reuse the badge from the content headings, but that rule is
 // scoped to `.lcars-text-bar`, so inside a side-menu button the count renders
-// as bare text tacked onto the label. Restate it as a pill that reads on both
-// the active (sunflower) and inactive (bluey) button backgrounds.
+// as bare text tacked onto the label. Restate it as a pill that reads on every
+// colour of the stack's rotation.
 #friends-side-column .header-count-badge {
   display: inline-flex;
   align-items: center;

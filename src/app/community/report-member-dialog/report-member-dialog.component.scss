@@ -11,7 +11,7 @@
 
 .report-dialog-intro {
   margin: 1rem 0;
-  color: rgb(255 255 255 / 84%);
+  color: vars.$white-a84;
   line-height: 1.5;
 }
 
@@ -24,7 +24,7 @@
 .report-dialog-note {
   margin: 1rem 0 0;
   font-size: 0.85rem;
-  color: rgb(255 255 255 / 66%);
+  color: vars.$white-a66;
 }
 
 .field-error {

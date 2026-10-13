@@ -18,8 +18,10 @@ import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
 import { ChatService } from 'src/app/fleet/chat/chat.service';
 import { AccountCardComponent } from 'src/app/shared/components/account-card/account-card.component';
 import { AccountCardVm } from 'src/app/shared/components/account-card/account-card.model';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { EntityAvatarComponent } from 'src/app/shared/components/entity-avatar/entity-avatar.component';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsCollapsibleBarComponent } from 'src/app/shared/components/lcars-collapsible-bar/lcars-collapsible-bar.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -98,11 +100,13 @@ export const REGISTRY_ACCOUNT_SORT_OPTIONS: readonly AccountSortOption[] = [
     AppDatePipe,
     CommonModule,
     LoadingBarComponent,
+    LcarsCollapsibleBarComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
     EntityAvatarComponent,
     AccountCardComponent,
     CommunityTabsComponent,
+    CollapsibleSectionComponent,
     FormsModule,
   ],
 })
@@ -115,6 +119,7 @@ export class RegistryProfileComponent
   private readonly _moderationService = inject(ModerationService);
   private readonly _authService = inject(AuthService);
   private readonly _dialog = inject(MatDialog);
+  private readonly _confirmPrompt = new ConfirmPrompt();
   private readonly _route = inject(ActivatedRoute);
   private readonly _seoService = inject(SeoService);
   private readonly _pageTitleService = inject(PageTitleService);
@@ -591,14 +596,8 @@ export class RegistryProfileComponent
     data: { title: string; message: string; confirmText: string },
     onConfirm: () => void,
   ): void {
-    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
-      width: '75%',
-      data: { ...data, cancelText: 'Cancel' },
-    });
-
-    dialogRef
-      .afterClosed()
-      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+    this._confirmPrompt
+      .ask({ ...data, cancelText: 'Cancel' })
       .subscribe(confirmed => {
         if (confirmed) {
           onConfirm();

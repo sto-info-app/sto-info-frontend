@@ -26,55 +26,46 @@
       <h1>@{{ account.handle }}</h1>
 
       <div id="registry-account-main-content">
-        <div class="lcars-text-bar">
-          <span>Account Information</span>
-        </div>
-
-        <div class="registry-account-inner-content">
-          <dl class="registry-detail-grid">
-            <dt>Handle</dt>
-            <dd>{{ account.handle }}</dd>
-            @if (account.platformName) {
-              <dt>Platform</dt>
-              <dd>{{ account.platformName }}</dd>
-            }
-            @if (account.launcherName) {
-              <dt>Launcher</dt>
-              <dd>{{ account.launcherName }}</dd>
-            }
-            @if (account.accountCreatedDate) {
-              <dt>Playing Since</dt>
-              <dd>{{ account.accountCreatedDate | date: 'longDate' }}</dd>
-            }
-            <dt>Lifetime Subscription</dt>
-            <dd>{{ account.lifetimeSubscription ? 'Yes' : 'No' }}</dd>
-          </dl>
-        </div>
-
-        <div class="lcars-text-bar">
-          <span class="title-with-badge">
-            Captain List
-            @if (account.publicCharacterCount > 0) {
-              <span class="header-count-badge">
-                {{ account.publicCharacterCount }}
-              </span>
-            }
-          </span>
-        </div>
-
-        <div class="registry-account-inner-content">
-          @if (account.characters.length === 0) {
-            <p class="lcars-empty-state">
-              This officer has not made any captains on this account public.
-            </p>
-          }
-
-          <div class="characters-grid">
-            @for (card of characterCards; track card.id) {
-              <app-character-card [vm]="card" />
-            }
+        <app-collapsible-section heading="Account Information">
+          <div class="registry-account-inner-content">
+            <dl class="registry-detail-grid">
+              <dt>Handle</dt>
+              <dd>{{ account.handle }}</dd>
+              @if (account.platformName) {
+                <dt>Platform</dt>
+                <dd>{{ account.platformName }}</dd>
+              }
+              @if (account.launcherName) {
+                <dt>Launcher</dt>
+                <dd>{{ account.launcherName }}</dd>
+              }
+              @if (account.accountCreatedDate) {
+                <dt>Playing Since</dt>
+                <dd>{{ account.accountCreatedDate | date: 'longDate' }}</dd>
+              }
+              <dt>Lifetime Subscription</dt>
+              <dd>{{ account.lifetimeSubscription ? 'Yes' : 'No' }}</dd>
+            </dl>
           </div>
-        </div>
+        </app-collapsible-section>
+
+        <app-collapsible-section
+          heading="Captain List"
+          [badge]="account.publicCharacterCount > 0 ? account.publicCharacterCount : null">
+          <div class="registry-account-inner-content">
+            @if (account.characters.length === 0) {
+              <p class="lcars-empty-state">
+                This officer has not made any captains on this account public.
+              </p>
+            }
+
+            <div class="characters-grid">
+              @for (card of characterCards; track card.id) {
+                <app-character-card [vm]="card" />
+              }
+            </div>
+          </div>
+        </app-collapsible-section>
       </div>
 
       <!--
@@ -97,7 +88,7 @@
     <div class="buttons">
       <a
         [routerLink]="profileLink"
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         >Back to Officer</a
       >
     </div>

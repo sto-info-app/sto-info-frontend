@@ -43,70 +43,61 @@
       </h1>
 
       <div id="registry-profile-main-content">
-        <div class="lcars-text-bar">
-          <span>Officer Details</span>
-        </div>
+        <app-collapsible-section heading="Officer Details">
+          <div class="registry-profile-inner-content">
+            <div class="registry-profile-identity">
+              <app-entity-avatar
+                [src]="profile.profilePicture300"
+                [alt]="profile.username"
+                [size]="300"></app-entity-avatar>
 
-        <div class="registry-profile-inner-content">
-          <div class="registry-profile-identity">
-            <app-entity-avatar
-              [src]="profile.profilePicture300"
-              [alt]="profile.username"
-              [size]="300"></app-entity-avatar>
+              <dl class="registry-detail-grid">
+                <dt>Joined</dt>
+                <dd>{{ profile.joinedAt | appDate: 'longDate' }}</dd>
+                <dt>Last Seen</dt>
+                <dd>
+                  {{
+                    profile.lastActiveAt
+                      ? (profile.lastActiveAt | appDate: 'longDate')
+                      : 'Never'
+                  }}
+                </dd>
+                @if (profile.playingSince) {
+                  <dt>Playing Since</dt>
+                  <dd>{{ profile.playingSince | date: 'longDate' }}</dd>
+                }
+                <dt>Accounts</dt>
+                <dd>{{ profile.publicAccountCount }}</dd>
+                <dt>Captains</dt>
+                <dd>{{ profile.publicCharacterCount }}</dd>
+              </dl>
+            </div>
+          </div>
+        </app-collapsible-section>
 
-            <dl class="registry-detail-grid">
-              <dt>Joined</dt>
-              <dd>{{ profile.joinedAt | appDate: 'longDate' }}</dd>
-              <dt>Last Seen</dt>
-              <dd>
-                {{
-                  profile.lastActiveAt
-                    ? (profile.lastActiveAt | appDate: 'longDate')
-                    : 'Never'
-                }}
-              </dd>
-              @if (profile.playingSince) {
-                <dt>Playing Since</dt>
-                <dd>{{ profile.playingSince | date: 'longDate' }}</dd>
+        <app-collapsible-section
+          heading="Account List"
+          [badge]="profile.accounts.length > 0 ? profile.accounts.length : null">
+          <div class="registry-profile-inner-content">
+            @if (profile.accounts.length === 0) {
+              <p class="lcars-empty-state">
+                This officer has not made any accounts public.
+              </p>
+            }
+
+            @if (allAccountsFilteredOut()) {
+              <p class="lcars-empty-state">
+                No accounts match the current filters.
+              </p>
+            }
+
+            <div class="accounts-grid">
+              @for (card of accountCards(); track card.id) {
+                <app-account-card [vm]="card" />
               }
-              <dt>Accounts</dt>
-              <dd>{{ profile.publicAccountCount }}</dd>
-              <dt>Captains</dt>
-              <dd>{{ profile.publicCharacterCount }}</dd>
-            </dl>
+            </div>
           </div>
-        </div>
-
-        <div class="lcars-text-bar">
-          <span class="title-with-badge">
-            Account List
-            @if (profile.accounts.length > 0) {
-              <span class="header-count-badge">
-                {{ profile.accounts.length }}
-              </span>
-            }
-          </span>
-        </div>
-
-        <div class="registry-profile-inner-content">
-          @if (profile.accounts.length === 0) {
-            <p class="lcars-empty-state">
-              This officer has not made any accounts public.
-            </p>
-          }
-
-          @if (allAccountsFilteredOut()) {
-            <p class="lcars-empty-state">
-              No accounts match the current filters.
-            </p>
-          }
-
-          <div class="accounts-grid">
-            @for (card of accountCards(); track card.id) {
-              <app-account-card [vm]="card" />
-            }
-          </div>
-        </div>
+        </app-collapsible-section>
       </div>
     }
   </div>
@@ -121,21 +112,11 @@
       id="registry-profile-side-column"
       class="col">
       @if (showListControls()) {
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Filters</span>
-          <button
-            type="button"
-            class="cta-icon"
-            (click)="filtersCollapsed = !filtersCollapsed"
-            [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
-            <i
-              class="fas"
-              [class.fa-caret-down]="filtersCollapsed"
-              [class.fa-caret-up]="!filtersCollapsed"></i>
-          </button>
-        </div>
+        <app-lcars-collapsible-bar
+          label="Filters"
+          [(collapsed)]="filtersCollapsed" />
         @if (!filtersCollapsed) {
-          <div class="filter-section">
+          <div class="filter-section lcars-rotate">
             <label
               class="select-label"
               for="registry-account-search-input"
@@ -150,7 +131,7 @@
               (ngModelChange)="searchText.set($event)" />
 
             @if (platformOptions().length > 1) {
-              <div class="lcars-select-container perano">
+              <div class="lcars-select-container">
                 <label
                   class="select-label"
                   for="registry-account-platform-select"
@@ -170,7 +151,7 @@
             }
 
             @if (launcherOptions().length > 1) {
-              <div class="lcars-select-container perano">
+              <div class="lcars-select-container">
                 <label
                   class="select-label"
                   for="registry-account-launcher-select"
@@ -212,22 +193,12 @@
           </div>
         }
 
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Sort</span>
-          <button
-            type="button"
-            class="cta-icon"
-            (click)="sortCollapsed = !sortCollapsed"
-            [title]="sortCollapsed ? 'Show Sort' : 'Hide Sort'">
-            <i
-              class="fas"
-              [class.fa-caret-down]="sortCollapsed"
-              [class.fa-caret-up]="!sortCollapsed"></i>
-          </button>
-        </div>
+        <app-lcars-collapsible-bar
+          label="Sort"
+          [(collapsed)]="sortCollapsed" />
         @if (!sortCollapsed) {
-          <div class="filter-section">
-            <div class="lcars-select-container tangerine">
+          <div class="filter-section lcars-rotate">
+            <div class="lcars-select-container">
               <label
                 class="select-label"
                 for="registry-account-sort-by-select"
@@ -243,7 +214,7 @@
                 }
               </select>
             </div>
-            <div class="lcars-select-container gold">
+            <div class="lcars-select-container">
               <label
                 class="select-label"
                 for="registry-account-sort-order-select"
@@ -263,107 +234,108 @@
       }
 
       @if (canActOnMember) {
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Officer Actions</span>
-        </div>
-        <div class="buttons">
-          @switch (relationship) {
-            @case (relationshipStatus.FRIENDS) {
-              <p class="registry-relationship-state">
-                {{ profile.username }} is on your friends list.
-              </p>
-              @if (isChatOffered) {
+        <app-collapsible-section
+          heading="Officer Actions"
+          barClass="small-lcars-bar-gap">
+          <div class="buttons">
+            @switch (relationship) {
+              @case (relationshipStatus.FRIENDS) {
+                <p class="registry-relationship-state">
+                  {{ profile.username }} is on your friends list.
+                </p>
+                @if (isChatOffered) {
+                  <button
+                    type="button"
+                    class="full-width-btn-link"
+                    [disabled]="isActing"
+                    (click)="message()">
+                    Message
+                  </button>
+                }
                 <button
                   type="button"
-                  class="full-width-btn-link sky"
+                  class="full-width-btn-link red"
                   [disabled]="isActing"
-                  (click)="message()">
-                  Message
+                  (click)="removeFriend()">
+                  Unfriend
                 </button>
               }
-              <button
-                type="button"
-                class="full-width-btn-link african-violet"
-                [disabled]="isActing"
-                (click)="removeFriend()">
-                Unfriend
-              </button>
+              @case (relationshipStatus.REQUEST_SENT) {
+                <p class="registry-relationship-state">
+                  Your friend request is awaiting a reply.
+                </p>
+                <button
+                  type="button"
+                  class="full-width-btn-link red"
+                  [disabled]="isActing"
+                  (click)="cancelRequest()">
+                  Withdraw Request
+                </button>
+              }
+              @case (relationshipStatus.REQUEST_RECEIVED) {
+                <p class="registry-relationship-state">
+                  {{ profile.username }} would like to add you as a friend.
+                </p>
+                <button
+                  type="button"
+                  class="full-width-btn-link green"
+                  [disabled]="isActing"
+                  (click)="acceptRequest()">
+                  Accept Request
+                </button>
+                <button
+                  type="button"
+                  class="full-width-btn-link red"
+                  [disabled]="isActing"
+                  (click)="declineRequest()">
+                  Decline Request
+                </button>
+              }
+              @case (relationshipStatus.BLOCKED) {
+                <p class="registry-relationship-state">
+                  You have blocked {{ profile.username }}.
+                </p>
+                <button
+                  type="button"
+                  class="full-width-btn-link green"
+                  [disabled]="isActing"
+                  (click)="unblockMember()">
+                  Unblock
+                </button>
+              }
+              @default {
+                <button
+                  type="button"
+                  class="full-width-btn-link green"
+                  [disabled]="isActing"
+                  (click)="addFriend()">
+                  Add Friend
+                </button>
+              }
             }
-            @case (relationshipStatus.REQUEST_SENT) {
-              <p class="registry-relationship-state">
-                Your friend request is awaiting a reply.
-              </p>
-              <button
-                type="button"
-                class="full-width-btn-link gold"
-                [disabled]="isActing"
-                (click)="cancelRequest()">
-                Withdraw Request
-              </button>
-            }
-            @case (relationshipStatus.REQUEST_RECEIVED) {
-              <p class="registry-relationship-state">
-                {{ profile.username }} would like to add you as a friend.
-              </p>
-              <button
-                type="button"
-                class="full-width-btn-link green"
-                [disabled]="isActing"
-                (click)="acceptRequest()">
-                Accept Request
-              </button>
+
+            @if (relationship !== relationshipStatus.BLOCKED) {
               <button
                 type="button"
                 class="full-width-btn-link red"
                 [disabled]="isActing"
-                (click)="declineRequest()">
-                Decline Request
+                (click)="blockMember()">
+                Block
               </button>
             }
-            @case (relationshipStatus.BLOCKED) {
-              <p class="registry-relationship-state">
-                You have blocked {{ profile.username }}.
-              </p>
-              <button
-                type="button"
-                class="full-width-btn-link green"
-                [disabled]="isActing"
-                (click)="unblockMember()">
-                Unblock
-              </button>
-            }
-            @default {
-              <button
-                type="button"
-                class="full-width-btn-link sunflower"
-                [disabled]="isActing"
-                (click)="addFriend()">
-                Add Friend
-              </button>
-            }
-          }
 
-          @if (relationship !== relationshipStatus.BLOCKED) {
+            <!-- Offered even to a viewer who has already blocked this officer:
+               blocking is a private preference, reporting asks an administrator
+               to look, and someone worth blocking is often worth reporting. -->
             <button
               type="button"
-              class="full-width-btn-link cardinal"
+              class="full-width-btn-link"
               [disabled]="isActing"
-              (click)="blockMember()">
-              Block
+              (click)="reportMember()">
+              Report
             </button>
-          }
-
-          <!-- Offered even to a viewer who has already blocked this officer:
-             blocking is a private preference, reporting asks an administrator
-             to look, and someone worth blocking is often worth reporting. -->
-          <button
-            type="button"
-            class="full-width-btn-link red"
-            [disabled]="isActing"
-            (click)="reportMember()">
-            Report
-          </button>
-        </div>
+          </div>
+        </app-collapsible-section>
       }
     </div>
   }

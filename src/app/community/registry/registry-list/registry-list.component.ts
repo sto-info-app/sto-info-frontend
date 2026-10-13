@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, take } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
+import { LcarsPaginationComponent } from 'src/app/shared/components/lcars-pagination/lcars-pagination.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { MemberCardComponent } from 'src/app/shared/components/member-card/member-card.component';
 import { MemberCardVm } from 'src/app/shared/components/member-card/member-card.model';
@@ -95,6 +96,8 @@ const MODE_CONFIG: Record<
     LcarsSuccessMessageComponent,
     MemberCardComponent,
     CommunityTabsComponent,
+    CollapsibleSectionComponent,
+    LcarsPaginationComponent,
   ],
 })
 export class RegistryListComponent
@@ -105,7 +108,7 @@ export class RegistryListComponent
   private readonly _registryService = inject(RegistryService);
   private readonly _communityService = inject(CommunityService);
   private readonly _authService = inject(AuthService);
-  private readonly _dialog = inject(MatDialog);
+  private readonly _confirmPrompt = new ConfirmPrompt();
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
 
@@ -334,14 +337,8 @@ export class RegistryListComponent
     data: { title: string; message: string; confirmText: string },
     onConfirm: () => void,
   ): void {
-    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
-      width: '75%',
-      data: { ...data, cancelText: 'Cancel' },
-    });
-
-    dialogRef
-      .afterClosed()
-      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+    this._confirmPrompt
+      .ask({ ...data, cancelText: 'Cancel' })
       .subscribe(confirmed => {
         if (confirmed) {
           onConfirm();

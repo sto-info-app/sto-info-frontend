@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
@@ -21,7 +22,12 @@ import { CommunityTabsComponent } from './community-tabs/community-tabs.componen
   templateUrl: './community.component.html',
   styleUrls: ['./community.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, CommunityTabsComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    CommunityTabsComponent,
+    CollapsibleSectionComponent,
+  ],
 })
 export class CommunityComponent {
   private readonly _authService = inject(AuthService);
