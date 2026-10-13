@@ -9,93 +9,71 @@
       evolve as new releases are deployed.
     </p>
 
+    <!--
+      Each section is its own anchor, so the side column's links land on it.
+      The host carries the id rather than a wrapper, so the sections stay
+      siblings and take successive colours.
+    -->
     @for (section of sectionMeta; track section.key) {
-      <section
+      <app-collapsible-section
         class="roadmap-section"
-        [id]="section.anchorId">
-        <div class="lcars-text-bar">
-          <h2 class="roadmap-section-title">
-            <span>{{ section.title }}</span>
-          </h2>
-          <button
-            type="button"
-            class="cta-icon"
-            [attr.aria-expanded]="sectionExpanded[section.key]"
-            [attr.aria-controls]="'roadmap-section-content-' + section.key"
-            [title]="sectionExpanded[section.key] ? 'Collapse' : 'Expand'"
-            (click)="toggleSection(section.key)">
-            @if (sectionExpanded[section.key]) {
-              <i
-                class="fas fa-caret-up"
-                aria-hidden="true"></i>
-            } @else {
-              <i
-                class="fas fa-caret-down"
-                aria-hidden="true"></i>
-            }
-          </button>
-        </div>
-
-        @if (sectionExpanded[section.key]) {
-          <div
-            class="roadmap-content"
-            [id]="'roadmap-section-content-' + section.key">
-            @if (section.key === 'complete') {
-              @for (item of complete; track item.title) {
-                <article class="roadmap-item">
-                  <h3>{{ item.title }}</h3>
-                  <ul class="lcars-list">
-                    @for (detail of item.details; track detail) {
-                      <li>{{ detail }}</li>
-                    }
-                  </ul>
-                </article>
-              }
-            }
-
-            @if (section.key === 'inProgress') {
+        [id]="section.anchorId"
+        [heading]="section.title">
+        @if (section.key === 'complete') {
+          @for (item of complete; track item.title) {
+            <article class="roadmap-item">
+              <h3>{{ item.title }}</h3>
               <ul class="lcars-list">
-                @for (item of inProgress; track item) {
-                  <li>{{ item }}</li>
+                @for (detail of item.details; track detail) {
+                  <li>{{ detail }}</li>
                 }
               </ul>
-            }
-
-            @if (section.key === 'planned') {
-              <ul class="lcars-list">
-                @for (item of planned; track item) {
-                  <li>{{ item }}</li>
-                }
-              </ul>
-            }
-
-            @if (section.key === 'futureIdeas') {
-              <ul class="lcars-list">
-                @for (item of futureIdeas; track item) {
-                  <li>{{ item }}</li>
-                }
-              </ul>
-            }
-          </div>
+            </article>
+          }
         }
-      </section>
+
+        @if (section.key === 'inProgress') {
+          <ul class="lcars-list">
+            @for (item of inProgress; track item) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        }
+
+        @if (section.key === 'planned') {
+          <ul class="lcars-list">
+            @for (item of planned; track item) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        }
+
+        @if (section.key === 'futureIdeas') {
+          <ul class="lcars-list">
+            @for (item of futureIdeas; track item) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        }
+      </app-collapsible-section>
     }
   </div>
 
   <div
     id="roadmap-side-column"
     class="col">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      @for (section of sectionMeta; track section.key) {
-        <a
-          [href]="getRouteLink(appRoutes.ROADMAP) + '#' + section.anchorId"
-          class="full-width-btn-link sunflower"
-          >{{ section.title }}</a
-        >
-      }
-    </div>
+    <app-collapsible-section
+      heading="Navigation"
+      barClass="small-lcars-bar-gap">
+      <div class="buttons">
+        @for (section of sectionMeta; track section.key) {
+          <a
+            [href]="getRouteLink(appRoutes.ROADMAP) + '#' + section.anchorId"
+            class="full-width-btn-link"
+            >{{ section.title }}</a
+          >
+        }
+      </div>
+    </app-collapsible-section>
   </div>
 </div>

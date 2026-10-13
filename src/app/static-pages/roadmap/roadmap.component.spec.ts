@@ -24,19 +24,24 @@ describe('RoadmapComponent', () => {
     expect(component.complete.length).toBeGreaterThan(0);
   });
 
-  it('should initialise sections using the configured expansion defaults', () => {
-    expect(component.sectionExpanded.complete).toBe(true);
-    expect(component.sectionExpanded.inProgress).toBe(true);
-    expect(component.sectionExpanded.planned).toBe(true);
-    expect(component.sectionExpanded.futureIdeas).toBe(false);
-  });
+  // Every section opens unfolded, as every collapsible section does.
+  it('draws each section as a collapsible section, anchored by its id', () => {
+    const sections: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll(
+        '#roadmap-main-column app-collapsible-section',
+      ),
+    );
 
-  it('should toggle section expansion state', () => {
-    component.toggleSection('planned');
-    expect(component.sectionExpanded.planned).toBe(false);
-
-    component.toggleSection('planned');
-    expect(component.sectionExpanded.planned).toBe(true);
+    expect(sections.map(section => section.id)).toEqual(
+      component.sectionMeta.map(section => section.anchorId),
+    );
+    sections.forEach(section =>
+      expect(
+        section
+          .querySelector('.collapsible-section__content')
+          ?.hasAttribute('hidden'),
+      ).toBe(false),
+    );
   });
 
   it('should define side navigation anchors for each section', () => {

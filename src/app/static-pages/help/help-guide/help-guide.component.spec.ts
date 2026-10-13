@@ -218,7 +218,11 @@ describe('HelpGuideComponent', () => {
     firstToggle.click();
     fixture.detectChanges();
 
-    expect(pageText()).not.toContain(firstSection.paragraphs[0]);
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
+        '.collapsible-section__content',
+      )?.hidden,
+    ).toBe(true);
     expect(pageText()).toContain(firstSection.heading);
   });
 

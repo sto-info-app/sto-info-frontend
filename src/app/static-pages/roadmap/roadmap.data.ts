@@ -1,8 +1,4 @@
-import {
-  RoadmapEntry,
-  RoadmapSectionKey,
-  RoadmapSectionMeta,
-} from './roadmap.models';
+import { RoadmapEntry, RoadmapSectionMeta } from './roadmap.models';
 
 export const ROADMAP_SECTION_META: RoadmapSectionMeta[] = [
   {
@@ -106,13 +102,3 @@ export const ROADMAP_PLANNED: string[] = [
 ];
 
 export const ROADMAP_FUTURE_IDEAS: string[] = [];
-
-export const ROADMAP_SECTION_EXPANDED_DEFAULTS: Record<
-  RoadmapSectionKey,
-  boolean
-> = {
-  complete: true,
-  inProgress: true,
-  planned: true,
-  futureIdeas: false,
-};

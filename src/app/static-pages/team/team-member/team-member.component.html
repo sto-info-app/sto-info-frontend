@@ -10,53 +10,50 @@
         </div>
       </div>
 
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Profile</span>
-      </div>
-
-      <div class="member-details-content">
-        <div class="detail-grid">
-          @for (item of member.info; track item.label) {
-            <div class="detail-item">
-              <span class="label">{{ item.label }}</span>
-              <span class="value">{{ item.value }}</span>
-            </div>
-          }
+      <app-collapsible-section
+        heading="Profile"
+        barClass="small-lcars-bar-gap">
+        <div class="member-details-content">
+          <div class="detail-grid">
+            @for (item of member.info; track item.label) {
+              <div class="detail-item">
+                <span class="label">{{ item.label }}</span>
+                <span class="value">{{ item.value }}</span>
+              </div>
+            }
+          </div>
         </div>
+      </app-collapsible-section>
 
-        @if (member.bio) {
-          <div class="member-bio-section">
-            <app-collapsible-section
-              heading="Biography"
-              barClass="small-lcars-bar-gap">
-              <div
-                class="bio-content"
-                [innerHTML]="member.bio"></div>
-            </app-collapsible-section>
-          </div>
-        }
+      @if (member.bio) {
+        <app-collapsible-section
+          heading="Biography"
+          barClass="small-lcars-bar-gap">
+          <div
+            class="bio-content"
+            [innerHTML]="member.bio"></div>
+        </app-collapsible-section>
+      }
 
-        @if (member.highlights?.length) {
-          <div class="member-highlights-section">
-            <div class="lcars-text-bar small-lcars-bar-gap">
-              <span>Highlights</span>
-            </div>
-            <ul class="highlights-list">
-              @for (highlight of member.highlights; track highlight) {
-                <li class="highlights-item">
-                  {{ highlight }}
-                </li>
-              }
-            </ul>
-          </div>
-        }
-      </div>
+      @if (member.highlights?.length) {
+        <app-collapsible-section
+          heading="Highlights"
+          barClass="small-lcars-bar-gap">
+          <ul class="highlights-list">
+            @for (highlight of member.highlights; track highlight) {
+              <li class="highlights-item">
+                {{ highlight }}
+              </li>
+            }
+          </ul>
+        </app-collapsible-section>
+      }
     } @else {
       <div class="error-container">
         <app-lcars-error-message
           message="We could not find that team member."></app-lcars-error-message>
         <a
-          class="full-width-btn-link peach"
+          class="lcars-btn lcars-btn-auto"
           [routerLink]="groupLink">
           Back to {{ groupLabel }}
         </a>
@@ -82,25 +79,26 @@
       </div>
     </div>
 
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      <a
-        [routerLink]="groupLink"
-        class="full-width-btn-link peach"
-        >Back to {{ groupLabel }}</a
-      >
-      <a
-        [routerLink]="aboutLink"
-        class="full-width-btn-link sunflower"
-        >About the App</a
-      >
-      <a
-        [routerLink]="supportersLink"
-        class="full-width-btn-link bluey"
-        >Supporters</a
-      >
-    </div>
+    <app-collapsible-section
+      heading="Navigation"
+      barClass="small-lcars-bar-gap">
+      <div class="buttons">
+        <a
+          [routerLink]="groupLink"
+          class="full-width-btn-link"
+          >Back to {{ groupLabel }}</a
+        >
+        <a
+          [routerLink]="aboutLink"
+          class="full-width-btn-link"
+          >About the App</a
+        >
+        <a
+          [routerLink]="supportersLink"
+          class="full-width-btn-link"
+          >Supporters</a
+        >
+      </div>
+    </app-collapsible-section>
   </div>
 </div>

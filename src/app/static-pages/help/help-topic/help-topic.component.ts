@@ -1,28 +1,8 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  NgZone,
-  OnInit,
-  inject,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { catchError, combineLatest, map, of } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { FeatureUnavailableComponent } from 'src/app/shared/components/feature-unavailable/feature-unavailable.component';
-import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
-import {
-  FEATURE_UNAVAILABLE_DISABLED,
-  FEATURE_UNAVAILABLE_OFFLINE,
-  FeatureUnavailableReason,
-} from 'src/app/shared/constants/feature-availability.constants';
-import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
-import { AuthService } from 'src/app/core/auth/auth.service';
-import { AccessControlService } from 'src/app/shared/services/access-control.service';
-import { PageTitleService } from 'src/app/shared/services/page-title.service';
-import { RoutingService } from 'src/app/shared/services/routing.service';
 
-import { HelpFeaturesService } from '../help-features.service';
+import { HelpPageDirective } from '../help-page.directive';
 import {
   blockingFeature,
   findHelpTopic,
@@ -57,10 +37,7 @@ import { HelpFeature, HelpGuide, HelpTopic } from '../help.models';
   standalone: true,
   imports: [RouterModule, FeatureUnavailableComponent],
 })
-export class HelpTopicComponent implements OnInit {
-  /** Route constants, for the links out of this page. */
-  readonly appRoutes = APP_ROUTES;
-
+export class HelpTopicComponent extends HelpPageDirective implements OnInit {
   /** The section being read, once it has been resolved. */
   topic: HelpTopic | null = null;
 
@@ -74,35 +51,6 @@ export class HelpTopicComponent implements OnInit {
   switchedOff: string | null = null;
 
   /**
-   * Why the section's feature is out of reach, when it is. Null whenever the
-   * section itself is shown.
-   */
-  unavailableReason: FeatureUnavailableReason | null = null;
-
-  /** The feature the notice is about. */
-  unavailableFeatureName = '';
-
-  /**
-   * The section's feature when the backend could not be asked about it, for
-   * the notice above its guides; null otherwise (FC-044).
-   */
-  unreachableFeatureName: string | null = null;
-
-  /** Why, for that notice: the systems are not answering. */
-  readonly unreachableReason = FEATURE_UNAVAILABLE_OFFLINE;
-
-  private readonly _route = inject(ActivatedRoute);
-  private readonly _router = inject(Router);
-  private readonly _routingService = inject(RoutingService);
-  private readonly _pageTitleService = inject(PageTitleService);
-  private readonly _helpFeatures = inject(HelpFeaturesService);
-  private readonly _accessControlService = inject(AccessControlService);
-  private readonly _authService = inject(AuthService);
-  private readonly _destroyRef = inject(DestroyRef);
-  private readonly _ngZone = inject(NgZone);
-  private readonly _cdr = inject(ChangeDetectorRef);
-
-  /**
    * Resolves the section named in the address, and watches it, so moving
    * between sections re-renders in place.
    *
@@ -112,82 +60,48 @@ export class HelpTopicComponent implements OnInit {
    * @returns void
    */
   ngOnInit(): void {
-    combineLatest([
-      this._route.paramMap.pipe(map(params => params.get('topicId'))),
-      this._helpFeatures.features(),
-      this._accessControlService
-        .getMyPermissions()
-        .pipe(catchError(() => of(new Set<string>() as ReadonlySet<string>))),
-    ])
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        observeInZone(this._ngZone, this._cdr),
-      )
-      .subscribe(([topicId, features, permissions]) => {
-        const topic = findHelpTopic(topicId);
+    this.watchPage('topicId', (topicId, features, permissions) => {
+      const topic = findHelpTopic(topicId);
 
-        if (!topic || !isTopicPermitted(topic, this._authService.isAdmin())) {
-          this.sendToNotFound();
-          return;
-        }
+      if (!topic || !isTopicPermitted(topic, this._authService.isAdmin())) {
+        this.sendToNotFound();
+        return;
+      }
 
-        const blocking = blockingFeature(features, topic.requiresFeature);
+      const blocking = blockingFeature(features, topic.requiresFeature);
 
-        if (blocking) {
-          this.showUnavailable(blocking);
-          return;
-        }
+      if (blocking) {
+        this.showUnavailable(blocking);
+        return;
+      }
 
-        const guides = topic.guides.filter(
-          guide =>
-            isGuidePermitted(guide, permissions) &&
-            isFeatureOffered(guide.requiresFeature, features),
-        );
+      const guides = topic.guides.filter(
+        guide =>
+          isGuidePermitted(guide, permissions) &&
+          isFeatureOffered(guide.requiresFeature, features),
+      );
 
-        if (guides.length === 0) {
-          this.sendToNotFound();
-          return;
-        }
+      if (guides.length === 0) {
+        this.sendToNotFound();
+        return;
+      }
 
-        const off = switchedOffFeature(features, topic.requiresFeature);
-        const unreachable = unreachableFeature(features, topic.requiresFeature);
+      const off = switchedOffFeature(features, topic.requiresFeature);
 
-        this.unavailableReason = null;
-        this.unreachableFeatureName =
-          unreachable === null ? null : HELP_FEATURE_NAMES[unreachable];
-        this.topic = topic;
-        this.guides = guides;
-        this.switchedOff = off === null ? null : switchedOffNote(off, 'topic');
-        // A guide says nothing more while the whole section is noted.
-        this.guideNotes = guides.map(guide => {
-          const guideOff = switchedOffFeature(features, guide.requiresFeature);
+      this.markShown(unreachableFeature(features, topic.requiresFeature));
+      this.topic = topic;
+      this.guides = guides;
+      this.switchedOff = off === null ? null : switchedOffNote(off, 'topic');
+      // A guide says nothing more while the whole section is noted.
+      this.guideNotes = guides.map(guide => {
+        const guideOff = switchedOffFeature(features, guide.requiresFeature);
 
-          return off !== null || guideOff === null
-            ? null
-            : `${HELP_FEATURE_NAMES[guideOff]} is switched off at the moment.`;
-        });
-        this._pageTitleService.setTitle(topic.title);
+        return off !== null || guideOff === null
+          ? null
+          : `${HELP_FEATURE_NAMES[guideOff]} is switched off at the moment.`;
       });
-  }
-
-  /**
-   * Builds the path to a guide.
-   *
-   * @param slug The guide's slug.
-   * @returns The router path to that guide.
-   */
-  getGuideLink(slug: string): string {
-    return `${this._routingService.getLink(this.appRoutes.HELP)}/${slug}`;
-  }
-
-  /**
-   * Translates a route constant into a path string.
-   *
-   * @param route The route key to look up.
-   * @returns The path string starting with /.
-   */
-  getRouteLink(route: string): string {
-    return this._routingService.getLink(route);
+      this._pageTitleService.setTitle(topic.title);
+    });
   }
 
   /**
@@ -199,18 +113,6 @@ export class HelpTopicComponent implements OnInit {
   private showUnavailable(feature: HelpFeature): void {
     this.topic = null;
     this.guides = [];
-    this.unavailableFeatureName = HELP_FEATURE_NAMES[feature];
-    this.unreachableFeatureName = null;
-    this.unavailableReason = FEATURE_UNAVAILABLE_DISABLED;
-    this._pageTitleService.setTitle(this.unavailableFeatureName);
-  }
-
-  /**
-   * Sends the visitor to the not-found page.
-   *
-   * @returns void
-   */
-  private sendToNotFound(): void {
-    void this._router.navigate([`/${this.appRoutes.PAGE_NOT_FOUND}`]);
+    this.markUnavailable(feature);
   }
 }

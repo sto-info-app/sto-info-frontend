@@ -1,33 +1,12 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  NgZone,
-  OnInit,
-  inject,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { catchError, combineLatest, map, of } from 'rxjs';
-import { FeatureUnavailableComponent } from 'src/app/shared/components/feature-unavailable/feature-unavailable.component';
-import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
-import {
-  FEATURE_UNAVAILABLE_DISABLED,
-  FEATURE_UNAVAILABLE_OFFLINE,
-  FeatureUnavailableReason,
-} from 'src/app/shared/constants/feature-availability.constants';
-import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
-import { AuthService } from 'src/app/core/auth/auth.service';
-import { AccessControlService } from 'src/app/shared/services/access-control.service';
-import { PageTitleService } from 'src/app/shared/services/page-title.service';
-import { RoutingService } from 'src/app/shared/services/routing.service';
-
+import { Component, OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
-import { HelpFeaturesService } from '../help-features.service';
+import { FeatureUnavailableComponent } from 'src/app/shared/components/feature-unavailable/feature-unavailable.component';
+
+import { HelpPageDirective } from '../help-page.directive';
 import {
   blockingFeature,
   findHelpGuide,
-  HELP_FEATURE_NAMES,
   isFeatureOffered,
   switchedOffFeature,
   switchedOffNote,
@@ -73,10 +52,7 @@ import {
     FeatureUnavailableComponent,
   ],
 })
-export class HelpGuideComponent implements OnInit {
-  /** Route constants, for the links out of this page. */
-  readonly appRoutes = APP_ROUTES;
-
+export class HelpGuideComponent extends HelpPageDirective implements OnInit {
   /** The guide being read, once it has been resolved. */
   guide: HelpGuide | null = null;
 
@@ -99,35 +75,6 @@ export class HelpGuideComponent implements OnInit {
   topicLink = '';
 
   /**
-   * Why the guide's feature is out of reach, when it is. Null whenever the
-   * guide itself is shown.
-   */
-  unavailableReason: FeatureUnavailableReason | null = null;
-
-  /** The feature the notice is about. */
-  unavailableFeatureName = '';
-
-  /**
-   * The feature the guide is about when the backend could not be asked about
-   * it, for the notice above the guide; null otherwise (FC-044).
-   */
-  unreachableFeatureName: string | null = null;
-
-  /** Why, for that notice: the systems are not answering. */
-  readonly unreachableReason = FEATURE_UNAVAILABLE_OFFLINE;
-
-  private readonly _route = inject(ActivatedRoute);
-  private readonly _router = inject(Router);
-  private readonly _routingService = inject(RoutingService);
-  private readonly _pageTitleService = inject(PageTitleService);
-  private readonly _helpFeatures = inject(HelpFeaturesService);
-  private readonly _accessControlService = inject(AccessControlService);
-  private readonly _authService = inject(AuthService);
-  private readonly _destroyRef = inject(DestroyRef);
-  private readonly _ngZone = inject(NgZone);
-  private readonly _cdr = inject(ChangeDetectorRef);
-
-  /**
    * Resolves the guide named in the address.
    *
    * Watches the parameter rather than reading it once, so following a link to
@@ -136,66 +83,35 @@ export class HelpGuideComponent implements OnInit {
    * @returns void
    */
   ngOnInit(): void {
-    combineLatest([
-      this._route.paramMap.pipe(map(params => params.get('guideSlug'))),
-      this._helpFeatures.features(),
-      this._accessControlService
-        .getMyPermissions()
-        .pipe(catchError(() => of(new Set<string>() as ReadonlySet<string>))),
-    ])
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        observeInZone(this._ngZone, this._cdr),
-      )
-      .subscribe(([slug, features, permissions]) => {
-        const location = findHelpGuide(slug);
+    this.watchPage('guideSlug', (slug, features, permissions) => {
+      const location = findHelpGuide(slug);
 
-        if (
-          !location ||
-          !isTopicPermitted(location.topic, this._authService.isAdmin())
-        ) {
-          this.sendToNotFound();
-          return;
-        }
+      if (
+        !location ||
+        !isTopicPermitted(location.topic, this._authService.isAdmin())
+      ) {
+        this.sendToNotFound();
+        return;
+      }
 
-        const blocking = blockingFeature(
-          features,
-          location.topic.requiresFeature,
-          location.guide.requiresFeature,
-        );
+      const blocking = blockingFeature(
+        features,
+        location.topic.requiresFeature,
+        location.guide.requiresFeature,
+      );
 
-        if (blocking) {
-          this.showUnavailable(blocking);
-          return;
-        }
+      if (blocking) {
+        this.showUnavailable(blocking);
+        return;
+      }
 
-        if (!isGuidePermitted(location.guide, permissions)) {
-          this.sendToNotFound();
-          return;
-        }
+      if (!isGuidePermitted(location.guide, permissions)) {
+        this.sendToNotFound();
+        return;
+      }
 
-        this.show(location, features, permissions);
-      });
-  }
-
-  /**
-   * Builds the path to another guide.
-   *
-   * @param slug The guide's slug.
-   * @returns The router path to that guide.
-   */
-  getGuideLink(slug: string): string {
-    return `${this._routingService.getLink(this.appRoutes.HELP)}/${slug}`;
-  }
-
-  /**
-   * Translates a route constant into a path string.
-   *
-   * @param route The route key to look up.
-   * @returns The path string starting with /.
-   */
-  getRouteLink(route: string): string {
-    return this._routingService.getLink(route);
+      this.show(location, features, permissions);
+    });
   }
 
   /**
@@ -231,9 +147,7 @@ export class HelpGuideComponent implements OnInit {
       location.guide.requiresFeature,
     );
 
-    this.unavailableReason = null;
-    this.unreachableFeatureName =
-      unreachable === null ? null : HELP_FEATURE_NAMES[unreachable];
+    this.markShown(unreachable);
     this.guide = location.guide;
     this.switchedOff = off === null ? null : switchedOffNote(off, 'guide');
     this.sections = visibleSections(location.guide, features);
@@ -262,31 +176,15 @@ export class HelpGuideComponent implements OnInit {
   /**
    * Says why a guide cannot be read, in place of the guide.
    *
-   * The page title is set to the feature rather than the guide's, because the
-   * guide is not what is being shown and naming it in the tab would advertise
-   * exactly what the notice is declining to open.
-   *
    * @param feature The feature out of reach.
    * @returns void
    */
   private showUnavailable(feature: HelpFeature): void {
     this.guide = null;
     this.sections = [];
-    this.unavailableFeatureName = HELP_FEATURE_NAMES[feature];
-    this.unreachableFeatureName = null;
     this.otherGuides = [];
     this.topicTitle = '';
     this.topicLink = '';
-    this.unavailableReason = FEATURE_UNAVAILABLE_DISABLED;
-    this._pageTitleService.setTitle(this.unavailableFeatureName);
-  }
-
-  /**
-   * Sends the visitor to the not-found page.
-   *
-   * @returns void
-   */
-  private sendToNotFound(): void {
-    void this._router.navigate([`/${this.appRoutes.PAGE_NOT_FOUND}`]);
+    this.markUnavailable(feature);
   }
 }

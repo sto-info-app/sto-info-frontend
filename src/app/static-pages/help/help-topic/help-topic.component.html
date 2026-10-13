@@ -11,7 +11,7 @@
     <div class="buttons-row">
       <a
         [routerLink]="getRouteLink(appRoutes.HELP)"
-        class="violet"
+        class="lcars-btn lcars-btn-auto"
         >All sections</a
       >
     </div>
@@ -45,15 +45,15 @@
     }
 
     <ul
-      class="help-guide-list"
+      class="help-guide-list lcars-rotate"
       [attr.aria-label]="topic.title + ' guides'">
       @for (guide of guides; track guide.slug; let index = $index) {
         <!--
-          Each guide is a panel in its section's colour, and the panel is the
+          Each guide is a panel in the next colour of the list's rotation, and the panel is the
           link rather than something with a link in it: somebody reaching for
           a guide aims at the box, so the anchor fills the box.
         -->
-        <li class="help-panel-card help-panel-card--{{ topic.id }}">
+        <li class="help-panel-card">
           <a
             class="help-panel-card__link"
             [routerLink]="getGuideLink(guide.slug)">
@@ -78,12 +78,12 @@
     <div class="buttons-row">
       <a
         [routerLink]="getRouteLink(appRoutes.HELP)"
-        class="violet"
+        class="lcars-btn lcars-btn-auto"
         >All sections</a
       >
       <a
         [routerLink]="getRouteLink(appRoutes.CONTACT)"
-        class="ice"
+        class="lcars-btn lcars-btn-auto"
         >Contact us</a
       >
     </div>

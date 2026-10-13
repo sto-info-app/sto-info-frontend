@@ -25,131 +25,127 @@
     possible... trust me, it will be installed on Tuesday!
   </p>
 
-  <div class="lcars-text-bar">
-    <h2><span>Social Media</span></h2>
-  </div>
-  <p>
-    We only have a small social media footprint. We are not about advertising,
-    earning money, or selling your data. We are about sharing our love of Star
-    Trek Online and helping each other out. But, if you would like to follow us
-    on the limited social media platforms we have to provide feedback, share
-    your thoughts, learn about updates to the app or just want to open hailing
-    frequencies to say hi, feel free to do so using the links below.
-  </p>
-  <div class="buttons-row">
-    <a
-      [href]="socialMediaRoutes.REDDIT"
-      class="sunflower"
-      target="_blank"
-      rel="noopener noreferrer"
-      >Reddit</a
-    >
-    <a
-      [href]="socialMediaRoutes.GITHUB"
-      class="almond"
-      target="_blank"
-      rel="noopener noreferrer"
-      >GitHub</a
-    >
-    <a
-      [href]="socialMediaRoutes.DISCORD"
-      class="sky"
-      target="_blank"
-      rel="noopener noreferrer"
-      >Discord</a
-    >
-    <a
-      [href]="socialMediaRoutes.BLUESKY"
-      class="blue"
-      target="_blank"
-      rel="noopener noreferrer"
-      >Bluesky</a
-    >
-  </div>
+  <app-collapsible-section heading="Social Media">
+    <p>
+      We only have a small social media footprint. We are not about advertising,
+      earning money, or selling your data. We are about sharing our love of Star
+      Trek Online and helping each other out. But, if you would like to follow us
+      on the limited social media platforms we have to provide feedback, share
+      your thoughts, learn about updates to the app or just want to open hailing
+      frequencies to say hi, feel free to do so using the links below.
+    </p>
+    <div class="buttons-row">
+      <a
+        [href]="socialMediaRoutes.REDDIT"
+        class="lcars-btn lcars-btn-auto"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Reddit</a
+      >
+      <a
+        [href]="socialMediaRoutes.GITHUB"
+        class="lcars-btn lcars-btn-auto"
+        target="_blank"
+        rel="noopener noreferrer"
+        >GitHub</a
+      >
+      <a
+        [href]="socialMediaRoutes.DISCORD"
+        class="lcars-btn lcars-btn-auto"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Discord</a
+      >
+      <a
+        [href]="socialMediaRoutes.BLUESKY"
+        class="lcars-btn lcars-btn-auto"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Bluesky</a
+      >
+    </div>
+  </app-collapsible-section>
 
-  <div class="lcars-text-bar">
-    <h2><span>The Crew</span></h2>
-  </div>
-  <p>
-    No ship is complete without a crew. The {{ appTitle }} is a community
-    project and we rely on the help of our volunteers and supporters to keep it
-    going. Meet the people who build, test, and support the project.
-  </p>
-  <div class="buttons-row">
-    <a
-      [routerLink]="getRouteLink(appRoutes.ABOUT_DEVELOPERS)"
-      class="evening"
-      >Developers</a
-    >
-    <a
-      [routerLink]="getRouteLink(appRoutes.ABOUT_VOLUNTEERS)"
-      class="violet"
-      >Volunteers</a
-    >
-    <a
-      [routerLink]="getRouteLink(appRoutes.ABOUT_SUPPORTERS)"
-      class="ice"
-      >Supporters</a
-    >
-  </div>
+  <app-collapsible-section heading="The Crew">
+    <p>
+      No ship is complete without a crew. The {{ appTitle }} is a community
+      project and we rely on the help of our volunteers and supporters to keep it
+      going. Meet the people who build, test, and support the project.
+    </p>
+    <div class="buttons-row">
+      <a
+        [routerLink]="getRouteLink(appRoutes.ABOUT_DEVELOPERS)"
+        class="lcars-btn lcars-btn-auto"
+        >Developers</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.ABOUT_VOLUNTEERS)"
+        class="lcars-btn lcars-btn-auto"
+        >Volunteers</a
+      >
+      <a
+        [routerLink]="getRouteLink(appRoutes.ABOUT_SUPPORTERS)"
+        class="lcars-btn lcars-btn-auto"
+        >Supporters</a
+      >
+    </div>
+  </app-collapsible-section>
 
-  <div class="lcars-text-bar">
-    <h2><span>Roadmap</span></h2>
-  </div>
-  <p>
-    Want to see what has already launched and what is still ahead? Check the
-    live roadmap for completed milestones, active priorities, planned work, and
-    future ideas.
-  </p>
-  <div class="buttons-row">
-    <a
-      [routerLink]="getRouteLink(appRoutes.ROADMAP)"
-      class="sky"
-      >View Roadmap</a
-    >
-  </div>
+  <app-collapsible-section heading="Roadmap">
+    <p>
+      Want to see what has already launched and what is still ahead? Check the
+      live roadmap for completed milestones, active priorities, planned work, and
+      future ideas.
+    </p>
+    <div class="buttons-row">
+      <a
+        [routerLink]="getRouteLink(appRoutes.ROADMAP)"
+        class="lcars-btn lcars-btn-auto"
+        >View Roadmap</a
+      >
+    </div>
+  </app-collapsible-section>
 
-  <div class="lcars-text-bar">
-    <h2><span>Costs</span></h2>
-  </div>
-  <p>
-    The STO Info (Star Trek Online Info) application is a free, independent,
-    fan-run project built for the community.
-  </p>
-  <p>
-    Patreon is not required to use the app, unlock features, or gain access to
-    anything.
-  </p>
-  <p>
-    If you choose to support the project, you are helping cover infrastructure
-    costs and the time needed to maintain and improve it — nothing more, nothing
-    less.
-  </p>
-  <p>
-    Estimated costs during development are over £600 (~$800 USD) per year, with
-    this expected to increase as the user base grows.
-  </p>
-  <p>
-    If you find the site useful and would like to help keep it running, you can
-    choose to support it with a voluntary donation.
-  </p>
-  <p>
-    There are no paid features, no exclusive access, and no obligation to
-    contribute. The project will remain free for everyone.
-  </p>
-  <p>
-    The only reward for supporting the project is the satisfaction of knowing
-    you are helping to keep it going and your name will be added to the
-    <a [routerLink]="getRouteLink(appRoutes.ABOUT_SUPPORTERS)">Supporters</a>
-    page (a single list; no amounts shown).
-  </p>
-  <div class="buttons-row">
-    <a
-      [href]="patreonUrl"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="lcars-btn-auto tangerine"
-      >Become a Patron Supporter</a
-    >
-  </div>
+  <app-collapsible-section heading="Costs">
+    <p>
+      The STO Info (Star Trek Online Info) application is a free, independent,
+      fan-run project built for the community.
+    </p>
+    <p>
+      Patreon is not required to use the app, unlock features, or gain access to
+      anything.
+    </p>
+    <p>
+      If you choose to support the project, you are helping cover infrastructure
+      costs and the time needed to maintain and improve it — nothing more, nothing
+      less.
+    </p>
+    <p>
+      Estimated costs during development are over £600 (~$800 USD) per year, with
+      this expected to increase as the user base grows.
+    </p>
+    <p>
+      If you find the site useful and would like to help keep it running, you can
+      choose to support it with a voluntary donation.
+    </p>
+    <p>
+      There are no paid features, no exclusive access, and no obligation to
+      contribute. The project will remain free for everyone.
+    </p>
+    <p>
+      The only reward for supporting the project is the satisfaction of knowing
+      you are helping to keep it going and your name will be added to the
+      <a [routerLink]="getRouteLink(appRoutes.ABOUT_SUPPORTERS)">Supporters</a>
+      page (a single list; no amounts shown).
+    </p>
+    <div class="buttons-row">
+      <a
+        [href]="patreonUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="lcars-btn lcars-btn-auto"
+        >Become a Patron Supporter</a
+      >
+    </div>
+  </app-collapsible-section>
 </div>

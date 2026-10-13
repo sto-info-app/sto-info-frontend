@@ -5,6 +5,7 @@ import { TeamListBaseComponent } from '../team-list-base.component';
 import { TeamMemberSectionComponent } from '../team-member-section/team-member-section.component';
 
 export type { MemberVm } from '../models/member-vm.model';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 @Component({
   selector: 'app-team-developers',
@@ -12,7 +13,11 @@ export type { MemberVm } from '../models/member-vm.model';
   styleUrls: ['./developers.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterModule, TeamMemberSectionComponent],
+  imports: [
+    RouterModule,
+    TeamMemberSectionComponent,
+    CollapsibleSectionComponent,
+  ],
 })
 export class TeamDevelopersComponent extends TeamListBaseComponent {
   constructor() {

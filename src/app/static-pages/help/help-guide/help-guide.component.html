@@ -11,7 +11,7 @@
     <div class="buttons-row">
       <a
         [routerLink]="getRouteLink(appRoutes.HELP)"
-        class="violet"
+        class="lcars-btn lcars-btn-auto"
         >All guides</a
       >
     </div>
@@ -72,7 +72,7 @@
         @for (link of guide.relatedLinks; track link.route) {
           <a
             [routerLink]="getRouteLink(link.route)"
-            class="sky"
+            class="lcars-btn lcars-btn-auto"
             >{{ link.label }}</a
           >
         }
@@ -97,12 +97,12 @@
     <div class="buttons-row">
       <a
         [routerLink]="getRouteLink(appRoutes.HELP)"
-        class="violet"
+        class="lcars-btn lcars-btn-auto"
         >All guides</a
       >
       <a
         [routerLink]="getRouteLink(appRoutes.CONTACT)"
-        class="ice"
+        class="lcars-btn lcars-btn-auto"
         >Contact us</a
       >
     </div>

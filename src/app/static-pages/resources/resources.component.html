@@ -11,26 +11,25 @@
   </p>
 
   @for (section of resourceLinks; track section.heading) {
-    <div class="lcars-text-bar">
-      <h2><span>{{ section.heading }}</span></h2>
-    </div>
-    <ul class="lcars-list">
-      @for (link of section.links; track link.url) {
-        <li>
-          <a
-            [href]="link.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            >{{ link.label
-            }}<i
-              class="fas fa-external-link ext-link"
-              title="(*external link)"></i
-          ></a>
-          @if (link.description) {
-            <span class="resource-description"> — {{ link.description }}</span>
-          }
-        </li>
-      }
-    </ul>
+    <app-collapsible-section [heading]="section.heading">
+      <ul class="lcars-list">
+        @for (link of section.links; track link.url) {
+          <li>
+            <a
+              [href]="link.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              >{{ link.label
+              }}<i
+                class="fas fa-external-link ext-link"
+                title="(*external link)"></i
+            ></a>
+            @if (link.description) {
+              <span class="resource-description"> — {{ link.description }}</span>
+            }
+          </li>
+        }
+      </ul>
+    </app-collapsible-section>
   }
 </div>

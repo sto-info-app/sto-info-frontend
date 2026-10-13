@@ -26,11 +26,11 @@
 
   <div class="form-container">
     <form
-      class="form"
+      class="form lcars-rotate"
       [formGroup]="contactForm"
       (ngSubmit)="onSubmit()"
     >
-      <div class="lcars-input-container cool">
+      <div class="lcars-input-container">
         <label for="contactName">Name</label>
         <input
           id="contactName"
@@ -45,7 +45,7 @@
         }
       </div>
 
-      <div class="lcars-input-container cool">
+      <div class="lcars-input-container">
         <label for="contactEmail">Email</label>
         <input
           id="contactEmail"
@@ -65,7 +65,7 @@
 
       <div
         id="topic-dropdown"
-        class="lcars-select-container cool"
+        class="lcars-select-container"
       >
         <label
           class="select-label"
@@ -91,7 +91,7 @@
         }
       </div>
 
-      <div class="lcars-input-container cool">
+      <div class="lcars-input-container">
         <label for="contactMessage">Message</label>
         <textarea
           id="contactMessage"
@@ -110,7 +110,7 @@
       <div class="buttons-container">
         <button
           type="submit"
-          class="submit-button"
+          class="submit-button green"
           [disabled]="contactForm.invalid || isSubmitting"
           [ngClass]="{ submitting: isSubmitting }"
         >

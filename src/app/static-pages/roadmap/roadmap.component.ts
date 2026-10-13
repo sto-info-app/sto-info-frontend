@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import {
@@ -7,25 +8,19 @@ import {
   ROADMAP_FUTURE_IDEAS,
   ROADMAP_IN_PROGRESS,
   ROADMAP_PLANNED,
-  ROADMAP_SECTION_EXPANDED_DEFAULTS,
   ROADMAP_SECTION_META,
 } from './roadmap.data';
-import { RoadmapSectionKey } from './roadmap.models';
 
 @Component({
   selector: 'app-roadmap',
   templateUrl: './roadmap.component.html',
   styleUrls: ['./roadmap.component.scss'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CollapsibleSectionComponent],
 })
 export class RoadmapComponent {
   readonly appRoutes = APP_ROUTES;
   readonly sectionMeta = ROADMAP_SECTION_META;
-
-  sectionExpanded: Record<RoadmapSectionKey, boolean> = {
-    ...ROADMAP_SECTION_EXPANDED_DEFAULTS,
-  };
 
   readonly complete = ROADMAP_COMPLETE;
 
@@ -36,10 +31,6 @@ export class RoadmapComponent {
   readonly futureIdeas = ROADMAP_FUTURE_IDEAS;
 
   private readonly _routingService = inject(RoutingService);
-
-  toggleSection(section: RoadmapSectionKey): void {
-    this.sectionExpanded[section] = !this.sectionExpanded[section];
-  }
 
   getRouteLink(route: string): string {
     return this._routingService.getLink(route);

@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'lcars-variables' as vars;
 
 .team-page {
@@ -25,7 +26,7 @@
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: rgba(vars.$lcars-cool, 0.3);
+    background-color: color.change(vars.$lcars-cool, $alpha: 0.3);
   }
 
   img {

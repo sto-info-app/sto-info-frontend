@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { MemberVm } from '../models/member-vm.model';
 
 @Component({
@@ -7,7 +8,7 @@ import { MemberVm } from '../models/member-vm.model';
   templateUrl: './team-member-section.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterModule],
+  imports: [RouterModule, CollapsibleSectionComponent],
 })
 export class TeamMemberSectionComponent {
   @Input({ required: true }) title!: string;
