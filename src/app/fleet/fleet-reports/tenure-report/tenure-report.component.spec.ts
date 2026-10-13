@@ -225,7 +225,7 @@ describe('TenureReportComponent', () => {
         '5 < 5 at least',
       ],
     ]);
-    expect(tables().length).toBe(1);
+    expect(tables()).toHaveLength(1);
     expect(select()).toBeNull();
     expect(text()).toContain('2 bands’ counts are hidden, so not drawn.');
   });

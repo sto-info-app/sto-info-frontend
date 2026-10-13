@@ -219,7 +219,7 @@ describe('ContributionReportComponent', () => {
       '2',
       '0',
     ]);
-    expect(tables().length).toBe(1);
+    expect(tables()).toHaveLength(1);
     expect(select()).toBeNull();
     expect(fixture.componentInstance.chart().data).toEqual([
       { name: 'Nov 29, 2024', count: 12500000 },

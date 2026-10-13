@@ -114,7 +114,10 @@ describe('FleetReportService', () => {
     it('reads every report’s audience', () => {
       service.audiences('community-1', 'fleet-1').subscribe();
 
-      httpMock.expectOne(`${reportsUrl}/audiences`).flush({});
+      const request = httpMock.expectOne(`${reportsUrl}/audiences`);
+
+      expect(request.request.method).toBe('GET');
+      request.flush({});
     });
 
     it('changes one report’s audience', () => {

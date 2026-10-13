@@ -8,12 +8,11 @@
   </p>
 } @else {
   @if (chart().data.length > 0) {
-    <div class="lcars-text-bar">
-      <span>Contributed in each interval</span>
-    </div>
-    <app-smart-chart
-      mode="bar"
-      [data]="chart().data" />
+    <app-collapsible-section heading="Contributed in each interval">
+      <app-smart-chart
+        mode="bar"
+        [data]="chart().data" />
+    </app-collapsible-section>
   }
   @if (chart().hidden > 0) {
     <p class="fleet-report-notice">
@@ -110,97 +109,96 @@
   </p>
 
   @if (shown.members; as members) {
-    <div class="lcars-text-bar">
-      <span>Members</span>
-    </div>
-    <div class="fleet-community-filter-row">
-      <div class="lcars-input-container sky">
-        <label for="contribution-at">Rises between</label>
-        <select
-          #at
-          id="contribution-at"
-          (change)="atChange.emit(at.value)">
-          @for (choice of choices(); track choice.to.importId) {
-            <option
-              [value]="choice.to.importId"
-              [selected]="choice.to.importId === shown.at?.importId">
-              {{ choice.from.exportedAt | appDate: 'medium' }} and
-              {{ choice.to.exportedAt | appDate: 'medium' }}
-            </option>
-          }
-        </select>
+    <app-collapsible-section heading="Members">
+      <div class="fleet-community-filter-row">
+        <div class="lcars-input-container">
+          <label for="contribution-at">Rises between</label>
+          <select
+            #at
+            id="contribution-at"
+            (change)="atChange.emit(at.value)">
+            @for (choice of choices(); track choice.to.importId) {
+              <option
+                [value]="choice.to.importId"
+                [selected]="choice.to.importId === shown.at?.importId">
+                {{ choice.from.exportedAt | appDate: 'medium' }} and
+                {{ choice.to.exportedAt | appDate: 'medium' }}
+              </option>
+            }
+          </select>
+        </div>
       </div>
-    </div>
 
-    @if (members.length === 0) {
-      <p class="fleet-community-empty">
-        Nobody’s contribution rose or reset in that interval.
-      </p>
-    } @else {
-      <table class="fleet-community-table">
-        <caption>
-          Each member’s rise in that interval, largest first, then each reset
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Member</th>
-            <th
-              scope="col"
-              class="fleet-community-table__number">
-              Rise
-            </th>
-            <th
-              scope="col"
-              class="fleet-community-table__number">
-              Total before
-            </th>
-            <th
-              scope="col"
-              class="fleet-community-table__number">
-              Total after
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (member of members; track member.identityId) {
+      @if (members.length === 0) {
+        <p class="fleet-community-empty">
+          Nobody’s contribution rose or reset in that interval.
+        </p>
+      } @else {
+        <table class="fleet-community-table">
+          <caption>
+            Each member’s rise in that interval, largest first, then each reset
+          </caption>
+          <thead>
             <tr>
-              <td data-label="Member">
-                {{
-                  member.member
-                    ? member.member.characterName + member.member.accountHandle
-                    : 'A member'
-                }}
-                @if (member.acrossGap) {
-                  <span class="fleet-report-note">
-                    across a gap, since
-                    {{ member.from?.exportedAt | appDate: 'medium' }}: in no
-                    interval’s total
-                  </span>
-                }
-              </td>
-              <td
-                data-label="Rise"
+              <th scope="col">Member</th>
+              <th
+                scope="col"
                 class="fleet-community-table__number">
-                @if (member.kind === reset) {
-                  Reset
-                } @else {
-                  {{ member.delta | reportFigure: cohort }}
-                }
-              </td>
-              <td
-                data-label="Total before"
+                Rise
+              </th>
+              <th
+                scope="col"
                 class="fleet-community-table__number">
-                {{ member.fromContribution | reportFigure: cohort }}
-              </td>
-              <td
-                data-label="Total after"
+                Total before
+              </th>
+              <th
+                scope="col"
                 class="fleet-community-table__number">
-                {{ member.toContribution | reportFigure: cohort }}
-              </td>
+                Total after
+              </th>
             </tr>
-          }
-        </tbody>
-      </table>
-    }
+          </thead>
+          <tbody>
+            @for (member of members; track member.identityId) {
+              <tr>
+                <td data-label="Member">
+                  {{
+                    member.member
+                      ? member.member.characterName + member.member.accountHandle
+                      : 'A member'
+                  }}
+                  @if (member.acrossGap) {
+                    <span class="fleet-report-note">
+                      across a gap, since
+                      {{ member.from?.exportedAt | appDate: 'medium' }}: in no
+                      interval’s total
+                    </span>
+                  }
+                </td>
+                <td
+                  data-label="Rise"
+                  class="fleet-community-table__number">
+                  @if (member.kind === reset) {
+                    Reset
+                  } @else {
+                    {{ member.delta | reportFigure: cohort }}
+                  }
+                </td>
+                <td
+                  data-label="Total before"
+                  class="fleet-community-table__number">
+                  {{ member.fromContribution | reportFigure: cohort }}
+                </td>
+                <td
+                  data-label="Total after"
+                  class="fleet-community-table__number">
+                  {{ member.toContribution | reportFigure: cohort }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </app-collapsible-section>
   }
 }

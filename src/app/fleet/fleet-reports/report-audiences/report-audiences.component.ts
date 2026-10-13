@@ -22,6 +22,7 @@ import {
   FleetReportAudience,
   FleetReportAudiences,
 } from 'src/app/models/fleet-report.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /** What to say when the audiences could not be read. */
@@ -70,7 +71,7 @@ function inPageOrder(audiences: FleetReportAudiences): FleetReportAudiences {
   styleUrls: ['./report-audiences.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AppDatePipe],
+  imports: [AppDatePipe, CollapsibleSectionComponent],
 })
 export class ReportAudiencesComponent implements OnInit {
   private readonly _reportService = inject(FleetReportService);

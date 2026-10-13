@@ -11,6 +11,7 @@ import { reportChartOf } from 'src/app/fleet/fleet-reports/report-chart.utils';
 import { ReportFigurePipe } from 'src/app/fleet/fleet-reports/report-figure.pipe';
 import { FleetContributionReport } from 'src/app/models/fleet-report.models';
 import { RosterChangeKind } from 'src/app/models/fleet-roster.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { SmartChartComponent } from 'src/app/shared/components/smart-chart/smart-chart.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -29,7 +30,12 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [AppDatePipe],
-  imports: [AppDatePipe, ReportFigurePipe, SmartChartComponent],
+  imports: [
+    AppDatePipe,
+    ReportFigurePipe,
+    SmartChartComponent,
+    CollapsibleSectionComponent,
+  ],
 })
 export class ContributionReportComponent {
   private readonly _datePipe = inject(AppDatePipe);

@@ -230,7 +230,7 @@ describe('FleetReportsPageComponent', () => {
         // The page's own address, whatever it is: only the query changes.
         link.getAttribute('href')?.split('?')[1],
         link.getAttribute('aria-current'),
-        link.classList.contains('gold'),
+        link.classList.contains('active'),
       ]),
     ).toEqual([
       // The detail export is the other report's, so it goes.
@@ -275,8 +275,8 @@ describe('FleetReportsPageComponent', () => {
     expect(
       (fixture.nativeElement as HTMLElement).querySelectorAll(
         'app-growth-report, app-activity-report, app-tenure-report, app-ranks-report, app-contribution-report',
-      ).length,
-    ).toBe(1);
+      ),
+    ).toHaveLength(1);
   });
 
   it('says what the report covers, and that it counts only for an aggregate audience', () => {

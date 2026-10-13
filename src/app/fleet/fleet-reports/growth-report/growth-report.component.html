@@ -8,12 +8,11 @@
   </p>
 } @else {
   @if (chart().data.length > 0) {
-    <div class="lcars-text-bar">
-      <span>Members at the end of each interval</span>
-    </div>
-    <app-smart-chart
-      mode="bar"
-      [data]="chart().data" />
+    <app-collapsible-section heading="Members at the end of each interval">
+      <app-smart-chart
+        mode="bar"
+        [data]="chart().data" />
+    </app-collapsible-section>
   }
   @if (chart().hidden > 0) {
     <p class="fleet-report-notice">

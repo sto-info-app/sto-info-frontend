@@ -47,6 +47,7 @@ import {
   FleetReportQuery,
   FleetReportView,
 } from 'src/app/models/fleet-report.models';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import { saveFile } from 'src/app/shared/utils/save-file.utils';
 import {
@@ -123,6 +124,7 @@ export type FleetReportsCsvState = 'IDLE' | 'BUSY' | 'FAILED';
     RecruitmentReportComponent,
     HoldingsReportComponent,
     ReportAudiencesComponent,
+    LcarsPanelComponent,
   ],
 })
 export class FleetReportsPageComponent extends FleetSectionPageDirective<FleetReportsData> {

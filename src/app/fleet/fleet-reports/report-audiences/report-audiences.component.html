@@ -1,10 +1,6 @@
-<section
+<app-collapsible-section
   class="report-audiences"
-  aria-labelledby="report-audiences-heading">
-  <div class="lcars-text-bar">
-    <span id="report-audiences-heading">Who sees each report</span>
-  </div>
-
+  heading="Who sees each report">
   @switch (state().kind) {
     @case ('LOADING') {
       <p class="fleet-report-notice">Reading who sees each report…</p>
@@ -13,7 +9,7 @@
       <p class="fleet-community-empty">{{ errorMessage }}</p>
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto sky"
+        class="lcars-btn lcars-btn-auto"
         (click)="load()">
         Try again
       </button>
@@ -42,8 +38,8 @@
             <td data-label="Report">{{ reportLabels[entry.report] }}</td>
             <td data-label="Shown to">
               @if (canEdit()) {
-                <div class="fleet-community-filter-row">
-                  <div class="lcars-input-container sky">
+                <div class="fleet-community-filter-row lcars-rotate">
+                  <div class="lcars-input-container">
                     <label [attr.for]="'audience-' + entry.report"
                       >Shown to</label
                     >
@@ -63,7 +59,7 @@
                   </div>
                   <button
                     type="button"
-                    class="lcars-btn lcars-btn-auto sky"
+                    class="lcars-btn lcars-btn-auto green"
                     [disabled]="!isChanged(entry) || saving() !== null"
                     (click)="onSave(entry)">
                     {{ saving() === entry.report ? 'Saving' : 'Save' }}
@@ -114,4 +110,4 @@
       }
     </details>
   }
-</section>
+</app-collapsible-section>

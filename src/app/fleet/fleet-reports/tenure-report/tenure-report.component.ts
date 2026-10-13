@@ -6,6 +6,7 @@ import {
   output,
 } from '@angular/core';
 
+import { BandedExportsTableComponent } from 'src/app/fleet/fleet-reports/banded-exports-table/banded-exports-table.component';
 import {
   TENURE_BAND_LABELS,
   TENURE_BANDS,
@@ -14,6 +15,7 @@ import { reportChartOf } from 'src/app/fleet/fleet-reports/report-chart.utils';
 import { ReportFigurePipe } from 'src/app/fleet/fleet-reports/report-figure.pipe';
 import { FleetTenureReport } from 'src/app/models/fleet-report.models';
 import { RosterExportRef } from 'src/app/models/fleet-roster.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { SmartChartComponent } from 'src/app/shared/components/smart-chart/smart-chart.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -31,7 +33,13 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
   templateUrl: './tenure-report.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AppDatePipe, ReportFigurePipe, SmartChartComponent],
+  imports: [
+    AppDatePipe,
+    BandedExportsTableComponent,
+    ReportFigurePipe,
+    SmartChartComponent,
+    CollapsibleSectionComponent,
+  ],
 })
 export class TenureReportComponent {
   readonly bands = TENURE_BANDS;

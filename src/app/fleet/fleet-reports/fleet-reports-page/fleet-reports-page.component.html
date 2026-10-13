@@ -16,13 +16,12 @@
 
       @if (data.shown; as shown) {
         <nav
-          class="fleet-reports__choice"
+          class="lcars-tabs fleet-reports__choice"
           aria-label="Report">
           @for (report of offered(data); track report) {
             <a
-              class="lcars-btn lcars-btn-auto"
-              [class.sky]="report !== data.chosen"
-              [class.gold]="report === data.chosen"
+              class="lcars-tab"
+              [class.active]="report === data.chosen"
               [routerLink]="[]"
               [queryParams]="queryFor(report)"
               queryParamsHandling="merge"
@@ -30,12 +29,16 @@
               >{{ reportLabels[report] }}</a
             >
           }
+          <span
+            class="lcars-tabs-filler"
+            aria-hidden="true"></span>
         </nav>
 
         @if (recordHeaderOf(shown); as record) {
-          <section
+          <app-lcars-panel
             class="fleet-reports__about"
-            aria-label="What the report covers">
+            heading="What the report covers"
+            [level]="2">
             <p class="fleet-reports__coverage">
               From the Fleet’s own records,
               {{ record.range.from | appDate: 'mediumDate' }} to
@@ -51,13 +54,13 @@
             }
 
             <form
-              class="fleet-community-filter-row"
+              class="fleet-community-filter-row lcars-rotate"
               aria-label="Span"
               (submit)="
                 $event.preventDefault();
                 onSpan(data, recordFrom.value, recordTo.value)
               ">
-              <div class="lcars-input-container sky">
+              <div class="lcars-input-container">
                 <label for="record-report-from">From</label>
                 <input
                   #recordFrom
@@ -65,7 +68,7 @@
                   type="date"
                   [value]="dayOf(data, data.query.from)" />
               </div>
-              <div class="lcars-input-container sky">
+              <div class="lcars-input-container">
                 <label for="record-report-to">To</label>
                 <input
                   #recordTo
@@ -76,19 +79,19 @@
               <div class="buttons-row">
                 <button
                   type="submit"
-                  class="lcars-btn lcars-btn-auto sky">
+                  class="lcars-btn lcars-btn-auto">
                   Show
                 </button>
                 <button
                   type="button"
-                  class="lcars-btn lcars-btn-auto sky"
+                  class="lcars-btn lcars-btn-auto"
                   [disabled]="!data.query.from && !data.query.to"
                   (click)="onEverySpan()">
                   The last twelve months
                 </button>
                 <button
                   type="button"
-                  class="lcars-btn lcars-btn-auto sky"
+                  class="lcars-btn lcars-btn-auto"
                   [disabled]="csvState() === 'BUSY'"
                   (click)="onCsv(data)">
                   {{
@@ -104,7 +107,7 @@
                 {{ csvFailedMessage }}
               </p>
             }
-          </section>
+          </app-lcars-panel>
 
           @if (reportAs(data, reports.ATTENDANCE); as attendance) {
             <app-attendance-report [report]="attendance" />
@@ -122,9 +125,10 @@
           </p>
         } @else {
           @let roster = rosterHeaderOf(shown);
-          <section
+          <app-lcars-panel
             class="fleet-reports__about"
-            aria-label="What the report covers">
+            heading="What the report covers"
+            [level]="2">
             @if (roster.stale) {
               <p class="fleet-report-notice">
                 A change is being worked into the history. This is how it stood
@@ -153,12 +157,12 @@
             }
 
             <form
-              class="fleet-community-filter-row"
+              class="fleet-community-filter-row lcars-rotate"
               aria-label="Span"
               (submit)="
                 $event.preventDefault(); onSpan(data, from.value, to.value)
               ">
-              <div class="lcars-input-container sky">
+              <div class="lcars-input-container">
                 <label for="report-from">From</label>
                 <input
                   #from
@@ -166,7 +170,7 @@
                   type="date"
                   [value]="dayOf(data, data.query.from)" />
               </div>
-              <div class="lcars-input-container sky">
+              <div class="lcars-input-container">
                 <label for="report-to">To</label>
                 <input
                   #to
@@ -177,19 +181,19 @@
               <div class="buttons-row">
                 <button
                   type="submit"
-                  class="lcars-btn lcars-btn-auto sky">
+                  class="lcars-btn lcars-btn-auto">
                   Show
                 </button>
                 <button
                   type="button"
-                  class="lcars-btn lcars-btn-auto sky"
+                  class="lcars-btn lcars-btn-auto"
                   [disabled]="!data.query.from && !data.query.to"
                   (click)="onEverySpan()">
                   Every export
                 </button>
                 <button
                   type="button"
-                  class="lcars-btn lcars-btn-auto sky"
+                  class="lcars-btn lcars-btn-auto"
                   [disabled]="csvState() === 'BUSY'"
                   (click)="onCsv(data)">
                   {{
@@ -205,7 +209,7 @@
                 {{ csvFailedMessage }}
               </p>
             }
-          </section>
+          </app-lcars-panel>
 
           @if (reportAs(data, reports.GROWTH); as growth) {
             <app-growth-report [report]="growth" />

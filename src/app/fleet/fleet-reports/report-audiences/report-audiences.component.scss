@@ -15,7 +15,7 @@
   summary {
     font-family: vars.$font-antonio;
     text-transform: uppercase;
-    color: vars.$lcars-sky;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
     cursor: pointer;
   }
 

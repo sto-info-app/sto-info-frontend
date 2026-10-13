@@ -11,6 +11,7 @@ import {
   FleetRanksReport,
   RanksExport,
 } from 'src/app/models/fleet-report.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { SmartChartComponent } from 'src/app/shared/components/smart-chart/smart-chart.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -34,7 +35,12 @@ export interface RankColumn {
   templateUrl: './ranks-report.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AppDatePipe, ReportFigurePipe, SmartChartComponent],
+  imports: [
+    AppDatePipe,
+    ReportFigurePipe,
+    SmartChartComponent,
+    CollapsibleSectionComponent,
+  ],
 })
 export class RanksReportComponent {
   /** The report. */

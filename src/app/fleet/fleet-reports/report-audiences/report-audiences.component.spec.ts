@@ -232,7 +232,7 @@ describe('ReportAudiencesComponent', () => {
     expect(text()).toContain(REPORT_AUDIENCES_ERROR);
     expect(find('table')).toBeNull();
 
-    (find('button') as HTMLButtonElement).click();
+    (find('button.lcars-btn') as HTMLButtonElement).click();
     fixture.detectChanges();
 
     expect(reports.audiences).toHaveBeenCalledTimes(2);
