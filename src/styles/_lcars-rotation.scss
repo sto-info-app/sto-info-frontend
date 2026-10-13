@@ -1,0 +1,44 @@
+@use 'sass:list';
+@use 'lcars-variables' as vars;
+
+// The palette rotation's API: the order and the mixin that applies it. No
+// output of its own, so a component stylesheet can use the mixin without
+// carrying a copy of the global rules, which `styles.scss` emits once.
+
+// The order in which elements that sit side by side take the LCARS palette,
+// the way the dashboard's tiles do (Steve's decision of 12 October 2026).
+// Every colour here carries black text at 5.8:1 or better, so a pill's label
+// or a panel's name can sit on any of them, and neighbours differ in hue as
+// well as lightness. Green and red are not in it: they are kept for accepting
+// and refusing, and stay `.green` / `.red` wherever a control does one or the
+// other, so a reader can trust what they mean.
+$lcars-rotation: (
+  'sunflower': vars.$lcars-sunflower,
+  'perano': vars.$lcars-perano,
+  'orange': vars.$lcars-orange,
+  'sky': vars.$lcars-sky,
+  'gold': vars.$lcars-gold,
+  'bluey': vars.$lcars-bluey,
+  'tangerine': vars.$lcars-tangerine,
+  'cool': vars.$lcars-cool,
+);
+
+// Gives each element matched by `$selector` the next colour of the rotation
+// as `--lcars-accent`, which pills, fields, choosers and panels
+// read. `$position` is `nth-child` for a run of siblings of any kind, or
+// `nth-of-type` where only one kind of element among them should count, and
+// `$condition` narrows which of them rotate. The position sits in `:where()`
+// so it adds nothing to the selector's weight: an `accent-*` class on the same
+// element always names its colour.
+@mixin rotate-accent($selector: '> *', $position: 'nth-child', $condition: '') {
+  $count: list.length($lcars-rotation);
+  $index: 1;
+
+  @each $name, $colour in $lcars-rotation {
+    #{$selector}:where(#{$condition}:#{$position}(#{$count}n + #{$index})) {
+      --lcars-accent: #{$colour};
+    }
+
+    $index: $index + 1;
+  }
+}

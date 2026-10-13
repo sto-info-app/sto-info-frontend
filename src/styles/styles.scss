@@ -1,5 +1,7 @@
+@use 'sass:color';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
+@use 'lcars-rotation' as rotation;
 
 // Emits the global STO item-rarity custom properties and `.rarity-*` /
 // `.go-rarity-*` utility classes for reuse across modules and components.
@@ -34,6 +36,56 @@
 // template, which a component's encapsulated styles cannot reach.
 @use 'fleet-community';
 
+// ─── Palette rotation ────────────────────────────────────────────────────────
+// Steve's decision of 12 October 2026: elements side by side take successive
+// LCARS colours, as the dashboard's tiles do, through `--lcars-accent`. Pills,
+// fields, choosers and panels read it, each falling back
+// to the colour it had before when nothing around it rotates.
+
+// Any group of controls can rotate by carrying the class: a form's fields, a
+// row of panels, a list of choosers. A group of one takes its surroundings'
+// colour instead.
+.lcars-rotate {
+  @include rotation.rotate-accent('> *', 'nth-child', ':not(:only-child)');
+}
+
+// The stacks and rows of pills rotate without being asked, so a page's
+// navigation reads like the dashboard's rather than as one colour repeated.
+// A lone pill does not count itself first: it takes the colour of the
+// section it sits in, so a section's one "All news" link matches its bar
+// rather than every such link on the page being the same sunflower.
+.buttons,
+.buttons-row {
+  @include rotation.rotate-accent('> *', 'nth-child', ':not(:only-child)');
+}
+
+// Sections on a page rotate among themselves, whatever else sits between
+// them. The bar itself stays the frame's blue (Steve, 13 October 2026); what
+// the section holds takes its colour. A section alone in its host —
+// a panel component's one section — does not count itself first: it takes the
+// colour its host was given, so a row of such components rotates as well.
+app-collapsible-section {
+  @include rotation.rotate-accent('&', 'nth-of-type', ':not(:only-of-type)');
+}
+
+// A colour named outright, for the one element that must keep its own:
+// `class="accent-tangerine"`. Declared after the rotations, which add no
+// weight of their own, so it wins wherever both reach. Green and red are here for a panel or bar about
+// something accepted or refused.
+@each $name, $colour in rotation.$lcars-rotation {
+  .accent-#{$name} {
+    --lcars-accent: #{$colour};
+  }
+}
+
+.accent-green {
+  --lcars-accent: #{vars.$lcars-green};
+}
+
+.accent-red {
+  --lcars-accent: #{vars.$lcars-red};
+}
+
 /* You can add global styles to this file, and also import other style files */
 
 html {
@@ -62,7 +114,7 @@ ul {
 }
 
 input::placeholder {
-  color: #aaa !important;
+  color: vars.$lcars-text-muted !important;
 }
 
 ul.no-bullets {
@@ -111,12 +163,12 @@ input {
   &:focus {
     outline: none;
     border-color: vars.$lcars-c48;
-    box-shadow: 0 0 5px rgb(102 204 255 / 50%);
+    box-shadow: 0 0 5px color.change(vars.$lcars-c48, $alpha: 0.5);
   }
 }
 
 input.errored {
-  border-color: #c23;
+  border-color: vars.$lcars-cardinal;
 }
 
 // ─── Tick boxes, radio buttons, file inputs and their groups ────────────────
@@ -198,7 +250,7 @@ input[type='file'] {
 
 .helper-error-text,
 .error-message-text {
-  color: #f20;
+  color: vars.$lcars-mars;
 }
 
 .buttons-container {
@@ -214,6 +266,9 @@ input[type='file'] {
 .lcars-btn,
 button.lcars-btn,
 .submit-button {
+  // The page's rotation, or the theme's own button blue where nothing rotates.
+  // Not important, so a colour class on the pill still names its colour.
+  background-color: var(--lcars-accent, #{vars.$lcars-c43});
   height: 60px !important;
   border-radius: 30px !important;
 
@@ -234,7 +289,7 @@ button.lcars-btn,
   display: inline-flex !important;
   justify-content: flex-end !important;
   align-items: flex-end !important;
-  color: #000 !important;
+  color: vars.$a11y-black !important;
   border: none !important;
   cursor: pointer;
 
@@ -257,8 +312,8 @@ button.lcars-btn,
   }
 
   &:disabled {
-    background-color: #344470 !important;
-    color: rgb(255 255 255 / 80%) !important;
+    background-color: vars.$lcars-c45 !important;
+    color: vars.$white-a80 !important;
     cursor: not-allowed;
   }
 }
@@ -287,6 +342,9 @@ button.lcars-btn-auto {
 }
 
 .buttons .full-width-btn-link {
+  // A stack takes the page's rotation, link and button alike; a colour class
+  // on one still names its own.
+  background-color: var(--lcars-accent, #{vars.$lcars-c43});
   height: auto;
   padding: 20px 25px 10px;
   text-align: right;
@@ -344,7 +402,9 @@ button.lcars-btn-auto {
     // The 9.6px above and below is what the old 24px top padding left under a
     // single line in a 60px pill, so a one-line pill is unchanged to the pixel.
     padding: 9.6px 25px 9.6px 26px;
-    background-color: #58e;
+
+    // The row's rotation, or the theme's button blue where nothing rotates.
+    background-color: var(--lcars-accent, #{vars.$lcars-c43});
     border-radius: 26px;
     text-align: right;
     font-size: 22px;
@@ -405,14 +465,16 @@ button.lcars-btn-auto {
   padding: 0;
   border-radius: 30px;
   overflow: hidden;
-  background: vars.$lcars-grey-bg; // Default
-  color: #000;
+
+  // The page's rotation, or the faint default where nothing rotates.
+  background: var(--lcars-accent, #{vars.$lcars-grey-bg});
+  color: vars.$a11y-black;
   transition: filter 0.2s ease;
   margin-bottom: 0.5rem;
   width: 100%;
   box-sizing: border-box;
   cursor: pointer;
-  border: 2px solid rgb(255 255 255 / 35%);
+  border: 2px solid vars.$white-a35;
 
   &:hover {
     filter: brightness(1.1);
@@ -427,7 +489,7 @@ button.lcars-btn-auto {
     top: 0.5rem;
     left: 1rem;
     margin: 0;
-    color: #000;
+    color: vars.$a11y-black;
     font-size: 0.6rem;
     text-transform: uppercase;
     font-weight: 800;
@@ -445,8 +507,8 @@ button.lcars-btn-auto {
     font-size: 0.9rem;
     font-weight: 800;
     font-stretch: condensed;
-    color: #000;
-    -webkit-text-fill-color: #000;
+    color: vars.$a11y-black;
+    -webkit-text-fill-color: vars.$a11y-black;
     cursor: pointer;
     outline: none;
     appearance: none;
@@ -461,7 +523,7 @@ button.lcars-btn-auto {
     padding: 1.5rem 2.5rem 0.5rem 1rem;
 
     // Custom arrow using data URI SVG (black triangle, 8x5px)
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23000'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='#{mixins.url-colour(vars.$a11y-black)}'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 1.2rem center;
     background-size: 8px 5px;
@@ -469,8 +531,8 @@ button.lcars-btn-auto {
     line-height: 1.4;
 
     option {
-      background: #222;
-      color: #fff;
+      background: vars.$lcars-field-bg-focus;
+      color: vars.$a11y-white;
     }
   }
 
@@ -480,9 +542,9 @@ button.lcars-btn-auto {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #faa;
-    background: rgb(10 0 0 / 75%);
-    border-top: 1px solid rgb(255 80 80 / 30%);
+    color: vars.$lcars-field-error-text;
+    background: vars.$lcars-field-error-bg;
+    border-top: 1px solid vars.$lcars-field-error-border;
     border-radius: 0 0 15px 15px;
     margin-top: 0.1rem;
   }
@@ -540,7 +602,9 @@ button.lcars-btn-auto {
 // ─── LCARS Input Container ───────────────────────────────────────────────────
 
 .lcars-input-container {
-  --lci-color: #555; // fallback, overridden by variant classes
+  // The page's rotation, or grey where nothing rotates; a variant class on
+  // the field still names its colour.
+  --lci-color: var(--lcars-accent, #{vars.$lcars-grey-dark});
 
   display: flex;
   flex-direction: column;
@@ -548,12 +612,15 @@ button.lcars-btn-auto {
   overflow: hidden;
   width: 100%;
   box-sizing: border-box;
-  box-shadow: 0 1px 1px 0 rgb(255 255 255 / 12%);
+  box-shadow: 0 1px 1px 0 vars.$white-a12;
   margin-bottom: 0.75rem;
   background: transparent !important;
   border-bottom: 2px solid var(--lci-color);
 
-  label {
+  // `.lcars-input-label` is the same caption over a picker, which is driven by
+  // a button rather than a control a `label` could name.
+  label,
+  .lcars-input-label {
     display: block;
     width: 75%;
     align-self: flex-start;
@@ -562,7 +629,7 @@ button.lcars-btn-auto {
     text-transform: uppercase;
     font-weight: 800;
     letter-spacing: 0.5px;
-    color: #000;
+    color: vars.$a11y-black;
     margin-bottom: 0;
     border-radius: 15px 12px 0 0;
     background-color: var(--lci-color);
@@ -571,10 +638,10 @@ button.lcars-btn-auto {
   input,
   textarea {
     display: block;
-    background: #1c1c1c;
+    background: vars.$lcars-field-bg;
     color: vars.$lcars-white;
     border: none;
-    border-top: 1px solid rgb(255 255 255 / 8%);
+    border-top: 1px solid vars.$white-a8;
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
     font-weight: 600;
@@ -586,15 +653,15 @@ button.lcars-btn-auto {
 
     &:last-child {
       border-radius: 0 10px 0 0;
-      box-shadow: 1px 0 0 0 rgb(255 255 255 / 12%);
+      box-shadow: 1px 0 0 0 vars.$white-a12;
     }
 
     &::placeholder {
-      color: #555;
+      color: vars.$lcars-grey-dark;
     }
 
     &:focus {
-      background: #222;
+      background: vars.$lcars-field-bg-focus;
       box-shadow: none;
       border-color: transparent;
     }
@@ -612,10 +679,10 @@ button.lcars-btn-auto {
     margin: 0;
     padding: 0.5rem 2.5rem 0.5rem 1rem;
     border: none;
-    border-top: 1px solid rgb(255 255 255 / 8%);
+    border-top: 1px solid vars.$white-a8;
     border-radius: 0;
-    background-color: #1c1c1c;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23fff'/%3E%3C/svg%3E");
+    background-color: vars.$lcars-field-bg;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='#{mixins.url-colour(vars.$a11y-white)}'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 1.2rem center;
     background-size: 8px 5px;
@@ -628,7 +695,7 @@ button.lcars-btn-auto {
     outline: none;
 
     &:focus-visible {
-      background-color: #222;
+      background-color: vars.$lcars-field-bg-focus;
       box-shadow: inset 0 0 0 2px vars.$lcars-perano;
     }
 
@@ -638,8 +705,8 @@ button.lcars-btn-auto {
     }
 
     option {
-      background: #222;
-      color: #fff;
+      background: vars.$lcars-field-bg-focus;
+      color: vars.$a11y-white;
     }
   }
 
@@ -649,9 +716,9 @@ button.lcars-btn-auto {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #faa;
-    background: rgb(10 0 0 / 75%);
-    border-top: 1px solid rgb(255 80 80 / 30%);
+    color: vars.$lcars-field-error-text;
+    background: vars.$lcars-field-error-bg;
+    border-top: 1px solid vars.$lcars-field-error-border;
     border-radius: 0;
 
     &:last-child {
@@ -735,7 +802,7 @@ button.lcars-btn-auto {
   height: 1.3rem;
   border-radius: 50%;
   background: vars.$lcars-tangerine;
-  color: #000;
+  color: vars.$a11y-black;
   font-size: 0.6rem;
   font-weight: 700;
   margin-left: 0.35rem;
@@ -776,14 +843,14 @@ button.lcars-btn-auto {
   .filter-select {
     appearance: none;
     font-stretch: condensed;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%23b3b3b3'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='#{mixins.url-colour(vars.$lcars-grey-light)}'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.6rem center;
     padding-right: 1.8rem;
     cursor: pointer;
 
     option {
-      background: #1a1a2e;
+      background: vars.$lcars-panel-bg;
       color: vars.$lcars-white;
     }
   }
@@ -834,7 +901,12 @@ button.lcars-btn-auto {
 .submitting,
 .submitting:disabled {
   position: relative;
-  background-image: linear-gradient(90deg, #25f 25%, #8bf 50%, #25f 75%);
+  background-image: linear-gradient(
+    90deg,
+    vars.$lcars-evening 25%,
+    vars.$lcars-ghost 50%,
+    vars.$lcars-evening 75%
+  );
   background-size: 400% 100%;
   background-position: 100% 50%;
   animation: progress-bar 2s linear infinite;
@@ -908,11 +980,38 @@ button.lcars-btn-auto {
 .collapsible-section {
   margin-bottom: 1.75rem;
 
+  // The heading sits where the bar's title cut-out does, and the title flows
+  // inside it, so the heading has a box of its own. Left to the bar's rule the
+  // title span alone was placed, and the heading round it measured nothing,
+  // which a browser test reads as a heading nobody can see. The title stays a
+  // block so its black cut-out keeps its full height and covers the bar's
+  // lower edge rather than leaving a line of the bar showing under it.
   .collapsible-section__title {
+    position: absolute;
+    top: -4px;
     margin: 0;
     font-size: inherit;
     font-weight: inherit;
     line-height: inherit;
+
+    > span {
+      position: static;
+    }
+
+    // A title with a badge is already a flex row, which a block would undo.
+    > span:not(.title-with-badge) {
+      display: block;
+    }
+  }
+
+  // A bar that may wrap lays its title out in the bar, so a second line makes
+  // the bar taller; its heading has to stay in the flow for that to work.
+  .lcars-text-bar--wraps .collapsible-section__title {
+    position: static;
+
+    > span {
+      position: relative;
+    }
   }
 
   .collapsible-section__content {
@@ -986,17 +1085,17 @@ button.lcars-btn-auto {
 
   &.federation {
     background: vars.$faction-federation;
-    color: #fff;
+    color: vars.$a11y-white;
   }
 
   &.klingon {
     background: vars.$faction-klingon;
-    color: #fff;
+    color: vars.$a11y-white;
   }
 
   &.undecided {
     background: vars.$faction-undecided;
-    color: #fff;
+    color: vars.$a11y-white;
   }
 }
 
@@ -1021,7 +1120,7 @@ button.lcars-btn-auto {
   font-size: 1rem;
   box-sizing: border-box;
   border-radius: 30px;
-  border: 2px solid rgb(255 255 255 / 35%);
+  border: 2px solid vars.$white-a35;
 
   &:hover {
     filter: brightness(1.2);
@@ -1094,6 +1193,17 @@ button.lcars-btn-auto {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  white-space: nowrap;
+
+  // The heading's own words, in a span of their own so the section's region
+  // is named by them alone. The bar's rule for its title span would otherwise
+  // pin this inner one too, on its own black cut-out, out of the flow.
+  > span:not(.header-count-badge, .sr-only) {
+    position: static;
+    height: auto;
+    padding: 0;
+    background-color: transparent;
+  }
 }
 
 // One or two digits keep the round badge the design started with; three or
@@ -1105,7 +1215,7 @@ button.lcars-btn-auto {
   align-items: center;
   justify-content: center;
   background-color: vars.$lcars-tangerine;
-  color: #000;
+  color: vars.$a11y-black;
   min-width: 26px;
   height: 26px;
   padding: 0 0.45rem;
@@ -1138,7 +1248,7 @@ button.lcars-btn-auto {
     border: none;
     border-radius: 999px;
     background: vars.$lcars-bluey;
-    color: #0d0d0d;
+    color: vars.$lcars-black;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -1170,6 +1280,21 @@ button.lcars-btn-auto {
   border: 0;
 }
 
+// The bar's rule for its title span outranks `.sr-only`, so a span hidden
+// for screen readers inside a bar — the pause between a heading and its count
+// — restates what hides it.
+.lcars-text-bar span.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 // ─── Field Picker ─────────────────────────────────────────────────────────────
 
 // A field whose value is chosen in a dialog rather than typed: a recipient, a
@@ -1185,8 +1310,8 @@ button.lcars-btn-auto {
   justify-content: space-between;
   gap: 0.75rem 1rem;
   padding: 0.75rem 1rem;
-  background: #1c1c1c;
-  border-top: 1px solid rgb(255 255 255 / 8%);
+  background: vars.$lcars-field-bg;
+  border-top: 1px solid vars.$white-a8;
 }
 
 .field-picker__identity {
@@ -1201,7 +1326,7 @@ button.lcars-btn-auto {
   line-height: 1.3;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #fff;
+  color: vars.$a11y-white;
   overflow-wrap: anywhere;
 }
 

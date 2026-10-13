@@ -56,7 +56,57 @@
               "src/styles/angular-mat-base.scss",
               "src/styles/lcars-theme.scss",
               "src/styles/lcars-theme-colours.scss",
-              "src/styles/styles.scss"
+              "src/styles/styles.scss",
+              {
+                "input": "src/styles/alert-themes/lcars-red-alert.scss",
+                "bundleName": "lcars-red-alert",
+                "inject": false
+              },
+              {
+                "input": "src/styles/alert-themes/lcars-red-alert-static.scss",
+                "bundleName": "lcars-red-alert-static",
+                "inject": false
+              },
+              {
+                "input": "src/styles/alert-themes/lcars-yellow-alert.scss",
+                "bundleName": "lcars-yellow-alert",
+                "inject": false
+              },
+              {
+                "input": "src/styles/alert-themes/lcars-yellow-alert-static.scss",
+                "bundleName": "lcars-yellow-alert-static",
+                "inject": false
+              },
+              {
+                "input": "src/styles/alert-themes/lcars-green-alert.scss",
+                "bundleName": "lcars-green-alert",
+                "inject": false
+              },
+              {
+                "input": "src/styles/alert-themes/lcars-green-alert-static.scss",
+                "bundleName": "lcars-green-alert-static",
+                "inject": false
+              },
+              {
+                "input": "src/styles/alert-themes/lcars-blue-alert.scss",
+                "bundleName": "lcars-blue-alert",
+                "inject": false
+              },
+              {
+                "input": "src/styles/alert-themes/lcars-blue-alert-static.scss",
+                "bundleName": "lcars-blue-alert-static",
+                "inject": false
+              },
+              {
+                "input": "src/styles/alert-themes/lcars-grey-alert.scss",
+                "bundleName": "lcars-grey-alert",
+                "inject": false
+              },
+              {
+                "input": "src/styles/alert-themes/lcars-grey-alert-static.scss",
+                "bundleName": "lcars-grey-alert-static",
+                "inject": false
+              }
             ],
             "scripts": [],
             "browser": "src/main.ts",

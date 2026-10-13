@@ -11,13 +11,30 @@
     ],
     "scss/operator-no-newline-after": null,
     "at-rule-no-deprecated": null,
-    "property-no-vendor-prefix": [true, { "ignoreProperties": ["-webkit-user-select"] }]
+    "property-no-vendor-prefix": [true, { "ignoreProperties": ["-webkit-user-select"] }],
+    "color-no-hex": [
+      true,
+      { "message": "Name the colour in src/styles/_lcars-variables.scss and use the variable" }
+    ],
+    "function-disallowed-list": [
+      ["rgb", "rgba", "hsl", "hsla"],
+      {
+        "message": "Name the colour in src/styles/_lcars-variables.scss; tint one with color.change($colour, $alpha: n)"
+      }
+    ]
   },
   "overrides": [
     {
       "files": ["src/styles/lcars-angular-theme-replacements.scss", "src/styles/styles.scss"],
       "rules": {
         "selector-class-pattern": null
+      }
+    },
+    {
+      "files": ["src/styles/_lcars-variables.scss", "src/styles/angular-mat-base.scss"],
+      "rules": {
+        "color-no-hex": null,
+        "function-disallowed-list": null
       }
     }
   ]

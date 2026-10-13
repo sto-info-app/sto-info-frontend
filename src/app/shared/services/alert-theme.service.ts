@@ -118,21 +118,23 @@ export class AlertThemeService implements OnDestroy {
    * Resolves the animated/base stylesheet URI for the given alert state.
    *
    * @param color Alert state.
-   * @returns Stylesheet path under `assets/`.
+   * @returns The stylesheet bundle's URL. `angular.json` builds each from
+   * `src/styles/alert-themes/` as a bundle it does not inject, so it loads only
+   * when linked here.
    */
   private getAnimatedCssUri(color: AlertState): string {
     switch (color) {
       case 'green':
-        return 'assets/lcars/lcars-green-alert.css';
+        return 'lcars-green-alert.css';
       case 'yellow':
-        return 'assets/lcars/lcars-yellow-alert.css';
+        return 'lcars-yellow-alert.css';
       case 'blue':
-        return 'assets/lcars/lcars-blue-alert.css';
+        return 'lcars-blue-alert.css';
       case 'grey':
-        return 'assets/lcars/lcars-grey-alert.css';
+        return 'lcars-grey-alert.css';
       case 'red':
       default:
-        return 'assets/lcars/lcars-red-alert.css';
+        return 'lcars-red-alert.css';
     }
   }
 
@@ -140,21 +142,23 @@ export class AlertThemeService implements OnDestroy {
    * Resolves the static stylesheet URI for the given alert state.
    *
    * @param color Alert state.
-   * @returns Stylesheet path under `assets/`.
+   * @returns The stylesheet bundle's URL. `angular.json` builds each from
+   * `src/styles/alert-themes/` as a bundle it does not inject, so it loads only
+   * when linked here.
    */
   private getStaticCssUri(color: AlertState): string {
     switch (color) {
       case 'green':
-        return 'assets/lcars/lcars-green-alert-static.css';
+        return 'lcars-green-alert-static.css';
       case 'yellow':
-        return 'assets/lcars/lcars-yellow-alert-static.css';
+        return 'lcars-yellow-alert-static.css';
       case 'blue':
-        return 'assets/lcars/lcars-blue-alert-static.css';
+        return 'lcars-blue-alert-static.css';
       case 'grey':
-        return 'assets/lcars/lcars-grey-alert-static.css';
+        return 'lcars-grey-alert-static.css';
       case 'red':
       default:
-        return 'assets/lcars/lcars-red-alert-static.css';
+        return 'lcars-red-alert-static.css';
     }
   }
 

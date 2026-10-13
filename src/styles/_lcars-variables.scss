@@ -1,16 +1,147 @@
+// The single place any colour is written down.
+// Every other stylesheet names a colour from here — `color: vars.$lcars-ice`,
+// a tint as `vars.$white-a10` or `color.change(vars.$lcars-c46, $alpha: 0.2)` —
+// and stylelint (`color-no-hex`, `function-disallowed-list`) rejects a literal
+// anywhere else. Where two names share a value, the second is an alias of the
+// first, so the value itself is still written once.
+
+// Accessibility Colors (Pure Black/White for Lighthouse compliance)
+$a11y-black: #000;
+$a11y-white: #fff;
+
+// Translucent Tints
+// Pure white and pure black at a given alpha, named by that alpha as a
+// percentage (`$white-a10` is `#fff` at 10%). Overlays, washes, borders and
+// shadows draw from these rather than writing their own.
+$white-a3: rgb(255 255 255 / 3%);
+$white-a5: rgb(255 255 255 / 5%);
+$white-a6: rgb(255 255 255 / 6%);
+$white-a8: rgb(255 255 255 / 8%);
+$white-a10: rgb(255 255 255 / 10%);
+$white-a12: rgb(255 255 255 / 12%);
+$white-a14: rgb(255 255 255 / 14%);
+$white-a15: rgb(255 255 255 / 15%);
+$white-a18: rgb(255 255 255 / 18%);
+$white-a20: rgb(255 255 255 / 20%);
+$white-a22: rgb(255 255 255 / 22%);
+$white-a25: rgb(255 255 255 / 25%);
+$white-a30: rgb(255 255 255 / 30%);
+$white-a35: rgb(255 255 255 / 35%);
+$white-a45: rgb(255 255 255 / 45%);
+$white-a50: rgb(255 255 255 / 50%);
+$white-a55: rgb(255 255 255 / 55%);
+$white-a60: rgb(255 255 255 / 60%);
+$white-a62: rgb(255 255 255 / 62%);
+$white-a66: rgb(255 255 255 / 66%);
+$white-a68: rgb(255 255 255 / 68%);
+$white-a70: rgb(255 255 255 / 70%);
+$white-a72: rgb(255 255 255 / 72%);
+$white-a74: rgb(255 255 255 / 74%);
+$white-a76: rgb(255 255 255 / 76%);
+$white-a78: rgb(255 255 255 / 78%);
+$white-a80: rgb(255 255 255 / 80%);
+$white-a82: rgb(255 255 255 / 82%);
+$white-a84: rgb(255 255 255 / 84%);
+$white-a87: rgb(255 255 255 / 87%);
+$black-a5: rgb(0 0 0 / 5%);
+$black-a15: rgb(0 0 0 / 15%);
+$black-a18: rgb(0 0 0 / 18%);
+$black-a20: rgb(0 0 0 / 20%);
+$black-a25: rgb(0 0 0 / 25%);
+$black-a28: rgb(0 0 0 / 28%);
+$black-a30: rgb(0 0 0 / 30%);
+$black-a35: rgb(0 0 0 / 35%);
+$black-a40: rgb(0 0 0 / 40%);
+$black-a45: rgb(0 0 0 / 45%);
+$black-a50: rgb(0 0 0 / 50%);
+$black-a55: rgb(0 0 0 / 55%);
+$black-a60: rgb(0 0 0 / 60%);
+$black-a62: rgb(0 0 0 / 62%);
+$black-a70: rgb(0 0 0 / 70%);
+$black-a72: rgb(0 0 0 / 72%);
+$black-a78: rgb(0 0 0 / 78%);
+$black-a80: rgb(0 0 0 / 80%);
+$black-a90: rgb(0 0 0 / 90%);
+
 // LCARS Standard Colors
 $lcars-black: #0d0d0d;
 $lcars-white: #f5f6fa;
-$lcars-grey-bg: rgb(255 255 255 / 5%);
-$lcars-grey-border: rgb(255 255 255 / 10%);
+$lcars-grey-bg: $white-a5;
+$lcars-grey-border: $white-a10;
 $lcars-grey-light: #b3b3b3;
+$lcars-grey-dark: #555;
 
 // Raised surfaces (member cards, list rows) sitting on the near-black page
 // background. `$lcars-grey-bg` is too faint to read as a distinct panel once a
 // card carries its own controls, so these are deliberately stronger.
-$lcars-card-surface: rgb(255 255 255 / 10%);
-$lcars-card-surface-hover: rgb(255 255 255 / 14%);
-$lcars-card-border: rgb(255 255 255 / 22%);
+$lcars-card-surface: $white-a10;
+$lcars-card-surface-hover: $white-a14;
+$lcars-card-border: $white-a22;
+
+// Structural Colors
+// Surfaces, ink and chrome that hold a page together rather than mean
+// anything. Named for what they are used as; none is offered as a content
+// colour (see `_lcars-palette-properties.scss`).
+
+// Panels and text on the character progress pages, also the fallbacks for the
+// `--lcars-panel-bg`, `--lcars-text` and `--lcars-text-muted` properties.
+$lcars-panel-bg: #1a1a2e;
+$lcars-text: #eee;
+$lcars-text-muted: #aaa;
+
+// The header row of a news, notification, Storytime or character card.
+$lcars-card-header-bg: #333;
+
+// Solid greys standing in for a white wash, so a pair's contrast holds as
+// written: the permission "none" pill (12% over its row) and the admiralty
+// ship chooser (6% over its panel).
+$lcars-grey-pill: #353535;
+$lcars-grey-raised: #272727;
+
+// Form fields inside an `.lcars-input-container` / `.lcars-select-container`.
+$lcars-field-bg: #1c1c1c;
+$lcars-field-bg-focus: #222;
+$lcars-field-error-text: #faa;
+$lcars-field-error-bg: rgb(10 0 0 / 75%);
+$lcars-field-error-border: rgb(255 80 80 / 30%);
+
+// The label sitting in an `.lcars-text-bar`.
+$lcars-text-bar-label: #9bf;
+
+// Scrollbars, track to thumb.
+$lcars-scrollbar-track: #121212;
+$lcars-scrollbar-thumb: #2d2d2d;
+$lcars-scrollbar-thumb-hover: #3f3f3f;
+
+// The `?` help popups on the profile, settings and Storytime pages.
+$lcars-help-bg: #1d2d3e;
+$lcars-help-bg-hover: #263e54;
+$lcars-help-border: #9de0ff;
+$lcars-help-text: #f2f8ff;
+$lcars-help-note: #b8e8ff;
+
+// A registry entry's public / private state, and the solid wash behind the
+// public colour once its help popup is open.
+$lcars-public-green: #6fff8f;
+$lcars-public-green-deep: #213d27;
+$lcars-private-red: #ff7b7b;
+
+// Messages and panels with a colour of their own.
+$lcars-error-text: #f45;
+$lcars-lock-message: #f9a;
+$lcars-interruption-title: #fc0;
+$lcars-biography-text: #b3e5fc;
+$lcars-loading-blue: #1560bd;
+
+// The base of a news article's blockquote and inline-code washes. A hair off
+// `$lcars-c43` (#58e), as the washes were first written; kept so they render
+// unchanged.
+$lcars-quote-blue: #5888ee;
+
+// Shades laid over artwork so text on it stays legible: a character card's
+// portrait and an account card's banner.
+$lcars-portrait-shade: rgb(40 40 60 / 70%);
+$lcars-banner-shade: rgb(0 5 15 / 75%);
 
 // LCARS Palette
 $lcars-sunflower: #fc6;
@@ -26,13 +157,77 @@ $lcars-tangerine: #f83;
 $lcars-red: #d44;
 $lcars-sky: #aaf;
 
-// Accessibility Colors (Pure Black/White for Lighthouse compliance)
-$a11y-black: #000;
-$a11y-white: #fff;
-
 // LCARS Palette Extensions (from lcars-theme-colours.scss)
+// Every colour thelcars.com's palette names, one per colour class in
+// `lcars-theme-colours.scss` and under the same name. Those already above are
+// not repeated; `space-white` and `c49` are aliases of `$lcars-white` and
+// `$lcars-perano`, which carry the same values.
+$lcars-space-white: $lcars-white;
+$lcars-violet-creme: #dbf;
+$lcars-magenta: #c49;
+$lcars-blue: #45f;
+$lcars-yellow: #fc3;
+$lcars-african-violet: #c8f;
+$lcars-almond: #ffaa90;
+$lcars-almond-creme: #fba;
+$lcars-gray: #668;
+$lcars-ice: #8cf;
+$lcars-mars: #f20;
+$lcars-peach: #f86;
+$lcars-butterscotch: #f96;
+$lcars-tomato: #f55;
+$lcars-lilac: #c3f;
+$lcars-evening: #25f;
+$lcars-midnight: #11e;
+$lcars-ghost: #8bf;
+$lcars-wheat: #ca8;
+$lcars-roseblush: #c66;
+$lcars-honey: #fc9;
+$lcars-pumpkinshade: #f74;
+$lcars-martian: #9d6;
+$lcars-moonbeam: #ccdeff;
+$lcars-galaxy: #444a77;
+$lcars-moonshine: #def;
+$lcars-october-sunset: #f40;
+$lcars-harvestgold: #fa4;
+$lcars-butter: #fec;
+$lcars-lima-bean: #cc6;
+$lcars-c43: #58e;
+$lcars-c44: #8ff;
+$lcars-c45: #344470;
+$lcars-c46: #455580;
 $lcars-c47: #79d;
 $lcars-c48: #6cf;
+$lcars-c49: $lcars-perano;
+$lcars-c50: #ff3500;
+$lcars-c51: #525;
+$lcars-c52: #636;
+$lcars-c53: #747;
+$lcars-c54: #858;
+$lcars-c55: #969;
+$lcars-c56: #f80;
+$lcars-c57: #d0b0a0;
+$lcars-c58: #bbf;
+$lcars-c59: #9a6;
+$lcars-c60: #0b0;
+$lcars-c61: #3f3;
+$lcars-c62: #dfd;
+$lcars-c63: #ffebde;
+$lcars-c64: #c9c;
+$lcars-c65: #f6eef6;
+$lcars-c66: #a6a;
+$lcars-c67: #d8d;
+$lcars-c68: #f00;
+$lcars-c69: #c00;
+$lcars-c70: #e00;
+$lcars-c71: #dfdfdf;
+$lcars-c72: #f7f7f7;
+
+// Further named colours outside thelcars.com's palette: the dashboard's
+// "bahama" tile, and the pale aqua the smart chart cycles through (it sits
+// beside `$lcars-sky`, but is `#aff`, not `#aaf`).
+$lcars-bahama: #36c;
+$lcars-chart-aqua: #aff;
 
 // Career Colors
 $career-tactical: $lcars-cardinal;
@@ -42,7 +237,35 @@ $career-science: $lcars-cool;
 // Faction Colors
 $faction-federation: #005a9c;
 $faction-klingon: #8b0000;
-$faction-undecided: #555;
+$faction-undecided: $lcars-grey-dark;
+
+// Platform Colors
+// Each storefront's own brand colour, for the account cards.
+$platform-playstation: #0070cc;
+$platform-xbox: #107c10;
+$platform-steam: #4c8db5;
+
+// Alert Panel Colors
+// One set per alert condition: the side blocks (`main`), the title and its
+// glow (`bright`, also the base of the panel's translucent title tints) and
+// the subtitle (`sub`). Grey's title is lighter than its bright block, so it
+// carries a title colour of its own.
+$alert-red-main: #7b0000;
+$alert-red-bright: #ff2b2b;
+$alert-red-sub: #ff9b9b;
+$alert-yellow-main: #7a4a00;
+$alert-yellow-bright: #ffb020;
+$alert-yellow-sub: #ffe2a6;
+$alert-green-main: #0b5f2a;
+$alert-green-bright: #3bff7b;
+$alert-green-sub: #b7ffd1;
+$alert-blue-main: #061c45;
+$alert-blue-bright: #1e6bff;
+$alert-blue-sub: #b8d6ff;
+$alert-grey-main: #2b2b2b;
+$alert-grey-bright: #d9d9d9;
+$alert-grey-sub: #f2f2f2;
+$alert-grey-title: #e6e6e6;
 
 // STO Item Rarity Colors
 // Single source of truth for the Star Trek Online item-rarity palette. Exposed
@@ -50,12 +273,79 @@ $faction-undecided: #555;
 // `sto-rarity-colours.scss`, and available to any component that tints by
 // rarity (R&D schools, equipment, inventory, drop tables, …).
 // Values match the STO wiki rarity classes: https://stowiki.net/wiki/Quality
-$rarity-common: #fff;
+// (common is plain white, so it names `$a11y-white`).
+$rarity-common: $a11y-white;
 $rarity-uncommon: #0c0;
 $rarity-rare: #09f;
 $rarity-very-rare: #a245b9;
 $rarity-ultra-rare: #6d65bc;
 $rarity-epic: #ffd700;
+
+// Alert Theme Colors
+// The slots of the alert-condition themes in `alert-themes/`, which recolour
+// the whole page for an alert: the data cascade's colour (`cascade`), panels
+// and bars (`main`), buttons and bar ends (`button`) and their text
+// (`button-text`), the frozen cascade's odd row out (`highlight`), the footer
+// (`footer-light`, `footer-dark`, `footer-panel`), and the static theme that
+// follows the animation (`static-cascade`, `static-cascade-end`,
+// `static-flash`). The flash and silver every theme shares are `$lcars-c72`
+// and `$lcars-c71`. A slot whose value another colour already carries is an
+// alias of it, so red is built from thelcars.com's own red-alert colours.
+$alert-theme-red-cascade: $lcars-c68;
+$alert-theme-red-main: $lcars-c69;
+$alert-theme-red-button: $lcars-c70;
+$alert-theme-red-button-text: $a11y-black;
+$alert-theme-red-highlight: #f44;
+$alert-theme-red-footer-light: $lcars-peach;
+$alert-theme-red-footer-dark: $lcars-red;
+$alert-theme-red-footer-panel: $lcars-tomato;
+$alert-theme-red-static-cascade: $lcars-c46;
+$alert-theme-red-static-cascade-end: $lcars-perano;
+$alert-theme-red-static-flash: $alert-theme-red-main;
+$alert-theme-yellow-cascade: $lcars-interruption-title;
+$alert-theme-yellow-main: #e6b800;
+$alert-theme-yellow-button: $alert-theme-yellow-cascade;
+$alert-theme-yellow-button-text: $a11y-black;
+$alert-theme-yellow-highlight: #ffe066;
+$alert-theme-yellow-footer-light: $alert-theme-yellow-highlight;
+$alert-theme-yellow-footer-dark: #c90;
+$alert-theme-yellow-footer-panel: #ffd24d;
+$alert-theme-yellow-static-cascade: $alert-theme-yellow-main;
+$alert-theme-yellow-static-cascade-end: $alert-theme-yellow-highlight;
+$alert-theme-yellow-static-flash: $alert-theme-yellow-main;
+$alert-theme-green-cascade: #0f0;
+$alert-theme-green-main: $rarity-uncommon;
+$alert-theme-green-button: #0e0;
+$alert-theme-green-button-text: $a11y-black;
+$alert-theme-green-highlight: #4f4;
+$alert-theme-green-footer-light: #8f6;
+$alert-theme-green-footer-dark: #4d4;
+$alert-theme-green-footer-panel: #5f5;
+$alert-theme-green-static-cascade: $alert-theme-green-main;
+$alert-theme-green-static-cascade-end: $alert-theme-green-footer-light;
+$alert-theme-green-static-flash: $alert-theme-green-main;
+$alert-theme-blue-cascade: $alert-blue-bright;
+$alert-theme-blue-main: #03c;
+$alert-theme-blue-button: $alert-theme-blue-cascade;
+$alert-theme-blue-button-text: $a11y-black;
+$alert-theme-blue-highlight: #66a3ff;
+$alert-theme-blue-footer-light: #82b3ff;
+$alert-theme-blue-footer-dark: $alert-theme-blue-cascade;
+$alert-theme-blue-footer-panel: #4d8dff;
+$alert-theme-blue-static-cascade: #1a3b7a;
+$alert-theme-blue-static-cascade-end: $alert-blue-sub;
+$alert-theme-blue-static-flash: $alert-theme-blue-cascade;
+$alert-theme-grey-cascade: $alert-grey-bright;
+$alert-theme-grey-main: #4a4a4a;
+$alert-theme-grey-button: #6b6b6b;
+$alert-theme-grey-button-text: $a11y-white;
+$alert-theme-grey-highlight: #bdbdbd;
+$alert-theme-grey-footer-light: #e0e0e0;
+$alert-theme-grey-footer-dark: #7a7a7a;
+$alert-theme-grey-footer-panel: $alert-theme-grey-highlight;
+$alert-theme-grey-static-cascade: $alert-theme-grey-footer-dark;
+$alert-theme-grey-static-cascade-end: $alert-grey-title;
+$alert-theme-grey-static-flash: $alert-theme-grey-main;
 
 // Font Variables
 $font-antonio: 'Antonio', 'Arial Narrow', sans-serif;

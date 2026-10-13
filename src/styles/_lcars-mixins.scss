@@ -1,5 +1,14 @@
 @use 'sass:color';
+@use 'sass:meta';
+@use 'sass:string';
 @use 'lcars-variables' as vars;
+
+// A named colour as it must be written inside a `data:` URL, with its `#`
+// percent-encoded: `url-colour(vars.$a11y-white)` is `%23fff`. Lets an inline
+// SVG take its fill from the palette rather than a literal.
+@function url-colour($colour) {
+  @return '%23' + string.slice(meta.inspect($colour), 2);
+}
 
 @mixin lcars-card {
   background: vars.$lcars-grey-bg;
@@ -7,9 +16,9 @@
   border-radius: 10px;
   overflow: hidden;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 8%),
-    inset 0 -1px 0 rgb(0 0 0 / 30%),
-    0 4px 8px rgb(0 0 0 / 40%);
+    inset 0 1px 0 vars.$white-a8,
+    inset 0 -1px 0 vars.$black-a30,
+    0 4px 8px vars.$black-a40;
   transition:
     transform 0.2s,
     background 0.2s,
@@ -17,11 +26,11 @@
 
   &:hover {
     transform: translateY(-2px);
-    background: rgb(255 255 255 / 10%);
+    background: vars.$white-a10;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 12%),
-      inset 0 -1px 0 rgb(0 0 0 / 30%),
-      0 6px 12px rgb(0 0 0 / 50%);
+      inset 0 1px 0 vars.$white-a12,
+      inset 0 -1px 0 vars.$black-a30,
+      0 6px 12px vars.$black-a50;
   }
 }
 
@@ -49,7 +58,7 @@
 
 @mixin lcars-value {
   font-size: 1rem;
-  color: #fff;
+  color: vars.$a11y-white;
   overflow-wrap: break-word;
 }
 
@@ -90,7 +99,7 @@
   border-left: 10px solid color.adjust($colour, $lightness: -18%);
   background: linear-gradient(
     180deg,
-    rgba($colour, 0.14) 0%,
+    color.change($colour, $alpha: 0.14) 0%,
     vars.$lcars-grey-bg 100%
   );
 
@@ -156,11 +165,11 @@
   gap: 0.8rem;
   padding: 0.8rem;
   font-size: 1.2rem;
-  background: rgb(0 0 0 / 40%);
-  border-left: 1px solid rgb(255 255 255 / 10%);
+  background: vars.$black-a40;
+  border-left: 1px solid vars.$white-a10;
 
   .cta-icon {
-    color: rgb(255 255 255 / 50%);
+    color: vars.$white-a50;
 
     &:hover {
       color: vars.$lcars-sunflower;
@@ -183,7 +192,7 @@
   @include lcars-badge;
 
   flex: 0 0 auto;
-  background: rgb(0 0 0 / 55%);
+  background: vars.$black-a55;
   color: vars.$lcars-white;
   letter-spacing: 0.05em;
   white-space: nowrap;

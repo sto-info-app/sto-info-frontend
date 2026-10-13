@@ -1,3 +1,4 @@
+@use 'lcars-rotation' as rotation;
 @use 'lcars-variables' as vars;
 
 // ─── Fleet Community ─────────────────────────────────────────────────────────
@@ -18,10 +19,27 @@
 // Every class is prefixed `fleet-community-`, so a rule from this partial can
 // be traced to it from the browser's inspector without searching.
 // ---
-// Colour: the Fleet system is sky throughout. The palette is named from
-// `lcars-variables`, never written out as a literal, and the colours that
-// carry meaning — a Fleet's recruitment state, an upload's scan state — are
-// left to the components that say those things.
+// Colour: the Fleet system takes the palette's rotation, as every page does
+// since Steve's decision of 12 October 2026, rather than the one sky it was
+// drawn in before. The palette is named from `lcars-variables`, never written
+// out as a literal, and the colours that carry meaning — a Fleet's
+// recruitment state, an upload's scan state — are left to the components that
+// say those things.
+
+// The blocks a Fleet page projects into its shell — a filter, a form, a panel,
+// a table — each take the next colour of the rotation, so a page's lone field
+// is not left grey and two blocks side by side differ. Sections are left out:
+// they rotate among themselves, as on every other page. Written here rather
+// than in the shell's own stylesheet because the blocks belong to the page
+// that projected them, out of reach of the shell's encapsulated styles; the
+// position sits in the mixin's `:where()`, so an `accent-*` class still wins.
+.fleet-page-shell {
+  @include rotation.rotate-accent(
+    '> *',
+    'nth-child',
+    ':not(app-collapsible-section)'
+  );
+}
 
 // The page's own column. Matches the padding the shell puts around a heading,
 // so a page that uses one and a page that uses both line up.
@@ -63,7 +81,8 @@
 // ─── Tables ──────────────────────────────────────────────────────────────────
 // The roster, its history and the reports are rows of figures, and a table is
 // the honest shape for them: a reader compares a column down, which a grid of
-// cards does not let them do. Header cells are Antonio in sky, figures are
+// cards does not let them do. Header cells are Antonio in the colour of the
+// block the table sits in (sky where nothing gives it one), figures are
 // right-aligned so their digits line up, and a row lights on hover only as a
 // reading aid.
 // ---
@@ -89,8 +108,8 @@
     text-align: left;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: vars.$lcars-sky;
-    border-bottom: 2px solid vars.$lcars-sky;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
+    border-bottom: 2px solid var(--lcars-accent, #{vars.$lcars-sky});
   }
 
   td {
@@ -175,7 +194,7 @@
     td::before {
       font-family: vars.$font-antonio;
       text-transform: uppercase;
-      color: vars.$lcars-sky;
+      color: var(--lcars-accent, #{vars.$lcars-sky});
       content: attr(data-label);
     }
 
@@ -350,5 +369,38 @@
   .fleet-community-image-crop__layout.has-image {
     flex-flow: column nowrap;
     gap: 1rem;
+  }
+}
+
+// ─── Mention list ────────────────────────────────────────────────────────────
+// The people offered while a mention is typed in chat (FC-033). It is Angular
+// Material's autocomplete panel, which the overlay draws at the foot of the
+// page, out of reach of the chat composer's encapsulated styles. The panel's
+// own classes are named as well, to outrank Material's rules for it, which
+// would otherwise square off its corners and stand each name 48px tall.
+.cdk-overlay-pane
+  .mat-mdc-autocomplete-panel.mdc-menu-surface.fleet-community-mention-list {
+  min-width: 12rem;
+  padding: 0.25rem 0;
+  border: 1px solid vars.$lcars-sky;
+  border-radius: 0.5rem;
+  background: vars.$lcars-black;
+  box-shadow: none;
+
+  .mat-mdc-option {
+    min-height: 0;
+    padding: 0.25rem 0.75rem;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+
+    &:hover {
+      background: none;
+    }
+
+    &.mat-mdc-option-active {
+      background: vars.$lcars-sky;
+      color: vars.$lcars-black;
+    }
   }
 }

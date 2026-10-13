@@ -14,11 +14,18 @@
 // use, so nothing leaks into the rest of the application.
 // ---
 // Custom Tracking defines no buttons or fields of its own. A button is
-// `.lcars-btn` with a colour class, a text field is `.lcars-input-container`, a
-// chooser is `.lcars-select-container` and a switch is `<app-lcars-toggle>` —
-// the same controls the dashboard, the admin pages and Storytime are built
-// from. What is left here is layout, and the few shapes the rest of the site
-// has no equivalent for.
+// `.lcars-btn`, a text field is `.lcars-input-container`, a chooser is
+// `.lcars-select-container` and a switch is `<app-lcars-toggle>` — the same
+// controls the dashboard, the admin pages and Storytime are built from. What
+// is left here is layout, and the few shapes the rest of the site has no
+// equivalent for.
+// ---
+// The feature was once tangerine throughout. Since Steve's decision of 12
+// October 2026 it takes the site's palette rotation (`--lcars-accent`) the way
+// the dashboard's tiles do: sections, tabs, fields and the controls inside
+// them each take the next colour, with tangerine only where nothing rotates.
+// A colour somebody chose — a colour field's answer — is content, and keeps
+// its own.
 
 .custom-tracking-page {
   padding: 1rem;
@@ -93,10 +100,12 @@
   display: contents;
 }
 
-// Adding a tab is the last thing on the strip, in the colour every other
-// control that makes something is drawn in. It is not a tab and does not
-// pretend to be one — it is never selected, and it never carries the strip's
-// rounded corner, which belongs to whatever is genuinely first.
+// Adding a tab is the last thing on the strip, filled tangerine so it reads
+// as a control rather than as one more name among the strip's one-colour tabs. Not green:
+// green is kept for accepting, and adding a tab accepts nothing. It is not a
+// tab and does not pretend to be one — it is never selected, and it never
+// carries the strip's rounded corner, which belongs to whatever is genuinely
+// first.
 // ---
 // A plus rather than a sentence: the strip is a row of names, and a tab whose
 // label ran to five words would be read as the longest name on it. What it
@@ -104,7 +113,7 @@
 .lcars-tabs .lcars-tab.custom-tracking-add-tab {
   min-width: 0;
   padding: 0 18px;
-  background-color: vars.$lcars-green;
+  background-color: vars.$lcars-tangerine;
   color: vars.$a11y-black;
 
   &:hover:not(:disabled) {
@@ -150,7 +159,7 @@
   border-radius: 6px;
   background: linear-gradient(
     180deg,
-    rgba(vars.$lcars-perano, 0.14) 0%,
+    color.change(vars.$lcars-perano, $alpha: 0.14) 0%,
     vars.$lcars-grey-bg 100%
   );
   overflow: hidden;
@@ -163,7 +172,7 @@
   border-left-color: color.adjust(vars.$lcars-bluey, $lightness: -18%);
   background: linear-gradient(
     180deg,
-    rgba(vars.$lcars-bluey, 0.16) 0%,
+    color.change(vars.$lcars-bluey, $alpha: 0.16) 0%,
     vars.$lcars-grey-bg 100%
   );
 
@@ -371,11 +380,26 @@
 // in their own strip at the end — never mistaken for something the field
 // itself does.
 // ---
-// Warm, where the tab panel above it is blue: a field is a thing inside the
-// tab, not another statement about it, and a stack of blue panels under a blue
-// panel would read as one list rather than as a thing and its contents.
+// Each field takes the next colour of the list's rotation, so neighbours
+// differ the way the dashboard's tiles do; tangerine, the colour the feature
+// was once drawn in throughout, is only for a field nothing around it colours.
+// The spine and the wash are mixed from the accent at runtime, because the
+// accent is a custom property rather than a colour known when this is built.
 .custom-tracking-field-panel {
   @include mixins.lcars-panel-card(vars.$lcars-tangerine);
+
+  --custom-tracking-field-accent: var(--lcars-accent, #{vars.$lcars-tangerine});
+
+  border-left-color: color-mix(
+    in srgb,
+    var(--custom-tracking-field-accent) 80%,
+    #{vars.$lcars-black}
+  );
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--custom-tracking-field-accent) 14%, transparent) 0%,
+    #{vars.$lcars-grey-bg} 100%
+  );
 }
 
 // A panel of a list holds still under the pointer. The lift belongs to a card
@@ -387,6 +411,13 @@
 
 .custom-tracking-field-panel__heading {
   @include mixins.lcars-panel-card-heading(vars.$lcars-tangerine);
+
+  background: var(--custom-tracking-field-accent);
+  border-bottom-color: color-mix(
+    in srgb,
+    var(--custom-tracking-field-accent) 80%,
+    #{vars.$lcars-black}
+  );
 }
 
 .custom-tracking-field-panel__name {
@@ -511,20 +542,11 @@
 
 // ─── Forms ───────────────────────────────────────────────────────────────────
 
+// An editor is an LCARS panel inside the form, so that its heading stays
+// inside the form it names; the form itself only bounds the width and spacing.
 .custom-tracking-form {
   max-width: 40rem;
-  padding: 0.75rem;
-  border: 1px solid vars.$lcars-card-border;
-  border-radius: 8px;
   margin: 0.5rem 0 1rem;
-  background: vars.$lcars-card-surface;
-
-  h3 {
-    margin: 0 0 0.75rem;
-    color: vars.$lcars-perano;
-    font-size: 1rem;
-    text-transform: uppercase;
-  }
 
   .field-hint {
     max-width: 70ch;
@@ -591,14 +613,10 @@
 
 // ─── The answers a choice field offers ───────────────────────────────────────
 
+// The choices are an LCARS panel of their own; its heading block names them.
 .custom-tracking-options {
-  padding: 0.75rem;
-  border: 1px solid vars.$lcars-card-border;
-  border-radius: 8px;
-  margin: 0 0 1rem;
-  background: vars.$lcars-card-surface;
+  max-width: 40rem;
 
-  h4,
   h5 {
     display: flex;
     flex-wrap: wrap;
@@ -645,6 +663,12 @@
   .lcars-input-container {
     flex: 1 1 12rem;
   }
+}
+
+// The count of choices rides on the panel's heading block, so it takes the
+// dark ground a panel's marks do rather than the quiet grey it has elsewhere.
+.custom-tracking-options__count {
+  @include mixins.lcars-panel-card-badge;
 }
 
 // Withdrawn options stay listed because a value that already chose one has to
@@ -953,19 +977,27 @@
 // is the thing, and without it the captions and answers float loose on the
 // page background with nothing marking where one section ends.
 // ---
-// Blue, the colour Custom Tracking draws a thing that reports in. The fields
-// inside are warm for the reason they are warm in the builder: a field is a
-// thing inside the section rather than another statement about it, and a stack
-// of blue inside blue would read as one list.
+// In the colour of the section's own bar, which the rotation of sections on
+// the page decides, so the spine carries on from the bar above it; blue where
+// nothing rotates. The fields inside take turns through warm colours of their
+// own, so a field still reads as a thing inside the section.
 .custom-tracking-display-panel {
+  --custom-tracking-section-accent: var(--lcars-accent, #{vars.$lcars-bluey});
+
   padding: 0.85rem 1rem 1rem;
   border: 1px solid vars.$lcars-grey-border;
-  border-left: 10px solid color.adjust(vars.$lcars-bluey, $lightness: -18%);
+  border-left: 10px solid
+    color-mix(
+      in srgb,
+      var(--custom-tracking-section-accent) 80%,
+      #{vars.$lcars-black}
+    );
   border-radius: 6px;
   background: linear-gradient(
     180deg,
-    rgba(vars.$lcars-bluey, 0.16) 0%,
-    vars.$lcars-grey-bg 100%
+    color-mix(in srgb, var(--custom-tracking-section-accent) 16%, transparent)
+      0%,
+    #{vars.$lcars-grey-bg} 100%
   );
 }
 
@@ -974,10 +1006,11 @@
 // way it says what a Storytime panel is. It marks where one field ends and the
 // next begins instead, the way a run of comments does over there.
 // ---
-// Nothing blue, which is the section's own colour and would read as another
-// statement about the section rather than as a thing inside it. Nothing red,
-// which the site keeps for what has gone wrong, and nothing green, which it
-// keeps for what makes something — a field reporting an answer is neither.
+// Nothing blue, which is where the section's own colour falls when nothing
+// rotates, and would read as another statement about the section rather than
+// as a thing inside it. Nothing red,
+// which the site keeps for refusing and for what has gone wrong, and nothing
+// green, which it keeps for accepting — a field reporting an answer is neither.
 // ---
 // Every one of them carries black at 4.5:1 or better, which is what lets the
 // name sit on the block. Violet will not at this size, so it is taken a shade
@@ -1006,9 +1039,9 @@ $custom-tracking-field-colours: (
       list.nth($custom-tracking-field-colours, 1),
       $lightness: -20%
     )};
-  --custom-tracking-field-wash: #{rgba(
+  --custom-tracking-field-wash: #{color.change(
       list.nth($custom-tracking-field-colours, 1),
-      0.14
+      $alpha: 0.14
     )};
 
   display: flex;
@@ -1028,7 +1061,7 @@ $custom-tracking-field-colours: (
     > app-custom-tracking-display-field:nth-child(#{$count}n + #{$index}) {
     --custom-tracking-field-surface: #{$colour};
     --custom-tracking-field-edge: #{color.adjust($colour, $lightness: -20%)};
-    --custom-tracking-field-wash: #{rgba($colour, 0.14)};
+    --custom-tracking-field-wash: #{color.change($colour, $alpha: 0.14)};
   }
 }
 
@@ -1048,7 +1081,7 @@ $custom-tracking-field-colours: (
   background: linear-gradient(
     180deg,
     var(--custom-tracking-field-wash) 0%,
-    rgb(0 0 0 / 28%) 100%
+    vars.$black-a28 100%
   );
 }
 
@@ -1079,7 +1112,7 @@ $custom-tracking-field-colours: (
 // name above it.
 .custom-tracking-display-field .custom-tracking-display-hint {
   max-width: 60ch;
-  color: rgb(0 0 0 / 72%);
+  color: vars.$black-a72;
   font-size: 0.75rem;
   font-weight: 400;
   letter-spacing: 0;
@@ -1125,9 +1158,9 @@ $custom-tracking-field-colours: (
 // label keeps the case it was written in: these are words somebody chose.
 .custom-tracking-display-choice {
   padding: 0.15rem 0.65rem;
-  border: 1px solid rgba(vars.$lcars-sunflower, 0.5);
+  border: 1px solid color.change(vars.$lcars-sunflower, $alpha: 0.5);
   border-radius: 10px;
-  background: rgba(vars.$lcars-sunflower, 0.16);
+  background: color.change(vars.$lcars-sunflower, $alpha: 0.16);
   color: vars.$lcars-white;
   font-size: 0.85rem;
 }
@@ -1156,10 +1189,10 @@ $custom-tracking-field-colours: (
   width: 100%;
   max-width: 22rem;
   height: 10px;
-  border: 1px solid rgba(vars.$lcars-sunflower, 0.35);
+  border: 1px solid color.change(vars.$lcars-sunflower, $alpha: 0.35);
   border-radius: 5px;
   margin-top: 0.35rem;
-  background: rgb(0 0 0 / 45%);
+  background: vars.$black-a45;
 }
 
 .custom-tracking-display-progress-fill {
@@ -1239,7 +1272,7 @@ $custom-tracking-field-colours: (
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
-  background: rgb(0 0 0 / 60%);
+  background: vars.$black-a60;
   color: vars.$lcars-white;
   place-items: center;
   transform: translate(-50%, -50%);

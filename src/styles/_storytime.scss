@@ -1,7 +1,9 @@
 @use 'sass:color';
 @use 'sass:list';
+@use 'sass:map';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
+@use 'lcars-rotation' as rotation;
 
 // STO Storytime.
 // One partial for the whole feature rather than a stylesheet per component:
@@ -223,12 +225,13 @@ nav[class^='storytime-'] :where(a, [aria-current='page']) {
 
 // The last thing on an editor: the irreversible action, set apart from the
 // form above it so it cannot be mistaken for one more field. The extra space
-// is the separation — a red border around it would compete with the red
-// button that does the work.
+// is the separation; the section's bar takes the red its button does, which
+// is what marks it as the destructive one.
 .storytime-danger {
+  display: block;
   margin-top: 3rem;
 
-  > .storytime-panel > p {
+  .storytime-panel > p {
     margin-top: 0;
   }
 }
@@ -357,6 +360,10 @@ $storytime-comment-colours: (
 // A panel stacks what it holds on the same rhythm a form uses between its
 // sections. Without this its rows are plain blocks carrying no margin, and two
 // fields end up flush against one another.
+// ---
+// `--bare` keeps the rhythm without the surface, for a panel whose contents are
+// LCARS panel cards already — the artwork under an editor's bar, the picture
+// inside its own card. A surface behind a card reads as a box in a box.
 .storytime-panel {
   @include storytime-panel-surface;
 
@@ -369,6 +376,40 @@ $storytime-comment-colours: (
   > * {
     margin-top: 0;
     margin-bottom: 0;
+  }
+
+  &--bare {
+    margin-top: 0;
+    padding: 0;
+    background: none;
+  }
+}
+
+// A panel of fields takes the palette in turn down its rows and on along each
+// row, so a field never shares a colour with the one beside it or the first of
+// the row above (Steve's decision of 12 October 2026). The panel's own
+// children rotate as any group does; a field after the first in a row takes
+// the colour after its neighbour's, counting on from the row's own. The
+// positions sit in `:where()` so a colour class on a field still names its
+// own.
+$storytime-rotation-colours: map.values(rotation.$lcars-rotation);
+$storytime-rotation-count: list.length($storytime-rotation-colours);
+
+.storytime-panel--rotate {
+  @include rotation.rotate-accent;
+
+  @for $row from 1 through $storytime-rotation-count {
+    @for $field from 2 through 3 {
+      $colour: list.nth(
+        $storytime-rotation-colours,
+        ($row + $field - 2) % $storytime-rotation-count + 1
+      );
+
+      > .form-row:where(:nth-child(#{$storytime-rotation-count}n + #{$row}))
+        > :where(:nth-child(#{$field})) {
+        --lcars-accent: #{$colour};
+      }
+    }
   }
 }
 
@@ -500,6 +541,35 @@ app-storytime-editor-actions {
     flex: 0 0 auto;
     min-width: 10rem;
   }
+}
+
+// Every row of pills in the feature takes the palette in turn, as the site's
+// own `.buttons-row` does (Steve's decision of 12 October 2026), so a row
+// never repeats one colour down its length. A pill that accepts or refuses
+// something keeps its green or red, which a colour class names outright.
+.storytime-page-actions,
+.storytime-form-actions,
+.storytime-actions,
+.storytime-character-list__controls,
+.storytime-arc-stories__order,
+.storytime-tag-admin__actions,
+.storytime-comments__actions,
+.storytime-reading-list__controls,
+.storytime-reading-list__item-controls,
+.storytime-removed__actions,
+.storytime-story__progress-actions,
+.storytime-spotlight__actions,
+.storytime-story__social,
+.storytime-story__report,
+.storytime-arc__social,
+.storytime-chapter__social,
+.storytime-chapter__progress,
+.storytime-chapter__resume,
+.storytime-chapter__navigation,
+.storytime-character__navigation,
+.storytime-image-manager__buttons,
+.storytime-policy-acceptance__links {
+  @include rotation.rotate-accent;
 }
 
 // What a page opens with: create a Story, add a Chapter, go back.
@@ -638,7 +708,7 @@ app-storytime-editor-actions {
 
 .storytime-setting-help[open] .storytime-setting-help__trigger {
   background-color: vars.$lcars-green;
-  color: #000;
+  color: vars.$a11y-black;
 }
 
 .storytime-setting-help__trigger {
@@ -647,8 +717,8 @@ app-storytime-editor-actions {
   justify-content: center;
   width: 24px;
   height: 24px;
-  color: #b8e8ff;
-  background: #1d2d3e;
+  color: vars.$lcars-help-note;
+  background: vars.$lcars-help-bg;
   border-radius: 3px;
   cursor: pointer;
   font-size: 18px;
@@ -669,11 +739,11 @@ app-storytime-editor-actions {
 }
 
 .storytime-setting-help__trigger:hover {
-  background-color: #263e54;
+  background-color: vars.$lcars-help-bg-hover;
 }
 
 .storytime-setting-help__trigger:focus-visible {
-  outline: 2px solid #6cf;
+  outline: 2px solid vars.$lcars-c48;
   outline-offset: 2px;
 }
 
@@ -685,11 +755,11 @@ app-storytime-editor-actions {
   z-index: 10;
   width: min(360px, calc(100vw - 80px));
   padding: 10px 12px;
-  border: 1px solid #9de0ff;
+  border: 1px solid vars.$lcars-help-border;
   border-radius: 8px;
-  background: #1d2d3e;
-  color: #f2f8ff;
-  box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
+  background: vars.$lcars-help-bg;
+  color: vars.$lcars-help-text;
+  box-shadow: 0 8px 20px vars.$black-a45;
   font-size: 0.85rem;
   line-height: 1.4;
 }
@@ -806,7 +876,7 @@ app-storytime-editor-actions {
       display: inline-block;
       padding: 0.1rem 0.4rem;
       border-radius: 3px;
-      background: rgb(0 0 0 / 35%);
+      background: vars.$black-a35;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
     }
@@ -872,7 +942,7 @@ p.storytime-fan-notice,
       object-fit: cover;
       display: block;
       border: 2px solid vars.$lcars-c47;
-      background: rgb(0 0 0 / 40%);
+      background: vars.$black-a40;
     }
   }
 
@@ -1031,18 +1101,12 @@ p.storytime-fan-notice,
     margin-bottom: 1rem;
   }
 
-  &__progress {
-    @include storytime-panel-surface;
-  }
-
   &__progress-summary {
     @include storytime-meta;
   }
 
   &__continue {
-    display: inline-block;
     margin-top: 0.75rem;
-    text-decoration: none;
   }
 
   &__stories {
@@ -1256,7 +1320,7 @@ p.storytime-fan-notice,
     object-fit: cover;
     border: 2px solid vars.$lcars-perano;
     border-radius: 6px;
-    background: rgb(0 0 0 / 40%);
+    background: vars.$black-a40;
   }
 
   &__identity {
@@ -1567,8 +1631,8 @@ $storytime-record-statuses: (
     justify-content: space-between;
     gap: 1rem;
     padding: 0.6rem 1rem;
-    background: #333;
-    border-bottom: 2px solid rgb(255 255 255 / 10%);
+    background: vars.$lcars-card-header-bg;
+    border-bottom: 2px solid vars.$white-a10;
     color: vars.$lcars-white;
     text-decoration: none;
     cursor: pointer;
@@ -1608,7 +1672,7 @@ $storytime-record-statuses: (
     @include mixins.lcars-badge;
 
     flex: 0 0 auto;
-    background: rgb(0 0 0 / 55%);
+    background: vars.$black-a55;
     color: vars.$lcars-white;
     letter-spacing: 0.05em;
   }
@@ -1624,7 +1688,7 @@ $storytime-record-statuses: (
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: rgb(0 0 0 / 55%);
+    background: vars.$black-a55;
     color: vars.$lcars-white;
     font-size: 0.9rem;
   }
@@ -1633,7 +1697,7 @@ $storytime-record-statuses: (
     display: flex;
     align-items: stretch;
     min-height: 90px;
-    background: rgb(255 255 255 / 3%);
+    background: vars.$white-a3;
   }
 
   &__details {
@@ -1661,11 +1725,11 @@ $storytime-record-statuses: (
     gap: 0.8rem;
     padding: 0.8rem;
     font-size: 1.2rem;
-    background: rgb(0 0 0 / 40%);
-    border-left: 1px solid rgb(255 255 255 / 10%);
+    background: vars.$black-a40;
+    border-left: 1px solid vars.$white-a10;
 
     .cta-icon {
-      color: rgb(255 255 255 / 50%);
+      color: vars.$white-a50;
 
       &:hover {
         color: vars.$lcars-sunflower;
@@ -1679,7 +1743,7 @@ $storytime-record-statuses: (
     border-left-color: color.adjust($colour, $lightness: -16%);
     background: linear-gradient(
       180deg,
-      rgba($colour, 0.18) 0%,
+      color.change($colour, $alpha: 0.18) 0%,
       vars.$lcars-grey-bg 100%
     );
 
@@ -1695,7 +1759,7 @@ $storytime-record-statuses: (
   border-left-color: color.adjust(vars.$lcars-cardinal, $lightness: -16%);
   background: linear-gradient(
     180deg,
-    rgba(vars.$lcars-cardinal, 0.25) 0%,
+    color.change(vars.$lcars-cardinal, $alpha: 0.25) 0%,
     vars.$lcars-grey-bg 100%
   );
 
@@ -1717,13 +1781,12 @@ $storytime-record-statuses: (
 // its own rather than a piece of either.
 .storytime-policy-acceptance {
   // The three documents, reachable from the point of acceptance. A creator
-  // asked to agree to something needs it one click away, not one search away.
+  // asked to agree to something needs it one click away, not one search away,
+  // and each is a destination of its own, so each is a pill.
   &__links {
-    font-size: 0.85rem;
-
-    a {
-      color: vars.$lcars-sunflower;
-    }
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
 }
 
@@ -2046,8 +2109,8 @@ app-storytime-tag-row {
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 1rem;
-  background: rgb(0 0 0 / 25%);
-  border-top: 1px solid rgb(255 255 255 / 10%);
+  background: vars.$black-a25;
+  border-top: 1px solid vars.$white-a10;
 
   // The icon says what the row is instead of a caption.
   &__icon {
@@ -2091,29 +2154,18 @@ app-storytime-tag-row {
 // Moderation and policy
 // -----------------------------------------------------------------------------
 
+// Each rule, and each content rating, is an LCARS panel card named by its
+// heading, in a column that takes the palette in turn. The heading is what
+// pairs a rule's name with its explanation for a screen reader.
 .storytime-policy {
-  &__rule {
-    @include storytime-panel-surface;
+  display: flex;
+  flex-direction: column;
+  margin: 1rem 0;
 
-    h2,
-    h3 {
-      font-family: vars.$font-antonio;
-      color: vars.$lcars-sunflower;
-    }
-
-    // The rule name carries the weight; the definition list markup is what
-    // makes a screen reader pair it with its explanation.
-    dt {
-      font-family: vars.$font-antonio;
-      color: vars.$lcars-sunflower;
-      margin-bottom: 0.25rem;
-    }
-
-    dd {
-      margin: 0;
-      color: vars.$lcars-grey-light;
-      line-height: 1.5;
-    }
+  &__summary {
+    margin: 0;
+    color: vars.$lcars-grey-light;
+    line-height: 1.5;
   }
 
   &__version {
@@ -2298,7 +2350,7 @@ app-storytime-tag-row {
     justify-content: center;
     font-size: 2.5rem;
     color: vars.$lcars-white;
-    text-shadow: 0 2px 8px rgb(0 0 0 / 70%);
+    text-shadow: 0 2px 8px vars.$black-a70;
   }
 
   // What the creator wrote about the video, under it. The video's own name is
@@ -2378,7 +2430,7 @@ app-storytime-tag-row {
   &__count {
     @include mixins.lcars-badge;
 
-    background: rgb(0 0 0 / 55%);
+    background: vars.$black-a55;
     color: vars.$lcars-white;
     font-family: vars.$font-antonio;
   }
@@ -2596,9 +2648,9 @@ app-storytime-tag-row {
     z-index: 20;
     min-width: 260px;
     margin-top: 0.5rem;
-    background: #1d2d3e;
+    background: vars.$lcars-help-bg;
     border: 1px solid vars.$lcars-grey-border;
-    box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
+    box-shadow: 0 8px 20px vars.$black-a45;
   }
 
   &__lists {

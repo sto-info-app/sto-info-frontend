@@ -55,7 +55,7 @@ describe('AlertThemeService', () => {
       expect(rendererSpy.setAttribute).toHaveBeenCalledWith(
         'mockLinkElement',
         'href',
-        'assets/lcars/lcars-red-alert.css',
+        'lcars-red-alert.css',
       );
       expect(rendererSpy.appendChild).toHaveBeenCalledWith(
         headSpy,
@@ -73,7 +73,7 @@ describe('AlertThemeService', () => {
       expect(rendererSpy.setAttribute).toHaveBeenCalledWith(
         'mockLinkElement',
         'href',
-        'assets/lcars/lcars-green-alert-static.css',
+        'lcars-green-alert-static.css',
       );
     });
 
@@ -107,7 +107,7 @@ describe('AlertThemeService', () => {
       expect(rendererSpy.setAttribute).toHaveBeenCalledWith(
         expect.anything(),
         'href',
-        'assets/lcars/lcars-red-alert.css',
+        'lcars-red-alert.css',
       );
 
       // Clear spy to verify the timer callback specifically
@@ -130,7 +130,7 @@ describe('AlertThemeService', () => {
       expect(rendererSpy.setAttribute).toHaveBeenCalledWith(
         expect.anything(),
         'href',
-        'assets/lcars/lcars-blue-alert-static.css',
+        'lcars-blue-alert-static.css',
       );
     }));
 
@@ -149,7 +149,7 @@ describe('AlertThemeService', () => {
       expect(rendererSpy.setAttribute).toHaveBeenCalledWith(
         expect.anything(),
         'href',
-        'assets/lcars/lcars-red-alert.css',
+        'lcars-red-alert.css',
       );
     });
 
@@ -158,19 +158,19 @@ describe('AlertThemeService', () => {
       expect(rendererSpy.setAttribute).toHaveBeenCalledWith(
         expect.anything(),
         'href',
-        'assets/lcars/lcars-red-alert.css',
+        'lcars-red-alert.css',
       );
     });
   });
 
   describe('CSS URI Resolution', () => {
     const animatedCases = [
-      { color: 'green', expected: 'assets/lcars/lcars-green-alert.css' },
-      { color: 'yellow', expected: 'assets/lcars/lcars-yellow-alert.css' },
-      { color: 'blue', expected: 'assets/lcars/lcars-blue-alert.css' },
-      { color: 'grey', expected: 'assets/lcars/lcars-grey-alert.css' },
-      { color: 'red', expected: 'assets/lcars/lcars-red-alert.css' },
-      { color: 'unknown', expected: 'assets/lcars/lcars-red-alert.css' },
+      { color: 'green', expected: 'lcars-green-alert.css' },
+      { color: 'yellow', expected: 'lcars-yellow-alert.css' },
+      { color: 'blue', expected: 'lcars-blue-alert.css' },
+      { color: 'grey', expected: 'lcars-grey-alert.css' },
+      { color: 'red', expected: 'lcars-red-alert.css' },
+      { color: 'unknown', expected: 'lcars-red-alert.css' },
     ];
 
     test.each(animatedCases)(
@@ -187,15 +187,15 @@ describe('AlertThemeService', () => {
     );
 
     const staticCases = [
-      { color: 'green', expected: 'assets/lcars/lcars-green-alert-static.css' },
+      { color: 'green', expected: 'lcars-green-alert-static.css' },
       {
         color: 'yellow',
-        expected: 'assets/lcars/lcars-yellow-alert-static.css',
+        expected: 'lcars-yellow-alert-static.css',
       },
-      { color: 'blue', expected: 'assets/lcars/lcars-blue-alert-static.css' },
-      { color: 'grey', expected: 'assets/lcars/lcars-grey-alert-static.css' },
-      { color: 'red', expected: 'assets/lcars/lcars-red-alert-static.css' },
-      { color: 'unknown', expected: 'assets/lcars/lcars-red-alert-static.css' },
+      { color: 'blue', expected: 'lcars-blue-alert-static.css' },
+      { color: 'grey', expected: 'lcars-grey-alert-static.css' },
+      { color: 'red', expected: 'lcars-red-alert-static.css' },
+      { color: 'unknown', expected: 'lcars-red-alert-static.css' },
     ];
 
     test.each(staticCases)(

@@ -47,7 +47,7 @@
     // the tabs, which lose the bottom of every label to make room.
     box-sizing: content-box;
     padding-bottom: 4px;
-    border-bottom: 3px solid #455580;
+    border-bottom: 3px solid vars.$lcars-c46;
 
     // No sideways scrolling: when the labels stop fitting, the strip grows a
     // second row instead. The rows below the first read as part of the same
@@ -94,7 +94,10 @@
     // and matching the others to it keeps the strip reading as one thing.
     padding: 0 24px 0 34px;
     border-radius: 6px 6px 0 0;
-    background-color: #455580;
+    background-color: vars.$lcars-c46;
+
+    // One colour for every tab, as the frame around the page is (Steve, 13
+    // October 2026): the strip is part of the LCARS frame, not content.
     color: vars.$lcars-perano;
     font-family: vars.$font-antonio;
     font-size: 1rem;
@@ -141,7 +144,7 @@
     align-self: stretch;
     min-width: 0;
     border-radius: 6px 20px 0 0;
-    background-color: #455580;
+    background-color: vars.$lcars-c46;
   }
 
   // Narrow enough that the strip is going to wrap whatever we do, so the
