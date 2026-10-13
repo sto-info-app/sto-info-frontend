@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SmartChartComponent } from './smart-chart.component';
+import { LCARS_COLOURS } from 'src/app/shared/constants/lcars-colours.constants';
 
 describe('SmartChartComponent', () => {
   let component: SmartChartComponent;
@@ -169,10 +170,10 @@ describe('SmartChartComponent', () => {
     expect(segments[0].name).toBe('Alpha');
     expect(segments[0].count).toBe(3);
     expect(segments[0].percentage).toBe(75);
-    expect(segments[0].color).toBe('#99ccff');
+    expect(segments[0].color).toBe(LCARS_COLOURS.perano);
     expect(segments[1].name).toBe('Beta');
     expect(segments[1].percentage).toBe(25);
-    expect(segments[1].color).toBe('#7788ff');
+    expect(segments[1].color).toBe(LCARS_COLOURS.bluey);
   });
 
   it('should return empty pieSegments when data is empty', () => {

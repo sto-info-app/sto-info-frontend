@@ -66,11 +66,14 @@ describe('FleetConfigurationService', () => {
    * any component to depend on.
    */
   it('asks the server once however many callers there are', () => {
-    service.getConfiguration().subscribe();
+    const answers: (FleetConfiguration | null)[] = [];
+    service.getConfiguration().subscribe(answer => answers.push(answer));
     service.getFeatures().subscribe();
-    service.getConfiguration().subscribe();
+    service.getConfiguration().subscribe(answer => answers.push(answer));
 
     httpMock.expectOne(API_URLS.FLEET_CONFIGURATION).flush(CONFIGURATION);
+
+    expect(answers).toEqual([CONFIGURATION, CONFIGURATION]);
   });
 
   describe('getFeatures', () => {

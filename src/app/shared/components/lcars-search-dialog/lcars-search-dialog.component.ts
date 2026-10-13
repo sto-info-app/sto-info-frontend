@@ -254,7 +254,7 @@ export class LcarsSearchDialogComponent<T = unknown> implements OnInit {
    * Closes the dialog without a selection.
    */
   cancel(): void {
-    this._dialogRef.close(undefined);
+    this._dialogRef.close();
   }
 
   /**

@@ -20,7 +20,7 @@
   font-size: 1rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgb(255 255 255 / 30%);
+  color: vars.$white-a30;
   transition: color 0.25s ease;
 
   &:focus-visible {
@@ -30,7 +30,7 @@
   }
 
   &--on {
-    color: rgb(255 255 255 / 80%);
+    color: vars.$white-a80;
   }
 
   &--disabled {
@@ -45,7 +45,7 @@
 
 .lcars-toggle__delta {
   font-size: 1.3rem;
-  color: rgb(255 255 255 / 15%);
+  color: vars.$white-a15;
   transition:
     color 0.25s ease,
     filter 0.25s ease;

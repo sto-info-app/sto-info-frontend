@@ -1,4 +1,9 @@
-import { Component, NO_ERRORS_SCHEMA, inject } from '@angular/core';
+import {
+  Component,
+  NO_ERRORS_SCHEMA,
+  SecurityContext,
+  inject,
+} from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
@@ -61,20 +66,13 @@ describe('ImageCropperBaseComponent', () => {
   let mockDialogRef: jest.Mocked<
     Pick<MatDialogRef<TestImageCropperComponent>, 'close'>
   >;
-  let mockSanitizer: jest.Mocked<Pick<DomSanitizer, 'bypassSecurityTrustUrl'>>;
 
   beforeEach(async () => {
     mockDialogRef = { close: jest.fn() };
-    mockSanitizer = {
-      bypassSecurityTrustUrl: jest.fn().mockImplementation(url => url),
-    };
 
     await TestBed.configureTestingModule({
       imports: [TestImageCropperComponent, NoopAnimationsModule],
-      providers: [
-        { provide: MatDialogRef, useValue: mockDialogRef },
-        { provide: DomSanitizer, useValue: mockSanitizer },
-      ],
+      providers: [{ provide: MatDialogRef, useValue: mockDialogRef }],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
@@ -223,10 +221,15 @@ describe('ImageCropperBaseComponent', () => {
       mockReader.onloadend();
       tick();
 
-      expect(mockSanitizer.bypassSecurityTrustUrl).toHaveBeenCalledWith(
-        'data:image/png;base64,abc',
-      );
       expect(component.croppedImage).toBe('data:image/png;base64,abc');
+      // The preview binds it as it is, without bypassing the sanitiser, which
+      // passes a `data:` URL untouched rather than prefixing it `unsafe:`.
+      expect(
+        TestBed.inject(DomSanitizer).sanitize(
+          SecurityContext.URL,
+          component.croppedImage,
+        ),
+      ).toBe('data:image/png;base64,abc');
     }));
 
     it('should log an error and return early if blob is missing', () => {

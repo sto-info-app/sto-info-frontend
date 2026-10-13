@@ -61,7 +61,7 @@
   height: 4px;
   margin-top: 0.6rem;
   overflow: hidden;
-  background: rgb(255 255 255 / 10%);
+  background: vars.$white-a10;
   border-radius: 2px;
 
   &::after {

@@ -1,3 +1,5 @@
+@use 'lcars-variables' as vars;
+
 :host {
   display: block;
   width: 100%;
@@ -9,22 +11,22 @@
   margin: 0 auto;
 
   .lcars-text-bar {
-    background-color: #ffaa90;
-    border-right: 28px solid #d44;
-    border-left: 28px solid #d44;
+    background-color: vars.$lcars-almond;
+    border-right: 28px solid vars.$lcars-red;
+    border-left: 28px solid vars.$lcars-red;
   }
 
   .lcars-bar {
-    border-right: 28px solid #d44;
-    border-left: 28px solid #d44;
+    border-right: 28px solid vars.$lcars-red;
+    border-left: 28px solid vars.$lcars-red;
 
     .lcars-bar-inner {
-      background-color: #ffaa90;
+      background-color: vars.$lcars-almond;
     }
   }
 
   .lcars-error-message {
-    color: #f45;
+    color: vars.$lcars-error-text;
     padding: 0 40px;
     text-align: left;
   }

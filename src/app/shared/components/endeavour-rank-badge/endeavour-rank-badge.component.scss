@@ -37,8 +37,8 @@
   letter-spacing: 0.15em;
   color: vars.$lcars-sunflower;
   text-shadow:
-    0 1px 6px #000,
-    0 0 12px #000;
+    0 1px 6px vars.$a11y-black,
+    0 0 12px vars.$a11y-black;
 }
 
 .rank-hero-number {
@@ -48,5 +48,5 @@
   font-family: Michroma, 'Courier New', Courier, monospace;
   letter-spacing: 0.08em;
   line-height: 1.1;
-  text-shadow: 0 2px 8px rgb(0 0 0 / 90%);
+  text-shadow: 0 2px 8px vars.$black-a90;
 }

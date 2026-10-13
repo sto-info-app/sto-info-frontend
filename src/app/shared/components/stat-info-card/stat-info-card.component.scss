@@ -6,7 +6,7 @@
   background-color: vars.$lcars-grey-bg; // Fallback
   border-radius: 15px 15px 0 0;
   overflow: hidden;
-  box-shadow: 0 4px 10px rgb(0 0 0 / 30%);
+  box-shadow: 0 4px 10px vars.$black-a30;
   height: 100%;
   transition: transform 0.2s ease;
   min-height: 140px;
@@ -62,7 +62,7 @@
     grid-template-columns: 2rem 1fr 2rem;
     align-items: center;
     padding: 0.75rem 0;
-    background-color: rgb(0 0 0 / 15%);
+    background-color: vars.$black-a15;
     color: vars.$lcars-black;
     text-decoration: none;
     font-size: 0.75rem;
@@ -70,13 +70,13 @@
     font-weight: 700;
     letter-spacing: 0.5px;
     transition: background-color 0.2s ease;
-    border-top: 1px solid rgb(0 0 0 / 5%);
+    border-top: 1px solid vars.$black-a5;
     position: relative;
     z-index: 2;
     box-sizing: border-box;
 
     &:hover {
-      background-color: rgb(0 0 0 / 25%);
+      background-color: vars.$black-a25;
     }
 
     .cta-text {

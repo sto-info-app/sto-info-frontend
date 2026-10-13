@@ -5,6 +5,7 @@ import {
   computed,
   input,
 } from '@angular/core';
+import { LCARS_COLOURS } from '../../constants/lcars-colours.constants';
 import { LcarsInformationMessageComponent } from '../lcars-information-message/lcars-information-message.component';
 
 export interface ChartDataItem {
@@ -113,17 +114,17 @@ export class SmartChartComponent {
   });
 
   /** Colours to loop through for chart segments. */
-  private readonly _colors = [
-    '#99ccff', // perano
-    '#7788ff', // bluey
-    '#ff7700', // orange
-    '#33cc99', // green
-    '#9944ff', // violet
-    '#ffaa00', // gold
-    '#5588ff', // cool
-    '#ff8833', // tangerine
-    '#aaffff', // sky
-    '#ffcc66', // sunflower
+  private readonly _colors: readonly string[] = [
+    LCARS_COLOURS.perano,
+    LCARS_COLOURS.bluey,
+    LCARS_COLOURS.orange,
+    LCARS_COLOURS.green,
+    LCARS_COLOURS.violet,
+    LCARS_COLOURS.gold,
+    LCARS_COLOURS.cool,
+    LCARS_COLOURS.tangerine,
+    LCARS_COLOURS.chartAqua,
+    LCARS_COLOURS.sunflower,
   ];
 
   /**

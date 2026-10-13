@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 
@@ -10,12 +11,12 @@
 
 .chart-wrapper {
   display: flex;
-  background: rgb(0 0 0 / 40%);
-  border: 1px solid rgba(vars.$lcars-perano, 0.2);
+  background: vars.$black-a40;
+  border: 1px solid color.change(vars.$lcars-perano, $alpha: 0.2);
   border-radius: 20px;
   overflow: hidden;
   gap: 0;
-  box-shadow: 0 4px 15px rgb(0 0 0 / 50%);
+  box-shadow: 0 4px 15px vars.$black-a50;
 
   @media (width <= 850px) {
     flex-direction: column;
@@ -32,7 +33,7 @@
   justify-content: center;
   padding: 0.75rem; // Reduced padding for "edge-to-edge" look
   min-height: 400px; // Taller for larger chart
-  background: #000;
+  background: vars.$a11y-black;
 
   // The technical Grid Background
   .chart-grid-bg {
@@ -44,12 +45,12 @@
     background-image:
       linear-gradient(
         to right,
-        rgba(vars.$lcars-orange, 0.5) 1px,
+        color.change(vars.$lcars-orange, $alpha: 0.5) 1px,
         transparent 1px
       ),
       linear-gradient(
         to bottom,
-        rgba(vars.$lcars-orange, 0.5) 1px,
+        color.change(vars.$lcars-orange, $alpha: 0.5) 1px,
         transparent 1px
       );
     z-index: 0;
@@ -61,19 +62,24 @@
     width: 360px;
     height: 360px;
     transform: rotate(-90deg);
-    filter: drop-shadow(0 0 10px rgb(0 0 0 / 80%));
+    filter: drop-shadow(0 0 10px vars.$black-a80);
 
     .pie-segment {
       transition:
         filter 0.2s ease,
         transform 0.2s ease;
       cursor: help;
-      stroke: #000;
+      stroke: vars.$a11y-black;
       stroke-width: 0.02;
 
       &:hover {
         filter: brightness(1.2) contrast(1.1);
       }
+    }
+
+    // The hole a donut chart cuts from the pie's centre.
+    .donut-hole {
+      fill: vars.$a11y-black;
     }
   }
 }
@@ -82,45 +88,45 @@
 
 .legend-panel {
   flex: 1;
-  background: rgba(vars.$lcars-grey-bg, 0.1);
-  border-left: 1px solid rgba(vars.$lcars-perano, 0.2);
+  background: color.change(vars.$lcars-grey-bg, $alpha: 0.1);
+  border-left: 1px solid color.change(vars.$lcars-perano, $alpha: 0.2);
   display: flex;
   flex-direction: column;
   min-width: 280px;
 
   @media (width <= 850px) {
     border-left: none;
-    border-top: 1px solid rgba(vars.$lcars-perano, 0.2);
+    border-top: 1px solid color.change(vars.$lcars-perano, $alpha: 0.2);
   }
 
   .legend-header {
-    background: rgba(vars.$lcars-perano, 0.15);
+    background: color.change(vars.$lcars-perano, $alpha: 0.15);
     padding: 0.75rem 1rem;
     font-size: 0.8rem;
     text-transform: uppercase;
     font-weight: 800;
     letter-spacing: 1px;
     color: vars.$lcars-black;
-    border-bottom: 2px solid #000;
+    border-bottom: 2px solid vars.$a11y-black;
   }
 
   .legend-items {
     display: flex;
     flex-direction: column;
     gap: 2px; // LCARS seam gap
-    background: #000;
+    background: vars.$a11y-black;
   }
 
   .legend-item {
     display: flex;
     align-items: center;
-    background: rgba(vars.$lcars-grey-bg, 0.15);
+    background: color.change(vars.$lcars-grey-bg, $alpha: 0.15);
     padding: 0.6rem 1rem;
     gap: 1rem;
     transition: background-color 0.2s ease;
 
     &:hover {
-      background: rgba(vars.$lcars-grey-bg, 0.25);
+      background: color.change(vars.$lcars-grey-bg, $alpha: 0.25);
     }
 
     .status-box {
@@ -130,11 +136,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: inset 0 0 4px rgb(0 0 0 / 50%);
+      box-shadow: inset 0 0 4px vars.$black-a50;
 
       i {
         font-size: 0.6rem;
-        color: #000;
+        color: vars.$a11y-black;
       }
     }
 
@@ -165,10 +171,10 @@
 // ─── Bar Chart (Pi-Hole Bar Style) ───────────────────────────────────────────
 
 .bar-chart-wrapper {
-  background: rgb(0 0 0 / 30%);
+  background: vars.$black-a30;
   padding: 1.5rem;
   border-radius: 15px;
-  border: 1px solid rgba(vars.$lcars-perano, 0.1);
+  border: 1px solid color.change(vars.$lcars-perano, $alpha: 0.1);
 
   .breakdown-item {
     display: grid;
@@ -186,7 +192,7 @@
     }
 
     .bar-track {
-      background: rgb(255 255 255 / 5%);
+      background: vars.$white-a5;
       height: 12px;
       border-radius: 2px;
       overflow: hidden;
@@ -194,7 +200,7 @@
       .bar-fill {
         height: 100%;
         transition: width 0.6s ease-out;
-        box-shadow: 0 0 10px rgb(0 0 0 / 30%);
+        box-shadow: 0 0 10px vars.$black-a30;
 
         @each $name,
           $color
@@ -228,7 +234,7 @@
 
 .no-data-msg {
   padding: 2rem;
-  background: rgb(0 0 0 / 20%);
+  background: vars.$black-a20;
   border-radius: 10px;
   text-align: center;
   font-style: italic;

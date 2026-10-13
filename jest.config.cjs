@@ -102,7 +102,6 @@ module.exports = {
     '/src/environments/',
     '/src/main.ts',
     '/src/polyfills.ts',
-    '/src/app/shared/services/script-loader.service.ts',
     '/.stryker-tmp/',
   ],
   coverageThreshold: {

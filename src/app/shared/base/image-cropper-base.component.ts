@@ -1,7 +1,6 @@
 import { DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialogRef } from '@angular/material/dialog';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import {
   ASSET_SCAN_AVAILABLE,
@@ -22,7 +21,6 @@ import { MILLISECONDS_SHOW_ERROR_MSG } from 'src/app/shared/constants/timings.co
 export abstract class ImageCropperBaseComponent {
   protected abstract readonly _dialogRef: MatDialogRef<unknown>;
 
-  protected readonly _sanitizer = inject(DomSanitizer);
   protected readonly _assetScan = inject(AssetScanService);
   protected readonly _destroyRef = inject(DestroyRef);
 
@@ -50,7 +48,11 @@ export abstract class ImageCropperBaseComponent {
   scanTookTooLong = false;
 
   imageChangedEvent: Event | null = null;
-  croppedImage: SafeUrl = '';
+  /**
+   * The crop as a `data:` URL, for the preview. Bound as it is: Angular's URL
+   * sanitiser passes a `data:` URL, and nothing here needs trusting past it.
+   */
+  croppedImage = '';
   croppedImageBlob: Blob | null = null;
   croppedImageWidth = 0;
   croppedImageHeight = 0;
@@ -185,14 +187,7 @@ export abstract class ImageCropperBaseComponent {
     const reader = new FileReader();
     reader.readAsDataURL(event.blob);
     reader.onloadend = () => {
-      //NOTE(SECURITY): Using bypassSecurityTrustUrl here is safe because:
-      //INFO: 1. The blob comes from ngx-image-cropper which re-encodes the image as PNG
-      //INFO: 2. Input files are strictly validated (only JPEG/PNG, no SVG)
-      //INFO: 3. The data URL is only used in an <img> tag which prevents script execution
-      //INFO: 4. The blob is created client-side from validated user input, not from external sources
-      this.croppedImage = this._sanitizer.bypassSecurityTrustUrl(
-        reader.result as string,
-      );
+      this.croppedImage = reader.result as string;
     };
   }
 

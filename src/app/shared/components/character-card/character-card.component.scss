@@ -5,7 +5,7 @@
 .character-card {
   @include mixins.lcars-card;
 
-  border-left: 10px solid #555;
+  border-left: 10px solid vars.$lcars-grey-dark;
 
   // Faction Colors
   &.starfleet,
@@ -16,7 +16,7 @@
     border-left-color: vars.$faction-federation;
     background: linear-gradient(
       180deg,
-      rgba(vars.$faction-federation, 0.6) 0%,
+      color.change(vars.$faction-federation, $alpha: 0.6) 0%,
       vars.$lcars-grey-bg 100%
     );
 
@@ -25,7 +25,7 @@
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(to right, rgb(40 40 60 / 70%), rgb(0 0 0 / 60%)),
+        linear-gradient(to right, vars.$lcars-portrait-shade, vars.$black-a60),
         url('https://cdn.startrekonline.info/cdn-cgi/imagedelivery/jQ0uSdJ3ty-KasNpXGxyuA/c2b204e6-2738-4522-e199-71ba91516000/square512')
           no-repeat center center;
       background-size: cover;
@@ -39,7 +39,7 @@
     border-left-color: vars.$faction-klingon;
     background: linear-gradient(
       180deg,
-      rgba(vars.$faction-klingon, 0.5) 0%,
+      color.change(vars.$faction-klingon, $alpha: 0.5) 0%,
       vars.$lcars-grey-bg 100%
     );
 
@@ -48,7 +48,7 @@
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(to right, rgb(40 40 60 / 70%), rgb(0 0 0 / 60%)),
+        linear-gradient(to right, vars.$lcars-portrait-shade, vars.$black-a60),
         url('https://cdn.startrekonline.info/cdn-cgi/imagedelivery/jQ0uSdJ3ty-KasNpXGxyuA/9662d3d5-5d59-4614-4246-dc99d28a5600/square512')
           no-repeat center center;
       background-size: cover;
@@ -61,7 +61,7 @@
     border-left-color: vars.$faction-undecided;
     background: linear-gradient(
       180deg,
-      rgba(vars.$faction-undecided, 0.6) 0%,
+      color.change(vars.$faction-undecided, $alpha: 0.6) 0%,
       vars.$lcars-grey-bg 100%
     );
 
@@ -70,7 +70,7 @@
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(to right, rgb(40 40 60 / 70%), rgb(0 0 0 / 60%)),
+        linear-gradient(to right, vars.$lcars-portrait-shade, vars.$black-a60),
         url('https://cdn.startrekonline.info/cdn-cgi/imagedelivery/jQ0uSdJ3ty-KasNpXGxyuA/1ba94464-3b9b-46c0-4e02-dbead970d600/public')
           no-repeat center center;
       background-size: cover;
@@ -84,12 +84,12 @@
     border-left-color: vars.$lcars-green;
     background: linear-gradient(
       180deg,
-      rgba(vars.$lcars-green, 0.05) 0%,
+      color.change(vars.$lcars-green, $alpha: 0.05) 0%,
       vars.$lcars-grey-bg 100%
     );
 
     .character-main-area {
-      background: rgba(vars.$lcars-green, 0.12);
+      background: color.change(vars.$lcars-green, $alpha: 0.12);
     }
   }
 
@@ -97,23 +97,23 @@
     border-left-color: vars.$lcars-violet;
     background: linear-gradient(
       180deg,
-      rgba(vars.$lcars-violet, 0.05) 0%,
+      color.change(vars.$lcars-violet, $alpha: 0.05) 0%,
       vars.$lcars-grey-bg 100%
     );
 
     .character-main-area {
-      background: rgba(vars.$lcars-violet, 0.1);
+      background: color.change(vars.$lcars-violet, $alpha: 0.1);
     }
   }
 
   .character-header-row {
     padding: 0.6rem 1rem;
-    background: #333;
+    background: vars.$lcars-card-header-bg;
     display: flex;
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
-    border-bottom: 2px solid rgb(255 255 255 / 10%);
+    border-bottom: 2px solid vars.$white-a10;
 
     &.tactical {
       background-color: vars.$career-tactical;
@@ -137,13 +137,13 @@
     }
 
     .recruit-type-icon {
-      filter: drop-shadow(0 4px 8px rgb(0 0 0 / 60%));
+      filter: drop-shadow(0 4px 8px vars.$black-a60);
     }
 
     // The pin sits with the name rather than being spaced away from it, so the
     // name takes the free width and leaves the recruit icon on the right.
     .pinned-badge {
-      color: #000;
+      color: vars.$a11y-black;
       font-size: 0.9rem;
       margin-right: 0.5rem;
       flex: none;
@@ -153,7 +153,7 @@
       flex: 1;
       font-weight: bold;
       font-size: 1.15rem;
-      color: #000;
+      color: vars.$a11y-black;
       text-transform: uppercase;
       white-space: nowrap;
       overflow: hidden;
@@ -168,7 +168,7 @@
     min-height: 110px;
     position: relative;
     overflow: hidden;
-    background: rgb(255 255 255 / 3%); // Fallback light tint
+    background: vars.$white-a3; // Fallback light tint
 
     .character-image-container {
       width: 100px;
@@ -192,19 +192,19 @@
         display: block;
         margin: 5px;
         padding: 0;
-        border: 2px solid #79d;
-        background: rgb(0 0 0 / 40%);
+        border: 2px solid vars.$lcars-c47;
+        background: vars.$black-a40;
 
         &[src*='photo-unavailable'] {
           opacity: 0.4;
-          border-color: rgb(119 153 221 / 30%);
+          border-color: color.change(vars.$lcars-c47, $alpha: 0.3);
         }
       }
 
       .image-fallback-icon {
         position: absolute;
         font-size: 3rem;
-        color: rgb(255 255 255 / 8%);
+        color: vars.$white-a8;
         z-index: 1;
       }
     }
@@ -238,7 +238,7 @@
         object-fit: contain;
         opacity: 0.75;
         filter: sepia(0.7) brightness(1.2) grayscale(0.5)
-          drop-shadow(0 0 5px rgb(255 255 255 / 30%));
+          drop-shadow(0 0 5px vars.$white-a30);
         -webkit-user-select: none;
         user-select: none;
       }
@@ -259,17 +259,17 @@
         .rank-icon-mini {
           height: 14px;
           width: auto;
-          background-color: rgb(255 255 255 / 15%);
+          background-color: vars.$white-a15;
           border-radius: 10px;
           padding: 2px 5px;
           box-shadow:
-            inset 0 1px 0 rgb(255 255 255 / 25%),
-            inset 0 -1px 0 rgb(0 0 0 / 30%),
-            0 2px 4px rgb(0 0 0 / 40%);
+            inset 0 1px 0 vars.$white-a25,
+            inset 0 -1px 0 vars.$black-a30,
+            0 2px 4px vars.$black-a40;
         }
 
         .rank-name {
-          color: #eee;
+          color: vars.$lcars-text;
           font-size: 0.95rem;
           font-weight: bold;
           text-transform: uppercase;
@@ -303,12 +303,12 @@
       justify-content: space-around;
       gap: 0.8rem;
       padding: 0.8rem;
-      background: rgb(0 0 0 / 40%);
-      border-left: 1px solid rgb(255 255 255 / 10%);
+      background: vars.$black-a40;
+      border-left: 1px solid vars.$white-a10;
 
       .cta-icon {
         font-size: 1.2rem;
-        color: rgb(255 255 255 / 50%);
+        color: vars.$white-a50;
         cursor: pointer;
         transition: all 0.2s ease;
 

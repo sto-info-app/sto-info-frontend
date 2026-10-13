@@ -117,12 +117,12 @@ describe('CustomTrackingDisplayComponent', () => {
     query<HTMLButtonElement>('.collapsible-section .cta-icon')?.click();
     fixture.detectChanges();
 
-    expect(query('.collapsible-section__content')).toBeNull();
+    expect(query('.collapsible-section__content')?.hidden).toBe(true);
 
     query<HTMLButtonElement>('.collapsible-section .cta-icon')?.click();
     fixture.detectChanges();
 
-    expect(query('.collapsible-section__content')).not.toBeNull();
+    expect(query('.collapsible-section__content')?.hidden).toBe(false);
   });
 
   it('names the section on its heading bar', () => {

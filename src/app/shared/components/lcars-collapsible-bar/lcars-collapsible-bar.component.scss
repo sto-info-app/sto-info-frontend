@@ -1,0 +1,4 @@
+// The bar is styled globally; its host takes no box of its own.
+:host {
+  display: contents;
+}

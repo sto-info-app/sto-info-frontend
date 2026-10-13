@@ -80,5 +80,5 @@ export function memberRoleModifier(member: RoleBearer): string {
  * @returns The role label.
  */
 export function memberRoleLabel(member: RoleBearer): string {
-  return normalisedRole(member).replace(/_/g, ' ');
+  return normalisedRole(member).replaceAll('_', ' ');
 }
