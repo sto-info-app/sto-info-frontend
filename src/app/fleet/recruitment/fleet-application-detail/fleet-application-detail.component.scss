@@ -5,10 +5,6 @@
 }
 
 .fleet-application {
-  &__intro {
-    margin: 0 0 1rem;
-  }
-
   &__notice {
     color: vars.$lcars-green;
     font-weight: 600;
@@ -22,9 +18,10 @@
     gap: 0.35rem 1rem;
     margin: 0 0 1rem;
 
+    // In the colour of the block the list sits in.
     dt {
       font-weight: 700;
-      color: vars.$lcars-sky;
+      color: var(--lcars-accent, #{vars.$lcars-sky});
     }
 
     dd {

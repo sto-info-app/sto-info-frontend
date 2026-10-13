@@ -38,6 +38,7 @@ import {
   ScopeMembershipStatus,
 } from 'src/app/models/fleet-recruitment.models';
 import { FleetRecruitmentState } from 'src/app/models/fleet.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 
 /** Never shown: anybody who can see the Fleet may open the page. */
@@ -84,10 +85,11 @@ export interface FleetApplyData {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe,
-    RouterLink,
+    CollapsibleSectionComponent,
     FleetPageShellComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
+    RouterLink,
   ],
 })
 export class FleetApplyComponent extends FleetSectionPageDirective<FleetApplyData> {

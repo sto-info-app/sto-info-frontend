@@ -29,10 +29,8 @@
         </p>
 
         @if (saveNotice(); as notice) {
-          <p
-            class="recruitment-settings__notice"
-            role="status">
-            {{ notice }}
+          <p class="recruitment-settings__notice">
+            <output>{{ notice }}</output>
           </p>
         }
         @if (saveError(); as refusal) {
@@ -44,7 +42,7 @@
         <form
           aria-label="Recruitment settings"
           (submit)="$event.preventDefault(); onSubmit(data)">
-          <div class="lcars-select-container gold">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="recruitment-state"
@@ -68,205 +66,207 @@
             joining or applying; it removes nobody.
           </p>
 
-          <div class="lcars-text-bar">
-            <span>Requirements</span>
-          </div>
-          <p class="fleet-community-field-hint">
-            Checked when somebody joins or applies. An invitation skips them.
-          </p>
-
-          <div class="lcars-input-container sky recruitment-settings__level">
-            <label for="recruitment-minimum-level">Minimum level</label>
-            <input
-              id="recruitment-minimum-level"
-              type="text"
-              inputmode="numeric"
-              autocomplete="off"
-              maxlength="2"
-              [value]="form.minimumLevel"
-              [disabled]="busy()"
-              [attr.aria-invalid]="problem?.minimumLevel !== null"
-              (input)="patch({ minimumLevel: $any($event.target).value })" />
-            @if (problem?.minimumLevel; as message) {
-              <span class="field-error">{{ message }}</span>
-            }
-          </div>
-
-          <fieldset class="recruitment-settings__factions">
-            <legend>Factions allowed</legend>
+          <app-collapsible-section heading="Requirements">
             <p class="fleet-community-field-hint">
-              Tick none to allow every faction.
+              Checked when somebody joins or applies. An invitation skips them.
             </p>
-            @for (faction of data.factions; track faction.id) {
-              <label class="recruitment-settings__check">
+
+            <div class="lcars-rotate">
+              <div class="lcars-input-container recruitment-settings__level">
+                <label for="recruitment-minimum-level">Minimum level</label>
                 <input
-                  type="checkbox"
-                  [checked]="isAllowed(faction.id)"
+                  id="recruitment-minimum-level"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  maxlength="2"
+                  [value]="form.minimumLevel"
                   [disabled]="busy()"
-                  (change)="
-                    onFaction(faction.id, $any($event.target).checked)
-                  " />
-                {{ faction.name }}
-              </label>
-            }
-          </fieldset>
-
-          <div class="lcars-input-container sky">
-            <label for="recruitment-requirements">In your own words</label>
-            <textarea
-              id="recruitment-requirements"
-              rows="4"
-              [attr.maxlength]="limits.REQUIREMENTS"
-              [value]="form.requirementsText"
-              [disabled]="busy()"
-              (input)="
-                patch({ requirementsText: $any($event.target).value })
-              "></textarea>
-            @if (problem?.requirementsText; as message) {
-              <span class="field-error">{{ message }}</span>
-            }
-          </div>
-          <p class="fleet-community-field-hint">
-            Shown on the Fleet’s page, beside the level and factions. Nothing
-            checks it for you.
-          </p>
-
-          <div class="lcars-text-bar">
-            <span>Application form</span>
-          </div>
-          <p class="fleet-community-field-hint">
-            Asked of whoever applies, when the Fleet takes applications. At most
-            {{ limits.QUESTIONS }} questions.
-          </p>
-
-          @if (form.questions.length === 0) {
-            <p class="fleet-community-empty">The form asks nothing yet.</p>
-          }
-
-          <ol class="recruitment-settings__questions">
-            @for (question of form.questions; track question.key) {
-              <li class="recruitment-settings__question">
-                <div class="fleet-community-form-row">
-                  <div class="lcars-input-container sky">
-                    <label [attr.for]="'question-prompt-' + question.key"
-                      >Question {{ $index + 1 }}</label
-                    >
-                    <input
-                      type="text"
-                      autocomplete="off"
-                      [id]="'question-prompt-' + question.key"
-                      [attr.maxlength]="limits.PROMPT"
-                      [value]="question.prompt"
-                      [disabled]="busy()"
-                      (input)="
-                        onQuestion(question.key, {
-                          prompt: $any($event.target).value,
-                        })
-                      " />
-                  </div>
-                  <div class="lcars-select-container sky">
-                    <label
-                      class="select-label"
-                      [attr.for]="'question-kind-' + question.key"
-                      >Answered as</label
-                    >
-                    <select
-                      [id]="'question-kind-' + question.key"
-                      [disabled]="busy()"
-                      (change)="
-                        onQuestion(question.key, {
-                          kind: $any($event.target).value,
-                        })
-                      ">
-                      @for (kind of questionKinds; track kind) {
-                        <option
-                          [value]="kind"
-                          [selected]="question.kind === kind">
-                          {{ kindLabels[kind] }}
-                        </option>
-                      }
-                    </select>
-                  </div>
-                </div>
-
-                @if (question.kind === singleChoice) {
-                  <div class="lcars-input-container sky">
-                    <label [attr.for]="'question-options-' + question.key"
-                      >Options, one per line</label
-                    >
-                    <textarea
-                      rows="4"
-                      [id]="'question-options-' + question.key"
-                      [value]="question.options"
-                      [disabled]="busy()"
-                      (input)="
-                        onQuestion(question.key, {
-                          options: $any($event.target).value,
-                        })
-                      "></textarea>
-                  </div>
+                  [attr.aria-invalid]="problem?.minimumLevel !== null"
+                  (input)="patch({ minimumLevel: $any($event.target).value })" />
+                @if (problem?.minimumLevel; as message) {
+                  <span class="field-error">{{ message }}</span>
                 }
+              </div>
 
-                @if (problem?.questions[question.key]; as message) {
-                  <p class="recruitment-settings__problem">{{ message }}</p>
-                }
-
-                <div class="recruitment-settings__question-actions">
+              <fieldset class="recruitment-settings__factions">
+                <legend>Factions allowed</legend>
+                <p class="fleet-community-field-hint">
+                  Tick none to allow every faction.
+                </p>
+                @for (faction of data.factions; track faction.id) {
                   <label class="recruitment-settings__check">
                     <input
                       type="checkbox"
-                      [checked]="question.required"
+                      [checked]="isAllowed(faction.id)"
                       [disabled]="busy()"
                       (change)="
-                        onQuestion(question.key, {
-                          required: $any($event.target).checked,
-                        })
+                        onFaction(faction.id, $any($event.target).checked)
                       " />
-                    Must be answered
+                    {{ faction.name }}
                   </label>
-                  <button
-                    type="button"
-                    class="lcars-btn lcars-btn-auto bluey"
-                    [disabled]="busy() || $first"
-                    [attr.aria-label]="'Move question ' + ($index + 1) + ' up'"
-                    (click)="onMoveQuestion($index, -1)">
-                    Up
-                  </button>
-                  <button
-                    type="button"
-                    class="lcars-btn lcars-btn-auto bluey"
-                    [disabled]="busy() || $last"
-                    [attr.aria-label]="
-                      'Move question ' + ($index + 1) + ' down'
-                    "
-                    (click)="onMoveQuestion($index, 1)">
-                    Down
-                  </button>
-                  <button
-                    type="button"
-                    class="lcars-btn lcars-btn-auto red"
-                    [disabled]="busy()"
-                    [attr.aria-label]="'Remove question ' + ($index + 1)"
-                    (click)="onRemoveQuestion(question.key)">
-                    Remove
-                  </button>
-                </div>
-              </li>
-            }
-          </ol>
+                }
+              </fieldset>
 
-          <button
-            type="button"
-            class="lcars-btn lcars-btn-auto gold"
-            [disabled]="busy() || form.questions.length >= limits.QUESTIONS"
-            (click)="onAddQuestion()">
-            Add a question
-          </button>
+              <div class="lcars-input-container">
+                <label for="recruitment-requirements">In your own words</label>
+                <textarea
+                  id="recruitment-requirements"
+                  rows="4"
+                  [attr.maxlength]="limits.REQUIREMENTS"
+                  [value]="form.requirementsText"
+                  [disabled]="busy()"
+                  (input)="
+                    patch({ requirementsText: $any($event.target).value })
+                  "></textarea>
+                @if (problem?.requirementsText; as message) {
+                  <span class="field-error">{{ message }}</span>
+                }
+              </div>
+              <p class="fleet-community-field-hint">
+                Shown on the Fleet’s page, beside the level and factions. Nothing
+                checks it for you.
+              </p>
+            </div>
+          </app-collapsible-section>
+
+          <app-collapsible-section heading="Application form">
+            <p class="fleet-community-field-hint">
+              Asked of whoever applies, when the Fleet takes applications. At most
+              {{ limits.QUESTIONS }} questions.
+            </p>
+
+            @if (form.questions.length === 0) {
+              <p class="fleet-community-empty">The form asks nothing yet.</p>
+            }
+
+            <ol class="recruitment-settings__questions lcars-rotate">
+              @for (question of form.questions; track question.key) {
+                <li>
+                  <app-lcars-panel [heading]="'Question ' + ($index + 1)">
+                    <div class="fleet-community-form-row">
+                      <div class="lcars-input-container">
+                        <label [attr.for]="'question-prompt-' + question.key"
+                          >What it asks</label
+                        >
+                        <input
+                          type="text"
+                          autocomplete="off"
+                          [id]="'question-prompt-' + question.key"
+                          [attr.maxlength]="limits.PROMPT"
+                          [value]="question.prompt"
+                          [disabled]="busy()"
+                          (input)="
+                            onQuestion(question.key, {
+                              prompt: $any($event.target).value,
+                            })
+                          " />
+                      </div>
+                      <div class="lcars-select-container">
+                        <label
+                          class="select-label"
+                          [attr.for]="'question-kind-' + question.key"
+                          >Answered as</label
+                        >
+                        <select
+                          [id]="'question-kind-' + question.key"
+                          [disabled]="busy()"
+                          (change)="
+                            onQuestion(question.key, {
+                              kind: $any($event.target).value,
+                            })
+                          ">
+                          @for (kind of questionKinds; track kind) {
+                            <option
+                              [value]="kind"
+                              [selected]="question.kind === kind">
+                              {{ kindLabels[kind] }}
+                            </option>
+                          }
+                        </select>
+                      </div>
+                    </div>
+
+                    @if (question.kind === singleChoice) {
+                      <div class="lcars-input-container">
+                        <label [attr.for]="'question-options-' + question.key"
+                          >Options, one per line</label
+                        >
+                        <textarea
+                          rows="4"
+                          [id]="'question-options-' + question.key"
+                          [value]="question.options"
+                          [disabled]="busy()"
+                          (input)="
+                            onQuestion(question.key, {
+                              options: $any($event.target).value,
+                            })
+                          "></textarea>
+                      </div>
+                    }
+
+                    @if (problem?.questions[question.key]; as message) {
+                      <p class="recruitment-settings__problem">{{ message }}</p>
+                    }
+
+                    <div class="recruitment-settings__question-actions lcars-rotate">
+                      <label class="recruitment-settings__check">
+                        <input
+                          type="checkbox"
+                          [checked]="question.required"
+                          [disabled]="busy()"
+                          (change)="
+                            onQuestion(question.key, {
+                              required: $any($event.target).checked,
+                            })
+                          " />
+                        Must be answered
+                      </label>
+                      <button
+                        type="button"
+                        class="lcars-btn lcars-btn-auto"
+                        [disabled]="busy() || $first"
+                        [attr.aria-label]="'Move question ' + ($index + 1) + ' up'"
+                        (click)="onMoveQuestion($index, -1)">
+                        Up
+                      </button>
+                      <button
+                        type="button"
+                        class="lcars-btn lcars-btn-auto"
+                        [disabled]="busy() || $last"
+                        [attr.aria-label]="
+                          'Move question ' + ($index + 1) + ' down'
+                        "
+                        (click)="onMoveQuestion($index, 1)">
+                        Down
+                      </button>
+                      <button
+                        type="button"
+                        class="lcars-btn lcars-btn-auto red"
+                        [disabled]="busy()"
+                        [attr.aria-label]="'Remove question ' + ($index + 1)"
+                        (click)="onRemoveQuestion(question.key)">
+                        Remove
+                      </button>
+                    </div>
+                  </app-lcars-panel>
+                </li>
+              }
+            </ol>
+
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto"
+              [disabled]="busy() || form.questions.length >= limits.QUESTIONS"
+              (click)="onAddQuestion()">
+              Add a question
+            </button>
+          </app-collapsible-section>
 
           <div class="fleet-community-form-actions">
             <button
               type="submit"
-              class="lcars-btn lcars-btn-auto sky"
+              class="lcars-btn lcars-btn-auto green"
               [disabled]="!canSave()">
               {{ busy() ? 'Saving' : 'Save' }}
             </button>

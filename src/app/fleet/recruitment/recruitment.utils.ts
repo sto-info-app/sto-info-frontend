@@ -10,12 +10,12 @@ export interface RecruitmentCharacterOption {
 }
 
 /** The refusals whose message the server writes for the person refused. */
-const EXPLAINED_REFUSALS: readonly number[] = [
+const EXPLAINED_REFUSALS: ReadonlySet<number> = new Set([
   HttpStatusCode.BadRequest,
   HttpStatusCode.Forbidden,
   HttpStatusCode.NotFound,
   HttpStatusCode.Conflict,
-];
+]);
 
 /**
  * The reader's Characters that could stand for them in a Fleet on one
@@ -58,7 +58,7 @@ export function recruitmentCharactersOf(
 export function recruitmentRefusalOf(error: unknown, fallback: string): string {
   if (
     !(error instanceof HttpErrorResponse) ||
-    !EXPLAINED_REFUSALS.includes(error.status)
+    !EXPLAINED_REFUSALS.has(error.status)
   ) {
     return fallback;
   }

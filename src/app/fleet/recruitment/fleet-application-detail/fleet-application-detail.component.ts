@@ -8,10 +8,11 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ParamMap, RouterLink } from '@angular/router';
+import { ParamMap } from '@angular/router';
 
 import { map, Observable } from 'rxjs';
 
+import { FleetBackLinkComponent } from 'src/app/fleet/components/fleet-back-link/fleet-back-link.component';
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
@@ -34,6 +35,7 @@ import {
   FleetApplicationDetail,
   FleetApplicationStatus,
 } from 'src/app/models/fleet-recruitment.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -74,9 +76,10 @@ export type ApplicationDecision = 'ACCEPT' | 'REJECT';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
-    RouterLink,
     AppDatePipe,
+    AsyncPipe,
+    CollapsibleSectionComponent,
+    FleetBackLinkComponent,
     FleetPageShellComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,

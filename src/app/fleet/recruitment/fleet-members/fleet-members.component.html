@@ -21,10 +21,8 @@
       </p>
 
       @if (removalNotice(); as notice) {
-        <p
-          class="fleet-members__notice"
-          role="status">
-          {{ notice }}
+        <p class="fleet-members__notice">
+          <output>{{ notice }}</output>
         </p>
       }
       @if (removalError(); as refusal) {
@@ -36,14 +34,14 @@
       @if (removing(); as member) {
         @let asked = actions[action()];
         <form
-          class="fleet-members__remove"
+          class="fleet-members__remove lcars-rotate"
           [attr.aria-label]="asked.verb + ' a member'"
           (submit)="$event.preventDefault(); onConfirm(data)">
           <p class="fleet-members__asking">
             {{ asked.verb }} {{ member.username ?? 'this account'
             }}{{ action() === 'REMOVE' ? ' from this Fleet' : '' }}?
           </p>
-          <div class="lcars-input-container tangerine">
+          <div class="lcars-input-container">
             <label for="member-removal-reason">Reason</label>
             <textarea
               id="member-removal-reason"
@@ -59,7 +57,8 @@
           <div class="fleet-community-form-actions">
             <button
               type="button"
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
+              [class.red]="asked.button !== 'red'"
               [disabled]="busy()"
               (click)="onCancel()">
               Keep them

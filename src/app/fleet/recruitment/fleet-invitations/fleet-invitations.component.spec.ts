@@ -120,8 +120,8 @@ describe('FleetInvitationsComponent', () => {
     expect(
       Array.from(
         (fixture.nativeElement as HTMLElement).querySelectorAll('tbody button'),
-      ).length,
-    ).toBe(1);
+      ),
+    ).toHaveLength(1);
   });
 
   it('says so when nobody has been invited', async () => {

@@ -16,22 +16,20 @@
       @let settings = data.view.settings;
 
       @if (sent()) {
-        <p
-          class="fleet-apply__notice"
-          role="status">
-          {{ sentMessage }}
+        <p class="fleet-apply__notice">
+          <output>{{ sentMessage }}</output>
         </p>
         <p class="fleet-community-field-hint">{{ inGameNote }}</p>
         <nav
           class="buttons-row"
           aria-label="Where next">
           <a
-            class="lcars-btn lcars-btn-auto gold"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="myApplicationsLink"
             >Your Fleet applications</a
           >
           <a
-            class="lcars-btn lcars-btn-auto sky"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="fleetLink(data)"
             >Back to the Fleet</a
           >
@@ -42,7 +40,7 @@
           class="buttons-row"
           aria-label="Where next">
           <a
-            class="lcars-btn lcars-btn-auto sky"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="fleetLink(data)"
             >Back to the Fleet</a
           >
@@ -53,25 +51,24 @@
           settings.factions.length > 0 ||
           settings.requirementsText
         ) {
-          <div class="lcars-text-bar">
-            <span>Requirements</span>
-          </div>
-          <ul class="fleet-apply__requirements">
-            @if (settings.minimumLevel !== null) {
-              <li>Level {{ settings.minimumLevel }} or above</li>
+          <app-collapsible-section heading="Requirements">
+            <ul class="fleet-apply__requirements">
+              @if (settings.minimumLevel !== null) {
+                <li>Level {{ settings.minimumLevel }} or above</li>
+              }
+              @if (settings.factions.length > 0) {
+                <li>
+                  Faction:
+                  @for (faction of settings.factions; track faction.id) {
+                    {{ faction.name }}{{ $last ? '' : ', ' }}
+                  }
+                </li>
+              }
+            </ul>
+            @if (settings.requirementsText) {
+              <p class="fleet-apply__text">{{ settings.requirementsText }}</p>
             }
-            @if (settings.factions.length > 0) {
-              <li>
-                Faction:
-                @for (faction of settings.factions; track faction.id) {
-                  {{ faction.name }}{{ $last ? '' : ', ' }}
-                }
-              </li>
-            }
-          </ul>
-          @if (settings.requirementsText) {
-            <p class="fleet-apply__text">{{ settings.requirementsText }}</p>
-          }
+          </app-collapsible-section>
         }
 
         @if (sendError(); as refusal) {
@@ -88,9 +85,10 @@
           </p>
         } @else {
           <form
+            class="lcars-rotate"
             aria-label="Your application"
             (submit)="$event.preventDefault(); onSubmit(data)">
-            <div class="lcars-select-container gold fleet-apply__character">
+            <div class="lcars-select-container fleet-apply__character">
               <label
                 class="select-label"
                 for="apply-character"
@@ -120,7 +118,7 @@
               @let fieldId = 'answer-' + question.id;
               @switch (question.kind) {
                 @case (kinds.SHORT_TEXT) {
-                  <div class="lcars-input-container sky">
+                  <div class="lcars-input-container">
                     <label [attr.for]="fieldId"
                       >{{ question.prompt
                       }}{{ question.required ? '' : ' (optional)' }}</label
@@ -138,7 +136,7 @@
                   </div>
                 }
                 @case (kinds.LONG_TEXT) {
-                  <div class="lcars-input-container sky">
+                  <div class="lcars-input-container">
                     <label [attr.for]="fieldId"
                       >{{ question.prompt
                       }}{{ question.required ? '' : ' (optional)' }}</label
@@ -155,7 +153,7 @@
                   </div>
                 }
                 @case (kinds.SINGLE_CHOICE) {
-                  <div class="lcars-select-container sky">
+                  <div class="lcars-select-container">
                     <label
                       class="select-label"
                       [attr.for]="fieldId"
@@ -230,7 +228,7 @@
               }
               <button
                 type="submit"
-                class="lcars-btn lcars-btn-auto gold"
+                class="lcars-btn lcars-btn-auto green"
                 [disabled]="!canSend(data)"
                 [attr.aria-describedby]="hint ? 'apply-send-hint' : null">
                 {{ busy() ? 'Sending' : 'Send the application' }}

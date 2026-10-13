@@ -21,8 +21,9 @@
   align-items: center;
 }
 
+// In the colour of the pill beside it, so each line reads as one entry.
 .fleet-recruitment-hub__description {
   flex: 1 1 18rem;
   margin: 0;
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
 }

@@ -198,7 +198,7 @@ describe('FleetApplyComponent', () => {
     expect(element.querySelector('input#answer-q-short')).not.toBeNull();
     expect(element.querySelector('textarea#answer-q-long')).not.toBeNull();
     expect(element.querySelector('select#answer-q-choice')).not.toBeNull();
-    expect(element.querySelectorAll('input[name="answer-q-yes"]').length).toBe(
+    expect(element.querySelectorAll('input[name="answer-q-yes"]')).toHaveLength(
       2,
     );
     expect(pageText(fixture)).toContain('Why us? (optional)');

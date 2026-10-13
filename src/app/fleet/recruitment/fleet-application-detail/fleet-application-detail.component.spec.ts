@@ -164,7 +164,7 @@ describe('FleetApplicationDetailComponent', () => {
     );
     expect(
       (fixture.nativeElement as HTMLElement)
-        .querySelector('.fleet-application__intro a')
+        .querySelector('app-fleet-back-link a')
         ?.getAttribute('href'),
     ).toBe(`${RECRUITMENT_FLEET_HREF}/recruitment/applications`);
   });

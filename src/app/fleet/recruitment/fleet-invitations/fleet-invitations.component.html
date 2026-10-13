@@ -15,10 +15,8 @@
       @let data = state.data;
 
       @if (actionNotice(); as notice) {
-        <p
-          class="fleet-invitations__notice"
-          role="status">
-          {{ notice }}
+        <p class="fleet-invitations__notice">
+          <output>{{ notice }}</output>
         </p>
       }
       @if (actionError(); as refusal) {
@@ -29,10 +27,10 @@
 
       @if (mayInvite(data)) {
         <form
-          class="fleet-invitations__form"
+          class="fleet-invitations__form lcars-rotate"
           aria-label="Invite somebody"
           (submit)="$event.preventDefault(); onInvite(data)">
-          <div class="lcars-input-container sky">
+          <div class="lcars-input-container">
             <label for="invitation-username">STO Info username</label>
             <input
               id="invitation-username"
@@ -51,7 +49,7 @@
           <div class="fleet-community-form-actions">
             <button
               type="submit"
-              class="lcars-btn lcars-btn-auto sky"
+              class="lcars-btn lcars-btn-auto green"
               [disabled]="busy() || username().trim() === ''">
               Send the invitation
             </button>
@@ -111,7 +109,7 @@
                     @if (isOpen(invitation)) {
                       <button
                         type="button"
-                        class="lcars-btn lcars-btn-auto bluey"
+                        class="lcars-btn lcars-btn-auto red"
                         [disabled]="busy()"
                         (click)="onWithdraw(data, invitation)">
                         Withdraw

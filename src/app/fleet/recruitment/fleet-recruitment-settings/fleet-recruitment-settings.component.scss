@@ -46,18 +46,14 @@
     cursor: pointer;
   }
 
+  // Each question's panel names its number, so the list draws none of its
+  // own.
   &__questions {
     display: grid;
     gap: 1rem;
     margin: 0 0 1rem;
-    padding-left: 1.5rem;
-  }
-
-  &__question {
-    padding: 0.75rem;
-    border-left: 4px solid vars.$lcars-sky;
-    border-radius: 0 0.4rem 0.4rem 0;
-    background: vars.$lcars-grey-bg;
+    padding: 0;
+    list-style: none;
   }
 
   &__question-actions {

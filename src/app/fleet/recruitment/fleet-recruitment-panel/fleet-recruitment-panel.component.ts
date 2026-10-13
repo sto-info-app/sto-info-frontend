@@ -30,6 +30,7 @@ import {
   ScopeMembershipStatus,
 } from 'src/app/models/fleet-recruitment.models';
 import { FleetRecruitmentState } from 'src/app/models/fleet.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -93,7 +94,7 @@ export const RECRUITMENT_ACTION_ERROR =
   styleUrls: ['./fleet-recruitment-panel.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AppDatePipe, FormsModule, RouterLink],
+  imports: [AppDatePipe, CollapsibleSectionComponent, FormsModule, RouterLink],
 })
 export class FleetRecruitmentPanelComponent {
   private readonly _recruitment = inject(FleetRecruitmentService);

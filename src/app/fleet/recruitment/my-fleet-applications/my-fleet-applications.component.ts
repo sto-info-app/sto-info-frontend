@@ -42,8 +42,10 @@ import {
   MyFleetInvitation,
 } from 'src/app/models/fleet-recruitment.models';
 import { CharacterFleetSummary } from 'src/app/models/fleet.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** What to say when the page could not be read. */
 export const MY_APPLICATIONS_ERROR =
@@ -100,11 +102,13 @@ export type MyFleetApplicationsState =
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
-    RouterLink,
     AppDatePipe,
+    AsyncPipe,
+    CollapsibleSectionComponent,
     FleetPageShellComponent,
     LcarsErrorMessageComponent,
+    LcarsPanelComponent,
+    RouterLink,
   ],
 })
 export class MyFleetApplicationsComponent {

@@ -182,7 +182,10 @@ describe('FleetRecruitmentPanelComponent', () => {
    */
   function controls(): string[] {
     return Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('button, a'),
+      // Not the section's own fold control, which is not the panel's to offer.
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'button:not(.cta-icon), a',
+      ),
     ).map(control => control.textContent?.trim() ?? '');
   }
 

@@ -202,8 +202,8 @@ describe('MyFleetApplicationsComponent', () => {
     expect(text).toContain('Confirm the Fleet on your Character’s page');
     expect(findButton(fixture, 'Withdraw')).toBeUndefined();
     expect(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('tbody a').length,
-    ).toBe(1);
+      (fixture.nativeElement as HTMLElement).querySelectorAll('tbody a'),
+    ).toHaveLength(1);
   });
 
   it.each([
@@ -243,8 +243,8 @@ describe('MyFleetApplicationsComponent', () => {
 
     expect(pageText(fixture)).toContain('Ninth Fleet');
     expect(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('tbody a').length,
-    ).toBe(0);
+      (fixture.nativeElement as HTMLElement).querySelectorAll('tbody a'),
+    ).toHaveLength(0);
   });
 
   it('says what the page that sent the reader here had to say', async () => {
@@ -314,8 +314,8 @@ describe('MyFleetApplicationsComponent', () => {
           (fixture.nativeElement as HTMLElement).querySelector(
             '#invitation-character-invite-1',
           ) as HTMLSelectElement
-        ).options.length,
-      ).toBe(3);
+        ).options,
+      ).toHaveLength(3);
     });
 
     it('is accepted with the Character chosen', async () => {

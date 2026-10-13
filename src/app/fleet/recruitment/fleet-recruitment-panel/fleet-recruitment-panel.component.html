@@ -1,11 +1,4 @@
-<section
-  class="fleet-recruitment"
-  aria-labelledby="fleet-recruitment-heading">
-  <h2
-    id="fleet-recruitment-heading"
-    class="fleet-recruitment__heading">
-    Recruitment
-  </h2>
+<app-collapsible-section heading="Recruitment">
 
   @if (loadFailed()) {
     <p
@@ -62,11 +55,13 @@
             </li>
           }
         </ul>
-        <a
-          class="fleet-recruitment__link"
-          [routerLink]="myApplicationsLink"
-          >See your Fleet applications</a
-        >
+        <div class="buttons-row fleet-recruitment__actions">
+          <a
+            class="lcars-btn lcars-btn-auto"
+            [routerLink]="myApplicationsLink"
+            >See your Fleet applications</a
+          >
+        </div>
       }
 
       @if (view.viewer.openInvitation; as invitation) {
@@ -91,7 +86,7 @@
               from your dashboard first.
             </p>
           } @else {
-            <div class="lcars-select-container gold fleet-recruitment__select">
+            <div class="lcars-select-container fleet-recruitment__select">
               <label
                 class="select-label"
                 for="fleet-recruitment-character"
@@ -117,14 +112,14 @@
               @if (view.viewer.openInvitation) {
                 <button
                   type="button"
-                  class="lcars-btn lcars-btn-auto gold"
+                  class="lcars-btn lcars-btn-auto green"
                   [disabled]="busy() || characterId() === ''"
                   (click)="accept()">
                   Accept the invitation
                 </button>
                 <button
                   type="button"
-                  class="lcars-btn lcars-btn-auto bluey"
+                  class="lcars-btn lcars-btn-auto red"
                   [disabled]="busy()"
                   (click)="decline()">
                   Decline
@@ -132,7 +127,7 @@
               } @else {
                 <button
                   type="button"
-                  class="lcars-btn lcars-btn-auto gold"
+                  class="lcars-btn lcars-btn-auto green"
                   [disabled]="busy() || characterId() === ''"
                   (click)="join()">
                   Join this Fleet
@@ -147,7 +142,7 @@
       @if (mayApply()) {
         <div class="buttons-row fleet-recruitment__actions">
           <a
-            class="lcars-btn lcars-btn-auto gold"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="applyLink"
             >Apply to join</a
           >
@@ -158,7 +153,7 @@
         <div class="buttons-row fleet-recruitment__actions">
           <button
             type="button"
-            class="lcars-btn lcars-btn-auto tangerine"
+            class="lcars-btn lcars-btn-auto red"
             [disabled]="busy()"
             (click)="leave()">
             Leave this Fleet
@@ -176,4 +171,4 @@
       </p>
     }
   }
-</section>
+</app-collapsible-section>

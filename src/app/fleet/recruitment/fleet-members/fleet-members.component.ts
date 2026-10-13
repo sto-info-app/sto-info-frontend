@@ -200,6 +200,7 @@ export class FleetMembersComponent extends FleetSectionPageDirective<FleetMember
 
     const action = this.action();
     const { communityId, fleetId } = data.section;
+    const change = action === 'SUSPEND' ? 'suspend' : 'reinstate';
     const done$ =
       action === 'REMOVE'
         ? this._recruitment.removeMember(
@@ -212,7 +213,7 @@ export class FleetMembersComponent extends FleetSectionPageDirective<FleetMember
             communityId,
             fleetId,
             member.membershipId,
-            action === 'SUSPEND' ? 'suspend' : 'reinstate',
+            change,
             reason,
           );
 

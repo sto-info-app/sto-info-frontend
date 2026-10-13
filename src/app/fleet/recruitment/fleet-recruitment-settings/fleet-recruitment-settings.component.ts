@@ -32,6 +32,7 @@ import {
   RecruitmentSettings,
 } from 'src/app/models/fleet-recruitment.models';
 import { FleetRecruitmentState } from 'src/app/models/fleet.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -45,6 +46,7 @@ import {
   SettingsDraft,
   SettingsProblems,
 } from './recruitment-settings.draft';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** What to say to somebody who may not change how the Fleet recruits. */
 export const FLEET_RECRUITMENT_SETTINGS_NOT_PERMITTED =
@@ -112,11 +114,13 @@ export interface RecruitmentSettingsData {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
     AppDatePipe,
+    AsyncPipe,
+    CollapsibleSectionComponent,
     FleetPageShellComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
+    LcarsPanelComponent,
   ],
 })
 export class FleetRecruitmentSettingsComponent extends FleetSectionPageDirective<RecruitmentSettingsData> {

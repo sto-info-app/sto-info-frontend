@@ -18,11 +18,11 @@
           decide applications.
         </p>
       } @else {
-        <ul class="fleet-recruitment-hub__list">
+        <ul class="fleet-recruitment-hub__list lcars-rotate">
           @for (action of state.data; track action.label) {
             <li class="fleet-recruitment-hub__item">
               <a
-                class="lcars-btn lcars-btn-auto gold"
+                class="lcars-btn lcars-btn-auto"
                 [routerLink]="action.link"
                 >{{ action.label }}</a
               >

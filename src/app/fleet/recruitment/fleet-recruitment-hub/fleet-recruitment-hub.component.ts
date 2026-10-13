@@ -61,24 +61,26 @@ export class FleetRecruitmentHubComponent extends FleetSectionPageDirective<
     const actions: FleetScopeAction[] = [];
 
     if (capabilities.includes(APPLICATIONS_VIEW_CAPABILITY)) {
-      actions.push({
-        label: 'Applications',
-        link: FLEET_LINKS.fleetApplications(
-          communitySlug,
-          platformSegment,
-          fleetSlug,
-        ),
-        description: `Read the applications to ${name}, and decide those waiting.`,
-      });
-      actions.push({
-        label: 'Invitations',
-        link: FLEET_LINKS.fleetInvitations(
-          communitySlug,
-          platformSegment,
-          fleetSlug,
-        ),
-        description: `See who has been invited to ${name}, and invite somebody.`,
-      });
+      actions.push(
+        {
+          label: 'Applications',
+          link: FLEET_LINKS.fleetApplications(
+            communitySlug,
+            platformSegment,
+            fleetSlug,
+          ),
+          description: `Read the applications to ${name}, and decide those waiting.`,
+        },
+        {
+          label: 'Invitations',
+          link: FLEET_LINKS.fleetInvitations(
+            communitySlug,
+            platformSegment,
+            fleetSlug,
+          ),
+          description: `See who has been invited to ${name}, and invite somebody.`,
+        },
+      );
     }
 
     if (capabilities.includes(MEMBERS_MANAGE_CAPABILITY)) {
