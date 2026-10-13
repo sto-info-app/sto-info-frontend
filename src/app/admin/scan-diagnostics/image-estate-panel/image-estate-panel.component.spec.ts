@@ -179,7 +179,11 @@ describe('ImageEstatePanelComponent (FC-040)', () => {
     expect(dialog.open).toHaveBeenCalledWith(
       GovernanceReasonDialogComponent,
       expect.objectContaining({
-        data: expect.objectContaining({ label: 'Reason', max: 500 }),
+        data: expect.objectContaining({
+          label: 'Reason',
+          max: 500,
+          confirmTone: 'accept',
+        }),
       }),
     );
     expect(estate.start).toHaveBeenCalledWith(
@@ -198,6 +202,13 @@ describe('ImageEstatePanelComponent (FC-040)', () => {
     button('Undo copies')!.click();
     button('Retire old copies')!.click();
 
+    // Retiring deletes the old copies, so its button is red.
+    expect(dialog.open).toHaveBeenLastCalledWith(
+      GovernanceReasonDialogComponent,
+      expect.objectContaining({
+        data: expect.objectContaining({ confirmTone: 'refuse' }),
+      }),
+    );
     expect(estate.start).not.toHaveBeenCalled();
   });
 

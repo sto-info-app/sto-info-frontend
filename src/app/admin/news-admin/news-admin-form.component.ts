@@ -21,6 +21,7 @@ import {
   NewsStatus,
 } from 'src/app/models/news.models';
 import { NewsService } from 'src/app/news/news.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /**
  * Create/edit form for a news post, with a live Markdown preview.
@@ -37,6 +38,7 @@ import { NewsService } from 'src/app/news/news.service';
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     MarkdownPipe,
+    CollapsibleSectionComponent,
   ],
 })
 export class NewsAdminFormComponent implements OnInit {

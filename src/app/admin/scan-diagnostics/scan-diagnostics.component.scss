@@ -1,8 +1,8 @@
 @use 'lcars-variables' as vars;
 
-// The page's colour is the one its card carries on the Admin landing page, so
-// the card and the page it opens read as the same thing.
-$scan-diagnostics-colour: vars.$lcars-sunflower;
+// Each section's figures are drawn in that section's colour, which comes from
+// its place in the page's rotation (Steve's decision of 12 October 2026).
+$scan-diagnostics-colour: var(--lcars-accent, #{vars.$lcars-sunflower});
 
 .scan-diagnostics__read {
   display: flex;
@@ -144,6 +144,11 @@ $scan-diagnostics-colour: vars.$lcars-sunflower;
     flex: 1 1 22rem;
     margin: 0;
   }
+}
+
+// The way back to the Admin page, a pill of its own beneath the last panel.
+.scan-diagnostics__back {
+  margin: 1.5rem 0 0;
 }
 
 // The open alerts and the worker processes (FC-042): one bordered item each,

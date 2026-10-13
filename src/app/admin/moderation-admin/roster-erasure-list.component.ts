@@ -25,6 +25,8 @@ import {
   RosterErasureAdminService,
   RosterErasurePreview,
 } from './roster-erasure-admin.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** How long an erasure's reason must be, as the server allows. */
 export const ROSTER_ERASURE_REASON_LIMITS = { min: 10, max: 500 } as const;
@@ -58,6 +60,8 @@ export const ROSTER_ERASURE_REASON_LIMITS = { min: 10, max: 500 } as const;
     LcarsErrorMessageComponent,
     LoadingBarComponent,
     RouterLink,
+    CollapsibleSectionComponent,
+    LcarsPanelComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

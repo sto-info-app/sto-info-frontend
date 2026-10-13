@@ -1,10 +1,6 @@
-<section
-  class="admin-section"
-  aria-labelledby="rescan-heading">
-  <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-    <span id="rescan-heading">Rescan campaigns</span>
-  </div>
-
+<app-collapsible-section
+  heading="Rescan campaigns"
+  barClass="small-lcars-bar-gap">
   <p>
     Rescan published pictures against today's scanner and policy, behind new
     uploads. A picture found infected is taken down, and site admins and its
@@ -15,10 +11,8 @@
   </p>
 
   @if (message(); as done) {
-    <p
-      class="image-estate__message"
-      role="status">
-      {{ done }}
+    <p class="image-estate__message">
+      <output>{{ done }}</output>
     </p>
   }
   @if (failure(); as problem) {
@@ -59,7 +53,7 @@
       <p>No campaign has run.</p>
     } @else {
       <ul
-        class="rescan__campaigns"
+        class="rescan__campaigns lcars-rotate"
         aria-label="Campaigns, newest first">
         @for (campaign of overview.campaigns; track campaign.id) {
           <li>
@@ -90,11 +84,11 @@
               </p>
             }
             @if (isOpen(campaign)) {
-              <div class="image-estate__actions">
+              <div class="image-estate__actions lcars-rotate">
                 @if (campaign.state === 'RUNNING') {
                   <button
                     type="button"
-                    class="lcars-btn lcars-btn-auto gold"
+                    class="lcars-btn lcars-btn-auto"
                     (click)="act(campaign, 'pause')">
                     Pause
                   </button>
@@ -166,7 +160,7 @@
                     </button>
                     <button
                       type="button"
-                      class="lcars-btn lcars-btn-auto gold"
+                      class="lcars-btn lcars-btn-auto green"
                       (click)="decide(finding, 'KEPT')">
                       Keep it
                     </button>
@@ -184,7 +178,7 @@
     <h3 class="image-estate__heading">Start a campaign</h3>
     @let chosen = form();
     <form
-      class="rescan__form"
+      class="rescan__form lcars-rotate"
       (submit)="$event.preventDefault(); start()">
       <fieldset class="rescan__kinds">
         <legend>Kinds of picture</legend>
@@ -202,7 +196,7 @@
         Leave every field empty to rescan every published picture.
       </p>
 
-      <div class="lcars-input-container sunflower">
+      <div class="lcars-input-container">
         <label for="rescan-from">Uploaded on or after</label>
         <input
           id="rescan-from"
@@ -210,7 +204,7 @@
           [value]="chosen.uploadedFrom"
           (change)="set('uploadedFrom', $any($event.target).value)" />
       </div>
-      <div class="lcars-input-container sunflower">
+      <div class="lcars-input-container">
         <label for="rescan-before">Uploaded before</label>
         <input
           id="rescan-before"
@@ -218,7 +212,7 @@
           [value]="chosen.uploadedBefore"
           (change)="set('uploadedBefore', $any($event.target).value)" />
       </div>
-      <div class="lcars-input-container sunflower">
+      <div class="lcars-input-container">
         <label for="rescan-days">Not scanned for this many days</label>
         <input
           id="rescan-days"
@@ -229,7 +223,7 @@
           [value]="chosen.notScannedForDays"
           (change)="set('notScannedForDays', $any($event.target).value)" />
       </div>
-      <div class="lcars-select-container sky">
+      <div class="lcars-select-container">
         <label for="rescan-priority">Order</label>
         <select
           id="rescan-priority"
@@ -255,19 +249,19 @@
       </label>
     </form>
 
-    <div class="image-estate__actions">
+    <div class="image-estate__actions lcars-rotate">
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto sunflower"
+        class="lcars-btn lcars-btn-auto"
         (click)="load()">
         Refresh
       </button>
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto green"
+        class="lcars-btn lcars-btn-auto"
         (click)="start()">
         Start a campaign
       </button>
     </div>
   }
-</section>
+</app-collapsible-section>

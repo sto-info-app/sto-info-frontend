@@ -46,6 +46,8 @@ import {
   ChatReportDecisionDialogComponent,
   ChatReportDecisionDialogData,
 } from './chat-report-decision-dialog.component';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** A page of the queue. */
 export const CHAT_REPORT_PAGE_SIZE = 20;
@@ -85,6 +87,8 @@ const SCOPE_LABELS: Readonly<Record<string, string>> = {
     LcarsSuccessMessageComponent,
     LoadingBarComponent,
     RouterLink,
+    CollapsibleSectionComponent,
+    LcarsPanelComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

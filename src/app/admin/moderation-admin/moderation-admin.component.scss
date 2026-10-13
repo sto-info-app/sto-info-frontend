@@ -20,11 +20,11 @@
   }
 
   .admin-record-title span {
-    color: rgb(255 255 255 / 78%);
+    color: vars.$white-a78;
   }
 
   .status-pill {
-    background: rgb(0 0 0 / 28%);
+    background: vars.$black-a28;
     color: vars.$lcars-white;
   }
 }
@@ -44,14 +44,19 @@
 
   .moderation-no-details {
     font-style: italic;
-    color: rgb(255 255 255 / 60%);
+    color: vars.$white-a60;
   }
 
-  // Disable and restore are the consequential actions on these pages, so they
-  // get the destructive treatment rather than the neutral one.
+  // An action that refuses or takes something away answers in red, one that
+  // accepts, restores or keeps answers in green, and the rest in orange
+  // (Steve's decision of 12 October 2026: green and red are kept for those).
   .moderation-record-actions {
     .cta-icon {
       @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);
+    }
+
+    .approve-icon {
+      @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-green);
     }
 
     .delete-icon {
@@ -89,18 +94,18 @@
     flex-direction: column;
     gap: 0.15rem;
     padding: 0.35rem 0.6rem;
-    border-left: 4px solid rgb(255 255 255 / 20%);
+    border-left: 4px solid vars.$white-a20;
     overflow-wrap: anywhere;
   }
 
   .chat-report-evidence__message--reported {
     border-left-color: vars.$lcars-orange;
-    background: rgb(255 255 255 / 6%);
+    background: vars.$white-a6;
   }
 
   .chat-report-evidence__meta {
     font-size: 0.8rem;
-    color: rgb(255 255 255 / 66%);
+    color: vars.$white-a66;
   }
 
   .chat-report-evidence__body {

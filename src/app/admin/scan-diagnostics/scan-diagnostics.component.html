@@ -22,7 +22,7 @@
         [message]="errorMessage"></app-lcars-error-message>
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto sunflower"
+        class="lcars-btn lcars-btn-auto"
         (click)="load()">
         Try again
       </button>
@@ -36,19 +36,15 @@
         <p>Read {{ diagnostics.generatedAt | appDate: 'medium' }}</p>
         <button
           type="button"
-          class="lcars-btn lcars-btn-auto sunflower"
+          class="lcars-btn lcars-btn-auto"
           (click)="refresh()">
           Refresh
         </button>
       </div>
 
-      <section
-        class="admin-section"
-        aria-labelledby="scan-alerts-heading">
-        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-          <span id="scan-alerts-heading">Alerts</span>
-        </div>
-
+      <app-collapsible-section
+        heading="Alerts"
+        barClass="small-lcars-bar-gap">
         @if (diagnostics.alerts.length === 0) {
           <p>Nothing needs a site admin.</p>
         } @else {
@@ -75,15 +71,11 @@
             }
           </ul>
         }
-      </section>
+      </app-collapsible-section>
 
-      <section
-        class="admin-section"
-        aria-labelledby="scan-worker-heading">
-        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-          <span id="scan-worker-heading">Worker</span>
-        </div>
-
+      <app-collapsible-section
+        heading="Worker"
+        barClass="small-lcars-bar-gap">
         @if (diagnostics.workers === null) {
           <p class="scan-diagnostics__unavailable">
             The worker’s heartbeat could not be read. Its migrations may not
@@ -162,15 +154,11 @@
             </p>
           }
         }
-      </section>
+      </app-collapsible-section>
 
-      <section
-        class="admin-section"
-        aria-labelledby="scan-publication-heading">
-        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-          <span id="scan-publication-heading">Publication</span>
-        </div>
-
+      <app-collapsible-section
+        heading="Publication"
+        barClass="small-lcars-bar-gap">
         @let publication = diagnostics.publication;
         @if (publication.paused) {
           <p>
@@ -240,15 +228,11 @@
             </div>
           </dl>
         }
-      </section>
+      </app-collapsible-section>
 
-      <section
-        class="admin-section"
-        aria-labelledby="scan-usage-heading">
-        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-          <span id="scan-usage-heading">Usage</span>
-        </div>
-
+      <app-collapsible-section
+        heading="Usage"
+        barClass="small-lcars-bar-gap">
         @if (diagnostics.usage === null) {
           <p class="scan-diagnostics__unavailable">
             The worker’s usage figures could not be read. Its migrations may not
@@ -356,15 +340,11 @@
             </tbody>
           </table>
         }
-      </section>
+      </app-collapsible-section>
 
-      <section
-        class="admin-section"
-        aria-labelledby="scan-engine-heading">
-        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-          <span id="scan-engine-heading">Engine</span>
-        </div>
-
+      <app-collapsible-section
+        heading="Engine"
+        barClass="small-lcars-bar-gap">
         @if (diagnostics.engine; as engine) {
           <dl class="scan-diagnostics__details">
             <div>
@@ -406,15 +386,11 @@
             not be read.
           </p>
         }
-      </section>
+      </app-collapsible-section>
 
-      <section
-        class="admin-section"
-        aria-labelledby="scan-backlog-heading">
-        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-          <span id="scan-backlog-heading">Backlog</span>
-        </div>
-
+      <app-collapsible-section
+        heading="Backlog"
+        barClass="small-lcars-bar-gap">
         @if (diagnostics.queue; as queue) {
           <dl class="scan-diagnostics__details">
             <div>
@@ -454,18 +430,18 @@
             <dd>{{ diagnostics.awaiting.retryPending }}</dd>
           </div>
         </dl>
-      </section>
+      </app-collapsible-section>
     }
 
-    <app-failed-jobs-panel></app-failed-jobs-panel>
+    <!--
+      Each panel draws its own section, so it is given its own colour: one
+      that differs from the sections on either side of it.
+    -->
+    <app-failed-jobs-panel class="accent-cool"></app-failed-jobs-panel>
 
-    <section
-      class="admin-section"
-      aria-labelledby="scan-rejections-heading">
-      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-        <span id="scan-rejections-heading">Refused uploads</span>
-      </div>
-
+    <app-collapsible-section
+      heading="Refused uploads"
+      barClass="small-lcars-bar-gap">
       <p>
         Why each upload was refused, and with what: the rejection code and the
         engine, never what matched. The uploader is only told it was not
@@ -475,7 +451,7 @@
       <form
         class="scan-diagnostics__lookup"
         (submit)="$event.preventDefault(); lookUp(assetId.value)">
-        <div class="lcars-input-container sunflower">
+        <div class="lcars-input-container">
           <label for="scan-asset-id">Look up an asset by its ID</label>
           <input
             #assetId
@@ -486,7 +462,7 @@
         </div>
         <button
           type="submit"
-          class="lcars-btn sunflower">
+          class="lcars-btn">
           Look up
         </button>
       </form>
@@ -645,14 +621,18 @@
           }
         }
       }
-    </section>
+    </app-collapsible-section>
 
-    <app-rescan-panel></app-rescan-panel>
+    <app-rescan-panel class="accent-perano"></app-rescan-panel>
 
-    <app-image-estate-panel></app-image-estate-panel>
+    <app-image-estate-panel class="accent-orange"></app-image-estate-panel>
 
-    <p>
-      <a [routerLink]="adminLink">Back to Admin</a>
-    </p>
+    <div class="scan-diagnostics__back">
+      <a
+        class="lcars-btn lcars-btn-auto"
+        [routerLink]="adminLink"
+        >Back to Admin</a
+      >
+    </div>
   </div>
 </div>

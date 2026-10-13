@@ -1,29 +1,14 @@
 @use 'lcars-variables' as vars;
-@use 'lcars-mixins' as mixins;
 
 // The site features' master switches (FC-045), under Operations on the Admin
-// page beside the publication pause, in the same card with the Operations
-// band's sunflower spine. Each feature's own spine is green while it is on.
+// page beside the publication pause: an LCARS panel in the colour the
+// Operations panels give it. Each feature's own spine is green while it is on.
 .feature-switches {
-  @include mixins.lcars-card;
-
   max-width: 42rem;
   margin: 0 0 1.5rem;
-  padding: 0.75rem 1rem 1rem;
-  border-left: 4px solid vars.$lcars-sunflower;
 
   p {
     max-width: none;
-  }
-
-  &__heading {
-    margin: 0 0 0.25rem;
-    font-family: vars.$font-antonio;
-    font-size: 1.1rem;
-    font-weight: normal;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: vars.$lcars-sunflower;
   }
 
   &__message {
@@ -58,7 +43,7 @@
     font-weight: normal;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: vars.$lcars-sunflower;
+    color: var(--lcars-accent, #{vars.$lcars-sunflower});
   }
 
   &__state {
@@ -75,7 +60,7 @@
       font-family: vars.$font-antonio;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: vars.$lcars-sunflower;
+      color: var(--lcars-accent, #{vars.$lcars-sunflower});
     }
 
     dd {
@@ -89,7 +74,7 @@
     font-family: vars.$font-antonio;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: vars.$lcars-sunflower;
+    color: var(--lcars-accent, #{vars.$lcars-sunflower});
   }
 
   &__flags {

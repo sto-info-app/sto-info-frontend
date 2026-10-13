@@ -1,0 +1,4 @@
+// The column is a column of the page's own layout, so its host takes no box.
+:host {
+  display: contents;
+}

@@ -33,6 +33,7 @@ import {
 import { NotificationService } from 'src/app/notifications/notification.service';
 import { AdminUserSearchService } from '../admin-user-search.service';
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /**
  * Admin compose form for broadcast or per-user notifications. Sent notifications
@@ -53,6 +54,7 @@ import { UserSettingsService } from 'src/app/dashboard/services/user-settings.se
     MatDialogModule,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class NotificationAdminSendComponent implements OnInit {

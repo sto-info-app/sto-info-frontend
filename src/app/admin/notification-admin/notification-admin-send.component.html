@@ -24,129 +24,116 @@
       [formGroup]="form"
       (ngSubmit)="send()"
       class="admin-form">
-      <section class="admin-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Compose Notification</span>
-        </div>
-
-        <div class="admin-panel">
-          <div class="form-row compact">
-            <div class="lcars-select-container sunflower">
-              <label
-                class="select-label"
-                for="notification-target-select"
-                >Audience</label
-              >
-              <select
-                id="notification-target-select"
-                title="Audience"
-                formControlName="target">
-                @for (target of targets; track target) {
-                  <option [value]="target">
-                    {{
-                      target === notificationTarget.BROADCAST
-                        ? 'Everyone'
-                        : 'Single user'
-                    }}
-                  </option>
-                }
-              </select>
-            </div>
-
-            <div class="lcars-select-container tangerine">
-              <label
-                class="select-label"
-                for="notification-severity-select"
-                >Severity</label
-              >
-              <select
-                id="notification-severity-select"
-                title="Severity"
-                formControlName="severity">
-                @for (severity of severities; track severity) {
-                  <option [value]="severity">{{ severityLabels[severity] }}</option>
-                }
-              </select>
-            </div>
+      <app-collapsible-section
+        heading="Compose Notification"
+        barClass="small-lcars-bar-gap">
+        <div class="admin-fields lcars-rotate">
+          <div class="lcars-select-container">
+            <label
+              class="select-label"
+              for="notification-target-select"
+              >Audience</label
+            >
+            <select
+              id="notification-target-select"
+              title="Audience"
+              formControlName="target">
+              @for (target of targets; track target) {
+                <option [value]="target">
+                  {{
+                    target === notificationTarget.BROADCAST
+                      ? 'Everyone'
+                      : 'Single user'
+                  }}
+                </option>
+              }
+            </select>
+          </div>
+          <div class="lcars-select-container">
+            <label
+              class="select-label"
+              for="notification-severity-select"
+              >Severity</label
+            >
+            <select
+              id="notification-severity-select"
+              title="Severity"
+              formControlName="severity">
+              @for (severity of severities; track severity) {
+                <option [value]="severity">{{ severityLabels[severity] }}</option>
+              }
+            </select>
           </div>
 
           @if (isUserTarget) {
-            <div class="form-row">
-              <div class="lcars-input-container bluey admin-field-full">
-                <label>Recipient</label>
-                <div class="field-picker">
-                  @if (selectedUser) {
-                    <div class="field-picker__identity">
-                      <p class="field-picker__name">{{ recipientName }}</p>
-                      @if (recipientRealName) {
-                        <p
-                          class="field-picker__meta"
-                          [class.privacy-blur]="privacyMode.isEnabled()">
-                          {{ recipientRealName }}
-                        </p>
-                      }
-                    </div>
-                  } @else {
-                    <p class="field-picker__empty">Nobody chosen yet.</p>
-                  }
-                  <button
-                    type="button"
-                    class="lcars-btn lcars-btn-auto bluey field-picker__btn"
-                    (click)="openUserPicker()">
-                    {{ selectedUser ? 'Change recipient' : 'Search and select' }}
-                  </button>
-                </div>
-                @if (
-                  form.controls.userId.touched && form.controls.userId.invalid
-                ) {
-                  <small class="field-error"
-                    >Choose who this notification goes to.</small
-                  >
+            <div class="lcars-input-container admin-field-full">
+              <span class="lcars-input-label">Recipient</span>
+              <div class="field-picker">
+                @if (selectedUser) {
+                  <div class="field-picker__identity">
+                    <p class="field-picker__name">{{ recipientName }}</p>
+                    @if (recipientRealName) {
+                      <p
+                        class="field-picker__meta"
+                        [class.privacy-blur]="privacyMode.isEnabled()">
+                        {{ recipientRealName }}
+                      </p>
+                    }
+                  </div>
+                } @else {
+                  <p class="field-picker__empty">Nobody chosen yet.</p>
                 }
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto field-picker__btn"
+                  (click)="openUserPicker()">
+                  {{ selectedUser ? 'Change recipient' : 'Search and select' }}
+                </button>
               </div>
+              @if (
+                form.controls.userId.touched && form.controls.userId.invalid
+              ) {
+                <small class="field-error"
+                  >Choose who this notification goes to.</small
+                >
+              }
             </div>
           }
 
-          <div class="form-row">
-            <div class="lcars-input-container perano admin-field-full">
-              <label for="notification-title-input">Title</label>
-              <input
-                id="notification-title-input"
-                type="text"
-                formControlName="title"
-                maxlength="160" />
-              @if (form.controls.title.touched && form.controls.title.invalid) {
-                <small class="field-error">A title is required.</small>
-              }
-            </div>
+          <div class="lcars-input-container admin-field-full">
+            <label for="notification-title-input">Title</label>
+            <input
+              id="notification-title-input"
+              type="text"
+              formControlName="title"
+              maxlength="160" />
+            @if (form.controls.title.touched && form.controls.title.invalid) {
+              <small class="field-error">A title is required.</small>
+            }
           </div>
 
-          <div class="form-row">
-            <div class="lcars-input-container gold admin-field-full">
-              <label for="notification-body-input">Body</label>
-              <textarea
-                id="notification-body-input"
-                formControlName="body"
-                rows="4"
-                maxlength="2000"></textarea>
-              @if (form.controls.body.touched && form.controls.body.invalid) {
-                <small class="field-error">A body is required.</small>
-              }
-            </div>
+          <div class="lcars-input-container admin-field-full">
+            <label for="notification-body-input">Body</label>
+            <textarea
+              id="notification-body-input"
+              formControlName="body"
+              rows="4"
+              maxlength="2000"></textarea>
+            @if (form.controls.body.touched && form.controls.body.invalid) {
+              <small class="field-error">A body is required.</small>
+            }
           </div>
 
-          <div class="form-row">
-            <div class="lcars-input-container bluey admin-field-full">
-              <label for="notification-link-input">Link URL</label>
-              <input
-                id="notification-link-input"
-                type="url"
-                formControlName="linkUrl"
-                maxlength="2048" />
-            </div>
+          <div class="lcars-input-container admin-field-full">
+            <label for="notification-link-input">Link URL</label>
+            <input
+              id="notification-link-input"
+              type="url"
+              formControlName="linkUrl"
+              maxlength="2048" />
           </div>
         </div>
-      </section>
+      </app-collapsible-section>
 
       <div class="admin-form-actions">
         <button
@@ -165,12 +152,12 @@
     </div>
     <div class="buttons">
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_NOTIFICATIONS"
         >Sent notifications</a
       >
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN"
         >Admin home</a
       >

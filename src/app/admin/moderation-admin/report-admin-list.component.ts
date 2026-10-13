@@ -9,9 +9,12 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
+import {
+  AdminReasonPrompt,
+  AdminReasonRequest,
+} from 'src/app/admin/admin-reason-prompt';
 import { Observable, finalize, take } from 'rxjs';
 import {
-  ADMIN_REASON_MAX_LENGTH,
   ModeratedUser,
   REPORT_REASON_LABELS,
   REPORT_STATUS_LABELS,
@@ -33,6 +36,8 @@ import {
 import { ModerationHoldAdminService } from './moderation-hold-admin.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 const PAGE_SIZE = 20;
 const LOAD_TIMEOUT_MS = 12000;
@@ -66,6 +71,8 @@ type StatusFilter = ReportStatus | 'ALL';
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
+    CollapsibleSectionComponent,
+    LcarsPanelComponent,
   ],
 })
 export class ReportAdminListComponent implements OnInit {
@@ -74,6 +81,7 @@ export class ReportAdminListComponent implements OnInit {
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _dialog = inject(MatDialog);
+  private readonly _reasons = new AdminReasonPrompt();
 
   appRoutes = APP_ROUTES;
   reportStatus = ReportStatus;
@@ -190,6 +198,7 @@ export class ReportAdminListComponent implements OnInit {
           `Dismiss the report about ${this.reportedName(report)}? The ` +
           'report is closed with no action taken. Neither member is told.',
         confirmText: 'Dismiss',
+        confirmTone: 'refuse',
       },
       reason =>
         this.setStatus(
@@ -248,6 +257,7 @@ export class ReportAdminListComponent implements OnInit {
           'sign in again, their record leaves the registry, and every open ' +
           'report about them is closed as actioned. They are not told why.',
         confirmText: 'Disable',
+        confirmTone: 'refuse',
       },
       reason =>
         this.runAction(
@@ -420,24 +430,12 @@ export class ReportAdminListComponent implements OnInit {
    * @param onConfirm - Invoked with the reason, trimmed.
    */
   private askReason(
-    data: { title: string; message: string; confirmText: string },
+    data: AdminReasonRequest,
     onConfirm: (reason: string) => void,
   ): void {
-    this._dialog
-      .open<
-        GovernanceReasonDialogComponent,
-        GovernanceReasonDialogData,
-        string
-      >(GovernanceReasonDialogComponent, {
-        width: '75%',
-        data: { ...data, label: 'Reason', max: ADMIN_REASON_MAX_LENGTH },
-      })
-      .afterClosed()
-      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
-      .subscribe(reason => {
-        if (reason) {
-          onConfirm(reason);
-        }
-      });
+    this._reasons
+      .ask(data)
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe(onConfirm);
   }
 }

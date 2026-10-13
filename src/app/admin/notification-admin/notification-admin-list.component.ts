@@ -27,6 +27,7 @@ import {
   SEVERITY_META,
 } from 'src/app/shared/constants/notifications.constants';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /**
  * Admin listing of previously sent notifications, rendered with the same card
@@ -47,6 +48,7 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class NotificationAdminListComponent implements OnInit {

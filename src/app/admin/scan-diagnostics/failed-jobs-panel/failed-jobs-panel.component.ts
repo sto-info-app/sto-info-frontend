@@ -1,21 +1,13 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   inject,
-  OnInit,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MatDialog } from '@angular/material/dialog';
 
-import { Observable, take } from 'rxjs';
+import { take } from 'rxjs';
 
-import {
-  GovernanceReasonDialogComponent,
-  GovernanceReasonDialogData,
-} from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
 import {
   DiscardUnretryableResult,
   FAILED_JOB_QUEUE_LABELS,
@@ -27,10 +19,15 @@ import {
   NOT_RETRYABLE_LABELS,
   RetryAllResult,
 } from 'src/app/models/failed-jobs.models';
-import { ADMIN_REASON_MAX_LENGTH } from 'src/app/models/moderation.models';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
+import {
+  ScanDiagnosticsPanelDirective,
+  serverMessageOf,
+} from '../scan-diagnostics-panel.directive';
+
 import { FailedJobsAdminService } from './failed-jobs-admin.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /** What the panel is showing. */
 export type FailedJobsState =
@@ -44,29 +41,9 @@ export interface FailedJobQueueChoice {
   readonly label: string;
 }
 
-/** What to say when an action fails and the server gave no reason. */
-export const FAILED_JOB_ACTION_ERROR =
-  'That could not be done. Please try again.';
-
 /** What to say when the list cannot be read and the server gave no reason. */
 export const FAILED_JOBS_READ_ERROR =
   'The failed jobs could not be read. The queues may be unreachable.';
-
-/**
- * The message the server gave with a refusal, such as a 409's reason or a
- * 503's "The job queues cannot be reached.".
- *
- * @param error - What the request failed with.
- * @returns The server's message, or undefined when it gave none.
- */
-export function serverMessageOf(error: unknown): string | undefined {
-  const said =
-    error instanceof HttpErrorResponse
-      ? (error.error as { message?: unknown } | null)?.message
-      : undefined;
-
-  return typeof said === 'string' ? said : undefined;
-}
 
 /**
  * Counts something in words: "1 job", "3 jobs".
@@ -135,13 +112,14 @@ export function discardOutcome(result: DiscardUnretryableResult): string {
     './failed-jobs-panel.component.scss',
   ],
   standalone: true,
-  imports: [AppDatePipe],
+  imports: [AppDatePipe, CollapsibleSectionComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FailedJobsPanelComponent implements OnInit {
+export class FailedJobsPanelComponent extends ScanDiagnosticsPanelDirective {
   private readonly _failedJobs = inject(FailedJobsAdminService);
-  private readonly _dialog = inject(MatDialog);
-  private readonly _destroyRef = inject(DestroyRef);
+
+  /** A refusal usually means the list is out of date, so it is read again. */
+  protected override readonly _reloadsAfterFailure = true;
 
   readonly queues: readonly FailedJobQueueChoice[] = FAILED_JOB_QUEUES.map(
     value => ({ value, label: FAILED_JOB_QUEUE_LABELS[value] }),
@@ -150,20 +128,11 @@ export class FailedJobsPanelComponent implements OnInit {
   readonly state = signal<FailedJobsState>({ kind: 'LOADING' });
   readonly queue = signal<FailedJobQueue | null>(null);
   readonly pageNumber = signal(1);
-  readonly message = signal<string | null>(null);
-  readonly failure = signal<string | null>(null);
-
-  /**
-   * Reads the failed jobs on arrival.
-   */
-  ngOnInit(): void {
-    this.load();
-  }
 
   /**
    * Reads the page of failed jobs asked for, afresh.
    */
-  load(): void {
+  override load(): void {
     this.state.set({ kind: 'LOADING' });
     this._failedJobs
       .list(this.queue(), this.pageNumber())
@@ -308,6 +277,7 @@ export class FailedJobsPanelComponent implements OnInit {
           this._failedJobs.discard(job.queue, job.jobId, reason),
           () => 'Discarded.',
         ),
+      'refuse',
     );
   }
 
@@ -346,6 +316,7 @@ export class FailedJobsPanelComponent implements OnInit {
           this._failedJobs.discardUnretryable(queue, reason),
           discardOutcome,
         ),
+      'refuse',
     );
   }
 
@@ -359,65 +330,5 @@ export class FailedJobsPanelComponent implements OnInit {
     return queue === null
       ? 'in every queue'
       : `in ${FAILED_JOB_QUEUE_LABELS[queue]}`;
-  }
-
-  /**
-   * Sends an action, says how it went and reads the list again.
-   *
-   * @param action - The request.
-   * @param success - Says what it came to.
-   */
-  private run<T>(action: Observable<T>, success: (result: T) => string): void {
-    this.message.set(null);
-    this.failure.set(null);
-    action.pipe(take(1), takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: result => {
-        this.message.set(success(result));
-        this.load();
-      },
-      error: (error: unknown) => {
-        this.failure.set(serverMessageOf(error) ?? FAILED_JOB_ACTION_ERROR);
-        this.load();
-      },
-    });
-  }
-
-  /**
-   * Asks why, and goes on with the reason once one is given. The reason is
-   * kept in the site admin log.
-   *
-   * @param title - The dialog's title.
-   * @param message - What is about to happen.
-   * @param confirmText - The button.
-   * @param onConfirm - Invoked with the reason.
-   */
-  private askReason(
-    title: string,
-    message: string,
-    confirmText: string,
-    onConfirm: (reason: string) => void,
-  ): void {
-    this._dialog
-      .open<
-        GovernanceReasonDialogComponent,
-        GovernanceReasonDialogData,
-        string
-      >(GovernanceReasonDialogComponent, {
-        width: '75%',
-        data: {
-          title,
-          message,
-          label: 'Reason',
-          confirmText,
-          max: ADMIN_REASON_MAX_LENGTH,
-        },
-      })
-      .afterClosed()
-      .pipe(take(1), takeUntilDestroyed(this._destroyRef))
-      .subscribe(reason => {
-        if (reason) {
-          onConfirm(reason);
-        }
-      });
   }
 }

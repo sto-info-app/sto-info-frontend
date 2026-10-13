@@ -21,6 +21,7 @@ import {
   UpdateBannerRequest,
 } from 'src/app/models/notification.models';
 import { NotificationService } from 'src/app/notifications/notification.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /** Maximum number of characters allowed in a banner message. */
 export const BANNER_MESSAGE_MAX_LENGTH = 2000;
@@ -40,6 +41,7 @@ export const BANNER_MESSAGE_MAX_LENGTH = 2000;
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsToggleComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class BannerAdminFormComponent implements OnInit {

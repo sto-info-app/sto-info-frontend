@@ -18,20 +18,17 @@
         [message]="errorMessage"></app-lcars-error-message>
     }
 
-    <section class="admin-section">
-      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-        <span>Banner List</span>
-        <div class="admin-section-actions">
-          <a
-            class="cta-icon"
-            [routerLink]="'/' + appRoutes.ADMIN_BANNERS_ADD"
-            title="New banner"
-            aria-label="New banner"
-          ><i class="fas fa-plus"></i
-          ></a>
-        </div>
-      </div>
-
+    <app-collapsible-section
+      heading="Banner List"
+      barClass="small-lcars-bar-gap">
+      <a
+        sectionActions
+        class="cta-icon"
+        [routerLink]="'/' + appRoutes.ADMIN_BANNERS_ADD"
+        title="New banner"
+        aria-label="New banner"
+      ><i class="fas fa-plus"></i
+      ></a>
       @if (!isLoading && banners.length === 0) {
         <p class="records-empty">No banners created yet.</p>
       }
@@ -139,7 +136,7 @@
           }
         </div>
       }
-    </section>
+    </app-collapsible-section>
   </div>
 
   <div class="admin-side-column col">
@@ -148,12 +145,12 @@
     </div>
     <div class="buttons">
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_BANNERS_ADD"
         >New banner</a
       >
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN"
         >Admin home</a
       >

@@ -63,6 +63,7 @@ describe('switchCopy (FC-045)', () => {
         'Within ten seconds Fleet Communities is open to everybody, as far ' +
         'as the capability flags beneath it allow.',
       confirmText: 'Switch on',
+      confirmTone: 'accept',
     });
   });
 
@@ -75,6 +76,7 @@ describe('switchCopy (FC-045)', () => {
         'deleted, and switching it on again brings it all back. Uploads are ' +
         'still scanned and published.',
       confirmText: 'Switch off',
+      confirmTone: 'refuse',
     });
   });
 });
@@ -154,7 +156,7 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
     const fleet = feature('FLEET_COMMUNITIES');
     const storytime = feature('STORYTIME');
 
-    expect(fleet.querySelector('h3')?.textContent?.trim()).toBe(
+    expect(fleet.querySelector('h4')?.textContent?.trim()).toBe(
       'Fleet Communities',
     );
     expect(words(fleet.querySelector('.feature-switches__state')!)).toBe('Off');
@@ -216,7 +218,7 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
       true,
       'Accepted for release',
     );
-    expect(element().querySelector('[role="status"]')?.textContent).toContain(
+    expect(element().querySelector('output')?.textContent).toContain(
       'Fleet Communities switched on.',
     );
     expect(button('Switch Fleet Communities off')).not.toBeNull();
@@ -251,7 +253,7 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
     await fixture.whenStable();
 
     expect(switches.set).not.toHaveBeenCalled();
-    expect(element().querySelector('[role="status"]')).toBeNull();
+    expect(element().querySelector('output')).toBeNull();
   });
 
   it('shows the server’s reason when it refuses, and reads the switches again', async () => {
@@ -321,7 +323,7 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
     await fixture.whenStable();
 
     expect(text()).toContain('The feature switches could not be read.');
-    expect(element().querySelector('[role="status"]')?.textContent).toContain(
+    expect(element().querySelector('output')?.textContent).toContain(
       'Fleet Communities switched on.',
     );
     expect(button('Switch Fleet Communities off')).toBeNull();

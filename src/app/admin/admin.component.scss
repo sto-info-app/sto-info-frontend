@@ -1,42 +1,5 @@
-@use 'sass:color';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
-
-// The colour each card carries, in the order the page reads. The content
-// pages are the cool half of the palette and the community pages the warm
-// half, so the two bands stay apart at a glance the way they did when this
-// page was one long grid. Every one of these is light enough to carry black
-// text on the name block, which is how LCARS labels are set everywhere else.
-$admin-landing-colours: (
-  'news': vars.$lcars-cool,
-  'banners': vars.$lcars-perano,
-  'notifications': vars.$lcars-green,
-  // Red for the report queues — this site's and Storytime's — because they
-  // are the ones with somebody waiting on them, taken light enough to carry
-  // black text the way every other name block here does. The two are the same
-  // job on either side of the site, so they are the same colour.
-  'reports': color.adjust(vars.$lcars-red, $lightness: 10%),
-  'moderation': color.adjust(vars.$lcars-red, $lightness: 10%),
-  'members': vars.$lcars-tangerine,
-  // With the moderation queues it is reached from: somebody is waiting on it.
-  'erasures': color.adjust(vars.$lcars-red, $lightness: 10%),
-  // Violet is the one colour here that will not carry black text at the size
-  // these names are set in. Taken a shade lighter it clears the contrast the
-  // rest of the site holds to and is still recognisably violet.
-  'permissions': color.adjust(vars.$lcars-violet, $lightness: 10%),
-  // Storytime's own management cards, in the colours they carry on the
-  // Storytime landing page. An administrator who runs both sees the same card
-  // in both places, and the colour is part of what says it is the same card.
-  'manage-spotlight': vars.$lcars-gold,
-  'tags': vars.$lcars-c48,
-  // Operations, which has a band of its own. Sunflower is taken by nothing
-  // else here and carries black text.
-  'scan-diagnostics': vars.$lcars-sunflower,
-  // The record of what admins did sits with the scanner's in Operations.
-  // Perano is otherwise only the banners' card, a band away, and carries
-  // black text.
-  'security-log': vars.$lcars-perano,
-);
 
 #admin-page {
   max-width: 72rem;
@@ -71,9 +34,16 @@ $admin-landing-colours: (
       padding: 0;
       list-style: none;
 
-      // The spine, in the card's own colour. Named here so a card without one
-      // still has an edge rather than a gap where an edge should be.
-      border-left: 4px solid vars.$lcars-grey-border;
+      // The spine, a shade darker than the card's name block. The grid
+      // rotates through the palette (Steve's decision of 12 October 2026), so
+      // a card's colour comes from where it sits rather than from a colour of
+      // its own; grey is only for a card that sits outside the rotation.
+      border-left: 4px solid
+        color-mix(
+          in srgb,
+          var(--lcars-accent, #{vars.$lcars-grey-border}) 72%,
+          #{vars.$lcars-black}
+        );
     }
 
     // The panel is the link rather than something with a link in it: the whole
@@ -88,8 +58,20 @@ $admin-landing-colours: (
       text-decoration: none;
 
       &:focus-visible {
-        outline: 2px solid vars.$lcars-perano;
+        outline: 2px solid var(--lcars-accent, #{vars.$lcars-perano});
         outline-offset: 2px;
+      }
+
+      // The card lifts on hover from the shared card mixin; the block
+      // brightens with it, so the thing under the pointer is the thing that
+      // answers.
+      &:hover .admin-landing__name,
+      &:focus-visible .admin-landing__name {
+        background: color-mix(
+          in srgb,
+          var(--lcars-accent, #{vars.$lcars-grey-border}) 85%,
+          #{vars.$lcars-white}
+        );
       }
     }
   }
@@ -102,10 +84,18 @@ $admin-landing-colours: (
     letter-spacing: 0.04em;
     text-transform: uppercase;
 
-    // Until a card says which colour it is. A name is unreadable on a
-    // background that never arrived, so the fallback is a real block.
-    background: vars.$lcars-grey-border;
-    color: vars.$lcars-white;
+    // The card's place in the rotation. Every colour in it carries black
+    // text, which is how LCARS labels are set everywhere else.
+    background: var(--lcars-accent, #{vars.$lcars-grey-border});
+    color: vars.$lcars-black;
+  }
+
+  // The publication pause and the feature switches, beneath the Operations
+  // cards.
+  &__operations {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 
   &__summary {
@@ -113,30 +103,5 @@ $admin-landing-colours: (
     padding: 0.6rem 1rem 0.75rem;
     max-width: none;
     font-size: 0.9rem;
-  }
-}
-
-// Scoped to the list rather than named on their own: the card's shape is set
-// at `.admin-landing__panels li`, which is a class and an element, and a lone
-// modifier class is not heard over it.
-@each $name, $colour in $admin-landing-colours {
-  .admin-landing__panels .admin-landing__card--#{$name} {
-    border-left-color: color.adjust($colour, $lightness: -18%);
-
-    .admin-landing__name {
-      background: $colour;
-      color: vars.$lcars-black;
-    }
-
-    // The card lifts on hover from the shared card mixin; the block brightens
-    // with it, so the thing under the pointer is the thing that answers.
-    a:hover .admin-landing__name,
-    a:focus-visible .admin-landing__name {
-      background: color.adjust($colour, $lightness: 10%);
-    }
-
-    a:focus-visible {
-      outline-color: $colour;
-    }
   }
 }

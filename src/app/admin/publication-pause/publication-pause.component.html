@@ -1,15 +1,10 @@
 @let current = state();
-<section
+@let paused = current.kind === 'READY' && current.pause.paused;
+<app-lcars-panel
   class="publication-pause"
-  [class.publication-pause--paused]="
-    current.kind === 'READY' && current.pause.paused
-  "
-  aria-labelledby="publication-pause-heading">
-  <h2
-    id="publication-pause-heading"
-    class="publication-pause__heading">
-    Publication
-  </h2>
+  heading="Publication"
+  [class.publication-pause--paused]="paused"
+  [class.accent-red]="paused">
   <app-help-link
     slug="site-admin-scanning"
     label="Help with pausing publication" />
@@ -19,10 +14,8 @@
   </p>
 
   @if (message(); as done) {
-    <p
-      class="publication-pause__message"
-      role="status">
-      {{ done }}
+    <p class="publication-pause__message">
+      <output>{{ done }}</output>
     </p>
   }
   @if (failure(); as problem) {
@@ -43,7 +36,7 @@
       </p>
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto sunflower"
+        class="lcars-btn lcars-btn-auto"
         (click)="load()">
         Try again
       </button>
@@ -105,4 +98,4 @@
       </button>
     }
   }
-</section>
+</app-lcars-panel>

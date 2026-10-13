@@ -1,10 +1,6 @@
-<section
-  class="admin-section"
-  aria-labelledby="failed-jobs-heading">
-  <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-    <span id="failed-jobs-heading">Failed jobs</span>
-  </div>
-
+<app-collapsible-section
+  heading="Failed jobs"
+  barClass="small-lcars-bar-gap">
   <p>
     Background jobs that ran out of attempts, queue by queue, newest failure
     first. Each shows internal IDs and a reason code only, never what the job
@@ -14,10 +10,8 @@
   </p>
 
   @if (message(); as done) {
-    <p
-      class="image-estate__message"
-      role="status">
-      {{ done }}
+    <p class="image-estate__message">
+      <output>{{ done }}</output>
     </p>
   }
   @if (failure(); as problem) {
@@ -39,7 +33,7 @@
       </p>
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto sunflower"
+        class="lcars-btn lcars-btn-auto"
         (click)="load()">
         Try again
       </button>
@@ -49,7 +43,7 @@
   @if (current.kind === 'READY') {
     @let list = current.page;
 
-    <div class="lcars-select-container sunflower failed-jobs__queue">
+    <div class="lcars-select-container failed-jobs__queue">
       <label for="failed-jobs-queue">Queue</label>
       <select
         id="failed-jobs-queue"
@@ -174,4 +168,4 @@
       </div>
     }
   }
-</section>
+</app-collapsible-section>

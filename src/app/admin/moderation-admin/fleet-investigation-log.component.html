@@ -77,35 +77,15 @@
       </table>
 
       @if (pageCount() > 1) {
-        <div class="lcars-pagination">
-          <button
-            type="button"
-            [disabled]="page() <= 1"
-            (click)="turn(-1)">
-            Newer
-          </button>
-          <span>Page {{ page() }} of {{ pageCount() }}</span>
-          <button
-            type="button"
-            [disabled]="page() >= pageCount()"
-            (click)="turn(1)">
-            Older
-          </button>
-        </div>
+        <app-lcars-pagination
+          previousLabel="Newer"
+          nextLabel="Older"
+          [page]="page()"
+          [pageCount]="pageCount()"
+          (turn)="turn($event)" />
       }
     }
   </div>
 
-  <div class="admin-side-column col">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      <a
-        class="full-width-btn-link sunflower"
-        [routerLink]="'/' + appRoutes.ADMIN"
-        >Admin home</a
-      >
-    </div>
-  </div>
+  <app-admin-side-navigation />
 </div>

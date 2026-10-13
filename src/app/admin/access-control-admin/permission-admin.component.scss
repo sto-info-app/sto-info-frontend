@@ -61,13 +61,13 @@
 
   .permission-code {
     font-size: 0.78rem;
-    color: rgb(255 255 255 / 62%);
+    color: vars.$white-a62;
     word-break: break-all;
   }
 
   .permission-description {
     margin: 0;
-    color: rgb(255 255 255 / 82%);
+    color: vars.$white-a82;
     line-height: 1.45;
   }
 
@@ -78,7 +78,7 @@
     margin: 0.35rem 0 0;
     padding: 0.6rem 0.75rem;
     border-radius: 4px;
-    background: rgb(255 255 255 / 6%);
+    background: vars.$white-a6;
   }
 
   .permission-row-actions {
@@ -95,12 +95,12 @@
   // is deciding whether to change something, so they must not share a colour.
   .status-pill.permission-role {
     background: vars.$lcars-perano;
-    color: #000;
+    color: vars.$a11y-black;
   }
 
   .status-pill.permission-granted {
     background: vars.$lcars-green;
-    color: #000;
+    color: vars.$a11y-black;
   }
 
   .status-pill.permission-denied {
@@ -108,14 +108,16 @@
     color: vars.$lcars-white;
   }
 
+  // Solid rather than see-through: the grey a 12% white wash made over the
+  // row on the page, so the pair's contrast (5.9:1) holds as written.
   .status-pill.permission-none {
-    background: rgb(255 255 255 / 12%);
-    color: rgb(255 255 255 / 78%);
+    background: vars.$lcars-grey-pill;
+    color: vars.$lcars-grey-light;
   }
 
   .field-hint {
     font-size: 0.75rem;
-    color: rgb(255 255 255 / 60%);
+    color: vars.$white-a60;
   }
 
   // The role picker is a decision about the whole account rather than one
@@ -124,7 +126,7 @@
   .role-note {
     margin: 0.25rem 0 0;
     font-size: 0.8rem;
-    color: rgb(255 255 255 / 72%);
+    color: vars.$white-a72;
   }
 
   // An administrator's role is read here and set elsewhere, so the panel says

@@ -28,14 +28,12 @@
         [message]="success"></app-lcars-success-message>
     }
 
-    <section class="admin-section">
-      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-        <span>Holds</span>
-      </div>
-
-      <div class="admin-panel">
-        <div class="form-row compact">
-          <div class="lcars-select-container sunflower">
+    <app-collapsible-section
+      heading="Holds"
+      barClass="small-lcars-bar-gap">
+      <app-lcars-panel heading="Filters">
+        <div class="admin-fields lcars-rotate">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="hold-filter"
@@ -55,7 +53,7 @@
             </select>
           </div>
         </div>
-      </div>
+      </app-lcars-panel>
 
       @if (!isLoading() && holds().length === 0) {
         <p class="records-empty">No holds match this filter.</p>
@@ -158,18 +156,18 @@
                         </li>
                       }
                     </ol>
-                    <div class="admin-form-actions">
+                    <div class="admin-form-actions lcars-rotate">
                       @if (reading.before) {
                         <button
                           type="button"
-                          class="lcars-btn sky"
+                          class="lcars-btn"
                           (click)="readEarlier(hold)">
                           Earlier
                         </button>
                       }
                       <button
                         type="button"
-                        class="lcars-btn sky"
+                        class="lcars-btn"
                         (click)="closeReading(hold)">
                         Put away
                       </button>
@@ -229,7 +227,7 @@
                 @if (!hold.releasedAt) {
                   <button
                     type="button"
-                    class="cta-icon"
+                    class="cta-icon approve-icon"
                     title="Extend"
                     aria-label="Extend"
                     (click)="extend(hold)">
@@ -249,7 +247,7 @@
           </article>
         }
       </div>
-    </section>
+    </app-collapsible-section>
   </div>
 
   <div class="admin-side-column col">
@@ -258,17 +256,17 @@
     </div>
     <div class="buttons">
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_CHAT_REPORTS"
         >Chat reports</a
       >
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_REPORTS"
         >Reported officers</a
       >
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN"
         >Admin home</a
       >

@@ -250,11 +250,17 @@ describe('RescanPanelComponent (FC-041)', () => {
     });
 
     it.each([
-      ['Take it down', 'TAKEN_DOWN', 'Taken down.', 'Take the picture down'],
-      ['Keep it', 'KEPT', 'Kept.', 'Keep the picture'],
+      [
+        'Take it down',
+        'TAKEN_DOWN',
+        'Taken down.',
+        'Take the picture down',
+        'refuse',
+      ],
+      ['Keep it', 'KEPT', 'Kept.', 'Keep the picture', 'accept'],
     ])(
       '%s, with the reason given, and reads the list again',
-      async (label, decision, done, title) => {
+      async (label, decision, done, title, confirmTone) => {
         await show();
 
         button(label)!.click();
@@ -262,7 +268,7 @@ describe('RescanPanelComponent (FC-041)', () => {
         expect(dialog.open).toHaveBeenCalledWith(
           GovernanceReasonDialogComponent,
           expect.objectContaining({
-            data: expect.objectContaining({ title }),
+            data: expect.objectContaining({ title, confirmTone }),
           }),
         );
         expect(rescans.decide).toHaveBeenCalledWith(

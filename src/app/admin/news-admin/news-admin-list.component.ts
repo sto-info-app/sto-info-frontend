@@ -23,6 +23,7 @@ import {
 } from 'src/app/models/news.models';
 import { NewsService } from 'src/app/news/news.service';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 const PAGE_SIZE = 20;
 const LOAD_TIMEOUT_MS = 12000;
@@ -43,6 +44,7 @@ const LOAD_TIMEOUT_MS = 12000;
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class NewsAdminListComponent implements OnInit {

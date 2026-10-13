@@ -23,6 +23,7 @@ import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 import { PublicationPauseAdminService } from './publication-pause-admin.service';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** What the control is showing. */
 export type PublicationPauseState =
@@ -94,11 +95,13 @@ const ACTIONS = {
       'until publication resumes. Every site admin is told if it stays ' +
       'paused for more than an hour.',
     confirmText: 'Pause publication',
+    confirmTone: 'refuse',
   },
   resume: {
     title: 'Resume publication',
     message: 'Everything held while it was paused publishes.',
     confirmText: 'Resume publication',
+    confirmTone: 'accept',
   },
 } as const;
 
@@ -115,7 +118,7 @@ const ACTIONS = {
   templateUrl: './publication-pause.component.html',
   styleUrls: ['./publication-pause.component.scss'],
   standalone: true,
-  imports: [AppDatePipe, HelpLinkComponent],
+  imports: [AppDatePipe, HelpLinkComponent, LcarsPanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublicationPauseComponent implements OnInit {
@@ -180,6 +183,7 @@ export class PublicationPauseComponent implements OnInit {
           message: copy.message,
           label: 'Reason',
           confirmText: copy.confirmText,
+          confirmTone: copy.confirmTone,
           max: ADMIN_REASON_MAX_LENGTH,
         },
       })

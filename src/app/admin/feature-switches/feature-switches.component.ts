@@ -22,6 +22,7 @@ import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 import { FeatureSwitchesAdminService } from './feature-switches-admin.service';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** What the panel is showing. */
 export type FeatureSwitchesState =
@@ -56,6 +57,7 @@ export function switchCopy(entry: FeatureSwitchState): {
   readonly title: string;
   readonly message: string;
   readonly confirmText: string;
+  readonly confirmTone: 'refuse' | 'accept';
 } {
   const { label } = entry;
 
@@ -68,6 +70,7 @@ export function switchCopy(entry: FeatureSwitchState): {
         'deleted, and switching it on again brings it all back. Uploads are ' +
         'still scanned and published.',
       confirmText: 'Switch off',
+      confirmTone: 'refuse',
     };
   }
 
@@ -77,6 +80,7 @@ export function switchCopy(entry: FeatureSwitchState): {
       `Within ten seconds ${label} is open to everybody, as far as the ` +
       'capability flags beneath it allow.',
     confirmText: 'Switch on',
+    confirmTone: 'accept',
   };
 }
 
@@ -106,7 +110,7 @@ export function switchOutcome(entry: FeatureSwitchState): string {
   templateUrl: './feature-switches.component.html',
   styleUrls: ['./feature-switches.component.scss'],
   standalone: true,
-  imports: [AppDatePipe, HelpLinkComponent],
+  imports: [AppDatePipe, HelpLinkComponent, LcarsPanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FeatureSwitchesComponent implements OnInit {
@@ -160,6 +164,7 @@ export class FeatureSwitchesComponent implements OnInit {
           message: copy.message,
           label: 'Reason',
           confirmText: copy.confirmText,
+          confirmTone: copy.confirmTone,
           max: ADMIN_REASON_MAX_LENGTH,
         },
       })

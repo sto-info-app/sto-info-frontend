@@ -11,13 +11,14 @@ import { RouterLink } from '@angular/router';
 
 import { take } from 'rxjs';
 
+import { AdminSideNavigationComponent } from 'src/app/admin/admin-side-navigation/admin-side-navigation.component';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
 import { FleetInvestigation } from 'src/app/models/fleet-governance.models';
 import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
+import { LcarsPaginationComponent } from 'src/app/shared/components/lcars-pagination/lcars-pagination.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /** A page of the log. */
@@ -35,9 +36,11 @@ const PAGE_SIZE = 20;
   styleUrls: ['../news-admin/news-admin.component.scss'],
   standalone: true,
   imports: [
+    AdminSideNavigationComponent,
     AppDatePipe,
     HelpLinkComponent,
     LcarsErrorMessageComponent,
+    LcarsPaginationComponent,
     LoadingBarComponent,
     RouterLink,
   ],
@@ -47,7 +50,6 @@ export class FleetInvestigationLogComponent {
   private readonly _governance = inject(FleetGovernanceService);
   private readonly _destroyRef = inject(DestroyRef);
 
-  readonly appRoutes = APP_ROUTES;
   readonly looks = signal<FleetInvestigation[]>([]);
   readonly total = signal(0);
   readonly page = signal(1);

@@ -18,20 +18,17 @@
         [message]="errorMessage"></app-lcars-error-message>
     }
 
-    <section class="admin-section">
-      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-        <span>Posts</span>
-        <div class="admin-section-actions">
-          <a
-            class="cta-icon"
-            [routerLink]="'/' + appRoutes.ADMIN_NEWS_ADD"
-            title="New post"
-            aria-label="New post"
-          ><i class="fas fa-plus"></i
-          ></a>
-        </div>
-      </div>
-
+    <app-collapsible-section
+      heading="Posts"
+      barClass="small-lcars-bar-gap">
+      <a
+        sectionActions
+        class="cta-icon"
+        [routerLink]="'/' + appRoutes.ADMIN_NEWS_ADD"
+        title="New post"
+        aria-label="New post"
+      ><i class="fas fa-plus"></i
+      ></a>
       @if (!isLoading && posts.length === 0) {
         <p class="records-empty">No posts yet. Create your first one.</p>
       }
@@ -86,7 +83,7 @@
                   @if (post.status === newsStatus.DRAFT) {
                     <button
                       type="button"
-                      class="cta-icon"
+                      class="cta-icon approve-icon"
                       (click)="publish(post)"
                       title="Publish post"
                       aria-label="Publish post"
@@ -107,7 +104,7 @@
           }
         </div>
       }
-    </section>
+    </app-collapsible-section>
   </div>
 
   <div class="admin-side-column col">
@@ -116,12 +113,12 @@
     </div>
     <div class="buttons">
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_NEWS_ADD"
         >New post</a
       >
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN"
         >Admin home</a
       >

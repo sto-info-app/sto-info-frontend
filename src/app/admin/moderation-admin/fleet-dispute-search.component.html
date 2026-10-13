@@ -23,43 +23,38 @@
         [message]="error"></app-lcars-error-message>
     }
 
-    <section class="admin-section">
-      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-        <span class="title-with-badge">
-          Communities
-          @if (total() > 0) {
-            <span class="header-count-badge">{{ total() }}</span>
-          }
-        </span>
-      </div>
-
-      <form
-        class="admin-panel"
-        role="search"
-        [formGroup]="form"
-        (ngSubmit)="find()">
-        <div class="form-row compact">
-          <div class="lcars-input-container bluey">
-            <label for="fleet-dispute-search-input"
-              >Search by name or web address</label
-            >
-            <input
-              id="fleet-dispute-search-input"
-              type="search"
-              formControlName="search"
-              [maxlength]="maxLength" />
+    <app-collapsible-section
+      heading="Communities"
+      barClass="small-lcars-bar-gap"
+      [badge]="total() > 0 ? total() : null">
+      <app-lcars-panel heading="Search">
+        <form
+          role="search"
+          [formGroup]="form"
+          (ngSubmit)="find()">
+          <div class="admin-fields lcars-rotate">
+            <div class="lcars-input-container admin-field-full">
+              <label for="fleet-dispute-search-input"
+                >Search by name or web address</label
+              >
+              <input
+                id="fleet-dispute-search-input"
+                type="search"
+                formControlName="search"
+                [maxlength]="maxLength" />
+            </div>
           </div>
-        </div>
 
-        <div class="admin-form-actions">
-          <button
-            type="submit"
-            class="lcars-btn green"
-            [disabled]="isLoading()">
-            Search
-          </button>
-        </div>
-      </form>
+          <div class="admin-form-actions">
+            <button
+              type="submit"
+              class="lcars-btn"
+              [disabled]="isLoading()">
+              Search
+            </button>
+          </div>
+        </form>
+      </app-lcars-panel>
 
       @if (!isLoading() && !errorMessage() && communities().length === 0) {
         <p class="records-empty">
@@ -125,7 +120,7 @@
           </div>
         }
       }
-    </section>
+    </app-collapsible-section>
   </div>
 
   <div class="admin-side-column col">
@@ -134,12 +129,12 @@
     </div>
     <div class="buttons">
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_FLEET_INVESTIGATIONS"
         >Fleet investigations</a
       >
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN"
         >Admin home</a
       >

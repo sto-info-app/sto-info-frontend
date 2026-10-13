@@ -23,6 +23,7 @@ import {
 import { SEVERITY_META } from 'src/app/shared/constants/notifications.constants';
 import { NotificationService } from 'src/app/notifications/notification.service';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 const LOAD_TIMEOUT_MS = 12000;
 
@@ -44,6 +45,7 @@ const LOAD_TIMEOUT_MS = 12000;
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class BannerAdminListComponent implements OnInit {

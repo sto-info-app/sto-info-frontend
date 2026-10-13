@@ -38,13 +38,16 @@
     mat-dialog-actions>
     <button
       type="button"
-      class="lcars-btn red"
+      class="lcars-btn"
+      [class.red]="isResolving"
       (click)="cancel()">
       Cancel
     </button>
     <button
       type="submit"
-      class="lcars-btn green"
+      class="lcars-btn"
+      [class.green]="isResolving"
+      [class.red]="!isResolving"
       [disabled]="!isValid()">
       {{ isResolving ? 'Resolve' : 'Dismiss' }}
     </button>

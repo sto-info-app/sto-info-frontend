@@ -27,19 +27,13 @@
         [message]="successMessage"></app-lcars-success-message>
     }
 
-    <section class="admin-section">
-      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-        <span class="title-with-badge">
-          Moderation Queue
-          @if (openCount > 0) {
-            <span class="header-count-badge">{{ openCount }}</span>
-          }
-        </span>
-      </div>
-
-      <div class="admin-panel">
-        <div class="form-row compact">
-          <div class="lcars-select-container sunflower">
+    <app-collapsible-section
+      heading="Moderation Queue"
+      barClass="small-lcars-bar-gap"
+      [badge]="openCount > 0 ? openCount : null">
+      <app-lcars-panel heading="Filters">
+        <div class="admin-fields lcars-rotate">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="report-status-filter"
@@ -56,7 +50,7 @@
             </select>
           </div>
 
-          <div class="lcars-input-container bluey">
+          <div class="lcars-input-container">
             <label for="report-search-input">Search by username</label>
             <input
               id="report-search-input"
@@ -70,13 +64,13 @@
         <div class="admin-form-actions">
           <button
             type="button"
-            class="lcars-btn green"
+            class="lcars-btn"
             [disabled]="isLoading"
             (click)="applyFilters()">
             Apply
           </button>
         </div>
-      </div>
+      </app-lcars-panel>
 
       @if (!isLoading && reports.length === 0) {
         <p class="records-empty">No reports match this filter.</p>
@@ -177,7 +171,7 @@
                   ) {
                     <button
                       type="button"
-                      class="cta-icon"
+                      class="cta-icon approve-icon"
                       (click)="markActioned(report)"
                       title="Close as actioned"
                       aria-label="Close as actioned"
@@ -185,7 +179,7 @@
                     ></button>
                     <button
                       type="button"
-                      class="cta-icon"
+                      class="cta-icon delete-icon"
                       (click)="dismiss(report)"
                       title="Dismiss report"
                       aria-label="Dismiss report"
@@ -205,7 +199,7 @@
                   @if (report.reported.isAccountDisabled) {
                     <button
                       type="button"
-                      class="cta-icon"
+                      class="cta-icon approve-icon"
                       (click)="enableReported(report)"
                       title="Restore this account"
                       aria-label="Restore this account"
@@ -227,7 +221,7 @@
           }
         </div>
       }
-    </section>
+    </app-collapsible-section>
   </div>
 
   <div class="admin-side-column col">
@@ -236,12 +230,12 @@
     </div>
     <div class="buttons">
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_USERS"
         >Manage members</a
       >
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN"
         >Admin home</a
       >

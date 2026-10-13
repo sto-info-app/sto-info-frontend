@@ -35,31 +35,45 @@
 
 .admin-page-intro {
   margin-bottom: 1rem;
-  color: rgb(255 255 255 / 76%);
+  color: vars.$white-a76;
 }
 
-.admin-section {
-  margin-top: 1.5rem;
-}
-
-.admin-section-header {
+// What an admin page's sections hold, once their bars became collapsible
+// sections (Steve's decision of 12 October 2026): the content sits under its
+// bar rather than in a dark box of its own.
+.admin-section-body {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 1rem;
 }
 
-.admin-section-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+// A form's or a filter's fields, two to a line, taking successive colours of
+// the palette (`lcars-rotate` beside this class). One container rather than a
+// row per pair, because the rotation counts the fields themselves: a field
+// that needs the whole line says so with `admin-field-full`.
+.admin-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+
+  > * {
+    min-width: 0;
+  }
+
+  .lcars-input-container,
+  .lcars-select-container {
+    margin: 0;
+  }
+
+  .admin-field-full {
+    grid-column: 1 / -1;
+  }
 }
 
-.admin-panel {
-  margin-top: 0.5rem;
-  padding: 1.25rem;
-  border-radius: 6px;
-  background: vars.$lcars-grey-bg;
+// A filter's or a search's buttons, under its fields.
+.admin-fields + .admin-form-actions,
+.admin-fields + .buttons-container {
+  margin-top: 1rem;
 }
 
 .admin-form {
@@ -68,29 +82,8 @@
   gap: 1.5rem;
 }
 
-.form-row {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-
-  .lcars-input-container,
-  .lcars-select-container,
-  .admin-toggle-card {
-    flex: 1;
-    min-width: 200px;
-  }
-}
-
-.form-row.compact .lcars-input-container,
-.form-row.compact .lcars-select-container {
-  min-width: 160px;
-}
-
-.admin-field-full {
-  width: 100%;
-}
-
 .admin-toggle-row {
+  grid-column: 1 / -1;
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
@@ -104,7 +97,7 @@
   padding: 0.95rem 1rem;
   border-left: 10px solid vars.$lcars-sunflower;
   border-radius: 4px;
-  background: rgb(255 255 255 / 6%);
+  background: vars.$white-a6;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -137,14 +130,14 @@
 .char-count {
   margin-left: auto;
   font-size: 0.75rem;
-  color: rgb(255 255 255 / 60%);
+  color: vars.$white-a60;
   font-variant-numeric: tabular-nums;
 }
 
 .markdown-preview {
   border-left: 10px solid color.adjust(vars.$lcars-perano, $lightness: -14%);
   border-radius: 0 18px 18px 0;
-  background: rgb(255 255 255 / 6%);
+  background: vars.$white-a6;
   padding: 1rem 1.25rem;
   margin-bottom: 0.5rem;
 
@@ -200,7 +193,7 @@
 
 .records-empty {
   margin: 1rem 0 0;
-  color: rgb(255 255 255 / 74%);
+  color: vars.$white-a74;
 }
 
 .admin-records {
@@ -214,8 +207,16 @@
 // pages, without adopting its border and resting shadow: an admin list is read
 // by running down it, and a row that answers the pointer makes the one being
 // worked on obvious.
+// A card takes the accent of the section it sits in, so a list reads in that
+// section's colour; a list whose colour means something - a news category, a
+// banner's severity, a member's role, a complaint - names its own below.
 .admin-record-card {
-  border-left: 10px solid color.adjust(vars.$lcars-sunflower, $lightness: -16%);
+  border-left: 10px solid
+    color-mix(
+      in srgb,
+      var(--lcars-accent, #{vars.$lcars-sunflower}) 80%,
+      #{vars.$lcars-black}
+    );
   border-radius: 6px;
   overflow: hidden;
   background: vars.$lcars-grey-bg;
@@ -225,7 +226,7 @@
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgb(0 0 0 / 50%);
+    box-shadow: 0 6px 12px vars.$black-a50;
   }
 }
 
@@ -245,8 +246,8 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.7rem 0.9rem;
-  background: vars.$lcars-sunflower;
-  color: #000;
+  background: var(--lcars-accent, #{vars.$lcars-sunflower});
+  color: vars.$a11y-black;
 }
 
 .admin-record-title {
@@ -262,7 +263,7 @@
   }
 
   span {
-    color: rgb(0 0 0 / 72%);
+    color: vars.$black-a72;
     font-size: 0.82rem;
   }
 }
@@ -282,7 +283,7 @@
   min-height: 30px;
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
-  background: rgb(0 0 0 / 18%);
+  background: vars.$black-a18;
   color: inherit;
   font-size: 0.75rem;
   font-weight: 700;
@@ -293,19 +294,19 @@
   &.active,
   &.success {
     background: vars.$lcars-perano;
-    color: #000;
+    color: vars.$a11y-black;
   }
 
   &.draft,
   &.inactive,
   &.warning {
     background: vars.$lcars-orange;
-    color: #000;
+    color: vars.$a11y-black;
   }
 
   &.info {
     background: vars.$lcars-perano;
-    color: #000;
+    color: vars.$a11y-black;
   }
 }
 
@@ -318,7 +319,7 @@
 
 .admin-record-summary {
   margin: 0;
-  color: rgb(255 255 255 / 82%);
+  color: vars.$white-a82;
   line-height: 1.5;
   white-space: pre-wrap;
 }
@@ -350,7 +351,7 @@
   }
 
   .value {
-    color: rgb(255 255 255 / 84%);
+    color: vars.$white-a84;
     overflow-wrap: anywhere;
   }
 }
@@ -362,10 +363,16 @@
   justify-content: center;
   gap: 0.6rem;
   padding-left: 1rem;
-  border-left: 1px solid rgb(255 255 255 / 10%);
+  border-left: 1px solid vars.$white-a10;
 
   .cta-icon {
     @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);
+  }
+
+  // Accepting answers in green, as removing answers in red: the two colours
+  // are kept for those (Steve's decision of 12 October 2026).
+  .approve-icon {
+    @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-green);
   }
 
   .delete-icon {
@@ -384,7 +391,7 @@
 
   .admin-record-header {
     background: vars.$lcars-grey-light;
-    color: #000;
+    color: vars.$a11y-black;
   }
 
   &.role-admin {
@@ -469,7 +476,7 @@
 .status-light {
   width: 0.8rem;
   height: 0.8rem;
-  border: 1px solid rgb(0 0 0 / 45%);
+  border: 1px solid vars.$black-a45;
   border-radius: 50%;
   flex-shrink: 0;
 
@@ -556,7 +563,7 @@
     align-items: center;
     gap: 0.4rem;
     font-size: 0.82rem;
-    color: rgb(255 255 255 / 70%);
+    color: vars.$white-a70;
 
     .news-admin-timestamp-icon {
       font-size: 0.78rem;
@@ -572,7 +579,7 @@
 
   .news-admin-summary {
     margin: 0;
-    color: rgb(255 255 255 / 82%);
+    color: vars.$white-a82;
     line-height: 1.5;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
@@ -620,7 +627,7 @@
 
   .banner-admin-message {
     margin: 0;
-    color: rgb(255 255 255 / 82%);
+    color: vars.$white-a82;
     line-height: 1.5;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
@@ -645,7 +652,7 @@
   }
 
   .banner-link-label {
-    color: rgb(255 255 255 / 84%);
+    color: vars.$white-a84;
   }
 
   .banner-link-url {
@@ -658,7 +665,7 @@
   }
 
   .admin-record-card {
-    border-left-color: #555;
+    border-left-color: vars.$lcars-grey-dark;
 
     &.severity-info {
       border-left-color: vars.$lcars-cool;
@@ -695,6 +702,10 @@
 }
 
 @media (width <= 768px) {
+  .admin-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .admin-layout {
     flex-direction: column;
     padding: 1rem;
@@ -714,7 +725,7 @@
     padding-left: 0;
     padding-top: 1rem;
     border-left: 0;
-    border-top: 1px solid rgb(255 255 255 / 10%);
+    border-top: 1px solid vars.$white-a10;
   }
 
   .admin-record-header {

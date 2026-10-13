@@ -104,24 +104,27 @@ describe('AdminComponent', () => {
     expect(component.getRouteLink('admin/news')).toBe('/admin/news');
   });
 
-  it('links to the permission overrides page', () => {
-    fixture.detectChanges();
-
-    const link: HTMLAnchorElement | null = fixture.nativeElement.querySelector(
-      'a[href="/admin/permissions"]',
-    );
-    expect(link?.textContent).toContain('Manage Permissions');
-  });
-
   // Steve's decision of 30 September 2026: a site administrator reaches any
-  // Community's dispute page, and this is the way in to a hidden one.
-  it('links to the Fleet disputes page (FC-050)', () => {
+  // Community's dispute page, and this is the way in to a hidden one (FC-050).
+  it.each([
+    [
+      'the permission overrides page',
+      '/admin/permissions',
+      'Manage Permissions',
+    ],
+    ['the Fleet disputes page', '/admin/fleet-disputes', 'Fleet Disputes'],
+    [
+      'the scan diagnostics page',
+      '/admin/scan-diagnostics',
+      'Scan Diagnostics',
+    ],
+  ])('links to %s', (_page, href, label) => {
     fixture.detectChanges();
 
     const link: HTMLAnchorElement | null = fixture.nativeElement.querySelector(
-      'a[href="/admin/fleet-disputes"]',
+      `a[href="${href}"]`,
     );
-    expect(link?.textContent).toContain('Fleet Disputes');
+    expect(link?.textContent).toContain(label);
   });
 
   // Steve's decision of 30 September 2026: the kill switch for publication
@@ -148,15 +151,6 @@ describe('AdminComponent', () => {
     expect(switches).not.toBeNull();
     expect(pause.nextElementSibling).toBe(switches);
     expect(element.textContent).toContain('Features');
-  });
-
-  it('links to the scan diagnostics page', () => {
-    fixture.detectChanges();
-
-    const link: HTMLAnchorElement | null = fixture.nativeElement.querySelector(
-      'a[href="/admin/scan-diagnostics"]',
-    );
-    expect(link?.textContent).toContain('Scan Diagnostics');
   });
 
   // The same cards the Storytime landing page offers. Everything else on this

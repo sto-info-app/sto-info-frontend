@@ -22,36 +22,36 @@
         [message]="error"></app-lcars-error-message>
     }
 
-    <section class="admin-section">
-      <div class="admin-panel">
-        <div class="form-row compact">
-          <div class="lcars-select-container sunflower">
-            <label
-              class="select-label"
-              for="security-log-source"
-              >Show</label
-            >
-            <select
-              id="security-log-source"
-              title="Show"
-              (change)="filter($any($event.target).value)">
+    <app-lcars-panel
+      heading="Filter"
+      [level]="2">
+      <div class="admin-fields lcars-rotate">
+        <div class="lcars-select-container">
+          <label
+            class="select-label"
+            for="security-log-source"
+            >Show</label
+          >
+          <select
+            id="security-log-source"
+            title="Show"
+            (change)="filter($any($event.target).value)">
+            <option
+              value=""
+              [selected]="source() === null">
+              Everything
+            </option>
+            @for (option of sources; track option) {
               <option
-                value=""
-                [selected]="source() === null">
-                Everything
+                [value]="option"
+                [selected]="option === source()">
+                {{ sourceLabels[option] }}
               </option>
-              @for (option of sources; track option) {
-                <option
-                  [value]="option"
-                  [selected]="option === source()">
-                  {{ sourceLabels[option] }}
-                </option>
-              }
-            </select>
-          </div>
+            }
+          </select>
         </div>
       </div>
-    </section>
+    </app-lcars-panel>
 
     @if (!isLoading() && entries().length === 0 && !errorMessage()) {
       <p class="records-empty">Nothing has been logged here yet.</p>
@@ -105,35 +105,15 @@
       </table>
 
       @if (pageCount() > 1) {
-        <div class="lcars-pagination">
-          <button
-            type="button"
-            [disabled]="page() <= 1"
-            (click)="turn(-1)">
-            Newer
-          </button>
-          <span>Page {{ page() }} of {{ pageCount() }}</span>
-          <button
-            type="button"
-            [disabled]="page() >= pageCount()"
-            (click)="turn(1)">
-            Older
-          </button>
-        </div>
+        <app-lcars-pagination
+          previousLabel="Newer"
+          nextLabel="Older"
+          [page]="page()"
+          [pageCount]="pageCount()"
+          (turn)="turn($event)" />
       }
     }
   </div>
 
-  <div class="admin-side-column col">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      <a
-        class="full-width-btn-link sunflower"
-        [routerLink]="'/' + appRoutes.ADMIN"
-        >Admin home</a
-      >
-    </div>
-  </div>
+  <app-admin-side-navigation />
 </div>

@@ -50,6 +50,8 @@ import {
   memberRoleModifier,
 } from 'src/app/shared/utils/member-role.utils';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 const PAGE_SIZE = 5;
 const LOAD_TIMEOUT_MS = 12000;
@@ -127,6 +129,8 @@ const STATUS_PILL_CLASSES: Record<PermissionStatus, string> = {
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
+    CollapsibleSectionComponent,
+    LcarsPanelComponent,
   ],
 })
 export class PermissionAdminComponent implements OnInit {
@@ -511,6 +515,7 @@ export class PermissionAdminComponent implements OnInit {
           'whatever their role confers, which may take the permission away ' +
           'or hand it back.',
         confirmText: 'Withdraw',
+        confirmTone: 'refuse',
       },
       reason =>
         this.runChange(
@@ -830,7 +835,10 @@ export class PermissionAdminComponent implements OnInit {
    * @param onConfirm - Invoked with the reason, trimmed.
    */
   private askReason(
-    data: { title: string; message: string; confirmText: string },
+    data: Pick<
+      GovernanceReasonDialogData,
+      'title' | 'message' | 'confirmText' | 'confirmTone'
+    >,
     onConfirm: (reason: string) => void,
   ): void {
     this._dialog

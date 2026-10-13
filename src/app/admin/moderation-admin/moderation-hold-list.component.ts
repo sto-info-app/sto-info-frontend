@@ -43,6 +43,8 @@ import {
   ModerationHoldExtendDialogData,
   ModerationHoldExtendDialogResult,
 } from './moderation-hold-extend-dialog.component';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** Which holds to list. */
 export type HoldFilter = 'ACTIVE' | 'RELEASED' | 'ALL';
@@ -103,6 +105,8 @@ export const HOLD_ACTION_LABELS: Readonly<Record<string, string>> = {
     LcarsSuccessMessageComponent,
     LoadingBarComponent,
     RouterLink,
+    CollapsibleSectionComponent,
+    LcarsPanelComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -286,6 +290,7 @@ export class ModerationHoldListComponent {
         'What it kept is no longer kept: it goes with the next purge, as if it had never been held.',
       label: 'Reason',
       confirmText: 'Release',
+      confirmTone: 'refuse',
       max: 500,
     }).subscribe(reason =>
       this.run(

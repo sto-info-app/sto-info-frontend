@@ -33,6 +33,7 @@ import { ScanDiagnosticsService } from 'src/app/shared/services/scan-diagnostics
 import { FailedJobsPanelComponent } from './failed-jobs-panel/failed-jobs-panel.component';
 import { ImageEstatePanelComponent } from './image-estate-panel/image-estate-panel.component';
 import { RescanPanelComponent } from './rescan-panel/rescan-panel.component';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /** What to say when the diagnostics could not be read at all. */
 export const SCAN_DIAGNOSTICS_ERROR =
@@ -239,6 +240,41 @@ export function summariseWorkers(
 }
 
 /**
+ * A sentence built from an alert's counts, provided every count it names was
+ * recorded (FC-042).
+ *
+ * @param detail - The alert's counts.
+ * @param keys - The counts the sentence needs.
+ * @param sentence - Builds the sentence once they are known to be there.
+ * @returns The sentence, or null when any of them is missing.
+ */
+function whenCounted(
+  detail: OperationsAlert['detail'],
+  keys: readonly string[],
+  sentence: () => string,
+): string | null {
+  return keys.some(key => detail[key] === undefined) ? null : sentence();
+}
+
+/**
+ * What a silent-workers alert says, which has something to say even without
+ * its counts: no count at all means the heartbeat itself could not be read
+ * (FC-042).
+ *
+ * @param detail - The alert's counts.
+ * @returns A sentence.
+ */
+function workerSilentDetail(detail: OperationsAlert['detail']): string {
+  if (detail['minutesSinceBeat'] !== undefined) {
+    return `None has checked in for ${counted(detail['minutesSinceBeat'], 'minute')}.`;
+  }
+
+  return detail['liveWorkers'] === undefined
+    ? 'The workers’ heartbeat could not be read.'
+    : 'None has checked in during the last day.';
+}
+
+/**
  * What an alert's counts say, in words (FC-042).
  *
  * @param alert - The alert.
@@ -251,46 +287,56 @@ export function alertDetailOf(alert: OperationsAlert): string | null {
   switch (alert.kind) {
     case 'SCAN_QUEUE_LAG':
     case 'PUBLICATION_QUEUE_LAG':
-      return detail['oldestMinutes'] === undefined
-        ? null
-        : `The oldest has waited ${minutes('oldestMinutes')}.`;
+      return whenCounted(
+        detail,
+        ['oldestMinutes'],
+        () => `The oldest has waited ${minutes('oldestMinutes')}.`,
+      );
     case 'WORKER_SILENT':
-      if (detail['minutesSinceBeat'] !== undefined) {
-        return `None has checked in for ${minutes('minutesSinceBeat')}.`;
-      }
-
-      return detail['liveWorkers'] === undefined
-        ? 'The workers’ heartbeat could not be read.'
-        : 'None has checked in during the last day.';
+      return workerSilentDetail(detail);
     case 'WORKER_PAUSED':
-      return detail['pausedWorkers'] === undefined ||
-        detail['pausedMinutes'] === undefined
-        ? null
-        : `${counted(detail['pausedWorkers'], 'worker')} paused, the ` +
-            `latest for ${minutes('pausedMinutes')}.`;
+      return whenCounted(
+        detail,
+        ['pausedWorkers', 'pausedMinutes'],
+        () =>
+          `${counted(detail['pausedWorkers'], 'worker')} paused, the ` +
+          `latest for ${minutes('pausedMinutes')}.`,
+      );
     case 'SIGNATURES_STALE':
-      return detail['signatureAgeHours'] === undefined
-        ? null
-        : `The newest are ${detail['signatureAgeHours']} hours old; the ` +
-            'worker stops scanning at 48.';
+      return whenCounted(
+        detail,
+        ['signatureAgeHours'],
+        () =>
+          `The newest are ${detail['signatureAgeHours']} hours old; the ` +
+          'worker stops scanning at 48.',
+      );
     case 'FAILED_JOBS':
-      return detail['failed'] === undefined
-        ? null
-        : `${counted(detail['failed'], 'failed job')}, listed under Failed jobs.`;
+      return whenCounted(
+        detail,
+        ['failed'],
+        () =>
+          `${counted(detail['failed'], 'failed job')}, listed under Failed jobs.`,
+      );
     case 'PUBLICATION_PAUSED_LONG':
-      return detail['pausedMinutes'] === undefined
-        ? null
-        : `Paused for ${minutes('pausedMinutes')}.`;
+      return whenCounted(
+        detail,
+        ['pausedMinutes'],
+        () => `Paused for ${minutes('pausedMinutes')}.`,
+      );
     case 'QUEUES_UNREACHABLE':
-      return detail['minutesUnreachable'] === undefined
-        ? null
-        : `For ${minutes('minutesUnreachable')}.`;
+      return whenCounted(
+        detail,
+        ['minutesUnreachable'],
+        () => `For ${minutes('minutesUnreachable')}.`,
+      );
     case 'PURGE_OWED':
-      return detail['overdue'] === undefined ||
-        detail['oldestHours'] === undefined
-        ? null
-        : `${counted(detail['overdue'], 'picture')} owed for over a day; ` +
-            `the oldest for ${detail['oldestHours']} hours.`;
+      return whenCounted(
+        detail,
+        ['overdue', 'oldestHours'],
+        () =>
+          `${counted(detail['overdue'], 'picture')} owed for over a day; ` +
+          `the oldest for ${detail['oldestHours']} hours.`,
+      );
     default:
       return null;
   }
@@ -378,6 +424,7 @@ export function formatDuration(ms: number | null): string {
     LoadingBarComponent,
     RescanPanelComponent,
     RouterModule,
+    CollapsibleSectionComponent,
   ],
 })
 export class ScanDiagnosticsComponent implements OnInit {

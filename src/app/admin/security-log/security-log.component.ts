@@ -7,10 +7,10 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
 
 import { take } from 'rxjs';
 
+import { AdminSideNavigationComponent } from 'src/app/admin/admin-side-navigation/admin-side-navigation.component';
 import { FAILED_JOB_QUEUE_LABELS } from 'src/app/models/failed-jobs.models';
 import {
   FEATURE_SWITCH_LABELS,
@@ -22,13 +22,14 @@ import {
   SYSTEM_SITE_ADMIN_ACTIONS,
 } from 'src/app/models/security-log.models';
 import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
+import { LcarsPaginationComponent } from 'src/app/shared/components/lcars-pagination/lcars-pagination.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 import { HOLD_ACTION_LABELS } from '../moderation-admin/moderation-hold-list.component';
 import { SecurityLogAdminService } from './security-log-admin.service';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** What the erasure and investigation logs call their entries. */
 const OTHER_ACTION_LABELS: Readonly<Record<string, string>> = {
@@ -50,6 +51,22 @@ const FAILED_JOB_ACTIONS: ReadonlySet<string> = new Set([
   'SCAN_JOB_RETRIED',
   'SCAN_JOB_DISCARDED',
 ]);
+
+/**
+ * One value from an entry's detail, as it is shown. The detail arrives as
+ * JSON, so anything that is not text, a number or a flag is a nested object
+ * or list, and is shown as the JSON it came as.
+ *
+ * @param value - The value; never null, which is left out before this.
+ * @returns It, as text.
+ */
+function detailValueOf(value: unknown): string {
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return `${value}`;
+  }
+
+  return typeof value === 'string' ? value : JSON.stringify(value);
+}
 
 /**
  * Says a code in words: `ROLE_WITHDRAWN` as "Role withdrawn".
@@ -78,11 +95,13 @@ function inWords(code: string): string {
   styleUrls: ['../news-admin/news-admin.component.scss'],
   standalone: true,
   imports: [
+    AdminSideNavigationComponent,
     AppDatePipe,
     HelpLinkComponent,
     LcarsErrorMessageComponent,
+    LcarsPaginationComponent,
     LoadingBarComponent,
-    RouterLink,
+    LcarsPanelComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -90,7 +109,6 @@ export class SecurityLogComponent {
   private readonly _log = inject(SecurityLogAdminService);
   private readonly _destroyRef = inject(DestroyRef);
 
-  readonly appRoutes = APP_ROUTES;
   readonly sources = Object.values(SecurityLogSource);
   readonly sourceLabels = SECURITY_LOG_SOURCE_LABELS;
 
@@ -244,10 +262,7 @@ export class SecurityLogComponent {
   protected detailOf(entry: SecurityLogEntry): string[] {
     return Object.entries(entry.detail ?? {})
       .filter(([, value]) => value !== null && value !== undefined)
-      .map(
-        ([name, value]) =>
-          `${name}: ${typeof value === 'object' ? JSON.stringify(value) : String(value)}`,
-      );
+      .map(([name, value]) => `${name}: ${detailValueOf(value)}`);
   }
 
   /** Reads the page asked for. */

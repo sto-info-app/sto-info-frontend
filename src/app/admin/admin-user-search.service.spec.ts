@@ -50,12 +50,14 @@ describe('AdminUserSearchService', () => {
   it('passes a custom page number', () => {
     service.search('spock', 2).subscribe();
     const req = httpMock.expectOne(r => r.params.get('page') === '2');
+    expect(req.request.params.get('q')).toBe('spock');
     req.flush(emptyPage);
   });
 
   it('passes a custom page size', () => {
     service.search('spock', 1, 10).subscribe();
     const req = httpMock.expectOne(r => r.params.get('pageSize') === '10');
+    expect(req.request.params.get('page')).toBe('1');
     req.flush(emptyPage);
   });
 

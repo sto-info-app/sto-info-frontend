@@ -53,7 +53,11 @@ describe('SecurityLogComponent (FC-039)', () => {
               subjectKind: 'MODERATION_HOLD',
               subjectId: 'hold-1',
               reason: 'Its review date passed.',
-              detail: { told: 2, reviewAt: '2026-09-28T10:00:00.000Z' },
+              detail: {
+                told: 2,
+                reviewAt: '2026-09-28T10:00:00.000Z',
+                extended: false,
+              },
             }),
             entryOf({
               source: SecurityLogSource.RETENTION,
@@ -145,6 +149,8 @@ describe('SecurityLogComponent (FC-039)', () => {
     expect(rows()[1]).toContain('Owner told the review is due');
     expect(rows()[1]).toContain('Moderation hold hold-1');
     expect(rows()[1]).toContain('told: 2');
+    expect(rows()[1]).toContain('reviewAt: 2026-09-28T10:00:00.000Z');
+    expect(rows()[1]).toContain('extended: false');
     expect(rows()[2]).toContain('Retention: chat messages');
     expect(rows()[2]).toContain('counts: {"purged":3}');
     expect(rows()[2]).not.toContain('finishedAt');

@@ -17,11 +17,11 @@ import { FailedJobsAdminService } from './failed-jobs-admin.service';
 import {
   countOf,
   discardOutcome,
-  FAILED_JOB_ACTION_ERROR,
   FAILED_JOBS_READ_ERROR,
   FailedJobsPanelComponent,
   retryAllOutcome,
 } from './failed-jobs-panel.component';
+import { SCAN_DIAGNOSTICS_ACTION_ERROR } from '../scan-diagnostics-panel.directive';
 
 /**
  * A failed job.
@@ -430,6 +430,7 @@ describe('FailedJobsPanelComponent (FC-042)', () => {
           message: 'It is sent round again, with its attempts back.',
           label: 'Reason',
           confirmText: 'Retry',
+          confirmTone: 'accept',
           max: ADMIN_REASON_MAX_LENGTH,
         },
       }),
@@ -458,6 +459,7 @@ describe('FailedJobsPanelComponent (FC-042)', () => {
         message:
           'It is removed from its queue and never runs again. A retry ' +
           'could still help this one.',
+        confirmTone: 'refuse',
       }),
     );
     expect(failedJobs.discard).toHaveBeenCalledWith(
@@ -559,11 +561,11 @@ describe('FailedJobsPanelComponent (FC-042)', () => {
 
     button('Discard').click();
     await fixture.whenStable();
-    expect(text()).toContain(FAILED_JOB_ACTION_ERROR);
+    expect(text()).toContain(SCAN_DIAGNOSTICS_ACTION_ERROR);
 
     button('Retry all').click();
     await fixture.whenStable();
-    expect(text()).toContain(FAILED_JOB_ACTION_ERROR);
+    expect(text()).toContain(SCAN_DIAGNOSTICS_ACTION_ERROR);
   });
 
   it('does nothing when the dialog is cancelled', async () => {

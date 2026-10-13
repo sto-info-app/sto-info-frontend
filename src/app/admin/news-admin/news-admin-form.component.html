@@ -22,117 +22,106 @@
       [formGroup]="form"
       (ngSubmit)="save()"
       class="admin-form">
-      <section class="admin-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Story Details</span>
-        </div>
-        <div class="admin-panel">
-          <div class="form-row">
-            <div class="lcars-input-container perano admin-field-full">
-              <label for="news-title-input">Title</label>
-              <input
-                id="news-title-input"
-                type="text"
-                formControlName="title"
-                maxlength="200" />
-              @if (form.controls.title.touched && form.controls.title.invalid) {
-                <small class="field-error">A title is required.</small>
+      <app-collapsible-section
+        heading="Story Details"
+        barClass="small-lcars-bar-gap">
+        <div class="admin-fields lcars-rotate">
+          <div class="lcars-input-container admin-field-full">
+            <label for="news-title-input">Title</label>
+            <input
+              id="news-title-input"
+              type="text"
+              formControlName="title"
+              maxlength="200" />
+            @if (form.controls.title.touched && form.controls.title.invalid) {
+              <small class="field-error">A title is required.</small>
+            }
+          </div>
+          <div class="lcars-input-container">
+            <label for="news-slug-input">Slug</label>
+            <input
+              id="news-slug-input"
+              type="text"
+              formControlName="slug"
+              placeholder="auto-generated from title"
+              maxlength="280" />
+          </div>
+
+          <div class="lcars-input-container">
+            <label for="news-summary-input">Summary</label>
+            <input
+              id="news-summary-input"
+              type="text"
+              formControlName="summary"
+              maxlength="500" />
+          </div>
+
+          <div class="lcars-select-container">
+            <label
+              class="select-label"
+              for="news-category-select"
+              >Category</label
+            >
+            <select
+              id="news-category-select"
+              title="Category"
+              formControlName="category">
+              @for (category of categories; track category) {
+                <option [value]="category">{{ categoryLabels[category] }}</option>
               }
-            </div>
+            </select>
           </div>
 
-          <div class="form-row compact">
-            <div class="lcars-input-container bluey">
-              <label for="news-slug-input">Slug</label>
-              <input
-                id="news-slug-input"
-                type="text"
-                formControlName="slug"
-                placeholder="auto-generated from title"
-                maxlength="280" />
-            </div>
-
-            <div class="lcars-input-container gold">
-              <label for="news-summary-input">Summary</label>
-              <input
-                id="news-summary-input"
-                type="text"
-                formControlName="summary"
-                maxlength="500" />
-            </div>
-          </div>
-
-          <div class="form-row compact">
-            <div class="lcars-select-container sunflower">
-              <label
-                class="select-label"
-                for="news-category-select"
-                >Category</label
-              >
-              <select
-                id="news-category-select"
-                title="Category"
-                formControlName="category">
-                @for (category of categories; track category) {
-                  <option [value]="category">{{ categoryLabels[category] }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="lcars-select-container tangerine">
-              <label
-                class="select-label"
-                for="news-status-select"
-                >Status</label
-              >
-              <select
-                id="news-status-select"
-                title="Status"
-                formControlName="status">
-                @for (status of statuses; track status) {
-                  <option [value]="status">{{ status  | titlecase }}</option>
-                }
-              </select>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="admin-section">
-        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-          <span>Body</span>
-        </div>
-
-        <div class="admin-panel">
-          <div class="form-row">
-            <div class="lcars-input-container perano admin-field-full">
-              <label for="news-body-input">Markdown Content</label>
-              <textarea
-                id="news-body-input"
-                formControlName="body"
-                rows="14"
-                maxlength="50000"></textarea>
-              @if (form.controls.body.touched && form.controls.body.invalid) {
-                <small class="field-error">A body is required.</small>
+          <div class="lcars-select-container">
+            <label
+              class="select-label"
+              for="news-status-select"
+              >Status</label
+            >
+            <select
+              id="news-status-select"
+              title="Status"
+              formControlName="status">
+              @for (status of statuses; track status) {
+                <option [value]="status">{{ status  | titlecase }}</option>
               }
-            </div>
+            </select>
           </div>
+        </div>
+      </app-collapsible-section>
 
+      <app-collapsible-section
+        heading="Body"
+        barClass="small-lcars-bar-gap">
+        <div class="admin-section-body">
+          <div class="lcars-input-container">
+            <label for="news-body-input">Markdown Content</label>
+            <textarea
+              id="news-body-input"
+              formControlName="body"
+              rows="14"
+              maxlength="50000"></textarea>
+            @if (form.controls.body.touched && form.controls.body.invalid) {
+              <small class="field-error">A body is required.</small>
+            }
+          </div>
           @if (showPreview) {
             <div class="markdown-preview">
               <span class="preview-label">Preview</span>
               <div [innerHTML]="bodyValue | markdown"></div>
             </div>
           }
-          
-          <button
-            type="button"
-            class="lcars-btn sunflower"
-            (click)="togglePreview()">
-            {{ showPreview ? 'Hide preview' : 'Show preview' }}
-          </button>
+
+          <div>
+            <button
+              type="button"
+              class="lcars-btn"
+              (click)="togglePreview()">
+              {{ showPreview ? 'Hide preview' : 'Show preview' }}
+            </button>
+          </div>
         </div>
-      </section>
+      </app-collapsible-section>
 
       <div class="admin-form-actions">
         <button
@@ -151,7 +140,7 @@
     </div>
     <div class="buttons">
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_NEWS"
         >Back to posts</a
       >

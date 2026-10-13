@@ -84,7 +84,9 @@ describe('ModerationHoldExtendDialogComponent', () => {
   });
 
   it('changes nothing on cancel', () => {
-    (element.querySelector('button.red') as HTMLButtonElement).click();
+    (
+      element.querySelector('button[type="button"]') as HTMLButtonElement
+    ).click();
 
     expect(close).toHaveBeenCalledWith();
   });

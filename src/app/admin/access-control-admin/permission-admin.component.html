@@ -27,19 +27,13 @@
     }
 
     @if (!selectedMember) {
-      <section class="admin-section">
-        <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-          <span class="title-with-badge">
-            Find A Member
-            @if (memberTotal > 0) {
-              <span class="header-count-badge">{{ memberTotal }}</span>
-            }
-          </span>
-        </div>
-
-        <div class="admin-panel">
-          <div class="form-row compact">
-            <div class="lcars-input-container bluey admin-field-full">
+      <app-collapsible-section
+        heading="Find A Member"
+        barClass="small-lcars-bar-gap"
+        [badge]="memberTotal > 0 ? memberTotal : null">
+        <app-lcars-panel heading="Search">
+          <div class="admin-fields lcars-rotate">
+            <div class="lcars-input-container admin-field-full">
               <label for="permission-search-input"
                 >Search by email or username</label
               >
@@ -53,24 +47,24 @@
             </div>
           </div>
 
-          <div class="admin-form-actions">
+          <div class="admin-form-actions lcars-rotate">
             @if (search || hasSearched) {
               <button
                 type="button"
-                class="lcars-btn red"
+                class="lcars-btn"
                 (click)="clearSearch()">
                 Clear
               </button>
             }
             <button
               type="button"
-              class="lcars-btn green"
+              class="lcars-btn"
               [disabled]="isBusy"
               (click)="searchMembers()">
               Search
             </button>
           </div>
-        </div>
+        </app-lcars-panel>
 
         @if (hasSearched && !isSearching && members.length === 0) {
           <p class="records-empty">No members match this search.</p>
@@ -156,14 +150,12 @@
             </div>
           }
         }
-      </section>
+      </app-collapsible-section>
     } @else {
-      <section class="admin-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Selected Member</span>
-        </div>
-
-        <div class="admin-panel selected-member">
+      <app-collapsible-section
+        heading="Selected Member"
+        barClass="small-lcars-bar-gap">
+        <div class="selected-member">
           <dl class="admin-record-details">
             <div class="admin-record-detail">
               <dt class="label">Member</dt>
@@ -199,22 +191,20 @@
             </div>
           </dl>
         </div>
-      </section>
+      </app-collapsible-section>
 
-      <section class="admin-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Account Role</span>
-        </div>
-
-        <div class="admin-panel">
+      <app-collapsible-section
+        heading="Account Role"
+        barClass="small-lcars-bar-gap">
+        <div class="admin-section-body">
           @if (isAdminMember) {
             <p class="role-locked">
               Administrators are appointed outside STO Info, so this account’s
               role is read here and changed there.
             </p>
           } @else {
-            <div class="form-row compact">
-              <div class="lcars-select-container violet">
+            <div class="admin-fields lcars-rotate">
+              <div class="lcars-select-container">
                 <label
                   class="select-label"
                   for="member-role-select"
@@ -248,23 +238,13 @@
             </div>
           }
         </div>
-      </section>
+      </app-collapsible-section>
 
       @if (summary) {
-        <section class="admin-section">
-          <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-            <span class="title-with-badge">
-              Effective Permissions
-              @if (summary.overrides.length > 0) {
-                <span class="header-count-badge"
-                  >{{ summary.overrides.length }} override{{
-                    summary.overrides.length === 1 ? '' : 's'
-                  }}</span
-                >
-              }
-            </span>
-          </div>
-
+        <app-collapsible-section
+          heading="Effective Permissions"
+          barClass="small-lcars-bar-gap"
+          [badge]="summary.overrides.length > 0 ? summary.overrides.length + (summary.overrides.length === 1 ? ' override' : ' overrides') : null">
           @if (rows.length === 0) {
             <p class="records-empty">
               The API reports no permissions to manage.
@@ -325,7 +305,7 @@
                   </button>
                   <button
                     type="button"
-                    class="lcars-btn tangerine"
+                    class="lcars-btn red"
                     [disabled]="isBusy"
                     (click)="prepareOverride(row, permissionEffect.DENY)">
                     Deny
@@ -333,7 +313,7 @@
                   @if (row.override) {
                     <button
                       type="button"
-                      class="lcars-btn perano"
+                      class="lcars-btn red"
                       [disabled]="isBusy"
                       (click)="withdrawOverride(row)">
                       Withdraw
@@ -343,20 +323,18 @@
               </article>
             }
           </div>
-        </section>
+        </app-collapsible-section>
 
-        <section class="admin-section">
-          <div class="lcars-text-bar small-lcars-bar-gap">
-            <span>Apply An Override</span>
-          </div>
-
+        <app-collapsible-section
+          heading="Apply An Override"
+          barClass="small-lcars-bar-gap">
           <form
             [formGroup]="form"
             (ngSubmit)="applyOverride()"
             class="admin-form">
-            <div class="admin-panel">
-              <div class="form-row compact">
-                <div class="lcars-select-container sunflower">
+            <div class="admin-section-body">
+              <div class="admin-fields lcars-rotate">
+                <div class="lcars-select-container">
                   <label
                     class="select-label"
                     for="override-permission-select"
@@ -375,7 +353,7 @@
                   </select>
                 </div>
 
-                <div class="lcars-select-container perano">
+                <div class="lcars-select-container">
                   <label
                     class="select-label"
                     for="override-effect-select"
@@ -392,10 +370,8 @@
                     }
                   </select>
                 </div>
-              </div>
 
-              <div class="form-row">
-                <div class="lcars-input-container bluey admin-field-full">
+                <div class="lcars-input-container admin-field-full">
                   <label for="override-reason-input">Reason</label>
                   <input
                     id="override-reason-input"
@@ -419,10 +395,8 @@
                     >
                   </div>
                 </div>
-              </div>
 
-              <div class="form-row compact">
-                <div class="lcars-input-container gold">
+                <div class="lcars-input-container">
                   <label for="override-expires-input"
                     >Expires At (optional)</label
                   >
@@ -457,7 +431,7 @@
               </div>
             </div>
           </form>
-        </section>
+        </app-collapsible-section>
       }
     }
   </div>
@@ -470,19 +444,19 @@
       @if (selectedMember) {
         <button
           type="button"
-          class="full-width-btn-link sunflower"
+          class="full-width-btn-link"
           [disabled]="isBusy"
           (click)="clearSelection()">
           Manage permissions
         </button>
       }
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_USERS"
         >Manage members</a
       >
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN"
         >Admin home</a
       >

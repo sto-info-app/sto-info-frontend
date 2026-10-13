@@ -1,13 +1,6 @@
 // Compose-specific spacing on top of the shared admin form styles. The shared
-// `.admin-panel` packs its rows together; give each field room to breathe so the
-// floating LCARS labels never crowd the inputs above/below them.
-.admin-panel {
-  display: flex;
-  flex-direction: column;
+// `.admin-fields` packs its fields together; give each field room to breathe so
+// the floating LCARS labels never crowd the inputs above/below them.
+.admin-fields {
   gap: 1.5rem;
-  padding: 1.5rem;
-}
-
-.form-row {
-  row-gap: 1.5rem;
 }

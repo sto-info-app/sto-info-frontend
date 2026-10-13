@@ -21,6 +21,8 @@ import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** The longest term the server takes. */
 export const FLEET_DISPUTE_SEARCH_MAX_LENGTH = 50;
@@ -52,6 +54,8 @@ const STATUS_LABELS: Readonly<Record<FleetScopeStatus, string>> = {
     LoadingBarComponent,
     ReactiveFormsModule,
     RouterLink,
+    CollapsibleSectionComponent,
+    LcarsPanelComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

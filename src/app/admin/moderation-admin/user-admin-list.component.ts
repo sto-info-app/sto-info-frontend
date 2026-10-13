@@ -8,16 +8,15 @@ import {
   inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
+import {
+  AdminReasonPrompt,
+  AdminReasonRequest,
+} from 'src/app/admin/admin-reason-prompt';
 import { Observable, finalize, take } from 'rxjs';
 import { PrivacyModeService } from 'src/app/dashboard/services/privacy-mode.service';
 import { ModeratedUser } from 'src/app/models/moderation.models';
-import {
-  GovernanceReasonDialogComponent,
-  GovernanceReasonDialogData,
-} from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
-import { ADMIN_REASON_MAX_LENGTH } from 'src/app/models/moderation.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -32,6 +31,8 @@ import {
   memberRoleModifier,
 } from 'src/app/shared/utils/member-role.utils';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 const PAGE_SIZE = 20;
 const LOAD_TIMEOUT_MS = 12000;
@@ -71,13 +72,15 @@ const DISABLED_FILTER_LABELS: Record<DisabledFilter, string> = {
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
+    CollapsibleSectionComponent,
+    LcarsPanelComponent,
   ],
 })
 export class UserAdminListComponent implements OnInit {
   private readonly _moderationService = inject(ModerationService);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
-  private readonly _dialog = inject(MatDialog);
+  private readonly _reasons = new AdminReasonPrompt();
 
   /**
    * Whether the names and email addresses on this page are blurred. Read by the
@@ -196,6 +199,7 @@ export class UserAdminListComponent implements OnInit {
           'sign in again, their record leaves the registry, and every open ' +
           'report about them is closed as actioned. They are not told why.',
         confirmText: 'Disable',
+        confirmTone: 'refuse',
       },
       reason =>
         this.runAction(
@@ -313,24 +317,12 @@ export class UserAdminListComponent implements OnInit {
    * @param onConfirm - Invoked with the reason, trimmed.
    */
   private askReason(
-    data: { title: string; message: string; confirmText: string },
+    data: AdminReasonRequest,
     onConfirm: (reason: string) => void,
   ): void {
-    this._dialog
-      .open<
-        GovernanceReasonDialogComponent,
-        GovernanceReasonDialogData,
-        string
-      >(GovernanceReasonDialogComponent, {
-        width: '75%',
-        data: { ...data, label: 'Reason', max: ADMIN_REASON_MAX_LENGTH },
-      })
-      .afterClosed()
-      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
-      .subscribe(reason => {
-        if (reason) {
-          onConfirm(reason);
-        }
-      });
+    this._reasons
+      .ask(data)
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe(onConfirm);
   }
 }

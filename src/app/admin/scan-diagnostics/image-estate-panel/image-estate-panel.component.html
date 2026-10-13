@@ -1,10 +1,6 @@
-<section
-  class="admin-section"
-  aria-labelledby="image-estate-heading">
-  <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-    <span id="image-estate-heading">Private image delivery</span>
-  </div>
-
+<app-collapsible-section
+  heading="Private image delivery"
+  barClass="small-lcars-bar-gap">
   <p>
     Every picture becomes private, reachable only by an address the site signs
     while the picture may be shown. Take an inventory, copy every public
@@ -13,10 +9,8 @@
   </p>
 
   @if (message(); as done) {
-    <p
-      class="image-estate__message"
-      role="status">
-      {{ done }}
+    <p class="image-estate__message">
+      <output>{{ done }}</output>
     </p>
   }
   @if (failure(); as problem) {
@@ -86,16 +80,16 @@
       }
     }
 
-    <div class="image-estate__actions">
+    <div class="image-estate__actions lcars-rotate">
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto sunflower"
+        class="lcars-btn lcars-btn-auto"
         (click)="load()">
         Refresh
       </button>
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto bluey"
+        class="lcars-btn lcars-btn-auto"
         [disabled]="status.inventory?.state === 'RUNNING'"
         (click)="takeInventory()">
         Take an inventory
@@ -104,7 +98,7 @@
         @if (run.state === 'RUNNING') {
           <button
             type="button"
-            class="lcars-btn lcars-btn-auto gold"
+            class="lcars-btn lcars-btn-auto"
             (click)="pause()">
             Pause
           </button>
@@ -119,14 +113,14 @@
       } @else {
         <button
           type="button"
-          class="lcars-btn lcars-btn-auto green"
+          class="lcars-btn lcars-btn-auto"
           [disabled]="!mayStart(status, kinds.COPY)"
           (click)="start(kinds.COPY)">
           {{ runLabels[kinds.COPY] }}
         </button>
         <button
           type="button"
-          class="lcars-btn lcars-btn-auto tangerine"
+          class="lcars-btn lcars-btn-auto"
           [disabled]="!mayStart(status, kinds.UNDO)"
           (click)="start(kinds.UNDO)">
           {{ runLabels[kinds.UNDO] }}
@@ -236,4 +230,4 @@
       }
     }
   }
-</section>
+</app-collapsible-section>

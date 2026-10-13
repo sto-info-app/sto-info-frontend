@@ -28,19 +28,13 @@
         [message]="success"></app-lcars-success-message>
     }
 
-    <section class="admin-section">
-      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-        <span class="title-with-badge">
-          Chat Queue
-          @if (openCount() > 0) {
-            <span class="header-count-badge">{{ openCount() }}</span>
-          }
-        </span>
-      </div>
-
-      <div class="admin-panel">
-        <div class="form-row compact">
-          <div class="lcars-select-container sunflower">
+    <app-collapsible-section
+      heading="Chat Queue"
+      barClass="small-lcars-bar-gap"
+      [badge]="openCount() > 0 ? openCount() : null">
+      <app-lcars-panel heading="Filters">
+        <div class="admin-fields lcars-rotate">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="chat-report-status-filter"
@@ -60,7 +54,7 @@
             </select>
           </div>
         </div>
-      </div>
+      </app-lcars-panel>
 
       @if (!isLoading() && reports().length === 0) {
         <p class="records-empty">No chat reports match this filter.</p>
@@ -140,7 +134,7 @@
                       } @else {
                         <button
                           type="button"
-                          class="lcars-btn lcars-btn-auto sky"
+                          class="lcars-btn lcars-btn-auto"
                           (click)="hold(report, 'EVIDENCE')">
                           Hold this evidence…
                         </button>
@@ -213,7 +207,7 @@
                   @if (isOpen(report)) {
                     <button
                       type="button"
-                      class="cta-icon"
+                      class="cta-icon approve-icon"
                       (click)="decide(report, reportStatus.ACTIONED)"
                       title="Resolve"
                       aria-label="Resolve">
@@ -221,7 +215,7 @@
                     </button>
                     <button
                       type="button"
-                      class="cta-icon"
+                      class="cta-icon delete-icon"
                       (click)="decide(report, reportStatus.DISMISSED)"
                       title="Dismiss"
                       aria-label="Dismiss">
@@ -257,10 +251,10 @@
         </div>
 
         @if (pageCount() > 1) {
-          <div class="admin-form-actions">
+          <div class="admin-form-actions lcars-rotate">
             <button
               type="button"
-              class="lcars-btn sky"
+              class="lcars-btn"
               [disabled]="page() <= 1"
               (click)="turn(-1)">
               Earlier
@@ -268,7 +262,7 @@
             <span>Page {{ page() }} of {{ pageCount() }}</span>
             <button
               type="button"
-              class="lcars-btn sky"
+              class="lcars-btn"
               [disabled]="page() >= pageCount()"
               (click)="turn(1)">
               Later
@@ -276,7 +270,7 @@
           </div>
         }
       }
-    </section>
+    </app-collapsible-section>
   </div>
 
   <div class="admin-side-column col">
@@ -285,12 +279,12 @@
     </div>
     <div class="buttons">
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_REPORTS"
         >Reported officers</a
       >
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN"
         >Admin home</a
       >

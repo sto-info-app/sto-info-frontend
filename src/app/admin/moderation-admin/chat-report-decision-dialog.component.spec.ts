@@ -48,7 +48,13 @@ describe('ChatReportDecisionDialogComponent', () => {
 
     note.value = '  Warned them  ';
     note.dispatchEvent(new Event('input'));
-    (element.querySelector('button.green') as HTMLButtonElement).click();
+    const resolve = element.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
+
+    // Resolving is accepting the report, so it is drawn green.
+    expect(resolve.classList).toContain('green');
+    resolve.click();
 
     expect(close).toHaveBeenCalledWith({
       status: ReportStatus.ACTIONED,
@@ -62,8 +68,12 @@ describe('ChatReportDecisionDialogComponent', () => {
     const note = element.querySelector(
       '#chat-report-note',
     ) as HTMLTextAreaElement;
-    const dismiss = element.querySelector('button.green') as HTMLButtonElement;
+    const dismiss = element.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
 
+    // Dismissing refuses the report, so it is drawn red.
+    expect(dismiss.classList).toContain('red');
     expect(element.textContent).toContain('with no action');
     expect(dismiss.disabled).toBe(true);
 
@@ -89,7 +99,9 @@ describe('ChatReportDecisionDialogComponent', () => {
   it('decides nothing on cancel', () => {
     const element = show(ReportStatus.DISMISSED);
 
-    (element.querySelector('button.red') as HTMLButtonElement).click();
+    (
+      element.querySelector('button[type="button"]') as HTMLButtonElement
+    ).click();
 
     expect(close).toHaveBeenCalledWith();
   });

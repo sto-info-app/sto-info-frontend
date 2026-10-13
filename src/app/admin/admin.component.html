@@ -11,7 +11,7 @@
   <app-collapsible-section
     heading="Site Content"
     barClass="small-lcars-bar-gap">
-    <ul class="admin-landing__panels">
+    <ul class="admin-landing__panels lcars-rotate">
       <li class="admin-landing__card--news">
         <a [routerLink]="getRouteLink(appRoutes.ADMIN_NEWS)">
           <span class="admin-landing__name">News &amp; Release Notes</span>
@@ -39,13 +39,13 @@
       </li>
     </ul>
   </app-collapsible-section>
-
   <app-collapsible-section
     [heading]="
       openReports ? 'Community · ' + openReports + ' open reports' : 'Community'
     "
+    sectionKey="Community"
     barClass="small-lcars-bar-gap">
-    <ul class="admin-landing__panels">
+    <ul class="admin-landing__panels lcars-rotate">
       <li class="admin-landing__card--reports">
         <a [routerLink]="getRouteLink(appRoutes.ADMIN_REPORTS)">
           <span class="admin-landing__name">Reported Officers</span>
@@ -117,11 +117,10 @@
       </li>
     </ul>
   </app-collapsible-section>
-
   <app-collapsible-section
     heading="Operations"
     barClass="small-lcars-bar-gap">
-    <ul class="admin-landing__panels">
+    <ul class="admin-landing__panels lcars-rotate">
       <li class="admin-landing__card--scan-diagnostics">
         <a [routerLink]="getRouteLink(appRoutes.ADMIN_SCAN_DIAGNOSTICS)">
           <span class="admin-landing__name">Scan Diagnostics</span>
@@ -140,9 +139,11 @@
         </a>
       </li>
     </ul>
-
-    <app-publication-pause></app-publication-pause>
-    <app-feature-switches></app-feature-switches>
+    <!-- The two Operations panels take successive colours of their own. -->
+    <div class="admin-landing__operations lcars-rotate">
+      <app-publication-pause></app-publication-pause>
+      <app-feature-switches></app-feature-switches>
+    </div>
   </app-collapsible-section>
 
   <!--
@@ -155,7 +156,7 @@
     <app-collapsible-section
       heading="Storytime"
       barClass="small-lcars-bar-gap">
-      <ul class="admin-landing__panels">
+      <ul class="admin-landing__panels lcars-rotate">
         @for (link of storytimeLinks; track link.permission) {
           <li class="admin-landing__card--{{ link.cardKey }}">
             <a [routerLink]="storytimeLinkFor(link)">

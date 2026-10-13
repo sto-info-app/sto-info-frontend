@@ -1,22 +1,13 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   inject,
-  OnInit,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MatDialog } from '@angular/material/dialog';
 
-import { Observable, take } from 'rxjs';
+import { take } from 'rxjs';
 
-import {
-  GovernanceReasonDialogComponent,
-  GovernanceReasonDialogData,
-} from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
-import { ADMIN_REASON_MAX_LENGTH } from 'src/app/models/moderation.models';
 import {
   RESCAN_COUNT_LABELS,
   RESCAN_KIND_LABELS,
@@ -31,7 +22,10 @@ import {
 } from 'src/app/models/rescan.models';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
+import { ScanDiagnosticsPanelDirective } from '../scan-diagnostics-panel.directive';
+
 import { RescanAdminService } from './rescan-admin.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /** What the panel is showing. */
 export type RescanPanelState =
@@ -56,12 +50,14 @@ const ACTIONS = {
     message:
       'It stops after the batch under way, and resumes where it stopped.',
     confirmText: 'Pause',
+    confirmTone: 'accept',
     done: 'Paused.',
   },
   resume: {
     title: 'Resume the campaign',
     message: 'It carries on after the last picture it staged.',
     confirmText: 'Resume',
+    confirmTone: 'accept',
     done: 'Resumed.',
   },
   cancel: {
@@ -69,6 +65,7 @@ const ACTIONS = {
     message:
       'It stages nothing more. Rescans already asked for still get their verdicts.',
     confirmText: 'Cancel campaign',
+    confirmTone: 'refuse',
     done: 'Cancelled.',
   },
 } as const;
@@ -82,6 +79,7 @@ const DECISIONS = {
       'picture was removed for breaking the rules for pictures, without ' +
       'your reason.',
     confirmText: 'Take it down',
+    confirmTone: 'refuse',
     done: 'Taken down.',
   },
   KEPT: {
@@ -90,6 +88,7 @@ const DECISIONS = {
       'It stays up, and leaves this list. A later rescan under a new policy ' +
       'may refuse it again.',
     confirmText: 'Keep it',
+    confirmTone: 'accept',
     done: 'Kept.',
   },
 } as const;
@@ -114,13 +113,11 @@ const DECISIONS = {
     './rescan-panel.component.scss',
   ],
   standalone: true,
-  imports: [AppDatePipe],
+  imports: [AppDatePipe, CollapsibleSectionComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RescanPanelComponent implements OnInit {
+export class RescanPanelComponent extends ScanDiagnosticsPanelDirective {
   private readonly _rescans = inject(RescanAdminService);
-  private readonly _dialog = inject(MatDialog);
-  private readonly _destroyRef = inject(DestroyRef);
 
   readonly kindLabels = RESCAN_KIND_LABELS;
   readonly kinds = Object.keys(RESCAN_KIND_LABELS);
@@ -129,8 +126,6 @@ export class RescanPanelComponent implements OnInit {
   readonly legacy = RescanCampaignKind.LEGACY;
 
   readonly state = signal<RescanPanelState>({ kind: 'LOADING' });
-  readonly message = signal<string | null>(null);
-  readonly failure = signal<string | null>(null);
   readonly form = signal<RescanForm>({
     kinds: [],
     uploadedFrom: '',
@@ -141,16 +136,9 @@ export class RescanPanelComponent implements OnInit {
   });
 
   /**
-   * Reads the campaigns on arrival.
-   */
-  ngOnInit(): void {
-    this.load();
-  }
-
-  /**
    * Reads the campaigns.
    */
-  load(): void {
+  override load(): void {
     this._rescans
       .overview()
       .pipe(take(1), takeUntilDestroyed(this._destroyRef))
@@ -238,8 +226,13 @@ export class RescanPanelComponent implements OnInit {
   act(campaign: RescanCampaign, action: keyof typeof ACTIONS): void {
     const copy = ACTIONS[action];
 
-    this.askReason(copy.title, copy.message, copy.confirmText, reason =>
-      this.run(this._rescans.act(campaign.id, action, reason), copy.done),
+    this.askReason(
+      copy.title,
+      copy.message,
+      copy.confirmText,
+      reason =>
+        this.run(this._rescans.act(campaign.id, action, reason), copy.done),
+      copy.confirmTone,
     );
   }
 
@@ -253,8 +246,13 @@ export class RescanPanelComponent implements OnInit {
   decide(finding: RescanFinding, decision: RescanDecision): void {
     const copy = DECISIONS[decision];
 
-    this.askReason(copy.title, copy.message, copy.confirmText, reason =>
-      this.run(this._rescans.decide(finding.id, decision, reason), copy.done),
+    this.askReason(
+      copy.title,
+      copy.message,
+      copy.confirmText,
+      reason =>
+        this.run(this._rescans.decide(finding.id, decision, reason), copy.done),
+      copy.confirmTone,
     );
   }
 
@@ -279,73 +277,5 @@ export class RescanPanelComponent implements OnInit {
       ...(form.unverifiedOnly ? { unverifiedOnly: true } : {}),
       priority: form.priority,
     };
-  }
-
-  /**
-   * Sends an action, says how it went and reads the campaigns again.
-   *
-   * @param action - The request.
-   * @param success - What to say when it works.
-   */
-  private run(action: Observable<unknown>, success: string): void {
-    this.message.set(null);
-    this.failure.set(null);
-    action.pipe(take(1), takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => {
-        this.message.set(success);
-        this.load();
-      },
-      error: (error: unknown) => {
-        const said =
-          error instanceof HttpErrorResponse
-            ? (error.error as { message?: unknown } | null)?.message
-            : undefined;
-
-        this.failure.set(
-          typeof said === 'string'
-            ? said
-            : 'That could not be done. Please try again.',
-        );
-      },
-    });
-  }
-
-  /**
-   * Asks why, and goes on with the reason once one is given. The reason is
-   * kept in the site admin log.
-   *
-   * @param title - The dialog's title.
-   * @param message - What is about to happen.
-   * @param confirmText - The button.
-   * @param onConfirm - Invoked with the reason.
-   */
-  private askReason(
-    title: string,
-    message: string,
-    confirmText: string,
-    onConfirm: (reason: string) => void,
-  ): void {
-    this._dialog
-      .open<
-        GovernanceReasonDialogComponent,
-        GovernanceReasonDialogData,
-        string
-      >(GovernanceReasonDialogComponent, {
-        width: '75%',
-        data: {
-          title,
-          message,
-          label: 'Reason',
-          confirmText,
-          max: ADMIN_REASON_MAX_LENGTH,
-        },
-      })
-      .afterClosed()
-      .pipe(take(1), takeUntilDestroyed(this._destroyRef))
-      .subscribe(reason => {
-        if (reason) {
-          onConfirm(reason);
-        }
-      });
   }
 }

@@ -1,12 +1,7 @@
 @let current = state();
-<section
+<app-lcars-panel
   class="feature-switches"
-  aria-labelledby="feature-switches-heading">
-  <h2
-    id="feature-switches-heading"
-    class="feature-switches__heading">
-    Features
-  </h2>
+  heading="Features">
   <app-help-link
     slug="site-admin-features"
     label="Help with switching features" />
@@ -17,10 +12,8 @@
   </p>
 
   @if (message(); as done) {
-    <p
-      class="feature-switches__message"
-      role="status">
-      {{ done }}
+    <p class="feature-switches__message">
+      <output>{{ done }}</output>
     </p>
   }
   @if (failure(); as problem) {
@@ -41,7 +34,7 @@
       </p>
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto sunflower"
+        class="lcars-btn lcars-btn-auto"
         (click)="load()">
         Try again
       </button>
@@ -55,11 +48,11 @@
           class="feature-switches__feature"
           [class.feature-switches__feature--on]="entry.isEnabled"
           [attr.aria-labelledby]="'feature-switch-' + entry.feature">
-          <h3
+          <h4
             [id]="'feature-switch-' + entry.feature"
             class="feature-switches__name">
             {{ entry.label }}
-          </h3>
+          </h4>
           <p class="feature-switches__state">
             <strong>{{ entry.isEnabled ? 'On' : 'Off' }}</strong>
           </p>
@@ -111,4 +104,4 @@
       }
     </ul>
   }
-</section>
+</app-lcars-panel>

@@ -1,22 +1,14 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
   inject,
-  OnInit,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MatDialog } from '@angular/material/dialog';
 
-import { Observable, take } from 'rxjs';
+import { take } from 'rxjs';
 
-import {
-  GovernanceReasonDialogComponent,
-  GovernanceReasonDialogData,
-} from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
 import {
   IMAGE_ESTATE_RUN_LABELS,
   IMAGE_ESTATE_STATE_LABELS,
@@ -24,10 +16,12 @@ import {
   ImageEstateRunState,
   ImageEstateStatus,
 } from 'src/app/models/image-estate.models';
-import { ADMIN_REASON_MAX_LENGTH } from 'src/app/models/moderation.models';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
+import { ScanDiagnosticsPanelDirective } from '../scan-diagnostics-panel.directive';
+
 import { ImageEstateAdminService } from './image-estate-admin.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /** What the panel is showing. */
 export type ImageEstatePanelState =
@@ -82,13 +76,11 @@ export const IMAGE_ESTATE_COUNT_LABELS: Readonly<Record<string, string>> = {
     './image-estate-panel.component.scss',
   ],
   standalone: true,
-  imports: [AppDatePipe],
+  imports: [AppDatePipe, CollapsibleSectionComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ImageEstatePanelComponent implements OnInit {
+export class ImageEstatePanelComponent extends ScanDiagnosticsPanelDirective {
   private readonly _estate = inject(ImageEstateAdminService);
-  private readonly _dialog = inject(MatDialog);
-  private readonly _destroyRef = inject(DestroyRef);
 
   readonly runLabels = IMAGE_ESTATE_RUN_LABELS;
   readonly stateLabels = IMAGE_ESTATE_STATE_LABELS;
@@ -96,8 +88,6 @@ export class ImageEstatePanelComponent implements OnInit {
   readonly kinds = ImageEstateRunKind;
 
   readonly state = signal<ImageEstatePanelState>({ kind: 'LOADING' });
-  readonly message = signal<string | null>(null);
-  readonly failure = signal<string | null>(null);
 
   /** The run that is open, if any. */
   readonly openRun = computed(() => {
@@ -131,16 +121,9 @@ export class ImageEstatePanelComponent implements OnInit {
   });
 
   /**
-   * Reads where the estate stands on arrival.
-   */
-  ngOnInit(): void {
-    this.load();
-  }
-
-  /**
    * Reads where the estate stands.
    */
-  load(): void {
+  override load(): void {
     this._estate
       .status()
       .pipe(take(1), takeUntilDestroyed(this._destroyRef))
@@ -189,6 +172,7 @@ export class ImageEstatePanelComponent implements OnInit {
           this._estate.start(kind, reason),
           `${this.runLabels[kind]} started. Refresh to follow it.`,
         ),
+      kind === ImageEstateRunKind.RETIRE ? 'refuse' : 'accept',
     );
   }
 
@@ -214,73 +198,5 @@ export class ImageEstatePanelComponent implements OnInit {
       'Resume',
       reason => this.run(this._estate.resume(reason), 'Resumed.'),
     );
-  }
-
-  /**
-   * Sends an action, says how it went and reads the estate again.
-   *
-   * @param action - The request.
-   * @param success - What to say when it works.
-   */
-  private run(action: Observable<unknown>, success: string): void {
-    this.message.set(null);
-    this.failure.set(null);
-    action.pipe(take(1), takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => {
-        this.message.set(success);
-        this.load();
-      },
-      error: (error: unknown) => {
-        const said =
-          error instanceof HttpErrorResponse
-            ? (error.error as { message?: unknown } | null)?.message
-            : undefined;
-
-        this.failure.set(
-          typeof said === 'string'
-            ? said
-            : 'That could not be done. Please try again.',
-        );
-      },
-    });
-  }
-
-  /**
-   * Asks why, and goes on with the reason once one is given. The reason is
-   * kept in the site admin log.
-   *
-   * @param title - The dialog's title.
-   * @param message - What is about to happen.
-   * @param confirmText - The button.
-   * @param onConfirm - Invoked with the reason.
-   */
-  private askReason(
-    title: string,
-    message: string,
-    confirmText: string,
-    onConfirm: (reason: string) => void,
-  ): void {
-    this._dialog
-      .open<
-        GovernanceReasonDialogComponent,
-        GovernanceReasonDialogData,
-        string
-      >(GovernanceReasonDialogComponent, {
-        width: '75%',
-        data: {
-          title,
-          message,
-          label: 'Reason',
-          confirmText,
-          max: ADMIN_REASON_MAX_LENGTH,
-        },
-      })
-      .afterClosed()
-      .pipe(take(1), takeUntilDestroyed(this._destroyRef))
-      .subscribe(reason => {
-        if (reason) {
-          onConfirm(reason);
-        }
-      });
   }
 }
