@@ -504,7 +504,13 @@ describe('AppComponent', () => {
       (globalThis as unknown as { CookieYes: unknown }).CookieYes = undefined;
       options.onLoad?.();
     });
-    (component as unknown as AppComponentInternals).loadCookieYesScript();
+
+    expect(() =>
+      (component as unknown as AppComponentInternals).loadCookieYesScript(),
+    ).not.toThrow();
+    expect(mockScriptLoaderService.loadScript).toHaveBeenCalledWith(
+      expect.objectContaining({ src: 'https://test' }),
+    );
   });
 
   it('should handle missing dataLayer in gtag function', () => {
@@ -544,6 +550,13 @@ describe('AppComponent', () => {
     (
       component as unknown as AppComponentInternals
     ).loadGoogleAnalyticsWithTrackingDisabled();
+
+    // The missing queue is put back before anything is pushed to it.
+    expect(
+      Array.isArray(
+        (globalThis as unknown as { dataLayer: unknown }).dataLayer,
+      ),
+    ).toBe(true);
   });
 
   it('should not open the refresh dialog if already open', () => {

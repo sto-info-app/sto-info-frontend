@@ -8,8 +8,8 @@
         <h1>Login</h1>
         <form
           (ngSubmit)="onLogin()"
-          class="form">
-          <div class="lcars-input-container bluey">
+          class="form lcars-rotate">
+          <div class="lcars-input-container">
             <label for="email">Email</label>
             <input
               type="email"
@@ -25,7 +25,7 @@
           </div>
 
           <div
-            class="lcars-input-container bluey"
+            class="lcars-input-container"
             data-private>
             <label for="password">Password</label>
             <input
@@ -55,12 +55,12 @@
         <div class="buttons">
           <a
             [routerLink]="registerLink"
-            class="full-width-btn-link gold"
+            class="full-width-btn-link"
             >Register</a
           >
           <a
             [routerLink]="resetPasswordLink"
-            class="full-width-btn-link sunflower"
+            class="full-width-btn-link"
             >Reset Password</a
           >
         </div>

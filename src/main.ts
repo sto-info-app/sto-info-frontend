@@ -15,7 +15,6 @@ import {
   RippleGlobalOptions,
 } from '@angular/material/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Router, RouterModule, provideRouter } from '@angular/router';
 import { JwtModule } from '@auth0/angular-jwt';
 
@@ -73,8 +72,9 @@ if (
 }
 
 export const appConfig: ApplicationConfig = {
+  // No animations provider: Angular Material has run its own CSS animations
+  // since v20, and nothing here uses @angular/animations triggers.
   providers: [
-    provideAnimationsAsync(),
     provideZoneChangeDetection(),
     provideRouter(routes),
     importProvidersFrom(

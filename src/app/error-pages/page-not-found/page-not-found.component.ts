@@ -12,7 +12,7 @@ import { AlertThemeService } from 'src/app/shared/services/alert-theme.service';
   selector: 'app-page-not-found',
   templateUrl: './page-not-found.component.html',
   styleUrls: [
-    '../../../assets/lcars/lcars-red-alert.css',
+    '../../../styles/alert-themes/lcars-red-alert.scss',
     './page-not-found.component.scss',
   ],
   standalone: true,
