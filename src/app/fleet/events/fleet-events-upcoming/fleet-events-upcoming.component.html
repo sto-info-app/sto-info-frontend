@@ -44,7 +44,11 @@
 }
 
 @if (calendarLink(); as link) {
-  <p>
-    <a [routerLink]="link">The full calendar</a>
-  </p>
+  <div class="buttons-row">
+    <a
+      class="lcars-btn lcars-btn-auto"
+      [routerLink]="link"
+      >The full calendar</a
+    >
+  </div>
 }

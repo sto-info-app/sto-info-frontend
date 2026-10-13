@@ -49,7 +49,7 @@ export class FleetEventsService {
     to: string,
   ): Observable<FleetEventCalendar> {
     return this._http.get<FleetEventCalendar>(this.eventsUrl(target), {
-      ...(this._authService.getHttpOptionsWithAccessToken() ?? {}),
+      ...this._authService.getHttpOptionsWithAccessToken(),
       params: new HttpParams().set('from', from).set('to', to),
     });
   }

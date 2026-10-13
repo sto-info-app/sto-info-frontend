@@ -164,13 +164,7 @@ export class FleetEventCalendarComponent extends FleetEventsPageDirective<FleetE
     const zone = this._settings.displayTimezone();
     const now = new Date();
     const month = calendarMonthOf(query.get('month'), now, zone);
-    const asked = query.get('view');
-    const view: FleetCalendarView =
-      asked === 'month' || asked === 'agenda'
-        ? asked
-        : prefersAgenda()
-          ? 'agenda'
-          : 'month';
+    const view = calendarViewOf(query.get('view'));
     const { from, to } = calendarRangeOf(month);
     const today = dayKeyOf(now, zone);
 
@@ -198,6 +192,21 @@ export class FleetEventCalendarComponent extends FleetEventsPageDirective<FleetE
       queryParamsHandling: 'merge',
     });
   }
+}
+
+/**
+ * The view the address asks for, or the one that suits the screen when it
+ * asks for neither.
+ *
+ * @param asked - The `view` in the query string.
+ * @returns The view.
+ */
+function calendarViewOf(asked: string | null): FleetCalendarView {
+  if (asked === 'month' || asked === 'agenda') {
+    return asked;
+  }
+
+  return prefersAgenda() ? 'agenda' : 'month';
 }
 
 /**

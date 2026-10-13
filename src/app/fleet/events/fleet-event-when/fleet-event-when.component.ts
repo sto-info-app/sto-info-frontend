@@ -55,11 +55,9 @@ export class FleetEventWhenComponent {
     }
 
     const sameDay = dayOf(start, reader) === dayOf(start, event);
+    const day = sameDay ? '' : dayOf(start, event) + ' ';
 
-    return `your time · ${sameDay ? '' : `${dayOf(start, event)} `}${timeOf(
-      start,
-      event,
-    )} ${event}`;
+    return `your time · ${day}${timeOf(start, event)} ${event}`;
   });
 }
 

@@ -35,6 +35,7 @@ import {
   FLEET_REMINDER_LEADS,
   FleetReminderLead,
 } from 'src/app/models/fleet-events.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import { MarkdownPipe } from 'src/app/shared/pipes/markdown.pipe';
@@ -72,6 +73,7 @@ export interface FleetEventDetailData {
     FleetPageShellComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class FleetEventDetailComponent extends FleetEventsPageDirective<FleetEventDetailData> {

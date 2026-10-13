@@ -144,7 +144,10 @@
     }
   }
 
+  // A fieldset, or a section the reader can fold away, whose host is laid
+  // out as a block so the margin tells.
   &__section {
+    display: block;
     margin: 1.5rem 0 0;
   }
 
@@ -154,6 +157,7 @@
   }
 
   &__preview {
+    display: block;
     margin: 1rem 0;
   }
 

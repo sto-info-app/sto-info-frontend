@@ -19,17 +19,19 @@
       @let event = state.data.event;
       @let characters = state.data.characters;
 
-      <p class="fleet-events__back">
-        <a [routerLink]="eventsLinkOf(scope)">Back to the calendar</a>
-      </p>
+      <div class="buttons-row fleet-events__back">
+        <a
+          class="lcars-btn lcars-btn-auto"
+          [routerLink]="eventsLinkOf(scope)"
+          >Back to the calendar</a
+        >
+      </div>
 
       <h2 class="fleet-events__title">{{ event.title }}</h2>
 
       @if (event.status === 'CANCELLED') {
-        <p
-          class="fleet-events__notice"
-          role="status">
-          This event was cancelled. Nothing of it lies ahead.
+        <p class="fleet-events__notice">
+          <output>This event was cancelled. Nothing of it lies ahead.</output>
         </p>
       }
 
@@ -78,7 +80,7 @@
           class="buttons-row fleet-events__actions"
           aria-label="Managing this event">
           <a
-            class="lcars-btn lcars-btn-auto gold"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="editLinkOf(scope, event.id)"
             >Change from now on</a
           >
@@ -108,7 +110,7 @@
             }
             <button
               type="button"
-              class="lcars-btn lcars-btn-auto green"
+              class="lcars-btn lcars-btn-auto"
               [disabled]="busy()"
               (click)="onSaveReminders(scope, event)">
               @if (chosenLeads().length === 0 && event.myReminders.length > 0) {
@@ -125,10 +127,9 @@
         </fieldset>
       }
 
-      <section
+      <app-collapsible-section
         class="fleet-events__section"
-        aria-labelledby="event-upcoming-heading">
-        <h3 id="event-upcoming-heading">What lies ahead</h3>
+        heading="What lies ahead">
         @if (event.upcoming.length === 0) {
           <p class="fleet-community-empty">Nothing of this event lies ahead.</p>
         } @else {
@@ -195,7 +196,7 @@
                   @if (event.mayManage && event.isOpen) {
                     @if (moving() === occurrence.id) {
                       <form
-                        class="fleet-events__answers"
+                        class="fleet-events__answers lcars-rotate"
                         [attr.aria-label]="
                           'Move the occurrence of ' + occurrence.localStart
                         "
@@ -203,7 +204,7 @@
                           $event.preventDefault();
                           onMove(scope, event, occurrence)
                         ">
-                        <div class="lcars-input-container sky">
+                        <div class="lcars-input-container">
                           <label [attr.for]="'move-date-' + occurrence.id"
                             >New day</label
                           >
@@ -214,7 +215,7 @@
                             [value]="moveDate()"
                             (input)="moveDate.set($any($event.target).value)" />
                         </div>
-                        <div class="lcars-input-container sky">
+                        <div class="lcars-input-container">
                           <label [attr.for]="'move-time-' + occurrence.id"
                             >New start, {{ event.timezone }}</label
                           >
@@ -233,7 +234,7 @@
                         </button>
                         <button
                           type="button"
-                          class="lcars-btn lcars-btn-auto bluey"
+                          class="lcars-btn lcars-btn-auto"
                           (click)="onCancelMove()">
                           Never mind
                         </button>
@@ -242,7 +243,7 @@
                       <div class="fleet-events__answers">
                         <button
                           type="button"
-                          class="lcars-btn lcars-btn-auto sky"
+                          class="lcars-btn lcars-btn-auto"
                           [disabled]="busy()"
                           (click)="onStartMove(occurrence)">
                           Move this one
@@ -264,13 +265,12 @@
             }
           </ol>
         }
-      </section>
+      </app-collapsible-section>
 
       @if (event.mayManage) {
-        <section
+        <app-collapsible-section
           class="fleet-events__section"
-          aria-labelledby="event-history-heading">
-          <h3 id="event-history-heading">Change log</h3>
+          heading="Change log">
           @if (history(); as actions) {
             @if (actions.length === 0) {
               <p class="fleet-community-empty">Nothing has changed yet.</p>
@@ -292,13 +292,13 @@
           } @else {
             <button
               type="button"
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
               [disabled]="busy()"
               (click)="onHistory(scope, event)">
               Show the change log
             </button>
           }
-        </section>
+        </app-collapsible-section>
       }
     }
   </app-fleet-page-shell>

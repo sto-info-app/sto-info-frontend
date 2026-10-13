@@ -19,7 +19,7 @@
   </p>
 
   @if (characters().length > 0) {
-    <div class="lcars-select-container gold">
+    <div class="lcars-select-container">
       <label [attr.for]="'answer-character-' + occurrence().id"
         >As which Character (optional)</label
       >
@@ -49,9 +49,8 @@
     </p>
   }
 
-  <div
+  <fieldset
     class="fleet-events__answers"
-    role="group"
     [attr.aria-label]="'Answer for ' + occurrence().localStart">
     @for (response of responses; track response) {
       <button
@@ -74,5 +73,5 @@
         Take my answer back
       </button>
     }
-  </div>
+  </fieldset>
 </fieldset>

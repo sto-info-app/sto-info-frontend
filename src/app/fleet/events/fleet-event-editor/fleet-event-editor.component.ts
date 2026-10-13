@@ -29,6 +29,7 @@ import {
   FleetEventRecurrence,
   FleetEventRole,
 } from 'src/app/models/fleet-events.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import { availableTimezones } from 'src/app/shared/utils/timezone.utils';
@@ -99,6 +100,7 @@ const RULES: readonly { key: FleetEventRecurrence; label: string }[] = [
     FleetPageShellComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class FleetEventEditorComponent extends FleetEventsPageDirective<FleetEventEditorData> {
@@ -383,18 +385,27 @@ export class FleetEventEditorComponent extends FleetEventsPageDirective<FleetEve
     this.monthDay.set(event.monthDay ?? 1);
     this.monthWeek.set(event.monthWeek ?? 1);
     this.monthWeekday.set(event.monthWeekday ?? 1);
-    this.ends.set(
-      event.endsOn !== null
-        ? 'ON'
-        : event.occurrenceLimit !== null
-          ? 'AFTER'
-          : 'NEVER',
-    );
+    this.ends.set(endsOf(event));
     this.endsOn.set(event.endsOn ?? '');
     this.occurrenceLimit.set(event.occurrenceLimit ?? 10);
     this.durationMinutes.set(event.durationMinutes);
     this.capacity.set(event.capacity === null ? '' : String(event.capacity));
   }
+}
+
+/**
+ * How a saved event ends, as the form asks it: on a date, after a number of
+ * occurrences, or never.
+ *
+ * @param event - The event.
+ * @returns The answer.
+ */
+function endsOf(event: FleetEventDetail): FleetEventEnds {
+  if (event.endsOn !== null) {
+    return 'ON';
+  }
+
+  return event.occurrenceLimit === null ? 'NEVER' : 'AFTER';
 }
 
 /**

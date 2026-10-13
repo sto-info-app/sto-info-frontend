@@ -19,9 +19,13 @@
       @let data = state.data;
 
       @if (scope.isCommunity) {
-        <p class="fleet-events__back">
-          <a [routerLink]="scope.scopeLink">Back to {{ scope.name }}</a>
-        </p>
+        <div class="buttons-row fleet-events__back">
+          <a
+            class="lcars-btn lcars-btn-auto"
+            [routerLink]="scope.scopeLink"
+            >Back to {{ scope.name }}</a
+          >
+        </div>
       }
 
       @if (data.calendar.mayManage) {
@@ -30,7 +34,7 @@
             class="buttons-row fleet-events__actions"
             aria-label="Organising events">
             <a
-              class="lcars-btn lcars-btn-auto gold"
+              class="lcars-btn lcars-btn-auto"
               [routerLink]="newLinkOf(scope)"
               >New event</a
             >
@@ -73,24 +77,24 @@
         </nav>
 
         <nav
-          class="fleet-events__months"
+          class="fleet-events__months lcars-rotate"
           aria-label="Which month">
           <button
             type="button"
-            class="lcars-btn lcars-btn-auto bluey"
+            class="lcars-btn lcars-btn-auto"
             (click)="onMonth(data, -1)">
             Previous month
           </button>
           <h2 class="fleet-events__month">{{ monthName(data.month) }}</h2>
           <button
             type="button"
-            class="lcars-btn lcars-btn-auto bluey"
+            class="lcars-btn lcars-btn-auto"
             (click)="onMonth(data, 1)">
             Next month
           </button>
           <button
             type="button"
-            class="lcars-btn lcars-btn-auto tangerine"
+            class="lcars-btn lcars-btn-auto"
             (click)="onToday()">
             This month
           </button>

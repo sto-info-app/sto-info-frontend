@@ -30,10 +30,10 @@
       }
 
       <form
-        class="fleet-events__editor"
+        class="fleet-events__editor lcars-rotate"
         aria-label="The event"
         (submit)="$event.preventDefault(); onSave(scope, event)">
-        <div class="lcars-input-container gold">
+        <div class="lcars-input-container">
           <label for="event-title">Title</label>
           <input
             id="event-title"
@@ -44,7 +44,7 @@
             (input)="title.set($any($event.target).value)" />
         </div>
 
-        <div class="lcars-input-container gold">
+        <div class="lcars-input-container">
           <label for="event-description"
             >Description (Markdown, optional)</label
           >
@@ -56,7 +56,7 @@
             (input)="description.set($any($event.target).value)"></textarea>
         </div>
 
-        <div class="lcars-input-container gold">
+        <div class="lcars-input-container">
           <label for="event-link"
             >Link, such as a Discord event (optional)</label
           >
@@ -68,7 +68,7 @@
             (input)="externalUrl.set($any($event.target).value)" />
         </div>
 
-        <div class="lcars-select-container sky">
+        <div class="lcars-select-container">
           <label for="event-audience">Who it is for</label>
           <select
             id="event-audience"
@@ -112,7 +112,7 @@
           </fieldset>
         }
 
-        <div class="lcars-select-container sky">
+        <div class="lcars-select-container">
           <label for="event-timezone">On the clock of</label>
           <select
             id="event-timezone"
@@ -148,8 +148,8 @@
             }
           </div>
 
-          <div class="fleet-events__answers">
-            <div class="lcars-input-container sky">
+          <div class="fleet-events__answers lcars-rotate">
+            <div class="lcars-input-container">
               <label for="event-start-date">{{
                 recurrence() === 'NONE' ? 'Day' : 'Starting'
               }}</label>
@@ -160,7 +160,7 @@
                 [value]="startDate()"
                 (input)="startDate.set($any($event.target).value)" />
             </div>
-            <div class="lcars-input-container sky">
+            <div class="lcars-input-container">
               <label for="event-start-time">Start</label>
               <input
                 id="event-start-time"
@@ -169,7 +169,7 @@
                 [value]="startTime()"
                 (input)="startTime.set($any($event.target).value)" />
             </div>
-            <div class="lcars-input-container sky">
+            <div class="lcars-input-container">
               <label for="event-duration">Minutes long (5 to 1440)</label>
               <input
                 id="event-duration"
@@ -182,7 +182,7 @@
           </div>
 
           @if (recurrence() !== 'NONE') {
-            <div class="lcars-input-container sky">
+            <div class="lcars-input-container">
               <label for="event-interval"
                 >Every how many
                 {{ recurrence() === 'WEEKLY' ? 'weeks' : 'months' }} (1 to
@@ -199,9 +199,8 @@
           }
 
           @if (recurrence() === 'WEEKLY') {
-            <div
+            <fieldset
               class="fleet-events__answers"
-              role="group"
               aria-label="On which days">
               @for (name of weekdayNames; track name; let index = $index) {
                 <label class="fleet-events__check">
@@ -214,11 +213,11 @@
                   {{ name }}
                 </label>
               }
-            </div>
+            </fieldset>
           }
 
           @if (recurrence() === 'MONTHLY_DAY') {
-            <div class="lcars-input-container sky">
+            <div class="lcars-input-container">
               <label for="event-month-day"
                 >On the day of the month (1 to 31)</label
               >
@@ -236,8 +235,8 @@
           }
 
           @if (recurrence() === 'MONTHLY_WEEKDAY') {
-            <div class="fleet-events__answers">
-              <div class="lcars-select-container sky">
+            <div class="fleet-events__answers lcars-rotate">
+              <div class="lcars-select-container">
                 <label for="event-month-week">On the</label>
                 <select
                   id="event-month-week"
@@ -251,7 +250,7 @@
                   }
                 </select>
               </div>
-              <div class="lcars-select-container sky">
+              <div class="lcars-select-container">
                 <label for="event-month-weekday">Weekday</label>
                 <select
                   id="event-month-weekday"
@@ -299,7 +298,7 @@
               </label>
             </div>
             @if (ends() === 'ON') {
-              <div class="lcars-input-container sky">
+              <div class="lcars-input-container">
                 <label for="event-ends-on">Last day</label>
                 <input
                   id="event-ends-on"
@@ -309,7 +308,7 @@
               </div>
             }
             @if (ends() === 'AFTER') {
-              <div class="lcars-input-container sky">
+              <div class="lcars-input-container">
                 <label for="event-limit">How many times (1 to 500)</label>
                 <input
                   id="event-limit"
@@ -323,7 +322,7 @@
           }
         </fieldset>
 
-        <div class="lcars-input-container gold">
+        <div class="lcars-input-container">
           <label for="event-capacity"
             >Places for Going (1 to 1000; empty for no limit)</label
           >
@@ -342,10 +341,10 @@
             [message]="refusal" />
         }
 
-        <div class="fleet-community-form-actions">
+        <div class="fleet-community-form-actions lcars-rotate">
           <button
             type="button"
-            class="lcars-btn lcars-btn-auto sky"
+            class="lcars-btn lcars-btn-auto"
             [disabled]="busy() || startDate() === ''"
             (click)="onPreview(scope)">
             Show what it comes to
@@ -357,7 +356,7 @@
             {{ event ? 'Save from now on' : 'Create the event' }}
           </button>
           <a
-            class="lcars-btn lcars-btn-auto bluey"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="cancelLinkOf(scope, event)"
             >Cancel</a
           >
@@ -365,12 +364,12 @@
       </form>
 
       @if (preview(); as shown) {
-        <section
+        <app-collapsible-section
           class="fleet-events__preview"
-          aria-labelledby="event-preview-heading">
-          <h2 id="event-preview-heading">
-            Over the next year, on the {{ shown.timezone }} clock
-          </h2>
+          sectionKey="preview"
+          [heading]="
+            'Over the next year, on the ' + shown.timezone + ' clock'
+          ">
           @if (shown.skippedMonths.length > 0) {
             <p class="fleet-events__notice">
               Skipped, having no such day: {{ shown.skippedMonths.join(', ') }}
@@ -402,7 +401,7 @@
               }
             </ol>
           }
-        </section>
+        </app-collapsible-section>
       }
     }
   </app-fleet-page-shell>

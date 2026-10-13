@@ -33,6 +33,7 @@ import {
   FleetOccurrenceDetail,
   FleetOccurrencePerson,
 } from 'src/app/models/fleet-events.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -80,6 +81,7 @@ export interface FleetEventOccurrenceData {
     FleetPageShellComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class FleetEventOccurrenceComponent extends FleetEventsPageDirective<FleetEventOccurrenceData> {

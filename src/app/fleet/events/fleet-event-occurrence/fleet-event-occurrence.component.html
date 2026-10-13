@@ -19,11 +19,13 @@
       @let detail = state.data.detail;
       @let occurrence = detail.occurrence;
 
-      <p class="fleet-events__back">
-        <a [routerLink]="eventLinkOf(scope, detail.event.id)"
+      <div class="buttons-row fleet-events__back">
+        <a
+          class="lcars-btn lcars-btn-auto"
+          [routerLink]="eventLinkOf(scope, detail.event.id)"
           >Back to {{ detail.event.title }}</a
         >
-      </p>
+      </div>
 
       <h2 class="fleet-events__title">{{ detail.event.title }}</h2>
 
@@ -35,16 +37,12 @@
       </p>
 
       @if (occurrence.status === 'CANCELLED') {
-        <p
-          class="fleet-events__notice"
-          role="status">
-          This occurrence was cancelled.
+        <p class="fleet-events__notice">
+          <output>This occurrence was cancelled.</output>
         </p>
       } @else if (detail.event.status === 'CANCELLED') {
-        <p
-          class="fleet-events__notice"
-          role="status">
-          This event was cancelled.
+        <p class="fleet-events__notice">
+          <output>This event was cancelled.</output>
         </p>
       }
       @if (occurrence.movedFromStartsAt) {
@@ -99,14 +97,13 @@
       }
 
       @if (detail.people.length > 0) {
-        <section
+        <app-collapsible-section
           class="fleet-events__section"
-          aria-labelledby="occurrence-people-heading">
-          <h3 id="occurrence-people-heading">Who answered</h3>
+          heading="Who answered">
           @for (group of groups; track group.key) {
             @let people = peopleIn(detail, group.key);
             @if (people.length > 0) {
-              <h4>{{ group.label }}</h4>
+              <h3>{{ group.label }}</h3>
               <ol class="fleet-events__people">
                 @for (person of people; track person.userId) {
                   <li>
@@ -116,20 +113,19 @@
               </ol>
             }
           }
-        </section>
+        </app-collapsible-section>
       }
 
       @if (state.data.sheet; as sheet) {
-        <section
+        <app-collapsible-section
           class="fleet-events__section"
-          aria-labelledby="occurrence-attendance-heading">
-          <h3 id="occurrence-attendance-heading">Who came</h3>
+          heading="Who came">
           <p class="fleet-community-field-hint">
             Kept apart from the answers. Only this calendar’s event managers and
             each person see it. Each is recorded as the Character they answered
             with, if any.
           </p>
-          <div class="lcars-input-container tangerine">
+          <div class="lcars-input-container">
             <label for="attendance-filter">Find by name</label>
             <input
               id="attendance-filter"
@@ -212,7 +208,7 @@
               </table>
             </div>
           }
-        </section>
+        </app-collapsible-section>
       }
     }
   </app-fleet-page-shell>

@@ -12,6 +12,13 @@ import {
 /** What kind of scope an event belongs to, for the wording of audiences. */
 export type FleetEventScopeKind = 'COMMUNITY' | 'FLEET' | 'ARMADA';
 
+/** What each kind of scope is called inside a sentence. */
+const SCOPE_NAMES: Readonly<Record<FleetEventScopeKind, string>> = {
+  COMMUNITY: 'the Community',
+  FLEET: 'the Fleet',
+  ARMADA: 'the Armada',
+};
+
 /** What to say when a change to an event could not be made. */
 export const FLEET_EVENTS_CHANGE_FAILED =
   'That could not be done. Please try again.';
@@ -89,12 +96,7 @@ export function fleetEventAudienceLabel(
   audience: FleetEventAudience,
   kind: FleetEventScopeKind,
 ): string {
-  const scope =
-    kind === 'COMMUNITY'
-      ? 'the Community'
-      : kind === 'FLEET'
-        ? 'the Fleet'
-        : 'the Armada';
+  const scope = SCOPE_NAMES[kind];
 
   switch (audience) {
     case 'PUBLIC':
@@ -137,7 +139,7 @@ export function ordinalOf(day: number): string {
 function listOf(items: readonly string[]): string {
   return items.length <= 1
     ? items.join('')
-    : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
+    : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`;
 }
 
 /**
@@ -164,30 +166,56 @@ export function fleetEventRuleOf(
     return `Once, on ${event.startDate}`;
   }
 
+  const unit = event.recurrence === 'WEEKLY' ? 'week' : 'month';
   const every =
-    event.recurrence === 'WEEKLY'
-      ? event.interval === 1
-        ? 'Every week'
-        : `Every ${event.interval} weeks`
-      : event.interval === 1
-        ? 'Every month'
-        : `Every ${event.interval} months`;
-  const on =
-    event.recurrence === 'WEEKLY'
-      ? listOf(event.weekdays.map(day => FLEET_WEEKDAY_NAMES[day - 1]))
-      : event.recurrence === 'MONTHLY_DAY'
-        ? `the ${ordinalOf(event.monthDay as number)}`
-        : `the ${FLEET_MONTH_WEEK_NAMES[event.monthWeek as number]} ${
-            FLEET_WEEKDAY_NAMES[(event.monthWeekday as number) - 1]
-          }`;
-  const ends =
-    event.endsOn !== null
-      ? `, until ${event.endsOn}`
-      : event.occurrenceLimit !== null
-        ? `, ${event.occurrenceLimit} times`
-        : '';
+    event.interval === 1 ? `Every ${unit}` : `Every ${event.interval} ${unit}s`;
 
-  return `${every} on ${on}, from ${event.startDate}${ends}`;
+  return `${every} on ${ruleDaysOf(event)}, from ${event.startDate}${ruleEndOf(event)}`;
+}
+
+/**
+ * Says which days a repeating event falls on.
+ *
+ * @param event - The event, which repeats.
+ * @returns Such as "Monday and Friday", "the 3rd" or "the second Tuesday".
+ */
+function ruleDaysOf(
+  event: Pick<
+    FleetEventDetail,
+    'recurrence' | 'weekdays' | 'monthDay' | 'monthWeek' | 'monthWeekday'
+  >,
+): string {
+  if (event.recurrence === 'WEEKLY') {
+    return listOf(event.weekdays.map(day => FLEET_WEEKDAY_NAMES[day - 1]));
+  }
+
+  if (event.recurrence === 'MONTHLY_DAY') {
+    return `the ${ordinalOf(event.monthDay as number)}`;
+  }
+
+  const week = FLEET_MONTH_WEEK_NAMES[event.monthWeek as number];
+  const weekday = FLEET_WEEKDAY_NAMES[(event.monthWeekday as number) - 1];
+
+  return `the ${week} ${weekday}`;
+}
+
+/**
+ * Says when a repeating event stops, as the end of its sentence.
+ *
+ * @param event - The event.
+ * @returns Such as ", until 2026-12-31" or ", 10 times"; nothing when it
+ * never stops.
+ */
+function ruleEndOf(
+  event: Pick<FleetEventDetail, 'endsOn' | 'occurrenceLimit'>,
+): string {
+  if (event.endsOn !== null) {
+    return `, until ${event.endsOn}`;
+  }
+
+  return event.occurrenceLimit === null
+    ? ''
+    : `, ${event.occurrenceLimit} times`;
 }
 
 /**
