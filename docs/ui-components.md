@@ -13,6 +13,10 @@ Two rules run through all of it:
   far apart — plus the shapes the rest of the site has no equivalent for.
 - **A colour says what kind of thing something is, not what state it is in**, so
   it means the same on every page.
+- **Colours mix (12 October 2026).** Elements side by side take successive
+  LCARS colours, as the dashboard's tiles do, rather than one colour repeated.
+  Green and red are kept for accepting and refusing; a status keeps its own
+  colour. See [Palette rotation](#palette-rotation).
 
 ---
 
@@ -24,7 +28,7 @@ Two rules run through all of it:
 | LCARS colour classes | `src/styles/lcars-theme-colours.scss` | `.<name>` (background) and `.go-<name>` (text) for the full LCARS palette. |
 | Angular Material base | `src/styles/angular-mat-base.scss` | Material's generated theme. Overrides for it sit at the top of `lcars-theme.scss`. |
 | App globals | `src/styles/styles.scss` | Forms, buttons, list-page patterns, badges, utilities — anything more than one feature uses. |
-| Shared SCSS API | `src/styles/_lcars-variables.scss`, `_lcars-mixins.scss`, `_lcars-tabs.scss`, `_registry-layout.scss`, `_news-colours.scss`, `_notification-card.scss`, `_sto-rarity-colours.scss`, `_lcars-palette-properties.scss` | Variables and mixins. No output of their own except where noted. |
+| Shared SCSS API | `src/styles/_lcars-variables.scss`, `_lcars-mixins.scss`, `_lcars-rotation.scss`, `_lcars-tabs.scss`, `_registry-layout.scss`, `_news-colours.scss`, `_notification-card.scss`, `_sto-rarity-colours.scss`, `_lcars-palette-properties.scss` | Variables and mixins. No output of their own except where noted. |
 | Feature partials | `src/styles/_storytime.scss`, `_custom-tracking.scss`, `_help.scss`, `_fleet-community.scss` | One partial per feature whose pages are built from the same handful of shapes. Every rule scoped by the feature's class prefix (`storytime-`, `custom-tracking-`, `help-`, `fleet-community-`). |
 | Rendered Markdown | `src/styles/_markdown.scss` | The classes both Markdown renderers emit for the site's own constructs (`.sto-indent`, `.sto-spacer`). Global rather than per feature: the same writing is shown on a News post, in a Chapter and in the editor preview beside it, and `[innerHTML]` content never carries a component's encapsulation attribute anyway. |
 | Component SCSS | `<component>/<component>.component.scss` | Everything else — one component's own layout. |
@@ -48,24 +52,146 @@ stylesheet imports by name and never by relative path:
 
 ## Colour
 
+### No literal colours
+
+**A colour is written down once, in `src/styles/_lcars-variables.scss`, and
+named everywhere else.** No other stylesheet writes a hexadecimal or calls
+`rgb()`, `rgba()`, `hsl()` or `hsla()`: stylelint's `color-no-hex` and
+`function-disallowed-list` reject both, and only `_lcars-variables.scss` and
+the generated `angular-mat-base.scss` are exempt. A colour the palette lacks is
+added to `_lcars-variables.scss` under a name — never snapped to a near one —
+and two names with one value make the second an alias of the first.
+
+- **A solid colour** is `vars.$lcars-ice`. Inside a custom property or an
+  `@supports` query it needs interpolating: `--accent: #{vars.$lcars-ice};`.
+- **A tint of pure white or black** is a variable named by its alpha as a
+  percentage: `vars.$white-a10`, `vars.$black-a40`.
+- **A tint of any other named colour** is
+  `color.change(vars.$lcars-c46, $alpha: 0.2)` (with `@use 'sass:color'`), not
+  `rgba()`, which the lint rule refuses.
+- **A colour inside a `data:` SVG** is
+  `fill='#{mixins.url-colour(vars.$a11y-white)}'`, which writes the
+  percent-encoded `%23fff`.
+- **A colour TypeScript needs as a value** — the smart chart's segment fills,
+  a catalogue accent's fallback and ink — comes from `LCARS_COLOURS` in
+  `src/app/shared/constants/lcars-colours.constants.ts`. Each entry mirrors a
+  Sass variable, and its spec reads `_lcars-variables.scss` and fails if the
+  two disagree. Wherever CSS applies the colour, read a `--lcars-*` property
+  instead (see below).
+
+The alert-condition themes follow the rule too. They live in
+`src/styles/alert-themes/` and take their colours from the `$alert-theme-*`
+slots. `angular.json` builds each as a stylesheet bundle that it does not inject
+(`lcars-red-alert.css`, `lcars-red-alert-static.css`, …), and
+`AlertThemeService` links one into the page when an alert begins.
+
+### Palette rotation
+
+Steve's decision of 12 October 2026: a page should not be one colour
+repeated. Elements that sit side by side take successive colours from one
+order — **sunflower, perano, orange, sky, gold, bluey, tangerine, cool** —
+through the custom property `--lcars-accent`. Every colour in it carries black
+text at 5.8:1 or better, and neighbours differ in hue as well as lightness.
+
+`src/styles/_lcars-rotation.scss` holds the order (`$lcars-rotation`) and the
+mixin `rotation.rotate-accent($selector, $position, $condition)`, with no
+output of its own; `styles.scss` emits the rules once.
+
+**What rotates without being asked**
+
+| Where | How |
+|---|---|
+| `.buttons` (a side stack) and `.buttons-row` (an inline row) | Each child takes the next colour. A row of one — a section's lone "All news" — takes the section's colour instead, so it matches its bar. |
+| `<app-collapsible-section>`s on a page | They rotate among themselves (`nth-of-type`), whatever sits between them, and what each holds takes its colour. The bar itself stays the frame's blue on every section (Steve, 13 October 2026), so the page's headings read as one with the LCARS frame around it. A section alone in its host — a panel component's one section — takes its host's colour instead, so a row of such components rotates too. |
+
+**What reads the accent** — each falls back to the colour it had before when
+nothing around it rotates: `.lcars-btn` (background), `.full-width-btn-link`
+in a stack, `.buttons a`, `.lcars-input-container` (`--lci-color`),
+`.lcars-select-container` (background) and `<app-lcars-panel>`. Section bars
+and tab strips do **not** (Steve, 13 October 2026): they belong to the LCARS
+frame around the content, so every bar is the frame's blue with a light-blue
+title, and every tab strip has perano labels with the open tab in sunflower,
+whatever rotates around them. Because the property inherits, a
+section's pills and fields take the section's colour unless they rotate among
+themselves.
+
+**Choosing colours yourself**
+
+- `class="lcars-rotate"` on any container rotates its direct children: a
+  form's fields, a grid of panels or tiles, a row of choosers. A container of
+  one leaves its child the colour around it.
+- `class="accent-<name>"` (any colour in the order, plus `green` and `red`)
+  pins one element's accent. The rotations add no weight of their own
+  (`:where()`) and the accent classes are declared after them, so an accent
+  class always wins.
+- A colour class on the element itself (`class="lcars-btn sky"`) still names
+  its colour outright. Keep those for colours that mean something — a status,
+  a news category, a rarity, a faction — and leave the rest to the rotation.
+
+**Green and red** are not in the order (Steve's decisions of 12 and 13
+October 2026):
+
+- **Green** — a control that commits or confirms: Save, Create, Send, Submit,
+  Upload, Publish, the yes of a dialog; and one that accepts something offered
+  or asked: Accept, Approve, Join, Grant.
+- **Red** — a control that refuses, rejects, deletes, removes or otherwise
+  destroys, and the no of a yes-or-no confirmation (`ConfirmDialogComponent`'s
+  Cancel).
+- **Neither** — everything else rotates, including a form's Cancel or Close,
+  which only abandons an edit, and a filter's Search, Apply or Clear, which
+  commit nothing.
+
+Two reds never sit side by side: where a confirmation's yes is itself the red
+one — Remove, Withdraw, Take it down — its Cancel rotates. The dialogs that
+ask for a reason take the tone of what they confirm: the governance reason
+dialog's `confirmTone` (`'accept'` by default, `'refuse'` for a destructive
+action) and the admin reason prompt's tone set the confirm green or red and
+the Cancel opposite or rotating to match. A colour that shows a state — a
+pressed toggle, the selected filter, a thumbs-down given, a Fleet's
+recruiting pill — is not a call to action, and keeps its own meaning.
+
+**Links that stand on their own are pills.** A link that is an action or a
+destination in its own right — "All news", "The full calendar", "Back to the
+Community" — is an `.lcars-btn` pill, in a `.buttons-row` when several sit
+together. A link inside a sentence stays a link.
+
 ### The SCSS palette
 
-`_lcars-variables.scss` is the single place any LCARS colour is written down:
-`$lcars-sunflower`, `$lcars-perano`, `$lcars-bluey`, `$lcars-orange`,
-`$lcars-green`, `$lcars-violet`, `$lcars-cardinal`, `$lcars-cool`, `$lcars-gold`,
-`$lcars-tangerine`, `$lcars-red`, `$lcars-sky`, plus `$lcars-c47` / `$lcars-c48`.
+`_lcars-variables.scss` holds the LCARS palette — `$lcars-sunflower`,
+`$lcars-perano`, `$lcars-bluey`, `$lcars-orange`, `$lcars-green`,
+`$lcars-violet`, `$lcars-cardinal`, `$lcars-cool`, `$lcars-gold`,
+`$lcars-tangerine`, `$lcars-red`, `$lcars-sky` — and every other colour of
+thelcars.com's palette under its class name (`$lcars-almond`, `$lcars-ice`,
+`$lcars-mars`, `$lcars-c43` … `$lcars-c72`), plus `$lcars-bahama` and the
+smart chart's `$lcars-chart-aqua`.
 
 It also holds the structural colours (`$lcars-black`, `$lcars-white`,
-`$lcars-grey-bg`, `$lcars-grey-border`, `$lcars-grey-light`), the raised-surface
-set used by cards and list rows (`$lcars-card-surface`,
-`$lcars-card-surface-hover`, `$lcars-card-border` — deliberately stronger than
-`$lcars-grey-bg`, which is too faint once a card carries controls of its own),
-the career and faction colours, the STO item-rarity colours, and
-`$font-antonio`.
+`$lcars-grey-bg`, `$lcars-grey-border`, `$lcars-grey-light`,
+`$lcars-grey-dark`), the raised-surface set used by cards and list rows
+(`$lcars-card-surface`, `$lcars-card-surface-hover`, `$lcars-card-border` —
+deliberately stronger than `$lcars-grey-bg`, which is too faint once a card
+carries controls of its own), the career and faction colours, the STO
+item-rarity colours, and `$font-antonio`. Beside them, named for what they are
+used as:
+
+| Group | Variables |
+|---|---|
+| Tints | `$white-a3` … `$white-a87`, `$black-a5` … `$black-a90` |
+| Progress pages | `$lcars-panel-bg`, `$lcars-text`, `$lcars-text-muted` (also the fallbacks of the matching `--lcars-*` properties) |
+| Cards | `$lcars-card-header-bg`, `$lcars-portrait-shade`, `$lcars-banner-shade` |
+| Solid washes | `$lcars-grey-pill`, `$lcars-grey-raised` |
+| Fields | `$lcars-field-bg`, `$lcars-field-bg-focus`, `$lcars-field-error-text`, `$lcars-field-error-bg`, `$lcars-field-error-border` |
+| Chrome | `$lcars-text-bar-label`, `$lcars-scrollbar-track`, `$lcars-scrollbar-thumb`, `$lcars-scrollbar-thumb-hover` |
+| Help popups | `$lcars-help-bg`, `$lcars-help-bg-hover`, `$lcars-help-border`, `$lcars-help-text`, `$lcars-help-note` |
+| Registry | `$lcars-public-green`, `$lcars-public-green-deep`, `$lcars-private-red` |
+| Messages | `$lcars-error-text`, `$lcars-lock-message`, `$lcars-interruption-title`, `$lcars-biography-text`, `$lcars-loading-blue`, `$lcars-quote-blue` |
+| Platforms | `$platform-playstation`, `$platform-xbox`, `$platform-steam` |
+| Alert panel | `$alert-<red\|yellow\|green\|blue\|grey>-main` / `-bright` / `-sub`, and `$alert-grey-title` |
 
 ### Colour classes in templates
 
-`lcars-theme-colours.scss` emits, for every LCARS colour name:
+`lcars-theme-colours.scss` emits, for every LCARS colour name (each written
+as the `$lcars-<name>` variable of the same name, `bahama` included):
 
 - `.<name>` — background colour (e.g. `class="lcars-btn sunflower"`)
 - `.go-<name>` — text colour (e.g. `class="go-mars"`)
@@ -191,8 +317,10 @@ its label on one line.
 than the main field styles on purpose.
 
 **Bare form scaffolding** — `.form-container`, `.form`, `.form-group` and the
-plain `input` rule in `styles.scss` are the pre-LCARS fallback still used by the
-auth pages. New forms should use `.lcars-input-container` instead.
+plain `input` rule in `styles.scss` are the pre-LCARS fallback. The auth pages
+keep `.form-container` / `.form` for layout only; their fields are
+`.lcars-input-container`s in a `lcars-rotate` form, as every new form's should
+be.
 
 > **Not global:** `.form-row`, `.field-hint` and `.compact` are re-declared per
 > feature (seven and three places respectively). They are a convention, not a
@@ -323,13 +451,48 @@ beneath it, which the reader can fold away.
 
 | Input | Type | Notes |
 |---|---|---|
-| `heading` | `string` (required) | Shown in the bar. |
+| `heading` | `string` (required) | Shown in the bar, as the section's `<h2>`, and names the section's region. |
 | `barClass` | `string` | Classes for the bar itself — `small-lcars-bar-gap` where sections stack. |
+| `badge` | `string \| number \| null` | A count or short mark in the bar's round `.header-count-badge`, beside the heading. Null draws none. Not part of the region's name. |
+| `sectionKey` | `string` | Names the section for the folds remembered on its page. The heading does by default; give a key where two sections on a page share a heading or the heading changes with the data. |
+
+A control of the host's own on the bar — an edit pen — is projected with the
+`sectionActions` attribute and sits ahead of the caret.
+
+**Every section that heads a block of content is one of these** (12 October
+2026). Bars that are only dividers, or head a single line, stay plain
+`.lcars-text-bar`s.
+
+Each section is a `<section>` labelled by its heading text alone, so it is a
+named region: `getByRole('region', { name: 'News' })` finds it whether or not
+its bar carries a badge. Do not wrap one in another region of the same name.
 
 Sections open expanded: a reader arriving at a page wants to read it, not open
-it first. The component owns the caret button, the icon swap and the
-`aria-expanded` / `aria-controls` pairing, which is why this is a component
-rather than repeated markup.
+it first. What a reader folds stays folded on their next visit to that page:
+`SectionFoldService` keeps the folded keys in `localStorage` under
+`lcars-folded-sections:<path>` (the path without its query, so a filtered or
+paged view shares the page's folds), and storage that is missing or refused
+leaves everything open. Folded content is **hidden, not removed**, so a form
+part way through keeps what was typed into it; a spec asserts `hidden` on
+`.collapsible-section__content` rather than that the content is gone.
+`setup-jest.ts` forgets every fold after each test. The component owns the
+caret button, the icon swap and the `aria-expanded` / `aria-controls`
+pairing, which is why this is a component rather than repeated markup.
+
+**`<app-lcars-panel>`** — a block of a page drawn as an LCARS panel card: a
+coloured spine, a solid heading block carrying its name, and a tinted body.
+Steve's decision of 12 October 2026 replaced the bare dark boxes a page used to
+put a block in — a follow box, a filter box, a list of alerts — with it.
+
+| Input | Type | Notes |
+|---|---|---|
+| `heading` | `string` (required) | The name on the heading block, labelling the panel's region. |
+| `level` | `2 \| 3 \| 4` | The heading's level in the page's outline. Default 3. |
+| `accent` | rotation colour \| `null` | A colour of its own; otherwise it takes `--lcars-accent`, so a run of panels in a `lcars-rotate` container varies by itself. |
+
+Marks for the heading block — a count, a state — are projected with the
+`panelMarks` attribute. List cards keep the `lcars-panel-card` mixins; the
+component is for a block of a page.
 
 ### Cards
 
@@ -402,7 +565,7 @@ place `.lcars-number-highlight` gives up its sunflower.
 | `<app-entity-avatar>` (3) | `src`, `alt` (required), `size` (`100 \| 300`) | Profile picture with a size-matched placeholder fallback. Resets its failure flag when `src` changes. Replaces the open-coded `<img>` plus `(error)` handler pages used to repeat. |
 | `<app-endeavour-rank-badge>` (3) | `totalNodes`, `size` (`'default' \| 'small'`) | Zero-padded four-digit rank readout. `small` rescales through host CSS variables rather than a second stylesheet. |
 | `<app-smart-chart>` (1) | `data: ChartDataItem[]`, `threshold` (5), `mode` (`'pie' \| 'donut' \| 'bar' \| 'auto'`) | Signal inputs. Switches between an SVG pie/donut and a bar chart on the number of data points; every segment path, bar width and colour class is computed once in a `computed`. Falls back to `<app-lcars-information-message>` when there is no data. |
-| `<app-help-link>` | `slug`, `label` (both required) | A small link, on its own line, to one Help guide (FC-049, FC-050). Goes under a page's or panel's heading. Settings uses it under each panel; `<app-fleet-page-shell>` draws one when given `helpSlug` and `helpLabel`. |
+| `<app-help-link>` | `slug`, `label` (both required) | A small help pill, on its own line, to one Help guide (FC-049, FC-050): half a pill's height and always `$lcars-c48`, which is outside the rotation, so it reads as "help" wherever it appears. Goes under a page's or panel's heading. Settings uses it under each panel; `<app-fleet-page-shell>` draws one when given `helpSlug` and `helpLabel`. |
 
 ### Feature locks
 
@@ -636,7 +799,9 @@ Running the site (FC-050) live in `help-fleets.data.ts` and
 the `guideSection` helper they share. Their styles are in `_help.scss`.
 
 - **The Help home** (`/help`, `HelpComponent`) is one tile per section, then
-  "Still stuck?" (FC-048). A tile is a panel card in its section's colour: the
+  "Still stuck?" (FC-048). A tile is a panel card in the next colour of the
+  [rotation](#palette-rotation) (12 October 2026; sections used to keep a
+  colour each): the
   section's title, how many guides it holds for this reader ("6 guides"), and
   its introduction. The whole tile is the link.
 - **A section** (`/help/topics/<id>`, `HelpTopicComponent`) lists its guides as
@@ -672,9 +837,9 @@ about is read as usual, under the `app-feature-unavailable` "Connection Lost"
 notice (`unreachableFeature`): transient unavailability must not hide useful
 help (plan §5; Steve's decision of 2 October 2026, FC-044).
 
-**Fleets and Running the site** (FC-050). Fleets is second, sky like every
-Fleet page, and waits on Fleet Community as a whole; Running the site is last,
-bluey like Running Storytime, and for site administrators alone. Every guide in
+**Fleets and Running the site** (FC-050). Fleets is second and waits on Fleet
+Community as a whole; Running the site is last, and for site administrators
+alone. Every guide in
 both has the same six parts in order — What it is for, Who can use it, Where to
 find it, one or more How sections, Who can see it, When something goes wrong —
 and `help-fleets.data.spec.ts` checks it, with curly quotes throughout. Each
@@ -709,20 +874,17 @@ What follows is only what Fleet adds.
 
 ### Colour
 
-**The whole feature is sky** — `$lcars-sky`, which is the lavender `#aaf` — the
-way Custom Tracking is tangerine and the help section is perano: fields,
-choosers, tab strips, table headers, the chat list's open channel. Around that
-the shared vocabulary keeps its own meanings, as on every other page: a
-primary action is a gold or orange pill, a page-level link a blue one, a
-section bar's title perano, a Community's or Fleet's name under a heading gold,
-a destructive action red. Community, Fleet and Armada are *not* three colours: they
+Fleet used to be drawn in sky throughout — fields, choosers, tab strips,
+table headers. Steve's decision of 12 October 2026 retired that: Fleet's
+pages take the [palette rotation](#palette-rotation) like every other page,
+with green and red kept for accepting and refusing. Community, Fleet and Armada are *not* three colours: they
 are told apart by a label and an icon, which leaves the palette free to mean
 something — a Fleet that is recruiting, closed or disputed, an upload that has
 passed or been refused — and keeps the distinction legible to a reader who
 cannot separate two mid-tone blues.
 
-`_fleet-community.scss` names every colour from `lcars-variables`. No Fleet
-stylesheet writes a hexadecimal.
+`_fleet-community.scss` names every colour from `lcars-variables`, as every
+stylesheet must (see [No literal colours](#no-literal-colours)).
 
 ### Layout
 
