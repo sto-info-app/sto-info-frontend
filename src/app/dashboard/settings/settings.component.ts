@@ -30,6 +30,7 @@ import {
 } from 'src/app/shared/constants/session-timeout.constants';
 import { PresenceVisibility } from '../models/user.model';
 import { PRESENCE_OPTIONS } from './settings.constants';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 @Component({
   selector: 'app-settings',
@@ -38,6 +39,7 @@ import { PRESENCE_OPTIONS } from './settings.constants';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CollapsibleSectionComponent,
     CommonModule,
     ReactiveFormsModule,
     RouterModule,

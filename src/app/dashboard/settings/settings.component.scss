@@ -1,3 +1,5 @@
+@use 'lcars-variables' as vars;
+
 // `main` gives the page a left gutter but no right one, and the two columns
 // here sit directly against each other. Both gaps are the column stack's to
 // supply: without them a heading bar drawn to its column's full width would
@@ -30,10 +32,6 @@
     .settings-side-column {
       max-width: none;
     }
-  }
-
-  .settings-bar {
-    margin-top: 60px;
   }
 
   // An LCARS bar carries its name on a black cut-out that starts after the
@@ -77,19 +75,11 @@
       margin-top: 1.5rem;
     }
 
-    label {
-      color: #6cf;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    select {
+    // The chooser is the site's LCARS field, kept to the width a zone's
+    // name needs rather than stretched across the section.
+    .lcars-input-container {
       max-width: 360px;
-      padding: 8px 10px;
-      border: 1px solid #9de0ff;
-      border-radius: 4px;
-      background: #1d2d3e;
-      color: #f2f8ff;
+      margin-bottom: 0;
     }
   }
 
@@ -99,7 +89,7 @@
   .settings-description {
     max-width: 70ch;
     margin: 0;
-    color: #b8e8ff;
+    color: vars.$lcars-help-note;
     font-size: 0.9rem;
   }
 
@@ -110,8 +100,8 @@
 
     &[open] {
       .settings-help-trigger {
-        background-color: #6fff8f;
-        color: #000;
+        background-color: vars.$lcars-public-green;
+        color: vars.$a11y-black;
       }
     }
   }
@@ -122,8 +112,8 @@
     justify-content: center;
     width: 20px;
     height: 20px;
-    color: #b8e8ff;
-    background: #1d2d3e;
+    color: vars.$lcars-help-note;
+    background: vars.$lcars-help-bg;
     border-radius: 3px;
     cursor: pointer;
     font-size: 16px;
@@ -135,11 +125,11 @@
     transition: background-color 120ms ease;
 
     &:hover {
-      background-color: #263e54;
+      background-color: vars.$lcars-help-bg-hover;
     }
 
     &:focus-visible {
-      outline: 2px solid #6cf;
+      outline: 2px solid vars.$lcars-c48;
       outline-offset: 2px;
     }
 
@@ -155,11 +145,11 @@
     z-index: 10;
     width: min(360px, calc(100vw - 80px));
     padding: 10px 12px;
-    border: 1px solid #9de0ff;
+    border: 1px solid vars.$lcars-help-border;
     border-radius: 8px;
-    background: #1d2d3e;
-    color: #f2f8ff;
-    box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
+    background: vars.$lcars-help-bg;
+    color: vars.$lcars-help-text;
+    box-shadow: 0 8px 20px vars.$black-a45;
     font-size: 0.85rem;
     line-height: 1.4;
 
@@ -171,7 +161,7 @@
     }
 
     strong {
-      color: #6cf;
+      color: vars.$lcars-c48;
       font-weight: 700;
       text-transform: uppercase;
     }

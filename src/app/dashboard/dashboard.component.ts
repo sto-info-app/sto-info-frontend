@@ -25,9 +25,11 @@ import { SRC_PHOTO_UNAVAILABLE_300PX } from '../shared/constants/app-image-asset
 import { APP_ROUTES } from '../shared/constants/app-routing.constants';
 import { FleetConfigurationService } from '../shared/services/fleet-configuration.service';
 import { RoutingService } from '../shared/services/routing.service';
+import { randomInt } from '../shared/utils/random.utils';
 import { User } from './models/user.model';
 import { DashboardService } from './services/dashboard.service';
 import { StoAccountService } from './services/sto-account.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -35,7 +37,12 @@ import { StoAccountService } from './services/sto-account.service';
   styleUrls: ['./dashboard.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, LoadingBarComponent],
+  imports: [
+    CollapsibleSectionComponent,
+    CommonModule,
+    RouterModule,
+    LoadingBarComponent,
+  ],
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   appRoutes = APP_ROUTES;
@@ -146,8 +153,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'Peldor joi', // Bajoran greeting during the Gratitude Festival
     ];
 
-    const randomGreeting: string =
-      greetings[Math.floor(Math.random() * greetings.length)];
+    const randomGreeting: string = greetings[randomInt(greetings.length)];
 
     if (this.user?.profile?.lastName)
       return randomGreeting + ', Captain ' + this.user.profile.lastName + '!';

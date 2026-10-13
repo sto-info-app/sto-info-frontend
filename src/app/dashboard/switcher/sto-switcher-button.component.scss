@@ -40,7 +40,7 @@
 
   &:hover,
   &:focus-visible {
-    background-color: rgb(255 255 255 / 10%);
+    background-color: vars.$white-a10;
   }
 
   &:focus-visible {

@@ -18,7 +18,9 @@ import {
   AccountCardDetail,
   AccountCardVm,
 } from 'src/app/shared/components/account-card/account-card.model';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { LcarsCollapsibleBarComponent } from 'src/app/shared/components/lcars-collapsible-bar/lcars-collapsible-bar.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
   APP_ROUTES,
@@ -99,6 +101,8 @@ export const ACCOUNT_SORT_OPTIONS: readonly AccountSortOption[] = [
     MatDialogModule,
     RouterModule,
     FormsModule,
+    CollapsibleSectionComponent,
+    LcarsCollapsibleBarComponent,
     LoadingBarComponent,
     AccountCardComponent,
     StoSwitcherButtonComponent,

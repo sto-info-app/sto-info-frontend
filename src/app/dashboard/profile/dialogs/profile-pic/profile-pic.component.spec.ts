@@ -9,7 +9,6 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import { DomSanitizer } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { of, throwError } from 'rxjs';
@@ -27,7 +26,6 @@ describe('ProfilePicComponent', () => {
   let fixture: ComponentFixture<ProfilePicComponent>;
   let mockDashboardService: jest.Mocked<DashboardService>;
   let mockDialogRef: jest.Mocked<MatDialogRef<ProfilePicComponent>>;
-  let mockSanitizer: jest.Mocked<DomSanitizer>;
   let mockAssetScan: jest.Mocked<AssetScanService>;
 
   beforeEach(async () => {
@@ -38,10 +36,6 @@ describe('ProfilePicComponent', () => {
     mockDialogRef = {
       close: jest.fn(),
     } as unknown as jest.Mocked<MatDialogRef<ProfilePicComponent>>;
-
-    mockSanitizer = {
-      bypassSecurityTrustUrl: jest.fn().mockImplementation(val => val),
-    } as unknown as jest.Mocked<DomSanitizer>;
 
     mockAssetScan = {
       watch: jest.fn(),
@@ -54,7 +48,6 @@ describe('ProfilePicComponent', () => {
         { provide: DashboardService, useValue: mockDashboardService },
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: DomSanitizer, useValue: mockSanitizer },
         { provide: AssetScanService, useValue: mockAssetScan },
       ],
     }).compileComponents();
@@ -152,7 +145,6 @@ describe('ProfilePicComponent', () => {
 
     setTimeout(() => {
       expect(component.croppedImage).toBe('data:image/png;base64,test');
-      expect(mockSanitizer.bypassSecurityTrustUrl).toHaveBeenCalled();
       done();
     });
   });

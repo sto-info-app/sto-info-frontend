@@ -6,7 +6,6 @@ import {
   tick,
 } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { DomSanitizer } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { of, throwError } from 'rxjs';
@@ -38,7 +37,6 @@ describe('CharacterPicComponent', () => {
   let mockDialogRef: jest.Mocked<
     Pick<MatDialogRef<CharacterPicComponent>, 'close'>
   >;
-  let mockSanitizer: jest.Mocked<Pick<DomSanitizer, 'bypassSecurityTrustUrl'>>;
   let mockAssetScan: jest.Mocked<Pick<AssetScanService, 'watch'>>;
 
   const mockCharacter = {
@@ -65,19 +63,12 @@ describe('CharacterPicComponent', () => {
       close: jest.fn(),
     };
 
-    mockSanitizer = {
-      bypassSecurityTrustUrl: jest
-        .fn()
-        .mockImplementation((url: string) => url),
-    };
-
     await TestBed.configureTestingModule({
       imports: [CharacterPicComponent, NoopAnimationsModule],
       providers: [
         { provide: CharacterService, useValue: mockCharacterService },
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: { character: mockCharacter } },
-        { provide: DomSanitizer, useValue: mockSanitizer },
         { provide: AssetScanService, useValue: mockAssetScan },
       ],
       schemas: [NO_ERRORS_SCHEMA],
@@ -205,9 +196,7 @@ describe('CharacterPicComponent', () => {
       tick(); // wait for filereader
 
       expect(component.croppedImageBlob).toBe(blob);
-      expect(mockSanitizer.bypassSecurityTrustUrl).toHaveBeenCalledWith(
-        'data:image/png;base64,mock',
-      );
+      expect(component.croppedImage).toBe('data:image/png;base64,mock');
     }));
 
     it('should log error if blob is missing', () => {

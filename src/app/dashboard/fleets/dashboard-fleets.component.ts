@@ -29,6 +29,7 @@ import {
   FeatureUnavailableReason,
 } from 'src/app/shared/constants/feature-availability.constants';
 import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /** What the page has to show. */
 export type DashboardFleetsState =
@@ -72,6 +73,7 @@ export type DashboardFleetsState =
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CollapsibleSectionComponent,
     AsyncPipe,
     RouterLink,
     FleetActivityFeedComponent,

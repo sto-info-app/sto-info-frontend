@@ -3,7 +3,7 @@
   [formGroup]="group">
   @switch (field.fieldType) {
     @case (fieldType.TEXT_SINGLE_LINE) {
-      <div class="lcars-input-container perano">
+      <div class="lcars-input-container">
         <label [attr.for]="controlId('text')">{{ field.name }}</label>
         <input
           type="text"
@@ -17,7 +17,7 @@
     }
 
     @case (fieldType.MARKDOWN) {
-      <div class="lcars-input-container perano">
+      <div class="lcars-input-container">
         <label [attr.for]="controlId('markdown')">{{ field.name }}</label>
         <textarea
           rows="6"
@@ -31,7 +31,7 @@
       <app-storytime-markdown-hint></app-storytime-markdown-hint>
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto bluey"
+        class="lcars-btn lcars-btn-auto"
         [attr.aria-expanded]="isPreviewing"
         (click)="togglePreview()">
         {{ isPreviewing ? 'Back to writing' : 'Preview' }}
@@ -44,7 +44,7 @@
     }
 
     @case (fieldType.INTEGER) {
-      <div class="lcars-input-container gold">
+      <div class="lcars-input-container">
         <label [attr.for]="controlId('integer')">{{ field.name }}</label>
         <input
           type="number"
@@ -59,7 +59,7 @@
     }
 
     @case (fieldType.YEAR) {
-      <div class="lcars-input-container gold">
+      <div class="lcars-input-container">
         <label [attr.for]="controlId('year')">{{ field.name }}</label>
         <input
           type="number"
@@ -73,7 +73,7 @@
     }
 
     @case (fieldType.DECIMAL) {
-      <div class="lcars-input-container gold">
+      <div class="lcars-input-container">
         <label [attr.for]="controlId('decimal')">{{ field.name }}</label>
         <input
           type="text"
@@ -86,7 +86,7 @@
     }
 
     @case (fieldType.PERCENTAGE) {
-      <div class="lcars-input-container gold">
+      <div class="lcars-input-container">
         <label [attr.for]="controlId('decimal')">{{ field.name }} (%)</label>
         <input
           type="text"
@@ -99,7 +99,7 @@
     }
 
     @case (fieldType.RANGE) {
-      <fieldset class="custom-tracking-value-group">
+      <fieldset class="custom-tracking-value-group lcars-rotate">
         <legend>{{ field.name }}</legend>
         <input
           type="range"
@@ -110,7 +110,7 @@
           [attr.step]="setting('step')"
           [attr.aria-label]="field.name"
           [attr.aria-describedby]="errorId" />
-        <div class="lcars-input-container gold">
+        <div class="lcars-input-container">
           <label [attr.for]="controlId('number-exact')">Exact value</label>
           <input
             type="number"
@@ -129,7 +129,7 @@
     }
 
     @case (fieldType.RATING) {
-      <fieldset class="custom-tracking-value-group">
+      <fieldset class="custom-tracking-value-group lcars-rotate">
         <legend>{{ field.name }}</legend>
         <div class="custom-tracking-value-choices">
           <label class="custom-tracking-value-choice">
@@ -156,9 +156,9 @@
     }
 
     @case (fieldType.PROGRESS) {
-      <fieldset class="custom-tracking-value-group">
+      <fieldset class="custom-tracking-value-group lcars-rotate">
         <legend>{{ field.name }}</legend>
-        <div class="lcars-input-container gold">
+        <div class="lcars-input-container">
           <label [attr.for]="controlId('current')">How far along</label>
           <input
             type="number"
@@ -168,7 +168,7 @@
             [attr.aria-describedby]="errorId"
             [attr.aria-invalid]="isInvalid" />
         </div>
-        <div class="lcars-input-container gold">
+        <div class="lcars-input-container">
           <label [attr.for]="controlId('maximum')">Out of</label>
           <input
             type="number"
@@ -186,7 +186,7 @@
     }
 
     @case (fieldType.DATE) {
-      <div class="lcars-input-container bluey">
+      <div class="lcars-input-container">
         <label [attr.for]="controlId('date')">{{ field.name }}</label>
         <input
           type="date"
@@ -200,7 +200,7 @@
     }
 
     @case (fieldType.MONTH_YEAR) {
-      <div class="lcars-input-container bluey">
+      <div class="lcars-input-container">
         <label [attr.for]="controlId('monthYear')">{{ field.name }}</label>
         <input
           type="month"
@@ -212,9 +212,9 @@
     }
 
     @case (fieldType.TIME) {
-      <fieldset class="custom-tracking-value-group">
+      <fieldset class="custom-tracking-value-group lcars-rotate">
         <legend>{{ field.name }}</legend>
-        <div class="lcars-input-container bluey">
+        <div class="lcars-input-container">
           <label [attr.for]="controlId('time')">Time</label>
           <input
             type="time"
@@ -223,7 +223,7 @@
             [attr.aria-describedby]="errorId"
             [attr.aria-invalid]="isInvalid" />
         </div>
-        <div class="lcars-select-container gold">
+        <div class="lcars-select-container">
           <label
             class="select-label"
             [attr.for]="controlId('timezone')"
@@ -245,9 +245,9 @@
     }
 
     @case (fieldType.DATE_TIME) {
-      <fieldset class="custom-tracking-value-group">
+      <fieldset class="custom-tracking-value-group lcars-rotate">
         <legend>{{ field.name }}</legend>
-        <div class="lcars-input-container bluey">
+        <div class="lcars-input-container">
           <label [attr.for]="controlId('localDateTime')">Date and time</label>
           <input
             type="datetime-local"
@@ -256,7 +256,7 @@
             [attr.aria-describedby]="errorId"
             [attr.aria-invalid]="isInvalid" />
         </div>
-        <div class="lcars-select-container gold">
+        <div class="lcars-select-container">
           <label
             class="select-label"
             [attr.for]="controlId('timezone')"
@@ -278,9 +278,9 @@
     }
 
     @case (fieldType.DATE_RANGE) {
-      <fieldset class="custom-tracking-value-group">
+      <fieldset class="custom-tracking-value-group lcars-rotate">
         <legend>{{ field.name }}</legend>
-        <div class="lcars-input-container bluey">
+        <div class="lcars-input-container">
           <label [attr.for]="controlId('startDate')">From</label>
           <input
             type="date"
@@ -291,7 +291,7 @@
             [attr.aria-describedby]="errorId"
             [attr.aria-invalid]="isInvalid" />
         </div>
-        <div class="lcars-input-container bluey">
+        <div class="lcars-input-container">
           <label [attr.for]="controlId('endDate')">To</label>
           <input
             type="date"
@@ -306,9 +306,9 @@
     }
 
     @case (fieldType.DATE_TIME_RANGE) {
-      <fieldset class="custom-tracking-value-group">
+      <fieldset class="custom-tracking-value-group lcars-rotate">
         <legend>{{ field.name }}</legend>
-        <div class="lcars-input-container bluey">
+        <div class="lcars-input-container">
           <label [attr.for]="controlId('startLocalDateTime')">From</label>
           <input
             type="datetime-local"
@@ -317,7 +317,7 @@
             [attr.aria-describedby]="errorId"
             [attr.aria-invalid]="isInvalid" />
         </div>
-        <div class="lcars-input-container bluey">
+        <div class="lcars-input-container">
           <label [attr.for]="controlId('endLocalDateTime')">To</label>
           <input
             type="datetime-local"
@@ -326,7 +326,7 @@
             [attr.aria-describedby]="errorId"
             [attr.aria-invalid]="isInvalid" />
         </div>
-        <div class="lcars-select-container gold">
+        <div class="lcars-select-container">
           <label
             class="select-label"
             [attr.for]="controlId('timezone')"
@@ -344,10 +344,10 @@
     }
 
     @case (fieldType.DURATION) {
-      <fieldset class="custom-tracking-value-group">
+      <fieldset class="custom-tracking-value-group lcars-rotate">
         <legend>{{ field.name }}</legend>
         @for (part of durationParts; track part.key) {
-          <div class="lcars-input-container gold">
+          <div class="lcars-input-container">
             <label [attr.for]="controlId(part.key)">{{ part.label }}</label>
             <input
               type="number"
@@ -380,7 +380,7 @@
         @if (isAnswered) {
           <button
             type="button"
-            class="lcars-btn lcars-btn-auto bluey"
+            class="lcars-btn lcars-btn-auto"
             (click)="clearAnswer()">
             Leave unanswered
           </button>
@@ -410,7 +410,7 @@
         @if (isAnswered) {
           <button
             type="button"
-            class="lcars-btn lcars-btn-auto bluey"
+            class="lcars-btn lcars-btn-auto"
             (click)="clearAnswer()">
             Leave unanswered
           </button>
@@ -419,7 +419,7 @@
     }
 
     @case (fieldType.YES_NO_UNKNOWN) {
-      <div class="lcars-select-container bluey">
+      <div class="lcars-select-container">
         <span class="select-label">{{ field.name }}</span>
         <select
           formControlName="triState"
@@ -435,7 +435,7 @@
     }
 
     @case (fieldType.RADIO) {
-      <fieldset class="custom-tracking-value-group">
+      <fieldset class="custom-tracking-value-group lcars-rotate">
         <legend>{{ field.name }}</legend>
         <div class="custom-tracking-value-choices">
           <label class="custom-tracking-value-choice">
@@ -466,7 +466,7 @@
     }
 
     @case (fieldType.DROPDOWN) {
-      <div class="lcars-select-container bluey">
+      <div class="lcars-select-container">
         <span class="select-label">{{ field.name }}</span>
         <select
           [id]="controlId('optionIds')"
@@ -487,7 +487,7 @@
     }
 
     @case (fieldType.CHECKBOX_LIST) {
-      <fieldset class="custom-tracking-value-group">
+      <fieldset class="custom-tracking-value-group lcars-rotate">
         <legend>{{ field.name }}</legend>
         <div class="custom-tracking-value-choices">
           @for (option of options; track option.id) {
@@ -509,7 +509,7 @@
     }
 
     @case (fieldType.MULTI_SELECT) {
-      <div class="lcars-select-container bluey">
+      <div class="lcars-select-container">
         <span class="select-label">{{ field.name }}</span>
         <select
           multiple
@@ -530,7 +530,7 @@
     }
 
     @case (fieldType.TAGS) {
-      <fieldset class="custom-tracking-value-group">
+      <fieldset class="custom-tracking-value-group lcars-rotate">
         <legend>{{ field.name }}</legend>
         <div class="custom-tracking-value-tags">
           @for (option of options; track option.id) {
@@ -554,9 +554,9 @@
     }
 
     @case (fieldType.COLOUR) {
-      <fieldset class="custom-tracking-value-group">
+      <fieldset class="custom-tracking-value-group lcars-rotate">
         <legend>{{ field.name }}</legend>
-        <div class="lcars-select-container bluey">
+        <div class="lcars-select-container">
           <span class="select-label">Colour</span>
           <select
             formControlName="colourMode"
@@ -572,7 +572,7 @@
         </div>
 
         @if (held('colourMode') === colourModes.TOKEN) {
-          <div class="lcars-select-container gold">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               [attr.for]="controlId('token')"
@@ -599,7 +599,7 @@
         }
 
         @if (held('colourMode') === colourModes.LITERAL) {
-          <div class="lcars-input-container gold">
+          <div class="lcars-input-container">
             <label [attr.for]="controlId('literal')">Colour value</label>
             <input
               type="text"
@@ -626,7 +626,7 @@
     }
 
     @case (fieldType.YOUTUBE) {
-      <div class="lcars-input-container perano">
+      <div class="lcars-input-container">
         <label [attr.for]="controlId('url')">{{ field.name }}</label>
         <input
           type="url"

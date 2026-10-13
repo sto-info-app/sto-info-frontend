@@ -30,6 +30,7 @@ import {
   createAccountForm,
   requireLauncherWhenOffered,
 } from '../account-form.factory';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 @Component({
   selector: 'app-account-manage',
@@ -38,6 +39,7 @@ import {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CollapsibleSectionComponent,
     CommonModule,
     ReactiveFormsModule,
     LcarsToggleComponent,

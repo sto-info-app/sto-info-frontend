@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'lcars-variables' as vars;
 
 #rd-container {
@@ -20,7 +21,7 @@
 }
 
 .character-subtitle {
-  color: var(--lcars-text-muted, #aaa);
+  color: var(--lcars-text-muted, vars.$lcars-text-muted);
   margin-top: -0.5rem;
   margin-bottom: 1rem;
   font-size: 0.9rem;
@@ -34,7 +35,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-evenly;
-  background: var(--lcars-panel-bg, #1a1a2e);
+  background: var(--lcars-panel-bg, vars.$lcars-panel-bg);
   border-radius: 4px;
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
@@ -57,7 +58,7 @@
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: rgb(255 255 255 / 55%);
+  color: vars.$white-a55;
 }
 
 // -- School list --------------------------------------------------------------
@@ -89,7 +90,7 @@
 
   // border-left colour and background tint are bound inline per school
   border-left: 4px solid vars.$lcars-gold;
-  background: rgba(vars.$lcars-gold, 0.07);
+  background: color.change(vars.$lcars-gold, $alpha: 0.07);
   transition:
     border-color 0.15s,
     background 0.15s;
@@ -110,7 +111,7 @@
   gap: 0.4rem;
   font-weight: 600;
   font-size: 0.9rem;
-  color: var(--lcars-text, #eee);
+  color: var(--lcars-text, vars.$lcars-text);
 }
 
 .rd-icon {
@@ -137,7 +138,7 @@
   border: none;
   padding: 0 0 0 0.25rem;
   cursor: pointer;
-  color: rgb(255 255 255 / 30%);
+  color: vars.$white-a30;
   font-size: 0.9rem;
   line-height: inherit;
   vertical-align: top;
@@ -154,7 +155,7 @@
   flex-direction: column;
   gap: 0.15rem;
   font-size: 0.75rem;
-  color: var(--lcars-text-muted, #aaa);
+  color: var(--lcars-text-muted, vars.$lcars-text-muted);
 }
 
 .rd-header-right {
@@ -189,7 +190,7 @@
   position: relative;
   height: 18px;
   border-radius: 999px;
-  background: rgb(255 255 255 / 12%);
+  background: vars.$white-a12;
   overflow: visible;
   cursor: pointer;
   transition:
@@ -243,12 +244,12 @@
   top: 50%;
   width: 1px;
   height: 55%;
-  background: rgb(255 255 255 / 30%);
+  background: vars.$white-a30;
   transform: translate(-50%, -50%);
   pointer-events: none;
 
   &.reached {
-    background: rgb(255 255 255 / 55%);
+    background: vars.$white-a55;
   }
 }
 
@@ -263,14 +264,14 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--lcars-panel-bg, #1a1a2e);
-  border: 2px solid var(--sto-rarity-color, rgb(255 255 255 / 55%));
+  background: var(--lcars-panel-bg, vars.$lcars-panel-bg);
+  border: 2px solid var(--sto-rarity-color, vars.$white-a55);
   transform: translate(-50%, -50%);
   pointer-events: none;
 
   &.reached {
-    background: var(--sto-rarity-color, #fff);
-    box-shadow: 0 0 5px var(--sto-rarity-color, rgb(255 255 255 / 60%));
+    background: var(--sto-rarity-color, vars.$a11y-white);
+    box-shadow: 0 0 5px var(--sto-rarity-color, vars.$white-a60);
   }
 }
 

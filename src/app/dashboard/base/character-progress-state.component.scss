@@ -1,5 +1,7 @@
+@use 'lcars-variables' as vars;
+
 .character-subtitle {
-  color: var(--lcars-text-muted, #aaa);
+  color: var(--lcars-text-muted, vars.$lcars-text-muted);
   margin-top: -0.5rem;
   margin-bottom: 1rem;
   font-size: 0.9rem;

@@ -13,6 +13,7 @@ import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { CharacterRdService } from 'src/app/dashboard/services/character-rd.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { CharacterRdComponent } from './character-rd.component';
+import { LCARS_COLOURS } from 'src/app/shared/constants/lcars-colours.constants';
 
 describe('CharacterRdComponent', () => {
   let component: CharacterRdComponent;
@@ -400,7 +401,7 @@ describe('CharacterRdComponent', () => {
 
   it('should resolve accent colour and fall back when absent', () => {
     expect(component.accent(mockProgress[0])).toBe('#c0392b');
-    expect(component.accent(mockProgress[1])).toBe('#fa0');
+    expect(component.accent(mockProgress[1])).toBe(LCARS_COLOURS.gold);
   });
 
   it('should build a translucent accent tint from hex', () => {

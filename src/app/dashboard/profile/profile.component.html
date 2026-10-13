@@ -13,177 +13,179 @@
       class="col">
       <h1>Personnel Record</h1>
       <div id="personnel-record-main-content">
-        <div class="lcars-text-bar personnel-lcars-text-bar">
-          <span>Personal Details</span>
+        <app-collapsible-section heading="Personal Details">
           <button
+            sectionActions
             type="button"
             class="cta-icon"
             (click)="editUserProfile()"
             title="Edit Personal Details"
           ><i class="fas fa-user-pen"></i
           ></button>
-        </div>
-        <div class="personnel-record-inner-content">
-          <p>
-            <span class="record-title">Rank:</span>
-            Captain
-          </p>
-          <p>
-            <span class="record-title">Name:</span>
-            {{ user.profile?.firstName || 'Unknown' }}
-            {{ user.profile?.lastName }}
-          </p>
-          <p>
-            <span class="record-title">Username:</span>
-            {{ user.profile?.username }}
-          </p>
-          <p>
-            <span class="record-title">Email:</span>
-            <span [class.privacy-blur]="privacyMode.isEnabled()">{{ user.email }}</span>
-            <i
-              class="fas fa-lock restricted-icon go-red"
-              title="Restricted: Cannot be changed"></i>
-          </p>
-          <p>
-            <span class="record-title">Galactic Personnel Registry:</span>
-            @if (user.profile?.publiclyVisible) {
-              <span class="registry-status registry-status-public">
-                Listed publicly
-              </span>
-            } @else {
-              <span class="registry-status registry-status-private">
-                Not listed publicly
-              </span>
-            }
-            <details class="registry-help">
-              <summary
-                class="registry-help-trigger"
-                aria-label="Registry visibility details"
-                title="Registry visibility details">
-                <i
-                  class="fas fa-question-circle"
-                  aria-hidden="true"></i>
-              </summary>
-              <div class="registry-help-popup">
-                @if (user.profile?.publiclyVisible) {
-                  <p>
-                    <span class="record-title registry-title-public"
-                      >Visible to others:</span
-                    >
-                    Username, profile picture, join date, last sign-in date,
-                    and any STO accounts and captains also marked as publicly
-                    visible.
-                  </p>
-                  <p>
-                    <span class="record-title registry-title-private"
-                      >Never visible:</span
-                    >
-                    Real name, email address, and private notes.
-                  </p>
-                } @else {
-                  <p>
-                    <span class="record-title registry-title-private"
-                      >Not publicly visible:</span
-                    >
-                    Everything in your profile is hidden from the Galactic
-                    Personnel Registry.
-                  </p>
-                }
-              </div>
-            </details>
-          </p>
-        </div>
-        <div class="lcars-text-bar personnel-lcars-text-bar">
-          <span>Activity</span>
-        </div>
-        <div class="personnel-record-inner-content">
-          <p>
-            <span class="record-title">Last logged in:</span>
-            {{ lastLoginLabel }}
-          </p>
-          <p>
-            <span class="record-title">Password last reset:</span>
-            {{ lastPasswordResetLabel }}
-          </p>
-          <p>
-            <span class="record-title">Record last updated:</span>
-            {{ lastUpdatedLabel }}
-          </p>
-          <p>
-            <span class="record-title">Commissioned:</span>
-            {{ memberSinceLabel }}
-          </p>
-        </div>
+          <div class="personnel-record-inner-content">
+            <p>
+              <span class="record-title">Rank:</span>
+              Captain
+            </p>
+            <p>
+              <span class="record-title">Name:</span>
+              {{ user.profile?.firstName || 'Unknown' }}
+              {{ user.profile?.lastName }}
+            </p>
+            <p>
+              <span class="record-title">Username:</span>
+              {{ user.profile?.username }}
+            </p>
+            <p>
+              <span class="record-title">Email:</span>
+              <span [class.privacy-blur]="privacyMode.isEnabled()">{{ user.email }}</span>
+              <i
+                class="fas fa-lock restricted-icon go-red"
+                title="Restricted: Cannot be changed"></i>
+            </p>
+            <p>
+              <span class="record-title">Galactic Personnel Registry:</span>
+              @if (user.profile?.publiclyVisible) {
+                <span class="registry-status registry-status-public">
+                  Listed publicly
+                </span>
+              } @else {
+                <span class="registry-status registry-status-private">
+                  Not listed publicly
+                </span>
+              }
+              <details class="registry-help">
+                <summary
+                  class="registry-help-trigger"
+                  aria-label="Registry visibility details"
+                  title="Registry visibility details">
+                  <i
+                    class="fas fa-question-circle"
+                    aria-hidden="true"></i>
+                </summary>
+                <div class="registry-help-popup">
+                  @if (user.profile?.publiclyVisible) {
+                    <p>
+                      <span class="record-title registry-title-public"
+                        >Visible to others:</span
+                      >
+                      Username, profile picture, join date, last sign-in date,
+                      and any STO accounts and captains also marked as publicly
+                      visible.
+                    </p>
+                    <p>
+                      <span class="record-title registry-title-private"
+                        >Never visible:</span
+                      >
+                      Real name, email address, and private notes.
+                    </p>
+                  } @else {
+                    <p>
+                      <span class="record-title registry-title-private"
+                        >Not publicly visible:</span
+                      >
+                      Everything in your profile is hidden from the Galactic
+                      Personnel Registry.
+                    </p>
+                  }
+                </div>
+              </details>
+            </p>
+          </div>
+        </app-collapsible-section>
+        <app-collapsible-section heading="Activity">
+          <div class="personnel-record-inner-content">
+            <p>
+              <span class="record-title">Last logged in:</span>
+              {{ lastLoginLabel }}
+            </p>
+            <p>
+              <span class="record-title">Password last reset:</span>
+              {{ lastPasswordResetLabel }}
+            </p>
+            <p>
+              <span class="record-title">Record last updated:</span>
+              {{ lastUpdatedLabel }}
+            </p>
+            <p>
+              <span class="record-title">Commissioned:</span>
+              {{ memberSinceLabel }}
+            </p>
+          </div>
+        </app-collapsible-section>
       </div>
     </div>
     <div
       id="personnel-record-side-column"
       class="col">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Photo</span>
+      <app-collapsible-section
+        heading="Photo"
+        barClass="small-lcars-bar-gap">
         <button
+          sectionActions
           type="button"
           class="cta-icon"
           (click)="editUserProfilePhoto()"
           title="Edit Photo"
         ><i class="fas fa-user-pen"></i
         ></button>
-      </div>
-      <div id="personnel-image">
-        <div class="pics-right">
-          @if (!user.profile?.profilePicture300) {
-            <img
-              src="{{ unavailablePhotoSrc }}"
-              alt="Unavailable"
-              title="Unavailable photo"
-              class="border"
-              loading="lazy" />
-          }
-          @if (user.profile?.profilePicture300) {
-            <img
-              [src]="user.profile.profilePicture300"
-              alt="{{ user.profile.firstName }} {{ user.profile.lastName }}"
-              title="{{ user.profile.firstName }} {{ user.profile.lastName }}"
-              class="border"
-              (error)="onProfileImageError($event)"
-              loading="lazy" />
-          }
+        <div id="personnel-image">
+          <div class="pics-right">
+            @if (!user.profile?.profilePicture300) {
+              <img
+                src="{{ unavailablePhotoSrc }}"
+                alt="Unavailable"
+                title="Unavailable photo"
+                class="border"
+                loading="lazy" />
+            }
+            @if (user.profile?.profilePicture300) {
+              <img
+                [src]="user.profile.profilePicture300"
+                alt="{{ user.profile.firstName }} {{ user.profile.lastName }}"
+                title="{{ user.profile.firstName }} {{ user.profile.lastName }}"
+                class="border"
+                (error)="onProfileImageError($event)"
+                loading="lazy" />
+            }
+          </div>
         </div>
-      </div>
-      <div class="lcars-text-bar">
-        <span>Auxiliary Controls</span>
-      </div>
-      <div class="buttons">
-        <a
-          [routerLink]="dashboardLink"
-          class="full-width-btn-link sunflower"
-          >{{ appRouteTitles.STO_DASHBOARD }}</a
-        >
-        @if (publicProfileLink) {
+      </app-collapsible-section>
+      <app-collapsible-section
+        heading="Auxiliary Controls"
+        barClass="small-lcars-bar-gap">
+        <div class="buttons">
           <a
-            [routerLink]="publicProfileLink"
-            class="full-width-btn-link african-violet"
-            >View Public Profile</a
+            [routerLink]="dashboardLink"
+            class="full-width-btn-link"
+            >{{ appRouteTitles.STO_DASHBOARD }}</a
           >
-        }
-        <a
-          [routerLink]="resetPasswordLink"
-          class="full-width-btn-link gold"
-          >{{ appRouteTitles.RESET_PASSWORD }}</a
-        >
-        <a
-          [routerLink]="settingsLink"
-          class="full-width-btn-link sunflower"
-          >Settings</a
-        >
-        <a
-          href="#"
-          class="full-width-btn-link red"
-          (click)="$event.preventDefault(); closeAccount()"
-          title="Close account"
-          >Close Account</a
-        >
-      </div>
+          @if (publicProfileLink) {
+            <a
+              [routerLink]="publicProfileLink"
+              class="full-width-btn-link"
+              >View Public Profile</a
+            >
+          }
+          <a
+            [routerLink]="resetPasswordLink"
+            class="full-width-btn-link"
+            >{{ appRouteTitles.RESET_PASSWORD }}</a
+          >
+          <a
+            [routerLink]="settingsLink"
+            class="full-width-btn-link"
+            >Settings</a
+          >
+          <a
+            href="#"
+            class="full-width-btn-link red"
+            (click)="$event.preventDefault(); closeAccount()"
+            title="Close account"
+            >Close Account</a
+          >
+        </div>
+      </app-collapsible-section>
     </div>
   </div>
 }

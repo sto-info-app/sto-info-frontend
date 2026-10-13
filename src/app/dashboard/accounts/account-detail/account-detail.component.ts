@@ -28,6 +28,7 @@ import { CharacterCardComponent } from 'src/app/shared/components/character-card
 import { CharacterCardVm } from 'src/app/shared/components/character-card/character-card.model';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { EndeavourRankBadgeComponent } from 'src/app/shared/components/endeavour-rank-badge/endeavour-rank-badge.component';
+import { LcarsCollapsibleBarComponent } from 'src/app/shared/components/lcars-collapsible-bar/lcars-collapsible-bar.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import {
@@ -56,6 +57,7 @@ import {
   decodeStoHandle,
   encodeStoHandle,
 } from 'src/app/shared/utils/sto-handle.utils';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /** Precomputed display values for a single character card. */
 interface CharacterVm {
@@ -88,10 +90,12 @@ interface CharacterFilterOptionsVm {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CollapsibleSectionComponent,
     CommonModule,
     FormsModule,
     RouterModule,
     LoadingBarComponent,
+    LcarsCollapsibleBarComponent,
     LcarsErrorMessageComponent,
     MatButtonModule,
     MatDialogModule,
@@ -128,7 +132,6 @@ export class AccountDetailComponent
   // ── Non-signal state (changed infrequently via HTTP callbacks) ────────────
   account: StoAccount | null = null;
   isLoading = true;
-  endeavourCollapsed = false;
   errorMessage = '';
 
   // ── Signal-based state ────────────────────────────────────────────────────

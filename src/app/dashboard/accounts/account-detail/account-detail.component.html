@@ -13,17 +13,18 @@
           [currentAccountId]="account.id"></app-sto-switcher-button>
       </div>
 
-      <div id="account-info-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Account Information</span>
-          <button
-            type="button"
-            class="cta-icon"
-            (click)="editAccount()"
-            title="Edit Account">
-            <i class="fas fa-user-pen"></i>
-          </button>
-        </div>
+      <app-collapsible-section
+        id="account-info-section"
+        heading="Account Information"
+        barClass="small-lcars-bar-gap">
+        <button
+          sectionActions
+          type="button"
+          class="cta-icon"
+          (click)="editAccount()"
+          title="Edit Account">
+          <i class="fas fa-user-pen"></i>
+        </button>
         <div class="account-info-content">
           <div class="info-grid">
             <div class="info-item">
@@ -65,57 +66,40 @@
             </div>
           </div>
         </div>
-      </div>
+      </app-collapsible-section>
 
       @if (endeavourSummary()) {
-        <div id="endeavour-summary-section">
-          <div class="lcars-text-bar small-lcars-bar-gap">
-            <span>Endeavour Perks</span>
-            <button
-              type="button"
-              class="cta-icon"
-              (click)="endeavourCollapsed = !endeavourCollapsed"
-              [title]="
-                endeavourCollapsed
-                  ? 'Show Endeavour Perks'
-                  : 'Hide Endeavour Perks'
-              ">
-              <i
-                class="fas"
-                [class.fa-caret-down]="endeavourCollapsed"
-                [class.fa-caret-up]="!endeavourCollapsed"></i>
-            </button>
-          </div>
-          @if (!endeavourCollapsed) {
-            <div class="endeavour-hero-row">
-              <app-endeavour-rank-badge
-                [totalNodes]="endeavourSummary()!.totalNodes" />
-              <div class="endeavour-cta">
-                <a
-                  [routerLink]="endeavoursLink()"
-                  class="full-width-btn-link gold">
-                  View Endeavour Perks
-                </a>
-              </div>
+        <app-collapsible-section
+          id="endeavour-summary-section"
+          heading="Endeavour Perks"
+          barClass="small-lcars-bar-gap">
+          <div class="endeavour-hero-row">
+            <app-endeavour-rank-badge
+              [totalNodes]="endeavourSummary()!.totalNodes" />
+            <div class="endeavour-cta">
+              <a
+                [routerLink]="endeavoursLink()"
+                class="lcars-btn lcars-btn-auto">
+                View Endeavour Perks
+              </a>
             </div>
-          }
-        </div>
+          </div>
+        </app-collapsible-section>
       }
 
-      <div id="characters-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span class="title-with-badge">
-            Captain List
-            <span class="header-count-badge">{{ filteredVms().length }}</span>
-          </span>
-          <button
-            type="button"
-            class="cta-icon"
-            (click)="addCharacter()"
-            title="Add Character">
-            <i class="fas fa-plus"></i>
-          </button>
-        </div>
+      <app-collapsible-section
+        id="characters-section"
+        heading="Captain List"
+        barClass="small-lcars-bar-gap"
+        [badge]="filteredVms().length">
+        <button
+          sectionActions
+          type="button"
+          class="cta-icon"
+          (click)="addCharacter()"
+          title="Add Character">
+          <i class="fas fa-plus"></i>
+        </button>
 
         <div class="characters-content">
           @if (characters().length === 0 && !isLoading) {
@@ -136,7 +120,7 @@
             }
           </div>
         </div>
-      </div>
+      </app-collapsible-section>
 
       <!-- Beneath the STO data: what is tracked, and the way to change it. -->
       <app-custom-tracking-owner-panel
@@ -148,7 +132,7 @@
           [message]="errorMessage"></app-lcars-error-message>
         <div class="buttons-row">
           <a
-            class="lcars-btn-auto sunflower"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="accountsLink">
             Back to Accounts
           </a>
@@ -161,21 +145,11 @@
     id="account-detail-side-column"
     class="col">
     @if (characters().length > 0) {
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Filters</span>
-        <button
-          type="button"
-          class="cta-icon"
-          (click)="filtersCollapsed = !filtersCollapsed"
-          [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
-          <i
-            class="fas"
-            [class.fa-caret-down]="filtersCollapsed"
-            [class.fa-caret-up]="!filtersCollapsed"></i>
-        </button>
-      </div>
+      <app-lcars-collapsible-bar
+        label="Filters"
+        [(collapsed)]="filtersCollapsed" />
       @if (!filtersCollapsed) {
-        <div class="filter-section">
+        <div class="filter-section lcars-rotate">
           <label
             class="select-label"
             for="captain-search-input"
@@ -189,7 +163,7 @@
             [ngModel]="searchText()"
             (ngModelChange)="searchText.set($event)" />
 
-          <div class="lcars-select-container perano">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="rank-select"
@@ -207,7 +181,7 @@
             </select>
           </div>
 
-          <div class="lcars-select-container bluey">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="species-select"
@@ -225,7 +199,7 @@
             </select>
           </div>
 
-          <div class="lcars-select-container tangerine">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="allegiance-select"
@@ -243,7 +217,7 @@
             </select>
           </div>
 
-          <div class="lcars-select-container gold">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="faction-select"
@@ -261,7 +235,7 @@
             </select>
           </div>
 
-          <div class="lcars-select-container perano">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="class-select"
@@ -279,7 +253,7 @@
             </select>
           </div>
 
-          <div class="lcars-select-container bluey">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="sex-select"
@@ -297,7 +271,7 @@
             </select>
           </div>
 
-          <div class="lcars-select-container tangerine">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="recruit-select"
@@ -338,22 +312,12 @@
         </div>
       }
 
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Sort</span>
-        <button
-          type="button"
-          class="cta-icon"
-          (click)="sortCollapsed = !sortCollapsed"
-          [title]="sortCollapsed ? 'Show Sort' : 'Hide Sort'">
-          <i
-            class="fas"
-            [class.fa-caret-down]="sortCollapsed"
-            [class.fa-caret-up]="!sortCollapsed"></i>
-        </button>
-      </div>
+      <app-lcars-collapsible-bar
+        label="Sort"
+        [(collapsed)]="sortCollapsed" />
       @if (!sortCollapsed) {
-        <div class="filter-section">
-          <div class="lcars-select-container tangerine">
+        <div class="filter-section lcars-rotate">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="captain-sort-by-select"
@@ -369,7 +333,7 @@
               }
             </select>
           </div>
-          <div class="lcars-select-container gold">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="captain-sort-order-select"
@@ -393,27 +357,28 @@
       }
     }
 
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      @if (endeavoursLink()) {
+    <app-collapsible-section
+      heading="Navigation"
+      barClass="small-lcars-bar-gap">
+      <div class="buttons">
+        @if (endeavoursLink()) {
+          <a
+            [routerLink]="endeavoursLink()"
+            class="full-width-btn-link"
+            >Endeavours</a
+          >
+        }
         <a
-          [routerLink]="endeavoursLink()"
-          class="full-width-btn-link gold"
-          >Endeavours</a
+          [routerLink]="accountsLink"
+          class="full-width-btn-link"
+          >Accounts</a
         >
-      }
-      <a
-        [routerLink]="accountsLink"
-        class="full-width-btn-link sunflower"
-        >Accounts</a
-      >
-      <a
-        [routerLink]="dashboardLink"
-        class="full-width-btn-link bluey"
-        >Dashboard</a
-      >
-    </div>
+        <a
+          [routerLink]="dashboardLink"
+          class="full-width-btn-link"
+          >Dashboard</a
+        >
+      </div>
+    </app-collapsible-section>
   </div>
 </div>

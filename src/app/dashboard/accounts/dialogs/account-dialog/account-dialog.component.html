@@ -16,8 +16,8 @@
   }
   <form
     [formGroup]="accountForm"
-    class="account-form">
-    <div class="lcars-input-container perano">
+    class="account-form lcars-rotate">
+    <div class="lcars-input-container">
       <label for="handle">Handle</label>
       <input
         type="text"
@@ -40,7 +40,7 @@
       }
     </div>
 
-    <div class="lcars-input-container bluey">
+    <div class="lcars-input-container">
       <label for="username">Username (Optional)</label>
       <input
         type="text"
@@ -48,7 +48,7 @@
         formControlName="username" />
     </div>
 
-    <div class="lcars-input-container sunflower">
+    <div class="lcars-input-container">
       <label for="email">Email (Optional)</label>
       <input
         type="email"
@@ -62,7 +62,7 @@
       }
     </div>
 
-    <div class="lcars-input-container gold">
+    <div class="lcars-input-container">
       <label for="accountCreatedDate">Account Created Date</label>
       <input
         type="date"
@@ -70,7 +70,7 @@
         formControlName="accountCreatedDate" />
     </div>
 
-    <div class="lcars-select-container tangerine">
+    <div class="lcars-select-container">
       <label
         class="select-label"
         for="platformId"
@@ -87,7 +87,7 @@
       </select>
     </div>
 
-    <div class="lcars-select-container bluey">
+    <div class="lcars-select-container">
       <label
         class="select-label"
         for="launcherId"
@@ -110,7 +110,7 @@
       }
     </div>
 
-    <div class="lcars-input-container perano">
+    <div class="lcars-input-container">
       <label for="notes">Notes</label>
       <textarea
         id="notes"
@@ -135,7 +135,7 @@
   <div class="buttons-container">
     <button
       type="button"
-      class="lcars-btn red"
+      class="lcars-btn"
       mat-button
       (click)="onCancelClick()">
       Cancel

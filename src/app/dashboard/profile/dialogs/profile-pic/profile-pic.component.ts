@@ -1,35 +1,38 @@
-import { ChangeDetectorRef, Component, NgZone, inject } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
 import { ImageCropperComponent } from 'ngx-image-cropper';
+import { Observable } from 'rxjs';
+import { RecordPhotoDialogBaseComponent } from 'src/app/dashboard/base/record-photo-dialog-base.component';
 import { User } from 'src/app/dashboard/models/user.model';
 import { DashboardService } from 'src/app/dashboard/services/dashboard.service';
 import { AssetScanStatusComponent } from 'src/app/shared/components/asset-scan-status/asset-scan-status.component';
 import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { ImageCropperBaseComponent } from 'src/app/shared/base/image-cropper-base.component';
-import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { AcceptedAsset } from 'src/app/shared/services/asset-scan.service';
 import { EditPersonalDetailsComponent } from '../edit-personal-details/edit-personal-details.component';
 
 @Component({
   selector: 'app-profile-pic',
-  templateUrl: './profile-pic.component.html',
+  templateUrl: '../../../base/record-photo-dialog.component.html',
   styleUrls: ['./profile-pic.component.scss'],
   standalone: true,
   imports: [
     ImageCropperComponent,
     MatDialogModule,
+    NgTemplateOutlet,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     AssetScanStatusComponent,
     LcarsWarningMessageComponent,
   ],
 })
-export class ProfilePicComponent extends ImageCropperBaseComponent {
+export class ProfilePicComponent extends RecordPhotoDialogBaseComponent {
   protected override readonly _dialogRef = inject(
     MatDialogRef<EditPersonalDetailsComponent>,
   );
@@ -37,39 +40,32 @@ export class ProfilePicComponent extends ImageCropperBaseComponent {
     user: User;
   } | null;
 
+  readonly heading = 'Starfleet Personnel Record Photo: Edit';
+  readonly unavailableMessage =
+    'Connection to the Starfleet Personnel Database has failed!';
+  readonly layout = {
+    row: 'flexbox',
+    main: 'col profile-pic-main-col',
+    side: 'col profile-pic-side-col',
+  };
+  override readonly inActionRow = true;
+
+  protected readonly _fileName = 'profile-pic.png';
+
   private readonly _dashboardService = inject(DashboardService);
-  private readonly _ngZone = inject(NgZone);
-  private readonly _cdr = inject(ChangeDetectorRef);
 
-  onUploadImageClick(): void {
-    try {
-      if (!this.validateCroppedImage()) return;
+  /** @returns True once the member's record is known. */
+  get hasRecord(): boolean {
+    return !!this.data?.user;
+  }
 
-      const formData = new FormData();
-      formData.append(
-        'profilePicture',
-        this.croppedImageBlob!,
-        'profile-pic.png',
-      );
-
-      this.isSubmitting = true;
-      this._dashboardService
-        .updateProfilePic(formData)
-        .pipe(observeInZone(this._ngZone, this._cdr))
-        .subscribe({
-          // The picture is not on the account yet. It is held privately
-          // and scanned first, and this dialogue stays open saying so
-          // until it is in use or was refused — FC-012.
-          next: accepted => this.watchUpload(accepted),
-          error: error => {
-            this.handleHttpError(error);
-            this.isSubmitting = false;
-          },
-        });
-    } catch (error) {
-      console.error('Error processing image blob:', error);
-      this.displayErrorMessage('Invalid image format.');
-      this.isSubmitting = false;
-    }
+  /**
+   * Sends the photo to the member's own record.
+   *
+   * @param formData - The photo.
+   * @returns What the upload endpoint answered.
+   */
+  protected send(formData: FormData): Observable<AcceptedAsset> {
+    return this._dashboardService.updateProfilePic(formData);
   }
 }

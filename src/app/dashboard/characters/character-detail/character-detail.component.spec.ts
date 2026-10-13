@@ -245,7 +245,13 @@ describe('CharacterDetailComponent', () => {
       fixture.detectChanges();
 
       const host = fixture.nativeElement as HTMLElement;
-      const sections = [...host.querySelectorAll('app-collapsible-section')];
+      // The side column's photo and navigation fold too; this is about the
+      // sections of the overview itself.
+      const sections = [
+        ...host.querySelectorAll(
+          '#character-detail-main-column app-collapsible-section',
+        ),
+      ];
       expect(
         sections.map(s =>
           s.querySelector('.collapsible-section__title')?.textContent?.trim(),
@@ -283,7 +289,11 @@ describe('CharacterDetailComponent', () => {
         sections[0].querySelector('button[aria-expanded]') as HTMLButtonElement
       ).click();
       fixture.detectChanges();
-      expect(host.querySelector('.detail-grid')).toBeNull();
+      expect(
+        host
+          .querySelector('.detail-grid')
+          ?.closest<HTMLElement>('.collapsible-section__content')?.hidden,
+      ).toBe(true);
       expect(
         sections[0].querySelector('button[title="Edit Character"]'),
       ).not.toBeNull();

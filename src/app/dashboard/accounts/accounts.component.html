@@ -8,50 +8,44 @@
     class="col">
     <h1>Your STO Accounts</h1>
     <div id="accounts-main-content">
-      <div class="lcars-text-bar accounts-lcars-text-bar">
-        <span>Account List</span>
+      <app-collapsible-section heading="Account List">
         <!--
-          Two controls on one bar, so they go in the actions group: a lone
-          `.cta-icon` is pinned to the right-hand end of the bar by the theme,
-          and a second one would be laid on top of the first.
-
-          The switcher earns its place here as well as on the pages below: it
-          reaches a captain in one step, where this page reaches the account
-          they are on and leaves the captain a second click away.
+          The switcher earns its place on the bar as well as on the pages
+          below: it reaches a captain in one step, where this page reaches the
+          account they are on and leaves the captain a second click away.
         -->
-        <div class="lcars-bar-actions">
-          <app-sto-switcher-button></app-sto-switcher-button>
-          <button
-            type="button"
-            class="cta-icon"
-            (click)="addAccount()"
-            title="Add STO Account">
-            <i class="fas fa-plus"></i>
-          </button>
-        </div>
-      </div>
+        <app-sto-switcher-button sectionActions></app-sto-switcher-button>
+        <button
+          sectionActions
+          type="button"
+          class="cta-icon"
+          (click)="addAccount()"
+          title="Add STO Account">
+          <i class="fas fa-plus"></i>
+        </button>
 
-      <div class="accounts-inner-content">
-        @if (accounts.length === 0 && !isLoading) {
-          <p>No STO accounts found. Click the + icon above to add one.</p>
-        }
-
-        @if (allAccountsFilteredOut()) {
-          <p>
-            No STO accounts match the current filters. Use Clear Filters to see
-            your accounts again.
-          </p>
-        }
-
-        <div class="accounts-grid">
-          @for (vm of filteredAccountVms(); track vm.id) {
-            <app-account-card
-              [vm]="vm.card"
-              [privacyMode]="privacyMode.isEnabled()"
-              (action)="onAccountCardAction(vm.account, $event)" />
+        <div class="accounts-inner-content">
+          @if (accounts.length === 0 && !isLoading) {
+            <p>No STO accounts found. Click the + icon above to add one.</p>
           }
+
+          @if (allAccountsFilteredOut()) {
+            <p>
+              No STO accounts match the current filters. Use Clear Filters to see
+              your accounts again.
+            </p>
+          }
+
+          <div class="accounts-grid">
+            @for (vm of filteredAccountVms(); track vm.id) {
+              <app-account-card
+                [vm]="vm.card"
+                [privacyMode]="privacyMode.isEnabled()"
+                (action)="onAccountCardAction(vm.account, $event)" />
+            }
+          </div>
         </div>
-      </div>
+      </app-collapsible-section>
     </div>
   </div>
 
@@ -59,21 +53,11 @@
     id="accounts-side-column"
     class="col">
     @if (showListControls()) {
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Filters</span>
-        <button
-          type="button"
-          class="cta-icon"
-          (click)="filtersCollapsed = !filtersCollapsed"
-          [title]="filtersCollapsed ? 'Show Filters' : 'Hide Filters'">
-          <i
-            class="fas"
-            [class.fa-caret-down]="filtersCollapsed"
-            [class.fa-caret-up]="!filtersCollapsed"></i>
-        </button>
-      </div>
+      <app-lcars-collapsible-bar
+        label="Filters"
+        [(collapsed)]="filtersCollapsed" />
       @if (!filtersCollapsed) {
-        <div class="filter-section">
+        <div class="filter-section lcars-rotate">
           <label
             class="select-label"
             for="account-search-input"
@@ -88,7 +72,7 @@
             (ngModelChange)="searchText.set($event)" />
 
           @if (platforms.length > 0) {
-            <div class="lcars-select-container perano">
+            <div class="lcars-select-container">
               <label
                 class="select-label"
                 for="account-platform-select"
@@ -108,7 +92,7 @@
           }
 
           @if (launchers.length > 0) {
-            <div class="lcars-select-container perano">
+            <div class="lcars-select-container">
               <label
                 class="select-label"
                 for="account-launcher-select"
@@ -160,22 +144,12 @@
         </div>
       }
 
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Sort</span>
-        <button
-          type="button"
-          class="cta-icon"
-          (click)="sortCollapsed = !sortCollapsed"
-          [title]="sortCollapsed ? 'Show Sort' : 'Hide Sort'">
-          <i
-            class="fas"
-            [class.fa-caret-down]="sortCollapsed"
-            [class.fa-caret-up]="!sortCollapsed"></i>
-        </button>
-      </div>
+      <app-lcars-collapsible-bar
+        label="Sort"
+        [(collapsed)]="sortCollapsed" />
       @if (!sortCollapsed) {
-        <div class="filter-section">
-          <div class="lcars-select-container tangerine">
+        <div class="filter-section lcars-rotate">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="account-sort-by-select"
@@ -191,7 +165,7 @@
               }
             </select>
           </div>
-          <div class="lcars-select-container gold">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="account-sort-order-select"
@@ -215,15 +189,16 @@
       }
     }
 
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      <a
-        [routerLink]="dashboardLink"
-        class="full-width-btn-link sunflower"
-        >{{ appRouteTitles.STO_DASHBOARD }}</a
-      >
-    </div>
+    <app-collapsible-section
+      heading="Navigation"
+      barClass="small-lcars-bar-gap">
+      <div class="buttons">
+        <a
+          [routerLink]="dashboardLink"
+          class="full-width-btn-link"
+          >{{ appRouteTitles.STO_DASHBOARD }}</a
+        >
+      </div>
+    </app-collapsible-section>
   </div>
 </div>

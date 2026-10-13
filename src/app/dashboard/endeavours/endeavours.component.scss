@@ -21,7 +21,7 @@
 }
 
 .account-subtitle {
-  color: var(--lcars-text-muted, #aaa);
+  color: var(--lcars-text-muted, vars.$lcars-text-muted);
   margin-top: -0.5rem;
   margin-bottom: 1rem;
   font-size: 0.9rem;
@@ -46,7 +46,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-evenly;
-  background: var(--lcars-panel-bg, #1a1a2e);
+  background: var(--lcars-panel-bg, vars.$lcars-panel-bg);
   border-radius: 4px;
   padding: 0.75rem 1rem;
 }
@@ -68,7 +68,7 @@
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: rgb(255 255 255 / 55%);
+  color: vars.$white-a55;
 }
 
 .space-stat .summary-value {
@@ -105,7 +105,7 @@
   gap: 0.2rem;
   padding: 0.6rem 0.75rem 0.5rem;
   border-radius: 4px;
-  background: var(--lcars-panel-bg, #1a1a2e);
+  background: var(--lcars-panel-bg, vars.$lcars-panel-bg);
   border-left: 4px solid transparent;
   transition:
     border-color 0.15s,
@@ -113,12 +113,12 @@
 
   &.space-row {
     border-left-color: vars.$lcars-perano;
-    background: rgba(vars.$lcars-perano, 0.07);
+    background: color.change(vars.$lcars-perano, $alpha: 0.07);
   }
 
   &.ground-row {
     border-left-color: vars.$lcars-tangerine;
-    background: rgba(vars.$lcars-tangerine, 0.07);
+    background: color.change(vars.$lcars-tangerine, $alpha: 0.07);
   }
 }
 
@@ -133,7 +133,7 @@
 .perk-name {
   font-weight: 600;
   font-size: 0.9rem;
-  color: var(--lcars-text, #eee);
+  color: var(--lcars-text, vars.$lcars-text);
 }
 
 .perk-info-btn {
@@ -145,7 +145,7 @@
   border: none;
   padding: 0 0 0 0.25rem;
   cursor: pointer;
-  color: rgb(255 255 255 / 30%);
+  color: vars.$white-a30;
   font-size: 0.9rem;
   line-height: inherit;
   vertical-align: top;
@@ -159,7 +159,7 @@
 
 .perk-description {
   font-size: 0.75rem;
-  color: var(--lcars-text-muted, #aaa);
+  color: var(--lcars-text-muted, vars.$lcars-text-muted);
 }
 
 .perk-header-right {
@@ -177,7 +177,7 @@
 
 .perk-node-count {
   font-size: 0.7rem;
-  color: rgb(255 255 255 / 45%);
+  color: vars.$white-a45;
   white-space: nowrap;
 }
 
@@ -214,7 +214,7 @@ $seg-clip: polygon(30% 0%, 100% 0%, 70% 100%, 0% 100%);
   cursor: pointer;
   clip-path: $seg-clip;
   border-radius: 0;
-  background: rgba(vars.$lcars-sunflower, 0.18);
+  background: color.change(vars.$lcars-sunflower, $alpha: 0.18);
   transition: background 0.08s ease;
   position: relative;
   z-index: 1;
@@ -241,7 +241,7 @@ $seg-clip: polygon(30% 0%, 100% 0%, 70% 100%, 0% 100%);
 }
 
 .space-segments .perk-segment {
-  background: rgba(vars.$lcars-perano, 0.18);
+  background: color.change(vars.$lcars-perano, $alpha: 0.18);
 
   &.filled {
     background: vars.$lcars-perano;
@@ -253,7 +253,7 @@ $seg-clip: polygon(30% 0%, 100% 0%, 70% 100%, 0% 100%);
 }
 
 .ground-segments .perk-segment {
-  background: rgba(vars.$lcars-tangerine, 0.18);
+  background: color.change(vars.$lcars-tangerine, $alpha: 0.18);
 
   &.filled {
     background: vars.$lcars-tangerine;

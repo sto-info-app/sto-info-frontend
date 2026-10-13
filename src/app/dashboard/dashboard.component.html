@@ -95,67 +95,68 @@
     <div
       id="dashboard-info-side-column"
       class="col">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Personnel Record</span>
-      </div>
-      <div id="personnel-image">
-        <div class="pics-right">
-          @if (!user.profile?.profilePicture300) {
-            <img
-              src="{{ unavailablePhotoSrc }}"
-              alt="Photo unavailable"
-              title="Photo unavailable"
-              class="border"
-              loading="lazy" />
-          }
-          @if (user.profile?.profilePicture300) {
-            <img
-              [src]="user.profile.profilePicture300"
-              alt="{{ user.profile.firstName }} {{ user.profile.lastName }}"
-              title="{{ user.profile.firstName }} {{ user.profile.lastName }}"
-              class="border"
-              (error)="onProfileImageError($event)"
-              loading="lazy" />
-          }
-          <p class="caption">Captain {{ user.profile?.lastName || '' }}</p>
+      <app-collapsible-section
+        heading="Personnel Record"
+        barClass="small-lcars-bar-gap">
+        <div id="personnel-image">
+          <div class="pics-right">
+            @if (!user.profile?.profilePicture300) {
+              <img
+                src="{{ unavailablePhotoSrc }}"
+                alt="Portrait unavailable"
+                title="Photo unavailable"
+                class="border"
+                loading="lazy" />
+            }
+            @if (user.profile?.profilePicture300) {
+              <img
+                [src]="user.profile.profilePicture300"
+                alt="{{ user.profile.firstName }} {{ user.profile.lastName }}"
+                title="{{ user.profile.firstName }} {{ user.profile.lastName }}"
+                class="border"
+                (error)="onProfileImageError($event)"
+                loading="lazy" />
+            }
+            <p class="caption">Captain {{ user.profile?.lastName || '' }}</p>
+          </div>
         </div>
-      </div>
-      <div class="buttons personnel-buttons">
-        <a
-          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_PROFILE)"
-          class="full-width-btn-link sunflower"
-          >View record</a
-        >
-        @if (publicProfileLink) {
+        <div class="buttons personnel-buttons">
           <a
-            [routerLink]="publicProfileLink"
-            class="full-width-btn-link african-violet"
-            >View Public Profile</a
+            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_PROFILE)"
+            class="full-width-btn-link"
+            >View record</a
           >
-        }
-        <a
-          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
-          class="full-width-btn-link sunflower"
-          >Manage STO Accounts</a
-        >
-        @if (isFleetOffered$ | async) {
+          @if (publicProfileLink) {
+            <a
+              [routerLink]="publicProfileLink"
+              class="full-width-btn-link"
+              >View Public Profile</a
+            >
+          }
           <a
-            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_FLEETS)"
-            class="full-width-btn-link sky"
-            >Communities You Follow</a
+            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+            class="full-width-btn-link"
+            >Manage STO Accounts</a
           >
+          @if (isFleetOffered$ | async) {
+            <a
+              [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_FLEETS)"
+              class="full-width-btn-link"
+              >Communities You Follow</a
+            >
+            <a
+              [routerLink]="getRouteLink(appRoutes.FLEET_MY_APPLICATIONS)"
+              class="full-width-btn-link"
+              >Your Fleet Applications</a
+            >
+          }
           <a
-            [routerLink]="getRouteLink(appRoutes.FLEET_MY_APPLICATIONS)"
-            class="full-width-btn-link sky"
-            >Your Fleet Applications</a
+            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_SETTINGS)"
+            class="full-width-btn-link"
+            >Settings</a
           >
-        }
-        <a
-          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_SETTINGS)"
-          class="full-width-btn-link gold"
-          >Settings</a
-        >
-      </div>
+        </div>
+      </app-collapsible-section>
     </div>
   }
 </div>

@@ -3,16 +3,21 @@
 }
 
 @if (character) {
-  <!-- Shared photo panel, reused by the overview and reputations side columns.
-       The edit control is only rendered when the host passes editable: true. -->
+  <!-- Shared photo panel, reused by the overview and every tracker's side
+       column. The edit control is only rendered when the host passes
+       editable: true. Each tab's copy folds on its own, so the tab names it. -->
   <ng-template
     #photoPanel
-    let-editable="editable">
+    let-editable="editable"
+    let-tab="tab">
     @if (character) {
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Photo</span>
+      <app-collapsible-section
+        heading="Photo"
+        barClass="small-lcars-bar-gap"
+        [sectionKey]="'photo-' + tab">
         @if (editable) {
           <button
+            sectionActions
             type="button"
             class="cta-icon"
             (click)="editCharacterPhoto()"
@@ -20,19 +25,57 @@
             <i class="fas fa-user-pen"></i>
           </button>
         }
-      </div>
-      <div id="character-image">
-        <div class="pics-right">
-          <img
-            [src]="getProfileImageUrl()"
-            alt="{{ character.handle }}"
-            title="{{ character.handle }}"
-            class="border"
-            (error)="onProfileImageError()"
-            loading="lazy" />
+        <div id="character-image">
+          <div class="pics-right">
+            <img
+              [src]="getProfileImageUrl()"
+              alt="{{ character.handle }}"
+              title="{{ character.handle }}"
+              class="border"
+              (error)="onProfileImageError()"
+              loading="lazy" />
+          </div>
         </div>
-      </div>
+      </app-collapsible-section>
     }
+  </ng-template>
+
+  <!-- Shared navigation, under the photo in every side column. A tracker's
+       tab adds the way back to the overview at the top of the stack. -->
+  <ng-template
+    #navPanel
+    let-tab="tab">
+    <app-collapsible-section
+      heading="Navigation"
+      barClass="small-lcars-bar-gap"
+      [sectionKey]="'navigation-' + tab">
+      <div class="buttons">
+        @if (tab !== 'overview') {
+          <button
+            type="button"
+            class="full-width-btn-link"
+            (click)="selectTab('overview')">
+            Overview
+          </button>
+        }
+        <a
+          [routerLink]="getAccountLink()"
+          [fragment]="'characters-section'"
+          class="full-width-btn-link"
+          >Captain List</a
+        >
+        <a
+          [routerLink]="getAccountLink()"
+          class="full-width-btn-link"
+          >Account Profile</a
+        >
+        <a
+          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
+          class="full-width-btn-link"
+          >All Accounts</a
+        >
+      </div>
+    </app-collapsible-section>
   </ng-template>
 
   <div id="character-detail-shell">
@@ -104,7 +147,7 @@
               flow, so each section's bottom margin and the next bar's top
               margin collapse into the same distance all the way down.
             -->
-            <div class="character-details">
+            <div class="character-details lcars-rotate">
               <!--
                 The STO data folds away like the sections beneath it; the pen
                 that edits it rides on the bar beside the caret.
@@ -267,29 +310,13 @@
             class="col">
             <ng-container
               [ngTemplateOutlet]="photoPanel"
-              [ngTemplateOutletContext]="{ editable: true }"></ng-container>
-
-            <div class="lcars-text-bar small-lcars-bar-gap">
-              <span>Navigation</span>
-            </div>
-            <div class="buttons">
-              <a
-                [routerLink]="getAccountLink()"
-                [fragment]="'characters-section'"
-                class="full-width-btn-link peach"
-                >Captain List</a
-              >
-              <a
-                [routerLink]="getAccountLink()"
-                class="full-width-btn-link sunflower"
-                >Account Profile</a
-              >
-              <a
-                [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
-                class="full-width-btn-link bluey"
-                >All Accounts</a
-              >
-            </div>
+              [ngTemplateOutletContext]="{
+                editable: true,
+                tab: 'overview',
+              }"></ng-container>
+            <ng-container
+              [ngTemplateOutlet]="navPanel"
+              [ngTemplateOutletContext]="{ tab: 'overview' }"></ng-container>
           </div>
         </div>
       </section>
@@ -305,36 +332,15 @@
             <div admiraltyAsidePhoto>
               <ng-container
                 [ngTemplateOutlet]="photoPanel"
-                [ngTemplateOutletContext]="{ editable: false }"></ng-container>
+                [ngTemplateOutletContext]="{
+                  editable: false,
+                  tab: 'admiralty',
+                }"></ng-container>
             </div>
             <div admiraltyAsideNav>
-              <div class="lcars-text-bar small-lcars-bar-gap">
-                <span>Navigation</span>
-              </div>
-              <div class="buttons">
-                <button
-                  type="button"
-                  class="full-width-btn-link gold"
-                  (click)="selectTab('overview')">
-                  Overview
-                </button>
-                <a
-                  [routerLink]="getAccountLink()"
-                  [fragment]="'characters-section'"
-                  class="full-width-btn-link peach"
-                  >Captain List</a
-                >
-                <a
-                  [routerLink]="getAccountLink()"
-                  class="full-width-btn-link sunflower"
-                  >Account Profile</a
-                >
-                <a
-                  [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
-                  class="full-width-btn-link bluey"
-                  >All Accounts</a
-                >
-              </div>
+              <ng-container
+                [ngTemplateOutlet]="navPanel"
+                [ngTemplateOutletContext]="{ tab: 'admiralty' }"></ng-container>
             </div>
           </app-character-admiralty>
         </section>
@@ -350,36 +356,15 @@
             <div repAsidePhoto>
               <ng-container
                 [ngTemplateOutlet]="photoPanel"
-                [ngTemplateOutletContext]="{ editable: false }"></ng-container>
+                [ngTemplateOutletContext]="{
+                  editable: false,
+                  tab: 'reputations',
+                }"></ng-container>
             </div>
             <div repAsideNav>
-              <div class="lcars-text-bar small-lcars-bar-gap">
-                <span>Navigation</span>
-              </div>
-              <div class="buttons">
-                <button
-                  type="button"
-                  class="full-width-btn-link gold"
-                  (click)="selectTab('overview')">
-                  Overview
-                </button>
-                <a
-                  [routerLink]="getAccountLink()"
-                  [fragment]="'characters-section'"
-                  class="full-width-btn-link peach"
-                  >Captain List</a
-                >
-                <a
-                  [routerLink]="getAccountLink()"
-                  class="full-width-btn-link sunflower"
-                  >Account Profile</a
-                >
-                <a
-                  [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
-                  class="full-width-btn-link bluey"
-                  >All Accounts</a
-                >
-              </div>
+              <ng-container
+                [ngTemplateOutlet]="navPanel"
+                [ngTemplateOutletContext]="{ tab: 'reputations' }"></ng-container>
             </div>
           </app-character-reputations>
         </section>
@@ -396,36 +381,15 @@
             <div rdAsidePhoto>
               <ng-container
                 [ngTemplateOutlet]="photoPanel"
-                [ngTemplateOutletContext]="{ editable: false }"></ng-container>
+                [ngTemplateOutletContext]="{
+                  editable: false,
+                  tab: 'rd',
+                }"></ng-container>
             </div>
             <div rdAsideNav>
-              <div class="lcars-text-bar small-lcars-bar-gap">
-                <span>Navigation</span>
-              </div>
-              <div class="buttons">
-                <button
-                  type="button"
-                  class="full-width-btn-link gold"
-                  (click)="selectTab('overview')">
-                  Overview
-                </button>
-                <a
-                  [routerLink]="getAccountLink()"
-                  [fragment]="'characters-section'"
-                  class="full-width-btn-link peach"
-                  >Captain List</a
-                >
-                <a
-                  [routerLink]="getAccountLink()"
-                  class="full-width-btn-link sunflower"
-                  >Account Profile</a
-                >
-                <a
-                  [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
-                  class="full-width-btn-link bluey"
-                  >All Accounts</a
-                >
-              </div>
+              <ng-container
+                [ngTemplateOutlet]="navPanel"
+                [ngTemplateOutletContext]="{ tab: 'rd' }"></ng-container>
             </div>
           </app-character-rd>
         </section>
@@ -442,36 +406,15 @@
             <div commendationAsidePhoto>
               <ng-container
                 [ngTemplateOutlet]="photoPanel"
-                [ngTemplateOutletContext]="{ editable: false }"></ng-container>
+                [ngTemplateOutletContext]="{
+                  editable: false,
+                  tab: 'commendations',
+                }"></ng-container>
             </div>
             <div commendationAsideNav>
-              <div class="lcars-text-bar small-lcars-bar-gap">
-                <span>Navigation</span>
-              </div>
-              <div class="buttons">
-                <button
-                  type="button"
-                  class="full-width-btn-link gold"
-                  (click)="selectTab('overview')">
-                  Overview
-                </button>
-                <a
-                  [routerLink]="getAccountLink()"
-                  [fragment]="'characters-section'"
-                  class="full-width-btn-link peach"
-                  >Captain List</a
-                >
-                <a
-                  [routerLink]="getAccountLink()"
-                  class="full-width-btn-link sunflower"
-                  >Account Profile</a
-                >
-                <a
-                  [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
-                  class="full-width-btn-link bluey"
-                  >All Accounts</a
-                >
-              </div>
+              <ng-container
+                [ngTemplateOutlet]="navPanel"
+                [ngTemplateOutletContext]="{ tab: 'commendations' }"></ng-container>
             </div>
           </app-character-commendations>
         </section>
@@ -488,36 +431,15 @@
             <div specAsidePhoto>
               <ng-container
                 [ngTemplateOutlet]="photoPanel"
-                [ngTemplateOutletContext]="{ editable: false }"></ng-container>
+                [ngTemplateOutletContext]="{
+                  editable: false,
+                  tab: 'specializations',
+                }"></ng-container>
             </div>
             <div specAsideNav>
-              <div class="lcars-text-bar small-lcars-bar-gap">
-                <span>Navigation</span>
-              </div>
-              <div class="buttons">
-                <button
-                  type="button"
-                  class="full-width-btn-link gold"
-                  (click)="selectTab('overview')">
-                  Overview
-                </button>
-                <a
-                  [routerLink]="getAccountLink()"
-                  [fragment]="'characters-section'"
-                  class="full-width-btn-link peach"
-                  >Captain List</a
-                >
-                <a
-                  [routerLink]="getAccountLink()"
-                  class="full-width-btn-link sunflower"
-                  >Account Profile</a
-                >
-                <a
-                  [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
-                  class="full-width-btn-link bluey"
-                  >All Accounts</a
-                >
-              </div>
+              <ng-container
+                [ngTemplateOutlet]="navPanel"
+                [ngTemplateOutletContext]="{ tab: 'specializations' }"></ng-container>
             </div>
           </app-character-specialization>
         </section>
@@ -529,7 +451,7 @@
     <app-lcars-error-message [message]="errorMessage"></app-lcars-error-message>
     <div class="buttons-row">
       <a
-        class="lcars-btn-auto sunflower"
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="getAccountLink()">
         Back to Account
       </a>

@@ -11,6 +11,7 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin, Observable, Subject, takeUntil } from 'rxjs';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { LCARS_COLOURS } from 'src/app/shared/constants/lcars-colours.constants';
 import {
   decodeStoHandle,
   encodeStoHandle,
@@ -64,7 +65,7 @@ export abstract class CharacterProgressBaseComponent<
   readonly failedIcons = signal<Set<string>>(new Set());
 
   /** Fallback accent when an item has no colour defined. */
-  protected readonly _fallbackAccent = '#fa0';
+  protected readonly _fallbackAccent: string = LCARS_COLOURS.gold;
 
   /**
    * Whether the captain is below the level that unlocks this tracker in game.
@@ -354,13 +355,13 @@ export abstract class CharacterProgressBaseComponent<
   accentTextColor(item: TProgress): string {
     const rgb = this.hexToRgb(this.accent(item));
     if (!rgb) {
-      return '#fff';
+      return LCARS_COLOURS.a11yWhite;
     }
     const luminance =
       0.2126 * this.linearise(rgb.r) +
       0.7152 * this.linearise(rgb.g) +
       0.0722 * this.linearise(rgb.b);
-    return luminance > 0.179 ? '#0d0d0d' : '#fff';
+    return luminance > 0.179 ? LCARS_COLOURS.black : LCARS_COLOURS.a11yWhite;
   }
 
   /** One 0-255 sRGB channel as the linear value a luminance sum wants. */

@@ -193,7 +193,10 @@ describe('StoAccountService', () => {
       httpMock.expectOne(API_URLS.STO_ACCOUNT_SWITCHER).flush([]);
 
       service.getSwitcherList().subscribe();
-      httpMock.expectOne(API_URLS.STO_ACCOUNT_SWITCHER).flush([]);
+      const second = httpMock.expectOne(API_URLS.STO_ACCOUNT_SWITCHER);
+
+      expect(second.request.method).toBe('GET');
+      second.flush([]);
     });
   });
 

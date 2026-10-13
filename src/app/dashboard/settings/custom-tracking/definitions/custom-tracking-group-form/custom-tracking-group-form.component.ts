@@ -18,6 +18,7 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 
 import { CustomTrackingGroupInput } from '../../custom-tracking.service';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** Distinguishes one form from another, for label and error associations. */
 let nextGroupFormId = 0;
@@ -41,6 +42,7 @@ let nextGroupFormId = 0;
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    LcarsPanelComponent,
     ReactiveFormsModule,
     LcarsErrorMessageComponent,
     LcarsToggleComponent,

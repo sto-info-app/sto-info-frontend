@@ -34,6 +34,7 @@ import {
 import { PrivacyModeService } from '../services/privacy-mode.service';
 import { EditPersonalDetailsComponent } from './dialogs/edit-personal-details/edit-personal-details.component';
 import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 interface ProfileEditDialogResult {
   stayLoggedIn?: boolean;
@@ -46,7 +47,13 @@ interface ProfileEditDialogResult {
   styleUrls: ['./profile.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatDialogModule, RouterModule, LoadingBarComponent],
+  imports: [
+    CollapsibleSectionComponent,
+    CommonModule,
+    MatDialogModule,
+    RouterModule,
+    LoadingBarComponent,
+  ],
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   /** Precomputed router link to the main dashboard. */

@@ -101,26 +101,10 @@
 
       <!-- Specialization list, grouped by Primary / Secondary availability -->
       @for (group of groupedProgress(); track group.type) {
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>{{ group.title }}</span>
-          <button
-            type="button"
-            class="cta-icon"
-            (click)="toggleGroup(group.type)"
-            [attr.aria-expanded]="!isGroupCollapsed(group.type)"
-            [title]='isGroupCollapsed(group.type)
-  ? "Show " + group.title
-  : "Hide " + group.title'
-          >
-            <i
-              class="fas"
-              [class.fa-caret-down]="isGroupCollapsed(group.type)"
-              [class.fa-caret-up]="!isGroupCollapsed(group.type)"
-            ></i>
-          </button>
-        </div>
-
-        @if (!isGroupCollapsed(group.type)) {
+        <app-collapsible-section
+          [heading]="group.title"
+          barClass="small-lcars-bar-gap"
+        >
           <div class="spec-list">
             @for (item of group.items; track item.specializationId) {
               <div
@@ -243,7 +227,7 @@
               </div>
             }
           </div>
-        }
+        </app-collapsible-section>
       }
 
       @if (filteredProgress().length === 0 && !isLoading) {
@@ -255,7 +239,7 @@
   <!-- Side column -->
   <div
     id="spec-side-column"
-    class="col"
+    class="col lcars-rotate"
   >
     <!-- Filters are pointless while the tracker is level-locked. -->
     @if (!isLevelLocked()) {
@@ -275,23 +259,10 @@
       ></app-character-progress-filters>
     }
 
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Briefing</span>
-      <button
-        type="button"
-        class="cta-icon"
-        (click)="toggleBriefing()"
-        [attr.aria-expanded]="!briefingCollapsed()"
-        [title]='briefingCollapsed() ? "Show Briefing" : "Hide Briefing"'
-      >
-        <i
-          class="fas"
-          [class.fa-caret-down]="briefingCollapsed()"
-          [class.fa-caret-up]="!briefingCollapsed()"
-        ></i>
-      </button>
-    </div>
-    @if (!briefingCollapsed()) {
+    <app-collapsible-section
+      heading="Briefing"
+      barClass="small-lcars-bar-gap"
+    >
       <div class="spec-briefing">
         <p>
           Specializations open at level {{ unlockLevel }}. Each level-up awards
@@ -312,7 +283,7 @@
           unlocks its Specialization Qualification for training bridge officers.
         </p>
       </div>
-    }
+    </app-collapsible-section>
 
     <!-- Host-projected content (e.g. character photo) shown below the briefing. -->
     <ng-content select="[specAsidePhoto]"></ng-content>
@@ -321,23 +292,25 @@
     <ng-content select="[specAsideNav]"></ng-content>
 
     @if (!embedded) {
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Navigation</span>
-      </div>
-      <div class="buttons">
-        <a
-          [routerLink]="characterLink()"
-          class="full-width-btn-link peach"
-        >Character</a>
-        <a
-          [routerLink]="accountLink()"
-          class="full-width-btn-link sunflower"
-        >Account</a>
-        <a
-          [routerLink]="accountsLink"
-          class="full-width-btn-link bluey"
-        >Accounts</a>
-      </div>
+      <app-collapsible-section
+        heading="Navigation"
+        barClass="small-lcars-bar-gap"
+      >
+        <div class="buttons">
+          <a
+            [routerLink]="characterLink()"
+            class="full-width-btn-link"
+          >Character</a>
+          <a
+            [routerLink]="accountLink()"
+            class="full-width-btn-link"
+          >Account</a>
+          <a
+            [routerLink]="accountsLink"
+            class="full-width-btn-link"
+          >Accounts</a>
+        </div>
+      </app-collapsible-section>
     }
   </div>
 </div>

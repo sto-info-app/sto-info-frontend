@@ -12,14 +12,14 @@
 <div class="lcars-profile-pic-container">
   <div class="lcars-profile-pic-inner-container">
     <div class="lcars-text-bar">
-      <span>Starfleet Personnel Record Photo: Edit</span>
+      <span>{{ heading }}</span>
     </div>
-    @if (data?.user) {
+    @if (hasRecord) {
       <div class="lcars-profile-pic-message">
         <div
-          class="flexbox"
+          [class]="layout.row"
           [class.has-image]="imageChangedEvent">
-          <div class="col profile-pic-main-col">
+          <div [class]="layout.main">
             <input
               type="file"
               title="Select a new profile picture"
@@ -40,7 +40,7 @@
             }
           </div>
           @if (imageChangedEvent) {
-            <div class="col profile-pic-side-col">
+            <div [class]="layout.side">
               @if (errorMessage) {
                 <app-lcars-error-message
                   title="Transmission Error"
@@ -69,39 +69,29 @@
             [message]="errorMessage"></app-lcars-error-message>
         }
         <div class="lcars-profile-pic-buttons">
-          <div
-            class="buttons-container"
-            mat-dialog-actions>
-            <button
-              type="submit"
-              class="lcars-btn submit-button sunflower"
-              mat-button
-              [disabled]="!croppedImage || isSubmitting || errorMessage"
-              (click)="onUploadImageClick(); $event.preventDefault()">
-              Upload
-            </button>
-            <button
-              type="button"
-              class="lcars-btn red"
-              mat-button
-              mat-dialog-close
-              [disabled]="isSubmitting"
-              (click)="onCloseClick()">
-              Close
-            </button>
-          </div>
+          @if (inActionRow) {
+            <div
+              class="buttons-container"
+              mat-dialog-actions>
+              <ng-container *ngTemplateOutlet="buttons" />
+            </div>
+          } @else {
+            <div class="buttons-container">
+              <ng-container *ngTemplateOutlet="buttons" />
+            </div>
+          }
         </div>
       </div>
     }
-    @if (!data?.user) {
+    @if (!hasRecord) {
       <div class="lcars-profile-pic-message">
         <app-lcars-error-message
           title="Transmission Error"
-          message="Connection to the Starfleet Personnel Database has failed!"></app-lcars-error-message>
+          [message]="unavailableMessage"></app-lcars-error-message>
         <div class="buttons">
           <button
             type="button"
-            class="lcars-btn sky"
+            class="lcars-btn"
             mat-button
             mat-dialog-close
             (click)="onCloseClick()">
@@ -112,3 +102,23 @@
     }
   </div>
 </div>
+
+<ng-template #buttons>
+  <button
+    type="submit"
+    class="lcars-btn submit-button green"
+    mat-button
+    [disabled]="!croppedImage || isSubmitting || errorMessage"
+    (click)="onUploadImageClick(); $event.preventDefault()">
+    Upload
+  </button>
+  <button
+    type="button"
+    class="lcars-btn"
+    mat-button
+    mat-dialog-close
+    [disabled]="isSubmitting"
+    (click)="onCloseClick()">
+    Close
+  </button>
+</ng-template>

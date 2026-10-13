@@ -8,6 +8,7 @@ import { CommunitySubscriptionService } from '../fleet/community-subscription.se
 import { FollowedCommunity } from '../models/fleet.models';
 import { FleetConfigurationService } from '../shared/services/fleet-configuration.service';
 import { RoutingService } from '../shared/services/routing.service';
+import * as random from '../shared/utils/random.utils';
 import { DashboardComponent } from './dashboard.component';
 import { StoAccount } from './models/sto-account.model';
 import { User } from './models/user.model';
@@ -181,6 +182,16 @@ describe('DashboardComponent', () => {
       component.user = undefined;
       const greeting = component.displayWelcomeText();
       expect(greeting).toMatch(/!$/);
+    });
+
+    it('should pick the greeting at random from the four it knows', () => {
+      const spy = jest.spyOn(random, 'randomInt').mockReturnValue(1);
+      component.user = undefined;
+
+      expect(component.displayWelcomeText()).toBe('Jolan tru!');
+      expect(spy).toHaveBeenCalledWith(4);
+
+      spy.mockRestore();
     });
   });
 

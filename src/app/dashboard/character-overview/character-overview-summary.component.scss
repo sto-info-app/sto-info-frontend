@@ -9,7 +9,7 @@ $trackers: (
   'rd': vars.$lcars-perano,
   'specializations': vars.$lcars-violet,
   'admiralty': vars.$lcars-tangerine,
-  'commendations': vars.$lcars-green,
+  'commendations': vars.$lcars-sky,
 );
 
 // The host page's column spaces its blocks with a gap of its own, so the
@@ -50,7 +50,7 @@ $trackers: (
       border-left-color: color.adjust($colour, $lightness: -18%);
       background: linear-gradient(
         180deg,
-        rgba($colour, 0.14) 0%,
+        color.change($colour, $alpha: 0.14) 0%,
         vars.$lcars-grey-bg 100%
       );
 
@@ -74,7 +74,7 @@ $trackers: (
 .overview-summary__chevron {
   flex: 0 0 auto;
   font-size: 0.8rem;
-  color: rgb(0 0 0 / 60%);
+  color: vars.$black-a60;
 }
 
 .overview-summary__body {
@@ -105,7 +105,7 @@ $trackers: (
   height: 6px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgb(255 255 255 / 10%);
+  background: vars.$white-a10;
 }
 
 .overview-summary__fill {
@@ -115,7 +115,7 @@ $trackers: (
 }
 
 .overview-summary__caption {
-  color: rgb(255 255 255 / 55%);
+  color: vars.$white-a55;
   font-size: 0.7rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -124,7 +124,7 @@ $trackers: (
 .overview-summary__error {
   display: block;
   margin: 0;
-  color: rgb(255 255 255 / 55%);
+  color: vars.$white-a55;
 }
 
 @media (width <= 768px) {

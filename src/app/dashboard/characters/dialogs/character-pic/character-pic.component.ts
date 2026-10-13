@@ -1,34 +1,37 @@
-import { ChangeDetectorRef, Component, NgZone, inject } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
 import { ImageCropperComponent } from 'ngx-image-cropper';
-import { ImageCropperBaseComponent } from 'src/app/shared/base/image-cropper-base.component';
+import { Observable } from 'rxjs';
+import { RecordPhotoDialogBaseComponent } from 'src/app/dashboard/base/record-photo-dialog-base.component';
 import { Character } from 'src/app/dashboard/models/character.model';
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { AssetScanStatusComponent } from 'src/app/shared/components/asset-scan-status/asset-scan-status.component';
 import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { AcceptedAsset } from 'src/app/shared/services/asset-scan.service';
 
 @Component({
   selector: 'app-character-pic',
-  templateUrl: './character-pic.component.html',
+  templateUrl: '../../../base/record-photo-dialog.component.html',
   styleUrls: ['./character-pic.component.scss'],
   standalone: true,
   imports: [
     ImageCropperComponent,
     MatDialogModule,
+    NgTemplateOutlet,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     AssetScanStatusComponent,
     LcarsWarningMessageComponent,
   ],
 })
-export class CharacterPicComponent extends ImageCropperBaseComponent {
+export class CharacterPicComponent extends RecordPhotoDialogBaseComponent {
   protected override readonly _dialogRef = inject(
     MatDialogRef<CharacterPicComponent>,
   );
@@ -36,39 +39,34 @@ export class CharacterPicComponent extends ImageCropperBaseComponent {
     character: Character;
   };
 
+  readonly heading = 'Character Personnel Record Photo: Edit';
+  readonly unavailableMessage =
+    'Connection to the Starfleet Character Database has failed!';
+  readonly layout = {
+    row: 'lcars-pic-layout',
+    main: 'lcars-pic-main-col',
+    side: 'lcars-pic-side-col',
+  };
+
+  protected readonly _fileName = 'character-pic.png';
+
   private readonly _characterService = inject(CharacterService);
-  private readonly _ngZone = inject(NgZone);
-  private readonly _cdr = inject(ChangeDetectorRef);
 
-  onUploadImageClick(): void {
-    try {
-      if (!this.validateCroppedImage()) return;
+  /** @returns True once the Character is known. */
+  get hasRecord(): boolean {
+    return !!this.data.character;
+  }
 
-      const formData = new FormData();
-      formData.append(
-        'profilePicture',
-        this.croppedImageBlob!,
-        'character-pic.png',
-      );
-
-      this.isSubmitting = true;
-      this._characterService
-        .updateCharacterProfilePic(this.data.character.id, formData)
-        .pipe(observeInZone(this._ngZone, this._cdr))
-        .subscribe({
-          // The portrait is not on the Character yet: it is held privately
-          // and scanned first, and this dialogue says where it has got to
-          // until it is in use or was refused — FC-012.
-          next: accepted => this.watchUpload(accepted),
-          error: error => {
-            this.handleHttpError(error);
-            this.isSubmitting = false;
-          },
-        });
-    } catch (error) {
-      console.error('Error processing image blob:', error);
-      this.displayErrorMessage('Invalid image format.');
-      this.isSubmitting = false;
-    }
+  /**
+   * Sends the portrait to the Character's record.
+   *
+   * @param formData - The portrait.
+   * @returns What the upload endpoint answered.
+   */
+  protected send(formData: FormData): Observable<AcceptedAsset> {
+    return this._characterService.updateCharacterProfilePic(
+      this.data.character.id,
+      formData,
+    );
   }
 }
