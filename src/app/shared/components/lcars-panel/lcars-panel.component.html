@@ -1,0 +1,35 @@
+<section
+  class="lcars-panel"
+  [attr.aria-labelledby]="headingId">
+  <div class="lcars-panel__heading">
+    @switch (level()) {
+      @case (2) {
+        <h2
+          class="lcars-panel__name"
+          [id]="headingId">
+          {{ heading() }}
+        </h2>
+      }
+      @case (4) {
+        <h4
+          class="lcars-panel__name"
+          [id]="headingId">
+          {{ heading() }}
+        </h4>
+      }
+      @default {
+        <h3
+          class="lcars-panel__name"
+          [id]="headingId">
+          {{ heading() }}
+        </h3>
+      }
+    }
+    <div class="lcars-panel__marks">
+      <ng-content select="[panelMarks]" />
+    </div>
+  </div>
+  <div class="lcars-panel__body">
+    <ng-content />
+  </div>
+</section>

@@ -1,9 +1,23 @@
-<section class="collapsible-section">
+<!--
+  Named by its heading alone, not the badge beside it, so every section is a
+  region a screen reader and a test can find by that name.
+-->
+<section
+  class="collapsible-section"
+  [attr.aria-labelledby]="headingId">
   <div
     class="lcars-text-bar"
     [ngClass]="barClass">
     <h2 class="collapsible-section__title">
-      <span>{{ heading }}</span>
+      @if (badge === null) {
+        <span [id]="headingId">{{ heading }}</span>
+      } @else {
+        <span class="title-with-badge">
+          <span [id]="headingId">{{ heading }}</span>
+          <span class="sr-only">, </span>
+          <span class="header-count-badge">{{ badge }}</span>
+        </span>
+      }
     </h2>
     <!--
       The caret shares the bar's actions group with whatever the host projects
@@ -28,11 +42,14 @@
     </div>
   </div>
 
-  @if (isExpanded) {
-    <div
-      class="collapsible-section__content"
-      [id]="contentId">
-      <ng-content />
-    </div>
-  }
+  <!--
+    Hidden rather than removed, so a form inside keeps what was typed into it
+    while its section is folded away.
+  -->
+  <div
+    class="collapsible-section__content"
+    [id]="contentId"
+    [hidden]="!isExpanded">
+    <ng-content />
+  </div>
 </section>

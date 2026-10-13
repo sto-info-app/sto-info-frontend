@@ -1,13 +1,40 @@
-// A line of its own under a heading, small, so it reads as an aside rather
-// than one of the page's controls.
+@use 'lcars-variables' as vars;
+
+// A line of its own under a heading, so it reads as an aside to the page
+// rather than one of its controls.
 :host {
   display: block;
   margin-bottom: 0.75rem;
 }
 
+// A small LCARS pill (Steve's decision of 12 October 2026): the shape every
+// other link to somewhere is drawn in, at half the height, and always the same
+// blue, which is not in the page's rotation, so a reader learns it as "help"
+// wherever it appears.
 .help-link {
   display: inline-flex;
   gap: 0.4rem;
-  align-items: center;
-  font-size: 0.9rem;
+  align-items: flex-end;
+  justify-content: flex-end;
+  min-height: 30px;
+  padding: 0 14px 4px 24px;
+  border-radius: 15px;
+  background-color: vars.$lcars-c48;
+  color: vars.$a11y-black;
+  font-family: vars.$font-antonio;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: filter 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-sunflower;
+    outline-offset: 2px;
+  }
 }
