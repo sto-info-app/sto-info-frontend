@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { PolicyHeaderComponent } from '../../shared/policy-header/policy-header.component';
 import { STORYTIME_COPY } from '../../storytime.constants';
@@ -22,7 +23,12 @@ import { STORYTIME_COPY } from '../../storytime.constants';
   selector: 'app-fan-content-notice',
   templateUrl: './fan-content-notice.component.html',
   standalone: true,
-  imports: [CommonModule, RouterModule, PolicyHeaderComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    PolicyHeaderComponent,
+    CollapsibleSectionComponent,
+  ],
 })
 export class FanContentNoticeComponent {
   /** User-facing copy, held centrally so wording stays consistent. */

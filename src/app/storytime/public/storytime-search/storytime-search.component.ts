@@ -11,6 +11,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import {
   SearchHit,
   SearchResults,
@@ -53,6 +54,7 @@ const SEARCH_PANEL_CLASSES: Record<string, string> = {
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsPanelComponent,
   ],
 })
 export class StorytimeSearchComponent implements OnInit {

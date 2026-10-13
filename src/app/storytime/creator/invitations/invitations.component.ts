@@ -10,6 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import {
   ArcCollaborator,
   ArcMembership,
@@ -49,6 +50,7 @@ import {
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class InvitationsComponent implements OnInit {

@@ -19,6 +19,7 @@ import {
   of,
   switchMap,
 } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import {
   CreditableMember,
   CrewCredit,
@@ -64,6 +65,7 @@ const MIN_SEARCH_LENGTH = 2;
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class CreditListComponent implements OnInit {

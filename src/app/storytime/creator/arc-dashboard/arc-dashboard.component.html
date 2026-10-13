@@ -21,7 +21,7 @@
 
   <div class="storytime-page-actions">
     <a
-      class="lcars-btn lcars-btn-auto green"
+      class="lcars-btn lcars-btn-auto"
       [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', 'new']">
       Create an Arc
     </a>
@@ -64,7 +64,7 @@
         <div class="storytime-record__details">
           <nav class="storytime-actions">
             <a
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
               [routerLink]="[
                 '/',
                 appRoutes.STORYTIME,
@@ -76,7 +76,7 @@
               >Stories</a
             >
             <a
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
               [routerLink]="[
                 '/',
                 appRoutes.STORYTIME,
@@ -89,7 +89,7 @@
             >
             @if (arc.publishedAt) {
               <a
-                class="lcars-btn lcars-btn-auto sky"
+                class="lcars-btn lcars-btn-auto"
                 [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]"
                 >View as a reader</a
               >

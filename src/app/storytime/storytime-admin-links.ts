@@ -12,12 +12,14 @@ export interface StorytimeAdminLink {
   /** The path segments beneath Storytime. */
   segments: string[];
   /**
-   * Which card this is, for styling.
+   * Which card this is, as a hook for styling one card apart from the rest.
    *
    * A key rather than a class name because two pages show these cards and each
    * names its own — `storytime-landing__card--moderation` on the landing page,
-   * `admin-landing__card--moderation` on the Admin page — while the card keeps
-   * its colour in both.
+   * `admin-landing__card--moderation` on the Admin page. Neither page colours a
+   * card by it any longer: the cards take the palette rotation in turn
+   * (Steve's decision of 12 October 2026), so a card's colour depends on where
+   * it sits among the cards shown.
    */
   cardKey: string;
 }

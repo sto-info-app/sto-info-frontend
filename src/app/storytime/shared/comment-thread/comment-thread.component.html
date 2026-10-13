@@ -55,7 +55,7 @@
                 <form
                   class="storytime-comments__form"
                   (ngSubmit)="postReply()">
-                  <div class="lcars-input-container perano">
+                  <div class="lcars-input-container">
                     <label [attr.for]="'reply-' + node.comment.id"
                       >Your reply</label
                     >
@@ -75,7 +75,7 @@
                       Post reply
                     </button>
                     <button
-                      class="lcars-btn lcars-btn-auto red"
+                      class="lcars-btn lcars-btn-auto"
                       type="button"
                       (click)="cancelReply()">
                       Cancel
@@ -92,7 +92,7 @@
         <form
           class="storytime-comments__form"
           (ngSubmit)="post()">
-          <div class="lcars-input-container perano">
+          <div class="lcars-input-container">
             <label for="comment-draft">Add a comment</label>
             <textarea
               id="comment-draft"
@@ -172,7 +172,7 @@
             <form
               class="storytime-comments__form"
               (ngSubmit)="saveEdit()">
-              <div class="lcars-input-container gold">
+              <div class="lcars-input-container">
                 <label [attr.for]="'edit-' + comment.id"
                   >Edit your comment</label
                 >
@@ -192,7 +192,7 @@
                   Save
                 </button>
                 <button
-                  class="lcars-btn lcars-btn-auto red"
+                  class="lcars-btn lcars-btn-auto"
                   type="button"
                   (click)="cancelEdit()">
                   Cancel
@@ -306,7 +306,7 @@
         <form
           class="storytime-comments__form"
           (ngSubmit)="confirmRemove()">
-          <div class="lcars-input-container red">
+          <div class="lcars-input-container">
             <label [attr.for]="'remove-' + comment.id"
               >What the author is told</label
             >
@@ -320,13 +320,13 @@
           </div>
           <div class="storytime-comments__actions">
             <button
-              class="lcars-btn lcars-btn-auto cardinal"
+              class="lcars-btn lcars-btn-auto red"
               type="submit"
               [disabled]="isSaving || !removeDraft.trim()">
               Remove comment
             </button>
             <button
-              class="lcars-btn lcars-btn-auto red"
+              class="lcars-btn lcars-btn-auto"
               type="button"
               (click)="cancelRemove()">
               Cancel

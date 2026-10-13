@@ -10,6 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { Spotlight } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -35,6 +36,7 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class SpotlightArchiveComponent implements OnInit {

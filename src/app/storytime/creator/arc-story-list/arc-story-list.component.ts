@@ -12,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import {
   ArcMembership,
   ArcMembershipStatus,
@@ -47,6 +48,7 @@ import { ARC_MEMBERSHIP_STATUS_LABELS } from '../../storytime.constants';
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     HasPermissionDirective,
+    CollapsibleSectionComponent,
   ],
 })
 export class ArcStoryListComponent implements OnInit {

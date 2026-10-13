@@ -12,9 +12,9 @@
 
     <form
       [formGroup]="form"
-      class="storytime-report__form">
+      class="storytime-report__form lcars-rotate">
       <div class="storytime-setting-field">
-        <div class="lcars-select-container sunflower">
+        <div class="lcars-select-container">
           <label
             class="select-label"
             for="report-reason"
@@ -48,7 +48,7 @@
         </details>
       </div>
 
-      <div class="lcars-input-container perano">
+      <div class="lcars-input-container">
         <label for="report-description">Anything you want to add</label>
         <textarea
           id="report-description"
@@ -63,6 +63,7 @@
 
     <p class="storytime-report__policy">
       <a
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']"
         mat-dialog-close
         >Read the content policy</a
@@ -75,7 +76,7 @@
     mat-dialog-actions>
     <button
       type="button"
-      class="lcars-btn red"
+      class="lcars-btn"
       mat-button
       (click)="cancel()">
       Cancel

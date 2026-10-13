@@ -16,14 +16,12 @@
       [formGroup]="form"
       class="storytime-form"
       (ngSubmit)="save()">
-      <section class="storytime-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Who they are</span>
-        </div>
-
-        <div class="storytime-panel">
+      <app-collapsible-section
+        heading="Who they are"
+        barClass="small-lcars-bar-gap">
+        <div class="storytime-panel storytime-panel--rotate">
           <div class="form-row">
-            <div class="lcars-input-container perano">
+            <div class="lcars-input-container">
               <label for="character-name">Name</label>
               <input
                 id="character-name"
@@ -35,7 +33,7 @@
               }
             </div>
 
-            <div class="lcars-input-container bluey">
+            <div class="lcars-input-container">
               <label for="character-slug">URL slug</label>
               <input
                 id="character-slug"
@@ -47,7 +45,7 @@
           </div>
 
           <div class="form-row">
-            <div class="lcars-input-container gold storytime-field-full">
+            <div class="lcars-input-container storytime-field-full">
               <label for="character-short-bio">One-line description</label>
               <input
                 id="character-short-bio"
@@ -62,7 +60,6 @@
             fieldId="character-biography"
             label="Biography"
             controlName="biographySource"
-            colour="perano"
             previewClass="storytime-character__biography"
             [rows]="10" />
 
@@ -73,16 +70,14 @@
               ariaLabel="One of the Story’s main Characters"></app-lcars-toggle>
           </div>
         </div>
-      </section>
+      </app-collapsible-section>
 
-      <section class="storytime-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Service record</span>
-        </div>
-
-        <div class="storytime-panel">
+      <app-collapsible-section
+        heading="Service record"
+        barClass="small-lcars-bar-gap">
+        <div class="storytime-panel storytime-panel--rotate">
           <div class="form-row">
-            <div class="lcars-input-container sky">
+            <div class="lcars-input-container">
               <label for="character-species">Species</label>
               <input
                 id="character-species"
@@ -91,7 +86,7 @@
                 maxlength="100" />
             </div>
 
-            <div class="lcars-input-container sky">
+            <div class="lcars-input-container">
               <label for="character-faction">Faction</label>
               <input
                 id="character-faction"
@@ -100,7 +95,7 @@
                 maxlength="100" />
             </div>
 
-            <div class="lcars-input-container sky">
+            <div class="lcars-input-container">
               <label for="character-rank">Rank</label>
               <input
                 id="character-rank"
@@ -111,7 +106,7 @@
           </div>
 
           <div class="form-row">
-            <div class="lcars-input-container cool">
+            <div class="lcars-input-container">
               <label for="character-occupation">Occupation</label>
               <input
                 id="character-occupation"
@@ -120,7 +115,7 @@
                 maxlength="150" />
             </div>
 
-            <div class="lcars-input-container cool">
+            <div class="lcars-input-container">
               <label for="character-affiliation">Affiliation</label>
               <input
                 id="character-affiliation"
@@ -129,7 +124,7 @@
                 maxlength="200" />
             </div>
 
-            <div class="lcars-input-container cool">
+            <div class="lcars-input-container">
               <label for="character-ship">Ship or posting</label>
               <input
                 id="character-ship"
@@ -139,7 +134,7 @@
             </div>
           </div>
         </div>
-      </section>
+      </app-collapsible-section>
 
       <!--
         The portrait waits for the Character to exist. It is set against a
@@ -147,28 +142,22 @@
         before the first save would mean holding a file with nowhere to put it.
       -->
       @if (character) {
-        <section class="storytime-section">
-          <div class="storytime-panel">
-            <app-storytime-image-manager
-              [slot]="imageSlots.CHARACTER_PORTRAIT"
-              [targetId]="character.id"
-              [imageUrl]="character.portraitImageUrl"
-              [imageAlt]="character.portraitImageAlt"
-              altControlName="portraitImageAlt"
-              (changed)="onImageChanged($event)"></app-storytime-image-manager>
-          </div>
-        </section>
+        <app-storytime-image-manager
+          [slot]="imageSlots.CHARACTER_PORTRAIT"
+          [targetId]="character.id"
+          [imageUrl]="character.portraitImageUrl"
+          [imageAlt]="character.portraitImageAlt"
+          altControlName="portraitImageAlt"
+          (changed)="onImageChanged($event)"></app-storytime-image-manager>
       }
 
-      <section class="storytime-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Traits</span>
-        </div>
-
-        <div class="storytime-panel">
+      <app-collapsible-section
+        heading="Traits"
+        barClass="small-lcars-bar-gap">
+        <div class="storytime-panel storytime-panel--rotate">
           @for (trait of traits.controls; track $index; let index = $index) {
             <div class="storytime-trait-row">
-              <div class="lcars-input-container violet">
+              <div class="lcars-input-container">
                 <label [attr.for]="'character-trait-' + index"
                   >Trait {{ index + 1 }}</label
                 >
@@ -189,7 +178,7 @@
 
           <div class="storytime-actions">
             <button
-              class="lcars-btn lcars-btn-auto sunflower"
+              class="lcars-btn lcars-btn-auto"
               type="button"
               [disabled]="traits.length >= maxTraits"
               (click)="addTrait()">
@@ -197,7 +186,7 @@
             </button>
           </div>
         </div>
-      </section>
+      </app-collapsible-section>
 
       <app-storytime-editor-actions
         [isSaving]="isSaving"

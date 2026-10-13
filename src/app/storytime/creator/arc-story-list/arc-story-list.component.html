@@ -3,7 +3,9 @@
   class="storytime-page">
   <h1>Stories in this Arc</h1>
 
-  <nav class="storytime-page-actions">
+  <nav
+    class="storytime-page-actions"
+    aria-label="This Arc">
     <!--
       An Arc is often the reason a Story gets written at all, so writing one
       starts here rather than somewhere else. It joins this Arc on its first
@@ -11,18 +13,18 @@
     -->
     <a
       *appHasPermission="permissions.STORYTIME_STORY_CREATE"
-      class="lcars-btn lcars-btn-auto green"
+      class="lcars-btn lcars-btn-auto"
       [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', 'new']"
       [queryParams]="{ arc: arcId }">
       Write a Story for this Arc
     </a>
     <a
-      class="lcars-btn lcars-btn-auto bluey"
+      class="lcars-btn lcars-btn-auto"
       [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', arcId]">
       Back to the Arc
     </a>
     <a
-      class="lcars-btn lcars-btn-auto sky"
+      class="lcars-btn lcars-btn-auto"
       [routerLink]="[
         '/',
         appRoutes.STORYTIME,
@@ -48,11 +50,9 @@
   </p>
 
   @if (invitableStories.length > 0) {
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Your Stories</span>
-      </div>
-
+    <app-collapsible-section
+      heading="Your Stories"
+      barClass="small-lcars-bar-gap">
       <ul class="storytime-arc-stories">
         @for (story of invitableStories; track story.id) {
           <li class="storytime-arc-stories__entry">
@@ -69,20 +69,18 @@
           </li>
         }
       </ul>
-    </section>
+    </app-collapsible-section>
   }
 
-  <section class="storytime-section">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Invite a Story</span>
-    </div>
-
+  <app-collapsible-section
+    heading="Invite a Story"
+    barClass="small-lcars-bar-gap">
     <form
       class="storytime-panel storytime-form"
       [formGroup]="form"
       (ngSubmit)="invite()">
       <div class="form-row">
-        <div class="lcars-input-container perano storytime-field-full">
+        <div class="lcars-input-container storytime-field-full">
           <label for="arc-story-id">Story ID</label>
           <input
             id="arc-story-id"
@@ -108,16 +106,14 @@
         </button>
       </div>
     </form>
-  </section>
+  </app-collapsible-section>
 
   @if (isLoading) {
     <app-loading-bar loadingText="Loading the Arc"></app-loading-bar>
   } @else {
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Reading order</span>
-      </div>
-
+    <app-collapsible-section
+      heading="Reading order"
+      barClass="small-lcars-bar-gap">
       @if (approved.length === 0) {
         <p class="storytime-empty">
           Nothing has joined this Arc yet. An Arc needs at least one agreed
@@ -161,7 +157,7 @@
                     aria-hidden="true"></i>
                 </button>
                 <button
-                  class="lcars-btn lcars-btn-auto cardinal"
+                  class="lcars-btn lcars-btn-auto red"
                   type="button"
                   (click)="remove(membership)">
                   Remove
@@ -171,14 +167,12 @@
           }
         </ol>
       }
-    </section>
+    </app-collapsible-section>
 
     @if (pending.length > 0) {
-      <section class="storytime-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Waiting on an answer</span>
-        </div>
-
+      <app-collapsible-section
+        heading="Waiting on an answer"
+        barClass="small-lcars-bar-gap">
         <ul class="storytime-arc-stories">
           @for (membership of pending; track membership.id) {
             <li class="storytime-arc-stories__entry">
@@ -198,14 +192,14 @@
                     Accept
                   </button>
                   <button
-                    class="lcars-btn lcars-btn-auto cardinal"
+                    class="lcars-btn lcars-btn-auto red"
                     type="button"
                     (click)="decline(membership)">
                     Decline
                   </button>
                 } @else {
                   <button
-                    class="lcars-btn lcars-btn-auto cardinal"
+                    class="lcars-btn lcars-btn-auto red"
                     type="button"
                     (click)="remove(membership)">
                     Withdraw invitation
@@ -215,7 +209,7 @@
             </li>
           }
         </ul>
-      </section>
+      </app-collapsible-section>
     }
   }
 </section>

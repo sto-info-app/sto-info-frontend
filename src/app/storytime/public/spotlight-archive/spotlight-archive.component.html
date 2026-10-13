@@ -51,28 +51,31 @@
     }
 
     @if (past.length > 0) {
-      <h2>Previously in the Spotlight</h2>
-      <ul class="storytime-spotlight storytime-spotlight--past">
-        @for (entry of past; track entry.id) {
-          <li class="storytime-panel-card storytime-panel-card--spotlight">
-            <a
-              class="storytime-panel-card__heading"
-              [routerLink]="linkFor(entry)"
-              [title]="entry.headline">
-              <h3 class="storytime-panel-card__name">{{ entry.headline }}</h3>
-            </a>
+      <app-collapsible-section
+        heading="Previously in the Spotlight"
+        barClass="small-lcars-bar-gap">
+        <ul class="storytime-spotlight storytime-spotlight--past">
+          @for (entry of past; track entry.id) {
+            <li class="storytime-panel-card storytime-panel-card--spotlight">
+              <a
+                class="storytime-panel-card__heading"
+                [routerLink]="linkFor(entry)"
+                [title]="entry.headline">
+                <h3 class="storytime-panel-card__name">{{ entry.headline }}</h3>
+              </a>
 
-            <div class="storytime-panel-card__body">
-              <p class="storytime-spotlight__work">{{ titleFor(entry) }}</p>
-              <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
-              <p class="storytime-spotlight__dates">
-                {{ entry.startsAt | appDate: 'longDate' }} –
-                {{ entry.endsAt | appDate: 'longDate' }}
-              </p>
-            </div>
-          </li>
-        }
-      </ul>
+              <div class="storytime-panel-card__body">
+                <p class="storytime-spotlight__work">{{ titleFor(entry) }}</p>
+                <p class="storytime-spotlight__summary">{{ entry.summary }}</p>
+                <p class="storytime-spotlight__dates">
+                  {{ entry.startsAt | appDate: 'longDate' }} –
+                  {{ entry.endsAt | appDate: 'longDate' }}
+                </p>
+              </div>
+            </li>
+          }
+        </ul>
+      </app-collapsible-section>
     }
   }
 </section>

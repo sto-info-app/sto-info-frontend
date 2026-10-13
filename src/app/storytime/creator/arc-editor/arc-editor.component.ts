@@ -11,6 +11,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import {
   ArcStatus,
   ManagedArc,
@@ -61,6 +62,7 @@ import {
     MarkdownFieldComponent,
     ImageManagerComponent,
     EditorActionsComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class ArcEditorComponent implements OnInit {

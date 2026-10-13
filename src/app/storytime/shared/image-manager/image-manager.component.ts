@@ -17,6 +17,7 @@ import {
 } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import {
@@ -48,7 +49,12 @@ import {
   selector: 'app-storytime-image-manager',
   templateUrl: './image-manager.component.html',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LcarsErrorMessageComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LcarsErrorMessageComponent,
+    LcarsPanelComponent,
+  ],
   viewProviders: [
     { provide: ControlContainer, useExisting: FormGroupDirective },
   ],

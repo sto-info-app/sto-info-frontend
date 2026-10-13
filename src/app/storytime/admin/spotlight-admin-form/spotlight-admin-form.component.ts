@@ -18,6 +18,7 @@ import {
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import {
   CreateSpotlightRequest,
   ManagedSpotlight,
@@ -83,6 +84,7 @@ interface SpotlightFields {
     LcarsErrorMessageComponent,
     ImageManagerComponent,
     EditorActionsComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class SpotlightAdminFormComponent implements OnInit {

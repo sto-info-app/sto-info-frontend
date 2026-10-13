@@ -1,9 +1,13 @@
-<div class="storytime-image-manager">
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>{{ spec.label }}</span>
-  </div>
-
-  <div class="storytime-panel">
+<!--
+  One panel card per picture, named for the slot it fills. It sits inside the
+  editor's own section, so it is a card under that section's bar rather than a
+  second bar of its own.
+-->
+<app-lcars-panel
+  class="storytime-image-manager"
+  [heading]="spec.label"
+  [level]="3">
+  <div class="storytime-panel storytime-panel--bare">
     @if (errorMessage) {
       <app-lcars-error-message
         title="Could not change that"
@@ -36,7 +40,7 @@
         <div class="storytime-image-manager__buttons">
           <button
             type="button"
-            class="lcars-btn lcars-btn-auto sunflower"
+            class="lcars-btn lcars-btn-auto"
             [disabled]="isRemoving"
             (click)="onChooseClick()">
             {{ hasImage ? 'Replace' : 'Add' }}
@@ -61,7 +65,7 @@
       uploaded into it next. The server refuses it on the same grounds.
     -->
     @if (hasImage) {
-      <div class="lcars-input-container bluey storytime-field-full">
+      <div class="lcars-input-container storytime-field-full">
         <label [attr.for]="'storytime-alt-' + slot">
           What does this picture show?
         </label>
@@ -77,4 +81,4 @@
       </div>
     }
   </div>
-</div>
+</app-lcars-panel>

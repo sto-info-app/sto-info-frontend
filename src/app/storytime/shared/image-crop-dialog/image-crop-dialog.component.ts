@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, NgZone, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import { ImageCropperComponent } from 'ngx-image-cropper';
-import { ImageCropperBaseComponent } from 'src/app/shared/base/image-cropper-base.component';
+import { DescribedImageCropperBaseComponent } from 'src/app/shared/base/described-image-cropper-base.component';
+import { ImageCropPickerComponent } from 'src/app/shared/components/image-crop-picker/image-crop-picker.component';
 import { AssetScanStatusComponent } from 'src/app/shared/components/asset-scan-status/asset-scan-status.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
@@ -56,7 +56,7 @@ export interface StorytimeImageCropData {
   imports: [
     CommonModule,
     FormsModule,
-    ImageCropperComponent,
+    ImageCropPickerComponent,
     MatDialogModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
@@ -64,7 +64,7 @@ export interface StorytimeImageCropData {
     LcarsWarningMessageComponent,
   ],
 })
-export class StorytimeImageCropDialogComponent extends ImageCropperBaseComponent {
+export class StorytimeImageCropDialogComponent extends DescribedImageCropperBaseComponent {
   protected override readonly _dialogRef = inject(
     MatDialogRef<StorytimeImageCropDialogComponent>,
   );
@@ -81,12 +81,7 @@ export class StorytimeImageCropDialogComponent extends ImageCropperBaseComponent
   /** The longest description the server accepts. */
   readonly altMaxLength = STORYTIME_IMAGE_ALT_MAX_LENGTH;
 
-  /** What the picture shows, which travels with the upload. */
-  altText = this.data.currentAlt ?? '';
-
   private readonly _imageService = inject(StorytimeImageService);
-  private readonly _ngZone = inject(NgZone);
-  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Creates the dialog, taking its crop rules from the slot being filled.
@@ -94,29 +89,10 @@ export class StorytimeImageCropDialogComponent extends ImageCropperBaseComponent
   constructor() {
     super();
 
-    this.outputFormat = this.spec.outputFormat;
-    this.minimumCroppedWidth = this.spec.minimumWidth;
-    this.minimumCroppedHeight = this.spec.minimumHeight;
-    this.recommendedCroppedWidth = this.spec.recommendedWidth;
-    this.recommendedCroppedHeight = this.spec.recommendedHeight;
+    this.altText = this.data.currentAlt ?? '';
+    this.holdCropTo(this.spec);
   }
 
-  /**
-   * Whether the upload button should do anything yet.
-   *
-   * @returns True when there is a crop and a description to send with it.
-   */
-  get canUpload(): boolean {
-    return (
-      this.croppedImage !== '' &&
-      this.altText.trim().length > 0 &&
-      !this.isSubmitting
-    );
-  }
-
-  /**
-   * Sends the crop and its description, closing with the updated work.
-   */
   /**
    * Fetches the work and closes with it, now that the picture is in use.
    *
@@ -138,47 +114,19 @@ export class StorytimeImageCropDialogComponent extends ImageCropperBaseComponent
       });
   }
 
+  /**
+   * Sends the crop and its description to be scanned.
+   */
   onUploadImageClick(): void {
-    if (!this.validateCroppedImage()) {
-      return;
-    }
-
-    const description = this.altText.trim();
-
-    if (!description) {
-      this.displayErrorMessage('Please describe what the image shows.');
-      return;
-    }
-
-    this.isSubmitting = true;
-
-    this._imageService
-      .upload(
-        this.data.slot,
-        this.data.targetId,
-        this.croppedImageBlob!,
-        description,
-      )
-      .pipe(observeInZone(this._ngZone, this._cdr))
-      .subscribe({
-        // The work has not changed yet. The picture is held privately and
-        // scanned first, and this dialogue reports where it has got to
-        // until it is in use or was refused — FC-012.
-        next: accepted => this.watchUpload(accepted),
-        error: (error: { status: number; error?: { message?: string } }) => {
-          this.isSubmitting = false;
-          // The server names the specific problem — a crop below the size the
-          // slot needs, or an image larger than the limit — which is more use
-          // than a generic failure.
-          const message = error.error?.message;
-
-          if (message) {
-            this.displayErrorMessage(message);
-            return;
-          }
-
-          this.handleHttpError(error);
-        },
-      });
+    this.uploadDescribed(
+      'Please describe what the image shows.',
+      (image, description) =>
+        this._imageService.upload(
+          this.data.slot,
+          this.data.targetId,
+          image,
+          description,
+        ),
+    );
   }
 }

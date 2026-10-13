@@ -12,16 +12,14 @@
   @if (isLoading) {
     <app-loading-bar loadingText="Loading the queue"></app-loading-bar>
   } @else {
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>What you will say</span>
-      </div>
-
+    <app-collapsible-section
+      heading="What you will say"
+      barClass="small-lcars-bar-gap">
       <form
-        class="storytime-panel storytime-form"
+        class="storytime-panel storytime-form storytime-panel--rotate"
         [formGroup]="form">
         <div class="form-row">
-          <div class="lcars-input-container perano storytime-field-full">
+          <div class="lcars-input-container storytime-field-full">
             <label for="moderation-message">What the creator is told</label>
             <textarea
               id="moderation-message"
@@ -37,7 +35,7 @@
         </div>
 
         <div class="form-row">
-          <div class="lcars-input-container gold storytime-field-full">
+          <div class="lcars-input-container storytime-field-full">
             <label for="moderation-resolution">Note for the record</label>
             <input
               id="moderation-resolution"
@@ -51,13 +49,11 @@
           </div>
         </div>
       </form>
-    </section>
+    </app-collapsible-section>
 
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Reports</span>
-      </div>
-
+    <app-collapsible-section
+      heading="Reports"
+      barClass="small-lcars-bar-gap">
       @if (reports.length === 0) {
         <p class="storytime-empty">Nothing has been reported.</p>
       } @else {
@@ -94,20 +90,20 @@
                   <div class="storytime-actions">
                     @if (report.status === reportStatus.OPEN) {
                       <button
-                        class="lcars-btn lcars-btn-auto bluey"
+                        class="lcars-btn lcars-btn-auto"
                         type="button"
                         (click)="claim(report)">
                         Claim
                       </button>
                     }
                     <button
-                      class="lcars-btn lcars-btn-auto cardinal"
+                      class="lcars-btn lcars-btn-auto red"
                       type="button"
                       (click)="removeContent(report)">
                       Remove the content
                     </button>
                     <button
-                      class="lcars-btn lcars-btn-auto sunflower"
+                      class="lcars-btn lcars-btn-auto red"
                       type="button"
                       (click)="dismiss(report)">
                       Dismiss
@@ -119,13 +115,11 @@
           }
         </ul>
       }
-    </section>
+    </app-collapsible-section>
 
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Appeals</span>
-      </div>
-
+    <app-collapsible-section
+      heading="Appeals"
+      barClass="small-lcars-bar-gap">
       @if (appeals.length === 0) {
         <p class="storytime-empty">Nobody is waiting on an appeal.</p>
       } @else {
@@ -157,7 +151,7 @@
                     Uphold and restore
                   </button>
                   <button
-                    class="lcars-btn lcars-btn-auto cardinal"
+                    class="lcars-btn lcars-btn-auto red"
                     type="button"
                     (click)="reject(appeal)">
                     Reject
@@ -168,6 +162,6 @@
           }
         </ul>
       }
-    </section>
+    </app-collapsible-section>
   }
 </section>

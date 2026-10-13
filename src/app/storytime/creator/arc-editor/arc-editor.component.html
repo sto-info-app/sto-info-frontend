@@ -13,9 +13,11 @@
     thing anybody wants after describing one.
   -->
   @if (arc) {
-    <nav class="storytime-page-actions">
+    <nav
+      class="storytime-page-actions"
+      aria-label="This Arc">
       <a
-        class="lcars-btn lcars-btn-auto green"
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="[
           '/',
           appRoutes.STORYTIME,
@@ -27,7 +29,7 @@
         >Stories</a
       >
       <a
-        class="lcars-btn lcars-btn-auto bluey"
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="[
           '/',
           appRoutes.STORYTIME,
@@ -39,7 +41,7 @@
         >Collaborators</a
       >
       <a
-        class="lcars-btn lcars-btn-auto sky"
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs']"
         >Back to your Arcs</a
       >
@@ -56,14 +58,12 @@
     [formGroup]="form"
     class="storytime-form"
     (ngSubmit)="save()">
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Arc Details</span>
-      </div>
-
-      <div class="storytime-panel">
+    <app-collapsible-section
+      heading="Arc Details"
+      barClass="small-lcars-bar-gap">
+      <div class="storytime-panel storytime-panel--rotate">
         <div class="form-row">
-          <div class="lcars-input-container perano storytime-field-full">
+          <div class="lcars-input-container storytime-field-full">
             <label for="arc-title">Title</label>
             <input
               id="arc-title"
@@ -80,7 +80,7 @@
         </div>
 
         <div class="form-row">
-          <div class="lcars-input-container bluey">
+          <div class="lcars-input-container">
             <label for="arc-slug">URL slug</label>
             <input
               id="arc-slug"
@@ -93,7 +93,7 @@
             </p>
           </div>
 
-          <div class="lcars-input-container gold">
+          <div class="lcars-input-container">
             <label for="arc-short-description">Short description</label>
             <input
               id="arc-short-description"
@@ -110,31 +110,26 @@
           fieldId="arc-description"
           label="Description"
           controlName="description"
-          colour="perano"
           previewClass="storytime-arc__description"
           [rows]="8" />
       </div>
-    </section>
+    </app-collapsible-section>
 
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Arc Settings</span>
-      </div>
-
-      <div class="storytime-panel">
+    <app-collapsible-section
+      heading="Arc Settings"
+      barClass="small-lcars-bar-gap">
+      <div class="storytime-panel storytime-panel--rotate">
         <div class="form-row">
           <app-storytime-setting-select
             fieldId="arc-visibility"
             label="Visibility"
             controlName="visibility"
-            colour="bluey"
             [options]="visibilityOptions" />
 
           <app-storytime-setting-select
             fieldId="arc-language"
             label="Language"
             controlName="languageCode"
-            colour="sunflower"
             [options]="languageOptions">
             <p>
               The language of your own writing about the Arc. The Stories in it
@@ -143,7 +138,7 @@
           </app-storytime-setting-select>
         </div>
       </div>
-    </section>
+    </app-collapsible-section>
 
     <!--
       Artwork waits for the Arc to exist. A picture is set against a saved Arc
@@ -151,12 +146,10 @@
       would mean holding a file with nowhere to put it.
     -->
     @if (arc) {
-      <section class="storytime-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Artwork</span>
-        </div>
-
-        <div class="storytime-panel">
+      <app-collapsible-section
+        heading="Artwork"
+        barClass="small-lcars-bar-gap">
+        <div class="storytime-panel storytime-panel--bare lcars-rotate">
           <p class="field-hint">
             Both are optional. An Arc without them shows no gap where they would
             have been.
@@ -178,7 +171,7 @@
             altControlName="profileImageAlt"
             (changed)="onImageChanged($event)"></app-storytime-image-manager>
         </div>
-      </section>
+      </app-collapsible-section>
     }
 
     <app-storytime-editor-actions
@@ -190,8 +183,12 @@
 
   @if (arc) {
     <!-- Tagging needs something to tag, so it appears once the Arc exists. -->
-    <app-tag-picker
-      targetType="ARC"
-      [targetId]="arc.id"></app-tag-picker>
+    <app-collapsible-section
+      heading="Tags"
+      barClass="small-lcars-bar-gap">
+      <app-tag-picker
+        targetType="ARC"
+        [targetId]="arc.id"></app-tag-picker>
+    </app-collapsible-section>
   }
 </div>

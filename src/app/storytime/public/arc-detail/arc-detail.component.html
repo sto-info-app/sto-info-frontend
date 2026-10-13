@@ -33,7 +33,10 @@
     }
 
     @if (hasProgress && progress) {
-      <section class="storytime-arc__progress">
+      <app-lcars-panel
+        class="storytime-arc__progress"
+        heading="Your Reading Progress"
+        [level]="2">
         <p class="storytime-arc__progress-summary">
           You have read {{ progress.completedStories }} of
           {{ progress.totalStories }}
@@ -47,7 +50,7 @@
 
         @if (continueStory && continueStory.story) {
           <a
-            class="storytime-arc__continue"
+            class="lcars-btn lcars-btn-auto storytime-arc__continue"
             [routerLink]="[
               '/',
               appRoutes.STORYTIME,
@@ -57,56 +60,56 @@
             Continue with {{ continueStory.story.title }}
           </a>
         }
-      </section>
+      </app-lcars-panel>
     }
 
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Reading Order</span>
-    </div>
+    <app-collapsible-section
+      heading="Reading Order"
+      barClass="small-lcars-bar-gap">
+      @if (stories.length === 0) {
+        <p class="storytime-empty">
+          None of the Stories in this Arc are published yet. Check back soon.
+        </p>
+      } @else {
+        <ol class="storytime-arc__stories">
+          @for (membership of stories; track membership.id) {
+            <li
+              class="storytime-panel-card storytime-panel-card--story"
+              [class.storytime-arc__story--read]="isRead(membership)">
+              <a
+                class="storytime-panel-card__heading"
+                [routerLink]="[
+                  '/',
+                  appRoutes.STORYTIME,
+                  'stories',
+                  membership.story?.slug,
+                ]"
+                [title]="membership.story?.title">
+                <span class="storytime-panel-card__name">{{
+                  membership.story?.title
+                }}</span>
+              </a>
 
-    @if (stories.length === 0) {
-      <p class="storytime-empty">
-        None of the Stories in this Arc are published yet. Check back soon.
-      </p>
-    } @else {
-      <ol class="storytime-arc__stories">
-        @for (membership of stories; track membership.id) {
-          <li
-            class="storytime-panel-card storytime-panel-card--story"
-            [class.storytime-arc__story--read]="isRead(membership)">
-            <a
-              class="storytime-panel-card__heading"
-              [routerLink]="[
-                '/',
-                appRoutes.STORYTIME,
-                'stories',
-                membership.story?.slug,
-              ]"
-              [title]="membership.story?.title">
-              <span class="storytime-panel-card__name">{{
-                membership.story?.title
-              }}</span>
-            </a>
-
-            @if (
-              membership.introductoryNote || membership.story?.shortDescription
-            ) {
-              <div class="storytime-panel-card__body">
-                @if (membership.introductoryNote) {
-                  <p class="storytime-arc__note">
-                    {{ membership.introductoryNote }}
-                  </p>
-                } @else {
-                  <p class="storytime-arc__story-summary">
-                    {{ membership.story?.shortDescription }}
-                  </p>
-                }
-              </div>
-            }
-          </li>
-        }
-      </ol>
-    }
+              @if (
+                membership.introductoryNote || membership.story?.shortDescription
+              ) {
+                <div class="storytime-panel-card__body">
+                  @if (membership.introductoryNote) {
+                    <p class="storytime-arc__note">
+                      {{ membership.introductoryNote }}
+                    </p>
+                  } @else {
+                    <p class="storytime-arc__story-summary">
+                      {{ membership.story?.shortDescription }}
+                    </p>
+                  }
+                </div>
+              }
+            </li>
+          }
+        </ol>
+      }
+    </app-collapsible-section>
     @if (arc) {
       <div class="storytime-arc__social">
         <app-reaction-control

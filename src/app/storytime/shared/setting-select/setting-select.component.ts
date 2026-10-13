@@ -38,8 +38,11 @@ export class SettingSelectComponent {
   /** The control on the editor's form this setting sets. */
   @Input({ required: true }) controlName!: string;
 
-  /** The LCARS colour the chooser is dressed in. */
-  @Input({ required: true }) colour!: string;
+  /**
+   * An LCARS colour of the chooser's own. Left empty, it takes the colour its
+   * row rotates to, so a row of settings no longer repeats one colour.
+   */
+  @Input() colour = '';
 
   /** The choices, with their explanations where they have one. */
   @Input({ required: true }) options: readonly SettingOption[] = [];

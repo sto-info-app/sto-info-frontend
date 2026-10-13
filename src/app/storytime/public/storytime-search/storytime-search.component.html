@@ -3,24 +3,29 @@
   class="storytime-page">
   <h1>Search</h1>
 
-  <form
-    class="storytime-panel storytime-search__form"
-    [formGroup]="form"
-    (ngSubmit)="submit()">
-    <div class="lcars-input-container perano">
-      <label for="storytime-search-q">Search Storytime</label>
-      <input
-        id="storytime-search-q"
-        type="search"
-        formControlName="q"
-        placeholder="A title, a name, a phrase" />
-    </div>
-    <button
-      class="lcars-btn green"
-      type="submit">
-      Search
-    </button>
-  </form>
+  <app-lcars-panel
+    heading="Find something to read"
+    [level]="2">
+    <form
+      class="storytime-search__form lcars-rotate"
+      role="search"
+      [formGroup]="form"
+      (ngSubmit)="submit()">
+      <div class="lcars-input-container">
+        <label for="storytime-search-q">Search Storytime</label>
+        <input
+          id="storytime-search-q"
+          type="search"
+          formControlName="q"
+          placeholder="A title, a name, a phrase" />
+      </div>
+      <button
+        class="lcars-btn"
+        type="submit">
+        Search
+      </button>
+    </form>
+  </app-lcars-panel>
 
   @if (errorMessage) {
     <app-lcars-error-message

@@ -11,7 +11,7 @@
 
   <div class="storytime-page-actions">
     <a
-      class="lcars-btn lcars-btn-auto green"
+      class="lcars-btn lcars-btn-auto"
       [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'spotlight', 'new']">
       Draft a selection
     </a>
@@ -60,7 +60,7 @@
           <div class="storytime-actions">
             @if (entry.isPublished) {
               <button
-                class="lcars-btn lcars-btn-auto cardinal"
+                class="lcars-btn lcars-btn-auto red"
                 type="button"
                 (click)="unpublish(entry)">
                 Withdraw

@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import {
   CONTENT_RATING_DESCRIPTIONS,
   CONTENT_RATING_LABELS,
@@ -28,7 +30,13 @@ import {
   selector: 'app-content-policy',
   templateUrl: './content-policy.component.html',
   standalone: true,
-  imports: [CommonModule, RouterModule, PolicyHeaderComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    PolicyHeaderComponent,
+    CollapsibleSectionComponent,
+    LcarsPanelComponent,
+  ],
 })
 export class ContentPolicyComponent {
   /** What the policy covers, in the order it is presented. */

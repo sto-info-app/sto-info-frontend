@@ -12,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Observable, finalize, forkJoin } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import {
   AppealStatus,
   ModerationAppeal,
@@ -48,6 +49,7 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class ModerationQueueComponent implements OnInit {

@@ -22,9 +22,11 @@
     its own sake.
   -->
   @if (story) {
-    <nav class="storytime-page-actions">
+    <nav
+      class="storytime-page-actions"
+      aria-label="This Story">
       <a
-        class="lcars-btn lcars-btn-auto green"
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="[
           '/',
           appRoutes.STORYTIME,
@@ -36,7 +38,7 @@
         >Chapters</a
       >
       <a
-        class="lcars-btn lcars-btn-auto bluey"
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="[
           '/',
           appRoutes.STORYTIME,
@@ -48,7 +50,7 @@
         >Cast</a
       >
       <a
-        class="lcars-btn lcars-btn-auto bluey"
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="[
           '/',
           appRoutes.STORYTIME,
@@ -60,7 +62,7 @@
         >Collaborators</a
       >
       <a
-        class="lcars-btn lcars-btn-auto sky"
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories']"
         >Back to your Stories</a
       >
@@ -77,14 +79,12 @@
     [formGroup]="form"
     class="storytime-form"
     (ngSubmit)="save()">
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Story Details</span>
-      </div>
-
-      <div class="storytime-panel">
+    <app-collapsible-section
+      heading="Story Details"
+      barClass="small-lcars-bar-gap">
+      <div class="storytime-panel storytime-panel--rotate">
         <div class="form-row">
-          <div class="lcars-input-container perano storytime-field-full">
+          <div class="lcars-input-container storytime-field-full">
             <label for="story-title">Title</label>
             <input
               id="story-title"
@@ -101,7 +101,7 @@
         </div>
 
         <div class="form-row">
-          <div class="lcars-input-container bluey">
+          <div class="lcars-input-container">
             <label for="story-slug">URL slug</label>
             <input
               id="story-slug"
@@ -114,7 +114,7 @@
             </p>
           </div>
 
-          <div class="lcars-input-container gold">
+          <div class="lcars-input-container">
             <label for="story-short-description">Short description</label>
             <input
               id="story-short-description"
@@ -131,31 +131,26 @@
           fieldId="story-description"
           label="Description"
           controlName="description"
-          colour="perano"
           previewClass="storytime-story__description"
           [rows]="8" />
       </div>
-    </section>
+    </app-collapsible-section>
 
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Story Settings</span>
-      </div>
-
-      <div class="storytime-panel">
+    <app-collapsible-section
+      heading="Story Settings"
+      barClass="small-lcars-bar-gap">
+      <div class="storytime-panel storytime-panel--rotate">
         <div class="form-row">
           <app-storytime-setting-select
             fieldId="story-rating"
             label="Content rating"
             controlName="contentRating"
-            colour="gold"
             [options]="ratingOptions" />
 
           <app-storytime-setting-select
             fieldId="story-completion"
             label="Status"
             controlName="completionState"
-            colour="tangerine"
             [options]="completionOptions" />
         </div>
 
@@ -164,14 +159,12 @@
             fieldId="story-visibility"
             label="Visibility"
             controlName="visibility"
-            colour="bluey"
             [options]="visibilityOptions" />
 
           <app-storytime-setting-select
             fieldId="story-language"
             label="Language"
             controlName="languageCode"
-            colour="sunflower"
             [options]="languageOptions">
             <p>
               The language the Story is written in. A Chapter written in another
@@ -180,7 +173,7 @@
           </app-storytime-setting-select>
         </div>
       </div>
-    </section>
+    </app-collapsible-section>
 
     <!--
       Artwork waits for the Story to exist. A picture is set against a saved
@@ -188,12 +181,10 @@
       save would mean holding a file with nowhere to put it.
     -->
     @if (story) {
-      <section class="storytime-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Artwork</span>
-        </div>
-
-        <div class="storytime-panel">
+      <app-collapsible-section
+        heading="Artwork"
+        barClass="small-lcars-bar-gap">
+        <div class="storytime-panel storytime-panel--bare lcars-rotate">
           <p class="field-hint">
             Both are optional. A Story without them shows no gap where they
             would have been.
@@ -215,7 +206,7 @@
             altControlName="profileImageAlt"
             (changed)="onImageChanged($event)"></app-storytime-image-manager>
         </div>
-      </section>
+      </app-collapsible-section>
     }
 
     <app-storytime-editor-actions
@@ -228,19 +219,28 @@
   @if (story) {
     <!--
       The terms are confirmed here as well as on the list, because this is
-      where the publish that needs them is pressed.
+      where the publish that needs them is pressed. Gone once they are.
     -->
-    <app-storytime-content-policy-panel
-      heading="Publishing Terms"
-      [story]="story"
-      (accepted)="
-        onPolicyAccepted($event)
-      "></app-storytime-content-policy-panel>
+    @if (!story.contentPolicyCurrent) {
+      <app-collapsible-section
+        heading="Publishing Terms"
+        barClass="small-lcars-bar-gap">
+        <app-storytime-content-policy-panel
+          [story]="story"
+          (accepted)="
+            onPolicyAccepted($event)
+          "></app-storytime-content-policy-panel>
+      </app-collapsible-section>
+    }
 
     <!-- Tagging needs something to tag, so it waits for the Story too. -->
-    <app-tag-picker
-      targetType="STORY"
-      [targetId]="story.id"></app-tag-picker>
+    <app-collapsible-section
+      heading="Tags"
+      barClass="small-lcars-bar-gap">
+      <app-tag-picker
+        targetType="STORY"
+        [targetId]="story.id"></app-tag-picker>
+    </app-collapsible-section>
 
     <!--
       Deleting is offered here as well as on the list, so a creator who has
@@ -249,11 +249,10 @@
       the Story is published.
     -->
     @if (canDelete) {
-      <section class="storytime-section storytime-danger">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span class="go-october-sunset">Delete this Story</span>
-        </div>
-
+      <app-collapsible-section
+        class="storytime-danger accent-red"
+        heading="Delete this Story"
+        barClass="small-lcars-bar-gap">
         <div class="storytime-panel">
           <p>
             Deleting this Story removes its Chapters, cast and credits with it.
@@ -270,7 +269,7 @@
             </button>
           </div>
         </div>
-      </section>
+      </app-collapsible-section>
     }
   }
 </div>
