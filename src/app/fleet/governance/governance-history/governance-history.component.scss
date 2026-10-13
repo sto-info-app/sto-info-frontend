@@ -5,10 +5,6 @@
 }
 
 .governance-history {
-  &__back {
-    margin: 0 0 1rem;
-  }
-
   &__list {
     display: grid;
     gap: 1rem;
@@ -18,13 +14,14 @@
     list-style: none;
   }
 
+  // In the colour the page's rotation gives the list.
   &__entry {
     padding-left: 0.75rem;
-    border-left: 4px solid vars.$lcars-sky;
+    border-left: 4px solid var(--lcars-accent, #{vars.$lcars-sky});
   }
 
   &__when {
-    color: vars.$lcars-sky;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
     font-size: 0.9rem;
   }
 

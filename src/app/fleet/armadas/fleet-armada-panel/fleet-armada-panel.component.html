@@ -1,17 +1,10 @@
 @if (view(); as view) {
   @if (view.placement !== null || view.mayRequest) {
-    <section
-      class="fleet-armada"
-      aria-labelledby="fleet-armada-heading">
-      <div class="lcars-text-bar">
-        <span id="fleet-armada-heading">Armada</span>
-      </div>
+    <app-collapsible-section heading="Armada">
 
       @if (notice(); as done) {
-        <p
-          class="fleet-armada__notice"
-          role="status">
-          {{ done }}
+        <p class="fleet-armada__notice">
+          <output>{{ done }}</output>
         </p>
       }
       @if (error(); as refusal) {
@@ -46,12 +39,12 @@
             </p>
           } @else if (leaving()) {
             <form
-              class="fleet-armada__form"
+              class="fleet-armada__form lcars-rotate"
               aria-label="Leave the Armada"
               (submit)="
                 $event.preventDefault(); onConfirmLeave(placement.armada)
               ">
-              <div class="lcars-input-container tangerine">
+              <div class="lcars-input-container">
                 <label for="fleet-armada-leave-reason">Reason</label>
                 <textarea
                   id="fleet-armada-leave-reason"
@@ -67,7 +60,7 @@
               <div class="fleet-community-form-actions">
                 <button
                   type="button"
-                  class="lcars-btn lcars-btn-auto bluey"
+                  class="lcars-btn lcars-btn-auto"
                   [disabled]="busy()"
                   (click)="onKeep()">
                   Stay
@@ -98,7 +91,7 @@
         </p>
         <button
           type="button"
-          class="lcars-btn lcars-btn-auto bluey"
+          class="lcars-btn lcars-btn-auto red"
           [disabled]="busy()"
           (click)="onWithdraw(open.id)">
           Withdraw the request
@@ -113,10 +106,10 @@
       } @else {
         <p>Not in an Armada. Its managers can ask to join one here.</p>
         <form
-          class="fleet-armada__form"
+          class="fleet-armada__form lcars-rotate"
           aria-label="Ask to join an Armada"
           (submit)="$event.preventDefault(); onRequest()">
-          <div class="lcars-input-container tangerine">
+          <div class="lcars-input-container">
             <label for="fleet-armada-choice">Armada</label>
             <select
               id="fleet-armada-choice"
@@ -132,7 +125,7 @@
               }
             </select>
           </div>
-          <div class="lcars-input-container tangerine">
+          <div class="lcars-input-container">
             <label for="fleet-armada-message">Message (optional)</label>
             <textarea
               id="fleet-armada-message"
@@ -167,6 +160,6 @@
           <p class="fleet-armada__last">Reason: {{ why }}</p>
         }
       }
-    </section>
+    </app-collapsible-section>
   }
 }

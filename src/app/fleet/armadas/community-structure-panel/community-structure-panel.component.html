@@ -3,12 +3,9 @@
     @if (
       structure.armadas.length > 0 || structure.standaloneFleets.length > 0
     ) {
-      <section
+      <app-collapsible-section
         class="community-structure"
-        aria-labelledby="community-structure-heading">
-        <div class="lcars-text-bar">
-          <span id="community-structure-heading">Armadas and Fleets</span>
-        </div>
+        heading="Armadas and Fleets">
 
         @for (entry of structure.armadas; track entry.armada.id) {
           <article
@@ -45,7 +42,7 @@
             }
           </ul>
         }
-      </section>
+      </app-collapsible-section>
     }
   }
 }

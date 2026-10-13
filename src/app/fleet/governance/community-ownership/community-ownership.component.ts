@@ -11,6 +11,7 @@ import { RouterLink } from '@angular/router';
 
 import { filter, Observable, switchMap } from 'rxjs';
 
+import { FleetBackLinkComponent } from 'src/app/fleet/components/fleet-back-link/fleet-back-link.component';
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
 import {
@@ -29,6 +30,7 @@ import {
   ConfirmPrompt,
   escapeHtml,
 } from 'src/app/shared/actions/confirm-prompt';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -61,11 +63,13 @@ export const OWNERSHIP_FAILED = 'That did not work. Please try again.';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
     AppDatePipe,
-    RouterLink,
+    AsyncPipe,
+    CollapsibleSectionComponent,
+    FleetBackLinkComponent,
     FleetPageShellComponent,
     LcarsErrorMessageComponent,
+    RouterLink,
   ],
 })
 export class CommunityOwnershipComponent extends GovernancePageDirective<OwnershipStanding> {

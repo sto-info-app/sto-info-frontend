@@ -30,13 +30,16 @@
     mat-dialog-actions>
     <button
       type="button"
-      class="lcars-btn green"
+      class="lcars-btn governance-reason-dialog__cancel"
+      [class.red]="tone === 'accept'"
       (click)="cancel()">
       Cancel
     </button>
     <button
       type="submit"
-      class="lcars-btn red"
+      class="lcars-btn"
+      [class.red]="tone === 'refuse'"
+      [class.green]="tone === 'accept'"
       [disabled]="!isValid()">
       {{ data.confirmText }}
     </button>

@@ -19,15 +19,13 @@
       @let roles = state.data;
       @let changes = mayChange(scope, roles);
 
-      <p class="governance-delegation__back">
-        <a [routerLink]="scope.manageLink">Back to Manage</a>
-      </p>
+      <app-fleet-back-link
+        [link]="scope.manageLink"
+        label="Back to Manage" />
 
       @if (notice(); as done) {
-        <p
-          class="governance-delegation__notice"
-          role="status">
-          {{ done }}
+        <p class="governance-delegation__notice">
+          <output>{{ done }}</output>
         </p>
       }
       @if (error(); as refusal) {
@@ -36,14 +34,11 @@
           [message]="refusal" />
       }
 
-      <section aria-labelledby="delegation-officers-heading">
-        <div class="lcars-text-bar">
-          <span id="delegation-officers-heading">What every Officer holds</span>
-        </div>
+      <app-collapsible-section heading="What every Officer holds">
 
         @if (changes) {
           <form
-            class="governance-delegation__form"
+            class="governance-delegation__form lcars-rotate"
             aria-label="What every Officer holds"
             (submit)="$event.preventDefault(); onSaveOfficers(scope, roles)">
             <fieldset class="governance-delegation__checklist">
@@ -74,7 +69,7 @@
             </fieldset>
 
             @if (officersLosing(roles)) {
-              <div class="lcars-input-container tangerine">
+              <div class="lcars-input-container">
                 <label for="delegation-officer-reason">
                   Why take these from the Officers
                 </label>
@@ -93,7 +88,7 @@
             <div class="fleet-community-form-actions">
               <button
                 type="button"
-                class="lcars-btn lcars-btn-auto bluey"
+                class="lcars-btn lcars-btn-auto"
                 [disabled]="busy() || !officersChanged(roles)"
                 (click)="onResetOfficers()">
                 Undo changes
@@ -119,16 +114,13 @@
             }
           </ul>
         }
-      </section>
+      </app-collapsible-section>
 
-      <section aria-labelledby="delegation-personal-heading">
-        <div class="lcars-text-bar">
-          <span id="delegation-personal-heading">Particular people</span>
-        </div>
+      <app-collapsible-section heading="Particular people">
 
         @if (clearing(); as entry) {
           <form
-            class="governance-delegation__form"
+            class="governance-delegation__form lcars-rotate"
             aria-label="Clear a grant or denial"
             (submit)="$event.preventDefault(); onConfirmClear(scope)">
             <p class="governance-delegation__asking">
@@ -136,7 +128,7 @@
               {{ entry.effect === deny ? 'denial of' : 'grant of' }}
               “{{ capabilityName(roles, entry.capability) }}”?
             </p>
-            <div class="lcars-input-container tangerine">
+            <div class="lcars-input-container">
               <label for="delegation-clear-reason">
                 Reason{{ entry.effect === deny ? ' (optional)' : '' }}
               </label>
@@ -151,7 +143,7 @@
             <div class="fleet-community-form-actions">
               <button
                 type="button"
-                class="lcars-btn lcars-btn-auto bluey"
+                class="lcars-btn lcars-btn-auto"
                 [disabled]="busy()"
                 (click)="onKeep()">
                 Keep it
@@ -224,10 +216,10 @@
             </p>
           } @else {
             <form
-              class="governance-delegation__form"
+              class="governance-delegation__form lcars-rotate"
               aria-label="Grant or deny one person"
               (submit)="$event.preventDefault(); onSetPersonal(scope)">
-              <div class="lcars-input-container tangerine">
+              <div class="lcars-input-container">
                 <label for="delegation-person">Person</label>
                 <select
                   id="delegation-person"
@@ -242,7 +234,7 @@
                   }
                 </select>
               </div>
-              <div class="lcars-input-container tangerine">
+              <div class="lcars-input-container">
                 <label for="delegation-capability">Capability</label>
                 <select
                   id="delegation-capability"
@@ -257,7 +249,7 @@
                   }
                 </select>
               </div>
-              <div class="lcars-input-container tangerine">
+              <div class="lcars-input-container">
                 <label for="delegation-effect">Grant or deny</label>
                 <select
                   id="delegation-effect"
@@ -270,7 +262,7 @@
                   }
                 </select>
               </div>
-              <div class="lcars-input-container tangerine">
+              <div class="lcars-input-container">
                 <label for="delegation-person-reason">
                   Why{{ personEffect() === deny ? '' : ' (optional)' }}
                 </label>
@@ -290,7 +282,9 @@
               <div class="fleet-community-form-actions">
                 <button
                   type="submit"
-                  class="lcars-btn lcars-btn-auto green"
+                  class="lcars-btn lcars-btn-auto"
+                  [class.green]="personEffect() === grant"
+                  [class.red]="personEffect() === deny"
                   [disabled]="busy() || !personReady()">
                   Save
                 </button>
@@ -298,7 +292,7 @@
             </form>
           }
         }
-      </section>
+      </app-collapsible-section>
     }
   </app-fleet-page-shell>
 }

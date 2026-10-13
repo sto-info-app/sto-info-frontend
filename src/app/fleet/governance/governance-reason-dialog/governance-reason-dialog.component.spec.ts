@@ -60,7 +60,9 @@ describe('GovernanceReasonDialogComponent', () => {
 
   it('asks for a reason, and closes with it trimmed', () => {
     const element = show();
-    const confirm = element.querySelector('button.red') as HTMLButtonElement;
+    const confirm = element.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
 
     expect(element.textContent).toContain('Suspend Kira Fleet');
     expect(element.textContent).toContain('It stays readable.');
@@ -80,19 +82,52 @@ describe('GovernanceReasonDialogComponent', () => {
     expect(element.textContent).toContain('10 to 500 characters');
     type(element, 'Too short');
     expect(
-      (element.querySelector('button.red') as HTMLButtonElement).disabled,
+      (element.querySelector('button[type="submit"]') as HTMLButtonElement)
+        .disabled,
     ).toBe(true);
     type(element, 'Checking it');
     expect(
-      (element.querySelector('button.red') as HTMLButtonElement).disabled,
+      (element.querySelector('button[type="submit"]') as HTMLButtonElement)
+        .disabled,
     ).toBe(false);
   });
 
   it('does nothing on cancel', () => {
     const element = show();
 
-    (element.querySelector('button.green') as HTMLButtonElement).click();
+    (
+      element.querySelector(
+        '.governance-reason-dialog__cancel',
+      ) as HTMLButtonElement
+    ).click();
 
     expect(close).toHaveBeenCalledWith();
   });
+
+  // Steve's decision of 13 October 2026: the yes of a confirmation is green
+  // and its Cancel red; a confirmation that takes something away is red, and
+  // its Cancel is left to the rotation so two reds never sit together.
+  it.each([
+    [undefined, 'green', 'red'],
+    ['accept', 'green', 'red'],
+    ['refuse', 'red', null],
+  ] as const)(
+    'colours a confirmation whose tone is %s',
+    (confirmTone, confirmColour, cancelColour) => {
+      const element = show({ confirmTone });
+      const confirm = element.querySelector(
+        'button[type="submit"]',
+      ) as HTMLButtonElement;
+      const cancel = element.querySelector(
+        '.governance-reason-dialog__cancel',
+      ) as HTMLButtonElement;
+
+      expect(confirm.classList.contains('green')).toBe(
+        confirmColour === 'green',
+      );
+      expect(confirm.classList.contains('red')).toBe(confirmColour === 'red');
+      expect(cancel.classList.contains('red')).toBe(cancelColour === 'red');
+      expect(cancel.classList.contains('green')).toBe(false);
+    },
+  );
 });

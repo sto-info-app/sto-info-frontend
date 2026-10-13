@@ -14,7 +14,7 @@
     @if (state.kind === 'READY') {
       @let data = state.data;
 
-      <div class="lcars-input-container tangerine armada-requests__filter">
+      <div class="lcars-input-container armada-requests__filter">
         <label for="armada-request-status">Show</label>
         <select
           id="armada-request-status"
@@ -30,10 +30,8 @@
       </div>
 
       @if (notice(); as done) {
-        <p
-          class="armada-requests__notice"
-          role="status">
-          {{ done }}
+        <p class="armada-requests__notice">
+          <output>{{ done }}</output>
         </p>
       }
 
@@ -41,14 +39,14 @@
         @let name = fleetName(answer.request.fleet);
 
         <form
-          class="armada-requests__form"
+          class="armada-requests__form lcars-rotate"
           [attr.aria-label]="
             (answer.mode === 'APPROVE' ? 'Approve ' : 'Reject ') + name
           "
           (submit)="$event.preventDefault(); onSubmit(data)">
           @if (answer.mode === 'APPROVE') {
             <p class="armada-requests__asking">Where does {{ name }} go?</p>
-            <div class="lcars-input-container tangerine">
+            <div class="lcars-input-container">
               <label for="armada-approve-position">Position</label>
               <select
                 id="armada-approve-position"
@@ -64,7 +62,7 @@
               </select>
             </div>
             @if (position() === 'GAMMA') {
-              <div class="lcars-input-container tangerine">
+              <div class="lcars-input-container">
                 <label for="armada-approve-parent">Under</label>
                 <select
                   id="armada-approve-parent"
@@ -97,7 +95,7 @@
             <p class="armada-requests__asking">
               Reject the request from {{ name }}?
             </p>
-            <div class="lcars-input-container tangerine">
+            <div class="lcars-input-container">
               <label for="armada-reject-reason">Reason</label>
               <textarea
                 id="armada-reject-reason"
@@ -121,7 +119,8 @@
           <div class="fleet-community-form-actions">
             <button
               type="button"
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
+              [class.red]="answer.mode === 'APPROVE'"
               [disabled]="busy()"
               (click)="onCancel()">
               Cancel

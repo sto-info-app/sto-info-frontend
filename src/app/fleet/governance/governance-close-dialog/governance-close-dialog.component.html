@@ -14,8 +14,8 @@
     <form
       [formGroup]="form"
       (ngSubmit)="onConfirm()"
-      class="governance-close__form">
-      <div class="lcars-input-container perano">
+      class="governance-close__form lcars-rotate">
+      <div class="lcars-input-container">
         <label for="governance-close-name">
           Type the {{ data.scopeNoun }}’s name to confirm:
           <span class="governance-close__name">{{ data.name }}</span>
@@ -33,7 +33,7 @@
         }
       </div>
 
-      <div class="lcars-input-container perano">
+      <div class="lcars-input-container">
         <label for="governance-close-reason">Why</label>
         <textarea
           id="governance-close-reason"
@@ -59,7 +59,7 @@
     mat-dialog-actions>
     <button
       type="button"
-      class="lcars-btn bluey"
+      class="lcars-btn"
       mat-button
       (click)="onCancel()">
       Keep it open

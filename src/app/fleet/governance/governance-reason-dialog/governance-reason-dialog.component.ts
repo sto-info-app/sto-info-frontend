@@ -19,6 +19,13 @@ export interface GovernanceReasonDialogData {
   /** What the box asks for: "Reason" or "Purpose". */
   readonly label: string;
   readonly confirmText: string;
+  /**
+   * What confirming does, which colours the buttons (Steve's decision of 13
+   * October 2026): `accept` (the default) for the yes of a confirmation,
+   * green, with Cancel red as the no; `refuse` for taking something away,
+   * red, with Cancel left to the rotation so two reds never sit together.
+   */
+  readonly confirmTone?: 'refuse' | 'accept';
   /** The fewest characters, trimmed; one by default. */
   readonly min?: number;
   readonly max: number;
@@ -43,6 +50,9 @@ export class GovernanceReasonDialogComponent {
   );
 
   readonly reason = signal('');
+
+  /** What confirming does, for the colour of its button. */
+  readonly tone = this.data.confirmTone ?? 'accept';
 
   /** Whether enough has been said. */
   readonly isValid = computed(

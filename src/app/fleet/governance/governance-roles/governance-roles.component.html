@@ -19,9 +19,9 @@
       @let roles = state.data;
       @let changes = mayChange(scope, roles);
 
-      <p class="governance-roles__back">
-        <a [routerLink]="scope.manageLink">Back to Manage</a>
-      </p>
+      <app-fleet-back-link
+        [link]="scope.manageLink"
+        label="Back to Manage" />
 
       <p class="governance-roles__owner">
         Owner:
@@ -33,10 +33,8 @@
       </p>
 
       @if (notice(); as done) {
-        <p
-          class="governance-roles__notice"
-          role="status">
-          {{ done }}
+        <p class="governance-roles__notice">
+          <output>{{ done }}</output>
         </p>
       }
       @if (error(); as refusal) {
@@ -47,14 +45,14 @@
 
       @if (withdrawing(); as holder) {
         <form
-          class="governance-roles__form"
+          class="governance-roles__form lcars-rotate"
           aria-label="Withdraw a role"
           (submit)="$event.preventDefault(); onConfirmWithdraw(scope)">
           <p class="governance-roles__asking">
             Withdraw {{ holder.username ?? 'this account' }}’s role as
             {{ roleLabels[holder.role] }}?
           </p>
-          <div class="lcars-input-container tangerine">
+          <div class="lcars-input-container">
             <label for="role-withdraw-reason">Reason</label>
             <textarea
               id="role-withdraw-reason"
@@ -72,7 +70,7 @@
           <div class="fleet-community-form-actions">
             <button
               type="button"
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
               [disabled]="busy()"
               (click)="onKeep()">
               Keep it
@@ -132,12 +130,9 @@
       }
 
       @if (changes) {
-        <section
+        <app-collapsible-section
           class="governance-roles__appoint"
-          aria-labelledby="role-appoint-heading">
-          <div class="lcars-text-bar">
-            <span id="role-appoint-heading">Appoint somebody</span>
-          </div>
+          heading="Appoint somebody">
 
           @let people = appointable(roles);
 
@@ -149,10 +144,10 @@
             </p>
           } @else {
             <form
-              class="governance-roles__form"
+              class="governance-roles__form lcars-rotate"
               aria-label="Appoint somebody"
               (submit)="$event.preventDefault(); onAppoint(scope)">
-              <div class="lcars-input-container tangerine">
+              <div class="lcars-input-container">
                 <label for="role-appointee">Person</label>
                 <select
                   id="role-appointee"
@@ -167,7 +162,7 @@
                   }
                 </select>
               </div>
-              <div class="lcars-input-container tangerine">
+              <div class="lcars-input-container">
                 <label for="role-appoint-role">Role</label>
                 <select
                   id="role-appoint-role"
@@ -180,7 +175,7 @@
                   }
                 </select>
               </div>
-              <div class="lcars-input-container tangerine">
+              <div class="lcars-input-container">
                 <label for="role-appoint-reason">Why (optional)</label>
                 <textarea
                   id="role-appoint-reason"
@@ -209,7 +204,7 @@
               </div>
             </form>
           }
-        </section>
+        </app-collapsible-section>
       }
     }
   </app-fleet-page-shell>

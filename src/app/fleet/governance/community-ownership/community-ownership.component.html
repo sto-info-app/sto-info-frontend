@@ -11,9 +11,9 @@
       @let scope = state.scope;
       @let standing = state.data;
 
-      <p class="community-ownership__back">
-        <a [routerLink]="scope.manageLink">Back to Manage</a>
-      </p>
+      <app-fleet-back-link
+        [link]="scope.manageLink"
+        label="Back to Manage" />
 
       <p class="community-ownership__intro">
         You can hand {{ scope.name }} over to one of its Admins. It moves only
@@ -21,10 +21,8 @@
       </p>
 
       @if (notice(); as done) {
-        <p
-          class="community-ownership__notice"
-          role="status">
-          {{ done }}
+        <p class="community-ownership__notice">
+          <output>{{ done }}</output>
         </p>
       }
       @if (error(); as refusal) {
@@ -34,12 +32,9 @@
       }
 
       @if (standing.offer; as offer) {
-        <section
+        <app-collapsible-section
           class="community-ownership__offer"
-          aria-labelledby="ownership-offer-heading">
-          <div class="lcars-text-bar">
-            <span id="ownership-offer-heading">Open offer</span>
-          </div>
+          heading="Open offer">
           <p>
             Offered to
             <strong>{{ offer.to.username ?? unnamed }}</strong>
@@ -53,7 +48,7 @@
             (click)="onCancel(scope, offer)">
             Take the offer back…
           </button>
-        </section>
+        </app-collapsible-section>
       } @else if (scope.isClosed) {
         <p class="fleet-community-empty">
           A closed Community cannot be handed over.
@@ -66,10 +61,10 @@
         </p>
       } @else {
         <form
-          class="community-ownership__form"
+          class="community-ownership__form lcars-rotate"
           aria-label="Offer ownership"
           (submit)="$event.preventDefault(); onOffer(scope, standing)">
-          <div class="lcars-input-container tangerine">
+          <div class="lcars-input-container">
             <label for="ownership-recipient">Admin</label>
             <select
               id="ownership-recipient"
@@ -87,7 +82,7 @@
           <div class="fleet-community-form-actions">
             <button
               type="submit"
-              class="lcars-btn lcars-btn-auto gold"
+              class="lcars-btn lcars-btn-auto"
               [disabled]="busy() || recipient() === ''">
               Offer ownership…
             </button>

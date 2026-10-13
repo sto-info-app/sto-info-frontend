@@ -27,6 +27,7 @@ import {
   GammaOutcome,
   GammaResolution,
 } from 'src/app/models/fleet-armada.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 
@@ -76,7 +77,12 @@ export const ARMADA_VIEW_FAILED =
   styleUrls: ['./armada-panel.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ArmadaTreeComponent, LcarsErrorMessageComponent, RouterLink],
+  imports: [
+    ArmadaTreeComponent,
+    CollapsibleSectionComponent,
+    LcarsErrorMessageComponent,
+    RouterLink,
+  ],
 })
 export class ArmadaPanelComponent {
   private readonly _armadas = inject(FleetArmadaService);

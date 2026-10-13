@@ -17,7 +17,7 @@
 
   &__facts {
     margin: 0 0 0.5rem;
-    color: vars.$lcars-sky;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
   }
 
   &__standalone {

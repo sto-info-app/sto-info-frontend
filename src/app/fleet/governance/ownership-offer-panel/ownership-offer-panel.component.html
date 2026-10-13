@@ -1,37 +1,36 @@
 @if (community(); as community) {
   @if (outcome() === 'ACCEPTED') {
-    <section
-      class="ownership-offer"
-      aria-labelledby="ownership-offer-heading">
-      <div class="lcars-text-bar">
-        <span id="ownership-offer-heading">Ownership</span>
-      </div>
-      <p
-        class="ownership-offer__done"
-        role="status">
-        You are now the Owner of {{ community.communityName }}.
-        <a [routerLink]="community.manageLink">Manage it</a>
+    <app-collapsible-section
+      heading="Ownership"
+      sectionKey="ownership-offer">
+      <p class="ownership-offer__done">
+        <output>
+          You are now the Owner of {{ community.communityName }}.
+        </output>
       </p>
-    </section>
+      <div class="buttons-row">
+        <a
+          class="lcars-btn lcars-btn-auto"
+          [routerLink]="community.manageLink"
+          >Manage it</a
+        >
+      </div>
+    </app-collapsible-section>
   } @else if (outcome() === 'DECLINED') {
-    <section
-      class="ownership-offer"
-      aria-labelledby="ownership-offer-heading">
-      <div class="lcars-text-bar">
-        <span id="ownership-offer-heading">Ownership</span>
-      </div>
-      <p role="status">
-        Declined. It is recorded in the Community’s history, where the Owner can
-        see it.
+    <app-collapsible-section
+      heading="Ownership"
+      sectionKey="ownership-offer">
+      <p>
+        <output>
+          Declined. It is recorded in the Community’s history, where the Owner
+          can see it.
+        </output>
       </p>
-    </section>
+    </app-collapsible-section>
   } @else if (offer(); as offer) {
-    <section
-      class="ownership-offer"
-      aria-labelledby="ownership-offer-heading">
-      <div class="lcars-text-bar">
-        <span id="ownership-offer-heading">Ownership offered to you</span>
-      </div>
+    <app-collapsible-section
+      heading="Ownership offered to you"
+      sectionKey="ownership-offer">
       <p>
         {{ offer.from.username ?? unnamed }} has offered you ownership of
         {{ community.communityName }}. The offer lapses on
@@ -50,7 +49,7 @@
       <div class="buttons-row">
         <button
           type="button"
-          class="lcars-btn lcars-btn-auto bluey"
+          class="lcars-btn lcars-btn-auto red"
           [disabled]="busy()"
           (click)="onDecline()">
           Decline
@@ -63,6 +62,6 @@
           Accept…
         </button>
       </div>
-    </section>
+    </app-collapsible-section>
   }
 }

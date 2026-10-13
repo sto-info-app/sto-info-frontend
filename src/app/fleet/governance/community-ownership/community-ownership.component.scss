@@ -5,10 +5,6 @@
 }
 
 .community-ownership {
-  &__back {
-    margin: 0 0 1rem;
-  }
-
   &__intro {
     max-width: 70ch;
     margin: 0 0 1rem;
@@ -19,7 +15,13 @@
     font-weight: 600;
   }
 
-  &__offer,
+  // The offer's section runs the width of the page, as every section bar
+  // does; only the form's measure is capped.
+  &__offer {
+    display: block;
+    margin-bottom: 1.5rem;
+  }
+
   &__form {
     max-width: 40rem;
     margin-bottom: 1.5rem;

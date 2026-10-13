@@ -20,6 +20,7 @@ import {
   ConfirmPrompt,
   escapeHtml,
 } from 'src/app/shared/actions/confirm-prompt';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -57,7 +58,12 @@ export const OFFER_ANSWER_FAILED = 'That did not work. Please try again.';
   styleUrls: ['./ownership-offer-panel.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AppDatePipe, RouterLink, LcarsErrorMessageComponent],
+  imports: [
+    AppDatePipe,
+    RouterLink,
+    CollapsibleSectionComponent,
+    LcarsErrorMessageComponent,
+  ],
 })
 export class OwnershipOfferPanelComponent {
   private readonly _governance = inject(FleetGovernanceService);

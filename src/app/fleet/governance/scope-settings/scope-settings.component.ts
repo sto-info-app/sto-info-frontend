@@ -24,6 +24,7 @@ import {
 
 import { GeneralFaction } from 'src/app/dashboard/models/character.model';
 import { CharacterLookupService } from 'src/app/dashboard/services/character-lookup.service';
+import { FleetBackLinkComponent } from 'src/app/fleet/components/fleet-back-link/fleet-back-link.component';
 import { FleetExactNameComponent } from 'src/app/fleet/components/fleet-exact-name/fleet-exact-name.component';
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
@@ -223,14 +224,15 @@ export interface FleetRenamedNote {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe,
-    ReactiveFormsModule,
-    RouterLink,
+    FleetBackLinkComponent,
     FleetExactNameComponent,
     FleetPageShellComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
     LoadingBarComponent,
+    ReactiveFormsModule,
+    RouterLink,
   ],
 })
 export class ScopeSettingsComponent extends GovernancePageDirective<ScopeSettingsData> {

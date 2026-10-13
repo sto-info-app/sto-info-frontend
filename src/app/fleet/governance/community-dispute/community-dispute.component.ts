@@ -8,10 +8,11 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 import { filter, Observable, switchMap } from 'rxjs';
 
+import { FleetBackLinkComponent } from 'src/app/fleet/components/fleet-back-link/fleet-back-link.component';
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import {
   COMMUNITY_AUDIENCE_LABELS,
@@ -48,6 +49,7 @@ import {
   ConfirmPrompt,
   escapeHtml,
 } from 'src/app/shared/actions/confirm-prompt';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -103,12 +105,13 @@ const PURPOSE = { min: 10, max: 500 } as const;
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
     AppDatePipe,
-    TitleCasePipe,
-    RouterLink,
+    AsyncPipe,
+    CollapsibleSectionComponent,
+    FleetBackLinkComponent,
     FleetPageShellComponent,
     LcarsErrorMessageComponent,
+    TitleCasePipe,
   ],
 })
 export class CommunityDisputeComponent extends GovernancePageDirective<CommunityDisputeView> {
@@ -274,6 +277,7 @@ export class CommunityDisputeComponent extends GovernancePageDirective<Community
           : 'Everything in it may change again, as before.',
         label: 'Reason',
         confirmText: suspending ? 'Suspend' : 'Reinstate',
+        confirmTone: suspending ? 'refuse' : 'accept',
         max: this.reasonLimit,
       }),
       reason =>

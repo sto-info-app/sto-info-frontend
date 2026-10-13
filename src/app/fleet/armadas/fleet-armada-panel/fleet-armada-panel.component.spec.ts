@@ -253,7 +253,7 @@ describe('FleetArmadaPanelComponent', () => {
         'armada-2',
         'Hello',
       );
-      expect(find('[role="status"]')?.textContent).toContain(
+      expect(find('output')?.textContent).toContain(
         'Your request is on its way to the Armada’s managers.',
       );
       expect(fixture.componentInstance.armadaId()).toBe('');

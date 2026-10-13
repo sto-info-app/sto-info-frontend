@@ -221,9 +221,7 @@ describe('ArmadaPanelComponent', () => {
         { position: ArmadaPosition.ALPHA, reason: 'Leading now' },
       );
       expect(find('form')).toBeNull();
-      expect(find('[role="status"]')?.textContent).toContain(
-        'Twelfth Fleet moved.',
-      );
+      expect(find('output')?.textContent).toContain('Twelfth Fleet moved.');
       expect(confirm.dialog.open).not.toHaveBeenCalled();
     });
 

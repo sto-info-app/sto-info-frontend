@@ -5,10 +5,6 @@
 }
 
 .governance-hub {
-  &__back {
-    margin: 0 0 1rem;
-  }
-
   &__notice {
     color: vars.$lcars-green;
     font-weight: 600;
@@ -36,15 +32,17 @@
     align-items: center;
   }
 
+  // In the colour of the pill beside it, so each line reads as one entry.
   &__description {
     flex: 1 1 18rem;
     margin: 0;
-    color: vars.$lcars-sky;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
   }
 
   // The measure is the words', not the section's: capped, the section drew
   // its heading bar half as wide as every other bar on the page (FC-044).
   &__close {
+    display: block;
     margin-top: 2.5rem;
 
     p {

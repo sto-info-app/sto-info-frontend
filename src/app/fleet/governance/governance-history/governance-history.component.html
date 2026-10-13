@@ -15,9 +15,9 @@
     loadingText="Reading the history"
     [errorMessage]="messageOf(state)">
     @if (state.kind === 'READY') {
-      <p class="governance-history__back">
-        <a [routerLink]="state.scope.manageLink">Back to Manage</a>
-      </p>
+      <app-fleet-back-link
+        [link]="state.scope.manageLink"
+        label="Back to Manage" />
 
       @if (state.data.length === 0) {
         <p class="fleet-community-empty">

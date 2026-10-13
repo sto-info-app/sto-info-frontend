@@ -29,11 +29,12 @@
     gap: 0.75rem;
     margin: 0;
     padding: 0.75rem;
-    border: 1px solid vars.$lcars-bluey;
+    border: 1px solid var(--lcars-accent, #{vars.$lcars-bluey});
 
+    // In the colour of the box it names, which the form's rotation gave it.
     legend {
       padding: 0 0.5rem;
-      color: vars.$lcars-sky;
+      color: var(--lcars-accent, #{vars.$lcars-sky});
     }
   }
 

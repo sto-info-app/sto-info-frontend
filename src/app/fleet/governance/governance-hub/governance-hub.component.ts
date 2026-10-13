@@ -13,6 +13,7 @@ import { RouterLink } from '@angular/router';
 import { filter, Observable, of, switchMap } from 'rxjs';
 
 import { ArmadaTabsComponent } from 'src/app/fleet/armadas/armada-tabs/armada-tabs.component';
+import { FleetBackLinkComponent } from 'src/app/fleet/components/fleet-back-link/fleet-back-link.component';
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
@@ -33,6 +34,7 @@ import {
 import { recruitmentRefusalOf } from 'src/app/fleet/recruitment/recruitment.utils';
 import { FleetScopeAction } from 'src/app/fleet/scope/fleet-scope-page.models';
 import { FleetScopeRole } from 'src/app/models/fleet-governance.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 
 /** What to say to somebody with no part in running the scope. */
@@ -77,12 +79,14 @@ export interface GovernanceHubData {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
-    RouterLink,
-    FleetPageShellComponent,
     ArmadaTabsComponent,
+    AsyncPipe,
+    CollapsibleSectionComponent,
+    FleetBackLinkComponent,
+    FleetPageShellComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
+    RouterLink,
   ],
 })
 export class GovernanceHubComponent extends GovernancePageDirective<GovernanceHubData> {

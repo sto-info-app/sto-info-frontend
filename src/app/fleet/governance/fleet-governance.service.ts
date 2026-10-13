@@ -333,10 +333,12 @@ export class FleetGovernanceService {
     action: 'suspend' | 'reinstate' | 'close',
     reason: string,
   ): Observable<void> {
-    const where =
-      scope === null
-        ? ''
-        : `/${scope.kind === 'FLEET' ? 'fleets' : 'armadas'}/${scope.id}`;
+    let where = '';
+
+    if (scope !== null) {
+      const collection = scope.kind === 'FLEET' ? 'fleets' : 'armadas';
+      where = `/${collection}/${scope.id}`;
+    }
 
     return this.authenticated(options =>
       this._http.post<void>(

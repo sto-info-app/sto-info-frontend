@@ -1,30 +1,16 @@
 import { AsyncPipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  signal,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
-
-import { Observable } from 'rxjs';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
 import { ArmadaTabsComponent } from 'src/app/fleet/armadas/armada-tabs/armada-tabs.component';
+import { FleetBackLinkComponent } from 'src/app/fleet/components/fleet-back-link/fleet-back-link.component';
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
-import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
-import {
-  GovernancePageDirective,
-  GovernanceScopeVm,
-} from 'src/app/fleet/governance/governance-page.directive';
+import { GovernanceScopeVm } from 'src/app/fleet/governance/governance-page.directive';
 import {
   GOVERNANCE_REASON_LIMIT,
   ROLE_LABELS,
   UNNAMED_PERSON,
 } from 'src/app/fleet/governance/governance.constants';
-import { recruitmentRefusalOf } from 'src/app/fleet/recruitment/recruitment.utils';
 import {
   AppointableRole,
   FleetScopeRole,
@@ -32,6 +18,8 @@ import {
   ScopeRoleHolder,
   ScopeRoles,
 } from 'src/app/models/fleet-governance.models';
+import { ScopeRolesPageDirective } from 'src/app/fleet/governance/scope-roles-page.directive';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -69,18 +57,18 @@ export const APPOINTABLE_ROLES: readonly AppointableRole[] = [
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
     AppDatePipe,
-    RouterLink,
-    FleetPageShellComponent,
     ArmadaTabsComponent,
+    AsyncPipe,
+    CollapsibleSectionComponent,
+    FleetBackLinkComponent,
+    FleetPageShellComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
   ],
 })
-export class GovernanceRolesComponent extends GovernancePageDirective<ScopeRoles> {
-  private readonly _governance = inject(FleetGovernanceService);
-  private readonly _destroyRef = inject(DestroyRef);
+export class GovernanceRolesComponent extends ScopeRolesPageDirective {
+  protected readonly _changeFailed = ROLE_CHANGE_FAILED;
 
   readonly notPermittedMessage = GOVERNANCE_ROLES_NOT_PERMITTED;
   readonly roleLabels = ROLE_LABELS;
@@ -102,15 +90,6 @@ export class GovernanceRolesComponent extends GovernancePageDirective<ScopeRoles
 
   /** Why it is withdrawn. */
   readonly withdrawReason = signal('');
-
-  /** Whether a change is under way. */
-  readonly busy = signal(false);
-
-  /** What the last change came to, if it was made. */
-  readonly notice = signal<string | null>(null);
-
-  /** What the last change came to, if it was refused or failed. */
-  readonly error = signal<string | null>(null);
 
   /**
    * Whether the reader may change anything here.
@@ -204,40 +183,5 @@ export class GovernanceRolesComponent extends GovernancePageDirective<ScopeRoles
       ROLE_WITHDRAWN,
       () => this.onKeep(),
     );
-  }
-
-  /**
-   * Reads who governs the scope.
-   *
-   * @param scope - The scope.
-   * @returns Its roles.
-   */
-  protected load(scope: GovernanceScopeVm): Observable<ScopeRoles> {
-    return this._governance.roles(scope.target);
-  }
-
-  /**
-   * Makes one change, then reads the page again.
-   *
-   * @param change - The request.
-   * @param done - What to say when it is made.
-   * @param reset - Clears the form it came from.
-   */
-  private run(change: Observable<void>, done: string, reset: () => void): void {
-    this.busy.set(true);
-    this.notice.set(null);
-    this.error.set(null);
-    change.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: () => {
-        this.busy.set(false);
-        reset();
-        this.notice.set(done);
-        this.reload();
-      },
-      error: (error: unknown) => {
-        this.busy.set(false);
-        this.error.set(recruitmentRefusalOf(error, ROLE_CHANGE_FAILED));
-      },
-    });
   }
 }

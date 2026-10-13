@@ -1,10 +1,5 @@
 @if (armada(); as armada) {
-  <section
-    class="armada-panel"
-    aria-labelledby="armada-panel-heading">
-    <div class="lcars-text-bar">
-      <span id="armada-panel-heading">Fleets in this Armada</span>
-    </div>
+  <app-collapsible-section heading="Fleets in this Armada">
 
     @if (failed()) {
       <app-lcars-error-message
@@ -22,10 +17,8 @@
       }
 
       @if (notice(); as done) {
-        <p
-          class="armada-panel__notice"
-          role="status">
-          {{ done }}
+        <p class="armada-panel__notice">
+          <output>{{ done }}</output>
         </p>
       }
 
@@ -33,7 +26,7 @@
         @let name = nameOf()(edit.node.fleet);
 
         <form
-          class="armada-panel__form"
+          class="armada-panel__form lcars-rotate"
           [attr.aria-label]="
             (edit.mode === 'MOVE' ? 'Move ' : 'Remove ') + name
           "
@@ -44,7 +37,7 @@
           </p>
 
           @if (edit.mode === 'MOVE') {
-            <div class="lcars-input-container tangerine">
+            <div class="lcars-input-container">
               <label for="armada-move-position">To</label>
               <select
                 id="armada-move-position"
@@ -60,7 +53,7 @@
               </select>
             </div>
             @if (position() === 'GAMMA') {
-              <div class="lcars-input-container tangerine">
+              <div class="lcars-input-container">
                 <label for="armada-move-parent">Under</label>
                 <select
                   id="armada-move-parent"
@@ -85,8 +78,8 @@
               @for (gamma of gammasOfEdited(); track gamma.fleet.id) {
                 @let choice = choiceFor(gamma);
 
-                <div class="armada-panel__gamma">
-                  <div class="lcars-input-container tangerine">
+                <div class="armada-panel__gamma lcars-rotate">
+                  <div class="lcars-input-container">
                     <label [for]="'gamma-outcome-' + gamma.fleet.id">{{
                       nameOf()(gamma.fleet)
                     }}</label>
@@ -115,7 +108,7 @@
                     </select>
                   </div>
                   @if (choice.outcome === 'GAMMA') {
-                    <div class="lcars-input-container tangerine">
+                    <div class="lcars-input-container">
                       <label [for]="'gamma-parent-' + gamma.fleet.id"
                         >Under</label
                       >
@@ -141,7 +134,7 @@
             </fieldset>
           }
 
-          <div class="lcars-input-container tangerine">
+          <div class="lcars-input-container">
             <label for="armada-change-reason">Reason</label>
             <textarea
               id="armada-change-reason"
@@ -164,7 +157,7 @@
           <div class="fleet-community-form-actions">
             <button
               type="button"
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
               [disabled]="busy()"
               (click)="onCancel()">
               Cancel
@@ -191,5 +184,5 @@
     } @else {
       <p class="armada-panel__loading">Reading the Fleets…</p>
     }
-  </section>
+  </app-collapsible-section>
 }

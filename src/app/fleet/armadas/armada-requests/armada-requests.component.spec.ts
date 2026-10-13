@@ -322,7 +322,7 @@ describe('ArmadaRequestsComponent', () => {
         'request-1',
         { position: ArmadaPosition.BETA },
       );
-      expect(find('[role="status"]')?.textContent).toContain(
+      expect(find('output')?.textContent).toContain(
         'Ninth Fleet joined the Armada.',
       );
       expect(service.requests).toHaveBeenCalledTimes(2);

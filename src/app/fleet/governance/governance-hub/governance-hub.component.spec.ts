@@ -440,7 +440,7 @@ describe('GovernanceHubComponent', () => {
       expect(
         (
           (fixture.nativeElement as HTMLElement).querySelector(
-            '.governance-hub__close button',
+            '.governance-hub__close .lcars-btn',
           ) as HTMLButtonElement
         ).disabled,
       ).toBe(true);

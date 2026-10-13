@@ -17,8 +17,9 @@
     max-width: 32rem;
   }
 
+  // In the section's colour: a note about the Armada, not a state.
   &__last {
-    color: vars.$lcars-sky;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
     overflow-wrap: anywhere;
   }
 }
