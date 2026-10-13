@@ -1,9 +1,8 @@
-<div
+<output
   class="chat-toasts"
-  role="status"
   aria-live="polite">
   @for (toast of toasts(); track toast.id) {
-    <div class="chat-toast">
+    <span class="chat-toast">
       <a
         class="chat-toast__link"
         [routerLink]="toast.link"
@@ -22,6 +21,6 @@
           class="fas fa-xmark"
           aria-hidden="true"></i>
       </button>
-    </div>
+    </span>
   }
-</div>
+</output>

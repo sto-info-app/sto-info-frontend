@@ -9,6 +9,7 @@ import {
   input,
   OnDestroy,
   output,
+  Renderer2,
   signal,
   viewChild,
 } from '@angular/core';
@@ -17,6 +18,11 @@ import {
   toObservable,
   toSignal,
 } from '@angular/core/rxjs-interop';
+import {
+  MatAutocomplete,
+  MatAutocompleteTrigger,
+  MatOption,
+} from '@angular/material/autocomplete';
 import { MatDialog } from '@angular/material/dialog';
 
 import {
@@ -125,6 +131,9 @@ export const CHAT_TYPING_SHOWN_MS = 5_000;
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
     LoadingBarComponent,
+    MatAutocomplete,
+    MatAutocompleteTrigger,
+    MatOption,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -181,7 +190,6 @@ export class ChatConversationComponent implements OnDestroy {
   readonly draft = signal('');
   readonly replyTo = signal<ChatMessage | null>(null);
   readonly suggestions = signal<ChatPerson[]>([]);
-  readonly activeSuggestion = signal(0);
   readonly unseen = signal(0);
 
   /** Who is writing here now, and until when (FC-034). */
@@ -220,6 +228,18 @@ export class ChatConversationComponent implements OnDestroy {
   private readonly _log = viewChild<ElementRef<HTMLElement>>('log');
   private readonly _composer =
     viewChild<ElementRef<HTMLTextAreaElement>>('composer');
+  private readonly _mentionList = viewChild(MatAutocompleteTrigger);
+
+  /**
+   * What the mention list writes into the composer when a person is picked:
+   * the composer's own text, unchanged, because the list would otherwise
+   * replace the whole message with the person. {@link pick} then puts the
+   * mention in at the caret.
+   *
+   * @returns The composer's text.
+   */
+  protected readonly composerText = (): string =>
+    (this._composer() as ElementRef<HTMLTextAreaElement>).nativeElement.value;
 
   /** Each message with what the log needs to draw it. */
   readonly rows = computed<ChatRow[]>(() => {
@@ -266,6 +286,18 @@ export class ChatConversationComponent implements OnDestroy {
   });
 
   constructor() {
+    // The composer's keys are read on their way down to it, before the
+    // mention list's own handler there: Tab has to pick from the list, and
+    // that handler would close the list first and let the focus move on.
+    const stopReadingKeys = inject(Renderer2).listen(
+      inject<ElementRef<HTMLElement>>(ElementRef).nativeElement,
+      'keydown',
+      (event: KeyboardEvent) => this.onKeydown(event),
+      { capture: true },
+    );
+
+    this._destroyRef.onDestroy(stopReadingKeys);
+
     toObservable(this.place)
       .pipe(
         distinctUntilChanged((a, b) => chatPlaceKey(a) === chatPlaceKey(b)),
@@ -443,26 +475,28 @@ export class ChatConversationComponent implements OnDestroy {
   }
 
   /**
-   * Handles the composer's keys: the mention list while it is open, Enter to
-   * send, Shift+Enter for a new line, Escape to stop replying.
+   * Handles the composer's keys: Enter or Tab to pick from the mention list
+   * while it is open, Enter to send, Shift+Enter for a new line, Escape to
+   * stop replying. The list moves with the arrows and closes on Escape by
+   * itself.
    *
-   * @param event - The key.
-   * @param textarea - The composer.
+   * @param event - The key, anywhere in the conversation.
    */
-  protected onKeydown(
-    event: KeyboardEvent,
-    textarea: HTMLTextAreaElement,
-  ): void {
-    const offered = this.suggestions();
+  private onKeydown(event: KeyboardEvent): void {
+    if (event.target !== this._composer()?.nativeElement) {
+      return;
+    }
 
-    if (offered.length > 0) {
-      const handled = this.onSuggestionKey(event.key, offered, textarea);
+    // The list is there whenever the composer is.
+    const list = this._mentionList() as MatAutocompleteTrigger;
 
-      if (handled) {
+    if (list.panelOpen) {
+      if (event.key === 'Enter' || event.key === 'Tab') {
         event.preventDefault();
-
-        return;
+        list.activeOption?.select();
       }
+
+      return;
     }
 
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -494,6 +528,12 @@ export class ChatConversationComponent implements OnDestroy {
       ...picked.filter(each => each.userId !== person.userId),
       person,
     ]);
+    this._mentionAt = null;
+    this.offer([]);
+  }
+
+  /** Forgets the mention being typed once the list closes, however it did. */
+  protected onMentionsClosed(): void {
     this._mentionAt = null;
     this.offer([]);
   }
@@ -892,45 +932,5 @@ export class ChatConversationComponent implements OnDestroy {
    */
   private offer(people: ChatPerson[]): void {
     this.suggestions.set(this._mentionAt === null ? [] : people);
-    this.activeSuggestion.set(0);
-  }
-
-  /**
-   * Moves through, picks from or closes the mention list.
-   *
-   * @param key - The key pressed.
-   * @param offered - Who is offered.
-   * @param textarea - The composer.
-   * @returns True when the key was the list's.
-   */
-  private onSuggestionKey(
-    key: string,
-    offered: ChatPerson[],
-    textarea: HTMLTextAreaElement,
-  ): boolean {
-    switch (key) {
-      case 'ArrowDown':
-        this.activeSuggestion.update(index => (index + 1) % offered.length);
-
-        return true;
-      case 'ArrowUp':
-        this.activeSuggestion.update(
-          index => (index - 1 + offered.length) % offered.length,
-        );
-
-        return true;
-      case 'Enter':
-      case 'Tab':
-        this.pick(offered[this.activeSuggestion()], textarea);
-
-        return true;
-      case 'Escape':
-        this._mentionAt = null;
-        this.offer([]);
-
-        return true;
-      default:
-        return false;
-    }
   }
 }

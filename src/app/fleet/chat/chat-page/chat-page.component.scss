@@ -57,10 +57,14 @@
   user-select: text;
 }
 
+// Each part of the list takes the next colour of the page's rotation (the
+// list carries `lcars-rotate`): its name, its open place and its controls,
+// so a Community and its Fleets read as neighbours rather than one block of
+// sky (Steve's decision of 12 October 2026).
 .chat-page__scope-name {
   margin: 0 0 0.35rem;
   font-size: 1rem;
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
   font-family: vars.$font-antonio;
   overflow-wrap: anywhere;
 
@@ -112,12 +116,12 @@
   }
 
   &--open {
-    background: vars.$lcars-sky;
+    background: var(--lcars-accent, #{vars.$lcars-sky});
     color: vars.$lcars-black;
 
     &:hover,
     &:focus-visible {
-      background: vars.$lcars-sky;
+      background: var(--lcars-accent, #{vars.$lcars-sky});
     }
 
     .chat-page__place-note {
@@ -141,7 +145,7 @@
   padding: 0.2rem 0.35rem;
   border: 0;
   background: none;
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
   cursor: pointer;
 
   &:hover,
@@ -186,7 +190,7 @@
   flex-direction: column;
   gap: 0.2rem;
   padding: 0.5rem 0;
-  border-bottom: 1px solid rgb(255 255 255 / 12%);
+  border-bottom: 1px solid vars.$white-a12;
 }
 
 .chat-page__transcript-status {

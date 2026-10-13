@@ -94,7 +94,11 @@ describe('ChatReportDialogComponent', () => {
   });
 
   it('reports nothing on cancel', () => {
-    (element.querySelector('button.red') as HTMLButtonElement).click();
+    (
+      element.querySelector(
+        '[mat-dialog-actions] button[type="button"]',
+      ) as HTMLButtonElement
+    ).click();
 
     expect(close).toHaveBeenCalledWith();
   });

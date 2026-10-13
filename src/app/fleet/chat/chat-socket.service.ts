@@ -390,7 +390,7 @@ export class ChatSocketService implements OnDestroy {
             () => null,
           );
 
-    if (ack === null || !ack.ok) {
+    if (!ack?.ok) {
       this.stop(
         ack === null || ack.error.status === 401 ? 'signedOut' : 'idle',
       );
@@ -401,7 +401,11 @@ export class ChatSocketService implements OnDestroy {
     this.scheduleReauth(ack.data.expiresAt);
     this.startHeartbeat();
 
-    for (const [key, joined] of [...this._joined]) {
+    // A copy, because a place that cannot be joined again is dropped from the
+    // map while this goes through it.
+    const joinedBefore = [...this._joined];
+
+    for (const [key, joined] of joinedBefore) {
       try {
         const page = await this.joinNow(
           joined.place,

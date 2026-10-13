@@ -1,3 +1,5 @@
+@use 'lcars-variables' as vars;
+
 #chat-report-dialog {
   display: flex;
   flex-direction: column;
@@ -13,6 +15,6 @@
 
 .chat-report-dialog__intro {
   margin: 0;
-  color: rgb(255 255 255 / 84%);
+  color: vars.$white-a84;
   line-height: 1.5;
 }

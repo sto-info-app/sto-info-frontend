@@ -90,14 +90,42 @@ const TRANSCRIPT_STATUS_LABELS: Readonly<Record<ChatTranscriptStatus, string>> =
  * @returns The file name.
  */
 export function transcriptFilename(transcript: ChatTranscript): string {
+  // Each run of anything else becomes one hyphen, so there is at most one to
+  // trim at either end.
   const slug =
     transcript.channelName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'channel';
+      .replace(/^-|-$/g, '') || 'channel';
 
   return `chat-${slug}-${transcript.toAt.slice(0, 10)}.txt`;
 }
+
+/**
+ * What a failed transcript download says.
+ *
+ * @param status - The status it failed with, if it reached the server.
+ * @returns The message.
+ */
+function transcriptDownloadError(status: number | undefined): string {
+  switch (status) {
+    case 410:
+      return 'That transcript has expired.';
+    case 403:
+      return 'You may no longer export that channel.';
+    default:
+      return 'The transcript could not be downloaded.';
+  }
+}
+
+/** Which of a target's IDs a scope's own Chat address names. */
+const SCOPE_ADDRESS_KEYS: Readonly<
+  Partial<Record<ChatRouteKind, 'communityId' | 'fleetId' | 'armadaId'>>
+> = {
+  communities: 'communityId',
+  fleets: 'fleetId',
+  armadas: 'armadaId',
+};
 
 /** What a scope is called, as a label before its name. */
 const SCOPE_LABELS: Readonly<Record<ChatScopeChannels['kind'], string>> = {
@@ -374,13 +402,7 @@ export class ChatPageComponent {
       .subscribe({
         next: file => saveFile(file, transcriptFilename(transcript)),
         error: (error: { status?: number }) => {
-          this.transcriptError.set(
-            error.status === 410
-              ? 'That transcript has expired.'
-              : error.status === 403
-                ? 'You may no longer export that channel.'
-                : 'The transcript could not be downloaded.',
-          );
+          this.transcriptError.set(transcriptDownloadError(error.status));
           this.loadTranscripts();
         },
       });
@@ -564,16 +586,9 @@ export class ChatPageComponent {
    */
   private openScopeChat(): void {
     const { kind, id } = this._address();
-    const key =
-      kind === 'communities'
-        ? 'communityId'
-        : kind === 'fleets'
-          ? 'fleetId'
-          : kind === 'armadas'
-            ? 'armadaId'
-            : null;
+    const key = kind === null ? undefined : SCOPE_ADDRESS_KEYS[kind];
 
-    if (key === null || this.isLoading()) {
+    if (key === undefined || this.isLoading()) {
       return;
     }
 

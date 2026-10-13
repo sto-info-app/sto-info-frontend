@@ -13,8 +13,8 @@
       purpose and each download are logged.
     </p>
 
-    <div class="chat-transcript-dialog__range">
-      <div class="lcars-input-container bluey">
+    <div class="chat-transcript-dialog__range lcars-rotate">
+      <div class="lcars-input-container">
         <label for="chat-transcript-from">From</label>
         <input
           id="chat-transcript-from"
@@ -25,7 +25,7 @@
           [value]="fromAt()"
           (input)="setFrom($any($event.target).value)" />
       </div>
-      <div class="lcars-input-container bluey">
+      <div class="lcars-input-container">
         <label for="chat-transcript-to">To</label>
         <input
           id="chat-transcript-to"
@@ -44,7 +44,7 @@
       <small class="chat-transcript-dialog__error">{{ error }}</small>
     }
 
-    <div class="lcars-input-container perano">
+    <div class="lcars-input-container accent-orange">
       <label for="chat-transcript-purpose">
         Purpose ({{ purposeMin }} to {{ purposeMax }} characters)
       </label>
@@ -63,7 +63,7 @@
     mat-dialog-actions>
     <button
       type="button"
-      class="lcars-btn red"
+      class="lcars-btn"
       (click)="cancel()">
       Cancel
     </button>

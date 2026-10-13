@@ -16,13 +16,13 @@
 .chat-transcript-dialog__intro,
 .chat-transcript-dialog__note {
   margin: 0;
-  color: rgb(255 255 255 / 84%);
+  color: vars.$white-a84;
   line-height: 1.5;
 }
 
 .chat-transcript-dialog__note {
   font-size: 0.85rem;
-  color: rgb(255 255 255 / 66%);
+  color: vars.$white-a66;
 }
 
 .chat-transcript-dialog__range {

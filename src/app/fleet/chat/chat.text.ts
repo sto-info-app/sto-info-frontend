@@ -42,7 +42,9 @@ const COUNT_WORDS: readonly string[] = [
  * @returns The phrase.
  */
 export function inWords(count: number, unit: string): string {
-  return `${COUNT_WORDS[count] ?? String(count)} ${count === 1 ? unit : `${unit}s`}`;
+  const units = count === 1 ? unit : `${unit}s`;
+
+  return `${COUNT_WORDS[count] ?? String(count)} ${units}`;
 }
 
 /**

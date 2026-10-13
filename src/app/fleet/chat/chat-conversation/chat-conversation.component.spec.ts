@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatDialog } from '@angular/material/dialog';
+import { By } from '@angular/platform-browser';
 
 import { Observable, of, Subject, throwError } from 'rxjs';
 
@@ -192,34 +194,66 @@ describe('ChatConversationComponent', () => {
     element.querySelector('#chat-composer-input') as HTMLTextAreaElement;
 
   /**
-   * Types into the composer, with the caret at the end.
+   * Types into the composer, with the caret at the end. It has the focus, as
+   * it would while being typed in, which the mention list opens only for.
    *
    * @param value - The text.
    */
   function type(value: string): void {
+    composer().focus();
     composer().value = value;
     composer().setSelectionRange(value.length, value.length);
     composer().dispatchEvent(new Event('input'));
   }
 
+  /** The legacy key codes Material's mention list reads keys by. */
+  const KEY_CODES: Record<string, number> = {
+    Tab: 9,
+    Enter: 13,
+    Escape: 27,
+    ArrowUp: 38,
+    ArrowDown: 40,
+  };
+
   /**
-   * Presses a key in the composer.
+   * Presses a key.
    *
    * @param key - The key.
    * @param shiftKey - Whether Shift is held.
+   * @param target - Where, the composer unless said.
    * @returns Whether it was stopped from doing its usual thing.
    */
-  function press(key: string, shiftKey = false): boolean {
+  function press(
+    key: string,
+    shiftKey = false,
+    target: HTMLElement = composer(),
+  ): boolean {
     const event = new KeyboardEvent('keydown', {
       key,
       shiftKey,
+      bubbles: true,
       cancelable: true,
     });
 
-    composer().dispatchEvent(event);
+    Object.defineProperty(event, 'keyCode', { value: KEY_CODES[key] ?? 0 });
+    target.dispatchEvent(event);
 
     return event.defaultPrevented;
   }
+
+  /** The mention list, drawn in the overlay rather than the conversation. */
+  const mentionList = (): HTMLElement | null =>
+    document.querySelector('.fleet-community-mention-list');
+  /** The names offered in the mention list. */
+  const offered = (): string[] =>
+    [
+      ...document.querySelectorAll('.fleet-community-mention-list mat-option'),
+    ].map(option => option.textContent?.trim() ?? '');
+  /** The name the arrows are on in the mention list. */
+  const activeOption = (): HTMLElement | null =>
+    document.querySelector(
+      '.fleet-community-mention-list mat-option.mat-mdc-option-active',
+    );
 
   /** Whether the clock is Jest's, so waiting must move it on. */
   let fakeTime = false;
@@ -378,6 +412,10 @@ describe('ChatConversationComponent', () => {
         'Monday 28 September',
         'Tuesday 29 September',
       ]);
+      // Each new day is ruled off from the one before.
+      expect(
+        element.querySelectorAll('.chat-conversation__day > hr'),
+      ).toHaveLength(2);
       expect(texts('.chat-message__author')).toEqual(['Kira', 'Odo', 'Kira']);
       expect(element.querySelectorAll('.chat-message--mine')).toHaveLength(1);
       expect(texts('.chat-message__time')[0]).toBe('12:00');
@@ -551,6 +589,10 @@ describe('ChatConversationComponent', () => {
       expect(press('Enter', true)).toBe(false);
       expect(socket.send).not.toHaveBeenCalled();
 
+      // Only the composer's own Enter sends.
+      expect(press('Enter', false, button('All chats'))).toBe(false);
+      expect(socket.send).not.toHaveBeenCalled();
+
       expect(press('Enter')).toBe(true);
       await settle();
 
@@ -665,7 +707,10 @@ describe('ChatConversationComponent', () => {
       expect(press('Escape')).toBe(true);
       await settle();
       expect(element.querySelector('.chat-composer__reply')).toBeNull();
-      expect(press('Escape')).toBe(false);
+      // Escape again, with nothing to stop, changes nothing.
+      press('Escape');
+      await settle();
+      expect(element.querySelector('.chat-composer__reply')).toBeNull();
 
       button('Reply').click();
       await settle();
@@ -710,19 +755,41 @@ describe('ChatConversationComponent', () => {
       await advance();
 
       expect(chat.people).toHaveBeenCalledWith('general', 'Ki');
-      expect(texts('.chat-composer__mention')).toEqual(['Kira']);
+      expect(offered()).toEqual(['Kira']);
+      expect(mentionList()?.getAttribute('aria-label')).toBe(
+        'People to mention',
+      );
       expect(composer().getAttribute('aria-expanded')).toBe('true');
 
+      // Enter picks while the list is open, and sends nothing.
       expect(press('Enter')).toBe(true);
       await settle();
+      expect(socket.send).not.toHaveBeenCalled();
       expect(composer().value).toBe('Hail @Kira ');
-      expect(element.querySelector('.chat-composer__mentions')).toBeNull();
+      expect(composer().selectionStart).toBe('Hail @Kira '.length);
+      expect(document.activeElement).toBe(composer());
+      expect(mentionList()).toBeNull();
+      expect(composer().getAttribute('aria-expanded')).toBe('false');
 
       press('Enter');
       await settle();
       expect(socket.send).toHaveBeenCalledWith(GENERAL, 'Hail @Kira', {
         mentions: ['kira'],
       });
+    });
+
+    it('puts the mention in where it is typed, keeping what follows', async () => {
+      composer().focus();
+      composer().value = 'Hail @Ki, and welcome';
+      composer().setSelectionRange(8, 8);
+      composer().dispatchEvent(new Event('input'));
+      await advance();
+
+      press('Enter');
+      await settle();
+
+      expect(composer().value).toBe('Hail @Kira , and welcome');
+      expect(composer().selectionStart).toBe('Hail @Kira '.length);
     });
 
     it('moves through the list with the arrows, and picks with Tab or the mouse', async () => {
@@ -733,51 +800,85 @@ describe('ChatConversationComponent', () => {
 
       type('@o');
       await advance();
+      expect(activeOption()?.textContent?.trim()).toBe('Kira');
       press('ArrowDown');
       await settle();
-      expect(
-        element.querySelector('[aria-selected="true"]')?.textContent?.trim(),
-      ).toBe('Odo');
+      expect(activeOption()?.textContent?.trim()).toBe('Odo');
       // Down wraps to the first; up wraps to the last.
       press('ArrowDown');
       press('ArrowUp');
       await settle();
       expect(composer().getAttribute('aria-activedescendant')).toBe(
-        'chat-mention-1',
+        activeOption()?.id,
       );
+      expect(activeOption()?.textContent?.trim()).toBe('Odo');
 
+      // Tab picks, and keeps the focus in the composer.
       expect(press('Tab')).toBe(true);
+      await settle();
       expect(composer().value).toBe('@Odo ');
+      expect(mentionList()).toBeNull();
 
       type('@Odo and @o');
       await advance();
-      element
-        .querySelector('.chat-composer__mention')
-        ?.dispatchEvent(new MouseEvent('mousedown', { cancelable: true }));
+      (
+        document.querySelector(
+          '.fleet-community-mention-list mat-option',
+        ) as HTMLElement
+      ).click();
+      await settle();
       expect(composer().value).toBe('@Odo and @Kira ');
+      expect(mentionList()).toBeNull();
     });
 
-    it('closes the list on Escape, and lets other keys through', async () => {
+    it('picks nobody when no name is chosen in the open list', async () => {
+      type('@Ki');
+      await advance();
+
+      const list = fixture.debugElement
+        .query(By.directive(MatAutocompleteTrigger))
+        .injector.get(MatAutocompleteTrigger);
+
+      jest.spyOn(list, 'activeOption', 'get').mockReturnValue(null);
+
+      expect(press('Enter')).toBe(true);
+      await settle();
+      expect(composer().value).toBe('@Ki');
+      expect(socket.send).not.toHaveBeenCalled();
+    });
+
+    it('closes the list on Escape, keeping a reply, and lets other keys through', async () => {
+      button('Reply').click();
       type('@Ki');
       await advance();
 
       expect(press('a')).toBe(false);
       expect(press('Escape')).toBe(true);
       await settle();
-      expect(element.querySelector('.chat-composer__mentions')).toBeNull();
+      expect(mentionList()).toBeNull();
+      expect(texts('.chat-composer__reply')).toEqual(['Replying to Kira']);
+
+      // Closed, the list keeps nobody to pick: Enter sends.
+      press('Enter');
+      await settle();
+      expect(socket.send).toHaveBeenCalledWith(GENERAL, '@Ki', {
+        mentions: [],
+        replyToMessageId: 'a',
+      });
     });
 
     it('offers nothing when the lookup fails, or once the mention is finished', async () => {
       chat.people.mockReturnValue(throwError(() => new Error('offline')));
       type('@Ki');
       await advance();
-      expect(element.querySelector('.chat-composer__mentions')).toBeNull();
+      expect(offered()).toEqual([]);
+      expect(composer().getAttribute('aria-expanded')).toBe('false');
 
       chat.people.mockReturnValue(of([KIRA]));
       type('@Kir');
       type('@Kira done');
       await advance();
-      expect(element.querySelector('.chat-composer__mentions')).toBeNull();
+      expect(offered()).toEqual([]);
     });
 
     it('offers only the friend in a conversation', async () => {
@@ -787,16 +888,16 @@ describe('ChatConversationComponent', () => {
 
       type('@o');
       await settle();
-      expect(texts('.chat-composer__mention')).toEqual(['Odo']);
+      expect(offered()).toEqual(['Odo']);
 
       type('@k');
       await settle();
-      expect(element.querySelector('.chat-composer__mentions')).toBeNull();
+      expect(offered()).toEqual([]);
 
       fixture.componentRef.setInput('partner', { userId: 'x', username: null });
       type('@');
       await settle();
-      expect(element.querySelector('.chat-composer__mentions')).toBeNull();
+      expect(offered()).toEqual([]);
       expect(chat.people).not.toHaveBeenCalled();
     });
   });
@@ -1009,6 +1110,7 @@ describe('ChatConversationComponent', () => {
 
     expect(composer()).toBeNull();
     expect(button('Reply')).toBeUndefined();
+    expect(press('Enter', false, button('All chats'))).toBe(false);
     expect(texts('.chat-conversation__read-only')).toEqual([
       'You can read this channel, but not post in it.',
     ]);

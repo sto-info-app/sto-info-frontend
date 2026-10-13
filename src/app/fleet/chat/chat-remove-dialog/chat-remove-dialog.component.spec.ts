@@ -42,7 +42,11 @@ describe('ChatRemoveDialogComponent', () => {
   });
 
   it('keeps the message on cancel', () => {
-    (element.querySelector('button.green') as HTMLButtonElement).click();
+    (
+      element.querySelector(
+        '[mat-dialog-actions] button[type="button"]',
+      ) as HTMLButtonElement
+    ).click();
 
     expect(close).toHaveBeenCalledWith();
   });

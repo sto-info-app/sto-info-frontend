@@ -48,7 +48,7 @@
   } @else {
     <div class="chat-page__layout">
       <nav
-        class="chat-page__list"
+        class="chat-page__list lcars-rotate"
         aria-label="Your chats">
         @if (scopes().length === 0 && conversations().length === 0) {
           <p class="fleet-community-empty">
@@ -125,7 +125,7 @@
             @if (scope.mayCreate) {
               <button
                 type="button"
-                class="lcars-btn sky chat-page__add"
+                class="lcars-btn chat-page__add"
                 (click)="addChannel(scope)">
                 Add channel
               </button>
@@ -223,7 +223,7 @@
                     @if (isDownloadable(transcript)) {
                       <button
                         type="button"
-                        class="lcars-btn green chat-page__transcript-download"
+                        class="lcars-btn chat-page__transcript-download"
                         [attr.aria-label]="
                           'Download the transcript of ' + transcript.channelName
                         "
@@ -237,7 +237,7 @@
             }
             <button
               type="button"
-              class="lcars-btn sky chat-page__add"
+              class="lcars-btn chat-page__add"
               (click)="refreshTranscripts()">
               Refresh
             </button>
@@ -275,7 +275,7 @@
             message="That chat is not there, or you can no longer read it."></app-lcars-error-message>
           <button
             type="button"
-            class="lcars-btn sky"
+            class="lcars-btn"
             (click)="showList()">
             All chats
           </button>

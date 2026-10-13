@@ -8,8 +8,10 @@
     <span class="chat-channel-dialog__scope">{{ data.scopeName }}</span>
   </h2>
 
-  <div mat-dialog-content>
-    <div class="lcars-input-container sky">
+  <div
+    class="lcars-rotate"
+    mat-dialog-content>
+    <div class="lcars-input-container">
       <label for="chat-channel-name">Name</label>
       <input
         id="chat-channel-name"
@@ -21,7 +23,7 @@
         (input)="setName($any($event.target).value)" />
     </div>
 
-    <div class="lcars-select-container sky">
+    <div class="lcars-select-container">
       <label for="chat-channel-read">Who reads it</label>
       <select
         id="chat-channel-read"
@@ -36,7 +38,7 @@
       </select>
     </div>
 
-    <div class="lcars-select-container sky">
+    <div class="lcars-select-container">
       <label for="chat-channel-post">Who posts in it</label>
       <select
         id="chat-channel-post"
@@ -60,7 +62,7 @@
     mat-dialog-actions>
     <button
       type="button"
-      class="lcars-btn red"
+      class="lcars-btn"
       (click)="cancel()">
       Cancel
     </button>

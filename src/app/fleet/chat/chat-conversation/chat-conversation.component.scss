@@ -81,12 +81,19 @@
 
 .chat-conversation__day {
   margin: 0.75rem 0 0.25rem;
-  padding-bottom: 0.15rem;
-  border-bottom: 1px solid vars.$lcars-grey-border;
   color: vars.$lcars-sky;
   font-family: vars.$font-antonio;
   text-transform: uppercase;
   font-size: 0.85rem;
+}
+
+// The line under a new day: a thin rule rather than the theme's thick bar.
+.chat-conversation__day-rule {
+  height: 1px;
+  margin: 0.15rem 0 0;
+  border: 0;
+  border-radius: 0;
+  background-color: vars.$lcars-grey-border;
 }
 
 .chat-message {
@@ -303,30 +310,6 @@
   &:focus-visible {
     outline: 2px solid vars.$lcars-sky;
   }
-}
-
-.chat-composer__mentions {
-  position: absolute;
-  bottom: calc(100% - 1rem);
-  left: 0.5rem;
-  z-index: 2;
-  min-width: 12rem;
-  margin: 0;
-  padding: 0.25rem 0;
-  list-style: none;
-  border: 1px solid vars.$lcars-sky;
-  border-radius: 0.5rem;
-  background: vars.$lcars-black;
-}
-
-.chat-composer__mention {
-  padding: 0.25rem 0.75rem;
-  cursor: pointer;
-}
-
-.chat-composer__mention--active {
-  background: vars.$lcars-sky;
-  color: vars.$lcars-black;
 }
 
 .chat-composer__footer {

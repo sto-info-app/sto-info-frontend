@@ -4,7 +4,7 @@
   <header class="chat-conversation__header">
     <button
       type="button"
-      class="lcars-btn sky chat-conversation__back"
+      class="lcars-btn chat-conversation__back"
       (click)="back.emit()">
       <i
         class="fas fa-chevron-left"
@@ -42,7 +42,7 @@
       }
       <button
         type="button"
-        class="lcars-btn sky"
+        class="lcars-btn"
         (click)="dismissReportNotice()">
         OK
       </button>
@@ -55,7 +55,6 @@
     role="log"
     aria-live="polite"
     aria-relevant="additions"
-    tabindex="0"
     [attr.aria-label]="'Messages in ' + title()"
     (scroll)="onScroll()">
     @if (!isLoading() && errorMessage() === null) {
@@ -63,7 +62,7 @@
         @if (before() !== null) {
           <button
             type="button"
-            class="lcars-btn sky"
+            class="lcars-btn"
             [disabled]="isLoadingOlder()"
             (click)="loadOlder()">
             {{ isLoadingOlder() ? 'Loading…' : 'Load earlier' }}
@@ -77,10 +76,9 @@
     <ol class="chat-conversation__messages">
       @for (row of rows(); track row.message.id) {
         @if (row.day; as day) {
-          <li
-            class="chat-conversation__day"
-            role="separator">
+          <li class="chat-conversation__day">
             {{ day }}
+            <hr class="chat-conversation__day-rule" />
           </li>
         }
         <li
@@ -225,7 +223,7 @@
               </button>
               <button
                 type="button"
-                class="chat-message__action"
+                class="chat-message__action chat-message__action--danger"
                 (click)="discard(line)">
                 Discard
               </button>
@@ -288,41 +286,25 @@
         class="chat-composer__input"
         rows="2"
         placeholder="Write a message. Enter sends; Shift+Enter starts a new line."
-        role="combobox"
-        aria-autocomplete="list"
-        aria-controls="chat-mentions"
-        [attr.aria-expanded]="suggestions().length > 0"
-        [attr.aria-activedescendant]="
-          suggestions().length > 0 ? 'chat-mention-' + activeSuggestion() : null
-        "
+        matAutocompletePosition="above"
+        [matAutocomplete]="mentions"
         [attr.maxlength]="maxLength"
-        (input)="onInput(composer)"
-        (keydown)="onKeydown($event, composer)"></textarea>
-      @if (suggestions().length > 0) {
-        <ul
-          id="chat-mentions"
-          class="chat-composer__mentions"
-          role="listbox"
-          aria-label="People to mention">
-          @for (
-            person of suggestions();
-            track person.userId;
-            let index = $index
-          ) {
-            <li
-              role="option"
-              class="chat-composer__mention"
-              [id]="'chat-mention-' + index"
-              [attr.aria-selected]="index === activeSuggestion()"
-              [class.chat-composer__mention--active]="
-                index === activeSuggestion()
-              "
-              (mousedown)="$event.preventDefault(); pick(person, composer)">
-              {{ nameOf(person) }}
-            </li>
-          }
-        </ul>
-      }
+        (input)="onInput(composer)"></textarea>
+      <mat-autocomplete
+        #mentions="matAutocomplete"
+        class="fleet-community-mention-list"
+        aria-label="People to mention"
+        panelWidth="auto"
+        autoActiveFirstOption
+        hideSingleSelectionIndicator
+        disableRipple
+        [displayWith]="composerText"
+        (optionSelected)="pick($event.option.value, composer)"
+        (closed)="onMentionsClosed()">
+        @for (person of suggestions(); track person.userId) {
+          <mat-option [value]="person">{{ nameOf(person) }}</mat-option>
+        }
+      </mat-autocomplete>
       <div class="chat-composer__footer">
         @if (remaining() !== null) {
           <span
