@@ -321,7 +321,7 @@ describe('RankOrderComponent', () => {
       },
     );
     expect(roster.rankOrder).toHaveBeenCalledTimes(2);
-    expect(find('[role="status"]')?.textContent?.trim()).toBe(RANK_ORDER_SAVED);
+    expect(find('output')?.textContent?.trim()).toBe(RANK_ORDER_SAVED);
     expect(boxes()[3].value).toBe('');
     expect((find('#rank-order-reason') as HTMLTextAreaElement).value).toBe('');
   });
@@ -402,7 +402,7 @@ describe('RankOrderComponent', () => {
     fixture.detectChanges();
 
     expect(text()).toContain(RANK_ORDER_SAVE_FAILED);
-    expect(find('[role="status"]')).toBeNull();
+    expect(find('output')).toBeNull();
   });
   it('shows a site admin looking in the order, and nothing to change (FC-036)', () => {
     scopes.resolveFleet.mockReturnValue(

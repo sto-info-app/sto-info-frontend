@@ -100,122 +100,113 @@
       }
 
       @if (list.mayChange) {
-        <form
-          class="fleet-former-names__form"
-          aria-labelledby="former-name-add-heading"
-          [formGroup]="form"
-          (ngSubmit)="onRecord(data)">
-          <h2
-            class="fleet-former-names__heading"
-            id="former-name-add-heading">
-            Add a former name
-          </h2>
-
-          <div class="lcars-input-container sky">
-            <label for="former-name-name">Name, exactly as in game</label>
-            <input
-              id="former-name-name"
-              type="text"
-              autocomplete="off"
-              formControlName="exactName"
-              [maxlength]="nameMaxLength" />
-            @if (form.controls.exactName.hasError('maxCodepoints')) {
-              <small class="field-error">{{ nameTooLong }}</small>
-            } @else if (
-              form.controls.exactName.touched && form.controls.exactName.invalid
-            ) {
-              <small class="field-error">
-                Please give the name the Fleet had.
-              </small>
-            }
-          </div>
-          <p class="fleet-community-field-hint">
-            Exactly as the game wrote it into the export’s filename, spaces at
-            either end included.
-          </p>
-
-          <div class="fleet-community-form-row">
-            <div class="lcars-input-container sky">
-              <label for="former-name-from">Used from</label>
+        <app-collapsible-section heading="Add a former name">
+          <form
+            class="fleet-former-names__form lcars-rotate"
+            aria-label="Add a former name"
+            [formGroup]="form"
+            (ngSubmit)="onRecord(data)">
+            <div class="lcars-input-container">
+              <label for="former-name-name">Name, exactly as in game</label>
               <input
-                id="former-name-from"
-                type="date"
-                formControlName="usedFrom" />
-              @if (
-                form.controls.usedFrom.touched && form.controls.usedFrom.invalid
-              ) {
-                <small class="field-error">
-                  Please say when the name was first used.
-                </small>
-              }
-            </div>
-            <div class="lcars-input-container sky">
-              <label for="former-name-until">Used until</label>
-              <input
-                id="former-name-until"
-                type="date"
-                formControlName="usedUntil" />
-              @if (
-                form.controls.usedUntil.touched &&
-                form.controls.usedUntil.invalid
-              ) {
-                <small class="field-error">
-                  Please say the last day the name was used.
-                </small>
+                id="former-name-name"
+                type="text"
+                autocomplete="off"
+                formControlName="exactName"
+                [maxlength]="nameMaxLength" />
+              @if (form.controls.exactName.hasError('maxCodepoints')) {
+                <small class="field-error">{{ nameTooLong }}</small>
               } @else if (
-                form.controls.usedUntil.touched && form.hasError('backwards')
+                form.controls.exactName.touched && form.controls.exactName.invalid
               ) {
                 <small class="field-error">
-                  The last day it was used cannot be before the first.
+                  Please give the name the Fleet had.
                 </small>
               }
             </div>
-          </div>
-          <p class="fleet-community-field-hint">
-            Both days are included, and read in your display timezone.
-          </p>
+            <p class="fleet-community-field-hint">
+              Exactly as the game wrote it into the export’s filename, spaces at
+              either end included.
+            </p>
 
-          <div class="lcars-input-container sky">
-            <label for="former-name-reason">Why</label>
-            <textarea
-              id="former-name-reason"
-              rows="2"
-              formControlName="reason"
-              [attr.maxlength]="reasonLimit"></textarea>
-            @if (form.controls.reason.touched && form.controls.reason.invalid) {
-              <small class="field-error">
-                @if (form.controls.reason.hasError('required')) {
-                  Say why, so whoever looks at this next knows.
-                } @else {
-                  Keep it to {{ reasonLimit }} characters.
+            <div class="fleet-community-form-row lcars-rotate">
+              <div class="lcars-input-container">
+                <label for="former-name-from">Used from</label>
+                <input
+                  id="former-name-from"
+                  type="date"
+                  formControlName="usedFrom" />
+                @if (
+                  form.controls.usedFrom.touched && form.controls.usedFrom.invalid
+                ) {
+                  <small class="field-error">
+                    Please say when the name was first used.
+                  </small>
                 }
-              </small>
-            }
-          </div>
-          <p class="fleet-community-field-hint">
-            Kept with the name. At most {{ reasonLimit }} characters.
-          </p>
+              </div>
+              <div class="lcars-input-container">
+                <label for="former-name-until">Used until</label>
+                <input
+                  id="former-name-until"
+                  type="date"
+                  formControlName="usedUntil" />
+                @if (
+                  form.controls.usedUntil.touched &&
+                  form.controls.usedUntil.invalid
+                ) {
+                  <small class="field-error">
+                    Please say the last day the name was used.
+                  </small>
+                } @else if (
+                  form.controls.usedUntil.touched && form.hasError('backwards')
+                ) {
+                  <small class="field-error">
+                    The last day it was used cannot be before the first.
+                  </small>
+                }
+              </div>
+            </div>
+            <p class="fleet-community-field-hint">
+              Both days are included, and read in your display timezone.
+            </p>
 
-          <div class="fleet-community-form-actions">
-            <button
-              type="submit"
-              class="lcars-btn lcars-btn-auto green"
-              [disabled]="busy()">
-              {{ busy() ? 'Recording' : 'Record this name' }}
-            </button>
-          </div>
-        </form>
+            <div class="lcars-input-container">
+              <label for="former-name-reason">Why</label>
+              <textarea
+                id="former-name-reason"
+                rows="2"
+                formControlName="reason"
+                [attr.maxlength]="reasonLimit"></textarea>
+              @if (form.controls.reason.touched && form.controls.reason.invalid) {
+                <small class="field-error">
+                  @if (form.controls.reason.hasError('required')) {
+                    Say why, so whoever looks at this next knows.
+                  } @else {
+                    Keep it to {{ reasonLimit }} characters.
+                  }
+                </small>
+              }
+            </div>
+            <p class="fleet-community-field-hint">
+              Kept with the name. At most {{ reasonLimit }} characters.
+            </p>
+
+            <div class="fleet-community-form-actions">
+              <button
+                type="submit"
+                class="lcars-btn lcars-btn-auto green"
+                [disabled]="busy()">
+                {{ busy() ? 'Recording' : 'Record this name' }}
+              </button>
+            </div>
+          </form>
+        </app-collapsible-section>
       }
 
       @if (list.removed.length > 0) {
-        <section
+        <app-collapsible-section
           class="fleet-former-names__removed"
-          aria-labelledby="former-name-removed-heading">
-          <h2
-            class="fleet-former-names__heading"
-            id="former-name-removed-heading">
-            Removed names
-          </h2>
+          heading="Removed names">
           <table class="fleet-community-table">
             <caption>
               Removed names match nothing new, most recently removed first
@@ -251,7 +242,7 @@
               }
             </tbody>
           </table>
-        </section>
+        </app-collapsible-section>
       }
     }
   </app-fleet-page-shell>

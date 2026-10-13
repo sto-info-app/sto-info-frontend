@@ -29,13 +29,12 @@
       </p>
 
       <nav
-        class="roster-conflicts__filters"
+        class="lcars-tabs roster-conflicts__filters"
         aria-label="Which conflicts">
         @for (filter of filters; track filter.state) {
           <a
-            class="lcars-btn lcars-btn-auto"
-            [class.sky]="filter.state !== data.state"
-            [class.gold]="filter.state === data.state"
+            class="lcars-tab"
+            [class.active]="filter.state === data.state"
             [routerLink]="[]"
             [queryParams]="queryFor(filter.state)"
             queryParamsHandling="merge"
@@ -43,21 +42,24 @@
             >{{ filter.label }}</a
           >
         }
+        <span
+          class="lcars-tabs-filler"
+          aria-hidden="true"></span>
       </nav>
 
       @if (selectNotice(); as notice) {
-        <p
-          class="roster-conflicts__notice"
-          role="status">
-          {{ notice.filename }}, uploaded
-          {{ notice.uploadedAt | appDate: 'medium' }}, now stands for its
-          moment.
-          @if (notice.held) {
-            It had not been read into the history, so it is read now, and the
-            history is rebuilt after.
-          } @else {
-            The history is rebuilt to match.
-          }
+        <p class="roster-conflicts__notice">
+          <output>
+            {{ notice.filename }}, uploaded
+            {{ notice.uploadedAt | appDate: 'medium' }}, now stands for its
+            moment.
+            @if (notice.held) {
+              It had not been read into the history, so it is read now, and
+              the history is rebuilt after.
+            } @else {
+              The history is rebuilt to match.
+            }
+          </output>
         </p>
       }
       @if (selectError(); as refusal) {
@@ -71,14 +73,13 @@
       }
 
       @for (group of page.items; track group.id) {
-        <section
+        <app-collapsible-section
           class="roster-conflicts__group"
-          [attr.aria-labelledby]="'group-' + group.id">
-          <h2
-            class="roster-conflicts__heading"
-            [id]="'group-' + group.id">
-            Exports claiming {{ group.exportedAt | appDate: 'medium' }}
-          </h2>
+          barClass="small-lcars-bar-gap"
+          [heading]="
+            'Exports claiming ' + (group.exportedAt | appDate: 'medium')
+          "
+          [sectionKey]="'group-' + group.id">
           <p class="fleet-report-notice">
             Found {{ group.openedAt | appDate: 'medium' }}.
             @if (group.resolvedAt) {
@@ -155,7 +156,7 @@
                     ) {
                       <button
                         type="button"
-                        class="lcars-btn lcars-btn-auto sky"
+                        class="lcars-btn lcars-btn-auto"
                         [disabled]="!canSelect(group, member)"
                         (click)="onSelect(data, group, member)">
                         {{
@@ -170,7 +171,7 @@
           </table>
 
           @if (!isReadOnly(data)) {
-            <div class="lcars-input-container sky">
+            <div class="lcars-input-container">
               <label [attr.for]="'reason-' + group.id">Why</label>
               <textarea
                 rows="2"
@@ -187,7 +188,7 @@
               {{ reasonLimit }} characters.
             </p>
           }
-        </section>
+        </app-collapsible-section>
       }
 
       @if (totalPages(page) > 1) {

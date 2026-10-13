@@ -254,12 +254,15 @@ export class RosterPageComponent extends FleetSectionPageDirective<RosterPageDat
     ) as (typeof ROSTER_SORTS)[number];
     // The address always names one: rosterQueryOf defaults it.
     const current = data.query.sort;
-    const direction =
-      current === sort
-        ? data.query.direction === RosterSortDirection.DESC
+    // A second press on the same column turns it round.
+    let direction = column.firstDirection;
+
+    if (current === sort) {
+      direction =
+        data.query.direction === RosterSortDirection.DESC
           ? RosterSortDirection.ASC
-          : RosterSortDirection.DESC
-        : column.firstDirection;
+          : RosterSortDirection.DESC;
+    }
 
     this.navigate({
       sort: sort === RosterSort.NAME ? null : sort,

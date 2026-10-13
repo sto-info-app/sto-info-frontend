@@ -326,7 +326,7 @@ describe('RosterImportRowsComponent', () => {
       true,
       'Duplicated by the game',
     );
-    expect(find('[role="status"]')?.textContent?.trim()).toBe(
+    expect(find('output')?.textContent?.trim()).toBe(
       '2 rows excluded: their members are unknown at this export.',
     );
     expect(imports.rows).toHaveBeenCalledTimes(2);
@@ -396,7 +396,7 @@ describe('RosterImportRowsComponent', () => {
       fixture.detectChanges();
 
       expect(text()).toContain(message);
-      expect(fixture.componentInstance.tickedRows().length).toBe(1);
+      expect(fixture.componentInstance.tickedRows()).toHaveLength(1);
       expect(corrected).toEqual([]);
     },
   );

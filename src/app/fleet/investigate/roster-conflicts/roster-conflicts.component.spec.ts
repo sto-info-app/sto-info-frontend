@@ -277,7 +277,7 @@ describe('RosterConflictsComponent', () => {
         textOf(link).trim(),
         link.getAttribute('href')?.split('?')[1],
         link.getAttribute('aria-current'),
-        link.classList.contains('gold'),
+        link.classList.contains('active'),
       ]),
     ).toEqual([
       ['Waiting', undefined, null, false],
@@ -354,7 +354,7 @@ describe('RosterConflictsComponent', () => {
       'Ninth Fleet_20241101-120000 (import-1).csv',
       'Selected',
     ]);
-    expect(selects().length).toBe(1);
+    expect(selects()).toHaveLength(1);
   });
 
   it('offers no selecting an export whose file expired, and says why (FC-037)', () => {
@@ -382,7 +382,7 @@ describe('RosterConflictsComponent', () => {
     expect(text()).toContain(
       'its file expired before it was chosen, so it can no longer be selected',
     );
-    expect(selects().length).toBe(1);
+    expect(selects()).toHaveLength(1);
   });
 
   it('says a reopened group keeps its selection until it is changed', () => {
@@ -436,7 +436,7 @@ describe('RosterConflictsComponent', () => {
       'The complete one',
     );
     expect(imports.conflicts).toHaveBeenCalledTimes(2);
-    expect(textOf(find('[role="status"]') as HTMLElement).trim()).toBe(
+    expect(textOf(find('output') as HTMLElement).trim()).toBe(
       'Ninth Fleet_20241101-120000 (import-1).csv, uploaded Nov 1, 2024, 12:30:00 PM, now stands for its moment. The history is rebuilt to match.',
     );
     expect((find('#reason-group-1') as HTMLTextAreaElement).value).toBe('');
@@ -448,7 +448,7 @@ describe('RosterConflictsComponent', () => {
     selects()[1].click();
     fixture.detectChanges();
 
-    expect(textOf(find('[role="status"]') as HTMLElement).trim()).toBe(
+    expect(textOf(find('output') as HTMLElement).trim()).toBe(
       'Ninth Fleet_20241101-120000 (import-2).csv, uploaded Nov 1, 2024, 12:30:00 PM, now stands for its moment. It had not been read into the history, so it is read now, and the history is rebuilt after.',
     );
   });
@@ -495,7 +495,7 @@ describe('RosterConflictsComponent', () => {
 
     expect(text()).toContain('That export is already the one selected.');
     expect(imports.conflicts).toHaveBeenCalledTimes(2);
-    expect(find('[role="status"]')).toBeNull();
+    expect(find('output')).toBeNull();
   });
 
   it.each([

@@ -18,20 +18,15 @@
   font-size: 0.85rem;
 }
 
+// The kinds of change to show, in their own panel: a box of ticks, laid out
+// in a row that wraps.
 .roster-history__kinds {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 1.25rem;
-  padding: 0.75rem 1rem;
-  margin: 0 0 1rem;
-  border: 1px solid vars.$lcars-grey-border;
-
-  legend {
-    padding: 0 0.5rem;
-    font-family: vars.$font-antonio;
-    text-transform: uppercase;
-    color: vars.$lcars-sky;
-  }
+  padding: 0;
+  margin: 0;
+  border: 0;
 }
 
 .roster-history__kind {
@@ -40,17 +35,11 @@
   align-items: center;
 }
 
+// Each interval is a section of its own, and its bar takes the page's
+// rotation; the space under it is the section's.
 .roster-history__interval {
-  padding: 0.5rem 0 1rem;
-  border-top: 2px solid vars.$lcars-sky;
-}
-
-.roster-history__heading {
-  margin: 0.5rem 0;
-  font-family: vars.$font-antonio;
-  font-size: 1.1rem;
-  text-transform: uppercase;
-  color: vars.$lcars-sky;
+  display: block;
+  padding-bottom: 1rem;
 }
 
 .roster-history__changes {
@@ -62,6 +51,6 @@
   }
 
   a {
-    color: vars.$lcars-sky;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
   }
 }

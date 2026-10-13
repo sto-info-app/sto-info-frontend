@@ -31,7 +31,7 @@
         class="buttons-row"
         aria-label="Fleet">
         <a
-          class="lcars-btn lcars-btn-auto sky"
+          class="lcars-btn lcars-btn-auto"
           [routerLink]="state.fleetLink"
           >Back to the Fleet</a
         >
@@ -96,10 +96,10 @@
         </button>
       }
 
-      <section class="roster-status__section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>The export</span>
-        </div>
+      <app-collapsible-section
+        class="roster-status__section"
+        heading="The export"
+        barClass="small-lcars-bar-gap">
         <dl class="roster-status__facts">
           <dt>File</dt>
           <dd>{{ state.detail.originalFilename }}</dd>
@@ -136,14 +136,13 @@
             <dd>{{ state.detail.problemCount }}</dd>
           }
         </dl>
-      </section>
+      </app-collapsible-section>
 
       @if (state.detail.problems?.length) {
-        <section class="roster-status__section">
-          <div class="lcars-text-bar small-lcars-bar-gap">
-            <span>Rows that could not be read</span>
-          </div>
-
+        <app-collapsible-section
+          class="roster-status__section"
+          heading="Rows that could not be read"
+          barClass="small-lcars-bar-gap">
           <ul class="roster-status__problems">
             @for (problem of state.detail.problems; track $index) {
               <li>
@@ -157,15 +156,14 @@
               </li>
             }
           </ul>
-        </section>
+        </app-collapsible-section>
       }
 
       @if (state.detail.conflictMembers?.length) {
-        <section class="roster-status__section">
-          <div class="lcars-text-bar small-lcars-bar-gap">
-            <span>Other exports of the same moment</span>
-          </div>
-
+        <app-collapsible-section
+          class="roster-status__section"
+          heading="Other exports of the same moment"
+          barClass="small-lcars-bar-gap">
           <p class="roster-status__hint">
             Oldest first. The first of them that was not refused is the version
             in force.
@@ -187,7 +185,7 @@
               </li>
             }
           </ul>
-        </section>
+        </app-collapsible-section>
       }
 
       @if (state.detail.actions !== null) {
@@ -220,12 +218,12 @@
         class="buttons-row"
         aria-label="Roster imports">
         <a
-          class="lcars-btn lcars-btn-auto sky"
+          class="lcars-btn lcars-btn-auto"
           [routerLink]="state.importsLink"
           >All imports</a
         >
         <a
-          class="lcars-btn lcars-btn-auto bluey"
+          class="lcars-btn lcars-btn-auto"
           [routerLink]="state.fleetLink"
           >Back to the Fleet</a
         >

@@ -1,12 +1,9 @@
 @let shown = detail();
 
-<section
+<app-collapsible-section
   class="import-corrections"
-  aria-labelledby="import-corrections-heading">
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span id="import-corrections-heading">Corrections</span>
-  </div>
-
+  heading="Corrections"
+  barClass="small-lcars-bar-gap">
   @if (!correctable()) {
     <p class="fleet-report-notice">
       Only an import in force, or held while another export of its moment
@@ -15,10 +12,8 @@
   }
 
   @if (notice(); as recorded) {
-    <p
-      class="import-corrections__notice"
-      role="status">
-      {{ recorded }}
+    <p class="import-corrections__notice">
+      <output>{{ recorded }}</output>
     </p>
   }
   @if (error(); as refusal) {
@@ -28,7 +23,7 @@
   }
 
   @if (!readOnly()) {
-    <div class="lcars-input-container sky">
+    <div class="lcars-input-container">
       <label for="import-correction-reason">Why</label>
       <textarea
         id="import-correction-reason"
@@ -56,7 +51,7 @@
     @if (!readOnly()) {
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto sky"
+        class="lcars-btn lcars-btn-auto"
         [disabled]="!canExclude()"
         (click)="onExcluded()">
         @if (busy() === 'EXCLUSION') {
@@ -82,7 +77,7 @@
     @if (!readOnly()) {
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto sky"
+        class="lcars-btn lcars-btn-auto"
         [disabled]="!canMarkPartial()"
         (click)="onPartial()">
         @if (busy() === 'PARTIAL') {
@@ -112,7 +107,7 @@
     @if (readOnly()) {
     } @else if (shown.exportLocalStamp) {
       <div class="fleet-community-filter-row">
-        <div class="lcars-input-container sky">
+        <div class="lcars-input-container">
           <label for="import-correction-zone">The clock it was taken on</label>
           <select
             #zoneField
@@ -157,7 +152,7 @@
 
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto sky"
+        class="lcars-btn lcars-btn-auto"
         [disabled]="!canCorrectZone()"
         (click)="onCorrectZone()">
         {{ busy() === 'TIMEZONE' ? 'Reading it again' : 'Read it again' }}
@@ -167,26 +162,27 @@
     }
   </div>
 
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>Corrections made</span>
-  </div>
-  @if (shown.actions?.length) {
-    <ul class="import-corrections__actions">
-      @for (action of shown.actions; track action.id) {
-        <li>
-          <span class="import-corrections__when">
-            {{ action.actedAt | appDate: 'medium' }},
-            {{ whoDid(action) }}
-            {{ verbs[action.action] }}:
-          </span>
-          “{{ action.reason }}”
-          @if (changeOf(action); as change) {
-            <span class="fleet-report-note">{{ change }}</span>
-          }
-        </li>
-      }
-    </ul>
-  } @else {
-    <p class="fleet-community-empty">Nobody has corrected this import.</p>
-  }
-</section>
+  <app-collapsible-section
+    heading="Corrections made"
+    barClass="small-lcars-bar-gap">
+    @if (shown.actions?.length) {
+      <ul class="import-corrections__actions">
+        @for (action of shown.actions; track action.id) {
+          <li>
+            <span class="import-corrections__when">
+              {{ action.actedAt | appDate: 'medium' }},
+              {{ whoDid(action) }}
+              {{ verbs[action.action] }}:
+            </span>
+            “{{ action.reason }}”
+            @if (changeOf(action); as change) {
+              <span class="fleet-report-note">{{ change }}</span>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="fleet-community-empty">Nobody has corrected this import.</p>
+    }
+  </app-collapsible-section>
+</app-collapsible-section>

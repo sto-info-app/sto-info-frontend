@@ -28,7 +28,10 @@
   margin-bottom: 1rem;
 }
 
+// Each part of the check is a section the reader can fold away; the host is
+// an element of its own, so it is laid out as a block for its margin to tell.
 .roster-import__section {
+  display: block;
   margin-top: 2rem;
 }
 
@@ -111,7 +114,7 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     padding: 0.5rem 0;
-    border-bottom: 1px solid rgb(255 255 255 / 15%);
+    border-bottom: 1px solid vars.$white-a15;
   }
 }
 
@@ -142,7 +145,7 @@
 .roster-import__row {
   padding: 0.75rem 1rem;
   border-left: 4px solid vars.$lcars-sky;
-  background: rgb(255 255 255 / 5%);
+  background: vars.$white-a5;
 }
 
 .roster-import__member {

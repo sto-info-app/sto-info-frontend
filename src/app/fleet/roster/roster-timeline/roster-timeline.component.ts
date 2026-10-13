@@ -27,6 +27,7 @@ import {
   SmartChartComponent,
 } from 'src/app/shared/components/smart-chart/smart-chart.component';
 import { ROOT_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /** What to say to somebody who may not read the history. */
@@ -81,6 +82,7 @@ export interface RosterTimelineData {
     FleetPageShellComponent,
     FleetTabsComponent,
     SmartChartComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class RosterTimelineComponent extends FleetSectionPageDirective<RosterTimelineData> {

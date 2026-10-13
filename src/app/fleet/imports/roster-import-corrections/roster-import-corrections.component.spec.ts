@@ -192,7 +192,7 @@ describe('RosterImportCorrectionsComponent', () => {
         true,
         'Uploaded to the wrong Fleet',
       );
-      expect(find('[role="status"]')?.textContent?.trim()).toBe(
+      expect(find('output')?.textContent?.trim()).toBe(
         'Taken out of the history. The roster is rebuilt without it.',
       );
       expect(corrected).toEqual([detail({ excluded: true })]);
@@ -445,7 +445,7 @@ describe('RosterImportCorrectionsComponent', () => {
 
       expect(text()).toContain(message);
       expect(corrected).toEqual([]);
-      expect(find('[role="status"]')).toBeNull();
+      expect(find('output')).toBeNull();
       expect(
         (find('#import-correction-reason') as HTMLTextAreaElement).value,
       ).toBe('  Uploaded to the wrong Fleet  ');
@@ -560,8 +560,11 @@ describe('RosterImportCorrectionsComponent', () => {
     expect(text()).toContain('This import counts in the Fleet’s history.');
     expect(find('#import-correction-reason')).toBeNull();
     expect(find('#import-correction-zone')).toBeNull();
+    // Only the sections' own fold buttons, which change nothing.
     expect(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('button'),
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'button:not([aria-controls])',
+      ),
     ).toHaveLength(0);
   });
 });

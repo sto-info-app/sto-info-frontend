@@ -101,50 +101,52 @@ export class FleetInvestigateComponent extends FleetSectionPageDirective<
         capabilities.includes(capability),
       )
     ) {
-      actions.push({
-        label: 'Conflicting exports',
-        link: FLEET_LINKS.fleetRosterConflicts(
-          communitySlug,
-          platformSegment,
-          fleetSlug,
-        ),
-        description:
-          `Choose which of ${fleet.exactGameName}’s exports stands for a ` +
-          'moment two or more of them claim.',
-      });
-      actions.push({
-        label: 'Roster identities',
-        link: FLEET_LINKS.fleetRosterIdentities(
-          communitySlug,
-          platformSegment,
-          fleetSlug,
-        ),
-        description:
-          `Decide the renames ${fleet.exactGameName}’s rosters suggest from ` +
-          'one export to the next.',
-      });
-      actions.push({
-        label: 'Former names',
-        link: FLEET_LINKS.fleetFormerNames(
-          communitySlug,
-          platformSegment,
-          fleetSlug,
-        ),
-        description:
-          `The names ${fleet.exactGameName} was known by before, so older ` +
-          'roster exports still match.',
-      });
-      actions.push({
-        label: 'Rank order',
-        link: FLEET_LINKS.fleetRankOrder(
-          communitySlug,
-          platformSegment,
-          fleetSlug,
-        ),
-        description:
-          `Order ${fleet.exactGameName}’s ranks, so a move between two reads ` +
-          'as a promotion or a demotion.',
-      });
+      actions.push(
+        {
+          label: 'Conflicting exports',
+          link: FLEET_LINKS.fleetRosterConflicts(
+            communitySlug,
+            platformSegment,
+            fleetSlug,
+          ),
+          description:
+            `Choose which of ${fleet.exactGameName}’s exports stands for a ` +
+            'moment two or more of them claim.',
+        },
+        {
+          label: 'Roster identities',
+          link: FLEET_LINKS.fleetRosterIdentities(
+            communitySlug,
+            platformSegment,
+            fleetSlug,
+          ),
+          description:
+            `Decide the renames ${fleet.exactGameName}’s rosters suggest from ` +
+            'one export to the next.',
+        },
+        {
+          label: 'Former names',
+          link: FLEET_LINKS.fleetFormerNames(
+            communitySlug,
+            platformSegment,
+            fleetSlug,
+          ),
+          description:
+            `The names ${fleet.exactGameName} was known by before, so older ` +
+            'roster exports still match.',
+        },
+        {
+          label: 'Rank order',
+          link: FLEET_LINKS.fleetRankOrder(
+            communitySlug,
+            platformSegment,
+            fleetSlug,
+          ),
+          description:
+            `Order ${fleet.exactGameName}’s ranks, so a move between two reads ` +
+            'as a promotion or a demotion.',
+        },
+      );
     }
 
     return of(actions);

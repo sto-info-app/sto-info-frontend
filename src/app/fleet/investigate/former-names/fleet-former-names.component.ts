@@ -46,6 +46,7 @@ import {
   FleetFormerName,
   FleetFormerNameList,
 } from 'src/app/models/fleet-former-name.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
@@ -97,6 +98,7 @@ const REMOVAL_DIALOG: RosterIdentityDecisionDialogData = {
     '<p>It stays listed under Removed names, with who removed it and why.</p>',
   confirmText: 'Remove',
   reasonRequired: true,
+  refuses: true,
 };
 
 /** A Fleet's former names, and the Fleet. */
@@ -138,6 +140,7 @@ export interface FleetFormerNamesData {
     FleetTabsComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class FleetFormerNamesComponent extends FleetSectionPageDirective<FleetFormerNamesData> {

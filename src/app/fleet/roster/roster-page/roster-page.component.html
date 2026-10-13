@@ -49,8 +49,8 @@
             </p>
           }
 
-          <div class="fleet-community-filter-row">
-            <div class="lcars-input-container sky">
+          <div class="fleet-community-filter-row lcars-rotate">
+            <div class="lcars-input-container">
               <label for="roster-day">Show the roster on</label>
               <input
                 #day
@@ -73,21 +73,21 @@
             <div class="buttons-row">
               <button
                 type="button"
-                class="lcars-btn lcars-btn-auto sky"
+                class="lcars-btn lcars-btn-auto"
                 [disabled]="!page.export?.previous"
                 (click)="onExport(page.export?.previous?.exportedAt ?? null)">
                 Earlier export
               </button>
               <button
                 type="button"
-                class="lcars-btn lcars-btn-auto sky"
+                class="lcars-btn lcars-btn-auto"
                 [disabled]="!page.export?.next"
                 (click)="onExport(page.export?.next?.exportedAt ?? null)">
                 Later export
               </button>
               <button
                 type="button"
-                class="lcars-btn lcars-btn-auto sky"
+                class="lcars-btn lcars-btn-auto"
                 [disabled]="!data.query.asOf"
                 (click)="onExport(null)">
                 Latest
@@ -98,11 +98,11 @@
 
         @if (page.export) {
           <form
-            class="fleet-community-filter-row"
+            class="fleet-community-filter-row lcars-rotate"
             role="search"
             aria-label="Find in the roster"
             (submit)="$event.preventDefault(); onFilter(search.value, rank.value)">
-            <div class="lcars-input-container sky">
+            <div class="lcars-input-container">
               <label for="roster-search">Character or handle</label>
               <input
                 #search
@@ -113,7 +113,7 @@
                 [value]="data.query.search ?? ''" />
             </div>
 
-            <div class="lcars-input-container sky">
+            <div class="lcars-input-container">
               <label for="roster-rank">Rank</label>
               <select
                 #rank
@@ -132,7 +132,7 @@
 
             <button
               type="submit"
-              class="lcars-btn lcars-btn-auto sky">
+              class="lcars-btn lcars-btn-auto">
               Find
             </button>
           </form>

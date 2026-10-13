@@ -31,7 +31,7 @@
         class="buttons-row"
         aria-label="Fleet">
         <a
-          class="lcars-btn lcars-btn-auto sky"
+          class="lcars-btn lcars-btn-auto"
           [routerLink]="state.fleetLink"
           >Back to the Fleet</a
         >
@@ -91,10 +91,8 @@
       }
 
       @if (decisionNotice(); as notice) {
-        <p
-          class="roster-identities__notice"
-          role="status">
-          {{ notice }}
+        <p class="roster-identities__notice">
+          <output>{{ notice }}</output>
         </p>
       }
 
@@ -201,7 +199,7 @@
                 @if (candidate.state !== 'OPEN' && !state.readOnly) {
                   <button
                     type="button"
-                    class="lcars-btn bluey"
+                    class="lcars-btn"
                     [disabled]="busy()"
                     (click)="decide(state, candidate, actions.UNDO)">
                     Undo
@@ -260,7 +258,7 @@
         class="buttons-row"
         aria-label="Roster identities">
         <a
-          class="lcars-btn lcars-btn-auto sky"
+          class="lcars-btn lcars-btn-auto"
           [routerLink]="state.fleetLink"
           >Back to the Fleet</a
         >

@@ -19,11 +19,11 @@
           {{ readOnlyNote }}
         </p>
       }
-      <ul class="fleet-investigate__list">
+      <ul class="fleet-investigate__list lcars-rotate">
         @for (action of state.data; track action.label) {
           <li class="fleet-investigate__item">
             <a
-              class="lcars-btn lcars-btn-auto gold"
+              class="lcars-btn lcars-btn-auto"
               [routerLink]="action.link"
               >{{ action.label }}</a
             >

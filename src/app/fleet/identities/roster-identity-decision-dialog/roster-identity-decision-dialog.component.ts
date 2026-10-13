@@ -21,6 +21,15 @@ export interface RosterIdentityDecisionDialogData {
 
   /** Whether a reason must be given. An undo must say why. */
   reasonRequired: boolean;
+
+  /**
+   * Whether going ahead refuses or removes something — a rejection, a
+   * removal — so its button is red. Otherwise it is green and Cancel, the no
+   * of the question, is red; beside a red button Cancel is left to the
+   * rotation, so two reds never sit together (Steve's decision of 13 October
+   * 2026).
+   */
+  refuses?: boolean;
 }
 
 /** The answer the dialog closes with when the reviewer goes ahead. */

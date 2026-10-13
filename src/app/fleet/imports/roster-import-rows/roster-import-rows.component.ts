@@ -32,6 +32,7 @@ import {
   RosterImportRow,
   RosterImportRowPage,
 } from 'src/app/models/fleet-import.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -69,7 +70,11 @@ export type RosterImportRowsState =
   styleUrls: ['./roster-import-rows.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AppDatePipe, LcarsErrorMessageComponent],
+  imports: [
+    AppDatePipe,
+    LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
+  ],
 })
 export class RosterImportRowsComponent {
   private readonly _importService = inject(RosterImportService);
@@ -267,13 +272,15 @@ export class RosterImportRowsComponent {
       .subscribe({
         next: detail => {
           const rows = lines.length === 1 ? '1 row' : `${lines.length} rows`;
+          const whose =
+            lines.length === 1 ? 'its member is' : 'their members are';
 
           this.busy.set(false);
           this.ticked.set(new Set());
           this.reason.set('');
           this.notice.set(
             excluded
-              ? `${rows} excluded: ${lines.length === 1 ? 'its member is' : 'their members are'} unknown at this export.`
+              ? `${rows} excluded: ${whose} unknown at this export.`
               : `${rows} put back into the history.`,
           );
           this._reload$.next();

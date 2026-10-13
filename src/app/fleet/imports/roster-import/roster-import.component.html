@@ -55,12 +55,12 @@
           class="buttons-row"
           aria-label="Fleet directories">
           <a
-            class="lcars-btn lcars-btn-auto sky"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="state.fleetLink"
             >Back to the Fleet</a
           >
           <a
-            class="lcars-btn lcars-btn-auto bluey"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="fleetDirectoryLink"
             >Browse Fleets</a
           >
@@ -76,8 +76,8 @@
           class="roster-import__form"
           [formGroup]="form"
           (ngSubmit)="onSubmit(state)">
-          <div class="form-row">
-            <div class="lcars-input-container sky">
+          <div class="form-row lcars-rotate">
+            <div class="lcars-input-container">
               <label for="roster-file">The export, as the game wrote it</label>
               <input
                 id="roster-file"
@@ -88,7 +88,7 @@
                 (change)="onFileChosen($event)" />
             </div>
 
-            <div class="lcars-input-container sky">
+            <div class="lcars-input-container">
               <label for="roster-timezone">The clock it was taken on</label>
               <select
                 id="roster-timezone"
@@ -137,17 +137,17 @@
           }
 
           @if (filenameProblem(result); as problem) {
-            <section class="roster-import__section">
-              <div class="lcars-text-bar small-lcars-bar-gap">
-                <span>The filename</span>
-              </div>
+            <app-collapsible-section
+              class="roster-import__section"
+              heading="The filename"
+              barClass="small-lcars-bar-gap">
               <p>{{ problem }}</p>
-            </section>
+            </app-collapsible-section>
           } @else {
-            <section class="roster-import__section">
-              <div class="lcars-text-bar small-lcars-bar-gap">
-                <span>The filename</span>
-              </div>
+            <app-collapsible-section
+              class="roster-import__section"
+              heading="The filename"
+              barClass="small-lcars-bar-gap">
               <dl class="roster-import__facts">
                 <dt>Fleet named</dt>
                 <dd>{{ result.filename.fleetLabel }}</dd>
@@ -172,13 +172,13 @@
                   below.
                 </p>
               }
-            </section>
+            </app-collapsible-section>
           }
 
-          <section class="roster-import__section">
-            <div class="lcars-text-bar small-lcars-bar-gap">
-              <span>The file</span>
-            </div>
+          <app-collapsible-section
+            class="roster-import__section"
+            heading="The file"
+            barClass="small-lcars-bar-gap">
             <dl class="roster-import__facts">
               <dt>Rows</dt>
               <dd>{{ result.source.rowCount }}</dd>
@@ -205,19 +205,14 @@
                 written in them reaches this site at all.
               </p>
             }
-          </section>
+          </app-collapsible-section>
 
           @if (result.problems.length) {
-            <section class="roster-import__section">
-              <div class="lcars-text-bar small-lcars-bar-gap">
-                <span class="title-with-badge">
-                  Rows that could not be read
-                  <span class="header-count-badge">{{
-                    result.problems.length
-                  }}</span>
-                </span>
-              </div>
-
+            <app-collapsible-section
+              class="roster-import__section"
+              heading="Rows that could not be read"
+              barClass="small-lcars-bar-gap"
+              [badge]="result.problems.length">
               <ul class="roster-import__problems">
                 @for (problem of result.problems; track $index) {
                   <li>
@@ -231,15 +226,14 @@
                   </li>
                 }
               </ul>
-            </section>
+            </app-collapsible-section>
           }
 
           @if (result.sample.length) {
-            <section class="roster-import__section">
-              <div class="lcars-text-bar lcars-text-bar--wraps small-lcars-bar-gap">
-                <span>The first rows, as they were read</span>
-              </div>
-
+            <app-collapsible-section
+              class="roster-import__section"
+              heading="The first rows, as they were read"
+              barClass="lcars-text-bar--wraps small-lcars-bar-gap">
               <ul class="roster-import__sample">
                 @for (row of result.sample; track row.line) {
                   <li class="roster-import__row">
@@ -289,15 +283,14 @@
                 what it was read as, in UTC, through
                 {{ result.timezone }}.
               </p>
-            </section>
+            </app-collapsible-section>
           }
 
           @if (importable(result)) {
-            <section class="roster-import__section">
-              <div class="lcars-text-bar small-lcars-bar-gap">
-                <span>Import it</span>
-              </div>
-
+            <app-collapsible-section
+              class="roster-import__section"
+              heading="Import it"
+              barClass="small-lcars-bar-gap">
               @if (needsMomentChoice(result)) {
                 <fieldset class="roster-import__moments">
                   <legend>Which moment was the export taken at?</legend>
@@ -335,12 +328,12 @@
 
               <button
                 type="button"
-                class="lcars-btn lcars-btn-auto gold roster-import__commit"
+                class="lcars-btn lcars-btn-auto green roster-import__commit"
                 [disabled]="importing || !readyToImport(result)"
                 (click)="onImport(state)">
                 Import this export
               </button>
-            </section>
+            </app-collapsible-section>
           }
 
           @if (importing) {
@@ -357,9 +350,13 @@
             <app-lcars-warning-message
               title="Already imported"
               [message]="notice.message" />
-            <p class="roster-import__earlier">
-              <a [routerLink]="notice.link">See the earlier import</a>
-            </p>
+            <div class="buttons-row roster-import__earlier">
+              <a
+                class="lcars-btn lcars-btn-auto"
+                [routerLink]="notice.link"
+                >See the earlier import</a
+              >
+            </div>
           }
         }
       }

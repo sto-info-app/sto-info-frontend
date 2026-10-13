@@ -4,15 +4,17 @@
   display: block;
 }
 
+// The member's name, then the ways on from here as a row of pills.
 .roster-timeline__member {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 1rem;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.roster-timeline__link {
-  color: vars.$lcars-sky;
+.roster-timeline__name {
+  margin: 0;
 }
 
 .roster-timeline__note {
@@ -31,5 +33,5 @@
 }
 
 .roster-timeline__when {
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
 }

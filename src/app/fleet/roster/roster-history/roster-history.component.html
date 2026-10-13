@@ -27,19 +27,23 @@
           </p>
         }
 
-        <fieldset class="roster-history__kinds">
-          <legend>Show</legend>
-          @for (kind of kinds; track kind) {
-            <label class="roster-history__kind">
-              <input
-                type="checkbox"
-                [checked]="isShown(data, kind)"
-                [disabled]="isLastShown(data, kind)"
-                (change)="onKind(data, kind, $any($event.target).checked)" />
-              {{ kindLabels[kind] }}
-            </label>
-          }
-        </fieldset>
+        <app-lcars-panel
+          heading="Show"
+          [level]="2">
+          <fieldset class="roster-history__kinds">
+            <legend class="sr-only">The changes to show</legend>
+            @for (kind of kinds; track kind) {
+              <label class="roster-history__kind">
+                <input
+                  type="checkbox"
+                  [checked]="isShown(data, kind)"
+                  [disabled]="isLastShown(data, kind)"
+                  (change)="onKind(data, kind, $any($event.target).checked)" />
+                {{ kindLabels[kind] }}
+              </label>
+            }
+          </fieldset>
+        </app-lcars-panel>
 
         @if (page.total === 0) {
           <p class="fleet-community-empty">
@@ -49,15 +53,16 @@
         }
 
         @for (interval of page.items; track interval.to.importId) {
-          <section
+          <app-collapsible-section
             class="roster-history__interval"
-            [attr.aria-labelledby]="'interval-' + interval.to.importId">
-            <h2
-              class="roster-history__heading"
-              [id]="'interval-' + interval.to.importId">
-              Between {{ interval.from.exportedAt | appDate: 'medium' }} and
-              {{ interval.to.exportedAt | appDate: 'medium' }}
-            </h2>
+            barClass="small-lcars-bar-gap"
+            [heading]="
+              'Between ' +
+              (interval.from.exportedAt | appDate: 'medium') +
+              ' and ' +
+              (interval.to.exportedAt | appDate: 'medium')
+            "
+            [sectionKey]="'interval-' + interval.to.importId">
             @if (interval.partial) {
               <p class="roster-history__notice">
                 The later export was partial: somebody missing from it may
@@ -140,7 +145,7 @@
                 }
               </ul>
             }
-          </section>
+          </app-collapsible-section>
         }
 
         @if (totalPages(page) > 1) {

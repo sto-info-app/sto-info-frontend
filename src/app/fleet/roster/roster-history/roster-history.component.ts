@@ -23,6 +23,8 @@ import {
   RosterChangeKind,
   RosterHistoryPage,
 } from 'src/app/models/fleet-roster.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /** What to say to somebody who may not read the history. */
@@ -62,6 +64,8 @@ export interface RosterHistoryData {
     AppDatePipe,
     FleetPageShellComponent,
     FleetTabsComponent,
+    CollapsibleSectionComponent,
+    LcarsPanelComponent,
   ],
 })
 export class RosterHistoryComponent extends FleetSectionPageDirective<RosterHistoryData> {

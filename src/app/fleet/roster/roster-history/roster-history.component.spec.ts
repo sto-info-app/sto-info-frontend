@@ -259,7 +259,10 @@ describe('RosterHistoryComponent', () => {
     render();
 
     expect(
-      page().querySelector('h2')?.textContent?.replace(/\s+/g, ' ').trim(),
+      page()
+        .querySelector('.roster-history__interval h2')
+        ?.textContent?.replace(/\s+/g, ' ')
+        .trim(),
     ).toBe('Between Nov 1, 2024, 12:00:00 PM and Nov 15, 2024, 12:00:00 PM');
   });
 

@@ -21,6 +21,7 @@ import {
   RosterImportDetail,
   RosterImportStatus,
 } from 'src/app/models/fleet-import.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import {
@@ -53,10 +54,10 @@ export const ROSTER_IMPORT_ACTION_VERBS: Readonly<
 };
 
 /** The statuses whose import can be corrected: in force, or held. */
-const CORRECTABLE: readonly RosterImportStatus[] = [
+const CORRECTABLE: ReadonlySet<RosterImportStatus> = new Set([
   RosterImportStatus.IMPORTED,
   RosterImportStatus.HELD,
-];
+]);
 
 /** Which correction is under way. */
 type Correction = 'EXCLUSION' | 'PARTIAL' | 'TIMEZONE';
@@ -84,7 +85,12 @@ type Correction = 'EXCLUSION' | 'PARTIAL' | 'TIMEZONE';
   styleUrls: ['./roster-import-corrections.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, AppDatePipe, LcarsErrorMessageComponent],
+  imports: [
+    RouterLink,
+    AppDatePipe,
+    LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
+  ],
 })
 export class RosterImportCorrectionsComponent {
   private readonly _importService = inject(RosterImportService);
@@ -129,9 +135,7 @@ export class RosterImportCorrectionsComponent {
   readonly pickedMoment = signal<string | null>(null);
 
   /** Whether the import is in force or held, as a correction needs. */
-  readonly correctable = computed(() =>
-    CORRECTABLE.includes(this.detail().status),
-  );
+  readonly correctable = computed(() => CORRECTABLE.has(this.detail().status));
 
   /** Whether a reason has been given. */
   readonly hasReason = computed(() => this.reason().trim() !== '');

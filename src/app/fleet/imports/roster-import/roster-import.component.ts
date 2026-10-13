@@ -33,6 +33,7 @@ import {
   RosterSourceHeaderShape,
 } from 'src/app/models/fleet-import.models';
 import { ResolvedStoFleet, StoFleet } from 'src/app/models/fleet.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
@@ -173,6 +174,7 @@ export interface RosterImportRepeatNotice {
     LcarsSuccessMessageComponent,
     LcarsWarningMessageComponent,
     LoadingBarComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class RosterImportComponent {
@@ -424,11 +426,14 @@ export class RosterImportComponent {
     const { exportStampAhead, rowCount } = preview.futureDates;
     const rows =
       rowCount === 1 ? '1 row has a date' : `${rowCount} rows have dates`;
-    const found = exportStampAhead
-      ? rowCount > 0
-        ? `The export's time and ${rows} after now`
-        : "The export's time is after now"
-      : `${rows} after now`;
+    let found = `${rows} after now`;
+
+    if (exportStampAhead) {
+      found =
+        rowCount > 0
+          ? `The export's time and ${rows} after now`
+          : "The export's time is after now";
+    }
 
     return (
       `${found}. That usually means the export was taken in a different ` +

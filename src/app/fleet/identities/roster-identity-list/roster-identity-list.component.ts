@@ -141,6 +141,7 @@ const DECISION_DIALOGS: Record<
       'rejected however many rosters suggest it again, until it is undone.</p>',
     confirmText: 'Reject',
     reasonRequired: false,
+    refuses: true,
   },
   [RosterIdentityDecisionAction.UNDO]: {
     title: 'Undo this decision',

@@ -21,18 +21,22 @@
         two tiers is shown as a promotion or a demotion; any other change of
         rank is shown only as a change. Ranks sharing a tier are equal, as a
         renamed rank is to its old name.
-        <a [routerLink]="investigateLink(data)">Back to Investigate</a>
       </p>
+      <div class="buttons-row">
+        <a
+          class="lcars-btn lcars-btn-auto"
+          [routerLink]="investigateLink(data)"
+          >Back to Investigate</a
+        >
+      </div>
 
       <p class="rank-order__current">
         Now: <strong>{{ describe(data.order.tiers) }}</strong>
       </p>
 
       @if (saveNotice(); as notice) {
-        <p
-          class="rank-order__notice"
-          role="status">
-          {{ notice }}
+        <p class="rank-order__notice">
+          <output>{{ notice }}</output>
         </p>
       }
       @if (saveError(); as refusal) {
@@ -131,7 +135,7 @@
             }
           </p>
 
-          <div class="lcars-input-container sky">
+          <div class="lcars-input-container">
             <label for="rank-order-reason">Why</label>
             <textarea
               id="rank-order-reason"
@@ -149,7 +153,7 @@
           <div class="fleet-community-form-actions">
             <button
               type="submit"
-              class="lcars-btn lcars-btn-auto sky"
+              class="lcars-btn lcars-btn-auto green"
               [disabled]="!canSave(data)">
               {{ busy() ? 'Saving' : 'Save the order' }}
             </button>
@@ -157,30 +161,29 @@
         </form>
       }
 
-      <div class="lcars-text-bar">
-        <span>Changes</span>
-      </div>
-      @if (data.order.actions?.length) {
-        <ul class="rank-order__actions">
-          @for (action of data.order.actions; track action.id) {
-            <li>
-              <span class="rank-order__when">
-                {{ action.actedAt | appDate: 'medium' }},
-                {{ action.actorName ?? 'an account since closed' }}:
-              </span>
-              “{{ action.reason }}”
-              <span class="rank-order__note">
-                from {{ describe(action.tiersBefore) }} to
-                {{ describe(action.tiersAfter) }}
-              </span>
-            </li>
-          }
-        </ul>
-      } @else {
-        <p class="fleet-community-empty">
-          Nobody has ordered this Fleet’s ranks yet.
-        </p>
-      }
+      <app-collapsible-section heading="Changes">
+        @if (data.order.actions?.length) {
+          <ul class="rank-order__actions">
+            @for (action of data.order.actions; track action.id) {
+              <li>
+                <span class="rank-order__when">
+                  {{ action.actedAt | appDate: 'medium' }},
+                  {{ action.actorName ?? 'an account since closed' }}:
+                </span>
+                “{{ action.reason }}”
+                <span class="rank-order__note">
+                  from {{ describe(action.tiersBefore) }} to
+                  {{ describe(action.tiersAfter) }}
+                </span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="fleet-community-empty">
+            Nobody has ordered this Fleet’s ranks yet.
+          </p>
+        }
+      </app-collapsible-section>
     }
   </app-fleet-page-shell>
 }

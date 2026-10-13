@@ -29,6 +29,7 @@ import {
   RosterRankLabel,
   RosterRankOrder,
 } from 'src/app/models/fleet-roster.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -83,6 +84,7 @@ export interface RankOrderData {
     FleetPageShellComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class RankOrderComponent extends FleetSectionPageDirective<RankOrderData> {
@@ -318,8 +320,13 @@ export function sameOrder(
   a: readonly (readonly string[])[],
   b: readonly (readonly string[])[],
 ): boolean {
+  // The labels are put in code-unit order only so that a tier's key does not
+  // depend on how they were arranged. A locale's collation could call two
+  // different labels equal and leave the key resting on their arrangement.
+  const byCodeUnit = (x: string, y: string): number =>
+    Number(x > y) - Number(x < y);
   const key = (tiers: readonly (readonly string[])[]): string =>
-    JSON.stringify(tiers.map(labels => [...labels].sort()));
+    JSON.stringify(tiers.map(labels => [...labels].sort(byCodeUnit)));
 
   return key(a) === key(b);
 }

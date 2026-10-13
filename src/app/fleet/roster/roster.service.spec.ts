@@ -126,7 +126,10 @@ describe('RosterService', () => {
   it('reads one member’s timeline', () => {
     service.timeline('community-1', 'fleet-1', 'identity-1').subscribe();
 
-    httpMock.expectOne(`${rosterUrl}/members/identity-1`).flush({});
+    const request = httpMock.expectOne(`${rosterUrl}/members/identity-1`);
+
+    expect(request.request.method).toBe('GET');
+    request.flush({});
   });
 
   describe('rank order', () => {

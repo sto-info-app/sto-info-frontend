@@ -6,10 +6,6 @@
 
 .rank-order__intro {
   max-width: 70ch;
-
-  a {
-    color: vars.$lcars-sky;
-  }
 }
 
 .rank-order__current {
@@ -45,7 +41,7 @@
 }
 
 .rank-order__when {
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
 }
 
 .rank-order__note {

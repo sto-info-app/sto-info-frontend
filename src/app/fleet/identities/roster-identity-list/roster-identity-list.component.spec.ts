@@ -791,7 +791,7 @@ describe('RosterIdentityListComponent', () => {
         { action: RosterIdentityDecisionAction.CONFIRM, revision: 0 },
       );
       expect(identities.list).toHaveBeenCalledTimes(2);
-      expect(find('[role="status"]')?.textContent?.trim()).toBe(
+      expect(find('output')?.textContent?.trim()).toBe(
         ROSTER_IDENTITY_DECISION_RECORDED,
       );
     });
@@ -843,7 +843,7 @@ describe('RosterIdentityListComponent', () => {
         fixture.detectChanges();
 
         expect(text()).toContain(message);
-        expect(find('[role="status"]')).toBeNull();
+        expect(find('output')).toBeNull();
         expect(identities.list).toHaveBeenCalledTimes(2);
         expect(button('Confirm')?.disabled).toBe(false);
       },

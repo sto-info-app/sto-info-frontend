@@ -8,23 +8,14 @@
   max-width: 70ch;
 }
 
-.fleet-former-names__heading {
-  margin: 0.5rem 0;
-  font-family: vars.$font-antonio;
-  font-size: 1.1rem;
-  text-transform: uppercase;
-  color: vars.$lcars-sky;
-}
-
+// The form and the removed names are sections of their own, whose bars
+// take the page's rotation.
 .fleet-former-names__form {
   max-width: 40rem;
-  padding: 0.5rem 0 1rem;
-  margin-top: 1rem;
-  border-top: 2px solid vars.$lcars-sky;
+  padding-bottom: 1rem;
 }
 
 .fleet-former-names__removed {
-  padding: 0.5rem 0 1rem;
-  margin-top: 1rem;
-  border-top: 2px solid vars.$lcars-sky;
+  display: block;
+  padding-bottom: 1rem;
 }

@@ -19,7 +19,7 @@
   }
 
   a {
-    color: vars.$lcars-sky;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
   }
 }
 
@@ -33,7 +33,7 @@
 
   legend {
     padding: 0 0.5rem;
-    color: vars.$lcars-sky;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
   }
 }
 
@@ -47,5 +47,5 @@
 }
 
 .import-corrections__when {
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
 }

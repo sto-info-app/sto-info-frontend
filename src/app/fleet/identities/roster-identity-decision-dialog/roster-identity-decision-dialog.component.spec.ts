@@ -15,14 +15,19 @@ describe('RosterIdentityDecisionDialogComponent', () => {
    * Opens the dialog.
    *
    * @param reasonRequired - Whether it must be told why.
+   * @param refuses - Whether going ahead refuses something.
    */
-  async function render(reasonRequired: boolean): Promise<void> {
+  async function render(
+    reasonRequired: boolean,
+    refuses?: boolean,
+  ): Promise<void> {
     dialogRef = { close: jest.fn() };
     const data: RosterIdentityDecisionDialogData = {
       title: 'Undo this decision',
       message: '<p>Undoing opens this rename again.</p>',
       confirmText: 'Undo',
       reasonRequired,
+      refuses,
     };
 
     await TestBed.configureTestingModule({
@@ -111,6 +116,11 @@ describe('RosterIdentityDecisionDialogComponent', () => {
       );
     });
 
+    it('draws going ahead green and backing out red', () => {
+      expect(button('Undo').classList).toContain('green');
+      expect(button('Cancel').classList).toContain('red');
+    });
+
     it('closes with nothing when cancelled', () => {
       button('Cancel').click();
 
@@ -146,6 +156,16 @@ describe('RosterIdentityDecisionDialogComponent', () => {
       expect(dialogRef.close).toHaveBeenCalledWith({
         reason: 'Two different people',
       });
+    });
+  });
+
+  describe('where going ahead refuses something', () => {
+    beforeEach(() => render(false, true));
+
+    it('draws going ahead red and leaves backing out to the rotation', () => {
+      expect(button('Undo').classList).toContain('red');
+      expect(button('Cancel').classList).not.toContain('red');
+      expect(button('Cancel').classList).not.toContain('green');
     });
   });
 });
